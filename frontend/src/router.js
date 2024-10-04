@@ -1,27 +1,14 @@
-import { createRouter, createWebHistory } from "vue-router";
-import RolesComp from "./Pages/RolesComp.vue";
-import RolesMatrixes from "./Pages/RolesMatrixes.vue";
-import WorkFlow from "./Pages/WorkFlow.vue";
-const routes = [
-  {
-    path: "/Roles",
-    name: RolesComp,
-    component: RolesComp,
-  },
-  {
-    path: "/RoleMatrix",
-    name: RolesMatrixes,
-    component: RolesMatrixes,
-  },
-  {
-    path: "/Workflows",
-    name: WorkFlow,
-    component: WorkFlow,
-  },
-];
+import {
+  createRouter,
+  createWebHashHistory,
+  createWebHistory,
+} from "vue-router";
+import Masterroutes from "./Pages/Master/Masterroutes";
+
+const routes = [...Masterroutes];
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHashHistory("/frontend"),
   routes,
 });
 // router.beforeEach((to, from, next) => {

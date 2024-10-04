@@ -2,7 +2,7 @@
   <div>
     <LoaderPage v-if="loadValue"></LoaderPage>
 
-    <HeaderComp headertext="WorkFlow Settings" />
+    <HeaderComp />
     <div class="container-fluid">
       <div class="row">
         <div class="col-2 p-0">
@@ -26,4 +26,15 @@ import SideBar from './Components/SideBar.vue';
 
 </script>
 
-<style></style>
+<style>
+@media (min-width: 1604px) and (max-width: 2400px) {
+  .col-2 {
+    width: 13.33%;
+
+  }
+
+  .col-10 {
+    width: 85.777%
+  }
+}
+</style>

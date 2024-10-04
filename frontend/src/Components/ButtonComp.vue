@@ -1,5 +1,5 @@
 <template>
-  <button :disabled="disabled" :type="type" class="border-0 bg-danger">
+  <button :disabled="disabled" :type="type" class="border-0 ">
     <i class="px-2" v-if="iconClass" :class="iconClass"></i>
     <span class="class-btn" v-if="name">{{ name }}</span>
     <span v-if="count !== null" class="ps-1 fw-bolder">( {{ count }} )</span>

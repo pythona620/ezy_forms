@@ -1,22 +1,32 @@
 <template>
-    <div class="sidebar pt-3">
-        <aside>
-            <ul class=" list-unstyled ">
-                <router-link v-for="(list, index) in sideBarData" :key="index" :to="`/${list.name}`"
-                    class="text-decoration-none text-black " active-class="active-link">
-                    <li :title="list.name"><i :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
-                        {{ list.name }}</li>
-                </router-link>
-            </ul>
-        </aside>
+    <div class="container-fluid">
+        <div class="sidebar pt-2">
+            <h1 class="font-12 m-0 text-muted ps-2">Master</h1>
+            <aside>
+                <ul class=" list-unstyled ">
+                    <router-link v-for="(list, index) in sideBarData" :key="index"
+                        :to="`/master/${list.name.toLowerCase()}`" class="text-decoration-none text-black"
+                        active-class="active-link">
+
+                        <li :title="list.name"><i :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
+                            {{ list.name }}</li>
+                    </router-link>
+                </ul>
+            </aside>
+        </div>
     </div>
+
 </template>
 <script setup>
 
 const sideBarData = [
-    { name: 'Roles', icon: 'bi-person-fill ' },
-    { name: 'RoleMatrix', icon: 'bi-bag-fill' },
-    { name: 'Workflows', icon: 'bi-diagram-2' },
+    { name: 'Archive', icon: 'bi bi-archive ' },
+    { name: 'Forms', icon: 'bi bi-file-earmark-ruled' },
+    { name: 'Trash', icon: 'bi bi-trash' },
+    { name: 'Activity-Log', icon: 'bi bi-stopwatch' },
+    { name: 'Users', icon: 'bi bi-people' },
+    { name: 'E-Signature', icon: 'bi bi-pencil' },
+
 
 ]
 
@@ -24,14 +34,14 @@ const sideBarData = [
 </script>
 <style scoped>
 li {
-    font-size: var(--thirteen);
+    font-size: var(--twelve);
     font-weight: var(--font-weight-medium);
-    color: var(--black-color);
-    padding: 8px 17px;
+    color: var(--text-color);
+    padding: 8px 0px;
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
-    margin: 0px 0px 0px 25px
+    margin: 0px 0px 0px 11px
 }
 
 
@@ -47,12 +57,14 @@ li {
 
 .active-link>li {
     background-color: var(--white-color);
-    color: var(--black-color);
+    color: var(--text-color);
     font-size: var(--thirteen);
     font-weight: var(--font-weight-normal);
     line-height: 26px;
     text-align: left;
     border-radius: 4px;
+    padding: 5px 0px;
+    margin-top: 8px;
 
 
 }

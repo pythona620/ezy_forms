@@ -8,11 +8,15 @@
 --info-color: #17a2b8;
 --light-color: #f8f9fa;
 --dark-color: #343a40;
---white-color: #ffffff;
+--white-color: #F1F1F1;
 --black-color: #1e1f2a;
---sidebar-color:#f0f0f0;
+--sidebar-color:#FAFAFA;
+--text-color:#111111;
+--buttonbgcolor:#2B1309;
 
 // Font Sizes
+--ten:10px;
+--eleven:11px;
 --twelve: 12px;
 --thirteen:13px;
 --fourteen: 14px;
@@ -51,22 +55,58 @@
 --transition-slow: 0.6s ease-in-out;
 }
 body{
-    font-family: "Montserrat", sans-serif;
+  font-family: "Poppins", sans-serif;
   font-optical-sizing: auto;
 }
 .buttoncomp{
-    background-color: var(--danger-color);
+    background-color: var(--buttonbgcolor);
     color: var(--white-color);
     border: none;
     border-radius: 4px;
-    font-size: var(--thirteen);
-    padding: 7px 7px;
-}
-.btn-outline-danger{
+    font-size: var(--eleven);
+    padding: 6px 3px 6px 3px;
+    height: 32px;
+    width: 72px;
 
-  
-  border-radius: 4px;
+}
+.btn-outline-primary {
+  transition: all 0.5s;
+  border-radius:4px ;
+  color: var(--danger-color) !important;
+  background-color: var(--white-color);
+  font-size: var(--twelve);
+  font-weight:var(--font-weight-medium);
+  line-height: 26px;
+  text-align: left;
+  border: 1px solid var(--danger-color);
+
+  padding: 3px 7px;
+  -webkit-border-radius:4px ;
+  -moz-border-radius:4px ;
+  -ms-border-radius:4px ;
+  -o-border-radius:4px ;
+}
+.font-12{
+  font-size: var(--twelve);
+}
+.font-13{
   font-size: var(--thirteen);
-  padding: 6px 7px;
+  font-weight: var(--font-weight-medium);
+  color: var(--text-color);
 }
-
+.font-14{
+  font-size: var(--fourteen);
+}
+.font-16{
+  font-size: var(--sixteen);
+}
+.font-20{
+  font-size: var(--twenty);
+}
+.font-10{
+  font-size: var(--ten);
+}
+.font-11{
+  font-size: var(--eleven);
+  font-weight: 400;
+}

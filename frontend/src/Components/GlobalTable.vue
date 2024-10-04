@@ -4,14 +4,13 @@
       <thead class="position-sticky">
         <tr>
           <th v-if="isCheckbox == 'true'">
-            <input v-if="tData.some((row) => row.status == 'Pending')" type="checkbox" class="checkbox form-check-input"
-              v-model="allCheck" @change="SelectedAll()" />
+            <input type="checkbox" class="checkbox form-check-input" @change="SelectedAll()" />
           </th>
-
+          <th>#</th>
           <th v-for="(column, index) in tHeaders" :key="index" :class="{ 'text-center': column.th === 'Users' }">
             {{ column.th }}
           </th>
-          <th class="text-center" v-if="isAction == 'true'">Actions</th>
+          <th class="text-center" v-if="isAction == 'true'">Action</th>
         </tr>
       </thead>
       <tbody>
@@ -118,10 +117,10 @@ const props = defineProps({
   actionType: {
     type: String,
   },
-  class: {
-    type: String,
-    required: true,
-  },
+  // class: {
+  //   type: String,
+  //   required: true,
+  // },
   isAction: {
     type: String,
   },
@@ -231,9 +230,8 @@ const emits = defineEmits([
 .global-table th {
   background-color: #f2f2f2 !important;
   text-align: left;
-  color: var(--secondary) !important;
-  font-size: var(--font-size-xs) !important;
-  // border-radius: var(--border-radius);
+  color: #999999;
+  font-size: 12px;
 }
 
 .global-table thead {

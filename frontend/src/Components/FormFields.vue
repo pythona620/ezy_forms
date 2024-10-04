@@ -9,7 +9,7 @@
     <div class="shadow-none"
       v-if="tag === 'input' && (type === 'text' || type === 'number' || type === 'email' || type === 'search')">
       <input :type="type" :placeholder="placeholder" :labeltext="labeltext" :name="name" :id="id" :min="min" :max="max"
-        v-model="localModel" :required="Required" class="form-control py-2 input-width" :class="{
+        v-model="localModel" :required="Required" class="form-control  input-width" :class="{
           'border-end-0 shadow-none': type === ('text' || type === 'number' || type === 'email' || type === 'search') && icon && label,
         }" />
       <span v-if="(type === 'number' || type === 'email' || type === 'search') && icon"
@@ -33,7 +33,7 @@
       <p class="fw-normal ps-2 m-0 text-secondary">{{ placeholder }}</p>
       <select v-if="tag === 'select'" class="form-select selectForm shadow-none border-0" :required="Required"
         :name="name" :id="id" v-model="localModel">
-        <option class="selectOption" value="" selected>All</option>
+        <!-- <option class="selectOption" value="" selected>All</option> -->
         <option class="selectOption" v-for="(item, index) in options" :key="index" :value="item">{{ item }}</option>
       </select>
     </div>
@@ -148,7 +148,7 @@ const maxDate = computed(() => {
 }
 
 .form-select {
-  font-size: 12px;
+  font-size: var(--ten);
 }
 
 select {
@@ -156,7 +156,8 @@ select {
 }
 
 .select-div {
-  height: 36px;
+  height: 32px;
+
   border: 1px solid #e2e2e2;
   display: flex;
   align-items: center;
@@ -165,14 +166,16 @@ select {
   cursor: pointer;
 
   input {
-    border: none;
+
     cursor: pointer;
-    font-size: 12px;
+    font-size: var(--ten);
     font-weight: 400;
+    border-left: none;
+    border-right: none;
   }
 
   padding: 0px 3px;
-  border-radius: 5px;
+  border-radius:var(--border-radius-sm);
 }
 
 .date-field {
@@ -186,16 +189,18 @@ select {
   align-items: center;
   justify-content: center;
   padding: 0px 3px;
-  border-radius: 5px;
+  border-radius: var(--border-radius-sm);
   background-color: var(--whiteColor);
-
+  font-size: var(--twelve);
+  max-width: 200px;
   // width: 100%;
 
   input {
     width: auto;
     border: none;
     cursor: pointer;
-    font-size: 12px;
+    font-size: var(--twelve);
+
   }
 }
 
@@ -204,17 +209,17 @@ select {
   right: 0;
   border-end-end-radius: 8px;
   top: 0;
-  padding: 5px 3px;
+  padding: 3px 3px;
 }
 
 .input-group {
-  height: 40px;
+  height: 32px;
   flex-wrap: nowrap;
 }
 
 .form-check-label {
   margin-right: 15px;
-  font-size: 13px;
+  font-size: var(--thirteen);
 }
 
 .form-switch {
@@ -226,6 +231,7 @@ select {
   color: var(--secondary) !important;
   white-space: nowrap;
   overflow: visible;
+  font-size: var(--ten);
 }
 
 .selectForm .selectOption {
@@ -246,6 +252,9 @@ select {
 
 .form-control {
   width: 100%;
+  height: 32px;
+  font-size: var(--ten);
+  max-width: 200px;
 }
 
 // .calendar-icon {
