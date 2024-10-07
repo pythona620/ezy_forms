@@ -1,13 +1,16 @@
-export const domain = process.env.NODE_ENV === "production" ? "" : "/api"; //=  "/api";   process.env.NODE_ENV === 'production' ? '/' : '/api'
+export const domain = "/api";
+//=  "/api";   process.env.NODE_ENV === 'production' ? '/' : '/api'
+console.log(domain, "ddddddddddddddddddd");
 export const fileDomain = "";
 
 export const doctypes = {
   poschecks: "POS Checks",
+  users: "User",
 };
 
 export const apis = {
-  resource: domain + `/api/resource/`,
-  uploadfile: domain + `/api/method/upload_file`,
+  resource: domain + `/resource/`,
+  uploadfile: domain + `/method/upload_file`,
 };
 // export const tokens = {
 //   Apikey: "1812146a6f090f1",

@@ -66,7 +66,7 @@ export default {
     },
     methods: {
         updateActiveTab(tab) {
-            this.activeTab = tab;
+            this.activeTab = tab.name;
             console.log(this.activeTab,);
         },
     },

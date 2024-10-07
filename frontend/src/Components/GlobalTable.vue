@@ -26,9 +26,9 @@
                 ? handleCellClick(row, rowIndex)
                 : ''
               ">
-              <span class="m-0 column">{{
+              <!-- <span class="m-0 column">{{
                 formatCellContent(row[column.td_key], column.td_key) || "-"
-              }}</span>
+                }}</span> -->
             </td>
             <td v-if="actionType === 'viewPdf'" class="text-center">
               <span>
@@ -44,18 +44,18 @@
           <td :selectedOption="selectoption"></td>
           column.td_key, -->
 
-            <!-- <td v-if="actionType === 'dropdown'" class="text-center position-relative">
-            <div class="dropdown">
-              <p class="p-0 actions" data-bs-toggle="dropdown" aria-expanded="false">
-                <span>...</span>
-              </p>
-              <ul class="dropdown-menu actionsdropdown">
-                <li @click="selectedAction(action)" v-for="(action, index) in actions" :key="index">
-                  <a class="dropdown-item">{{ action }}</a>
-                </li>
-              </ul>
-            </div>
-          </td> -->
+            <td v-if="actionType === 'dropdown'" class="text-center position-relative">
+              <div class="dropdown">
+                <p class="p-0 actions" data-bs-toggle="dropdown" aria-expanded="false">
+                  <span>...</span>
+                </p>
+                <ul class="dropdown-menu actionsdropdown">
+                  <li @click="selectedAction(action)" v-for="(action, index) in actions" :key="index">
+                    <a class="dropdown-item">{{ action }}</a>
+                  </li>
+                </ul>
+              </div>
+            </td>
             <!-- <td
             v-if="actionType === 'Modal'"
             class="text-center d-flex justify-content-center"
@@ -132,7 +132,12 @@ const props = defineProps({
 const emits = defineEmits([
 
 ]);
-
+const actions = ref(
+  [
+    'naren',
+    'reddy'
+  ]
+)
 // const allCheck = ref(false);
 // function SelectedAll() {
 //   props.tData.forEach(batch => {
@@ -151,9 +156,9 @@ const emits = defineEmits([
 // onMounted(() => {
 //   allCheck.value = false;
 // });
-// function selectedAction(action) {
-//   emits("action", action);
-// }
+function selectedAction(action) {
+  emits("action", action);
+}
 
 // function handleFileChange(event) {
 //   const file = event.target.files[0];
@@ -195,6 +200,7 @@ const emits = defineEmits([
     text-overflow: ellipsis;
     white-space: nowrap;
     color: var(--muted) !important;
+    font-size: var(--twelve);
   }
 }
 
@@ -206,7 +212,7 @@ const emits = defineEmits([
     font-size: 12px;
   }
 
-  left: 9.5vh !important;
+
 }
 
 .text-decoration,
