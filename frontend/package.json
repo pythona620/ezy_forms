@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build --base=/assets/ezy_forms/frontend/ && yarn copy-html-entry",
     "preview": "vite preview",
+    "build": "vite build --base=/assets/ezy_forms/frontend/ && yarn copy-html-entry && yarn copy-assets",
+    "copy-assets": "cp -r ./src/assets/* ../../../sites/assets",
     "copy-html-entry": "cp ../ezy_forms/public/frontend/index.html ../ezy_forms/www/frontend.html"
   },
   "dependencies": {
