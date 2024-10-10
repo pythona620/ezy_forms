@@ -1,10 +1,10 @@
 <template>
     <div>
 
-        <CheckBoxComp :checkOptions="checkOptions" name="exampleCheckbox" id="exampleCheckbox" v-model="selectedOptions"
-            labeltext="Choose options:" />
+        <FormFields tag="checkbox" :checkOptions="checkOptions" name="exampleCheckbox" id="exampleCheckbox"
+            v-model="selectedOptions" labeltext="Choose options:" />
         <p>Selected Radio Value: {{ selectedOptions }}</p>
-        <DropDownComp :dropDownOptions="dropDownOptions" name="exampleDropdown" id="exampleDropdown"
+        <FormFields tag="dropdown" :dropDownOptions="dropDownOptions" name="exampleDropdown" id="exampleDropdown"
             v-model="selectedDropdown" labeltext="Choose an option:" />
         <p>Selected Radio Value: {{ selectedDropdown }}</p>
 
@@ -12,13 +12,10 @@
 </template>
 
 <script>
-import CheckBoxComp from '../../Components/CheckBoxComp.vue';
-// import FormFields from '../../Components/FormFields.vue';
-import DropDownComp from '../../Components/DropDownComp.vue';
+import FormFields from '../../Components/FormFields.vue';
 export default {
     components: {
-
-        CheckBoxComp, DropDownComp
+        FormFields
     },
     data() {
         return {
