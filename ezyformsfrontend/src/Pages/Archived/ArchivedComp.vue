@@ -23,7 +23,7 @@
                 </div>
 
                 <div class="d-flex align-items-center mb-1">
-                    <ButtonComp class="buttoncomp font-10" name="CreateForm"></ButtonComp>
+                    <ButtonComp class="buttoncomp font-10" name="Create form"></ButtonComp>
                 </div>
             </div>
         </div>
@@ -37,9 +37,11 @@
             <p class="m-0 fw-normal font-12">You can access your archived forms by filtering.</p>
             <div class=" mt-3">
                 <!-- Button trigger modal -->
-                <button type="button" class=" filterbtn d-flex m-auto" data-bs-toggle="modal"
+                <button type="button" class=" filterbtn d-flex m-auto align-items-center" data-bs-toggle="modal"
                     data-bs-target="#exampleModal">
-                    Filters
+                    <h1 class="font-12 d-flex align-items-center p-0 m-0"> <span class=""><i
+                                class="bi bi-funnel"></i></span> Filters</h1>
+
                 </button>
 
                 <!-- Modal -->
@@ -83,7 +85,11 @@
                                         <FormFields class="mb-3" tag="input" type="date" name="Requested" id="Requested"
                                             placeholder="Jan-2024-Dec-2024" v-model="filterObj.search" />
                                     </div>
-                                    <div class="col-3"></div>
+                                    <div class="col-3">
+                                        <FormFields tag="radio" :options="radioOptions" name="exampleRadio"
+                                            id="exampleRadio" v-model="filterObj.selectedRadio"
+                                            labeltext="Approval Status" />
+                                    </div>
                                     <div class="col-3">
                                         <label class="font-13 ps-1" for="Requested">Requested Id:</label>
                                         <FormFields class="mb-3" tag="input" type="search" name="Requested"
@@ -92,10 +98,14 @@
                                 </div>
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="btn font-12" data-bs-dismiss="modal">Cancel
-                                    Filter</button>
-                                <button type="button" class="btn btn-primary font-12" data-bs-dismiss="modal"
-                                    @click="applyFilter()">Apply
+                                <button type="button" class="cancelfilter border-0 text-nowrap font-10 "
+                                    data-bs-dismiss="modal"><span class="font-14 me-1">x</span>Cancel Filter</button>
+
+                                <button type="button"
+                                    class="applyfilter text-nowrap border-0 bg-primary text-white font-10 d-flex justify-content-center align-items-center"
+                                    data-bs-dismiss="modal" @click="applyFilter()"><span class="font-16 me-1"><i
+                                            class="bi bi-check2 "></i></span>
+                                    Apply
                                     Filter</button>
                             </div>
                         </div>
@@ -120,7 +130,7 @@ import GlobalTable from '../../Components/GlobalTable.vue';
 import { ref } from 'vue';
 const filterObj = ref({
     search: '',
-    selectoption: ''
+    selectoption: '', selectedRadio: ''
 
 
 })
@@ -147,6 +157,8 @@ function applyFilter() {
     // const modal = new bootstrap.Modal(document.getElementById('exampleModal'));
     // modal.hide();
 }
+const radioOptions = ref(['All',
+    'Approved', 'Rejected']);
 </script>
 <style>
 .form_archived {
@@ -165,5 +177,23 @@ function applyFilter() {
     padding: 5px 23px;
     border-radius: 4px;
     color: #3021FE;
+}
+
+.cancelfilter {
+    width: 150px;
+    height: 34px;
+    border-radius: 6px;
+    background-color: #f1f1f1;
+    color: #111111;
+    padding: 8px 20px;
+}
+
+.applyfilter {
+    width: 150px;
+    height: 34px;
+    border-radius: 6px;
+    /* background-color: #f1f1f1; */
+    /* color: #111111; */
+    padding: 8px 20px;
 }
 </style>

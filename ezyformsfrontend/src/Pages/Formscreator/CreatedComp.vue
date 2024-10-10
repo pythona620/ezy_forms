@@ -35,8 +35,7 @@
 import FormFields from '../../Components/FormFields.vue';
 import ButtonComp from '../../Components/ButtonComp.vue';
 import GlobalTable from '../../Components/GlobalTable.vue';
-import axiosInstance from '../../shared/services/interceptor';
-import { apis, doctypes } from '../../shared/apiurls';
+
 import { callWithErrorHandling, onMounted, ref } from 'vue';
 const filterObj = ref({
     search: '',

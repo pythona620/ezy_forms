@@ -134,6 +134,7 @@ li {
     height: 93.5dvh;
     background-color: var(--sidebar-color);
     padding-top: 12px;
+
 }
 
 .active-link>li {

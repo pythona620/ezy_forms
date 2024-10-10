@@ -39,7 +39,7 @@
     </div>
 
     <!-- Radio Buttons -->
-    <div v-if="tag === 'radio'" class="form-check">
+    <div v-if="tag === 'radio'" :class="{ 'form-check flex-layout': isFlex, 'form-check one-by-one-layout': !isFlex }">
       <div v-for="(item, index) in options" :key="index" class="form-check-item">
         <label :for="`${id}-${index}`" class="form-check-label">
           <input type="radio" :name="name" :id="`${id}-${index}`" :value="item" v-model="localModel"
@@ -50,14 +50,16 @@
     </div>
 
 
-
     <!-- Checkboxes -->
     <div v-if="tag === 'checkbox'" class="form-check">
-      <label v-for="(item, index) in options" :key="index" class="form-check-label">
-        <input type="checkbox" :name="name" :id="`${id}-${index}`" :value="item" v-model="localModel"
-          class="form-check-input" />
-        {{ item }}
-      </label>
+      <div v-for="(item, index) in options" :key="index">
+        <label for="`${id}-${index}`" class="form-check-label">
+          <input type="checkbox" :name="name" :id="`${id}-${index}`" :value="item" v-model="localModel"
+            class="form-check-input" />
+          {{ item }}
+        </label>
+      </div>
+
     </div>
 
     <!-- Toggle Switch -->
@@ -74,6 +76,10 @@ import { defineProps, defineEmits, ref, watch, computed } from "vue";
 const props = defineProps({
   type: {
     type: String,
+  },
+  isFlex: {
+    type: Boolean,
+    default: true,
   },
   tag: { type: String, required: true },
   options: { type: Array, default: () => [] },
@@ -214,6 +220,17 @@ select {
   border-end-end-radius: 8px;
   top: 0;
   padding: 3px 3px;
+}
+
+.flex-layout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.one-by-one-layout {
+  display: block;
+  margin-bottom: 10px;
 }
 
 .input-group {

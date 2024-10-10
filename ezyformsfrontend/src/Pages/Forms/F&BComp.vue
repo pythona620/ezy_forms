@@ -70,6 +70,12 @@
 
                 </div>
             </div>
+            <div class="card mt-4">
+                <div class="card-body">
+                    <FormFields tag="checkbox" :options="checkboxOptions" name="excheckbox" id="excheckbox"
+                        v-model="selectedCheckBox" labeltext="Raising For:" />
+                </div>
+            </div>
             <div class="d-flex justify-content-between align-items-center mt-3 mb-4">
                 <div>
                     <ButtonComp class="buttoncomp font-10" name="Create Form"></ButtonComp>
@@ -91,9 +97,12 @@ import { ref } from 'vue';
 const name = ref('')
 const radioOptions = ref(['Self',
     'Others']);
-
+const checkboxOptions = ref([
+    'opton1', 'oprion2'
+])
 // Store the selected radio value
 const selectedRadio = ref('');
+const selectedCheckBox = ref('')
 </script>
 <style scoped>
 .card-body {
