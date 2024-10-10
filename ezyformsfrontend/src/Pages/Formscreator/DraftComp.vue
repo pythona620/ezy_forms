@@ -1,21 +1,29 @@
 <template>
     <div>
-        <!-- Render FormFields for Radio Button -->
-        <FormFields tag="radio" :options="radioOptions" name="exampleRadio" id="exampleRadio" v-model="selectedRadio"
-            labeltext="Choose an option:" />
 
-        <!-- Display selected radio button value -->
-        <p>Selected Radio Value: {{ selectedRadio }}</p>
+        <FormFields tag="checkbox" :checkOptions="checkOptions" name="exampleCheckbox" id="exampleCheckbox"
+            v-model="selectedOptions" labeltext="Choose options:" />
+        <p>Selected Radio Value: {{ selectedOptions }}</p>
+        <FormFields tag="dropdown" :dropDownOptions="dropDownOptions" name="exampleDropdown" id="exampleDropdown"
+            v-model="selectedDropdown" labeltext="Choose an option:" />
+        <p>Selected Radio Value: {{ selectedDropdown }}</p>
+
     </div>
 </template>
 
-<script setup>
-import { ref } from 'vue';
-import FormFields from '../../Components/FormFields.vue';  // Import your FormFields component
-
-// Define the options for the radio buttons
-const radioOptions = ref(['Option 1', 'Option 2', 'Option 3']);
-
-// Store the selected radio value
-const selectedRadio = ref('');
+<script>
+import FormFields from '../../Components/FormFields.vue';
+export default {
+    components: {
+        FormFields
+    },
+    data() {
+        return {
+            checkOptions: ['Option 1', 'Option 2', 'Option 3'],
+            dropDownOptions: ['Option 1', 'Option 2', 'Option 3'],
+            selectedOptions: [],
+            selectedDropdown: []
+        };
+    },
+};
 </script>

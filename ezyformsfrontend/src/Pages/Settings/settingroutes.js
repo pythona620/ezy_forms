@@ -6,8 +6,8 @@ const WorkFLow = () => import("./WorkFlow.vue");
 const Roles = () => import("./RolesComp.vue");
 const RolesMatrix = () => import("./RolesMatrix.vue");
 const Categories = () => import("./Catagories.vue");
-const ActivityLog = () => import("./ActivitLog.vue");
-
+const ActivityLog = () => import("./DepartmentComp.vue");
+const EsignComp = () => import("./EsignComp.vue");
 const settingRoutes = [
   {
     path: "/settings",
@@ -52,9 +52,14 @@ const settingRoutes = [
         name: "Categories",
       },
       {
-        path: "activitylog",
+        path: "department",
         component: ActivityLog,
         name: "ActivityLog",
+      },
+      {
+        path: "esign",
+        component: EsignComp,
+        name: "EsignComp",
       },
     ],
   },

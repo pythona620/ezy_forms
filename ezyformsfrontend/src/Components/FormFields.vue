@@ -52,20 +52,28 @@
 
     <!-- Checkboxes -->
     <div v-if="tag === 'checkbox'" class="form-check">
-      <div v-for="(item, index) in options" :key="index">
-        <label for="`${id}-${index}`" class="form-check-label">
+      <div v-for="(item, index) in checkOptions" :key="index">
+        <label :for="`${id}-${index}`" class="form-check-label">
           <input type="checkbox" :name="name" :id="`${id}-${index}`" :value="item" v-model="localModel"
             class="form-check-input" />
           {{ item }}
         </label>
       </div>
-
     </div>
 
     <!-- Toggle Switch -->
     <div v-if="tag === 'toggle'" class="form-check form-switch">
       <input type="checkbox" :name="name" :id="id" v-model="localModel" class="form-check-input" />
       <label class="form-check-label" :for="id">{{ placeholder }}</label>
+    </div>
+    <!-- dropdowns -->
+    <div v-if="tag === 'dropdown'" class="form-group">
+      <label :for="id">{{ labeltext }}</label>
+      <select :id="id" :name="name" v-model="localModel" class="form-control">
+        <option v-for="(option, index) in dropDownOptions" :key="index" :value="option">
+          {{ option }}
+        </option>
+      </select>
     </div>
   </div>
 </template>
@@ -83,6 +91,8 @@ const props = defineProps({
   },
   tag: { type: String, required: true },
   options: { type: Array, default: () => [] },
+  checkOptions: { type: Array, default: () => [] },
+  dropDownOptions: { type: Array, default: () => [] },
   placeholder: { type: String },
   labeltext: { type: String },
   name: { type: String, required: true },

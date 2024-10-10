@@ -21,7 +21,10 @@
                             :options="['JW Marriott Golfshire Banglore', 'JW Marriott Golfshire Banglore']" />
                     </div>
                 </div>
-
+                <div v-if="tableShow" class="d-flex align-items-center mb-1">
+                    <ButtonComp class="buttoncomp font-10" data-bs-toggle="modal" data-bs-target="#exampleModal"
+                        name="Apply filters"></ButtonComp>
+                </div>
                 <div class="d-flex align-items-center mb-1">
                     <ButtonComp class="buttoncomp font-10" name="Create form"></ButtonComp>
                 </div>
@@ -44,77 +47,76 @@
 
                 </button>
 
-                <!-- Modal -->
-                <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
-                    aria-hidden="true">
-                    <div class="modal-dialog modal-xl">
-                        <div class="modal-content">
 
-                            <div class="modal-body">
-                                <div class="row">
-                                    <div class="col-3">
-                                        <label class="font-13 ps-1" for="Requested">Requested By:</label>
-                                        <FormFields class="mb-3" tag="input" type="search" name="Requested"
-                                            id="Requested" placeholder="Search" v-model="filterObj.search" />
-                                    </div>
-                                    <div class="col-3">
-                                        <label class="font-13 ps-1 fw-medium" for="dept">Requested Dept:</label>
-                                        <FormFields tag="select" placeholder="Select Department" class="mb-3"
-                                            name="dept" v-model="filterObj.selectoption" id="dept" :Required="false"
-                                            :options="['JW Marriott Golfshire Banglore', 'JW Marriott Golfshire Banglore']" />
-                                    </div>
-                                    <div class="col-3">
-                                        <label class="font-13 ps-1" for="dept">Owner OF Form:</label>
-                                        <FormFields tag="select" placeholder="Select Department" class="mb-3"
-                                            name="dept" v-model="filterObj.selectoption" id="dept" :Required="false"
-                                            :options="['JW Marriott Golfshire Banglore', 'JW Marriott Golfshire Banglore']" />
-                                    </div>
-                                    <div class="col-3">
-                                        <label class="font-13 ps-1" for="dept">Form Category:</label>
-                                        <FormFields tag="select" placeholder="Select Department" class="mb-3"
-                                            name="dept" v-model="filterObj.selectoption" id="dept" :Required="false"
-                                            :options="['JW Marriott Golfshire Banglore', 'JW Marriott Golfshire Banglore']" />
-                                    </div>
-                                    <div class="col-3">
-                                        <label class="font-13 ps-1" for="Requested">Form Name:</label>
-                                        <FormFields class="mb-3" tag="input" type="search" name="Requested"
-                                            id="Requested" placeholder="Search" v-model="filterObj.search" />
-                                    </div>
-                                    <div class="col-3">
-                                        <label class="font-13 ps-1" for="Requested">Requested Period:</label>
-                                        <FormFields class="mb-3" tag="input" type="date" name="Requested" id="Requested"
-                                            placeholder="Jan-2024-Dec-2024" v-model="filterObj.search" />
-                                    </div>
-                                    <div class="col-3">
-                                        <FormFields tag="radio" :options="radioOptions" name="exampleRadio"
-                                            id="exampleRadio" v-model="filterObj.selectedRadio"
-                                            labeltext="Approval Status" />
-                                    </div>
-                                    <div class="col-3">
-                                        <label class="font-13 ps-1" for="Requested">Requested Id:</label>
-                                        <FormFields class="mb-3" tag="input" type="search" name="Requested"
-                                            id="Requested" placeholder="Search" v-model="filterObj.search" />
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="cancelfilter border-0 text-nowrap font-10 "
-                                    data-bs-dismiss="modal"><span class="font-14 me-1">x</span>Cancel Filter</button>
-
-                                <button type="button"
-                                    class="applyfilter text-nowrap border-0 bg-primary text-white font-10 d-flex justify-content-center align-items-center"
-                                    data-bs-dismiss="modal" @click="applyFilter()"><span class="font-16 me-1"><i
-                                            class="bi bi-check2 "></i></span>
-                                    Apply
-                                    Filter</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
 
         </div>
 
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-3">
+                            <label class="font-13 ps-1" for="Requested">Requested By:</label>
+                            <FormFields class="mb-3" tag="input" type="search" name="Requested" id="Requested"
+                                placeholder="Search" v-model="filterObj.search" />
+                        </div>
+                        <div class="col-3">
+                            <label class="font-13 ps-1 fw-medium" for="dept">Requested Dept:</label>
+                            <FormFields tag="select" placeholder="Select Department" class="mb-3" name="dept"
+                                v-model="filterObj.selectoption" id="dept" :Required="false"
+                                :options="['JW Marriott Golfshire Banglore', 'JW Marriott Golfshire Banglore']" />
+                        </div>
+                        <div class="col-3">
+                            <label class="font-13 ps-1" for="dept">Owner OF Form:</label>
+                            <FormFields tag="select" placeholder="Select Department" class="mb-3" name="dept"
+                                v-model="filterObj.selectoption" id="dept" :Required="false"
+                                :options="['JW Marriott Golfshire Banglore', 'JW Marriott Golfshire Banglore']" />
+                        </div>
+                        <div class="col-3">
+                            <label class="font-13 ps-1" for="dept">Form Category:</label>
+                            <FormFields tag="select" placeholder="Select Department" class="mb-3" name="dept"
+                                v-model="filterObj.selectoption" id="dept" :Required="false"
+                                :options="['JW Marriott Golfshire Banglore', 'JW Marriott Golfshire Banglore']" />
+                        </div>
+                        <div class="col-3">
+                            <label class="font-13 ps-1" for="Requested">Form Name:</label>
+                            <FormFields class="mb-3" tag="input" type="search" name="Requested" id="Requested"
+                                placeholder="Search" v-model="filterObj.search" />
+                        </div>
+                        <div class="col-3">
+                            <label class="font-13 ps-1" for="Requested">Requested Period:</label>
+                            <FormFields class="mb-3" tag="input" type="date" name="Requested" id="Requested"
+                                placeholder="Jan-2024-Dec-2024" v-model="filterObj.search" />
+                        </div>
+                        <div class="col-3">
+                            <FormFields tag="radio" :options="radioOptions" name="exampleRadio" id="exampleRadio"
+                                v-model="filterObj.selectedRadio" labeltext="Approval Status" />
+                        </div>
+                        <div class="col-3">
+                            <label class="font-13 ps-1" for="Requested">Requested Id:</label>
+                            <FormFields class="mb-3" tag="input" type="search" name="Requested" id="Requested"
+                                placeholder="Search" v-model="filterObj.search" />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="cancelfilter border-0 text-nowrap font-10 "
+                        data-bs-dismiss="modal"><span class="font-14 me-1">x</span>Cancel Filter</button>
+
+                    <button type="button"
+                        class="applyfilter text-nowrap border-0 bg-primary text-white font-10 d-flex justify-content-center align-items-center"
+                        data-bs-dismiss="modal" @click="applyFilter()"><span class="font-16 me-1"><i
+                                class="bi bi-check2 "></i></span>
+                        Apply
+                        Filter</button>
+                </div>
+            </div>
+        </div>
     </div>
     <div v-if="tableShow">
         <div class="mt-2">

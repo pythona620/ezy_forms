@@ -1,22 +1,79 @@
 <template>
     <div class="container-fluid">
         <div class="sidebar pt-2">
+            <!-- Title for the overall sidebar -->
             <h1 class="font-12 m-0 text-muted ps-2">{{ sidebarTitle }}</h1>
+
             <aside class="mt-1">
-                <ul class="list-unstyled">
-                    <router-link v-for="(list, index) in sidebarData" :key="index"
-                        :to="`${baseRoute}/${list.route.toLowerCase()}`" class="text-decoration-none text-black"
-                        active-class="active-link">
-                        <li :title="list.name">
-                            <i :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
-                            {{ list.name }}
-                        </li>
-                    </router-link>
-                </ul>
+                <!-- Settings section title for first group -->
+                <template v-if="isSettingsRoute">
+                    <h2 class="font-10 m-0 text-muted ps-2">{{ firstSettingsTitle }}</h2>
+                    <ul class="list-unstyled">
+                        <router-link v-for="(list, index) in firstSettingsGroup" :key="index"
+                            :to="`${baseRoute}/${list.route.toLowerCase()}`" class="text-decoration-none text-black"
+                            active-class="active-link">
+                            <li :title="list.name">
+                                <i :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
+                                {{ list.name }}
+                            </li>
+                        </router-link>
+                    </ul>
+
+                    <!-- Settings section title for second group -->
+                    <h2 class="font-10 m-0 text-muted ps-2 mt-3">{{ secondSettingsTitle }}</h2>
+                    <ul class="list-unstyled">
+                        <router-link v-for="(list, index) in secondSettingsGroup" :key="index"
+                            :to="`${baseRoute}/${list.route.toLowerCase()}`" class="text-decoration-none text-black"
+                            active-class="active-link">
+                            <li :title="list.name">
+                                <i :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
+                                {{ list.name }}
+                            </li>
+                        </router-link>
+                    </ul>
+                    <h2 class="font-10 m-0 text-muted ps-2">{{ thirdSettingsTitle }}</h2>
+                    <ul class="list-unstyled">
+                        <router-link v-for="(list, index) in thirdSettingsGroup" :key="index"
+                            :to="`${baseRoute}/${list.route.toLowerCase()}`" class="text-decoration-none text-black"
+                            active-class="active-link">
+                            <li :title="list.name">
+                                <i :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
+                                {{ list.name }}
+                            </li>
+                        </router-link>
+                    </ul>
+                    <h2 class="font-10 m-0 text-muted ps-2">{{ forthSettingsTitle }}</h2>
+                    <ul class="list-unstyled">
+                        <router-link v-for="(list, index) in forthSettingsGroup" :key="index"
+                            :to="`${baseRoute}/${list.route.toLowerCase()}`" class="text-decoration-none text-black"
+                            active-class="active-link">
+                            <li :title="list.name">
+                                <i :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
+                                {{ list.name }}
+                            </li>
+                        </router-link>
+                    </ul>
+                </template>
+
+                <!-- Other sidebar items if not on settings route -->
+                <template v-else>
+                    <ul class="list-unstyled">
+                        <router-link v-for="(list, index) in sidebarData" :key="index"
+                            :to="`${baseRoute}/${list.route.toLowerCase()}`" class="text-decoration-none text-black"
+                            active-class="active-link">
+                            <li :title="list.name">
+                                <i :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
+                                {{ list.name }}
+                            </li>
+                        </router-link>
+                    </ul>
+                </template>
             </aside>
         </div>
     </div>
 </template>
+
+
 
 
 <script setup>
@@ -37,15 +94,24 @@ const formSideBarData = [
 ];
 
 const settingsSideBarData = [
-    { name: 'User Management', icon: 'bi bi-people', route: 'usermanagement' },
-    { name: 'Work Flow', icon: 'bi bi-diagram-3', route: 'workflow' },
+    { name: 'Profile', icon: 'bi bi-person-circle', route: 'profile' },
+    { name: 'E-Signature', icon: 'bi bi-person-circle', route: 'esign' },
     { name: 'Role', icon: 'bi bi-shield-lock', route: 'role' },
     { name: 'Role Matrix', icon: 'bi bi-grid-3x3-gap', route: 'rolematrix' },
-    { name: 'Categories', icon: 'bi bi-tags', route: 'categories' },
+    { name: 'Work Flow', icon: 'bi bi-diagram-3', route: 'workflow' },
     { name: 'Notifications', icon: 'bi bi-bell', route: 'notifications' },
-    { name: 'Activity Log', icon: 'bi bi-clock-history', route: 'activitylog' },
-    { name: 'Profile', icon: 'bi bi-person-circle', route: 'profile' },
+    { name: 'Department', icon: 'bi bi-clock-history', route: 'department' },
+    { name: 'User Management', icon: 'bi bi-people', route: 'usermanagement' },
+    { name: 'Categories', icon: 'bi bi-tags', route: 'categories' },
+
 ];
+// Define the title for the first and second settings sections
+const firstSettingsTitle = 'My Details';
+const secondSettingsTitle = 'Workflow';
+const thirdSettingsTitle = 'Master';
+const forthSettingsTitle = 'Form';
+
+
 
 const todoSideBarData = [
     { name: 'Received for me', icon: 'bi bi-bucket', route: 'receivedform' },
@@ -83,13 +149,14 @@ const sidebarData = computed(() => {
     }
     return [];
 });
-
+const firstSettingsGroup = computed(() => settingsSideBarData.slice(0, 2)); // First 4 items
+const secondSettingsGroup = computed(() => settingsSideBarData.slice(2, 6));
+const thirdSettingsGroup = computed(() => settingsSideBarData.slice(6, 8)); // Remaining items
+const forthSettingsGroup = computed(() => settingsSideBarData.slice(8));
 // Define the title based on the current route
 const sidebarTitle = computed(() => {
     if (isMasterRoute.value) {
         return 'Departments';
-    } else if (isSettingsRoute.value) {
-        return 'Settings';
     } else if (isToDoRoute.value) {
         return 'Requests';
     } else if (isUserFormsRoute.value) {
