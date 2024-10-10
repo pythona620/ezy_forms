@@ -242,3 +242,10 @@ app_license = "mit"
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
 
+
+# website_route_rules = [{'from_route': '/UserManagement/<path:app_path>', 'to_route': 'UserManagement'},]
+
+website_redirects = [
+    {"source": "/fr", "target": "/ezyformsfrontend"},
+    {"source": "/user", "target": "/UserManagement"}
+]

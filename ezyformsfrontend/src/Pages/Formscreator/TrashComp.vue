@@ -144,10 +144,11 @@
                                                             aria-label="Close"></button>
                                                     </div>
                                                     <div class="modal-body">
-                                                        <div v-if="formCreated" class="preview-section mt-1">
+                                                        <div v-if="formCreated">
                                                             <div v-for="(section, sectionIndex) in sections"
-                                                                :key="'preview-' + sectionIndex">
-                                                                <h4>{{ section.name }}</h4>
+                                                                :key="'preview-' + sectionIndex"
+                                                                class="preview-section mb-2">
+                                                                <h5>{{ section.name }}</h5>
                                                                 <div class="row">
                                                                     <div v-for="(column, columnIndex) in section.columns"
                                                                         :key="'column-preview-' + columnIndex"
@@ -160,12 +161,47 @@
                                                                                     <label
                                                                                         :for="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex">
                                                                                         {{ field.name }}</label>
-                                                                                    <component
-                                                                                        :is="getFieldComponent(field.type)"
-                                                                                        v-model="field.value"
-                                                                                        :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
-                                                                                        class="form-control">
-                                                                                    </component>
+                                                                                    <template
+                                                                                        v-if="field.type == 'select'">
+                                                                                        <select
+                                                                                            v-if="field.type === 'select'"
+                                                                                            v-model="field.value"
+                                                                                            class="form-select mb-2 font-13">
+                                                                                            <option
+                                                                                                v-for="(option, index) in field.options.split('\n')"
+                                                                                                :key="index"
+                                                                                                :value="option">
+                                                                                                {{ option }}
+                                                                                            </option>
+                                                                                        </select>
+                                                                                    </template>
+                                                                                    <template
+                                                                                        v-else-if="field.type == 'checkbox' || field.type == 'radio'">
+                                                                                        <div class="row">
+                                                                                            <div class="form-check col-6"
+                                                                                                v-for="(option, index) in field.options.split('\n')">
+                                                                                                <label
+                                                                                                    class="form-check-label"
+                                                                                                    :for="option">
+                                                                                                    {{ option }}
+                                                                                                </label>
+                                                                                                <input class=""
+                                                                                                    :type="field.type"
+                                                                                                    :name="option"
+                                                                                                    :id="option">
+
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </template>
+                                                                                    <template v-else>
+                                                                                        <component
+                                                                                            :is="getFieldComponent(field.type)"
+                                                                                            v-model="field.value"
+                                                                                            :type="field.type"
+                                                                                            :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                                                                                            :class="form - control">
+                                                                                        </component>
+                                                                                    </template>
                                                                                 </div>
                                                                             </div>
                                                                         </div>
@@ -174,12 +210,12 @@
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div class="modal-footer">
+                                                    <!-- <div class="modal-footer">
                                                         <button type="button" class="btn btn-secondary"
                                                             data-bs-dismiss="modal">Close</button>
                                                         <button class="btn btn-primary"
                                                             @click="saveFormFields">Save</button>
-                                                    </div>
+                                                    </div> -->
                                                 </div>
                                             </div>
                                         </div>
@@ -228,20 +264,31 @@
                                                                             class="form-select mb-2 font-13"
                                                                             @change="onFieldTypeChange(sectionIndex, columnIndex, fieldIndex)">
                                                                             <option value="">Select Type</option>
-                                                                            <option value="dropdown">Drop Down
-                                                                            </option>
-                                                                            <option value="textarea">Paragraph
-                                                                            </option>
-                                                                            <option value="text">Short answer
-                                                                            </option>
-                                                                            <option value="checkbox">Checkbox
-                                                                            </option>
-                                                                            <option value="date">Date</option>
+                                                                            <option v-for="section in fieldTypes"
+                                                                                :value="section.type">{{ section.label
+                                                                                }}</option>
+
                                                                         </select>
+                                                                        <div
+                                                                            v-if="field.type == 'checkbox' || field.type == 'radio' || field.type == 'select'">
+                                                                            <label for="options">Enter Options:</label>
+                                                                            <textarea id="options"
+                                                                                placeholder="Enter your Options"
+                                                                                v-model="field.options"
+                                                                                class="form-control shadow-none mb-1 font-14 p-0">
+                                    </textarea>
+                                                                        </div>
+                                                                        <div>
+                                                                            <input v-model="field.mandatory"
+                                                                                placeholder="Field Name"
+                                                                                type="checkbox" />
+                                                                            <label for="mandatory">Mandatory</label>
+                                                                            <!--- checkbox for mandatory -->
+                                                                        </div>
                                                                     </div>
                                                                 </div>
                                                                 <div
-                                                                    class="d-flex justify-content-center align-items-center">
+                                                                    class="d-flex justify-content-center align-items-center my-2">
                                                                     <button class="btn btn-light btn-sm fw-bold m-2"
                                                                         @click="addField(sectionIndex, columnIndex)">
                                                                         <i class="bi bi-plus"></i> Add Field
@@ -252,7 +299,7 @@
                                                     </div>
                                                 </section>
                                             </div>
-                                            <div class="d-flex justify-content-center align-items-center mt-4">
+                                            <div class="d-flex justify-content-center align-items-center my-4">
                                                 <button class="btn btn-light border font-12" @click="addSection">
                                                     <i class="bi bi-plus-circle me-1 fs-6"></i> Add Section
                                                 </button>
@@ -278,6 +325,7 @@
 <script setup>
 import FormFields from '../../Components/FormFields.vue';
 import ButtonComp from '../../Components/ButtonComp.vue';
+import InputComp from '../../Components/InputComp.vue';
 
 import {
     onMounted,
@@ -329,6 +377,42 @@ const steps = [{
     icon: 'bi bi-question-circle'
 },
 ];
+
+const fieldTypes = [
+    {
+        label: 'Text',
+        type: 'dataText'
+    },
+    {
+        label: 'Checkbox',
+        type: 'checkbox'
+    },
+    {
+        label: 'Radio',
+        type: 'radio'
+    },
+    {
+        label: 'Attach',
+        type: 'file'
+    },
+    {
+        label: 'Number',
+        type: 'number'
+    },
+    {
+        label: 'TextArea',
+        type: 'textarea'
+    },
+    {
+        label: 'Date',
+        type: 'date'
+    },
+    {
+        label: "Select",
+        type: 'select'
+    }
+]
+
 
 // Save the form as a draft
 const saveAsDraft = () => {
@@ -405,6 +489,8 @@ const addField = (sectionIndex, columnIndex) => {
         name: '',
         type: '',
         value: ref(''), // Keeping the value as a ref for reactivity
+        options: '',
+        mandatory: false
     });
 };
 
@@ -417,21 +503,27 @@ const removeField = (sectionIndex, columnIndex, fieldIndex) => {
 const onFieldTypeChange = (sectionIndex, columnIndex, fieldIndex) => {
     const field = sections[sectionIndex].columns[columnIndex].fields[fieldIndex];
     // Handle additional logic for field type change if needed
+    console.log("field === ", field)
+    console.log(" sections === ", sections)
+
 };
+
 
 // Dynamically determine the input field type
 const getFieldComponent = (type) => {
     switch (type) {
-        case 'text':
+        case 'dataText':
             return 'input';
         case 'textarea':
             return 'textarea';
         case 'checkbox':
             return 'input'; // Checkbox input will need to handle checked state
-        case 'dropdown':
+        case 'select':
             return 'select'; // Handle options for dropdown separately
         case 'date':
             return 'input'; // Consider using type="date" for HTML5 date input
+        case 'radio':
+            return 'input';
         default:
             return 'input';
     }

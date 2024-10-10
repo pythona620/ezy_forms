@@ -4,11 +4,11 @@
   "description": "ezy_forms",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "postinstall": "cd frontend && yarn install",
-    "dev": "cd frontend && yarn dev",
-    "build": "cd frontend && yarn build"
-  },
+  "test": "echo \"Error: no test specified\" && exit 1",
+  "postinstall": "cd ezyformsfrontend && yarn install && cd ../UserManagement && yarn install",
+  "dev": "(cd ezyformsfrontend && yarn dev) & (cd UserManagement && yarn dev)",
+  "build": "cd ezyformsfrontend && yarn build && cd ../UserManagement && yarn build"
+},
   "keywords": [],
   "author": "",
   "license": "ISC"
