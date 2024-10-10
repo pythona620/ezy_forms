@@ -274,7 +274,7 @@
     </div>
 </template>
 
-<script>
+<script setup>
 import FormFields from '../../Components/FormFields.vue';
 import ButtonComp from '../../Components/ButtonComp.vue';
 
