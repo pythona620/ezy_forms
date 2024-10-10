@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
   "test": "echo \"Error: no test specified\" && exit 1",
-  "postinstall": "cd ezyformsfrontend && yarn install && cd ../UserManagement && yarn install",
-  "dev": "(cd ezyformsfrontend && yarn dev) & (cd UserManagement && yarn dev)",
-  "build": "cd ezyformsfrontend && yarn build && cd ../UserManagement && yarn build"
+  "postinstall": "cd ezyformsfrontend && yarn install",
+  "dev": "(cd ezyformsfrontend && yarn dev)",
+  "build": "cd ezyformsfrontend && yarn build"
 },
   "keywords": [],
   "author": "",
