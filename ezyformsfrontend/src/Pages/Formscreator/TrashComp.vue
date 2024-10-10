@@ -137,7 +137,8 @@
                                             <div class="modal-dialog modal-lg">
                                                 <div class="modal-content">
                                                     <div class="modal-header">
-                                                        <h5 class="modal-title" id="exampleModalLabel">Preview Form
+                                                        <h5 class="modal-title m-0 font-13" id="exampleModalLabel">
+                                                            Preview Form
                                                         </h5>
                                                         <button type="button" class="btn-close" data-bs-dismiss="modal"
                                                             aria-label="Close"></button>
@@ -182,7 +183,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="main-section">
+                                        <div class="mt-4">
                                             <div v-for="(section, sectionIndex) in sections" :key="sectionIndex"
                                                 class="dynamicSection">
                                                 <input v-model="section.name" type="text"
@@ -190,11 +191,11 @@
                                                 <section class="row">
                                                     <div class="d-flex justify-content-end">
                                                         <button v-if="section.columns.length < 3"
-                                                            class="btn btn-light bg-transparent border-0"
+                                                            class="btn btn-light bg-transparent border-0 font-13"
                                                             @click="addColumn(sectionIndex)">
                                                             <i class="bi bi-plus"></i> Add Column
                                                         </button>
-                                                        <button class="btn btn-light bg-transparent border-0"
+                                                        <button class="btn btn-light bg-transparent border-0 font-13"
                                                             @click="removeSection(sectionIndex)">
                                                             <i class="bi bi-trash me-2"></i> Delete Section
                                                         </button>
@@ -217,14 +218,14 @@
                                                                         <div class="d-flex justify-content-between">
                                                                             <input v-model="field.name"
                                                                                 placeholder="Field Name"
-                                                                                class="border-less-input mb-1" />
+                                                                                class="border-less-input mb-1 font-14 p-0" />
                                                                             <button class="btn btn-light btn-sm"
                                                                                 @click="removeField(sectionIndex, columnIndex, fieldIndex)">
                                                                                 <i class="bi bi-trash"></i>
                                                                             </button>
                                                                         </div>
                                                                         <select v-model="field.type"
-                                                                            class="form-select mb-2"
+                                                                            class="form-select mb-2 font-13"
                                                                             @change="onFieldTypeChange(sectionIndex, columnIndex, fieldIndex)">
                                                                             <option value="">Select Type</option>
                                                                             <option value="dropdown">Drop Down
@@ -251,8 +252,8 @@
                                                     </div>
                                                 </section>
                                             </div>
-                                            <div class="d-flex justify-content-center align-items-center">
-                                                <button class="btn btn-light border" @click="addSection">
+                                            <div class="d-flex justify-content-center align-items-center mt-4">
+                                                <button class="btn btn-light border font-12" @click="addSection">
                                                     <i class="bi bi-plus-circle me-1 fs-6"></i> Add Section
                                                 </button>
                                             </div>
@@ -463,9 +464,8 @@ const saveFormFields = () => {
 <style scoped>
 .dynamicSection {
     border: 1px solid #CCCCCC;
-    margin: 20px;
-    padding: 10px;
-    border-radius: 10px;
+    margin-bottom: 20px;
+    border-radius: 7px;
     background-color: #EEEEEE;
 }
 
@@ -636,7 +636,7 @@ select {
 .stepperbackground {
     background-color: #EEEEEE;
     height: 50px;
-    display: flex;
-    align-items: center;
+    border-radius: 7px;
+
 }
 </style>
