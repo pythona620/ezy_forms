@@ -213,7 +213,7 @@
                                                                                             <template
                                                                                                 v-else-if="field.type == 'checkbox' || field.type == 'radio'">
                                                                                                 <div class="row">
-                                                                                                    <div class="form-check col-6 mb-4"
+                                                                                                    <div class="form-check col-3 mb-4"
                                                                                                         v-for="(option, index) in field.options.split('\n')">
                                                                                                         <div
                                                                                                             class="d-flex gap-2 align-items-center">
