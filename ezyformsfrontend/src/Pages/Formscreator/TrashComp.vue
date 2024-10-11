@@ -15,7 +15,7 @@
                     <ul class="steps">
                         <li v-for="step in steps" :key="step.id"
                             :class="{ active: activeStep === step.id, completed: activeStep > step.id }">
-                            <div class="d-flex gap-3 align-items-center">
+                            <div class="d-flex gap-3 align-items-center" @click="handleStepClick(step.label)">
                                 <i :class="step.icon"></i>
                                 <div class="step-text">
                                     <span class="font-10">{{ step.stepno }}</span><br>
@@ -178,17 +178,23 @@
                                                                                     <template
                                                                                         v-else-if="field.type == 'checkbox' || field.type == 'radio'">
                                                                                         <div class="row">
-                                                                                            <div class="form-check col-6"
+                                                                                            <div class="form-check col-6 mb-4"
                                                                                                 v-for="(option, index) in field.options.split('\n')">
-                                                                                                <label
-                                                                                                    class="form-check-label"
-                                                                                                    :for="option">
-                                                                                                    {{ option }}
-                                                                                                </label>
-                                                                                                <input class=""
-                                                                                                    :type="field.type"
-                                                                                                    :name="option"
-                                                                                                    :id="option">
+                                                                                                <div
+                                                                                                    class="d-flex gap-2 align-items-center">
+                                                                                                    <div><label
+                                                                                                            class="form-check-label m-0"
+                                                                                                            :for="option">
+                                                                                                            {{ option }}
+                                                                                                        </label></div>
+                                                                                                    <div><input class=""
+                                                                                                            :type="field.type"
+                                                                                                            :name="option"
+                                                                                                            :id="option">
+                                                                                                    </div>
+                                                                                                </div>
+
+
 
                                                                                             </div>
                                                                                         </div>
@@ -271,18 +277,27 @@
                                                                         </select>
                                                                         <div
                                                                             v-if="field.type == 'checkbox' || field.type == 'radio' || field.type == 'select'">
-                                                                            <label for="options">Enter Options:</label>
+                                                                            <label class="font-12  fw-light"
+                                                                                for="options">Enter
+                                                                                Options:</label>
                                                                             <textarea id="options"
                                                                                 placeholder="Enter your Options"
                                                                                 v-model="field.options"
-                                                                                class="form-control shadow-none mb-1 font-14 p-0">
+                                                                                class="form-control shadow-none mb-1 font-12 ">
                                     </textarea>
                                                                         </div>
-                                                                        <div>
-                                                                            <input v-model="field.mandatory"
-                                                                                placeholder="Field Name"
-                                                                                type="checkbox" />
-                                                                            <label for="mandatory">Mandatory</label>
+                                                                        <div class="d-flex gap-2 align-items-center">
+
+                                                                            <div><input class="font-12"
+                                                                                    v-model="field.mandatory"
+                                                                                    placeholder="Field Name"
+                                                                                    type="checkbox" />
+                                                                            </div>
+                                                                            <div><label for="mandatory"
+                                                                                    class="font-12 m-0 fw-light ">Mandatory</label>
+                                                                            </div>
+
+
                                                                             <!--- checkbox for mandatory -->
                                                                         </div>
                                                                     </div>
@@ -352,6 +367,28 @@ const form = ref({
     accessibility: [],
     questions: [], // Array to hold added questions
 });
+const tableForm = ref(true);
+const creatForm = ref(false);
+function formCration() {
+    tableForm.value = false;
+    creatForm.value = true;
+}
+function cancelForm() {
+    tableForm.value = true;
+    creatForm.value = false
+}
+const handleStepClick = (label) => {
+    switch (label) {
+        case 'About Form':
+            prevStep();
+            break;
+        case 'Questions in Form':
+            nextStep();
+            break;
+
+    }
+};
+
 
 // New question structure
 const newQuestion = ref({
@@ -665,8 +702,14 @@ has context menu .form-container {
 
 label {
     display: block;
+    font-size: 13px;
     margin-bottom: 8px;
     font-weight: 600;
+}
+
+input,
+input::placeholder {
+    font: 12px;
 }
 
 input,

@@ -31,173 +31,224 @@
             isCheckbox='true' />
     </div>
     <div class="" v-if="creatForm">
-        <div class="d-flex justify-content-between align-items-center">
-            <div class="ps-1 m-0 d-flex align-items-center" @click="cancelForm()">
-                <h1 class="font-13"><i class="bi bi-arrow-left"></i><span class="ms-2">Cancel Form</span></h1>
-            </div>
-            <div>
-                <ButtonComp class="font-10 rounded-2" name="Save as Draft"></ButtonComp>
-            </div>
-        </div>
-        <div class="form-container mt-1">
-
-            <div class="row">
-                <div class=" col-2">
-                    <ul class="steps">
-                        <li v-for="step in steps" :key="step.id"
-                            :class="{ active: activeStep === step.id, completed: activeStep > step.id }">
-                            <div class="d-flex gap-3 align-items-center" @click="handleStepClick(step.label)">
-                                <i :class="step.icon"></i>
-                                <div class="step-text">
-                                    <span class="font-10">{{ step.stepno }}</span><br>
-                                    <span>{{ step.label }}</span>
-                                </div>
-                            </div>
-                        </li>
-                    </ul>
-
-
+        <div class="">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="ps-1 m-0 d-flex align-items-center" @click="cancelForm()">
+                    <h1 class="font-13"><i class="bi bi-arrow-left"></i><span class="ms-2">Cancel Form</span></h1>
                 </div>
-                <div class=" col-10">
+                <div>
+                    <ButtonComp class="font-10 rounded-2" name="Save as Draft"></ButtonComp>
+                </div>
+            </div>
+            <div class="form-container mt-1">
 
-                    <div class="">
-
-                        <div class="form-content stepsDiv">
-                            <!-- About Form Step -->
-                            <div v-if="activeStep === 1">
-                                <div class="">
-                                    <div
-                                        class=" stepperbackground ps-2 pe-2 m-0 d-flex justify-content-between align-items-center">
-                                        <h1 class="font-11 m-0"><i class="bi bi-chevron-left"></i><span
-                                                class="ms-2">Cancel
-                                                Form</span>
-                                        </h1>
-                                        <h1 class="font-11 m-0">About Form</h1>
-                                        <ButtonComp class="buttoncomp" name="Next" v-if="activeStep < 3"
-                                            @click="nextStep" />
-
+                <div class="row">
+                    <div class=" col-2">
+                        <ul class="steps">
+                            <li v-for="step in steps" :key="step.id"
+                                :class="{ active: activeStep === step.id, completed: activeStep > step.id }">
+                                <div class="d-flex gap-3 align-items-center" @click="handleStepClick(step.label)">
+                                    <i :class="step.icon"></i>
+                                    <div class="step-text">
+                                        <span class="font-10">{{ step.stepno }}</span><br>
+                                        <span>{{ step.label }}</span>
                                     </div>
                                 </div>
-                                <div class="row">
-                                    <div class="col-4">
+                            </li>
+                        </ul>
 
-                                    </div>
-                                    <div class="col-4">
+                    </div>
+                    <div class=" col-10">
 
-                                        <div class=" mt-4">
-                                            <div class="">
+                        <div class="">
 
-                                                <FormFields labeltext="Form Name" class="mb-3" type="text" tag="input"
-                                                    name="Value" id="Value" placeholder="Untitle Form" orm
-                                                    v-model="filterObj.name" />
-
-                                            </div>
-                                        </div>
-                                        <div class=" mt-4">
-                                            <div class="">
-
-                                                <FormFields labeltext="Form Short Code" class="mb-3" type="text"
-                                                    tag="input" name="Value" id="Value" placeholder="Untitle Form"
-                                                    v-model="filterObj.code" />
-
-                                            </div>
-                                        </div>
-                                        <div class=" mt-4">
-                                            <div class="">
-
-                                                <FormFields labeltext="Owner Of The Form" class="mb-3 w-100"
-                                                    tag="select" name="dept" id="dept" placeholder="Select Department"
-                                                    :options="['JW Marriott Golfshire Banglore', 'JW Marriott Golfshire Banglore']"
-                                                    v-model="filterObj.owner" />
-
-                                            </div>
-                                        </div>
-                                        <div class=" mt-4">
-                                            <div class="">
-
-                                                <FormFields labeltext="Form Cateogry" class="mb-3" tag="select"
-                                                    name="desgination" id="desgination" placeholder="Select Cateogry"
-                                                    :options="['JW Marriott Golfshire Banglore', 'JW Marriott Golfshire Banglore']"
-                                                    v-model="filterObj.categery" />
-
-                                            </div>
-                                        </div>
-                                        <div class=" mt-4 ">
-                                            <div class="">
-
-                                                <FormFields labeltext="Accessbility Departments" class="mb-3"
-                                                    tag="select" name="desgination" id="Departments"
-                                                    placeholder="Select Desigination"
-                                                    :options="['JW Marriott Golfshire Banglore', 'JW Marriott Golfshire Banglore']"
-                                                    v-model="filterObj.dept" />
-
-                                            </div>
-                                        </div>
-
-                                    </div>
-
-                                    <div class="col-4"></div>
-                                </div>
-
-                            </div>
-
-                            <!-- Questions in Form Step -->
-                            <div v-if="activeStep === 2">
-                                <div class="">
-                                    <div
-                                        class=" stepperbackground ps-2 pe-2  m-0 d-flex justify-content-between align-items-center">
-                                        <h1 class="font-11 m-0"><i @click="prevStep"
-                                                class="bi bi-chevron-left"></i><span class="ms-2">Back To
-                                                About
-                                                Form</span>
-                                        </h1>
-                                        <button class="btn btn-light font-10" type="button" data-bs-toggle="modal"
-                                            data-bs-target="#exampleModal" @click="createForm">
-                                            <i class="bi bi-eye me-1"></i>Preview
-                                        </button>
-
-                                    </div>
+                            <div class="form-content stepsDiv">
+                                <!-- About Form Step -->
+                                <div v-if="activeStep === 1">
                                     <div class="">
-                                        <!-- <div class="d-flex justify-content-end">
+                                        <div
+                                            class=" stepperbackground ps-2 pe-2 m-0 d-flex justify-content-between align-items-center">
+                                            <h1 class="font-11 m-0"><i class="bi bi-chevron-left"></i><span
+                                                    class="ms-2">Cancel
+                                                    Form</span>
+                                            </h1>
+                                            <h1 class="font-11 m-0">About Form</h1>
+                                            <ButtonComp class="buttoncomp" name="Next" v-if="activeStep < 3"
+                                                @click="nextStep" />
+
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-4">
+
+                                        </div>
+                                        <div class="col-4">
+
+                                            <div class=" mt-4">
+                                                <div class="">
+
+                                                    <FormFields labeltext="Form Name" class="mb-3" type="text"
+                                                        tag="input" name="Value" id="Value" placeholder="Untitle Form"
+                                                        orm v-model="filterObj.name" />
+
+                                                </div>
+                                            </div>
+                                            <div class=" mt-4">
+                                                <div class="">
+
+                                                    <FormFields labeltext="Form Short Code" class="mb-3" type="text"
+                                                        tag="input" name="Value" id="Value" placeholder="Untitle Form"
+                                                        v-model="filterObj.code" />
+
+                                                </div>
+                                            </div>
+                                            <div class=" mt-4">
+                                                <div class="">
+
+                                                    <FormFields labeltext="Owner Of The Form" class="mb-3 w-100"
+                                                        tag="select" name="dept" id="dept"
+                                                        placeholder="Select Department"
+                                                        :options="['JW Marriott Golfshire Banglore', 'JW Marriott Golfshire Banglore']"
+                                                        v-model="filterObj.owner" />
+
+                                                </div>
+                                            </div>
+                                            <div class=" mt-4">
+                                                <div class="">
+
+                                                    <FormFields labeltext="Form Cateogry" class="mb-3" tag="select"
+                                                        name="desgination" id="desgination"
+                                                        placeholder="Select Cateogry"
+                                                        :options="['JW Marriott Golfshire Banglore', 'JW Marriott Golfshire Banglore']"
+                                                        v-model="filterObj.categery" />
+
+                                                </div>
+                                            </div>
+                                            <div class=" mt-4 ">
+                                                <div class="">
+
+                                                    <FormFields labeltext="Accessbility Departments" class="mb-3"
+                                                        tag="select" name="desgination" id="Departments"
+                                                        placeholder="Select Desigination"
+                                                        :options="['JW Marriott Golfshire Banglore', 'JW Marriott Golfshire Banglore']"
+                                                        v-model="filterObj.dept" />
+
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="col-4"></div>
+                                    </div>
+
+                                </div>
+
+                                <!-- Questions in Form Step -->
+                                <div v-if="activeStep === 2">
+                                    <div class="">
+                                        <div
+                                            class=" stepperbackground ps-2 pe-2  m-0 d-flex justify-content-between align-items-center">
+                                            <h1 class="font-11 m-0"><i @click="prevStep"
+                                                    class="bi bi-chevron-left"></i><span class="ms-2">Back To
+                                                    About
+                                                    Form</span>
+                                            </h1>
+                                            <button class="btn btn-light font-10" type="button" data-bs-toggle="modal"
+                                                data-bs-target="#exampleModal" @click="createForm">
+                                                <i class="bi bi-eye me-1"></i>Preview
+                                            </button>
+
+                                        </div>
+                                        <div class="">
+                                            <!-- <div class="d-flex justify-content-end">
                                             <button class="btn btn-light" type="button" data-bs-toggle="modal"
                                                 data-bs-target="#exampleModal" @click="createForm">
                                                 <i class="bi bi-eye me-1"></i>Preview
                                             </button>
                                         </div> -->
-                                        <div class="modal fade" id="exampleModal" tabindex="-1"
-                                            aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                            <div class="modal-dialog modal-xl">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title m-0 font-13" id="exampleModalLabel">
-                                                            Preview Form
-                                                        </h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                            aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        <div v-if="formCreated" class="preview-section mt-1">
-                                                            <div v-for="(section, sectionIndex) in sections"
-                                                                :key="'preview-' + sectionIndex">
-                                                                <h4>{{ section.name }}</h4>
-                                                                <div class="row">
-                                                                    <div v-for="(column, columnIndex) in section.columns"
-                                                                        :key="'column-preview-' + columnIndex"
-                                                                        class="col">
-                                                                        <div class="mb-3">
-                                                                            <div v-for="(field, fieldIndex) in column.fields"
-                                                                                :key="'field-preview-' + fieldIndex">
-                                                                                <div v-if="field.name">
-                                                                                    <!-- Only show field if the name is not empty -->
-                                                                                    <label
-                                                                                        :for="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex">
-                                                                                        {{ field.name }}</label>
-                                                                                    <component
-                                                                                        :is="getFieldComponent(field.type)"
-                                                                                        v-model="field.value"
-                                                                                        :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
-                                                                                        class="form-control">
-                                                                                    </component>
+                                            <div class="modal fade" id="exampleModal" tabindex="-1"
+                                                aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                                <div class="modal-dialog modal-xl">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title m-0 font-13" id="exampleModalLabel">
+                                                                Preview Form
+                                                            </h5>
+                                                            <button type="button" class="btn-close"
+                                                                data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <div v-if="formCreated">
+                                                                <div class="card p-1">
+                                                                    <div v-for="(section, sectionIndex) in sections"
+                                                                        :key="'preview-' + sectionIndex"
+                                                                        class="preview-section mb-2">
+                                                                        <h5>{{ section.name }}</h5>
+                                                                        <div class="row">
+                                                                            <div v-for="(column, columnIndex) in section.columns"
+                                                                                :key="'column-preview-' + columnIndex"
+                                                                                class="col">
+                                                                                <div class="mb-3">
+                                                                                    <div v-for="(field, fieldIndex) in column.fields"
+                                                                                        :key="'field-preview-' + fieldIndex">
+                                                                                        <div v-if="field.name">
+                                                                                            <!-- Only show field if the name is not empty -->
+                                                                                            <label
+                                                                                                :for="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex">
+                                                                                                {{ field.name }}</label>
+                                                                                            <template
+                                                                                                v-if="field.type == 'select'">
+                                                                                                <select
+                                                                                                    v-if="field.type === 'select'"
+                                                                                                    v-model="field.value"
+                                                                                                    class="form-select mb-2 font-13">
+                                                                                                    <option
+                                                                                                        v-for="(option, index) in field.options.split('\n')"
+                                                                                                        :key="index"
+                                                                                                        :value="option">
+                                                                                                        {{ option }}
+                                                                                                    </option>
+                                                                                                </select>
+                                                                                            </template>
+                                                                                            <template
+                                                                                                v-else-if="field.type == 'checkbox' || field.type == 'radio'">
+                                                                                                <div class="row">
+                                                                                                    <div class="form-check col-6 mb-4"
+                                                                                                        v-for="(option, index) in field.options.split('\n')">
+                                                                                                        <div
+                                                                                                            class="d-flex gap-2 align-items-center">
+                                                                                                            <div><label
+                                                                                                                    class="form-check-label m-0"
+                                                                                                                    :for="option">
+                                                                                                                    {{
+                                                                                                                        option
+                                                                                                                    }}
+                                                                                                                </label>
+                                                                                                            </div>
+                                                                                                            <div><input
+                                                                                                                    class=""
+                                                                                                                    :type="field.type"
+                                                                                                                    :name="option"
+                                                                                                                    :id="option">
+                                                                                                            </div>
+                                                                                                        </div>
+
+
+
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            </template>
+                                                                                            <template v-else>
+                                                                                                <component
+                                                                                                    :is="getFieldComponent(field.type)"
+                                                                                                    v-model="field.value"
+                                                                                                    :type="field.type"
+                                                                                                    :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                                                                                                    :class="form - control">
+                                                                                                </component>
+                                                                                            </template>
+                                                                                        </div>
+                                                                                    </div>
                                                                                 </div>
                                                                             </div>
                                                                         </div>
@@ -205,116 +256,135 @@
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                    </div>
-                                                    <div class="modal-footer">
+                                                        <!-- <div class="modal-footer">
                                                         <button type="button" class="btn btn-secondary"
                                                             data-bs-dismiss="modal">Close</button>
                                                         <button class="btn btn-primary"
                                                             @click="saveFormFields">Save</button>
+                                                    </div> -->
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="mt-4">
-                                            <div v-for="(section, sectionIndex) in sections" :key="sectionIndex"
-                                                class="dynamicSection">
-                                                <div class="d-flex justify-content-between">
-                                                    <div>
-                                                        <input v-model="section.name" type="text"
-                                                            class="border-less-input font-14"
-                                                            placeholder="Section Name">
-                                                    </div>
-                                                    <div>
-                                                        <div class="d-flex ">
-                                                            <button v-if="section.columns.length < 3"
-                                                                class="btn btn-light bg-transparent border-0 font-13"
-                                                                @click="addColumn(sectionIndex)">
-                                                                <i class="bi bi-plus"></i> Add Column
-                                                            </button>
-                                                            <button
-                                                                class="btn btn-light bg-transparent border-0 font-13"
-                                                                @click="removeSection(sectionIndex)">
-                                                                <i class="bi bi-trash me-2"></i> Delete Section
-                                                            </button>
+                                            <div class="mt-4">
+                                                <div v-for="(section, sectionIndex) in sections" :key="sectionIndex"
+                                                    class="dynamicSection">
+                                                    <div class="d-flex justify-content-between">
+                                                        <div><input v-model="section.name" type="text"
+                                                                class="border-less-input font-14"
+                                                                placeholder="Section Name">
                                                         </div>
-                                                    </div>
-                                                </div>
-
-
-
-                                                <section class="row">
-
-                                                    <div class="col">
-                                                        <div class="row">
-                                                            <div v-for="(column, columnIndex) in section.columns"
-                                                                :key="columnIndex" class="col p-0 dynamicColumn">
-                                                                <div
-                                                                    class="column_name d-flex align-items-center justify-content-end">
-                                                                    <button class="btn btn-light btn-sm pe-4"
-                                                                        @click="removeColumn(sectionIndex, columnIndex)">
-                                                                        <i class="bi bi-trash"></i>
-                                                                    </button>
-                                                                </div>
-                                                                <!-- Dynamically added fields within the column -->
-                                                                <div v-for="(field, fieldIndex) in column.fields"
-                                                                    :key="fieldIndex" class="mt-2">
-                                                                    <div class="px-3 py-1 field-border">
-                                                                        <div class="d-flex justify-content-between">
-                                                                            <input v-model="field.name"
-                                                                                placeholder="Field Name"
-                                                                                class="border-less-input mb-1 font-14 p-0" />
-                                                                            <button class="btn btn-light btn-sm"
-                                                                                @click="removeField(sectionIndex, columnIndex, fieldIndex)">
-                                                                                <i class="bi bi-trash"></i>
-                                                                            </button>
-                                                                        </div>
-                                                                        <select v-model="field.type"
-                                                                            class="form-select mb-2 font-13"
-                                                                            @change="onFieldTypeChange(sectionIndex, columnIndex, fieldIndex)">
-                                                                            <option value="">Select Type</option>
-                                                                            <option value="dropdown">Drop Down
-                                                                            </option>
-                                                                            <option value="textarea">Paragraph
-                                                                            </option>
-                                                                            <option value="text">Short answer
-                                                                            </option>
-                                                                            <option value="checkbox">Checkbox
-                                                                            </option>
-                                                                            <option value="date">Date</option>
-                                                                        </select>
-                                                                    </div>
-                                                                </div>
-                                                                <div
-                                                                    class="d-flex justify-content-center align-items-center">
-                                                                    <button class="btn btn-light btn-sm fw-bold m-2"
-                                                                        @click="addField(sectionIndex, columnIndex)">
-                                                                        <i class="bi bi-plus"></i> Add Field
-                                                                    </button>
-                                                                </div>
+                                                        <div>
+                                                            <div class="d-flex justify-content-end">
+                                                                <button v-if="section.columns.length < 3"
+                                                                    class="btn btn-light bg-transparent border-0 font-13"
+                                                                    @click="addColumn(sectionIndex)">
+                                                                    <i class="bi bi-plus"></i> Add Column
+                                                                </button>
+                                                                <button
+                                                                    class="btn btn-light bg-transparent border-0 font-13"
+                                                                    @click="removeSection(sectionIndex)">
+                                                                    <i class="bi bi-trash me-2"></i> Delete Section
+                                                                </button>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </section>
-                                            </div>
-                                            <div class="d-flex justify-content-center align-items-center mt-4">
-                                                <button class="btn btn-light border font-12" @click="addSection">
-                                                    <i class="bi bi-plus-circle me-1 fs-6"></i> Add Section
-                                                </button>
+
+                                                    <section class="row">
+
+                                                        <div class="col">
+                                                            <div class="row">
+                                                                <div v-for="(column, columnIndex) in section.columns"
+                                                                    :key="columnIndex" class="col p-0 dynamicColumn">
+                                                                    <div
+                                                                        class="column_name d-flex align-items-center justify-content-end">
+                                                                        <button class="btn btn-light btn-sm"
+                                                                            @click="removeColumn(sectionIndex, columnIndex)">
+                                                                            <i class="bi bi-trash"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                    <!-- Dynamically added fields within the column -->
+                                                                    <div v-for="(field, fieldIndex) in column.fields"
+                                                                        :key="fieldIndex" class="mt-2">
+                                                                        <div class="px-3 py-1 field-border">
+                                                                            <div class="d-flex justify-content-between">
+                                                                                <input v-model="field.name"
+                                                                                    placeholder="Field Name"
+                                                                                    class="border-less-input mb-1 font-14 p-0" />
+                                                                                <button class="btn btn-light btn-sm"
+                                                                                    @click="removeField(sectionIndex, columnIndex, fieldIndex)">
+                                                                                    <i class="bi bi-trash"></i>
+                                                                                </button>
+                                                                            </div>
+                                                                            <select v-model="field.type"
+                                                                                class="form-select mb-2 font-13"
+                                                                                @change="onFieldTypeChange(sectionIndex, columnIndex, fieldIndex)">
+                                                                                <option value="">Select Type</option>
+                                                                                <option v-for="section in fieldTypes"
+                                                                                    :value="section.type">{{
+                                                                                        section.label
+                                                                                    }}</option>
+
+                                                                            </select>
+                                                                            <div
+                                                                                v-if="field.type == 'checkbox' || field.type == 'radio' || field.type == 'select'">
+                                                                                <label class="font-12  fw-light"
+                                                                                    for="options">Enter
+                                                                                    Options:</label>
+                                                                                <textarea id="options"
+                                                                                    placeholder="Enter your Options"
+                                                                                    v-model="field.options"
+                                                                                    class="form-control shadow-none mb-1 font-12 ">
+                                    </textarea>
+                                                                            </div>
+                                                                            <div
+                                                                                class="d-flex gap-2 align-items-center">
+
+                                                                                <div><input class="font-12"
+                                                                                        v-model="field.mandatory"
+                                                                                        placeholder="Field Name"
+                                                                                        type="checkbox" />
+                                                                                </div>
+                                                                                <div><label for="mandatory"
+                                                                                        class="font-12 m-0 fw-light ">Mandatory</label>
+                                                                                </div>
+
+
+                                                                                <!--- checkbox for mandatory -->
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div
+                                                                        class="d-flex justify-content-center align-items-center my-2">
+                                                                        <button class="btn btn-light btn-sm fw-bold m-2"
+                                                                            @click="addField(sectionIndex, columnIndex)">
+                                                                            <i class="bi bi-plus"></i> Add Field
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </section>
+                                                </div>
+                                                <div class="d-flex justify-content-center align-items-center my-4">
+                                                    <button class="btn btn-light border font-12" @click="addSection">
+                                                        <i class="bi bi-plus-circle me-1 fs-6"></i> Add Section
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+
                             </div>
+                        </div>
+
+                        <div>
 
                         </div>
                     </div>
-
-                    <div>
-
-                    </div>
                 </div>
-            </div>
 
+            </div>
         </div>
     </div>
 </template>
@@ -373,6 +443,10 @@ const handleStepClick = (label) => {
 // Current active step
 const activeStep = ref(1);
 
+
+
+
+
 // Form data structure
 const form = ref({
     name: '',
@@ -381,6 +455,10 @@ const form = ref({
     accessibility: [],
     questions: [], // Array to hold added questions
 });
+
+
+
+
 
 // New question structure
 const newQuestion = ref({
@@ -406,6 +484,42 @@ const steps = [{
     icon: 'bi bi-question-circle'
 },
 ];
+
+const fieldTypes = [
+    {
+        label: 'Text',
+        type: 'dataText'
+    },
+    {
+        label: 'Checkbox',
+        type: 'checkbox'
+    },
+    {
+        label: 'Radio',
+        type: 'radio'
+    },
+    {
+        label: 'Attach',
+        type: 'file'
+    },
+    {
+        label: 'Number',
+        type: 'number'
+    },
+    {
+        label: 'TextArea',
+        type: 'textarea'
+    },
+    {
+        label: 'Date',
+        type: 'date'
+    },
+    {
+        label: "Select",
+        type: 'select'
+    }
+]
+
 
 // Save the form as a draft
 const saveAsDraft = () => {
@@ -482,6 +596,8 @@ const addField = (sectionIndex, columnIndex) => {
         name: '',
         type: '',
         value: ref(''), // Keeping the value as a ref for reactivity
+        options: '',
+        mandatory: false
     });
 };
 
@@ -494,21 +610,27 @@ const removeField = (sectionIndex, columnIndex, fieldIndex) => {
 const onFieldTypeChange = (sectionIndex, columnIndex, fieldIndex) => {
     const field = sections[sectionIndex].columns[columnIndex].fields[fieldIndex];
     // Handle additional logic for field type change if needed
+    console.log("field === ", field)
+    console.log(" sections === ", sections)
+
 };
+
 
 // Dynamically determine the input field type
 const getFieldComponent = (type) => {
     switch (type) {
-        case 'text':
+        case 'dataText':
             return 'input';
         case 'textarea':
             return 'textarea';
         case 'checkbox':
             return 'input'; // Checkbox input will need to handle checked state
-        case 'dropdown':
+        case 'select':
             return 'select'; // Handle options for dropdown separately
         case 'date':
             return 'input'; // Consider using type="date" for HTML5 date input
+        case 'radio':
+            return 'input';
         default:
             return 'input';
     }
@@ -536,10 +658,15 @@ const saveFormFields = () => {
 
     console.log('Form Data:', formData);
 };
-onMounted(() => {
-    // fetchData();
-})
 </script>
+
+
+
+
+
+
+
+
 <style scoped>
 .formsticky {
     position: sticky;
@@ -660,7 +787,8 @@ has context menu .form-container {
 label {
     display: block;
     margin-bottom: 8px;
-    font-weight: 600;
+    font-weight: 500;
+    margin-top: 15px;
 }
 
 input,
