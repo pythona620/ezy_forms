@@ -1,0 +1,72 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-10-01 15:45:04.495503",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "business_unit",
+  "form_type",
+  "form_category",
+  "form_view"
+ ],
+ "fields": [
+  {
+   "fieldname": "business_unit",
+   "fieldtype": "Link",
+   "label": "Business Unit",
+   "options": "Ezy Business Unit"
+  },
+  {
+   "fieldname": "form_type",
+   "fieldtype": "Data",
+   "label": "Form Type"
+  },
+  {
+   "fieldname": "form_category",
+   "fieldtype": "Data",
+   "label": "Form Category"
+  },
+  {
+   "fieldname": "form_view",
+   "fieldtype": "Text Editor",
+   "label": "Form View"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-10-11 16:35:08.280096",
+ "modified_by": "Administrator",
+ "module": "Ezy Forms",
+ "name": "Ezy Forms",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Website Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
