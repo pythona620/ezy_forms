@@ -213,10 +213,10 @@
                                                                                             <template
                                                                                                 v-else-if="field.type == 'checkbox' || field.type == 'radio'">
                                                                                                 <div class="row">
-                                                                                                    <div class="form-check col-3 mb-4"
+                                                                                                    <div class="form-check col-4 mb-4"
                                                                                                         v-for="(option, index) in field.options.split('\n')">
                                                                                                         <div
-                                                                                                            class="d-flex gap-2 align-items-center">
+                                                                                                            class="d-flex gap-1 align-items-center">
                                                                                                             <div><label
                                                                                                                     class="form-check-label m-0"
                                                                                                                     :for="option">
@@ -728,7 +728,7 @@ const saveFormFields = () => {
 
 .preview-section {
     background-color: #f9f9f9;
-    padding: 20px;
+    padding: 8px;
     border-radius: 10px;
 }
 
@@ -789,6 +789,7 @@ label {
     margin-bottom: 8px;
     font-weight: 500;
     margin-top: 15px;
+    font-size: 13px;
 }
 
 input,
