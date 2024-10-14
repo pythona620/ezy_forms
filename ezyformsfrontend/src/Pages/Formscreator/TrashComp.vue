@@ -228,23 +228,29 @@
                                         <div class="mt-4">
                                             <div v-for="(section, sectionIndex) in sections" :key="sectionIndex"
                                                 class="dynamicSection">
-                                                <input v-model="section.name" type="text"
-                                                    class="border-less-input font-14" placeholder="Section Name">
-                                                <section class="row">
-                                                    <div class="d-flex justify-content-end">
-                                                        <button v-if="section.columns.length < 3"
+                                                <section class="d-flex justify-content-between">
+                                                    <input v-model="section.name" type="text"
+                                                        class="border-less-input font-14" placeholder="Section Name">
+                                                    <button class="btn btn-light bg-transparent border-0 font-13"
+                                                        @click="removeSection(sectionIndex)">
+                                                        <i class="bi bi-trash me-2"></i> Delete Section
+                                                    </button>
+                                                </section>
+                                                <section class="row" v-for="(row, rowIndex) in section.rows"
+                                                    :key="rowIndex">
+                                                    
+                                                    <div class="d-flex justify-content-between">
+                                                        <p class="px-2">Row {{ rowIndex }}</p>
+                                                        <button v-if="row.columns.length < 3"
                                                             class="btn btn-light bg-transparent border-0 font-13"
                                                             @click="addColumn(sectionIndex)">
                                                             <i class="bi bi-plus"></i> Add Column
                                                         </button>
-                                                        <button class="btn btn-light bg-transparent border-0 font-13"
-                                                            @click="removeSection(sectionIndex)">
-                                                            <i class="bi bi-trash me-2"></i> Delete Section
-                                                        </button>
+
                                                     </div>
                                                     <div class="col">
                                                         <div class="row">
-                                                            <div v-for="(column, columnIndex) in section.columns"
+                                                            <div v-for="(column, columnIndex) in row.columns"
                                                                 :key="columnIndex" class="col p-0 dynamicColumn">
                                                                 <div
                                                                     class="column_name d-flex align-items-center justify-content-end">
@@ -313,6 +319,13 @@
                                                         </div>
                                                     </div>
                                                 </section>
+
+                                                <div class="d-flex justify-content-center align-items-center my-2">
+                                                    <button class="btn btn-light btn-sm fw-bold m-2"
+                                                        @click="addRow(sectionIndex, rowIndex)">
+                                                        <i class="bi bi-plus"></i> Add Row
+                                                    </button>
+                                                </div>
                                             </div>
                                             <div class="d-flex justify-content-center align-items-center my-4">
                                                 <button class="btn btn-light border font-12" @click="addSection">
@@ -497,9 +510,12 @@ const formCreated = ref(false); // To control form preview visibility
 const addSection = () => {
     sections.push({
         name: '', // Initialize section name
-        columns: [{
-            fields: [] // Initialize with an empty fields array
+        rows: [{
+            columns: [{
+                fields: [] // Initialize with an empty fields array
+            }]
         }]
+
     });
 };
 
@@ -508,9 +524,17 @@ const removeSection = (sectionIndex) => {
     sections.splice(sectionIndex, 1);
 };
 
+const addRow = (sectionIndex) => {
+    sections[sectionIndex].rows.push({
+        columns: [{ // Initialize with a default column
+            fields: [] // Initialize with an empty fields array
+        }]
+    })
+}
+
 // Function to add a new column inside a section
-const addColumn = (sectionIndex) => {
-    sections[sectionIndex].columns.push({
+const addColumn = (sectionIndex, rowIndex) => {
+    sections[sectionIndex].rows[rowIndex].columns.push({
         fields: []
     });
 };
