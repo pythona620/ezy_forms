@@ -134,7 +134,7 @@
                                         </div> -->
                                         <div class="modal fade" id="exampleModal" tabindex="-1"
                                             aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                            <div class="modal-dialog modal-lg">
+                                            <div class="modal-dialog modal-xl">
                                                 <div class="modal-content">
                                                     <div class="modal-header">
                                                         <h5 class="modal-title m-0 font-13" id="exampleModalLabel">
@@ -149,8 +149,9 @@
                                                                 :key="'preview-' + sectionIndex"
                                                                 class="preview-section mb-2">
                                                                 <h5>{{ section.name }}</h5>
-                                                                <div class="row">
-                                                                    <div v-for="(column, columnIndex) in section.columns"
+                                                                <div class="row mb-2"
+                                                                    v-for="(row, rowIndex) in section.rows">
+                                                                    <div v-for="(column, columnIndex) in row.columns"
                                                                         :key="'column-preview-' + columnIndex"
                                                                         class="col">
                                                                         <div class="mb-3">
@@ -162,9 +163,9 @@
                                                                                         :for="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex">
                                                                                         {{ field.name }}</label>
                                                                                     <template
-                                                                                        v-if="field.type == 'select'">
+                                                                                        v-if="field.type == 'select' || field.type == 'multiselect'">
                                                                                         <select
-                                                                                            v-if="field.type === 'select'"
+                                                                                            :multiple="field.type == 'multiselect'"
                                                                                             v-model="field.value"
                                                                                             class="form-select mb-2 font-13">
                                                                                             <option
@@ -179,7 +180,8 @@
                                                                                         v-else-if="field.type == 'checkbox' || field.type == 'radio'">
                                                                                         <div class="row">
                                                                                             <div class="form-check col-6 mb-4"
-                                                                                                v-for="(option, index) in field.options.split('\n')">
+                                                                                                v-for="(option, index) in field.options.split('\n')"
+                                                                                                :key="index">
                                                                                                 <div
                                                                                                     class="d-flex gap-2 align-items-center">
                                                                                                     <div><label
@@ -238,9 +240,13 @@
                                                 </section>
                                                 <section class="row" v-for="(row, rowIndex) in section.rows"
                                                     :key="rowIndex">
-                                                    
+
                                                     <div class="d-flex justify-content-between">
                                                         <p class="px-2">Row {{ rowIndex }}</p>
+
+                                                        <button class="btn btn-light bg-transparent border-0 font-13"
+                                                            @click="removeRow(sectionIndex, rowIndex)"><i
+                                                                class="bi bi-plus"></i> Remove Row</button>
                                                         <button v-if="row.columns.length < 3"
                                                             class="btn btn-light bg-transparent border-0 font-13"
                                                             @click="addColumn(sectionIndex, rowIndex)">
@@ -255,7 +261,7 @@
                                                                 <div
                                                                     class="column_name d-flex align-items-center justify-content-end">
                                                                     <button class="btn btn-light btn-sm"
-                                                                        @click="removeColumn(sectionIndex, columnIndex)">
+                                                                        @click="removeColumn(sectionIndex, rowIndex, columnIndex)">
                                                                         <i class="bi bi-trash"></i>
                                                                     </button>
                                                                 </div>
@@ -268,21 +274,22 @@
                                                                                 placeholder="Field Name"
                                                                                 class="border-less-input mb-1 font-14 p-0" />
                                                                             <button class="btn btn-light btn-sm"
-                                                                                @click="removeField(sectionIndex, columnIndex, fieldIndex)">
+                                                                                @click="removeField(sectionIndex, rowIndex, columnIndex, fieldIndex)">
                                                                                 <i class="bi bi-trash"></i>
                                                                             </button>
                                                                         </div>
                                                                         <select v-model="field.type"
                                                                             class="form-select mb-2 font-13"
-                                                                            @change="onFieldTypeChange(sectionIndex, columnIndex, fieldIndex)">
+                                                                            @change="onFieldTypeChange(sectionIndex, rowIndex, columnIndex, fieldIndex)">
                                                                             <option value="">Select Type</option>
                                                                             <option v-for="section in fieldTypes"
-                                                                                :value="section.type">{{ section.label
+                                                                                :key="section" :value="section.type">{{
+                                                                                    section.label
                                                                                 }}</option>
 
                                                                         </select>
                                                                         <div
-                                                                            v-if="field.type == 'checkbox' || field.type == 'radio' || field.type == 'select'">
+                                                                            v-if="field.type == 'checkbox' || field.type == 'radio' || field.type == 'select' || field.type == 'multiselect'">
                                                                             <label class="font-12  fw-light"
                                                                                 for="options">Enter
                                                                                 Options:</label>
@@ -311,7 +318,7 @@
                                                                 <div
                                                                     class="d-flex justify-content-center align-items-center my-2">
                                                                     <button class="btn btn-light btn-sm fw-bold m-2"
-                                                                        @click="addField(sectionIndex,rowIndex, columnIndex)">
+                                                                        @click="addField(sectionIndex, rowIndex, columnIndex)">
                                                                         <i class="bi bi-plus"></i> Add Field
                                                                     </button>
                                                                 </div>
@@ -460,6 +467,10 @@ const fieldTypes = [
     {
         label: "Select",
         type: 'select'
+    },
+    {
+        label: "MultiSelect",
+        type: 'multiselect'
     }
 ]
 
@@ -532,6 +543,10 @@ const addRow = (sectionIndex) => {
     })
 }
 
+const removeRow = (sectionIndex, rowIndex) => {
+    sections[sectionIndex].rows.splice(rowIndex, 1);
+};
+
 // Function to add a new column inside a section
 const addColumn = (sectionIndex, rowIndex) => {
     sections[sectionIndex].rows[rowIndex].columns.push({
@@ -540,12 +555,12 @@ const addColumn = (sectionIndex, rowIndex) => {
 };
 
 // Function to remove a column inside a section
-const removeColumn = (sectionIndex, columnIndex) => {
-    sections[sectionIndex].columns.splice(columnIndex, 1);
+const removeColumn = (sectionIndex, rowIndex, columnIndex) => {
+    sections[sectionIndex].rows[rowIndex].columns.splice(columnIndex, 1);
 };
 
 // Function to add a new field inside a column
-const addField = (sectionIndex,rowIndex, columnIndex) => {
+const addField = (sectionIndex, rowIndex, columnIndex) => {
     sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields.push({
         name: '',
         type: '',
@@ -556,13 +571,13 @@ const addField = (sectionIndex,rowIndex, columnIndex) => {
 };
 
 // Function to remove a field inside a column
-const removeField = (sectionIndex, columnIndex, fieldIndex) => {
-    sections[sectionIndex].columns[columnIndex].fields.splice(fieldIndex, 1);
+const removeField = (sectionIndex, rowIndex, columnIndex, fieldIndex) => {
+    sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields.splice(fieldIndex, 1);
 };
 
 // Handle the change of field type to display the correct input
-const onFieldTypeChange = (sectionIndex, columnIndex, fieldIndex) => {
-    const field = sections[sectionIndex].columns[columnIndex].fields[fieldIndex];
+const onFieldTypeChange = (sectionIndex, rowIndex, columnIndex, fieldIndex) => {
+    const field = sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex];
     // Handle additional logic for field type change if needed
     console.log("field === ", field)
     console.log(" sections === ", sections)
@@ -574,6 +589,8 @@ const onFieldTypeChange = (sectionIndex, columnIndex, fieldIndex) => {
 const getFieldComponent = (type) => {
     switch (type) {
         case 'dataText':
+            return 'input';
+        case 'number':
             return 'input';
         case 'textarea':
             return 'textarea';
