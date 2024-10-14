@@ -216,7 +216,13 @@
                                                                                                     <div class="form-check col-4 mb-4"
                                                                                                         v-for="(option, index) in field.options.split('\n')">
                                                                                                         <div
-                                                                                                            class="d-flex gap-1 align-items-center">
+                                                                                                            class="d-flex gap-2 align-items-center">
+                                                                                                            <div><input
+                                                                                                                    class=""
+                                                                                                                    :type="field.type"
+                                                                                                                    :name="option"
+                                                                                                                    :id="option">
+                                                                                                            </div>
                                                                                                             <div><label
                                                                                                                     class="form-check-label m-0"
                                                                                                                     :for="option">
@@ -225,12 +231,7 @@
                                                                                                                     }}
                                                                                                                 </label>
                                                                                                             </div>
-                                                                                                            <div><input
-                                                                                                                    class=""
-                                                                                                                    :type="field.type"
-                                                                                                                    :name="option"
-                                                                                                                    :id="option">
-                                                                                                            </div>
+
                                                                                                         </div>
 
 
@@ -274,16 +275,16 @@
                                                                 placeholder="Section Name">
                                                         </div>
                                                         <div>
-                                                            <div class="d-flex justify-content-end">
+                                                            <div class="d-flex justify-content-end gap-2 mt-1">
                                                                 <button v-if="section.columns.length < 3"
-                                                                    class="btn btn-light bg-transparent border-0 font-13"
+                                                                    class="btn btn-light border-0 font-13"
                                                                     @click="addColumn(sectionIndex)">
                                                                     <i class="bi bi-plus"></i> Add Column
                                                                 </button>
-                                                                <button
-                                                                    class="btn btn-light bg-transparent border-0 font-13"
+                                                                <button class="btn btn-light border-0 font-13"
                                                                     @click="removeSection(sectionIndex)">
-                                                                    <i class="bi bi-trash me-2"></i> Delete Section
+                                                                    <i class="bi bi-trash 
+                                                                    "></i> Delete Section
                                                                 </button>
                                                             </div>
                                                         </div>
@@ -297,7 +298,7 @@
                                                                     :key="columnIndex" class="col p-0 dynamicColumn">
                                                                     <div
                                                                         class="column_name d-flex align-items-center justify-content-end">
-                                                                        <button class="btn btn-light btn-sm"
+                                                                        <button class=" border-0"
                                                                             @click="removeColumn(sectionIndex, columnIndex)">
                                                                             <i class="bi bi-trash"></i>
                                                                         </button>
@@ -668,6 +669,11 @@ const saveFormFields = () => {
 
 
 <style scoped>
+input {
+    font-size: 13px !important;
+    height: 50px;
+}
+
 .formsticky {
     position: sticky;
     top: 50px;
@@ -696,7 +702,7 @@ const saveFormFields = () => {
 }
 
 .column_name {
-    border-bottom: 1px solid #f1f1f1;
+    /* border-bottom: 1px solid #f1f1f1; */
     padding: 1px 10px;
 }
 
@@ -734,6 +740,7 @@ const saveFormFields = () => {
 
 input[type="checkbox"] {
     margin-left: 5px;
+    height: 10px;
 }
 
 has context menu .form-container {
