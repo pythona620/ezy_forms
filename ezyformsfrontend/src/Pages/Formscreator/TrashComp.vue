@@ -243,7 +243,7 @@
                                                         <p class="px-2">Row {{ rowIndex }}</p>
                                                         <button v-if="row.columns.length < 3"
                                                             class="btn btn-light bg-transparent border-0 font-13"
-                                                            @click="addColumn(sectionIndex)">
+                                                            @click="addColumn(sectionIndex, rowIndex)">
                                                             <i class="bi bi-plus"></i> Add Column
                                                         </button>
 
@@ -311,7 +311,7 @@
                                                                 <div
                                                                     class="d-flex justify-content-center align-items-center my-2">
                                                                     <button class="btn btn-light btn-sm fw-bold m-2"
-                                                                        @click="addField(sectionIndex, columnIndex)">
+                                                                        @click="addField(sectionIndex,rowIndex, columnIndex)">
                                                                         <i class="bi bi-plus"></i> Add Field
                                                                     </button>
                                                                 </div>
@@ -545,8 +545,8 @@ const removeColumn = (sectionIndex, columnIndex) => {
 };
 
 // Function to add a new field inside a column
-const addField = (sectionIndex, columnIndex) => {
-    sections[sectionIndex].columns[columnIndex].fields.push({
+const addField = (sectionIndex,rowIndex, columnIndex) => {
+    sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields.push({
         name: '',
         type: '',
         value: ref(''), // Keeping the value as a ref for reactivity
