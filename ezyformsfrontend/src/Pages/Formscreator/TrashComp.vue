@@ -206,7 +206,7 @@
                                                                                             :is="getFieldComponent(field.type)"
                                                                                             v-model="field.value"
                                                                                             :type="field.type"
-                                                                                            :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                                                                                            :name="'field-' + sectionIndex+'-'+rowIndex + '-' + columnIndex + '-' + fieldIndex"
                                                                                             :class="form - control">
                                                                                         </component>
                                                                                     </template>
