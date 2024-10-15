@@ -2,128 +2,112 @@
     <div class="">
         <div class="d-flex justify-content-between align-items-center">
             <div class="ps-1 m-0 d-flex align-items-center">
-                <h1 class="font-13"><i class="bi bi-arrow-left"></i><span class="ms-2">Cancel Form</span></h1>
+                <h1 class="font-13">
+                    <i class="bi bi-arrow-left"></i><span class="ms-2">Cancel Form</span>
+                </h1>
             </div>
             <div>
                 <ButtonComp class="font-10 rounded-2" name="Save as Draft"></ButtonComp>
             </div>
         </div>
         <div class="form-container mt-1">
-
             <div class="row">
-                <div class=" col-2">
+                <div class="col-2">
                     <ul class="steps">
                         <li v-for="step in steps" :key="step.id"
                             :class="{ active: activeStep === step.id, completed: activeStep > step.id }">
                             <div class="d-flex gap-3 align-items-center" @click="handleStepClick(step.label)">
                                 <i :class="step.icon"></i>
                                 <div class="step-text">
-                                    <span class="font-10">{{ step.stepno }}</span><br>
+                                    <span class="font-10">{{ step.stepno }}</span><br />
                                     <span>{{ step.label }}</span>
                                 </div>
                             </div>
                         </li>
                     </ul>
-
                 </div>
-                <div class=" col-10">
-
+                <div class="col-10">
                     <div class="">
-
                         <div class="form-content stepsDiv">
                             <!-- About Form Step -->
                             <div v-if="activeStep === 1">
                                 <div class="">
                                     <div
-                                        class=" stepperbackground ps-2 pe-2 m-0 d-flex justify-content-between align-items-center">
-                                        <h1 class="font-11 m-0"><i class="bi bi-chevron-left"></i><span
-                                                class="ms-2">Cancel
-                                                Form</span>
+                                        class="stepperbackground ps-2 pe-2 m-0 d-flex justify-content-between align-items-center">
+                                        <h1 class="font-11 m-0">
+                                            <i class="bi bi-chevron-left"></i><span class="ms-2">Cancel Form</span>
                                         </h1>
                                         <h1 class="font-11 m-0">About Form</h1>
                                         <ButtonComp class="buttoncomp" name="Next" v-if="activeStep < 3"
                                             @click="nextStep" />
-
                                     </div>
                                 </div>
                                 <div class="row">
+                                    <div class="col-4"></div>
                                     <div class="col-4">
-
-                                    </div>
-                                    <div class="col-4">
-
-                                        <div class=" mt-4">
+                                        <div class="mt-4">
                                             <div class="">
-
                                                 <FormFields labeltext="Form Name" class="mb-3" type="text" tag="input"
                                                     name="Value" id="Value" placeholder="Untitle Form" orm
                                                     v-model="filterObj.name" />
-
                                             </div>
                                         </div>
-                                        <div class=" mt-4">
+                                        <div class="mt-4">
                                             <div class="">
-
                                                 <FormFields labeltext="Form Short Code" class="mb-3" type="text"
                                                     tag="input" name="Value" id="Value" placeholder="Untitle Form"
                                                     v-model="filterObj.code" />
-
                                             </div>
                                         </div>
-                                        <div class=" mt-4">
+                                        <div class="mt-4">
                                             <div class="">
-
                                                 <FormFields labeltext="Owner Of The Form" class="mb-3 w-100"
                                                     tag="select" name="dept" id="dept" placeholder="Select Department"
-                                                    :options="['JW Marriott Golfshire Banglore', 'JW Marriott Golfshire Banglore']"
-                                                    v-model="filterObj.owner" />
-
+                                                    :options="[
+                            'JW Marriott Golfshire Banglore',
+                            'JW Marriott Golfshire Banglore',
+                        ]" v-model="filterObj.owner" />
                                             </div>
                                         </div>
-                                        <div class=" mt-4">
+                                        <div class="mt-4">
                                             <div class="">
-
                                                 <FormFields labeltext="Form Cateogry" class="mb-3" tag="select"
                                                     name="desgination" id="desgination" placeholder="Select Cateogry"
-                                                    :options="['JW Marriott Golfshire Banglore', 'JW Marriott Golfshire Banglore']"
-                                                    v-model="filterObj.categery" />
-
+                                                    :options="[
+                            'JW Marriott Golfshire Banglore',
+                            'JW Marriott Golfshire Banglore',
+                        ]" v-model="filterObj.categery" />
                                             </div>
                                         </div>
-                                        <div class=" mt-4 ">
+                                        <div class="mt-4">
                                             <div class="">
-
                                                 <FormFields labeltext="Accessbility Departments" class="mb-3"
                                                     tag="select" name="desgination" id="Departments"
-                                                    placeholder="Select Desigination"
-                                                    :options="['JW Marriott Golfshire Banglore', 'JW Marriott Golfshire Banglore']"
-                                                    v-model="filterObj.dept" />
-
+                                                    placeholder="Select Desigination" :options="[
+                            'JW Marriott Golfshire Banglore',
+                            'JW Marriott Golfshire Banglore',
+                        ]" v-model="filterObj.dept" />
                                             </div>
                                         </div>
-
                                     </div>
 
                                     <div class="col-4"></div>
                                 </div>
-
                             </div>
 
                             <!-- Questions in Form Step -->
                             <div v-if="activeStep === 2">
                                 <div class="">
                                     <div
-                                        class=" stepperbackground ps-2 pe-2  m-0 d-flex justify-content-between align-items-center">
-                                        <h1 class="font-11 m-0"><i @click="prevStep"
-                                                class="bi bi-chevron-left"></i><span class="ms-2">Back To
-                                                About
-                                                Form</span>
+                                        class="stepperbackground ps-2 pe-2 m-0 d-flex justify-content-between align-items-center">
+                                        <h1 class="font-11 m-0">
+                                            <i @click="prevStep" class="bi bi-chevron-left"></i><span class="ms-2">Back
+                                                To About Form</span>
                                         </h1>
                                         <button class="btn btn-light font-10" type="button" data-bs-toggle="modal"
                                             data-bs-target="#exampleModal" @click="createForm">
                                             <i class="bi bi-eye me-1"></i>Preview
                                         </button>
-
                                     </div>
                                     <div class="">
                                         <!-- <div class="d-flex justify-content-end">
@@ -149,55 +133,63 @@
                                                                 :key="'preview-' + sectionIndex"
                                                                 class="preview-section mb-2">
                                                                 <h5>{{ section.name }}</h5>
-                                                                <div class="row mb-2"
-                                                                    v-for="(row, rowIndex) in section.rows">
+                                                                <div class="row mb-2 previewRow"
+                                                                    v-for="(row, rowIndex) in section.rows"
+                                                                    :key="rowIndex">
                                                                     <div v-for="(column, columnIndex) in row.columns"
                                                                         :key="'column-preview-' + columnIndex"
-                                                                        class="col">
+                                                                        class="col previewColumn">
                                                                         <div class="mb-3">
                                                                             <div v-for="(field, fieldIndex) in column.fields"
                                                                                 :key="'field-preview-' + fieldIndex">
                                                                                 <div v-if="field.name">
                                                                                     <!-- Only show field if the name is not empty -->
-                                                                                    <label
-                                                                                        :for="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex">
+                                                                                    <label :for="'field-' +
+                            sectionIndex +
+                            '-' +
+                            columnIndex +
+                            '-' +
+                            fieldIndex
+                            ">
                                                                                         {{ field.name }}</label>
-                                                                                    <template
-                                                                                        v-if="field.type == 'select' || field.type == 'multiselect'">
+                                                                                    <template v-if="field.type == 'select' ||
+                            field.type == 'multiselect'
+                            ">
                                                                                         <select
                                                                                             :multiple="field.type == 'multiselect'"
                                                                                             v-model="field.value"
                                                                                             class="form-select mb-2 font-13">
-                                                                                            <option
-                                                                                                v-for="(option, index) in field.options.split('\n')"
-                                                                                                :key="index"
-                                                                                                :value="option">
+                                                                                            <option v-for="(
+                                                  option, index
+                                                ) in field.options.split('\n')" :key="index" :value="option">
                                                                                                 {{ option }}
                                                                                             </option>
                                                                                         </select>
                                                                                     </template>
-                                                                                    <template
-                                                                                        v-else-if="field.type == 'checkbox' || field.type == 'radio'">
+                                                                                    <template v-else-if="field.type == 'checkbox' ||
+                            field.type == 'radio'
+                            ">
                                                                                         <div class="row">
-                                                                                            <div class="form-check col-6 mb-4"
-                                                                                                v-for="(option, index) in field.options.split('\n')"
-                                                                                                :key="index">
+                                                                                            <div class="form-check col-6 mb-1 d-flex justify-content-between align-items-center"
+                                                                                                v-for="(
+                                                  option, index
+                                                ) in field.options.split('\n')" :key="index">
                                                                                                 <div
                                                                                                     class="d-flex gap-2 align-items-center">
-                                                                                                    <div><label
+                                                                                                    <div>
+                                                                                                        <input class=""
+                                                                                                            :type="field.type"
+                                                                                                            :name="option"
+                                                                                                            :id="option" />
+                                                                                                    </div>
+                                                                                                    <div>
+                                                                                                        <label
                                                                                                             class="form-check-label m-0"
                                                                                                             :for="option">
                                                                                                             {{ option }}
-                                                                                                        </label></div>
-                                                                                                    <div><input class=""
-                                                                                                            :type="field.type"
-                                                                                                            :name="option"
-                                                                                                            :id="option">
+                                                                                                        </label>
                                                                                                     </div>
                                                                                                 </div>
-
-
-
                                                                                             </div>
                                                                                         </div>
                                                                                     </template>
@@ -205,9 +197,13 @@
                                                                                         <component
                                                                                             :is="getFieldComponent(field.type)"
                                                                                             v-model="field.value"
-                                                                                            :type="field.type"
-                                                                                            :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
-                                                                                            :class="form - control">
+                                                                                            :type="field.type" :name="'field-' +
+                            sectionIndex +
+                            '-' +
+                            columnIndex +
+                            '-' +
+                            fieldIndex
+                            " :class="form - control" class="form-control">
                                                                                         </component>
                                                                                     </template>
                                                                                 </div>
@@ -232,7 +228,7 @@
                                                 class="dynamicSection">
                                                 <section class="d-flex justify-content-between">
                                                     <input v-model="section.name" type="text"
-                                                        class="border-less-input font-14" placeholder="Section Name">
+                                                        class="border-less-input font-14" placeholder="Section Name" />
                                                     <button class="btn btn-light bg-transparent border-0 font-13"
                                                         @click="removeSection(sectionIndex)">
                                                         <i class="bi bi-trash me-2"></i> Delete Section
@@ -240,19 +236,20 @@
                                                 </section>
                                                 <section class="row" v-for="(row, rowIndex) in section.rows"
                                                     :key="rowIndex">
-
                                                     <div class="d-flex justify-content-between">
-                                                        <p class="px-2">Row {{ rowIndex }}</p>
-
-                                                        <button class="btn btn-light bg-transparent border-0 font-13"
-                                                            @click="removeRow(sectionIndex, rowIndex)"><i
-                                                                class="bi bi-plus"></i> Remove Row</button>
-                                                        <button v-if="row.columns.length < 3"
-                                                            class="btn btn-light bg-transparent border-0 font-13"
-                                                            @click="addColumn(sectionIndex, rowIndex)">
-                                                            <i class="bi bi-plus"></i> Add Column
-                                                        </button>
-
+                                                        <p class="px-2 m-0">{{ rowIndex }} row</p>
+                                                        <div>
+                                                            <button
+                                                                class="btn btn-light bg-transparent border-0 font-13"
+                                                                @click="removeRow(sectionIndex, rowIndex)">
+                                                                <i class="bi bi-plus"></i> Remove Row
+                                                            </button>
+                                                            <button v-if="row.columns.length < 3"
+                                                                class="btn btn-light bg-transparent border-0 font-13"
+                                                                @click="addColumn(sectionIndex, rowIndex)">
+                                                                <i class="bi bi-plus"></i> Add Column
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                     <div class="col">
                                                         <div class="row">
@@ -273,43 +270,65 @@
                                                                             <input v-model="field.name"
                                                                                 placeholder="Field Name"
                                                                                 class="border-less-input mb-1 font-14 p-0" />
-                                                                            <button class="btn btn-light btn-sm"
+                                                                            <button class="btn btn-light btn-sm mb-1"
                                                                                 @click="removeField(sectionIndex, rowIndex, columnIndex, fieldIndex)">
                                                                                 <i class="bi bi-trash"></i>
                                                                             </button>
                                                                         </div>
-                                                                        <select v-model="field.type"
+                                                                        <!-- <Multiselect v-model="field.type"
+                                                                            class=" mb-2 multiselect" :searchable="true"
+                                                                            label="label"
+                                                                            @change="onFieldTypeChange(sectionIndex, rowIndex, columnIndex, fieldIndex)"
+                                                                            :options="fieldTypes" /> -->
+                                                                        <div class="dropdown">
+                                                                            <input type="text"
+                                                                                placeholder="Search and select Type..."
+                                                                                v-model="searchQuery"
+                                                                                @input="filterTypes"
+                                                                                class="bg-white search-input shadow-none mb-2" />
+                                                                            <div class="dropdown-list">
+                                                                                <div v-for="section in filteredFieldTypes"
+                                                                                    :key="section.type"
+                                                                                    @click="selectType(section)"
+                                                                                    class="dropdown-item">
+                                                                                    {{ section.label }}
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                        <!-- <p>Selected Type: {{ field.type }}</p> -->
+                                                                        <!-- <select v-model="field.type"
                                                                             class="form-select mb-2 font-13"
                                                                             @change="onFieldTypeChange(sectionIndex, rowIndex, columnIndex, fieldIndex)">
                                                                             <option value="">Select Type</option>
                                                                             <option v-for="section in fieldTypes"
-                                                                                :key="section" :value="section.type">{{
-                                                                                    section.label
-                                                                                }}</option>
-
-                                                                        </select>
-                                                                        <div
-                                                                            v-if="field.type == 'checkbox' || field.type == 'radio' || field.type == 'select' || field.type == 'multiselect'">
-                                                                            <label class="font-12  fw-light"
-                                                                                for="options">Enter
-                                                                                Options:</label>
+                                                                                :key="section" :value="section.type">
+                                                                                {{ section.label }}
+                                                                            </option>
+                                                                        </select> -->
+                                                                        <div v-if="field.type == 'checkbox' ||
+                            field.type == 'radio' ||
+                            field.type == 'select' ||
+                            field.type == 'multiselect'
+                            ">
+                                                                            <label class="font-12 fw-light"
+                                                                                for="options">Enter Options:</label>
                                                                             <textarea id="options"
                                                                                 placeholder="Enter your Options"
                                                                                 v-model="field.options"
-                                                                                class="form-control shadow-none mb-1 font-12 ">
+                                                                                class="form-control shadow-none mb-1 font-12">
                                     </textarea>
                                                                         </div>
                                                                         <div class="d-flex gap-2 align-items-center">
-
-                                                                            <div><input class="font-12"
+                                                                            <div>
+                                                                                <input class="font-12"
                                                                                     v-model="field.mandatory"
                                                                                     placeholder="Field Name"
                                                                                     type="checkbox" />
                                                                             </div>
-                                                                            <div><label for="mandatory"
-                                                                                    class="font-12 m-0 fw-light ">Mandatory</label>
+                                                                            <div>
+                                                                                <label for="mandatory"
+                                                                                    class="font-12 m-0 fw-light">Mandatory</label>
                                                                             </div>
-
 
                                                                             <!--- checkbox for mandatory -->
                                                                         </div>
@@ -343,47 +362,53 @@
                                     </div>
                                 </div>
                             </div>
-
                         </div>
                     </div>
 
-                    <div>
-
-                    </div>
+                    <div></div>
                 </div>
             </div>
-
         </div>
     </div>
 </template>
 
 <script setup>
-import FormFields from '../../Components/FormFields.vue';
-import ButtonComp from '../../Components/ButtonComp.vue';
-import InputComp from '../../Components/InputComp.vue';
-
-import {
-    onMounted,
-    ref,
-    reactive
-} from 'vue';
+import FormFields from "../../Components/FormFields.vue";
+import ButtonComp from "../../Components/ButtonComp.vue";
+import InputComp from "../../Components/InputComp.vue";
+import Multiselect from "@vueform/multiselect";
+import "@vueform/multiselect/themes/default.css";
+import { onMounted, ref, reactive, computed } from "vue";
 const filterObj = ref({
-    name: '',
-    code: '',
-    dept: '',
-    categery: '',
-    owner: ''
+    name: "",
+    code: "",
+    dept: "",
+    categery: "",
+    owner: "",
+});
+const searchQuery = ref('');
+const field = ref({ type: '' });
 
-})
 
+const filteredFieldTypes = computed(() => {
+    return fieldTypes.filter(section =>
+        section.label.toLowerCase().includes(searchQuery.value.toLowerCase())
+    );
+});
+
+// Method to handle selecting a field type
+const selectType = (section) => {
+    field.value.type = section.type; // Set the selected type
+    searchQuery.value = ''; // Clear the search input after selection
+};
 // Current active step
 const activeStep = ref(1);
 
 // Form data structure
 const form = ref({
-    name: '',
-    owner: '',
-    category: '',
+    name: "",
+    owner: "",
+    category: "",
     accessibility: [],
     questions: [], // Array to hold added questions
 });
@@ -395,89 +420,87 @@ function formCration() {
 }
 function cancelForm() {
     tableForm.value = true;
-    creatForm.value = false
+    creatForm.value = false;
 }
 const handleStepClick = (label) => {
     switch (label) {
-        case 'About Form':
+        case "About Form":
             prevStep();
             break;
-        case 'Questions in Form':
+        case "Questions in Form":
             nextStep();
             break;
-
     }
 };
 
-
 // New question structure
 const newQuestion = ref({
-    text: '',
-    answerType: 'short', // Default answer type
+    text: "",
+    answerType: "short", // Default answer type
 });
 
 // Dummy data for departments and categories
-const departments = ['HR', 'Finance', 'IT', 'Sales'];
-const categories = ['Internal', 'External', 'Confidential'];
+const departments = ["HR", "Finance", "IT", "Sales"];
+const categories = ["Internal", "External", "Confidential"];
 
 // List of steps with IDs and labels
-const steps = [{
-    id: 1,
-    label: 'About Form',
-    stepno: 'Step 1',
-    icon: 'bi bi-info-circle'
-},
-{
-    id: 2,
-    label: 'Questions in Form',
-    stepno: 'Step 2',
-    icon: 'bi bi-question-circle'
-},
+const steps = [
+    {
+        id: 1,
+        label: "About Form",
+        stepno: "Step 1",
+        icon: "bi bi-info-circle",
+    },
+    {
+        id: 2,
+        label: "Questions in Form",
+        stepno: "Step 2",
+        icon: "bi bi-question-circle",
+    },
 ];
 
 const fieldTypes = [
     {
-        label: 'Text',
-        type: 'dataText'
+        label: "Text",
+        type: "dataText",
     },
     {
-        label: 'Checkbox',
-        type: 'checkbox'
+        label: "Checkbox",
+        type: "checkbox",
     },
     {
-        label: 'Radio',
-        type: 'radio'
+        label: "Radio",
+        type: "radio",
     },
     {
-        label: 'Attach',
-        type: 'file'
+        label: "Attach",
+        type: "file",
     },
     {
-        label: 'Number',
-        type: 'number'
+        label: "Number",
+        type: "number",
     },
     {
-        label: 'TextArea',
-        type: 'textarea'
+        label: "TextArea",
+        type: "textarea",
     },
     {
-        label: 'Date',
-        type: 'date'
+        label: "Date",
+        type: "date",
     },
     {
         label: "Select",
-        type: 'select'
+        type: "select",
     },
     {
         label: "MultiSelect",
-        type: 'multiselect'
-    }
-]
-
+        type: "multiselect",
+    },
+];
 
 // Save the form as a draft
 const saveAsDraft = () => {
-    console.log('Form saved as draft:', form.value);
+    console.log("Form saved as draft:", form.value);
 };
 
 // Move to the next step
@@ -496,17 +519,17 @@ const prevStep = () => {
 
 // Save the form (final step)
 const saveForm = () => {
-    console.log('Form data saved:', form.value);
+    console.log("Form data saved:", form.value);
 };
 
 // Add a new question to the form
 const addQuestion = () => {
     if (newQuestion.value.text) {
         form.value.questions.push({
-            ...newQuestion.value
+            ...newQuestion.value,
         });
-        newQuestion.value.text = ''; // Clear input after adding
-        newQuestion.value.answerType = 'short'; // Reset to default
+        newQuestion.value.text = ""; // Clear input after adding
+        newQuestion.value.answerType = "short"; // Reset to default
     }
 };
 
@@ -514,19 +537,24 @@ const addQuestion = () => {
 const removeQuestion = (index) => {
     form.value.questions.splice(index, 1);
 };
-const sections = reactive([]);
+const sections = reactive([
+
+]);
 const formCreated = ref(false); // To control form preview visibility
 
 // Function to add a new section with a default column
 const addSection = () => {
     sections.push({
-        name: '', // Initialize section name
-        rows: [{
-            columns: [{
-                fields: [] // Initialize with an empty fields array
-            }]
-        }]
-
+        name: "", // Initialize section name
+        rows: [
+            {
+                columns: [
+                    {
+                        fields: [], // Initialize with an empty fields array
+                    },
+                ],
+            },
+        ],
     });
 };
 
@@ -537,11 +565,14 @@ const removeSection = (sectionIndex) => {
 
 const addRow = (sectionIndex) => {
     sections[sectionIndex].rows.push({
-        columns: [{ // Initialize with a default column
-            fields: [] // Initialize with an empty fields array
-        }]
-    })
-}
+        columns: [
+            {
+                // Initialize with a default column
+                fields: [], // Initialize with an empty fields array
+            },
+        ],
+    });
+};
 
 const removeRow = (sectionIndex, rowIndex) => {
     sections[sectionIndex].rows.splice(rowIndex, 1);
@@ -550,7 +581,7 @@ const removeRow = (sectionIndex, rowIndex) => {
 // Function to add a new column inside a section
 const addColumn = (sectionIndex, rowIndex) => {
     sections[sectionIndex].rows[rowIndex].columns.push({
-        fields: []
+        fields: [],
     });
 };
 
@@ -562,11 +593,11 @@ const removeColumn = (sectionIndex, rowIndex, columnIndex) => {
 // Function to add a new field inside a column
 const addField = (sectionIndex, rowIndex, columnIndex) => {
     sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields.push({
-        name: '',
-        type: '',
-        value: ref(''), // Keeping the value as a ref for reactivity
-        options: '',
-        mandatory: false
+        name: "",
+        type: "",
+        value: ref(""), // Keeping the value as a ref for reactivity
+        options: "",
+        mandatory: false,
     });
 };
 
@@ -575,35 +606,35 @@ const removeField = (sectionIndex, rowIndex, columnIndex, fieldIndex) => {
     sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields.splice(fieldIndex, 1);
 };
 
+
 // Handle the change of field type to display the correct input
 const onFieldTypeChange = (sectionIndex, rowIndex, columnIndex, fieldIndex) => {
-    const field = sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex];
+    const field =
+        sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex];
     // Handle additional logic for field type change if needed
-    console.log("field === ", field)
-    console.log(" sections === ", sections)
-
+    console.log("field === ", field);
+    console.log(" sections === ", sections);
 };
-
 
 // Dynamically determine the input field type
 const getFieldComponent = (type) => {
     switch (type) {
-        case 'dataText':
-            return 'input';
-        case 'number':
-            return 'input';
-        case 'textarea':
-            return 'textarea';
-        case 'checkbox':
-            return 'input'; // Checkbox input will need to handle checked state
-        case 'select':
-            return 'select'; // Handle options for dropdown separately
-        case 'date':
-            return 'input'; // Consider using type="date" for HTML5 date input
-        case 'radio':
-            return 'input';
+        case "dataText":
+            return "input";
+        case "number":
+            return "input";
+        case "textarea":
+            return "textarea";
+        case "checkbox":
+            return "input"; // Checkbox input will need to handle checked state
+        case "select":
+            return "select"; // Handle options for dropdown separately
+        case "date":
+            return "input"; // Consider using type="date" for HTML5 date input
+        case "radio":
+            return "input";
         default:
-            return 'input';
+            return "input";
     }
 };
 
@@ -615,32 +646,32 @@ const createForm = () => {
 // Save form data
 const saveFormFields = () => {
     // Map through sections and extract field values
-    const formData = sections.map(section => ({
+    const formData = sections.map((section) => ({
         ...section,
-        columns: section.columns.map(column => ({
+        columns: section.columns.map((column) => ({
             ...column,
-            fields: column.fields.map(field => ({
+            fields: column.fields.map((field) => ({
                 name: field.name,
                 type: field.type,
-                value: field.value.value // Accessing the value property of the ref
+                value: field.value.value, // Accessing the value property of the ref
             })),
         })),
     }));
 
-    console.log('Form Data:', formData);
+    console.log("Form Data:", formData);
 };
 </script>
 
 <style scoped>
 .dynamicSection {
-    border: 1px solid #CCCCCC;
+    border: 1px solid #cccccc;
     margin-bottom: 20px;
     border-radius: 7px;
-    background-color: #EEEEEE;
+    background-color: #eeeeee;
 }
 
 .dynamicColumn {
-    border: 1px solid #CCCCCC;
+    border: 1px solid #cccccc;
     border-radius: 10px;
     margin: 20px;
     position: relative;
@@ -649,7 +680,6 @@ const saveFormFields = () => {
 
 .dynamicColumn:hover {
     border: 1px solid rgb(119, 119, 119);
-
 }
 
 .column_name {
@@ -681,12 +711,6 @@ const saveFormFields = () => {
     border: 1px solid rgb(221, 221, 221);
     border-radius: 10px;
     margin: 5px 10px;
-}
-
-.preview-section {
-    background-color: #f9f9f9;
-    padding: 20px;
-    border-radius: 10px;
 }
 
 input[type="checkbox"] {
@@ -726,7 +750,7 @@ has context menu .form-container {
 }
 
 .steps li.active {
-    color: #1B14DF;
+    color: #1b14df;
     font-weight: bold;
 }
 
@@ -755,8 +779,8 @@ input::placeholder {
 
 input,
 select {
-    width: 100%;
-    padding: 10px;
+    /* width: 100%; */
+    padding: 5px;
     border: 1px solid #ccc;
     border-radius: 4px;
 }
@@ -810,9 +834,65 @@ select {
 }
 
 .stepperbackground {
-    background-color: #EEEEEE;
+    background-color: #eeeeee;
     height: 50px;
     border-radius: 7px;
+}
 
+.preview-section {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 10px;
+    /* box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px; */
+}
+
+.previewRow {
+    /* box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px; */
+    /* border: 1px solid #cccccc71; */
+    border-radius: 5px;
+    background-color: #eeeeee;
+}
+
+.previewColumn {
+    border: 0 1px 0 0 solid black;
+}
+
+.multiselect .multiselect-dropdown .multiselect-options .multiselect-option span {
+    width: 100%;
+    font-size: 12px;
+    background-color: #fff !important;
+    color: #000 !important;
+
+}
+
+.dropdown {
+    position: relative;
+}
+
+.search-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.dropdown-list {
+    position: absolute;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+.dropdown-item {
+    padding: 10px;
+    cursor: pointer;
+}
+
+.dropdown-item:hover {
+    background-color: #f0f0f0;
 }
 </style>
