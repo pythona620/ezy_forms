@@ -197,13 +197,9 @@
                                                                                         <component
                                                                                             :is="getFieldComponent(field.type)"
                                                                                             v-model="field.value"
-                                                                                            :type="field.type" :name="'field-' +
-                            sectionIndex +
-                            '-' +
-                            columnIndex +
-                            '-' +
-                            fieldIndex
-                            " :class="form - control" class="form-control">
+                                                                                            :type="field.type"
+                                                                                            :name="'field-' + sectionIndex + '-' + rowIndex + '-' + columnIndex + '-' + fieldIndex"
+                                                                                            :class="form - control">
                                                                                         </component>
                                                                                     </template>
                                                                                 </div>
