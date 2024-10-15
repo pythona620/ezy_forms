@@ -1,33 +1,33 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "field:business_code",
- "creation": "2024-10-01 15:41:03.142498",
+ "autoname": "field:department_code",
+ "creation": "2024-10-13 16:08:14.307598",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "business_unit",
-  "business_code"
+  "department_code",
+  "department_name"
  ],
  "fields": [
   {
-   "fieldname": "business_unit",
+   "fieldname": "department_code",
    "fieldtype": "Data",
-   "label": "Business Unit"
+   "label": "Department Code",
+   "unique": 1
   },
   {
-   "fieldname": "business_code",
+   "fieldname": "department_name",
    "fieldtype": "Data",
-   "label": "Business Code",
-   "unique": 1
+   "label": "Department Name"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-10-14 15:26:06.181587",
+ "modified": "2024-10-14 16:56:03.932295",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
- "name": "Ezy Business Unit",
+ "name": "Ezy Departments",
  "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [

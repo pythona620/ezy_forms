@@ -1,0 +1,125 @@
+# Copyright (c) 2024, bharath and contributors
+# For license information, please see license.txt
+
+import frappe
+from frappe.model.document import Document
+from frappe.utils import now as frappe_now
+import sys
+import subprocess
+import os
+from frappe.modules.utils import export_customizations
+from ast import literal_eval
+
+class EzyFormDefinitions(Document):
+	pass
+
+@frappe.whitelist()
+def add_dynamic_doctype(doctype:str,owner_of_the_form:str,company_doctype:str,form_category:str,form_name:str):
+	""" Owner_of_the_form should come from Departments Doctype in Select Field."""
+	"""Adding DocTypes dynamically, giving Perms for the doctype and creating a default section-break field for DocType"""
+	try:
+		doc = frappe.new_doc("DocType")
+		doc.name = doctype
+		doc.creation = frappe_now()
+		doc.modified = frappe_now()
+		doc.modified_by = frappe.session.user
+		doc.module = "User Forms"
+		doc.app = "ezy_forms"
+		doc.insert(ignore_permissions=True)
+		frappe.db.commit()
+		doc.reload()
+		form_defs = frappe.new_doc("Ezy Form Definitions")
+		form_defs.form_type = doctype
+		form_defs.form_category = form_category
+		form_defs.form_name = form_name
+		form_defs.owner_of_the_form = owner_of_the_form
+		form_defs.active = 1
+		form_defs.count = 0
+		form_defs.insert(ignore_permissions=True).save()
+		frappe.db.commit()
+		"""need to migrate in this step itself as DocType is created need to update in DB."""
+		bench_migrating_from_code()
+
+		"""need to add perms in this step itself for system manager to access the DocType"""
+		activating_perms(doctype=doctype)
+		document_to_reload = frappe.get_doc("DocType",doctype)
+		document_to_reload.reload()
+
+		"""need to migrate in this step itself because of adding permissions in the below level"""
+		bench_migrating_from_code()
+		add_customized_fields_for_dynamic_doc([{"doctype": "Custom Field","dt": doctype,"fieldname": "system_generated_section_break","fieldtype": "Section Break","label":"System Generated Section Break","module":"User Forms","insert_after":None,"is_system_generated":1},{"doctype": "Custom Field","dt": doctype,"fieldname": "company_fieldname","fieldtype": "Link","label":"Company","module":"User Forms","insert_after":"system_generated_section_break","is_system_generated":1,"options":company_doctype}])
+	except Exception as e:
+		exc_type, exc_obj, exc_tb = sys.exc_info()
+		frappe.log_error("Error in Creating New Doc",
+						 "line No:{}\n{}".format(exc_tb.tb_lineno, str(e)))
+		frappe.throw(str(e))
+		return {"success": False, "message": str(e)}
+
+@frappe.whitelist()
+def add_customized_fields_for_dynamic_doc(fields:list[dict]):
+	try:
+		if isinstance(fields,str):fields = literal_eval(fields)
+		if not len(fields)>0:return {"success":False,"message":"Pass Fields for storing."}
+		doctype = fields[0]["doctype"]
+		# Now Checking whether those column are already existing or not
+		checking_columns_are_already_existing_or_not_in_doctype_mentioned = frappe.db.sql(f"DESCRIBE `tab{doctype}`;")
+		checking_columns_are_already_existing_or_not_in_doctype_mentioned = [i[0] for i in checking_columns_are_already_existing_or_not_in_doctype_mentioned]
+		fields_in_mentioned_doctype = [_[0] for _ in frappe.db.sql(f"DESCRIBE `tab{fields[0]['dt']}`;")]
+		for dicts_of_docs_entries in fields:
+			if dicts_of_docs_entries["fieldname"] in fields_in_mentioned_doctype:
+				if dicts_of_docs_entries["fieldtype"] not in ["Section Break","Column Break","Tab Break"]: dicts_of_docs_entries = dicts_of_docs_entries | {"in_list_view":1}
+				doc_for_existing_custom_field = frappe.get_doc(doctype,f"{dicts_of_docs_entries['dt']}-{dicts_of_docs_entries['fieldname']}")
+				doc_for_existing_custom_field.insert_after = dicts_of_docs_entries["insert_after"]
+				doc_for_existing_custom_field.save(ignore_permissions=True)
+				frappe.db.commit()
+				doc_for_existing_custom_field.db_update()
+				doc_for_existing_custom_field.reload()
+			else:
+				# Create a new field
+				if dicts_of_docs_entries["fieldtype"] not in ["Section Break","Column Break","Tab Break"]: dicts_of_docs_entries = dicts_of_docs_entries | {"in_list_view":1}
+				doc_for_new_custom_field = frappe.get_doc(dicts_of_docs_entries).insert(ignore_permissions=True)
+				doc_for_new_custom_field.save()
+				frappe.db.commit()
+				doc_for_new_custom_field.db_update()
+				doc_for_new_custom_field.reload()
+		export_customizations(module= "User Forms",doctype=fields[0]["dt"],sync_on_migrate= 1,with_permissions= 0)
+	except Exception as e:
+		exc_type, exc_obj, exc_tb = sys.exc_info()
+		frappe.log_error("Error in add_customized_fields_for_dynamic_doc",
+						 "line No:{}\n{}".format(exc_tb.tb_lineno, str(e)))
+		frappe.throw(str(e))
+		return {"success": False, "message": str(e)}
+
+@frappe.whitelist()
+def delete_entire_customized_dynamic_doctype(doctype:str):
+	custom_export_json_file_path = frappe.utils.get_bench_path()+f"/apps/ezy_forms/ezy_forms/user_forms/custom/{doctype.lower().replace(' ','_')}.json"
+	os.remove(custom_export_json_file_path)
+	frappe.delete_doc("DocType",doctype)
+	frappe.db.commit()
+	frappe.db.sql(f"""DROP TABLE `tab{doctype}`;""")
+	frappe.db.commit()
+	frappe.db.delete("Custom Field",filters={"dt":doctype,"module":"User Forms"})
+	frappe.db.commit()
+	bench_migrating_from_code()
+
+@frappe.whitelist()
+def deleting_customized_field_from_custom_dynamic_doc(doctype,field):
+	frappe.delete_doc("Custom Field",f"{doctype}-{field}")
+	frappe.db.commit()
+	frappe.db.sql(f"""ALTER TABLE `tab{doctype}` DROP COLUMN {field};""")
+	frappe.db.commit()
+	export_customizations(doctype= doctype,module= "User Forms",sync_on_migrate= 1,with_permissions= 0)
+	bench_migrating_from_code()
+
+def bench_migrating_from_code():
+	os.chdir(frappe.utils.get_bench_path()+"/sites")
+	subprocess.run(["bench","migrate"])
+
+def activating_perms(doctype):
+	perm_doc = frappe.new_doc("DocPerm")
+	perm_doc.parent = doctype
+	perm_doc.parentfield="permissions"
+	perm_doc.parenttype="DocType"
+	perm_doc.role="System Manager"
+	perm_doc.insert(ignore_permissions=True)
+	frappe.db.commit()

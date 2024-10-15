@@ -8,37 +8,54 @@
   "business_unit",
   "form_type",
   "form_category",
-  "form_view"
+  "owner_of_the_form",
+  "active",
+  "count"
  ],
  "fields": [
   {
    "fieldname": "business_unit",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Business Unit",
    "options": "Ezy Business Unit"
   },
   {
    "fieldname": "form_type",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Form Type"
   },
   {
    "fieldname": "form_category",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Form Category"
   },
   {
-   "fieldname": "form_view",
-   "fieldtype": "Text Editor",
-   "label": "Form View"
+   "fieldname": "owner_of_the_form",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Owner Of The Form"
+  },
+  {
+   "default": "0",
+   "fieldname": "active",
+   "fieldtype": "Check",
+   "label": "Active"
+  },
+  {
+   "fieldname": "count",
+   "fieldtype": "Int",
+   "label": "Count"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-10-11 16:35:08.280096",
+ "modified": "2024-10-14 18:15:36.377003",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
- "name": "Ezy Forms",
+ "name": "Ezy Form Definitions",
  "owner": "Administrator",
  "permissions": [
   {

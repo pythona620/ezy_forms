@@ -5,5 +5,5 @@
 from frappe.tests.utils import FrappeTestCase
 
 
-class TestEzyForms(FrappeTestCase):
+class TestEzyEmployee(FrappeTestCase):
 	pass
