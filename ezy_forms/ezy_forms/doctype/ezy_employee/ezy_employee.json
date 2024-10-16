@@ -31,8 +31,9 @@
   },
   {
    "fieldname": "department",
-   "fieldtype": "Data",
-   "label": "Department"
+   "fieldtype": "Link",
+   "label": "Department",
+   "options": "Ezy Departments"
   },
   {
    "fieldname": "designation",
@@ -52,7 +53,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-10-14 15:48:48.331107",
+ "modified": "2024-10-15 10:42:48.401871",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
  "name": "Ezy Employee",
