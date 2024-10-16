@@ -1,0 +1,110 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:{business_unit}-{form_short_name}",
+ "creation": "2024-10-01 15:45:04.495503",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "business_unit",
+  "form_type",
+  "form_category",
+  "owner_of_the_form",
+  "active",
+  "count",
+  "accessible_departments",
+  "form_short_name",
+  "form_json"
+ ],
+ "fields": [
+  {
+   "fieldname": "business_unit",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Business Unit",
+   "options": "Ezy Business Unit"
+  },
+  {
+   "fieldname": "form_type",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Form Type"
+  },
+  {
+   "fieldname": "form_category",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Form Category"
+  },
+  {
+   "fieldname": "owner_of_the_form",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Owner Of The Form"
+  },
+  {
+   "default": "0",
+   "fieldname": "active",
+   "fieldtype": "Check",
+   "label": "Active"
+  },
+  {
+   "fieldname": "count",
+   "fieldtype": "Int",
+   "label": "Count"
+  },
+  {
+   "fieldname": "accessible_departments",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Accessible Departments"
+  },
+  {
+   "fieldname": "form_short_name",
+   "fieldtype": "Data",
+   "label": "Form Short Name"
+  },
+  {
+   "fieldname": "form_json",
+   "fieldtype": "Small Text",
+   "label": "Form JSON"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-10-15 12:04:40.065755",
+ "modified_by": "Administrator",
+ "module": "Ezy Forms",
+ "name": "Ezy Form Definitions",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Website Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
