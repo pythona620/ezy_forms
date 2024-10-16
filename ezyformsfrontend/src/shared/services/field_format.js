@@ -1,42 +1,53 @@
 export function extractFieldsWithBreaks(data) {
-    const result = [];
+  const result = [];
+  let previousFieldname = null; // Track the previous fieldname
+  let index = 0;
 
-    data.forEach((section) => {
-        section.rows.forEach((row) => {
-            row.columns.forEach((column) => {
-                let previousFieldname = null; // Track the previous fieldname
+  data.forEach((section) => {
+    section.rows.forEach((row) => {
+      row.columns.forEach((column) => {
+        
+        column.fields.forEach((field) => {
+          // Add the "insert_after_column" key to the current field
+          const generatedFieldname = convertLabelToFieldName(field.label);
+          result.push({
+            ...field,
+            fieldname: generatedFieldname,
+            insert_after_column: previousFieldname,
+            idx: index++, // Assign index
+          });
 
-                column.fields.forEach((field) => {
-                    // Add the "insert_after_column" key to the current field
-                    const generatedFieldname = convertLabelToFieldName(field.label);
-                    result.push({
-                        ...field,
-                        fieldname : generatedFieldname,
-                        insert_after_column: previousFieldname,
-                    });
-
-                    // Update previousFieldname for the next field in this column
-                    previousFieldname = generatedFieldname;
-                });
-
-
-                // Add "Column Break" marker after each column
-                result.push({
-                    fieldtype: "Column Break",
-                    fieldname: convertLabelToFieldName(column.label),
-                    label: column.label,
-                });
-            });
-
-            // Add "Row Break" marker after each row
-            result.push({ fieldtype: "Row Break", fieldname: row.fieldname });
+          // Update previousFieldname for the next field in this column
+          previousFieldname = generatedFieldname;
         });
 
-        // Add "Section Break" marker after each section
-        result.push({ fieldtype: "Section Break", label: section.label, fieldname: convertLabelToFieldName(section.label) });
+
+        // Add "Column Break" marker after each column
+        result.push({
+          fieldtype: "Column Break",
+          fieldname: convertLabelToFieldName(column.label),
+          label: column.label,
+          insert_after_column: previousFieldname, // Track the break
+          idx: index++, // Assign index
+        });
+
+        // Update previousFieldname to the column break
+        previousFieldname = column.fieldname;
+      });
+
+      // Add "Row Break" marker after each row
+      result.push({ fieldtype: "Row Break", fieldname: row.fieldname, insert_after_column: previousFieldname,idx: index++ });
+      // Update previousFieldname to the row break
+      previousFieldname = row.fieldname;
     });
 
-    return result;
+    // Add "Section Break" marker after each section
+    result.push({ fieldtype: "Section Break", label: section.label, fieldname: convertLabelToFieldName(section.label), insert_after_column: previousFieldname ,idx: index++});
+    // Update previousFieldname to the section break
+    previousFieldname = section.fieldname;
+  });
+
+  return result;
 }
 
 // Usage
@@ -109,9 +120,9 @@ export function rebuildOriginalStructure(flatArray) {
 // console.log(JSON.stringify(originalStructure, null, 2));
 
 function convertLabelToFieldName(label) {
-    return label
-      .trim()                     // Remove leading/trailing spaces
-      .toLowerCase()               // Convert to lowercase
-      .replace(/\s+/g, '_')        // Replace spaces with underscores
-      .replace(/[^a-z0-9_]/g, ''); // Remove non-alphanumeric characters except underscores
-  }
+  return label
+    .trim()                     // Remove leading/trailing spaces
+    .toLowerCase()               // Convert to lowercase
+    .replace(/\s+/g, '_')        // Replace spaces with underscores
+    .replace(/[^a-z0-9_]/g, ''); // Remove non-alphanumeric characters except underscores
+}
