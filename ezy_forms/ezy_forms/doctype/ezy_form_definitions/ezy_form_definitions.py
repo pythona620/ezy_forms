@@ -15,12 +15,15 @@ class EzyFormDefinitions(Document):
 	pass
 
 @frappe.whitelist()
-def add_dynamic_doctype(doctype:str,owner_of_the_form:str,company_doctype:str,business_unit:str,form_category:str,form_name:str,accessible_departments:str,form_short_name:str,fields:list[dict]):
+def add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:str,form_name:str,accessible_departments:str,form_short_name:str,fields:list[dict]):
 	""" Owner_of_the_form should come from Departments Doctype in Select Field."""
 	"""Adding DocTypes dynamically, giving Perms for the doctype and creating a default section-break field for DocType"""
 	try:
+		if business_unit == None or business_unit == "":return {"success":False,"message":"Pass Business Unit because it is considered as prefix"}
+		doctype = business_unit + "-" + form_short_name		
 		if isinstance(fields,str):
 			fields = literal_eval(fields)
+		if frappe.db.exists("Ezy Form Definitions",doctype):return {"success":False,"message":f"Already '{doctype}' exists. Please rename the form."}
 		if not frappe.db.exists("DocType",doctype):
 			doc = frappe.new_doc("DocType")
 			doc.name = doctype
@@ -33,7 +36,6 @@ def add_dynamic_doctype(doctype:str,owner_of_the_form:str,company_doctype:str,bu
 			frappe.db.commit()
 			doc.reload()
 			form_defs = frappe.new_doc("Ezy Form Definitions")
-			form_defs.form_type = doctype
 			form_defs.form_category = form_category
 			form_defs.accessible_departments = accessible_departments
 			form_defs.form_name = form_name
@@ -55,10 +57,8 @@ def add_dynamic_doctype(doctype:str,owner_of_the_form:str,company_doctype:str,bu
 
 			"""need to migrate in this step itself because of adding permissions in the below level"""
 			bench_migrating_from_code()
-			if len(fields)>0:
-				fields = dict(list(literal_eval(fields).items()) + list(literal_eval({"doctype": "Custom Field","dt": doctype,"fieldname": "system_generated_section_break","fieldtype": "Section Break","label":"System Generated Section Break","module":"User Forms","insert_after":None,"is_system_generated":1},{"doctype": "Custom Field","dt": doctype,"fieldname": "company_fieldname","fieldtype": "Link","label":"Company","module":"User Forms","insert_after":"system_generated_section_break","is_system_generated":1,"options":company_doctype}).items()))
-			fields = [{"doctype": "Custom Field","dt": doctype,"fieldname": "system_generated_section_break","fieldtype": "Section Break","label":"System Generated Section Break","module":"User Forms","insert_after":None,"is_system_generated":1},{"doctype": "Custom Field","dt": doctype,"fieldname": "company_fieldname","fieldtype": "Link","label":"Company","module":"User Forms","insert_after":"system_generated_section_break","is_system_generated":1,"options":company_doctype}]
-		add_customized_fields_for_dynamic_doc(fields=fields,form_short_name=form_short_name,business_unit=business_unit)
+		if len(fields)>0:
+			add_customized_fields_for_dynamic_doc(fields=fields,doctype=doctype)
 	except Exception as e:
 		exc_type, exc_obj, exc_tb = sys.exc_info()
 		frappe.log_error("Error in Creating New Doc",
@@ -68,22 +68,30 @@ def add_dynamic_doctype(doctype:str,owner_of_the_form:str,company_doctype:str,bu
 		return {"success": False, "message": str(e)}
 
 @frappe.whitelist()
-def add_customized_fields_for_dynamic_doc(fields:list[dict],form_short_name,business_unit):
+def add_customized_fields_for_dynamic_doc(fields:list[dict],doctype:str):
 	try:
-		if not frappe.db.exists("Ezy Form Definitions",{"name":f"{business_unit}-{form_short_name}"}):
-			return {"success":False,"message":f"pass a valide Form's Short Name - {form_short_name} which exists."}
+		if not frappe.db.exists("Ezy Form Definitions",{"name":doctype}):
+			return {"success":False,"message":f"pass a valide Form's Short Name - {doctype} which exists."}
 		if not len(fields)>0:return {"success":False,"message":"Pass Fields for storing."}
 		if isinstance(fields,str):fields = literal_eval(fields)
-		doctype = fields[0]["doctype"]
 		# Now Checking whether those column are already existing or not
-		checking_columns_are_already_existing_or_not_in_doctype_mentioned = frappe.db.sql(f"DESCRIBE `tab{doctype}`;")
+		checking_columns_are_already_existing_or_not_in_doctype_mentioned = frappe.db.sql(f"DESCRIBE `tabCustom Field`;")
 		checking_columns_are_already_existing_or_not_in_doctype_mentioned = [i[0] for i in checking_columns_are_already_existing_or_not_in_doctype_mentioned]
-		fields_in_mentioned_doctype = [_[0] for _ in frappe.db.sql(f"DESCRIBE `tab{fields[0]['dt']}`;")]
+		fields_in_mentioned_doctype = [_[0] for _ in frappe.db.sql(f"DESCRIBE `tab{doctype}`;")]
 		for dicts_of_docs_entries in fields:
 			if dicts_of_docs_entries["fieldname"] in fields_in_mentioned_doctype:
 				if dicts_of_docs_entries["fieldtype"] not in ["Section Break","Column Break","Tab Break"]: dicts_of_docs_entries = dicts_of_docs_entries | {"in_list_view":1}
-				doc_for_existing_custom_field = frappe.get_doc(doctype,f"{dicts_of_docs_entries['dt']}-{dicts_of_docs_entries['fieldname']}")
+				doc_for_existing_custom_field = frappe.get_doc("Custom Field",f"{doctype}-{dicts_of_docs_entries['fieldname']}")
 				doc_for_existing_custom_field.insert_after = dicts_of_docs_entries["insert_after"]
+				if "reqd" in dicts_of_docs_entries:doc_for_existing_custom_field.reqd = dicts_of_docs_entries["reqd"]
+				if "options" in dicts_of_docs_entries:
+					if isinstance(dicts_of_docs_entries["options"],str):
+						dicts_of_docs_entries["options"] = literal_eval(dicts_of_docs_entries["options"])
+					doc_for_existing_custom_field.options = "\n".join(dicts_of_docs_entries["options"])
+				if "default" in dicts_of_docs_entries:
+					doc_for_existing_custom_field.default = dicts_of_docs_entries["default"]
+				doc_for_existing_custom_field.label = dicts_of_docs_entries["label"]
+				doc_for_existing_custom_field.fieldtype = dicts_of_docs_entries["fieldtype"]
 				doc_for_existing_custom_field.save(ignore_permissions=True)
 				frappe.db.commit()
 				doc_for_existing_custom_field.db_update()
@@ -96,13 +104,13 @@ def add_customized_fields_for_dynamic_doc(fields:list[dict],form_short_name,busi
 				frappe.db.commit()
 				doc_for_new_custom_field.db_update()
 				doc_for_new_custom_field.reload()
-		export_customizations(module= "User Forms",doctype=fields[0]["dt"],sync_on_migrate= 1,with_permissions= 0)
-		custom_export_json_file_path = frappe.utils.get_bench_path()+f"/apps/ezy_forms/ezy_forms/user_forms/custom/{fields[0]['dt'].lower().replace(' ','_')}.json"
+		export_customizations(module= "User Forms",doctype=doctype,sync_on_migrate= 1,with_permissions= 0)
+		custom_export_json_file_path = frappe.utils.get_bench_path()+f"/apps/ezy_forms/ezy_forms/user_forms/custom/{doctype.lower().replace(' ','_').replace('-','_')}.json"
 		with open(custom_export_json_file_path, 'r') as file:
 			data = json.load(file)["custom_fields"]
-			keys = ["idx","label","fieldname","fieldtype","insert_after"]
+			keys = ["idx","label","fieldname","fieldtype","insert_after","reqd","options","default"]
 			field_attributes = [dict((k, dict1[k]) for k in keys if k in dict1) for dict1 in data]
-		frappe.db.set_value("Ezy Form Definitions",f"{business_unit}-{form_short_name}",{"form_json":str(field_attributes)})
+		frappe.db.set_value("Ezy Form Definitions",doctype,{"form_json":str(field_attributes)})
 		frappe.db.commit()
 		return field_attributes
 	except Exception as e:
@@ -115,8 +123,10 @@ def add_customized_fields_for_dynamic_doc(fields:list[dict],form_short_name,busi
 
 @frappe.whitelist()
 def delete_entire_customized_dynamic_doctype(doctype:str):
-	custom_export_json_file_path = frappe.utils.get_bench_path()+f"/apps/ezy_forms/ezy_forms/user_forms/custom/{doctype.lower().replace(' ','_')}.json"
-	os.remove(custom_export_json_file_path)
+	if frappe.db.exists("DocType",doctype): return {"success":False,"message":f"The Form mentioned doesnot exists - {doctype}"}
+	custom_export_json_file_path = frappe.utils.get_bench_path()+f"/apps/ezy_forms/ezy_forms/user_forms/custom/{doctype.lower().replace(' ','_').replace('-','_')}.json"
+	if os.path.exists(custom_export_json_file_path): os.remove(custom_export_json_file_path)
+	if not frappe.db.exists("DocType",doctype):return {"success":False,"message":f"The given Doc - {doctype} doesn't exists."}
 	frappe.delete_doc("DocType",doctype)
 	frappe.db.commit()
 	frappe.db.sql(f"""DROP TABLE `tab{doctype}`;""")
@@ -124,14 +134,17 @@ def delete_entire_customized_dynamic_doctype(doctype:str):
 	frappe.db.delete("Custom Field",filters={"dt":doctype,"module":"User Forms"})
 	frappe.db.commit()
 	bench_migrating_from_code()
+	frappe.db.set_value("Ezy Form Definitions",doctype,{"active":0})
+	frappe.db.commit()
 
 @frappe.whitelist()
 def deleting_customized_field_from_custom_dynamic_doc(doctype,field):
+	if not frappe.db.exists("DocType",doctype): return {"success":False,"message":f"The Form mentioned doesnot exists - '{doctype}'"}
 	frappe.delete_doc("Custom Field",f"{doctype}-{field}")
 	frappe.db.commit()
 	frappe.db.sql(f"""ALTER TABLE `tab{doctype}` DROP COLUMN {field};""")
 	frappe.db.commit()
-	export_customizations(doctype= doctype,module= "User Forms",sync_on_migrate= 1,with_permissions= 0)
+	export_customizations(doctype= doctype,module= "User Forms",sync_on_migrate= 1,with_permissions= 0)	
 	bench_migrating_from_code()
 
 def bench_migrating_from_code():
