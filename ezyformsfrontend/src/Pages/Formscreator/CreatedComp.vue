@@ -458,7 +458,7 @@ import FormFields from "../../Components/FormFields.vue";
 import ButtonComp from "../../Components/ButtonComp.vue";
 import GlobalTable from "../../Components/GlobalTable.vue";
 import { callWithErrorHandling, onMounted, ref, reactive } from "vue";
-import { extractFieldsWithBreaks } from '../../shared/services/field_format'
+import { extractFieldsWithBreaks } from '../../shared/services/field_format';
 const filterObj = ref({
     form_name: "",
     form_short_name: "",
@@ -594,6 +594,7 @@ function formData(){
         fields
     }
     console.log(" Complete Data === ", dataObj)
+    
 
     
 }
