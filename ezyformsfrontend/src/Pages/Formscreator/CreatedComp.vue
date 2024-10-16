@@ -85,14 +85,14 @@
                                                     <div class="">
                                                         <FormFields labeltext="Form Name" class="mb-3" type="text"
                                                             tag="input" name="Value" id="Value"
-                                                            placeholder="Untitle Form" orm v-model="filterObj.name" />
+                                                            placeholder="Untitle Form" orm v-model="filterObj.form_name" />
                                                     </div>
                                                 </div>
                                                 <div class="mt-4">
                                                     <div class="">
                                                         <FormFields labeltext="Form Short Code" class="mb-3" type="text"
                                                             tag="input" name="Value" id="Value"
-                                                            placeholder="Untitle Form" v-model="filterObj.code" />
+                                                            placeholder="Untitle Form" v-model="filterObj.form_short_name" />
                                                     </div>
                                                 </div>
                                                 <div class="mt-4">
@@ -102,7 +102,7 @@
                                                             placeholder="Select Department" :options="[
                                                                 'JW Marriott Golfshire Banglore',
                                                                 'JW Marriott Golfshire Banglore',
-                                                            ]" v-model="filterObj.owner" />
+                                                            ]" v-model="filterObj.owner_of_the_form" />
                                                     </div>
                                                 </div>
                                                 <div class="mt-4">
@@ -112,7 +112,7 @@
                                                             placeholder="Select Cateogry" :options="[
                                                                 'JW Marriott Golfshire Banglore',
                                                                 'JW Marriott Golfshire Banglore',
-                                                            ]" v-model="filterObj.categery" />
+                                                            ]" v-model="filterObj.form_category" />
                                                     </div>
                                                 </div>
                                                 <div class="mt-4">
@@ -122,7 +122,7 @@
                                                             placeholder="Select Desigination" :options="[
                                                                 'JW Marriott Golfshire Banglore',
                                                                 'JW Marriott Golfshire Banglore',
-                                                            ]" v-model="filterObj.dept" />
+                                                            ]" v-model="filterObj.accessible_departments" />
                                                     </div>
                                                 </div>
                                             </div>
@@ -140,6 +140,11 @@
                                                     <i @click="prevStep" class="bi bi-chevron-left"></i><span
                                                         class="ms-2">Back To About Form</span>
                                                 </h1>
+                                                <button class="btn btn-light font-10" type="button"
+                                                   
+                                                    @click="formData()">
+                                                    <i class="bi bi-eye me-1"></i>SaveData
+                                                </button>
                                                 <button class="btn btn-light font-10" type="button"
                                                     data-bs-toggle="modal" data-bs-target="#exampleModal"
                                                     @click="createForm">
@@ -455,13 +460,12 @@ import GlobalTable from "../../Components/GlobalTable.vue";
 import { callWithErrorHandling, onMounted, ref, reactive } from "vue";
 import { extractFieldsWithBreaks } from '../../shared/services/field_format'
 const filterObj = ref({
-    search: "",
-    selectoption: "",
-    name: "",
-    code: "",
-    dept: "",
-    categery: "",
-    owner: "",
+    form_name: "",
+    form_short_name: "",
+    accessible_departments:[],
+    business_unit: "",
+    form_category: "",
+    owner_of_the_form: "",
 });
 const tableheaders = ref([
     { th: "Form name", td_key: "name" },
@@ -580,7 +584,19 @@ const nextStep = () => {
     if (activeStep.value < 3) {
         activeStep.value += 1;
     }
+    console.log(filterObj.value,'fffffffffffff')
+
 };
+function formData(){
+    const fields = extractFieldsWithBreaks(sections)
+    const dataObj = {
+        ...filterObj.value,
+        fields
+    }
+    console.log(" Complete Data === ", dataObj)
+
+    
+}
 
 // Move to the previous step
 const prevStep = () => {
@@ -589,26 +605,7 @@ const prevStep = () => {
     }
 };
 
-// Save the form (final step)
-const saveForm = () => {
-    console.log("Form data saved:", form.value);
-};
 
-// Add a new question to the form
-const addQuestion = () => {
-    if (newQuestion.value.text) {
-        form.value.questions.push({
-            ...newQuestion.value,
-        });
-        newQuestion.value.text = ""; // Clear input after adding
-        newQuestion.value.answerType = "short"; // Reset to default
-    }
-};
-
-// Remove a question from the form
-const removeQuestion = (index) => {
-    form.value.questions.splice(index, 1);
-};
 const sections = reactive([]);
 const formCreated = ref(false); // To control form preview visibility
 
@@ -742,26 +739,6 @@ const getRowSuffix = (index) => {
 const createForm = () => {
     formCreated.value = true;
 };
-
-// Save form data
-const saveFormFields = () => {
-    // Map through sections and extract field values
-    const formData = sections.map((section) => ({
-        ...section,
-        columns: section.columns.map((column) => ({
-            ...column,
-            fields: column.fields.map((field) => ({
-                name: field.name,
-                type: field.type,
-                value: field.value.value, // Accessing the value property of the ref
-            })),
-        })),
-    }));
-
-    console.log("Form Data:", formData);
-};
-
-
 
 
 </script>
