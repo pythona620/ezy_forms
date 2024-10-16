@@ -85,44 +85,40 @@
                                                     <div class="">
                                                         <FormFields labeltext="Form Name" class="mb-3" type="text"
                                                             tag="input" name="Value" id="Value"
-                                                            placeholder="Untitle Form" orm v-model="filterObj.form_name" />
+                                                            placeholder="Untitle Form" orm
+                                                            v-model="filterObj.form_name" />
                                                     </div>
                                                 </div>
                                                 <div class="mt-4">
                                                     <div class="">
                                                         <FormFields labeltext="Form Short Code" class="mb-3" type="text"
                                                             tag="input" name="Value" id="Value"
-                                                            placeholder="Untitle Form" v-model="filterObj.form_short_name" />
+                                                            placeholder="Untitle Form"
+                                                            v-model="filterObj.form_short_name" />
                                                     </div>
                                                 </div>
                                                 <div class="mt-4">
                                                     <div class="">
                                                         <FormFields labeltext="Owner Of The Form" class="mb-3 w-100"
                                                             tag="select" name="dept" id="dept"
-                                                            placeholder="Select Department" :options="[
-                                                                'JW Marriott Golfshire Banglore',
-                                                                'JW Marriott Golfshire Banglore',
-                                                            ]" v-model="filterObj.owner_of_the_form" />
+                                                            placeholder="Select Department" :options=formOptions
+                                                            v-model="filterObj.owner_of_the_form" />
                                                     </div>
                                                 </div>
                                                 <div class="mt-4">
                                                     <div class="">
                                                         <FormFields labeltext="Form Cateogry" class="mb-3" tag="select"
                                                             name="desgination" id="desgination"
-                                                            placeholder="Select Cateogry" :options="[
-                                                                'JW Marriott Golfshire Banglore',
-                                                                'JW Marriott Golfshire Banglore',
-                                                            ]" v-model="filterObj.form_category" />
+                                                            placeholder="Select Cateogry" :options=departments
+                                                            v-model="filterObj.form_category" />
                                                     </div>
                                                 </div>
                                                 <div class="mt-4">
                                                     <div class="">
                                                         <FormFields labeltext="Accessbility Departments" class="mb-3"
                                                             tag="select" name="desgination" id="Departments"
-                                                            placeholder="Select Desigination" :options="[
-                                                                'JW Marriott Golfshire Banglore',
-                                                                'JW Marriott Golfshire Banglore',
-                                                            ]" v-model="filterObj.accessible_departments" />
+                                                            placeholder="Select Desigination" :options=formOptions
+                                                            v-model="filterObj.accessible_departments" />
                                                     </div>
                                                 </div>
                                             </div>
@@ -140,9 +136,7 @@
                                                     <i @click="prevStep" class="bi bi-chevron-left"></i><span
                                                         class="ms-2">Back To About Form</span>
                                                 </h1>
-                                                <button class="btn btn-light font-10" type="button"
-                                                   
-                                                    @click="formData()">
+                                                <button class="btn btn-light font-10" type="button" @click="formData()">
                                                     <i class="bi bi-eye me-1"></i>SaveData
                                                 </button>
                                                 <button class="btn btn-light font-10" type="button"
@@ -196,7 +190,9 @@
                                                                                                     '-' +
                                                                                                     fieldIndex
                                                                                                     ">
-                                                                                                    {{ field.label}}</label>
+                                                                                                    {{
+                                                                                                        field.label
+                                                                                                    }}</label>
                                                                                                 <template v-if="field.fieldtype == 'select' ||
                                                                                                     field.fieldtype == 'multiselect'
                                                                                                 ">
@@ -314,7 +310,8 @@
                                                                             class="col p-0 dynamicColumn">
                                                                             <div
                                                                                 class="column_name d-flex align-items-center justify-content-between">
-                                                                                <input v-model="column.label" type="text"
+                                                                                <input v-model="column.label"
+                                                                                    type="text"
                                                                                     class="border-less-input columnFieldInput font-14"
                                                                                     placeholder="Column Name" />
                                                                                 <button class="btn btn-light btn-sm"
@@ -459,10 +456,12 @@ import ButtonComp from "../../Components/ButtonComp.vue";
 import GlobalTable from "../../Components/GlobalTable.vue";
 import { callWithErrorHandling, onMounted, ref, reactive } from "vue";
 import { extractFieldsWithBreaks } from '../../shared/services/field_format';
+import axiosInstance from '../../shared/services/interceptor';
+import { apis, doctypes } from "../../shared/apiurls";
 const filterObj = ref({
     form_name: "",
     form_short_name: "",
-    accessible_departments:[],
+    accessible_departments: [],
     business_unit: "",
     form_category: "",
     owner_of_the_form: "",
@@ -584,19 +583,21 @@ const nextStep = () => {
     if (activeStep.value < 3) {
         activeStep.value += 1;
     }
-    console.log(filterObj.value,'fffffffffffff')
+    console.log(filterObj.value, 'fffffffffffff')
 
 };
-function formData(){
+function formData() {
     const fields = extractFieldsWithBreaks(sections)
     const dataObj = {
         ...filterObj.value,
         fields
     }
     console.log(" Complete Data === ", dataObj)
-    
+    axiosInstance.post(apis.savedata, dataObj).then((res) => {
+        console.log(res, rrrrrrrrrrrrrrr);
+    })
 
-    
+
 }
 
 // Move to the previous step
@@ -618,7 +619,7 @@ const addSection = () => {
             {
                 columns: [
                     {
-                        label:"",
+                        label: "",
                         fields: [], // Initialize with an empty fields array
                     },
                 ],
@@ -740,6 +741,23 @@ const getRowSuffix = (index) => {
 const createForm = () => {
     formCreated.value = true;
 };
+
+const formOptions = ref([])
+function deptData() {
+
+    axiosInstance.get(apis.resource + doctypes.departments).then((res) => {
+        if (res?.data?.length) {
+            formOptions.value = res.data.value.map((dept) => dept.name);
+
+            console.log(formOptions.value, 'deptttttt');
+        }
+    })
+
+}
+onMounted(() => {
+    deptData();
+
+})
 
 
 </script>
