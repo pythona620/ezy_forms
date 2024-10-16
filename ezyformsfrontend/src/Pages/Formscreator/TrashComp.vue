@@ -64,9 +64,9 @@
                                                 <FormFields labeltext="Owner Of The Form" class="mb-3 w-100"
                                                     tag="select" name="dept" id="dept" placeholder="Select Department"
                                                     :options="[
-                            'JW Marriott Golfshire Banglore',
-                            'JW Marriott Golfshire Banglore',
-                        ]" v-model="filterObj.owner" />
+                                                        'JW Marriott Golfshire Banglore',
+                                                        'JW Marriott Golfshire Banglore',
+                                                    ]" v-model="filterObj.owner" />
                                             </div>
                                         </div>
                                         <div class="mt-4">
@@ -74,9 +74,9 @@
                                                 <FormFields labeltext="Form Cateogry" class="mb-3" tag="select"
                                                     name="desgination" id="desgination" placeholder="Select Cateogry"
                                                     :options="[
-                            'JW Marriott Golfshire Banglore',
-                            'JW Marriott Golfshire Banglore',
-                        ]" v-model="filterObj.categery" />
+                                                        'JW Marriott Golfshire Banglore',
+                                                        'JW Marriott Golfshire Banglore',
+                                                    ]" v-model="filterObj.categery" />
                                             </div>
                                         </div>
                                         <div class="mt-4">
@@ -84,9 +84,9 @@
                                                 <FormFields labeltext="Accessbility Departments" class="mb-3"
                                                     tag="select" name="desgination" id="Departments"
                                                     placeholder="Select Desigination" :options="[
-                            'JW Marriott Golfshire Banglore',
-                            'JW Marriott Golfshire Banglore',
-                        ]" v-model="filterObj.dept" />
+                                                        'JW Marriott Golfshire Banglore',
+                                                        'JW Marriott Golfshire Banglore',
+                                                    ]" v-model="filterObj.dept" />
                                             </div>
                                         </div>
                                     </div>
@@ -145,16 +145,16 @@
                                                                                 <div v-if="field.name">
                                                                                     <!-- Only show field if the name is not empty -->
                                                                                     <label :for="'field-' +
-                            sectionIndex +
-                            '-' +
-                            columnIndex +
-                            '-' +
-                            fieldIndex
-                            ">
+                                                                                        sectionIndex +
+                                                                                        '-' +
+                                                                                        columnIndex +
+                                                                                        '-' +
+                                                                                        fieldIndex
+                                                                                        ">
                                                                                         {{ field.name }}</label>
                                                                                     <template v-if="field.type == 'select' ||
-                            field.type == 'multiselect'
-                            ">
+                                                                                        field.type == 'multiselect'
+                                                                                    ">
                                                                                         <select
                                                                                             :multiple="field.type == 'multiselect'"
                                                                                             v-model="field.value"
@@ -167,8 +167,8 @@
                                                                                         </select>
                                                                                     </template>
                                                                                     <template v-else-if="field.type == 'checkbox' ||
-                            field.type == 'radio'
-                            ">
+                                                                                        field.type == 'radio'
+                                                                                    ">
                                                                                         <div class="row">
                                                                                             <div class="form-check col-6 mb-1 d-flex justify-content-between align-items-center"
                                                                                                 v-for="(
@@ -197,8 +197,13 @@
                                                                                         <component
                                                                                             :is="getFieldComponent(field.type)"
                                                                                             v-model="field.value"
-                                                                                            :type="field.type"
-                                                                                            :name="'field-' + sectionIndex + '-' + rowIndex + '-' + columnIndex + '-' + fieldIndex"
+                                                                                            :type="field.type" :name="'field-' +
+                                                                                                sectionIndex +
+                                                                                                '-' +
+                                                                                                columnIndex +
+                                                                                                '-' +
+                                                                                                fieldIndex
+                                                                                                "
                                                                                             :class="form - control">
                                                                                         </component>
                                                                                     </template>
@@ -302,10 +307,10 @@
                                                                             </option>
                                                                         </select> -->
                                                                         <div v-if="field.type == 'checkbox' ||
-                            field.type == 'radio' ||
-                            field.type == 'select' ||
-                            field.type == 'multiselect'
-                            ">
+                                                                            field.type == 'radio' ||
+                                                                            field.type == 'select' ||
+                                                                            field.type == 'multiselect'
+                                                                        ">
                                                                             <label class="font-12 fw-light"
                                                                                 for="options">Enter Options:</label>
                                                                             <textarea id="options"
