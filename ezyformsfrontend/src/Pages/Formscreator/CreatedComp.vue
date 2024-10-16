@@ -593,7 +593,7 @@ function formData() {
         fields
     }
     console.log(" Complete Data === ", dataObj)
-    axiosInstance.post('http://192.168.1.134:8000/api/method/ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions.add_dynamic_doctype', dataObj).then((res) => {
+    axiosInstance.post(apis.savedata, dataObj).then((res) => {
         console.log(res, rrrrrrrrrrrrrrr);
     })
 
