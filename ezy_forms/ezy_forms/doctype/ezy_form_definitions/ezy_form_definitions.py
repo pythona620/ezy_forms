@@ -104,7 +104,8 @@ def add_customized_fields_for_dynamic_doc(fields:list[dict],doctype:str):
 				frappe.db.commit()
 				doc_for_new_custom_field.db_update()
 				doc_for_new_custom_field.reload()
-		export_customizations(module= "User Forms",doctype=doctype,sync_on_migrate= 1,with_permissions= 0)
+			# should be within the loop because the changes need to be done immediately (handles field order in the background)
+			export_customizations(module= "User Forms",doctype=doctype,sync_on_migrate= 1,with_permissions= 0)
 		custom_export_json_file_path = frappe.utils.get_bench_path()+f"/apps/ezy_forms/ezy_forms/user_forms/custom/{doctype.lower().replace(' ','_').replace('-','_')}.json"
 		with open(custom_export_json_file_path, 'r') as file:
 			data = json.load(file)["custom_fields"]
