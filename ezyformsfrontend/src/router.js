@@ -9,7 +9,12 @@ import todoroutes from "./Pages/ToDo/todoroute";
 import createrRoutes from "./Pages/Formscreator/formscratorroute";
 import archivedroutes from "./Pages/Archived/archivedroutes";
 import dashBoardroutes from "./Pages/Dashboard/dashboardroute";
+import Login from "./views/Login.vue";
 const routes = [
+  {
+    path: '/',
+    component: Login
+  },
   ...Masterroutes,
   ...settingRoutes,
   ...todoroutes,

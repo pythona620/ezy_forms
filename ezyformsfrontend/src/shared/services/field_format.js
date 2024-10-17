@@ -6,14 +6,14 @@ export function extractFieldsWithBreaks(data) {
   data.forEach((section) => {
     section.rows.forEach((row) => {
       row.columns.forEach((column) => {
-        
+
         column.fields.forEach((field) => {
-          // Add the "insert_after_column" key to the current field
+          // Add the "insert_after" key to the current field
           const generatedFieldname = convertLabelToFieldName(field.label);
           result.push({
             ...field,
             fieldname: generatedFieldname,
-            insert_after_column: previousFieldname,
+            insert_after: previousFieldname,
             idx: index++, // Assign index
           });
 
@@ -27,7 +27,7 @@ export function extractFieldsWithBreaks(data) {
           fieldtype: "Column Break",
           fieldname: convertLabelToFieldName(column.label),
           label: column.label,
-          insert_after_column: previousFieldname, // Track the break
+          insert_after: previousFieldname, // Track the break
           idx: index++, // Assign index
         });
 
@@ -36,13 +36,13 @@ export function extractFieldsWithBreaks(data) {
       });
 
       // Add "Row Break" marker after each row
-      result.push({ fieldtype: "Row Break", fieldname: row.fieldname, insert_after_column: previousFieldname,idx: index++ });
+      result.push({ fieldtype: "Row Break", fieldname: row.fieldname, insert_after: previousFieldname, idx: index++ });
       // Update previousFieldname to the row break
       previousFieldname = row.fieldname;
     });
 
     // Add "Section Break" marker after each section
-    result.push({ fieldtype: "Section Break", label: section.label, fieldname: convertLabelToFieldName(section.label), insert_after_column: previousFieldname ,idx: index++});
+    result.push({ fieldtype: "Section Break", label: section.label, fieldname: convertLabelToFieldName(section.label), insert_after: previousFieldname, idx: index++ });
     // Update previousFieldname to the section break
     previousFieldname = section.fieldname;
   });
@@ -90,7 +90,7 @@ export function rebuildOriginalStructure(flatArray) {
       currentRow.columns.push(currentColumn);
     } else {
       // Add a field to the current column
-      const { insert_after_column, ...fieldData } = item; // Remove the helper key
+      const { insert_after, ...fieldData } = item; // Remove the helper key
       currentColumn.fields.push(fieldData);
     }
   });
@@ -100,17 +100,17 @@ export function rebuildOriginalStructure(flatArray) {
 
 // Usage
 // const flatArray = [
-//   { fieldname: "user_name", fieldtype: "data", label: "User Name", insert_after_column: null },
-//   { fieldname: "user_id", fieldtype: "data", label: "User ID", insert_after_column: "user_name" },
+//   { fieldname: "user_name", fieldtype: "data", label: "User Name", insert_after: null },
+//   { fieldname: "user_id", fieldtype: "data", label: "User ID", insert_after: "user_name" },
 //   { type: "Column Break", fieldname: "col_tac", label: "User Info" },
-//   { fieldname: "user_mobile", fieldtype: "data", label: "User Mobile", insert_after_column: null },
-//   { fieldname: "user_email", fieldtype: "data", label: "User Email", insert_after_column: "user_mobile" },
+//   { fieldname: "user_mobile", fieldtype: "data", label: "User Mobile", insert_after: null },
+//   { fieldname: "user_email", fieldtype: "data", label: "User Email", insert_after: "user_mobile" },
 //   { type: "Column Break", fieldname: "col_tac", label: "User Data" },
 //   { type: "Row Break", fieldname: "row_tac" },
-//   { fieldname: "user_father_name", fieldtype: "data", label: "User Father Name", insert_after_column: null },
-//   { fieldname: "user_mother_name", fieldtype: "data", label: "User Mother Name", insert_after_column: "user_father_name" },
+//   { fieldname: "user_father_name", fieldtype: "data", label: "User Father Name", insert_after: null },
+//   { fieldname: "user_mother_name", fieldtype: "data", label: "User Mother Name", insert_after: "user_father_name" },
 //   { type: "Column Break", fieldname: "col_tac", label: "User Info1" },
-//   { fieldname: "user_address", fieldtype: "data", label: "User House No", insert_after_column: null },
+//   { fieldname: "user_address", fieldtype: "data", label: "User House No", insert_after: null },
 //   { type: "Column Break", fieldname: "col_tac", label: "User Data" },
 //   { type: "Row Break", fieldname: "row_tac" },
 //   { type: "Section Break", fieldname: "proprty_tac" }

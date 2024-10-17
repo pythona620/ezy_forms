@@ -28,8 +28,7 @@
                             </div>
                             <div class="mt-1">
                                 <FormFields tag="select" placeholder="" class="mb-3" name="roles" id="roles"
-                                    :Required="false" v-model="options"
-                                    :options="['JW Marriott Golfshire Banglore', 'JW Marriott Golfshire hyd']" />
+                                    :Required="false" v-model="business_unit" :options="EzyFormsCompanys" />
                             </div>
                             <div class="logooutbtn">
                                 <img src="../assets/Image.svg" />
@@ -45,41 +44,61 @@
 
 
 </template>
-<script>
+<script setup>
+import { ref, onMounted, watch } from 'vue';
+import { apis, doctypes } from '../shared/apiurls';
+import axiosInstance from '../shared/services/interceptor';
 import ButtonComp from './ButtonComp.vue';
 import FormFields from './FormFields.vue';
 import TabsComp from './TabsComp.vue';
+import { EzyBusinessUnit } from '../shared/services/ezyBusiness_unit'
+// Define reactive variables
+const tabsData = [
+    { name: 'Dashboard', icon: 'bi bi-columns-gap', route: '/dashboard' },
+    { name: 'To do', icon: 'fa-solid fa-list-check', route: '/todo' },
+    { name: 'Forms', icon: 'fa-solid fa-clipboard', route: '/forms' },
+    { name: 'Settings', icon: 'fa-solid fa-gear', route: '/settings' },
+    { name: 'Archive', icon: 'bi bi-archive', route: '/archived' },
+    { name: 'Form', icon: 'fa-solid fa-clipboard', route: '/new' }
+];
+const activeTab = ref('');
+const business_unit = ref('');
+const EzyFormsCompanys = ref([]);
 
-export default {
-    components: {
-        TabsComp,
-        FormFields, ButtonComp
-    },
-    props: {
 
-    },
-    data() {
-        return {
-            tabsData: [
-                { name: 'Dashboard', icon: 'bi bi-columns-gap', route: '/dashboard' },
-                { name: 'To do', icon: 'fa-solid fa-list-check', route: '/todo' },
-                // { name: 'Documents', icon: 'fa-solid fa-file', route: '/documents' },
-                { name: 'Forms', icon: 'fa-solid fa-clipboard', route: '/forms' },
-                { name: 'Settings', icon: 'fa-solid fa-gear', route: '/settings' },
-                { name: 'Archive', icon: 'bi bi-archive', route: '/archived' },
-                { name: 'Form', icon: 'fa-solid fa-clipboard', route: '/new' }
-            ],
-            activeTab: '',
-            options: ''
-        };
-    },
-    methods: {
-        updateActiveTab(tab) {
-            this.activeTab = tab.name;
-            console.log(this.activeTab,);
-        },
-    },
-}
+const ezyForms = () => {
+    const queryParams = {
+        fields: JSON.stringify(["*"]),
+    };
+
+    axiosInstance.get(apis.resource + doctypes.wfSettingEzyForms, {
+        params: queryParams,
+    }).then((res) => {
+        if (res?.data?.length) {
+            console.log(res.data, "-=-=-=");
+            EzyFormsCompanys.value = res.data.map((company) => company.business_unit);
+            if (EzyFormsCompanys.value.length) {
+                business_unit.value = EzyFormsCompanys.value[0];
+            }
+
+        }
+    }).catch((error) => {
+        console.error("Error fetching ezyForms data:", error);
+    });
+};
+
+const updateActiveTab = (tab) => {
+    activeTab.value = tab.name;
+};
+
+watch(business_unit, (newBusinessUnit) => {
+    EzyBusinessUnit.value = newBusinessUnit;
+    console.log(EzyBusinessUnit.value, "Selected business unit updated");
+});
+
+onMounted(() => {
+    ezyForms();
+});
 </script>
 <style scoped>
 .headerbackgound {

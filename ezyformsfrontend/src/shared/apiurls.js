@@ -9,11 +9,13 @@ export const doctypes = {
   // poschecks: "User",
   users: "User",
   departments: "Ezy Departments",
+  wfSettingEzyForms: "Ezy Business Unit",
 };
 
 export const apis = {
   resource: domain + `/resource/`,
   uploadfile: domain + `/method/upload_file`,
+  login: domain + `/method/login`,
   savedata:
     domain +
     `/method/ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions.add_dynamic_doctype`,
