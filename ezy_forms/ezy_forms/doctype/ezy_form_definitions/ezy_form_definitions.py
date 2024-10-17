@@ -136,14 +136,13 @@ def add_customized_fields_for_dynamic_doc(fields:list[dict],doctype:str):
 
 @frappe.whitelist()
 def delete_entire_customized_dynamic_doctype(doctype:str):
-	if frappe.db.exists("DocType",doctype): return {"success":False,"message":f"The Form mentioned doesnot exists - {doctype}"}
+	if not frappe.db.exists("DocType",doctype): return {"success":False,"message":f"The Form mentioned doesnot exists - {doctype}"}
 	custom_export_json_file_path = frappe.utils.get_bench_path()+f"/apps/ezy_forms/ezy_forms/user_forms/custom/{doctype.lower().replace(' ','_').replace('-','_')}.json"
 	if os.path.exists(custom_export_json_file_path): os.remove(custom_export_json_file_path)
-	if not frappe.db.exists("DocType",doctype):return {"success":False,"message":f"The given Doc - {doctype} doesn't exists."}
 	frappe.delete_doc("DocType",doctype)
 	frappe.db.commit()
-	frappe.db.sql(f"""DROP TABLE `tab{doctype}`;""")
-	frappe.db.commit()
+	# frappe.db.sql(f"""DROP TABLE `tab{doctype}`;""")
+	# frappe.db.commit()
 	frappe.db.delete("Custom Field",filters={"dt":doctype,"module":"User Forms"})
 	frappe.db.commit()
 	bench_migrating_from_code()
