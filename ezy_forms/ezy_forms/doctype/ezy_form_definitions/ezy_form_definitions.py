@@ -32,9 +32,21 @@ def add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:st
 			doc.modified_by = frappe.session.user
 			doc.module = "User Forms"
 			doc.app = "ezy_forms"
+			doc.custom = 1
 			doc.insert(ignore_permissions=True)
 			frappe.db.commit()
 			doc.reload()
+			custom_docperm = frappe.new_doc("Custom DocPerm")
+			custom_docperm.parent = doctype
+			custom_docperm.read = 1
+			custom_docperm.create = 1
+			custom_docperm.delete = 1
+			custom_docperm.select = 1
+			custom_docperm.write = 1
+			custom_docperm.role = "System Manager"
+			custom_docperm.insert(ignore_permissions=True)
+			frappe.db.commit()
+			custom_docperm.reload()
 			form_defs = frappe.new_doc("Ezy Form Definitions")
 			form_defs.form_category = form_category
 			form_defs.accessible_departments = accessible_departments
