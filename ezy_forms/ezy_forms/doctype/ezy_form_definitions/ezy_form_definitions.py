@@ -10,7 +10,6 @@ import os
 from frappe.modules.utils import export_customizations
 from ast import literal_eval
 import json
-import numpy
 
 class EzyFormDefinitions(Document):
 	pass
