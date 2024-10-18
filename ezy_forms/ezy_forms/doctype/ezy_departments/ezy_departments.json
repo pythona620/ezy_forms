@@ -25,9 +25,8 @@
   },
   {
    "fieldname": "business_unit",
-   "fieldtype": "Link",
-   "label": "Business Unit",
-   "options": "Ezy Business Unit"
+   "fieldtype": "Data",
+   "label": "Business Unit"
   },
   {
    "fieldname": "ezy_departments_items",
@@ -38,7 +37,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-10-15 10:51:45.524112",
+ "modified": "2024-10-18 16:37:48.187210",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
  "name": "Ezy Departments",
