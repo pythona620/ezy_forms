@@ -10,6 +10,7 @@ import os
 from frappe.modules.utils import export_customizations
 from ast import literal_eval
 import json
+import numpy
 
 class EzyFormDefinitions(Document):
 	pass
@@ -73,6 +74,8 @@ def add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:st
 			add_customized_fields_for_dynamic_doc(fields=fields,doctype=doctype)
 	except Exception as e:
 		exc_type, exc_obj, exc_tb = sys.exc_info()
+		if "list index out of range" in str(e):
+			return {"success":False,"message":"Please try again after some time else change the short name to add new form. Reason :- Already this name has been used. Deleting this form in database (works in background)."}
 		frappe.log_error("Error in Creating New Doc",
 						 "line No:{}\n{}".format(exc_tb.tb_lineno, str(e)))
 		frappe.db.rollback()
@@ -136,18 +139,33 @@ def add_customized_fields_for_dynamic_doc(fields:list[dict],doctype:str):
 
 @frappe.whitelist()
 def delete_entire_customized_dynamic_doctype(doctype:str):
-	if not frappe.db.exists("DocType",doctype): return {"success":False,"message":f"The Form mentioned doesnot exists - {doctype}"}
-	custom_export_json_file_path = frappe.utils.get_bench_path()+f"/apps/ezy_forms/ezy_forms/user_forms/custom/{doctype.lower().replace(' ','_').replace('-','_')}.json"
-	if os.path.exists(custom_export_json_file_path): os.remove(custom_export_json_file_path)
-	frappe.delete_doc("DocType",doctype)
-	frappe.db.commit()
-	frappe.db.sql(f"""DROP TABLE `tab{doctype}`;""")
-	frappe.db.commit()
-	frappe.db.delete("Custom Field",filters={"dt":doctype,"module":"User Forms"})
-	frappe.db.commit()
-	bench_migrating_from_code()
-	frappe.db.set_value("Ezy Form Definitions",doctype,{"active":0})
-	frappe.db.commit()
+	try:
+		if not frappe.db.exists("DocType",doctype): return {"success":False,"message":f"The Form mentioned doesnot exists - {doctype}"}
+		custom_export_json_file_path = frappe.utils.get_bench_path()+f"/apps/ezy_forms/ezy_forms/user_forms/custom/{doctype.lower().replace(' ','_').replace('-','_')}.json"
+		if os.path.exists(custom_export_json_file_path): os.remove(custom_export_json_file_path)
+		frappe.db.delete("Custom Field",filters={"dt":doctype,"module":"User Forms"})
+		frappe.db.commit()
+		frappe.db.delete("Custom DocPerm",{"parent":doctype})
+		frappe.db.commit()
+		table_exists_or_not_in_db = frappe.db.sql(f"show tables like '%{doctype}';",as_list=True)
+		if len(table_exists_or_not_in_db)>0:
+			# frappe doesn't delete doctype in the database so we need two time validation of get_list
+			delete_doc_from_doctype_view = frappe.delete_doc("DocType",doctype)
+			frappe.db.commit()
+		table_exists_or_not_in_db = frappe.db.sql(f"show tables like '%{doctype}';",as_list=True)
+		if len(table_exists_or_not_in_db)>0:
+			frappe.db.sql(f"""Truncate TABLE `tab{doctype}`;""")
+			frappe.db.commit()
+		bench_migrating_from_code()
+		frappe.db.set_value("Ezy Form Definitions",doctype,{"active":0})
+		frappe.db.commit()
+	except Exception as e:
+		exc_type, exc_obj, exc_tb = sys.exc_info()
+		frappe.log_error("Error in deleting_entire_customized_fields_for_dynamic_doc",
+						 "line No:{}\n{}".format(exc_tb.tb_lineno, str(e)))
+		frappe.db.rollback()
+		frappe.throw(str(e))
+		return {"success": False, "message": str(e)}
 
 @frappe.whitelist()
 def deleting_customized_field_from_custom_dynamic_doc(doctype,field):
