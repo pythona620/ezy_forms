@@ -95,9 +95,7 @@
                 </div>
             </div>
         </div>
-        <!-- Modal for viewing form -->
-        <!-- <template> -->
-        <!-- Modal for viewing form -->
+
         <div class="modal fade" id="formViewModal" tabindex="-1" aria-labelledby="formViewModalLabel"
             aria-hidden="true">
             <div class="modal-dialog modal-lg">
@@ -107,8 +105,8 @@
                         <button type="button" class="btn-close" @click="hideModal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <pre>{{ selectedForm }}</pre> <!-- Display selected form data -->
-                        <!-- Add more detailed view of the form here -->
+                        <pre>{{ selectedForm }}</pre>
+
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" @click="hideModal">Close</button>
@@ -116,7 +114,7 @@
                 </div>
             </div>
         </div>
-        <!-- </template> -->
+
 
     </div>
 </template>
@@ -144,8 +142,6 @@ function actionCreated(rowData, actionEvent) {
     console.log("actionEvent === ", actionEvent)
     if (actionEvent.name === 'View form') {
         // raise a modal
-
-
         const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});
         modal.show();
         selectedForm.value = rowData; // Store the selected form data

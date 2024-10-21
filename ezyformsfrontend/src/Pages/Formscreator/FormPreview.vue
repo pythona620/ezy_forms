@@ -23,7 +23,7 @@
                                         <div v-for="(column, columnIndex) in row.columns"
                                             :key="'column-preview-' + columnIndex" class="col">
                                             <h6>{{ column.label }}</h6>
-                                            <div class="mb-2">
+                                            <div class="mb-2 ms-2">
                                                 <div v-for="(field, fieldIndex) in column.fields"
                                                     :key="'field-preview-' + fieldIndex">
                                                     <div v-if="field.label">
@@ -50,7 +50,7 @@
                                                                 </option>
                                                             </select>
                                                         </template>
-                                                        <template v-else-if="field.fieldtype == 'check' ||
+                                                        <template v-else-if="field.fieldtype == 'checkbox' ||
                 field.fieldtype == 'radio'
                 ">
                                                             <div class="row">
@@ -107,10 +107,39 @@
 </template>
 
 <script setup>
-import { reactive } from "vue";
+import { defineProps } from "vue";
 
-const sections = reactive([]);
 
+const props = defineProps({
+    sections: {
+        type: Array,
+        required: true,
+    }
+});
+
+
+const getFieldComponent = (type) => {
+    switch (type) {
+        case "Data":
+            return "input";
+        case "number":
+            return "input";
+        case "Text":
+            return "textarea";
+        case "checkbox":
+            return "input";
+        case "Select":
+            return "select";
+        case "Date":
+            return "input";
+        case "Attach":
+            return "file";
+        case "radio":
+            return "input";
+        default:
+            return "input";
+    }
+};
 </script>
 
 <style lang="sass" scoped>
