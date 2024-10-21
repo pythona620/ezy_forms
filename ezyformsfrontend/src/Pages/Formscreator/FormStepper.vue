@@ -498,7 +498,7 @@ const businessUnit = computed(() => {
     return EzyBusinessUnit;
 });
 onMounted(() => {
-    // deptData();
+    deptData();
     console.log(businessUnit.value.value, "businessUnit in stepper component");
 })
 const filterObj = ref({
@@ -779,7 +779,8 @@ function deptData() {
     const queryParams = {
         fields: JSON.stringify(["*"]),
     };
-    axiosInstance.get(apis.resource + doctypes.departments + `/${businessUnit.value.value}-${filterObj.value.form_short_name}`, { params: queryParams })
+    // + `/${businessUnit.value.value}-${filterObj.value.form_short_name}`
+    axiosInstance.get(apis.resource + doctypes.departments, { params: queryParams })
         .then((res) => {
             if (res?.data?.length) {
                 console.log(res.data, "nnnnnnnnnnnnn departments");
