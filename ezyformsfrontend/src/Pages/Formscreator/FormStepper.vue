@@ -68,7 +68,7 @@
                                                 <div class="mt-4">
                                                     <div class="">
                                                         <FormFields labeltext="Form Short Code" class="mb-3" type="text"
-                                                            tag="input" name="Value" id="Value"
+                                                            @change="Formshortname" tag="input" name="Value" id="Value"
                                                             placeholder="Untitle Form"
                                                             v-model="filterObj.form_short_name" />
                                                     </div>
@@ -473,7 +473,7 @@
 
 <script setup>
 import FormFields from "../../Components/FormFields.vue";
-import { callWithErrorHandling, onMounted, ref, reactive, computed } from "vue";
+import { callWithErrorHandling, onMounted, ref, reactive, computed, watch } from "vue";
 import ButtonComp from "../../Components/ButtonComp.vue";
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
 import { extractFieldsWithBreaks } from '../../shared/services/field_format';
@@ -581,6 +581,18 @@ const handleStepClick = (label) => {
 const nextStep = () => {
     if (activeStep.value < 3) {
         activeStep.value += 1;
+    }
+};
+// watch(
+//     () => filterObj.form_short_name, 
+//     (newVal, oldVal) => {
+//         Formshortname(newVal, oldVal);
+//     }
+// );
+const Formshortname = (newVal, oldVal) => {
+    if (newVal !== oldVal) {
+        console.log('Form short name updated:', newVal);
+        deptData();
     }
 };
 function formData() {
@@ -759,10 +771,9 @@ function deptData() {
         .then((res) => {
             if (res?.data?.length) {
                 console.log(res.data, "nnnnnnnnnnnnn departments");
-
                 // Assuming res.data is an array of departments and each department has a 'name' property
-                formOptions.value = res.data.map((dept) => dept.name);
-                console.log(formOptions.value, 'deptttttt');
+                // formOptions.value = res.data.map((dept) => dept.name);
+                // console.log(formOptions.value, 'deptttttt');
             }
         })
         .catch((error) => {
