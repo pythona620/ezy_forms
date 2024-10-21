@@ -132,7 +132,7 @@
                                                 <i class="bi bi-eye me-1"></i>Preview
                                             </button>
                                         </div> -->
-                                                <!-- <div class="modal fade" id="exampleModal" tabindex="-1"
+                                                <div class="modal fade" id="exampleModal" tabindex="-1"
                                                     aria-labelledby="exampleModalLabel" aria-hidden="true">
                                                     <div class="modal-dialog modal-xl">
                                                         <div class="modal-content">
@@ -191,7 +191,7 @@
                                                                                                         </option>
                                                                                                     </select>
                                                                                                 </template>
-<template v-else-if="field.fieldtype == 'check' ||
+                                                                                                <template v-else-if="field.fieldtype == 'check' ||
                         field.fieldtype == 'radio'
                         ">
                                                                                                     <div class="row">
@@ -221,7 +221,7 @@
                                                                                                         </div>
                                                                                                     </div>
                                                                                                 </template>
-<template v-else>
+                                                                                                <template v-else>
                                                                                                     <component
                                                                                                         :is="getFieldComponent(field.fieldtype)"
                                                                                                         v-model="field.value"
@@ -235,22 +235,24 @@
                         " :class="form - control" class="form-control previewInputHeight">
                                                                                                     </component>
                                                                                                 </template>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-    <button class="btn btn-primary" @click="saveFormFields">Save</button>
-</div>
-</div>
-</div>
-</div> -->
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <!-- <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary"
+                                                            data-bs-dismiss="modal">Close</button>
+                                                        <button class="btn btn-primary"
+                                                            @click="saveFormFields">Save</button>
+                                                    </div> -->
+                                                        </div>
+                                                    </div>
+                                                </div>
                                                 <div class="mt-4">
                                                     <div v-for="(section, sectionIndex) in sections" :key="sectionIndex"
                                                         class="dynamicSection">
@@ -398,7 +400,7 @@
                                                                                         </option>
                                                                                     </select>
                                                                                     <div
-                                                                                        v-if="field.fieldtype == 'Check' || field.fieldtype == 'radio' || field.fieldtype == 'Select' || field.fieldtype == 'multiselect'">
+                                                                                        v-if="field.fieldtype == 'Check' || field.fieldtype == 'radio' || field.fieldtype == 'Select' || field.fieldtype == 'multiselect' ">
                                                                                         <label class="font-12 fw-light"
                                                                                             for="options">Enter
                                                                                             Options:</label>
@@ -429,8 +431,8 @@
                                                                                 <button
                                                                                     class="btn btn-light btn-sm d-flex align-items-center addField m-2"
                                                                                     @click="
-                        addField(sectionIndex, rowIndex, columnIndex)
-                        ">
+                                addField(sectionIndex, rowIndex, columnIndex)
+                                ">
                                                                                     <i class="bi bi-plus fs-4"></i>
                                                                                     <span>Add Field</span>
                                                                                 </button>
