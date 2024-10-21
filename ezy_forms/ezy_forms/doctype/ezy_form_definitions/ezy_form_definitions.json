@@ -22,7 +22,8 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Business Unit",
-   "options": "Ezy Business Unit"
+   "options": "Ezy Business Unit",
+   "search_index": 1
   },
   {
    "fieldname": "form_type",
@@ -72,7 +73,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-10-15 12:04:40.065755",
+ "modified": "2024-10-21 14:37:17.038825",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
  "name": "Ezy Form Definitions",
