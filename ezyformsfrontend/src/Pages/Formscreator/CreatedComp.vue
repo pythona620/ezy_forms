@@ -148,6 +148,8 @@ function actionCreated(rowData, actionEvent) {
 
         const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});
         modal.show();
+        selectedForm.value = rowData; // Store the selected form data
+
     }
 }
 const hideModal = () => {
@@ -166,14 +168,9 @@ const actions = ref(
         { name: 'In-active this form', icon: 'fa-solid fa-ban' }
     ]
 )
-const showFormModal = ref(false); // Reactive reference to control modal visibility
-const selectedForm = ref(null);
-function viewForm(form) {
-    console.log("clicked Form");
 
-    selectedForm.value = form; // Store the selected form data
-    showFormModal.value = true; // Show the modal
-}
+const selectedForm = ref(null);
+
 const filterObj = ref({
     limitstart: 0,
     limitPageLength: 20,
