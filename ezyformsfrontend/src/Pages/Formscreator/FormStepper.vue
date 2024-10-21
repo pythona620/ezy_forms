@@ -601,12 +601,12 @@ const nextStep = () => {
 //         Formshortname(newVal, oldVal);
 //     }
 // );
-const Formshortname = (newVal, oldVal) => {
-    if (newVal !== oldVal) {
-        console.log('Form short name updated:', newVal);
-        deptData();
-    }
-};
+// const Formshortname = (newVal, oldVal) => {
+//     if (newVal !== oldVal) {
+//         console.log('Form short name updated:', newVal);
+//         deptData();
+//     }
+// };
 function formData() {
     const fields = extractFieldsWithBreaks(sections)
     const dataObj = {
