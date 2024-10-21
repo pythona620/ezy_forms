@@ -2,18 +2,18 @@
     <div>
         <div class="">
             <div class="">
-                <div class="d-flex justify-content-between align-items-center CancelNdSave">
+                <div class="d-flex justify-content-between align-items-center CancelNdSave my-2 mx-1">
                     <div class="ps-1 m-0 d-flex align-items-center" @click="cancelForm()">
                         <h1 class="font-13 m-0">
                             <i class="bi bi-arrow-left"></i><span class="ms-2">Cancel Form</span>
                         </h1>
                     </div>
                     <div>
-                        <button class="btn btn-light font-10" type="button" data-bs-toggle="modal"
+                        <button class="btn btn-light font-13" type="button" data-bs-toggle="modal"
                             data-bs-target="#exampleModal" @click="createForm">
                             <i class="bi bi-eye me-1"></i>Preview
                         </button>
-                        <ButtonComp class="font-10 rounded-2" name="Save as Draft" @click="formData()"></ButtonComp>
+                        <ButtonComp class="font-13 rounded-2" name="Save as Draft" @click="formData()"></ButtonComp>
                     </div>
                 </div>
                 <div class="form-container container-fluid mt-1">
@@ -132,7 +132,7 @@
                                                 <i class="bi bi-eye me-1"></i>Preview
                                             </button>
                                         </div> -->
-                                                <div class="modal fade" id="exampleModal" tabindex="-1"
+                                                <!-- <div class="modal fade" id="exampleModal" tabindex="-1"
                                                     aria-labelledby="exampleModalLabel" aria-hidden="true">
                                                     <div class="modal-dialog modal-xl">
                                                         <div class="modal-content">
@@ -168,7 +168,7 @@
                                                                                         <div v-for="(field, fieldIndex) in column.fields"
                                                                                             :key="'field-preview-' + fieldIndex">
                                                                                             <div v-if="field.label">
-                                                                                                <!-- Only show field if the name is not empty -->
+
                                                                                                 <label :for="'field-' +
                         sectionIndex +
                         '-' +
@@ -191,7 +191,7 @@
                                                                                                         </option>
                                                                                                     </select>
                                                                                                 </template>
-                                                                                                <template v-else-if="field.fieldtype == 'check' ||
+<template v-else-if="field.fieldtype == 'check' ||
                         field.fieldtype == 'radio'
                         ">
                                                                                                     <div class="row">
@@ -221,7 +221,7 @@
                                                                                                         </div>
                                                                                                     </div>
                                                                                                 </template>
-                                                                                                <template v-else>
+<template v-else>
                                                                                                     <component
                                                                                                         :is="getFieldComponent(field.fieldtype)"
                                                                                                         v-model="field.value"
@@ -235,24 +235,22 @@
                         " :class="form - control" class="form-control previewInputHeight">
                                                                                                     </component>
                                                                                                 </template>
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <!-- <div class="modal-footer">
-                                                        <button type="button" class="btn btn-secondary"
-                                                            data-bs-dismiss="modal">Close</button>
-                                                        <button class="btn btn-primary"
-                                                            @click="saveFormFields">Save</button>
-                                                    </div> -->
-                                                        </div>
-                                                    </div>
-                                                </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+    <button class="btn btn-primary" @click="saveFormFields">Save</button>
+</div>
+</div>
+</div>
+</div> -->
                                                 <div class="mt-4">
                                                     <div v-for="(section, sectionIndex) in sections" :key="sectionIndex"
                                                         class="dynamicSection">
@@ -303,7 +301,7 @@
                                                                 <button
                                                                     class="btn btn-light bg-transparent border-0 font-13 deleteSection"
                                                                     @click="removeSection(sectionIndex)">
-                                                                    <i class="bi bi-trash me-2"></i> Delete approval
+                                                                    <i class="bi bi-trash me-2"></i> Delete Section
                                                                 </button>
                                                             </div>
                                                         </section>
@@ -312,7 +310,8 @@
                                                                 :key="rowIndex">
                                                                 <div
                                                                     class="d-flex justify-content-between align-items-center">
-                                                                    <label>{{ getRowSuffix(rowIndex) }}</label>
+                                                                    <label class="rownames">{{ getRowSuffix(rowIndex)
+                                                                        }}</label>
                                                                     <div>
                                                                         <button v-if="row.columns.length < 3"
                                                                             class="btn btn-light bg-transparent border-0 font-13"
@@ -399,7 +398,7 @@
                                                                                         </option>
                                                                                     </select>
                                                                                     <div
-                                                                                        v-if="field.fieldtype == 'Check' || field.fieldtype == 'radio' || field.fieldtype == 'Select' || field.fieldtype == 'multiselect' ">
+                                                                                        v-if="field.fieldtype == 'Check' || field.fieldtype == 'radio' || field.fieldtype == 'Select' || field.fieldtype == 'multiselect'">
                                                                                         <label class="font-12 fw-light"
                                                                                             for="options">Enter
                                                                                             Options:</label>
@@ -430,8 +429,8 @@
                                                                                 <button
                                                                                     class="btn btn-light btn-sm d-flex align-items-center addField m-2"
                                                                                     @click="
-                                addField(sectionIndex, rowIndex, columnIndex)
-                                ">
+                        addField(sectionIndex, rowIndex, columnIndex)
+                        ">
                                                                                     <i class="bi bi-plus fs-4"></i>
                                                                                     <span>Add Field</span>
                                                                                 </button>
@@ -452,7 +451,7 @@
                                                     <div class="d-flex justify-content-center align-items-center my-4">
                                                         <button class="btn btn-light border font-12"
                                                             @click="addSection">
-                                                            <i class="bi bi-plus-circle me-1 fs-6"></i> Add Approval
+                                                            <i class="bi bi-plus-circle me-1 fs-6"></i> Add Section
                                                         </button>
                                                     </div>
                                                 </div>
@@ -492,18 +491,24 @@ const businessUnit = computed(() => {
     return EzyBusinessUnit;
 });
 onMounted(() => {
-    if (filterObj.value.form_short_name) {
-        deptData();
-    }
+    // deptData();
+    console.log(businessUnit.value.value, "businessUnit in stepper component");
 })
 const filterObj = ref({
     form_name: "",
     form_short_name: "",
-    accessible_departments: "[]",
+    accessible_departments: "",
     business_unit: `${businessUnit.value.value}`,
     form_category: "",
     owner_of_the_form: "",
 });
+watch(
+    businessUnit,
+    (newVal) => {
+        filterObj.value.business_unit = newVal;
+    },
+    { immediate: true }
+);
 const steps = [
     {
         id: 1,
@@ -789,12 +794,16 @@ function deptData() {
 }
 
 .stepsDiv {
-    margin-top: 40px;
+    margin-top: 25px;
 }
 
 input {
     font-size: 13px !important;
     height: 35px;
+}
+
+.rownames {
+    opacity: 0;
 }
 
 .formsticky {
@@ -909,7 +918,7 @@ has context menu .form-container {
 
 .completedStepIcon {
     color: #1b14df;
-    font-size: 12px;
+    font-size: 14px;
 }
 
 .steps li.completed {
