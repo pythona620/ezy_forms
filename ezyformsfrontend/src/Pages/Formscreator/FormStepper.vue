@@ -191,7 +191,7 @@
                                                                                                         </option>
                                                                                                     </select>
                                                                                                 </template>
-                                                                                                <template v-else-if="field.fieldtype == 'check' ||
+                                                                                                <template v-else-if="field.fieldtype == 'checkbox' ||
                         field.fieldtype == 'radio'
                         ">
                                                                                                     <div class="row">
@@ -400,7 +400,7 @@
                                                                                         </option>
                                                                                     </select>
                                                                                     <div
-                                                                                        v-if="field.fieldtype == 'Check' || field.fieldtype == 'radio' || field.fieldtype == 'Select' || field.fieldtype == 'multiselect' ">
+                                                                                        v-if="field.fieldtype == 'checkbox' || field.fieldtype == 'radio' || field.fieldtype == 'Select' || field.fieldtype == 'multiselect' ">
                                                                                         <label class="font-12 fw-light"
                                                                                             for="options">Enter
                                                                                             Options:</label>
@@ -532,7 +532,7 @@ const fieldTypes = [
     },
     {
         label: "Checkbox",
-        type: "Check",
+        type: "checkbox",
     },
     {
         label: "Radio",
@@ -738,7 +738,7 @@ const getFieldComponent = (type) => {
             return "input";
         case "Text":
             return "textarea";
-        case "Check":
+        case "checkbox":
             return "input"; // Checkbox input will need to handle checked state
         case "Select":
             return "select"; // Handle options for dropdown separately
