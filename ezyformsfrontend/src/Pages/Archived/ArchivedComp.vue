@@ -162,7 +162,7 @@ function applyFilter() {
 const radioOptions = ref(['All',
     'Approved', 'Rejected']);
 </script>
-<style>
+<style scoped>
 .form_archived {
     display: flex;
     align-items: center;

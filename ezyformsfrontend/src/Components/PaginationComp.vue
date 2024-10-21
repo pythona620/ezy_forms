@@ -6,10 +6,10 @@
       </li>
       <li v-if="props.currentRecords < props.totalRecords" class="more" @click="itemsIncrease()">more..</li>
     </ul>
-  </div>
-  <div>
-    <span class="totalcount text-secondary">{{ props.currentRecords }} /
-      <span class="fw-bold">{{ props.totalRecords }}</span> records</span>
+    <div>
+      <span class="totalcount text-secondary">{{ props.currentRecords }} /
+        <span class="fw-bold">{{ props.totalRecords }}</span> records</span>
+    </div>
   </div>
 </template>
 
@@ -25,11 +25,11 @@ const props = defineProps({
     type: Number,
     required: true,
   },
-  tab_name: String
+
 });
 
-const itemsPerPage = ref(100);
-const newpages = ref([100, 200, 500]);
+const itemsPerPage = ref(10);
+const newpages = ref([10, 20, 50]);
 const emit = defineEmits(["updateValue", "limitStart"]);
 const start = ref(0);
 
@@ -64,4 +64,89 @@ watch(() => props.currentRecords, (newVal, oldVal) => {
 
 </script>
 <!-- Styles -->
-<style scoped></style>
+<style scoped>
+.pagination-controls {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  /* max-width: 300px; */
+  align-items: center;
+}
+
+.pagination .active {
+  font-weight: bold;
+}
+
+.pagination-controls button {
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+ul.pagination {
+  display: flex;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  background-color: #f4f5f6;
+  border-radius: 8px;
+}
+
+ul.pagination li {
+  display: inline;
+  padding: 4px 7px !important;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+ul.pagination li:last-child {
+  border-radius: 0px 8px 8px 0px !important;
+}
+
+ul.pagination li:first-child {
+  border-radius: 8px 0px 0px 8px !important;
+}
+
+ul.pagination li a {
+  /* border-radius: 5px; */
+  color: #ccc;
+  text-decoration: none;
+  /* background-color: #F4F5F6; */
+  /* border: 1px solid black; */
+}
+
+ul.pagination li:has(a.active) {
+  background-color: #ccc;
+}
+
+ul.pagination li:has(a.active):hover {
+  background: grey !important;
+}
+
+ul.pagination li:has(a.active) a {
+  color: white !important;
+}
+
+ul.pagination li:hover:not(.active) {
+  background-color: #f4f5f6 !important;
+}
+
+button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.more {
+  color: var(--secondary);
+}
+
+.totalcount {
+  font-size: 12px;
+}
+</style>

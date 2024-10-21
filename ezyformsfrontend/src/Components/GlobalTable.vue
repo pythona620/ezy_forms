@@ -22,10 +22,18 @@
             </td>
             <td class="">{{ rowIndex + 1 }}</td>
             <td v-for="(column, colIndex) in tHeaders" :key="colIndex">
-              <!-- <span class="m-0 column">{{
-                formatCellContent(row[column.td_key], column.td_key) || "-"
-                }}</span> -->
-              {{ row[column.td_key] }}
+              <span v-if="column.td_key == 'active'" :class="{
+      activeform: row[column.td_key] == '1',
+      'text-danger': row[column.td_key] == '0',
+    }">
+                <i class="bi bi-circle-fill status-circle font-10 text-center pe-2"></i>
+              </span>
+              <span v-if="column.td_key === 'active'">
+                {{ row[column.td_key] === 1 ? 'Active' : 'Inactive' }}
+              </span>
+              <span v-else>
+                {{ row[column.td_key] || '-' }}
+              </span>
             </td>
             <td v-if="actionType === 'viewPdf'" class="text-center">
               <span>
@@ -47,7 +55,7 @@
                   <span>...</span>
                 </p>
                 <ul class="dropdown-menu actionsdropdown">
-                  <li class="" @click="selectedAction(action)" v-for="(action, index) in actions" :key="index">
+                  <li class="" @click="selectedAction(row, action)" v-for="(action, index) in actions" :key="index">
                     <a class="dropdown-item d-flex gap-2"> <i :class="action.icon"></i>
                       <h1 class="font-10"> {{ action.name }}</h1>
                     </a>
@@ -131,17 +139,12 @@ const props = defineProps({
 const emits = defineEmits([
 
 ]);
-const actions = ref(
-  [
-    { name: 'View form', icon: 'fa-solid fa-eye' },
-    { name: 'Edit accessibility to dept.', icon: 'fa-solid fa-users' },
-    { name: 'Share this form', icon: 'fa-solid fa-share-alt' },
-    { name: 'Download Print format', icon: 'fa-solid fa-download' },
-    { name: 'Edit Form', icon: 'fa-solid fa-edit' },
-    { name: 'In-active this form', icon: 'fa-solid fa-ban' }
-  ]
-)
 
+
+function selectedAction(row, action) {
+  emits("actionClicked", row, action);
+  console.log(row, " actionClicked --------------");
+}
 // const allCheck = ref(false);
 // function SelectedAll() {
 //   props.tData.forEach(batch => {
@@ -160,9 +163,6 @@ const actions = ref(
 // onMounted(() => {
 //   allCheck.value = false;
 // });
-function selectedAction(action) {
-  emits("action", action);
-}
 
 // function handleFileChange(event) {
 //   const file = event.target.files[0];
@@ -186,6 +186,13 @@ function selectedAction(action) {
 </script>
 
 <style lang="scss">
+.activeform {
+  font-size: 11px;
+  font-weight: 400;
+  text-align: left;
+  color: #16EC2F;
+}
+
 .spinner-grow {
   width: 13px !important;
   height: 13px !important;
