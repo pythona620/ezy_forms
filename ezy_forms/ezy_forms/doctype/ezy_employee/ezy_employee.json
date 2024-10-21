@@ -1,0 +1,78 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-10-14 15:44:35.657327",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "emp_code",
+  "emp_name",
+  "emp_mail_id",
+  "department",
+  "designation",
+  "reporting_to",
+  "reporting_designation"
+ ],
+ "fields": [
+  {
+   "fieldname": "emp_code",
+   "fieldtype": "Data",
+   "label": "Emp code"
+  },
+  {
+   "fieldname": "emp_name",
+   "fieldtype": "Data",
+   "label": "Emp Name"
+  },
+  {
+   "fieldname": "emp_mail_id",
+   "fieldtype": "Data",
+   "label": "Emp Mail ID"
+  },
+  {
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Department",
+   "options": "Ezy Departments"
+  },
+  {
+   "fieldname": "designation",
+   "fieldtype": "Data",
+   "label": "Designation"
+  },
+  {
+   "fieldname": "reporting_to",
+   "fieldtype": "Data",
+   "label": "Reporting To"
+  },
+  {
+   "fieldname": "reporting_designation",
+   "fieldtype": "Data",
+   "label": "Reporting Designation"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-10-15 10:42:48.401871",
+ "modified_by": "Administrator",
+ "module": "Ezy Forms",
+ "name": "Ezy Employee",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
