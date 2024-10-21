@@ -785,8 +785,8 @@ function deptData() {
             if (res?.data?.length) {
                 console.log(res.data, "nnnnnnnnnnnnn departments");
                 // Assuming res.data is an array of departments and each department has a 'name' property
-                // formOptions.value = res.data.map((dept) => dept.name);
-                // console.log(formOptions.value, 'deptttttt');
+                formOptions.value = res.data.map((dept) => dept.name);
+                console.log(formOptions.value, 'deptttttt');
             }
         })
         .catch((error) => {
