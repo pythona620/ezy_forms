@@ -21,14 +21,11 @@
                 @change="selectedCheckList(row, rowIndex)" />
             </td>
             <td class="">{{ rowIndex + 1 }}</td>
-            <td v-for="(column, colIndex) in tHeaders" :key="colIndex" @click="
-              column.td_key == 'batch_data' || column.td_key == 'check_no'
-                ? handleCellClick(row, rowIndex)
-                : ''
-              ">
+            <td v-for="(column, colIndex) in tHeaders" :key="colIndex">
               <!-- <span class="m-0 column">{{
                 formatCellContent(row[column.td_key], column.td_key) || "-"
                 }}</span> -->
+              {{ row[column.td_key] }}
             </td>
             <td v-if="actionType === 'viewPdf'" class="text-center">
               <span>

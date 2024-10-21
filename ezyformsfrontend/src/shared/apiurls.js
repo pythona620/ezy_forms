@@ -2,7 +2,7 @@ export const domain =
   import.meta.env.VITE_API_BASE_URL === "production" ? "" : "/api";
 
 //=  "/api";   process.env.NODE_ENV === 'production' ? '/' : '/api'
-console.log(domain, "ddddddddddddddddddd");
+
 export const fileDomain = "";
 
 export const doctypes = {
@@ -10,6 +10,8 @@ export const doctypes = {
   users: "User",
   departments: "Ezy Departments",
   wfSettingEzyForms: "Ezy Business Unit",
+  EzyFormDefinitions: "Ezy Form Definitions"
+
 };
 
 export const apis = {

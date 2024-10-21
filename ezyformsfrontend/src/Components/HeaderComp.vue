@@ -51,7 +51,7 @@ import axiosInstance from '../shared/services/interceptor';
 import ButtonComp from './ButtonComp.vue';
 import FormFields from './FormFields.vue';
 import TabsComp from './TabsComp.vue';
-import { EzyBusinessUnit } from '../shared/services/ezyBusiness_unit'
+import { EzyBusinessUnit } from '../shared/services/business_unit'
 // Define reactive variables
 const tabsData = [
     { name: 'Dashboard', icon: 'bi bi-columns-gap', route: '/dashboard' },
@@ -75,7 +75,6 @@ const ezyForms = () => {
         params: queryParams,
     }).then((res) => {
         if (res?.data?.length) {
-            console.log(res.data, "-=-=-=");
             EzyFormsCompanys.value = res.data.map((company) => company.business_unit);
             if (EzyFormsCompanys.value.length) {
                 business_unit.value = EzyFormsCompanys.value[0];
@@ -93,7 +92,6 @@ const updateActiveTab = (tab) => {
 
 watch(business_unit, (newBusinessUnit) => {
     EzyBusinessUnit.value = newBusinessUnit;
-    console.log(EzyBusinessUnit.value, "Selected business unit updated");
 });
 
 onMounted(() => {

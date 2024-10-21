@@ -3,6 +3,7 @@ const Created = () => import("./CreatedComp.vue");
 const Draft = () => import("./DraftComp.vue");
 
 const Trash = () => import("./TrashComp.vue");
+const FormStepper = () => import('./FormStepper.vue');
 
 const createrRoutes = [
   {
@@ -26,6 +27,11 @@ const createrRoutes = [
         component: Draft,
         name: "Draft",
       },
+      {
+        path: "formsteps",
+        component: FormStepper,
+        name: "FormStepper"
+      }
     ],
   },
 ];

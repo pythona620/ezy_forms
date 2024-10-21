@@ -3,6 +3,7 @@ export function extractFieldsWithBreaks(data) {
   let previousFieldname = null; // Track the previous fieldname
   let index = 0;
 
+
   data.forEach((section) => {
     section.rows.forEach((row) => {
       row.columns.forEach((column) => {
@@ -20,31 +21,33 @@ export function extractFieldsWithBreaks(data) {
           // Update previousFieldname for the next field in this column
           previousFieldname = generatedFieldname;
         });
-
+        const columnFieldname = convertLabelToFieldName(column.label);
 
         // Add "Column Break" marker after each column
         result.push({
           fieldtype: "Column Break",
-          fieldname: convertLabelToFieldName(column.label),
+          doctype: "Custom Field",
+          dt: column.dt,
+          fieldname: columnFieldname,
           label: column.label,
           insert_after: previousFieldname, // Track the break
           idx: index++, // Assign index
         });
 
         // Update previousFieldname to the column break
-        previousFieldname = column.fieldname;
+        previousFieldname = columnFieldname;
       });
-
+      const rowFieldname = convertLabelToFieldName(row.label);
       // Add "Row Break" marker after each row
-      result.push({ fieldtype: "Row Break", fieldname: row.fieldname, insert_after: previousFieldname, idx: index++ });
+      result.push({ fieldtype: "Column Break", doctype: "Custom Field", fieldname: rowFieldname, dt: row.dt, insert_after: previousFieldname, idx: index++ });
       // Update previousFieldname to the row break
-      previousFieldname = row.fieldname;
+      previousFieldname = rowFieldname;
     });
-
+    const sectionFieldname = convertLabelToFieldName(section.label);
     // Add "Section Break" marker after each section
-    result.push({ fieldtype: "Section Break", label: section.label, fieldname: convertLabelToFieldName(section.label), insert_after: previousFieldname, idx: index++ });
+    result.push({ fieldtype: "Section Break", doctype: "Custom Field", label: section.label, dt: section.dt, fieldname: sectionFieldname, insert_after: previousFieldname, idx: index++ });
     // Update previousFieldname to the section break
-    previousFieldname = section.fieldname;
+    previousFieldname = sectionFieldname;
   });
 
   return result;

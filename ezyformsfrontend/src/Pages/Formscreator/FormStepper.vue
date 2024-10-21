@@ -1,62 +1,36 @@
 <template>
     <div>
-        <div class="d-flex justify-content-between align-items-center formsticky">
-            <div>
-                <h1 class="m-0 font-13">Forms Master</h1>
-                <p class="m-0 font-11 pt-1">374 forms available</p>
-            </div>
-            <div class="d-flex gap-3 align-items-center">
-                <div class="d-flex mt-2">
-                    <div>
-                        <FormFields labeltext="" class="mb-3" tag="input" type="search" placeholder="Search File Name"
-                            name="Value" id="Value" v-model="filterObj.search" />
-                    </div>
-                    <div>
-                        <FormFields tag="select" placeholder="Filter By" class="mb-3" name="roles"
-                            v-model="filterObj.selectoption" id="roles" :Required="false" :options="[
-                                'JW Marriott Golfshire Banglore',
-                                'JW Marriott Golfshire Banglore',
-                            ]" />
-                    </div>
-                </div>
-
-                <div class="d-flex align-items-center mb-1">
-                    <ButtonComp class="buttoncomp" @click="formCreation()" name="Create form"></ButtonComp>
-                </div>
-            </div>
-        </div>
-        <!-- v-if="tableForm" -->
-        <div class="mt-2">
-            <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" actionType="dropdown"
-                isCheckbox="true" />
-        </div>
-        <div class="" v-if="creatForm">
+        <div class="">
             <div class="">
-                <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex justify-content-between align-items-center CancelNdSave">
                     <div class="ps-1 m-0 d-flex align-items-center" @click="cancelForm()">
-                        <h1 class="font-13">
+                        <h1 class="font-13 m-0">
                             <i class="bi bi-arrow-left"></i><span class="ms-2">Cancel Form</span>
                         </h1>
                     </div>
                     <div>
-                        <ButtonComp class="font-10 rounded-2" name="Save as Draft"></ButtonComp>
+                        <button class="btn btn-light font-10" type="button" data-bs-toggle="modal"
+                            data-bs-target="#exampleModal" @click="createForm">
+                            <i class="bi bi-eye me-1"></i>Preview
+                        </button>
+                        <ButtonComp class="font-10 rounded-2" name="Save as Draft" @click="formData()"></ButtonComp>
                     </div>
                 </div>
-                <div class="form-container mt-1">
+                <div class="form-container container-fluid mt-1">
                     <div class="row">
                         <div class="col-2">
                             <ul class="steps">
                                 <li v-for="step in steps" :key="step.id" :class="{
-                                active: activeStep === step.id,
-                                completed: activeStep > step.id,
-                            }">
+                        active: activeStep === step.id,
+                        completed: activeStep > step.id,
+                    }">
                                     <div class="d-flex gap-3 align-items-center" @click="handleStepClick(step.label)">
                                         <i v-if="activeStep > step.id"
                                             class="ri-checkbox-circle-fill completedStepIcon"></i>
                                         <i v-else :class="step.icon"></i>
                                         <div class="step-text">
-                                            <span class="font-10">{{ step.stepno }}</span><br />
-                                            <span>{{ step.label }}</span>
+                                            <span class="font-11">{{ step.stepno }}</span><br />
+                                            <span class=" font-14">{{ step.label }}</span>
                                         </div>
                                     </div>
                                 </li>
@@ -70,11 +44,12 @@
                                         <div class="">
                                             <div
                                                 class="stepperbackground ps-2 pe-2 m-0 d-flex justify-content-between align-items-center">
-                                                <h1 class="font-11 m-0">
-                                                    <i class="bi bi-chevron-left"></i><span class="ms-2">Cancel
+                                                <h1 class="font-14 m-0">
+                                                    <i class="bi bi-chevron-left" @click="cancelForm()"></i><span
+                                                        class="ms-2">Cancel
                                                         Form</span>
                                                 </h1>
-                                                <h1 class="font-11 m-0">About Form</h1>
+                                                <h1 class="font-14 fw-bold m-0">About Form</h1>
                                                 <ButtonComp class="buttoncomp" name="Next" v-if="activeStep < 3"
                                                     @click="nextStep" />
                                             </div>
@@ -137,14 +112,18 @@
                                                     <i @click="prevStep" class="bi bi-chevron-left"></i><span
                                                         class="ms-2">Back To About Form</span>
                                                 </h1>
-                                                <button class="btn btn-light font-10" type="button" @click="formData()">
-                                                    <i class="bi bi-eye me-1"></i>SaveData
-                                                </button>
-                                                <button class="btn btn-light font-10" type="button"
-                                                    data-bs-toggle="modal" data-bs-target="#exampleModal"
-                                                    @click="createForm">
-                                                    <i class="bi bi-eye me-1"></i>Preview
-                                                </button>
+                                                <div>
+
+                                                    <!-- <button class="btn btn-light font-10 bg-transparent " type="button"
+                                                        @click="formData()">
+                                                        Save Data
+                                                    </button> -->
+                                                    <!-- <button class="btn btn-light font-10" type="button"
+                                                        data-bs-toggle="modal" data-bs-target="#exampleModal"
+                                                        @click="createForm">
+                                                        <i class="bi bi-eye me-1"></i>Preview
+                                                    </button> -->
+                                                </div>
                                             </div>
                                             <div class="">
                                                 <!-- <div class="d-flex justify-content-end">
@@ -166,8 +145,14 @@
                                                                     data-bs-dismiss="modal" aria-label="Close"></button>
                                                             </div>
                                                             <div class="modal-body">
+                                                                <div v-if="!sections.length">
+                                                                    <div class=" text-center">
+                                                                        <h4>Sections Not Added</h4>
+                                                                    </div>
+                                                                </div>
                                                                 <div v-if="formCreated">
-                                                                    <div class="card p-1">
+
+                                                                    <div v-if="sections.length" class="card p-1">
                                                                         <div v-for="(section, sectionIndex) in sections"
                                                                             :key="'preview-' + sectionIndex"
                                                                             class="preview-section mb-2">
@@ -185,20 +170,20 @@
                                                                                             <div v-if="field.label">
                                                                                                 <!-- Only show field if the name is not empty -->
                                                                                                 <label :for="'field-' +
-                                sectionIndex +
-                                '-' +
-                                columnIndex +
-                                '-' +
-                                fieldIndex
-                                ">
+                        sectionIndex +
+                        '-' +
+                        columnIndex +
+                        '-' +
+                        fieldIndex
+                        ">
                                                                                                     {{
-                                field.label
-                            }}</label>
-                                                                                                <template v-if="field.fieldtype == 'select' ||
-                                field.fieldtype == 'multiselect'
-                                ">
+                        field.label
+                    }}</label>
+                                                                                                <template v-if="field.fieldtype == 'Select' ||
+                        field.fieldtype == 'multiselect'
+                        ">
                                                                                                     <select :multiple="field.fieldtype == 'multiselect'
-                                " v-model="field.value" class="form-select mb-2 font-13">
+                        " v-model="field.value" class="form-select mb-2 font-13">
                                                                                                         <option v-for="(
                                                         option, index
                                                       ) in field.options.split('\n')" :key="index" :value="option">
@@ -206,9 +191,9 @@
                                                                                                         </option>
                                                                                                     </select>
                                                                                                 </template>
-                                                                                                <template v-else-if="field.fieldtype == 'checkbox' ||
-                                field.fieldtype == 'radio'
-                                ">
+                                                                                                <template v-else-if="field.fieldtype == 'check' ||
+                        field.fieldtype == 'radio'
+                        ">
                                                                                                     <div class="row">
                                                                                                         <div class="form-check col-4 mb-4"
                                                                                                             v-for="(
@@ -228,8 +213,8 @@
                                                                                                                         class="form-check-label m-0"
                                                                                                                         :for="option">
                                                                                                                         {{
-                                option
-                            }}
+                        option
+                    }}
                                                                                                                     </label>
                                                                                                                 </div>
                                                                                                             </div>
@@ -242,12 +227,12 @@
                                                                                                         v-model="field.value"
                                                                                                         :type="field.fieldtype"
                                                                                                         :name="'field-' +
-                                sectionIndex +
-                                '-' +
-                                columnIndex +
-                                '-' +
-                                fieldIndex
-                                " :class="form - control" class="form-control previewInputHeight">
+                        sectionIndex +
+                        '-' +
+                        columnIndex +
+                        '-' +
+                        fieldIndex
+                        " :class="form - control" class="form-control previewInputHeight">
                                                                                                     </component>
                                                                                                 </template>
                                                                                             </div>
@@ -274,12 +259,53 @@
                                                         <section class="d-flex justify-content-between">
                                                             <input v-model="section.label" type="text"
                                                                 class="border-less-input font-14"
-                                                                placeholder="Section Name" />
-                                                            <button
-                                                                class="btn btn-light bg-transparent border-0 font-13"
-                                                                @click="removeSection(sectionIndex)">
-                                                                <i class="bi bi-trash me-2"></i> Delete Section
-                                                            </button>
+                                                                placeholder="Untitled approval flow" />
+                                                            <div class=" d-flex">
+                                                                <button
+                                                                    class="btn btn-light designationBtn d-flex align-items-center"
+                                                                    type="button" data-bs-toggle="offcanvas"
+                                                                    data-bs-target="#offcanvasRight"
+                                                                    aria-controls="offcanvasRight"><img
+                                                                        src="../../assets/oui_app-users-roles.svg"
+                                                                        alt="" class="me-1"> Add
+                                                                    designations</button>
+
+                                                                <div class="offcanvas offcanvas-end" tabindex="-1"
+                                                                    id="offcanvasRight"
+                                                                    aria-labelledby="offcanvasRightLabel">
+                                                                    <div class="offcanvas-header">
+                                                                        <h5 id="offcanvasRightLabel">Add designation for
+                                                                            requestor
+                                                                        </h5>
+                                                                        <button type="button"
+                                                                            class="btn-close bg-light text-reset"
+                                                                            data-bs-dismiss="offcanvas"
+                                                                            aria-label="Close"></button>
+                                                                    </div>
+                                                                    <div class="offcanvas-body">
+                                                                        <ul class=" list-unstyled">
+                                                                            <li class="designationList">
+                                                                                <input type="checkbox" name="" id=""
+                                                                                    class="designationCheckBox">
+                                                                                <span class="ps-2">intern</span>
+                                                                            </li>
+                                                                        </ul>
+                                                                    </div>
+                                                                    <div class=" offcanvas-footer">
+                                                                        <div class=" text-end p-3">
+                                                                            <ButtonComp
+                                                                                class="btn btn-dark addingDesignations"
+                                                                                name=" Add Designations" />
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <button
+                                                                    class="btn btn-light bg-transparent border-0 font-13 deleteSection"
+                                                                    @click="removeSection(sectionIndex)">
+                                                                    <i class="bi bi-trash me-2"></i> Delete approval
+                                                                </button>
+                                                            </div>
                                                         </section>
                                                         <div class="container-fluid">
                                                             <section class="row" v-for="(row, rowIndex) in section.rows"
@@ -288,15 +314,15 @@
                                                                     class="d-flex justify-content-between align-items-center">
                                                                     <label>{{ getRowSuffix(rowIndex) }}</label>
                                                                     <div>
-                                                                        <button
-                                                                            class="btn btn-light bg-transparent border-0 font-13"
-                                                                            @click="removeRow(sectionIndex, rowIndex)">
-                                                                            <i class="ri-subtract-line"></i> Remove Row
-                                                                        </button>
                                                                         <button v-if="row.columns.length < 3"
                                                                             class="btn btn-light bg-transparent border-0 font-13"
                                                                             @click="addColumn(sectionIndex, rowIndex)">
                                                                             <i class="bi bi-plus"></i> Add Column
+                                                                        </button>
+                                                                        <button
+                                                                            class="btn btn-light bg-transparent border-0 font-13"
+                                                                            @click="removeRow(sectionIndex, rowIndex)">
+                                                                            <i class="ri-subtract-line"></i> Delete row
                                                                         </button>
                                                                     </div>
                                                                 </div>
@@ -313,12 +339,12 @@
                                                                                     placeholder="Column Name" />
                                                                                 <button class="btn btn-light btn-sm"
                                                                                     @click="
-                                removeColumn(
-                                    sectionIndex,
-                                    rowIndex,
-                                    columnIndex
-                                )
-                                ">
+                        removeColumn(
+                            sectionIndex,
+                            rowIndex,
+                            columnIndex
+                        )
+                        ">
                                                                                     <i class="bi bi-trash"></i>
                                                                                 </button>
                                                                             </div>
@@ -341,13 +367,13 @@
                                                                                             <button
                                                                                                 class="btn btn-light btn-sm"
                                                                                                 @click="
-                                removeField(
-                                    sectionIndex,
-                                    rowIndex,
-                                    columnIndex,
-                                    fieldIndex
-                                )
-                                ">
+                        removeField(
+                            sectionIndex,
+                            rowIndex,
+                            columnIndex,
+                            fieldIndex
+                        )
+                        ">
                                                                                                 <i
                                                                                                     class="bi bi-trash"></i>
                                                                                             </button>
@@ -356,13 +382,13 @@
                                                                                     <select v-model="field.fieldtype"
                                                                                         class="form-select mb-2 font-13 searchSelect"
                                                                                         @change="
-                                onFieldTypeChange(
-                                    sectionIndex,
-                                    rowIndex,
-                                    columnIndex,
-                                    fieldIndex
-                                )
-                                ">
+                        onFieldTypeChange(
+                            sectionIndex,
+                            rowIndex,
+                            columnIndex,
+                            fieldIndex
+                        )
+                        ">
                                                                                         <option value="">Select Type
                                                                                         </option>
                                                                                         <option
@@ -373,7 +399,7 @@
                                                                                         </option>
                                                                                     </select>
                                                                                     <div
-                                                                                        v-if="field.fieldtype == 'checkbox' || field.fieldtype == 'radio' || field.fieldtype == 'select' || field.fieldtype == 'multiselect' ">
+                                                                                        v-if="field.fieldtype == 'Check' || field.fieldtype == 'radio' || field.fieldtype == 'Select' || field.fieldtype == 'multiselect' ">
                                                                                         <label class="font-12 fw-light"
                                                                                             for="options">Enter
                                                                                             Options:</label>
@@ -402,11 +428,12 @@
                                                                             <div
                                                                                 class="d-flex justify-content-center align-items-center my-2">
                                                                                 <button
-                                                                                    class="btn btn-light btn-sm addField m-2"
+                                                                                    class="btn btn-light btn-sm d-flex align-items-center addField m-2"
                                                                                     @click="
                                 addField(sectionIndex, rowIndex, columnIndex)
                                 ">
-                                                                                    <i class="bi bi-plus"></i> Add Field
+                                                                                    <i class="bi bi-plus fs-4"></i>
+                                                                                    <span>Add Field</span>
                                                                                 </button>
                                                                             </div>
                                                                         </div>
@@ -415,17 +442,17 @@
                                                             </section>
                                                         </div>
                                                         <div
-                                                            class="d-flex justify-content-center align-items-center my-2">
-                                                            <button class="btn btn-light btn-sm addRow m-2"
+                                                            class="d-flex justify-content-start align-items-center my-2">
+                                                            <button class="btn btn-light addRow m-2 "
                                                                 @click="addRow(sectionIndex, rowIndex)">
-                                                                <i class="bi bi-plus"></i> Add Row
+                                                                <i class="bi bi-plus"></i> Add row in section
                                                             </button>
                                                         </div>
                                                     </div>
                                                     <div class="d-flex justify-content-center align-items-center my-4">
                                                         <button class="btn btn-light border font-12"
                                                             @click="addSection">
-                                                            <i class="bi bi-plus-circle me-1 fs-6"></i> Add Section
+                                                            <i class="bi bi-plus-circle me-1 fs-6"></i> Add Approval
                                                         </button>
                                                     </div>
                                                 </div>
@@ -437,361 +464,323 @@
                         </div>
                     </div>
 
-                    <div></div>
+
                 </div>
             </div>
         </div>
     </div>
 </template>
+
 <script setup>
 import FormFields from "../../Components/FormFields.vue";
-import ButtonComp from "../../Components/ButtonComp.vue";
-import GlobalTable from "../../Components/GlobalTable.vue";
 import { callWithErrorHandling, onMounted, ref, reactive, computed } from "vue";
-// import { extractFieldsWithBreaks } from '../../shared/services/field_format';
+import ButtonComp from "../../Components/ButtonComp.vue";
+import { EzyBusinessUnit } from "../../shared/services/business_unit";
+import { extractFieldsWithBreaks } from '../../shared/services/field_format';
 import axiosInstance from '../../shared/services/interceptor';
 import { apis, doctypes } from "../../shared/apiurls";
-import { EzyBusinessUnit } from "../../shared/services/business_unit";
 import { useRouter } from "vue-router";
+const router = useRouter();
+
+const checkboxValue = ref(0);
+// Current active step
+const activeStep = ref(1);
+// Dummy data for departments and categories
+const departments = ["HR", "Finance", "IT", "Sales"];
+const categories = ["Internal", "External", "Confidential"];
 const businessUnit = computed(() => {
-    return EzyBusinessUnit.value;
+    return EzyBusinessUnit;
 });
 onMounted(() => {
-    // deptData();
-    fetchTable()
-
+    if (filterObj.value.form_short_name) {
+        deptData();
+    }
 })
 const filterObj = ref({
     form_name: "",
     form_short_name: "",
     accessible_departments: "[]",
-    business_unit: `${businessUnit.value}`,
+    business_unit: `${businessUnit.value.value}`,
     form_category: "",
     owner_of_the_form: "",
 });
-const tableheaders = ref([
-    { th: "Form name", td_key: "name" },
-    { th: "Form category", td_key: "form_category" },
-    { th: "Owner of form", td_key: "owner_of_the_form" },
-    { th: "Accessible departments", td_key: "accessible_departments" },
-    { th: "Status", td_key: "status" },
-]);
-const tableData = ref([]);
-
-// const tableForm = ref(true);
-// const creatForm = ref(false);
-const router = useRouter();
-function formCreation() {
-    router.push({
-        path: '/new/formsteps',
-        // query: `${businessUnit.value}`
-    }); // Navigate to the desired route
-}
-// function cancelForm() {
-//     // tableForm.value = true;
-//     // creatForm.value = false;
-// }
-// const handleStepClick = (label) => {
-//     switch (label) {
-//         case "About Form":
-//             prevStep();
-//             break;
-//         case "Questions in Form":
-//             nextStep();
-//             break;
-//     }
-// };
-// const checkboxValue = ref(0);
-// // Current active step
-// const activeStep = ref(1);
-
-// Form data structure
-// const form = ref({
-//     name: "",
-//     owner: "",
-//     category: "",
-//     accessibility: [],
-//     questions: [], // Array to hold added questions
-// });
-
-// New question structure
-// const newQuestion = ref({
-//     text: "",
-//     answerType: "short", // Default answer type
-// });
-
-// Dummy data for departments and categories
-// const departments = ["HR", "Finance", "IT", "Sales"];
-// const categories = ["Internal", "External", "Confidential"];
-
-// List of steps with IDs and labels
-// const steps = [
-//     {
-//         id: 1,
-//         label: "About Form",
-//         stepno: "Step 1",
-//         icon: "bi bi-info-circle",
-//     },
-//     {
-//         id: 2,
-//         label: "Questions in Form",
-//         stepno: "Step 2",
-//         icon: "bi bi-question-circle",
-//     },
-// ];
-
-// const fieldTypes = [
-//     {
-//         label: "Text",
-//         type: "Data",
-//     },
-//     {
-//         label: "Checkbox",
-//         type: "Check",
-//     },
-//     {
-//         label: "Radio",
-//         type: "radio",
-//     },
-//     {
-//         label: "Attach",
-//         type: "Attach",
-//     },
-//     {
-//         label: "Number",
-//         type: "number",
-//     },
-//     {
-//         label: "TextArea",
-//         type: "Text",
-//     },
-//     {
-//         label: "Date",
-//         type: "Date",
-//     },
-//     {
-//         label: "Select",
-//         type: "Select",
-//     },
-//     {
-//         label: "MultiSelect",
-//         type: "multiselect",
-//     },
-// ];
+const steps = [
+    {
+        id: 1,
+        label: "About Form",
+        stepno: "Step 1",
+        icon: "bi bi-info-circle",
+    },
+    {
+        id: 2,
+        label: "Fields & Workflow",
+        stepno: "Step 2",
+        icon: "bi bi-question-circle",
+    },
+];
+const fieldTypes = [
+    {
+        label: "Text",
+        type: "Data",
+    },
+    {
+        label: "Checkbox",
+        type: "Check",
+    },
+    {
+        label: "Radio",
+        type: "radio",
+    },
+    {
+        label: "Attach",
+        type: "Attach",
+    },
+    {
+        label: "Number",
+        type: "number",
+    },
+    {
+        label: "TextArea",
+        type: "Text",
+    },
+    {
+        label: "Date",
+        type: "Date",
+    },
+    {
+        label: "Select",
+        type: "Select",
+    },
+    {
+        label: "MultiSelect",
+        type: "multiselect",
+    },
+];
 
 // Save the form as a draft
-// const saveAsDraft = () => {
-//     console.log("Form saved as draft:", form.value);
-// };
+const saveAsDraft = () => {
+    console.log("Form saved as draft:", form.value);
+};
 
+function cancelForm() {
+    router.push({
+        path: '/new/created'
+    })
+}
+const handleStepClick = (label) => {
+    switch (label) {
+        case "About Form":
+            prevStep();
+            break;
+        case "Fields & Workflow":
+            nextStep();
+            break;
+    }
+};
 // Move to the next step
-// const nextStep = () => {
-//     if (activeStep.value < 3) {
-//         activeStep.value += 1;
-//     }
-// };
-// function formData() {
-//     const fields = extractFieldsWithBreaks(sections)
-//     const dataObj = {
-//         ...filterObj.value,
-//         fields
-//     }
-//     console.log("Complete Data === ", dataObj)
-//     axiosInstance.post(apis.savedata, dataObj).then((res) => {
-//         console.log(res, "saved From Responces");
-//     })
-
-
-// }
+const nextStep = () => {
+    if (activeStep.value < 3) {
+        activeStep.value += 1;
+    }
+};
+function formData() {
+    const fields = extractFieldsWithBreaks(sections)
+    const dataObj = {
+        ...filterObj.value,
+        fields
+    }
+    console.log("Complete Data === ", dataObj)
+    axiosInstance.post(apis.savedata, dataObj).then((res) => {
+        console.log(res, "saved From Responces");
+    })
+}
 
 // Move to the previous step
-// const prevStep = () => {
-//     if (activeStep.value > 1) {
-//         activeStep.value -= 1;
-//     }
-// };
+const prevStep = () => {
+    if (activeStep.value > 1) {
+        activeStep.value -= 1;
+    }
+};
 
 
-// const sections = reactive([]);
-// const formCreated = ref(false); // To control form preview visibility
+const sections = reactive([]);
+const formCreated = ref(false); // To control form preview visibility
 
 // Function to add a new section with a default column
-// const addSection = () => {
-//     sections.push({
-//         label: "",
-//         dt: `${businessUnit.value}-${filterObj.value.form_short_name}`,
-//         rows: [
-//             {
-//                 label: getRowSuffix(0),
-//                 dt: `${businessUnit.value}-${filterObj.value.form_short_name}`,
-//                 columns: [
-//                     {
-//                         label: "",
-//                         dt: `${businessUnit.value}-${filterObj.value.form_short_name}`,
-//                         fields: [], // Initialize with an empty fields array
-//                     },
-//                 ],
-//             },
-//         ],
-//     });
-// };
-// // Function to remove a section
-// const removeSection = (sectionIndex) => {
-//     sections.splice(sectionIndex, 1);
-// };
+const addSection = () => {
+    sections.push({
+        label: "",
+        dt: `${businessUnit.value.value}-${filterObj.value.form_short_name}`,
+        rows: [
+            {
+                label: getRowSuffix(0),
+                dt: `${businessUnit.value.value}-${filterObj.value.form_short_name}`,
+                columns: [
+                    {
+                        label: "",
+                        dt: `${businessUnit.value.value}-${filterObj.value.form_short_name}`,
+                        fields: [], // Initialize with an empty fields array
+                    },
+                ],
+            },
+        ],
+    });
+};
+// Function to remove a section
+const removeSection = (sectionIndex) => {
+    sections.splice(sectionIndex, 1);
+};
 
-// const addRow = (sectionIndex) => {
-//     const rowIndex = sections[sectionIndex].rows.length;  // Get the current row index
-//     const rowSuffix = getRowSuffix(rowIndex);
-//     sections[sectionIndex].rows.push({
-//         label: rowSuffix,
-//         dt: `${businessUnit.value}-${filterObj.value.form_short_name}`,
-//         columns: [
-//             {
+const addRow = (sectionIndex) => {
+    const rowIndex = sections[sectionIndex].rows.length;  // Get the current row index
+    const rowSuffix = getRowSuffix(rowIndex);
+    sections[sectionIndex].rows.push({
+        label: rowSuffix,
+        dt: `${businessUnit.value.value}-${filterObj.value.form_short_name}`,
+        columns: [
+            {
 
-//                 fields: [], // Initialize with an empty fields array
-//             },
-//         ],
-//     });
-// };
+                fields: [], // Initialize with an empty fields array
+            },
+        ],
+    });
+};
 
-// const removeRow = (sectionIndex, rowIndex) => {
-//     sections[sectionIndex].rows.splice(rowIndex, 1);
-// };
+const removeRow = (sectionIndex, rowIndex) => {
+    sections[sectionIndex].rows.splice(rowIndex, 1);
+};
 
 // Function to add a new column inside a section
-// const addColumn = (sectionIndex, rowIndex) => {
-//     sections[sectionIndex].rows[rowIndex].columns.push({
-//         label: "",
-//         fields: [],
-//     });
-// };
+const addColumn = (sectionIndex, rowIndex) => {
+    sections[sectionIndex].rows[rowIndex].columns.push({
+        label: "",
+        fields: [],
+    });
+};
 
 // Function to remove a column inside a section
-// const removeColumn = (sectionIndex, rowIndex, columnIndex) => {
-//     sections[sectionIndex].rows[rowIndex].columns.splice(columnIndex, 1);
-// };
+const removeColumn = (sectionIndex, rowIndex, columnIndex) => {
+    sections[sectionIndex].rows[rowIndex].columns.splice(columnIndex, 1);
+};
 
 // Function to add a new field inside a column
-// const addField = (sectionIndex, rowIndex, columnIndex) => {
-//     sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields.push({
-//         label: "",
-//         fieldtype: "",
-//         // value: ref(""), // Keeping the value as a ref for reactivity
-//         options: "",
-//         reqd: false,
-//         doctype: "Custom Field",
-//         dt: `${businessUnit.value}-${filterObj.value.form_short_name}`
-//     });
-// };
+const addField = (sectionIndex, rowIndex, columnIndex) => {
+    sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields.push({
+        label: "",
+        fieldtype: "",
+        // value: ref(""), // Keeping the value as a ref for reactivity
+        options: "",
+        reqd: false,
+        doctype: "Custom Field",
+        dt: `${businessUnit.value.value}-${filterObj.value.form_short_name}`
+    });
+};
 
 // Function to remove a field inside a column
-// const removeField = (sectionIndex, rowIndex, columnIndex, fieldIndex) => {
-//     sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields.splice(fieldIndex, 1);
-// };
+const removeField = (sectionIndex, rowIndex, columnIndex, fieldIndex) => {
+    sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields.splice(fieldIndex, 1);
+};
 
 
 // Function to copy a field and add it below the original field inside a column
-// const copyField = (sectionIndex, rowIndex, columnIndex, fieldIndex) => {
-//     // Get the field to copy
-//     const fieldToCopy = sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex];
+const copyField = (sectionIndex, rowIndex, columnIndex, fieldIndex) => {
+    // Get the field to copy
+    const fieldToCopy = sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex];
 
-//     // Create a shallow copy of the field
-//     const newField = { ...fieldToCopy };
+    // Create a shallow copy of the field
+    const newField = { ...fieldToCopy };
 
-//     // Optionally, you can modify some properties (e.g., rename the field)
-//     newField.name = `${fieldToCopy.name} Name the field`;
+    // Optionally, you can modify some properties (e.g., rename the field)
+    newField.name = `${fieldToCopy.name} Name the field`;
 
-//     // Insert the copied field after the original one
-//     sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields.splice(fieldIndex + 1, 0, newField);
-// };
+    // Insert the copied field after the original one
+    sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields.splice(fieldIndex + 1, 0, newField);
+};
 // Handle the change of field type to display the correct input
-// const onFieldTypeChange = (sectionIndex, rowIndex, columnIndex, fieldIndex) => {
-//     const field =
-//         sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex];
-//     // Handle additional logic for field type change if needed
-//     console.log("field === ", field);
-//     console.log(" sections === ", sections);
+const onFieldTypeChange = (sectionIndex, rowIndex, columnIndex, fieldIndex) => {
+    const field =
+        sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex];
+    // Handle additional logic for field type change if needed
+    console.log("field === ", field);
+    console.log(" sections === ", sections);
 
 
-//     const xyz = extractFieldsWithBreaks(sections)
-//     console.log(" extracted Format === ", xyz)
+    const xyz = extractFieldsWithBreaks(sections)
+    console.log(" extracted Format === ", xyz)
 
 
-// };
+};
 // Dynamically determine the input field type
-// const getFieldComponent = (type) => {
-//     switch (type) {
-//         case "Data":
-//             return "input";
-//         case "number":
-//             return "input";
-//         case "Text":
-//             return "textarea";
-//         case "Check":
-//             return "input"; // Checkbox input will need to handle checked state
-//         case "Select":
-//             return "select"; // Handle options for dropdown separately
-//         case "Date":
-//             return "input";
-//         case "Date":
-//             return "file";
-//         case "radio":
-//             return "input";
-//         default:
-//             return "input";
-//     }
-// };
-// const getRowSuffix = (index) => {
-//     if (index === 0) {
-//         return "1st row";
-//     } else if (index === 1) {
-//         return "2nd row";
-//     } else if (index === 2) {
-//         return "3rd row";
-//     } else {
-//         return `${index + 1}th row`;
-//     }
-// };
+const getFieldComponent = (type) => {
+    switch (type) {
+        case "Data":
+            return "input";
+        case "number":
+            return "input";
+        case "Text":
+            return "textarea";
+        case "Check":
+            return "input"; // Checkbox input will need to handle checked state
+        case "Select":
+            return "select"; // Handle options for dropdown separately
+        case "Date":
+            return "input";
+        case "Date":
+            return "file";
+        case "radio":
+            return "input";
+        default:
+            return "input";
+    }
+};
+const getRowSuffix = (index) => {
+    if (index === 0) {
+        return "1st row";
+    } else if (index === 1) {
+        return "2nd row";
+    } else if (index === 2) {
+        return "3rd row";
+    } else {
+        return `${index + 1}th row`;
+    }
+};
 
 // Trigger the creation of form and show the preview
-// const createForm = () => {
-//     formCreated.value = true;
-// };
+const createForm = () => {
+    formCreated.value = true;
+};
 
-// const formOptions = ref([])
-// function deptData() {
-//     axiosInstance.get(apis.resource + doctypes.departments)
-//         .then((res) => {
-//             if (res?.data?.length) {
-//                 formOptions.value = res.data.map((dept) => dept.name);
-//                 console.log(formOptions.value, 'deptttttt');
-//             }
-//         })
-//         .catch((error) => {
-//             console.error("Error fetching department data:", error);
-//         });
-// }
-
-function fetchTable() {
+const formOptions = ref([])
+function deptData() {
     const queryParams = {
         fields: JSON.stringify(["*"]),
     };
-
-    axiosInstance.get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParams })
+    axiosInstance.get(apis.resource + doctypes.departments + `/${businessUnit.value.value}-${filterObj.value.form_short_name}`, { params: queryParams })
         .then((res) => {
-            tableData.value = res.data;
+            if (res?.data?.length) {
+                console.log(res.data, "nnnnnnnnnnnnn departments");
+
+                // Assuming res.data is an array of departments and each department has a 'name' property
+                formOptions.value = res.data.map((dept) => dept.name);
+                console.log(formOptions.value, 'deptttttt');
+            }
         })
         .catch((error) => {
-            console.error("Error fetching ezyForms data:", error);
+            console.error("Error fetching department data:", error);
         });
 }
-
-
 
 </script>
 
 <style scoped>
+.CancelNdSave {
+    background-color: #fafafa;
+}
+
+.stepsDiv {
+    margin-top: 40px;
+}
+
 input {
     font-size: 13px !important;
     height: 35px;
@@ -864,7 +853,7 @@ input {
 
 input[type="checkbox"] {
     margin-left: 5px;
-    height: 10px;
+    height: 15px;
 }
 
 has context menu .form-container {
@@ -893,8 +882,9 @@ has context menu .form-container {
 }
 
 .steps li {
-    padding: 10px 20px;
-    font-size: 12px;
+    padding: 25px 20px;
+    font-size: 14px;
+    font-weight: 400;
     cursor: pointer;
     transition: 0.3s all ease;
     width: 100%;
@@ -913,7 +903,8 @@ has context menu .form-container {
 
 .steps li.completed {
     color: #000;
-
+    font-size: 14px;
+    font-weight: 400;
     font-weight: normal;
     opacity: 0.7;
 }
@@ -922,14 +913,14 @@ has context menu .form-container {
     content: "";
     display: block;
     width: 1px;
-    height: 20px;
+    height: 40px;
     background-color: #d9d9d9;
     /* Customize the color */
     position: absolute;
     border-radius: 2px;
     left: 25px;
     /* Adjust position relative to the icon */
-    top: 80%;
+    top: 75%;
     /* Position the line below the step */
 }
 
@@ -1014,10 +1005,16 @@ select {
     height: 35px;
 }
 
-.addField,
-.addRow {
+.addField {
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 400;
+}
+
+.addRow {
+    border: 1px solid #111111;
+    font-size: 12px;
+    font-weight: 400;
+    border-radius: 6px;
 }
 
 .columnFieldInput {
@@ -1026,5 +1023,37 @@ select {
 
 .copyIcon {
     cursor: pointer;
+}
+
+.deleteSection {
+    color: #FE212E;
+}
+
+.designationBtn {
+    color: #1B14DF;
+    font-size: 13px;
+    font-weight: 400;
+    background-color: transparent;
+    border: none;
+}
+
+.designationList {
+    border: 1px solid #eeeeee;
+    font-size: 14px;
+    font-weight: 400;
+    padding: 15px 5px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+}
+
+.designationCheckBox {
+    font-size: 20px !important;
+}
+
+.addingDesignations {
+    font-size: 14px;
+    font-weight: 600;
+    /* margin-right: 30px; */
 }
 </style>

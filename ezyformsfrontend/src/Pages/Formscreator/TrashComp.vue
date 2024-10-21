@@ -64,9 +64,9 @@
                                                 <FormFields labeltext="Owner Of The Form" class="mb-3 w-100"
                                                     tag="select" name="dept" id="dept" placeholder="Select Department"
                                                     :options="[
-                                                        'JW Marriott Golfshire Banglore',
-                                                        'JW Marriott Golfshire Banglore',
-                                                    ]" v-model="filterObj.owner" />
+                            'JW Marriott Golfshire Banglore',
+                            'JW Marriott Golfshire Banglore',
+                        ]" v-model="filterObj.owner" />
                                             </div>
                                         </div>
                                         <div class="mt-4">
@@ -74,9 +74,9 @@
                                                 <FormFields labeltext="Form Cateogry" class="mb-3" tag="select"
                                                     name="desgination" id="desgination" placeholder="Select Cateogry"
                                                     :options="[
-                                                        'JW Marriott Golfshire Banglore',
-                                                        'JW Marriott Golfshire Banglore',
-                                                    ]" v-model="filterObj.categery" />
+                            'JW Marriott Golfshire Banglore',
+                            'JW Marriott Golfshire Banglore',
+                        ]" v-model="filterObj.categery" />
                                             </div>
                                         </div>
                                         <div class="mt-4">
@@ -84,9 +84,9 @@
                                                 <FormFields labeltext="Accessbility Departments" class="mb-3"
                                                     tag="select" name="desgination" id="Departments"
                                                     placeholder="Select Desigination" :options="[
-                                                        'JW Marriott Golfshire Banglore',
-                                                        'JW Marriott Golfshire Banglore',
-                                                    ]" v-model="filterObj.dept" />
+                            'JW Marriott Golfshire Banglore',
+                            'JW Marriott Golfshire Banglore',
+                        ]" v-model="filterObj.dept" />
                                             </div>
                                         </div>
                                     </div>
@@ -145,16 +145,16 @@
                                                                                 <div v-if="field.name">
                                                                                     <!-- Only show field if the name is not empty -->
                                                                                     <label :for="'field-' +
-                                                                                        sectionIndex +
-                                                                                        '-' +
-                                                                                        columnIndex +
-                                                                                        '-' +
-                                                                                        fieldIndex
-                                                                                        ">
+                            sectionIndex +
+                            '-' +
+                            columnIndex +
+                            '-' +
+                            fieldIndex
+                            ">
                                                                                         {{ field.name }}</label>
                                                                                     <template v-if="field.type == 'select' ||
-                                                                                        field.type == 'multiselect'
-                                                                                    ">
+                            field.type == 'multiselect'
+                            ">
                                                                                         <select
                                                                                             :multiple="field.type == 'multiselect'"
                                                                                             v-model="field.value"
@@ -167,8 +167,8 @@
                                                                                         </select>
                                                                                     </template>
                                                                                     <template v-else-if="field.type == 'checkbox' ||
-                                                                                        field.type == 'radio'
-                                                                                    ">
+                            field.type == 'radio'
+                            ">
                                                                                         <div class="row">
                                                                                             <div class="form-check col-6 mb-1 d-flex justify-content-between align-items-center"
                                                                                                 v-for="(
@@ -198,13 +198,12 @@
                                                                                             :is="getFieldComponent(field.type)"
                                                                                             v-model="field.value"
                                                                                             :type="field.type" :name="'field-' +
-                                                                                                sectionIndex +
-                                                                                                '-' +
-                                                                                                columnIndex +
-                                                                                                '-' +
-                                                                                                fieldIndex
-                                                                                                "
-                                                                                            :class="form - control">
+                            sectionIndex +
+                            '-' +
+                            columnIndex +
+                            '-' +
+                            fieldIndex
+                            " :class="form - control">
                                                                                         </component>
                                                                                     </template>
                                                                                 </div>
@@ -234,6 +233,53 @@
                                                         @click="removeSection(sectionIndex)">
                                                         <i class="bi bi-trash me-2"></i> Delete Section
                                                     </button>
+                                                    <div class="dropdown menuOff">
+                                                        <button class="btn btn-light dropdown-toggle" type="button"
+                                                            id="triggerId" data-bs-toggle="dropdown"
+                                                            aria-haspopup="true" aria-expanded="false">
+                                                            <i class="bi bi-three-dots"></i>
+                                                        </button>
+                                                        <div class="dropdown-menu" aria-labelledby="triggerId">
+                                                            <ul class=" ps-0">
+                                                                <li class="dropdown-item">
+                                                                    <button class="btn btn-light btn-sm addRow m-2"
+                                                                        @click="addRow(sectionIndex, rowIndex)">
+                                                                        <i class="bi bi-plus"></i> Add Row
+                                                                    </button>
+                                                                </li>
+                                                                <li class="dropdown-item">
+                                                                    <button
+                                                                        class="btn btn-light bg-transparent border-0 font-13"
+                                                                        @click="removeRow(sectionIndex, rowIndex)">
+                                                                        <i class="ri-subtract-line"></i> Remove
+                                                                        Row
+                                                                    </button>
+                                                                </li>
+                                                                <li class="dropdown-item">
+                                                                    <button v-if="row.columns.length < 3"
+                                                                        class="btn btn-light bg-transparent border-0 font-13"
+                                                                        @click="addColumn(sectionIndex, rowIndex)">
+                                                                        <i class="bi bi-plus"></i> Add Column
+                                                                    </button>
+                                                                </li>
+                                                                <li class="dropdown-item">
+                                                                    <button class="btn btn-light btn-sm"
+                                                                        @click="removeColumn(sectionIndex, rowIndex, columnIndex)">
+                                                                        <i class="bi bi-trash"> Remove
+                                                                            Column</i>
+                                                                    </button>
+                                                                </li>
+                                                                <li class="dropdown-item">
+                                                                    <button
+                                                                        class="btn btn-light bg-transparent border-0 font-13"
+                                                                        @click="removeSection(sectionIndex)">
+                                                                        <i class="bi bi-trash me-2"></i> Delete
+                                                                        Section
+                                                                    </button>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
                                                 </section>
                                                 <section class="row" v-for="(row, rowIndex) in section.rows"
                                                     :key="rowIndex">
@@ -307,10 +353,10 @@
                                                                             </option>
                                                                         </select> -->
                                                                         <div v-if="field.type == 'checkbox' ||
-                                                                            field.type == 'radio' ||
-                                                                            field.type == 'select' ||
-                                                                            field.type == 'multiselect'
-                                                                        ">
+                            field.type == 'radio' ||
+                            field.type == 'select' ||
+                            field.type == 'multiselect'
+                            ">
                                                                             <label class="font-12 fw-light"
                                                                                 for="options">Enter Options:</label>
                                                                             <textarea id="options"
