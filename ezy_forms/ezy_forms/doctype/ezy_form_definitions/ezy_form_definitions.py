@@ -125,7 +125,7 @@ def add_customized_fields_for_dynamic_doc(fields:list[dict],doctype:str):
 			data = json.load(file)["custom_fields"]
 			keys = ["idx","label","fieldname","fieldtype","insert_after","reqd","options","default"]
 			field_attributes = [dict((k, dict1[k]) for k in keys if k in dict1) for dict1 in data]
-		frappe.db.set_value("Ezy Form Definitions",doctype,{"form_json":str(field_attributes)})
+		frappe.db.set_value("Ezy Form Definitions",doctype,{"form_json":str(field_attributes).replace("'",'"').replace("None","null")})
 		frappe.db.commit()
 		return field_attributes
 	except Exception as e:
