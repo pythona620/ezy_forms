@@ -8,11 +8,14 @@
                             <i class="bi bi-arrow-left"></i><span class="ms-2">Cancel Form</span>
                         </h1>
                     </div>
-                    <div>
-                        <button class="btn btn-light font-13" type="button" data-bs-toggle="modal"
+                    <div class=" d-flex">
+                        <div v-if="sections.length">
+                            <FormPreview :sections="sections" />
+                        </div>
+                        <!-- <button class="btn btn-light font-13" type="button" data-bs-toggle="modal"
                             data-bs-target="#exampleModal" @click="createForm">
                             <i class="bi bi-eye me-1"></i>Preview
-                        </button>
+                        </button> -->
                         <ButtonComp class="font-13 rounded-2" name="Save as Draft" @click="formData()"></ButtonComp>
                     </div>
                 </div>
@@ -481,6 +484,8 @@ import { extractFieldsWithBreaks } from '../../shared/services/field_format';
 import axiosInstance from '../../shared/services/interceptor';
 import { apis, doctypes } from "../../shared/apiurls";
 import { useRouter } from "vue-router";
+import FormPreview from './FormPreview.vue'
+
 const router = useRouter();
 
 const checkboxValue = ref(0);
@@ -744,7 +749,7 @@ const getFieldComponent = (type) => {
             return "select"; // Handle options for dropdown separately
         case "Date":
             return "input";
-        case "Date":
+        case "Attach":
             return "file";
         case "radio":
             return "input";
@@ -1033,7 +1038,7 @@ select {
 }
 
 .addRow {
-    border: 1px solid #111111;
+    border: 1px solid #ccc;
     font-size: 12px;
     font-weight: 400;
     border-radius: 6px;
