@@ -10,8 +10,8 @@
       v-if="tag === 'input' && (type === 'text' || type === 'number' || type === 'email' || type === 'search')">
       <input :type="type" :placeholder="placeholder" :labeltext="labeltext" :name="name" :id="id" :min="min" :max="max"
         v-model="localModel" :required="Required" class="form-control  input-width" :class="{
-          'border-end-0 shadow-none': type === ('text' || type === 'number' || type === 'email' || type === 'search') && icon && label,
-        }" />
+      'border-end-0 shadow-none': type === ('text' || type === 'number' || type === 'email' || type === 'search') && icon && label,
+    }" />
       <span v-if="(type === 'number' || type === 'email' || type === 'search') && icon"
         class="input-group-text pe-3 bg-white border-start-0">
         <i class="ri-search-line"></i>
