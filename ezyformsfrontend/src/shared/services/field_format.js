@@ -13,6 +13,9 @@ export function extractFieldsWithBreaks(data) {
           const generatedFieldname = convertLabelToFieldName(field.label);
           result.push({
             ...field,
+            doctype: "Custom Field",
+            dt: section.dt,
+            _user_tags: "Field",
             fieldname: generatedFieldname,
             insert_after: previousFieldname,
             idx: index++, // Assign index
@@ -27,9 +30,10 @@ export function extractFieldsWithBreaks(data) {
         result.push({
           fieldtype: "Column Break",
           doctype: "Custom Field",
-          dt: column.dt,
+          dt: section.dt,
           fieldname: columnFieldname,
           label: column.label,
+          _user_tags: "Column Break",
           insert_after: previousFieldname, // Track the break
           idx: index++, // Assign index
         });
@@ -39,13 +43,13 @@ export function extractFieldsWithBreaks(data) {
       });
       const rowFieldname = convertLabelToFieldName(row.label);
       // Add "Row Break" marker after each row
-      result.push({ fieldtype: "Column Break", doctype: "Custom Field", fieldname: rowFieldname, dt: row.dt, insert_after: previousFieldname, idx: index++ });
+      result.push({ fieldtype: "Column Break", _user_tags: "Row Break", doctype: "Custom Field", fieldname: rowFieldname, dt: section.dt, insert_after: previousFieldname, idx: index++ });
       // Update previousFieldname to the row break
       previousFieldname = rowFieldname;
     });
     const sectionFieldname = convertLabelToFieldName(section.label);
     // Add "Section Break" marker after each section
-    result.push({ fieldtype: "Section Break", doctype: "Custom Field", label: section.label, dt: section.dt, fieldname: sectionFieldname, insert_after: previousFieldname, idx: index++ });
+    result.push({ fieldtype: "Section Break", _user_tags: "Section Break", doctype: "Custom Field", label: section.label, dt: section.dt, fieldname: sectionFieldname, insert_after: previousFieldname, idx: index++ });
     // Update previousFieldname to the section break
     previousFieldname = sectionFieldname;
   });
@@ -58,69 +62,95 @@ export function extractFieldsWithBreaks(data) {
 // console.log(flattenedFieldsWithBreaks);
 
 
-
-export function rebuildOriginalStructure(flatArray) {
+export function rebuildToStructuredArray(flatArray) {
   const result = [];
   let currentSection = null;
   let currentRow = null;
   let currentColumn = null;
 
-  flatArray.forEach((item) => {
-    if (item.type === "Section Break") {
-      // Start a new section
-      currentSection = {
-        fieldtype: "Section Break",
-        fieldname: item.fieldname,
-        rows: []
-      };
-      result.push(currentSection);
-    } else if (item.type === "Row Break") {
-      // Start a new row
-      currentRow = {
-        fieldtype: "Row Break",
-        fieldname: item.fieldname,
-        columns: []
-      };
-      currentSection.rows.push(currentRow);
-    } else if (item.type === "Column Break") {
-      // Start a new column
-      currentColumn = {
-        fieldtype: "Column Break",
-        fieldname: item.fieldname,
-        label: item.label,
-        fields: []
-      };
-      currentRow.columns.push(currentColumn);
-    } else {
-      // Add a field to the current column
-      const { insert_after, ...fieldData } = item; // Remove the helper key
-      currentColumn.fields.push(fieldData);
+  for (let i = flatArray.length - 1; i >= 0; i--) {
+    const item = flatArray[i];
+
+    switch (item._user_tags) {
+      case "Section Break":
+        // If there's an existing section, push it to the result before starting a new one
+        if (currentSection) {
+          result.unshift(currentSection); // Add to the beginning for correct order
+        }
+        currentSection = {
+          fieldtype: item.fieldtype,
+          fieldname: item.fieldname,
+          label: item.label,
+          rows: [] // Initialize rows for the new section
+        };
+        currentRow = null; // Reset currentRow for new section
+        break;
+
+      case "Row Break":
+        if (currentSection) {
+          if (currentRow) {
+            currentSection.rows.unshift(currentRow); // Push previous row into the section
+          }
+          currentRow = {
+            fieldtype: item.fieldtype,
+            fieldname: item.fieldname,
+            label: item.label,
+            columns: [] // Initialize columns for the new row
+          };
+        }
+        break;
+
+      case "Column Break":
+        if (currentRow) {
+          currentColumn = {
+            fieldtype: item.fieldtype,
+            fieldname: item.fieldname,
+            label: item.label,
+            fields: [] // Initialize fields for the new column
+          };
+          currentRow.columns.unshift(currentColumn); // Add new column to the current row
+        }
+        break;
+
+      default: // Regular field
+        if (currentColumn) {
+          currentColumn.fields.unshift({
+            fieldname: item.fieldname,
+            fieldtype: item.fieldtype,
+            label: item.label
+          });
+        }
+        break;
     }
-  });
+  }
+
+  // After the loop, push the last row and section if they exist
+  if (currentRow) {
+    currentSection.rows.unshift(currentRow);
+  }
+  if (currentSection) {
+    result.unshift(currentSection);
+  }
 
   return result;
 }
 
-// Usage
-// const flatArray = [
-//   { fieldname: "user_name", fieldtype: "data", label: "User Name", insert_after: null },
-//   { fieldname: "user_id", fieldtype: "data", label: "User ID", insert_after: "user_name" },
-//   { type: "Column Break", fieldname: "col_tac", label: "User Info" },
-//   { fieldname: "user_mobile", fieldtype: "data", label: "User Mobile", insert_after: null },
-//   { fieldname: "user_email", fieldtype: "data", label: "User Email", insert_after: "user_mobile" },
-//   { type: "Column Break", fieldname: "col_tac", label: "User Data" },
-//   { type: "Row Break", fieldname: "row_tac" },
-//   { fieldname: "user_father_name", fieldtype: "data", label: "User Father Name", insert_after: null },
-//   { fieldname: "user_mother_name", fieldtype: "data", label: "User Mother Name", insert_after: "user_father_name" },
-//   { type: "Column Break", fieldname: "col_tac", label: "User Info1" },
-//   { fieldname: "user_address", fieldtype: "data", label: "User House No", insert_after: null },
-//   { type: "Column Break", fieldname: "col_tac", label: "User Data" },
-//   { type: "Row Break", fieldname: "row_tac" },
-//   { type: "Section Break", fieldname: "proprty_tac" }
-// ];
+// Example flat array input
+const flatArray = [
+  { "fieldtype": "data", "fieldname": "tr", "label": "tr", "_user_tags": "Field" },
+  { "fieldtype": "data", "fieldname": "uioer", "label": "uioer", "_user_tags": "Field" },
+  { "fieldtype": "Column Break", "fieldname": "diort", "label": "diort", "_user_tags": "Column Break" },
+  { "fieldtype": "data", "fieldname": "yuio", "label": "yuio", "_user_tags": "Field" },
+  { "fieldtype": "Column Break", "fieldname": "test_colm2", "label": "test colm2", "_user_tags": "Column Break" },
+  { "fieldtype": "Row Break", "fieldname": "1st_row", "label": "", "_user_tags": "Row Break" },
+  { "fieldtype": "Section Break", "fieldname": "fdgfd", "label": "", "_user_tags": "Section Break" },
+];
 
-// const originalStructure = rebuildOriginalStructure(flatArray);
-// console.log(JSON.stringify(originalStructure, null, 2));
+// Usage
+const structuredArray = rebuildToStructuredArray(flatArray);
+console.log(JSON.stringify(structuredArray, null, 2));
+
+
 
 function convertLabelToFieldName(label) {
   return label

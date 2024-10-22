@@ -16,7 +16,7 @@
                             data-bs-target="#exampleModal" @click="createForm">
                             <i class="bi bi-eye me-1"></i>Preview
                         </button> -->
-                        <ButtonComp class="font-13 rounded-2" name="Save as Draft" @click="formData()"></ButtonComp>
+                        <ButtonComp class="font-13 rounded-2" name="Save" @click="saveformData()"></ButtonComp>
                     </div>
                 </div>
                 <div class="form-container container-fluid mt-1">
@@ -477,29 +477,25 @@
 
 <script setup>
 import FormFields from "../../Components/FormFields.vue";
-import { callWithErrorHandling, onMounted, ref, reactive, computed, watch } from "vue";
+import { onMounted, ref, reactive, computed, watch } from "vue";
 import ButtonComp from "../../Components/ButtonComp.vue";
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
-import { extractFieldsWithBreaks } from '../../shared/services/field_format';
+import { extractFieldsWithBreaks, rebuildToStructuredArray } from '../../shared/services/field_format';
 import axiosInstance from '../../shared/services/interceptor';
 import { apis, doctypes } from "../../shared/apiurls";
 import { useRouter } from "vue-router";
 import FormPreview from './FormPreview.vue'
 
 const router = useRouter();
-
-const checkboxValue = ref(0);
 // Current active step
 const activeStep = ref(1);
 // Dummy data for departments and categories
 const departments = ["HR", "Finance", "IT", "Sales"];
-const categories = ["Internal", "External", "Confidential"];
 const businessUnit = computed(() => {
     return EzyBusinessUnit;
 });
 onMounted(() => {
     deptData();
-    console.log(businessUnit.value.value, "businessUnit in stepper component");
 })
 const filterObj = ref({
     form_name: "",
@@ -569,10 +565,6 @@ const fieldTypes = [
     },
 ];
 
-// Save the form as a draft
-const saveAsDraft = () => {
-    console.log("Form saved as draft:", form.value);
-};
 
 function cancelForm() {
     router.push({
@@ -595,28 +587,23 @@ const nextStep = () => {
         activeStep.value += 1;
     }
 };
-// watch(
-//     () => filterObj.form_short_name, 
-//     (newVal, oldVal) => {
-//         Formshortname(newVal, oldVal);
-//     }
-// );
-// const Formshortname = (newVal, oldVal) => {
-//     if (newVal !== oldVal) {
-//         console.log('Form short name updated:', newVal);
-//         deptData();
-//     }
-// };
-function formData() {
+function saveformData() {
+    console.log(" sections === ", sections)
     const fields = extractFieldsWithBreaks(sections)
     const dataObj = {
         ...filterObj.value,
         fields
     }
-    console.log("Complete Data === ", dataObj)
-    axiosInstance.post(apis.savedata, dataObj).then((res) => {
-        console.log(res, "saved From Responces");
-    })
+    console.log("Complete Data === ", dataObj.fields)
+
+    const result = dataObj.fields.map(({ fieldtype, fieldname,label, _user_tags}) => ({ fieldtype, fieldname,label,_user_tags }));
+
+    const reunitForm = rebuildToStructuredArray(result);
+
+    console.log(" Rebuil;d form  === ", reunitForm)
+    // axiosInstance.post(apis.savedata, dataObj).then((res) => {
+    //     console.log(res, "saved From Responces");
+    // })
 }
 
 // Move to the previous step
@@ -638,11 +625,9 @@ const addSection = () => {
         rows: [
             {
                 label: getRowSuffix(0),
-                dt: `${businessUnit.value.value}-${filterObj.value.form_short_name}`,
                 columns: [
                     {
                         label: "",
-                        dt: `${businessUnit.value.value}-${filterObj.value.form_short_name}`,
                         fields: [], // Initialize with an empty fields array
                     },
                 ],
@@ -660,7 +645,6 @@ const addRow = (sectionIndex) => {
     const rowSuffix = getRowSuffix(rowIndex);
     sections[sectionIndex].rows.push({
         label: rowSuffix,
-        dt: `${businessUnit.value.value}-${filterObj.value.form_short_name}`,
         columns: [
             {
 
@@ -695,8 +679,6 @@ const addField = (sectionIndex, rowIndex, columnIndex) => {
         // value: ref(""), // Keeping the value as a ref for reactivity
         options: "",
         reqd: false,
-        doctype: "Custom Field",
-        dt: `${businessUnit.value.value}-${filterObj.value.form_short_name}`
     });
 };
 
@@ -1085,3 +1067,110 @@ select {
     /* margin-right: 30px; */
 }
 </style>
+
+
+<!-- 
+{
+    doctype:"Custom Field",
+    dt:"HICC-fgfd",
+    fieldname: "ffg",
+    fieldtype: "yuyt",
+    idx: 1,
+    insert_after: "fgdh",
+    label: "io",
+    options:'',
+    reqd: false,
+    _user_tags:'Field'
+},
+{
+    doctype:"Custom Field",
+    dt:"HICC-fgfd",
+    fieldname: "ffg",
+    fieldtype: "Column Break",
+    idx: 2,
+    insert_after: "fgdh",
+    label: "io",
+    _user_tags:'Column Break'
+},
+{
+    doctype:"Custom Field",
+    dt:"HICC-fgfd",
+    fieldname: "ffg",
+    fieldtype: "yuyt",
+    idx: 3,
+    insert_after: "fgdh",
+    label: "io",
+    options:'',
+    reqd: false,
+    _user_tags:'Field'
+},
+{
+    doctype:"Custom Field",
+    dt:"HICC-fgfd",
+    fieldname: "ffg",
+    fieldtype: "Column Break",
+    idx: 4,
+    insert_after: "fgdh",
+    label: "io",
+    _user_tags:'Column Break'
+},
+{
+    doctype:"Custom Field",
+    dt:"HICC-fgfd",
+    fieldname: "ffg",
+    fieldtype: "Column Break",
+    idx: 2,
+    insert_after: "fgdh",
+    label: "io",
+    _user_tags:'Row Break'
+},
+{
+    doctype:"Custom Field",
+    dt:"HICC-fgfd",
+    fieldname: "ffg",
+    fieldtype: "section Break",
+    idx: 2,
+    insert_after: "fgdh",
+    label: "io",
+    _user_tags:'Section Break'
+}
+
+
+[{
+    label:'io',
+    _user_tags:'Section Break',
+    rows:[
+        label : ' 1st row ',
+        _user_tags:'Row Break',
+        columns: [
+        {
+            label : ' xyz ',
+        _user_tags:'Column Break',
+        fields: [ 
+        {
+            doctype:"Custom Field",
+            dt:"HICC-fgfd",
+            fieldname: "ffg",
+            fieldtype: "yuyt",
+            label: "io",
+            options:'',
+            reqd: false,
+            _user_tags:'Field'
+        },
+        {
+            doctype:"Custom Field",
+            dt:"HICC-fgfd",
+            fieldname: "ffg",
+            fieldtype: "yuyt",
+           
+            label: "io",
+            options:'',
+            reqd: false,
+            _user_tags:'Field'
+        }
+        ]
+        }
+        ]
+    ]
+
+}] -->

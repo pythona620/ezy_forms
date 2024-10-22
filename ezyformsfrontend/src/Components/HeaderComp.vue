@@ -75,7 +75,7 @@ const ezyForms = () => {
         params: queryParams,
     }).then((res) => {
         if (res?.data?.length) {
-            EzyFormsCompanys.value = res.data.map((company) => company.business_unit);
+            EzyFormsCompanys.value = res.data.map((company) => company.bu_code);
             if (EzyFormsCompanys.value.length) {
                 business_unit.value = EzyFormsCompanys.value[0];
             }
