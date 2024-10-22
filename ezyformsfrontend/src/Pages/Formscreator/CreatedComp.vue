@@ -147,7 +147,6 @@ function actionCreated(rowData, actionEvent) {
         modal.show();
         selectedForm.value = rowData; // Store the selected form data
 
-        console.log(" === xyz === ", JSON.parse(rowData?.form_json?.replace(/\\\"/g, '"')))
 
 
         // const result = dataObj.fields.map(({ fieldtype, fieldname,label, _user_tags}) => ({ fieldtype, fieldname,label,_user_tags }));
