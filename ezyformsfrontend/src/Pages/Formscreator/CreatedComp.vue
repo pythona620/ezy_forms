@@ -105,7 +105,9 @@
                         <button type="button" class="btn-close" @click="hideModal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <pre>{{ selectedForm }}</pre>
+
+                            <FormPreview :sections="selectedForm" />
+                        
 
                     </div>
                     <div class="modal-footer">
@@ -122,18 +124,20 @@
 import FormFields from "../../Components/FormFields.vue";
 import ButtonComp from "../../Components/ButtonComp.vue";
 import GlobalTable from "../../Components/GlobalTable.vue";
-import { callWithErrorHandling, onMounted, ref, computed, watch } from "vue";
+import { callWithErrorHandling, onMounted, ref, computed, watch , reactive} from "vue";
 import PaginationComp from '../../Components/PaginationComp.vue'
 import axiosInstance from '../../shared/services/interceptor';
 import { apis, doctypes } from "../../shared/apiurls";
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
 import { useRouter } from "vue-router";
 import { rebuildToStructuredArray } from "../../shared/services/field_format";
+import FormPreview from './FormPreview.vue'
 
 
 const businessUnit = computed(() => {
     return EzyBusinessUnit.value;
 });
+const sections = reactive([]);
 onMounted(() => {
     // fetchTable()
 
@@ -145,18 +149,19 @@ function actionCreated(rowData, actionEvent) {
         // raise a modal
         const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});
         modal.show();
-        selectedForm.value = rowData; // Store the selected form data
+        // selectedForm.value = rowData; // Store the selected form data
 
 
 
         // const result = dataObj.fields.map(({ fieldtype, fieldname,label, _user_tags}) => ({ fieldtype, fieldname,label,_user_tags }));
 
 
-        let xyz = rebuildToStructuredArray(JSON.parse(rowData?.form_json?.replace(/\\\"/g, '"')))
+        selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json?.replace(/\\\"/g, '"')))
 
 
 
-        console.log(" Rebuil;d form  === ", xyz)
+
+        console.log(" Rebuil;d form  === ", selectedForm.value)
     }
 }
 const hideModal = () => {

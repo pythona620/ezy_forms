@@ -614,7 +614,7 @@ const formCreated = ref(false); // To control form preview visibility
 const addSection = () => {
     sections.push({
         label: "",
-        dt: `${businessUnit.value.value}-${filterObj.value.form_short_name}`,
+        // dt: `${businessUnit.value.value}-${filterObj.value.form_short_name}`,
         rows: [
             {
                 label: getRowSuffix(0),
