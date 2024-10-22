@@ -15,7 +15,7 @@ export function extractFieldsWithBreaks(data) {
             ...field,
             doctype: "Custom Field",
             dt: section.dt,
-            _user_tags: "Field",
+            description: "Field",
             fieldname: generatedFieldname,
             insert_after: previousFieldname,
             idx: index++, // Assign index
@@ -33,7 +33,7 @@ export function extractFieldsWithBreaks(data) {
           dt: section.dt,
           fieldname: columnFieldname,
           label: column.label,
-          _user_tags: "Column Break",
+          description: "Column Break",
           insert_after: previousFieldname, // Track the break
           idx: index++, // Assign index
         });
@@ -43,13 +43,13 @@ export function extractFieldsWithBreaks(data) {
       });
       const rowFieldname = convertLabelToFieldName(row.label);
       // Add "Row Break" marker after each row
-      result.push({ fieldtype: "Column Break", _user_tags: "Row Break", doctype: "Custom Field", fieldname: rowFieldname, dt: section.dt, insert_after: previousFieldname, idx: index++ });
+      result.push({ fieldtype: "Column Break", description: "Row Break", doctype: "Custom Field", fieldname: rowFieldname, dt: section.dt, insert_after: previousFieldname, idx: index++ });
       // Update previousFieldname to the row break
       previousFieldname = rowFieldname;
     });
     const sectionFieldname = convertLabelToFieldName(section.label);
     // Add "Section Break" marker after each section
-    result.push({ fieldtype: "Section Break", _user_tags: "Section Break", doctype: "Custom Field", label: section.label, dt: section.dt, fieldname: sectionFieldname, insert_after: previousFieldname, idx: index++ });
+    result.push({ fieldtype: "Section Break", description: "Section Break", doctype: "Custom Field", label: section.label, dt: section.dt, fieldname: sectionFieldname, insert_after: previousFieldname, idx: index++ });
     // Update previousFieldname to the section break
     previousFieldname = sectionFieldname;
   });
@@ -71,7 +71,7 @@ export function rebuildToStructuredArray(flatArray) {
   for (let i = flatArray.length - 1; i >= 0; i--) {
     const item = flatArray[i];
 
-    switch (item._user_tags) {
+    switch (item.description) {
       case "Section Break":
         // If there's an existing section, push it to the result before starting a new one
         if (currentSection) {
@@ -92,9 +92,8 @@ export function rebuildToStructuredArray(flatArray) {
             currentSection.rows.unshift(currentRow); // Push previous row into the section
           }
           currentRow = {
-            fieldtype: item.fieldtype,
+            fieldtype: "Row Break",
             fieldname: item.fieldname,
-            // label: item.label,
             columns: [] // Initialize columns for the new row
           };
         }
@@ -137,13 +136,13 @@ export function rebuildToStructuredArray(flatArray) {
 
 // Example flat array input
 const flatArray = [
-  { "fieldtype": "data", "fieldname": "tr", "label": "tr", "_user_tags": "Field" },
-  { "fieldtype": "data", "fieldname": "uioer", "label": "uioer", "_user_tags": "Field" },
-  { "fieldtype": "Column Break", "fieldname": "diort", "label": "diort", "_user_tags": "Column Break" },
-  { "fieldtype": "data", "fieldname": "yuio", "label": "yuio", "_user_tags": "Field" },
-  { "fieldtype": "Column Break", "fieldname": "test_colm2", "label": "test colm2", "_user_tags": "Column Break" },
-  { "fieldtype": "Row Break", "fieldname": "1st_row", "label": "", "_user_tags": "Row Break" },
-  { "fieldtype": "Section Break", "fieldname": "fdgfd", "label": "", "_user_tags": "Section Break" },
+  { "fieldtype": "data", "fieldname": "tr", "label": "tr", "description": "Field" },
+  { "fieldtype": "data", "fieldname": "uioer", "label": "uioer", "description": "Field" },
+  { "fieldtype": "Column Break", "fieldname": "diort", "label": "diort", "description": "Column Break" },
+  { "fieldtype": "data", "fieldname": "yuio", "label": "yuio", "description": "Field" },
+  { "fieldtype": "Column Break", "fieldname": "test_colm2", "label": "test colm2", "description": "Column Break" },
+  { "fieldtype": "Row Break", "fieldname": "1st_row", "label": "", "description": "Row Break" },
+  { "fieldtype": "Section Break", "fieldname": "fdgfd", "label": "", "description": "Section Break" },
 ];
 
 // Usage

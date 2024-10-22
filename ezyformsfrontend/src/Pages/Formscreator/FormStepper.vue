@@ -670,7 +670,7 @@ const addField = (sectionIndex, rowIndex, columnIndex) => {
         label: "",
         fieldtype: "",
         // value: ref(""), // Keeping the value as a ref for reactivity
-        options: "",
+        options: null,
         reqd: false,
     });
 };
@@ -697,10 +697,14 @@ const copyField = (sectionIndex, rowIndex, columnIndex, fieldIndex) => {
 };
 // Handle the change of field type to display the correct input
 const onFieldTypeChange = (sectionIndex, rowIndex, columnIndex, fieldIndex) => {
+    let fieldType = sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex].fieldtype
+    if(fieldType !== 'checkbox' || fieldType !== 'Select' || fieldType !== 'radio' || fieldType !== 'multiselect'){
+        sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex].options = null
+    }
     const field =
         sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex];
     // Handle additional logic for field type change if needed
-    console.log("field === ", field);
+    console.log(fieldType,"field === ", field);
     console.log(" sections === ", sections);
 
 

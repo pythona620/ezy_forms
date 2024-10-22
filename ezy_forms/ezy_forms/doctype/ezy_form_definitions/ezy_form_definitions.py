@@ -10,7 +10,7 @@ import os
 from frappe.modules.utils import export_customizations
 from ast import literal_eval
 import json
- 
+import pandas as pd
 class EzyFormDefinitions(Document):
     pass
  
@@ -23,7 +23,7 @@ def add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:st
 		doctype = business_unit + "-" + form_short_name		
 		if isinstance(fields,str):
 			fields = literal_eval(fields)
-		if frappe.db.exists("Ezy Form Definitions",doctype):return {"success":False,"message":f"Already '{doctype}' exists. Please rename the form."}
+		# if frappe.db.exists("Ezy Form Definitions",doctype):return {"success":False,"message":f"Already '{doctype}' exists. Please rename the form."}
 		if not frappe.db.exists("DocType",doctype):
 			doc = frappe.new_doc("DocType")
 			doc.name = doctype
@@ -104,6 +104,8 @@ def add_customized_fields_for_dynamic_doc(fields:list[dict],doctype:str):
                     doc_for_existing_custom_field.options = "\n".join(dicts_of_docs_entries["options"])
                 if "default" in dicts_of_docs_entries:
                     doc_for_existing_custom_field.default = dicts_of_docs_entries["default"]
+                if "description" in dicts_of_docs_entries:
+                    doc_for_existing_custom_field.description = dicts_of_docs_entries["description"]
                 doc_for_existing_custom_field.label = dicts_of_docs_entries["label"]
                 doc_for_existing_custom_field.fieldtype = dicts_of_docs_entries["fieldtype"]
                 doc_for_existing_custom_field.save(ignore_permissions=True)
@@ -123,8 +125,10 @@ def add_customized_fields_for_dynamic_doc(fields:list[dict],doctype:str):
         custom_export_json_file_path = frappe.utils.get_bench_path()+f"/apps/ezy_forms/ezy_forms/user_forms/custom/{doctype.lower().replace(' ','_').replace('-','_')}.json"
         with open(custom_export_json_file_path, 'r') as file:
             data = json.load(file)["custom_fields"]
-            keys = ["idx","label","fieldname","fieldtype","insert_after","reqd","options","default","_user_tags"]
-            field_attributes = [dict((k, dict1[k]) for k in keys if k in dict1) for dict1 in data]
+            keys = ["idx","label","fieldname","fieldtype","insert_after","reqd","options","default","description"]
+            custom_fields_df = pd.DataFrame.from_records(data)
+            custom_fields_df = custom_fields_df[keys]
+            field_attributes = custom_fields_df.sort_values(by=['idx']).to_dict("records")
         frappe.db.set_value("Ezy Form Definitions",doctype,{"form_json":str(field_attributes).replace("'",'"').replace("None","null")})
         frappe.db.commit()
         return field_attributes
