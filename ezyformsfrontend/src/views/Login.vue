@@ -68,7 +68,7 @@ export default {
 				axiosInstance.post(apis.login, this.formdata).then((res) => {
 					toast.success("Login Successfully", { autoClose: 2000 });
 					setTimeout(() => {
-						this.$router.push({ name: 'Home' });
+						this.$router.push({ name: '/new/created' });
 					}, 700);
 					this.storeData = res;
 					// console.log(this.storeData, 'Login Data');

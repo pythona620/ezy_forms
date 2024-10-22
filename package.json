@@ -4,12 +4,15 @@
   "description": "ezy_forms",
   "main": "index.js",
   "scripts": {
-  "test": "echo \"Error: no test specified\" && exit 1",
-  "postinstall": "cd ezyformsfrontend && yarn install",
-  "dev": "(cd ezyformsfrontend && yarn dev)",
-  "build": "cd ezyformsfrontend && yarn build"
-},
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall": "cd ezyformsfrontend && yarn install",
+    "dev": "(cd ezyformsfrontend && yarn dev)",
+    "build": "cd ezyformsfrontend && yarn build"
+  },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "vue-select": "^3.20.3"
+  }
 }

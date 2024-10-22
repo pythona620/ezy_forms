@@ -6,11 +6,11 @@ const axiosInstance = axios.create();
 
 axiosInstance.interceptors.request.use(
   (config) => {
-    if (config.url.includes("resource")) {
-      loadValue.value = false;
-    } else {
-      loadValue.value = true;
-    }
+    // if (config.url.includes("resource")) {
+    //   loadValue.value = false;
+    // } else {
+    loadValue.value = true;
+    // }
     // config.withCredentials = true;
     // config.headers = {
     //     Authorization: `token ${tokens.Apikey}:${tokens.secretkey}`

@@ -8,15 +8,16 @@
                             <i class="bi bi-arrow-left"></i><span class="ms-2">Cancel Form</span>
                         </h1>
                     </div>
-                    <div class=" d-flex">
-                        <div v-if="sections.length">
-                            <FormPreview :sections="sections" />
-                        </div>
+                    <div>
+
                         <!-- <button class="btn btn-light font-13" type="button" data-bs-toggle="modal"
                             data-bs-target="#exampleModal" @click="createForm">
                             <i class="bi bi-eye me-1"></i>Preview
                         </button> -->
-                        <ButtonComp class="font-13 rounded-2" name="Save as Draft" @click="formData()"></ButtonComp>
+                        <!-- <ButtonComp class="font-13 rounded-2" name="Save as Draft"></ButtonComp> -->
+                        <button type="butoon" class="btn font-13 btn-light " @click="SaveAsDrafts()"><i
+                                class="bi bi-bookmark-check-fill"></i>
+                            Save As Draft</button>
                     </div>
                 </div>
                 <div class="form-container container-fluid mt-1">
@@ -25,7 +26,7 @@
                             <ul class="steps">
                                 <li v-for="step in steps" :key="step.id" :class="{
                         active: activeStep === step.id,
-                        completed: activeStep > step.id,
+                        completed: activeStep > step.id && index === steps.length - 1,
                     }">
                                     <div class="d-flex gap-3 align-items-center" @click="handleStepClick(step.label)">
                                         <i v-if="activeStep > step.id"
@@ -70,34 +71,82 @@
                                                 </div>
                                                 <div class="mt-4">
                                                     <div class="">
+
                                                         <FormFields labeltext="Form Short Code" class="mb-3" type="text"
-                                                            @change="Formshortname" tag="input" name="Value" id="Value"
+                                                            tag="input" name="Value" id="Value"
                                                             placeholder="Untitle Form"
                                                             v-model="filterObj.form_short_name" />
+                                                        <!-- <label for="">Form Short Code</label>
+
+                                                        <Multiselect :options=formOptions
+                                                            v-model="filterObj.form_short_name"
+                                                            placeholder="Untitle Form" :multiple="true"
+                                                            :searchable="true" /> -->
                                                     </div>
                                                 </div>
                                                 <div class="mt-4">
                                                     <div class="">
-                                                        <FormFields labeltext="Owner Of The Form" class="mb-3 w-100"
+                                                        <!-- <FormFields labeltext="Owner Of The Form" class="mb-3 w-100"
                                                             tag="select" name="dept" id="dept"
                                                             placeholder="Select Department" :options=formOptions
-                                                            v-model="filterObj.owner_of_the_form" />
+                                                            v-model="filterObj.owner_of_the_form" /> -->
+                                                        <label for="">Owner Of The Form</label>
+
+                                                        <Multiselect :options="OwnerOfTheFormData"
+                                                            @change="OwnerOftheForm"
+                                                            v-model="filterObj.owner_of_the_form"
+                                                            placeholder="Select Department" :multiple="false"
+                                                            class=" font-11" :searchable="true" />
+
                                                     </div>
                                                 </div>
                                                 <div class="mt-4">
                                                     <div class="">
-                                                        <FormFields labeltext="Form Cateogry" class="mb-3" tag="select"
+                                                        <!-- <FormFields labeltext="Form Cateogry" class="mb-3" tag="select"
                                                             name="desgination" id="desgination"
                                                             placeholder="Select Cateogry" :options=departments
-                                                            v-model="filterObj.form_category" />
+                                                            v-model="filterObj.form_category" /> -->
+
+                                                        <label for="">Form Cateogry</label>
+
+                                                        <Multiselect :options=departments
+                                                            v-model="filterObj.form_category"
+                                                            placeholder="Select Cateogry" :multiple="false"
+                                                            :searchable="true" class=" font-11" />
                                                     </div>
                                                 </div>
                                                 <div class="mt-4">
                                                     <div class="">
-                                                        <FormFields labeltext="Accessbility Departments" class="mb-3"
-                                                            tag="select" name="desgination" id="Departments"
+                                                        <!-- <FormFields labeltext="Accessbility Departments" class="mb-3"
+                                                            tag="multiselect" name="desgination" id="Departments"
                                                             placeholder="Select Desigination" :options=formOptions
-                                                            v-model="filterObj.accessible_departments" />
+                                                            v-model="filterObj.accessible_departments" /> -->
+                                                        <!-- <v-select v-model="filterObj.accessible_departments"
+                                                            :options="formOptions"></v-select> -->
+                                                    </div>
+                                                    <!-- <label for="">Accessbility Departments</label> -->
+                                                    <!-- <Multiselect :options=formOptions
+                                                        v-model="filterObj.accessible_departments"
+                                                        placeholder="Select Desigination" :multiple="true"
+                                                        track-by="code" :close-on-select="false"
+                                                        :clear-on-select="false" :searchable="true" /> -->
+
+                                                    <div>
+                                                        <label class="typo__label">
+                                                            <label for="">Accessibility Departments</label>
+                                                        </label>
+                                                        <VueMultiselect v-model="filterObj.accessible_departments"
+                                                            :options="formOptions" :multiple="true"
+                                                            :close-on-select="false" :clear-on-select="false"
+                                                            :preserve-search="true" placeholder="Select Designation"
+                                                            label="name" track-by="name" class=" font-11">
+                                                            <template #selection="{ values, isOpen }">
+                                                                <span class="multiselect__single font-10"
+                                                                    v-if="values.length" v-show="!isOpen">
+                                                                    {{ values.length }} options selected
+                                                                </span>
+                                                            </template>
+                                                        </VueMultiselect>
                                                     </div>
                                                 </div>
                                             </div>
@@ -115,12 +164,15 @@
                                                     <i @click="prevStep" class="bi bi-chevron-left"></i><span
                                                         class="ms-2">Back To About Form</span>
                                                 </h1>
-                                                <div>
-
-                                                    <!-- <button class="btn btn-light font-10 bg-transparent " type="button"
+                                                <div class=" d-flex gap-2">
+                                                    <div v-if="sections.length">
+                                                        <FormPreview :sections="sections" />
+                                                    </div>
+                                                    <button :disabled="!sections.length"
+                                                        class="btn btn-dark font-10  Withborder border " type="button"
                                                         @click="formData()">
                                                         Save Data
-                                                    </button> -->
+                                                    </button>
                                                     <!-- <button class="btn btn-light font-10" type="button"
                                                         data-bs-toggle="modal" data-bs-target="#exampleModal"
                                                         @click="createForm">
@@ -264,14 +316,14 @@
                                                                 class="border-less-input font-14"
                                                                 placeholder="Untitled approval flow" />
                                                             <div class=" d-flex">
-                                                                <button
+                                                                <!-- <button
                                                                     class="btn btn-light designationBtn d-flex align-items-center"
                                                                     type="button" data-bs-toggle="offcanvas"
                                                                     data-bs-target="#offcanvasRight"
                                                                     aria-controls="offcanvasRight"><img
                                                                         src="../../assets/oui_app-users-roles.svg"
                                                                         alt="" class="me-1"> Add
-                                                                    designations</button>
+                                                                    designations</button> -->
 
                                                                 <div class="offcanvas offcanvas-end" tabindex="-1"
                                                                     id="offcanvasRight"
@@ -306,7 +358,7 @@
                                                                 <button
                                                                     class="btn btn-light bg-transparent border-0 font-13 deleteSection"
                                                                     @click="removeSection(sectionIndex)">
-                                                                    <i class="bi bi-trash me-2"></i> Delete Section
+                                                                    <i class="bi bi-trash me-1"></i> Delete Section
                                                                 </button>
                                                             </div>
                                                         </section>
@@ -485,6 +537,9 @@ import axiosInstance from '../../shared/services/interceptor';
 import { apis, doctypes } from "../../shared/apiurls";
 import { useRouter } from "vue-router";
 import FormPreview from './FormPreview.vue'
+import Multiselect from '@vueform/multiselect';
+import '@vueform/multiselect/themes/default.css';
+import VueMultiselect from 'vue-multiselect'
 
 const router = useRouter();
 
@@ -492,11 +547,16 @@ const checkboxValue = ref(0);
 // Current active step
 const activeStep = ref(1);
 // Dummy data for departments and categories
-const departments = ["HR", "Finance", "IT", "Sales"];
-const categories = ["Internal", "External", "Confidential"];
+const departments = ref([]);
+const categories = ref([]);
+const formOptions = ref([]); // Stores accessible departments
+const OwnerOfTheFormData = ref([]); // Stores departments for owner_of_the_form
+
 const businessUnit = computed(() => {
     return EzyBusinessUnit;
 });
+
+
 onMounted(() => {
     deptData();
     console.log(businessUnit.value.value, "businessUnit in stepper component");
@@ -595,18 +655,17 @@ const nextStep = () => {
         activeStep.value += 1;
     }
 };
-// watch(
-//     () => filterObj.form_short_name, 
-//     (newVal, oldVal) => {
-//         Formshortname(newVal, oldVal);
-//     }
-// );
-// const Formshortname = (newVal, oldVal) => {
-//     if (newVal !== oldVal) {
-//         console.log('Form short name updated:', newVal);
-//         deptData();
-//     }
-// };
+watch(
+    () => filterObj.owner_of_the_form,
+    (newVal, oldVal) => {
+        if (newVal !== oldVal) {
+            OwnerOftheForm(newVal, oldVal);
+        }
+    }
+);
+
+
+
 function formData() {
     const fields = extractFieldsWithBreaks(sections)
     const dataObj = {
@@ -774,19 +833,19 @@ const createForm = () => {
     formCreated.value = true;
 };
 
-const formOptions = ref([])
 function deptData() {
     const queryParams = {
         fields: JSON.stringify(["*"]),
     };
-    // + `/${businessUnit.value.value}-${filterObj.value.form_short_name}`
+
     axiosInstance.get(apis.resource + doctypes.departments, { params: queryParams })
         .then((res) => {
             if (res?.data?.length) {
-                console.log(res.data, "nnnnnnnnnnnnn departments");
-                // Assuming res.data is an array of departments and each department has a 'name' property
-                formOptions.value = res.data.map((dept) => dept.name);
-                console.log(formOptions.value, 'deptttttt');
+                // console.log(res.data, "Fetched departments");
+                // Mapping department names
+                OwnerOfTheFormData.value = res.data.map((dept) => dept.name);
+                formOptions.value = res.data; // Store the full data for accessible departments
+                // console.log(formOptions.value, 'Accessible Departments');
             }
         })
         .catch((error) => {
@@ -794,9 +853,32 @@ function deptData() {
         });
 }
 
-</script>
+function OwnerOftheForm(newVal) {
+    console.log("Selected value:", newVal);
+    console.log(newVal, "------------");
+    categoriesData(newVal);
+}
 
-<style scoped>
+function categoriesData(newVal) {
+    axiosInstance.get(apis.resource + doctypes.departments + `/${newVal}`)
+        .then((res) => {
+            if (res?.data?.ezy_departments_items) {
+                console.log(res.data.ezy_departments_items, "Fetched categories");
+                departments.value = res.data.ezy_departments_items.map((item) => item.category);
+                console.log(departments.value, 'Categories');
+            }
+        })
+        .catch((error) => {
+            console.error("Error fetching categories data:", error);
+        });
+}
+
+</script>
+<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
+
+<style lang="scss" scoped>
+/* @import '@vueform/multiselect/themes/default.css'; */
+
 .CancelNdSave {
     background-color: #fafafa;
 }
@@ -1039,10 +1121,11 @@ select {
 }
 
 .addRow {
-    border: 1px solid #ccc;
+    // border: 1px solid #ccc;
     font-size: 12px;
     font-weight: 400;
     border-radius: 6px;
+    background-color: transparent;
 }
 
 .columnFieldInput {
@@ -1083,5 +1166,82 @@ select {
     font-size: 14px;
     font-weight: 600;
     /* margin-right: 30px; */
+}
+
+.Withborder {
+    border: 1px solid #eeeeee;
+
+}
+
+
+.multiselect-option {
+    font-size: 11px !important;
+}
+
+.multiselect {
+    margin: initial;
+    font-size: 11px !important;
+    border: 1px solid #e2e2e2 !important;
+    min-height: 35px !important;
+
+    .multiselect-wrapper {
+        min-height: 35px !important;
+    }
+
+    .multiselect-dropdown {
+        .multiselect-options {
+            font-size: 11px;
+
+
+            li.multiselect-option span {
+                font-size: 11px !important;
+
+            }
+
+            li.multiselect-option .is-selected {
+                background-color: grey !important;
+                font-size: 11px;
+            }
+        }
+    }
+
+}
+
+.multiselect__option span {
+    font-size: 11px;
+    /* Change this value to whatever size you need */
+}
+
+.multiselect .multiselect-option {
+    font-size: 11px;
+}
+
+.multiselect .multiselect-wrapper {
+    min-height: 35px !important;
+}
+
+.multiselect .multiselect--above {
+    min-height: 35px !important;
+
+}
+
+.multiselect .multiselect__tags {
+
+    min-height: 35px;
+    font-size: 11px !important;
+
+
+}
+
+.multiselect .multiselect__placeholder {
+    font-size: 11px;
+}
+
+.multiselect .multiselect__single {
+    font-size: 11px;
+}
+
+.multiselect .multiselect__tags .multiselect__placeholder {
+    font-size: 11px;
 }
 </style>

@@ -37,6 +37,14 @@
         <option class="selectOption" v-for="(item, index) in options" :key="index" :value="item">{{ item }}</option>
       </select>
     </div>
+    <div class="input-group select-section shadow-none" v-if="tag === 'multiselect'">
+      <p class="fw-normal ps-2 m-0 text-secondary">{{ placeholder }}</p>
+      <select v-if="tag === 'multiselect'" class="form-select selectForm shadow-none border-0" :required="Required"
+        multiple :name="name" :id="id" v-model="localModel">
+        <!-- <option class="selectOption" value="" selected>All</option> -->
+        <option class="selectOption" v-for="(item, index) in options" :key="index" :value="item">{{ item }}</option>
+      </select>
+    </div>
 
     <!-- Radio Buttons -->
     <div v-if="tag === 'radio'" :class="{ 'form-check flex-layout': isFlex, 'form-check one-by-one-layout': !isFlex }">

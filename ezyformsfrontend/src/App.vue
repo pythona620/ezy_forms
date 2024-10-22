@@ -28,6 +28,7 @@ import { computed } from 'vue';
 import HeaderComp from './Components/HeaderComp.vue';
 import LoaderPage from './Components/loader/LoaderPage.vue';
 import SideBar from './Components/SideBar.vue';
+import '@vueform/multiselect/themes/default.css';
 
 // Get current route
 const route = useRoute();

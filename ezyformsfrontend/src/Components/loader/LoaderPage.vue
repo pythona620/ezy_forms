@@ -6,7 +6,7 @@
             <div class="circle"></div>
             <div class="circle"></div>
         </div>
-        <div class="loader-text">Loading...</div>
+        <!-- <div class="loader-text">Loading...</div> -->
     </div>
 </template>
 
@@ -24,7 +24,7 @@ export default {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background-color: var(--muted);
+    background-color: #00000041;
     opacity: 0.9;
     position: absolute;
     z-index: 1007;

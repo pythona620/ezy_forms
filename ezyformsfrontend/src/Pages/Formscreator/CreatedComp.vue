@@ -233,6 +233,7 @@ function fetchTable() {
         filters: JSON.stringify(filters),
         limit_page_length: filterObj.value.limitPageLength,
         limitstart: filterObj.value.limitstart,
+        order_by: "`tabEzy Form Definitions`.`creation` desc"
     };
 
     axiosInstance
