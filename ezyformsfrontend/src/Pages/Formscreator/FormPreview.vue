@@ -57,7 +57,7 @@
                                                                 <div class="row">
                                                                     <div class="form-check col-4 mb-4" v-for="(
                                                         option, index
-                                                      ) in field.options.split('\n')" :key="index">
+                                                      ) in field?.options?.split('\n')" :key="index">
                                                                         <div class="d-flex gap-2 align-items-center">
                                                                             <div>
                                                                                 <input class="" :type="field.fieldtype"
