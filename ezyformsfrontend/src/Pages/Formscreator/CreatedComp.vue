@@ -96,26 +96,7 @@
             </div>
         </div>
 
-        <div class="modal fade" id="formViewModal" tabindex="-1" aria-labelledby="formViewModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="formViewModalLabel">View Form</h5>
-                        <button type="button" class="btn-close" @click="hideModal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-
-                            <FormPreview :sections="selectedForm" />
-                        
-
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" @click="hideModal">Close</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <FormPreview v-model:sections="selectedForm"  />
 
 
     </div>
@@ -124,7 +105,7 @@
 import FormFields from "../../Components/FormFields.vue";
 import ButtonComp from "../../Components/ButtonComp.vue";
 import GlobalTable from "../../Components/GlobalTable.vue";
-import { callWithErrorHandling, onMounted, ref, computed, watch , reactive} from "vue";
+import { callWithErrorHandling, onMounted, ref, computed, watch, reactive } from "vue";
 import PaginationComp from '../../Components/PaginationComp.vue'
 import axiosInstance from '../../shared/services/interceptor';
 import { apis, doctypes } from "../../shared/apiurls";
@@ -142,26 +123,17 @@ onMounted(() => {
     // fetchTable()
 
 })
+const selectedForm = ref(null);
 function actionCreated(rowData, actionEvent) {
     console.log(rowData, "oooooooooooooooooo");
     console.log("actionEvent === ", actionEvent)
+    selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json?.replace(/\\\"/g, '"')))
+    console.log(" Rebuild form  === ", selectedForm.value)
     if (actionEvent.name === 'View form') {
-        // raise a modal
-        const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});
+        const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});// raise a modal
         modal.show();
         // selectedForm.value = rowData; // Store the selected form data
-
-
-
         // const result = dataObj.fields.map(({ fieldtype, fieldname,label, _user_tags}) => ({ fieldtype, fieldname,label,_user_tags }));
-
-
-        selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json?.replace(/\\\"/g, '"')))
-
-
-
-
-        console.log(" Rebuil;d form  === ", selectedForm.value)
     }
 }
 const hideModal = () => {
@@ -181,7 +153,6 @@ const actions = ref(
     ]
 )
 
-const selectedForm = ref(null);
 
 const filterObj = ref({
     limitstart: 0,

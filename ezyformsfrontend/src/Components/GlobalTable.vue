@@ -32,10 +32,7 @@
                 {{ row[column.td_key] === 1 ? 'Active' : 'Inactive' }}
               </span>
               <span v-else>
-                {{ column.td_key === 'accessible_departments'
-      ? (JSON.parse(row[column.td_key]).join(',') || '-') // Parse and join with '_'
-      : (row[column.td_key] || '-')
-                }}
+               {{ row[column.td_key] || '-' }}
               </span>
             </td>
             <td v-if="actionType === 'viewPdf'" class="text-center">
