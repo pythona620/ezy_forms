@@ -588,22 +588,15 @@ const nextStep = () => {
     }
 };
 function saveformData() {
-    console.log(" sections === ", sections)
     const fields = extractFieldsWithBreaks(sections)
     const dataObj = {
         ...filterObj.value,
         fields
     }
-    console.log("Complete Data === ", dataObj.fields)
 
-    const result = dataObj.fields.map(({ fieldtype, fieldname,label, _user_tags}) => ({ fieldtype, fieldname,label,_user_tags }));
-
-    const reunitForm = rebuildToStructuredArray(result);
-
-    console.log(" Rebuil;d form  === ", reunitForm)
-    // axiosInstance.post(apis.savedata, dataObj).then((res) => {
-    //     console.log(res, "saved From Responces");
-    // })
+    axiosInstance.post(apis.savedata, dataObj).then((res) => {
+        console.log(res, "saved From Responces");
+    })
 }
 
 // Move to the previous step
@@ -765,10 +758,8 @@ function deptData() {
     axiosInstance.get(apis.resource + doctypes.departments, { params: queryParams })
         .then((res) => {
             if (res?.data?.length) {
-                console.log(res.data, "nnnnnnnnnnnnn departments");
                 // Assuming res.data is an array of departments and each department has a 'name' property
                 formOptions.value = res.data.map((dept) => dept.name);
-                console.log(formOptions.value, 'deptttttt');
             }
         })
         .catch((error) => {
@@ -1068,109 +1059,3 @@ select {
 }
 </style>
 
-
-<!-- 
-{
-    doctype:"Custom Field",
-    dt:"HICC-fgfd",
-    fieldname: "ffg",
-    fieldtype: "yuyt",
-    idx: 1,
-    insert_after: "fgdh",
-    label: "io",
-    options:'',
-    reqd: false,
-    _user_tags:'Field'
-},
-{
-    doctype:"Custom Field",
-    dt:"HICC-fgfd",
-    fieldname: "ffg",
-    fieldtype: "Column Break",
-    idx: 2,
-    insert_after: "fgdh",
-    label: "io",
-    _user_tags:'Column Break'
-},
-{
-    doctype:"Custom Field",
-    dt:"HICC-fgfd",
-    fieldname: "ffg",
-    fieldtype: "yuyt",
-    idx: 3,
-    insert_after: "fgdh",
-    label: "io",
-    options:'',
-    reqd: false,
-    _user_tags:'Field'
-},
-{
-    doctype:"Custom Field",
-    dt:"HICC-fgfd",
-    fieldname: "ffg",
-    fieldtype: "Column Break",
-    idx: 4,
-    insert_after: "fgdh",
-    label: "io",
-    _user_tags:'Column Break'
-},
-{
-    doctype:"Custom Field",
-    dt:"HICC-fgfd",
-    fieldname: "ffg",
-    fieldtype: "Column Break",
-    idx: 2,
-    insert_after: "fgdh",
-    label: "io",
-    _user_tags:'Row Break'
-},
-{
-    doctype:"Custom Field",
-    dt:"HICC-fgfd",
-    fieldname: "ffg",
-    fieldtype: "section Break",
-    idx: 2,
-    insert_after: "fgdh",
-    label: "io",
-    _user_tags:'Section Break'
-}
-
-
-[{
-    label:'io',
-    _user_tags:'Section Break',
-    rows:[
-        label : ' 1st row ',
-        _user_tags:'Row Break',
-        columns: [
-        {
-            label : ' xyz ',
-        _user_tags:'Column Break',
-        fields: [ 
-        {
-            doctype:"Custom Field",
-            dt:"HICC-fgfd",
-            fieldname: "ffg",
-            fieldtype: "yuyt",
-            label: "io",
-            options:'',
-            reqd: false,
-            _user_tags:'Field'
-        },
-        {
-            doctype:"Custom Field",
-            dt:"HICC-fgfd",
-            fieldname: "ffg",
-            fieldtype: "yuyt",
-           
-            label: "io",
-            options:'',
-            reqd: false,
-            _user_tags:'Field'
-        }
-        ]
-        }
-        ]
-    ]
-
-}] -->

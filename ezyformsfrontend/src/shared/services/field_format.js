@@ -94,7 +94,7 @@ export function rebuildToStructuredArray(flatArray) {
           currentRow = {
             fieldtype: item.fieldtype,
             fieldname: item.fieldname,
-            label: item.label,
+            // label: item.label,
             columns: [] // Initialize columns for the new row
           };
         }
@@ -147,8 +147,8 @@ const flatArray = [
 ];
 
 // Usage
-const structuredArray = rebuildToStructuredArray(flatArray);
-console.log(JSON.stringify(structuredArray, null, 2));
+// const structuredArray = rebuildToStructuredArray(flatArray);
+// console.log(JSON.stringify(structuredArray, null, 2));
 
 
 

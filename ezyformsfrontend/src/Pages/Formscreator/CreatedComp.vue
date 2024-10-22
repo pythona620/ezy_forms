@@ -128,7 +128,7 @@ import axiosInstance from '../../shared/services/interceptor';
 import { apis, doctypes } from "../../shared/apiurls";
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
 import { useRouter } from "vue-router";
-import { rebuildOriginalStructure } from "../../shared/services/field_format";
+import { rebuildToStructuredArray } from "../../shared/services/field_format";
 
 
 const businessUnit = computed(() => {
@@ -147,8 +147,17 @@ function actionCreated(rowData, actionEvent) {
         modal.show();
         selectedForm.value = rowData; // Store the selected form data
 
-        console.log( " === xyz === ", JSON.parse(rowData?.form_json?.replace(/\\\"/g, '"')))
-        let xyz = rebuildOriginalStructure(JSON.parse(rowData?.form_json?.replace(/\\\"/g, '"')))
+        console.log(" === xyz === ", JSON.parse(rowData?.form_json?.replace(/\\\"/g, '"')))
+
+
+        // const result = dataObj.fields.map(({ fieldtype, fieldname,label, _user_tags}) => ({ fieldtype, fieldname,label,_user_tags }));
+
+
+        let xyz = rebuildToStructuredArray(JSON.parse(rowData?.form_json?.replace(/\\\"/g, '"')))
+
+
+
+        console.log(" Rebuil;d form  === ", xyz)
     }
 }
 const hideModal = () => {
