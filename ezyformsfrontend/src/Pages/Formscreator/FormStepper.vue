@@ -139,7 +139,7 @@
                                                             :options="formOptions" :multiple="true"
                                                             :close-on-select="false" :clear-on-select="false"
                                                             :preserve-search="true" placeholder="Select Designation"
-                                                            label="name" track-by="name" class=" font-11">
+                                                            class=" font-11">
                                                             <template #selection="{ values, isOpen }">
                                                                 <span class="multiselect__single font-10"
                                                                     v-if="values.length" v-show="!isOpen">
@@ -529,10 +529,10 @@
 
 <script setup>
 import FormFields from "../../Components/FormFields.vue";
-import { callWithErrorHandling, onMounted, ref, reactive, computed, watch } from "vue";
+import { onMounted, ref, reactive, computed, watch } from "vue";
 import ButtonComp from "../../Components/ButtonComp.vue";
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
-import { extractFieldsWithBreaks } from '../../shared/services/field_format';
+import { extractFieldsWithBreaks, rebuildToStructuredArray } from '../../shared/services/field_format';
 import axiosInstance from '../../shared/services/interceptor';
 import { apis, doctypes } from "../../shared/apiurls";
 import { useRouter } from "vue-router";
@@ -542,8 +542,6 @@ import '@vueform/multiselect/themes/default.css';
 import VueMultiselect from 'vue-multiselect'
 
 const router = useRouter();
-
-const checkboxValue = ref(0);
 // Current active step
 const activeStep = ref(1);
 // Dummy data for departments and categories
@@ -559,12 +557,13 @@ const businessUnit = computed(() => {
 
 onMounted(() => {
     deptData();
-    console.log(businessUnit.value.value, "businessUnit in stepper component");
 })
+
+const selectedAccdept = ref("")
 const filterObj = ref({
     form_name: "",
     form_short_name: "",
-    accessible_departments: "",
+    accessible_departments: [],
     business_unit: `${businessUnit.value.value}`,
     form_category: "",
     owner_of_the_form: "",
@@ -629,10 +628,6 @@ const fieldTypes = [
     },
 ];
 
-// Save the form as a draft
-const saveAsDraft = () => {
-    console.log("Form saved as draft:", form.value);
-};
 
 function cancelForm() {
     router.push({
@@ -664,15 +659,14 @@ watch(
     }
 );
 
-
-
 function formData() {
     const fields = extractFieldsWithBreaks(sections)
     const dataObj = {
         ...filterObj.value,
         fields
     }
-    console.log("Complete Data === ", dataObj)
+    dataObj.accessible_departments = JSON.stringify(dataObj.accessible_departments)
+    // console.log(dataObj);
     axiosInstance.post(apis.savedata, dataObj).then((res) => {
         console.log(res, "saved From Responces");
     })
@@ -687,7 +681,7 @@ const prevStep = () => {
 
 
 const sections = reactive([]);
-const formCreated = ref(false); // To control form preview visibility
+const formCreated = ref(false);
 
 // Function to add a new section with a default column
 const addSection = () => {
@@ -697,11 +691,9 @@ const addSection = () => {
         rows: [
             {
                 label: getRowSuffix(0),
-                dt: `${businessUnit.value.value}-${filterObj.value.form_short_name}`,
                 columns: [
                     {
                         label: "",
-                        dt: `${businessUnit.value.value}-${filterObj.value.form_short_name}`,
                         fields: [], // Initialize with an empty fields array
                     },
                 ],
@@ -719,7 +711,6 @@ const addRow = (sectionIndex) => {
     const rowSuffix = getRowSuffix(rowIndex);
     sections[sectionIndex].rows.push({
         label: rowSuffix,
-        dt: `${businessUnit.value.value}-${filterObj.value.form_short_name}`,
         columns: [
             {
 
@@ -754,8 +745,6 @@ const addField = (sectionIndex, rowIndex, columnIndex) => {
         // value: ref(""), // Keeping the value as a ref for reactivity
         options: "",
         reqd: false,
-        doctype: "Custom Field",
-        dt: `${businessUnit.value.value}-${filterObj.value.form_short_name}`
     });
 };
 
@@ -843,8 +832,9 @@ function deptData() {
             if (res?.data?.length) {
                 // console.log(res.data, "Fetched departments");
                 // Mapping department names
+                // label="name" track-by="name"
                 OwnerOfTheFormData.value = res.data.map((dept) => dept.name);
-                formOptions.value = res.data; // Store the full data for accessible departments
+                formOptions.value = res.data.map((dept) => dept.name); // Store the full data for accessible departments
                 // console.log(formOptions.value, 'Accessible Departments');
             }
         })
@@ -855,7 +845,6 @@ function deptData() {
 
 function OwnerOftheForm(newVal) {
     console.log("Selected value:", newVal);
-    console.log(newVal, "------------");
     categoriesData(newVal);
 }
 
