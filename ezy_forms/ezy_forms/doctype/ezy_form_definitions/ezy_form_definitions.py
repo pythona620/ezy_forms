@@ -55,54 +55,57 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
 	"""Adding DocTypes dynamically, giving Perms for the doctype and creating a default section-break field for DocType"""
 	try:
 		if business_unit == None or business_unit == "":return {"success":False,"message":"Pass Business Unit because it is considered as prefix"}
-		doctype = business_unit + "-" + form_short_name		
+		doctype = business_unit + "-" + form_short_name
 		if isinstance(fields,str):
 			fields = literal_eval(fields)
 		if frappe.db.exists("Ezy Form Definitions",doctype):return {"success":False,"message":f"Already '{doctype}' exists. Please rename the form."}
-		doc = frappe.new_doc("DocType")
-		doc.name = doctype
-		doc.creation = frappe_now()
-		doc.modified = frappe_now()
-		doc.modified_by = frappe.session.user
-		doc.module = "User Forms"
-		doc.app = "ezy_forms"
-		doc.custom = 1
-		doc.insert(ignore_permissions=True)
-		frappe.db.commit()
-		doc.reload()
-		custom_docperm = frappe.new_doc("Custom DocPerm")
-		custom_docperm.parent = doctype
-		custom_docperm.read = 1
-		custom_docperm.create = 1
-		custom_docperm.delete = 1
-		custom_docperm.select = 1
-		custom_docperm.write = 1
-		custom_docperm.role = "System Manager"
-		custom_docperm.insert(ignore_permissions=True)
-		frappe.db.commit()
-		custom_docperm.reload()
-		form_defs = frappe.new_doc("Ezy Form Definitions")
-		form_defs.form_category = form_category
-		form_defs.accessible_departments = accessible_departments
-		form_defs.form_name = form_name
-		form_defs.form_short_name = form_short_name
-		form_defs.owner_of_the_form = owner_of_the_form
-		form_defs.active = 1
-		form_defs.business_unit = business_unit
-		form_defs.count = 0
-		form_defs.insert(ignore_permissions=True).save()
-		form_defs.reload()
-		frappe.db.commit()
-		"""need to migrate in this step itself as DocType is created need to update in DB."""
-		bench_migrating_from_code()
+		if not frappe.db.exists("DocType",doctype):
+			doc = frappe.new_doc("DocType")
+			doc.name = doctype
+			doc.creation = frappe_now()
+			doc.modified = frappe_now()
+			doc.modified_by = frappe.session.user
+			doc.module = "User Forms"
+			doc.app = "ezy_forms"
+			doc.custom = 1
+			doc.insert(ignore_permissions=True)
+			frappe.db.commit()
+			doc.reload()
+			custom_docperm = frappe.new_doc("Custom DocPerm")
+			custom_docperm.parent = doctype
+			custom_docperm.read = 1
+			custom_docperm.create = 1
+			custom_docperm.delete = 1
+			custom_docperm.select = 1
+			custom_docperm.write = 1
+			custom_docperm.role = "System Manager"
+			custom_docperm.insert(ignore_permissions=True)
+			frappe.db.commit()
+			custom_docperm.reload()
+			form_defs = frappe.new_doc("Ezy Form Definitions")
+			form_defs.form_category = form_category
+			form_defs.accessible_departments = accessible_departments
+			form_defs.form_name = form_name
+			form_defs.form_short_name = form_short_name
+			form_defs.owner_of_the_form = owner_of_the_form
+			form_defs.active = 1
+			form_defs.business_unit = business_unit
+			form_defs.count = 0
+			form_defs.insert(ignore_permissions=True).save()
+			form_defs.reload()
+			frappe.db.commit()
+			"""need to migrate in this step itself as DocType is created need to update in DB."""
+			bench_migrating_from_code()
 
-		"""need to add perms in this step itself for system manager to access the DocType"""
-		activating_perms(doctype=doctype)
-		document_to_reload = frappe.get_doc("DocType",doctype)
-		document_to_reload.reload()
+			"""need to add perms in this step itself for system manager to access the DocType"""
+			activating_perms(doctype=doctype)
+			document_to_reload = frappe.get_doc("DocType",doctype)
+			document_to_reload.reload()
 
-		"""need to migrate in this step itself because of adding permissions in the below level"""
-		bench_migrating_from_code()
+			"""need to migrate in this step itself because of adding permissions in the below level"""
+			bench_migrating_from_code()
+		if len(fields)>0:
+			add_customized_fields_for_dynamic_doc(fields=fields,doctype=doctype)
 	except Exception as e:
 		exc_type, exc_obj, exc_tb = sys.exc_info()
 		if "list index out of range" in str(e):
