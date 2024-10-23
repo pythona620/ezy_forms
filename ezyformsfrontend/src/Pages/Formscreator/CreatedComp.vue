@@ -96,7 +96,7 @@
             </div>
         </div>
 
-        <FormPreview v-model:sections="selectedForm"  />
+        <FormPreview :sections="selectedForm" />
 
 
     </div>
@@ -125,15 +125,18 @@ onMounted(() => {
 })
 const selectedForm = ref(null);
 function actionCreated(rowData, actionEvent) {
-    console.log(rowData, "oooooooooooooooooo");
-    console.log("actionEvent === ", actionEvent)
-    selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json?.replace(/\\\"/g, '"')))
-    console.log(" Rebuild form  === ", selectedForm.value)
     if (actionEvent.name === 'View form') {
-        const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});// raise a modal
-        modal.show();
-        // selectedForm.value = rowData; // Store the selected form data
-        // const result = dataObj.fields.map(({ fieldtype, fieldname,label, _user_tags}) => ({ fieldtype, fieldname,label,_user_tags }));
+        if (rowData?.form_json) {
+            selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json?.replace(/\\\"/g, '"')))
+            const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});// raise a modal
+            modal.show();
+        } else {
+            console.warn(" There is no form fields ")
+            formCreation(rowData)
+        }
+    }
+    if (actionEvent.name === 'Edit Form') {
+        formCreation(rowData)
     }
 }
 const hideModal = () => {
@@ -145,10 +148,10 @@ const hideModal = () => {
 const actions = ref(
     [
         { name: 'View form', icon: 'fa-solid fa-eye' },
+        { name: 'Edit Form', icon: 'fa-solid fa-edit' },
         { name: 'Edit accessibility to dept.', icon: 'fa-solid fa-users' },
         { name: 'Share this form', icon: 'fa-solid fa-share-alt' },
         { name: 'Download Print format', icon: 'fa-solid fa-download' },
-        { name: 'Edit Form', icon: 'fa-solid fa-edit' },
         { name: 'In-active this form', icon: 'fa-solid fa-ban' }
     ]
 )
@@ -187,10 +190,16 @@ const tableheaders = ref([
 const tableData = ref([]);
 
 const router = useRouter();
-function formCreation() {
-    router.push({
-        path: '/new/formsteps',
-    });
+function formCreation(item = null) {
+    if (item == null) {
+        router.push({ name: "FormStepper" });
+    } else {
+        router.push({
+            name: "FormStepper",
+            params: { paramid: item.name },
+            // state: { formData: { id: 1, name: 'Sample Form' } }
+        });
+    }
 }
 // Handle updating the current value
 const PaginationUpdateValue = (itemsPerPage) => {

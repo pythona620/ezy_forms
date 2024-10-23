@@ -59,7 +59,7 @@ const tabsData = [
     { name: 'Forms', icon: 'fa-solid fa-clipboard', route: '/forms' },
     { name: 'Settings', icon: 'fa-solid fa-gear', route: '/settings' },
     { name: 'Archive', icon: 'bi bi-archive', route: '/archived' },
-    { name: 'Form', icon: 'fa-solid fa-clipboard', route: '/new' }
+    { name: 'Form', icon: 'fa-solid fa-clipboard', route: '/create-form' }
 ];
 const activeTab = ref('');
 const business_unit = ref('');

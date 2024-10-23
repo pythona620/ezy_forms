@@ -7,9 +7,9 @@ const FormStepper = () => import('./FormStepper.vue');
 
 const createrRoutes = [
   {
-    path: "/new",
+    path: "/create-form",
     component: FormsCreator,
-    redirect: "/new/created",
+    redirect: "/create-form/created",
 
     children: [
       {
@@ -27,10 +27,15 @@ const createrRoutes = [
         component: Draft,
         name: "Draft",
       },
+      // {
+      //   path: "formsteps",
+      //   component: FormStepper,
+      //   name: "FormStepper"
+      // },
       {
-        path: "formsteps",
+        path: 'formsteps/:paramid?',
         component: FormStepper,
-        name: "FormStepper"
+        name: 'FormStepper'
       }
     ],
   },

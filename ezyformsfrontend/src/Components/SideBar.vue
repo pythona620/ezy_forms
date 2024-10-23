@@ -135,7 +135,7 @@ const isMasterRoute = computed(() => route.path.startsWith('/forms'));
 const isSettingsRoute = computed(() => route.path.startsWith('/settings'));
 // const isArchivedRoute = computed(() => route.path.startsWith('/archived'));
 const isToDoRoute = computed(() => route.path.startsWith('/todo'));
-const isUserFormsRoute = computed(() => route.path.startsWith('/new'));
+const isUserFormsRoute = computed(() => route.path.startsWith('/create-form'));
 // Compute sidebar data based on the current route
 const sidebarData = computed(() => {
     if (isMasterRoute.value) {
@@ -174,7 +174,7 @@ const baseRoute = computed(() => {
     } else if (isToDoRoute.value) {
         return '/todo';
     } else if (isUserFormsRoute.value) {
-        return '/new';
+        return '/create-form';
     }
     return '/';
 });

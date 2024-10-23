@@ -37,7 +37,7 @@ const route = useRoute();
 const isArchivedRoute = computed(() => route.path.startsWith('/archived'));
 
 // Check if the current route is '/new/formsteps'
-const isFormStepsRoute = computed(() => route.path === '/new/formsteps');
+const isFormStepsRoute = computed(() => route.path.includes('/create-form/formsteps'));
 </script>
 
 <style>

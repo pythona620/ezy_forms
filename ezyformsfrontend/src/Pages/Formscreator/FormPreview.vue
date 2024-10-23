@@ -15,7 +15,6 @@
                     </div>
                     <div class="modal-body">
                         <div>
-                            <p> Welcome</p>
                             <div class="card p-1">
                                 <div v-for="(section, sectionIndex) in sections" :key="'preview-' + sectionIndex"
                                     class="preview-section m-2">
@@ -119,8 +118,8 @@ onMounted(() => {
 })
 
 watch(() => {
-    console.log(" watch  == ", props.sections)
-})
+    //   console.log(" watch  == ", props.sections)
+}) 
 const getFieldComponent = (type) => {
     switch (type) {
         case "Data":

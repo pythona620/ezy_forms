@@ -5,7 +5,7 @@
                 <div class="d-flex justify-content-between align-items-center CancelNdSave my-2 mx-1">
                     <div class="ps-1 m-0 d-flex align-items-center" @click="cancelForm()">
                         <h1 class="font-13 m-0">
-                            <i class="bi bi-arrow-left"></i><span class="ms-2">Cancel Form</span>
+                            <i class="bi bi-arrow-left"></i><span class="ms-2">Back</span>
                         </h1>
                     </div>
                     <div>
@@ -45,9 +45,8 @@
                                         <div class="">
                                             <div
                                                 class="stepperbackground ps-2 pe-2 m-0 d-flex justify-content-between align-items-center">
-                                                <h1 class="font-14 m-0">
-                                                    <i class="bi bi-chevron-left" @click="cancelForm()"></i><span
-                                                        class="ms-2">Cancel
+                                                <h1 class="font-14 m-0" @click="cancelForm()">
+                                                    <i class="bi bi-chevron-left"></i><span class="ms-2">Cancel
                                                         Form</span>
                                                 </h1>
                                                 <h1 class="font-14 fw-bold m-0">About Form</h1>
@@ -163,7 +162,7 @@
                                                 </h1>
                                                 <div class=" d-flex gap-2">
                                                     <div v-if="sections.length">
-                                                        <button class="btn btn-light font-13" type="button"                                                           
+                                                        <button class="btn btn-light font-13" type="button"
                                                             @click="previewForm">
                                                             <i class="bi bi-eye me-1"></i>Preview
                                                         </button>
@@ -233,13 +232,15 @@
                                                                                                     fieldIndex
                                                                                                     ">
                                                                                                     {{
-                                                                                                    field.label
+                                                                                                        field.label
                                                                                                     }}</label>
                                                                                                 <template v-if="field.fieldtype == 'Select' ||
                                                                                                     field.fieldtype == 'multiselect'
                                                                                                 ">
                                                                                                     <select :multiple="field.fieldtype == 'multiselect'
-                                                                                                        " v-model="field.value" class="form-select mb-2 font-13">
+                                                                                                        "
+                                                                                                        v-model="field.value"
+                                                                                                        class="form-select mb-2 font-13">
                                                                                                         <option v-for="(
                                                         option, index
                                                       ) in field.options.split('\n')" :key="index" :value="option">
@@ -269,7 +270,7 @@
                                                                                                                         class="form-check-label m-0"
                                                                                                                         :for="option">
                                                                                                                         {{
-                                                                                                                        option
+                                                                                                                            option
                                                                                                                         }}
                                                                                                                     </label>
                                                                                                                 </div>
@@ -288,7 +289,9 @@
                                                                                                             columnIndex +
                                                                                                             '-' +
                                                                                                             fieldIndex
-                                                                                                            " :class="form - control" class="form-control previewInputHeight">
+                                                                                                            "
+                                                                                                        :class="form - control"
+                                                                                                        class="form-control previewInputHeight">
                                                                                                     </component>
                                                                                                 </template>
                                                                                             </div>
@@ -536,12 +539,13 @@ import { EzyBusinessUnit } from "../../shared/services/business_unit";
 import { extractFieldsWithBreaks, rebuildToStructuredArray } from '../../shared/services/field_format';
 import axiosInstance from '../../shared/services/interceptor';
 import { apis, doctypes } from "../../shared/apiurls";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import FormPreview from './FormPreview.vue'
 import Multiselect from '@vueform/multiselect';
 import '@vueform/multiselect/themes/default.css';
 import VueMultiselect from 'vue-multiselect'
 
+const route = useRoute();
 const router = useRouter();
 // Current active step
 const activeStep = ref(1);
@@ -555,9 +559,14 @@ const businessUnit = computed(() => {
     return EzyBusinessUnit;
 });
 
+let paramId = ref("")
 
 onMounted(() => {
     deptData();
+
+    paramId = route.params.paramid || 'new'; // Default to 'new' if no param is provided
+    console.log(route.state, ' === paramId:', paramId);
+    if (paramId != 'new') getFormData()
 })
 
 const selectedAccdept = ref("")
@@ -632,7 +641,7 @@ const fieldTypes = [
 
 function cancelForm() {
     router.push({
-        path: '/new/created'
+        name: 'Created'
     })
 }
 const handleStepClick = (label) => {
@@ -681,7 +690,7 @@ const prevStep = () => {
 };
 
 
-const sections = reactive([]);
+let sections = reactive([]);
 const formCreated = ref(false);
 
 // Function to add a new section with a default column
@@ -826,12 +835,12 @@ const getRowSuffix = (index) => {
 const previewForm = () => {
     // sections = rebuildToStructuredArray(JSON.parse(rowData?.form_json?.replace(/\\\"/g, '"')))
     // console.log(" Rebuild form  === ", selectedForm.value)
-   
-        const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});// raise a modal
-        modal.show();
-        // selectedForm.value = rowData; // Store the selected form data
-        // const result = dataObj.fields.map(({ fieldtype, fieldname,label, _user_tags}) => ({ fieldtype, fieldname,label,_user_tags }));
-    
+
+    const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});// raise a modal
+    modal.show();
+    // selectedForm.value = rowData; // Store the selected form data
+    // const result = dataObj.fields.map(({ fieldtype, fieldname,label, _user_tags}) => ({ fieldtype, fieldname,label,_user_tags }));
+
 
 };
 
@@ -872,6 +881,20 @@ function categoriesData(newVal) {
         })
         .catch((error) => {
             console.error("Error fetching categories data:", error);
+        });
+}
+// Get form by ID
+function getFormData() {
+    axiosInstance.get(apis.resource + doctypes.EzyFormDefinitions + `/${paramId}`)
+        .then((res) => {
+            if (res?.data) {
+                filterObj.value = res?.data
+                sections = rebuildToStructuredArray(JSON.parse(res?.data?.form_json?.replace(/\\\"/g, '"')))
+                console.log(" sections === ", sections)
+            }
+        })
+        .catch((error) => {
+            console.error("Error fetching  data:", error);
         });
 }
 
