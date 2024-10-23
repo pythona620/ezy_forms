@@ -423,6 +423,7 @@ const departments = ref([]);
 const categories = ref([]);
 const formOptions = ref([]); // Stores accessible departments
 const OwnerOfTheFormData = ref([]); // Stores departments for owner_of_the_form
+let sections = reactive([]);
 
 const businessUnit = computed(() => {
     return EzyBusinessUnit;
@@ -434,7 +435,8 @@ onMounted(() => {
     deptData();
 
     paramId = route.params.paramid || 'new'; // Default to 'new' if no param is provided
-    if (paramId != 'new') getFormData()
+    console.log(' === paramId:', paramId);
+    if (paramId && paramId != 'new') getFormData()
 })
 
 const selectedAccdept = ref("")
@@ -554,12 +556,12 @@ const prevStep = () => {
     }
 };
 
-let sections = ref([]);
 const formCreated = ref(false);
 
 // Function to add a new section with a default column
 const addSection = () => {
-    sections.value.push({
+    console.log(" Add Section ", sections)
+    sections.push({
         label: "",
         dt: `${businessUnit.value.value}-${filterObj.value.form_short_name}`,
         rows: [
@@ -727,10 +729,15 @@ function categoriesData(newVal) {
 function getFormData() {
     axiosInstance.get(apis.resource + doctypes.EzyFormDefinitions + `/${paramId}`)
         .then((res) => {
-            if (res?.data) {
-                filterObj.value = res?.data
-                sections = rebuildToStructuredArray(JSON.parse(res?.data?.form_json?.replace(/\\\"/g, '"')))
-                console.log(" sections === ", sections)
+            let res_data = res?.data
+            if (res_data) {
+                filterObj.value = res_data
+                // console.log( " Flat array === ",JSON.parse(res_data?.form_json?.replace(/\\\"/g, '"')))
+                let structuredArr = rebuildToStructuredArray(JSON.parse(res_data?.form_json?.replace(/\\\"/g, '"')))
+                // console.log(" structuredArr === ", structuredArr[0])
+                structuredArr.forEach((item, index) => {
+                    sections.push(item)
+                })
             }
         })
         .catch((error) => {
