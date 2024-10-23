@@ -666,7 +666,7 @@ function formData() {
         ...filterObj.value,
         fields
     }
-    dataObj.accessible_departments = JSON.stringify(dataObj.accessible_departments)
+    dataObj.accessible_departments = dataObj.accessible_departments.toString(); //JSON.stringify(dataObj.accessible_departments)
     // console.log(dataObj);
     axiosInstance.post(apis.savedata, dataObj).then((res) => {
         console.log(res, "saved From Responces");
@@ -688,7 +688,7 @@ const formCreated = ref(false);
 const addSection = () => {
     sections.push({
         label: "",
-        // dt: `${businessUnit.value.value}-${filterObj.value.form_short_name}`,
+        dt: `${businessUnit.value.value}-${filterObj.value.form_short_name}`,
         rows: [
             {
                 label: getRowSuffix(0),
