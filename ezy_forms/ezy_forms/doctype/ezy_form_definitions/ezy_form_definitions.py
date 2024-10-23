@@ -148,6 +148,8 @@ def deleting_customized_field_from_custom_dynamic_doc(doctype,field):
 		field_attributes = custom_fields_df.sort_values(by=['idx']).to_dict("records")
 		frappe.db.set_value("Ezy Form Definitions",doctype,{"form_json":str(field_attributes).replace("'",'"').replace("None","null")})
 		frappe.db.commit()
+		reloading = frappe.get_doc("DocType",doctype)
+		reloading.reload()
 		return field_attributes
 	except Exception as e:
 		exc_type, exc_obj, exc_tb = sys.exc_info()
