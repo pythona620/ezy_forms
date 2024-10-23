@@ -3,7 +3,6 @@ import { loadValue } from "../../Components/loader/loader";
 import { toast } from "vue3-toastify";
 // import { tokens } from "../apiurls";
 const axiosInstance = axios.create();
-
 axiosInstance.interceptors.request.use(
   (config) => {
     // if (config.url.includes("resource")) {

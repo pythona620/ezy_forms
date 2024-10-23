@@ -22,9 +22,9 @@
                         <div class="col-2">
                             <ul class="steps">
                                 <li v-for="step in steps" :key="step.id" :class="{
-                                    active: activeStep === step.id,
-                                    completed: activeStep > step.id && index === steps.length - 1,
-                                }">
+                        active: activeStep === step.id,
+                        completed: activeStep > step.id && index === steps.length - 1,
+                    }">
                                     <div class="d-flex gap-3 align-items-center" @click="handleStepClick(step.label)">
                                         <i v-if="activeStep > step.id"
                                             class="ri-checkbox-circle-fill completedStepIcon"></i>
@@ -181,137 +181,6 @@
                                                 </div>
                                             </div>
                                             <div class="">
-                                                <!-- <div class="d-flex justify-content-end">
-                                            <button class="btn btn-light" type="button" data-bs-toggle="modal"
-                                                data-bs-target="#exampleModal" @click="createForm">
-                                                <i class="bi bi-eye me-1"></i>Preview
-                                            </button>
-                                        </div> -->
-                                                <div class="modal fade" id="exampleModal" tabindex="-1"
-                                                    aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                                    <div class="modal-dialog modal-xl">
-                                                        <div class="modal-content">
-                                                            <div class="modal-header">
-                                                                <h5 class="modal-title m-0 font-13"
-                                                                    id="exampleModalLabel">
-                                                                    Preview Form
-                                                                </h5>
-                                                                <button type="button" class="btn-close"
-                                                                    data-bs-dismiss="modal" aria-label="Close"></button>
-                                                            </div>
-                                                            <div class="modal-body">
-                                                                <div v-if="!sections.length">
-                                                                    <div class=" text-center">
-                                                                        <h4>Sections Not Added</h4>
-                                                                    </div>
-                                                                </div>
-                                                                <div v-if="formCreated">
-
-                                                                    <div v-if="sections.length" class="card p-1">
-                                                                        <div v-for="(section, sectionIndex) in sections"
-                                                                            :key="'preview-' + sectionIndex"
-                                                                            class="preview-section mb-2">
-                                                                            <h5>{{ section.label }}</h5>
-                                                                            <div class="row"
-                                                                                v-for="(row, rowIndex) in section.rows"
-                                                                                :key="rowIndex">
-                                                                                <div v-for="(column, columnIndex) in row.columns"
-                                                                                    :key="'column-preview-' + columnIndex"
-                                                                                    class="col">
-                                                                                    <h6>{{ column.label }}</h6>
-                                                                                    <div class="mb-2">
-                                                                                        <div v-for="(field, fieldIndex) in column.fields"
-                                                                                            :key="'field-preview-' + fieldIndex">
-                                                                                            <div v-if="field.label">
-
-                                                                                                <label :for="'field-' +
-                                                                                                    sectionIndex +
-                                                                                                    '-' +
-                                                                                                    columnIndex +
-                                                                                                    '-' +
-                                                                                                    fieldIndex
-                                                                                                    ">
-                                                                                                    {{
-                                                                                                        field.label
-                                                                                                    }}</label>
-                                                                                                <template v-if="field.fieldtype == 'Select' ||
-                                                                                                    field.fieldtype == 'multiselect'
-                                                                                                ">
-                                                                                                    <select :multiple="field.fieldtype == 'multiselect'
-                                                                                                        "
-                                                                                                        v-model="field.value"
-                                                                                                        class="form-select mb-2 font-13">
-                                                                                                        <option v-for="(
-                                                        option, index
-                                                      ) in field.options.split('\n')" :key="index" :value="option">
-                                                                                                            {{ option }}
-                                                                                                        </option>
-                                                                                                    </select>
-                                                                                                </template>
-                                                                                                <template v-else-if="field.fieldtype == 'checkbox' ||
-                                                                                                    field.fieldtype == 'radio'
-                                                                                                ">
-                                                                                                    <div class="row">
-                                                                                                        <div class="form-check col-4 mb-4"
-                                                                                                            v-for="(
-                                                        option, index
-                                                      ) in field.options.split('\n')" :key="index">
-                                                                                                            <div
-                                                                                                                class="d-flex gap-2 align-items-center">
-                                                                                                                <div>
-                                                                                                                    <input
-                                                                                                                        class=""
-                                                                                                                        :type="field.fieldtype"
-                                                                                                                        :name="option"
-                                                                                                                        :id="option" />
-                                                                                                                </div>
-                                                                                                                <div>
-                                                                                                                    <label
-                                                                                                                        class="form-check-label m-0"
-                                                                                                                        :for="option">
-                                                                                                                        {{
-                                                                                                                            option
-                                                                                                                        }}
-                                                                                                                    </label>
-                                                                                                                </div>
-                                                                                                            </div>
-                                                                                                        </div>
-                                                                                                    </div>
-                                                                                                </template>
-                                                                                                <template v-else>
-                                                                                                    <component
-                                                                                                        :is="getFieldComponent(field.fieldtype)"
-                                                                                                        v-model="field.value"
-                                                                                                        :type="field.fieldtype"
-                                                                                                        :name="'field-' +
-                                                                                                            sectionIndex +
-                                                                                                            '-' +
-                                                                                                            columnIndex +
-                                                                                                            '-' +
-                                                                                                            fieldIndex
-                                                                                                            "
-                                                                                                        :class="form - control"
-                                                                                                        class="form-control previewInputHeight">
-                                                                                                    </component>
-                                                                                                </template>
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <!-- <div class="modal-footer">
-                                                        <button type="button" class="btn btn-secondary"
-                                                            data-bs-dismiss="modal">Close</button>
-                                                        <button class="btn btn-primary"
-                                                            @click="saveFormFields">Save</button>
-                                                    </div> -->
-                                                        </div>
-                                                    </div>
-                                                </div>
                                                 <div class="mt-4">
                                                     <div v-for="(section, sectionIndex) in sections" :key="sectionIndex"
                                                         class="dynamicSection">
@@ -329,7 +198,7 @@
                                                                         alt="" class="me-1"> Add
                                                                     designations</button> -->
 
-                                                                <div class="offcanvas offcanvas-end" tabindex="-1"
+                                                                <!-- <div class="offcanvas offcanvas-end" tabindex="-1"
                                                                     id="offcanvasRight"
                                                                     aria-labelledby="offcanvasRightLabel">
                                                                     <div class="offcanvas-header">
@@ -357,7 +226,7 @@
                                                                                 name=" Add Designations" />
                                                                         </div>
                                                                     </div>
-                                                                </div>
+                                                                </div> -->
 
                                                                 <button
                                                                     class="btn btn-light bg-transparent border-0 font-13 deleteSection"
@@ -399,12 +268,12 @@
                                                                                     placeholder="Column Name" />
                                                                                 <button class="btn btn-light btn-sm"
                                                                                     @click="
-                                                                                        removeColumn(
-                                                                                            sectionIndex,
-                                                                                            rowIndex,
-                                                                                            columnIndex
-                                                                                        )
-                                                                                        ">
+                        removeColumn(
+                            sectionIndex,
+                            rowIndex,
+                            columnIndex
+                        )
+                        ">
                                                                                     <i class="bi bi-trash"></i>
                                                                                 </button>
                                                                             </div>
@@ -427,13 +296,13 @@
                                                                                             <button
                                                                                                 class="btn btn-light btn-sm"
                                                                                                 @click="
-                                                                                                    removeField(
-                                                                                                        sectionIndex,
-                                                                                                        rowIndex,
-                                                                                                        columnIndex,
-                                                                                                        fieldIndex
-                                                                                                    )
-                                                                                                    ">
+                        removeField(
+                            sectionIndex,
+                            rowIndex,
+                            columnIndex,
+                            fieldIndex
+                        )
+                        ">
                                                                                                 <i
                                                                                                     class="bi bi-trash"></i>
                                                                                             </button>
@@ -442,13 +311,13 @@
                                                                                     <select v-model="field.fieldtype"
                                                                                         class="form-select mb-2 font-13 searchSelect"
                                                                                         @change="
-                                                                                            onFieldTypeChange(
-                                                                                                sectionIndex,
-                                                                                                rowIndex,
-                                                                                                columnIndex,
-                                                                                                fieldIndex
-                                                                                            )
-                                                                                            ">
+                        onFieldTypeChange(
+                            sectionIndex,
+                            rowIndex,
+                            columnIndex,
+                            fieldIndex
+                        )
+                        ">
                                                                                         <option value="">Select Type
                                                                                         </option>
                                                                                         <option
@@ -490,8 +359,8 @@
                                                                                 <button
                                                                                     class="btn btn-light btn-sm d-flex align-items-center addField m-2"
                                                                                     @click="
-                                                                                        addField(sectionIndex, rowIndex, columnIndex)
-                                                                                        ">
+                        addField(sectionIndex, rowIndex, columnIndex)
+                        ">
                                                                                     <i class="bi bi-plus fs-4"></i>
                                                                                     <span>Add Field</span>
                                                                                 </button>
@@ -565,7 +434,6 @@ onMounted(() => {
     deptData();
 
     paramId = route.params.paramid || 'new'; // Default to 'new' if no param is provided
-    console.log(route.state, ' === paramId:', paramId);
     if (paramId != 'new') getFormData()
 })
 
@@ -668,7 +536,6 @@ watch(
         }
     }
 );
-
 function formData() {
     const fields = extractFieldsWithBreaks(sections)
     const dataObj = {
@@ -676,12 +543,10 @@ function formData() {
         fields
     }
     dataObj.accessible_departments = dataObj.accessible_departments.toString(); //JSON.stringify(dataObj.accessible_departments)
-    // console.log(dataObj);
     axiosInstance.post(apis.savedata, dataObj).then((res) => {
         console.log(res, "saved From Responces");
     })
 }
-
 // Move to the previous step
 const prevStep = () => {
     if (activeStep.value > 1) {
@@ -689,13 +554,12 @@ const prevStep = () => {
     }
 };
 
-
-let sections = reactive([]);
+let sections = ref([]);
 const formCreated = ref(false);
 
 // Function to add a new section with a default column
 const addSection = () => {
-    sections.push({
+    sections.value.push({
         label: "",
         dt: `${businessUnit.value.value}-${filterObj.value.form_short_name}`,
         rows: [
@@ -756,6 +620,7 @@ const addField = (sectionIndex, rowIndex, columnIndex) => {
         options: null,
         reqd: false,
     });
+    console.log("----------", sections);
 };
 
 // Function to remove a field inside a column
@@ -796,29 +661,7 @@ const onFieldTypeChange = (sectionIndex, rowIndex, columnIndex, fieldIndex) => {
 
 
 };
-// Dynamically determine the input field type
-const getFieldComponent = (type) => {
-    switch (type) {
-        case "Data":
-            return "input";
-        case "number":
-            return "input";
-        case "Text":
-            return "textarea";
-        case "checkbox":
-            return "input"; // Checkbox input will need to handle checked state
-        case "Select":
-            return "select"; // Handle options for dropdown separately
-        case "Date":
-            return "input";
-        case "Attach":
-            return "file";
-        case "radio":
-            return "input";
-        default:
-            return "input";
-    }
-};
+
 const getRowSuffix = (index) => {
     if (index === 0) {
         return "1st row";
@@ -866,7 +709,6 @@ function deptData() {
 }
 
 function OwnerOftheForm(newVal) {
-    console.log("Selected value:", newVal);
     categoriesData(newVal);
 }
 
@@ -874,9 +716,7 @@ function categoriesData(newVal) {
     axiosInstance.get(apis.resource + doctypes.departments + `/${newVal}`)
         .then((res) => {
             if (res?.data?.ezy_departments_items) {
-                console.log(res.data.ezy_departments_items, "Fetched categories");
                 departments.value = res.data.ezy_departments_items.map((item) => item.category);
-                console.log(departments.value, 'Categories');
             }
         })
         .catch((error) => {
@@ -897,6 +737,10 @@ function getFormData() {
             console.error("Error fetching  data:", error);
         });
 }
+watch(sections, (newSections) => {
+    console.log(sections, "---------------------");
+    console.log('Sections changed:', newSections);
+}, { deep: true });
 
 </script>
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>

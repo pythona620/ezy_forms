@@ -40,44 +40,44 @@
                             <div class="col-3">
                                 <label class="font-13 ps-1" for="Requested">Requested By:</label>
                                 <FormFields class="mb-3" tag="input" type="search" name="Requested" id="Requested"
-                                    placeholder="Search" v-model="filterObj.search" />
+                                    placeholder="Search" v-model="filterOnModal.Requested_id" />
                             </div>
                             <div class="col-3">
                                 <label class="font-13 ps-1 fw-medium" for="dept">Requested Dept:</label>
                                 <FormFields tag="select" placeholder="Select Department" class="mb-3" name="dept"
-                                    v-model="filterObj.selectoption" id="dept" :Required="false"
+                                    v-model="filterOnModal.Requested_dept" id="dept" :Required="false"
                                     :options="['JW Marriott Golfshire Banglore', 'JW Marriott Golfshire Banglore']" />
                             </div>
                             <div class="col-3">
                                 <label class="font-13 ps-1" for="dept">Owner OF Form:</label>
                                 <FormFields tag="select" placeholder="Select Department" class="mb-3" name="dept"
-                                    v-model="filterObj.selectoption" id="dept" :Required="false"
+                                    v-model="filterOnModal.Owner_OF_Form" id="dept" :Required="false"
                                     :options="['JW Marriott Golfshire Banglore', 'JW Marriott Golfshire Banglore']" />
                             </div>
                             <div class="col-3">
                                 <label class="font-13 ps-1" for="dept">Form Category:</label>
                                 <FormFields tag="select" placeholder="Select Department" class="mb-3" name="dept"
-                                    v-model="filterObj.selectoption" id="dept" :Required="false"
+                                    v-model="filterOnModal.Form_Category" id="dept" :Required="false"
                                     :options="['JW Marriott Golfshire Banglore', 'JW Marriott Golfshire Banglore']" />
                             </div>
                             <div class="col-3">
                                 <label class="font-13 ps-1" for="Requested">Form Name:</label>
                                 <FormFields class="mb-3" tag="input" type="search" name="Requested" id="Requested"
-                                    placeholder="Search" v-model="filterObj.search" />
+                                    placeholder="Search" v-model="filterOnModal.Form_Name" />
                             </div>
                             <div class="col-3">
                                 <label class="font-13 ps-1" for="Requested">Requested Period:</label>
                                 <FormFields class="mb-3" tag="input" type="date" name="Requested" id="Requested"
-                                    placeholder="Jan-2024-Dec-2024" v-model="filterObj.search" />
+                                    placeholder="Jan-2024-Dec-2024" v-model="filterOnModal.Requested_Period" />
                             </div>
                             <div class="col-3">
                                 <FormFields tag="radio" :options="radioOptions" name="exampleRadio" id="exampleRadio"
-                                    v-model="filterObj.selectedRadio" labeltext="Approval Status" />
+                                    v-model="filterOnModal.Approval_status" labeltext="Approval Status" />
                             </div>
                             <div class="col-3">
                                 <label class="font-13 ps-1" for="Requested">Requested Id:</label>
                                 <FormFields class="mb-3" tag="input" type="search" name="Requested" id="Requested"
-                                    placeholder="Search" v-model="filterObj.search" />
+                                    placeholder="Search" v-model="filterOnModal.RequestedId" />
                             </div>
                         </div>
                     </div>
@@ -156,6 +156,17 @@ const actions = ref(
     ]
 )
 
+const filterOnModal = ref({
+    Requested_id: "",
+    Requested_dept: "",
+    Owner_OF_Form: "",
+    Form_Category: "",
+    Form_Name: "",
+    Requested_Period: "",
+    Approval_status: "",
+    RequestedId: ""
+
+})
 
 const filterObj = ref({
     limitstart: 0,
@@ -168,6 +179,7 @@ const filterObj = ref({
     owner_of_the_form: "",
     search: "",
 });
+const radioOptions = ref(["yes", "no"])
 watch(
     businessUnit,
     (newVal) => {
@@ -197,7 +209,7 @@ function formCreation(item = null) {
         router.push({
             name: "FormStepper",
             params: { paramid: item.name },
-            // state: { formData: { id: 1, name: 'Sample Form' } }
+
         });
     }
 }

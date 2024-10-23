@@ -18,7 +18,7 @@
                             <div class="card p-1">
                                 <div v-for="(section, sectionIndex) in sections" :key="'preview-' + sectionIndex"
                                     class="preview-section m-2">
-                                    <h5>{{ section.label || '-'}}</h5>
+                                    <h5>{{ section.label || '-' }}</h5>
                                     <div class=" container-fluid">
                                         <div class="row" v-for="(row, rowIndex) in section.rows" :key="rowIndex">
                                             <div v-for="(column, columnIndex) in row.columns"
@@ -29,20 +29,20 @@
                                                         :key="'field-preview-' + fieldIndex">
                                                         <div v-if="field.label">
                                                             <label :for="'field-' +
-                                                                sectionIndex +
-                                                                '-' +
-                                                                columnIndex +
-                                                                '-' +
-                                                                fieldIndex
-                                                                ">
+                                    sectionIndex +
+                                    '-' +
+                                    columnIndex +
+                                    '-' +
+                                    fieldIndex
+                                    ">
 
                                                                 <span class=" font-12">{{ field.label
                                                                     }}</span></label>
                                                             <template v-if="field.fieldtype == 'Select' ||
-                                                                field.fieldtype == 'multiselect'
-                                                            ">
+                                    field.fieldtype == 'multiselect'
+                                    ">
                                                                 <select :multiple="field.fieldtype == 'multiselect'
-                                                                    " v-model="field.value" class="form-select mb-2 font-13">
+                                    " v-model="field.value" class="form-select mb-2 font-13">
                                                                     <option v-for="(
                                                         option, index
                                                       ) in field.options.split('\n')" :key="index" :value="option">
@@ -51,8 +51,8 @@
                                                                 </select>
                                                             </template>
                                                             <template v-else-if="field.fieldtype == 'checkbox' ||
-                                                                field.fieldtype == 'radio'
-                                                            ">
+                                    field.fieldtype == 'radio'
+                                    ">
                                                                 <div class="row">
                                                                     <div class="form-check col-4 mb-4" v-for="(
                                                         option, index
@@ -66,8 +66,8 @@
                                                                                 <label class="form-check-label m-0"
                                                                                     :for="option">
                                                                                     {{
-                                                                                    option
-                                                                                    }}
+                                    option
+                                }}
                                                                                 </label>
                                                                             </div>
                                                                         </div>
@@ -77,12 +77,12 @@
                                                             <template v-else>
                                                                 <component :is="getFieldComponent(field.fieldtype)"
                                                                     v-model="field.value" :type="field.fieldtype" :name="'field-' +
-                                                                        sectionIndex +
-                                                                        '-' +
-                                                                        columnIndex +
-                                                                        '-' +
-                                                                        fieldIndex
-                                                                        " :class="form - control" class="form-control previewInputHeight">
+                                    sectionIndex +
+                                    '-' +
+                                    columnIndex +
+                                    '-' +
+                                    fieldIndex
+                                    " class="form-control previewInputHeight">
                                                                 </component>
                                                             </template>
                                                         </div>
@@ -103,23 +103,21 @@
 </template>
 
 <script setup>
-import { defineProps, onMounted, watch } from "vue";
+import { defineProps } from "vue";
 
 
 const props = defineProps({
     sections: {
-        type: Array,
+        type: [Array, null],
         required: true,
     }
 });
 
-onMounted(() => {
-    console.log(" props sections ==== ", props.sections)
-})
 
-watch(() => {
-    //   console.log(" watch  == ", props.sections)
-}) 
+
+// watch(() => {
+//       console.log(" watch  == ", props.sections)
+// })
 const getFieldComponent = (type) => {
     switch (type) {
         case "Data":

@@ -32,7 +32,7 @@
                 {{ row[column.td_key] === 1 ? 'Active' : 'Inactive' }}
               </span>
               <span v-else>
-               {{ row[column.td_key] || '-' }}
+                {{ row[column.td_key] || '-' }}
               </span>
             </td>
             <td v-if="actionType === 'viewPdf'" class="text-center">
@@ -143,7 +143,7 @@ const emits = defineEmits([
 
 function selectedAction(row, action) {
   emits("actionClicked", row, action);
-  console.log(row, " actionClicked --------------");
+
 }
 // const allCheck = ref(false);
 // function SelectedAll() {
