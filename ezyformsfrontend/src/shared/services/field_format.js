@@ -10,46 +10,62 @@ export function extractFieldsWithBreaks(data) {
 
         column.fields.forEach((field) => {
           // Add the "insert_after" key to the current field
-          const generatedFieldname = convertLabelToFieldName(field.label);
+          console.log(" field === ", field)
+          field['reqd'] = field.reqd ? 1 : 0
+          const generatedFieldname = convertLabelToFieldName(field?.label);
           result.push({
             ...field,
-            doctype: "Custom Field",
-            dt: section.dt,
+            doctype: "DocField",
+            parent: section.parent,
             description: "Field",
             fieldname: generatedFieldname,
-            insert_after: previousFieldname,
+            // insert_after: previousFieldname,
             idx: index++, // Assign index
+            "parentfield": "fields",
+            "parenttype": "DocType",
           });
 
           // Update previousFieldname for the next field in this column
           previousFieldname = generatedFieldname;
         });
-        const columnFieldname = convertLabelToFieldName(column.label);
+        const columnFieldname = convertLabelToFieldName(column?.label);
 
         // Add "Column Break" marker after each column
         result.push({
           fieldtype: "Column Break",
-          doctype: "Custom Field",
-          dt: section.dt,
+          doctype: "DocField",
+          parent: section.parent,
           fieldname: columnFieldname,
           label: column.label,
           description: "Column Break",
-          insert_after: previousFieldname, // Track the break
+          // insert_after: previousFieldname, // Track the break
           idx: index++, // Assign index
+          "parentfield": "fields",
+          "parenttype": "DocType",
         });
 
         // Update previousFieldname to the column break
         previousFieldname = columnFieldname;
       });
-      const rowFieldname = convertLabelToFieldName(row.label);
+      const rowFieldname = convertLabelToFieldName(row?.label);
       // Add "Row Break" marker after each row
-      result.push({ fieldtype: "Column Break", description: "Row Break", doctype: "Custom Field", fieldname: rowFieldname, dt: section.dt, insert_after: previousFieldname, idx: index++ });
+      result.push({
+        fieldtype: "Column Break", description: "Row Break", doctype: "DocField", fieldname: rowFieldname, parent: section.parent,
+        // insert_after: previousFieldname, 
+        idx: index++, "parentfield": "fields",
+        "parenttype": "DocType",
+      });
       // Update previousFieldname to the row break
       previousFieldname = rowFieldname;
     });
-    const sectionFieldname = convertLabelToFieldName(section.label);
+    const sectionFieldname = convertLabelToFieldName(section?.label);
     // Add "Section Break" marker after each section
-    result.push({ fieldtype: "Section Break", description: "Section Break", doctype: "Custom Field", label: section.label, dt: section.dt, fieldname: sectionFieldname, insert_after: previousFieldname, idx: index++ });
+    result.push({
+      fieldtype: "Section Break", description: "Section Break", doctype: "DocField", label: section.label, parent: section.parent, fieldname: sectionFieldname,
+      // insert_after: previousFieldname, 
+      idx: index++, "parentfield": "fields",
+      "parenttype": "DocType",
+    });
     // Update previousFieldname to the section break
     previousFieldname = sectionFieldname;
   });
@@ -81,6 +97,7 @@ export function rebuildToStructuredArray(flatArray) {
           fieldtype: item.fieldtype,
           fieldname: item.fieldname,
           label: item.label,
+          parent: item.parent,
           rows: [] // Initialize rows for the new section
         };
         currentRow = null; // Reset currentRow for new section
@@ -94,6 +111,8 @@ export function rebuildToStructuredArray(flatArray) {
           currentRow = {
             fieldtype: "Row Break",
             fieldname: item.fieldname,
+            label: item.fieldname,
+            parent: item.parent,
             columns: [] // Initialize columns for the new row
           };
         }
@@ -105,6 +124,7 @@ export function rebuildToStructuredArray(flatArray) {
             fieldtype: item.fieldtype,
             fieldname: item.fieldname,
             label: item.label,
+            parent: item.parent,
             fields: [] // Initialize fields for the new column
           };
           currentRow.columns.unshift(currentColumn); // Add new column to the current row
@@ -116,6 +136,7 @@ export function rebuildToStructuredArray(flatArray) {
           currentColumn.fields.unshift({
             fieldname: item.fieldname,
             fieldtype: item.fieldtype,
+            parent: item.parent,
             label: item.label
           });
         }
@@ -148,6 +169,93 @@ const flatArray = [
 // Usage
 // const structuredArray = rebuildToStructuredArray(flatArray);
 // console.log(JSON.stringify(structuredArray, null, 2));
+
+
+// deleted sec, rows,columns, fields
+export function deletedFieldsExtraction(data) {
+  const result = [];
+  let previousFieldname = null; // Track the previous fieldname
+  let index = 0;
+
+
+  data.forEach((section) => {
+    section.rows.forEach((row) => {
+      row.columns.forEach((column) => {
+
+        column.fields.forEach((field) => {
+          // Add the "insert_after" key to the current field
+          console.log(" field === ", field)
+          result.push({
+            ...field,
+            doctype: "DocField",
+            parent: section.parent,
+            description: "Field",
+            fieldname: generatedFieldname,
+            // insert_after: previousFieldname,
+            idx: index++, // Assign index
+            "parentfield": "fields",
+            "parenttype": "DocType",
+          });
+
+          // Update previousFieldname for the next field in this column
+          previousFieldname = generatedFieldname;
+        });
+        const columnFieldname = convertLabelToFieldName(column?.label);
+
+        // Add "Column Break" marker after each column
+        result.push({
+          fieldtype: "Column Break",
+          doctype: "DocField",
+          parent: section.parent,
+          fieldname: columnFieldname,
+          label: column.label,
+          description: "Column Break",
+          // insert_after: previousFieldname, // Track the break
+          idx: index++, // Assign index
+          "parentfield": "fields",
+          "parenttype": "DocType",
+        });
+
+        // Update previousFieldname to the column break
+        previousFieldname = columnFieldname;
+      });
+      const rowFieldname = convertLabelToFieldName(row?.label);
+      // Add "Row Break" marker after each row
+      result.push({
+        fieldtype: "Column Break", description: "Row Break", doctype: "DocField", fieldname: rowFieldname, parent: section.parent,
+        // insert_after: previousFieldname, 
+        idx: index++, "parentfield": "fields",
+        "parenttype": "DocType",
+      });
+      // Update previousFieldname to the row break
+      previousFieldname = rowFieldname;
+    });
+    const sectionFieldname = convertLabelToFieldName(section?.label);
+    // Add "Section Break" marker after each section
+    result.push({
+      fieldtype: "Section Break", description: "Section Break", doctype: "DocField", label: section.label, parent: section.parent, fieldname: sectionFieldname,
+      // insert_after: previousFieldname, 
+      idx: index++, "parentfield": "fields",
+      "parenttype": "DocType",
+    });
+    // Update previousFieldname to the section break
+    previousFieldname = sectionFieldname;
+  });
+
+  return result;
+}
+
+
+
+export function extractFieldnames(obj) {
+  console.log(" obj === ", obj)
+  let fieldnames = [];
+  if (obj.fieldname) fieldnames.push(obj.fieldname);
+  if (obj.rows) obj.rows.forEach(row => fieldnames.push(...extractFieldnames(row)));
+  if (obj.columns) obj.columns.forEach(column => fieldnames.push(...extractFieldnames(column)));
+  if (obj.fields) obj.fields.forEach(field => fieldnames.push(...extractFieldnames(field)));
+  return fieldnames;
+}
 
 
 

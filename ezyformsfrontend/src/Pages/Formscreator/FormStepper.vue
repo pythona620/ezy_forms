@@ -22,9 +22,9 @@
                         <div class="col-2">
                             <ul class="steps">
                                 <li v-for="step in steps" :key="step.id" :class="{
-                        active: activeStep === step.id,
-                        completed: activeStep > step.id && index === steps.length - 1,
-                    }">
+                                    active: activeStep === step.id,
+                                    completed: activeStep > step.id && index === steps.length - 1,
+                                }">
                                     <div class="d-flex gap-3 align-items-center" @click="handleStepClick(step.label)">
                                         <i v-if="activeStep > step.id"
                                             class="ri-checkbox-circle-fill completedStepIcon"></i>
@@ -170,7 +170,7 @@
                                                     </div>
                                                     <button :disabled="!sections.length"
                                                         class="btn btn-dark font-10  Withborder border " type="button"
-                                                        @click="formData()">
+                                                        @click="saveFormData()">
                                                         Save Data
                                                     </button>
                                                     <!-- <button class="btn btn-light font-10" type="button"
@@ -268,12 +268,12 @@
                                                                                     placeholder="Column Name" />
                                                                                 <button class="btn btn-light btn-sm"
                                                                                     @click="
-                        removeColumn(
-                            sectionIndex,
-                            rowIndex,
-                            columnIndex
-                        )
-                        ">
+                                                                                        removeColumn(
+                                                                                            sectionIndex,
+                                                                                            rowIndex,
+                                                                                            columnIndex
+                                                                                        )
+                                                                                        ">
                                                                                     <i class="bi bi-trash"></i>
                                                                                 </button>
                                                                             </div>
@@ -296,13 +296,13 @@
                                                                                             <button
                                                                                                 class="btn btn-light btn-sm"
                                                                                                 @click="
-                        removeField(
-                            sectionIndex,
-                            rowIndex,
-                            columnIndex,
-                            fieldIndex
-                        )
-                        ">
+                                                                                                    removeField(
+                                                                                                        sectionIndex,
+                                                                                                        rowIndex,
+                                                                                                        columnIndex,
+                                                                                                        fieldIndex
+                                                                                                    )
+                                                                                                    ">
                                                                                                 <i
                                                                                                     class="bi bi-trash"></i>
                                                                                             </button>
@@ -311,13 +311,13 @@
                                                                                     <select v-model="field.fieldtype"
                                                                                         class="form-select mb-2 font-13 searchSelect"
                                                                                         @change="
-                        onFieldTypeChange(
-                            sectionIndex,
-                            rowIndex,
-                            columnIndex,
-                            fieldIndex
-                        )
-                        ">
+                                                                                            onFieldTypeChange(
+                                                                                                sectionIndex,
+                                                                                                rowIndex,
+                                                                                                columnIndex,
+                                                                                                fieldIndex
+                                                                                            )
+                                                                                            ">
                                                                                         <option value="">Select Type
                                                                                         </option>
                                                                                         <option
@@ -359,8 +359,8 @@
                                                                                 <button
                                                                                     class="btn btn-light btn-sm d-flex align-items-center addField m-2"
                                                                                     @click="
-                        addField(sectionIndex, rowIndex, columnIndex)
-                        ">
+                                                                                        addField(sectionIndex, rowIndex, columnIndex)
+                                                                                        ">
                                                                                     <i class="bi bi-plus fs-4"></i>
                                                                                     <span>Add Field</span>
                                                                                 </button>
@@ -405,7 +405,7 @@ import FormFields from "../../Components/FormFields.vue";
 import { onMounted, ref, reactive, computed, watch } from "vue";
 import ButtonComp from "../../Components/ButtonComp.vue";
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
-import { extractFieldsWithBreaks, rebuildToStructuredArray } from '../../shared/services/field_format';
+import { extractFieldsWithBreaks, rebuildToStructuredArray, extractFieldnames } from '../../shared/services/field_format';
 import axiosInstance from '../../shared/services/interceptor';
 import { apis, doctypes } from "../../shared/apiurls";
 import { useRoute, useRouter } from "vue-router";
@@ -424,6 +424,9 @@ const categories = ref([]);
 const formOptions = ref([]); // Stores accessible departments
 const OwnerOfTheFormData = ref([]); // Stores departments for owner_of_the_form
 let sections = reactive([]);
+let deleted_items = reactive([])
+let deleted_flat_arr = reactive([])
+
 
 const businessUnit = computed(() => {
     return EzyBusinessUnit;
@@ -436,7 +439,9 @@ onMounted(() => {
 
     paramId = route.params.paramid || 'new'; // Default to 'new' if no param is provided
     console.log(' === paramId:', paramId);
-    if (paramId && paramId != 'new') getFormData()
+    if (paramId != undefined && paramId != null && paramId != 'new') {
+        getFormData()
+    }
 })
 
 const selectedAccdept = ref("")
@@ -542,7 +547,8 @@ function formData() {
     const fields = extractFieldsWithBreaks(sections)
     const dataObj = {
         ...filterObj.value,
-        fields
+        fields,
+        "doctype": doctypes.EzyFormDefinitions
     }
     dataObj.accessible_departments = dataObj.accessible_departments.toString(); //JSON.stringify(dataObj.accessible_departments)
     axiosInstance.post(apis.savedata, dataObj).then((res) => {
@@ -556,14 +562,12 @@ const prevStep = () => {
     }
 };
 
-const formCreated = ref(false);
-
 // Function to add a new section with a default column
 const addSection = () => {
     console.log(" Add Section ", sections)
     sections.push({
         label: "",
-        dt: `${businessUnit.value.value}-${filterObj.value.form_short_name}`,
+        parent: `${businessUnit.value.value}-${filterObj.value.form_short_name}`,
         rows: [
             {
                 label: getRowSuffix(0),
@@ -579,12 +583,15 @@ const addSection = () => {
 };
 // Function to remove a section
 const removeSection = (sectionIndex) => {
+    let item = sections[sectionIndex]
+    if (item.parent) deleted_items.push(item)
     sections.splice(sectionIndex, 1);
 };
 
 const addRow = (sectionIndex) => {
     const rowIndex = sections[sectionIndex].rows.length;  // Get the current row index
     const rowSuffix = getRowSuffix(rowIndex);
+    console.log(" Rowsuffix == ", rowSuffix)
     sections[sectionIndex].rows.push({
         label: rowSuffix,
         columns: [
@@ -597,6 +604,8 @@ const addRow = (sectionIndex) => {
 };
 
 const removeRow = (sectionIndex, rowIndex) => {
+    let item = sections[sectionIndex].rows[rowIndex]
+    if (item.parent) deleted_items.push(item)
     sections[sectionIndex].rows.splice(rowIndex, 1);
 };
 
@@ -610,6 +619,8 @@ const addColumn = (sectionIndex, rowIndex) => {
 
 // Function to remove a column inside a section
 const removeColumn = (sectionIndex, rowIndex, columnIndex) => {
+    let item = sections[sectionIndex].rows[rowIndex].columns[columnIndex]
+    if (item.parent) deleted_items.push(item)
     sections[sectionIndex].rows[rowIndex].columns.splice(columnIndex, 1);
 };
 
@@ -622,11 +633,13 @@ const addField = (sectionIndex, rowIndex, columnIndex) => {
         options: null,
         reqd: false,
     });
-    console.log("----------", sections);
+
 };
 
 // Function to remove a field inside a column
 const removeField = (sectionIndex, rowIndex, columnIndex, fieldIndex) => {
+    let item = sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex]
+    if (item.parent) deleted_items.push(item)
     sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields.splice(fieldIndex, 1);
 };
 
@@ -657,6 +670,7 @@ const onFieldTypeChange = (sectionIndex, rowIndex, columnIndex, fieldIndex) => {
     console.log(fieldType, "field === ", field);
     console.log(" sections === ", sections);
 
+    console.log(" deleted items sections === ", deleted_items)
 
     const xyz = extractFieldsWithBreaks(sections)
     console.log(" extracted Format === ", xyz)
@@ -732,9 +746,10 @@ function getFormData() {
             let res_data = res?.data
             if (res_data) {
                 filterObj.value = res_data
-                // console.log( " Flat array === ",JSON.parse(res_data?.form_json?.replace(/\\\"/g, '"')))
+                OwnerOftheForm(filterObj.value.owner_of_the_form);
+                console.log(" Flat array === ", JSON.parse(res_data?.form_json?.replace(/\\\"/g, '"')))
                 let structuredArr = rebuildToStructuredArray(JSON.parse(res_data?.form_json?.replace(/\\\"/g, '"')))
-                // console.log(" structuredArr === ", structuredArr[0])
+                console.log(" structuredArr === ", structuredArr[0])
                 structuredArr.forEach((item, index) => {
                     sections.push(item)
                 })
@@ -744,10 +759,34 @@ function getFormData() {
             console.error("Error fetching  data:", error);
         });
 }
-watch(sections, (newSections) => {
-    console.log(sections, "---------------------");
-    console.log('Sections changed:', newSections);
-}, { deep: true });
+
+function delete_form_items_fields() {
+    axiosInstance.post(apis.delete_form_items, {
+        deleted_fields: deleted_items.flatMap(extractFieldnames),
+        doctype: paramId
+    }).then((res) => {
+        console.log(" delete resp === ", res)
+        if (res?.message?.success) {
+            // return res;
+            formData()
+        }
+    })
+}
+
+async function saveFormData() {
+    let data = deleted_items.flatMap(extractFieldnames)
+    if ((paramId != undefined && paramId != null && paramId != 'new') && data.length) {
+        delete_form_items_fields()
+        //    console.log(" result", result)
+
+    } else {
+        formData()
+    }
+}
+// watch(sections, (newSections) => {
+//     console.log(sections, "---------------------");
+//     console.log('Sections changed:', newSections);
+// }, { deep: true });
 
 </script>
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>

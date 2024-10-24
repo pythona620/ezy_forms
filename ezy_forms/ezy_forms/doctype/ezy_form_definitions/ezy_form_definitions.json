@@ -7,7 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "business_unit",
-  "form_type",
+  "form_name",
   "form_category",
   "owner_of_the_form",
   "active",
@@ -24,12 +24,6 @@
    "label": "Business Unit",
    "options": "Ezy Business Unit",
    "search_index": 1
-  },
-  {
-   "fieldname": "form_type",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Form Type"
   },
   {
    "fieldname": "form_category",
@@ -69,11 +63,17 @@
    "fieldname": "form_json",
    "fieldtype": "Small Text",
    "label": "Form JSON"
+  },
+  {
+   "fieldname": "form_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Form Name"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-10-21 14:37:17.038825",
+ "modified": "2024-10-24 10:58:45.260304",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
  "name": "Ezy Form Definitions",
