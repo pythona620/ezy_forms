@@ -10,7 +10,7 @@ export function extractFieldsWithBreaks(data) {
 
         column.fields.forEach((field) => {
           // Add the "insert_after" key to the current field
-          console.log(" field === ", field)
+          // console.log(" field === ", field)
           field['reqd'] = field.reqd ? 1 : 0
           const generatedFieldname = convertLabelToFieldName(field?.label);
           result.push({

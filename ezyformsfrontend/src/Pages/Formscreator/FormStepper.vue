@@ -285,6 +285,7 @@
                                                                                         class="d-flex justify-content-between">
                                                                                         <input v-model="field.label"
                                                                                             placeholder="Name the field"
+                                                                                            @change="handleFieldChange(field.label, fieldIndex)" 
                                                                                             class="border-less-input mb-1 columnFieldInput font-14 p-0" />
                                                                                         <div>
                                                                                             <button
@@ -667,16 +668,21 @@ const onFieldTypeChange = (sectionIndex, rowIndex, columnIndex, fieldIndex) => {
     const field =
         sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex];
     // Handle additional logic for field type change if needed
-    console.log(fieldType, "field === ", field);
-    console.log(" sections === ", sections);
+    // console.log(fieldType, "field === ", field);
+    // console.log(" sections === ", sections);
 
-    console.log(" deleted items sections === ", deleted_items)
+    // console.log(" deleted items sections === ", deleted_items)
 
-    const xyz = extractFieldsWithBreaks(sections)
-    console.log(" extracted Format === ", xyz)
+    // const xyz = extractFieldsWithBreaks(sections)
+    // console.log(" extracted Format === ", xyz)
 
 
 };
+
+function handleFieldChange(newValue) {
+      console.log("Field label changed to:", newValue);
+      // Add further logic here (e.g., form validation, API call, etc.)
+    }
 
 const getRowSuffix = (index) => {
     if (index === 0) {
@@ -787,6 +793,12 @@ async function saveFormData() {
 //     console.log(sections, "---------------------");
 //     console.log('Sections changed:', newSections);
 // }, { deep: true });
+
+
+const getFlatArrayofFields = deleted_items.flatMap(extractFieldnames);
+
+const hasDuplicates = (array) => new Set(array).size !== array.length;
+// console.log(hasDuplicates(arr));
 
 </script>
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
