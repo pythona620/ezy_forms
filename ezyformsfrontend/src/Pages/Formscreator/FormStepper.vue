@@ -764,6 +764,10 @@ const onFieldTypeChange = (sectionIndex, rowIndex, columnIndex, fieldIndex) => {
 function handleFieldChange(event) {
       console.log(" === Field label changed to:", event.target.value);
       // Add further logic here (e.g., form validation, API call, etc.)
+      const xyz = sections.flatMap(extractFieldnames);
+      console.log(" ==== xyz  ==== ", xyz)
+
+      const hasDuplicates = (array) => new Set(array).size !== array.length;
     }
 
 function handleInputChange(eve){
