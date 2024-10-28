@@ -62,6 +62,7 @@
                                                         <FormFields labeltext="Form Name" class="mb-3" type="text"
                                                             tag="input" name="Value" id="Value"
                                                             placeholder="Untitle Form" orm
+                                                            @change="handleInputChange" 
                                                             v-model="filterObj.form_name" />
                                                     </div>
                                                 </div>
@@ -285,7 +286,7 @@
                                                                                         class="d-flex justify-content-between">
                                                                                         <input v-model="field.label"
                                                                                             placeholder="Name the field"
-                                                                                            @change="handleFieldChange(field.label, fieldIndex)" 
+                                                                                            @change="handleFieldChange" 
                                                                                             class="border-less-input mb-1 columnFieldInput font-14 p-0" />
                                                                                         <div>
                                                                                             <button
@@ -679,10 +680,31 @@ const onFieldTypeChange = (sectionIndex, rowIndex, columnIndex, fieldIndex) => {
 
 };
 
-function handleFieldChange(newValue) {
-      console.log("Field label changed to:", newValue);
+function handleFieldChange(event) {
+      console.log(" === Field label changed to:", event.target.value);
       // Add further logic here (e.g., form validation, API call, etc.)
     }
+
+function handleInputChange(eve){
+    console.log(" input change === ", eve.target.value)
+    
+    const filters = [
+        ["form_name", "like", `%${eve.target.value}%`]
+    ];    
+    const queryParams = {
+        fields: JSON.stringify(["*"]),
+        filters: JSON.stringify(filters)
+    };
+
+    axiosInstance
+        .get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParams })
+        .then((res) => {
+            console.log(" res === ", res)
+        })
+        .catch((error) => {
+            console.error("Error fetching ezyForms data:", error);
+        });
+}    
 
 const getRowSuffix = (index) => {
     if (index === 0) {
