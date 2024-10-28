@@ -775,27 +775,23 @@ const onFieldTypeChange = (sectionIndex, rowIndex, columnIndex, fieldIndex) => {
 };
 
 function handleFieldChange(sectionIndex, rowIndex, columnIndex, fieldIndex) {
-    const flatArr = sections.flatMap(extractfieldlabels);
-    const isDuplicate = hasDuplicates(flatArr); // Check once to reuse this result
+    const isDuplicate = hasDuplicates(sections.flatMap(extractfieldlabels));
+    const section = sections[sectionIndex];
 
-    // Assign error message for the specific field if fieldIndex is valid
-    if (fieldIndex !== undefined && fieldIndex >= 0 && columnIndex !== undefined && columnIndex >= 0 && sectionIndex !== undefined) {
-        sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex].errorMsg =
-            isDuplicate ? "Duplicate Label Name" : "";
-    }
-
-    // Assign error message for the column if fieldIndex is not valid
-    if (fieldIndex === undefined && columnIndex !== undefined && columnIndex >= 0 && sectionIndex !== undefined) {
-        sections[sectionIndex].rows[rowIndex].columns[columnIndex].errorMsg =
-            isDuplicate ? "Duplicate Label Name in Column" : "";
-    }
-
-    // Assign error message for the section if both columnIndex and fieldIndex are not valid
-    if (columnIndex === undefined && fieldIndex === undefined && sectionIndex !== undefined) {
-        sections[sectionIndex].errorMsg =
-            isDuplicate ? "Duplicate Label Name in Section" : "";
+    if (section) {
+        if (fieldIndex >= 0) {
+            section.rows[rowIndex].columns[columnIndex].fields[fieldIndex].errorMsg = 
+                isDuplicate ? "Duplicate Label Name" : "";
+        } else if (columnIndex >= 0) {
+            section.rows[rowIndex].columns[columnIndex].errorMsg = 
+                isDuplicate ? "Duplicate Label Name in Column" : "";
+        } else {
+            section.errorMsg = 
+                isDuplicate ? "Duplicate Label Name in Section" : "";
+        }
     }
 }
+
 
 function handleInputChange(eve) {
     console.log(" input change === ", eve.target.value)
