@@ -22,9 +22,10 @@
                         <div class="col-2">
                             <ul class="steps">
                                 <li v-for="step in steps" :key="step.id" :class="{
-                                    active: activeStep === step.id,
-                                    completed: activeStep > step.id && index === steps.length - 1,
-                                }">
+                        active: activeStep === step.id,
+                        completed: activeStep > step.id,
+                    }">
+                                    <!-- && index === steps.length - 1 -->
                                     <div class="d-flex gap-3 align-items-center" @click="handleStepClick(step.label)">
                                         <i v-if="activeStep > step.id"
                                             class="ri-checkbox-circle-fill completedStepIcon"></i>
@@ -59,19 +60,25 @@
                                             <div class="col-4">
                                                 <div class="mt-4">
                                                     <div class="">
-                                                        <FormFields labeltext="Form Name" class="mb-3" type="text"
+                                                        <FormFields labeltext="Form Name" class="mb-1" type="text"
                                                             tag="input" name="Value" id="Value"
                                                             placeholder="Untitle Form" orm
                                                             v-model="filterObj.form_name" />
+                                                        <span v-if="formNameError" class="text-danger ErrorMsg ms-2">{{
+                        formNameError
+                    }}</span>
                                                     </div>
                                                 </div>
                                                 <div class="mt-4">
                                                     <div class="">
 
-                                                        <FormFields labeltext="Form Short Code" class="mb-3" type="text"
+                                                        <FormFields labeltext="Form Short Code" class="mb-1" type="text"
                                                             tag="input" name="Value" id="Value"
-                                                            placeholder="Untitle Form"
+                                                            placeholder="Untitled Form"
                                                             v-model="filterObj.form_short_name" />
+                                                        <span v-if="formShortNameError"
+                                                            class="text-danger ErrorMsg ms-2">{{
+                        formShortNameError }}</span>
                                                         <!-- <label for="">Form Short Code</label>
 
                                                         <Multiselect :options=formOptions
@@ -189,16 +196,16 @@
                                                                 class="border-less-input font-14"
                                                                 placeholder="Untitled approval flow" />
                                                             <div class=" d-flex">
-                                                                <!-- <button
+                                                                <button
                                                                     class="btn btn-light designationBtn d-flex align-items-center"
                                                                     type="button" data-bs-toggle="offcanvas"
                                                                     data-bs-target="#offcanvasRight"
                                                                     aria-controls="offcanvasRight"><img
                                                                         src="../../assets/oui_app-users-roles.svg"
                                                                         alt="" class="me-1"> Add
-                                                                    designations</button> -->
+                                                                    designations</button>
 
-                                                                <!-- <div class="offcanvas offcanvas-end" tabindex="-1"
+                                                                <div class="offcanvas offcanvas-end" tabindex="-1"
                                                                     id="offcanvasRight"
                                                                     aria-labelledby="offcanvasRightLabel">
                                                                     <div class="offcanvas-header">
@@ -211,14 +218,31 @@
                                                                             aria-label="Close"></button>
                                                                     </div>
                                                                     <div class="offcanvas-body">
-                                                                        <ul class=" list-unstyled">
-                                                                            <li class="designationList">
-                                                                                <input type="checkbox" name="" id=""
-                                                                                    class="designationCheckBox">
-                                                                                <span class="ps-2">intern</span>
+                                                                        <div
+                                                                            class="d-flex align-items-center gap-2 ps-2">
+                                                                            <div class="position-relative">
+
+                                                                                <input type="checkbox" id="selectAll"
+                                                                                    v-model="isAllSelected"
+                                                                                    class="designationCheckBox position-absolute bg-transparent form-control border-0 ms-1" />
+                                                                                <label for="selectAll fw-bold"
+                                                                                    class="SelectallDesignation">Select
+                                                                                    all</label>
+                                                                            </div>
+                                                                        </div>
+                                                                        <ul class="list-unstyled">
+                                                                            <li v-for="(item, index) in DesignationList"
+                                                                                :key="index" class="designationList">
+                                                                                <input type="checkbox"
+                                                                                    v-model="designationValue"
+                                                                                    :value="item"
+                                                                                    class="designationCheckBox"
+                                                                                    @change="handleSingleSelect" />
+                                                                                <span class="ps-2">{{ item }}</span>
                                                                             </li>
                                                                         </ul>
                                                                     </div>
+
                                                                     <div class=" offcanvas-footer">
                                                                         <div class=" text-end p-3">
                                                                             <ButtonComp
@@ -226,7 +250,7 @@
                                                                                 name=" Add Designations" />
                                                                         </div>
                                                                     </div>
-                                                                </div> -->
+                                                                </div>
 
                                                                 <button
                                                                     class="btn btn-light bg-transparent border-0 font-13 deleteSection"
@@ -268,12 +292,12 @@
                                                                                     placeholder="Column Name" />
                                                                                 <button class="btn btn-light btn-sm"
                                                                                     @click="
-                                                                                        removeColumn(
-                                                                                            sectionIndex,
-                                                                                            rowIndex,
-                                                                                            columnIndex
-                                                                                        )
-                                                                                        ">
+                        removeColumn(
+                            sectionIndex,
+                            rowIndex,
+                            columnIndex
+                        )
+                        ">
                                                                                     <i class="bi bi-trash"></i>
                                                                                 </button>
                                                                             </div>
@@ -296,13 +320,13 @@
                                                                                             <button
                                                                                                 class="btn btn-light btn-sm"
                                                                                                 @click="
-                                                                                                    removeField(
-                                                                                                        sectionIndex,
-                                                                                                        rowIndex,
-                                                                                                        columnIndex,
-                                                                                                        fieldIndex
-                                                                                                    )
-                                                                                                    ">
+                        removeField(
+                            sectionIndex,
+                            rowIndex,
+                            columnIndex,
+                            fieldIndex
+                        )
+                        ">
                                                                                                 <i
                                                                                                     class="bi bi-trash"></i>
                                                                                             </button>
@@ -311,13 +335,13 @@
                                                                                     <select v-model="field.fieldtype"
                                                                                         class="form-select mb-2 font-13 searchSelect"
                                                                                         @change="
-                                                                                            onFieldTypeChange(
-                                                                                                sectionIndex,
-                                                                                                rowIndex,
-                                                                                                columnIndex,
-                                                                                                fieldIndex
-                                                                                            )
-                                                                                            ">
+                        onFieldTypeChange(
+                            sectionIndex,
+                            rowIndex,
+                            columnIndex,
+                            fieldIndex
+                        )
+                        ">
                                                                                         <option value="">Select Type
                                                                                         </option>
                                                                                         <option
@@ -359,8 +383,8 @@
                                                                                 <button
                                                                                     class="btn btn-light btn-sm d-flex align-items-center addField m-2"
                                                                                     @click="
-                                                                                        addField(sectionIndex, rowIndex, columnIndex)
-                                                                                        ">
+                        addField(sectionIndex, rowIndex, columnIndex)
+                        ">
                                                                                     <i class="bi bi-plus fs-4"></i>
                                                                                     <span>Add Field</span>
                                                                                 </button>
@@ -413,35 +437,37 @@ import FormPreview from './FormPreview.vue'
 import Multiselect from '@vueform/multiselect';
 import '@vueform/multiselect/themes/default.css';
 import VueMultiselect from 'vue-multiselect'
-
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 const route = useRoute();
 const router = useRouter();
-// Current active step
 const activeStep = ref(1);
-// Dummy data for departments and categories
 const departments = ref([]);
 const categories = ref([]);
-const formOptions = ref([]); // Stores accessible departments
-const OwnerOfTheFormData = ref([]); // Stores departments for owner_of_the_form
+const formOptions = ref([]);
+const OwnerOfTheFormData = ref([]);
 let sections = reactive([]);
 let deleted_items = reactive([])
 let deleted_flat_arr = reactive([])
-
-
+const DesignationList = ref(["intern", "Junior associate", "Associate", "Senior associate", "Supervisor"]);
+const designationValue = ref([]);
 const businessUnit = computed(() => {
     return EzyBusinessUnit;
 });
-
+const ezyFormsData = ref([]);
+const formNameError = ref("");
+const formShortNameError = ref("");
 let paramId = ref("")
 
 onMounted(() => {
     deptData();
 
-    paramId = route.params.paramid || 'new'; // Default to 'new' if no param is provided
+    paramId = route.params.paramid || 'new';
     console.log(' === paramId:', paramId);
     if (paramId != undefined && paramId != null && paramId != 'new') {
         getFormData()
     }
+    tableData()
 })
 
 const selectedAccdept = ref("")
@@ -460,6 +486,26 @@ watch(
     },
     { immediate: true }
 );
+watch(
+    () => filterObj.value.form_name,
+    (newVal) => {
+        formNameError.value = newVal && ezyFormsData.value.some(item =>
+            item.form_name && item.form_name.toLowerCase() === newVal.toLowerCase()
+        ) ? "Name already exists" : "";
+        console.log(newVal, "Form Name updated");
+    }
+);
+
+watch(
+    () => filterObj.value.form_short_name,
+    (newVal) => {
+        formShortNameError.value = newVal && ezyFormsData.value.some(item =>
+            item.form_short_name && item.form_short_name.toLowerCase() === newVal.toLowerCase()
+        ) ? "Short name already exists" : "";
+        console.log(newVal, "Form Short Name updated");
+    }
+);
+
 const steps = [
     {
         id: 1,
@@ -512,7 +558,29 @@ const fieldTypes = [
         type: "multiselect",
     },
 ];
+const isAllSelected = computed({
+    get() {
+        return DesignationList.value.length > 0 && DesignationList.value.every(item => designationValue.value.includes(item));
+    },
+    set(value) {
+        if (value) {
+            designationValue.value = [...DesignationList.value];
+        } else {
+            designationValue.value = [];
+        }
+    }
+});
 
+// Watch for changes to designationValue to log it
+watch(designationValue, (newValue) => {
+    console.log('Selected Designations:', newValue);
+});
+
+function handleSingleSelect() {
+    if (!isAllSelected.value && designationValue.value.length === 1) {
+        console.log('Selected only one designation:', designationValue.value[0]);
+    }
+}
 
 function cancelForm() {
     router.push({
@@ -552,7 +620,13 @@ function formData() {
     }
     dataObj.accessible_departments = dataObj.accessible_departments.toString(); //JSON.stringify(dataObj.accessible_departments)
     axiosInstance.post(apis.savedata, dataObj).then((res) => {
-        console.log(res, "saved From Responces");
+        if (res) {
+            toast.success("Form Created Successfull")
+            router.push({
+                name: 'Created'
+            })
+        }
+        console.log(dataObj, "saved From Responces");
     })
 }
 // Move to the previous step
@@ -586,6 +660,8 @@ const removeSection = (sectionIndex) => {
     let item = sections[sectionIndex]
     if (item.parent) deleted_items.push(item)
     sections.splice(sectionIndex, 1);
+    toast.success("Section removed", { autoClose: 500 })
+
 };
 
 const addRow = (sectionIndex) => {
@@ -607,6 +683,8 @@ const removeRow = (sectionIndex, rowIndex) => {
     let item = sections[sectionIndex].rows[rowIndex]
     if (item.parent) deleted_items.push(item)
     sections[sectionIndex].rows.splice(rowIndex, 1);
+    toast.success("Row removed", { autoClose: 500 })
+
 };
 
 // Function to add a new column inside a section
@@ -622,6 +700,8 @@ const removeColumn = (sectionIndex, rowIndex, columnIndex) => {
     let item = sections[sectionIndex].rows[rowIndex].columns[columnIndex]
     if (item.parent) deleted_items.push(item)
     sections[sectionIndex].rows[rowIndex].columns.splice(columnIndex, 1);
+    toast.success("Column removed", { autoClose: 500 })
+
 };
 
 // Function to add a new field inside a column
@@ -641,6 +721,7 @@ const removeField = (sectionIndex, rowIndex, columnIndex, fieldIndex) => {
     let item = sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex]
     if (item.parent) deleted_items.push(item)
     sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields.splice(fieldIndex, 1);
+    toast.success("Field removed", { autoClose: 500 })
 };
 
 
@@ -725,7 +806,9 @@ function deptData() {
 }
 
 function OwnerOftheForm(newVal) {
-    categoriesData(newVal);
+    if (newVal) {
+        categoriesData(newVal);
+    }
 }
 
 function categoriesData(newVal) {
@@ -745,8 +828,14 @@ function getFormData() {
         .then((res) => {
             let res_data = res?.data
             if (res_data) {
+                if (res_data.accessible_departments) {
+                    res_data.accessible_departments = res_data.accessible_departments.split(',');
+                }
                 filterObj.value = res_data
-                OwnerOftheForm(filterObj.value.owner_of_the_form);
+                formNameError.value = ''
+                formShortNameError.value = ''
+                // NO Need To hit
+                // OwnerOftheForm(filterObj.value.owner_of_the_form);
                 console.log(" Flat array === ", JSON.parse(res_data?.form_json?.replace(/\\\"/g, '"')))
                 let structuredArr = rebuildToStructuredArray(JSON.parse(res_data?.form_json?.replace(/\\\"/g, '"')))
                 console.log(" structuredArr === ", structuredArr[0])
@@ -783,16 +872,40 @@ async function saveFormData() {
         formData()
     }
 }
-// watch(sections, (newSections) => {
-//     console.log(sections, "---------------------");
-//     console.log('Sections changed:', newSections);
-// }, { deep: true });
+function tableData() {
+    const filters = [];
+    const queryParams = {
+        fields: JSON.stringify(["*"]),
+        filters: JSON.stringify(filters),
+        limit_page_length: 'None',
+        limitstart: 0,
+        order_by: "`tabEzy Form Definitions`.`creation` desc"
+    };
+
+    axiosInstance
+        .get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParams })
+        .then((res) => {
+            ezyFormsData.value = res.data;
+        })
+        .catch((error) => {
+            console.error("Error fetching ezyForms data:", error);
+        });
+}
 
 </script>
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 
 <style lang="scss" scoped>
 /* @import '@vueform/multiselect/themes/default.css'; */
+
+
+.ErrorMsg {
+    font-size: 11px;
+}
+
+.SelectallDesignation {
+    color: #1B14DF;
+}
 
 .CancelNdSave {
     background-color: #fafafa;
@@ -1071,10 +1184,17 @@ select {
     border-radius: 6px;
     display: flex;
     align-items: center;
+    margin-bottom: 4px;
 }
 
 .designationCheckBox {
     font-size: 20px !important;
+
+}
+
+.designationCheckBox:focus {
+
+    box-shadow: none;
 }
 
 .addingDesignations {

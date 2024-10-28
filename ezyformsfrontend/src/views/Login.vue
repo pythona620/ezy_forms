@@ -1,7 +1,7 @@
 <template>
 	<div class="bg-img">
 		<div class="input-div p-5">
-			<h3 class="text-center mb-5 fw-bolder"><b>EZY TAGS</b></h3>
+			<h3 class="text-center mb-5 fw-bolder"><b>EZY FORMS</b></h3>
 			<div class="input-box">
 				<span class="icon"><i class="bi bi-envelope-fill"></i></span>
 				<input type="text" class=" text-white " id="name" v-model="formdata.usr" @input="validatename"
@@ -68,10 +68,10 @@ export default {
 				axiosInstance.post(apis.login, this.formdata).then((res) => {
 					toast.success("Login Successfully", { autoClose: 2000 });
 					setTimeout(() => {
-						this.$router.push({ name: '/new/created' });
+						this.$router.push({ path: '/create-form/created' });
 					}, 700);
 					this.storeData = res;
-					// console.log(this.storeData, 'Login Data');
+					// console.log(this.storeData, 'Login Data'); 
 					localStorage.setItem('UserName', JSON.stringify(this.storeData));
 				}).catch((error) => {
 					console.error("Login error: ", error);
@@ -101,7 +101,7 @@ export default {
 	background: transparent;
 	backdrop-filter: blur(7px);
 	/* background-color: rgba(0, 0, 0, 0.5); */
-	background-color: rgba(0, 0, 0, 0.7);
+	background-color: rgba(0, 0, 0, 0.39);
 	border-radius: 20px;
 	margin-right: 100px;
 	box-shadow: 0 4px 8px 0 rgba(219, 216, 216, 0.2),
