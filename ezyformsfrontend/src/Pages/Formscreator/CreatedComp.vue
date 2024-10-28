@@ -7,7 +7,7 @@
             </div>
             <div class="d-flex gap-2 align-items-center">
                 <div>
-                    <FormFields labeltext="" class="" tag="input" type="search" placeholder="Search File Name"
+                    <FormFields labeltext="" class="" tag="input" type="search" placeholder="Search Form Name"
                         name="Value" id="Value" v-model="filterObj.search" @input="fetchTable()" />
                 </div>
                 <div>
@@ -185,8 +185,8 @@ watch(
     (newVal) => {
         filterObj.value.business_unit = newVal;
 
-        console.log(newVal, "new value of business unit");
         if (newVal) {
+            console.log(newVal, "new value of business unit");
             fetchTable()
         }
     },

@@ -6,17 +6,18 @@
 
 
       <!-- Conditionally show the header and sidebar if not on '/new/formsteps' -->
-      <HeaderComp v-if="!isFormStepsRoute" />
+      <!-- <HeaderComp v-if="!isFormStepsRoute" /> -->
 
       <div class="container-fluid">
         <div class="row">
           <!-- Conditionally render the sidebar based on the current route -->
-          <div class="col-2 p-0" v-if="!isFormStepsRoute && !isArchivedRoute">
+          <!-- <div class="col-2 p-0" v-if="!isFormStepsRoute && !isArchivedRoute">
             <SideBar />
-          </div>
+          </div> -->
 
           <!-- Adjust column size based on route -->
-          <div :class="[(isFormStepsRoute || isArchivedRoute) ? 'col-12' : 'col-10']">
+          <!-- :class="[(isFormStepsRoute || isArchivedRoute) ? 'col-12' : 'col-10']" -->
+          <div>
             <RouterView></RouterView>
           </div>
         </div>
