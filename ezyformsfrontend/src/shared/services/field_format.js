@@ -248,13 +248,21 @@ export function deletedFieldsExtraction(data) {
 
 
 export function extractFieldnames(obj) {
-  console.log(" obj === ", obj)
   let fieldnames = [];
   if (obj.fieldname) fieldnames.push(obj.fieldname);
   if (obj.rows) obj.rows.forEach(row => fieldnames.push(...extractFieldnames(row)));
   if (obj.columns) obj.columns.forEach(column => fieldnames.push(...extractFieldnames(column)));
   if (obj.fields) obj.fields.forEach(field => fieldnames.push(...extractFieldnames(field)));
   return fieldnames;
+}
+
+export function extractfieldlabels(obj) {
+  let fieldlabels = [];
+  if (obj.label) fieldlabels.push(obj.label);
+  if (obj.rows) obj.rows.forEach(row => fieldlabels.push(...extractfieldlabels(row)));
+  if (obj.columns) obj.columns.forEach(column => fieldlabels.push(...extractfieldlabels(column)));
+  if (obj.fields) obj.fields.forEach(field => fieldlabels.push(...extractfieldlabels(field)));
+  return fieldlabels;
 }
 
 

@@ -22,9 +22,9 @@
                         <div class="col-2">
                             <ul class="steps">
                                 <li v-for="step in steps" :key="step.id" :class="{
-                        active: activeStep === step.id,
-                        completed: activeStep > step.id,
-                    }">
+                                    active: activeStep === step.id,
+                                    completed: activeStep > step.id,
+                                }">
                                     <!-- && index === steps.length - 1 -->
                                     <div class="d-flex gap-3 align-items-center" @click="handleStepClick(step.label)">
                                         <i v-if="activeStep > step.id"
@@ -62,12 +62,11 @@
                                                     <div class="">
                                                         <FormFields labeltext="Form Name" class="mb-1" type="text"
                                                             tag="input" name="Value" id="Value"
-                                                            placeholder="Untitle Form" orm
-                                                            @change="handleInputChange" 
+                                                            placeholder="Untitle Form" orm @change="handleInputChange"
                                                             v-model="filterObj.form_name" />
                                                         <span v-if="formNameError" class="text-danger ErrorMsg ms-2">{{
-                        formNameError
-                    }}</span>
+                                                            formNameError
+                                                            }}</span>
                                                     </div>
                                                 </div>
                                                 <div class="mt-4">
@@ -79,7 +78,7 @@
                                                             v-model="filterObj.form_short_name" />
                                                         <span v-if="formShortNameError"
                                                             class="text-danger ErrorMsg ms-2">{{
-                        formShortNameError }}</span>
+                                                                formShortNameError }}</span>
                                                         <!-- <label for="">Form Short Code</label>
 
                                                         <Multiselect :options=formOptions
@@ -195,7 +194,11 @@
                                                         <section class="d-flex justify-content-between">
                                                             <input v-model="section.label" type="text"
                                                                 class="border-less-input font-14"
+                                                                @change="handleFieldChange(sectionIndex)"
                                                                 placeholder="Untitled approval flow" />
+                                                            <small v-if="section.errorMsg" class="text-danger"> {{
+                                                                section.errorMsg
+                                                            }}</small>
                                                             <div class=" d-flex">
                                                                 <button
                                                                     class="btn btn-light designationBtn d-flex align-items-center"
@@ -290,15 +293,20 @@
                                                                                 <input v-model="column.label"
                                                                                     type="text"
                                                                                     class="border-less-input columnFieldInput font-14"
+                                                                                    @change="handleFieldChange(sectionIndex, rowIndex, columnIndex)"
                                                                                     placeholder="Column Name" />
+                                                                                <small v-if="column.errorMsg"
+                                                                                    class="text-danger"> {{
+                                                                                        column.errorMsg
+                                                                                    }}</small>
                                                                                 <button class="btn btn-light btn-sm"
                                                                                     @click="
-                        removeColumn(
-                            sectionIndex,
-                            rowIndex,
-                            columnIndex
-                        )
-                        ">
+                                                                                        removeColumn(
+                                                                                            sectionIndex,
+                                                                                            rowIndex,
+                                                                                            columnIndex
+                                                                                        )
+                                                                                        ">
                                                                                     <i class="bi bi-trash"></i>
                                                                                 </button>
                                                                             </div>
@@ -310,7 +318,7 @@
                                                                                         class="d-flex justify-content-between">
                                                                                         <input v-model="field.label"
                                                                                             placeholder="Name the field"
-                                                                                            @change="handleFieldChange" 
+                                                                                            @change="handleFieldChange(sectionIndex, rowIndex, columnIndex, fieldIndex)"
                                                                                             class="border-less-input mb-1 columnFieldInput font-14 p-0" />
                                                                                         <div>
                                                                                             <button
@@ -322,13 +330,13 @@
                                                                                             <button
                                                                                                 class="btn btn-light btn-sm"
                                                                                                 @click="
-                        removeField(
-                            sectionIndex,
-                            rowIndex,
-                            columnIndex,
-                            fieldIndex
-                        )
-                        ">
+                                                                                                    removeField(
+                                                                                                        sectionIndex,
+                                                                                                        rowIndex,
+                                                                                                        columnIndex,
+                                                                                                        fieldIndex
+                                                                                                    )
+                                                                                                    ">
                                                                                                 <i
                                                                                                     class="bi bi-trash"></i>
                                                                                             </button>
@@ -337,13 +345,13 @@
                                                                                     <select v-model="field.fieldtype"
                                                                                         class="form-select mb-2 font-13 searchSelect"
                                                                                         @change="
-                        onFieldTypeChange(
-                            sectionIndex,
-                            rowIndex,
-                            columnIndex,
-                            fieldIndex
-                        )
-                        ">
+                                                                                            onFieldTypeChange(
+                                                                                                sectionIndex,
+                                                                                                rowIndex,
+                                                                                                columnIndex,
+                                                                                                fieldIndex
+                                                                                            )
+                                                                                            ">
                                                                                         <option value="">Select Type
                                                                                         </option>
                                                                                         <option
@@ -378,6 +386,10 @@
 
                                                                                         <!--- checkbox for mandatory -->
                                                                                     </div>
+                                                                                    <small v-if="field.errorMsg"
+                                                                                        class="text-danger"> {{
+                                                                                            field.errorMsg
+                                                                                        }}</small>
                                                                                 </div>
                                                                             </div>
                                                                             <div
@@ -385,8 +397,8 @@
                                                                                 <button
                                                                                     class="btn btn-light btn-sm d-flex align-items-center addField m-2"
                                                                                     @click="
-                        addField(sectionIndex, rowIndex, columnIndex)
-                        ">
+                                                                                        addField(sectionIndex, rowIndex, columnIndex)
+                                                                                        ">
                                                                                     <i class="bi bi-plus fs-4"></i>
                                                                                     <span>Add Field</span>
                                                                                 </button>
@@ -431,7 +443,7 @@ import FormFields from "../../Components/FormFields.vue";
 import { onMounted, ref, reactive, computed, watch } from "vue";
 import ButtonComp from "../../Components/ButtonComp.vue";
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
-import { extractFieldsWithBreaks, rebuildToStructuredArray, extractFieldnames } from '../../shared/services/field_format';
+import { extractFieldsWithBreaks, rebuildToStructuredArray, extractFieldnames, extractfieldlabels } from '../../shared/services/field_format';
 import axiosInstance from '../../shared/services/interceptor';
 import { apis, doctypes } from "../../shared/apiurls";
 import { useRoute, useRouter } from "vue-router";
@@ -459,6 +471,7 @@ const businessUnit = computed(() => {
 const ezyFormsData = ref([]);
 const formNameError = ref("");
 const formShortNameError = ref("");
+const fieldNameError = ref("")
 let paramId = ref("")
 
 onMounted(() => {
@@ -662,7 +675,7 @@ const removeSection = (sectionIndex) => {
     let item = sections[sectionIndex]
     if (item.parent) deleted_items.push(item)
     sections.splice(sectionIndex, 1);
-    toast.success("Section removed", { autoClose: 500 })
+    // toast.success("Section removed", { autoClose: 500 })
 
 };
 
@@ -685,7 +698,7 @@ const removeRow = (sectionIndex, rowIndex) => {
     let item = sections[sectionIndex].rows[rowIndex]
     if (item.parent) deleted_items.push(item)
     sections[sectionIndex].rows.splice(rowIndex, 1);
-    toast.success("Row removed", { autoClose: 500 })
+    // toast.success("Row removed", { autoClose: 500 })
 
 };
 
@@ -702,7 +715,7 @@ const removeColumn = (sectionIndex, rowIndex, columnIndex) => {
     let item = sections[sectionIndex].rows[rowIndex].columns[columnIndex]
     if (item.parent) deleted_items.push(item)
     sections[sectionIndex].rows[rowIndex].columns.splice(columnIndex, 1);
-    toast.success("Column removed", { autoClose: 500 })
+    // toast.success("Column removed", { autoClose: 500 })
 
 };
 
@@ -723,7 +736,7 @@ const removeField = (sectionIndex, rowIndex, columnIndex, fieldIndex) => {
     let item = sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex]
     if (item.parent) deleted_items.push(item)
     sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields.splice(fieldIndex, 1);
-    toast.success("Field removed", { autoClose: 500 })
+    // toast.success("Field removed", { autoClose: 500 })
 };
 
 
@@ -761,21 +774,35 @@ const onFieldTypeChange = (sectionIndex, rowIndex, columnIndex, fieldIndex) => {
 
 };
 
-function handleFieldChange(event) {
-      console.log(" === Field label changed to:", event.target.value);
-      // Add further logic here (e.g., form validation, API call, etc.)
-      const xyz = sections.flatMap(extractFieldnames);
-      console.log(" ==== xyz  ==== ", xyz)
+function handleFieldChange(sectionIndex, rowIndex, columnIndex, fieldIndex) {
+    const flatArr = sections.flatMap(extractfieldlabels);
+    const isDuplicate = hasDuplicates(flatArr); // Check once to reuse this result
 
-      const hasDuplicates = (array) => new Set(array).size !== array.length;
+    // Assign error message for the specific field if fieldIndex is valid
+    if (fieldIndex !== undefined && fieldIndex >= 0 && columnIndex !== undefined && columnIndex >= 0 && sectionIndex !== undefined) {
+        sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex].errorMsg =
+            isDuplicate ? "Duplicate Label Name" : "";
     }
 
-function handleInputChange(eve){
+    // Assign error message for the column if fieldIndex is not valid
+    if (fieldIndex === undefined && columnIndex !== undefined && columnIndex >= 0 && sectionIndex !== undefined) {
+        sections[sectionIndex].rows[rowIndex].columns[columnIndex].errorMsg =
+            isDuplicate ? "Duplicate Label Name in Column" : "";
+    }
+
+    // Assign error message for the section if both columnIndex and fieldIndex are not valid
+    if (columnIndex === undefined && fieldIndex === undefined && sectionIndex !== undefined) {
+        sections[sectionIndex].errorMsg =
+            isDuplicate ? "Duplicate Label Name in Section" : "";
+    }
+}
+
+function handleInputChange(eve) {
     console.log(" input change === ", eve.target.value)
-    
+
     const filters = [
         ["form_name", "like", `%${eve.target.value}%`]
-    ];    
+    ];
     const queryParams = {
         fields: JSON.stringify(["*"]),
         filters: JSON.stringify(filters)
@@ -789,7 +816,7 @@ function handleInputChange(eve){
         .catch((error) => {
             console.error("Error fetching ezyForms data:", error);
         });
-}    
+}
 
 const getRowSuffix = (index) => {
     if (index === 0) {
