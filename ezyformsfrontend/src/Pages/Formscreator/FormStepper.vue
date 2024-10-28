@@ -204,7 +204,11 @@
                                                         <section class="d-flex justify-content-between">
                                                             <input v-model="section.label" type="text"
                                                                 class="border-less-input font-14"
+                                                                @change="handleFieldChange(sectionIndex)"
                                                                 placeholder="Untitled approval flow" />
+                                                            <small v-if="section.errorMsg" class="text-danger"> {{
+                        section.errorMsg
+                    }}</small>
                                                             <div class=" d-flex">
                                                                 <button
                                                                     class="btn btn-light designationBtn d-flex align-items-center"
@@ -299,14 +303,19 @@
                                                                                 <input v-model="column.label"
                                                                                     type="text"
                                                                                     class="border-less-input columnFieldInput font-14"
+                                                                                    @change="handleFieldChange(sectionIndex, rowIndex, columnIndex)"
                                                                                     placeholder="Column Name" />
+                                                                                <small v-if="column.errorMsg"
+                                                                                    class="text-danger"> {{
+                        column.errorMsg
+                    }}</small>
                                                                                 <button class="btn btn-light btn-sm"
                                                                                     @click="
-                        removeColumn(
-                            sectionIndex,
-                            rowIndex,
-                            columnIndex
-                        )
+                    removeColumn(
+                        sectionIndex,
+                        rowIndex,
+                        columnIndex
+                    )
                         ">
                                                                                     <i class="bi bi-trash"></i>
                                                                                 </button>
@@ -319,7 +328,7 @@
                                                                                         class="d-flex justify-content-between">
                                                                                         <input v-model="field.label"
                                                                                             placeholder="Name the field"
-                                                                                            @change="handleFieldChange"
+                                                                                            @change="handleFieldChange(sectionIndex, rowIndex, columnIndex, fieldIndex)"
                                                                                             class="border-less-input mb-1 columnFieldInput font-14 p-0" />
                                                                                         <div>
                                                                                             <button
@@ -387,6 +396,10 @@
 
                                                                                         <!--- checkbox for mandatory -->
                                                                                     </div>
+                                                                                    <small v-if="field.errorMsg"
+                                                                                        class="text-danger"> {{
+                        field.errorMsg
+                    }}</small>
                                                                                 </div>
                                                                             </div>
                                                                             <div
@@ -638,7 +651,7 @@ import FormFields from "../../Components/FormFields.vue";
 import { onMounted, ref, reactive, computed, watch } from "vue";
 import ButtonComp from "../../Components/ButtonComp.vue";
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
-import { extractFieldsWithBreaks, rebuildToStructuredArray, extractFieldnames } from '../../shared/services/field_format';
+import { extractFieldsWithBreaks, rebuildToStructuredArray, extractFieldnames, extractfieldlabels } from '../../shared/services/field_format';
 import axiosInstance from '../../shared/services/interceptor';
 import { apis, doctypes } from "../../shared/apiurls";
 import { useRoute, useRouter } from "vue-router";
@@ -666,6 +679,7 @@ const businessUnit = computed(() => {
 const ezyFormsData = ref([]);
 const formNameError = ref("");
 const formShortNameError = ref("");
+const fieldNameError = ref("")
 let paramId = ref("")
 
 onMounted(() => {
@@ -959,21 +973,34 @@ const onFieldTypeChange = (sectionIndex, rowIndex, columnIndex, fieldIndex) => {
 
 };
 
-function handleFieldChange(event) {
-    console.log(" === Field label changed to:", event.target.value);
-    // Add further logic here (e.g., form validation, API call, etc.)
-    const xyz = sections.flatMap(extractFieldnames);
-    console.log(" ==== xyz  ==== ", xyz)
+function handleFieldChange(sectionIndex, rowIndex, columnIndex, fieldIndex) {
+    const flatArr = sections.flatMap(extractfieldlabels);
+    const isDuplicate = hasDuplicates(flatArr); // Check once to reuse this result
 
-    const hasDuplicates = (array) => new Set(array).size !== array.length;
+    // Assign error message for the specific field if fieldIndex is valid
+    if (fieldIndex !== undefined && fieldIndex >= 0 && columnIndex !== undefined && columnIndex >= 0 && sectionIndex !== undefined) {
+        sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex].errorMsg =
+            isDuplicate ? "Duplicate Label Name" : "";
+    }
+
+    // Assign error message for the column if fieldIndex is not valid
+    if (fieldIndex === undefined && columnIndex !== undefined && columnIndex >= 0 && sectionIndex !== undefined) {
+        sections[sectionIndex].rows[rowIndex].columns[columnIndex].errorMsg =
+            isDuplicate ? "Duplicate Label Name in Column" : "";
+    }
+
+    // Assign error message for the section if both columnIndex and fieldIndex are not valid
+    if (columnIndex === undefined && fieldIndex === undefined && sectionIndex !== undefined) {
+        sections[sectionIndex].errorMsg =
+            isDuplicate ? "Duplicate Label Name in Section" : "";
+    }
 }
-function handleInputChange(event, fieldType) {
-    const inputValue = event.target.value;
 
+function handleInputChange(eve) {
+    console.log(" input change === ", eve.target.value)
 
-    // Set filter based on fieldType
     const filters = [
-        [fieldType, "like", `%${inputValue}%`]
+        ["form_name", "like", `%${eve.target.value}%`]
     ];
     const queryParams = {
         fields: JSON.stringify(["*"]),
