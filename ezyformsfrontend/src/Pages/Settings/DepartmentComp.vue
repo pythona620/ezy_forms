@@ -180,8 +180,47 @@
             </div>
         </div>
         <div class="mt-2">
-            <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction='true' actionType="dropdown"
-                isCheckbox="true" />
+            <GlobalTable :tHeaders="tableheaders" :tData="tableData" @actionClicked="actionCreated" isAction='true'
+                :actions="actions" actionType="dropdown" isCheckbox="true" />
+        </div>
+        <div class="modal fade" id="viewCategory" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+            aria-labelledby="viewCategoryLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="viewCategoryLabel">Modal title</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table mt-3 global-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Category Name</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(item, index) in categoriesData" :key="index">
+                                    <td>{{ index + 1 }}</td>
+                                    <td v-if="editIndex !== index">{{ item.category }}</td>
+                                    <td v-else>
+                                        <input type="text" v-model="editCategory" @change="saveEditCategory(index)"
+                                            placeholder="Edit Category" />
+                                    </td>
+                                    <td>
+                                        <i v-if="editIndex !== index" class="bi bi-pencil"
+                                            @click="startEditCategory(index, item.category)"></i>
+                                        <i v-else class="bi bi-check font-20" @click="saveEditCategory(index)"></i>
+                                        <i class="bi bi-trash ms-2" @click="removeCategory(index)"></i>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
         </div>
     </div>
 </template>
@@ -193,6 +232,8 @@ import axiosInstance from '../../shared/services/interceptor';
 import { apis, doctypes } from '../../shared/apiurls';
 import { onMounted, ref, computed, watch } from 'vue';
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
+
+
 const businessUnit = computed(() => {
     return EzyBusinessUnit.value;
 });
@@ -206,9 +247,44 @@ const EzyFormsCompanys = ref([]);
 const newCategory = ref("");
 const editIndex = ref(null);
 const editCategory = ref("");
+const categoriesData = ref([])
+const actions = ref(
+    [
+        { name: 'View Categories', icon: 'fa-solid fa-eye' },
+
+    ]
+)
+function actionCreated(rowData, actionEvent) {
+    if (actionEvent.name === 'View Categories') {
+        if (rowData) {
+            console.log(rowData.name, "jjjjjjjjjjjjj");
+            axiosInstance.get(apis.resource + doctypes.departments + `/${rowData.name}`)
+                .then((res) => {
+                    if (res.data) {
+                        console.log(res.data, "================================");
+                        if (res?.data?.ezy_departments_items) {
+                            categoriesData.value = res.data.ezy_departments_items;
+                        }
+                        console.log(categoriesData.value);
+
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error fetching categories data:", error);
+                });
 
 
 
+            const modal = new bootstrap.Modal(document.getElementById('viewCategory'), {});
+            modal.show();
+
+        } else {
+            console.warn(" There is no form fields ")
+            formCreation(rowData)
+        }
+    }
+
+}
 const tableheaders = ref([
     { th: "Department Code", td_key: "department_code" },
     { th: "Department Name", td_key: "department_name" },
@@ -258,27 +334,43 @@ function addCategory() {
             category: newCategory.value,
             parentfield: 'ezy_departments_items'
         });
-        newCategory.value = ""; // Clear the input field after adding
+        newCategory.value = "";
     }
 }
 function startEdit(index, category) {
-    editIndex.value = index; // Set the index of the category to edit
-    editCategory.value = category; // Load the category name into the edit input
+    editIndex.value = index;
+    editCategory.value = category;
 }
 
 function saveEdit(index) {
     if (editCategory.value.trim()) {
-        CreateDepartments.value.ezy_departments_items[index].category = editCategory.value; // Update the category name
-        editIndex.value = null; // Clear edit mode
-        editCategory.value = ""; // Clear edit input
+        CreateDepartments.value.ezy_departments_items[index].category = editCategory.value;
+        editIndex.value = null;
+        editCategory.value = "";
     }
 }
 
 function removeCategory(index) {
-    CreateDepartments.value.ezy_departments_items.splice(index, 1); // Remove item at specified index
+    CreateDepartments.value.ezy_departments_items.splice(index, 1);
 }
+
+function startEditCategory(index, category) {
+    editIndex.value = index;
+    editCategory.value = category;
+}
+
+
+function saveEditCategory(index) {
+    if (editCategory.value.trim()) {
+        categoriesData.value[index].category = editCategory.value;
+        editIndex.value = null;
+        editCategory.value = "";
+    }
+}
+
+
 function applyFilters() {
-    deptData(); // Calls deptData to send filters
+    deptData();
 }
 
 function resetFilters() {
@@ -333,7 +425,7 @@ function deptData() {
     axiosInstance.get(apis.resource + doctypes.departments, { params: queryParams })
         .then((res) => {
             if (res.data) {
-                console.log(res.data, "Fetched departments");
+
                 tableData.value = res.data;
             }
         })

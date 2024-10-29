@@ -10,7 +10,8 @@ export const doctypes = {
   users: "User",
   departments: "Ezy Departments",
   wfSettingEzyForms: "Ezy Business Unit",
-  EzyFormDefinitions: "Ezy Form Definitions"
+  EzyFormDefinitions: "Ezy Form Definitions",
+  designations: "Ezy Designations"
 
 };
 
@@ -21,9 +22,9 @@ export const apis = {
   savedata:
     domain +
     `/method/ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions.add_dynamic_doctype`,
-    savedocs: domain+'/method/frappe.desk.form.save.savedocs',
-    delete_form_items : domain + '/method/ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions.deleting_customized_field_from_custom_dynamic_doc',
-    checkRecord : domain + '/method/frappe.client.get_list'
+  savedocs: domain + '/method/frappe.desk.form.save.savedocs',
+  delete_form_items: domain + '/method/ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions.deleting_customized_field_from_custom_dynamic_doc',
+  checkRecord: domain + '/method/frappe.client.get_list'
 };
 
 // export const tokens = {
