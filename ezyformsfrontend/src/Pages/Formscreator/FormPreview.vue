@@ -15,6 +15,91 @@
                     </div>
                     <div class="modal-body">
                         <div>
+                            <div class=" card p-1 mb-2">
+                                <div class=" container">
+                                    <div class="row">
+
+                                        <div class="col">
+                                            <div class="container">
+                                                <div class="row">
+                                                    <div class="col-3">
+                                                        <div class=" d-flex align-items-center justify-content-between">
+                                                            <span class="font-10">
+                                                                Form Name
+                                                            </span>
+                                                            <span class=" text-right">:</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-9">
+                                                        <span class=" font-12 fw-bold">
+                                                            {{ $props.formDescriptions.form_name || "Untitled" }}
+                                                        </span>
+                                                    </div>
+                                                    <div class="col-3">
+                                                        <div class=" d-flex align-items-center justify-content-between">
+                                                            <span class="font-10">
+                                                                Form Short Code
+                                                            </span>
+                                                            <span class=" text-right">:</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-9">
+                                                        <span class="font-12 fw-bold">
+                                                            {{ $props.formDescriptions.form_short_name }}
+                                                        </span>
+                                                    </div>
+                                                    <div class="col-3">
+                                                        <div class=" d-flex align-items-center justify-content-between">
+                                                            <span class="font-10">
+                                                                Form category
+                                                            </span>
+                                                            <span class=" text-right">:</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-9">
+                                                        <span class="font-12 fw-bold">
+                                                            {{ $props.formDescriptions.form_category }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class=" container">
+                                                <div class="row">
+                                                    <div class="col-6">
+                                                        <div class=" d-flex align-items-center justify-content-between">
+                                                            <span class="font-10">
+                                                                Owner of the form
+                                                            </span>
+                                                            <span class=" text-right">:</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <span class="font-12 fw-bold">
+                                                            {{ $props.formDescriptions.owner_of_the_form }}
+
+                                                        </span>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <div class=" d-flex align-items-center justify-content-between">
+                                                            <span class="font-10">
+                                                                Accessibility to departments
+                                                            </span>
+                                                            <span class=" text-right">:</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <span class="font-12 fw-bold">
+                                                            {{ $props.formDescriptions.accessible_departments }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="card p-1">
                                 <div v-for="(section, sectionIndex) in sections" :key="'preview-' + sectionIndex"
                                     class="preview-section m-2">
@@ -29,20 +114,21 @@
                                                         :key="'field-preview-' + fieldIndex">
                                                         <div v-if="field.label">
                                                             <label :for="'field-' +
-                                    sectionIndex +
-                                    '-' +
-                                    columnIndex +
-                                    '-' +
-                                    fieldIndex
-                                    ">
+                                                                sectionIndex +
+                                                                '-' +
+                                                                columnIndex +
+                                                                '-' +
+                                                                fieldIndex
+                                                                ">
 
                                                                 <span class=" font-12">{{ field.label
                                                                     }}</span></label>
                                                             <template v-if="field.fieldtype == 'Select' ||
-                                    field.fieldtype == 'multiselect'
-                                    ">
+                                                                field.fieldtype == 'multiselect'
+                                                                ">
                                                                 <select :multiple="field.fieldtype == 'multiselect'
-                                    " v-model="field.value" class="form-select mb-2 font-13">
+                                                                " v-model="field.value"
+                                                                    class="form-select mb-2 font-13">
                                                                     <option v-for="(
                                                         option, index
                                                       ) in field.options.split('\n')" :key="index" :value="option">
@@ -51,8 +137,8 @@
                                                                 </select>
                                                             </template>
                                                             <template v-else-if="field.fieldtype == 'checkbox' ||
-                                    field.fieldtype == 'radio'
-                                    ">
+                                                                field.fieldtype == 'radio'
+                                                                ">
                                                                 <div class="row">
                                                                     <div class="form-check col-4 mb-4" v-for="(
                                                         option, index
@@ -60,14 +146,15 @@
                                                                         <div class="d-flex gap-2 align-items-center">
                                                                             <div>
                                                                                 <input class="" :type="field.fieldtype"
-                                                                                    :name="option" :id="option" />
+                                                                                    :name="option" :id="option"
+                                                                                    readonly />
                                                                             </div>
                                                                             <div>
                                                                                 <label class="form-check-label m-0"
                                                                                     :for="option">
                                                                                     {{
-                                    option
-                                }}
+                                                                option
+                                                            }}
                                                                                 </label>
                                                                             </div>
                                                                         </div>
@@ -75,14 +162,15 @@
                                                                 </div>
                                                             </template>
                                                             <template v-else>
-                                                                <component :is="getFieldComponent(field.fieldtype)"
+                                                                <component readonly
+                                                                    :is="getFieldComponent(field.fieldtype)"
                                                                     v-model="field.value" :type="field.fieldtype" :name="'field-' +
-                                    sectionIndex +
-                                    '-' +
-                                    columnIndex +
-                                    '-' +
-                                    fieldIndex
-                                    " class="form-control previewInputHeight">
+                                                                sectionIndex +
+                                                                '-' +
+                                                                columnIndex +
+                                                                '-' +
+                                                                fieldIndex
+                                                                " class="form-control previewInputHeight">
                                                                 </component>
                                                             </template>
                                                         </div>
@@ -103,21 +191,27 @@
 </template>
 
 <script setup>
-import { defineProps } from "vue";
-
+import { defineProps, watch } from "vue";
 
 const props = defineProps({
     sections: {
         type: [Array, null],
         required: true,
-    }
+    },
+    formDescriptions: {
+        type: Object,
+        required: true,
+    },
 });
 
-
-
-// watch(() => {
-//       console.log(" watch  == ", props.sections)
-// })
+// Watch for changes in formDescriptions
+watch(
+    () => props.formDescriptions,
+    (newVal) => {
+        console.log("Updated formDescriptions in child:", newVal);
+    },
+    { deep: true } // Enables deep watching for nested object changes
+);
 const getFieldComponent = (type) => {
     switch (type) {
         case "Data":

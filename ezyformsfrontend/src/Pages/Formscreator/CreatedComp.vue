@@ -96,7 +96,7 @@
             </div>
         </div>
 
-        <FormPreview :sections="selectedForm" />
+        <FormPreview :sections="selectedForm" :formDescriptions="formDescriptions" />
 
 
     </div>
@@ -127,9 +127,12 @@ const selectedForm = ref(null);
 function actionCreated(rowData, actionEvent) {
     if (actionEvent.name === 'View form') {
         if (rowData?.form_json) {
+            formDescriptions.value = { ...rowData }
+            console.log(formDescriptions.value, "iiiiiiiiiiiii");
             selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json?.replace(/\\\"/g, '"')))
             const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});// raise a modal
             modal.show();
+
         } else {
             console.warn(" There is no form fields ")
             formCreation(rowData)
@@ -155,6 +158,7 @@ const actions = ref(
         { name: 'In-active this form', icon: 'fa-solid fa-ban' }
     ]
 )
+const formDescriptions = ref({})
 
 const filterOnModal = ref({
     Requested_id: "",
@@ -193,7 +197,8 @@ watch(
     { immediate: true }
 );
 const tableheaders = ref([
-    { th: "Form name", td_key: "name" },
+    { th: "Name", td_key: "name" },
+    { th: "Form name", td_key: "form_name" },
     { th: "Form category", td_key: "form_category" },
     { th: "Owner of form", td_key: "owner_of_the_form" },
     { th: "Accessible departments", td_key: "accessible_departments" },

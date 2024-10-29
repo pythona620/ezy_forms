@@ -22,21 +22,21 @@
                         <div class="col-2">
                             <ul class="steps">
                                 <li v-for="step in steps" :key="step.id" :class="{
-                                    active: activeStep === step.id,
-                                    completed: activeStep > step.id,
-                                }">
-                                    <!-- && index === steps.length - 1 -->
-                                    <div class="d-flex gap-3 align-items-center" @click="handleStepClick(step.label)">
+                        active: activeStep === step.id,
+                        completed: activeStep > step.id,
+                    }">
+                                    <div class="d-flex gap-3 align-items-center" @click="handleStepClick(step.id)">
                                         <i v-if="activeStep > step.id"
                                             class="ri-checkbox-circle-fill completedStepIcon"></i>
                                         <i v-else :class="step.icon"></i>
                                         <div class="step-text">
                                             <span class="font-11">{{ step.stepno }}</span><br />
-                                            <span class=" font-14">{{ step.label }}</span>
+                                            <span class="font-14">{{ step.label }}</span>
                                         </div>
                                     </div>
                                 </li>
                             </ul>
+
                         </div>
                         <div class="col-10">
                             <div class="">
@@ -51,7 +51,9 @@
                                                         Form</span>
                                                 </h1>
                                                 <h1 class="font-14 fw-bold m-0">About Form</h1>
-                                                <ButtonComp class="buttoncomp" name="Next" v-if="activeStep < 3"
+                                                <ButtonComp
+                                                    :disabled="formNameError.length || formShortNameError.length || !filterObj.accessible_departments.length || !filterObj.form_category.length || !filterObj.owner_of_the_form.length"
+                                                    class="buttoncomp" name="Next" v-if="activeStep < 3"
                                                     @click="nextStep" />
                                             </div>
                                         </div>
@@ -60,25 +62,29 @@
                                             <div class="col-4">
                                                 <div class="mt-4">
                                                     <div class="">
-                                                        <FormFields labeltext="Form Name" class="mb-1" type="text"
-                                                            tag="input" name="Value" id="Value"
-                                                            placeholder="Untitle Form" orm @change="handleInputChange"
+                                                        <FormFields
+                                                            :disabled="paramId != undefined && paramId != null && paramId != 'new'"
+                                                            labeltext="Form Name" class="mb-1" type="text" tag="input"
+                                                            name="Value" id="formName" placeholder="Untitled Form"
+                                                            @change="(event) => handleInputChange(event, 'form_name')"
                                                             v-model="filterObj.form_name" />
-                                                        <span v-if="formNameError" class="text-danger ErrorMsg ms-2">{{
-                                                            formNameError
-                                                            }}</span>
+                                                        <span v-if="formNameError" class="text-danger ErrorMsg ms-2">
+                                                            {{ formNameError }}</span>
                                                     </div>
                                                 </div>
                                                 <div class="mt-4">
                                                     <div class="">
 
-                                                        <FormFields labeltext="Form Short Code" class="mb-1" type="text"
-                                                            tag="input" name="Value" id="Value"
+                                                        <FormFields
+                                                            :disabled="paramId != undefined && paramId != null && paramId != 'new'"
+                                                            labeltext="Form Short Code" class="mb-1" type="text"
+                                                            tag="input" name="Value" id="formShortCode"
                                                             placeholder="Untitled Form"
+                                                            @change="(event) => handleInputChange(event, 'form_short_name')"
                                                             v-model="filterObj.form_short_name" />
                                                         <span v-if="formShortNameError"
-                                                            class="text-danger ErrorMsg ms-2">{{
-                                                                formShortNameError }}</span>
+                                                            class="text-danger ErrorMsg ms-2">
+                                                            {{ formShortNameError }}</span>
                                                         <!-- <label for="">Form Short Code</label>
 
                                                         <Multiselect :options=formOptions
@@ -164,21 +170,25 @@
                                             <div
                                                 class="stepperbackground ps-2 pe-2 m-0 d-flex justify-content-between align-items-center">
                                                 <h1 class="font-11 m-0">
-                                                    <i @click="prevStep" class="bi bi-chevron-left"></i><span
+                                                    <i @click="prevStep(1)" class="bi bi-chevron-left"></i><span
                                                         class="ms-2">Back To About Form</span>
                                                 </h1>
-                                                <div class=" d-flex gap-2">
+                                                <div class=" d-flex gap-2 align-items-center">
                                                     <div v-if="sections.length">
                                                         <button class="btn btn-light font-13" type="button"
                                                             @click="previewForm">
                                                             <i class="bi bi-eye me-1"></i>Preview
                                                         </button>
-                                                        <FormPreview :sections="sections" />
+                                                        <FormPreview :sections="sections"
+                                                            :formDescriptions="formDescriptions" />
                                                     </div>
+                                                    <ButtonComp
+                                                        class="buttoncomp btn btn-dark font-10  Withborder border"
+                                                        name="Next" v-if="activeStep < 3" @click="nextStep" />
                                                     <button :disabled="!sections.length"
                                                         class="btn btn-dark font-10  Withborder border " type="button"
                                                         @click="saveFormData()">
-                                                        Save Data
+                                                        Save data
                                                     </button>
                                                     <!-- <button class="btn btn-light font-10" type="button"
                                                         data-bs-toggle="modal" data-bs-target="#exampleModal"
@@ -197,8 +207,8 @@
                                                                 @change="handleFieldChange(sectionIndex)"
                                                                 placeholder="Untitled approval flow" />
                                                             <small v-if="section.errorMsg" class="text-danger"> {{
-                                                                section.errorMsg
-                                                            }}</small>
+                        section.errorMsg
+                    }}</small>
                                                             <div class=" d-flex">
                                                                 <button
                                                                     class="btn btn-light designationBtn d-flex align-items-center"
@@ -297,16 +307,16 @@
                                                                                     placeholder="Column Name" />
                                                                                 <small v-if="column.errorMsg"
                                                                                     class="text-danger"> {{
-                                                                                        column.errorMsg
-                                                                                    }}</small>
+                        column.errorMsg
+                    }}</small>
                                                                                 <button class="btn btn-light btn-sm"
                                                                                     @click="
-                                                                                        removeColumn(
-                                                                                            sectionIndex,
-                                                                                            rowIndex,
-                                                                                            columnIndex
-                                                                                        )
-                                                                                        ">
+                    removeColumn(
+                        sectionIndex,
+                        rowIndex,
+                        columnIndex
+                    )
+                        ">
                                                                                     <i class="bi bi-trash"></i>
                                                                                 </button>
                                                                             </div>
@@ -330,13 +340,13 @@
                                                                                             <button
                                                                                                 class="btn btn-light btn-sm"
                                                                                                 @click="
-                                                                                                    removeField(
-                                                                                                        sectionIndex,
-                                                                                                        rowIndex,
-                                                                                                        columnIndex,
-                                                                                                        fieldIndex
-                                                                                                    )
-                                                                                                    ">
+                        removeField(
+                            sectionIndex,
+                            rowIndex,
+                            columnIndex,
+                            fieldIndex
+                        )
+                        ">
                                                                                                 <i
                                                                                                     class="bi bi-trash"></i>
                                                                                             </button>
@@ -345,13 +355,13 @@
                                                                                     <select v-model="field.fieldtype"
                                                                                         class="form-select mb-2 font-13 searchSelect"
                                                                                         @change="
-                                                                                            onFieldTypeChange(
-                                                                                                sectionIndex,
-                                                                                                rowIndex,
-                                                                                                columnIndex,
-                                                                                                fieldIndex
-                                                                                            )
-                                                                                            ">
+                        onFieldTypeChange(
+                            sectionIndex,
+                            rowIndex,
+                            columnIndex,
+                            fieldIndex
+                        )
+                        ">
                                                                                         <option value="">Select Type
                                                                                         </option>
                                                                                         <option
@@ -388,8 +398,8 @@
                                                                                     </div>
                                                                                     <small v-if="field.errorMsg"
                                                                                         class="text-danger"> {{
-                                                                                            field.errorMsg
-                                                                                        }}</small>
+                        field.errorMsg
+                    }}</small>
                                                                                 </div>
                                                                             </div>
                                                                             <div
@@ -397,8 +407,8 @@
                                                                                 <button
                                                                                     class="btn btn-light btn-sm d-flex align-items-center addField m-2"
                                                                                     @click="
-                                                                                        addField(sectionIndex, rowIndex, columnIndex)
-                                                                                        ">
+                        addField(sectionIndex, rowIndex, columnIndex)
+                        ">
                                                                                     <i class="bi bi-plus fs-4"></i>
                                                                                     <span>Add Field</span>
                                                                                 </button>
@@ -425,6 +435,204 @@
                                                 </div>
                                             </div>
                                         </div>
+                                    </div>
+                                    <div v-if="activeStep === 3">
+                                        <div
+                                            class="stepperbackground ps-2 pe-2 m-0 d-flex justify-content-between align-items-center">
+                                            <h1 class="font-11 m-0">
+                                                <i @click="prevStep(2)" class="bi bi-chevron-left"></i><span
+                                                    class="ms-2">Back To Fields & Workflow</span>
+                                            </h1>
+                                            <div class=" d-flex gap-2">
+
+                                                <button :disabled="!sections.length"
+                                                    class="btn btn-dark font-10  Withborder border " type="button"
+                                                    @click="saveFormData()">
+                                                    Save Data
+                                                </button>
+
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class=" card p-3 mb-2 mt-2">
+                                                <div class=" container">
+                                                    <div class="row">
+                                                        <div class="col">
+                                                            <div class="container">
+                                                                <div class="row">
+                                                                    <div class="col-3">
+                                                                        <div
+                                                                            class=" d-flex align-items-center justify-content-between">
+                                                                            <span class="font-10">
+                                                                                Form Name
+                                                                            </span>
+                                                                            <span class=" text-right">:</span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-9">
+                                                                        <span class=" font-12 fw-bold">
+                                                                            {{ formDescriptions.form_name }}
+                                                                        </span>
+                                                                    </div>
+                                                                    <div class="col-3">
+                                                                        <div
+                                                                            class=" d-flex align-items-center justify-content-between">
+                                                                            <span class="font-10">
+                                                                                Form Short Code
+                                                                            </span>
+                                                                            <span class=" text-right">:</span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-9">
+                                                                        <span class="font-12 fw-bold">
+                                                                            {{ formDescriptions.form_short_name }}
+                                                                        </span>
+                                                                    </div>
+                                                                    <div class="col-3">
+                                                                        <div
+                                                                            class=" d-flex align-items-center justify-content-between">
+                                                                            <span class="font-10">
+                                                                                Form category
+                                                                            </span>
+                                                                            <span class=" text-right">:</span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-9">
+                                                                        <span class="font-12 fw-bold">
+                                                                            {{ formDescriptions.form_category }}
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col">
+                                                            <div class=" container">
+                                                                <div class="row">
+                                                                    <div class="col-6">
+                                                                        <div
+                                                                            class=" d-flex align-items-center justify-content-between">
+                                                                            <span class="font-10">
+                                                                                Owner of the form
+                                                                            </span>
+                                                                            <span class=" text-right">:</span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-6">
+                                                                        <span class="font-12 fw-bold">
+                                                                            {{ formDescriptions.owner_of_the_form }}
+                                                                        </span>
+                                                                    </div>
+                                                                    <div class="col-6">
+                                                                        <div
+                                                                            class=" d-flex align-items-center justify-content-between">
+                                                                            <span class="font-10">
+                                                                                Accessibility to departments
+                                                                            </span>
+                                                                            <span class=" text-right">:</span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-6">
+                                                                        <span class="font-12 fw-bold">
+                                                                            {{ formDescriptions.accessible_departments
+                                                                            }}
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div v-if="sections.length" class="card p-1">
+                                                <div v-for="(section, sectionIndex) in sections"
+                                                    :key="'preview-' + sectionIndex" class="preview-section m-2">
+                                                    <h5>{{ section.label || '-' }}</h5>
+                                                    <div class=" container-fluid">
+                                                        <div class="row" v-for="(row, rowIndex) in section.rows"
+                                                            :key="rowIndex">
+                                                            <div v-for="(column, columnIndex) in row.columns"
+                                                                :key="'column-preview-' + columnIndex" class="col">
+                                                                <h6>{{ column.label || '-' }}</h6>
+                                                                <div class="mb-2 ms-2">
+                                                                    <div v-for="(field, fieldIndex) in column.fields"
+                                                                        :key="'field-preview-' + fieldIndex">
+                                                                        <div v-if="field.label">
+                                                                            <label :for="'field-' +
+                        sectionIndex +
+                        '-' +
+                        columnIndex +
+                        '-' +
+                        fieldIndex
+                        ">
+
+                                                                                <span class=" font-12">{{ field.label
+                                                                                    }}</span></label>
+                                                                            <template v-if="field.fieldtype == 'Select' ||
+                        field.fieldtype == 'multiselect'
+                        ">
+                                                                                <select :multiple="field.fieldtype == 'multiselect'
+                        " v-model="field.value" class="form-select mb-2 font-13">
+                                                                                    <option v-for="(
+                                                        option, index
+                                                      ) in field.options.split('\n')" :key="index" :value="option">
+                                                                                        {{ option }}
+                                                                                    </option>
+                                                                                </select>
+                                                                            </template>
+                                                                            <template v-else-if="field.fieldtype == 'checkbox' ||
+                        field.fieldtype == 'radio'
+                        ">
+                                                                                <div class="row">
+                                                                                    <div class="form-check col-4 mb-4"
+                                                                                        v-for="(
+                                                        option, index
+                                                      ) in field?.options?.split('\n')" :key="index">
+                                                                                        <div
+                                                                                            class="d-flex gap-2 align-items-center">
+                                                                                            <div>
+                                                                                                <input class=""
+                                                                                                    :type="field.fieldtype"
+                                                                                                    :name="option"
+                                                                                                    :id="option"
+                                                                                                    readonly />
+                                                                                            </div>
+                                                                                            <div>
+                                                                                                <label
+                                                                                                    class="form-check-label m-0"
+                                                                                                    :for="option">
+                                                                                                    {{
+                        option
+                    }}
+                                                                                                </label>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </template>
+                                                                            <template v-else>
+                                                                                <component readonly
+                                                                                    :is="getFieldComponent(field.fieldtype)"
+                                                                                    v-model="field.value"
+                                                                                    :type="field.fieldtype" :name="'field-' +
+                        sectionIndex +
+                        '-' +
+                        columnIndex +
+                        '-' +
+                                                                fieldIndex
+                                                                " class="form-control previewInputHeight">
+                                                                                </component>
+                                                                            </template>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
                                     </div>
                                 </div>
                             </div>
@@ -476,16 +684,14 @@ let paramId = ref("")
 
 onMounted(() => {
     deptData();
-
     paramId = route.params.paramid || 'new';
     console.log(' === paramId:', paramId);
     if (paramId != undefined && paramId != null && paramId != 'new') {
         getFormData()
     }
-    tableData()
-})
 
-const selectedAccdept = ref("")
+
+})
 const filterObj = ref({
     form_name: "",
     form_short_name: "",
@@ -494,6 +700,10 @@ const filterObj = ref({
     form_category: "",
     owner_of_the_form: "",
 });
+const formDescriptions = computed(() => filterObj.value);
+
+// const formDescriptions = ref({ ...filterObj.value });
+
 watch(
     businessUnit,
     (newVal) => {
@@ -503,7 +713,8 @@ watch(
 );
 
 
-const steps = [
+
+const steps = ref([
     {
         id: 1,
         label: "About Form",
@@ -516,7 +727,13 @@ const steps = [
         stepno: "Step 2",
         icon: "bi bi-question-circle",
     },
-];
+    {
+        id: 3,
+        label: "Preview & Save",
+        stepno: "Step 3",
+        icon: "ri-checkbox-circle-line"
+    }
+]);
 const fieldTypes = [
     {
         label: "Text",
@@ -584,20 +801,24 @@ function cancelForm() {
         name: 'Created'
     })
 }
-const handleStepClick = (label) => {
-    switch (label) {
-        case "About Form":
-            prevStep();
-            break;
-        case "Fields & Workflow":
-            nextStep();
-            break;
+const handleStepClick = (stepId) => {
+    if (stepId < activeStep.value) {
+        prevStep(stepId);
+    } else if (stepId > activeStep.value) {
+        nextStep(stepId);
     }
 };
-// Move to the next step
+
 const nextStep = () => {
     if (activeStep.value < 3) {
+
         activeStep.value += 1;
+    }
+};
+
+const prevStep = () => {
+    if (activeStep.value > 1) {
+        activeStep.value -= 1;
     }
 };
 watch(
@@ -623,19 +844,15 @@ function formData() {
                 name: 'Created'
             })
         }
-        console.log(dataObj, "saved From Responces");
+
     })
 }
-// Move to the previous step
-const prevStep = () => {
-    if (activeStep.value > 1) {
-        activeStep.value -= 1;
-    }
-};
+
 
 // Function to add a new section with a default column
 const addSection = () => {
-    console.log(" Add Section ", sections)
+
+
     sections.push({
         label: "",
         parent: `${businessUnit.value.value}-${filterObj.value.form_short_name}`,
@@ -664,7 +881,7 @@ const removeSection = (sectionIndex) => {
 const addRow = (sectionIndex) => {
     const rowIndex = sections[sectionIndex].rows.length;  // Get the current row index
     const rowSuffix = getRowSuffix(rowIndex);
-    console.log(" Rowsuffix == ", rowSuffix)
+
     sections[sectionIndex].rows.push({
         label: rowSuffix,
         columns: [
@@ -796,13 +1013,24 @@ function handleInputChange(eve) {
     axiosInstance
         .get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParams })
         .then((res) => {
-            console.log(" res === ", res)
+            ezyFormsData.value = res.data;
+            if (fieldType === "form_name") {
+                formNameError.value = inputValue && ezyFormsData.value.some(item =>
+                    item.form_name && item.form_name.toLowerCase() === inputValue.toLowerCase()
+                ) ? "Name already exists" : "";
+            } else if (fieldType === "form_short_name") {
+                formShortNameError.value = inputValue && ezyFormsData.value.some(item =>
+                    item.form_short_name && item.form_short_name.toLowerCase() === inputValue.toLowerCase()
+                ) ? "Short name already exists" : "";
+            }
+
         })
         .catch((error) => {
             console.error("Error fetching ezyForms data:", error);
+            if (fieldType === "form_name") formNameError.value = "";
+            else if (fieldType === "form_short_name") formShortNameError.value = "";
         });
 }
-
 const getRowSuffix = (index) => {
     if (index === 0) {
         return "1st row";
@@ -824,7 +1052,7 @@ const previewForm = () => {
     modal.show();
     // selectedForm.value = rowData; // Store the selected form data
     // const result = dataObj.fields.map(({ fieldtype, fieldname,label, _user_tags}) => ({ fieldtype, fieldname,label,_user_tags }));
-
+    console.log(formDescriptions.value, "000000000000000000--------------0000000000000000000");
 
 };
 
@@ -876,13 +1104,9 @@ function getFormData() {
                     res_data.accessible_departments = res_data.accessible_departments.split(',');
                 }
                 filterObj.value = res_data
-                formNameError.value = ''
-                formShortNameError.value = ''
-                // NO Need To hit
-                // OwnerOftheForm(filterObj.value.owner_of_the_form);
-                console.log(" Flat array === ", JSON.parse(res_data?.form_json?.replace(/\\\"/g, '"')))
+
                 let structuredArr = rebuildToStructuredArray(JSON.parse(res_data?.form_json?.replace(/\\\"/g, '"')))
-                console.log(" structuredArr === ", structuredArr[0])
+
                 structuredArr.forEach((item, index) => {
                     sections.push(item)
                 })
@@ -898,7 +1122,7 @@ function delete_form_items_fields() {
         deleted_fields: deleted_items.flatMap(extractFieldnames),
         doctype: paramId
     }).then((res) => {
-        console.log(" delete resp === ", res)
+
         if (res?.message?.success) {
             // return res;
             formData()
@@ -916,26 +1140,29 @@ async function saveFormData() {
         formData()
     }
 }
-function tableData() {
-    const filters = [];
-    const queryParams = {
-        fields: JSON.stringify(["*"]),
-        filters: JSON.stringify(filters),
-        limit_page_length: 'None',
-        limitstart: 0,
-        order_by: "`tabEzy Form Definitions`.`creation` desc"
-    };
 
-    axiosInstance
-        .get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParams })
-        .then((res) => {
-            ezyFormsData.value = res.data;
-        })
-        .catch((error) => {
-            console.error("Error fetching ezyForms data:", error);
-        });
-}
-
+const getFieldComponent = (type) => {
+    switch (type) {
+        case "Data":
+            return "input";
+        case "number":
+            return "input";
+        case "Text":
+            return "textarea";
+        case "checkbox":
+            return "input";
+        case "Select":
+            return "select";
+        case "Date":
+            return "input";
+        case "Attach":
+            return "file";
+        case "radio":
+            return "input";
+        default:
+            return "input";
+    }
+};
 
 const getFlatArrayofFields = deleted_items.flatMap(extractFieldnames);
 

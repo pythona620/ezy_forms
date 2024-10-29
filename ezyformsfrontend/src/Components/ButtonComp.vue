@@ -28,7 +28,7 @@ export default {
       default: "button",
     },
     disabled: {
-      type: Boolean,
+      type: [Boolean, Number],
     },
   },
   computed: {
