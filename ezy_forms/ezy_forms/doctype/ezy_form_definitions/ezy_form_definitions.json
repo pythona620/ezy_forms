@@ -67,20 +67,12 @@
   {
    "fieldname": "form_name",
    "fieldtype": "Data",
-<<<<<<< HEAD
-   "in_list_view": 1,
-=======
->>>>>>> 9bff5ee501516029c9aa961cbab7a8627e8df455
    "label": "Form Name"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2024-10-24 10:58:45.260304",
-=======
  "modified": "2024-10-24 10:59:01.449205",
->>>>>>> 9bff5ee501516029c9aa961cbab7a8627e8df455
  "modified_by": "Administrator",
  "module": "Ezy Forms",
  "name": "Ezy Form Definitions",
