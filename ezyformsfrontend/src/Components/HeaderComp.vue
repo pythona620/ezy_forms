@@ -8,7 +8,7 @@
 
                     <div class="col-2">
                         <div class="d-flex gap-2 p-2 align-items-center">
-                            <div><img class="imgmix" src="../assets/Group 1.jpg" /></div>
+                            <div><img class="imgmix" src="../assets/favicon.jpg" /></div>
                             <div class="m-0">
                                 <p class="font-13 m-0 ">EZY | Forms</p>
                             </div>

@@ -20,23 +20,26 @@
                 <div class="form-container container-fluid mt-1">
                     <div class="row">
                         <div class="col-2">
-                            <ul class="steps">
-                                <li v-for="step in steps" :key="step.id" :class="{
+                            <div>
+
+
+                                <ul class="steps">
+                                    <li v-for="step in steps" :key="step.id" :class="{
                         active: activeStep === step.id,
                         completed: activeStep > step.id,
                     }">
-                                    <div class="d-flex gap-3 align-items-center" @click="handleStepClick(step.id)">
-                                        <i v-if="activeStep > step.id"
-                                            class="ri-checkbox-circle-fill completedStepIcon"></i>
-                                        <i v-else :class="step.icon"></i>
-                                        <div class="step-text">
-                                            <span class="font-11">{{ step.stepno }}</span><br />
-                                            <span class="font-14">{{ step.label }}</span>
+                                        <div class="d-flex gap-3 align-items-center" @click="handleStepClick(step.id)">
+                                            <i v-if="activeStep > step.id"
+                                                class="ri-checkbox-circle-fill completedStepIcon"></i>
+                                            <i v-else :class="step.icon"></i>
+                                            <div class="step-text">
+                                                <span class="font-11">{{ step.stepno }}</span><br />
+                                                <span class="font-14">{{ step.label }}</span>
+                                            </div>
                                         </div>
-                                    </div>
-                                </li>
-                            </ul>
-
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
                         <div class="col-10">
                             <div class="">
@@ -397,7 +400,7 @@
                                                                                         <!--- checkbox for mandatory -->
                                                                                     </div>
                                                                                     <small v-if="field.errorMsg"
-                                                                                        class="text-danger"> {{
+                                                                                        class="text-danger font-10"> {{
                         field.errorMsg
                     }}</small>
                                                                                 </div>
@@ -454,8 +457,8 @@
                                             </div>
                                         </div>
                                         <div>
-                                            <div class=" card p-3 mb-2 mt-2">
-                                                <div class=" container">
+                                            <div class=" card py-3 px-0 mb-2 mt-2">
+                                                <div class=" container-fluid">
                                                     <div class="row">
                                                         <div class="col">
                                                             <div class="container">
@@ -508,7 +511,7 @@
                                                         <div class="col">
                                                             <div class=" container">
                                                                 <div class="row">
-                                                                    <div class="col-6">
+                                                                    <div class="col-4">
                                                                         <div
                                                                             class=" d-flex align-items-center justify-content-between">
                                                                             <span class="font-10">
@@ -517,12 +520,12 @@
                                                                             <span class=" text-right">:</span>
                                                                         </div>
                                                                     </div>
-                                                                    <div class="col-6">
+                                                                    <div class="col-8">
                                                                         <span class="font-12 fw-bold">
                                                                             {{ formDescriptions.owner_of_the_form }}
                                                                         </span>
                                                                     </div>
-                                                                    <div class="col-6">
+                                                                    <div class="col-4">
                                                                         <div
                                                                             class=" d-flex align-items-center justify-content-between">
                                                                             <span class="font-10">
@@ -531,7 +534,7 @@
                                                                             <span class=" text-right">:</span>
                                                                         </div>
                                                                     </div>
-                                                                    <div class="col-6">
+                                                                    <div class="col-8">
                                                                         <span class="font-12 fw-bold">
                                                                             {{ formDescriptions.accessible_departments
                                                                             }}
@@ -602,7 +605,7 @@
                                                                                                     :for="option">
                                                                                                     {{
                         option
-                    }}
+                                                                                                    }}
                                                                                                 </label>
                                                                                             </div>
                                                                                         </div>
@@ -708,6 +711,7 @@ watch(
     businessUnit,
     (newVal) => {
         filterObj.value.business_unit = newVal;
+
     },
     { immediate: true }
 );
@@ -836,7 +840,8 @@ function formData() {
         fields,
         "doctype": doctypes.EzyFormDefinitions
     }
-    dataObj.accessible_departments = dataObj.accessible_departments.toString(); //JSON.stringify(dataObj.accessible_departments)
+    console.log(dataObj);
+    dataObj.accessible_departments = dataObj.accessible_departments.toString(); //JSON.stringify(dataObj.accessible_departments) dataObj.accessible_departments.toString()
     axiosInstance.post(apis.savedata, dataObj).then((res) => {
         if (res) {
             toast.success("Form Created Successfull")
@@ -995,12 +1000,13 @@ function handleFieldChange(sectionIndex, rowIndex, columnIndex, fieldIndex) {
             isDuplicate ? "Duplicate Label Name in Section" : "";
     }
 }
+function handleInputChange(event, fieldType) {
+    const inputValue = event.target.value;
+    console.log(`${fieldType} input change === `, inputValue);
 
-function handleInputChange(eve) {
-    console.log(" input change === ", eve.target.value)
-
+    // Set filter based on fieldType
     const filters = [
-        ["form_name", "like", `%${eve.target.value}%`]
+        [fieldType, "like", `%${inputValue}%`]
     ];
     const queryParams = {
         fields: JSON.stringify(["*"]),
@@ -1010,7 +1016,10 @@ function handleInputChange(eve) {
     axiosInstance
         .get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParams })
         .then((res) => {
+            console.log(`${fieldType} response === `, res.data);
             ezyFormsData.value = res.data;
+
+            // Check for duplicates and set appropriate error message
             if (fieldType === "form_name") {
                 formNameError.value = inputValue && ezyFormsData.value.some(item =>
                     item.form_name && item.form_name.toLowerCase() === inputValue.toLowerCase()
@@ -1020,14 +1029,15 @@ function handleInputChange(eve) {
                     item.form_short_name && item.form_short_name.toLowerCase() === inputValue.toLowerCase()
                 ) ? "Short name already exists" : "";
             }
-
         })
         .catch((error) => {
             console.error("Error fetching ezyForms data:", error);
+            // Clear error message on fetch error
             if (fieldType === "form_name") formNameError.value = "";
             else if (fieldType === "form_short_name") formShortNameError.value = "";
         });
 }
+
 const getRowSuffix = (index) => {
     if (index === 0) {
         return "1st row";
@@ -1183,6 +1193,9 @@ const hasDuplicates = (array) => new Set(array).size !== array.length;
 
 .CancelNdSave {
     background-color: #fafafa;
+    position: sticky;
+    top: 0;
+    z-index: 1;
 }
 
 .stepsDiv {
@@ -1411,6 +1424,10 @@ select {
     background-color: #eeeeee;
     height: 50px;
     border-radius: 7px;
+    position: sticky;
+    z-index: 1;
+    top: 30px;
+
 }
 
 .previewInputHeight {

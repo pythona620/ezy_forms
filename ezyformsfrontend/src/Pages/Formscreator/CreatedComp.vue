@@ -13,7 +13,7 @@
                 <div>
                     <button type="button" class=" filterbtn d-flex align-items-center justify-content-between"
                         data-bs-toggle="modal" data-bs-target="#exampleModal">
-                        <span> Filters By</span> <span><i class="bi bi-chevron-down"></i></span>
+                        <span> <i class="ri-filter-2-line"></i></span>
                     </button>
 
                 </div>
@@ -50,15 +50,13 @@
                             </div>
                             <div class="col-3">
                                 <label class="font-13 ps-1" for="dept">Owner OF Form:</label>
-                                <FormFields tag="select" placeholder="Select Department" class="mb-3" name="dept"
-                                    v-model="filterOnModal.Owner_OF_Form" id="dept" :Required="false"
-                                    :options="['JW Marriott Golfshire Banglore', 'JW Marriott Golfshire Banglore']" />
+                                <FormFields tag="input" type="search" placeholder="Select Department" class="mb-3"
+                                    name="dept" v-model="filterOnModal.Owner_OF_Form" id="dept" :Required="false" />
                             </div>
                             <div class="col-3">
-                                <label class="font-13 ps-1" for="dept">Form Category:</label>
-                                <FormFields tag="select" placeholder="Select Department" class="mb-3" name="dept"
-                                    v-model="filterOnModal.Form_Category" id="dept" :Required="false"
-                                    :options="['JW Marriott Golfshire Banglore', 'JW Marriott Golfshire Banglore']" />
+                                <label class="font-13 ps-1 " type="search" for="dept">Form Category:</label>
+                                <FormFields tag="input" placeholder="Select Department" class="mb-3" name="dept"
+                                    v-model="filterOnModal.Form_Category" id="dept" :Required="false" />
                             </div>
                             <div class="col-3">
                                 <label class="font-13 ps-1" for="Requested">Form Name:</label>
@@ -82,12 +80,12 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="cancelfilter border-0 text-nowrap font-10 "
+                        <button type="button" class="cancelfilter border-0 text-nowrap font-10 " @click="resetFilters"
                             data-bs-dismiss="modal"><span class="font-14 me-1">x</span>Cancel Filter</button>
 
                         <button type="button"
                             class="applyfilter text-nowrap border-0 bg-primary text-white font-10 d-flex justify-content-center align-items-center"
-                            data-bs-dismiss="modal" @click="applyFilter()"><span class="font-16 me-1"><i
+                            data-bs-dismiss="modal" @click="applyFilters"><span class="font-16 me-1"><i
                                     class="bi bi-check2 "></i></span>
                             Apply
                             Filter</button>
@@ -232,7 +230,21 @@ const PaginationLimitStart = ([itemsPerPage, start]) => {
     fetchTable();
 
 };
-
+function applyFilters() {
+    fetchTable(); // Calls deptData to send filters
+}
+function resetFilters() {
+    filterOnModal.value = {
+        Requested_id: "",
+        Requested_dept: "",
+        Owner_OF_Form: "",
+        Form_Category: "",
+        Form_Name: "",
+        Requested_Period: "",
+        Approval_status: "",
+        RequestedId: ""
+    };
+}
 function fetchTable() {
     const filters = [
         ["business_unit", "like", `%${filterObj.value.business_unit}%`]
@@ -240,7 +252,30 @@ function fetchTable() {
     if (filterObj.value.search.trim()) {
         filters.push(["name", "like", `%${filterObj.value.search}%`]);
     }
-
+    if (filterOnModal.value.Requested_id) {
+        filters.push(["Requested_id", "like", `%${filterOnModal.value.Requested_id}%`]);
+    }
+    if (filterOnModal.value.Requested_dept) {
+        filters.push(["Requested_dept", "like", `%${filterOnModal.value.Requested_dept}%`]);
+    }
+    if (filterOnModal.value.Owner_OF_Form) {
+        filters.push(["Owner_OF_Form", "like", `%${filterOnModal.value.Owner_OF_Form}%`]);
+    }
+    if (filterOnModal.value.Form_Category) {
+        filters.push(["Form_Category", "like", `%${filterOnModal.value.Form_Category}%`]);
+    }
+    if (filterOnModal.value.Form_Name) {
+        filters.push(["name", "like", `%${filterOnModal.value.Form_Name}%`]);
+    }
+    if (filterOnModal.value.Requested_Period) {
+        filters.push(["Requested_Period", "like", `%${filterOnModal.value.Requested_Period}%`]);
+    }
+    if (filterOnModal.value.Approval_status) {
+        filters.push(["Approval_status", "like", `%${filterOnModal.value.Approval_status}%`]);
+    }
+    if (filterOnModal.value.RequestedId) {
+        filters.push(["RequestedId", "like", `%${filterOnModal.value.RequestedId}%`]);
+    }
     const queryParams = {
         fields: JSON.stringify(["*"]),
         filters: JSON.stringify(filters),
@@ -264,10 +299,11 @@ function fetchTable() {
 <style scoped>
 .filterbtn {
     border: 1px solid #CCCCCC;
-    font-size: 11px;
+    font-size: 16px;
     border-radius: 4px;
     color: #999999;
-    padding: 5px;
+    padding: 8px;
+    width: 100%;
 }
 
 .cancelfilter {
