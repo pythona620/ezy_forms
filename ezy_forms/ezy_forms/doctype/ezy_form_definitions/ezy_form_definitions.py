@@ -10,6 +10,7 @@ import os
 from frappe.modules.utils import export_customizations
 from ast import literal_eval
 import json
+import pandas as pd
 
 class EzyFormDefinitions(Document):
 	pass
@@ -95,21 +96,24 @@ def add_customized_fields_for_dynamic_doc(fields:list[dict],doctype:str):
 		for dicts_of_docs_entries in fields:
 			if dicts_of_docs_entries["fieldname"] in fields_in_mentioned_doctype:
 				if dicts_of_docs_entries["fieldtype"] not in ["Section Break","Column Break","Tab Break"]: dicts_of_docs_entries = dicts_of_docs_entries | {"in_list_view":1}
-				doc_for_existing_custom_field = frappe.get_doc("Custom Field",f"{doctype}-{dicts_of_docs_entries['fieldname']}")
-				doc_for_existing_custom_field.insert_after = dicts_of_docs_entries["insert_after"]
-				if "reqd" in dicts_of_docs_entries:doc_for_existing_custom_field.reqd = dicts_of_docs_entries["reqd"]
-				if "options" in dicts_of_docs_entries:
-					if isinstance(dicts_of_docs_entries["options"],str):
-						dicts_of_docs_entries["options"] = literal_eval(dicts_of_docs_entries["options"])
-					doc_for_existing_custom_field.options = "\n".join(dicts_of_docs_entries["options"])
-				if "default" in dicts_of_docs_entries:
-					doc_for_existing_custom_field.default = dicts_of_docs_entries["default"]
-				doc_for_existing_custom_field.label = dicts_of_docs_entries["label"]
-				doc_for_existing_custom_field.fieldtype = dicts_of_docs_entries["fieldtype"]
-				doc_for_existing_custom_field.save(ignore_permissions=True)
-				frappe.db.commit()
-				doc_for_existing_custom_field.db_update()
-				doc_for_existing_custom_field.reload()
+				if not frappe.db.exists(dicts_of_docs_entries):
+					doc_for_existing_custom_field = frappe.get_doc("Custom Field",f"{doctype}-{dicts_of_docs_entries['fieldname']}")
+					doc_for_existing_custom_field.insert_after = dicts_of_docs_entries["insert_after"]
+					if "reqd" in dicts_of_docs_entries:doc_for_existing_custom_field.reqd = dicts_of_docs_entries["reqd"]
+					if "options" in dicts_of_docs_entries:
+						if isinstance(dicts_of_docs_entries["options"],str):
+							dicts_of_docs_entries["options"] = literal_eval(dicts_of_docs_entries["options"])
+						doc_for_existing_custom_field.options = "\n".join(dicts_of_docs_entries["options"])
+					if "default" in dicts_of_docs_entries:
+						doc_for_existing_custom_field.default = dicts_of_docs_entries["default"]
+					if "description" in dicts_of_docs_entries:
+						doc_for_existing_custom_field.description = dicts_of_docs_entries["description"]
+					doc_for_existing_custom_field.label = dicts_of_docs_entries["label"]
+					doc_for_existing_custom_field.fieldtype = dicts_of_docs_entries["fieldtype"]
+					doc_for_existing_custom_field.save(ignore_permissions=True)
+					frappe.db.commit()
+					doc_for_existing_custom_field.db_update()
+					doc_for_existing_custom_field.reload()
 			else:
 				# Create a new field
 				if dicts_of_docs_entries["fieldtype"] not in ["Section Break","Column Break","Tab Break"]: dicts_of_docs_entries = dicts_of_docs_entries | {"in_list_view":1}
@@ -123,9 +127,11 @@ def add_customized_fields_for_dynamic_doc(fields:list[dict],doctype:str):
 		custom_export_json_file_path = frappe.utils.get_bench_path()+f"/apps/ezy_forms/ezy_forms/user_forms/custom/{doctype.lower().replace(' ','_').replace('-','_')}.json"
 		with open(custom_export_json_file_path, 'r') as file:
 			data = json.load(file)["custom_fields"]
-			keys = ["idx","label","fieldname","fieldtype","insert_after","reqd","options","default"]
-			field_attributes = [dict((k, dict1[k]) for k in keys if k in dict1) for dict1 in data]
-		frappe.db.set_value("Ezy Form Definitions",doctype,{"form_json":str(field_attributes)})
+			keys = ["idx","label","fieldname","fieldtype","insert_after","reqd","options","default","description"]
+			custom_fields_df = pd.DataFrame.from_records(data)
+			custom_fields_df = custom_fields_df[keys]
+			field_attributes = custom_fields_df.sort_values(by=['idx']).to_dict("records")
+		frappe.db.set_value("Ezy Form Definitions",doctype,{"form_json":str(field_attributes).replace("'",'"').replace("None","null")})
 		frappe.db.commit()
 		return field_attributes
 	except Exception as e:
