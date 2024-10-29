@@ -13,6 +13,7 @@
   {
    "fieldname": "ezy_business_unit",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Ezy Business Unit",
    "options": "Ezy Business Unit",
    "search_index": 1
@@ -20,6 +21,7 @@
   {
    "fieldname": "designation_name",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Designation Name",
    "search_index": 1
   },
@@ -35,7 +37,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-10-29 11:58:25.188406",
+ "modified": "2024-10-29 12:20:47.486260",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
  "name": "Ezy Designations",
