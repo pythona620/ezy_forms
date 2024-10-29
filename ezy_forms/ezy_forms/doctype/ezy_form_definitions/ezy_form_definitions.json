@@ -14,7 +14,8 @@
   "count",
   "accessible_departments",
   "form_short_name",
-  "form_json"
+  "form_json",
+  "form_status"
  ],
  "fields": [
   {
@@ -68,11 +69,18 @@
    "fieldname": "form_name",
    "fieldtype": "Data",
    "label": "Form Name"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "form_status",
+   "fieldtype": "Select",
+   "label": "Form Status",
+   "options": "Draft\nCreated"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-10-24 10:59:01.449205",
+ "modified": "2024-10-29 12:50:41.327504",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
  "name": "Ezy Form Definitions",

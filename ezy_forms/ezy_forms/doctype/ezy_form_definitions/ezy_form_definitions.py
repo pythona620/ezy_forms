@@ -12,10 +12,10 @@ import pandas as pd
 from frappe.utils.background_jobs import enqueue
 
 class EzyFormDefinitions(Document):
-    pass
+	pass
  
 @frappe.whitelist()
-def add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:str,form_name:str,accessible_departments:str,form_short_name:str,fields:list[dict]):
+def add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:str,form_name:str,accessible_departments:str,form_short_name:str,fields:list[dict],form_status:str):
 	return_response_for_doc_add = enqueue(
 		enqueued_add_dynamic_doctype,
 		owner_of_the_form=owner_of_the_form,
@@ -25,6 +25,7 @@ def add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:st
 		accessible_departments=accessible_departments,
 		form_short_name=form_short_name,
 		fields=fields,
+		form_status=form_status,
 		now=True,
 		is_async=True,
 		queue="short")
@@ -53,7 +54,7 @@ def deleting_customized_field_from_custom_dynamic_doc(doctype:str,deleted_fields
 	return deleted_fields_qresponse
 
 @frappe.whitelist()
-def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:str,form_name:str,accessible_departments:str,form_short_name:str,fields:list[dict]):
+def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:str,form_name:str,accessible_departments:str,form_short_name:str,fields:list[dict],form_status:str):
 	""" Owner_of_the_form should come from Departments Doctype in Select Field."""
 	"""Adding DocTypes dynamically, giving Perms for the doctype and creating a default section-break field for DocType"""
 	try:
@@ -90,6 +91,7 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
 			form_defs.accessible_departments = accessible_departments
 			form_defs.form_name = form_name
 			form_defs.form_short_name = form_short_name
+			form_defs.form_status = form_status
 			form_defs.owner_of_the_form = owner_of_the_form
 			form_defs.active = 1
 			form_defs.business_unit = business_unit
@@ -187,14 +189,14 @@ def enqueued_deleting_customized_field_from_custom_dynamic_doc(doctype:str,delet
 		return {"success": False, "message": str(e)}
 
 def bench_migrating_from_code():
-    os.chdir(frappe.utils.get_bench_path()+"/sites")
-    subprocess.run(["bench","migrate"])
+	os.chdir(frappe.utils.get_bench_path()+"/sites")
+	subprocess.run(["bench","migrate"])
  
 def activating_perms(doctype):
-    perm_doc = frappe.new_doc("DocPerm")
-    perm_doc.parent = doctype
-    perm_doc.parentfield="permissions"
-    perm_doc.parenttype="DocType"
-    perm_doc.role="System Manager"
-    perm_doc.insert(ignore_permissions=True)
-    frappe.db.commit()
+	perm_doc = frappe.new_doc("DocPerm")
+	perm_doc.parent = doctype
+	perm_doc.parentfield="permissions"
+	perm_doc.parenttype="DocType"
+	perm_doc.role="System Manager"
+	perm_doc.insert(ignore_permissions=True)
+	frappe.db.commit()
