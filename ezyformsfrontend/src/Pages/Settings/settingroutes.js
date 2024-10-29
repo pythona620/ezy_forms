@@ -1,3 +1,5 @@
+import Designations from "./Designations.vue";
+
 const SettingsPage = () => import("./SettingsPage.vue");
 const ProfileComp = () => import("./ProfileComp.vue");
 const NotificationComp = () => import("./NotificationComp.vue");
@@ -50,6 +52,11 @@ const settingRoutes = [
         path: "categories",
         component: Categories,
         name: "Categories",
+      },
+      {
+        path: "designations",
+        component: Designations,
+        name: "Designations"
       },
       {
         path: "department",
