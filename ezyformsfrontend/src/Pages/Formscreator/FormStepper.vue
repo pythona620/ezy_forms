@@ -978,6 +978,9 @@ const onFieldTypeChange = (sectionIndex, rowIndex, columnIndex, fieldIndex) => {
 
 };
 
+
+
+
 function handleFieldChange(sectionIndex, rowIndex, columnIndex, fieldIndex) {
     const flatArr = sections.flatMap(extractfieldlabels);
     const isDuplicate = hasDuplicates(flatArr); // Check once to reuse this result

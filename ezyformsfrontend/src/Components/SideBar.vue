@@ -101,6 +101,7 @@ const settingsSideBarData = [
     { name: 'Work Flow', icon: 'bi bi-diagram-3', route: 'workflow' },
     { name: 'Notifications', icon: 'bi bi-bell', route: 'notifications' },
     { name: 'Department', icon: 'bi bi-clock-history', route: 'department' },
+    { name: 'Designation', icon: 'bi bi-people', route: 'designations' },
     { name: 'User Management', icon: 'bi bi-people', route: 'usermanagement' },
     { name: 'Categories', icon: 'bi bi-tags', route: 'categories' },
 
@@ -151,8 +152,8 @@ const sidebarData = computed(() => {
 });
 const firstSettingsGroup = computed(() => settingsSideBarData.slice(0, 2)); // First 4 items
 const secondSettingsGroup = computed(() => settingsSideBarData.slice(2, 6));
-const thirdSettingsGroup = computed(() => settingsSideBarData.slice(6, 8)); // Remaining items
-const forthSettingsGroup = computed(() => settingsSideBarData.slice(8));
+const thirdSettingsGroup = computed(() => settingsSideBarData.slice(6, 9)); // Remaining items
+const forthSettingsGroup = computed(() => settingsSideBarData.slice(9));
 // Define the title based on the current route
 const sidebarTitle = computed(() => {
     if (isMasterRoute.value) {
