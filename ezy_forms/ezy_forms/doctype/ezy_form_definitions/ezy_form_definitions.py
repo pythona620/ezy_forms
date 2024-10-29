@@ -1,6 +1,6 @@
 # Copyright (c) 2024, bharath and contributors
 # For license information, please see license.txt
-
+ 
 import frappe
 from frappe.model.document import Document
 from frappe.utils import now as frappe_now
@@ -16,7 +16,7 @@ class EzyFormDefinitions(Document):
 
 @frappe.whitelist()
 def add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:str,form_name:str,accessible_departments:str,form_short_name:str,fields:list[dict]):
-	enqueue(
+	return_response_for_doc_add = enqueue(
 		enqueued_add_dynamic_doctype,
 		owner_of_the_form=owner_of_the_form,
 		business_unit=business_unit,
@@ -26,28 +26,31 @@ def add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:st
 		form_short_name=form_short_name,
 		fields=fields,
 		now=True,
-		is_async=True, 
+		is_async=True,
 		queue="short")
+	return return_response_for_doc_add
 
 @frappe.whitelist()
 def add_customized_fields_for_dynamic_doc(fields:list[dict],doctype:str):
-	enqueue(
+	return_response_for_add_or_edit_fields = enqueue(
 		enqueued_add_customized_fields_for_dynamic_doc,
 		fields=fields,
 		doctype=doctype,
 		now=True,
-		is_async=True, 
+		is_async=True,
 		queue="short")
+	return return_response_for_add_or_edit_fields
 
 @frappe.whitelist()
-def deleting_customized_field_from_custom_dynamic_doc(doctype,field):
-	enqueue(
+def deleting_customized_field_from_custom_dynamic_doc(doctype:str,deleted_fields:list):
+	deleted_fields_qresponse = enqueue(
 		enqueued_deleting_customized_field_from_custom_dynamic_doc,
 		doctype=doctype,
-		field=field,
+		deleted_fields=deleted_fields,
 		now=True,
-		is_async=True, 
+		is_async=True,
 		queue="short")
+	return deleted_fields_qresponse
 
 @frappe.whitelist()
 def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:str,form_name:str,accessible_departments:str,form_short_name:str,fields:list[dict]):
@@ -58,7 +61,7 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
 		doctype = business_unit + "-" + form_short_name
 		if isinstance(fields,str):
 			fields = literal_eval(fields)
-		if frappe.db.exists("Ezy Form Definitions",doctype):return {"success":False,"message":f"Already '{doctype}' exists. Please rename the form."}
+		# if frappe.db.exists("Ezy Form Definitions",doctype):return {"success":False,"message":f"Already '{doctype}' exists. Please rename the form."}
 		if not frappe.db.exists("DocType",doctype):
 			doc = frappe.new_doc("DocType")
 			doc.name = doctype
@@ -106,6 +109,7 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
 			bench_migrating_from_code()
 		if len(fields)>0:
 			add_customized_fields_for_dynamic_doc(fields=fields,doctype=doctype)
+		return {"success":True,"message":"Form Created."}
 	except Exception as e:
 		exc_type, exc_obj, exc_tb = sys.exc_info()
 		if "list index out of range" in str(e):
@@ -121,8 +125,7 @@ def enqueued_add_customized_fields_for_dynamic_doc(fields:list[dict],doctype:str
 	try:
 		if isinstance(fields,str):fields = literal_eval(fields)
 		if not len(fields)>0:return {"success":False,"message":"Pass Fields for storing."}
-		# if not frappe.db.exists("Ezy Form Definitions",{"name":doctype}):
-		# 	return {"success":False,"message":f"pass a valide Form's Short Name - {doctype} which exists."}
+		# if not frappe.db.exists("Ezy Form Definitions",{"name":doctype}): return {"success":False,"message":f"pass a valid Form's Short Name - {doctype} which exists."}
 		fields_in_mentioned_doctype = [_[0] for _ in frappe.db.sql(f"DESCRIBE `tab{doctype}`;")]
 		for dicts_of_docs_entries in fields:
 			if dicts_of_docs_entries["fieldname"] in fields_in_mentioned_doctype:
@@ -156,13 +159,9 @@ def enqueued_add_customized_fields_for_dynamic_doc(fields:list[dict],doctype:str
 				doc_for_new_custom_field.db_update()
 				doc_for_new_custom_field.reload()
 		bench_migrating_from_code()
-		keys = ["idx","label","fieldname","fieldtype","reqd","options","default","description"]
-		field_attributes = frappe.db.get_all("DocField",{"parent":doctype},keys)
-		custom_fields_df = pd.DataFrame.from_records(field_attributes)
-		field_attributes = custom_fields_df.sort_values(by=['idx']).to_dict("records")
-		frappe.db.set_value("Ezy Form Definitions",doctype,{"form_json":str(field_attributes).replace("'",'"').replace("None","null")})
+		frappe.db.set_value("Ezy Form Definitions",doctype,{"form_json":str(fields).replace("'",'"').replace("None","null")})
 		frappe.db.commit()
-		return field_attributes
+		return {"success":True,"message":fields}
 	except Exception as e:
 		exc_type, exc_obj, exc_tb = sys.exc_info()
 		frappe.log_error("Error in add_customized_fields_for_dynamic_doc",
@@ -172,21 +171,13 @@ def enqueued_add_customized_fields_for_dynamic_doc(fields:list[dict],doctype:str
 		return {"success": False, "message": str(e)}
 
 @frappe.whitelist()
-def enqueued_deleting_customized_field_from_custom_dynamic_doc(doctype,field):
+def enqueued_deleting_customized_field_from_custom_dynamic_doc(doctype:str,deleted_fields:list):
 	try:
-		if not frappe.db.exists("DocType",doctype): return {"success":False,"message":f"The Form mentioned doesnot exists - '{doctype}'"}
-		frappe.db.delete("DocField",{"parent":doctype,"fieldname":field})
+		frappe.db.delete("DocField",{"parent":doctype,"fieldname":["in",deleted_fields]})
 		frappe.db.commit()
-		bench_migrating_from_code()
-		keys = ["idx","label","fieldname","fieldtype","reqd","options","default","description"]
-		field_attributes = frappe.db.get_all("DocField",{"parent":doctype},keys)
-		custom_fields_df = pd.DataFrame.from_records(field_attributes)
-		field_attributes = custom_fields_df.sort_values(by=['idx']).to_dict("records")
-		frappe.db.set_value("Ezy Form Definitions",doctype,{"form_json":str(field_attributes).replace("'",'"').replace("None","null")})
-		frappe.db.commit()
-		reloading = frappe.get_doc("DocType",doctype)
-		reloading.reload()
-		return field_attributes
+		reloading_doc = frappe.get_doc("DocType",doctype)
+		reloading_doc.reload()
+		return {"success":True,"message":deleted_fields}
 	except Exception as e:
 		exc_type, exc_obj, exc_tb = sys.exc_info()
 		frappe.log_error("Error in Deleting Field",

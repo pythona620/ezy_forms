@@ -1,0 +1,60 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-10-29 11:56:11.377860",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "ezy_business_unit",
+  "designation_name",
+  "ezy_departments"
+ ],
+ "fields": [
+  {
+   "fieldname": "ezy_business_unit",
+   "fieldtype": "Link",
+   "label": "Ezy Business Unit",
+   "options": "Ezy Business Unit",
+   "search_index": 1
+  },
+  {
+   "fieldname": "designation_name",
+   "fieldtype": "Data",
+   "label": "Designation Name",
+   "search_index": 1
+  },
+  {
+   "fieldname": "ezy_departments",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Ezy Departments",
+   "options": "Ezy Departments",
+   "reqd": 1,
+   "search_index": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-10-29 11:58:25.188406",
+ "modified_by": "Administrator",
+ "module": "Ezy Forms",
+ "name": "Ezy Designations",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}
