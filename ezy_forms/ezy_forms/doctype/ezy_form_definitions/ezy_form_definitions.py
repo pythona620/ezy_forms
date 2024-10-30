@@ -62,7 +62,6 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
 		doctype = form_short_name
 		if isinstance(fields,str):
 			fields = literal_eval(fields)
-		# if frappe.db.exists("Ezy Form Definitions",doctype):return {"success":False,"message":f"Already '{doctype}' exists. Please rename the form."}
 		if not frappe.db.exists("DocType",doctype):
 			doc = frappe.new_doc("DocType")
 			doc.name = doctype
@@ -96,7 +95,11 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
 
 			document_to_reload = frappe.get_doc("DocType",doctype)
 			document_to_reload.reload()
-
+			add_customized_fields_for_dynamic_doc(fields=[
+                {"label": "Company Field","fieldname": "company_field","fieldtype": "Data","description": "static","idx": 0},
+                {"label": "WF Generated Request Id","fieldname": "wf_generated_request_id","fieldtype": "Data","description": "static","idx": 1},
+                {"label": "WF Generated Request Status","fieldname": "wf_generated_request_status","fieldtype": "Data","description": "static","idx": 2}]
+                ,doctype=doctype)
 		if len(fields)>0:
 			add_customized_fields_for_dynamic_doc(fields=fields,doctype=doctype)
 		return {"success":True,"message":"Form Created."}
@@ -119,11 +122,12 @@ def enqueued_add_customized_fields_for_dynamic_doc(fields:list[dict],doctype:str
 		fields_in_mentioned_doctype = [_[0] for _ in frappe.db.sql(f"DESCRIBE `tab{doctype}`;")]
 		for dicts_of_docs_entries in fields:
 			if dicts_of_docs_entries["fieldname"] in fields_in_mentioned_doctype:
-				doc_exists_name_or_not = frappe.db.exists(dicts_of_docs_entries)
-				if dicts_of_docs_entries["fieldtype"] not in ["Section Break","Column Break","Tab Break"]: dicts_of_docs_entries = dicts_of_docs_entries | {"in_list_view":1}
+				doc_exists_name_or_not = frappe.db.exists("DocField",dicts_of_docs_entries)
+				
 				if not doc_exists_name_or_not:
-					name_of_existing_doc = frappe.db.get_all("DocField",filters={"fieldname":dicts_of_docs_entries["fieldname"],"parent":dicts_of_docs_entries["parent"]},pluck="name")[0]
+					name_of_existing_doc = frappe.db.get_all("DocField",filters={"fieldname":dicts_of_docs_entries["fieldname"],"parent":doctype},pluck="name")[0]
 					doc_for_existing_custom_field = frappe.get_doc("DocField",name_of_existing_doc)
+					if dicts_of_docs_entries["fieldtype"] not in ["Section Break","Column Break","Tab Break"]: doc_for_existing_custom_field.in_list_view=1
 					if "reqd" in dicts_of_docs_entries:doc_for_existing_custom_field.reqd = dicts_of_docs_entries["reqd"]
 					if "options" in dicts_of_docs_entries:
 						if isinstance(dicts_of_docs_entries["options"],str):
@@ -143,7 +147,8 @@ def enqueued_add_customized_fields_for_dynamic_doc(fields:list[dict],doctype:str
 			else:
 				# Create a new field
 				if dicts_of_docs_entries["fieldtype"] not in ["Section Break","Column Break","Tab Break"]: dicts_of_docs_entries = dicts_of_docs_entries | {"in_list_view":1}
-				doc_for_new_custom_field = frappe.get_doc(dicts_of_docs_entries).insert(ignore_permissions=True)
+				doc_for_new_custom_field = frappe.get_doc('DocType', doctype)
+				doc_for_new_custom_field.append('fields', dicts_of_docs_entries)
 				doc_for_new_custom_field.save()
 				frappe.db.commit()
 				doc_for_new_custom_field.db_update()
