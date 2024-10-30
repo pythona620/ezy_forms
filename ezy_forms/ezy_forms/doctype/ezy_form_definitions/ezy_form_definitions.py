@@ -59,7 +59,7 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
 	"""Adding DocTypes dynamically, giving Perms for the doctype and creating a default section-break field for DocType"""
 	try:
 		if business_unit == None or business_unit == "":return {"success":False,"message":"Pass Business Unit because it is considered as prefix"}
-		doctype = business_unit + "-" + form_short_name
+		doctype = form_short_name
 		if isinstance(fields,str):
 			fields = literal_eval(fields)
 		# if frappe.db.exists("Ezy Form Definitions",doctype):return {"success":False,"message":f"Already '{doctype}' exists. Please rename the form."}
@@ -72,6 +72,7 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
 			doc.module = "User Forms"
 			doc.app = "ezy_forms"
 			doc.custom = 1
+			doc.description = business_unit
 			doc.insert(ignore_permissions=True)
 			frappe.db.commit()
 			doc.reload()

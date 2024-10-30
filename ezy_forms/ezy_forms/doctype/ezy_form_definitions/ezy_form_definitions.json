@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:{business_unit}-{form_short_name}",
+ "autoname": "format:form_short_name",
  "creation": "2024-10-01 15:45:04.495503",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -75,12 +75,13 @@
    "fieldname": "form_status",
    "fieldtype": "Select",
    "label": "Form Status",
-   "options": "Draft\nCreated"
+   "options": "Draft\nCreated",
+   "search_index": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-10-29 12:50:41.327504",
+ "modified": "2024-10-30 10:22:35.219439",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
  "name": "Ezy Form Definitions",
