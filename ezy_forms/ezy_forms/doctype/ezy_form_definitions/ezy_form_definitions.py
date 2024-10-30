@@ -76,17 +76,10 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
 			doc.insert(ignore_permissions=True)
 			frappe.db.commit()
 			doc.reload()
-			custom_docperm = frappe.new_doc("Custom DocPerm")
-			custom_docperm.parent = doctype
-			custom_docperm.read = 1
-			custom_docperm.create = 1
-			custom_docperm.delete = 1
-			custom_docperm.select = 1
-			custom_docperm.write = 1
-			custom_docperm.role = "System Manager"
-			custom_docperm.insert(ignore_permissions=True)
-			frappe.db.commit()
-			custom_docperm.reload()
+			"""need to add perms in this step itself for system manager to access the DocType"""
+			activating_perms(doctype=doctype)
+			"""need to migrate in this step itself as DocType is created need to update in DB."""
+			bench_migrating_from_code()
 			form_defs = frappe.new_doc("Ezy Form Definitions")
 			form_defs.form_category = form_category
 			form_defs.accessible_departments = accessible_departments
@@ -100,16 +93,10 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
 			form_defs.insert(ignore_permissions=True).save()
 			form_defs.reload()
 			frappe.db.commit()
-			"""need to migrate in this step itself as DocType is created need to update in DB."""
-			bench_migrating_from_code()
 
-			"""need to add perms in this step itself for system manager to access the DocType"""
-			activating_perms(doctype=doctype)
 			document_to_reload = frappe.get_doc("DocType",doctype)
 			document_to_reload.reload()
 
-			"""need to migrate in this step itself because of adding permissions in the below level"""
-			bench_migrating_from_code()
 		if len(fields)>0:
 			add_customized_fields_for_dynamic_doc(fields=fields,doctype=doctype)
 		return {"success":True,"message":"Form Created."}
