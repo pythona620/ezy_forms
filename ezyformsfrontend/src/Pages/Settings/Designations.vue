@@ -57,7 +57,8 @@
                                             :options="['JW Marriott Golfshire Banglore', 'JW Marriott Golfshire Banglore']" />
                                     </div>
                                     <div class="col-3">
-                                        <label class="font-13 ps-1" for="Requested">Designation:</label>
+                                        <label class="font-13 ps-1" for="Requested">Designation
+                                            :</label>
                                         <FormFields class="mb-3" tag="input" type="search" name="Requested"
                                             id="Requested" placeholder="Search"
                                             v-model="filterOnModal.department_name" />
