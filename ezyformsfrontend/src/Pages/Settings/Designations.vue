@@ -57,7 +57,7 @@
                                             :options="['JW Marriott Golfshire Banglore', 'JW Marriott Golfshire Banglore']" />
                                     </div>
                                     <div class="col-3">
-                                        <label class="font-13 ps-1" for="Requested">Form Name:</label>
+                                        <label class="font-13 ps-1" for="Requested">Designation:</label>
                                         <FormFields class="mb-3" tag="input" type="search" name="Requested"
                                             id="Requested" placeholder="Search"
                                             v-model="filterOnModal.department_name" />
@@ -137,8 +137,8 @@
             </div>
         </div>
         <div class="mt-2">
-            <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction='true' :actions="actions"
-                actionType="dropdown" isCheckbox="true" />
+            <GlobalTable @actionClicked="actionCreated" :tHeaders="tableheaders" :tData="tableData" isAction='true'
+                :actions="actions" actionType="dropdown" isCheckbox="true" />
         </div>
     </div>
 </template>
@@ -168,11 +168,22 @@ const departmentsList = ref([])
 
 const actions = ref(
     [
-        { name: 'View Categories', icon: 'fa-solid fa-eye' },
+        { name: 'View Designation', icon: 'fa-solid fa-eye' },
 
     ]
 )
+function actionCreated(rowData, actionEvent) {
+    if (actionEvent.name === 'View Designation') {
+        if (rowData) {
 
+            const modal = new bootstrap.Modal(document.getElementById('viewCategory'), {});
+            modal.show();
+        } else {
+            console.warn("No form fields provided.");
+            formCreation(rowData);
+        }
+    }
+}
 const tableheaders = ref([
     { th: "Designations Name", td_key: "designation_name" },
     { th: "Departments", td_key: "ezy_departments" },
