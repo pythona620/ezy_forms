@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <!-- <div> -->
         <!-- <button class="btn btn-light font-10 border" type="button" data-bs-toggle="modal" data-bs-target="#exampleModal"
             @click="createForm">
             <i class="bi bi-eye me-1"></i>Preview
@@ -192,7 +192,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    <!-- </div> -->
 </template>
 
 <script setup>
@@ -205,7 +205,7 @@ const props = defineProps({
     },
     sections: {
         type: [Array, null],
-        required: true,
+        required: false,
     },
     formDescriptions: {
         type: Object,
