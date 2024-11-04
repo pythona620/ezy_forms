@@ -90,10 +90,26 @@
                                                         </div>
                                                     </div>
                                                     <div class="col-6">
-                                                        <span class="font-12 fw-bold">
-                                                            {{ $props.formDescriptions.accessible_departments }}
+                                                        <span class="font-12 fw-bold mt-3">
+                                                            <template
+                                                                v-if="Array.isArray(props.formDescriptions.accessible_departments) && props.formDescriptions.accessible_departments.length === 1">
+                                                                {{ props.formDescriptions.accessible_departments[0] }}
+                                                            </template>
+                                                            <template
+                                                                v-else-if="Array.isArray(props.formDescriptions.accessible_departments) && props.formDescriptions.accessible_departments.length > 1">
+                                                                <ul class=" p-0 list-unstyled">
+                                                                    <li v-for="(department, index) in props.formDescriptions.accessible_departments"
+                                                                        :key="index">
+                                                                        {{ department }},
+                                                                    </li>
+                                                                </ul>
+                                                            </template>
+                                                            <template v-else>
+                                                                {{ props.formDescriptions.accessible_departments }}
+                                                            </template>
                                                         </span>
                                                     </div>
+
                                                 </div>
                                             </div>
                                         </div>
@@ -101,9 +117,9 @@
                                 </div>
                             </div>
                             <div class="card p-1">
-                                <div v-for="(blockItem, blockIndex) in blockArr ">
-                                    <div v-for="(section, sectionIndex) in blockItem.sections" :key="'preview-' + sectionIndex"
-                                        class="preview-section m-2">
+                                <div v-for="(blockItem, blockIndex) in blockArr " :key="blockIndex">
+                                    <div v-for="(section, sectionIndex) in blockItem.sections"
+                                        :key="'preview-' + sectionIndex" class="preview-section m-2">
                                         <h5>{{ section.label || '-' }}</h5>
                                         <div class=" container-fluid">
                                             <div class="row" v-for="(row, rowIndex) in section.rows" :key="rowIndex">
@@ -115,20 +131,20 @@
                                                             :key="'field-preview-' + fieldIndex">
                                                             <div v-if="field.label">
                                                                 <label :for="'field-' +
-                                                                    sectionIndex +
-                                                                    '-' +
-                                                                    columnIndex +
-                                                                    '-' +
-                                                                    fieldIndex
-                                                                    ">
+                                                                sectionIndex +
+                                                                '-' +
+                                                                columnIndex +
+                                                                '-' +
+                                                                fieldIndex
+                                                                ">
 
                                                                     <span class=" font-12">{{ field.label
                                                                         }}</span></label>
                                                                 <template v-if="field.fieldtype == 'Select' ||
-                                                                    field.fieldtype == 'multiselect'
+                                                                field.fieldtype == 'multiselect'
                                                                 ">
                                                                     <select :multiple="field.fieldtype == 'multiselect'
-                                                                        " v-model="field.value"
+                                                                " v-model="field.value"
                                                                         class="form-select mb-2 font-13">
                                                                         <option v-for="(
                                                         option, index
@@ -138,7 +154,7 @@
                                                                     </select>
                                                                 </template>
                                                                 <template v-else-if="field.fieldtype == 'checkbox' ||
-                                                                    field.fieldtype == 'radio'
+                                                                field.fieldtype == 'radio'
                                                                 ">
                                                                     <div class="row">
                                                                         <div class="form-check col-4 mb-4" v-for="(
@@ -156,8 +172,8 @@
                                                                                     <label class="form-check-label m-0"
                                                                                         :for="option">
                                                                                         {{
-                                                                                            option
-                                                                                        }}
+                                                                option
+                                                            }}
                                                                                     </label>
                                                                                 </div>
                                                                             </div>
@@ -169,12 +185,12 @@
                                                                         :is="getFieldComponent(field.fieldtype)"
                                                                         v-model="field.value" :type="field.fieldtype"
                                                                         :name="'field-' +
-                                                                            sectionIndex +
-                                                                            '-' +
-                                                                            columnIndex +
-                                                                            '-' +
-                                                                            fieldIndex
-                                                                            " class="form-control previewInputHeight">
+                                                                sectionIndex +
+                                                                '-' +
+                                                                columnIndex +
+                                                                '-' +
+                                                                fieldIndex
+                                                                " class="form-control previewInputHeight">
                                                                     </component>
                                                                 </template>
                                                             </div>
@@ -199,7 +215,7 @@
 import { defineProps, watch } from "vue";
 
 const props = defineProps({
-    blockArr:{
+    blockArr: {
         type: [Array, null],
         required: true
     },
