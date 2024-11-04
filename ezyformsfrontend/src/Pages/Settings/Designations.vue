@@ -327,7 +327,7 @@ const ezyForms = () => {
 function cancelCreate() {
     createDesignation.value = {
         designation_name: "",
-        ezy_business_unit: "",
+        ezy_business_unit: `${businessUnit.value}`,
         ezy_departments: ""
     }
 }
@@ -337,12 +337,17 @@ function createDesig() {
         "doctype": doctypes.designations
     }
     console.log(dataObj, "------------------");
-    // axiosInstance.post(apis.resource + doctypes.designations, dataObj).then((res) => {
-    //     if (res.data) {
-    //         designationData()
-    //     }
+    axiosInstance.post(apis.resource + doctypes.designations, dataObj).then((res) => {
+        if (res.data) {
+            designationData()
+            createDesignation.value = {
+                designation_name: "",
+                ezy_departments: "",
+                ezy_business_unit: `${businessUnit.value}`
+            }
+        }
 
-    // })
+    })
 }
 </script>
 <style scoped>

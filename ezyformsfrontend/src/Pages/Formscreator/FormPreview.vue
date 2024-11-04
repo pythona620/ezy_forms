@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <!-- <div> -->
         <!-- <button class="btn btn-light font-10 border" type="button" data-bs-toggle="modal" data-bs-target="#exampleModal"
             @click="createForm">
             <i class="bi bi-eye me-1"></i>Preview
@@ -90,14 +90,14 @@
                                                         </div>
                                                     </div>
                                                     <div class="col-6">
-                                                        <span class="font-12 fw-bold mt-3">
+                                                        <span class="font-12 fw-bold ">
                                                             <template
                                                                 v-if="Array.isArray(props.formDescriptions.accessible_departments) && props.formDescriptions.accessible_departments.length === 1">
                                                                 {{ props.formDescriptions.accessible_departments[0] }}
                                                             </template>
                                                             <template
                                                                 v-else-if="Array.isArray(props.formDescriptions.accessible_departments) && props.formDescriptions.accessible_departments.length > 1">
-                                                                <ul class=" p-0 list-unstyled">
+                                                                <ul class=" p-0 mb-0 list-unstyled mt-1">
                                                                     <li v-for="(department, index) in props.formDescriptions.accessible_departments"
                                                                         :key="index">
                                                                         {{ department }},
@@ -208,7 +208,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    <!-- </div> -->
 </template>
 
 <script setup>
@@ -221,7 +221,7 @@ const props = defineProps({
     },
     sections: {
         type: [Array, null],
-        required: true,
+        required: false,
     },
     formDescriptions: {
         type: Object,

@@ -209,18 +209,18 @@
                                                             class="btn btn-light designationBtn d-flex align-items-center"
                                                             type="button" data-bs-toggle="offcanvas"
                                                             data-bs-target="#offcanvasRight"
-                                                            aria-controls="offcanvasRight"><img
+                                                            aria-controls="offcanvasRight" @click="AddDesignCanvas(blockIndex)"><img
                                                                 src="../../assets/oui_app-users-roles.svg" alt=""
-                                                                class="me-1"> Add
-                                                            designations</button>
+                                                                class="me-1">
+                                                            Add designations</button>
 
                                                         <div class="offcanvas offcanvas-end" tabindex="-1"
                                                             id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
-                                                            <div class="offcanvas-header">
-                                                                <h5 id="offcanvasRightLabel">Add designation
+                                                            <div class="offcanvas-header add_designationHeader">
+                                                                <span id="offcanvasRightLabel font-14">Add designation
                                                                     for
                                                                     requestor
-                                                                </h5>
+                                                                </span>
                                                                 <button type="button"
                                                                     class="btn-close bg-light text-reset"
                                                                     data-bs-dismiss="offcanvas"
@@ -228,7 +228,8 @@
                                                             </div>
                                                             <div class="offcanvas-body">
                                                                 <div class="d-flex align-items-center gap-2 ps-2">
-                                                                    <div class="position-relative">
+                                                                    <div v-if="DesignationList.length"
+                                                                        class="position-relative">
 
                                                                         <input type="checkbox" id="selectAll"
                                                                             v-model="isAllSelected"
@@ -238,7 +239,7 @@
                                                                             all</label>
                                                                     </div>
                                                                 </div>
-                                                                <ul class="list-unstyled">
+                                                                <ul v-if="DesignationList.length" class="list-unstyled">
                                                                     <li v-for="(item, index) in DesignationList"
                                                                         :key="index" class="designationList">
                                                                         <input type="checkbox"
@@ -248,11 +249,19 @@
                                                                         <span class="ps-2">{{ item }}</span>
                                                                     </li>
                                                                 </ul>
+                                                                <div v-else>
+                                                                    <div class=" d-flex justify-content-center">
+                                                                        <span>No
+                                                                            Designations
+                                                                            Found</span>
+                                                                    </div>
+                                                                </div>
                                                             </div>
 
                                                             <div class=" offcanvas-footer">
                                                                 <div class=" text-end p-3">
                                                                     <ButtonComp class="btn btn-dark addingDesignations"
+                                                                        @click="addDesignationBtn"
                                                                         name=" Add Designations" />
                                                                 </div>
                                                             </div>
@@ -701,8 +710,8 @@ const OwnerOfTheFormData = ref([]);
 let sections = reactive([]);
 let blockArr = reactive([]);
 let deleted_items = reactive([])
-let deleted_flat_arr = reactive([])
-const DesignationList = ref(["intern", "Junior associate", "Associate", "Senior associate", "Supervisor"]);
+const DesignationList = ref([]);
+// "intern", "Junior associate", "Associate", "Senior associate", "Supervisor"
 const designationValue = ref([]);
 const businessUnit = computed(() => {
     return EzyBusinessUnit;
@@ -710,7 +719,8 @@ const businessUnit = computed(() => {
 const ezyFormsData = ref([]);
 const formNameError = ref("");
 const formShortNameError = ref("");
-const fieldNameError = ref("")
+ const selectedBlockIndex = ref("");
+ let workflowSetup = reactive([])
 let paramId = ref("")
 
 onMounted(() => {
@@ -720,6 +730,7 @@ onMounted(() => {
     if (paramId != undefined && paramId != null && paramId != 'new') {
         getFormData()
     }
+
 
 
 })
@@ -739,7 +750,6 @@ watch(
     businessUnit,
     (newVal) => {
         filterObj.value.business_unit = newVal;
-
     },
     { immediate: true }
 );
@@ -817,7 +827,7 @@ const isAllSelected = computed({
     }
 });
 
-// Watch for changes to designationValue to log it
+
 watch(designationValue, (newValue) => {
     console.log('Selected Designations:', newValue);
 });
@@ -826,6 +836,55 @@ function handleSingleSelect() {
     if (!isAllSelected.value && designationValue.value.length === 1) {
         console.log('Selected only one designation:', designationValue.value[0]);
     }
+}
+
+function addDesignationBtn() {
+    console.log(selectedBlockIndex.value, 'Selected Designations:', designationValue.value);
+    let xyz = {        
+        type : selectedBlockIndex.value == 0 ? 'requestor' : 'approver',
+        roles : designationValue.value,
+        fields : blockArr[0].sections.flatMap(extractFieldnames)
+    }
+
+    console.log(" ============ ", xyz)
+    workflowSetup.push(xyz)
+}
+
+const AddDesignCanvas = (idx) => {
+    if (filterObj.value.accessible_departments.length) {
+        designationData(filterObj.value.accessible_departments);
+    }
+    selectedBlockIndex.value = idx;
+
+    console.log(blockArr[idx] ," designation idx === ", idx)
+};
+
+
+function designationData(departments) {
+    const filters = [];
+
+    if (Array.isArray(departments) && departments.length > 0) {
+        filters.push(["ezy_departments", "in", departments]);
+    }
+
+    const queryParams = {
+        fields: JSON.stringify(["*"]),
+        // filters: JSON.stringify(filters),
+        limit_page_length: filterObj.value.limitPageLength,
+        limitstart: filterObj.value.limitstart,
+        order_by: "`tabWF Roles`.`creation` desc"
+    };
+
+    axiosInstance.get(apis.resource + doctypes.designations, { params: queryParams })
+        .then((res) => {
+            if (res.data) {
+                console.log(res.data, "Fetched Designations");
+                DesignationList.value = res.data.map(item => item.role);
+            }
+        })
+        .catch((error) => {
+            console.error("Error fetching designations data:", error);
+        });
 }
 
 function cancelForm() {
@@ -862,14 +921,17 @@ watch(
     }
 );
 function formData() {
-    const fields = extractFieldsWithBreaks(sections)
+    const fields = extractFieldsWithBreaks(blockArr)
+    console.log(" filter obj === ", filterObj.value)
     const dataObj = {
         ...filterObj.value,
         fields,
-        "doctype": doctypes.EzyFormDefinitions
+        "doctype": doctypes.EzyFormDefinitions,
+        workflow_setup: workflowSetup,
+        "form_status" : "Draft"
     }
-    console.log(dataObj);
     dataObj.accessible_departments = dataObj.accessible_departments.toString(); //JSON.stringify(dataObj.accessible_departments) dataObj.accessible_departments.toString()
+    console.log(dataObj);
     axiosInstance.post(apis.savedata, dataObj).then((res) => {
         if (res) {
             toast.success("Form Created Successfull")
@@ -877,7 +939,6 @@ function formData() {
                 name: 'Created'
             })
         }
-
     })
 }
 
@@ -973,7 +1034,7 @@ const addField = (blockIndex, sectionIndex, rowIndex, columnIndex) => {
         label: "",
         fieldtype: "",
         // value: ref(""), // Keeping the value as a ref for reactivity
-        options: null,
+        options: '',
         reqd: false,
     });
 
@@ -1163,7 +1224,7 @@ function getFormData() {
                 let structuredArr = rebuildToStructuredArray(JSON.parse(res_data?.form_json?.replace(/\\\"/g, '"')))
 
                 structuredArr.forEach((item, index) => {
-                    sections.push(item)
+                    blockArr.push(item)
                 })
             }
         })
@@ -1230,6 +1291,11 @@ const hasDuplicates = (array) => new Set(array).size !== array.length;
 <style lang="scss" scoped>
 /* @import '@vueform/multiselect/themes/default.css'; */
 
+.add_designationHeader {
+    box-shadow: 0px 4px 4px 0px #0000000D;
+    font-size: 14px;
+
+}
 
 .ErrorMsg {
     font-size: 11px;
