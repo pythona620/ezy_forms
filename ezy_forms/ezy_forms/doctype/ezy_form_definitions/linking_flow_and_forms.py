@@ -1,8 +1,8 @@
 import frappe
 import sys
+import polars as pl
 
-@frappe.whitelist()
-def enqueing_creation_of_roadmap(doctype:str,property_name:str,bulk_request:bool):
+def enqueing_creation_of_roadmap(doctype:str,property_name:str,bulk_request:bool,requestors:list[dict]):
 	try:
 		if not frappe.db.exists("WF Settings",{"name":"Ezy Forms"}):
 			wf_settings_doc = frappe.new_doc("WF Settings")
@@ -30,6 +30,37 @@ def enqueing_creation_of_roadmap(doctype:str,property_name:str,bulk_request:bool
 	except Exception as e:
 		exc_type, exc_obj, exc_tb = sys.exc_info()
 		frappe.log_error("Error in Creating New Roadmap in Workflow.",
+						 "line No:{}\n{}".format(exc_tb.tb_lineno, str(e)))
+		frappe.db.rollback()
+		frappe.throw(str(e))
+		return {"success": False, "message": str(e)}
+	
+def list_to_dict_with_ones(x):
+	x = str(x).split(" ,")
+	x = f"""{dict(zip(x,[1] * len(x)))}"""
+	return x
+
+def add_roles_to_wf_requestors(doc_rec:str,requestors:list[dict]):
+	try:
+		requestors_df = pl.DataFrame(requestors)
+		requestors_df = requestors_df.explode("roles")
+		requestors_df = requestors_df.with_columns(pl.col("fields").list.join(" ,").map_elements(list_to_dict_with_ones).alias("fields"))
+		requestors_section = requestors_df.filter(pl.col('type').str.contains("requestor")).select("roles","fields").rename({"roles":"requestor","fields":"columns_allowed"}).to_dicts()
+		approvers_section = requestors_df.filter(pl.col('type').str.contains("approver")).select("roles","fields","idx").rename({"roles":"role","fields":"columns_allowed","idx":"level"}).to_dicts()
+		frappe.db.sql(f"""delete from `tabWF Requestors` where parent = '{doc_rec}' and parentfield = 'wf_requestors' and parenttype = 'WF Roadmap';""")
+		frappe.db.commit()
+		frappe.db.sql(f"""delete from `tabWF Level Setup` where parent ='{doc_rec}' and parentfield='wf_level_setup' and parenttype='WF Roadmap';""")
+		frappe.db.commit()
+		roadmap_doc = frappe.get_doc("WF Roadmap",doc_rec)
+		for single_requestor in requestors_section:
+			roadmap_doc.append("wf_requestors", single_requestor)
+		for single_approver in approvers_section:
+			roadmap_doc.append("wf_level_setup", single_approver)
+		roadmap_doc.save(ignore_permissions=True)
+		frappe.db.commit()
+	except Exception as e:
+		exc_type, exc_obj, exc_tb = sys.exc_info()
+		frappe.log_error("Error in Updating Roadmap's requestors and approvers in Workflow.",
 						 "line No:{}\n{}".format(exc_tb.tb_lineno, str(e)))
 		frappe.db.rollback()
 		frappe.throw(str(e))
