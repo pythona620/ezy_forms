@@ -15,7 +15,7 @@ class EzyFormDefinitions(Document):
 	pass
  
 @frappe.whitelist()
-def add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:str,form_name:str,accessible_departments:str,form_short_name:str,fields:list[dict],form_status:str,workflow_setup:list[dict],requestors:list[dict]):
+def add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:str,form_name:str,accessible_departments:str,form_short_name:str,fields:list[dict],form_status:str,workflow_setup:list[dict]):
 	return_response_for_doc_add = enqueue(
 		enqueued_add_dynamic_doctype,
 		owner_of_the_form=owner_of_the_form,
@@ -27,7 +27,6 @@ def add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:st
 		fields=fields,
 		form_status=form_status,
 		workflow_setup=workflow_setup,
-		requestors=requestors,
 		now=True,
 		is_async=True,
 		queue="short")
@@ -54,7 +53,7 @@ def deleting_customized_field_from_custom_dynamic_doc(doctype:str,deleted_fields
 		queue="short")
 	return deleted_fields_qresponse
 
-def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:str,form_name:str,accessible_departments:str,form_short_name:str,fields:list[dict],form_status:str,workflow_setup:list[dict],requestors:list[dict]):
+def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:str,form_name:str,accessible_departments:str,form_short_name:str,fields:list[dict],form_status:str,workflow_setup:list[dict]):
 	""" Owner_of_the_form should come from Departments Doctype in Select Field."""
 	"""Adding DocTypes dynamically, giving Perms for the doctype and creating a default section-break field for DocType"""
 	try:
@@ -63,9 +62,7 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
 		if isinstance(fields,str):
 			fields = literal_eval(fields)
 		if isinstance(workflow_setup,str):
-			workflow_setup = literal_eval(workflow_setup)
-		if isinstance(requestors,str):
-			requestors = literal_eval(requestors)
+			requestors = literal_eval(workflow_setup)
 		if not frappe.db.exists("DocType",doctype):
 			frappe.db.sql(f"DROP TABLE IF EXISTS `tab{doctype}`;")
 			frappe.db.commit()
