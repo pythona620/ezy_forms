@@ -62,7 +62,7 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
 		if isinstance(fields,str):
 			fields = literal_eval(fields)
 		if isinstance(workflow_setup,str):
-			requestors = literal_eval(workflow_setup)
+			workflow_setup = literal_eval(workflow_setup)
 		if not frappe.db.exists("DocType",doctype):
 			frappe.db.sql(f"DROP TABLE IF EXISTS `tab{doctype}`;")
 			frappe.db.commit()
@@ -108,9 +108,9 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
 			enqueing_creation_of_roadmap(doctype=doctype,property_name=business_unit,bulk_request=False)
 		if len(fields)>0:
 			add_customized_fields_for_dynamic_doc(fields=fields,doctype=doctype)
-		if len(requestors)>0:
+		if len(workflow_setup)>0:
 			doc_rec = "_".join(business_unit.split()).upper() + "_" + "_".join(doctype.split()).upper().replace(" ", "_")
-			add_roles_to_wf_requestors(doc_rec = doc_rec,requestors=requestors)
+			add_roles_to_wf_requestors(doc_rec = doc_rec,requestors=workflow_setup)
 		return {"success":True,"message":"Form Created."}
 	except Exception as e:
 		exc_type, exc_obj, exc_tb = sys.exc_info()
