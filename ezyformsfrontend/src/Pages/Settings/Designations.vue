@@ -127,9 +127,8 @@
 
                                 <button type="button"
                                     class="applyfilter btn btn-dark text-nowrap font-10 d-flex justify-content-center align-items-center"
-                                    data-bs-dismiss="modal" @click="createDesig"><span class="font-16 me-1"><i
-                                            class="bi bi-check2 "></i></span>
-                                    Create Department</button>
+                                    data-bs-dismiss="modal" @click="createDesig">
+                                    Create Designation</button>
                             </div>
                         </div>
                     </div>
@@ -262,18 +261,18 @@ function designationData() {
         filters: JSON.stringify(filters),
         limit_page_length: filterObj.value.limitPageLength,
         limitstart: filterObj.value.limitstart,
-        order_by: "`tabEzy Departments`.`creation` desc"
+        order_by: "`tabEzy Designations`.`creation` desc"
     };
 
     axiosInstance.get(apis.resource + doctypes.designations, { params: queryParams })
         .then((res) => {
             if (res.data) {
-                console.log(res.data, "Fetched departments");
+                console.log(res.data, "Fetched Designations");
                 tableData.value = res.data;
             }
         })
         .catch((error) => {
-            console.error("Error fetching department data:", error);
+            console.error("Error fetching designations data:", error);
         });
 }
 

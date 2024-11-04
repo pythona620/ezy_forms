@@ -101,78 +101,83 @@
                                 </div>
                             </div>
                             <div class="card p-1">
-                                <div v-for="(section, sectionIndex) in sections" :key="'preview-' + sectionIndex"
-                                    class="preview-section m-2">
-                                    <h5>{{ section.label || '-' }}</h5>
-                                    <div class=" container-fluid">
-                                        <div class="row" v-for="(row, rowIndex) in section.rows" :key="rowIndex">
-                                            <div v-for="(column, columnIndex) in row.columns"
-                                                :key="'column-preview-' + columnIndex" class="col">
-                                                <h6>{{ column.label || '-' }}</h6>
-                                                <div class="mb-2 ms-2">
-                                                    <div v-for="(field, fieldIndex) in column.fields"
-                                                        :key="'field-preview-' + fieldIndex">
-                                                        <div v-if="field.label">
-                                                            <label :for="'field-' +
-                                                                sectionIndex +
-                                                                '-' +
-                                                                columnIndex +
-                                                                '-' +
-                                                                fieldIndex
-                                                                ">
+                                <div v-for="(blockItem, blockIndex) in blockArr ">
+                                    <div v-for="(section, sectionIndex) in blockItem.sections" :key="'preview-' + sectionIndex"
+                                        class="preview-section m-2">
+                                        <h5>{{ section.label || '-' }}</h5>
+                                        <div class=" container-fluid">
+                                            <div class="row" v-for="(row, rowIndex) in section.rows" :key="rowIndex">
+                                                <div v-for="(column, columnIndex) in row.columns"
+                                                    :key="'column-preview-' + columnIndex" class="col">
+                                                    <h6>{{ column.label || '-' }}</h6>
+                                                    <div class="mb-2 ms-2">
+                                                        <div v-for="(field, fieldIndex) in column.fields"
+                                                            :key="'field-preview-' + fieldIndex">
+                                                            <div v-if="field.label">
+                                                                <label :for="'field-' +
+                                                                    sectionIndex +
+                                                                    '-' +
+                                                                    columnIndex +
+                                                                    '-' +
+                                                                    fieldIndex
+                                                                    ">
 
-                                                                <span class=" font-12">{{ field.label
-                                                                    }}</span></label>
-                                                            <template v-if="field.fieldtype == 'Select' ||
-                                                                field.fieldtype == 'multiselect'
+                                                                    <span class=" font-12">{{ field.label
+                                                                        }}</span></label>
+                                                                <template v-if="field.fieldtype == 'Select' ||
+                                                                    field.fieldtype == 'multiselect'
                                                                 ">
-                                                                <select :multiple="field.fieldtype == 'multiselect'
-                                                                " v-model="field.value"
-                                                                    class="form-select mb-2 font-13">
-                                                                    <option v-for="(
+                                                                    <select :multiple="field.fieldtype == 'multiselect'
+                                                                        " v-model="field.value"
+                                                                        class="form-select mb-2 font-13">
+                                                                        <option v-for="(
                                                         option, index
                                                       ) in field.options.split('\n')" :key="index" :value="option">
-                                                                        {{ option }}
-                                                                    </option>
-                                                                </select>
-                                                            </template>
-                                                            <template v-else-if="field.fieldtype == 'checkbox' ||
-                                                                field.fieldtype == 'radio'
+                                                                            {{ option }}
+                                                                        </option>
+                                                                    </select>
+                                                                </template>
+                                                                <template v-else-if="field.fieldtype == 'checkbox' ||
+                                                                    field.fieldtype == 'radio'
                                                                 ">
-                                                                <div class="row">
-                                                                    <div class="form-check col-4 mb-4" v-for="(
+                                                                    <div class="row">
+                                                                        <div class="form-check col-4 mb-4" v-for="(
                                                         option, index
                                                       ) in field?.options?.split('\n')" :key="index">
-                                                                        <div class="d-flex gap-2 align-items-center">
-                                                                            <div>
-                                                                                <input class="" :type="field.fieldtype"
-                                                                                    :name="option" :id="option"
-                                                                                    readonly />
-                                                                            </div>
-                                                                            <div>
-                                                                                <label class="form-check-label m-0"
-                                                                                    :for="option">
-                                                                                    {{
-                                                                option
-                                                            }}
-                                                                                </label>
+                                                                            <div
+                                                                                class="d-flex gap-2 align-items-center">
+                                                                                <div>
+                                                                                    <input class=""
+                                                                                        :type="field.fieldtype"
+                                                                                        :name="option" :id="option"
+                                                                                        readonly />
+                                                                                </div>
+                                                                                <div>
+                                                                                    <label class="form-check-label m-0"
+                                                                                        :for="option">
+                                                                                        {{
+                                                                                            option
+                                                                                        }}
+                                                                                    </label>
+                                                                                </div>
                                                                             </div>
                                                                         </div>
                                                                     </div>
-                                                                </div>
-                                                            </template>
-                                                            <template v-else>
-                                                                <component readonly
-                                                                    :is="getFieldComponent(field.fieldtype)"
-                                                                    v-model="field.value" :type="field.fieldtype" :name="'field-' +
-                                                                sectionIndex +
-                                                                '-' +
-                                                                columnIndex +
-                                                                '-' +
-                                                                fieldIndex
-                                                                " class="form-control previewInputHeight">
-                                                                </component>
-                                                            </template>
+                                                                </template>
+                                                                <template v-else>
+                                                                    <component readonly
+                                                                        :is="getFieldComponent(field.fieldtype)"
+                                                                        v-model="field.value" :type="field.fieldtype"
+                                                                        :name="'field-' +
+                                                                            sectionIndex +
+                                                                            '-' +
+                                                                            columnIndex +
+                                                                            '-' +
+                                                                            fieldIndex
+                                                                            " class="form-control previewInputHeight">
+                                                                    </component>
+                                                                </template>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -194,6 +199,10 @@
 import { defineProps, watch } from "vue";
 
 const props = defineProps({
+    blockArr:{
+        type: [Array, null],
+        required: true
+    },
     sections: {
         type: [Array, null],
         required: true,
