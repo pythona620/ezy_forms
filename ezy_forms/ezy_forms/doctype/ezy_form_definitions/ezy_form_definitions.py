@@ -103,7 +103,7 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
 			document_to_reload = frappe.get_doc("DocType",doctype)
 			document_to_reload.reload()
 			add_customized_fields_for_dynamic_doc(fields=[
-                {"label": "Company Field","fieldname": "company_field","fieldtype": "Data","description": "static","idx": 0},
+                {"label": "Company Field","fieldname": "company_field","fieldtype": "Link","description": "static","idx": 0,"options":"Ezy Business Unit"},
                 {"label": "WF Generated Request Id","fieldname": "wf_generated_request_id","fieldtype": "Data","description": "static","idx": 1},
                 {"label": "WF Generated Request Status","fieldname": "wf_generated_request_status","fieldtype": "Data","description": "static","idx": 2}]
                 ,doctype=doctype)
