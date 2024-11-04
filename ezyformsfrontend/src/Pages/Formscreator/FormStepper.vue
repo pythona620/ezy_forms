@@ -862,14 +862,14 @@ watch(
     }
 );
 function formData() {
-    const fields = extractFieldsWithBreaks(sections)
+    const fields = extractFieldsWithBreaks(blockArr)
     const dataObj = {
         ...filterObj.value,
         fields,
         "doctype": doctypes.EzyFormDefinitions
     }
-    console.log(dataObj);
     dataObj.accessible_departments = dataObj.accessible_departments.toString(); //JSON.stringify(dataObj.accessible_departments) dataObj.accessible_departments.toString()
+    console.log(dataObj);
     axiosInstance.post(apis.savedata, dataObj).then((res) => {
         if (res) {
             toast.success("Form Created Successfull")
@@ -877,7 +877,6 @@ function formData() {
                 name: 'Created'
             })
         }
-
     })
 }
 
