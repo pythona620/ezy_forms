@@ -1,73 +1,87 @@
+import { doctypes } from "../apiurls";
+
 export function extractFieldsWithBreaks(data) {
   const result = [];
   let previousFieldname = null; // Track the previous fieldname
   let index = 0;
 
 
-  data.forEach((section) => {
-    section.rows.forEach((row) => {
-      row.columns.forEach((column) => {
+  data.forEach((block) => {
+    block.sections.forEach((section) => {
 
-        column.fields.forEach((field) => {
-          // Add the "insert_after" key to the current field
-          // console.log(" field === ", field)
-          field['reqd'] = field.reqd ? 1 : 0
-          const generatedFieldname = convertLabelToFieldName(field?.label);
+      section.rows.forEach((row) => {
+        row.columns.forEach((column) => {
+
+          column.fields.forEach((field) => {
+            // Add the "insert_after" key to the current field
+            // console.log(" field === ", field)
+            field['reqd'] = field.reqd ? 1 : 0
+            const generatedFieldname = convertLabelToFieldName(field?.label);
+            result.push({
+              ...field,
+              doctype: "DocField",
+              parent: section.parent,
+              description: "Field",
+              fieldname: generatedFieldname,
+              // insert_after: previousFieldname,
+              idx: index++, // Assign index
+              "parentfield": "fields",
+              "parenttype": "DocType",
+            });
+
+            // Update previousFieldname for the next field in this column
+            previousFieldname = generatedFieldname;
+          });
+          const columnFieldname = convertLabelToFieldName(column?.label);
+
+          // Add "Column Break" marker after each column
           result.push({
-            ...field,
+            fieldtype: "Column Break",
             doctype: "DocField",
             parent: section.parent,
-            description: "Field",
-            fieldname: generatedFieldname,
-            // insert_after: previousFieldname,
+            fieldname: columnFieldname,
+            label: column.label,
+            description: "Column Break",
+            // insert_after: previousFieldname, // Track the break
             idx: index++, // Assign index
             "parentfield": "fields",
             "parenttype": "DocType",
           });
 
-          // Update previousFieldname for the next field in this column
-          previousFieldname = generatedFieldname;
+          // Update previousFieldname to the column break
+          previousFieldname = columnFieldname;
         });
-        const columnFieldname = convertLabelToFieldName(column?.label);
-
-        // Add "Column Break" marker after each column
+        const rowFieldname = convertLabelToFieldName(row?.label);
+        // Add "Row Break" marker after each row
         result.push({
-          fieldtype: "Column Break",
-          doctype: "DocField",
-          parent: section.parent,
-          fieldname: columnFieldname,
-          label: column.label,
-          description: "Column Break",
-          // insert_after: previousFieldname, // Track the break
-          idx: index++, // Assign index
-          "parentfield": "fields",
+          fieldtype: "Column Break", description: "Row Break", doctype: "DocField", fieldname: rowFieldname, parent: section.parent,
+          // insert_after: previousFieldname, 
+          idx: index++, "parentfield": "fields",
           "parenttype": "DocType",
         });
-
-        // Update previousFieldname to the column break
-        previousFieldname = columnFieldname;
+        // Update previousFieldname to the row break
+        previousFieldname = rowFieldname;
       });
-      const rowFieldname = convertLabelToFieldName(row?.label);
-      // Add "Row Break" marker after each row
+
+      const sectionFieldname = convertLabelToFieldName(section?.label);
+      // Add "Section Break" marker after each section
       result.push({
-        fieldtype: "Column Break", description: "Row Break", doctype: "DocField", fieldname: rowFieldname, parent: section.parent,
+        fieldtype: "Section Break", description: "Section Break", doctype: "DocField", label: section.label, parent: section.parent, fieldname: sectionFieldname,
         // insert_after: previousFieldname, 
         idx: index++, "parentfield": "fields",
         "parenttype": "DocType",
       });
-      // Update previousFieldname to the row break
-      previousFieldname = rowFieldname;
+      // Update previousFieldname to the section break
+      previousFieldname = sectionFieldname;
     });
-    const sectionFieldname = convertLabelToFieldName(section?.label);
-    // Add "Section Break" marker after each section
+
+    const blockFieldname = convertLabelToFieldName(block?.label || `block_${index}`);
+
     result.push({
-      fieldtype: "Section Break", description: "Section Break", doctype: "DocField", label: section.label, parent: section.parent, fieldname: sectionFieldname,
-      // insert_after: previousFieldname, 
-      idx: index++, "parentfield": "fields",
-      "parenttype": "DocType",
-    });
-    // Update previousFieldname to the section break
-    previousFieldname = sectionFieldname;
+      fieldtype: "Section Break ", description: "Block Break", doctype: "DocField", label: block.label, parent: block.parent, fieldname: blockFieldname,
+      idx: index++
+    })
+    previousFieldname = blockFieldname;
   });
 
   return result;
@@ -80,6 +94,7 @@ export function extractFieldsWithBreaks(data) {
 
 export function rebuildToStructuredArray(flatArray) {
   const result = [];
+  let currentBlock = null;
   let currentSection = null;
   let currentRow = null;
   let currentColumn = null;
@@ -88,10 +103,28 @@ export function rebuildToStructuredArray(flatArray) {
     const item = flatArray[i];
 
     switch (item.description) {
+      case "Block Break":
+        // If there's an existing block, push it to the result before starting a new one
+        if (currentBlock) {
+          if (currentSection) {
+            currentBlock.sections.unshift(currentSection); // Add the last section to the block
+          }
+          result.unshift(currentBlock); // Push the block to the result
+        }
+        currentBlock = {
+          fieldtype: item.fieldtype,
+          fieldname: item.fieldname,
+          label: item.label,
+          parent: item.parent,
+          sections: [] // Initialize sections for the new block
+        };
+        currentSection = null; // Reset currentSection for the new block
+        break;
+
       case "Section Break":
-        // If there's an existing section, push it to the result before starting a new one
+        // If there's an existing section, push it to the current block before starting a new one
         if (currentSection) {
-          result.unshift(currentSection); // Add to the beginning for correct order
+          currentBlock.sections.unshift(currentSection); // Add the last section to the block
         }
         currentSection = {
           fieldtype: item.fieldtype,
@@ -100,22 +133,21 @@ export function rebuildToStructuredArray(flatArray) {
           parent: item.parent,
           rows: [] // Initialize rows for the new section
         };
-        currentRow = null; // Reset currentRow for new section
+        currentRow = null; // Reset currentRow for the new section
         break;
 
       case "Row Break":
-        if (currentSection) {
-          if (currentRow) {
-            currentSection.rows.unshift(currentRow); // Push previous row into the section
-          }
-          currentRow = {
-            fieldtype: "Row Break",
-            fieldname: item.fieldname,
-            label: item.fieldname,
-            parent: item.parent,
-            columns: [] // Initialize columns for the new row
-          };
+        // If there's an existing row, push it to the current section before starting a new one
+        if (currentRow) {
+          currentSection.rows.unshift(currentRow); // Push previous row into the section
         }
+        currentRow = {
+          fieldtype: "Row Break",
+          fieldname: item.fieldname,
+          label: item.fieldname,
+          parent: item.parent,
+          columns: [] // Initialize columns for the new row
+        };
         break;
 
       case "Column Break":
@@ -151,6 +183,10 @@ export function rebuildToStructuredArray(flatArray) {
   if (currentSection) {
     result.unshift(currentSection);
   }
+  if (currentBlock) {
+    result.unshift(currentBlock);
+  }
+
 
   return result;
 }
@@ -178,68 +214,79 @@ export function deletedFieldsExtraction(data) {
   let index = 0;
 
 
-  data.forEach((section) => {
-    section.rows.forEach((row) => {
-      row.columns.forEach((column) => {
+  data.forEach((block) => {
+    block.sections.forEach((section) => {
+      section.rows.forEach((row) => {
+        row.columns.forEach((column) => {
 
-        column.fields.forEach((field) => {
-          // Add the "insert_after" key to the current field
-          console.log(" field === ", field)
+          column.fields.forEach((field) => {
+            // Add the "insert_after" key to the current field
+            console.log(" field === ", field)
+            result.push({
+              ...field,
+              doctype: "DocField",
+              parent: section.parent,
+              description: "Field",
+              fieldname: generatedFieldname,
+              // insert_after: previousFieldname,
+              idx: index++, // Assign index
+              "parentfield": "fields",
+              "parenttype": "DocType",
+            });
+
+            // Update previousFieldname for the next field in this column
+            previousFieldname = generatedFieldname;
+          });
+          const columnFieldname = convertLabelToFieldName(column?.label);
+
+          // Add "Column Break" marker after each column
           result.push({
-            ...field,
+            fieldtype: "Column Break",
             doctype: "DocField",
             parent: section.parent,
-            description: "Field",
-            fieldname: generatedFieldname,
-            // insert_after: previousFieldname,
+            fieldname: columnFieldname,
+            label: column.label,
+            description: "Column Break",
+            // insert_after: previousFieldname, // Track the break
             idx: index++, // Assign index
             "parentfield": "fields",
             "parenttype": "DocType",
           });
 
-          // Update previousFieldname for the next field in this column
-          previousFieldname = generatedFieldname;
+          // Update previousFieldname to the column break
+          previousFieldname = columnFieldname;
         });
-        const columnFieldname = convertLabelToFieldName(column?.label);
-
-        // Add "Column Break" marker after each column
+        const rowFieldname = convertLabelToFieldName(row?.label);
+        // Add "Row Break" marker after each row
         result.push({
-          fieldtype: "Column Break",
-          doctype: "DocField",
-          parent: section.parent,
-          fieldname: columnFieldname,
-          label: column.label,
-          description: "Column Break",
-          // insert_after: previousFieldname, // Track the break
-          idx: index++, // Assign index
-          "parentfield": "fields",
+          fieldtype: "Column Break", description: "Row Break", doctype: "DocField", fieldname: rowFieldname, parent: section.parent,
+          // insert_after: previousFieldname, 
+          idx: index++, "parentfield": "fields",
           "parenttype": "DocType",
         });
-
-        // Update previousFieldname to the column break
-        previousFieldname = columnFieldname;
+        // Update previousFieldname to the row break
+        previousFieldname = rowFieldname;
       });
-      const rowFieldname = convertLabelToFieldName(row?.label);
-      // Add "Row Break" marker after each row
+      const sectionFieldname = convertLabelToFieldName(section?.label);
+      // Add "Section Break" marker after each section
       result.push({
-        fieldtype: "Column Break", description: "Row Break", doctype: "DocField", fieldname: rowFieldname, parent: section.parent,
+        fieldtype: "Section Break", description: "Section Break", doctype: "DocField", label: section.label, parent: section.parent, fieldname: sectionFieldname,
         // insert_after: previousFieldname, 
         idx: index++, "parentfield": "fields",
         "parenttype": "DocType",
       });
-      // Update previousFieldname to the row break
-      previousFieldname = rowFieldname;
+      // Update previousFieldname to the section break
+      previousFieldname = sectionFieldname;
     });
-    const sectionFieldname = convertLabelToFieldName(section?.label);
-    // Add "Section Break" marker after each section
+
+    const blockFieldname = convertLabelToFieldName(block?.label || `block_${index}`);
+
     result.push({
-      fieldtype: "Section Break", description: "Section Break", doctype: "DocField", label: section.label, parent: section.parent, fieldname: sectionFieldname,
-      // insert_after: previousFieldname, 
-      idx: index++, "parentfield": "fields",
-      "parenttype": "DocType",
-    });
-    // Update previousFieldname to the section break
-    previousFieldname = sectionFieldname;
+      fieldtype: "Section Break", description: "Block Break", doctype: "DocField", label: block.label, parent: block.parent, fieldname: blockFieldname,
+      idx: index++
+    })
+    previousFieldname = blockFieldname;
+
   });
 
   return result;
@@ -250,6 +297,7 @@ export function deletedFieldsExtraction(data) {
 export function extractFieldnames(obj) {
   let fieldnames = [];
   if (obj.fieldname) fieldnames.push(obj.fieldname);
+  if (obj.sections) obj.sections.forEach(section => fieldnames.push(...extractFieldnames(section)));
   if (obj.rows) obj.rows.forEach(row => fieldnames.push(...extractFieldnames(row)));
   if (obj.columns) obj.columns.forEach(column => fieldnames.push(...extractFieldnames(column)));
   if (obj.fields) obj.fields.forEach(field => fieldnames.push(...extractFieldnames(field)));
@@ -259,6 +307,7 @@ export function extractFieldnames(obj) {
 export function extractfieldlabels(obj) {
   let fieldlabels = [];
   if (obj.label) fieldlabels.push(obj.label);
+  if (obj.sections) obj.sections.forEach(section => fieldlabels.push(...extractfieldlabels(section)));
   if (obj.rows) obj.rows.forEach(row => fieldlabels.push(...extractfieldlabels(row)));
   if (obj.columns) obj.columns.forEach(column => fieldlabels.push(...extractfieldlabels(column)));
   if (obj.fields) obj.fields.forEach(field => fieldlabels.push(...extractfieldlabels(field)));
