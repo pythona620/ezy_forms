@@ -209,7 +209,7 @@
                                                             class="btn btn-light designationBtn d-flex align-items-center"
                                                             type="button" data-bs-toggle="offcanvas"
                                                             data-bs-target="#offcanvasRight"
-                                                            aria-controls="offcanvasRight" @click="AddDesignCanvas"><img
+                                                            aria-controls="offcanvasRight" @click="AddDesignCanvas(blockIndex)"><img
                                                                 src="../../assets/oui_app-users-roles.svg" alt=""
                                                                 class="me-1">
                                                             Add designations</button>
@@ -710,7 +710,6 @@ const OwnerOfTheFormData = ref([]);
 let sections = reactive([]);
 let blockArr = reactive([]);
 let deleted_items = reactive([])
-let deleted_flat_arr = reactive([])
 const DesignationList = ref([]);
 // "intern", "Junior associate", "Associate", "Senior associate", "Supervisor"
 const designationValue = ref([]);
@@ -720,7 +719,8 @@ const businessUnit = computed(() => {
 const ezyFormsData = ref([]);
 const formNameError = ref("");
 const formShortNameError = ref("");
-const fieldNameError = ref("")
+ const selectedBlockIndex = ref("");
+ let workflowSetup = reactive([])
 let paramId = ref("")
 
 onMounted(() => {
@@ -839,13 +839,24 @@ function handleSingleSelect() {
 }
 
 function addDesignationBtn() {
-    console.log('Selected Designations:', designationValue.value);
+    console.log(selectedBlockIndex.value, 'Selected Designations:', designationValue.value);
+    let xyz = {        
+        type : selectedBlockIndex.value == 0 ? 'requestor' : 'approver',
+        roles : designationValue.value,
+        fields : blockArr[0].sections.flatMap(extractFieldnames)
+    }
+
+    console.log(" ============ ", xyz)
+    workflowSetup.push(xyz)
 }
 
-const AddDesignCanvas = () => {
+const AddDesignCanvas = (idx) => {
     if (filterObj.value.accessible_departments.length) {
         designationData(filterObj.value.accessible_departments);
     }
+    selectedBlockIndex.value = idx;
+
+    console.log(blockArr[idx] ," designation idx === ", idx)
 };
 
 
@@ -858,17 +869,17 @@ function designationData(departments) {
 
     const queryParams = {
         fields: JSON.stringify(["*"]),
-        filters: JSON.stringify(filters),
+        // filters: JSON.stringify(filters),
         limit_page_length: filterObj.value.limitPageLength,
         limitstart: filterObj.value.limitstart,
-        order_by: "`tabEzy Designations`.`creation` desc"
+        order_by: "`tabWF Roles`.`creation` desc"
     };
 
     axiosInstance.get(apis.resource + doctypes.designations, { params: queryParams })
         .then((res) => {
             if (res.data) {
                 console.log(res.data, "Fetched Designations");
-                DesignationList.value = res.data.map(item => item.designation_name);
+                DesignationList.value = res.data.map(item => item.role);
             }
         })
         .catch((error) => {
@@ -911,10 +922,13 @@ watch(
 );
 function formData() {
     const fields = extractFieldsWithBreaks(blockArr)
+    console.log(" filter obj === ", filterObj.value)
     const dataObj = {
         ...filterObj.value,
         fields,
-        "doctype": doctypes.EzyFormDefinitions
+        "doctype": doctypes.EzyFormDefinitions,
+        workflow_setup: workflowSetup,
+        "form_status" : "Draft"
     }
     dataObj.accessible_departments = dataObj.accessible_departments.toString(); //JSON.stringify(dataObj.accessible_departments) dataObj.accessible_departments.toString()
     console.log(dataObj);
@@ -1020,7 +1034,7 @@ const addField = (blockIndex, sectionIndex, rowIndex, columnIndex) => {
         label: "",
         fieldtype: "",
         // value: ref(""), // Keeping the value as a ref for reactivity
-        options: null,
+        options: '',
         reqd: false,
     });
 
@@ -1210,7 +1224,7 @@ function getFormData() {
                 let structuredArr = rebuildToStructuredArray(JSON.parse(res_data?.form_json?.replace(/\\\"/g, '"')))
 
                 structuredArr.forEach((item, index) => {
-                    sections.push(item)
+                    blockArr.push(item)
                 })
             }
         })
