@@ -209,18 +209,18 @@
                                                             class="btn btn-light designationBtn d-flex align-items-center"
                                                             type="button" data-bs-toggle="offcanvas"
                                                             data-bs-target="#offcanvasRight"
-                                                            aria-controls="offcanvasRight"><img
+                                                            aria-controls="offcanvasRight" @click="AddDesignCanvas"><img
                                                                 src="../../assets/oui_app-users-roles.svg" alt=""
-                                                                class="me-1"> Add
-                                                            designations</button>
+                                                                class="me-1">
+                                                            Add designations</button>
 
                                                         <div class="offcanvas offcanvas-end" tabindex="-1"
                                                             id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
-                                                            <div class="offcanvas-header">
-                                                                <h5 id="offcanvasRightLabel">Add designation
+                                                            <div class="offcanvas-header add_designationHeader">
+                                                                <span id="offcanvasRightLabel font-14">Add designation
                                                                     for
                                                                     requestor
-                                                                </h5>
+                                                                </span>
                                                                 <button type="button"
                                                                     class="btn-close bg-light text-reset"
                                                                     data-bs-dismiss="offcanvas"
@@ -228,7 +228,8 @@
                                                             </div>
                                                             <div class="offcanvas-body">
                                                                 <div class="d-flex align-items-center gap-2 ps-2">
-                                                                    <div class="position-relative">
+                                                                    <div v-if="DesignationList.length"
+                                                                        class="position-relative">
 
                                                                         <input type="checkbox" id="selectAll"
                                                                             v-model="isAllSelected"
@@ -238,7 +239,7 @@
                                                                             all</label>
                                                                     </div>
                                                                 </div>
-                                                                <ul class="list-unstyled">
+                                                                <ul v-if="DesignationList.length" class="list-unstyled">
                                                                     <li v-for="(item, index) in DesignationList"
                                                                         :key="index" class="designationList">
                                                                         <input type="checkbox"
@@ -248,11 +249,19 @@
                                                                         <span class="ps-2">{{ item }}</span>
                                                                     </li>
                                                                 </ul>
+                                                                <div v-else>
+                                                                    <div class=" d-flex justify-content-center">
+                                                                        <span>No
+                                                                            Designations
+                                                                            Found</span>
+                                                                    </div>
+                                                                </div>
                                                             </div>
 
                                                             <div class=" offcanvas-footer">
                                                                 <div class=" text-end p-3">
                                                                     <ButtonComp class="btn btn-dark addingDesignations"
+                                                                        @click="addDesignationBtn"
                                                                         name=" Add Designations" />
                                                                 </div>
                                                             </div>
@@ -702,7 +711,8 @@ let sections = reactive([]);
 let blockArr = reactive([]);
 let deleted_items = reactive([])
 let deleted_flat_arr = reactive([])
-const DesignationList = ref(["intern", "Junior associate", "Associate", "Senior associate", "Supervisor"]);
+const DesignationList = ref([]);
+// "intern", "Junior associate", "Associate", "Senior associate", "Supervisor"
 const designationValue = ref([]);
 const businessUnit = computed(() => {
     return EzyBusinessUnit;
@@ -722,6 +732,7 @@ onMounted(() => {
     }
 
 
+
 })
 const filterObj = ref({
     form_name: "",
@@ -739,7 +750,6 @@ watch(
     businessUnit,
     (newVal) => {
         filterObj.value.business_unit = newVal;
-
     },
     { immediate: true }
 );
@@ -817,7 +827,7 @@ const isAllSelected = computed({
     }
 });
 
-// Watch for changes to designationValue to log it
+
 watch(designationValue, (newValue) => {
     console.log('Selected Designations:', newValue);
 });
@@ -826,6 +836,44 @@ function handleSingleSelect() {
     if (!isAllSelected.value && designationValue.value.length === 1) {
         console.log('Selected only one designation:', designationValue.value[0]);
     }
+}
+
+function addDesignationBtn() {
+    console.log('Selected Designations:', designationValue.value);
+}
+
+const AddDesignCanvas = () => {
+    if (filterObj.value.accessible_departments.length) {
+        designationData(filterObj.value.accessible_departments);
+    }
+};
+
+
+function designationData(departments) {
+    const filters = [];
+
+    if (Array.isArray(departments) && departments.length > 0) {
+        filters.push(["ezy_departments", "in", departments]);
+    }
+
+    const queryParams = {
+        fields: JSON.stringify(["*"]),
+        filters: JSON.stringify(filters),
+        limit_page_length: filterObj.value.limitPageLength,
+        limitstart: filterObj.value.limitstart,
+        order_by: "`tabEzy Designations`.`creation` desc"
+    };
+
+    axiosInstance.get(apis.resource + doctypes.designations, { params: queryParams })
+        .then((res) => {
+            if (res.data) {
+                console.log(res.data, "Fetched Designations");
+                DesignationList.value = res.data.map(item => item.designation_name);
+            }
+        })
+        .catch((error) => {
+            console.error("Error fetching designations data:", error);
+        });
 }
 
 function cancelForm() {
@@ -1230,6 +1278,11 @@ const hasDuplicates = (array) => new Set(array).size !== array.length;
 <style lang="scss" scoped>
 /* @import '@vueform/multiselect/themes/default.css'; */
 
+.add_designationHeader {
+    box-shadow: 0px 4px 4px 0px #0000000D;
+    font-size: 14px;
+
+}
 
 .ErrorMsg {
     font-size: 11px;
