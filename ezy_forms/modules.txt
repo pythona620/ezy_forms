@@ -1,2 +1,2 @@
-ezy_forms
 User Forms
+Ezy Forms

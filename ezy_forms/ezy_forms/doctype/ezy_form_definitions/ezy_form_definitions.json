@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:{business_unit}-{form_short_name}",
+ "autoname": "field:form_short_name",
  "creation": "2024-10-01 15:45:04.495503",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -14,7 +14,8 @@
   "count",
   "accessible_departments",
   "form_short_name",
-  "form_json"
+  "form_json",
+  "form_status"
  ],
  "fields": [
   {
@@ -57,7 +58,8 @@
   {
    "fieldname": "form_short_name",
    "fieldtype": "Data",
-   "label": "Form Short Name"
+   "label": "Form Short Name",
+   "unique": 1
   },
   {
    "fieldname": "form_json",
@@ -68,15 +70,23 @@
    "fieldname": "form_name",
    "fieldtype": "Data",
    "label": "Form Name"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "form_status",
+   "fieldtype": "Select",
+   "label": "Form Status",
+   "options": "Draft\nCreated",
+   "search_index": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-10-24 10:59:01.449205",
+ "modified": "2024-10-30 10:49:45.296555",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
  "name": "Ezy Form Definitions",
- "naming_rule": "Expression",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
