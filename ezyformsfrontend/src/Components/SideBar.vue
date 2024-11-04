@@ -54,11 +54,25 @@
                         </router-link>
                     </ul>
                 </template>
+<template v-if="isMasterRoute">
+    <ul class="list-unstyled">
+        <router-link  v-for="department in formSideBarData" :key="department.route"
+          :to="`/forms/department/${department.route}`" 
+          class="text-decoration-none text-black"
+          active-class="active-link">
+        <li >
 
+          <i :class="`bi-icon ps-1 bg-transparent ${department.icon} me-3`"></i>
+          {{ department.name }}  </li>
+        </router-link>
+    
+    </ul>
+</template>
                 <!-- Other sidebar items if not on settings route -->
                 <template v-else>
                     <ul class="list-unstyled">
                         <router-link v-for="(list, index) in sidebarData" :key="index"
+                      
                             :to="`${baseRoute}/${list.route.toLowerCase()}`" class="text-decoration-none text-black"
                             active-class="active-link">
                             <li :title="list.name">
@@ -66,6 +80,9 @@
                                 {{ list.name }}
                             </li>
                         </router-link>
+                       
+
+
                     </ul>
                 </template>
             </aside>
@@ -75,31 +92,33 @@
 
 
 
-
 <script setup>
-import { computed } from 'vue';
-import { useRoute } from 'vue-router'; // Import the useRoute hook
+import { computed, onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+// import { useRoute } from 'vue-router'; // Import the useRoute hook
+import axiosInstance from '../shared/services/interceptor';
+import { apis, doctypes } from '../shared/apiurls';
 
-// Define sidebar data for different routes
-const formSideBarData = [
-    { name: 'IT', icon: 'bi bi-display', route: 'it' },
-    { name: 'F & B', icon: 'bi bi-cup-straw', route: 'f&b' },
-    { name: 'Sales', icon: 'bi bi-bar-chart', route: 'sales' },
-    { name: 'HR', icon: 'bi bi-people-fill', route: 'hr' },
-    { name: 'Finance', icon: 'bi bi-wallet2', route: 'finance' },
-    { name: 'Administration', icon: 'bi bi-building', route: 'admin' },
-    { name: 'House keeping', icon: 'bi bi-bucket', route: 'housekeeping' },
-    { name: 'Front office', icon: 'fa-solid fa-concierge-bell', route: 'frontoffice' },
-    { name: 'Revenue', icon: 'bi bi-cash-stack', route: 'revenue' },
-];
 
+// const formSideBarData = [
+//     { name: 'IT', icon: 'bi bi-display', route: 'it' },
+//     { name: 'F & B', icon: 'bi bi-cup-straw', route: 'f&b' },
+//     { name: 'Sales', icon: 'bi bi-bar-chart', route: 'sales' },
+//     { name: 'HR', icon: 'bi bi-people-fill', route: 'hr' },
+//     { name: 'Finance', icon: 'bi bi-wallet2', route: 'finance' },
+//     { name: 'Administration', icon: 'bi bi-building', route: 'admin' },
+//     { name: 'House keeping', icon: 'bi bi-bucket', route: 'housekeeping' },
+//     { name: 'Front office', icon: 'fa-solid fa-concierge-bell', route: 'frontoffice' },
+//     { name: 'Revenue', icon: 'bi bi-cash-stack', route: 'revenue' },
+// ];
+const formSideBarData = ref([])
 const settingsSideBarData = [
     { name: 'Profile', icon: 'bi bi-person-circle', route: 'profile' },
     { name: 'E-Signature', icon: 'bi bi-person-circle', route: 'esign' },
-    { name: 'Role', icon: 'bi bi-shield-lock', route: 'role' },
-    { name: 'Role Matrix', icon: 'bi bi-grid-3x3-gap', route: 'rolematrix' },
-    { name: 'Work Flow', icon: 'bi bi-diagram-3', route: 'workflow' },
-    { name: 'Notifications', icon: 'bi bi-bell', route: 'notifications' },
+    // { name: 'Role', icon: 'bi bi-shield-lock', route: 'role' },
+    // { name: 'Role Matrix', icon: 'bi bi-grid-3x3-gap', route: 'rolematrix' },
+    // { name: 'Work Flow', icon: 'bi bi-diagram-3', route: 'workflow' },
+    // { name: 'Notifications', icon: 'bi bi-bell', route: 'notifications' },
     { name: 'Department', icon: 'bi bi-clock-history', route: 'department' },
     { name: 'Designation', icon: 'bi bi-people', route: 'designations' },
     { name: 'User Management', icon: 'bi bi-people', route: 'usermanagement' },
@@ -108,7 +127,7 @@ const settingsSideBarData = [
 ];
 // Define the title for the first and second settings sections
 const firstSettingsTitle = 'My Details';
-const secondSettingsTitle = 'Workflow';
+// const secondSettingsTitle = 'Workflow';
 const thirdSettingsTitle = 'Master';
 const forthSettingsTitle = 'Form';
 
@@ -130,6 +149,8 @@ const userFormSideBarData = [
 
 
 const route = useRoute();
+const router = useRouter();
+
 
 // Determine if the current route is /forms, /settings, /todo, or /archived
 const isMasterRoute = computed(() => route.path.startsWith('/forms'));
@@ -140,9 +161,8 @@ const isUserFormsRoute = computed(() => route.path.startsWith('/create-form'));
 // Compute sidebar data based on the current route
 const sidebarData = computed(() => {
     if (isMasterRoute.value) {
-        return formSideBarData;
-    } else if (isSettingsRoute.value) {
-        return settingsSideBarData;
+        return formSideBarData.value;
+    
     } else if (isToDoRoute.value) {
         return todoSideBarData;
     } else if (isUserFormsRoute.value) {
@@ -151,9 +171,9 @@ const sidebarData = computed(() => {
     return [];
 });
 const firstSettingsGroup = computed(() => settingsSideBarData.slice(0, 2)); // First 4 items
-const secondSettingsGroup = computed(() => settingsSideBarData.slice(2, 6));
-const thirdSettingsGroup = computed(() => settingsSideBarData.slice(6, 9)); // Remaining items
-const forthSettingsGroup = computed(() => settingsSideBarData.slice(9));
+// const secondSettingsGroup = computed(() => settingsSideBarData.slice(2, 6));
+const thirdSettingsGroup = computed(() => settingsSideBarData.slice(2, 4)); // Remaining items
+const forthSettingsGroup = computed(() => settingsSideBarData.slice(4));
 // Define the title based on the current route
 const sidebarTitle = computed(() => {
     if (isMasterRoute.value) {
@@ -179,6 +199,62 @@ const baseRoute = computed(() => {
     }
     return '/';
 });
+onMounted(() => {
+    deptData()
+})
+const filterObj = ref({
+    limitPageLength: 'None',
+    limitstart: 0
+});
+const deptartmentData = ref([])
+function deptData() {
+  const queryParams = {
+    fields: JSON.stringify(["*"]),
+    limit_page_length: filterObj.value.limitPageLength,
+    limitstart: filterObj.value.limitstart,
+    order_by: "`tabEzy Departments`.`creation` desc"
+  };
+
+  axiosInstance.get(apis.resource + doctypes.departments, { params: queryParams })
+    .then((res) => {
+      if (res.data) {
+        deptartmentData.value = res.data;
+        console.log(deptartmentData.value, 'Fetched department data');
+
+        // Modify the routing to always go to /forms/department
+        formSideBarData.value = deptartmentData.value.map(department => ({
+            name: department.department_name,
+              icon: getIconByDepartmentName(department.department_name),
+              route: department.department_name.replace(/\s+/g, '-').toLowerCase(), // Normalize route
+              id: department.id // Ensure you capture the department ID
+        }));
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching department data:", error);
+    });
+}
+
+
+// // Function to navigate to department route based on ID
+// function navigateToDepartment(id) {
+//     router.push({ name: 'DepartmentDetail', params: { id } });
+// }
+// Optional: Define a function to get icons based on department name
+function getIconByDepartmentName(name) {
+    const icons = {
+        'IT': 'bi bi-display',
+        'F & B': 'bi bi-cup-straw',
+        'Sales Department': 'bi bi-bar-chart',
+        'HR Department': 'bi bi-people-fill',
+        'Finance': 'bi bi-wallet2',
+        'Administration': 'bi bi-building',
+        'House keeping': 'bi bi-bucket',
+        'Front office': 'fa-solid fa-concierge-bell',
+        'Revenue': 'bi bi-cash-stack'
+    };
+    return icons[name] || 'bi bi-file';
+}
 
 </script>
 
@@ -217,6 +293,7 @@ li {
 
 }
 
+
 .active-link>li:hover {
     background-color: var(--white-color);
     color: var(--black-color);
@@ -227,3 +304,4 @@ li {
     border-radius: 4px;
 }
 </style>
+

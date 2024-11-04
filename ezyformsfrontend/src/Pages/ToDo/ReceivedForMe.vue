@@ -28,7 +28,7 @@
     </div>
     <div class="mt-2">
         <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction='true' actionType="dropdown"
-            isCheckbox='true' />
+            isCheckbox='true':actions="actions" />
     </div>
 </template>
 <script setup>
@@ -55,6 +55,16 @@ const tableheaders = ref([
 
 ]
 
+)
+const actions = ref(
+    [
+        { name: 'View Request', icon: 'fa-solid fa-eye' },
+        
+        { name: 'Share this form', icon: 'fa-solid fa-share-alt' },
+        { name: 'Download Form', icon: 'fa-solid fa-download' },
+        { name: 'Edit Form', icon: 'fa-solid fa-edit' },
+        
+    ]
 )
 const tableData = ref([]);
 console.log(tableData.value, "tableeee");
