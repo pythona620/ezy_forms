@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "field:emp_mail_id",
  "creation": "2024-10-14 15:44:35.657327",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -27,7 +28,8 @@
   {
    "fieldname": "emp_mail_id",
    "fieldtype": "Data",
-   "label": "Emp Mail ID"
+   "label": "Emp Mail ID",
+   "unique": 1
   },
   {
    "fieldname": "department",
@@ -38,7 +40,8 @@
   {
    "fieldname": "designation",
    "fieldtype": "Data",
-   "label": "Designation"
+   "label": "Designation",
+   "search_index": 1
   },
   {
    "fieldname": "reporting_to",
@@ -48,15 +51,17 @@
   {
    "fieldname": "reporting_designation",
    "fieldtype": "Data",
-   "label": "Reporting Designation"
+   "label": "Reporting Designation",
+   "search_index": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-10-15 10:42:48.401871",
+ "modified": "2024-11-01 12:48:19.267264",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
  "name": "Ezy Employee",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {

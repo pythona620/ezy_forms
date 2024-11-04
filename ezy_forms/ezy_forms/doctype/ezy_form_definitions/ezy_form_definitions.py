@@ -8,14 +8,14 @@ import sys
 import subprocess
 import os
 from ast import literal_eval
-import pandas as pd
 from frappe.utils.background_jobs import enqueue
+from ezy_forms.ezy_forms.doctype.ezy_form_definitions.linking_flow_and_forms import enqueing_creation_of_roadmap, add_roles_to_wf_requestors
 
 class EzyFormDefinitions(Document):
 	pass
  
 @frappe.whitelist()
-def add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:str,form_name:str,accessible_departments:str,form_short_name:str,fields:list[dict],form_status:str):
+def add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:str,form_name:str,accessible_departments:str,form_short_name:str,fields:list[dict],form_status:str,workflow_setup:list[dict],requestors:list[dict]):
 	return_response_for_doc_add = enqueue(
 		enqueued_add_dynamic_doctype,
 		owner_of_the_form=owner_of_the_form,
@@ -26,6 +26,8 @@ def add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:st
 		form_short_name=form_short_name,
 		fields=fields,
 		form_status=form_status,
+		workflow_setup=workflow_setup,
+		requestors=requestors,
 		now=True,
 		is_async=True,
 		queue="short")
@@ -42,7 +44,6 @@ def add_customized_fields_for_dynamic_doc(fields:list[dict],doctype:str):
 		queue="short")
 	return return_response_for_add_or_edit_fields
 
-@frappe.whitelist()
 def deleting_customized_field_from_custom_dynamic_doc(doctype:str,deleted_fields:list):
 	deleted_fields_qresponse = enqueue(
 		enqueued_deleting_customized_field_from_custom_dynamic_doc,
@@ -53,17 +54,22 @@ def deleting_customized_field_from_custom_dynamic_doc(doctype:str,deleted_fields
 		queue="short")
 	return deleted_fields_qresponse
 
-@frappe.whitelist()
-def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:str,form_name:str,accessible_departments:str,form_short_name:str,fields:list[dict],form_status:str):
+def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:str,form_name:str,accessible_departments:str,form_short_name:str,fields:list[dict],form_status:str,workflow_setup:list[dict],requestors:list[dict]):
 	""" Owner_of_the_form should come from Departments Doctype in Select Field."""
 	"""Adding DocTypes dynamically, giving Perms for the doctype and creating a default section-break field for DocType"""
 	try:
 		if business_unit == None or business_unit == "":return {"success":False,"message":"Pass Business Unit because it is considered as prefix"}
-		doctype = business_unit + "-" + form_short_name
+		doctype = form_short_name
 		if isinstance(fields,str):
 			fields = literal_eval(fields)
-		# if frappe.db.exists("Ezy Form Definitions",doctype):return {"success":False,"message":f"Already '{doctype}' exists. Please rename the form."}
+		if isinstance(workflow_setup,str):
+			workflow_setup = literal_eval(workflow_setup)
+		if isinstance(requestors,str):
+			requestors = literal_eval(requestors)
 		if not frappe.db.exists("DocType",doctype):
+			frappe.db.sql(f"DROP TABLE IF EXISTS `tab{doctype}`;")
+			frappe.db.commit()
+			if frappe.db.exists("Ezy Form Definitions",{"name":form_short_name}):return {"success":True,"message":f"Already Created Form with the same name - '{form_short_name}' but haven't removed in 'Ezy Form Definitions'."}
 			doc = frappe.new_doc("DocType")
 			doc.name = doctype
 			doc.creation = frappe_now()
@@ -72,20 +78,14 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
 			doc.module = "User Forms"
 			doc.app = "ezy_forms"
 			doc.custom = 1
+			doc.description = business_unit
 			doc.insert(ignore_permissions=True)
 			frappe.db.commit()
 			doc.reload()
-			custom_docperm = frappe.new_doc("Custom DocPerm")
-			custom_docperm.parent = doctype
-			custom_docperm.read = 1
-			custom_docperm.create = 1
-			custom_docperm.delete = 1
-			custom_docperm.select = 1
-			custom_docperm.write = 1
-			custom_docperm.role = "System Manager"
-			custom_docperm.insert(ignore_permissions=True)
-			frappe.db.commit()
-			custom_docperm.reload()
+			"""need to add perms in this step itself for system manager to access the DocType"""
+			activating_perms(doctype=doctype)
+			"""need to migrate in this step itself as DocType is created need to update in DB."""
+			bench_migrating_from_code()
 			form_defs = frappe.new_doc("Ezy Form Definitions")
 			form_defs.form_category = form_category
 			form_defs.accessible_departments = accessible_departments
@@ -99,18 +99,21 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
 			form_defs.insert(ignore_permissions=True).save()
 			form_defs.reload()
 			frappe.db.commit()
-			"""need to migrate in this step itself as DocType is created need to update in DB."""
-			bench_migrating_from_code()
 
-			"""need to add perms in this step itself for system manager to access the DocType"""
-			activating_perms(doctype=doctype)
 			document_to_reload = frappe.get_doc("DocType",doctype)
 			document_to_reload.reload()
-
-			"""need to migrate in this step itself because of adding permissions in the below level"""
-			bench_migrating_from_code()
+			add_customized_fields_for_dynamic_doc(fields=[
+                {"label": "Company Field","fieldname": "company_field","fieldtype": "Link","description": "static","idx": 0,"options":"Ezy Business Unit"},
+                {"label": "WF Generated Request Id","fieldname": "wf_generated_request_id","fieldtype": "Data","description": "static","idx": 1},
+                {"label": "WF Generated Request Status","fieldname": "wf_generated_request_status","fieldtype": "Data","description": "static","idx": 2}]
+                ,doctype=doctype)
+			##### calling enqueing_creation_of_roadmap for creating roadmap for this particular mentioned form
+			enqueing_creation_of_roadmap(doctype=doctype,property_name=business_unit,bulk_request=False)
 		if len(fields)>0:
 			add_customized_fields_for_dynamic_doc(fields=fields,doctype=doctype)
+		if len(requestors)>0:
+			doc_rec = "_".join(business_unit.split()).upper() + "_" + "_".join(doctype.split()).upper().replace(" ", "_")
+			add_roles_to_wf_requestors(doc_rec = doc_rec,requestors=requestors)
 		return {"success":True,"message":"Form Created."}
 	except Exception as e:
 		exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -122,7 +125,6 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
 		frappe.throw(str(e))
 		return {"success": False, "message": str(e)}
 
-@frappe.whitelist()
 def enqueued_add_customized_fields_for_dynamic_doc(fields:list[dict],doctype:str):
 	try:
 		if isinstance(fields,str):fields = literal_eval(fields)
@@ -131,11 +133,12 @@ def enqueued_add_customized_fields_for_dynamic_doc(fields:list[dict],doctype:str
 		fields_in_mentioned_doctype = [_[0] for _ in frappe.db.sql(f"DESCRIBE `tab{doctype}`;")]
 		for dicts_of_docs_entries in fields:
 			if dicts_of_docs_entries["fieldname"] in fields_in_mentioned_doctype:
-				doc_exists_name_or_not = frappe.db.exists(dicts_of_docs_entries)
-				if dicts_of_docs_entries["fieldtype"] not in ["Section Break","Column Break","Tab Break"]: dicts_of_docs_entries = dicts_of_docs_entries | {"in_list_view":1}
+				doc_exists_name_or_not = frappe.db.exists("DocField",dicts_of_docs_entries)
+				
 				if not doc_exists_name_or_not:
-					name_of_existing_doc = frappe.db.get_all("DocField",filters={"fieldname":dicts_of_docs_entries["fieldname"],"parent":dicts_of_docs_entries["parent"]},pluck="name")[0]
+					name_of_existing_doc = frappe.db.get_all("DocField",filters={"fieldname":dicts_of_docs_entries["fieldname"],"parent":doctype},pluck="name")[0]
 					doc_for_existing_custom_field = frappe.get_doc("DocField",name_of_existing_doc)
+					if dicts_of_docs_entries["fieldtype"] not in ["Section Break","Column Break","Tab Break"]: doc_for_existing_custom_field.in_list_view=1
 					if "reqd" in dicts_of_docs_entries:doc_for_existing_custom_field.reqd = dicts_of_docs_entries["reqd"]
 					if "options" in dicts_of_docs_entries:
 						if isinstance(dicts_of_docs_entries["options"],str):
@@ -155,7 +158,9 @@ def enqueued_add_customized_fields_for_dynamic_doc(fields:list[dict],doctype:str
 			else:
 				# Create a new field
 				if dicts_of_docs_entries["fieldtype"] not in ["Section Break","Column Break","Tab Break"]: dicts_of_docs_entries = dicts_of_docs_entries | {"in_list_view":1}
-				doc_for_new_custom_field = frappe.get_doc(dicts_of_docs_entries).insert(ignore_permissions=True)
+				doc_for_new_custom_field = frappe.get_doc('DocType', doctype)
+				# appending records in child with get_doc
+				doc_for_new_custom_field.append('fields', dicts_of_docs_entries)
 				doc_for_new_custom_field.save()
 				frappe.db.commit()
 				doc_for_new_custom_field.db_update()
@@ -172,7 +177,6 @@ def enqueued_add_customized_fields_for_dynamic_doc(fields:list[dict],doctype:str
 		frappe.throw(str(e))
 		return {"success": False, "message": str(e)}
 
-@frappe.whitelist()
 def enqueued_deleting_customized_field_from_custom_dynamic_doc(doctype:str,deleted_fields:list):
 	try:
 		frappe.db.delete("DocField",{"parent":doctype,"fieldname":["in",deleted_fields]})
