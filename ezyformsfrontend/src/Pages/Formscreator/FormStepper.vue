@@ -25,9 +25,9 @@
 
                                 <ul class="steps">
                                     <li v-for="step in steps" :key="step.id" :class="{
-                                        active: activeStep === step.id,
-                                        completed: activeStep > step.id,
-                                    }">
+                        active: activeStep === step.id,
+                        completed: activeStep > step.id,
+                    }">
                                         <div class="d-flex gap-3 align-items-center" @click="handleStepClick(step.id)">
                                             <i v-if="activeStep > step.id"
                                                 class="ri-checkbox-circle-fill completedStepIcon"></i>
@@ -182,9 +182,8 @@
                                                             @click="previewForm">
                                                             <i class="bi bi-eye me-1"></i>Preview
                                                         </button>
-                                                        <FormPreview :blockArr="blockArr"
-                                                            :formDescriptions="formDescriptions" />
                                                     </div>
+
                                                     <ButtonComp
                                                         class="buttoncomp btn btn-dark font-10  Withborder border"
                                                         name="Next" v-if="activeStep < 3" @click="nextStep" />
@@ -200,76 +199,71 @@
                                                     </button> -->
                                                 </div>
                                             </div>
+                                            <FormPreview :blockArr="blockArr" :formDescriptions="formDescriptions" />
                                             <div class="">
                                                 <!-- Here is block level starts -->
-                                                <div class="block-level"  v-for="(block, blockIndex) in blockArr"
-                                                :key="blockIndex">
-                                                <div class="d-flex justify-content-end">
-                                                    <button
-                                                                        class="btn btn-light designationBtn d-flex align-items-center"
-                                                                        type="button" data-bs-toggle="offcanvas"
-                                                                        data-bs-target="#offcanvasRight"
-                                                                        aria-controls="offcanvasRight"><img
-                                                                            src="../../assets/oui_app-users-roles.svg"
-                                                                            alt="" class="me-1"> Add
-                                                                        designations</button>
+                                                <div class="block-level" v-for="(block, blockIndex) in blockArr"
+                                                    :key="blockIndex">
+                                                    <div class="d-flex justify-content-end">
+                                                        <button
+                                                            class="btn btn-light designationBtn d-flex align-items-center"
+                                                            type="button" data-bs-toggle="offcanvas"
+                                                            data-bs-target="#offcanvasRight"
+                                                            aria-controls="offcanvasRight"><img
+                                                                src="../../assets/oui_app-users-roles.svg" alt=""
+                                                                class="me-1"> Add
+                                                            designations</button>
 
-                                                                    <div class="offcanvas offcanvas-end" tabindex="-1"
-                                                                        id="offcanvasRight"
-                                                                        aria-labelledby="offcanvasRightLabel">
-                                                                        <div class="offcanvas-header">
-                                                                            <h5 id="offcanvasRightLabel">Add designation
-                                                                                for
-                                                                                requestor
-                                                                            </h5>
-                                                                            <button type="button"
-                                                                                class="btn-close bg-light text-reset"
-                                                                                data-bs-dismiss="offcanvas"
-                                                                                aria-label="Close"></button>
-                                                                        </div>
-                                                                        <div class="offcanvas-body">
-                                                                            <div
-                                                                                class="d-flex align-items-center gap-2 ps-2">
-                                                                                <div class="position-relative">
+                                                        <div class="offcanvas offcanvas-end" tabindex="-1"
+                                                            id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+                                                            <div class="offcanvas-header">
+                                                                <h5 id="offcanvasRightLabel">Add designation
+                                                                    for
+                                                                    requestor
+                                                                </h5>
+                                                                <button type="button"
+                                                                    class="btn-close bg-light text-reset"
+                                                                    data-bs-dismiss="offcanvas"
+                                                                    aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="offcanvas-body">
+                                                                <div class="d-flex align-items-center gap-2 ps-2">
+                                                                    <div class="position-relative">
 
-                                                                                    <input type="checkbox"
-                                                                                        id="selectAll"
-                                                                                        v-model="isAllSelected"
-                                                                                        class="designationCheckBox position-absolute bg-transparent form-control border-0 ms-1" />
-                                                                                    <label for="selectAll fw-bold"
-                                                                                        class="SelectallDesignation">Select
-                                                                                        all</label>
-                                                                                </div>
-                                                                            </div>
-                                                                            <ul class="list-unstyled">
-                                                                                <li v-for="(item, index) in DesignationList"
-                                                                                    :key="index"
-                                                                                    class="designationList">
-                                                                                    <input type="checkbox"
-                                                                                        v-model="designationValue"
-                                                                                        :value="item"
-                                                                                        class="designationCheckBox"
-                                                                                        @change="handleSingleSelect" />
-                                                                                    <span class="ps-2">{{ item }}</span>
-                                                                                </li>
-                                                                            </ul>
-                                                                        </div>
-
-                                                                        <div class=" offcanvas-footer">
-                                                                            <div class=" text-end p-3">
-                                                                                <ButtonComp
-                                                                                    class="btn btn-dark addingDesignations"
-                                                                                    name=" Add Designations" />
-                                                                            </div>
-                                                                        </div>
+                                                                        <input type="checkbox" id="selectAll"
+                                                                            v-model="isAllSelected"
+                                                                            class="designationCheckBox position-absolute bg-transparent form-control border-0 ms-1" />
+                                                                        <label for="selectAll fw-bold"
+                                                                            class="SelectallDesignation">Select
+                                                                            all</label>
                                                                     </div>
+                                                                </div>
+                                                                <ul class="list-unstyled">
+                                                                    <li v-for="(item, index) in DesignationList"
+                                                                        :key="index" class="designationList">
+                                                                        <input type="checkbox"
+                                                                            v-model="designationValue" :value="item"
+                                                                            class="designationCheckBox"
+                                                                            @change="handleSingleSelect" />
+                                                                        <span class="ps-2">{{ item }}</span>
+                                                                    </li>
+                                                                </ul>
+                                                            </div>
 
-                                                                    <button
-                                                                        class="btn btn-light bg-transparent border-0 font-13 deleteSection"
-                                                                        @click="removeBlock(blockIndex)">
-                                                                        <i class="bi bi-trash me-1"></i> Delete Block
-                                                                    </button>
-                                                </div>
+                                                            <div class=" offcanvas-footer">
+                                                                <div class=" text-end p-3">
+                                                                    <ButtonComp class="btn btn-dark addingDesignations"
+                                                                        name=" Add Designations" />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <button
+                                                            class="btn btn-light bg-transparent border-0 font-13 deleteSection"
+                                                            @click="removeBlock(blockIndex)">
+                                                            <i class="bi bi-trash me-1"></i> Delete Block
+                                                        </button>
+                                                    </div>
 
                                                     <div class="mt-2">
                                                         <div v-for="(section, sectionIndex) in block.sections"
@@ -280,13 +274,13 @@
                                                                     @change="handleFieldChange(sectionIndex)"
                                                                     placeholder="Untitled approval flow" />
                                                                 <small v-if="section.errorMsg" class="text-danger"> {{
-                                                                    section.errorMsg
-                                                                    }}</small>
-                                                                <div class=" d-flex">                                                                  
+                        section.errorMsg
+                    }}</small>
+                                                                <div class=" d-flex">
 
                                                                     <button
                                                                         class="btn btn-light bg-transparent border-0 font-13 deleteSection"
-                                                                        @click="removeSection(blockIndex,sectionIndex)">
+                                                                        @click="removeSection(blockIndex, sectionIndex)">
                                                                         <i class="bi bi-trash me-1"></i> Delete Section
                                                                     </button>
                                                                 </div>
@@ -298,17 +292,17 @@
                                                                     <div
                                                                         class="d-flex justify-content-between align-items-center">
                                                                         <label class="rownames">{{
-                                                                            getRowSuffix(rowIndex)
-                                                                            }}</label>
+                        getRowSuffix(rowIndex)
+                    }}</label>
                                                                         <div>
                                                                             <button v-if="row.columns.length < 3"
                                                                                 class="btn btn-light bg-transparent border-0 font-13"
-                                                                                @click="addColumn(blockIndex,sectionIndex, rowIndex)">
+                                                                                @click="addColumn(blockIndex, sectionIndex, rowIndex)">
                                                                                 <i class="bi bi-plus"></i> Add Column
                                                                             </button>
                                                                             <button
                                                                                 class="btn btn-light bg-transparent border-0 font-13"
-                                                                                @click="removeRow(blockIndex,sectionIndex, rowIndex)">
+                                                                                @click="removeRow(blockIndex, sectionIndex, rowIndex)">
                                                                                 <i class="ri-subtract-line"></i> Delete
                                                                                 row
                                                                             </button>
@@ -324,21 +318,21 @@
                                                                                     <input v-model="column.label"
                                                                                         type="text"
                                                                                         class="border-less-input columnFieldInput font-14"
-                                                                                        @change="handleFieldChange(blockIndex,sectionIndex, rowIndex, columnIndex)"
+                                                                                        @change="handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex)"
                                                                                         placeholder="Column Name" />
                                                                                     <small v-if="column.errorMsg"
                                                                                         class="text-danger"> {{
-                                                                                        column.errorMsg
-                                                                                        }}</small>
+                        column.errorMsg
+                    }}</small>
                                                                                     <button class="btn btn-light btn-sm"
                                                                                         @click="
-                                                                                            removeColumn(
-                                                                                                blockIndex,
-                                                                                                sectionIndex,
-                                                                                                rowIndex,
-                                                                                                columnIndex
-                                                                                            )
-                                                                                            ">
+                    removeColumn(
+                        blockIndex,
+                        sectionIndex,
+                        rowIndex,
+                        columnIndex
+                    )
+                        ">
                                                                                         <i class="bi bi-trash"></i>
                                                                                     </button>
                                                                                 </div>
@@ -356,20 +350,20 @@
                                                                                                 <button
                                                                                                     class="btn btn-light btn-sm"><i
                                                                                                         class="ri-file-copy-line copyIcon"
-                                                                                                        @click="copyField(blockIndex,sectionIndex, rowIndex, columnIndex, fieldIndex)"></i>
+                                                                                                        @click="copyField(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"></i>
                                                                                                 </button>
 
                                                                                                 <button
                                                                                                     class="btn btn-light btn-sm"
                                                                                                     @click="
-                                                                                                        removeField(
-                                                                                                            blockIndex,
-                                                                                                            sectionIndex,
-                                                                                                            rowIndex,
-                                                                                                            columnIndex,
-                                                                                                            fieldIndex
-                                                                                                        )
-                                                                                                        ">
+                        removeField(
+                            blockIndex,
+                            sectionIndex,
+                            rowIndex,
+                            columnIndex,
+                            fieldIndex
+                        )
+                        ">
                                                                                                     <i
                                                                                                         class="bi bi-trash"></i>
                                                                                                 </button>
@@ -379,14 +373,14 @@
                                                                                             v-model="field.fieldtype"
                                                                                             class="form-select mb-2 font-13 searchSelect"
                                                                                             @change="
-                                                                                                onFieldTypeChange(
-                                                                                                    blockIndex,
-                                                                                                    sectionIndex,
-                                                                                                    rowIndex,
-                                                                                                    columnIndex,
-                                                                                                    fieldIndex
-                                                                                                )
-                                                                                                ">
+                        onFieldTypeChange(
+                            blockIndex,
+                            sectionIndex,
+                            rowIndex,
+                            columnIndex,
+                            fieldIndex
+                        )
+                        ">
                                                                                             <option value="">Select Type
                                                                                             </option>
                                                                                             <option
@@ -425,8 +419,8 @@
                                                                                         <small v-if="field.errorMsg"
                                                                                             class="text-danger font-10">
                                                                                             {{
-                                                                                            field.errorMsg
-                                                                                            }}</small>
+                        field.errorMsg
+                    }}</small>
                                                                                     </div>
                                                                                 </div>
                                                                                 <div
@@ -434,8 +428,8 @@
                                                                                     <button
                                                                                         class="btn btn-light btn-sm d-flex align-items-center addField m-2"
                                                                                         @click="
-                                                                                            addField(blockIndex,sectionIndex, rowIndex, columnIndex)
-                                                                                            ">
+                        addField(blockIndex, sectionIndex, rowIndex, columnIndex)
+                        ">
                                                                                         <i class="bi bi-plus fs-4"></i>
                                                                                         <span>Add Field</span>
                                                                                     </button>
@@ -448,7 +442,7 @@
                                                             <div
                                                                 class="d-flex justify-content-start align-items-center my-2">
                                                                 <button class="btn btn-light addRow m-2 "
-                                                                    @click="addRow(blockIndex,sectionIndex, rowIndex)">
+                                                                    @click="addRow(blockIndex, sectionIndex, rowIndex)">
                                                                     <i class="bi bi-plus"></i> Add row in section
                                                                 </button>
                                                             </div>
@@ -461,15 +455,14 @@
                                                             </button>
                                                         </div>
                                                     </div>
-                                                    
+
                                                 </div>
 
                                                 <div class="d-flex justify-content-center align-items-center my-4">
-                                                        <button class="btn btn-light border font-12"
-                                                            @click="addBlock">
-                                                            <i class="bi bi-plus-circle me-1 fs-6"></i> Add Block
-                                                        </button>
-                                                    </div>
+                                                    <button class="btn btn-light border font-12" @click="addBlock">
+                                                        <i class="bi bi-plus-circle me-1 fs-6"></i> Add Block
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -595,20 +588,20 @@
                                                                         :key="'field-preview-' + fieldIndex">
                                                                         <div v-if="field.label">
                                                                             <label :for="'field-' +
-                                                                                sectionIndex +
-                                                                                '-' +
-                                                                                columnIndex +
-                                                                                '-' +
-                                                                                fieldIndex
-                                                                                ">
+                        sectionIndex +
+                        '-' +
+                        columnIndex +
+                        '-' +
+                        fieldIndex
+                        ">
 
                                                                                 <span class=" font-12">{{ field.label
                                                                                     }}</span></label>
                                                                             <template v-if="field.fieldtype == 'Select' ||
-                                                                                field.fieldtype == 'multiselect'
-                                                                            ">
+                        field.fieldtype == 'multiselect'
+                        ">
                                                                                 <select :multiple="field.fieldtype == 'multiselect'
-                                                                                    " v-model="field.value" class="form-select mb-2 font-13">
+                        " v-model="field.value" class="form-select mb-2 font-13">
                                                                                     <option v-for="(
                                                         option, index
                                                       ) in field.options.split('\n')" :key="index" :value="option">
@@ -617,8 +610,8 @@
                                                                                 </select>
                                                                             </template>
                                                                             <template v-else-if="field.fieldtype == 'checkbox' ||
-                                                                                field.fieldtype == 'radio'
-                                                                            ">
+                        field.fieldtype == 'radio'
+                        ">
                                                                                 <div class="row">
                                                                                     <div class="form-check col-4 mb-4"
                                                                                         v-for="(
@@ -638,7 +631,7 @@
                                                                                                     class="form-check-label m-0"
                                                                                                     :for="option">
                                                                                                     {{
-                                                                                                        option
+                                                                                                    option
                                                                                                     }}
                                                                                                 </label>
                                                                                             </div>
@@ -651,12 +644,12 @@
                                                                                     :is="getFieldComponent(field.fieldtype)"
                                                                                     v-model="field.value"
                                                                                     :type="field.fieldtype" :name="'field-' +
-                                                                                        sectionIndex +
-                                                                                        '-' +
-                                                                                        columnIndex +
-                                                                                        '-' +
-                                                                                        fieldIndex
-                                                                                        " class="form-control previewInputHeight">
+                        sectionIndex +
+                        '-' +
+                        columnIndex +
+                        '-' +
+                        fieldIndex
+                        " class="form-control previewInputHeight">
                                                                                 </component>
                                                                             </template>
                                                                         </div>
@@ -889,17 +882,17 @@ function formData() {
 }
 
 // Function to add a new block 
-const addBlock = () =>{
+const addBlock = () => {
     const blockIndex = blockArr.length + 1;
     blockArr.push({
-        label : `block-${blockIndex}`,
+        label: `block-${blockIndex}`,
         parent: `${businessUnit.value.value}-${filterObj.value.form_short_name}`,
         sections: []
     })
 }
 
 // function to delete block
-const removeBlock = (blockIndex) =>{
+const removeBlock = (blockIndex) => {
     let item = blockArr[blockIndex]
     if (item.parent) deleted_items.push(item)
     blockArr.splice(blockIndex, 1);
@@ -908,7 +901,7 @@ const removeBlock = (blockIndex) =>{
 
 // Function to add a new section with a default column
 const addSection = (blockIndex) => {
- 
+
     blockArr[blockIndex].sections.push({
         label: "",
         parent: `${businessUnit.value.value}-${filterObj.value.form_short_name}`,
@@ -926,7 +919,7 @@ const addSection = (blockIndex) => {
     });
 };
 // Function to remove a section
-const removeSection = (blockIndex ,sectionIndex) => {
+const removeSection = (blockIndex, sectionIndex) => {
     let item = blockArr[blockIndex].sections[sectionIndex]
     if (item.parent) deleted_items.push(item)
     blockArr[blockIndex].sections.splice(sectionIndex, 1);
@@ -949,7 +942,7 @@ const addRow = (blockIndex, sectionIndex) => {
     });
 };
 
-const removeRow = (blockIndex,sectionIndex, rowIndex) => {
+const removeRow = (blockIndex, sectionIndex, rowIndex) => {
     let item = blockArr[blockIndex].sections[sectionIndex].rows[rowIndex]
     if (item.parent) deleted_items.push(item)
     blockArr[blockIndex].sections[sectionIndex].rows.splice(rowIndex, 1);
@@ -958,7 +951,7 @@ const removeRow = (blockIndex,sectionIndex, rowIndex) => {
 };
 
 // Function to add a new column inside a section
-const addColumn = (blockIndex,sectionIndex, rowIndex) => {
+const addColumn = (blockIndex, sectionIndex, rowIndex) => {
     blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns.push({
         label: "",
         fields: [],
@@ -966,7 +959,7 @@ const addColumn = (blockIndex,sectionIndex, rowIndex) => {
 };
 
 // Function to remove a column inside a section
-const removeColumn = (blockIndex,sectionIndex, rowIndex, columnIndex) => {
+const removeColumn = (blockIndex, sectionIndex, rowIndex, columnIndex) => {
     let item = blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex]
     if (item.parent) deleted_items.push(item)
     blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns.splice(columnIndex, 1);
@@ -975,7 +968,7 @@ const removeColumn = (blockIndex,sectionIndex, rowIndex, columnIndex) => {
 };
 
 // Function to add a new field inside a column
-const addField = (blockIndex,sectionIndex, rowIndex, columnIndex) => {
+const addField = (blockIndex, sectionIndex, rowIndex, columnIndex) => {
     blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields.push({
         label: "",
         fieldtype: "",
@@ -987,8 +980,8 @@ const addField = (blockIndex,sectionIndex, rowIndex, columnIndex) => {
 };
 
 // Function to remove a field inside a column
-const removeField = (blockIndex,sectionIndex, rowIndex, columnIndex, fieldIndex) => {
-    console.log(rowIndex, " field remove === ", blockArr[blockIndex].sections[sectionIndex] )
+const removeField = (blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) => {
+    console.log(rowIndex, " field remove === ", blockArr[blockIndex].sections[sectionIndex])
     let item = blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex]
     if (item.parent) deleted_items.push(item)
     blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields.splice(fieldIndex, 1);
@@ -1114,7 +1107,7 @@ const previewForm = () => {
     modal.show();
     // selectedForm.value = rowData; // Store the selected form data
     // const result = dataObj.fields.map(({ fieldtype, fieldname,label, _user_tags}) => ({ fieldtype, fieldname,label,_user_tags }));
-    console.log(formDescriptions.value, "000000000000000000--------------0000000000000000000");
+    console.log(formDescriptions.value.accessible_departments.toString(), "000000000000000000--------------0000000000000000000");
 
 };
 
@@ -1626,7 +1619,7 @@ select {
     font-size: 11px;
 }
 
-.block-level{
+.block-level {
     margin-top: 10px;
     border: 1px solid #e5e5e5;
     border-radius: 5px;

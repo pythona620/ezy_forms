@@ -1,14 +1,15 @@
 <template>
-<div class="d-flex justify-content-between align-items-center ">
-        <div>
-            <h1 class="m-0 font-13">
-                Roles
-            </h1>
-            <p class="m-0 font-11 pt-1">
-               19 Roles
-            </p>
-        </div>
-        <div class="d-flex gap-2 align-items-center">
+    <div>
+        <div class="d-flex justify-content-between align-items-center ">
+            <div>
+                <h1 class="m-0 font-13">
+                    Roles
+                </h1>
+                <p class="m-0 font-11 pt-1">
+                    19 Roles
+                </p>
+            </div>
+            <div class="d-flex gap-2 align-items-center">
                 <div class="d-flex">
                     <div>
                         <!-- <FormFields labeltext="" class="mb-3" tag="input" type="search" placeholder="Search File Name"
@@ -98,9 +99,11 @@
                     <ButtonComp class="buttoncomp" name="Action"></ButtonComp>
                 </div>
             </div>
-    </div>
-    <div class="mt-2">
-        <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction='true' actionType="dropdown" />
+        </div>
+        <div class="mt-2">
+            <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction='true' isCheckbox="true"
+                actionType="dropdown" />
+        </div>
     </div>
     <!-- <div>help
         <div class="text-center position-relative">
@@ -121,11 +124,13 @@
 <script setup>
 
 import FormFields from '../../Components/FormFields.vue';
-    import ButtonComp from '../../Components/ButtonComp.vue';
-    import GlobalTable from '../../Components/GlobalTable.vue';
-    import axiosInstance from '../../shared/services/interceptor';
+import ButtonComp from '../../Components/ButtonComp.vue';
+import GlobalTable from '../../Components/GlobalTable.vue';
+import axiosInstance from '../../shared/services/interceptor';
 import { apis, doctypes } from '../../shared/apiurls';
 import { onMounted, ref, computed, watch } from 'vue';
+import { EzyBusinessUnit } from "../../shared/services/business_unit";
+
 // const actions = ref(
 //     [
 //         { name: 'View form', icon: 'fa-solid fa-eye' },
@@ -136,13 +141,18 @@ import { onMounted, ref, computed, watch } from 'vue';
 //         { name: 'In-active this form', icon: 'fa-solid fa-ban' }
 //     ]
 // )
+
+// const businessUnit = computed(() => {
+//     return EzyBusinessUnit.value;
+// });
 onMounted(() => {
-   rolesData();
+    rolesData()
 })
 const radioOptions = ref(["yes", "no"])
 const filterObj = ref({
     limitPageLength: 'None',
-    limitstart: 0
+    limitstart: 0,
+    business_unit: ""
 });
 const filterOnModal = ref({
     roles: "",
@@ -155,12 +165,28 @@ const filterOnModal = ref({
     RequestedId: ""
 
 })
-    const tableheaders = ref([
-        { th: "Roles", td_key: "name" },
+// watch(
+//     businessUnit,
+//     (newVal) => {
+//         filterObj.value.business_unit = newVal;
+
+//         if (newVal.length) {
+//             console.log(newVal, "new value of business unit");
+//             rolesData()
+//         }
+//     },
+//     { immediate: true }
+// );
+
+const tableheaders = ref([
+    { th: "Roles", td_key: "name" },
 ])
-    const tableData = ref([]);
-    function rolesData() {
-    const filters = [];
+const tableData = ref([]);
+function rolesData() {
+    const filters = [
+
+        // ["business_unit", "like", `%${filterObj.value.business_unit}%`]
+    ];
     if (filterOnModal.value.Requested_id) {
         filters.push(["Requested_id", "like", `%${filterOnModal.value.roles}%`]);
     }
@@ -191,7 +217,7 @@ const filterOnModal = ref({
         filters: JSON.stringify(filters),
         limit_page_length: filterObj.value.limitPageLength,
         limitstart: filterObj.value.limitstart,
-        order_by: "`tabEzy Departments`.`creation` desc"
+        order_by: "`tabRole`.`creation` desc"
     };
 
     axiosInstance.get(apis.resource + '/' + doctypes.roles, { params: queryParams })
