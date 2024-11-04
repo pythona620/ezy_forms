@@ -9,13 +9,13 @@ import subprocess
 import os
 from ast import literal_eval
 from frappe.utils.background_jobs import enqueue
-from ezy_forms.ezy_forms.doctype.ezy_form_definitions.linking_flow_and_forms import enqueing_creation_of_roadmap
+from ezy_forms.ezy_forms.doctype.ezy_form_definitions.linking_flow_and_forms import enqueing_creation_of_roadmap, add_roles_to_wf_requestors
 
 class EzyFormDefinitions(Document):
 	pass
  
 @frappe.whitelist()
-def add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:str,form_name:str,accessible_departments:str,form_short_name:str,fields:list[dict],form_status:str):
+def add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:str,form_name:str,accessible_departments:str,form_short_name:str,fields:list[dict],form_status:str,workflow_setup:list[dict],requestors:list[dict]):
 	return_response_for_doc_add = enqueue(
 		enqueued_add_dynamic_doctype,
 		owner_of_the_form=owner_of_the_form,
@@ -26,6 +26,8 @@ def add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:st
 		form_short_name=form_short_name,
 		fields=fields,
 		form_status=form_status,
+		workflow_setup=workflow_setup,
+		requestors=requestors,
 		now=True,
 		is_async=True,
 		queue="short")
@@ -52,7 +54,7 @@ def deleting_customized_field_from_custom_dynamic_doc(doctype:str,deleted_fields
 		queue="short")
 	return deleted_fields_qresponse
 
-def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:str,form_name:str,accessible_departments:str,form_short_name:str,fields:list[dict],form_status:str):
+def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:str,form_name:str,accessible_departments:str,form_short_name:str,fields:list[dict],form_status:str,workflow_setup:list[dict],requestors:list[dict]):
 	""" Owner_of_the_form should come from Departments Doctype in Select Field."""
 	"""Adding DocTypes dynamically, giving Perms for the doctype and creating a default section-break field for DocType"""
 	try:
@@ -60,6 +62,10 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
 		doctype = form_short_name
 		if isinstance(fields,str):
 			fields = literal_eval(fields)
+		if isinstance(workflow_setup,str):
+			workflow_setup = literal_eval(workflow_setup)
+		if isinstance(requestors,str):
+			requestors = literal_eval(requestors)
 		if not frappe.db.exists("DocType",doctype):
 			frappe.db.sql(f"DROP TABLE IF EXISTS `tab{doctype}`;")
 			frappe.db.commit()
@@ -97,7 +103,7 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
 			document_to_reload = frappe.get_doc("DocType",doctype)
 			document_to_reload.reload()
 			add_customized_fields_for_dynamic_doc(fields=[
-                {"label": "Company Field","fieldname": "company_field","fieldtype": "Data","description": "static","idx": 0},
+                {"label": "Company Field","fieldname": "company_field","fieldtype": "Link","description": "static","idx": 0,"options":"Ezy Business Unit"},
                 {"label": "WF Generated Request Id","fieldname": "wf_generated_request_id","fieldtype": "Data","description": "static","idx": 1},
                 {"label": "WF Generated Request Status","fieldname": "wf_generated_request_status","fieldtype": "Data","description": "static","idx": 2}]
                 ,doctype=doctype)
@@ -105,6 +111,9 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
 			enqueing_creation_of_roadmap(doctype=doctype,property_name=business_unit,bulk_request=False)
 		if len(fields)>0:
 			add_customized_fields_for_dynamic_doc(fields=fields,doctype=doctype)
+		if len(requestors)>0:
+			doc_rec = "_".join(business_unit.split()).upper() + "_" + "_".join(doctype.split()).upper().replace(" ", "_")
+			add_roles_to_wf_requestors(doc_rec = doc_rec,requestors=requestors)
 		return {"success":True,"message":"Form Created."}
 	except Exception as e:
 		exc_type, exc_obj, exc_tb = sys.exc_info()
