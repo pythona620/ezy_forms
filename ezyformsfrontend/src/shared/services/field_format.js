@@ -14,7 +14,6 @@ export function extractFieldsWithBreaks(data) {
 
           column.fields.forEach((field) => {
             // Add the "insert_after" key to the current field
-            console.log(" field === ", field)
             field['reqd'] = field.reqd ? 1 : 0
             const generatedFieldname = convertLabelToFieldName(field?.label);
             result.push({
@@ -25,7 +24,7 @@ export function extractFieldsWithBreaks(data) {
               fieldtype: field.fieldtype,
               idx: index++, // Assign index
               label: field.label,
-              reqd : field.reqd ? 1 : 0
+              reqd: field.reqd ? 1 : 0
             });
 
             // Update previousFieldname for the next field in this column
@@ -53,11 +52,11 @@ export function extractFieldsWithBreaks(data) {
         const rowFieldname = convertLabelToFieldName(row?.label);
         // Add "Row Break" marker after each row
         result.push({
-          description: "Row Break", 
+          description: "Row Break",
           fieldname: rowFieldname,
-          fieldtype: "Column Break", 
+          fieldtype: "Column Break",
           idx: index++,
-          label : rowFieldname
+          label: rowFieldname
         });
         // Update previousFieldname to the row break
         previousFieldname = rowFieldname;
@@ -66,10 +65,10 @@ export function extractFieldsWithBreaks(data) {
       const sectionFieldname = convertLabelToFieldName(section?.label);
       // Add "Section Break" marker after each section
       result.push({
-        description: "Section Break", 
+        description: "Section Break",
         fieldname: sectionFieldname,
-        fieldtype: "Section Break", 
-        label: section.label, 
+        fieldtype: "Section Break",
+        label: section.label,
         idx: index++
       });
       // Update previousFieldname to the section break
@@ -79,10 +78,10 @@ export function extractFieldsWithBreaks(data) {
     const blockFieldname = convertLabelToFieldName(block?.label || `block_${index}`);
 
     result.push({
-      description: "Block Break", 
+      description: "Block Break",
       fieldname: blockFieldname,
-      fieldtype: "Section Break ", 
-      label: block.label, 
+      fieldtype: "Section Break ",
+      label: block.label,
       idx: index++
     })
     previousFieldname = blockFieldname;
@@ -108,68 +107,73 @@ export function rebuildToStructuredArray(flatArray) {
 
     switch (item.description) {
       case "Block Break":
-        // If there's an existing block, push it to the result before starting a new one
+        // Push current section, row, and block if they exist
+        if (currentRow) {
+          currentSection.rows.unshift(currentRow);
+          currentRow = null;
+        }
+        if (currentSection) {
+          currentBlock.sections.unshift(currentSection);
+          currentSection = null;
+        }
         if (currentBlock) {
-          result.unshift(currentBlock); // Add to the beginning for correct order
+          result.unshift(currentBlock);
         }
         currentBlock = {
           fieldtype: item.fieldtype,
           fieldname: item.fieldname,
           label: item.label,
           parent: item.parent,
-          sections: [] // Initialize sections for the new block
+          sections: []
         };
-        currentSection = null; // Reset currentSection for new block
         break;
 
       case "Section Break":
-        // If there's an existing section, push it to the current block before starting a new one
+        // Push current row and section if they exist
+        if (currentRow) {
+          currentSection.rows.unshift(currentRow);
+          currentRow = null;
+        }
         if (currentSection) {
-          if (currentBlock) {
-            currentBlock.sections.unshift(currentSection); // Add section to the block
-          } else {
-            result.unshift(currentSection); // If no block, add section to result
-          }
+          currentBlock.sections.unshift(currentSection);
         }
         currentSection = {
           fieldtype: item.fieldtype,
           fieldname: item.fieldname,
           label: item.label,
           parent: item.parent,
-          rows: [] // Initialize rows for the new section
+          rows: []
         };
-        currentRow = null; // Reset currentRow for new section
         break;
 
       case "Row Break":
-        if (currentSection) {
-          if (currentRow) {
-            currentSection.rows.unshift(currentRow); // Push previous row into the section
-          }
-          currentRow = {
-            fieldtype: "Row Break",
-            fieldname: item.fieldname,
-            label: item.fieldname,
-            parent: item.parent,
-            columns: [] // Initialize columns for the new row
-          };
+        // Push current row if it exists
+        if (currentRow) {
+          currentSection.rows.unshift(currentRow);
         }
+        currentRow = {
+          fieldtype: item.fieldtype,
+          fieldname: item.fieldname,
+          label: item.label,
+          parent: item.parent,
+          columns: []
+        };
         break;
 
       case "Column Break":
-        if (currentRow) {
-          currentColumn = {
-            fieldtype: item.fieldtype,
-            fieldname: item.fieldname,
-            label: item.label,
-            parent: item.parent,
-            fields: [] // Initialize fields for the new column
-          };
-          currentRow.columns.unshift(currentColumn); // Add new column to the current row
-        }
+        // Add the column to the current row
+        currentColumn = {
+          fieldtype: item.fieldtype,
+          fieldname: item.fieldname,
+          label: item.label,
+          parent: item.parent,
+          fields: []
+        };
+        currentRow.columns.unshift(currentColumn);
         break;
 
       default: // Regular field
+        // Add field to the current column
         if (currentColumn) {
           currentColumn.fields.unshift({
             fieldname: item.fieldname,
@@ -182,16 +186,12 @@ export function rebuildToStructuredArray(flatArray) {
     }
   }
 
-  // After the loop, push the last row, section, and block if they exist
+  // Push the last row, section, and block (if any exist)
   if (currentRow) {
     currentSection.rows.unshift(currentRow);
   }
   if (currentSection) {
-    if (currentBlock) {
-      currentBlock.sections.unshift(currentSection);
-    } else {
-      result.unshift(currentSection);
-    }
+    currentBlock.sections.unshift(currentSection);
   }
   if (currentBlock) {
     result.unshift(currentBlock);
@@ -203,18 +203,98 @@ export function rebuildToStructuredArray(flatArray) {
 
 // Example flat array input
 const flatArray = [
-  { "fieldtype": "data", "fieldname": "tr", "label": "tr", "description": "Field" },
-  { "fieldtype": "data", "fieldname": "uioer", "label": "uioer", "description": "Field" },
-  { "fieldtype": "Column Break", "fieldname": "diort", "label": "diort", "description": "Column Break" },
-  { "fieldtype": "data", "fieldname": "yuio", "label": "yuio", "description": "Field" },
-  { "fieldtype": "Column Break", "fieldname": "test_colm2", "label": "test colm2", "description": "Column Break" },
-  { "fieldtype": "Row Break", "fieldname": "1st_row", "label": "", "description": "Row Break" },
-  { "fieldtype": "Section Break", "fieldname": "fdgfd", "label": "", "description": "Section Break" },
+  {
+    "description": "Field",
+    "fieldname": "piufvhd",
+    "fieldtype": "Data",
+    "idx": 0,
+    "label": "piufvhd",
+    "reqd": 0
+  },
+  {
+    "description": "Field",
+    "fieldname": "gfgf",
+    "fieldtype": "Data",
+    "idx": 1,
+    "label": "gfgf",
+    "reqd": 0
+  },
+  {
+    "description": "Column Break",
+    "fieldname": "",
+    "fieldtype": "Column Break",
+    "idx": 2,
+    "label": "",
+    "doctype": "DocField"
+  },
+  {
+    "description": "Row Break",
+    "fieldname": "row_0_0",
+    "fieldtype": "Row Break",  // Corrected to "Row Break"
+    "idx": 3,
+    "label": "row_0_0"
+  },
+  {
+    "description": "Section Break",
+    "fieldname": "",
+    "fieldtype": "Section Break",
+    "label": "",
+    "idx": 4,
+    "doctype": "DocField"
+  },
+  {
+    "description": "Block Break",
+    "fieldname": "block1",
+    "fieldtype": "Block Break",  // Corrected to "Block Break"
+    "label": "block-1",
+    "idx": 5
+  },
+  {
+    "description": "Field",
+    "fieldname": "fdgdfhdf",
+    "fieldtype": "Data",
+    "idx": 6,
+    "label": "fdgdfhdf",
+    "reqd": 0,
+    "doctype": "DocField"
+  },
+  {
+    "description": "Column Break",
+    "fieldname": "fdgdfh",
+    "fieldtype": "Column Break",
+    "idx": 7,
+    "label": "fdgdfh",
+    "doctype": "DocField"
+  },
+  {
+    "description": "Row Break",
+    "fieldname": "row_0_0_1",
+    "fieldtype": "Row Break",  // Corrected to "Row Break"
+    "idx": 8,
+    "label": "row_0_0_1",
+    "doctype": "DocField"
+  },
+  {
+    "description": "Section Break",
+    "fieldname": "dfsdgksfg",
+    "fieldtype": "Section Break",
+    "label": "dfsdgksfg",
+    "idx": 9,
+    "doctype": "DocField"
+  },
+  {
+    "description": "Block Break",
+    "fieldname": "block2",
+    "fieldtype": "Block Break",  // Corrected to "Block Break"
+    "label": "block-2",
+    "idx": 10,
+    "doctype": "DocField"
+  }
 ];
 
 // Usage
 // const structuredArray = rebuildToStructuredArray(flatArray);
-// console.log(JSON.stringify(structuredArray, null, 2));
+// console.log(" field format === ", structuredArray);
 
 
 // deleted sec, rows,columns, fields

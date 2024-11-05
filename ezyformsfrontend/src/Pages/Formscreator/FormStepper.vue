@@ -285,7 +285,7 @@
                                                                     placeholder="Untitled approval flow" />
                                                                 <small v-if="section.errorMsg" class="text-danger"> {{
                                                                     section.errorMsg
-                                                                }}</small>
+                                                                    }}</small>
                                                                 <div class=" d-flex">
 
                                                                     <button
@@ -303,7 +303,7 @@
                                                                         class="d-flex justify-content-between align-items-center">
                                                                         <label class="rownames">{{
                                                                             getRowSuffix(rowIndex)
-                                                                        }}</label>
+                                                                            }}</label>
                                                                         <div>
                                                                             <button v-if="row.columns.length < 3"
                                                                                 class="btn btn-light bg-transparent border-0 font-13"
@@ -583,87 +583,90 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div v-if="sections.length" class="card p-1">
-                                                <div v-for="(section, sectionIndex) in sections"
-                                                    :key="'preview-' + sectionIndex" class="preview-section m-2">
-                                                    <h5>{{ section.label || '-' }}</h5>
-                                                    <div class=" container-fluid">
-                                                        <div class="row" v-for="(row, rowIndex) in section.rows"
-                                                            :key="rowIndex">
-                                                            <div v-for="(column, columnIndex) in row.columns"
-                                                                :key="'column-preview-' + columnIndex" class="col">
-                                                                <h6>{{ column.label || '-' }}</h6>
-                                                                <div class="mb-2 ms-2">
-                                                                    <div v-for="(field, fieldIndex) in column.fields"
-                                                                        :key="'field-preview-' + fieldIndex">
-                                                                        <div v-if="field.label">
-                                                                            <label :for="'field-' +
-                                                                                sectionIndex +
-                                                                                '-' +
-                                                                                columnIndex +
-                                                                                '-' +
-                                                                                fieldIndex
-                                                                                ">
+                                            <div v-if="blockArr.length" class="card p-1">
+                                                <div v-for="(block, blockIndex) in blockArr" :key="blockIndex">
+                                                    <div v-for="(section, sectionIndex) in block.sections"
+                                                        :key="'preview-' + sectionIndex" class="preview-section m-2">
+                                                        <h5>{{ section.label || '-' }}</h5>
+                                                        <div class=" container-fluid">
+                                                            <div class="row" v-for="(row, rowIndex) in section.rows"
+                                                                :key="rowIndex">
+                                                                <div v-for="(column, columnIndex) in row.columns"
+                                                                    :key="'column-preview-' + columnIndex" class="col">
+                                                                    <h6>{{ column.label || '-' }}</h6>
+                                                                    <div class="mb-2 ms-2">
+                                                                        <div v-for="(field, fieldIndex) in column.fields"
+                                                                            :key="'field-preview-' + fieldIndex">
+                                                                            <div v-if="field.label">
+                                                                                <label :for="'field-' +
+                                                                                    sectionIndex +
+                                                                                    '-' +
+                                                                                    columnIndex +
+                                                                                    '-' +
+                                                                                    fieldIndex
+                                                                                    ">
 
-                                                                                <span class=" font-12">{{ field.label
-                                                                                    }}</span></label>
-                                                                            <template v-if="field.fieldtype == 'Select' ||
-                                                                                field.fieldtype == 'multiselect'
-                                                                            ">
-                                                                                <select :multiple="field.fieldtype == 'multiselect'
-                                                                                    " v-model="field.value"
-                                                                                    class="form-select mb-2 font-13">
-                                                                                    <option v-for="(
+                                                                                    <span class=" font-12">{{
+                                                                                        field.label
+                                                                                        }}</span></label>
+                                                                                <template v-if="field.fieldtype == 'Select' ||
+                                                                                    field.fieldtype == 'multiselect'
+                                                                                ">
+                                                                                    <select :multiple="field.fieldtype == 'multiselect'
+                                                                                        " v-model="field.value"
+                                                                                        class="form-select mb-2 font-13">
+                                                                                        <option v-for="(
                                                         option, index
                                                       ) in field.options.split('\n')" :key="index" :value="option">
-                                                                                        {{ option }}
-                                                                                    </option>
-                                                                                </select>
-                                                                            </template>
-                                                                            <template v-else-if="field.fieldtype == 'checkbox' ||
-                                                                                field.fieldtype == 'radio'
-                                                                            ">
-                                                                                <div class="row">
-                                                                                    <div class="form-check col-4 mb-4"
-                                                                                        v-for="(
+                                                                                            {{ option }}
+                                                                                        </option>
+                                                                                    </select>
+                                                                                </template>
+                                                                                <template v-else-if="field.fieldtype == 'checkbox' ||
+                                                                                    field.fieldtype == 'radio'
+                                                                                ">
+                                                                                    <div class="row">
+                                                                                        <div class="form-check col-4 mb-4"
+                                                                                            v-for="(
                                                         option, index
                                                       ) in field?.options?.split('\n')" :key="index">
-                                                                                        <div
-                                                                                            class="d-flex gap-2 align-items-center">
-                                                                                            <div>
-                                                                                                <input class=""
-                                                                                                    :type="field.fieldtype"
-                                                                                                    :name="option"
-                                                                                                    :id="option"
-                                                                                                    readonly />
-                                                                                            </div>
-                                                                                            <div>
-                                                                                                <label
-                                                                                                    class="form-check-label m-0"
-                                                                                                    :for="option">
-                                                                                                    {{
-                                                                                                        option
-                                                                                                    }}
-                                                                                                </label>
+                                                                                            <div
+                                                                                                class="d-flex gap-2 align-items-center">
+                                                                                                <div>
+                                                                                                    <input class=""
+                                                                                                        :type="field.fieldtype"
+                                                                                                        :name="option"
+                                                                                                        :id="option"
+                                                                                                        readonly />
+                                                                                                </div>
+                                                                                                <div>
+                                                                                                    <label
+                                                                                                        class="form-check-label m-0"
+                                                                                                        :for="option">
+                                                                                                        {{
+                                                                                                            option
+                                                                                                        }}
+                                                                                                    </label>
+                                                                                                </div>
                                                                                             </div>
                                                                                         </div>
                                                                                     </div>
-                                                                                </div>
-                                                                            </template>
-                                                                            <template v-else>
-                                                                                <component readonly
-                                                                                    :is="getFieldComponent(field.fieldtype)"
-                                                                                    v-model="field.value"
-                                                                                    :type="field.fieldtype" :name="'field-' +
-                                                                                        sectionIndex +
-                                                                                        '-' +
-                                                                                        columnIndex +
-                                                                                        '-' +
-                                                                                        fieldIndex
-                                                                                        "
-                                                                                    class="form-control previewInputHeight">
-                                                                                </component>
-                                                                            </template>
+                                                                                </template>
+                                                                                <template v-else>
+                                                                                    <component readonly
+                                                                                        :is="getFieldComponent(field.fieldtype)"
+                                                                                        v-model="field.value"
+                                                                                        :type="field.fieldtype" :name="'field-' +
+                                                                                            sectionIndex +
+                                                                                            '-' +
+                                                                                            columnIndex +
+                                                                                            '-' +
+                                                                                            fieldIndex
+                                                                                            "
+                                                                                        class="form-control previewInputHeight">
+                                                                                    </component>
+                                                                                </template>
+                                                                            </div>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -842,29 +845,26 @@ function handleSingleSelect() {
 }
 
 function addDesignationBtn() {
-    console.log(selectedBlockIndex.value, 'Selected Designations:', designationValue.value);
     let xyz = {
         type: selectedBlockIndex.value == 0 ? 'requestor' : 'approver',
         roles: designationValue.value,
-        fields: blockArr[0].sections.flatMap(extractFieldnames),
-        blockIdx: selectedBlockIndex.value
+        fields: blockArr[selectedBlockIndex.value].sections.flatMap(extractFieldnames),
+        idx: selectedBlockIndex.value
     }
 
-    console.log(" ============ ", xyz)
     // workflowSetup.push(xyz)
 
     // Check if an object with the same blockIdx already exists in workflowSetup
-    const existingIndex = workflowSetup.findIndex(item => item.blockIdx === xyz.blockIdx);
-
+    const existingIndex = workflowSetup.findIndex(item => item.idx === xyz.idx);
     if (existingIndex !== -1) {
         // Replace the existing object
         workflowSetup[existingIndex] = xyz;
-        console.log(`Replaced object at index ${existingIndex} with blockIdx ${xyz.blockIdx}`);
     } else {
         // No duplicate, push the new object
         workflowSetup.push(xyz);
-        console.log(`Added new object with blockIdx ${xyz.blockIdx}`);
     }
+
+    add_Wf_roles_setup()
 }
 
 const AddDesignCanvas = (idx) => {
@@ -980,14 +980,14 @@ const removeBlock = (blockIndex) => {
 const addSection = (blockIndex) => {
     let sectionIndex = blockArr[blockIndex].sections.length
     let rowIndex = blockArr[blockIndex].sections;
-    console.log(sectionIndex, " ========== ", rowIndex)
+    console.log(blockIndex, "====", sectionIndex, " ========== ", rowIndex)
 
     blockArr[blockIndex].sections.push({
         label: "",
         parent: `${businessUnit.value.value}-${filterObj.value.form_short_name}`,
         rows: [
             {
-                label: `row_0_${sectionIndex}`,
+                label: `row_0_${sectionIndex}_${blockIndex}`,
                 columns: [
                     {
                         label: "",
@@ -1012,7 +1012,7 @@ const addRow = (blockIndex, sectionIndex) => {
     const rowSuffix = getRowSuffix(rowIndex);
 
     blockArr[blockIndex].sections[sectionIndex].rows.push({
-        label: `row_${rowIndex}_${sectionIndex}`,
+        label: `row_${rowIndex}_${sectionIndex}_${blockIndex}`,
         columns: [
             {
 
@@ -1182,14 +1182,8 @@ const getRowSuffix = (index) => {
 
 // Trigger the creation of form and show the preview
 const previewForm = () => {
-    // sections = rebuildToStructuredArray(JSON.parse(rowData?.form_json?.replace(/\\\"/g, '"')))
-    // console.log(" Rebuild form  === ", selectedForm.value)
-
     const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});// raise a modal
     modal.show();
-    // selectedForm.value = rowData; // Store the selected form data
-    // const result = dataObj.fields.map(({ fieldtype, fieldname,label, _user_tags}) => ({ fieldtype, fieldname,label,_user_tags }));
-    console.log(formDescriptions.value.accessible_departments.toString(), "000000000000000000--------------0000000000000000000");
 
 };
 
@@ -1242,10 +1236,18 @@ function getFormData() {
                 }
                 filterObj.value = res_data
 
-                let structuredArr = rebuildToStructuredArray(JSON.parse(res_data?.form_json?.replace(/\\\"/g, '"')))
+                // let structuredArr = rebuildToStructuredArray((JSON.parse(res_data?.form_json?.fields).fields)?.replace(/\\\"/g, '"'))
+                let structuredArr = rebuildToStructuredArray(JSON.parse(res_data?.form_json).fields)
 
+                // workflowSetup.push(JSON.parse(res_data?.form_json).workflow) 
+                // console.log(" structure === ", structuredArr)
                 structuredArr.forEach((item, index) => {
                     blockArr.push(item)
+                })
+
+                JSON.parse(res_data?.form_json).workflow.forEach((item, index) => {
+                    workflowSetup.push(item)
+                    console.log(" Work flow setup === ", workflowSetup)
                 })
             }
         })
@@ -1276,6 +1278,16 @@ async function saveFormData() {
     } else {
         formData()
     }
+}
+
+function add_Wf_roles_setup() {
+    axiosInstance.post(apis.add_roles_WF, {
+        workflow_setup: workflowSetup,
+        doctype: filterObj.value.form_short_name,
+        business_unit: filterObj.value.business_unit
+    }).then((res) => {
+        console.log(" =====   ", res)
+    })
 }
 
 const getFieldComponent = (type) => {
