@@ -17,7 +17,7 @@
                     </div>
                     <div class="col-7">
                         <div class="mt-2">
-                            <TabsComp :tabs="tabsData" :activeTab="activeTab" @activeTabValue="updateActiveTab" />
+                            <TabsComp :tabs="tabsData" />
 
                         </div>
                     </div>
@@ -61,7 +61,7 @@ const tabsData = [
     { name: 'Archive', icon: 'bi bi-archive', route: '/archived' },
     { name: 'Form', icon: 'fa-solid fa-clipboard', route: '/create-form' }
 ];
-const activeTab = ref('');
+// const activeTab = ref('');
 const business_unit = ref('');
 const EzyFormsCompanys = ref([]);
 
@@ -86,9 +86,9 @@ const ezyForms = () => {
     });
 };
 
-const updateActiveTab = (tab) => {
-    activeTab.value = tab.name;
-};
+// const updateActiveTab = (tab) => {
+//     activeTab.value = tab.name;
+// };
 
 watch(business_unit, (newBusinessUnit) => {
     EzyBusinessUnit.value = newBusinessUnit;

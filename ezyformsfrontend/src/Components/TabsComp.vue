@@ -2,7 +2,7 @@
   <div class="tabs-div">
     <ul class="tab-list m-0 p-0">
       <!-- Loop through tabs and display the icon and tab name -->
-      <li v-for="(tab, index) in tabs" :key="index" :class="{ active: activeTab === tab.name }" class="tab-item">
+      <li v-for="(tab, index) in tabs" :key="index" class="tab-item">
         <router-link :to="tab.route" class="tab-link" active-class="active-link" @click="passActiveTab(tab.name)">
           <i :class="tab.icon"></i> {{ tab.name }}
         </router-link>
@@ -21,10 +21,10 @@ const props = defineProps({
     type: Array,
     required: true,
   },
-  activeTab: {
-    type: String,
-    required: true,
-  },
+  // activeTab: {
+  //   type: String,
+  //   required: true,
+  // },
 });
 
 function passActiveTab(tab) {
