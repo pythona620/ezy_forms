@@ -6,6 +6,7 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "company_field",
   "emp_code",
   "emp_name",
   "emp_mail_id",
@@ -53,11 +54,17 @@
    "fieldtype": "Data",
    "label": "Reporting Designation",
    "search_index": 1
+  },
+  {
+   "fieldname": "company_field",
+   "fieldtype": "Link",
+   "label": "Company Field",
+   "options": "Ezy Business Unit"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-11-01 12:48:19.267264",
+ "modified": "2024-11-04 17:13:46.904628",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
  "name": "Ezy Employee",
