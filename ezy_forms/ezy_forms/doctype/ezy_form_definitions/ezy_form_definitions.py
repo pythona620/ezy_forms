@@ -154,7 +154,14 @@ def enqueued_add_customized_fields_for_dynamic_doc(fields:list[dict],doctype:str
 				doc_for_new_custom_field.db_update()
 				doc_for_new_custom_field.reload()
 		bench_migrating_from_code()
-		frappe.db.set_value("Ezy Form Definitions",doctype,{"form_json":str(fields).replace("'",'"').replace("None","null")})
+		workflow_from_defs = frappe.db.get_value("Ezy Form Definitions",doctype,"form_json")
+		if not workflow_from_defs:
+			workflow_from_defs = {"workflow":[]}
+		else:
+			workflow_from_defs = literal_eval(workflow_from_defs)["workflow"]
+			workflow_from_defs = {"workflow":workflow_from_defs}
+		field_with_workflow = {"fields":fields} | workflow_from_defs
+		frappe.db.set_value("Ezy Form Definitions",doctype,{"form_json":str(field_with_workflow).replace("'",'"').replace("None","null")})
 		frappe.db.commit()
 		return {"success":True,"message":fields}
 	except Exception as e:

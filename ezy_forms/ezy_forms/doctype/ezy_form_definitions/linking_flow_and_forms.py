@@ -1,7 +1,7 @@
 import frappe
 import sys
 import polars as pl
-
+from ast import literal_eval
 def enqueing_creation_of_roadmap(doctype:str,property_name:str,bulk_request:bool):
 	try:
 		if not frappe.db.exists("WF Settings",{"name":"Ezy Forms"}):
@@ -65,6 +65,12 @@ def add_roles_to_wf_requestors(business_unit:str,doctype:str,workflow_setup:list
 		for single_approver in approvers_section:
 			roadmap_doc.append("wf_level_setup", single_approver)
 		roadmap_doc.save(ignore_permissions=True)
+		frappe.db.commit()
+		workflow_from_defs = frappe.db.get_value("Ezy Form Definitions",doctype,"form_json")
+		fields_from_defs = literal_eval(workflow_from_defs)["fields"]
+		fields_from_defs = {"fields":fields_from_defs}
+		field_with_workflow = fields_from_defs | {"workflow":workflow_setup}
+		frappe.db.set_value("Ezy Form Definitions",doctype,{"form_json":str(field_with_workflow).replace("'",'"').replace("None","null")})
 		frappe.db.commit()
 	except Exception as e:
 		exc_type, exc_obj, exc_tb = sys.exc_info()
