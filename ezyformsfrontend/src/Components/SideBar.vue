@@ -20,7 +20,7 @@
                     </ul>
 
                     <!-- Settings section title for second group -->
-                    <h2 class="font-10 m-0 text-muted ps-2 mt-3">{{ secondSettingsTitle }}</h2>
+                    <!-- <h2 class="font-10 m-0 text-muted ps-2 mt-3">{{ secondSettingsTitle }}</h2>
                     <ul class="list-unstyled">
                         <router-link v-for="(list, index) in secondSettingsGroup" :key="index"
                             :to="`${baseRoute}/${list.route.toLowerCase()}`" class="text-decoration-none text-black"
@@ -30,7 +30,7 @@
                                 {{ list.name }}
                             </li>
                         </router-link>
-                    </ul>
+                    </ul> -->
                     <h2 class="font-10 m-0 text-muted ps-2">{{ thirdSettingsTitle }}</h2>
                     <ul class="list-unstyled">
                         <router-link v-for="(list, index) in thirdSettingsGroup" :key="index"
@@ -221,12 +221,11 @@ function deptData() {
         deptartmentData.value = res.data;
         console.log(deptartmentData.value, 'Fetched department data');
 
-        // Modify the routing to always go to /forms/department
         formSideBarData.value = deptartmentData.value.map(department => ({
             name: department.department_name,
               icon: getIconByDepartmentName(department.department_name),
-              route: department.department_name.replace(/\s+/g, '-').toLowerCase(), // Normalize route
-              id: department.id // Ensure you capture the department ID
+              route: department.name.replace(/\s+/g, '-').toLowerCase(),
+            //   id: department.id 
         }));
       }
     })
