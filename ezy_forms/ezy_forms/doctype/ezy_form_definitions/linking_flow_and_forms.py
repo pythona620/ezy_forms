@@ -59,7 +59,7 @@ def add_roles_to_wf_requestors(business_unit:str,doctype:str,workflow_setup:list
 		frappe.db.commit()
 		roadmap_doc = frappe.get_doc("WF Roadmap",doc_rec)
 		if len(approvers_section)>0:
-			roadmap_doc.workflow_levels = max([max_level['idx'] for max_level in approvers_section])
+			roadmap_doc.workflow_levels = max([max_level['level'] for max_level in approvers_section])
 		for single_requestor in requestors_section:
 			roadmap_doc.append("wf_requestors", single_requestor)
 		for single_approver in approvers_section:
