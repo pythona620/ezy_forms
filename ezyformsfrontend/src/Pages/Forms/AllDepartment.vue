@@ -1,8 +1,11 @@
 <template>
-    <div class="d-flex justify-content-between align-items-center ">
+    <div>
+      <h6> </h6>
+      <div >
+        <div class="d-flex justify-content-between align-items-center ">
         <div>
             <h1 class="m-0 font-13">
-                Revenue in IT department
+                Forms in {{ id }}
             </h1>
             <p class="m-0 font-11 pt-1">
                 2 forms available
@@ -27,17 +30,27 @@
         </div>
     </div>
     <div class="mt-2">
-        <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction='true' actionType="dropdown" />
+        <GlobalTable :tHeaders="tableheaders" :tData="tableData"  />
+        <!-- isAction='true' actionType="dropdown" -->
     </div>
-</template>
-<script setup>
-import FormFields from '../../Components/FormFields.vue';
+      </div>
+      
+    </div>
+  </template>
+  
+  <script setup>
+  import { ref, watch } from 'vue';
+import { apis,doctypes } from '../../shared/apiurls';
+  import axiosInstance from '../../shared/services/interceptor';
+  import FormFields from '../../Components/FormFields.vue';
 import ButtonComp from '../../Components/ButtonComp.vue';
 import GlobalTable from '../../Components/GlobalTable.vue';
-import axiosInstance from '../../shared/services/interceptor';
-import { apis, doctypes } from '../../shared/apiurls';
-import { callWithErrorHandling, onMounted, ref } from 'vue';
-const filterObj = ref({
+  // Define props
+  const props = defineProps(['id']);
+  
+  // Local state for department details
+  const department = ref(null);
+  const filterObj = ref({
     search: '',
     selectoption: ''
 
@@ -49,24 +62,35 @@ const tableheaders = ref([
 
     { th: "Accessible departments", td_key: "acess" },
     { th: "Status", td_key: "status" },
-    { th: "WorkFlow", td_key: "status" },
+    // { th: "WorkFlow", td_key: "status" },
 
 ]
 
 )
 const tableData = ref([]);
 console.log(tableData.value, "tableeee");
-// function fetchData() {
-//     const queryparams = {
-//         fields: ['*']
-//     };
-//     axiosInstance.get(apis.resource + doctypes.poschecks, queryparams).then(res => {
-//         console.log(res, "resposne");
-//         // tableData.value = res.data
-//         console.log(tableData.value, "rrrrrrrrrr");
-//     })
-// }
-onMounted(() => {
-    // fetchData();
-})
-</script>
+  // Watch for changes in the id prop
+  watch(
+    () => props.id,
+    (newId) => {
+      if (newId) {
+        fetchDepartmentDetails(newId);
+      }
+    },
+    { immediate: true } // This will trigger the watch immediately on component mount
+  );
+  
+  // Function to fetch department details
+  function fetchDepartmentDetails(id) {
+    console.log(id,'iiiiiiiiiiiiiiiiiiiiiiiii')
+    axiosInstance.get(apis.resource+doctypes.departments) // Adjust the API endpoint as needed
+      .then((response) => {
+        department.value = response.data;
+        console.log(department.value, 'Fetched department details');
+      })
+      .catch((error) => {
+        console.error("Error fetching department details:", error);
+      });
+  }
+  </script>
+  

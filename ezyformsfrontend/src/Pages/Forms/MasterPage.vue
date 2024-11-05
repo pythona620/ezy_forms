@@ -10,6 +10,7 @@
 
                 <div class="col-10">
                     <RouterView></RouterView>
+                    
                 </div>
             </div>
         </div>
