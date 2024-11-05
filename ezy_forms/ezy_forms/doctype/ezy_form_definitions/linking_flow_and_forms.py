@@ -1,7 +1,7 @@
 import frappe
 import sys
 import polars as pl
-
+from ast import literal_eval
 def enqueing_creation_of_roadmap(doctype:str,property_name:str,bulk_request:bool):
 	try:
 		if not frappe.db.exists("WF Settings",{"name":"Ezy Forms"}):
@@ -40,24 +40,37 @@ def list_to_dict_with_ones(x):
 	x = f"""{dict(zip(x,[1] * len(x)))}"""
 	return x
 
-def add_roles_to_wf_requestors(doc_rec:str,requestors:list[dict]):
+@frappe.whitelist()
+def add_roles_to_wf_requestors(business_unit:str,doctype:str,workflow_setup:list[dict]):
 	try:
-		requestors_df = pl.DataFrame(requestors)
+		if not len(workflow_setup)>0 or not business_unit or not doctype:return {"success":False,"message":"Please pass levels or requestors for adding Workflow Level Setup."}
+		doc_rec = "_".join(business_unit.split()).upper() + "_" + "_".join(doctype.split()).upper().replace(" ", "_")
+		requestors_df = pl.DataFrame(workflow_setup)
 		requestors_df = requestors_df.explode("roles")
 		requestors_df = requestors_df.with_columns(pl.col("fields").list.join(" ,").map_elements(list_to_dict_with_ones).alias("fields"))
 		requestors_section = requestors_df.filter(pl.col('type').str.contains("requestor")).select("roles","fields").rename({"roles":"requestor","fields":"columns_allowed"}).to_dicts()
-		approvers_section = requestors_df.filter(pl.col('type').str.contains("approver")).select("roles","fields","idx").rename({"roles":"role","fields":"columns_allowed","idx":"level"}).to_dicts()
+		approvers_section = requestors_df.filter(pl.col('type').str.contains("approver"))
+		if approvers_section.shape[0]>0:
+			approvers_section = approvers_section.select("roles","fields","idx").rename({"roles":"role","fields":"columns_allowed","idx":"level"}).to_dicts()
+		else:approvers_section=[]
 		frappe.db.sql(f"""delete from `tabWF Requestors` where parent = '{doc_rec}' and parentfield = 'wf_requestors' and parenttype = 'WF Roadmap';""")
 		frappe.db.commit()
 		frappe.db.sql(f"""delete from `tabWF Level Setup` where parent ='{doc_rec}' and parentfield='wf_level_setup' and parenttype='WF Roadmap';""")
 		frappe.db.commit()
 		roadmap_doc = frappe.get_doc("WF Roadmap",doc_rec)
-		roadmap_doc.workflow_levels = max([max_level['idx'] for max_level in approvers_section])
+		if len(approvers_section)>0:
+			roadmap_doc.workflow_levels = max([max_level['level'] for max_level in approvers_section])
 		for single_requestor in requestors_section:
 			roadmap_doc.append("wf_requestors", single_requestor)
 		for single_approver in approvers_section:
 			roadmap_doc.append("wf_level_setup", single_approver)
 		roadmap_doc.save(ignore_permissions=True)
+		frappe.db.commit()
+		workflow_from_defs = frappe.db.get_value("Ezy Form Definitions",doctype,"form_json")
+		fields_from_defs = literal_eval(workflow_from_defs)["fields"]
+		fields_from_defs = {"fields":fields_from_defs}
+		field_with_workflow = fields_from_defs | {"workflow":workflow_setup}
+		frappe.db.set_value("Ezy Form Definitions",doctype,{"form_json":str(field_with_workflow).replace("'",'"').replace("None","null")})
 		frappe.db.commit()
 	except Exception as e:
 		exc_type, exc_obj, exc_tb = sys.exc_info()

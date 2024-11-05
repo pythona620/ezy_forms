@@ -219,10 +219,7 @@ const props = defineProps({
         type: [Array, null],
         required: true
     },
-    sections: {
-        type: [Array, null],
-        required: false,
-    },
+    
     formDescriptions: {
         type: Object,
         required: true,

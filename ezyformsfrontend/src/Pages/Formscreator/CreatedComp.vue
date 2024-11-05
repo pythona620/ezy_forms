@@ -94,7 +94,7 @@
             </div>
         </div>
 
-        <FormPreview :blockArr="null" :sections="selectedForm" :formDescriptions="formDescriptions" />
+        <FormPreview :blockArr="selectedForm" :formDescriptions="formDescriptions" />
 
 
     </div>
@@ -127,8 +127,8 @@ function actionCreated(rowData, actionEvent) {
     if (actionEvent.name === 'View form') {
         if (rowData?.form_json) {
             formDescriptions.value = { ...rowData }
-            console.log(formDescriptions.value, "iiiiiiiiiiiii");
-            selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json?.replace(/\\\"/g, '"')))
+            console.log(rowData, "iiiiiiiiiiiii");
+            selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json).fields)
             const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});// raise a modal
             modal.show();
 
