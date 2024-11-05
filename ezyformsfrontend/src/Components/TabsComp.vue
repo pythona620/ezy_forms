@@ -1,9 +1,9 @@
 <template>
   <div class="tabs-div">
     <ul class="tab-list m-0 p-0">
-      <!-- Loop through tabs and display the icon and tab name -->
       <li v-for="(tab, index) in tabs" :key="index" class="tab-item">
-        <router-link :to="tab.route" class="tab-link" active-class="active-link" @click="passActiveTab(tab.name)">
+        <router-link :to="tab.route" :class="['tab-link', isActiveTab(tab) ? 'active-link' : '']"
+          @click="passActiveTab(tab.name)">
           <i :class="tab.icon"></i> {{ tab.name }}
         </router-link>
       </li>
@@ -13,28 +13,35 @@
 
 <script setup>
 import { defineProps, defineEmits } from "vue";
+import { useRoute } from "vue-router";
 
 const emits = defineEmits(["activeTabValue"]);
+const route = useRoute();
 
 const props = defineProps({
   tabs: {
     type: Array,
     required: true,
   },
-  // activeTab: {
-  //   type: String,
-  //   required: true,
-  // },
 });
 
 function passActiveTab(tab) {
   emits("activeTabValue", tab);
 }
+
+function isActiveTab(tab) {
+  // Check for `Forms` tab and any route that starts with `/forms/department/`
+  if (tab.name === 'Forms') {
+    return route.path.startsWith('/forms/department/');
+  }
+
+  // For all other tabs, check if the current route path starts with the tab route
+  return route.path.startsWith(tab.route);
+}
 </script>
 
-<style scoped>
-/* Add your styles here */
-</style>
+
+
 
 
 <style scoped>

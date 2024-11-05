@@ -89,7 +89,7 @@ export default {
 .bg-img {
 	/* background-image: url(../assets/ElektronicsDevice.webp) !important; */
 	background-size: 100vw 100vh;
-	width: 100vw;
+	/* width: 100vw; */
 	height: 100vh;
 	color: white;
 	display: flex;
