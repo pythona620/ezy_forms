@@ -285,7 +285,7 @@
                                                                     placeholder="Untitled approval flow" />
                                                                 <small v-if="section.errorMsg" class="text-danger"> {{
                                                                     section.errorMsg
-                                                                    }}</small>
+                                                                }}</small>
                                                                 <div class=" d-flex">
 
                                                                     <button
@@ -303,7 +303,7 @@
                                                                         class="d-flex justify-content-between align-items-center">
                                                                         <label class="rownames">{{
                                                                             getRowSuffix(rowIndex)
-                                                                            }}</label>
+                                                                        }}</label>
                                                                         <div>
                                                                             <button v-if="row.columns.length < 3"
                                                                                 class="btn btn-light bg-transparent border-0 font-13"
@@ -332,7 +332,7 @@
                                                                                         placeholder="Column Name" />
                                                                                     <small v-if="column.errorMsg"
                                                                                         class="text-danger"> {{
-                                                                                        column.errorMsg
+                                                                                            column.errorMsg
                                                                                         }}</small>
                                                                                     <button class="btn btn-light btn-sm"
                                                                                         @click="
@@ -429,7 +429,7 @@
                                                                                         <small v-if="field.errorMsg"
                                                                                             class="text-danger font-10">
                                                                                             {{
-                                                                                            field.errorMsg
+                                                                                                field.errorMsg
                                                                                             }}</small>
                                                                                     </div>
                                                                                 </div>
@@ -611,7 +611,8 @@
                                                                                 field.fieldtype == 'multiselect'
                                                                             ">
                                                                                 <select :multiple="field.fieldtype == 'multiselect'
-                                                                                    " v-model="field.value" class="form-select mb-2 font-13">
+                                                                                    " v-model="field.value"
+                                                                                    class="form-select mb-2 font-13">
                                                                                     <option v-for="(
                                                         option, index
                                                       ) in field.options.split('\n')" :key="index" :value="option">
@@ -659,7 +660,8 @@
                                                                                         columnIndex +
                                                                                         '-' +
                                                                                         fieldIndex
-                                                                                        " class="form-control previewInputHeight">
+                                                                                        "
+                                                                                    class="form-control previewInputHeight">
                                                                                 </component>
                                                                             </template>
                                                                         </div>
@@ -844,11 +846,25 @@ function addDesignationBtn() {
     let xyz = {
         type: selectedBlockIndex.value == 0 ? 'requestor' : 'approver',
         roles: designationValue.value,
-        fields: blockArr[0].sections.flatMap(extractFieldnames)
+        fields: blockArr[0].sections.flatMap(extractFieldnames),
+        blockIdx: selectedBlockIndex.value
     }
 
     console.log(" ============ ", xyz)
-    workflowSetup.push(xyz)
+    // workflowSetup.push(xyz)
+
+    // Check if an object with the same blockIdx already exists in workflowSetup
+    const existingIndex = workflowSetup.findIndex(item => item.blockIdx === xyz.blockIdx);
+
+    if (existingIndex !== -1) {
+        // Replace the existing object
+        workflowSetup[existingIndex] = xyz;
+        console.log(`Replaced object at index ${existingIndex} with blockIdx ${xyz.blockIdx}`);
+    } else {
+        // No duplicate, push the new object
+        workflowSetup.push(xyz);
+        console.log(`Added new object with blockIdx ${xyz.blockIdx}`);
+    }
 }
 
 const AddDesignCanvas = (idx) => {
@@ -923,7 +939,6 @@ watch(
 );
 function formData() {
     const fields = extractFieldsWithBreaks(blockArr)
-    console.log(" filter obj === ", filterObj.value)
     const dataObj = {
         ...filterObj.value,
         fields,
