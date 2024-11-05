@@ -25,9 +25,9 @@
 
                                 <ul class="steps">
                                     <li v-for="step in steps" :key="step.id" :class="{
-                        active: activeStep === step.id,
-                        completed: activeStep > step.id,
-                    }">
+                                        active: activeStep === step.id,
+                                        completed: activeStep > step.id,
+                                    }">
                                         <div class="d-flex gap-3 align-items-center" @click="handleStepClick(step.id)">
                                             <i v-if="activeStep > step.id"
                                                 class="ri-checkbox-circle-fill completedStepIcon"></i>
@@ -209,7 +209,8 @@
                                                             class="btn btn-light designationBtn d-flex align-items-center"
                                                             type="button" data-bs-toggle="offcanvas"
                                                             data-bs-target="#offcanvasRight"
-                                                            aria-controls="offcanvasRight" @click="AddDesignCanvas(blockIndex)"><img
+                                                            aria-controls="offcanvasRight"
+                                                            @click="AddDesignCanvas(blockIndex)"><img
                                                                 src="../../assets/oui_app-users-roles.svg" alt=""
                                                                 class="me-1">
                                                             Add designations</button>
@@ -283,8 +284,8 @@
                                                                     @change="handleFieldChange(sectionIndex)"
                                                                     placeholder="Untitled approval flow" />
                                                                 <small v-if="section.errorMsg" class="text-danger"> {{
-                        section.errorMsg
-                    }}</small>
+                                                                    section.errorMsg
+                                                                    }}</small>
                                                                 <div class=" d-flex">
 
                                                                     <button
@@ -301,8 +302,8 @@
                                                                     <div
                                                                         class="d-flex justify-content-between align-items-center">
                                                                         <label class="rownames">{{
-                        getRowSuffix(rowIndex)
-                    }}</label>
+                                                                            getRowSuffix(rowIndex)
+                                                                            }}</label>
                                                                         <div>
                                                                             <button v-if="row.columns.length < 3"
                                                                                 class="btn btn-light bg-transparent border-0 font-13"
@@ -331,17 +332,17 @@
                                                                                         placeholder="Column Name" />
                                                                                     <small v-if="column.errorMsg"
                                                                                         class="text-danger"> {{
-                        column.errorMsg
-                    }}</small>
+                                                                                        column.errorMsg
+                                                                                        }}</small>
                                                                                     <button class="btn btn-light btn-sm"
                                                                                         @click="
-                    removeColumn(
-                        blockIndex,
-                        sectionIndex,
-                        rowIndex,
-                        columnIndex
-                    )
-                        ">
+                                                                                            removeColumn(
+                                                                                                blockIndex,
+                                                                                                sectionIndex,
+                                                                                                rowIndex,
+                                                                                                columnIndex
+                                                                                            )
+                                                                                            ">
                                                                                         <i class="bi bi-trash"></i>
                                                                                     </button>
                                                                                 </div>
@@ -365,14 +366,14 @@
                                                                                                 <button
                                                                                                     class="btn btn-light btn-sm"
                                                                                                     @click="
-                        removeField(
-                            blockIndex,
-                            sectionIndex,
-                            rowIndex,
-                            columnIndex,
-                            fieldIndex
-                        )
-                        ">
+                                                                                                        removeField(
+                                                                                                            blockIndex,
+                                                                                                            sectionIndex,
+                                                                                                            rowIndex,
+                                                                                                            columnIndex,
+                                                                                                            fieldIndex
+                                                                                                        )
+                                                                                                        ">
                                                                                                     <i
                                                                                                         class="bi bi-trash"></i>
                                                                                                 </button>
@@ -382,14 +383,14 @@
                                                                                             v-model="field.fieldtype"
                                                                                             class="form-select mb-2 font-13 searchSelect"
                                                                                             @change="
-                        onFieldTypeChange(
-                            blockIndex,
-                            sectionIndex,
-                            rowIndex,
-                            columnIndex,
-                            fieldIndex
-                        )
-                        ">
+                                                                                                onFieldTypeChange(
+                                                                                                    blockIndex,
+                                                                                                    sectionIndex,
+                                                                                                    rowIndex,
+                                                                                                    columnIndex,
+                                                                                                    fieldIndex
+                                                                                                )
+                                                                                                ">
                                                                                             <option value="">Select Type
                                                                                             </option>
                                                                                             <option
@@ -428,8 +429,8 @@
                                                                                         <small v-if="field.errorMsg"
                                                                                             class="text-danger font-10">
                                                                                             {{
-                        field.errorMsg
-                    }}</small>
+                                                                                            field.errorMsg
+                                                                                            }}</small>
                                                                                     </div>
                                                                                 </div>
                                                                                 <div
@@ -437,8 +438,8 @@
                                                                                     <button
                                                                                         class="btn btn-light btn-sm d-flex align-items-center addField m-2"
                                                                                         @click="
-                        addField(blockIndex, sectionIndex, rowIndex, columnIndex)
-                        ">
+                                                                                            addField(blockIndex, sectionIndex, rowIndex, columnIndex)
+                                                                                            ">
                                                                                         <i class="bi bi-plus fs-4"></i>
                                                                                         <span>Add Field</span>
                                                                                     </button>
@@ -597,20 +598,20 @@
                                                                         :key="'field-preview-' + fieldIndex">
                                                                         <div v-if="field.label">
                                                                             <label :for="'field-' +
-                        sectionIndex +
-                        '-' +
-                        columnIndex +
-                        '-' +
-                        fieldIndex
-                        ">
+                                                                                sectionIndex +
+                                                                                '-' +
+                                                                                columnIndex +
+                                                                                '-' +
+                                                                                fieldIndex
+                                                                                ">
 
                                                                                 <span class=" font-12">{{ field.label
                                                                                     }}</span></label>
                                                                             <template v-if="field.fieldtype == 'Select' ||
-                        field.fieldtype == 'multiselect'
-                        ">
+                                                                                field.fieldtype == 'multiselect'
+                                                                            ">
                                                                                 <select :multiple="field.fieldtype == 'multiselect'
-                        " v-model="field.value" class="form-select mb-2 font-13">
+                                                                                    " v-model="field.value" class="form-select mb-2 font-13">
                                                                                     <option v-for="(
                                                         option, index
                                                       ) in field.options.split('\n')" :key="index" :value="option">
@@ -619,8 +620,8 @@
                                                                                 </select>
                                                                             </template>
                                                                             <template v-else-if="field.fieldtype == 'checkbox' ||
-                        field.fieldtype == 'radio'
-                        ">
+                                                                                field.fieldtype == 'radio'
+                                                                            ">
                                                                                 <div class="row">
                                                                                     <div class="form-check col-4 mb-4"
                                                                                         v-for="(
@@ -640,7 +641,7 @@
                                                                                                     class="form-check-label m-0"
                                                                                                     :for="option">
                                                                                                     {{
-                                                                                                    option
+                                                                                                        option
                                                                                                     }}
                                                                                                 </label>
                                                                                             </div>
@@ -653,12 +654,12 @@
                                                                                     :is="getFieldComponent(field.fieldtype)"
                                                                                     v-model="field.value"
                                                                                     :type="field.fieldtype" :name="'field-' +
-                        sectionIndex +
-                        '-' +
-                        columnIndex +
-                        '-' +
-                        fieldIndex
-                        " class="form-control previewInputHeight">
+                                                                                        sectionIndex +
+                                                                                        '-' +
+                                                                                        columnIndex +
+                                                                                        '-' +
+                                                                                        fieldIndex
+                                                                                        " class="form-control previewInputHeight">
                                                                                 </component>
                                                                             </template>
                                                                         </div>
@@ -719,8 +720,8 @@ const businessUnit = computed(() => {
 const ezyFormsData = ref([]);
 const formNameError = ref("");
 const formShortNameError = ref("");
- const selectedBlockIndex = ref("");
- let workflowSetup = reactive([])
+const selectedBlockIndex = ref("");
+let workflowSetup = reactive([])
 let paramId = ref("")
 
 onMounted(() => {
@@ -840,10 +841,10 @@ function handleSingleSelect() {
 
 function addDesignationBtn() {
     console.log(selectedBlockIndex.value, 'Selected Designations:', designationValue.value);
-    let xyz = {        
-        type : selectedBlockIndex.value == 0 ? 'requestor' : 'approver',
-        roles : designationValue.value,
-        fields : blockArr[0].sections.flatMap(extractFieldnames)
+    let xyz = {
+        type: selectedBlockIndex.value == 0 ? 'requestor' : 'approver',
+        roles: designationValue.value,
+        fields: blockArr[0].sections.flatMap(extractFieldnames)
     }
 
     console.log(" ============ ", xyz)
@@ -856,7 +857,7 @@ const AddDesignCanvas = (idx) => {
     }
     selectedBlockIndex.value = idx;
 
-    console.log(blockArr[idx] ," designation idx === ", idx)
+    console.log(blockArr[idx], " designation idx === ", idx)
 };
 
 
@@ -928,7 +929,7 @@ function formData() {
         fields,
         "doctype": doctypes.EzyFormDefinitions,
         workflow_setup: workflowSetup,
-        "form_status" : "Draft"
+        "form_status": "Draft"
     }
     dataObj.accessible_departments = dataObj.accessible_departments.toString(); //JSON.stringify(dataObj.accessible_departments) dataObj.accessible_departments.toString()
     console.log(dataObj);
@@ -962,13 +963,16 @@ const removeBlock = (blockIndex) => {
 
 // Function to add a new section with a default column
 const addSection = (blockIndex) => {
+    let sectionIndex = blockArr[blockIndex].sections.length
+    let rowIndex = blockArr[blockIndex].sections;
+    console.log(sectionIndex, " ========== ", rowIndex)
 
     blockArr[blockIndex].sections.push({
         label: "",
         parent: `${businessUnit.value.value}-${filterObj.value.form_short_name}`,
         rows: [
             {
-                label: getRowSuffix(0),
+                label: `row_0_${sectionIndex}`,
                 columns: [
                     {
                         label: "",
@@ -993,7 +997,7 @@ const addRow = (blockIndex, sectionIndex) => {
     const rowSuffix = getRowSuffix(rowIndex);
 
     blockArr[blockIndex].sections[sectionIndex].rows.push({
-        label: rowSuffix,
+        label: `row_${rowIndex}_${sectionIndex}`,
         columns: [
             {
 
@@ -1068,7 +1072,7 @@ const copyField = (blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) 
 const onFieldTypeChange = (blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) => {
     let fieldType = blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex].fieldtype
     if (fieldType !== 'checkbox' || fieldType !== 'Select' || fieldType !== 'radio' || fieldType !== 'multiselect') {
-        blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex].options = null
+        blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex].options = ''
     }
     // const field =
     //     sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex];
@@ -1088,8 +1092,10 @@ const onFieldTypeChange = (blockIndex, sectionIndex, rowIndex, columnIndex, fiel
 
 
 function handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) {
-    const flatArr = sections.flatMap(extractfieldlabels);
+    const flatArr = blockArr.flatMap(extractfieldlabels);
+    console.log(" flatArr === ", flatArr)
     const isDuplicate = hasDuplicates(flatArr); // Check once to reuse this result
+    console.log(" is duplicate === ", isDuplicate)
 
     // Assign error message for the specific field if fieldIndex is valid
     if (fieldIndex !== undefined && fieldIndex >= 0 && columnIndex !== undefined && columnIndex >= 0 && sectionIndex !== undefined) {

@@ -14,14 +14,18 @@ export function extractFieldsWithBreaks(data) {
 
           column.fields.forEach((field) => {
             // Add the "insert_after" key to the current field
-            // console.log(" field === ", field)
+            console.log(" field === ", field)
             field['reqd'] = field.reqd ? 1 : 0
             const generatedFieldname = convertLabelToFieldName(field?.label);
             result.push({
-              ...field,
+              // ...field,
+
               description: "Field",
               fieldname: generatedFieldname,
+              fieldtype: field.fieldtype,
               idx: index++, // Assign index
+              label: field.label,
+              reqd : field.reqd ? 1 : 0
             });
 
             // Update previousFieldname for the next field in this column
@@ -52,7 +56,8 @@ export function extractFieldsWithBreaks(data) {
           description: "Row Break", 
           fieldname: rowFieldname,
           fieldtype: "Column Break", 
-          idx: index++
+          idx: index++,
+          label : rowFieldname
         });
         // Update previousFieldname to the row break
         previousFieldname = rowFieldname;
