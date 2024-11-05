@@ -5,6 +5,7 @@
         <a href="#" :itemsPerPage="itemsPerPage" :class="{ active: page === itemsPerPage }">{{ page }}</a>
       </li>
       <li v-if="props.currentRecords < props.totalRecords" class="more" @click="itemsIncrease()">more..</li>
+      <!-- v-if="props.currentRecords < props.totalRecords" -->
     </ul>
     <div>
       <span class="totalcount text-secondary">{{ props.currentRecords }} /
@@ -28,8 +29,8 @@ const props = defineProps({
 
 });
 
-const itemsPerPage = ref(10);
-const newpages = ref([10, 20, 50]);
+const itemsPerPage = ref(100);
+const newpages = ref([100, 200, 500]);
 const emit = defineEmits(["updateValue", "limitStart"]);
 const start = ref(0);
 
