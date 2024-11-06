@@ -34,7 +34,7 @@
                                     <ul class="dropdown-menu dropdown-menu-start">
                                         <li>
                                             <div class="d-flex justify-content-center align-items-center">
-                                                <ButtonComp class="log_out_btn rounded-2" @click="logout()"
+                                                <ButtonComp class="buttoncomp rounded-2" @click="logout()"
                                                     name="Log Out"></ButtonComp>
                                             </div>
                                         </li>

@@ -110,7 +110,7 @@
                             <div class="modal-body">
                                 <label class="font-13 ps-1" for="designation_name">Designation Name</label>
                                 <FormFields class="mb-3" tag="input" type="text" name="designation_name"
-                                    id="designation_name" placeholder="Enter department code"
+                                    id="designation_name" placeholder="Enter designation name "
                                     v-model="createDesignation.designation_name" />
                                 <label class="font-13 ps-1" for="business_unit">Business Unit</label>
                                 <FormFields tag="select" placeholder="" class="mb-3" name="business_unit"
