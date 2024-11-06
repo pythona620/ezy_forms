@@ -409,11 +409,13 @@
                                                                                                     class="font-12 m-0 fw-light">Mandatory</label>
                                                                                             </div>
 
+
                                                                                             <!--- checkbox for mandatory -->
                                                                                         </div>
-                                                                                        <small v-if="field.errorMsg"
-                                                                                            class="text-danger font-10">
-                                                                                            {{ field.errorMsg }}</small>
+                                                                                        <small v-if="field.error"
+                                                                                            class="text-danger font-10">{{
+                        field.error
+                    }} </small>
                                                                                     </div>
                                                                                 </div>
                                                                                 <div
@@ -738,13 +740,8 @@ import FormFields from "../../Components/FormFields.vue";
 import { onMounted, ref, reactive, computed, watch } from "vue";
 import ButtonComp from "../../Components/ButtonComp.vue";
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
-import {
-    extractFieldsWithBreaks,
-    rebuildToStructuredArray,
-    extractFieldnames,
-    extractfieldlabels,
-} from "../../shared/services/field_format";
-import axiosInstance from "../../shared/services/interceptor";
+import { extractFieldsWithBreaks, rebuildToStructuredArray, extractFieldnames, extractfieldlabels, addErrorMessagesToStructuredArray } from '../../shared/services/field_format';
+import axiosInstance from '../../shared/services/interceptor';
 import { apis, doctypes } from "../../shared/apiurls";
 import { useRoute, useRouter } from "vue-router";
 import FormPreview from "./FormPreview.vue";
@@ -1025,7 +1022,7 @@ function formData() {
                 });
                 paramId = res.message.message;
                 if (paramId.value !== "new") {
-                    blockArr = [];
+                    blockArr.splice(0, blockArr.length)
                     getFormData();
                 }
             }
@@ -1172,25 +1169,13 @@ const copyField = (blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) 
     ].fields.splice(fieldIndex + 1, 0, newField);
 };
 // Handle the change of field type to display the correct input
-const onFieldTypeChange = (
-    blockIndex,
-    sectionIndex,
-    rowIndex,
-    columnIndex,
-    fieldIndex
-) => {
-    let fieldType =
-        blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex]
-            .fields[fieldIndex].fieldtype;
-    if (
-        fieldType !== "checkbox" ||
-        fieldType !== "Select" ||
-        fieldType !== "radio" ||
-        fieldType !== "multiselect"
-    ) {
-        blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
-            columnIndex
-        ].fields[fieldIndex].options = "";
+const onFieldTypeChange = (blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) => {
+    const checkFieldType = addErrorMessagesToStructuredArray(blockArr)
+    blockArr.splice(0, blockArr.length, ...checkFieldType)
+
+    let fieldType = blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex].fieldtype
+    if (fieldType !== 'checkbox' || fieldType !== 'Select' || fieldType !== 'radio' || fieldType !== 'multiselect') {
+        blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex].options = ''
     }
     // const field =
     //     sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex];
@@ -1206,9 +1191,9 @@ const onFieldTypeChange = (
 
 function handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) {
     const flatArr = blockArr.flatMap(extractfieldlabels);
-    console.log(" flatArr === ", flatArr);
     const isDuplicate = hasDuplicates(flatArr); // Check once to reuse this result
-    console.log(" is duplicate === ", isDuplicate);
+    const checkFieldType = addErrorMessagesToStructuredArray(blockArr)
+    blockArr.splice(0, blockArr.length, ...checkFieldType)
 
     // Assign error message for the specific field if fieldIndex is valid
     if (
@@ -1451,7 +1436,6 @@ const getFieldComponent = (type) => {
     }
 };
 
-const getFlatArrayofFields = deleted_items.flatMap(extractFieldnames);
 
 const hasDuplicates = (array) => new Set(array).size !== array.length;
 // console.log(hasDuplicates(arr));

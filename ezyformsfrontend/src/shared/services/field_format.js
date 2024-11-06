@@ -404,6 +404,53 @@ export function extractfieldlabels(obj) {
   return fieldlabels;
 }
 
+export function validateFields(flatArray) {
+  console.log(" flat Array == ", flatArray)
+  const invalidFields = [];
+  flatArray.forEach((item, index) => {
+    // Check if label exists but fieldtype is missing or invalid
+    if (item.label && (!item.fieldtype || item.fieldtype.trim() === "")) {
+      invalidFields.push({
+        index: index,
+        label: item.label,
+        message: `Field "${item.label}" at index ${index} has no valid fieldtype. Please select a fieldtype.`
+      });
+    }
+  });
+
+  return invalidFields;
+}
+
+
+export function addErrorMessagesToStructuredArray(structuredArray) {
+  structuredArray.forEach((block, blockIndex) => {
+    // Traverse sections in each block
+    block.sections.forEach((section, sectionIndex) => {
+      // Traverse rows in each section
+      section.rows.forEach((row, rowIndex) => {
+        // Traverse columns in each row
+        row.columns.forEach((column, columnIndex) => {
+          // Traverse fields in each column
+          column.fields.forEach((field, fieldIndex) => {
+            if (!field.fieldtype || field.fieldtype.trim() === "") {
+              // Add an error message for missing fieldtype
+              field.error = `Field "${field.label}" has no valid fieldtype. Please select a fieldtype.`;
+            }else {
+              // Clear the error if fieldtype is valid
+              field.error = "";
+            }
+          });
+        });
+      });
+    });
+  });
+  return structuredArray;
+}
+
+// Example structured array usage
+// const updatedArray = addErrorMessagesToStructuredArray(structuredArray);
+// console.log(JSON.stringify(updatedArray, null, 2));
+
 
 
 function convertLabelToFieldName(label) {

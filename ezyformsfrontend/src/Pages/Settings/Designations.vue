@@ -185,9 +185,9 @@ function actionCreated(rowData, actionEvent) {
     }
 }
 const tableheaders = ref([
-    { th: "Designations Name", td_key: "designation_name" },
-    { th: "Departments", td_key: "ezy_departments" },
-    { th: "Business Unit", td_key: "ezy_business_unit" },
+    { th: "Name", td_key: "role" },
+    // { th: "Departments", td_key: "ezy_departments" },
+    // { th: "Business Unit", td_key: "ezy_business_unit" },
 ])
 const createDesignation = ref({
     designation_name: "",
@@ -273,7 +273,7 @@ function designationData() {
         filters: JSON.stringify(filters),
         limit_page_length: filterObj.value.limitPageLength,
         limitstart: filterObj.value.limitstart,
-        order_by: "`tabEzy Designations`.`creation` desc"
+        order_by: "`tabWF Roles`.`creation` desc"
     };
 
     axiosInstance.get(apis.resource + doctypes.designations, { params: queryParams })
