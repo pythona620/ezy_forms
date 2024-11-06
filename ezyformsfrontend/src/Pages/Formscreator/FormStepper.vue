@@ -9,20 +9,16 @@
                         </h1>
                     </div>
                     <div>
-
-
                         <!-- <ButtonComp class="font-13 rounded-2" name="Save as Draft"></ButtonComp> -->
-                        <button type="butoon" class="btn font-13 btn-light " @click="SaveAsDrafts()"><i
-                                class="bi bi-bookmark-check-fill"></i>
-                            Save As Draft</button>
+                        <button type="butoon" class="btn font-13 btn-light" @click="SaveAsDrafts()">
+                            <i class="bi bi-bookmark-check-fill"></i> Save As Draft
+                        </button>
                     </div>
                 </div>
                 <div class="form-container container-fluid mt-1">
                     <div class="row">
                         <div class="col-2">
-                            <div>
-
-
+                            <div class="steps-sticky-div">
                                 <ul class="steps">
                                     <li v-for="step in steps" :key="step.id" :class="{
                         active: activeStep === step.id,
@@ -54,10 +50,12 @@
                                                         Form</span>
                                                 </h1>
                                                 <h1 class="font-14 fw-bold m-0">About Form</h1>
-                                                <ButtonComp
-                                                    :disabled="formNameError.length || formShortNameError.length || !filterObj.accessible_departments.length || !filterObj.form_category.length || !filterObj.owner_of_the_form.length"
-                                                    class="buttoncomp" name="Next" v-if="activeStep < 3"
-                                                    @click="nextStep" />
+                                                <ButtonComp :disabled="formNameError.length ||
+                        formShortNameError.length ||
+                        !filterObj.accessible_departments.length ||
+                        !filterObj.form_category.length ||
+                        !filterObj.owner_of_the_form.length
+                        " class="buttoncomp" name="Next" v-if="activeStep < 3" @click="nextStep" />
                                             </div>
                                         </div>
                                         <div class="row">
@@ -65,10 +63,11 @@
                                             <div class="col-4">
                                                 <div class="mt-4">
                                                     <div class="">
-                                                        <FormFields
-                                                            :disabled="paramId != undefined && paramId != null && paramId != 'new'"
-                                                            labeltext="Form Name" class="mb-1" type="text" tag="input"
-                                                            name="Value" id="formName" placeholder="Untitled Form"
+                                                        <FormFields :disabled="paramId != undefined &&
+                        paramId != null &&
+                        paramId != 'new'
+                        " labeltext="Form Name" class="mb-1" type="text" tag="input" name="Value" id="formName"
+                                                            placeholder="Untitled Form"
                                                             @change="(event) => handleInputChange(event, 'form_name')"
                                                             v-model="filterObj.form_name" />
                                                         <span v-if="formNameError" class="text-danger ErrorMsg ms-2">
@@ -77,14 +76,12 @@
                                                 </div>
                                                 <div class="mt-4">
                                                     <div class="">
-
-                                                        <FormFields
-                                                            :disabled="paramId != undefined && paramId != null && paramId != 'new'"
-                                                            labeltext="Form Short Code" class="mb-1" type="text"
-                                                            tag="input" name="Value" id="formShortCode"
-                                                            placeholder="Untitled Form"
-                                                            @change="(event) => handleInputChange(event, 'form_short_name')"
-                                                            v-model="filterObj.form_short_name" />
+                                                        <FormFields :disabled="paramId != undefined &&
+                        paramId != null &&
+                        paramId != 'new'
+                        " labeltext="Form Short Code" class="mb-1" type="text" tag="input" name="Value"
+                                                            id="formShortCode" placeholder="Untitled Form" @change="(event) => handleInputChange(event, 'form_short_name')
+                        " v-model="filterObj.form_short_name" />
                                                         <span v-if="formShortNameError"
                                                             class="text-danger ErrorMsg ms-2">
                                                             {{ formShortNameError }}</span>
@@ -108,8 +105,7 @@
                                                             @change="OwnerOftheForm"
                                                             v-model="filterObj.owner_of_the_form"
                                                             placeholder="Select Department" :multiple="false"
-                                                            class=" font-11" :searchable="true" />
-
+                                                            class="font-11" :searchable="true" />
                                                     </div>
                                                 </div>
                                                 <div class="mt-4">
@@ -121,10 +117,10 @@
 
                                                         <label for="">Form Cateogry</label>
 
-                                                        <Multiselect :options=departments
+                                                        <Multiselect :options="departments"
                                                             v-model="filterObj.form_category"
                                                             placeholder="Select Cateogry" :multiple="false"
-                                                            :searchable="true" class=" font-11" />
+                                                            :searchable="true" class="font-11" />
                                                     </div>
                                                 </div>
                                                 <div class="mt-4">
@@ -151,7 +147,7 @@
                                                             :options="formOptions" :multiple="true"
                                                             :close-on-select="false" :clear-on-select="false"
                                                             :preserve-search="true" placeholder="Select Designation"
-                                                            class=" font-11">
+                                                            class="font-11">
                                                             <template #selection="{ values, isOpen }">
                                                                 <span class="multiselect__single font-10"
                                                                     v-if="values.length" v-show="!isOpen">
@@ -176,7 +172,7 @@
                                                     <i @click="prevStep(1)" class="bi bi-chevron-left"></i><span
                                                         class="ms-2">Back To About Form</span>
                                                 </h1>
-                                                <div class=" d-flex gap-2 align-items-center">
+                                                <div class="d-flex gap-2 align-items-center">
                                                     <div v-if="blockArr.length">
                                                         <button class="btn btn-light font-13" type="button"
                                                             @click="previewForm">
@@ -185,10 +181,10 @@
                                                     </div>
 
                                                     <ButtonComp
-                                                        class="buttoncomp btn btn-dark font-10  Withborder border"
+                                                        class="buttoncomp btn btn-dark font-10 Withborder border"
                                                         name="Next" v-if="activeStep < 3" @click="nextStep" />
                                                     <button :disabled="!blockArr.length"
-                                                        class="btn btn-dark font-10  Withborder border " type="button"
+                                                        class="btn btn-dark font-10 Withborder border" type="button"
                                                         @click="saveFormData()">
                                                         Save data
                                                     </button>
@@ -204,72 +200,36 @@
                                                 <!-- Here is block level starts -->
                                                 <div class="block-level" v-for="(block, blockIndex) in blockArr"
                                                     :key="blockIndex">
-                                                    <div class="d-flex justify-content-end">
-                                                        <button
-                                                            class="btn btn-light designationBtn d-flex align-items-center"
-                                                            type="button" data-bs-toggle="offcanvas"
-                                                            data-bs-target="#offcanvasRight"
-                                                            aria-controls="offcanvasRight"
-                                                            @click="AddDesignCanvas(blockIndex)"><img
-                                                                src="../../assets/oui_app-users-roles.svg" alt=""
-                                                                class="me-1">
-                                                            Add designations</button>
-
-                                                        <div class="offcanvas offcanvas-end" tabindex="-1"
-                                                            id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
-                                                            <div class="offcanvas-header add_designationHeader">
-                                                                <span id="offcanvasRightLabel font-14">Add designation
-                                                                    for
-                                                                    requestor
-                                                                </span>
-                                                                <button type="button"
-                                                                    class="btn-close bg-light text-reset"
-                                                                    data-bs-dismiss="offcanvas"
-                                                                    aria-label="Close"></button>
-                                                            </div>
-                                                            <div class="offcanvas-body">
-                                                                <div class="d-flex align-items-center gap-2 ps-2">
-                                                                    <div v-if="DesignationList.length"
-                                                                        class="position-relative">
-
-                                                                        <input type="checkbox" id="selectAll"
-                                                                            v-model="isAllSelected"
-                                                                            class="designationCheckBox position-absolute bg-transparent form-control border-0 ms-1" />
-                                                                        <label for="selectAll fw-bold"
-                                                                            class="SelectallDesignation">Select
-                                                                            all</label>
-                                                                    </div>
-                                                                </div>
-                                                                <ul v-if="DesignationList.length" class="list-unstyled">
-                                                                    <li v-for="(item, index) in DesignationList"
-                                                                        :key="index" class="designationList">
-                                                                        <input type="checkbox"
-                                                                            v-model="designationValue" :value="item"
-                                                                            class="designationCheckBox"
-                                                                            @change="handleSingleSelect" />
-                                                                        <span class="ps-2">{{ item }}</span>
-                                                                    </li>
-                                                                </ul>
-                                                                <div v-else>
-                                                                    <div class=" d-flex justify-content-center">
-                                                                        <span>No
-                                                                            Designations
-                                                                            Found</span>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                            <div class=" offcanvas-footer">
-                                                                <div class=" text-end p-3">
-                                                                    <ButtonComp class="btn btn-dark addingDesignations"
-                                                                        @click="addDesignationBtn"
-                                                                        name=" Add Designations" />
-                                                                </div>
-                                                            </div>
+                                                    <div class="d-flex justify-content-end ">
+                                                        <div v-if="paramId && workflowSetup.length"
+                                                            class="d-flex align-items-center">
+                                                            <span class="font-10">{{ blockIndex == 0 ? 'Requestor : ' :
+                        'Approver: ' }} </span>
+                                                            <label v-if="getWorkflowSetup(blockIndex)">
+                                                                {{ getWorkflowSetup(blockIndex).roles.join(", ") }}
+                                                            </label>
                                                         </div>
+                                                        <button v-if="paramId != undefined &&
+                        paramId != null &&
+                        paramId != 'new'
+                        " class="btn btn-light designationBtn d-flex align-items-center" type="button"
+                                                            data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight"
+                                                            aria-controls="offcanvasRight"
+                                                            @click="AddDesignCanvas(blockIndex)">
+                                                            <template v-if="paramId && workflowSetup.length">
+                                                                <i class="bi bi-pencil font-14"></i>
+                                                            </template>
+                                                            <template v-else>
+                                                                <img src="../../assets/oui_app-users-roles.svg"
+                                                                    alt="Add" class="me-1" />
+                                                                Add designations
+                                                            </template>
+                                                        </button>
+
+
 
                                                         <button
-                                                            class="btn btn-light bg-transparent border-0 font-13 deleteSection"
+                                                            class="btn btn-light bg-transparent border-0 font-13 deleteBlock"
                                                             @click="removeBlock(blockIndex)">
                                                             <i class="bi bi-trash me-1"></i> Delete Block
                                                         </button>
@@ -283,11 +243,9 @@
                                                                     class="border-less-input font-14"
                                                                     @change="handleFieldChange(sectionIndex)"
                                                                     placeholder="Untitled approval flow" />
-                                                                <small v-if="section.errorMsg" class="text-danger"> {{
-                        section.errorMsg
-                    }}</small>
-                                                                <div class=" d-flex">
-
+                                                                <small v-if="section.errorMsg" class="text-danger">
+                                                                    {{ section.errorMsg }}</small>
+                                                                <div class="d-flex">
                                                                     <button
                                                                         class="btn btn-light bg-transparent border-0 font-13 deleteSection"
                                                                         @click="removeSection(blockIndex, sectionIndex)">
@@ -296,7 +254,7 @@
                                                                 </div>
                                                             </section>
                                                             <div class="container-fluid">
-                                                                <section class="row"
+                                                                <section class="row dynamicRow"
                                                                     v-for="(row, rowIndex) in section.rows"
                                                                     :key="rowIndex">
                                                                     <div
@@ -307,14 +265,18 @@
                                                                         <div>
                                                                             <button v-if="row.columns.length < 3"
                                                                                 class="btn btn-light bg-transparent border-0 font-13"
-                                                                                @click="addColumn(blockIndex, sectionIndex, rowIndex)">
+                                                                                @click="
+                        addColumn(blockIndex, sectionIndex, rowIndex)
+                        ">
                                                                                 <i class="bi bi-plus"></i> Add Column
                                                                             </button>
                                                                             <button
-                                                                                class="btn btn-light bg-transparent border-0 font-13"
-                                                                                @click="removeRow(blockIndex, sectionIndex, rowIndex)">
-                                                                                <i class="ri-subtract-line"></i> Delete
-                                                                                row
+                                                                                class="btn btn-light bg-transparent border-0 font-12 deleteRow"
+                                                                                @click="
+                        removeRow(blockIndex, sectionIndex, rowIndex)
+                        ">
+                                                                                <i class="ri-subtract-line"></i>
+                                                                                Delete row
                                                                             </button>
                                                                         </div>
                                                                     </div>
@@ -328,20 +290,25 @@
                                                                                     <input v-model="column.label"
                                                                                         type="text"
                                                                                         class="border-less-input columnFieldInput font-14"
-                                                                                        @change="handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex)"
-                                                                                        placeholder="Column Name" />
+                                                                                        @change="
+                        handleFieldChange(
+                            blockIndex,
+                            sectionIndex,
+                            rowIndex,
+                            columnIndex
+                        )
+                        " placeholder="Column Name" />
                                                                                     <small v-if="column.errorMsg"
-                                                                                        class="text-danger"> {{
-                        column.errorMsg
-                    }}</small>
+                                                                                        class="text-danger">
+                                                                                        {{ column.errorMsg }}</small>
                                                                                     <button class="btn btn-light btn-sm"
                                                                                         @click="
-                    removeColumn(
-                        blockIndex,
-                        sectionIndex,
-                        rowIndex,
-                        columnIndex
-                    )
+                        removeColumn(
+                            blockIndex,
+                            sectionIndex,
+                            rowIndex,
+                            columnIndex
+                        )
                         ">
                                                                                         <i class="bi bi-trash"></i>
                                                                                     </button>
@@ -354,17 +321,32 @@
                                                                                             class="d-flex justify-content-between">
                                                                                             <input v-model="field.label"
                                                                                                 placeholder="Name the field"
-                                                                                                @change="handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
-                                                                                                class="border-less-input mb-1 columnFieldInput font-14 p-0" />
+                                                                                                @change="
+                        handleFieldChange(
+                            blockIndex,
+                            sectionIndex,
+                            rowIndex,
+                            columnIndex,
+                            fieldIndex
+                        )
+                        " class="border-less-input mb-1 columnFieldInput font-14 p-0" />
                                                                                             <div>
                                                                                                 <button
-                                                                                                    class="btn btn-light btn-sm"><i
-                                                                                                        class="ri-file-copy-line copyIcon"
-                                                                                                        @click="copyField(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"></i>
+                                                                                                    class="btn btn-light btn-sm">
+                                                                                                    <i class="ri-file-copy-line copyIcon"
+                                                                                                        @click="
+                        copyField(
+                            blockIndex,
+                            sectionIndex,
+                            rowIndex,
+                            columnIndex,
+                            fieldIndex
+                        )
+                        "></i>
                                                                                                 </button>
 
                                                                                                 <button
-                                                                                                    class="btn btn-light btn-sm"
+                                                                                                    class="btn btn-light btn-sm trash-btn"
                                                                                                     @click="
                         removeField(
                             blockIndex,
@@ -400,8 +382,11 @@
                                                                                                 {{ section.label }}
                                                                                             </option>
                                                                                         </select>
-                                                                                        <div
-                                                                                            v-if="field.fieldtype == 'checkbox' || field.fieldtype == 'radio' || field.fieldtype == 'Select' || field.fieldtype == 'multiselect'">
+                                                                                        <div v-if="field.fieldtype == 'checkbox' ||
+                        field.fieldtype == 'radio' ||
+                        field.fieldtype == 'Select' ||
+                        field.fieldtype == 'multiselect'
+                        ">
                                                                                             <label
                                                                                                 class="font-12 fw-light"
                                                                                                 for="options">Enter
@@ -428,9 +413,7 @@
                                                                                         </div>
                                                                                         <small v-if="field.errorMsg"
                                                                                             class="text-danger font-10">
-                                                                                            {{
-                        field.errorMsg
-                    }}</small>
+                                                                                            {{ field.errorMsg }}</small>
                                                                                     </div>
                                                                                 </div>
                                                                                 <div
@@ -438,7 +421,12 @@
                                                                                     <button
                                                                                         class="btn btn-light btn-sm d-flex align-items-center addField m-2"
                                                                                         @click="
-                        addField(blockIndex, sectionIndex, rowIndex, columnIndex)
+                        addField(
+                            blockIndex,
+                            sectionIndex,
+                            rowIndex,
+                            columnIndex
+                        )
                         ">
                                                                                         <i class="bi bi-plus fs-4"></i>
                                                                                         <span>Add Field</span>
@@ -451,7 +439,7 @@
                                                             </div>
                                                             <div
                                                                 class="d-flex justify-content-start align-items-center my-2">
-                                                                <button class="btn btn-light addRow m-2 "
+                                                                <button class="btn btn-light addRow m-2"
                                                                     @click="addRow(blockIndex, sectionIndex, rowIndex)">
                                                                     <i class="bi bi-plus"></i> Add row in section
                                                                 </button>
@@ -465,7 +453,6 @@
                                                             </button>
                                                         </div>
                                                     </div>
-
                                                 </div>
 
                                                 <div class="d-flex justify-content-center align-items-center my-4">
@@ -483,44 +470,39 @@
                                                 <i @click="prevStep(2)" class="bi bi-chevron-left"></i><span
                                                     class="ms-2">Back To Fields & Workflow</span>
                                             </h1>
-                                            <div class=" d-flex gap-2">
-
+                                            <div class="d-flex gap-2">
                                                 <button :disabled="!sections.length"
-                                                    class="btn btn-dark font-10  Withborder border " type="button"
+                                                    class="btn btn-dark font-10 Withborder border" type="button"
                                                     @click="saveFormData()">
                                                     Save Data
                                                 </button>
-
                                             </div>
                                         </div>
                                         <div>
-                                            <div class=" card py-3 px-0 mb-2 mt-2">
-                                                <div class=" container-fluid">
+                                            <div class="card py-3 px-0 mb-2 mt-2">
+                                                <div class="container-fluid">
                                                     <div class="row">
                                                         <div class="col">
                                                             <div class="container">
                                                                 <div class="row">
                                                                     <div class="col-3">
                                                                         <div
-                                                                            class=" d-flex align-items-center justify-content-between">
-                                                                            <span class="font-10">
-                                                                                Form Name
-                                                                            </span>
-                                                                            <span class=" text-right">:</span>
+                                                                            class="d-flex align-items-center justify-content-between">
+                                                                            <span class="font-10"> Form Name </span>
+                                                                            <span class="text-right">:</span>
                                                                         </div>
                                                                     </div>
                                                                     <div class="col-9">
-                                                                        <span class=" font-12 fw-bold">
+                                                                        <span class="font-12 fw-bold">
                                                                             {{ formDescriptions.form_name }}
                                                                         </span>
                                                                     </div>
                                                                     <div class="col-3">
                                                                         <div
-                                                                            class=" d-flex align-items-center justify-content-between">
-                                                                            <span class="font-10">
-                                                                                Form Short Code
+                                                                            class="d-flex align-items-center justify-content-between">
+                                                                            <span class="font-10"> Form Short Code
                                                                             </span>
-                                                                            <span class=" text-right">:</span>
+                                                                            <span class="text-right">:</span>
                                                                         </div>
                                                                     </div>
                                                                     <div class="col-9">
@@ -530,11 +512,9 @@
                                                                     </div>
                                                                     <div class="col-3">
                                                                         <div
-                                                                            class=" d-flex align-items-center justify-content-between">
-                                                                            <span class="font-10">
-                                                                                Form category
-                                                                            </span>
-                                                                            <span class=" text-right">:</span>
+                                                                            class="d-flex align-items-center justify-content-between">
+                                                                            <span class="font-10"> Form category </span>
+                                                                            <span class="text-right">:</span>
                                                                         </div>
                                                                     </div>
                                                                     <div class="col-9">
@@ -546,15 +526,14 @@
                                                             </div>
                                                         </div>
                                                         <div class="col">
-                                                            <div class=" container">
+                                                            <div class="container">
                                                                 <div class="row">
                                                                     <div class="col-4">
                                                                         <div
-                                                                            class=" d-flex align-items-center justify-content-between">
-                                                                            <span class="font-10">
-                                                                                Owner of the form
+                                                                            class="d-flex align-items-center justify-content-between">
+                                                                            <span class="font-10"> Owner of the form
                                                                             </span>
-                                                                            <span class=" text-right">:</span>
+                                                                            <span class="text-right">:</span>
                                                                         </div>
                                                                     </div>
                                                                     <div class="col-8">
@@ -564,18 +543,40 @@
                                                                     </div>
                                                                     <div class="col-4">
                                                                         <div
-                                                                            class=" d-flex align-items-center justify-content-between">
+                                                                            class="d-flex align-items-center justify-content-between">
                                                                             <span class="font-10">
                                                                                 Accessibility to departments
                                                                             </span>
-                                                                            <span class=" text-right">:</span>
+                                                                            <span class="text-right">:</span>
                                                                         </div>
                                                                     </div>
                                                                     <div class="col-8">
-                                                                        <span class="font-12 fw-bold">
-                                                                            {{ formDescriptions.accessible_departments
-                                                                            }}
+                                                                        <span class="font-12 fw-bold ">
+                                                                            <template
+                                                                                v-if="Array.isArray(formDescriptions.accessible_departments) && formDescriptions.accessible_departments.length === 1">
+                                                                                {{
+                        formDescriptions.accessible_departments[0]
+                    }}
+                                                                            </template>
+                                                                            <template
+                                                                                v-else-if="Array.isArray(formDescriptions.accessible_departments) && formDescriptions.accessible_departments.length > 1">
+                                                                                <ul
+                                                                                    class=" p-0 mb-0 list-unstyled mt-1">
+                                                                                    <li v-for="(department, index) in formDescriptions.accessible_departments"
+                                                                                        :key="index">
+                                                                                        {{ department }},
+                                                                                    </li>
+                                                                                </ul>
+                                                                            </template>
+                                                                            <template v-else>
+                                                                                {{
+                        formDescriptions.accessible_departments
+                    }}
+                                                                            </template>
                                                                         </span>
+
+
+
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -587,13 +588,13 @@
                                                 <div v-for="(block, blockIndex) in blockArr" :key="blockIndex">
                                                     <div v-for="(section, sectionIndex) in block.sections"
                                                         :key="'preview-' + sectionIndex" class="preview-section m-2">
-                                                        <h5>{{ section.label || '-' }}</h5>
-                                                        <div class=" container-fluid">
+                                                        <h5>{{ section.label || "-" }}</h5>
+                                                        <div class="container-fluid">
                                                             <div class="row" v-for="(row, rowIndex) in section.rows"
                                                                 :key="rowIndex">
                                                                 <div v-for="(column, columnIndex) in row.columns"
                                                                     :key="'column-preview-' + columnIndex" class="col">
-                                                                    <h6>{{ column.label || '-' }}</h6>
+                                                                    <h6>{{ column.label || "-" }}</h6>
                                                                     <div class="mb-2 ms-2">
                                                                         <div v-for="(field, fieldIndex) in column.fields"
                                                                             :key="'field-preview-' + fieldIndex">
@@ -605,19 +606,19 @@
                         '-' +
                         fieldIndex
                         ">
-
-                                                                                    <span class=" font-12">{{
+                                                                                    <span class="font-12">{{
                         field.label
                     }}</span></label>
                                                                                 <template v-if="field.fieldtype == 'Select' ||
                         field.fieldtype == 'multiselect'
                         ">
-                                                                                    <select :multiple="field.fieldtype == 'multiselect'
-                        " v-model="field.value"
+                                                                                    <select
+                                                                                        :multiple="field.fieldtype == 'multiselect'"
+                                                                                        v-model="field.value"
                                                                                         class="form-select mb-2 font-13">
                                                                                         <option v-for="(
-                                                        option, index
-                                                      ) in field.options.split('\n')" :key="index" :value="option">
+                                                option, index
+                                              ) in field.options.split('\n')" :key="index" :value="option">
                                                                                             {{ option }}
                                                                                         </option>
                                                                                     </select>
@@ -628,8 +629,8 @@
                                                                                     <div class="row">
                                                                                         <div class="form-check col-4 mb-4"
                                                                                             v-for="(
-                                                        option, index
-                                                      ) in field?.options?.split('\n')" :key="index">
+                                                option, index
+                                              ) in field?.options?.split('\n')" :key="index">
                                                                                             <div
                                                                                                 class="d-flex gap-2 align-items-center">
                                                                                                 <div>
@@ -643,9 +644,7 @@
                                                                                                     <label
                                                                                                         class="form-check-label m-0"
                                                                                                         :for="option">
-                                                                                                        {{
-                        option
-                    }}
+                                                                                                        {{ option }}
                                                                                                     </label>
                                                                                                 </div>
                                                                                             </div>
@@ -662,8 +661,7 @@
                         columnIndex +
                         '-' +
                         fieldIndex
-                                                                                            "
-                                                                                        class="form-control previewInputHeight">
+                        " class="form-control previewInputHeight">
                                                                                     </component>
                                                                                 </template>
                                                                             </div>
@@ -676,19 +674,63 @@
                                                 </div>
                                             </div>
                                         </div>
-
-
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
 
 
+        <!-- /***** Add designations for WF */ -->
+
+        <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+            <div class="offcanvas-header add_designationHeader">
+                <span id="offcanvasRightLabel font-14">
+                    Add designation for {{
+                    selectedBlockIndex == 0 ?
+                    'Requestor' :
+                    'Approver' }}
+                </span>
+
+                <button type="button" class="btn-close bg-light text-reset" data-bs-dismiss="offcanvas"
+                    aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body">
+                <div class="d-flex align-items-center gap-2 ps-2">
+                    <div v-if="DesignationList.length" class="position-relative">
+                        <input type="checkbox" id="selectAll" v-model="isAllSelected"
+                            class="designationCheckBox position-absolute bg-transparent form-control border-0 ms-1" />
+                        <label for="selectAll fw-bold" class="SelectallDesignation">Select
+                            all</label>
+                    </div>
+                </div>
+                <ul v-if="DesignationList.length" class="list-unstyled">
+                    <li v-for="(item, index) in DesignationList" :key="index" class="designationList">
+                        <input type="checkbox" v-model="designationValue" :value="item" class="designationCheckBox"
+                            @change="handleSingleSelect" />
+                        <span class="ps-2">{{ item }}</span>
+                    </li>
+                </ul>
+                <div v-else>
+                    <div class="d-flex justify-content-center">
+                        <span>No Designations Found</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="offcanvas-footer">
+                <div class="text-end p-3">
+                    <ButtonComp class="btn btn-dark addingDesignations" data-bs-dismiss="offcanvas"
+                        @click="addDesignationBtn" name=" Add Designations" />
                 </div>
             </div>
         </div>
     </div>
+
+
 </template>
 
 <script setup>
@@ -696,14 +738,19 @@ import FormFields from "../../Components/FormFields.vue";
 import { onMounted, ref, reactive, computed, watch } from "vue";
 import ButtonComp from "../../Components/ButtonComp.vue";
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
-import { extractFieldsWithBreaks, rebuildToStructuredArray, extractFieldnames, extractfieldlabels } from '../../shared/services/field_format';
-import axiosInstance from '../../shared/services/interceptor';
+import {
+    extractFieldsWithBreaks,
+    rebuildToStructuredArray,
+    extractFieldnames,
+    extractfieldlabels,
+} from "../../shared/services/field_format";
+import axiosInstance from "../../shared/services/interceptor";
 import { apis, doctypes } from "../../shared/apiurls";
 import { useRoute, useRouter } from "vue-router";
-import FormPreview from './FormPreview.vue'
-import Multiselect from '@vueform/multiselect';
-import '@vueform/multiselect/themes/default.css';
-import VueMultiselect from 'vue-multiselect'
+import FormPreview from "./FormPreview.vue";
+import Multiselect from "@vueform/multiselect";
+import "@vueform/multiselect/themes/default.css";
+import VueMultiselect from "vue-multiselect";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 const route = useRoute();
@@ -715,7 +762,7 @@ const formOptions = ref([]);
 const OwnerOfTheFormData = ref([]);
 let sections = reactive([]);
 let blockArr = reactive([]);
-let deleted_items = reactive([])
+let deleted_items = reactive([]);
 const DesignationList = ref([]);
 // "intern", "Junior associate", "Associate", "Senior associate", "Supervisor"
 const designationValue = ref([]);
@@ -723,8 +770,8 @@ const ezyFormsData = ref([]);
 const formNameError = ref("");
 const formShortNameError = ref("");
 const selectedBlockIndex = ref("");
-let workflowSetup = reactive([])
-let paramId = ref("")
+let workflowSetup = reactive([]);
+let paramId = ref("");
 const businessUnit = computed(() => {
     console.log(EzyBusinessUnit.value, "businessUnit from global======");
     return EzyBusinessUnit;
@@ -747,7 +794,6 @@ watch(
     (newVal) => {
         if (newVal && newVal.value) {
             filterObj.value.business_unit = newVal.value;
-
         }
     },
     { immediate: true }
@@ -755,15 +801,15 @@ watch(
 
 onMounted(() => {
     deptData();
-    paramId = route.params.paramid || 'new';
-    console.log(' === paramId:', paramId);
-    if (paramId != undefined && paramId != null && paramId != 'new') {
-        getFormData()
+    paramId = route.params.paramid || "new";
+    console.log(" === paramId:", paramId);
+    if (paramId != undefined && paramId != null && paramId != "new") {
+        getFormData();
     }
-    let Bu_Unit = localStorage.getItem("Bu")
+    let Bu_Unit = localStorage.getItem("Bu");
     filterObj.value.business_unit = Bu_Unit;
     console.log("businessUnit from LocalStorage======", filterObj.value.business_unit);
-})
+});
 
 const steps = ref([
     {
@@ -782,8 +828,8 @@ const steps = ref([
         id: 3,
         label: "Preview & Save",
         stepno: "Step 3",
-        icon: "ri-checkbox-circle-line"
-    }
+        icon: "ri-checkbox-circle-line",
+    },
 ]);
 const fieldTypes = [
     {
@@ -823,9 +869,13 @@ const fieldTypes = [
         type: "multiselect",
     },
 ];
+
 const isAllSelected = computed({
     get() {
-        return DesignationList.value.length > 0 && DesignationList.value.every(item => designationValue.value.includes(item));
+        return (
+            DesignationList.value.length > 0 &&
+            DesignationList.value.every((item) => designationValue.value.includes(item))
+        );
     },
     set(value) {
         if (value) {
@@ -833,32 +883,31 @@ const isAllSelected = computed({
         } else {
             designationValue.value = [];
         }
-    }
+    },
 });
 
-
 watch(designationValue, (newValue) => {
-    console.log('Selected Designations:', newValue);
+    console.log("Selected Designations:", newValue);
 });
 
 function handleSingleSelect() {
     if (!isAllSelected.value && designationValue.value.length === 1) {
-        console.log('Selected only one designation:', designationValue.value[0]);
+        console.log("Selected only one designation:", designationValue.value[0]);
     }
 }
 
 function addDesignationBtn() {
     let xyz = {
-        type: selectedBlockIndex.value == 0 ? 'requestor' : 'approver',
+        type: selectedBlockIndex.value == 0 ? "requestor" : "approver",
         roles: designationValue.value,
         fields: blockArr[selectedBlockIndex.value].sections.flatMap(extractFieldnames),
-        idx: selectedBlockIndex.value
-    }
+        idx: selectedBlockIndex.value,
+    };
 
     // workflowSetup.push(xyz)
 
     // Check if an object with the same blockIdx already exists in workflowSetup
-    const existingIndex = workflowSetup.findIndex(item => item.idx === xyz.idx);
+    const existingIndex = workflowSetup.findIndex((item) => item.idx === xyz.idx);
     if (existingIndex !== -1) {
         // Replace the existing object
         workflowSetup[existingIndex] = xyz;
@@ -867,7 +916,21 @@ function addDesignationBtn() {
         workflowSetup.push(xyz);
     }
 
-    add_Wf_roles_setup()
+    add_Wf_roles_setup();
+}
+
+// const getWorkflowSetup = (blockIndex) => {
+//     return workflowSetup.find((setup) => setup.idx === blockIndex);
+// };
+
+function getWorkflowSetup(blockIndex) {
+    return workflowSetup.find((setup) => setup.idx === blockIndex) || {};
+}
+
+// Initialize `designationValue` based on the roles for the given block index
+function initializeDesignationValue(blockIndex) {
+    const rolesForBlock = getWorkflowSetup(blockIndex).roles || [];
+    designationValue.value = [...rolesForBlock]; // Reset designationValue to match only roles for the current block
 }
 
 const AddDesignCanvas = (idx) => {
@@ -875,10 +938,8 @@ const AddDesignCanvas = (idx) => {
         designationData(filterObj.value.accessible_departments);
     }
     selectedBlockIndex.value = idx;
-
-    console.log(blockArr[idx], " designation idx === ", idx)
+    initializeDesignationValue(idx);
 };
-
 
 function designationData(departments) {
     const filters = [];
@@ -892,14 +953,15 @@ function designationData(departments) {
         // filters: JSON.stringify(filters),
         limit_page_length: filterObj.value.limitPageLength,
         limitstart: filterObj.value.limitstart,
-        order_by: "`tabWF Roles`.`creation` desc"
+        order_by: "`tabWF Roles`.`creation` desc",
     };
 
-    axiosInstance.get(apis.resource + doctypes.designations, { params: queryParams })
+    axiosInstance
+        .get(apis.resource + doctypes.designations, { params: queryParams })
         .then((res) => {
             if (res.data) {
                 console.log(res.data, "Fetched Designations");
-                DesignationList.value = res.data.map(item => item.role);
+                DesignationList.value = res.data.map((item) => item.role);
             }
         })
         .catch((error) => {
@@ -909,8 +971,8 @@ function designationData(departments) {
 
 function cancelForm() {
     router.push({
-        name: 'Created'
-    })
+        name: "Created",
+    });
 }
 const handleStepClick = (stepId) => {
     if (stepId < activeStep.value) {
@@ -922,7 +984,6 @@ const handleStepClick = (stepId) => {
 
 const nextStep = () => {
     if (activeStep.value < 3) {
-
         activeStep.value += 1;
     }
 };
@@ -940,50 +1001,62 @@ watch(
         }
     }
 );
+
+
 function formData() {
-    const fields = extractFieldsWithBreaks(blockArr)
+    const fields = extractFieldsWithBreaks(blockArr);
     const dataObj = {
         ...filterObj.value,
         fields,
-        "doctype": doctypes.EzyFormDefinitions,
+        doctype: doctypes.EzyFormDefinitions,
         workflow_setup: workflowSetup,
-        "form_status": "Draft"
-    }
+        form_status: "Draft",
+    };
     dataObj.accessible_departments = dataObj.accessible_departments.toString(); //JSON.stringify(dataObj.accessible_departments) dataObj.accessible_departments.toString()
-    console.log(dataObj);
-    axiosInstance.post(apis.savedata, dataObj).then((res) => {
-        if (res) {
-            toast.success("Form Created Successfull")
-            router.push({
-                name: 'Created'
-            })
-        }
-    })
+    console.log(dataObj, "---------------------------------------------------------");
+
+    axiosInstance
+        .post(apis.savedata, dataObj)
+        .then((res) => {
+            if (res) {
+                toast.success("Form Created Successfully", { autoClose: 2000 });
+                router.push({
+                    params: { paramid: res.message.message },
+                });
+                paramId = res.message.message;
+                if (paramId.value !== "new") {
+                    blockArr = [];
+                    getFormData();
+                }
+            }
+        })
+        .catch((error) => {
+            console.error("Error saving form data:", error);
+        });
 }
 
-// Function to add a new block 
+// Function to add a new block
 const addBlock = () => {
     const blockIndex = blockArr.length + 1;
     blockArr.push({
         label: `block-${blockIndex}`,
         parent: `${businessUnit.value.value}-${filterObj.value.form_short_name}`,
-        sections: []
-    })
-}
+        sections: [],
+    });
+};
 
 // function to delete block
 const removeBlock = (blockIndex) => {
-    let item = blockArr[blockIndex]
-    if (item.parent) deleted_items.push(item)
+    let item = blockArr[blockIndex];
+    if (item.parent) deleted_items.push(item);
     blockArr.splice(blockIndex, 1);
-}
-
+};
 
 // Function to add a new section with a default column
 const addSection = (blockIndex) => {
-    let sectionIndex = blockArr[blockIndex].sections.length
+    let sectionIndex = blockArr[blockIndex].sections.length;
     let rowIndex = blockArr[blockIndex].sections;
-    console.log(blockIndex, "====", sectionIndex, " ========== ", rowIndex)
+    console.log(blockIndex, "====", sectionIndex, " ========== ", rowIndex);
 
     blockArr[blockIndex].sections.push({
         label: "",
@@ -1003,22 +1076,20 @@ const addSection = (blockIndex) => {
 };
 // Function to remove a section
 const removeSection = (blockIndex, sectionIndex) => {
-    let item = blockArr[blockIndex].sections[sectionIndex]
-    if (item.parent) deleted_items.push(item)
+    let item = blockArr[blockIndex].sections[sectionIndex];
+    if (item.parent) deleted_items.push(item);
     blockArr[blockIndex].sections.splice(sectionIndex, 1);
     // toast.success("Section removed", { autoClose: 500 })
-
 };
 
 const addRow = (blockIndex, sectionIndex) => {
-    const rowIndex = blockArr[blockIndex].sections[sectionIndex].rows.length;  // Get the current row index
+    const rowIndex = blockArr[blockIndex].sections[sectionIndex].rows.length; // Get the current row index
     const rowSuffix = getRowSuffix(rowIndex);
 
     blockArr[blockIndex].sections[sectionIndex].rows.push({
         label: `row_${rowIndex}_${sectionIndex}_${blockIndex}`,
         columns: [
             {
-
                 fields: [], // Initialize with an empty fields array
             },
         ],
@@ -1026,11 +1097,10 @@ const addRow = (blockIndex, sectionIndex) => {
 };
 
 const removeRow = (blockIndex, sectionIndex, rowIndex) => {
-    let item = blockArr[blockIndex].sections[sectionIndex].rows[rowIndex]
-    if (item.parent) deleted_items.push(item)
+    let item = blockArr[blockIndex].sections[sectionIndex].rows[rowIndex];
+    if (item.parent) deleted_items.push(item);
     blockArr[blockIndex].sections[sectionIndex].rows.splice(rowIndex, 1);
     // toast.success("Row removed", { autoClose: 500 })
-
 };
 
 // Function to add a new column inside a section
@@ -1043,39 +1113,52 @@ const addColumn = (blockIndex, sectionIndex, rowIndex) => {
 
 // Function to remove a column inside a section
 const removeColumn = (blockIndex, sectionIndex, rowIndex, columnIndex) => {
-    let item = blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex]
-    if (item.parent) deleted_items.push(item)
-    blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns.splice(columnIndex, 1);
+    let item =
+        blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex];
+    if (item.parent) deleted_items.push(item);
+    blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns.splice(
+        columnIndex,
+        1
+    );
     // toast.success("Column removed", { autoClose: 500 })
-
 };
 
 // Function to add a new field inside a column
 const addField = (blockIndex, sectionIndex, rowIndex, columnIndex) => {
-    blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields.push({
+    blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
+        columnIndex
+    ].fields.push({
         label: "",
         fieldtype: "",
         // value: ref(""), // Keeping the value as a ref for reactivity
-        options: '',
+        options: "",
         reqd: false,
     });
-
 };
 
 // Function to remove a field inside a column
 const removeField = (blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) => {
-    console.log(rowIndex, " field remove === ", blockArr[blockIndex].sections[sectionIndex])
-    let item = blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex]
-    if (item.parent) deleted_items.push(item)
-    blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields.splice(fieldIndex, 1);
+    console.log(
+        rowIndex,
+        " field remove === ",
+        blockArr[blockIndex].sections[sectionIndex]
+    );
+    let item =
+        blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex]
+            .fields[fieldIndex];
+    if (item.parent) deleted_items.push(item);
+    blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
+        columnIndex
+    ].fields.splice(fieldIndex, 1);
     // toast.success("Field removed", { autoClose: 500 })
 };
-
 
 // Function to copy a field and add it below the original field inside a column
 const copyField = (blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) => {
     // Get the field to copy
-    const fieldToCopy = blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex];
+    const fieldToCopy =
+        blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex]
+            .fields[fieldIndex];
 
     // Create a shallow copy of the field
     const newField = { ...fieldToCopy };
@@ -1084,13 +1167,30 @@ const copyField = (blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) 
     newField.name = `${fieldToCopy.name} Name the field`;
 
     // Insert the copied field after the original one
-    blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields.splice(fieldIndex + 1, 0, newField);
+    blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
+        columnIndex
+    ].fields.splice(fieldIndex + 1, 0, newField);
 };
 // Handle the change of field type to display the correct input
-const onFieldTypeChange = (blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) => {
-    let fieldType = blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex].fieldtype
-    if (fieldType !== 'checkbox' || fieldType !== 'Select' || fieldType !== 'radio' || fieldType !== 'multiselect') {
-        blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex].options = ''
+const onFieldTypeChange = (
+    blockIndex,
+    sectionIndex,
+    rowIndex,
+    columnIndex,
+    fieldIndex
+) => {
+    let fieldType =
+        blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex]
+            .fields[fieldIndex].fieldtype;
+    if (
+        fieldType !== "checkbox" ||
+        fieldType !== "Select" ||
+        fieldType !== "radio" ||
+        fieldType !== "multiselect"
+    ) {
+        blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
+            columnIndex
+        ].fields[fieldIndex].options = "";
     }
     // const field =
     //     sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex];
@@ -1102,35 +1202,48 @@ const onFieldTypeChange = (blockIndex, sectionIndex, rowIndex, columnIndex, fiel
 
     // const xyz = extractFieldsWithBreaks(sections)
     // console.log(" extracted Format === ", xyz)
-
-
 };
-
-
-
 
 function handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) {
     const flatArr = blockArr.flatMap(extractfieldlabels);
-    console.log(" flatArr === ", flatArr)
+    console.log(" flatArr === ", flatArr);
     const isDuplicate = hasDuplicates(flatArr); // Check once to reuse this result
-    console.log(" is duplicate === ", isDuplicate)
+    console.log(" is duplicate === ", isDuplicate);
 
     // Assign error message for the specific field if fieldIndex is valid
-    if (fieldIndex !== undefined && fieldIndex >= 0 && columnIndex !== undefined && columnIndex >= 0 && sectionIndex !== undefined) {
-        blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex].errorMsg =
-            isDuplicate ? "Duplicate Label Name" : "";
+    if (
+        fieldIndex !== undefined &&
+        fieldIndex >= 0 &&
+        columnIndex !== undefined &&
+        columnIndex >= 0 &&
+        sectionIndex !== undefined
+    ) {
+        blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
+            columnIndex
+        ].fields[fieldIndex].errorMsg = isDuplicate ? "Duplicate Label Name" : "";
     }
 
     // Assign error message for the column if fieldIndex is not valid
-    if (fieldIndex === undefined && columnIndex !== undefined && columnIndex >= 0 && sectionIndex !== undefined) {
-        blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].errorMsg =
-            isDuplicate ? "Duplicate Label Name in Column" : "";
+    if (
+        fieldIndex === undefined &&
+        columnIndex !== undefined &&
+        columnIndex >= 0 &&
+        sectionIndex !== undefined
+    ) {
+        blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
+            columnIndex
+        ].errorMsg = isDuplicate ? "Duplicate Label Name in Column" : "";
     }
 
     // Assign error message for the section if both columnIndex and fieldIndex are not valid
-    if (columnIndex === undefined && fieldIndex === undefined && sectionIndex !== undefined) {
-        blockArr[blockIndex].sections[sectionIndex].errorMsg =
-            isDuplicate ? "Duplicate Label Name in Section" : "";
+    if (
+        columnIndex === undefined &&
+        fieldIndex === undefined &&
+        sectionIndex !== undefined
+    ) {
+        blockArr[blockIndex].sections[sectionIndex].errorMsg = isDuplicate
+            ? "Duplicate Label Name in Section"
+            : "";
     }
 }
 function handleInputChange(event, fieldType) {
@@ -1138,29 +1251,40 @@ function handleInputChange(event, fieldType) {
     console.log(`${fieldType} input change === `, inputValue);
 
     // Set filter based on fieldType
-    const filters = [
-        [fieldType, "like", `%${inputValue}%`]
-    ];
+    const filters = [[fieldType, "like", `%${inputValue}%`]];
     const queryParams = {
         fields: JSON.stringify(["*"]),
-        filters: JSON.stringify(filters)
+        filters: JSON.stringify(filters),
     };
 
     axiosInstance
-        .get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParams })
+        .get(`${apis.resource}${doctypes.EzyFormDefinitions}`, {
+            params: queryParams,
+        })
         .then((res) => {
             console.log(`${fieldType} response === `, res.data);
             ezyFormsData.value = res.data;
 
             // Check for duplicates and set appropriate error message
             if (fieldType === "form_name") {
-                formNameError.value = inputValue && ezyFormsData.value.some(item =>
-                    item.form_name && item.form_name.toLowerCase() === inputValue.toLowerCase()
-                ) ? "Name already exists" : "";
+                formNameError.value =
+                    inputValue &&
+                        ezyFormsData.value.some(
+                            (item) =>
+                                item.form_name && item.form_name.toLowerCase() === inputValue.toLowerCase()
+                        )
+                        ? "Name already exists"
+                        : "";
             } else if (fieldType === "form_short_name") {
-                formShortNameError.value = inputValue && ezyFormsData.value.some(item =>
-                    item.form_short_name && item.form_short_name.toLowerCase() === inputValue.toLowerCase()
-                ) ? "Short name already exists" : "";
+                formShortNameError.value =
+                    inputValue &&
+                        ezyFormsData.value.some(
+                            (item) =>
+                                item.form_short_name &&
+                                item.form_short_name.toLowerCase() === inputValue.toLowerCase()
+                        )
+                        ? "Short name already exists"
+                        : "";
             }
         })
         .catch((error) => {
@@ -1185,9 +1309,8 @@ const getRowSuffix = (index) => {
 
 // Trigger the creation of form and show the preview
 const previewForm = () => {
-    const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});// raise a modal
+    const modal = new bootstrap.Modal(document.getElementById("formViewModal"), {}); // raise a modal
     modal.show();
-
 };
 
 function deptData() {
@@ -1195,7 +1318,8 @@ function deptData() {
         fields: JSON.stringify(["*"]),
     };
 
-    axiosInstance.get(apis.resource + doctypes.departments, { params: queryParams })
+    axiosInstance
+        .get(apis.resource + doctypes.departments, { params: queryParams })
         .then((res) => {
             if (res?.data?.length) {
                 // console.log(res.data, "Fetched departments");
@@ -1218,7 +1342,8 @@ function OwnerOftheForm(newVal) {
 }
 
 function categoriesData(newVal) {
-    axiosInstance.get(apis.resource + doctypes.departments + `/${newVal}`)
+    axiosInstance
+        .get(apis.resource + doctypes.departments + `/${newVal}`)
         .then((res) => {
             if (res?.data?.ezy_departments_items) {
                 departments.value = res.data.ezy_departments_items.map((item) => item.category);
@@ -1230,28 +1355,31 @@ function categoriesData(newVal) {
 }
 // Get form by ID
 function getFormData() {
-    axiosInstance.get(apis.resource + doctypes.EzyFormDefinitions + `/${paramId}`)
+    axiosInstance
+        .get(apis.resource + doctypes.EzyFormDefinitions + `/${paramId}`)
         .then((res) => {
-            let res_data = res?.data
+            let res_data = res?.data;
             if (res_data) {
                 if (res_data.accessible_departments) {
-                    res_data.accessible_departments = res_data.accessible_departments.split(',');
+                    res_data.accessible_departments = res_data.accessible_departments.split(",");
                 }
-                filterObj.value = res_data
+                filterObj.value = res_data;
 
                 // let structuredArr = rebuildToStructuredArray((JSON.parse(res_data?.form_json?.fields).fields)?.replace(/\\\"/g, '"'))
-                let structuredArr = rebuildToStructuredArray(JSON.parse(res_data?.form_json).fields)
+                let structuredArr = rebuildToStructuredArray(
+                    JSON.parse(res_data?.form_json).fields
+                );
 
-                // workflowSetup.push(JSON.parse(res_data?.form_json).workflow) 
+                // workflowSetup.push(JSON.parse(res_data?.form_json).workflow)
                 // console.log(" structure === ", structuredArr)
                 structuredArr.forEach((item, index) => {
-                    blockArr.push(item)
-                })
+                    blockArr.push(item);
+                });
 
                 JSON.parse(res_data?.form_json).workflow.forEach((item, index) => {
-                    workflowSetup.push(item)
-                    console.log(" Work flow setup === ", workflowSetup)
-                })
+                    workflowSetup.push(item);
+                    console.log(" Work flow setup === ", workflowSetup);
+                });
             }
         })
         .catch((error) => {
@@ -1260,37 +1388,44 @@ function getFormData() {
 }
 
 function delete_form_items_fields() {
-    axiosInstance.post(apis.delete_form_items, {
-        deleted_fields: deleted_items.flatMap(extractFieldnames),
-        doctype: paramId
-    }).then((res) => {
-
-        if (res?.message?.success) {
-            // return res;
-            formData()
-        }
-    })
+    axiosInstance
+        .post(apis.delete_form_items, {
+            deleted_fields: deleted_items.flatMap(extractFieldnames),
+            doctype: paramId,
+        })
+        .then((res) => {
+            if (res?.message?.success) {
+                // return res;
+                formData();
+            }
+        });
 }
 
 async function saveFormData() {
-    let data = deleted_items.flatMap(extractFieldnames)
-    if ((paramId != undefined && paramId != null && paramId != 'new') && data.length) {
-        delete_form_items_fields()
+    let data = deleted_items.flatMap(extractFieldnames);
+    if (paramId != undefined && paramId != null && paramId != "new" && data.length) {
+        delete_form_items_fields();
         //    console.log(" result", result)
-
     } else {
-        formData()
+        formData();
     }
 }
 
 function add_Wf_roles_setup() {
-    axiosInstance.post(apis.add_roles_WF, {
-        workflow_setup: workflowSetup,
-        doctype: filterObj.value.form_short_name,
-        business_unit: filterObj.value.business_unit
-    }).then((res) => {
-        console.log(" =====   ", res)
-    })
+    axiosInstance
+        .post(apis.add_roles_WF, {
+            workflow_setup: workflowSetup,
+            doctype: filterObj.value.form_short_name,
+            business_unit: filterObj.value.business_unit,
+        })
+        .then((res) => {
+            console.log(" =====   ", res);
+            if (selectedBlockIndex.value == 0) {
+                toast.success("Requestor Added")
+            } else {
+                toast.success("Accepor Added")
+            }
+        });
 }
 
 const getFieldComponent = (type) => {
@@ -1320,7 +1455,6 @@ const getFlatArrayofFields = deleted_items.flatMap(extractFieldnames);
 
 const hasDuplicates = (array) => new Set(array).size !== array.length;
 // console.log(hasDuplicates(arr));
-
 </script>
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 
@@ -1328,9 +1462,8 @@ const hasDuplicates = (array) => new Set(array).size !== array.length;
 /* @import '@vueform/multiselect/themes/default.css'; */
 
 .add_designationHeader {
-    box-shadow: 0px 4px 4px 0px #0000000D;
+    box-shadow: 0px 4px 4px 0px #0000000d;
     font-size: 14px;
-
 }
 
 .ErrorMsg {
@@ -1338,7 +1471,7 @@ const hasDuplicates = (array) => new Set(array).size !== array.length;
 }
 
 .SelectallDesignation {
-    color: #1B14DF;
+    color: #1b14df;
 }
 
 .CancelNdSave {
@@ -1350,6 +1483,12 @@ const hasDuplicates = (array) => new Set(array).size !== array.length;
 
 .stepsDiv {
     margin-top: 25px;
+}
+
+.steps-sticky-div {
+    position: sticky;
+    z-index: 1;
+    top: 30px;
 }
 
 input {
@@ -1373,7 +1512,11 @@ input {
     margin-bottom: 20px;
     border-radius: 7px;
     background-color: #eeeeee;
+    position: relative;
+    transition: all 2s ease-in;
 }
+
+
 
 .dynamicColumn {
     border: 1px solid #cccccc;
@@ -1418,7 +1561,11 @@ input {
     border-radius: 10px;
     margin: 5px 10px;
     background-color: #fafafa;
+    position: relative;
 }
+
+
+
 
 .preview-section {
     background-color: #f9f9f9;
@@ -1577,7 +1724,6 @@ select {
     position: sticky;
     z-index: 1;
     top: 30px;
-
 }
 
 .previewInputHeight {
@@ -1606,11 +1752,19 @@ select {
 }
 
 .deleteSection {
-    color: #FE212E;
+    color: #fe212e;
+
+    font-weight: 400;
+
+}
+
+.deleteBlock {
+    color: #fe212e;
+    font-weight: 400;
 }
 
 .designationBtn {
-    color: #1B14DF;
+    color: #1b14df;
     font-size: 13px;
     font-weight: 400;
     background-color: transparent;
@@ -1630,11 +1784,9 @@ select {
 
 .designationCheckBox {
     font-size: 20px !important;
-
 }
 
 .designationCheckBox:focus {
-
     box-shadow: none;
 }
 
@@ -1646,9 +1798,7 @@ select {
 
 .Withborder {
     border: 1px solid #eeeeee;
-
 }
-
 
 .multiselect-option {
     font-size: 11px !important;
@@ -1668,10 +1818,8 @@ select {
         .multiselect-options {
             font-size: 11px;
 
-
             li.multiselect-option span {
                 font-size: 11px !important;
-
             }
 
             li.multiselect-option .is-selected {
@@ -1680,7 +1828,6 @@ select {
             }
         }
     }
-
 }
 
 .multiselect__option span {
@@ -1698,15 +1845,11 @@ select {
 
 .multiselect .multiselect--above {
     min-height: 35px !important;
-
 }
 
 .multiselect .multiselect__tags {
-
     min-height: 35px;
     font-size: 11px !important;
-
-
 }
 
 .multiselect .multiselect__placeholder {
@@ -1726,6 +1869,7 @@ select {
     border: 1px solid #e5e5e5;
     border-radius: 5px;
     padding: 5px 10px;
-    background-color: #e5e5e5
+    background-color: #e5e5e5;
+    position: relative;
 }
 </style>
