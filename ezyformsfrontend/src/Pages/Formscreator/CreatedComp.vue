@@ -28,7 +28,7 @@
 
             <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" actionType="dropdown"
                 @actionClicked="actionCreated" :actions="actions" isCheckbox="true" />
-            <PaginationComp :currentRecords="tableData.length" :totalRecords="tableData.length"
+            <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
                 @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
         </div>
         <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -112,6 +112,7 @@ import { useRouter } from "vue-router";
 import { rebuildToStructuredArray } from "../../shared/services/field_format";
 import FormPreview from './FormPreview.vue'
 
+const totalRecords = ref(0);
 
 const businessUnit = computed(() => {
     return EzyBusinessUnit.value;
@@ -157,6 +158,7 @@ const actions = ref(
     ]
 )
 const formDescriptions = ref({})
+const tableData = ref([]);
 
 const filterOnModal = ref({
     Requested_id: "",
@@ -171,8 +173,8 @@ const filterOnModal = ref({
 })
 
 const filterObj = ref({
-    limitstart: 0,
-    limitPageLength: 20,
+    limit_start: 0,
+    limitPageLength: 100,
     form_name: "",
     form_short_name: "",
     accessible_departments: "[]",
@@ -187,8 +189,10 @@ watch(
     (newVal) => {
         filterObj.value.business_unit = newVal;
 
-        if (newVal) {
+        if (newVal.length) {
             console.log(newVal, "new value of business unit");
+            localStorage.setItem("Bu", filterObj.value.business_unit)
+            tableData.value = []
             fetchTable()
         }
     },
@@ -202,7 +206,6 @@ const tableheaders = ref([
     { th: "Accessible departments", td_key: "accessible_departments" },
     { th: "Status", td_key: "active" },
 ]);
-const tableData = ref([]);
 
 const router = useRouter();
 function formCreation(item = null) {
@@ -219,14 +222,14 @@ function formCreation(item = null) {
 // Handle updating the current value
 const PaginationUpdateValue = (itemsPerPage) => {
     filterObj.value.limitPageLength = itemsPerPage;
-    filterObj.value.limitstart = 0;
+    filterObj.value.limit_start = 0;
     fetchTable();
 
 };
 // Handle updating the limit start
 const PaginationLimitStart = ([itemsPerPage, start]) => {
     filterObj.value.limitPageLength = itemsPerPage;
-    filterObj.value.limitstart = start;
+    filterObj.value.limit_start = start;
     fetchTable();
 
 };
@@ -280,16 +283,35 @@ function fetchTable() {
         fields: JSON.stringify(["*"]),
         filters: JSON.stringify(filters),
         limit_page_length: filterObj.value.limitPageLength,
-        limitstart: filterObj.value.limitstart,
+        limit_start: filterObj.value.limit_start,
         order_by: "`tabEzy Form Definitions`.`creation` desc"
     };
-
-    axiosInstance
-        .get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParams })
+    const queryParamsCount = {
+        fields: JSON.stringify(["count( `tabEzy Form Definitions`.`name`) AS total_count"]),
+        limitPageLength: "None",
+        filters: JSON.stringify(filters),
+    }
+    axiosInstance.get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParamsCount })
         .then((res) => {
-            tableData.value = res.data;
+            // console.log(res.data[0].total_count);
+            totalRecords.value = res.data[0].total_count
+
         })
         .catch((error) => {
+            console.error("Error fetching ezyForms data:", error);
+        });
+
+
+    axiosInstance.get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParams })
+        .then(res => {
+            const newData = res.data;
+            if (filterObj.value.limit_start === 0) {
+                tableData.value = newData;
+            } else {
+                tableData.value = tableData.value.concat(newData);
+            }
+        })
+        .catch(error => {
             console.error("Error fetching ezyForms data:", error);
         });
 }

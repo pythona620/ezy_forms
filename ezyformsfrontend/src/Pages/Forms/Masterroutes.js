@@ -14,7 +14,7 @@ const Masterroutes = [
       {
         path: 'department/:id',
         component: AllDeptComp,
-        name: 'DepartmentDetail',
+        name: 'DepartmentDetail/:id',
         props: true, // Automatically pass route params as props
       },
     ],

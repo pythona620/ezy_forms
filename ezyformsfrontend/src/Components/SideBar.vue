@@ -54,25 +54,24 @@
                         </router-link>
                     </ul>
                 </template>
-<template v-if="isMasterRoute">
-    <ul class="list-unstyled">
-        <router-link  v-for="department in formSideBarData" :key="department.route"
-          :to="`/forms/department/${department.route}`" 
-          class="text-decoration-none text-black"
-          active-class="active-link">
-        <li >
+                <template v-if="isMasterRoute">
+                    <ul class="list-unstyled">
+                        <router-link v-for="department in formSideBarData" :key="department.route"
+                            :to="`/forms/department/${department.route}`" class="text-decoration-none text-black"
+                            active-class="active-link">
+                            <li>
 
-          <i :class="`bi-icon ps-1 bg-transparent ${department.icon} me-3`"></i>
-          {{ department.name }}  </li>
-        </router-link>
-    
-    </ul>
-</template>
+                                <i :class="`bi-icon ps-1 bg-transparent ${department.icon} me-3`"></i>
+                                {{ department.name }}
+                            </li>
+                        </router-link>
+
+                    </ul>
+                </template>
                 <!-- Other sidebar items if not on settings route -->
                 <template v-else>
                     <ul class="list-unstyled">
                         <router-link v-for="(list, index) in sidebarData" :key="index"
-                      
                             :to="`${baseRoute}/${list.route.toLowerCase()}`" class="text-decoration-none text-black"
                             active-class="active-link">
                             <li :title="list.name">
@@ -80,9 +79,6 @@
                                 {{ list.name }}
                             </li>
                         </router-link>
-                       
-
-
                     </ul>
                 </template>
             </aside>
@@ -100,17 +96,6 @@ import axiosInstance from '../shared/services/interceptor';
 import { apis, doctypes } from '../shared/apiurls';
 
 
-// const formSideBarData = [
-//     { name: 'IT', icon: 'bi bi-display', route: 'it' },
-//     { name: 'F & B', icon: 'bi bi-cup-straw', route: 'f&b' },
-//     { name: 'Sales', icon: 'bi bi-bar-chart', route: 'sales' },
-//     { name: 'HR', icon: 'bi bi-people-fill', route: 'hr' },
-//     { name: 'Finance', icon: 'bi bi-wallet2', route: 'finance' },
-//     { name: 'Administration', icon: 'bi bi-building', route: 'admin' },
-//     { name: 'House keeping', icon: 'bi bi-bucket', route: 'housekeeping' },
-//     { name: 'Front office', icon: 'fa-solid fa-concierge-bell', route: 'frontoffice' },
-//     { name: 'Revenue', icon: 'bi bi-cash-stack', route: 'revenue' },
-// ];
 const formSideBarData = ref([])
 const settingsSideBarData = [
     { name: 'Profile', icon: 'bi bi-person-circle', route: 'profile' },
@@ -162,7 +147,7 @@ const isUserFormsRoute = computed(() => route.path.startsWith('/create-form'));
 const sidebarData = computed(() => {
     if (isMasterRoute.value) {
         return formSideBarData.value;
-    
+
     } else if (isToDoRoute.value) {
         return todoSideBarData;
     } else if (isUserFormsRoute.value) {
@@ -186,7 +171,6 @@ const sidebarTitle = computed(() => {
     return '';
 });
 
-
 const baseRoute = computed(() => {
     if (isMasterRoute.value) {
         return '/forms';
@@ -208,49 +192,39 @@ const filterObj = ref({
 });
 const deptartmentData = ref([])
 function deptData() {
-  const queryParams = {
-    fields: JSON.stringify(["*"]),
-    limit_page_length: filterObj.value.limitPageLength,
-    limitstart: filterObj.value.limitstart,
-    order_by: "`tabEzy Departments`.`creation` desc"
-  };
+    const queryParams = {
+        fields: JSON.stringify(["*"]),
+        limit_page_length: filterObj.value.limitPageLength,
+        limitstart: filterObj.value.limitstart,
+        order_by: "`tabEzy Departments`.`creation` desc"
+    };
 
-  axiosInstance.get(apis.resource + doctypes.departments, { params: queryParams })
-    .then((res) => {
-      if (res.data) {
-        deptartmentData.value = res.data;
-        console.log(deptartmentData.value, 'Fetched department data');
+    axiosInstance.get(apis.resource + doctypes.departments, { params: queryParams })
+        .then((res) => {
+            if (res.data) {
+                deptartmentData.value = res.data;
 
-        formSideBarData.value = deptartmentData.value.map(department => ({
-            name: department.department_name,
-              icon: getIconByDepartmentName(department.department_name),
-              route: department.name.replace(/\s+/g, '-').toLowerCase(),
-            //   id: department.id 
-        }));
-      }
-    })
-    .catch((error) => {
-      console.error("Error fetching department data:", error);
-    });
+
+                formSideBarData.value = deptartmentData.value.map(department => ({
+                    name: department.department_name,
+                    icon: getIconByDepartmentName(department.department_name),
+                    route: department.name.replace(/\s+/g, '-').toLowerCase(),
+
+                    //   id: department.id 
+                }));
+            }
+        })
+        .catch((error) => {
+            console.error("Error fetching department data:", error);
+        });
 }
 
-
-// // Function to navigate to department route based on ID
-// function navigateToDepartment(id) {
-//     router.push({ name: 'DepartmentDetail', params: { id } });
-// }
-// Optional: Define a function to get icons based on department name
 function getIconByDepartmentName(name) {
     const icons = {
-        'IT': 'bi bi-display',
-        'F & B': 'bi bi-cup-straw',
+
         'Sales Department': 'bi bi-bar-chart',
         'HR Department': 'bi bi-people-fill',
-        'Finance': 'bi bi-wallet2',
-        'Administration': 'bi bi-building',
-        'House keeping': 'bi bi-bucket',
-        'Front office': 'fa-solid fa-concierge-bell',
-        'Revenue': 'bi bi-cash-stack'
+
     };
     return icons[name] || 'bi bi-file';
 }
@@ -303,4 +277,3 @@ li {
     border-radius: 4px;
 }
 </style>
-
