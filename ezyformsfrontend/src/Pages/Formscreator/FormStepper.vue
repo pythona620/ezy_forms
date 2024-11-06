@@ -284,8 +284,8 @@
                                                                     @change="handleFieldChange(sectionIndex)"
                                                                     placeholder="Untitled approval flow" />
                                                                 <small v-if="section.errorMsg" class="text-danger"> {{
-                        section.errorMsg
-                    }}</small>
+                                                                    section.errorMsg
+                                                                }}</small>
                                                                 <div class=" d-flex">
 
                                                                     <button
@@ -302,8 +302,8 @@
                                                                     <div
                                                                         class="d-flex justify-content-between align-items-center">
                                                                         <label class="rownames">{{
-                        getRowSuffix(rowIndex)
-                    }}</label>
+                                                                            getRowSuffix(rowIndex)
+                                                                        }}</label>
                                                                         <div>
                                                                             <button v-if="row.columns.length < 3"
                                                                                 class="btn btn-light bg-transparent border-0 font-13"
@@ -424,13 +424,13 @@
                                                                                                     class="font-12 m-0 fw-light">Mandatory</label>
                                                                                             </div>
 
+
                                                                                             <!--- checkbox for mandatory -->
                                                                                         </div>
-                                                                                        <small v-if="field.errorMsg"
-                                                                                            class="text-danger font-10">
-                                                                                            {{
-                        field.errorMsg
-                    }}</small>
+                                                                                        <small v-if="field.error"
+                                                                                            class="text-danger font-10">{{
+                                                                                            field.error
+                                                                                            }} </small>
                                                                                     </div>
                                                                                 </div>
                                                                                 <div
@@ -607,8 +607,8 @@
                         ">
 
                                                                                     <span class=" font-12">{{
-                        field.label
-                    }}</span></label>
+                                                                                        field.label
+                                                                                    }}</span></label>
                                                                                 <template v-if="field.fieldtype == 'Select' ||
                         field.fieldtype == 'multiselect'
                         ">
@@ -696,7 +696,7 @@ import FormFields from "../../Components/FormFields.vue";
 import { onMounted, ref, reactive, computed, watch } from "vue";
 import ButtonComp from "../../Components/ButtonComp.vue";
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
-import { extractFieldsWithBreaks, rebuildToStructuredArray, extractFieldnames, extractfieldlabels } from '../../shared/services/field_format';
+import { extractFieldsWithBreaks, rebuildToStructuredArray, extractFieldnames, extractfieldlabels, addErrorMessagesToStructuredArray } from '../../shared/services/field_format';
 import axiosInstance from '../../shared/services/interceptor';
 import { apis, doctypes } from "../../shared/apiurls";
 import { useRoute, useRouter } from "vue-router";
@@ -1088,6 +1088,9 @@ const copyField = (blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) 
 };
 // Handle the change of field type to display the correct input
 const onFieldTypeChange = (blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) => {
+    const checkFieldType = addErrorMessagesToStructuredArray(blockArr)
+    blockArr.splice(0, blockArr.length, ...checkFieldType)
+
     let fieldType = blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex].fieldtype
     if (fieldType !== 'checkbox' || fieldType !== 'Select' || fieldType !== 'radio' || fieldType !== 'multiselect') {
         blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex].options = ''
@@ -1111,9 +1114,9 @@ const onFieldTypeChange = (blockIndex, sectionIndex, rowIndex, columnIndex, fiel
 
 function handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) {
     const flatArr = blockArr.flatMap(extractfieldlabels);
-    console.log(" flatArr === ", flatArr)
     const isDuplicate = hasDuplicates(flatArr); // Check once to reuse this result
-    console.log(" is duplicate === ", isDuplicate)
+    const checkFieldType = addErrorMessagesToStructuredArray(blockArr)
+    blockArr.splice(0, blockArr.length, ...checkFieldType)
 
     // Assign error message for the specific field if fieldIndex is valid
     if (fieldIndex !== undefined && fieldIndex >= 0 && columnIndex !== undefined && columnIndex >= 0 && sectionIndex !== undefined) {
@@ -1316,7 +1319,6 @@ const getFieldComponent = (type) => {
     }
 };
 
-const getFlatArrayofFields = deleted_items.flatMap(extractFieldnames);
 
 const hasDuplicates = (array) => new Set(array).size !== array.length;
 // console.log(hasDuplicates(arr));
