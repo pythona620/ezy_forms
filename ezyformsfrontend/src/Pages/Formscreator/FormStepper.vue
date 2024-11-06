@@ -203,9 +203,10 @@
                                                     <div class="d-flex justify-content-end ">
                                                         <div v-if="paramId && workflowSetup.length"
                                                             class="d-flex align-items-center">
-                                                            <span class="font-10">{{ blockIndex == 0 ? 'Requestor : ' :
-                        'Approver: ' }} </span>
-                                                            <label v-if="getWorkflowSetup(blockIndex)">
+                                                            <span class="font-10 pe-1">
+                                                                {{ blockIndex == 0 ? 'Requestor : ' : 'Approver : ' }}
+                                                            </span>
+                                                            <label class="ps-1" v-if="getWorkflowSetup(blockIndex)">
                                                                 {{ getWorkflowSetup(blockIndex).roles.join(", ") }}
                                                             </label>
                                                         </div>
@@ -713,7 +714,8 @@
                     <li v-for="(item, index) in DesignationList" :key="index" class="designationList">
                         <input type="checkbox" v-model="designationValue" :value="item" class="designationCheckBox"
                             @change="handleSingleSelect" />
-                        <span class="ps-2">{{ item }}</span>
+                        <span class="ps-2">{{ item
+                            }}</span>
                     </li>
                 </ul>
                 <div v-else>
@@ -945,20 +947,20 @@ function designationData(departments) {
         filters.push(["ezy_departments", "in", departments]);
     }
 
-    const queryParams = {
-        fields: JSON.stringify(["*"]),
-        // filters: JSON.stringify(filters),
-        limit_page_length: filterObj.value.limitPageLength,
-        limitstart: filterObj.value.limitstart,
-        order_by: "`tabWF Roles`.`creation` desc",
-    };
+    // const queryParams = {
+    //     fields: JSON.stringify(["*"]),
+    //     // filters: JSON.stringify(filters),
+    //     limit_page_length: filterObj.value.limitPageLength,
+    //     limitstart: filterObj.value.limitstart,
+    //     order_by: "`tabWF Role Matrix`.`creation` desc",
+    // };
 
     axiosInstance
-        .get(apis.resource + doctypes.designations, { params: queryParams })
+        .get(apis.resource + doctypes.WFRoleMatrix + `/${filterObj.value.business_unit}`)
         .then((res) => {
             if (res.data) {
                 console.log(res.data, "Fetched Designations");
-                DesignationList.value = res.data.map((item) => item.role);
+                DesignationList.value = res.data.users.map(user => (user.role_name));
             }
         })
         .catch((error) => {
