@@ -51,16 +51,17 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch,computed } from 'vue';
 import { useRouter } from 'vue-router'; // Import useRouter
 import { apis, doctypes } from '../shared/apiurls';
 import axiosInstance from '../shared/services/interceptor';
 import ButtonComp from './ButtonComp.vue';
 import FormFields from './FormFields.vue';
 import TabsComp from './TabsComp.vue';
-import { EzyBusinessUnit } from '../shared/services/business_unit';
+
 
 const router = useRouter(); // Initialize router
+import { EzyBusinessUnit } from "../shared/services/business_unit";
 
 // Define reactive variables
 const tabsData = ref([
@@ -100,14 +101,26 @@ const ezyForms = () => {
         console.error("Error fetching ezyForms data:", error);
     });
 };
+watch(business_unit, (newBu, oldBu) => {
+  
 
-watch(business_unit, (newBusinessUnit) => {
-    EzyBusinessUnit.value = newBusinessUnit;
+    EzyBusinessUnit.value = newBu;
+
+    if (oldBu) {
+        deptData(true); 
+    } else {
+       
+        deptData(); 
+    }
 });
 
-function deptData() {
+function deptData(value=null) {
+    const filters = [
+        ["business_unit", "like", `%${business_unit.value}%`]
+    ];
     const queryParams = {
         fields: JSON.stringify(["*"]),
+        filters: JSON.stringify(filters),
     };
 
     axiosInstance.get(apis.resource + doctypes.departments, { params: queryParams })
@@ -115,25 +128,27 @@ function deptData() {
             if (res.data) {
                 deptartmentData.value = res.data;
 
+                // Update the route for the "Forms" tab with the first department's route
+                const newFormsRoute = deptartmentData.value.length > 0
+                    ? `/forms/department/${deptartmentData.value[0].name.replace(/\s+/g, '-').toLowerCase()}`
+                    : '/forms';
 
-                // Update tabsData with new route for Forms tab
-                const newFormsRoute = deptartmentData.value.map(department =>
-                    department.name.replace(/\s+/g, '-').toLowerCase()
-                );
+                tabsData.value = tabsData.value.map(tab => {
+                    if (tab.name === 'Forms') {
+                        return { ...tab, route: newFormsRoute };
+                    }
+                    return tab;
+                });
 
-
-                if (newFormsRoute.length > 0) {
-                    tabsData.value = tabsData.value.map(tab => {
-                        if (tab.name === 'Forms') {
-                            return { ...tab, route: `/forms/department/${newFormsRoute[0]}` };
-                        }
-                        return tab;
-                    });
-                }
-
+               
                 formSideBarData.value = deptartmentData.value.map(department => ({
                     route: department.name.replace(/\s+/g, '-').toLowerCase(),
                 }));
+
+                if(value){
+                    handleBuChange({route:newFormsRoute})
+                }
+
             }
         })
         .catch((error) => {
@@ -141,8 +156,12 @@ function deptData() {
         });
 }
 
+
 // Handle tab change
 const handleTabChange = (tab) => {
+    router.push(tab.route);
+};
+const handleBuChange = (tab) => {
     router.push(tab.route);
 };
 

@@ -99,13 +99,35 @@
 
 
 <script setup>
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref,watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 // import { useRoute } from 'vue-router'; // Import the useRoute hook
 import axiosInstance from '../shared/services/interceptor';
 import { apis, doctypes } from '../shared/apiurls';
+import { EzyBusinessUnit } from "../shared/services/business_unit";
+const businessUnit = computed(() => {
+    return EzyBusinessUnit.value;
+});
+const newBusinessUnit=ref({
+    business_unit:''
+})
+const filterObj = ref({
+    limitPageLength: 'None',
+    limitstart: 0
+});
+watch(
+    businessUnit,
+    (newVal) => {
+      
+        newBusinessUnit.value.business_unit = newVal;
 
-
+        if (newVal.length) {
+          
+            deptData()
+        }
+    },
+    { immediate: true }
+);
 const formSideBarData = ref([])
 const settingsSideBarData = [
     { name: 'Profile', icon: 'bi bi-person-circle', route: 'profile' },
@@ -116,8 +138,8 @@ const settingsSideBarData = [
     // { name: 'Notifications', icon: 'bi bi-bell', route: 'notifications' },
     { name: 'Department', icon: 'bi bi-clock-history', route: 'department' },
     { name: 'Designation', icon: 'bi bi-people', route: 'designations' },
-    { name: 'User Management', icon: 'bi bi-people', route: 'usermanagement' },
-    { name: 'Categories', icon: 'bi bi-tags', route: 'categories' },
+    { name: 'Employees', icon: 'bi bi-people', route: 'usermanagement' },
+    // { name: 'Categories', icon: 'bi bi-tags', route: 'categories' },
 
 ];
 // Define the title for the first and second settings sections
@@ -194,10 +216,7 @@ const baseRoute = computed(() => {
     return '/';
 });
 
-const filterObj = ref({
-    limitPageLength: 'None',
-    limitstart: 0
-});
+
 const deptartmentData = ref([])
 onMounted(() => {
     if (route.path.startsWith('/forms')) {
@@ -205,10 +224,15 @@ onMounted(() => {
     }
 })  
 function deptData() {
+    const filters = [
+        ["business_unit", "like", `%${newBusinessUnit.value.business_unit}%`]
+    ];
     const queryParams = {
         fields: JSON.stringify(["*"]),
         limit_page_length: filterObj.value.limitPageLength,
         limitstart: filterObj.value.limitstart,
+        filters: JSON.stringify(filters),
+
         order_by: "`tabEzy Departments`.`creation` asc",
         
     };

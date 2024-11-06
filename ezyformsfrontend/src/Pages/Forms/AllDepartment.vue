@@ -1,6 +1,5 @@
 <template>
   <div>
-
     <div>
       <div class="d-flex justify-content-between align-items-center">
         <div>
@@ -46,28 +45,35 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, computed, watch } from 'vue';
 import axiosInstance from '../../shared/services/interceptor';
 import { apis, doctypes } from '../../shared/apiurls';
 import FormFields from '../../Components/FormFields.vue';
 import ButtonComp from '../../Components/ButtonComp.vue';
 import GlobalTable from '../../Components/GlobalTable.vue';
+import { EzyBusinessUnit } from '../../shared/services/business_unit';
 
 // Props for dynamic ID
 const props = defineProps(['id']);
 
-// Local state and initializations
-const department = ref(null);
-const filterObj = ref({ search: '', selectoption: '' });
-const tableheaders = ref([
-  { th: "Form name", td_key: "name" },
-  { th: "Form category", td_key: "form_category" },
-  { th: "Accessible departments", td_key: "acess" },
-  { th: "Status", td_key: "status" },
-]);
-const tableData = ref([]);
+// Business unit and filter object
+const businessUnit = computed(() => EzyBusinessUnit.value);
+const newBusinessUnit = ref({ business_unit: '' });
+const filterObj = ref({ search: '', selectoption: '', limitPageLength: 'None', limitstart: 0 });
 
-// Watch for changes in the `id` prop and fetch department details
+// Watch business unit and department ID changes
+watch(
+  businessUnit,
+  (newVal) => {
+    newBusinessUnit.value.business_unit = newVal;
+    if (newVal.length) {
+     
+      fetchDepartmentDetails(props.id);
+    }
+  },
+  { immediate: true }
+);
+
 watch(
   () => props.id,
   (newId) => {
@@ -78,20 +84,37 @@ watch(
   { immediate: true }
 );
 
-// Fetch data function
+// Table headers and data
+const tableheaders = ref([
+  { th: "Form name", td_key: "name" },
+  { th: "Form category", td_key: "form_category" },
+  { th: "Accessible departments", td_key: "acess" },
+  { th: "Status", td_key: "status" },
+]);
+const tableData = ref([]);
+
+// Fetch department details function
 function fetchDepartmentDetails(id) {
-  axiosInstance.get(`${apis.resource}${doctypes.departments}/${id}`)
+  const filters = [
+    ["business_unit", "like", `%${newBusinessUnit.value.business_unit}%`]
+  ];
+  const queryParams = {
+    fields: JSON.stringify(["*"]),
+    limit_page_length: filterObj.value.limitPageLength,
+    limitstart: filterObj.value.limitstart,
+    filters: JSON.stringify(filters),
+    order_by: "`tabEzy Departments`.`creation` asc",
+  };
+  
+  axiosInstance
+    .get(`${apis.resource}${doctypes.departments}/${id}`, { params: queryParams })
     .then((response) => {
       tableData.value = [response.data];
-
     })
     .catch((error) => {
       console.error("Error fetching department details:", error);
     });
 }
-
-
-
 </script>
 
 <style>
