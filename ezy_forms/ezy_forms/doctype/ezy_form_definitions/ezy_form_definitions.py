@@ -105,7 +105,7 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
 			enqueing_creation_of_roadmap(doctype=doctype,property_name=business_unit,bulk_request=False)
 		if len(fields)>0:
 			add_customized_fields_for_dynamic_doc(fields=fields,doctype=doctype)
-		return {"success":True,"message":"Form Created."}
+		return {"success":True,"message":doctype}
 	except Exception as e:
 		exc_type, exc_obj, exc_tb = sys.exc_info()
 		if "list index out of range" in str(e):
