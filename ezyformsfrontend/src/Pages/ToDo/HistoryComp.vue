@@ -44,8 +44,8 @@ import GlobalTable from '../../Components/GlobalTable.vue';
 import { callWithErrorHandling, onMounted, ref } from 'vue';
 const filterObj = ref({
     search: '',
-    selectoption: ''
-
+    selectoption: '',
+    dateId:''
 
 })
 const tableheaders = ref([
@@ -62,18 +62,8 @@ const tableheaders = ref([
 
 )
 const tableData = ref([]);
-console.log(tableData.value, "tableeee");
-// function fetchData() {
-//     const queryparams = {
-//         fields: ['*']
-//     };
-//     axiosInstance.get(apis.resource + doctypes.poschecks, queryparams).then(res => {
-//         console.log(res, "resposne");
-//         tableData.value = res.data
-//         console.log(tableData.value, "rrrrrrrrrr");
-//     })
-// }
+
 onMounted(() => {
-    // fetchData();
+    
 })
 </script>

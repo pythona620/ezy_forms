@@ -56,12 +56,22 @@
                 </template>
                 <template v-if="isMasterRoute">
                     <ul class="list-unstyled">
-                        <router-link v-for="department in formSideBarData" :key="department.route"
+                        <router-link v-for="(department,index) in formSideBarData" :key="department.route"
                             :to="`/forms/department/${department.route}`" class="text-decoration-none text-black"
                             active-class="active-link">
                             <li>
 
-                                <i :class="`bi-icon ps-1 bg-transparent ${department.icon} me-3`"></i>
+                                <!-- <i :class="`bi-icon ps-1 bg-transparent ${department.icon} me-3`"></i> -->
+                                <i :class="[
+                            'bi-icon',
+                            'fs-6',
+                            'bg-transparent',
+                            'bi',
+                            iconClasses[index % iconClasses.length],
+                            'me-3',
+                           
+                          ]"></i>
+
                                 {{ department.name }}
                             </li>
                         </router-link>
@@ -183,20 +193,24 @@ const baseRoute = computed(() => {
     }
     return '/';
 });
-onMounted(() => {
-    deptData()
-})
+
 const filterObj = ref({
     limitPageLength: 'None',
     limitstart: 0
 });
 const deptartmentData = ref([])
+onMounted(() => {
+    if (route.path.startsWith('/forms')) {
+        deptData();
+    }
+})  
 function deptData() {
     const queryParams = {
         fields: JSON.stringify(["*"]),
         limit_page_length: filterObj.value.limitPageLength,
         limitstart: filterObj.value.limitstart,
-        order_by: "`tabEzy Departments`.`creation` desc"
+        order_by: "`tabEzy Departments`.`creation` asc",
+        
     };
 
     axiosInstance.get(apis.resource + doctypes.departments, { params: queryParams })
@@ -207,7 +221,7 @@ function deptData() {
 
                 formSideBarData.value = deptartmentData.value.map(department => ({
                     name: department.department_name,
-                    icon: getIconByDepartmentName(department.department_name),
+                    // icon: iconClasses,
                     route: department.name.replace(/\s+/g, '-').toLowerCase(),
 
                     //   id: department.id 
@@ -218,16 +232,27 @@ function deptData() {
             console.error("Error fetching department data:", error);
         });
 }
+const iconClasses = [
+  "bi-file-earmark-check",
+  "bi-question-octagon",
+  "bi-file-earmark-bar-graph",
+"bi-card-checklist",
+  "bi-file-earmark-ruled",
+  "bi-journal-x",
+  "bi-clock-history",
+  "bi-percent",
 
-function getIconByDepartmentName(name) {
-    const icons = {
+];
 
-        'Sales Department': 'bi bi-bar-chart',
-        'HR Department': 'bi bi-people-fill',
+// function getIconByDepartmentName(name) {
+//     const icons = {
 
-    };
-    return icons[name] || 'bi bi-file';
-}
+//         'Sales Department': 'bi bi-bar-chart',
+//         'HR Department': 'bi bi-people-fill',
+
+//     };
+//     return icons[name] || 'bi bi-file';
+// }
 
 </script>
 
