@@ -114,16 +114,16 @@
                                         <div class=" col">
                                             <label class="font-13 ps-1" for="emp_code">Emp code</label>
                                             <FormFields class="mb-3" tag="input" type="text" name="emp_code"
-                                                id="emp_code" placeholder="Enter department code"
+                                                id="emp_code" placeholder="Enter Emp code"
                                                 v-model="createEmployee.emp_code" />
                                             <label class="font-13 ps-1" for="emp_name">Emp Name</label>
                                             <FormFields class="mb-3" tag="input" type="text" name="emp_name"
-                                                id="emp_name" placeholder="Enter department code"
+                                                id="emp_name" placeholder="Enter Emp Name"
                                                 v-model="createEmployee.emp_name" />
 
                                             <label class="font-13 ps-1" for="emp_mail_id">Emp Mail ID</label>
                                             <FormFields class="mb-3" tag="input" type="text" name="emp_mail_id"
-                                                id="emp_mail_id" placeholder="Enter department code"
+                                                id="emp_mail_id" placeholder="Enter Email"
                                                 v-model="createEmployee.emp_mail_id" />
                                             <label class="font-13 ps-1 fw-medium" for="dept">Departments</label>
                                             <FormFields tag="select" placeholder="Select Department" class="mb-3"
@@ -133,17 +133,17 @@
                                         <div class=" col">
                                             <label class="font-13 ps-1" for="Designation">Designation</label>
                                             <FormFields class="mb-3" tag="input" type="text" name="Designation"
-                                                id="Designation" placeholder="Enter department code"
+                                                id="Designation" placeholder="Enter Designation"
                                                 v-model="createEmployee.designation" />
                                             <label class="font-13 ps-1" for="reporting_to">Reporting To</label>
                                             <FormFields class="mb-3" tag="input" type="text" name="reporting_to"
-                                                id="reporting_to" placeholder="Enter department code"
+                                                id="reporting_to" placeholder="Enter Reporting To"
                                                 v-model="createEmployee.reporting_to" />
                                             <label class="font-13 ps-1" for="reporting_designation">Reporting
                                                 Designation</label>
                                             <FormFields class="mb-3" tag="input" type="text"
                                                 name="reporting_designation" id="reporting_designation"
-                                                placeholder="Enter department code"
+                                                placeholder="Enter Reporting Designation"
                                                 v-model="createEmployee.reporting_designation" />
                                         </div>
 
