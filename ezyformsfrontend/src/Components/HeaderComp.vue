@@ -83,6 +83,10 @@ function logout() {
         window.location.reload();
     });
 }
+onMounted(() => {
+    ezyForms();
+
+});
 const ezyForms = () => {
     const queryParams = {
         fields: JSON.stringify(["*"]),
@@ -161,20 +165,16 @@ function deptData(value = null) {
 //     router.push(tab.route);
 // };
 const handleBuChange = (tab) => {
-    
+
     router.push(tab.route);
 };
 // Handle tab change
 const handleTabChange = (tab) => {
-   
-   
+
+
     router.push(tab.route);
 };
 
-onMounted(() => {
-    ezyForms();
-    // deptData();
-});
 </script>
 
 <style scoped>

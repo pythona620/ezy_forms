@@ -77,7 +77,8 @@
               
             </div>
       </div>
-      <GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" />
+      <GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true" actionType="dropdown"
+        @actionClicked="actionCreated" :actions="actions" />
     </div>
     <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
       <div class="offcanvas-header">
@@ -96,6 +97,8 @@
         </div>
       </div>
     </div>
+    <FormPreview :blockArr="selectedForm" :formDescriptions="formDescriptions" />
+
   </div>
 </template>
 
@@ -107,15 +110,40 @@ import FormFields from '../../Components/FormFields.vue';
 import ButtonComp from '../../Components/ButtonComp.vue';
 import GlobalTable from '../../Components/GlobalTable.vue';
 import { EzyBusinessUnit } from '../../shared/services/business_unit';
+import { rebuildToStructuredArray } from '../../shared/services/field_format';
+import FormPreview from '../../Components/FormPreview.vue'
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 
 // Props for dynamic ID
 const props = defineProps(['id']);
+const formDescriptions = ref({})
+const selectedForm = ref(null);
 
 // Business unit and filter object
 const businessUnit = computed(() => EzyBusinessUnit.value);
 const newBusinessUnit = ref({ business_unit: '' });
 const filterObj = ref({ search: '', selectoption: '', limitPageLength: 'None', limitstart: 0 });
+const actions = ref(
+  [
+    { name: 'View form', icon: 'fa-solid fa-eye' },
 
+  ]
+)
+function actionCreated(rowData, actionEvent) {
+  if (actionEvent.name === 'View form') {
+    if (rowData?.form_json) {
+      formDescriptions.value = { ...rowData }
+      selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json).fields)
+      const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});// raise a modal
+      modal.show();
+
+    } else {
+      toast.warn(" There is no form fields ")
+    }
+  }
+
+}
 // Watch business unit and department ID changes
 watch(
   [() => businessUnit.value, () => props.id],
