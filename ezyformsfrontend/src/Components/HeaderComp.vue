@@ -83,6 +83,10 @@ function logout() {
         window.location.reload();
     });
 }
+onMounted(() => {
+    ezyForms();
+
+});
 const ezyForms = () => {
     const queryParams = {
         fields: JSON.stringify(["*"]),
@@ -163,10 +167,7 @@ const handleBuChange = (tab) => {
     router.push(tab.route);
 };
 
-onMounted(() => {
-    ezyForms();
-    deptData();
-});
+
 </script>
 
 <style scoped>

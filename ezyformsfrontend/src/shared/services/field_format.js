@@ -422,61 +422,61 @@ export function validateFields(flatArray) {
 }
 
 
-// export function addErrorMessagesToStructuredArray(structuredArray) {
-//   structuredArray.forEach((block, blockIndex) => {
-//     // Traverse sections in each block
-//     block.sections.forEach((section, sectionIndex) => {
-//       // Traverse rows in each section
-//       section.rows.forEach((row, rowIndex) => {
-//         // Traverse columns in each row
-//         row.columns.forEach((column, columnIndex) => {
-//           // Traverse fields in each column
-//           column.fields.forEach((field, fieldIndex) => {
-//             if (!field.fieldtype || field.fieldtype.trim() === "") {
-//               // Add an error message for missing fieldtype
-//               field.error = `Field "${field.label}" has no valid fieldtype. Please select a fieldtype.`;
-//             }else {
-//               // Clear the error if fieldtype is valid
-//               field.error = "";
-//             }
-//           });
-//         });
-//       });
-//     });
-//   });
-//   return structuredArray;
-// }
 export function addErrorMessagesToStructuredArray(structuredArray) {
-  structuredArray.forEach((block) => {
+  structuredArray.forEach((block, blockIndex) => {
     // Traverse sections in each block
-    block.sections.forEach((section) => {
+    block.sections.forEach((section, sectionIndex) => {
       // Traverse rows in each section
-      section.rows.forEach((row) => {
+      section.rows.forEach((row, rowIndex) => {
         // Traverse columns in each row
-        row.columns.forEach((column) => {
+        row.columns.forEach((column, columnIndex) => {
           // Traverse fields in each column
-          column.fields.forEach((field) => {
-            // Check for empty Field label
-            if (!field.label || field.label.trim() === '') {
-              field.errorMessage = 'Field label is required.';
+          column.fields.forEach((field, fieldIndex) => {
+            if (!field.fieldtype || field.fieldtype.trim() === "") {
+              // Add an error message for missing fieldtype
+              field.error = `Field "${field.label}" has no valid fieldtype. Please select a fieldtype.`;
             } else {
-              field.errorMessage = ''; // Clear error if label is present
-            }
-
-            // Check for missing or empty Field Type
-            if (!field.fieldtype || field.fieldtype.trim() === '') {
-              field.errorTypeMessage = `Field "${field.label}" has no valid fieldtype. Please select a fieldtype.`;
-            } else {
-              field.errorTypeMessage = ''; // Clear error if fieldtype is valid
+              // Clear the error if fieldtype is valid
+              field.error = "";
             }
           });
         });
       });
     });
   });
-
   return structuredArray;
 }
+// export function addErrorMessagesToStructuredArray(structuredArray) {
+//   structuredArray.forEach((block) => {
+//     // Traverse sections in each block
+//     block.sections.forEach((section) => {
+//       // Traverse rows in each section
+//       section.rows.forEach((row) => {
+//         // Traverse columns in each row
+//         row.columns.forEach((column) => {
+//           // Traverse fields in each column
+//           column.fields.forEach((field) => {
+//             // Check for empty Field label
+//             if (!field.label) {
+//               field.errorMessage = 'Field label is required.';
+//             } else {
+//               field.errorMessage = '';
+//             }
+
+//             // Check for missing or empty Field Type
+//             if (!field.fieldtype || field.fieldtype.trim() === '') {
+//               field.errorTypeMessage = `Field "${field.label}" has no valid fieldtype. Please select a fieldtype.`;
+//             } else {
+//               field.errorTypeMessage = ''; // Clear error if fieldtype is valid
+//             }
+//           });
+//         });
+//       });
+//     });
+//   });
+
+//   return structuredArray;
+// }
 
 
 // Example structured array usage

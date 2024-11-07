@@ -110,7 +110,7 @@ import { apis, doctypes } from "../../shared/apiurls";
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
 import { useRouter } from "vue-router";
 import { rebuildToStructuredArray } from "../../shared/services/field_format";
-import FormPreview from './FormPreview.vue'
+import FormPreview from '../../Components/FormPreview.vue'
 
 const totalRecords = ref(0);
 

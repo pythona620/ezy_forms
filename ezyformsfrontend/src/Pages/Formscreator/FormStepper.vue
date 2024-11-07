@@ -210,9 +210,7 @@
                                                                 {{ getWorkflowSetup(blockIndex).roles.join(", ") }}
                                                             </label>
                                                         </div>
-                                                        <button v-if="paramId != undefined &&
-                        paramId != null &&
-                        paramId != 'new'
+                                                        <button v-if="paramId != undefined && paramId != null && paramId != 'new'
                         " class="btn btn-light designationBtn d-flex align-items-center" type="button"
                                                             data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight"
                                                             aria-controls="offcanvasRight"
@@ -291,7 +289,7 @@
                                                                                 class="col p-0 dynamicColumn">
                                                                                 <div
                                                                                     class="column_name d-flex align-items-center justify-content-between">
-                                                                                    <div>
+                                                                                    <div class=" d-flex flex-column">
                                                                                         <input v-model="column.label"
                                                                                             type="text"
                                                                                             class="border-less-input columnFieldInput font-14"
@@ -304,7 +302,7 @@
                         )
                         " placeholder="Column Name" />
                                                                                         <small v-if="column.errorMsg"
-                                                                                            class="text-danger">
+                                                                                            class="text-danger font-10">
                                                                                             {{ column.errorMsg
                                                                                             }}</small>
                                                                                     </div>
@@ -340,14 +338,10 @@
                             fieldIndex
                         )
                         " class="border-less-input columnFieldInput font-14 p-0" />
-                                                                                                <div v-if="field.errorMessage"
-                                                                                                    class="error text-danger font-10 mb-1">
-                                                                                                    {{
-                        field.errorMessage
-                    }}</div>
+
                                                                                                 <span
                                                                                                     v-if="field.errorTypeMessage"
-                                                                                                    class="error text-danger font-10">{{
+                                                                                                    class="error text-danger font-10 mb-1">{{
                         field.errorMessage
                     }}</span>
                                                                                             </div>
@@ -766,7 +760,7 @@ import { extractFieldsWithBreaks, rebuildToStructuredArray, extractFieldnames, e
 import axiosInstance from '../../shared/services/interceptor';
 import { apis, doctypes } from "../../shared/apiurls";
 import { useRoute, useRouter } from "vue-router";
-import FormPreview from "./FormPreview.vue";
+import FormPreview from "../../Components/FormPreview.vue";
 import Multiselect from "@vueform/multiselect";
 import "@vueform/multiselect/themes/default.css";
 import VueMultiselect from "vue-multiselect";
@@ -943,8 +937,9 @@ function addDesignationBtn() {
 // };
 
 function getWorkflowSetup(blockIndex) {
-    return workflowSetup.find((setup) => setup.idx === blockIndex) || {};
+    return workflowSetup.find((setup) => setup.idx === blockIndex) || { roles: [] };
 }
+
 
 // Initialize `designationValue` based on the roles for the given block index
 function initializeDesignationValue(blockIndex) {
