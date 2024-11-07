@@ -116,6 +116,7 @@ watch(business_unit, (newBu, oldBu) => {
     }
 });
 
+
 function deptData(value = null) {
     const filters = [
         ["business_unit", "like", `%${business_unit.value}%`]
@@ -159,14 +160,20 @@ function deptData(value = null) {
 }
 
 
+// // Handle tab change
+// const handleTabChange = (tab) => {
+//     router.push(tab.route);
+// };
+const handleBuChange = (tab) => {
+
+    router.push(tab.route);
+};
 // Handle tab change
 const handleTabChange = (tab) => {
-    router.push(tab.route);
-};
-const handleBuChange = (tab) => {
-    router.push(tab.route);
-};
 
+
+    router.push(tab.route);
+};
 
 </script>
 
