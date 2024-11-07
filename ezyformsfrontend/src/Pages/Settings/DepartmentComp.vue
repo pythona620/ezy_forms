@@ -10,10 +10,24 @@
             </p> -->
             </div>
             <div class="d-flex gap-2 align-items-center">
-                <div class="d-flex">
+                <div class="d-flex align-items-center">
                     <div>
-                        <!-- <FormFields labeltext="" class="mb-3" tag="input" type="search" placeholder="Search File Name"
-                        name="Value" id="Value" v-model="filterObj.search" /> -->
+                        <div class="me-2">
+                <span v-if="filterOnModal.department_name && filterOnModal.applieddepartment_name" class="process-date font-12 m-0">
+                  {{ filterOnModal.department_name }}
+                  <span v-if="filterOnModal.department_name" class="badge badge-icon rounded-3   text-white ms-2"
+                    @click="clearFilter('department_name')">
+                    <i class="ri-close-line close-icon text-dark rounded-3"></i>
+                  </span>
+                </span>
+                <span v-if="filterOnModal.department_code && filterOnModal.applieddepartment_code" class="process-date font-12 m-0">
+                  {{ filterOnModal.department_code }}
+                  <span v-if="filterOnModal.department_code" class="badge badge-icon rounded-3   text-white ms-2"
+                    @click="clearFilter('department_code')">
+                    <i class="ri-close-line close-icon text-dark rounded-3"></i>
+                  </span>
+                </span>
+                        </div>
                     </div>
                     <div>
                         <button type="button" class=" filterbtn d-flex align-items-center " data-bs-toggle="modal"
@@ -31,52 +45,21 @@
                             <div class="modal-body">
                                 <div class="row">
                                     <div class="col-3">
-                                        <label class="font-13 ps-1" for="Requested">Requested By:</label>
+                                        <label class="font-13 ps-1" for="Requested">Department Code:</label>
                                         <FormFields class="mb-3" tag="input" type="search" name="Requested"
-                                            id="Requested" placeholder="Search" v-model="filterOnModal.Requested_id" />
+                                            id="Requested" placeholder="Search" v-model="filterOnModal.department_code" />
                                     </div>
+                                    
                                     <div class="col-3">
                                         <label class="font-13 ps-1 fw-medium" for="dept">Requested Dept:</label>
                                         <FormFields tag="select" placeholder="Select Department" class="mb-3"
-                                            name="dept" v-model="filterOnModal.Requested_dept" id="dept"
+                                            name="dept" v-model="filterOnModal.department_name" id="dept"
                                             :Required="false"
-                                            :options="['JW Marriott Golfshire Banglore', 'JW Marriott Golfshire Banglore']" />
+                                            :options="designiations" />
                                     </div>
-                                    <div class="col-3">
-                                        <label class="font-13 ps-1" for="dept">Owner OF Form:</label>
-                                        <FormFields tag="select" placeholder="Select Department" class="mb-3"
-                                            name="dept" v-model="filterOnModal.Owner_OF_Form" id="dept"
-                                            :Required="false"
-                                            :options="['JW Marriott Golfshire Banglore', 'JW Marriott Golfshire Banglore']" />
-                                    </div>
-                                    <div class="col-3">
-                                        <label class="font-13 ps-1" for="dept">Form Category:</label>
-                                        <FormFields tag="select" placeholder="Select Department" class="mb-3"
-                                            name="dept" v-model="filterOnModal.Form_Category" id="dept"
-                                            :Required="false"
-                                            :options="['JW Marriott Golfshire Banglore', 'JW Marriott Golfshire Banglore']" />
-                                    </div>
-                                    <div class="col-3">
-                                        <label class="font-13 ps-1" for="Requested">Department:</label>
-                                        <FormFields class="mb-3" tag="input" type="search" name="Requested"
-                                            id="Requested" placeholder="Search"
-                                            v-model="filterOnModal.department_name" />
-                                    </div>
-                                    <div class="col-3">
-                                        <label class="font-13 ps-1" for="Requested">Requested Period:</label>
-                                        <FormFields class="mb-3" tag="input" type="date" name="Requested" id="Requested"
-                                            placeholder="Jan-2024-Dec-2024" v-model="filterOnModal.Requested_Period" />
-                                    </div>
-                                    <div class="col-3">
-                                        <FormFields tag="radio" :options="radioOptions" name="exampleRadio"
-                                            id="exampleRadio" v-model="filterOnModal.Approval_status"
-                                            labeltext="Approval Status" />
-                                    </div>
-                                    <div class="col-3">
-                                        <label class="font-13 ps-1" for="Requested">Requested Id:</label>
-                                        <FormFields class="mb-3" tag="input" type="search" name="Requested"
-                                            id="Requested" placeholder="Search" v-model="filterOnModal.RequestedId" />
-                                    </div>
+                                  
+                                  
+
                                 </div>
                             </div>
                             <div class="modal-footer">
@@ -96,6 +79,7 @@
                     </div>
                 </div>
                 <div class="d-flex align-items-center ">
+                    
                     <button type="button" class="btn btn-dark buttoncomp CreateDepartments d-flex align-items-center "
                         data-bs-toggle="modal" data-bs-target="#createDepartments">
                         Create Departments
@@ -235,7 +219,7 @@ import ButtonComp from '../../Components/ButtonComp.vue';
 import GlobalTable from '../../Components/GlobalTable.vue';
 import axiosInstance from '../../shared/services/interceptor';
 import { apis, doctypes } from '../../shared/apiurls';
-import { onMounted, ref, computed, watch } from 'vue';
+import { onMounted, ref, computed, watch,reactive } from 'vue';
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
@@ -302,17 +286,29 @@ const filterObj = ref({
     limitPageLength: 'None',
     limitstart: 0
 });
-const filterOnModal = ref({
-    Requested_id: "",
-    Requested_dept: "",
-    Owner_OF_Form: "",
-    Form_Category: "",
+const filterOnModal = reactive({
+    applieddepartment_name:false,
+    applieddepartment_code:false,
+
     department_name: "",
-    Requested_Period: "",
-    Approval_status: "",
-    RequestedId: ""
+    department_code:''
+   
 
 })
+
+
+function clearFilter(type) {
+    if (type === "department_name") {
+      filterOnModal.department_name = "";
+      filterOnModal.applieddepartment_name = false;
+    } else if (type === "department_code") {
+      filterOnModal.department_code = "";
+      filterOnModal.applieddepartment_code = false;
+    }
+ 
+
+    applyFilters();
+  }
 watch(
     businessUnit,
     (newVal) => {
@@ -381,51 +377,33 @@ function saveCategories() {
         });
 }
 function applyFilters() {
-    deptData();
+  
+    filterOnModal.applieddepartment_code=Boolean(filterOnModal.department_code);
+    filterOnModal.applieddepartment_name=Boolean(filterOnModal.department_name)
+
+   deptData();
 }
 
 function resetFilters() {
     filterOnModal.value = {
-        Requested_id: "",
-        Requested_dept: "",
-        Owner_OF_Form: "",
-        Form_Category: "",
-        Form_Name: "",
-        Requested_Period: "",
-        Approval_status: "",
-        RequestedId: ""
+          department_name: "",
+    department_code:''
     };
     deptData()
 }
+const designiations=ref([]);
 
 function deptData() {
     const filters = [
         ["business_unit", "like", `%${CreateDepartments.value.business_unit}%`]
     ];
-    if (filterOnModal.value.Requested_id) {
-        filters.push(["Requested_id", "like", `%${filterOnModal.value.Requested_id}%`]);
+    if (filterOnModal.department_code) {
+        filters.push(["department_code", "like", `%${filterOnModal.department_code}%`]);
     }
-    if (filterOnModal.value.Requested_dept) {
-        filters.push(["Requested_dept", "like", `%${filterOnModal.value.Requested_dept}%`]);
+    if (filterOnModal.department_name) {
+        filters.push(["department_name", "like", `%${filterOnModal.department_name}%`]);
     }
-    if (filterOnModal.value.Owner_OF_Form) {
-        filters.push(["Owner_OF_Form", "like", `%${filterOnModal.value.Owner_OF_Form}%`]);
-    }
-    if (filterOnModal.value.Form_Category) {
-        filters.push(["Form_Category", "like", `%${filterOnModal.value.Form_Category}%`]);
-    }
-    if (filterOnModal.value.department_name) {
-        filters.push(["department_name", "like", `%${filterOnModal.value.department_name}%`]);
-    }
-    if (filterOnModal.value.Requested_Period) {
-        filters.push(["Requested_Period", "like", `%${filterOnModal.value.Requested_Period}%`]);
-    }
-    if (filterOnModal.value.Approval_status) {
-        filters.push(["Approval_status", "like", `%${filterOnModal.value.Approval_status}%`]);
-    }
-    if (filterOnModal.value.RequestedId) {
-        filters.push(["RequestedId", "like", `%${filterOnModal.value.RequestedId}%`]);
-    }
+   
 
     const queryParams = {
         fields: JSON.stringify(["*"]),
@@ -440,6 +418,8 @@ function deptData() {
             if (res.data) {
 
                 tableData.value = res.data;
+                designiations.value = [...new Set(res.data.map((designation) => designation.department_name))];
+
             }
         })
         .catch((error) => {
