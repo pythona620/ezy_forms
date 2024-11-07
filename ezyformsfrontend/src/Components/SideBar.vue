@@ -115,19 +115,7 @@ const filterObj = ref({
     limitPageLength: 'None',
     limitstart: 0
 });
-watch(
-    businessUnit,
-    (newVal) => {
 
-        newBusinessUnit.value.business_unit = newVal;
-
-        if (newVal.length) {
-
-            deptData()
-        }
-    },
-    { immediate: true }
-);
 const formSideBarData = ref([])
 const settingsSideBarData = [
     { name: 'Profile', icon: 'bi bi-person-circle', route: 'profile' },
@@ -218,11 +206,11 @@ const baseRoute = computed(() => {
 
 
 const deptartmentData = ref([])
-onMounted(() => {
-    if (route.path.startsWith('/forms')) {
-        deptData();
-    }
-})
+// onMounted(() => {
+//     if (route.path.startsWith('/forms')) {
+//         deptData();
+//     }
+// })
 function deptData() {
     const filters = [
         ["business_unit", "like", `%${newBusinessUnit.value.business_unit}%`]
@@ -244,7 +232,7 @@ function deptData() {
 
 
                 formSideBarData.value = deptartmentData.value.map(department => ({
-                    name: department.name,
+                    name: department.department_name,
                     // icon: iconClasses,
                     route: department.name.replace(/\s+/g, '-').toLowerCase(),
 
@@ -267,7 +255,17 @@ const iconClasses = [
     "bi-percent",
 
 ];
+watch(
+  [businessUnit, isMasterRoute],
+  ([newBusinessUnitVal, isMaster]) => {
+    newBusinessUnit.value.business_unit = newBusinessUnitVal;
 
+    if (isMaster && newBusinessUnitVal.length) {
+      deptData();
+    }
+  },
+  { immediate: true }
+);
 // function getIconByDepartmentName(name) {
 //     const icons = {
 

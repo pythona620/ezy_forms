@@ -63,26 +63,16 @@ const filterObj = ref({ search: '', selectoption: '', limitPageLength: 'None', l
 
 // Watch business unit and department ID changes
 watch(
-  businessUnit,
-  (newVal) => {
-    newBusinessUnit.value.business_unit = newVal;
-    if (newVal.length) {
-
-      fetchDepartmentDetails(props.id);
+  [() => businessUnit.value, () => props.id],
+  ([newBusinessUnitVal, newId]) => {
+    newBusinessUnit.value.business_unit = newBusinessUnitVal;
+    if (newBusinessUnitVal.length || newId) {
+      fetchDepartmentDetails(newId || props.id);
     }
   },
   { immediate: true }
 );
 
-watch(
-  () => props.id,
-  (newId) => {
-    if (newId) {
-      fetchDepartmentDetails(newId);
-    }
-  },
-  { immediate: true }
-);
 
 // Table headers and data
 const tableheaders = ref([
