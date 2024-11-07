@@ -76,10 +76,11 @@
                             data-bs-target="#fileterModal">
                             <span> <i class="ri-filter-2-line"></i></span>
                             <span v-if="appliedFiltersCount !== 0"
-                            class=" p-0 position-absolute text-danger  translate-middle badge rounded-pill font-13 ">
-                  {{ appliedFiltersCount }}
+                            class=" badge badge-light colorappiled ">
+                (  {{ appliedFiltersCount }})
                 </span>
                         </button>
+                     
 
                     </div>
                 </div>
@@ -619,5 +620,8 @@ function SaveEditEmp() {
     /* background-color: #f1f1f1; */
     /* color: #111111; */
     padding: 8px 20px;
+}
+.colorappiled{
+    color: #9f9494;
 }
 </style>

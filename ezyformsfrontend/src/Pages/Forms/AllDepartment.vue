@@ -11,10 +11,38 @@
           </p>
         </div>
         <div class="d-flex gap-2 align-items-center">
-                <div class="d-flex">
-                    <div>
-                        <!-- <FormFields labeltext="" class="mb-3" tag="input" type="search" placeholder="Search File Name"
-                        name="Value" id="Value" v-model="filterObj.search" /> -->
+                <div class="d-flex  align-items-center">
+                  <div>
+                        <div class="me-2">
+                <span v-if="filterOnModal.form_name && filterOnModal.appliedform_name" class="process-date font-12 m-0">
+                  {{ filterOnModal.form_name }}
+                  <span v-if="filterOnModal.form_name" class="badge badge-icon rounded-3   text-white ms-2"
+                    @click="clearFilter('form_name')">
+                    <i class="ri-close-line close-icon text-dark rounded-3"></i>
+                  </span>
+                </span>
+                <span v-if="filterOnModal.form_category && filterOnModal.appliedform_category" class="process-date font-12 m-0">
+                  {{ filterOnModal.form_category }}
+                  <span v-if="filterOnModal.form_category" class="badge badge-icon rounded-3   text-white ms-2"
+                    @click="clearFilter('form_category')">
+                    <i class="ri-close-line close-icon text-dark rounded-3"></i>
+                  </span>
+                </span>
+                <span v-if="filterOnModal.accessible_departments && filterOnModal.appliedaccessible_departments" class="process-date font-12 m-0">
+                  {{ filterOnModal.accessible_departments }}
+                  <span v-if="filterOnModal.accessible_departments" class="badge badge-icon rounded-3   text-white ms-2"
+                    @click="clearFilter('accessible_departments')">
+                    <i class="ri-close-line close-icon text-dark rounded-3"></i>
+                  </span>
+                </span>
+                <span v-if="filterOnModal.form_status && filterOnModal.appliedStatus" class="process-date font-12 m-0">
+                  {{ filterOnModal.form_status }}
+                  <span v-if="filterOnModal.form_status" class="badge badge-icon rounded-3   text-white ms-2"
+                    @click="clearFilter('form_status')">
+                    <i class="ri-close-line close-icon text-dark rounded-3"></i>
+                  </span>
+                </span>
+                        </div>
                     </div>
                     <div>
                         <button type="button" class=" filterbtn d-flex align-items-center " data-bs-toggle="modal"
@@ -26,22 +54,34 @@
                 </div>
                 <div class="modal fade" id="fileterModal" tabindex="-1" aria-labelledby="fileterModalLabel"
                     aria-hidden="true">
-                    <div class="modal-dialog modal-xl">
+                    <div class="modal-dialog modal-lg">
                         <div class="modal-content">
 
                             <div class="modal-body">
                                 <div class="row">
-                                    <div class="col-3">
+                                  <div class="col-6">
                                         <label class="font-13 ps-1" for="Requested">Form Name:</label>
-                                        <!-- <FormFields class="mb-3" tag="input" type="search" name="Requested"
-                                            id="Requested" placeholder="Search" v-model="filterOnModal.form_name" /> -->
-
-                                            <div>
-                    <FormFields labeltext="" class="" tag="input" type="search" placeholder="Search Form Name"
-                        name="Value" id="Value" v-model="filterObj.search" @input="fetchDepartmentDetails(id)" />
-                </div>
+                                        <FormFields class="mb-3" tag="input" type="search" name="Requested"
+                                            id="Requested" placeholder="Search" v-model="filterOnModal.form_name" />
                                     </div>
-                                    
+                                    <div class="col-6">
+                                        <label class="font-13 ps-1" for="dept">Form Category:</label>
+                                        <FormFields tag="select" placeholder="Form Category" class="mb-3"
+                                            name="dept" v-model="filterOnModal.form_category" id="dept" :Required="false"
+                                            :options="formCategory" />
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="font-13 ps-1" for="dept">Accessible departments:</label>
+                                        <FormFields tag="select" placeholder="Accessible departments" class="mb-3"
+                                            name="dept" v-model="filterOnModal.accessible_departments" id="dept" :Required="false"
+                                            :options="accessibleDepartments" />
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="font-13 ps-1" for="dept">Status:</label>
+                                        <FormFields tag="select" placeholder="Status" class="mb-3"
+                                            name="dept" v-model="filterOnModal.form_status" id="dept" :Required="false"
+                                            :options="['Active','Draft']" />
+                                    </div>
                                     <!-- <div class="col-3">
                                         <label class="font-13 ps-1 fw-medium" for="dept">Requested Dept:</label>
                                         <FormFields tag="select" placeholder="Select Department" class="mb-3"
@@ -77,8 +117,9 @@
               
             </div>
       </div>
-      <GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true" actionType="dropdown"
-        @actionClicked="actionCreated" :actions="actions" />
+      <div class="mt-3"><GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true" actionType="dropdown"
+        @actionClicked="actionCreated" :actions="actions" /></div>
+      
     </div>
     <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
       <div class="offcanvas-header">
@@ -103,7 +144,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, reactive } from 'vue';
 import axiosInstance from '../../shared/services/interceptor';
 import { apis, doctypes } from '../../shared/apiurls';
 import FormFields from '../../Components/FormFields.vue';
@@ -119,11 +160,43 @@ import "vue3-toastify/dist/index.css";
 const props = defineProps(['id']);
 const formDescriptions = ref({})
 const selectedForm = ref(null);
+const filterOnModal=reactive({
+  appliedform_name:false,
+  appliedform_category:false,
+  appliedaccessible_departments:false,
+  appliedStatus:false,
+form_name:'',
+form_category:'',
+accessible_departments:'',
+form_status:''
+})
+function clearFilter(type) {
+    if (type === "form_name") {
+      filterOnModal.form_name = "";
+      filterOnModal.appliedform_name = false;
+    } else if (type === "form_category") {
+      filterOnModal.form_category = "";
+      filterOnModal.appliedform_category = false;
+    
+    }
+    else if (type === "accessible_departments") {
+      filterOnModal.accessible_departments = "";
+      filterOnModal.appliedaccessible_departments = false;
+    
+    }
+    else if (type === "form_status") {
+      filterOnModal.form_status = "";
+      filterOnModal.appliedStatus = false;
+    
+    }
+ 
 
+    applyFilters();
+  }
 // Business unit and filter object
 const businessUnit = computed(() => EzyBusinessUnit.value);
 const newBusinessUnit = ref({ business_unit: '' });
-const filterObj = ref({ search: '', selectoption: '', limitPageLength: 'None', limitstart: 0 });
+const filterObj = ref({  limitPageLength: 'None', limitstart: 0 });
 const actions = ref(
   [
     { name: 'View form', icon: 'fa-solid fa-eye' },
@@ -144,6 +217,17 @@ function actionCreated(rowData, actionEvent) {
   }
 
 }
+function applyFilters() {
+  filterOnModal.appliedform_name=Boolean(filterOnModal.form_name);
+  filterOnModal.appliedform_category=Boolean(filterOnModal.form_category);
+filterOnModal.appliedaccessible_departments=Boolean(filterOnModal.accessible_departments);
+filterOnModal.appliedStatus=Boolean(filterOnModal.form_status);
+
+  // filterOnModal.applieddepartment_code=Boolean(filterOnModal.department_code);
+  // filterOnModal.applieddepartment_name=Boolean(filterOnModal.department_name)
+
+fetchDepartmentDetails()
+}
 // Watch business unit and department ID changes
 watch(
   [() => businessUnit.value, () => props.id],
@@ -162,10 +246,11 @@ const tableheaders = ref([
   { th: "Form name", td_key: "form_name" },
   { th: "Form category", td_key: "form_category" },
   { th: "Accessible departments", td_key: "accessible_departments" },
-  { th: "Status", td_key: "status" },
+  { th: "Status", td_key: "form_status" },
 ]);
 const tableData = ref([]);
-
+const formCategory=ref([]);
+const accessibleDepartments=ref([])
 // Fetch department details function
 function fetchDepartmentDetails(id) {
   const filters = [
@@ -174,8 +259,17 @@ function fetchDepartmentDetails(id) {
   if (props.id) {
     filters.push(["owner_of_the_form", "like", `%${props.id}%`]);
   }
-  if (filterObj.value.search.trim()) {
-        filters.push(["name", "like", `${filterObj.value.search}`]);
+  if (filterOnModal.form_name) {
+        filters.push(["form_name", "like", `${filterOnModal.form_name}`]);
+    }
+    if (filterOnModal.form_category) {
+        filters.push(["form_category", "like", `${filterOnModal.form_category}`]);
+    }
+    if (filterOnModal.accessible_departments) {
+        filters.push(["accessible_departments", "like", `${filterOnModal.accessible_departments}`]);
+    }
+    if (filterOnModal.form_status) {
+        filters.push(["form_status", "like", `${filterOnModal.form_status}`]);
     }
   const queryParams = {
     fields: JSON.stringify(["*"]),
@@ -189,6 +283,9 @@ function fetchDepartmentDetails(id) {
     .get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParams })
     .then((response) => {
       tableData.value = response.data;
+      formCategory.value = [...new Set(response.data.map((formCategory) => formCategory.form_category))];
+      accessibleDepartments.value=[...new Set(response.data.map((accessibleDepartments) => accessibleDepartments.accessible_departments))];
+
     })
     .catch((error) => {
       console.error("Error fetching department details:", error);

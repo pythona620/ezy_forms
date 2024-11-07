@@ -7,8 +7,45 @@
             </div>
             <div class="d-flex gap-2 align-items-center">
                 <div>
-                    <FormFields labeltext="" class="" tag="input" type="search" placeholder="Search Form Name"
-                        name="Value" id="Value" v-model="filterObj.search" @input="fetchTable()" />
+                    <!-- <FormFields labeltext="" class="" tag="input" type="search" placeholder="Search Form Name"
+                        name="Value" id="Value" v-model="filterObj.search" @input="fetchTable()" /> -->
+                        <div class="me-2">
+                <span v-if="filterOnModal.form_name && filterOnModal.appliedform_name" class="process-date font-12 m-0">
+                  {{ filterOnModal.form_name }}
+                  <span v-if="filterOnModal.form_name" class="badge badge-icon rounded-3   text-white ms-2"
+                    @click="clearFilter('form_name')">
+                    <i class="ri-close-line close-icon text-dark rounded-3"></i>
+                  </span>
+                </span>
+                <span v-if="filterOnModal.form_category && filterOnModal.appliedform_category" class="process-date font-12 m-0">
+                  {{ filterOnModal.form_category }}
+                  <span v-if="filterOnModal.form_category" class="badge badge-icon rounded-3   text-white ms-2"
+                    @click="clearFilter('form_category')">
+                    <i class="ri-close-line close-icon text-dark rounded-3"></i>
+                  </span>
+                </span>
+                <span v-if="filterOnModal.accessible_departments && filterOnModal.appliedaccessible_departments" class="process-date font-12 m-0">
+                  {{ filterOnModal.accessible_departments }}
+                  <span v-if="filterOnModal.accessible_departments" class="badge badge-icon rounded-3   text-white ms-2"
+                    @click="clearFilter('accessible_departments')">
+                    <i class="ri-close-line close-icon text-dark rounded-3"></i>
+                  </span>
+                </span>
+                <span v-if="filterOnModal.active && filterOnModal.appliedStatus" class="process-date font-12 m-0">
+                  {{ filterOnModal.active }}
+                  <span v-if="filterOnModal.active" class="badge badge-icon rounded-3   text-white ms-2"
+                    @click="clearFilter('active')">
+                    <i class="ri-close-line close-icon text-dark rounded-3"></i>
+                  </span>
+                </span>
+                <span v-if="filterOnModal.owner_of_the_form && filterOnModal.appledowner_of_the_form" class="process-date font-12 m-0">
+                  {{ filterOnModal.owner_of_the_form }}
+                  <span v-if="filterOnModal.owner_of_the_form" class="badge badge-icon rounded-3   text-white ms-2"
+                    @click="clearFilter('owner_of_the_form')">
+                    <i class="ri-close-line close-icon text-dark rounded-3"></i>
+                  </span>
+                </span>
+                        </div>
                 </div>
                 <div>
                     <button type="button" class=" filterbtn d-flex align-items-center justify-content-between"
@@ -37,46 +74,35 @@
 
                     <div class="modal-body">
                         <div class="row">
-                            <div class="col-3">
-                                <label class="font-13 ps-1" for="Requested">Requested By:</label>
-                                <FormFields class="mb-3" tag="input" type="search" name="Requested" id="Requested"
-                                    placeholder="Search" v-model="filterOnModal.Requested_id" />
-                            </div>
-                            <div class="col-3">
-                                <label class="font-13 ps-1 fw-medium" for="dept">Requested Dept:</label>
-                                <FormFields tag="select" placeholder="Select Department" class="mb-3" name="dept"
-                                    v-model="filterOnModal.Requested_dept" id="dept" :Required="false"
-                                    :options="['JW Marriott Golfshire Banglore', 'JW Marriott Golfshire Banglore']" />
-                            </div>
-                            <div class="col-3">
-                                <label class="font-13 ps-1" for="dept">Owner OF Form:</label>
-                                <FormFields tag="input" type="search" placeholder="Select Department" class="mb-3"
-                                    name="dept" v-model="filterOnModal.Owner_OF_Form" id="dept" :Required="false" />
-                            </div>
-                            <div class="col-3">
-                                <label class="font-13 ps-1 " type="search" for="dept">Form Category:</label>
-                                <FormFields tag="input" placeholder="Select Department" class="mb-3" name="dept"
-                                    v-model="filterOnModal.Form_Category" id="dept" :Required="false" />
-                            </div>
-                            <div class="col-3">
-                                <label class="font-13 ps-1" for="Requested">Form Name:</label>
-                                <FormFields class="mb-3" tag="input" type="search" name="Requested" id="Requested"
-                                    placeholder="Search" v-model="filterOnModal.Form_Name" />
-                            </div>
-                            <div class="col-3">
-                                <label class="font-13 ps-1" for="Requested">Requested Period:</label>
-                                <FormFields class="mb-3" tag="input" type="date" name="Requested" id="Requested"
-                                    placeholder="Jan-2024-Dec-2024" v-model="filterOnModal.Requested_Period" />
-                            </div>
-                            <div class="col-3">
-                                <FormFields tag="radio" :options="radioOptions" name="exampleRadio" id="exampleRadio"
-                                    v-model="filterOnModal.Approval_status" labeltext="Approval Status" />
-                            </div>
-                            <div class="col-3">
-                                <label class="font-13 ps-1" for="Requested">Requested Id:</label>
-                                <FormFields class="mb-3" tag="input" type="search" name="Requested" id="Requested"
-                                    placeholder="Search" v-model="filterOnModal.RequestedId" />
-                            </div>
+                            <div class="col-4">
+                                        <label class="font-13 ps-1" for="Requested">Form Name:</label>
+                                        <FormFields class="mb-3" tag="input" type="search" name="Requested"
+                                            id="Requested" placeholder="Search" v-model="filterOnModal.form_name" />
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="font-13 ps-1" for="dept">Form Category:</label>
+                                        <FormFields tag="select" placeholder="Form Category" class="mb-3"
+                                            name="dept" v-model="filterOnModal.form_category" id="dept" :Required="false"
+                                            :options="formCategory" />
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="font-13 ps-1" for="dept">Accessible departments:</label>
+                                        <FormFields tag="select" placeholder="Accessible departments" class="mb-3"
+                                            name="dept" v-model="filterOnModal.accessible_departments" id="dept" :Required="false"
+                                            :options="accessibleDepartments" />
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="font-13 ps-1" for="dept">Status:</label>
+                                        <FormFields tag="select" placeholder="Status" class="mb-3"
+                                            name="dept" v-model="filterOnModal.active" id="dept" :Required="false"
+                                            :options="['Active','Draft']" />
+                                    </div>
+                                    <div class="col-4">
+                                        <label class="font-13 ps-1" for="dept">Owner OF Form:</label>
+                                        <FormFields tag="select" placeholder="Owner Of The Form" class="mb-3"
+                                            name="dept" v-model="filterOnModal.owner_of_the_form" id="dept" :Required="false"
+                                            :options="ownerForms" />
+                                    </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -160,18 +186,61 @@ const actions = ref(
 const formDescriptions = ref({})
 const tableData = ref([]);
 
-const filterOnModal = ref({
-    Requested_id: "",
-    Requested_dept: "",
-    Owner_OF_Form: "",
-    Form_Category: "",
-    Form_Name: "",
-    Requested_Period: "",
-    Approval_status: "",
-    RequestedId: ""
-
+const filterOnModal=reactive({
+  appliedform_name:false,
+  appliedform_category:false,
+  appliedaccessible_departments:false,
+  appliedStatus:false,
+  appledowner_of_the_form:false,
+form_name:'',
+form_category:'',
+accessible_departments:'',
+active:'',
+owner_of_the_form:''
 })
+function clearFilter(type) {
+    if (type === "form_name") {
+      filterOnModal.form_name = "";
+      filterOnModal.appliedform_name = false;
+    } else if (type === "form_category") {
+      filterOnModal.form_category = "";
+      filterOnModal.appliedform_category = false;
+    
+    }
+    else if (type === "accessible_departments") {
+      filterOnModal.accessible_departments = "";
+      filterOnModal.appliedaccessible_departments = false;
+    
+    }
+    else if (type === "active") {
+      filterOnModal.active = "";
+      filterOnModal.appliedStatus = false;
+    
+    }
+    else if (type === "owner_of_the_form") {
+      filterOnModal.owner_of_the_form = "";
+      filterOnModal.appledowner_of_the_form = false;
+    
+    }
+ 
 
+    applyFilters();
+  }
+  function applyFilters() {
+  filterOnModal.appliedform_name=Boolean(filterOnModal.form_name);
+  filterOnModal.appliedform_category=Boolean(filterOnModal.form_category);
+filterOnModal.appliedaccessible_departments=Boolean(filterOnModal.accessible_departments);
+filterOnModal.appliedStatus=Boolean(filterOnModal.active);
+filterOnModal.appledowner_of_the_form=Boolean(filterOnModal.owner_of_the_form);
+
+
+
+
+  // filterOnModal.applieddepartment_code=Boolean(filterOnModal.department_code);
+  // filterOnModal.applieddepartment_name=Boolean(filterOnModal.department_name)
+
+fetchTable()
+}
 const filterObj = ref({
     limit_start: 0,
     limitPageLength: 100,
@@ -233,9 +302,7 @@ const PaginationLimitStart = ([itemsPerPage, start]) => {
     fetchTable();
 
 };
-function applyFilters() {
-    fetchTable(); // Calls deptData to send filters
-}
+
 function resetFilters() {
     filterOnModal.value = {
         Requested_id: "",
@@ -248,37 +315,29 @@ function resetFilters() {
         RequestedId: ""
     };
 }
+const formCategory=ref([]);
+const accessibleDepartments=ref([]);
+const ownerForms=ref([])
 function fetchTable() {
     const filters = [
         ["business_unit", "like", `%${filterObj.value.business_unit}%`]
     ];
-    if (filterObj.value.search.trim()) {
-        filters.push(["name", "like", `%${filterObj.value.search}%`]);
+    if (filterOnModal.form_name) {
+        filters.push(["form_name", "like", `%${filterOnModal.form_name}%`]);
     }
-    if (filterOnModal.value.Requested_id) {
-        filters.push(["Requested_id", "like", `%${filterOnModal.value.Requested_id}%`]);
+    if (filterOnModal.form_category) {
+        filters.push(["form_category", "like", `${filterOnModal.form_category}`]);
     }
-    if (filterOnModal.value.Requested_dept) {
-        filters.push(["Requested_dept", "like", `%${filterOnModal.value.Requested_dept}%`]);
+    if (filterOnModal.accessible_departments) {
+        filters.push(["accessible_departments", "like", `${filterOnModal.accessible_departments}`]);
     }
-    if (filterOnModal.value.Owner_OF_Form) {
-        filters.push(["owner_of_the_form", "like", `%${filterOnModal.value.Owner_OF_Form}%`]);
+    if (filterOnModal.active) {
+        filters.push(["active", "like", `${filterOnModal.active}`]);
     }
-    if (filterOnModal.value.Form_Category) {
-        filters.push(["Form_Category", "like", `%${filterOnModal.value.Form_Category}%`]);
+    if (filterOnModal.owner_of_the_form) {
+        filters.push(["owner_of_the_form", "like", filterOnModal.owner_of_the_form]);
     }
-    if (filterOnModal.value.Form_Name) {
-        filters.push(["name", "like", `%${filterOnModal.value.Form_Name}%`]);
-    }
-    if (filterOnModal.value.Requested_Period) {
-        filters.push(["Requested_Period", "like", `%${filterOnModal.value.Requested_Period}%`]);
-    }
-    if (filterOnModal.value.Approval_status) {
-        filters.push(["Approval_status", "like", `%${filterOnModal.value.Approval_status}%`]);
-    }
-    if (filterOnModal.value.RequestedId) {
-        filters.push(["RequestedId", "like", `%${filterOnModal.value.RequestedId}%`]);
-    }
+
     const queryParams = {
         fields: JSON.stringify(["*"]),
         filters: JSON.stringify(filters),
@@ -307,6 +366,9 @@ function fetchTable() {
             const newData = res.data;
             if (filterObj.value.limit_start === 0) {
                 tableData.value = newData;
+                formCategory.value = [...new Set(newData.map((formCategory) => formCategory.form_category))];
+      accessibleDepartments.value=[...new Set(newData.map((accessibleDepartments) => accessibleDepartments.accessible_departments))];
+ownerForms.value=[...new Set(newData.map((ownerForms)=>ownerForms.owner_of_the_form))]
             } else {
                 tableData.value = tableData.value.concat(newData);
             }
