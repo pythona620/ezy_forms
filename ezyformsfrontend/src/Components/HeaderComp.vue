@@ -51,7 +51,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch,computed } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import { useRouter } from 'vue-router'; // Import useRouter
 import { apis, doctypes } from '../shared/apiurls';
 import axiosInstance from '../shared/services/interceptor';
@@ -102,19 +102,17 @@ const ezyForms = () => {
     });
 };
 watch(business_unit, (newBu, oldBu) => {
-  
-
     EzyBusinessUnit.value = newBu;
 
     if (oldBu) {
-        deptData(true); 
+        deptData(true);
     } else {
-       
-        deptData(); 
+
+        deptData();
     }
 });
 
-function deptData(value=null) {
+function deptData(value = null) {
     const filters = [
         ["business_unit", "like", `%${business_unit.value}%`]
     ];
@@ -140,13 +138,13 @@ function deptData(value=null) {
                     return tab;
                 });
 
-               
+
                 formSideBarData.value = deptartmentData.value.map(department => ({
                     route: department.name.replace(/\s+/g, '-').toLowerCase(),
                 }));
 
-                if(value){
-                    handleBuChange({route:newFormsRoute})
+                if (value) {
+                    handleBuChange({ route: newFormsRoute })
                 }
 
             }

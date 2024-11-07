@@ -240,12 +240,15 @@
                                                         <div v-for="(section, sectionIndex) in block.sections"
                                                             :key="sectionIndex" class="dynamicSection">
                                                             <section class="d-flex justify-content-between">
-                                                                <input v-model="section.label" type="text"
-                                                                    class="border-less-input font-14"
-                                                                    @change="handleFieldChange(sectionIndex)"
-                                                                    placeholder="Untitled approval flow" />
-                                                                <small v-if="section.errorMsg" class="text-danger">
-                                                                    {{ section.errorMsg }}</small>
+                                                                <div class=" d-flex flex-column">
+                                                                    <input v-model="section.label" type="text"
+                                                                        class="border-less-input font-14"
+                                                                        @change="handleFieldChange(sectionIndex)"
+                                                                        placeholder="Untitled approval flow" />
+                                                                    <small v-if="section.errorMsg" class="text-danger">
+                                                                        {{ section.errorMsg }}</small>
+
+                                                                </div>
                                                                 <div class="d-flex">
                                                                     <button
                                                                         class="btn btn-light bg-transparent border-0 font-13 deleteSection"
@@ -288,10 +291,11 @@
                                                                                 class="col p-0 dynamicColumn">
                                                                                 <div
                                                                                     class="column_name d-flex align-items-center justify-content-between">
-                                                                                    <input v-model="column.label"
-                                                                                        type="text"
-                                                                                        class="border-less-input columnFieldInput font-14"
-                                                                                        @change="
+                                                                                    <div>
+                                                                                        <input v-model="column.label"
+                                                                                            type="text"
+                                                                                            class="border-less-input columnFieldInput font-14"
+                                                                                            @change="
                         handleFieldChange(
                             blockIndex,
                             sectionIndex,
@@ -299,9 +303,11 @@
                             columnIndex
                         )
                         " placeholder="Column Name" />
-                                                                                    <small v-if="column.errorMsg"
-                                                                                        class="text-danger">
-                                                                                        {{ column.errorMsg }}</small>
+                                                                                        <small v-if="column.errorMsg"
+                                                                                            class="text-danger">
+                                                                                            {{ column.errorMsg
+                                                                                            }}</small>
+                                                                                    </div>
                                                                                     <button class="btn btn-light btn-sm"
                                                                                         @click="
                         removeColumn(
@@ -317,12 +323,15 @@
                                                                                 <!-- Dynamically added fields within the column -->
                                                                                 <div v-for="(field, fieldIndex) in column.fields"
                                                                                     :key="fieldIndex" class="mt-2">
-                                                                                    <div class="px-3 py-1 field-border">
+                                                                                    <div class="px-1  field-border">
                                                                                         <div
                                                                                             class="d-flex justify-content-between">
-                                                                                            <input v-model="field.label"
-                                                                                                placeholder="Name the field"
-                                                                                                @change="
+                                                                                            <div
+                                                                                                class=" d-flex flex-column">
+                                                                                                <input
+                                                                                                    v-model="field.label"
+                                                                                                    placeholder="Name the field"
+                                                                                                    @change="
                         handleFieldChange(
                             blockIndex,
                             sectionIndex,
@@ -330,19 +339,30 @@
                             columnIndex,
                             fieldIndex
                         )
-                        " class="border-less-input mb-1 columnFieldInput font-14 p-0" />
+                        " class="border-less-input columnFieldInput font-14 p-0" />
+                                                                                                <div v-if="field.errorMessage"
+                                                                                                    class="error text-danger font-10 mb-1">
+                                                                                                    {{
+                        field.errorMessage
+                    }}</div>
+                                                                                                <span
+                                                                                                    v-if="field.errorTypeMessage"
+                                                                                                    class="error text-danger font-10">{{
+                        field.errorMessage
+                    }}</span>
+                                                                                            </div>
                                                                                             <div>
                                                                                                 <button
                                                                                                     class="btn btn-light btn-sm">
                                                                                                     <i class="ri-file-copy-line copyIcon"
                                                                                                         @click="
-                        copyField(
-                            blockIndex,
-                            sectionIndex,
-                            rowIndex,
-                            columnIndex,
-                            fieldIndex
-                        )
+                    copyField(
+                        blockIndex,
+                        sectionIndex,
+                        rowIndex,
+                        columnIndex,
+                        fieldIndex
+                    )
                         "></i>
                                                                                                 </button>
 

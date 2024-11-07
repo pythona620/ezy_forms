@@ -67,7 +67,7 @@ watch(
   (newVal) => {
     newBusinessUnit.value.business_unit = newVal;
     if (newVal.length) {
-     
+
       fetchDepartmentDetails(props.id);
     }
   },
@@ -86,9 +86,9 @@ watch(
 
 // Table headers and data
 const tableheaders = ref([
-  { th: "Form name", td_key: "name" },
+  { th: "Form name", td_key: "form_name" },
   { th: "Form category", td_key: "form_category" },
-  { th: "Accessible departments", td_key: "acess" },
+  { th: "Accessible departments", td_key: "accessible_departments" },
   { th: "Status", td_key: "status" },
 ]);
 const tableData = ref([]);
@@ -98,18 +98,21 @@ function fetchDepartmentDetails(id) {
   const filters = [
     ["business_unit", "like", `%${newBusinessUnit.value.business_unit}%`]
   ];
+  if (props.id) {
+    filters.push(["owner_of_the_form", "like", `%${props.id}%`]);
+  }
   const queryParams = {
     fields: JSON.stringify(["*"]),
     limit_page_length: filterObj.value.limitPageLength,
     limitstart: filterObj.value.limitstart,
     filters: JSON.stringify(filters),
-    order_by: "`tabEzy Departments`.`creation` asc",
+    order_by: "`tabEzy Form Definitions`.`creation` desc",
   };
-  
+
   axiosInstance
-    .get(`${apis.resource}${doctypes.departments}/${id}`, { params: queryParams })
+    .get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParams })
     .then((response) => {
-      tableData.value = [response.data];
+      tableData.value = response.data;
     })
     .catch((error) => {
       console.error("Error fetching department details:", error);

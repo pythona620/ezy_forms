@@ -56,21 +56,21 @@
                 </template>
                 <template v-if="isMasterRoute">
                     <ul class="list-unstyled">
-                        <router-link v-for="(department,index) in formSideBarData" :key="department.route"
+                        <router-link v-for="(department, index) in formSideBarData" :key="department.route"
                             :to="`/forms/department/${department.route}`" class="text-decoration-none text-black"
                             active-class="active-link">
                             <li>
 
                                 <!-- <i :class="`bi-icon ps-1 bg-transparent ${department.icon} me-3`"></i> -->
                                 <i :class="[
-                            'bi-icon',
-                            'fs-6',
-                            'bg-transparent',
-                            'bi',
-                            iconClasses[index % iconClasses.length],
-                            'me-3',
-                           
-                          ]"></i>
+                'bi-icon',
+                'fs-6',
+                'bg-transparent',
+                'bi',
+                iconClasses[index % iconClasses.length],
+                'me-3',
+
+            ]"></i>
 
                                 {{ department.name }}
                             </li>
@@ -99,7 +99,7 @@
 
 
 <script setup>
-import { computed, onMounted, ref,watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 // import { useRoute } from 'vue-router'; // Import the useRoute hook
 import axiosInstance from '../shared/services/interceptor';
@@ -108,8 +108,8 @@ import { EzyBusinessUnit } from "../shared/services/business_unit";
 const businessUnit = computed(() => {
     return EzyBusinessUnit.value;
 });
-const newBusinessUnit=ref({
-    business_unit:''
+const newBusinessUnit = ref({
+    business_unit: ''
 })
 const filterObj = ref({
     limitPageLength: 'None',
@@ -118,11 +118,11 @@ const filterObj = ref({
 watch(
     businessUnit,
     (newVal) => {
-      
+
         newBusinessUnit.value.business_unit = newVal;
 
         if (newVal.length) {
-          
+
             deptData()
         }
     },
@@ -222,7 +222,7 @@ onMounted(() => {
     if (route.path.startsWith('/forms')) {
         deptData();
     }
-})  
+})
 function deptData() {
     const filters = [
         ["business_unit", "like", `%${newBusinessUnit.value.business_unit}%`]
@@ -234,7 +234,7 @@ function deptData() {
         filters: JSON.stringify(filters),
 
         order_by: "`tabEzy Departments`.`creation` asc",
-        
+
     };
 
     axiosInstance.get(apis.resource + doctypes.departments, { params: queryParams })
@@ -244,7 +244,7 @@ function deptData() {
 
 
                 formSideBarData.value = deptartmentData.value.map(department => ({
-                    name: department.department_name,
+                    name: department.name,
                     // icon: iconClasses,
                     route: department.name.replace(/\s+/g, '-').toLowerCase(),
 
@@ -257,14 +257,14 @@ function deptData() {
         });
 }
 const iconClasses = [
-  "bi-file-earmark-check",
-  "bi-question-octagon",
-  "bi-file-earmark-bar-graph",
-"bi-card-checklist",
-  "bi-file-earmark-ruled",
-  "bi-journal-x",
-  "bi-clock-history",
-  "bi-percent",
+    "bi-file-earmark-check",
+    "bi-question-octagon",
+    "bi-file-earmark-bar-graph",
+    "bi-card-checklist",
+    "bi-file-earmark-ruled",
+    "bi-journal-x",
+    "bi-clock-history",
+    "bi-percent",
 
 ];
 

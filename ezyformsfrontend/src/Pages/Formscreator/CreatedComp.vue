@@ -262,7 +262,7 @@ function fetchTable() {
         filters.push(["Requested_dept", "like", `%${filterOnModal.value.Requested_dept}%`]);
     }
     if (filterOnModal.value.Owner_OF_Form) {
-        filters.push(["Owner_OF_Form", "like", `%${filterOnModal.value.Owner_OF_Form}%`]);
+        filters.push(["owner_of_the_form", "like", `%${filterOnModal.value.Owner_OF_Form}%`]);
     }
     if (filterOnModal.value.Form_Category) {
         filters.push(["Form_Category", "like", `%${filterOnModal.value.Form_Category}%`]);
