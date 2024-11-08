@@ -47,12 +47,12 @@
                                             <div>
                                                 <li>
                                                 <div class=" ">
-                                                    <span class="fw-medium font-13 "> {{ userFullName }}</span>
+                                                    <span class="fw-medium font-13 "> {{ userEmail }}</span>
                                                    
                                                 </div>
                                                 <div class=" ">
                                                   
-                                                    <span class="fw-medium font-11">Product designer</span>
+                                                    <span class="fw-medium font-11">{{ userDesigination }}</span>
                                                 </div>
                                             </li>
                                             </div>
@@ -157,7 +157,8 @@ const formList = ref([])
 const business_unit = ref('');
 const userInitial = ref('');
 
-const userFullName = ref('');
+const userEmail = ref('');
+const userDesigination=ref('')
 
 const EzyFormsCompanys = ref([]);
 const formSideBarData = ref([]);
@@ -179,7 +180,8 @@ onMounted(() => {
     const userData = JSON.parse(localStorage.getItem('UserName'));
     if (userData && userData.full_name) {
         userInitial.value = userData.full_name.charAt(0).toUpperCase();
-        userFullName.value = userData.full_name
+        userEmail.value = userData.email;
+        userDesigination.value=userData.desigination
     }
 
 });
