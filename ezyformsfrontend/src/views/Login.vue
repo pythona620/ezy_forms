@@ -7,7 +7,7 @@
 				<input type="text" class=" text-white " id="name" v-model="formdata.usr" @input="validatename"
 					:class="{ 'is-invalid': errors.usr }" />
 				<label>Email</label>
-				<div class="invalid-feedback" v-if="errors.usr">
+				<div class="invalid-feedback font-11 mt-3" v-if="errors.usr">
 					{{ errors.usr }}
 				</div>
 			</div>
@@ -17,7 +17,7 @@
 				<input class="text-white" type="password" id="password" v-model="formdata.pwd" @input="validatepassword"
 					:class="{ 'is-invalid': errors.pwd }" />
 				<label>Password</label>
-				<div class="invalid-feedback" v-if="errors.pwd">
+				<div class="invalid-feedback font-11 mt-3" v-if="errors.pwd">
 					{{ errors.pwd }}
 				</div>
 			</div>
@@ -30,7 +30,7 @@
 </template>
 
 <script>
-import { apis } from '../shared/apiurls';
+import { apis, doctypes } from '../shared/apiurls';
 import axiosInstance from '../shared/services/interceptor';
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
@@ -43,6 +43,7 @@ export default {
 			},
 			storeData: [],
 			errors: {},
+			email: ""
 		};
 	},
 	methods: {
@@ -66,21 +67,48 @@ export default {
 
 			if (!this.errors.usr && !this.errors.pwd) {
 				axiosInstance.post(apis.login, this.formdata).then((res) => {
-					toast.success("Login Successfully", { autoClose: 2000 });
-					setTimeout(() => {
-						this.$router.push({ path: '/create-form/created' });
-					}, 700);
-					this.storeData = res;
-					// console.log(this.storeData, 'Login Data'); 
-					localStorage.setItem('UserName', JSON.stringify(this.storeData));
+					if (res) {
+						toast.success("Login Successfully", { autoClose: 2000 });
+						setTimeout(() => {
+							this.$router.push({ path: '/create-form/created' });
+						}, 700);
+						this.storeData = res;
+						localStorage.setItem('UserName', JSON.stringify(this.storeData));
+						if (this.formdata.usr) {
+							this.userData(this.formdata.usr);
+						}
+
+					}
 				}).catch((error) => {
 					console.error("Login error: ", error);
 				});
 			} else {
 				console.log('Form is invalid');
 			}
-		}
+		},
+		userData(email) {
+			axiosInstance.get(`${apis.resource}${doctypes.users}/${email}`)
+				.then((res) => {
+					this.email = res.data.email
+					console.log(this.email);
 
+
+					axiosInstance.get(`${apis.resource}${doctypes.EzyEmployeeList}/${this.email}`)
+						.then((responce) => {
+							const employeeData = responce.data
+							localStorage.setItem('employeeData', JSON.stringify(employeeData));
+							console.log(employeeData, "11111111111111111111");
+
+						})
+						.catch((error) => {
+							console.error("Error fetching user data:", error);
+						});
+
+				})
+				.catch((error) => {
+					console.error("Error fetching user data:", error);
+				});
+		}
 	},
 };
 </script>
@@ -205,8 +233,8 @@ button {
 
 	.invalid-feedback {
 		width: 100%;
-		margin-top: 1.25rem;
-		font-size: .875em;
+		margin-top: 5px;
+		font-size: 12px;
 		color: var(--bs-danger-text);
 	}
 }

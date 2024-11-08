@@ -3,6 +3,7 @@
 
 import frappe
 from frappe.model.document import Document
+import sys
 
 class EzyEmployee(Document):
 	def after_insert(self):
@@ -62,3 +63,16 @@ class EzyEmployee(Document):
 
 	def save(self):
 		super().save(self.name) # call the base save method
+	
+@frappe.whitelist()
+def role_based_accessible_requests(role:str,business_unit:str):
+	try:
+		list_of_roadmaps = frappe.db.get_all("WF Requestors",{"parent":["like",f"%{business_unit}%"],"requestor":role},pluck="parent")
+		return {"success":True,"list_of_roadmaps":list_of_roadmaps}
+	except Exception as e:
+		exc_type, exc_obj, exc_tb = sys.exc_info()
+		frappe.log_error("Error in Role based Roadmaps.",
+						 "line No:{}\n{}".format(exc_tb.tb_lineno, str(e)))
+		frappe.db.rollback()
+		frappe.throw(str(e))
+		return {"success": False, "message": str(e)}

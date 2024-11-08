@@ -1339,6 +1339,7 @@ function deptData() {
 
 function OwnerOftheForm(newVal) {
     if (newVal) {
+
         categoriesData(newVal);
     }
 }
