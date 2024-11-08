@@ -76,9 +76,12 @@
                                     </div>
                                     <div class="col-6">
                                         <label class="font-13 ps-1" for="dept">Accessible departments:</label>
-                                        <FormFields tag="select" placeholder="Accessible departments" class="mb-3"
+                                        <!-- <FormFields tag="select" placeholder="Accessible departments" class="mb-3"
                                             name="dept" v-model="filterOnModal.accessible_departments" id="dept" :Required="false"
-                                            :options="accessibleDepartments" />
+                                            :options="accessibleDepartments" /> -->
+                                            <FormFields class="" tag="input" type="search" name="Requested"
+                                            id="Requested" placeholder="Search" v-model="filterOnModal.accessible_departments" />
+                                           <span class="m-0 font-10 ps-2">Note:Please seperate departments with commas</span>
                                     </div>
                                     <div class="col-6">
                                         <label class="font-13 ps-1" for="dept">Status:</label>
@@ -175,7 +178,7 @@ const formDescriptions = ref({})
 const selectedForm = ref(null);
 const tableData = ref([]);
 const formCategory=ref([]);
-const accessibleDepartments=ref([])
+
 const filterOnModal=reactive({
   appliedform_name:false,
   appliedform_category:false,
@@ -337,7 +340,7 @@ function fetchDepartmentDetails(id) {
       tableData.value = response.data;
      
       formCategory.value = [...new Set(response.data.map((formCategory) => formCategory.form_category))];
-      accessibleDepartments.value=[...new Set(response.data.map((accessibleDepartments) => accessibleDepartments.accessible_departments))];
+      
 
     })
     .catch((error) => {
@@ -369,33 +372,8 @@ function fetchDepartmentDetails(id) {
 }
 
 
-.filterbtn {
-    border: 1px solid #CCCCCC;
-    font-size: 16px;
-    border-radius: 4px;
-    color: #999999;
-    padding: 8px;
-    width: 100%;
-}
 
 
 
-.cancelfilter {
-    width: 150px;
-    height: 34px;
-    border-radius: 6px;
-    background-color: #f1f1f1;
-    color: #111111;
-    padding: 8px 20px;
-}
-
-.applyfilter {
-    width: 150px;
-    height: 34px;
-    border-radius: 6px;
-    /* background-color: #f1f1f1; */
-    /* color: #111111; */
-    padding: 8px 20px;
-}
 </style>
 

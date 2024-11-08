@@ -91,9 +91,13 @@
                                     </div>
                                     <div class="col-4">
                                         <label class="font-13 ps-1" for="dept">Accessible departments:</label>
-                                        <FormFields tag="select" placeholder="Accessible departments" class="mb-3"
+                                        <!-- <FormFields tag="select" placeholder="Accessible departments" class="mb-3"
                                             name="dept" v-model="filterOnModal.accessible_departments" id="dept" :Required="false"
-                                            :options="accessibleDepartments" />
+                                            :options="accessibleDepartments" /> -->
+                                            <FormFields class="" tag="input" type="search" name="Requested"
+                                            id="Requested" placeholder="Search" v-model="filterOnModal.accessible_departments" />
+                                           <span class="m-0 font-10 ps-2">Note:Please seperate departments with commas</span>
+
                                     </div>
                                     <div class="col-4">
                                         <label class="font-13 ps-1" for="dept">Status:</label>
@@ -279,7 +283,7 @@ const filterObj = ref({
     owner_of_the_form: "",
     search: "",
 });
-const radioOptions = ref(["yes", "no"])
+
 watch(
     businessUnit,
     (newVal) => {
@@ -394,7 +398,7 @@ function fetchTable() {
             if (filterObj.value.limit_start === 0) {
                 tableData.value = newData;
                 formCategory.value = [...new Set(newData.map((formCategory) => formCategory.form_category))];
-      accessibleDepartments.value=[...new Set(newData.map((accessibleDepartments) => accessibleDepartments.accessible_departments))];
+     
 ownerForms.value=[...new Set(newData.map((ownerForms)=>ownerForms.owner_of_the_form))]
             } else {
                 tableData.value = tableData.value.concat(newData);
