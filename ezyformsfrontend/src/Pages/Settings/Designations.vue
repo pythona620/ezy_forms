@@ -20,13 +20,15 @@
         </div>
         <div class="mt-2">
             <GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" />
+            <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
+                @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
         </div>
     </div>
 </template>
 <script setup>
 import FormFields from '../../Components/FormFields.vue';
-import ButtonComp from '../../Components/ButtonComp.vue';
 import GlobalTable from '../../Components/GlobalTable.vue';
+import PaginationComp from '../../Components/PaginationComp.vue'
 import axiosInstance from '../../shared/services/interceptor';
 import { apis, doctypes } from '../../shared/apiurls';
 import { onMounted, ref, computed, watch } from 'vue';
@@ -38,6 +40,8 @@ onMounted(() => {
     designationData();
 
 })
+const totalRecords = ref(0);
+
 const tableData = ref([]);
 const tableheaders = ref([
     { th: "Name", td_key: "role" },
@@ -48,10 +52,23 @@ const createDesignation = ref({
 });
 const filterObj = ref({
     limitPageLength: 'None',
-    limitstart: 0,
+    limit_start: 0,
     search: ""
 });
+// Handle updating the current value
+const PaginationUpdateValue = (itemsPerPage) => {
+    filterObj.value.limitPageLength = itemsPerPage;
+    filterObj.value.limit_start = 0;
+    fetchTable();
 
+};
+// Handle updating the limit start
+const PaginationLimitStart = ([itemsPerPage, start]) => {
+    filterObj.value.limitPageLength = itemsPerPage;
+    filterObj.value.limit_start = start;
+    fetchTable();
+
+};
 watch(
     businessUnit,
     (newVal) => {
@@ -77,9 +94,23 @@ function designationData() {
         fields: JSON.stringify(["*"]),
         filters: JSON.stringify(filters),
         limit_page_length: filterObj.value.limitPageLength,
-        limitstart: filterObj.value.limitstart,
+        limit_start: filterObj.value.limit_start,
         order_by: "`tabWF Roles`.`creation` desc"
     };
+    const queryParamsCount = {
+        fields: JSON.stringify(["count( `tabWF Roles`.`name`) AS total_count"]),
+        limitPageLength: "None",
+        filters: JSON.stringify(filters),
+    }
+    axiosInstance.get(`${apis.resource}${doctypes.designations}`, { params: queryParamsCount })
+        .then((res) => {
+            // console.log(res.data[0].total_count);
+            totalRecords.value = res.data[0].total_count
+
+        })
+        .catch((error) => {
+            console.error("Error fetching ezyForms data:", error);
+        });
 
     axiosInstance.get(apis.resource + doctypes.designations, { params: queryParams })
         .then((res) => {

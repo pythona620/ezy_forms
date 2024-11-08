@@ -13,30 +13,33 @@
                 <div class="d-flex align-items-center">
                     <div>
                         <div class="me-2">
-                <span v-if="filterOnModal.department_name && filterOnModal.applieddepartment_name" class="process-date font-11 m-0">
-                  {{ filterOnModal.department_name }}
-                  <span v-if="filterOnModal.department_name" class="badge badge-icon rounded-3   text-white ms-2"
-                    @click="clearFilter('department_name')">
-                    <i class="ri-close-line close-icon text-dark rounded-3"></i>
-                  </span>
-                </span>
-                <span v-if="filterOnModal.department_code && filterOnModal.applieddepartment_code" class="process-date font-11 m-0">
-                  {{ filterOnModal.department_code }}
-                  <span v-if="filterOnModal.department_code" class="badge badge-icon rounded-3   text-white ms-2"
-                    @click="clearFilter('department_code')">
-                    <i class="ri-close-line close-icon text-dark rounded-3"></i>
-                  </span>
-                </span>
+                            <span v-if="filterOnModal.department_name && filterOnModal.applieddepartment_name"
+                                class="process-date font-11 m-0">
+                                {{ filterOnModal.department_name }}
+                                <span v-if="filterOnModal.department_name"
+                                    class="badge badge-icon rounded-3   text-white ms-2"
+                                    @click="clearFilter('department_name')">
+                                    <i class="ri-close-line close-icon text-dark rounded-3"></i>
+                                </span>
+                            </span>
+                            <span v-if="filterOnModal.department_code && filterOnModal.applieddepartment_code"
+                                class="process-date font-11 m-0">
+                                {{ filterOnModal.department_code }}
+                                <span v-if="filterOnModal.department_code"
+                                    class="badge badge-icon rounded-3   text-white ms-2"
+                                    @click="clearFilter('department_code')">
+                                    <i class="ri-close-line close-icon text-dark rounded-3"></i>
+                                </span>
+                            </span>
                         </div>
                     </div>
                     <div>
-                        <button type="button" class=" filterbtn d-flex align-items-center position-relative " data-bs-toggle="modal"
-                            data-bs-target="#fileterModal">
+                        <button type="button" class=" filterbtn d-flex align-items-center position-relative "
+                            data-bs-toggle="modal" data-bs-target="#fileterModal">
                             <span> <i class="ri-filter-2-line"></i></span>
-                            <span v-if="appliedFiltersCount !== 0"
-                            class=" badge badge-light colorappiled ">
-                (  {{ appliedFiltersCount }})
-                </span>
+                            <span v-if="appliedFiltersCount !== 0" class=" badge badge-light colorappiled ">
+                                ( {{ appliedFiltersCount }})
+                            </span>
                         </button>
 
                     </div>
@@ -51,18 +54,18 @@
                                     <div class="col-6">
                                         <label class="font-13 ps-1" for="Requested">Department Code:</label>
                                         <FormFields class="mb-3" tag="input" type="search" name="Requested"
-                                            id="Requested" placeholder="Search" v-model="filterOnModal.department_code" />
+                                            id="Requested" placeholder="Search"
+                                            v-model="filterOnModal.department_code" />
                                     </div>
-                                    
+
                                     <div class="col-6">
                                         <label class="font-13 ps-1 fw-medium" for="dept">Requested Dept:</label>
                                         <FormFields tag="select" placeholder="Select Department" class="mb-3"
                                             name="dept" v-model="filterOnModal.department_name" id="dept"
-                                            :Required="false"
-                                            :options="designiations" />
+                                            :Required="false" :options="designiations" />
                                     </div>
-                                  
-                                  
+
+
 
                                 </div>
                             </div>
@@ -83,7 +86,7 @@
                     </div>
                 </div>
                 <div class="d-flex align-items-center ">
-                    
+
                     <button type="button" class="btn btn-dark buttoncomp CreateDepartments d-flex align-items-center "
                         data-bs-toggle="modal" data-bs-target="#createDepartments">
                         Create Departments
@@ -170,6 +173,8 @@
         <div class="mt-2">
             <GlobalTable :tHeaders="tableheaders" :tData="tableData" @actionClicked="actionCreated" isAction='true'
                 :actions="actions" actionType="dropdown" isCheckbox="true" />
+            <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
+                @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
         </div>
         <div class="modal fade" id="viewCategory" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
             aria-labelledby="viewCategoryLabel" aria-hidden="true">
@@ -221,9 +226,10 @@
 import FormFields from '../../Components/FormFields.vue';
 import ButtonComp from '../../Components/ButtonComp.vue';
 import GlobalTable from '../../Components/GlobalTable.vue';
+import PaginationComp from '../../Components/PaginationComp.vue'
 import axiosInstance from '../../shared/services/interceptor';
 import { apis, doctypes } from '../../shared/apiurls';
-import { onMounted, ref, computed, watch,reactive } from 'vue';
+import { onMounted, ref, computed, watch, reactive } from 'vue';
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
@@ -235,6 +241,8 @@ const businessUnit = computed(() => {
 onMounted(() => {
     ezyForms();
 })
+const totalRecords = ref(0);
+
 const tableData = ref([]);
 const radioOptions = ref(["yes", "no"])
 const EzyFormsCompanys = ref([]);
@@ -249,6 +257,25 @@ const actions = ref(
 
     ]
 )
+
+const filterObj = ref({
+    limitPageLength: 'None',
+    limit_start: 0
+});
+// Handle updating the current value
+const PaginationUpdateValue = (itemsPerPage) => {
+    filterObj.value.limitPageLength = itemsPerPage;
+    filterObj.value.limit_start = 0;
+    fetchTable();
+
+};
+// Handle updating the limit start
+const PaginationLimitStart = ([itemsPerPage, start]) => {
+    filterObj.value.limitPageLength = itemsPerPage;
+    filterObj.value.limit_start = start;
+    fetchTable();
+
+};
 function actionCreated(rowData, actionEvent) {
     if (actionEvent.name === 'View Categories') {
         if (rowData) {
@@ -286,17 +313,14 @@ const CreateDepartments = ref({
 
     ]
 });
-const filterObj = ref({
-    limitPageLength: 'None',
-    limitstart: 0
-});
+
 const filterOnModal = reactive({
-    applieddepartment_name:false,
-    applieddepartment_code:false,
+    applieddepartment_name: false,
+    applieddepartment_code: false,
 
     department_name: "",
-    department_code:''
-   
+    department_code: ''
+
 
 })
 const appliedFiltersCount = computed(() => {
@@ -306,23 +330,23 @@ const appliedFiltersCount = computed(() => {
             value: filterOnModal.department_name,
             applied: filterOnModal.applieddepartment_name,
         },
-      
-       
+
+
     ].filter((filter) => filter.applied && filter.value).length;
 });
 
 function clearFilter(type) {
     if (type === "department_name") {
-      filterOnModal.department_name = "";
-      filterOnModal.applieddepartment_name = false;
+        filterOnModal.department_name = "";
+        filterOnModal.applieddepartment_name = false;
     } else if (type === "department_code") {
-      filterOnModal.department_code = "";
-      filterOnModal.applieddepartment_code = false;
+        filterOnModal.department_code = "";
+        filterOnModal.applieddepartment_code = false;
     }
- 
+
 
     applyFilters();
-  }
+}
 watch(
     businessUnit,
     (newVal) => {
@@ -391,21 +415,21 @@ function saveCategories() {
         });
 }
 function applyFilters() {
-  
-    filterOnModal.applieddepartment_code=Boolean(filterOnModal.department_code);
-    filterOnModal.applieddepartment_name=Boolean(filterOnModal.department_name)
 
-   deptData();
+    filterOnModal.applieddepartment_code = Boolean(filterOnModal.department_code);
+    filterOnModal.applieddepartment_name = Boolean(filterOnModal.department_name)
+
+    deptData();
 }
 
 function resetFilters() {
     filterOnModal.value = {
-          department_name: "",
-    department_code:''
+        department_name: "",
+        department_code: ''
     };
     deptData()
 }
-const designiations=ref([]);
+const designiations = ref([]);
 
 function deptData() {
     const filters = [
@@ -417,15 +441,29 @@ function deptData() {
     if (filterOnModal.department_name) {
         filters.push(["department_name", "like", `%${filterOnModal.department_name}%`]);
     }
-   
+
 
     const queryParams = {
         fields: JSON.stringify(["*"]),
         filters: JSON.stringify(filters),
         limit_page_length: filterObj.value.limitPageLength,
-        limitstart: filterObj.value.limitstart,
+        limit_start: filterObj.value.limit_start,
         order_by: "`tabEzy Departments`.`creation` desc"
     };
+    const queryParamsCount = {
+        fields: JSON.stringify(["count( `tabEzy Departments`.`name`) AS total_count"]),
+        limitPageLength: "None",
+        filters: JSON.stringify(filters),
+    }
+    axiosInstance.get(`${apis.resource}${doctypes.departments}`, { params: queryParamsCount })
+        .then((res) => {
+            // console.log(res.data[0].total_count);
+            totalRecords.value = res.data[0].total_count
+
+        })
+        .catch((error) => {
+            console.error("Error fetching ezyForms data:", error);
+        });
 
     axiosInstance.get(apis.resource + doctypes.departments, { params: queryParams })
         .then((res) => {

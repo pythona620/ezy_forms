@@ -23,7 +23,7 @@
 
                         <span v-if="filterOnModal.designation && filterOnModal.applieddesignation"
                             class="process-date font-12 m-0"> {{
-                                filterOnModal.designation }}
+                            filterOnModal.designation }}
                             <span v-if="filterOnModal.designation" class="badge badge-icon rounded-3   text-white ms-2"
                                 @click="clearFilter('designation')">
                                 <i class="ri-close-line close-icon text-dark rounded-3"></i>
@@ -31,7 +31,7 @@
                         </span>
                         <span v-if="filterOnModal.department && filterOnModal.applieddepartment"
                             class="process-date font-12 m-0"> {{
-                                filterOnModal.department }}
+                            filterOnModal.department }}
                             <span v-if="filterOnModal.department" class="badge badge-icon rounded-3   text-white ms-2"
                                 @click="clearFilter('department')">
                                 <i class="ri-close-line close-icon text-dark rounded-3"></i>
@@ -39,7 +39,7 @@
                         </span>
                         <span v-if="filterOnModal.emp_mail_id && filterOnModal.appliedEmp_mail_id"
                             class="process-date font-12 m-0"> {{
-                                filterOnModal.emp_mail_id }}
+                            filterOnModal.emp_mail_id }}
                             <span v-if="filterOnModal.emp_mail_id" class="badge badge-icon rounded-3   text-white ms-2"
                                 @click="clearFilter('emp_mail_id')">
                                 <i class="ri-close-line close-icon text-dark rounded-3"></i>
@@ -47,7 +47,7 @@
                         </span>
                         <span v-if="filterOnModal.emp_code && filterOnModal.appliedeEmp_code"
                             class="process-date font-12 m-0"> {{
-                                filterOnModal.emp_name }}
+                            filterOnModal.emp_name }}
                             <span v-if="filterOnModal.emp_name" class="badge badge-icon rounded-3   text-white ms-2"
                                 @click="clearFilter('emp_name')">
                                 <i class="ri-close-line close-icon text-dark rounded-3"></i>
@@ -55,7 +55,7 @@
                         </span>
                         <span v-if="filterOnModal.reporting_designation && filterOnModal.appliedreporting_designation"
                             class="process-date font-12 m-0"> {{
-                                filterOnModal.reporting_designation }}
+                            filterOnModal.reporting_designation }}
                             <span v-if="filterOnModal.reporting_designation"
                                 class="badge badge-icon rounded-3   text-white ms-2"
                                 @click="clearFilter('reporting_designation')">
@@ -64,7 +64,7 @@
                         </span>
                         <span v-if="filterOnModal.reporting_to && filterOnModal.appliedreporting_to"
                             class="process-date font-12 m-0"> {{
-                                filterOnModal.reporting_to }}
+                            filterOnModal.reporting_to }}
                             <span v-if="filterOnModal.reporting_to" class="badge badge-icon rounded-3   text-white ms-2"
                                 @click="clearFilter('reporting_to')">
                                 <i class="ri-close-line close-icon text-dark rounded-3"></i>
@@ -72,15 +72,14 @@
                         </span>
                     </div>
                     <div>
-                        <button type="button" class=" filterbtn d-flex align-items-center position-relative " data-bs-toggle="modal"
-                            data-bs-target="#fileterModal">
+                        <button type="button" class=" filterbtn d-flex align-items-center position-relative "
+                            data-bs-toggle="modal" data-bs-target="#fileterModal">
                             <span> <i class="ri-filter-2-line"></i></span>
-                            <span v-if="appliedFiltersCount !== 0"
-                            class=" badge badge-light colorappiled ">
-                (  {{ appliedFiltersCount }})
-                </span>
+                            <span v-if="appliedFiltersCount !== 0" class=" badge badge-light colorappiled ">
+                                ( {{ appliedFiltersCount }})
+                            </span>
                         </button>
-                     
+
 
                     </div>
                 </div>
@@ -227,6 +226,8 @@
         <div class="mt-2">
             <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction='true' :actions="actions"
                 @actionClicked="actionCreated" actionType="dropdown" isCheckbox="true" />
+            <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
+                @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
         </div>
         <div class="modal fade" id="viewEmployee" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
             aria-labelledby="viewEmployeeLabel" aria-hidden="true">
@@ -294,6 +295,7 @@
 import FormFields from '../../Components/FormFields.vue';
 import ButtonComp from '../../Components/ButtonComp.vue';
 import GlobalTable from '../../Components/GlobalTable.vue';
+import PaginationComp from '../../Components/PaginationComp.vue';
 import axiosInstance from '../../shared/services/interceptor';
 import { apis, doctypes } from '../../shared/apiurls';
 import { onMounted, reactive, ref, computed } from 'vue';
@@ -305,7 +307,10 @@ onMounted(() => {
     deptData();
     employeeData();
 })
-
+const totalRecords = ref(0);
+const designiations = ref([]);
+const reportingTo = ref([]);
+const reportingDesigination = ref([]);
 const departmentsList = ref([])
 const createEmployee = ref({
     emp_code: "",
@@ -337,7 +342,7 @@ function actionCreated(rowData, actionEvent) {
 }
 const filterObj = ref({
     limitPageLength: 'None',
-    limitstart: 0
+    limit_start: 0
 });
 const tableheaders = ref([
     { th: "Employee Code", td_key: "emp_code" },
@@ -385,7 +390,7 @@ const appliedFiltersCount = computed(() => {
             value: filterOnModal.reporting_to,
             applied: filterOnModal.appliedreporting_to,
         },
-       
+
     ].filter((filter) => filter.applied && filter.value).length;
 });
 const filterOnModal = reactive({
@@ -484,7 +489,7 @@ function deptData() {
     const queryParams = {
         fields: JSON.stringify(["*"]),
         limit_page_length: filterObj.value.limitPageLength,
-        limitstart: filterObj.value.limitstart,
+        limit_start: filterObj.value.limit_start,
     };
 
     axiosInstance.get(apis.resource + doctypes.departments, { params: queryParams })
@@ -501,9 +506,20 @@ function deptData() {
         });
 }
 
-const designiations = ref([]);
-const reportingTo = ref([]);
-const reportingDesigination = ref([]);
+// Handle updating the current value
+const PaginationUpdateValue = (itemsPerPage) => {
+    filterObj.value.limitPageLength = itemsPerPage;
+    filterObj.value.limit_start = 0;
+    fetchTable();
+
+};
+// Handle updating the limit start
+const PaginationLimitStart = ([itemsPerPage, start]) => {
+    filterObj.value.limitPageLength = itemsPerPage;
+    filterObj.value.limit_start = start;
+    fetchTable();
+
+};
 function employeeData() {
     const filters = [];
     if (filterOnModal.emp_code) {
@@ -533,9 +549,24 @@ function employeeData() {
         fields: JSON.stringify(["*"]),
         filters: JSON.stringify(filters),
         limit_page_length: filterObj.value.limitPageLength,
-        limitstart: filterObj.value.limitstart,
-        // order_by: "`tabEzy Employee`.`creation` desc"
+        limit_start: filterObj.value.limit_start,
+        order_by: "`tabEzy Employee`.`creation` desc"
     };
+    const queryParamsCount = {
+        fields: JSON.stringify(["count( `tabEzy Employee`.`name`) AS total_count"]),
+        limitPageLength: "None",
+        filters: JSON.stringify(filters),
+    }
+    axiosInstance.get(`${apis.resource}${doctypes.EzyEmployeeList}`, { params: queryParamsCount })
+        .then((res) => {
+            // console.log(res.data[0].total_count);
+            totalRecords.value = res.data[0].total_count
+
+        })
+        .catch((error) => {
+            console.error("Error fetching ezyForms data:", error);
+        });
+
 
     axiosInstance.get(apis.resource + doctypes.EzyEmployeeList, { params: queryParams })
         .then((res) => {
@@ -621,5 +652,4 @@ function SaveEditEmp() {
     /* color: #111111; */
     padding: 8px 20px;
 }
-
 </style>
