@@ -109,7 +109,7 @@
                     Filter</button>
 
                   <button type="button"
-                    class=" applyfilter text-nowrap border-0  text-white font-10 d-flex justify-content-center align-items-center"
+                    class=" applyfilter btn btn-dark text-nowrap border-0  text-white font-10 d-flex justify-content-center align-items-center"
                     data-bs-dismiss="modal" @click="applyFilters"><span class="font-16 me-1"><i
                         class="bi bi-check2 "></i></span>
                     Apply
@@ -385,8 +385,8 @@ function fetchDepartmentDetails(id) {
   width: 150px;
   height: 34px;
   border-radius: 6px;
-   background-color: #f1f1f1; 
-  color: #111111; 
+   /* background-color: #f1f1f1; 
+  color: #111111;  */
   padding: 8px 20px;
 }
 
