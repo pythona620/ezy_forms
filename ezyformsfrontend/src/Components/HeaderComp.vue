@@ -33,18 +33,40 @@
                                     <div class="btn-group dropdown navbar-nav ms-auto">
                                         <button type="button" class="btn border-0 p-0 me-2 mt-0"
                                             data-bs-toggle="dropdown" aria-expanded="false">
-                                            <!-- <img src="../assets/Image.svg" /> -->
-                                            {{ userInitial }}
+                                            <img src="../assets/Image.svg" />
                                         </button>
-                                        <ul class="dropdown-menu dropdown-menu-start">
-                                            <li>
-                                                <div class="d-flex justify-content-center align-items-center ">
-                                                    <span class=" fw-bold font-13 p-2"> {{ userFullName }}</span>
+                                        <ul class="dropdown-menu dropdown-menu-start p-2">
+                                            <div class="d-flex gap-3 align-items-center">
+                                                <div>
+                                                <li class="d-flex justify-content-center align-items-center btn btn-dark">
+                                                
+                                                {{ userInitial }}
+
+                                            </li>
+                                            </div>
+                                            <div>
+                                                <li>
+                                                <div class=" ">
+                                                    <span class="fw-medium font-13 "> {{ userFullName }}</span>
+                                                   
+                                                </div>
+                                                <div class=" ">
+                                                  
+                                                    <span class="fw-medium font-11">Product designer</span>
                                                 </div>
                                             </li>
-                                            <li>
+                                            </div>
+                                            </div>
+                                          
+                                            <li class="mt-2">
                                                 <div class="d-flex justify-content-center align-items-center">
-                                                    <ButtonComp class="buttoncomp rounded-2" @click="logout()"
+                                                    <ButtonComp class="changepass rounded-2 text-left" icon="lock"
+                                                        name="Change Password"></ButtonComp>
+                                                </div>
+                                            </li>
+                                            <li class="mt-2">
+                                                <div class="d-flex justify-content-center align-items-center">
+                                                    <ButtonComp class=" logout rounded-2 text-left" icon="box-arrow-right" @click="logout()"
                                                         name="Log Out"></ButtonComp>
                                                 </div>
                                             </li>
@@ -143,6 +165,8 @@ const deptartmentData = ref([]);
 const activeTab = ref('')
 function logout() {
     localStorage.removeItem('UserName');
+
+
     router.push({ path: '/' }).then(() => {
 
     });
@@ -155,7 +179,7 @@ onMounted(() => {
     const userData = JSON.parse(localStorage.getItem('UserName'));
     if (userData && userData.full_name) {
         userInitial.value = userData.full_name.charAt(0).toUpperCase();
-        userFullName.value = userData.full_name.toUpperCase()
+        userFullName.value = userData.full_name
     }
 
 });
@@ -334,8 +358,28 @@ const handleBuChange = (tab) => {
     align-items: center;
     margin-bottom: 7px;
 }
-
-
+.changepass{
+    width: 214px;
+    height: 32px;
+    border-radius: 4px;
+    background-color:#F2F2FF;
+    padding: 9px 30px 9px 9px;
+    font-size: 11px;
+    color: #2124FE;
+    text-align: left;
+    
+}
+.logout{
+    width: 214px;
+    height: 32px;
+    border-radius: 4px;
+    background-color:#FFF2F3;
+    padding: 9px 30px 9px 9px;
+    font-size: 11px;
+    color: #FE212E;
+    text-align: left;
+    
+}
 
 @media (min-width: 1604px) and (max-width: 2400px) {
     .col-3 {
