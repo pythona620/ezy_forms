@@ -11,9 +11,9 @@
           </p>
         </div>
         <div class="d-flex gap-2 align-items-center">
-                <div class="d-flex  align-items-center">
-                  <div>
-                        <div class="me-2">
+          <div class="d-flex  align-items-center">
+            <div>
+              <div class="me-2">
                 <span v-if="filterOnModal.form_name && filterOnModal.appliedform_name" class="process-date font-12 m-0">
                   {{ filterOnModal.form_name }}
                   <span v-if="filterOnModal.form_name" class="badge badge-icon rounded-3   text-white "
@@ -21,14 +21,16 @@
                     <i class="ri-close-line close-icon text-dark rounded-3"></i>
                   </span>
                 </span>
-                <span v-if="filterOnModal.form_category && filterOnModal.appliedform_category" class="process-date font-12 m-0">
+                <span v-if="filterOnModal.form_category && filterOnModal.appliedform_category"
+                  class="process-date font-12 m-0">
                   {{ filterOnModal.form_category }}
                   <span v-if="filterOnModal.form_category" class="badge badge-icon rounded-3   text-white "
                     @click="clearFilter('form_category')">
                     <i class="ri-close-line close-icon text-dark rounded-3"></i>
                   </span>
                 </span>
-                <span v-if="filterOnModal.accessible_departments && filterOnModal.appliedaccessible_departments" class="process-date font-12 m-0">
+                <span v-if="filterOnModal.accessible_departments && filterOnModal.appliedaccessible_departments"
+                  class="process-date font-12 m-0">
                   {{ filterOnModal.accessible_departments }}
                   <span v-if="filterOnModal.accessible_departments" class="badge badge-icon rounded-3   text-white "
                     @click="clearFilter('accessible_departments')">
@@ -42,20 +44,20 @@
                     <i class="ri-close-line close-icon text-dark rounded-3"></i>
                   </span>
                 </span>
-                        </div>
-                    </div>
-                    <div>
-                      <button type="button" class=" filterbtn d-flex align-items-center position-relative " data-bs-toggle="modal"
-                            data-bs-target="#fileterModal">
-                            <span> <i class="ri-filter-2-line"></i></span>
-                            <span v-if="appliedFiltersCount !== 0"
-                            class=" badge badge-light colorappiled ">
-                (  {{ appliedFiltersCount }})
+              </div>
+            </div>
+            <div>
+              <button type="button" class=" filterbtn d-flex align-items-center position-relative "
+                data-bs-toggle="modal" data-bs-target="#fileterModal">
+                <span> <i class="ri-filter-2-line"></i></span>
+                <span v-if="appliedFiltersCount !== 0" class=" badge badge-light colorappiled ">
+                  ( {{ appliedFiltersCount }})
                 </span>
-                        </button>
+              </button>
 
-                    </div>
-                </div>
+            </div>
+          </div>
+          
                 <div class="modal fade" id="fileterModal" tabindex="-1" aria-labelledby="fileterModalLabel"
                     aria-hidden="true">
                     <div class="modal-dialog modal-lg">
@@ -96,40 +98,40 @@
                                             :Required="false"
                                             :options="designiations" />
                                     </div> -->
-                                  
-                                  
 
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="cancelfilter border-0 text-nowrap font-10 "
-                                    @click="resetFilters" data-bs-dismiss="modal"><span
-                                        class="font-14 me-1">x</span>Cancel
-                                    Filter</button>
 
-                                <button type="button"
-                                    class="applyfilter text-nowrap border-0 bg-primary text-white font-10 d-flex justify-content-center align-items-center"
-                                    data-bs-dismiss="modal" @click="applyFilters"><span class="font-16 me-1"><i
-                                            class="bi bi-check2 "></i></span>
-                                    Apply
-                                    Filter</button>
-                            </div>
-                        </div>
-                    </div>
+
+                  </div>
                 </div>
-                <div class="d-flex align-items-center ">
-                  <ButtonComp class="buttoncomp font-10" name="CreateForm" data-bs-toggle="offcanvas"
-            data-bs-target="#offcanvasRight" aria-controls="offcanvasRight"></ButtonComp>
+                <div class="modal-footer">
+                  <button type="button" class="cancelfilter border-0 text-nowrap font-10 " @click="resetFilters"
+                    data-bs-dismiss="modal"><span class="font-14 me-1">x</span>Cancel
+                    Filter</button>
+
+                  <button type="button"
+                    class=" applyfilter text-nowrap border-0  text-white font-10 d-flex justify-content-center align-items-center"
+                    data-bs-dismiss="modal" @click="applyFilters"><span class="font-16 me-1"><i
+                        class="bi bi-check2 "></i></span>
+                    Apply
+                    Filter</button>
                 </div>
-              
+              </div>
             </div>
+          </div>
+          <div class="d-flex align-items-center ">
+            <ButtonComp class="buttoncomp font-10" name="CreateForm" data-bs-toggle="offcanvas"
+              data-bs-target="#offcanvasRight" aria-controls="offcanvasRight"></ButtonComp>
+          </div>
+
+        </div>
       </div>
-      <div class="mt-3"><GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true" actionType="dropdown"
-        @actionClicked="actionCreated" :actions="actions" />
+      <div class="mt-3">
+        <GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true" actionType="dropdown"
+          @actionClicked="actionCreated" :actions="actions" />
         <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
-        @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
+          @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
       </div>
-      
+
     </div>
     <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
       <div class="offcanvas-header">
@@ -190,51 +192,51 @@ accessible_departments:'',
 form_status:''
 })
 const appliedFiltersCount = computed(() => {
-    return [
-        { value: filterOnModal.form_category, applied: filterOnModal.appliedform_category },
-        {
-            value: filterOnModal.form_name,
-            applied: filterOnModal.appliedform_name,
-        },
-        {
-            value: filterOnModal.form_status,
-            applied: filterOnModal.appliedStatus,
-        },
-        {
-            value: filterOnModal.accessible_departments,
-            applied: filterOnModal.appliedaccessible_departments,
-        },
-      
-       
-    ].filter((filter) => filter.applied && filter.value).length;
+  return [
+    { value: filterOnModal.form_category, applied: filterOnModal.appliedform_category },
+    {
+      value: filterOnModal.form_name,
+      applied: filterOnModal.appliedform_name,
+    },
+    {
+      value: filterOnModal.form_status,
+      applied: filterOnModal.appliedStatus,
+    },
+    {
+      value: filterOnModal.accessible_departments,
+      applied: filterOnModal.appliedaccessible_departments,
+    },
+
+
+  ].filter((filter) => filter.applied && filter.value).length;
 });
 function clearFilter(type) {
-    if (type === "form_name") {
-      filterOnModal.form_name = "";
-      filterOnModal.appliedform_name = false;
-    } else if (type === "form_category") {
-      filterOnModal.form_category = "";
-      filterOnModal.appliedform_category = false;
-    
-    }
-    else if (type === "accessible_departments") {
-      filterOnModal.accessible_departments = "";
-      filterOnModal.appliedaccessible_departments = false;
-    
-    }
-    else if (type === "form_status") {
-      filterOnModal.form_status = "";
-      filterOnModal.appliedStatus = false;
-    
-    }
- 
+  if (type === "form_name") {
+    filterOnModal.form_name = "";
+    filterOnModal.appliedform_name = false;
+  } else if (type === "form_category") {
+    filterOnModal.form_category = "";
+    filterOnModal.appliedform_category = false;
 
-    applyFilters();
   }
+  else if (type === "accessible_departments") {
+    filterOnModal.accessible_departments = "";
+    filterOnModal.appliedaccessible_departments = false;
+
+  }
+  else if (type === "form_status") {
+    filterOnModal.form_status = "";
+    filterOnModal.appliedStatus = false;
+
+  }
+
+
+  applyFilters();
+}
 // Business unit and filter object
 const businessUnit = computed(() => EzyBusinessUnit.value);
 const newBusinessUnit = ref({ business_unit: '' });
-const filterObj = ref({  limitPageLength: 'None', limit_start: 0 });
+const filterObj = ref({ limitPageLength: 'None', limit_start: 0 });
 const actions = ref(
   [
     { name: 'View form', icon: 'fa-solid fa-eye' },
@@ -256,37 +258,37 @@ function actionCreated(rowData, actionEvent) {
 
 }
 function applyFilters() {
-  filterOnModal.appliedform_name=Boolean(filterOnModal.form_name);
-  filterOnModal.appliedform_category=Boolean(filterOnModal.form_category);
-filterOnModal.appliedaccessible_departments=Boolean(filterOnModal.accessible_departments);
-filterOnModal.appliedStatus=Boolean(filterOnModal.form_status);
+  filterOnModal.appliedform_name = Boolean(filterOnModal.form_name);
+  filterOnModal.appliedform_category = Boolean(filterOnModal.form_category);
+  filterOnModal.appliedaccessible_departments = Boolean(filterOnModal.accessible_departments);
+  filterOnModal.appliedStatus = Boolean(filterOnModal.form_status);
 
-
-fetchDepartmentDetails()
+  fetchDepartmentDetails()
 }
 // Watch business unit and department ID changes
 watch(
   [() => businessUnit.value, () => props.id],
   ([newBusinessUnitVal, newId]) => {
     newBusinessUnit.value.business_unit = newBusinessUnitVal;
-    if (newBusinessUnitVal.length || newId) {
+    if (newBusinessUnitVal.length && newId) {
       fetchDepartmentDetails(newId || props.id);
     }
   },
   { immediate: true }
 );
+
 // Handle updating the current value
 const PaginationUpdateValue = (itemsPerPage) => {
-    filterObj.value.limitPageLength = itemsPerPage;
-    filterObj.value.limit_start = 0;
-    fetchTable();
+  filterObj.value.limitPageLength = itemsPerPage;
+  filterObj.value.limit_start = 0;
+  fetchTable();
 
 };
 // Handle updating the limit start
 const PaginationLimitStart = ([itemsPerPage, start]) => {
-    filterObj.value.limitPageLength = itemsPerPage;
-    filterObj.value.limit_start = start;
-    fetchTable();
+  filterObj.value.limitPageLength = itemsPerPage;
+  filterObj.value.limit_start = start;
+  fetchTable();
 
 };
 
@@ -301,17 +303,17 @@ function fetchDepartmentDetails(id) {
     filters.push(["owner_of_the_form", "like", `%${props.id}%`]);
   }
   if (filterOnModal.form_name) {
-        filters.push(["form_name", "like", `${filterOnModal.form_name}`]);
-    }
-    if (filterOnModal.form_category) {
-        filters.push(["form_category", "like", `${filterOnModal.form_category}`]);
-    }
-    if (filterOnModal.accessible_departments) {
-        filters.push(["accessible_departments", "like", `${filterOnModal.accessible_departments}`]);
-    }
-    if (filterOnModal.form_status) {
-        filters.push(["form_status", "like", `${filterOnModal.form_status}`]);
-    }
+    filters.push(["form_name", "like", `${filterOnModal.form_name}`]);
+  }
+  if (filterOnModal.form_category) {
+    filters.push(["form_category", "like", `${filterOnModal.form_category}`]);
+  }
+  if (filterOnModal.accessible_departments) {
+    filters.push(["accessible_departments", "like", `${filterOnModal.accessible_departments}`]);
+  }
+  if (filterOnModal.form_status) {
+    filters.push(["form_status", "like", `${filterOnModal.form_status}`]);
+  }
   const queryParams = {
     fields: JSON.stringify(["*"]),
     limit_page_length: filterObj.value.limitPageLength,
@@ -320,25 +322,25 @@ function fetchDepartmentDetails(id) {
     order_by: "`tabEzy Form Definitions`.`creation` desc",
   };
   const queryParamsCount = {
-        fields: JSON.stringify(["count( `tabEzy Form Definitions`.`name`) AS total_count"]),
-        limitPageLength: "None",
-        filters: JSON.stringify(filters),
-    }
-    axiosInstance.get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParamsCount })
-        .then((res) => {
-          
-            totalRecords.value = res.data[0].total_count
+    fields: JSON.stringify(["count( `tabEzy Form Definitions`.`name`) AS total_count"]),
+    limitPageLength: "None",
+    filters: JSON.stringify(filters),
+  }
+  axiosInstance.get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParamsCount })
+    .then((res) => {
 
-        })
-        .catch((error) => {
-            console.error("Error fetching ezyForms data:", error);
-        });
+      totalRecords.value = res.data[0].total_count
+
+    })
+    .catch((error) => {
+      console.error("Error fetching ezyForms data:", error);
+    });
 
   axiosInstance
     .get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParams })
     .then((response) => {
       tableData.value = response.data;
-     
+
       formCategory.value = [...new Set(response.data.map((formCategory) => formCategory.form_category))];
       
 
@@ -351,8 +353,6 @@ function fetchDepartmentDetails(id) {
 </script>
 
 <style>
-
-
 .dashedcircle {
   border: 1px dashed #AAAAAA;
   height: 30px;
@@ -372,8 +372,33 @@ function fetchDepartmentDetails(id) {
 }
 
 
+.cancelfilter {
+  width: 150px;
+  height: 34px;
+  border-radius: 6px;
+  background-color: #f1f1f1;
+  color: #111111;
+  padding: 8px 20px;
+}
 
+.applyfilter {
+  width: 150px;
+  height: 34px;
+  border-radius: 6px;
+   background-color: #f1f1f1; 
+  color: #111111; 
+  padding: 8px 20px;
+}
+
+
+.filterbtn {
+  border: 1px solid #CCCCCC;
+  font-size: 16px;
+  border-radius: 4px;
+  color: #999999;
+  padding: 8px;
+  width: 100%;
+}
 
 
 </style>
-

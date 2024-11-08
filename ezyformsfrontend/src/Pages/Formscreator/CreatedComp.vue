@@ -9,53 +9,59 @@
                 <div>
                     <!-- <FormFields labeltext="" class="" tag="input" type="search" placeholder="Search Form Name"
                         name="Value" id="Value" v-model="filterObj.search" @input="fetchTable()" /> -->
-                        <div class="me-2">
-                <span v-if="filterOnModal.form_name && filterOnModal.appliedform_name" class="process-date font-12 m-0">
-                  {{ filterOnModal.form_name }}
-                  <span v-if="filterOnModal.form_name" class="badge badge-icon rounded-3   text-white "
-                    @click="clearFilter('form_name')">
-                    <i class="ri-close-line close-icon text-dark rounded-3"></i>
-                  </span>
-                </span>
-                <span v-if="filterOnModal.form_category && filterOnModal.appliedform_category" class="process-date font-12 m-0">
-                  {{ filterOnModal.form_category }}
-                  <span v-if="filterOnModal.form_category" class="badge badge-icon rounded-3   text-white "
-                    @click="clearFilter('form_category')">
-                    <i class="ri-close-line close-icon text-dark rounded-3"></i>
-                  </span>
-                </span>
-                <span v-if="filterOnModal.accessible_departments && filterOnModal.appliedaccessible_departments" class="process-date font-12 m-0">
-                  {{ filterOnModal.accessible_departments }}
-                  <span v-if="filterOnModal.accessible_departments" class="badge badge-icon rounded-3   text-white "
-                    @click="clearFilter('accessible_departments')">
-                    <i class="ri-close-line close-icon text-dark rounded-3"></i>
-                  </span>
-                </span>
-                <span v-if="filterOnModal.active && filterOnModal.appliedStatus" class="process-date font-12 m-0">
-                  {{ filterOnModal.active }}
-                  <span v-if="filterOnModal.active" class="badge badge-icon rounded-3   text-white "
-                    @click="clearFilter('active')">
-                    <i class="ri-close-line close-icon text-dark rounded-3"></i>
-                  </span>
-                </span>
-                <span v-if="filterOnModal.owner_of_the_form && filterOnModal.appledowner_of_the_form" class="process-date font-12 m-0">
-                  {{ filterOnModal.owner_of_the_form }}
-                  <span v-if="filterOnModal.owner_of_the_form" class="badge badge-icon rounded-3   text-white "
-                    @click="clearFilter('owner_of_the_form')">
-                    <i class="ri-close-line close-icon text-dark rounded-3"></i>
-                  </span>
-                </span>
-                        </div>
+                    <div class="me-2">
+                        <span v-if="filterOnModal.form_name && filterOnModal.appliedform_name"
+                            class="process-date font-12 m-0">
+                            {{ filterOnModal.form_name }}
+                            <span v-if="filterOnModal.form_name" class="badge badge-icon rounded-3   text-white "
+                                @click="clearFilter('form_name')">
+                                <i class="ri-close-line close-icon text-dark rounded-3"></i>
+                            </span>
+                        </span>
+                        <span v-if="filterOnModal.form_category && filterOnModal.appliedform_category"
+                            class="process-date font-12 m-0">
+                            {{ filterOnModal.form_category }}
+                            <span v-if="filterOnModal.form_category" class="badge badge-icon rounded-3   text-white "
+                                @click="clearFilter('form_category')">
+                                <i class="ri-close-line close-icon text-dark rounded-3"></i>
+                            </span>
+                        </span>
+                        <span v-if="filterOnModal.accessible_departments && filterOnModal.appliedaccessible_departments"
+                            class="process-date font-12 m-0">
+                            {{ filterOnModal.accessible_departments }}
+                            <span v-if="filterOnModal.accessible_departments"
+                                class="badge badge-icon rounded-3   text-white "
+                                @click="clearFilter('accessible_departments')">
+                                <i class="ri-close-line close-icon text-dark rounded-3"></i>
+                            </span>
+                        </span>
+                        <span v-if="filterOnModal.active && filterOnModal.appliedStatus"
+                            class="process-date font-12 m-0">
+                            {{ filterOnModal.active }}
+                            <span v-if="filterOnModal.active" class="badge badge-icon rounded-3   text-white "
+                                @click="clearFilter('active')">
+                                <i class="ri-close-line close-icon text-dark rounded-3"></i>
+                            </span>
+                        </span>
+                        <span v-if="filterOnModal.owner_of_the_form && filterOnModal.appledowner_of_the_form"
+                            class="process-date font-12 m-0">
+                            {{ filterOnModal.owner_of_the_form }}
+                            <span v-if="filterOnModal.owner_of_the_form"
+                                class="badge badge-icon rounded-3   text-white "
+                                @click="clearFilter('owner_of_the_form')">
+                                <i class="ri-close-line close-icon text-dark rounded-3"></i>
+                            </span>
+                        </span>
+                    </div>
                 </div>
                 <div>
-                    <button type="button" class=" filterbtn d-flex align-items-center position-relative " data-bs-toggle="modal"
-                            data-bs-target="#exampleModal">
-                            <span> <i class="ri-filter-2-line"></i></span>
-                            <span v-if="appliedFiltersCount !== 0"
-                            class=" badge badge-light colorappiled ">
-                (  {{ appliedFiltersCount }})
-                </span>
-                        </button>
+                    <button type="button" class=" filterbtn d-flex align-items-center position-relative "
+                        data-bs-toggle="modal" data-bs-target="#exampleModal">
+                        <span> <i class="ri-filter-2-line"></i></span>
+                        <span v-if="appliedFiltersCount !== 0" class=" badge badge-light colorappiled ">
+                            ( {{ appliedFiltersCount }})
+                        </span>
+                    </button>
 
                 </div>
 
@@ -194,17 +200,17 @@ const actions = ref(
 const formDescriptions = ref({})
 const tableData = ref([]);
 
-const filterOnModal=reactive({
-  appliedform_name:false,
-  appliedform_category:false,
-  appliedaccessible_departments:false,
-  appliedStatus:false,
-  appledowner_of_the_form:false,
-form_name:'',
-form_category:'',
-accessible_departments:'',
-active:'',
-owner_of_the_form:''
+const filterOnModal = reactive({
+    appliedform_name: false,
+    appliedform_category: false,
+    appliedaccessible_departments: false,
+    appliedStatus: false,
+    appledowner_of_the_form: false,
+    form_name: '',
+    form_category: '',
+    accessible_departments: '',
+    active: '',
+    owner_of_the_form: ''
 })
 const appliedFiltersCount = computed(() => {
     return [
@@ -225,52 +231,52 @@ const appliedFiltersCount = computed(() => {
             value: filterOnModal.owner_of_the_form,
             applied: filterOnModal.appledowner_of_the_form,
         },
-      
-       
+
+
     ].filter((filter) => filter.applied && filter.value).length;
 });
 function clearFilter(type) {
     if (type === "form_name") {
-      filterOnModal.form_name = "";
-      filterOnModal.appliedform_name = false;
+        filterOnModal.form_name = "";
+        filterOnModal.appliedform_name = false;
     } else if (type === "form_category") {
-      filterOnModal.form_category = "";
-      filterOnModal.appliedform_category = false;
-    
+        filterOnModal.form_category = "";
+        filterOnModal.appliedform_category = false;
+
     }
     else if (type === "accessible_departments") {
-      filterOnModal.accessible_departments = "";
-      filterOnModal.appliedaccessible_departments = false;
-    
+        filterOnModal.accessible_departments = "";
+        filterOnModal.appliedaccessible_departments = false;
+
     }
     else if (type === "active") {
-      filterOnModal.active = "";
-      filterOnModal.appliedStatus = false;
-    
+        filterOnModal.active = "";
+        filterOnModal.appliedStatus = false;
+
     }
     else if (type === "owner_of_the_form") {
-      filterOnModal.owner_of_the_form = "";
-      filterOnModal.appledowner_of_the_form = false;
-    
+        filterOnModal.owner_of_the_form = "";
+        filterOnModal.appledowner_of_the_form = false;
+
     }
- 
+
 
     applyFilters();
-  }
-  function applyFilters() {
-  filterOnModal.appliedform_name=Boolean(filterOnModal.form_name);
-  filterOnModal.appliedform_category=Boolean(filterOnModal.form_category);
-filterOnModal.appliedaccessible_departments=Boolean(filterOnModal.accessible_departments);
-filterOnModal.appliedStatus=Boolean(filterOnModal.active);
-filterOnModal.appledowner_of_the_form=Boolean(filterOnModal.owner_of_the_form);
+}
+function applyFilters() {
+    filterOnModal.appliedform_name = Boolean(filterOnModal.form_name);
+    filterOnModal.appliedform_category = Boolean(filterOnModal.form_category);
+    filterOnModal.appliedaccessible_departments = Boolean(filterOnModal.accessible_departments);
+    filterOnModal.appliedStatus = Boolean(filterOnModal.active);
+    filterOnModal.appledowner_of_the_form = Boolean(filterOnModal.owner_of_the_form);
 
 
 
 
-  // filterOnModal.applieddepartment_code=Boolean(filterOnModal.department_code);
-  // filterOnModal.applieddepartment_name=Boolean(filterOnModal.department_name)
+    // filterOnModal.applieddepartment_code=Boolean(filterOnModal.department_code);
+    // filterOnModal.applieddepartment_name=Boolean(filterOnModal.department_name)
 
-fetchTable()
+    fetchTable()
 }
 const filterObj = ref({
     limit_start: 0,
@@ -291,7 +297,7 @@ watch(
 
         if (newVal.length) {
             console.log(newVal, "new value of business unit");
-            localStorage.setItem("Bu", filterObj.value.business_unit)
+            // localStorage.setItem("Bu", filterObj.value.business_unit)
             tableData.value = []
             fetchTable()
         }
@@ -346,9 +352,9 @@ function resetFilters() {
         RequestedId: ""
     };
 }
-const formCategory=ref([]);
-const accessibleDepartments=ref([]);
-const ownerForms=ref([])
+const formCategory = ref([]);
+const accessibleDepartments = ref([]);
+const ownerForms = ref([])
 function fetchTable() {
     const filters = [
         ["business_unit", "like", `%${filterObj.value.business_unit}%`]
