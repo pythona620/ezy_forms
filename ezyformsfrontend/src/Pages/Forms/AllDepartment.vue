@@ -45,9 +45,13 @@
                         </div>
                     </div>
                     <div>
-                        <button type="button" class=" filterbtn d-flex align-items-center " data-bs-toggle="modal"
+                      <button type="button" class=" filterbtn d-flex align-items-center position-relative " data-bs-toggle="modal"
                             data-bs-target="#fileterModal">
                             <span> <i class="ri-filter-2-line"></i></span>
+                            <span v-if="appliedFiltersCount !== 0"
+                            class=" badge badge-light colorappiled ">
+                (  {{ appliedFiltersCount }})
+                </span>
                         </button>
 
                     </div>
@@ -118,7 +122,10 @@
             </div>
       </div>
       <div class="mt-3"><GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true" actionType="dropdown"
-        @actionClicked="actionCreated" :actions="actions" /></div>
+        @actionClicked="actionCreated" :actions="actions" />
+        <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
+        @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
+      </div>
       
     </div>
     <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
@@ -155,6 +162,7 @@ import { rebuildToStructuredArray } from '../../shared/services/field_format';
 import FormPreview from '../../Components/FormPreview.vue'
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
+const totalRecords = ref(0);
 
 // Props for dynamic ID
 const props = defineProps(['id']);
@@ -170,6 +178,25 @@ form_category:'',
 accessible_departments:'',
 form_status:''
 })
+const appliedFiltersCount = computed(() => {
+    return [
+        { value: filterOnModal.form_category, applied: filterOnModal.appliedform_category },
+        {
+            value: filterOnModal.form_name,
+            applied: filterOnModal.appliedform_name,
+        },
+        {
+            value: filterOnModal.form_status,
+            applied: filterOnModal.appliedStatus,
+        },
+        {
+            value: filterOnModal.accessible_departments,
+            applied: filterOnModal.appliedaccessible_departments,
+        },
+      
+       
+    ].filter((filter) => filter.applied && filter.value).length;
+});
 function clearFilter(type) {
     if (type === "form_name") {
       filterOnModal.form_name = "";

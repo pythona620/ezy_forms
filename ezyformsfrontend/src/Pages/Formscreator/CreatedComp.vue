@@ -48,10 +48,14 @@
                         </div>
                 </div>
                 <div>
-                    <button type="button" class=" filterbtn d-flex align-items-center justify-content-between"
-                        data-bs-toggle="modal" data-bs-target="#exampleModal">
-                        <span> <i class="ri-filter-2-line"></i></span>
-                    </button>
+                    <button type="button" class=" filterbtn d-flex align-items-center position-relative " data-bs-toggle="modal"
+                            data-bs-target="#exampleModal">
+                            <span> <i class="ri-filter-2-line"></i></span>
+                            <span v-if="appliedFiltersCount !== 0"
+                            class=" badge badge-light colorappiled ">
+                (  {{ appliedFiltersCount }})
+                </span>
+                        </button>
 
                 </div>
 
@@ -198,6 +202,29 @@ accessible_departments:'',
 active:'',
 owner_of_the_form:''
 })
+const appliedFiltersCount = computed(() => {
+    return [
+        { value: filterOnModal.form_category, applied: filterOnModal.appliedform_category },
+        {
+            value: filterOnModal.form_name,
+            applied: filterOnModal.appliedform_name,
+        },
+        {
+            value: filterOnModal.active,
+            applied: filterOnModal.appliedStatus,
+        },
+        {
+            value: filterOnModal.accessible_departments,
+            applied: filterOnModal.appliedaccessible_departments,
+        },
+        {
+            value: filterOnModal.owner_of_the_form,
+            applied: filterOnModal.appledowner_of_the_form,
+        },
+      
+       
+    ].filter((filter) => filter.applied && filter.value).length;
+});
 function clearFilter(type) {
     if (type === "form_name") {
       filterOnModal.form_name = "";
@@ -408,11 +435,11 @@ ownerForms.value=[...new Set(newData.map((ownerForms)=>ownerForms.owner_of_the_f
     padding: 8px 20px;
 }
 
-
+/* 
 .formsticky {
     position: sticky;
     top: 50px;
     z-index: 100;
     background: white;
-}
+} */
 </style>

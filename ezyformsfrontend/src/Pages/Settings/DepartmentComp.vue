@@ -13,14 +13,14 @@
                 <div class="d-flex align-items-center">
                     <div>
                         <div class="me-2">
-                <span v-if="filterOnModal.department_name && filterOnModal.applieddepartment_name" class="process-date font-12 m-0">
+                <span v-if="filterOnModal.department_name && filterOnModal.applieddepartment_name" class="process-date font-11 m-0">
                   {{ filterOnModal.department_name }}
                   <span v-if="filterOnModal.department_name" class="badge badge-icon rounded-3   text-white ms-2"
                     @click="clearFilter('department_name')">
                     <i class="ri-close-line close-icon text-dark rounded-3"></i>
                   </span>
                 </span>
-                <span v-if="filterOnModal.department_code && filterOnModal.applieddepartment_code" class="process-date font-12 m-0">
+                <span v-if="filterOnModal.department_code && filterOnModal.applieddepartment_code" class="process-date font-11 m-0">
                   {{ filterOnModal.department_code }}
                   <span v-if="filterOnModal.department_code" class="badge badge-icon rounded-3   text-white ms-2"
                     @click="clearFilter('department_code')">
@@ -30,27 +30,31 @@
                         </div>
                     </div>
                     <div>
-                        <button type="button" class=" filterbtn d-flex align-items-center " data-bs-toggle="modal"
+                        <button type="button" class=" filterbtn d-flex align-items-center position-relative " data-bs-toggle="modal"
                             data-bs-target="#fileterModal">
                             <span> <i class="ri-filter-2-line"></i></span>
+                            <span v-if="appliedFiltersCount !== 0"
+                            class=" badge badge-light colorappiled ">
+                (  {{ appliedFiltersCount }})
+                </span>
                         </button>
 
                     </div>
                 </div>
                 <div class="modal fade" id="fileterModal" tabindex="-1" aria-labelledby="fileterModalLabel"
                     aria-hidden="true">
-                    <div class="modal-dialog modal-xl">
+                    <div class="modal-dialog modal-lg">
                         <div class="modal-content">
 
                             <div class="modal-body">
                                 <div class="row">
-                                    <div class="col-3">
+                                    <div class="col-6">
                                         <label class="font-13 ps-1" for="Requested">Department Code:</label>
                                         <FormFields class="mb-3" tag="input" type="search" name="Requested"
                                             id="Requested" placeholder="Search" v-model="filterOnModal.department_code" />
                                     </div>
                                     
-                                    <div class="col-3">
+                                    <div class="col-6">
                                         <label class="font-13 ps-1 fw-medium" for="dept">Requested Dept:</label>
                                         <FormFields tag="select" placeholder="Select Department" class="mb-3"
                                             name="dept" v-model="filterOnModal.department_name" id="dept"
@@ -295,7 +299,17 @@ const filterOnModal = reactive({
    
 
 })
-
+const appliedFiltersCount = computed(() => {
+    return [
+        { value: filterOnModal.department_code, applied: filterOnModal.applieddepartment_code },
+        {
+            value: filterOnModal.department_name,
+            applied: filterOnModal.applieddepartment_name,
+        },
+      
+       
+    ].filter((filter) => filter.applied && filter.value).length;
+});
 
 function clearFilter(type) {
     if (type === "department_name") {

@@ -621,7 +621,5 @@ function SaveEditEmp() {
     /* color: #111111; */
     padding: 8px 20px;
 }
-.colorappiled{
-    color: #9f9494;
-}
+
 </style>
