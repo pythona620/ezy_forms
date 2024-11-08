@@ -472,7 +472,7 @@ function resetFilters() {
         Approval_status: "",
 
     };
-    employeeData()
+    
 }
 function cancelCreate() {
     createEmployee.value = {

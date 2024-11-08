@@ -3,7 +3,7 @@
         <div class="d-flex justify-content-between align-items-center formsticky">
             <div>
                 <h1 class="m-0 font-13">Forms Master</h1>
-                <p class="m-0 font-11 pt-1">374 forms available</p>
+                <p class="m-0 font-11 pt-1">{{ totalRecords }} forms available</p>
             </div>
             <div class="d-flex gap-2 align-items-center">
                 <div>

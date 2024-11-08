@@ -47,6 +47,20 @@
                     <i class="ri-close-line close-icon text-dark rounded-3"></i>
                   </span>
                 </span>
+                <span v-if="filterOnModal.requested_by && filterOnModal.appliedrequest_by" class="process-date font-12 m-0">
+                  {{ filterOnModal.requested_by }}
+                  <span v-if="filterOnModal.requested_by" class="badge badge-icon rounded-3   text-white"
+                    @click="clearFilter('form_status')">
+                    <i class="ri-close-line close-icon text-dark rounded-3"></i>
+                  </span>
+                </span>
+                <span v-if="filterOnModal.requested_department && filterOnModal.appliedrequested_department" class="process-date font-12 m-0">
+                  {{ filterOnModal.requested_department }}
+                  <span v-if="filterOnModal.requested_department" class="badge badge-icon rounded-3   text-white"
+                    @click="clearFilter('form_status')">
+                    <i class="ri-close-line close-icon text-dark rounded-3"></i>
+                  </span>
+                </span>
                         </div>
                     </div>
                     <div>
@@ -99,14 +113,17 @@
                                             name="dept" v-model="filterOnModal.form_status" id="dept" :Required="false"
                                             :options="['Active','Draft']" />
                                     </div>
-                                    <!-- <div class="col-3">
-                                        <label class="font-13 ps-1 fw-medium" for="dept">Requested Dept:</label>
-                                        <FormFields tag="select" placeholder="Select Department" class="mb-3"
-                                            name="dept" v-model="filterOnModal.department_name" id="dept"
-                                            :Required="false"
-                                            :options="designiations" />
-                                    </div> -->
                                   
+                                    <div class="col-6">
+                                        <label class="font-13 ps-1" for="Requested">Requested By:</label>
+                                        <FormFields class="mb-3" tag="input" type="search" name="Requested"
+                                            id="Requested" placeholder="Search" v-model="filterOnModal.requested_by" />
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="font-13 ps-1" for="Requested">Requested Department:</label>
+                                        <FormFields class="mb-3" tag="input" type="search" name="Requested"
+                                            id="Requested" placeholder="Search" v-model="filterOnModal.requested_department" />
+                                    </div>
                                   
 
                                 </div>
@@ -180,11 +197,15 @@ const filterOnModal=reactive({
   appliedaccessible_departments:false,
   appliedStatus:false,
   appliedrequest_id:false,
+  appliedrequest_by:false,
+  appliedrequested_department:false,
 form_name:'',
 form_category:'',
 accessible_departments:'',
 form_status:'',
-request_id:''
+request_id:'',
+requested_by:'',
+requested_department:''
 })
 const appliedFiltersCount = computed(() => {
     return [
@@ -204,6 +225,14 @@ const appliedFiltersCount = computed(() => {
         {
             value: filterOnModal.request_id,
             applied: filterOnModal.appliedrequest_id,
+        },
+        {
+            value: filterOnModal.requested_by,
+            applied: filterOnModal.appliedrequest_by,
+        },
+        {
+            value: filterOnModal.requested_department,
+            applied: filterOnModal.appliedrequested_department,
         },
       
        
@@ -228,9 +257,19 @@ function clearFilter(type) {
       filterOnModal.appliedStatus = false;
     
     }
-    else if (type === "form_status") {
+    else if (type === "request_id") {
       filterOnModal.request_id = "";
       filterOnModal.appliedrequest_id = false;
+    
+    }
+    else if (type === "requested_by") {
+      filterOnModal.requested_by = "";
+      filterOnModal.appliedrequest_by = false;
+    
+    }
+    else if (type === "requested_department") {
+      filterOnModal.requested_department = "";
+      filterOnModal.appliedrequested_department = false;
     
     }
  
@@ -242,7 +281,10 @@ function clearFilter(type) {
   filterOnModal.appliedform_category=Boolean(filterOnModal.form_category);
 filterOnModal.appliedaccessible_departments=Boolean(filterOnModal.accessible_departments);
 filterOnModal.appliedStatus=Boolean(filterOnModal.form_status);
-filterOnModal.appliedrequest_id=Boolean(filterOnModal.request_id)
+filterOnModal.appliedrequest_id=Boolean(filterOnModal.request_id);
+filterOnModal.appliedrequest_by=Boolean(filterOnModal.requested_by);
+filterOnModal.appliedrequested_department=Boolean(filterOnModal.requested_department);
+
 
 }
 onMounted(() => {

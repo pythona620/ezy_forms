@@ -334,6 +334,13 @@ const appliedFiltersCount = computed(() => {
 
     ].filter((filter) => filter.applied && filter.value).length;
 });
+function resetFilters() {
+    filterOnModal.value = {
+        department_name: "",
+        department_code: "",
+       
+    };
+}
 
 function clearFilter(type) {
     if (type === "department_name") {
@@ -424,13 +431,7 @@ function applyFilters() {
     deptData();
 }
 
-function resetFilters() {
-    filterOnModal.value = {
-        department_name: "",
-        department_code: ''
-    };
-    deptData()
-}
+
 const designiations = ref([]);
 
 function deptData() {

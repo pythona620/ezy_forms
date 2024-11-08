@@ -7,7 +7,7 @@
             Forms in {{ id }}
           </h1>
           <p class="m-0 font-11 pt-1">
-            2 forms available
+          {{ totalRecords }} forms available
           </p>
         </div>
         <div class="d-flex gap-2 align-items-center">
