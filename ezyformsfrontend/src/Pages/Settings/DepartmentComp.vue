@@ -17,7 +17,7 @@
                                 class="process-date font-11 m-0">
                                 {{ filterOnModal.department_name }}
                                 <span v-if="filterOnModal.department_name"
-                                    class="badge badge-icon rounded-3   text-white ms-2"
+                                    class="badge badge-icon rounded-3   text-white "
                                     @click="clearFilter('department_name')">
                                     <i class="ri-close-line close-icon text-dark rounded-3"></i>
                                 </span>
@@ -26,7 +26,7 @@
                                 class="process-date font-11 m-0">
                                 {{ filterOnModal.department_code }}
                                 <span v-if="filterOnModal.department_code"
-                                    class="badge badge-icon rounded-3   text-white ms-2"
+                                    class="badge badge-icon rounded-3   text-white "
                                     @click="clearFilter('department_code')">
                                     <i class="ri-close-line close-icon text-dark rounded-3"></i>
                                 </span>

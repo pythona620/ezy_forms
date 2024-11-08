@@ -3,7 +3,7 @@ import Designations from "./Designations.vue";
 const SettingsPage = () => import("./SettingsPage.vue");
 const ProfileComp = () => import("./ProfileComp.vue");
 const NotificationComp = () => import("./NotificationComp.vue");
-const UserManageent = () => import("./UserManagement.vue");
+const EmployeeComp = () => import("./EmployeeComp.vue");
 const WorkFLow = () => import("./WorkFlow.vue");
 const Roles = () => import("./RolesComp.vue");
 const RolesMatrix = () => import("./RolesMatrix.vue");
@@ -18,9 +18,9 @@ const settingRoutes = [
 
     children: [
       {
-        path: "usermanagement",
-        component: UserManageent,
-        name: "UserManageent",
+        path: "employee",
+        component: EmployeeComp,
+        name: "EmployeeComp",
       },
       {
         path: "profile",

@@ -16,28 +16,28 @@
                         <div class="me-2">
                 <span v-if="filterOnModal.form_name && filterOnModal.appliedform_name" class="process-date font-12 m-0">
                   {{ filterOnModal.form_name }}
-                  <span v-if="filterOnModal.form_name" class="badge badge-icon rounded-3   text-white ms-2"
+                  <span v-if="filterOnModal.form_name" class="badge badge-icon rounded-3   text-white "
                     @click="clearFilter('form_name')">
                     <i class="ri-close-line close-icon text-dark rounded-3"></i>
                   </span>
                 </span>
                 <span v-if="filterOnModal.form_category && filterOnModal.appliedform_category" class="process-date font-12 m-0">
                   {{ filterOnModal.form_category }}
-                  <span v-if="filterOnModal.form_category" class="badge badge-icon rounded-3   text-white ms-2"
+                  <span v-if="filterOnModal.form_category" class="badge badge-icon rounded-3   text-white "
                     @click="clearFilter('form_category')">
                     <i class="ri-close-line close-icon text-dark rounded-3"></i>
                   </span>
                 </span>
                 <span v-if="filterOnModal.accessible_departments && filterOnModal.appliedaccessible_departments" class="process-date font-12 m-0">
                   {{ filterOnModal.accessible_departments }}
-                  <span v-if="filterOnModal.accessible_departments" class="badge badge-icon rounded-3   text-white ms-2"
+                  <span v-if="filterOnModal.accessible_departments" class="badge badge-icon rounded-3   text-white "
                     @click="clearFilter('accessible_departments')">
                     <i class="ri-close-line close-icon text-dark rounded-3"></i>
                   </span>
                 </span>
                 <span v-if="filterOnModal.form_status && filterOnModal.appliedStatus" class="process-date font-12 m-0">
                   {{ filterOnModal.form_status }}
-                  <span v-if="filterOnModal.form_status" class="badge badge-icon rounded-3   text-white ms-2"
+                  <span v-if="filterOnModal.form_status" class="badge badge-icon rounded-3   text-white"
                     @click="clearFilter('form_status')">
                     <i class="ri-close-line close-icon text-dark rounded-3"></i>
                   </span>
@@ -159,15 +159,23 @@ import ButtonComp from '../../Components/ButtonComp.vue';
 import GlobalTable from '../../Components/GlobalTable.vue';
 import { EzyBusinessUnit } from '../../shared/services/business_unit';
 import { rebuildToStructuredArray } from '../../shared/services/field_format';
+import PaginationComp from "../../Components/PaginationComp.vue"
 import FormPreview from '../../Components/FormPreview.vue'
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 const totalRecords = ref(0);
-
-// Props for dynamic ID
+const tableheaders = ref([
+  { th: "Form name", td_key: "form_name" },
+  { th: "Form category", td_key: "form_category" },
+  { th: "Accessible departments", td_key: "accessible_departments" },
+  { th: "Status", td_key: "form_status" },
+]);
 const props = defineProps(['id']);
 const formDescriptions = ref({})
 const selectedForm = ref(null);
+const tableData = ref([]);
+const formCategory=ref([]);
+const accessibleDepartments=ref([])
 const filterOnModal=reactive({
   appliedform_name:false,
   appliedform_category:false,
@@ -223,7 +231,7 @@ function clearFilter(type) {
 // Business unit and filter object
 const businessUnit = computed(() => EzyBusinessUnit.value);
 const newBusinessUnit = ref({ business_unit: '' });
-const filterObj = ref({  limitPageLength: 'None', limitstart: 0 });
+const filterObj = ref({  limitPageLength: 'None', limit_start: 0 });
 const actions = ref(
   [
     { name: 'View form', icon: 'fa-solid fa-eye' },
@@ -250,8 +258,6 @@ function applyFilters() {
 filterOnModal.appliedaccessible_departments=Boolean(filterOnModal.accessible_departments);
 filterOnModal.appliedStatus=Boolean(filterOnModal.form_status);
 
-  // filterOnModal.applieddepartment_code=Boolean(filterOnModal.department_code);
-  // filterOnModal.applieddepartment_name=Boolean(filterOnModal.department_name)
 
 fetchDepartmentDetails()
 }
@@ -266,18 +272,23 @@ watch(
   },
   { immediate: true }
 );
+// Handle updating the current value
+const PaginationUpdateValue = (itemsPerPage) => {
+    filterObj.value.limitPageLength = itemsPerPage;
+    filterObj.value.limit_start = 0;
+    fetchTable();
+
+};
+// Handle updating the limit start
+const PaginationLimitStart = ([itemsPerPage, start]) => {
+    filterObj.value.limitPageLength = itemsPerPage;
+    filterObj.value.limit_start = start;
+    fetchTable();
+
+};
 
 
-// Table headers and data
-const tableheaders = ref([
-  { th: "Form name", td_key: "form_name" },
-  { th: "Form category", td_key: "form_category" },
-  { th: "Accessible departments", td_key: "accessible_departments" },
-  { th: "Status", td_key: "form_status" },
-]);
-const tableData = ref([]);
-const formCategory=ref([]);
-const accessibleDepartments=ref([])
+
 // Fetch department details function
 function fetchDepartmentDetails(id) {
   const filters = [
@@ -301,15 +312,30 @@ function fetchDepartmentDetails(id) {
   const queryParams = {
     fields: JSON.stringify(["*"]),
     limit_page_length: filterObj.value.limitPageLength,
-    limitstart: filterObj.value.limitstart,
+    limit_start: filterObj.value.limit_start,
     filters: JSON.stringify(filters),
     order_by: "`tabEzy Form Definitions`.`creation` desc",
   };
+  const queryParamsCount = {
+        fields: JSON.stringify(["count( `tabEzy Form Definitions`.`name`) AS total_count"]),
+        limitPageLength: "None",
+        filters: JSON.stringify(filters),
+    }
+    axiosInstance.get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParamsCount })
+        .then((res) => {
+          
+            totalRecords.value = res.data[0].total_count
+
+        })
+        .catch((error) => {
+            console.error("Error fetching ezyForms data:", error);
+        });
 
   axiosInstance
     .get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParams })
     .then((response) => {
       tableData.value = response.data;
+     
       formCategory.value = [...new Set(response.data.map((formCategory) => formCategory.form_category))];
       accessibleDepartments.value=[...new Set(response.data.map((accessibleDepartments) => accessibleDepartments.accessible_departments))];
 
@@ -318,16 +344,12 @@ function fetchDepartmentDetails(id) {
       console.error("Error fetching department details:", error);
     });
 }
-// const filterOnModal = ref({
-//   form_name: "",
-   
-//     department_name: "",
-   
 
-// })
 </script>
 
 <style>
+
+
 .dashedcircle {
   border: 1px dashed #AAAAAA;
   height: 30px;

@@ -126,7 +126,7 @@ const settingsSideBarData = [
     // { name: 'Notifications', icon: 'bi bi-bell', route: 'notifications' },
     { name: 'Department', icon: 'bi bi-clock-history', route: 'department' },
     { name: 'Designation', icon: 'bi bi-people', route: 'designations' },
-    { name: 'Employees', icon: 'bi bi-people', route: 'usermanagement' },
+    { name: 'Employees', icon: 'bi bi-people', route: 'employee' },
     // { name: 'Categories', icon: 'bi bi-tags', route: 'categories' },
 
 ];
@@ -287,7 +287,9 @@ li {
     white-space: nowrap;
     text-overflow: ellipsis;
     overflow: hidden;
-    margin: 0px 0px 0px 11px;
+    padding: 5px 10px;
+
+    /* margin: 0px 0px 0px 11px; */
 }
 
 .bi-icon {
@@ -308,8 +310,9 @@ li {
     font-weight: var(--font-weight-medium);
     line-height: 26px;
     text-align: left;
-    border-radius: 4px;
-    padding: 5px 0px;
+    border-radius: 6px;
+    
+   
 
 }
 
