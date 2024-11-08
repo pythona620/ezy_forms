@@ -98,7 +98,7 @@
 
 <script setup>
 // import ButtonComp from "./ButtonComp.vue";
-import { defineProps, defineEmits, ref, onMounted } from "vue";
+import { defineProps, defineEmits, ref, onMounted, watch } from "vue";
 // import moment from "moment";
 // import FormFields from "./FormFields.vue";
 const props = defineProps({
@@ -137,7 +137,7 @@ const props = defineProps({
 });
 
 const emits = defineEmits([
-
+  "actionClicked"
 ]);
 
 
@@ -145,24 +145,43 @@ function selectedAction(row, action) {
   emits("actionClicked", row, action);
 
 }
-// const allCheck = ref(false);
-// function SelectedAll() {
-//   props.tData.forEach(batch => {
-//     if (batch.status === 'Pending') {
-//       batch.isSelected = allCheck.value;
-//     }
-//   });
-//   emits("all-Check", allCheck.value);
-//   // console.log(allCheck.value,'allcheck')
-// }
+const allCheck = ref(false);
 
-// function selectedCheckList(checked, index) {
-//   allCheck.value = props.tData.every(batch => batch.status !== 'Pending' || batch.isSelected);
-//   emits("checkbox-click", checked, index);
-// }
-// onMounted(() => {
-//   allCheck.value = false;
-// });
+function SelectedAll() {
+  allCheck.value = !allCheck.value;
+  console.log("All Check Toggled:", allCheck.value);
+
+  props.tData.forEach(row => {
+    row.isSelected = allCheck.value;
+  });
+  const selectedData = props.tData.filter(row => row.isSelected);
+  console.log("Selected Data:", selectedData);
+  emits("all-Check", allCheck.value);
+}
+
+function selectedCheckList(row, index) {
+  const allChecked = props.tData.every(row => row.isSelected);
+  allCheck.value = allChecked;
+  const selectedData = props.tData.filter(row => row.isSelected);
+  console.log("Selected Data:", selectedData);
+  emits("checkbox-click", row, index);
+}
+
+watch(
+  () => props.tData.map(row => row.isSelected),
+  (newVal) => {
+    const allChecked = newVal.every(selected => selected);
+    if (allCheck.value !== allChecked) {
+      allCheck.value = allChecked;
+
+    }
+  },
+  { deep: true }
+);
+
+onMounted(() => {
+  allCheck.value = false;
+});
 
 // function handleFileChange(event) {
 //   const file = event.target.files[0];
