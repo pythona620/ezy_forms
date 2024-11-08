@@ -15,7 +15,7 @@
                         <span v-if="filterOnModal.emp_code && filterOnModal.appliedeEmp_code"
                             class="process-date font-12 m-0">
                             {{ filterOnModal.emp_code }}
-                            <span v-if="filterOnModal.emp_code" class="badge badge-icon rounded-3   text-white ms-2"
+                            <span v-if="filterOnModal.emp_code" class="badge badge-icon rounded-3   text-white "
                                 @click="clearFilter('emp_code')">
                                 <i class="ri-close-line close-icon text-dark rounded-3"></i>
                             </span>
@@ -24,7 +24,7 @@
                         <span v-if="filterOnModal.designation && filterOnModal.applieddesignation"
                             class="process-date font-12 m-0"> {{
                                 filterOnModal.designation }}
-                            <span v-if="filterOnModal.designation" class="badge badge-icon rounded-3   text-white ms-2"
+                            <span v-if="filterOnModal.designation" class="badge badge-icon rounded-3   text-white "
                                 @click="clearFilter('designation')">
                                 <i class="ri-close-line close-icon text-dark rounded-3"></i>
                             </span>
@@ -32,7 +32,7 @@
                         <span v-if="filterOnModal.department && filterOnModal.applieddepartment"
                             class="process-date font-12 m-0"> {{
                                 filterOnModal.department }}
-                            <span v-if="filterOnModal.department" class="badge badge-icon rounded-3   text-white ms-2"
+                            <span v-if="filterOnModal.department" class="badge badge-icon rounded-3   text-white "
                                 @click="clearFilter('department')">
                                 <i class="ri-close-line close-icon text-dark rounded-3"></i>
                             </span>
@@ -40,7 +40,7 @@
                         <span v-if="filterOnModal.emp_mail_id && filterOnModal.appliedEmp_mail_id"
                             class="process-date font-12 m-0"> {{
                                 filterOnModal.emp_mail_id }}
-                            <span v-if="filterOnModal.emp_mail_id" class="badge badge-icon rounded-3   text-white ms-2"
+                            <span v-if="filterOnModal.emp_mail_id" class="badge badge-icon rounded-3   text-white "
                                 @click="clearFilter('emp_mail_id')">
                                 <i class="ri-close-line close-icon text-dark rounded-3"></i>
                             </span>
@@ -48,7 +48,7 @@
                         <span v-if="filterOnModal.emp_code && filterOnModal.appliedeEmp_code"
                             class="process-date font-12 m-0"> {{
                                 filterOnModal.emp_name }}
-                            <span v-if="filterOnModal.emp_name" class="badge badge-icon rounded-3   text-white ms-2"
+                            <span v-if="filterOnModal.emp_name" class="badge badge-icon rounded-3   text-white "
                                 @click="clearFilter('emp_name')">
                                 <i class="ri-close-line close-icon text-dark rounded-3"></i>
                             </span>
@@ -57,7 +57,7 @@
                             class="process-date font-12 m-0"> {{
                                 filterOnModal.reporting_designation }}
                             <span v-if="filterOnModal.reporting_designation"
-                                class="badge badge-icon rounded-3   text-white ms-2"
+                                class="badge badge-icon rounded-3   text-white "
                                 @click="clearFilter('reporting_designation')">
                                 <i class="ri-close-line close-icon text-dark rounded-3"></i>
                             </span>
@@ -65,7 +65,7 @@
                         <span v-if="filterOnModal.reporting_to && filterOnModal.appliedreporting_to"
                             class="process-date font-12 m-0"> {{
                                 filterOnModal.reporting_to }}
-                            <span v-if="filterOnModal.reporting_to" class="badge badge-icon rounded-3   text-white ms-2"
+                            <span v-if="filterOnModal.reporting_to" class="badge badge-icon rounded-3   text-white "
                                 @click="clearFilter('reporting_to')">
                                 <i class="ri-close-line close-icon text-dark rounded-3"></i>
                             </span>

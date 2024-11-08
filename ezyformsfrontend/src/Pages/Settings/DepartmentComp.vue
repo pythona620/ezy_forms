@@ -15,14 +15,14 @@
                         <div class="me-2">
                 <span v-if="filterOnModal.department_name && filterOnModal.applieddepartment_name" class="process-date font-11 m-0">
                   {{ filterOnModal.department_name }}
-                  <span v-if="filterOnModal.department_name" class="badge badge-icon rounded-3   text-white ms-2"
+                  <span v-if="filterOnModal.department_name" class="badge badge-icon rounded-3   text-white "
                     @click="clearFilter('department_name')">
                     <i class="ri-close-line close-icon text-dark rounded-3"></i>
                   </span>
                 </span>
                 <span v-if="filterOnModal.department_code && filterOnModal.applieddepartment_code" class="process-date font-11 m-0">
                   {{ filterOnModal.department_code }}
-                  <span v-if="filterOnModal.department_code" class="badge badge-icon rounded-3   text-white ms-2"
+                  <span v-if="filterOnModal.department_code" class="badge badge-icon rounded-3   text-white "
                     @click="clearFilter('department_code')">
                     <i class="ri-close-line close-icon text-dark rounded-3"></i>
                   </span>

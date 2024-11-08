@@ -12,35 +12,35 @@
                         <div class="me-2">
                 <span v-if="filterOnModal.form_name && filterOnModal.appliedform_name" class="process-date font-12 m-0">
                   {{ filterOnModal.form_name }}
-                  <span v-if="filterOnModal.form_name" class="badge badge-icon rounded-3   text-white ms-2"
+                  <span v-if="filterOnModal.form_name" class="badge badge-icon rounded-3   text-white "
                     @click="clearFilter('form_name')">
                     <i class="ri-close-line close-icon text-dark rounded-3"></i>
                   </span>
                 </span>
                 <span v-if="filterOnModal.form_category && filterOnModal.appliedform_category" class="process-date font-12 m-0">
                   {{ filterOnModal.form_category }}
-                  <span v-if="filterOnModal.form_category" class="badge badge-icon rounded-3   text-white ms-2"
+                  <span v-if="filterOnModal.form_category" class="badge badge-icon rounded-3   text-white "
                     @click="clearFilter('form_category')">
                     <i class="ri-close-line close-icon text-dark rounded-3"></i>
                   </span>
                 </span>
                 <span v-if="filterOnModal.accessible_departments && filterOnModal.appliedaccessible_departments" class="process-date font-12 m-0">
                   {{ filterOnModal.accessible_departments }}
-                  <span v-if="filterOnModal.accessible_departments" class="badge badge-icon rounded-3   text-white ms-2"
+                  <span v-if="filterOnModal.accessible_departments" class="badge badge-icon rounded-3   text-white "
                     @click="clearFilter('accessible_departments')">
                     <i class="ri-close-line close-icon text-dark rounded-3"></i>
                   </span>
                 </span>
                 <span v-if="filterOnModal.active && filterOnModal.appliedStatus" class="process-date font-12 m-0">
                   {{ filterOnModal.active }}
-                  <span v-if="filterOnModal.active" class="badge badge-icon rounded-3   text-white ms-2"
+                  <span v-if="filterOnModal.active" class="badge badge-icon rounded-3   text-white "
                     @click="clearFilter('active')">
                     <i class="ri-close-line close-icon text-dark rounded-3"></i>
                   </span>
                 </span>
                 <span v-if="filterOnModal.owner_of_the_form && filterOnModal.appledowner_of_the_form" class="process-date font-12 m-0">
                   {{ filterOnModal.owner_of_the_form }}
-                  <span v-if="filterOnModal.owner_of_the_form" class="badge badge-icon rounded-3   text-white ms-2"
+                  <span v-if="filterOnModal.owner_of_the_form" class="badge badge-icon rounded-3   text-white "
                     @click="clearFilter('owner_of_the_form')">
                     <i class="ri-close-line close-icon text-dark rounded-3"></i>
                   </span>
