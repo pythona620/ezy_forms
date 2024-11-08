@@ -408,6 +408,8 @@ function saveCategories() {
     axiosInstance.put(`${apis.resource}${doctypes.departments}/${categoriesDataEdit.value.name}`, categoriesDataEdit.value)
         .then((response) => {
             toast.success("Changes Saved", { autoClose: 500 })
+            const modal = bootstrap.Modal.getInstance(document.getElementById('viewCategory'));
+            modal.hide();
             console.log("Categories saved successfully:", response.data);
         })
         .catch((error) => {

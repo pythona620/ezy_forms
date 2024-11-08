@@ -22,7 +22,7 @@
                             <div class="d-flex gap-3 justify-content-end align-items-center m-0">
                                 <div class="mb-1">
                                     <ButtonComp v-if="shouldShowButton" class="btn-outline-primary text-nowrap font-10"
-                                        name="Raise request" data-bs-toggle="modal" data-bs-target="#staticBackdrop"
+                                        name="Raise request" data-bs-toggle="modal" data-bs-target="#riaseRequestModal"
                                         @click="raiseRequest" />
 
                                 </div>
@@ -60,12 +60,12 @@
             </div>
             <!-- Modal -->
         </div>
-        <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-            aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal fade" id="riaseRequestModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+            aria-labelledby="riaseRequestModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-sm">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title font-14 fw-bold" id="staticBackdropLabel">Raise Request</h5>
+                        <h5 class="modal-title font-14 fw-bold" id="riaseRequestModalLabel">Raise Request</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
@@ -88,7 +88,7 @@
                     </div>
                     <div>
                         <div class=" d-flex justify-content-center align-items-center p-3">
-                            <button data-bs-dismiss="modal" class="btn btn-dark font-12 w-100" type="submit"
+                            <button class="btn btn-dark font-12 w-100" type="submit"
                                 @click="raiseRequestSubmission">Raise
                                 Request</button>
                         </div>
@@ -185,6 +185,7 @@ const ezyForms = () => {
 };
 watch(business_unit, (newBu, oldBu) => {
     EzyBusinessUnit.value = newBu;
+    localStorage.setItem("Bu", EzyBusinessUnit.value)
 
     if (oldBu) {
         deptData(true);
@@ -293,7 +294,10 @@ function raiseRequestSubmission() {
     // axiosInstance.post(apis.raiseRequest, dataObj)
     //     .then((response) => {
     //         console.log(response);
+    toast.success("Rquest Raised", { autoClose: 500 })
 
+    const modal = bootstrap.Modal.getInstance(document.getElementById('riaseRequestModal'));
+    modal.hide();
     //     })
     //     .catch((error) => {
     //         console.error("Error fetching data:", error);
