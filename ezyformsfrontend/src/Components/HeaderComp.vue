@@ -24,7 +24,6 @@
                                     <ButtonComp v-if="shouldShowButton" class="btn-outline-primary text-nowrap font-10"
                                         name="Raise request" data-bs-toggle="modal" data-bs-target="#riaseRequestModal"
                                         @click="raiseRequest" />
-
                                 </div>
                                 <div class="mt-1">
                                     <FormFields tag="select" placeholder="" class="mb-3" name="roles" id="roles"
