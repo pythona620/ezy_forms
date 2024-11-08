@@ -12,10 +12,10 @@
         v-model="localModel" :required="Required" class="form-control  input-width" :class="{
       'border-end-0 shadow-none': type === ('text' || type === 'number' || type === 'email' || type === 'search') && icon && label,
     }" />
-      <span v-if="(type === 'number' || type === 'email' || type === 'search') && icon"
+      <!-- <span v-if="(type === 'number' || type === 'email' || type === 'search') && icon"
         class="input-group-text pe-3 bg-white border-start-0">
         <i class="ri-search-line"></i>
-      </span>
+      </span> -->
     </div>
 
     <!-- Select Field -->

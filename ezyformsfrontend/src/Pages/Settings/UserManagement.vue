@@ -10,16 +10,77 @@
             </p> -->
             </div>
             <div class="d-flex gap-2 align-items-center">
-                <div class="d-flex">
-                    <div>
-                        <!-- <FormFields labeltext="" class="mb-3" tag="input" type="search" placeholder="Search File Name"
-                        name="Value" id="Value" v-model="filterObj.search" /> -->
+                <div class="d-flex align-items-center">
+                    <div class="me-2">
+                        <span v-if="filterOnModal.emp_code && filterOnModal.appliedeEmp_code"
+                            class="process-date font-12 m-0">
+                            {{ filterOnModal.emp_code }}
+                            <span v-if="filterOnModal.emp_code" class="badge badge-icon rounded-3   text-white ms-2"
+                                @click="clearFilter('emp_code')">
+                                <i class="ri-close-line close-icon text-dark rounded-3"></i>
+                            </span>
+                        </span>
+
+                        <span v-if="filterOnModal.designation && filterOnModal.applieddesignation"
+                            class="process-date font-12 m-0"> {{
+                                filterOnModal.designation }}
+                            <span v-if="filterOnModal.designation" class="badge badge-icon rounded-3   text-white ms-2"
+                                @click="clearFilter('designation')">
+                                <i class="ri-close-line close-icon text-dark rounded-3"></i>
+                            </span>
+                        </span>
+                        <span v-if="filterOnModal.department && filterOnModal.applieddepartment"
+                            class="process-date font-12 m-0"> {{
+                                filterOnModal.department }}
+                            <span v-if="filterOnModal.department" class="badge badge-icon rounded-3   text-white ms-2"
+                                @click="clearFilter('department')">
+                                <i class="ri-close-line close-icon text-dark rounded-3"></i>
+                            </span>
+                        </span>
+                        <span v-if="filterOnModal.emp_mail_id && filterOnModal.appliedEmp_mail_id"
+                            class="process-date font-12 m-0"> {{
+                                filterOnModal.emp_mail_id }}
+                            <span v-if="filterOnModal.emp_mail_id" class="badge badge-icon rounded-3   text-white ms-2"
+                                @click="clearFilter('emp_mail_id')">
+                                <i class="ri-close-line close-icon text-dark rounded-3"></i>
+                            </span>
+                        </span>
+                        <span v-if="filterOnModal.emp_code && filterOnModal.appliedeEmp_code"
+                            class="process-date font-12 m-0"> {{
+                                filterOnModal.emp_name }}
+                            <span v-if="filterOnModal.emp_name" class="badge badge-icon rounded-3   text-white ms-2"
+                                @click="clearFilter('emp_name')">
+                                <i class="ri-close-line close-icon text-dark rounded-3"></i>
+                            </span>
+                        </span>
+                        <span v-if="filterOnModal.reporting_designation && filterOnModal.appliedreporting_designation"
+                            class="process-date font-12 m-0"> {{
+                                filterOnModal.reporting_designation }}
+                            <span v-if="filterOnModal.reporting_designation"
+                                class="badge badge-icon rounded-3   text-white ms-2"
+                                @click="clearFilter('reporting_designation')">
+                                <i class="ri-close-line close-icon text-dark rounded-3"></i>
+                            </span>
+                        </span>
+                        <span v-if="filterOnModal.reporting_to && filterOnModal.appliedreporting_to"
+                            class="process-date font-12 m-0"> {{
+                                filterOnModal.reporting_to }}
+                            <span v-if="filterOnModal.reporting_to" class="badge badge-icon rounded-3   text-white ms-2"
+                                @click="clearFilter('reporting_to')">
+                                <i class="ri-close-line close-icon text-dark rounded-3"></i>
+                            </span>
+                        </span>
                     </div>
                     <div>
-                        <button type="button" class=" filterbtn d-flex align-items-center " data-bs-toggle="modal"
+                        <button type="button" class=" filterbtn d-flex align-items-center position-relative " data-bs-toggle="modal"
                             data-bs-target="#fileterModal">
                             <span> <i class="ri-filter-2-line"></i></span>
+                            <span v-if="appliedFiltersCount !== 0"
+                            class=" badge badge-light colorappiled ">
+                (  {{ appliedFiltersCount }})
+                </span>
                         </button>
+                     
 
                     </div>
                 </div>
@@ -47,34 +108,30 @@
                                     </div>
 
                                     <div class="col-3">
-                                        <label class="font-13 ps-1" for="dept">Owner OF Form:</label>
+                                        <label class="font-13 ps-1" for="dept">Employee Department:</label>
                                         <FormFields tag="select" placeholder="Select Department" class="mb-3"
-                                            name="dept" v-model="filterOnModal.Owner_OF_Form" id="dept"
-                                            :Required="false"
-                                            :options="['JW Marriott Golfshire Banglore', 'JW Marriott Golfshire Banglore']" />
+                                            name="dept" v-model="filterOnModal.department" id="dept" :Required="false"
+                                            :options="departmentsList" />
                                     </div>
                                     <div class="col-3">
-                                        <label class="font-13 ps-1" for="dept">Form Category:</label>
-                                        <FormFields tag="select" placeholder="Select Department" class="mb-3"
-                                            name="dept" v-model="filterOnModal.Form_Category" id="dept"
-                                            :Required="false"
-                                            :options="['JW Marriott Golfshire Banglore', 'JW Marriott Golfshire Banglore']" />
+                                        <label class="font-13 ps-1" for="dept">Employee Desigination:</label>
+                                        <FormFields tag="select" placeholder="Select Desigination" class="mb-3"
+                                            name="dept" v-model="filterOnModal.designation" id="dept" :Required="false"
+                                            :options="designiations" />
                                     </div>
                                     <div class="col-3">
-                                        <label class="font-13 ps-1" for="Requested">Requested Period:</label>
-                                        <FormFields class="mb-3" tag="input" type="date" name="Requested" id="Requested"
-                                            placeholder="Jan-2024-Dec-2024" v-model="filterOnModal.Requested_Period" />
+                                        <label class="font-13 ps-1" for="Requested">Reporting To:</label>
+                                        <FormFields tag="select" placeholder="Reporting To" class="mb-3" name="dept"
+                                            v-model="filterOnModal.reporting_to" id="dept" :Required="false"
+                                            :options="reportingTo" />
                                     </div>
                                     <div class="col-3">
-                                        <FormFields tag="radio" :options="radioOptions" name="exampleRadio"
-                                            id="exampleRadio" v-model="filterOnModal.Approval_status"
-                                            labeltext="Approval Status" />
+                                        <label class="font-13 ps-1" for="Requested">Reporting Desigination:</label>
+                                        <FormFields tag="select" placeholder="Reporting To" class="mb-3" name="dept"
+                                            v-model="filterOnModal.reporting_designation" id="dept" :Required="false"
+                                            :options="reportingDesigination" />
                                     </div>
-                                    <div class="col-3">
-                                        <label class="font-13 ps-1" for="Requested">Requested Id:</label>
-                                        <FormFields class="mb-3" tag="input" type="search" name="Requested"
-                                            id="Requested" placeholder="Search" v-model="filterOnModal.RequestedId" />
-                                    </div>
+
                                 </div>
                             </div>
                             <div class="modal-footer">
@@ -239,7 +296,7 @@ import ButtonComp from '../../Components/ButtonComp.vue';
 import GlobalTable from '../../Components/GlobalTable.vue';
 import axiosInstance from '../../shared/services/interceptor';
 import { apis, doctypes } from '../../shared/apiurls';
-import { onMounted, ref } from 'vue';
+import { onMounted, reactive, ref, computed } from 'vue';
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 
@@ -248,7 +305,7 @@ onMounted(() => {
     deptData();
     employeeData();
 })
-const radioOptions = ref(["yes", "no"])
+
 const departmentsList = ref([])
 const createEmployee = ref({
     emp_code: "",
@@ -292,34 +349,123 @@ const tableheaders = ref([
     { th: "Reporting Designation", td_key: "reporting_designation" },
 
 ])
-const filterOnModal = ref({
+
+const filtersBeforeApplyingCount = computed(() => {
+    return [filterOnModal.designation, filterOnModal.emp_code, filterOnModal.department, filterOnModal.emp_mail_id, filterOnModal.emp_name, filterOnModal.reporting_designation, filterOnModal.reporting_to].filter(
+        (value) => value
+    ).length;
+});
+
+// Count of filters that are both applied and have non-empty values
+const appliedFiltersCount = computed(() => {
+    return [
+        { value: filterOnModal.designation, applied: filterOnModal.applieddesignation },
+        {
+            value: filterOnModal.emp_code,
+            applied: filterOnModal.appliedeEmp_code,
+        },
+        {
+            value: filterOnModal.emp_mail_id,
+            applied: filterOnModal.appliedEmp_mail_id,
+        },
+        {
+            value: filterOnModal.department,
+            applied: filterOnModal.applieddepartment,
+        },
+        {
+            value: filterOnModal.emp_name,
+            applied: filterOnModal.appliedEmp_name,
+        },
+
+        {
+            value: filterOnModal.reporting_designation,
+            applied: filterOnModal.appliedreporting_designation,
+        },
+        {
+            value: filterOnModal.reporting_to,
+            applied: filterOnModal.appliedreporting_to,
+        },
+       
+    ].filter((filter) => filter.applied && filter.value).length;
+});
+const filterOnModal = reactive({
+    appliedeEmp_code: false,
+    appliedEmp_name: false,
+    appliedEmp_mail_id: false,
+    applieddepartment: false,
+    applieddesignation: false,
+    appliedreporting_to: false,
+    appliedreporting_designation: false,
+
     emp_code: "",
     emp_name: "",
     emp_mail_id: "",
-    Requested_dept: "",
-    Owner_OF_Form: "",
-    Form_Category: "",
-    Requested_Period: "",
-    Approval_status: "",
-    RequestedId: ""
+
+    department: "",
+    designation: "",
+    reporting_to: "",
+    reporting_designation: "",
+
 
 })
+function clearFilter(type) {
+    if (type === "emp_code") {
+        filterOnModal.emp_code = "";
+        filterOnModal.appliedeEmp_code = false;
+    } else if (type === "designation") {
+        filterOnModal.designation = "";
+        filterOnModal.applieddesignation = false;
+    }
+    else if (type === "department") {
+        filterOnModal.department = "";
+        filterOnModal.applieddepartment = false;
+    }
+    else if (type === "emp_mail_id") {
+        filterOnModal.emp_mail_id = "";
+        filterOnModal.appliedEmp_mail_id = false;
+    }
+    else if (type === "emp_name") {
+        filterOnModal.emp_name = "";
+        filterOnModal.appliedEmp_name = false;
+    }
+    else if (type === "reporting_designation") {
+        filterOnModal.reporting_designation = "";
+        filterOnModal.appliedreporting_designation = false;
+    }
+    else if (type === "reporting_to") {
+        filterOnModal.reporting_to = "";
+        filterOnModal.appliedreporting_to = false;
+    }
+
+
+    applyFilters();
+}
 const tableData = ref([]);
 
 function applyFilters() {
-    employeeData(); // Calls employeeData to send filters
+
+    filterOnModal.appliedeEmp_code = Boolean(filterOnModal.emp_code);
+    filterOnModal.appliedEmp_name = Boolean(filterOnModal.emp_name);
+    filterOnModal.appliedEmp_mail_id = Boolean(filterOnModal.emp_mail_id);
+    filterOnModal.applieddepartment = Boolean(filterOnModal.department);
+    filterOnModal.applieddesignation = Boolean(filterOnModal.designation);
+    filterOnModal.appliedreporting_to = Boolean(filterOnModal.reporting_to);
+    filterOnModal.appliedreporting_designation = Boolean(filterOnModal.reporting_designation);
+
+    employeeData();
 }
+
 
 function resetFilters() {
     filterOnModal.value = {
         emp_code: "",
-        Requested_dept: "",
+
         Owner_OF_Form: "",
         Form_Category: "",
         Form_Name: "",
         Requested_Period: "",
         Approval_status: "",
-        RequestedId: ""
+
     };
     employeeData()
 }
@@ -355,33 +501,33 @@ function deptData() {
         });
 }
 
-
+const designiations = ref([]);
+const reportingTo = ref([]);
+const reportingDesigination = ref([]);
 function employeeData() {
     const filters = [];
-    if (filterOnModal.value.emp_code) {
-        filters.push(["emp_code", "like", `%${filterOnModal.value.emp_code}%`]);
+    if (filterOnModal.emp_code) {
+        filters.push(["emp_code", "like", `%${filterOnModal.emp_code}%`]);
     }
-    if (filterOnModal.value.emp_name) {
-        filters.push(["emp_name", "like", `%${filterOnModal.value.emp_name}%`]);
+    if (filterOnModal.emp_name) {
+        filters.push(["emp_name", "like", `%${filterOnModal.emp_name}%`]);
     }
-    if (filterOnModal.value.emp_mail_id) {
-        filters.push(["emp_mail_id", "like", `%${filterOnModal.value.emp_mail_id}%`]);
+    if (filterOnModal.emp_mail_id) {
+        filters.push(["emp_mail_id", "like", `%${filterOnModal.emp_mail_id}%`]);
     }
-    if (filterOnModal.value.Owner_OF_Form) {
-        filters.push(["Owner_OF_Form", "like", `%${filterOnModal.value.Owner_OF_Form}%`]);
+    if (filterOnModal.department) {
+        filters.push(["department", "=", `${filterOnModal.department}`]);
     }
-    if (filterOnModal.value.Form_Category) {
-        filters.push(["Form_Category", "like", `%${filterOnModal.value.Form_Category}%`]);
+    if (filterOnModal.designation) {
+        filters.push(["designation", "like", `${filterOnModal.designation}`]);
     }
-    if (filterOnModal.value.Requested_Period) {
-        filters.push(["Requested_Period", "like", `%${filterOnModal.value.Requested_Period}%`]);
+    if (filterOnModal.reporting_to) {
+        filters.push(["reporting_to", "like", `${filterOnModal.reporting_to}`]);
     }
-    if (filterOnModal.value.Approval_status) {
-        filters.push(["Approval_status", "like", `%${filterOnModal.value.Approval_status}%`]);
+    if (filterOnModal.reporting_designation) {
+        filters.push(["reporting_designation", "like", `%${filterOnModal.reporting_designation}%`]);
     }
-    if (filterOnModal.value.RequestedId) {
-        filters.push(["RequestedId", "like", `%${filterOnModal.value.RequestedId}%`]);
-    }
+
 
     const queryParams = {
         fields: JSON.stringify(["*"]),
@@ -396,12 +542,17 @@ function employeeData() {
             if (res.data) {
                 console.log(res.data, "Fetched departments");
                 tableData.value = res.data;
+                designiations.value = [...new Set(res.data.map((designation) => designation.designation))];
+                reportingTo.value = [...new Set(res.data.map((reporting) => reporting.reporting_to))];
+                reportingDesigination.value = [...new Set(res.data.map((reportingDesigination) => reportingDesigination.reporting_designation))]
+
             }
         })
         .catch((error) => {
             console.error("Error fetching department data:", error);
         });
 }
+
 function createEmpl() {
     const dataObj = {
         ...createEmployee.value,
@@ -470,4 +621,5 @@ function SaveEditEmp() {
     /* color: #111111; */
     padding: 8px 20px;
 }
+
 </style>

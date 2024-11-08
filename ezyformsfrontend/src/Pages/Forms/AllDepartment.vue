@@ -10,20 +10,123 @@
             2 forms available
           </p>
         </div>
-        <div class="d-flex gap-3 align-items-center">
-          <div class="d-flex mt-2">
-            <FormFields labeltext="" class="mb-3" tag="input" type="search" placeholder="Search File Name" name="Value"
-              id="Value" v-model="filterObj.search" />
-            <FormFields tag="select" placeholder="Filter By" class="mb-3" name="roles" v-model="filterObj.selectoption"
-              id="roles" :Required="false"
-              :options="['JW Marriott Golfshire Banglore', 'JW Marriott Golfshire Banglore']" />
-          </div>
-          <ButtonComp class="buttoncomp font-10" name="CreateForm" data-bs-toggle="offcanvas"
+        <div class="d-flex gap-2 align-items-center">
+                <div class="d-flex  align-items-center">
+                  <div>
+                        <div class="me-2">
+                <span v-if="filterOnModal.form_name && filterOnModal.appliedform_name" class="process-date font-12 m-0">
+                  {{ filterOnModal.form_name }}
+                  <span v-if="filterOnModal.form_name" class="badge badge-icon rounded-3   text-white ms-2"
+                    @click="clearFilter('form_name')">
+                    <i class="ri-close-line close-icon text-dark rounded-3"></i>
+                  </span>
+                </span>
+                <span v-if="filterOnModal.form_category && filterOnModal.appliedform_category" class="process-date font-12 m-0">
+                  {{ filterOnModal.form_category }}
+                  <span v-if="filterOnModal.form_category" class="badge badge-icon rounded-3   text-white ms-2"
+                    @click="clearFilter('form_category')">
+                    <i class="ri-close-line close-icon text-dark rounded-3"></i>
+                  </span>
+                </span>
+                <span v-if="filterOnModal.accessible_departments && filterOnModal.appliedaccessible_departments" class="process-date font-12 m-0">
+                  {{ filterOnModal.accessible_departments }}
+                  <span v-if="filterOnModal.accessible_departments" class="badge badge-icon rounded-3   text-white ms-2"
+                    @click="clearFilter('accessible_departments')">
+                    <i class="ri-close-line close-icon text-dark rounded-3"></i>
+                  </span>
+                </span>
+                <span v-if="filterOnModal.form_status && filterOnModal.appliedStatus" class="process-date font-12 m-0">
+                  {{ filterOnModal.form_status }}
+                  <span v-if="filterOnModal.form_status" class="badge badge-icon rounded-3   text-white ms-2"
+                    @click="clearFilter('form_status')">
+                    <i class="ri-close-line close-icon text-dark rounded-3"></i>
+                  </span>
+                </span>
+                        </div>
+                    </div>
+                    <div>
+                      <button type="button" class=" filterbtn d-flex align-items-center position-relative " data-bs-toggle="modal"
+                            data-bs-target="#fileterModal">
+                            <span> <i class="ri-filter-2-line"></i></span>
+                            <span v-if="appliedFiltersCount !== 0"
+                            class=" badge badge-light colorappiled ">
+                (  {{ appliedFiltersCount }})
+                </span>
+                        </button>
+
+                    </div>
+                </div>
+                <div class="modal fade" id="fileterModal" tabindex="-1" aria-labelledby="fileterModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+
+                            <div class="modal-body">
+                                <div class="row">
+                                  <div class="col-6">
+                                        <label class="font-13 ps-1" for="Requested">Form Name:</label>
+                                        <FormFields class="mb-3" tag="input" type="search" name="Requested"
+                                            id="Requested" placeholder="Search" v-model="filterOnModal.form_name" />
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="font-13 ps-1" for="dept">Form Category:</label>
+                                        <FormFields tag="select" placeholder="Form Category" class="mb-3"
+                                            name="dept" v-model="filterOnModal.form_category" id="dept" :Required="false"
+                                            :options="formCategory" />
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="font-13 ps-1" for="dept">Accessible departments:</label>
+                                        <FormFields tag="select" placeholder="Accessible departments" class="mb-3"
+                                            name="dept" v-model="filterOnModal.accessible_departments" id="dept" :Required="false"
+                                            :options="accessibleDepartments" />
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="font-13 ps-1" for="dept">Status:</label>
+                                        <FormFields tag="select" placeholder="Status" class="mb-3"
+                                            name="dept" v-model="filterOnModal.form_status" id="dept" :Required="false"
+                                            :options="['Active','Draft']" />
+                                    </div>
+                                    <!-- <div class="col-3">
+                                        <label class="font-13 ps-1 fw-medium" for="dept">Requested Dept:</label>
+                                        <FormFields tag="select" placeholder="Select Department" class="mb-3"
+                                            name="dept" v-model="filterOnModal.department_name" id="dept"
+                                            :Required="false"
+                                            :options="designiations" />
+                                    </div> -->
+                                  
+                                  
+
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="cancelfilter border-0 text-nowrap font-10 "
+                                    @click="resetFilters" data-bs-dismiss="modal"><span
+                                        class="font-14 me-1">x</span>Cancel
+                                    Filter</button>
+
+                                <button type="button"
+                                    class="applyfilter text-nowrap border-0 bg-primary text-white font-10 d-flex justify-content-center align-items-center"
+                                    data-bs-dismiss="modal" @click="applyFilters"><span class="font-16 me-1"><i
+                                            class="bi bi-check2 "></i></span>
+                                    Apply
+                                    Filter</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center ">
+                  <ButtonComp class="buttoncomp font-10" name="CreateForm" data-bs-toggle="offcanvas"
             data-bs-target="#offcanvasRight" aria-controls="offcanvasRight"></ButtonComp>
-        </div>
+                </div>
+              
+            </div>
       </div>
-      <GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true" actionType="dropdown"
+      <div class="mt-3"><GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true" actionType="dropdown"
         @actionClicked="actionCreated" :actions="actions" />
+        <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
+        @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
+      </div>
+      
     </div>
     <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
       <div class="offcanvas-header">
@@ -48,7 +151,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, reactive } from 'vue';
 import axiosInstance from '../../shared/services/interceptor';
 import { apis, doctypes } from '../../shared/apiurls';
 import FormFields from '../../Components/FormFields.vue';
@@ -59,16 +162,68 @@ import { rebuildToStructuredArray } from '../../shared/services/field_format';
 import FormPreview from '../../Components/FormPreview.vue'
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
+const totalRecords = ref(0);
 
 // Props for dynamic ID
 const props = defineProps(['id']);
 const formDescriptions = ref({})
 const selectedForm = ref(null);
+const filterOnModal=reactive({
+  appliedform_name:false,
+  appliedform_category:false,
+  appliedaccessible_departments:false,
+  appliedStatus:false,
+form_name:'',
+form_category:'',
+accessible_departments:'',
+form_status:''
+})
+const appliedFiltersCount = computed(() => {
+    return [
+        { value: filterOnModal.form_category, applied: filterOnModal.appliedform_category },
+        {
+            value: filterOnModal.form_name,
+            applied: filterOnModal.appliedform_name,
+        },
+        {
+            value: filterOnModal.form_status,
+            applied: filterOnModal.appliedStatus,
+        },
+        {
+            value: filterOnModal.accessible_departments,
+            applied: filterOnModal.appliedaccessible_departments,
+        },
+      
+       
+    ].filter((filter) => filter.applied && filter.value).length;
+});
+function clearFilter(type) {
+    if (type === "form_name") {
+      filterOnModal.form_name = "";
+      filterOnModal.appliedform_name = false;
+    } else if (type === "form_category") {
+      filterOnModal.form_category = "";
+      filterOnModal.appliedform_category = false;
+    
+    }
+    else if (type === "accessible_departments") {
+      filterOnModal.accessible_departments = "";
+      filterOnModal.appliedaccessible_departments = false;
+    
+    }
+    else if (type === "form_status") {
+      filterOnModal.form_status = "";
+      filterOnModal.appliedStatus = false;
+    
+    }
+ 
 
+    applyFilters();
+  }
 // Business unit and filter object
 const businessUnit = computed(() => EzyBusinessUnit.value);
 const newBusinessUnit = ref({ business_unit: '' });
-const filterObj = ref({ search: '', selectoption: '', limitPageLength: 'None', limitstart: 0 });
+const filterObj = ref({  limitPageLength: 'None', limitstart: 0 });
 const actions = ref(
   [
     { name: 'View form', icon: 'fa-solid fa-eye' },
@@ -89,6 +244,17 @@ function actionCreated(rowData, actionEvent) {
   }
 
 }
+function applyFilters() {
+  filterOnModal.appliedform_name=Boolean(filterOnModal.form_name);
+  filterOnModal.appliedform_category=Boolean(filterOnModal.form_category);
+filterOnModal.appliedaccessible_departments=Boolean(filterOnModal.accessible_departments);
+filterOnModal.appliedStatus=Boolean(filterOnModal.form_status);
+
+  // filterOnModal.applieddepartment_code=Boolean(filterOnModal.department_code);
+  // filterOnModal.applieddepartment_name=Boolean(filterOnModal.department_name)
+
+fetchDepartmentDetails()
+}
 // Watch business unit and department ID changes
 watch(
   [() => businessUnit.value, () => props.id],
@@ -107,10 +273,11 @@ const tableheaders = ref([
   { th: "Form name", td_key: "form_name" },
   { th: "Form category", td_key: "form_category" },
   { th: "Accessible departments", td_key: "accessible_departments" },
-  { th: "Status", td_key: "status" },
+  { th: "Status", td_key: "form_status" },
 ]);
 const tableData = ref([]);
-
+const formCategory=ref([]);
+const accessibleDepartments=ref([])
 // Fetch department details function
 function fetchDepartmentDetails(id) {
   const filters = [
@@ -119,6 +286,18 @@ function fetchDepartmentDetails(id) {
   if (props.id) {
     filters.push(["owner_of_the_form", "like", `%${props.id}%`]);
   }
+  if (filterOnModal.form_name) {
+        filters.push(["form_name", "like", `${filterOnModal.form_name}`]);
+    }
+    if (filterOnModal.form_category) {
+        filters.push(["form_category", "like", `${filterOnModal.form_category}`]);
+    }
+    if (filterOnModal.accessible_departments) {
+        filters.push(["accessible_departments", "like", `${filterOnModal.accessible_departments}`]);
+    }
+    if (filterOnModal.form_status) {
+        filters.push(["form_status", "like", `${filterOnModal.form_status}`]);
+    }
   const queryParams = {
     fields: JSON.stringify(["*"]),
     limit_page_length: filterObj.value.limitPageLength,
@@ -131,11 +310,21 @@ function fetchDepartmentDetails(id) {
     .get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParams })
     .then((response) => {
       tableData.value = response.data;
+      formCategory.value = [...new Set(response.data.map((formCategory) => formCategory.form_category))];
+      accessibleDepartments.value=[...new Set(response.data.map((accessibleDepartments) => accessibleDepartments.accessible_departments))];
+
     })
     .catch((error) => {
       console.error("Error fetching department details:", error);
     });
 }
+// const filterOnModal = ref({
+//   form_name: "",
+   
+//     department_name: "",
+   
+
+// })
 </script>
 
 <style>
@@ -156,4 +345,35 @@ function fetchDepartmentDetails(id) {
   position: absolute;
   left: 2%;
 }
+
+
+.filterbtn {
+    border: 1px solid #CCCCCC;
+    font-size: 16px;
+    border-radius: 4px;
+    color: #999999;
+    padding: 8px;
+    width: 100%;
+}
+
+
+
+.cancelfilter {
+    width: 150px;
+    height: 34px;
+    border-radius: 6px;
+    background-color: #f1f1f1;
+    color: #111111;
+    padding: 8px 20px;
+}
+
+.applyfilter {
+    width: 150px;
+    height: 34px;
+    border-radius: 6px;
+    /* background-color: #f1f1f1; */
+    /* color: #111111; */
+    padding: 8px 20px;
+}
 </style>
+
