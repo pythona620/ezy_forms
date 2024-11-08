@@ -126,7 +126,7 @@ const settingsSideBarData = [
     // { name: 'Notifications', icon: 'bi bi-bell', route: 'notifications' },
     { name: 'Department', icon: 'bi bi-clock-history', route: 'department' },
     { name: 'Designation', icon: 'bi bi-people', route: 'designations' },
-    { name: 'Employees', icon: 'bi bi-people', route: 'usermanagement' },
+    { name: 'Employees', icon: 'bi bi-people', route: 'employee' },
     // { name: 'Categories', icon: 'bi bi-tags', route: 'categories' },
 
 ];
