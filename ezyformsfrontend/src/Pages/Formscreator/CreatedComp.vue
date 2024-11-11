@@ -85,38 +85,38 @@
                     <div class="modal-body">
                         <div class="row">
                             <div class="col-4">
-                                        <label class="font-13 ps-1" for="Requested">Form Name:</label>
-                                        <FormFields class="mb-3" tag="input" type="search" name="Requested"
-                                            id="Requested" placeholder="Search" v-model="filterOnModal.form_name" />
-                                    </div>
-                                    <div class="col-4">
-                                        <label class="font-13 ps-1" for="dept">Form Category:</label>
-                                        <FormFields tag="select" placeholder="Form Category" class="mb-3"
-                                            name="dept" v-model="filterOnModal.form_category" id="dept" :Required="false"
-                                            :options="formCategory" />
-                                    </div>
-                                    <div class="col-4">
-                                        <label class="font-13 ps-1" for="dept">Accessible departments:</label>
-                                        <!-- <FormFields tag="select" placeholder="Accessible departments" class="mb-3"
+                                <label class="font-13 ps-1" for="Requested">Form Name:</label>
+                                <FormFields class="mb-3" tag="input" type="search" name="Requested" id="Requested"
+                                    placeholder="Search" v-model="filterOnModal.form_name" />
+                            </div>
+                            <div class="col-4">
+                                <label class="font-13 ps-1" for="dept">Form Category:</label>
+                                <FormFields tag="select" placeholder="Form Category" class="mb-3" name="dept"
+                                    v-model="filterOnModal.form_category" id="dept" :Required="false"
+                                    :options="formCategory" />
+                            </div>
+                            <div class="col-4">
+                                <label class="font-13 ps-1" for="dept">Accessible departments:</label>
+                                <!-- <FormFields tag="select" placeholder="Accessible departments" class="mb-3"
                                             name="dept" v-model="filterOnModal.accessible_departments" id="dept" :Required="false"
                                             :options="accessibleDepartments" /> -->
-                                            <FormFields class="" tag="input" type="search" name="Requested"
-                                            id="Requested" placeholder="Search" v-model="filterOnModal.accessible_departments" />
-                                           <span class="m-0 font-10 ps-2">Note:Please seperate departments with commas</span>
+                                <FormFields class="" tag="input" type="search" name="Requested" id="Requested"
+                                    placeholder="Search" v-model="filterOnModal.accessible_departments" />
+                                <span class="m-0 font-10 ps-2">Note:Please seperate departments with commas</span>
 
-                                    </div>
-                                    <div class="col-4">
-                                        <label class="font-13 ps-1" for="dept">Status:</label>
-                                        <FormFields tag="select" placeholder="Status" class="mb-3"
-                                            name="dept" v-model="filterOnModal.active" id="dept" :Required="false"
-                                            :options="['Active','Draft']" />
-                                    </div>
-                                    <div class="col-4">
-                                        <label class="font-13 ps-1" for="dept">Owner OF Form:</label>
-                                        <FormFields tag="select" placeholder="Owner Of The Form" class="mb-3"
-                                            name="dept" v-model="filterOnModal.owner_of_the_form" id="dept" :Required="false"
-                                            :options="ownerForms" />
-                                    </div>
+                            </div>
+                            <div class="col-4">
+                                <label class="font-13 ps-1" for="dept">Status:</label>
+                                <FormFields tag="select" placeholder="Status" class="mb-3" name="dept"
+                                    v-model="filterOnModal.active" id="dept" :Required="false"
+                                    :options="['Active', 'Draft']" />
+                            </div>
+                            <div class="col-4">
+                                <label class="font-13 ps-1" for="dept">Owner OF Form:</label>
+                                <FormFields tag="select" placeholder="Owner Of The Form" class="mb-3" name="dept"
+                                    v-model="filterOnModal.owner_of_the_form" id="dept" :Required="false"
+                                    :options="ownerForms" />
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -167,7 +167,6 @@ function actionCreated(rowData, actionEvent) {
     if (actionEvent.name === 'View form') {
         if (rowData?.form_json) {
             formDescriptions.value = { ...rowData }
-            console.log(rowData, "iiiiiiiiiiiii");
             selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json).fields)
             const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});// raise a modal
             modal.show();
@@ -404,8 +403,8 @@ function fetchTable() {
             if (filterObj.value.limit_start === 0) {
                 tableData.value = newData;
                 formCategory.value = [...new Set(newData.map((formCategory) => formCategory.form_category))];
-     
-ownerForms.value=[...new Set(newData.map((ownerForms)=>ownerForms.owner_of_the_form))]
+
+                ownerForms.value = [...new Set(newData.map((ownerForms) => ownerForms.owner_of_the_form))]
             } else {
                 tableData.value = tableData.value.concat(newData);
             }
