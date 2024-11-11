@@ -15,7 +15,7 @@
                         </div>
                         <div class="col-7">
                             <div class="mt-2">
-                                <TabsComp :tabs="tabsData" @changeTab="handleTabChange" />
+                                <TabsComp :tabs="filteredTabsData" @changeTab="handleTabChange" />
                             </div>
                         </div>
                         <div class="col-3">
@@ -58,11 +58,24 @@
                                                         </div>
                                                     </li>
                                                 </div>
+                                                <div v-if="username === 'Administrator'">
+                                                    <li>
+                                                        <div class=" ">
+                                                            <span class="fw-medium font-13 "> {{ userAdmin }}</span>
+
+                                                        </div>
+                                                        <!-- <div class=" ">
+                                                  
+                                                    <span class="fw-medium font-11">{{ userDesigination }}</span>
+                                                </div> -->
+                                                    </li>
+                                                </div>
                                             </div>
 
                                             <li class="mt-2">
                                                 <div class="d-flex justify-content-center align-items-center">
                                                     <ButtonComp class="changepass rounded-2 text-left" icon="lock"
+                                                        data-bs-toggle="modal" data-bs-target="#changePassword"
                                                         name="Change Password"></ButtonComp>
                                                 </div>
                                             </li>
@@ -133,6 +146,42 @@
                 </div>
             </div>
         </div>
+        <div class="modal fade" id="changePassword" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="changePasswordLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title font-14 fw-bold" id="changePasswordLabel">Change Password</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- <FormFields tag="select" placeholder="Category" class="mb-3" name="roles" id="roles"
+                            @change="changingCategory" :Required="false" :options="categoryOptions"
+                            v-model="selectedData.selectedCategory" /> -->
+                    <div class=" mb-2">
+                        <label class="raise-label" for="changepass">New Password</label>
+                        <FormFields class="mb-3" tag="input" type="text" name="changepass" id="changepass"
+                            placeholder="Enter" v-model="new_password" />
+                    </div>
+                    <div class=" mb-2">
+                        <label class="raise-label" for="confirmpass">Confirm Password</label>
+                        <FormFields class="" tag="input" type="text" name="confirmpass" id="confirmpass"
+                            placeholder="Enter" v-model="confirm_password" />
+                            <span v-if="passwordsMismatch" class="text-danger font-10 m-0 ps-2">Passwords do not match.</span>
+                    </div>
+                    <!-- <FormFields tag="select" placeholder="Form" class="mb-3" name="roles" id="roles"
+                            :Required="false" :options="formList" v-model="selectedData.selectedform" /> -->
+                </div>
+                <div>
+                    <div class=" d-flex justify-content-center align-items-center p-3">
+                        <button class="btn btn-dark font-12 w-100" type="submit" @click="passwordChange()">
+                            Confirm New Password</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
     </div>
 
 </template>
@@ -175,9 +224,14 @@ const categoryOptions = ref([])
 const formList = ref([])
 const business_unit = ref('');
 const userInitial = ref('');
+const new_password = ref("")
+const username = ref('');
 
+const confirm_password = ref('')
 const userEmail = ref('');
 const userDesigination = ref('')
+const userAdmin = ref('')
+
 const blockArr = ref([])
 const EzyFormsCompanys = ref([]);
 const formSideBarData = ref([]);
@@ -187,6 +241,12 @@ const filterObj = ref({
     limit_start: 0,
     limitPageLength: 100,
 })
+const filteredTabsData = computed(() => {
+
+return username.value === 'Administrator'
+    ? tabsData.value
+    : tabsData.value.filter(tab => tab.name !== 'Form');
+});
 function logout() {
     localStorage.removeItem('UserName');
     localStorage.removeItem('employeeData');
@@ -200,20 +260,58 @@ function logout() {
 const props = defineProps(['id']);
 onMounted(() => {
     ezyForms();
-    activeTab.value = route.path
-    const userData = JSON.parse(localStorage.getItem('employeeData'));
-    if (userData) {
-        userInitial.value = userData.emp_name.charAt(0).toUpperCase();
-        userEmail.value = userData.name;
-        userDesigination.value = userData.designation
-    }
+    activeTab.value = route.path;
 
+    // Retrieve data from localStorage
+    const userData = JSON.parse(localStorage.getItem('employeeData'));
+    const userName = JSON.parse(localStorage.getItem('UserName'));
+
+    if (userName) {
+        // Set the username based on the UserName data, which is used to check if the user is Admin
+        username.value = userName.full_name;
+
+        if (userName.full_name === 'Administrator') {
+
+            userAdmin.value = userName.full_name;
+            userInitial.value = userName.full_name.charAt(0).toUpperCase();
+        } else if (userData) {
+            // Non-admin login: Set both employee and user-specific data
+            userAdmin.value = userName.full_name;
+            userInitial.value = userData.emp_name.charAt(0).toUpperCase();
+            userEmail.value = userData.name;
+            userDesigination.value = userData.designation;
+        }
+    } else {
+        console.warn("No user data found in localStorage.");
+    }
 });
 
 const shouldShowButton = computed(() => {
     const pathsToMatch = ['/forms/department', '/todo'];
     return pathsToMatch.some(path => route.path.includes(path));
 });
+const passwordsMismatch = computed(() => 
+    new_password.value && confirm_password.value && new_password.value !== confirm_password.value
+);
+function passwordChange() {
+    if (passwordsMismatch.value) {
+        console.error("Passwords do not match.");
+        return;
+    }
+
+    const userName = JSON.parse(localStorage.getItem('employeeData'));
+    const payload = {
+        new_password: new_password.value,
+    };
+
+    axiosInstance.put(`${apis.resource}${doctypes.users}/${userName.name}`, payload)
+        .then((res) => {
+            console.log("Password updated successfully:", res.data);
+        })
+        .catch((error) => {
+            console.error("Error:", error);
+        });
+}
 const ezyForms = () => {
     const queryParams = {
         fields: JSON.stringify(["*"]),
