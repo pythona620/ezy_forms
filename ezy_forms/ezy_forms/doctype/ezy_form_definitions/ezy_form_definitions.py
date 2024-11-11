@@ -96,13 +96,13 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
 
 			document_to_reload = frappe.get_doc("DocType",doctype)
 			document_to_reload.reload()
-			add_customized_fields_for_dynamic_doc(fields=[
-				{"label": "Company Field","fieldname": "company_field","fieldtype": "Link","description": "static","idx": 0,"options":"Ezy Business Unit"},
-				{"label": "WF Generated Request Id","fieldname": "wf_generated_request_id","fieldtype": "Data","description": "static","idx": 1},
-				{"label": "WF Generated Request Status","fieldname": "wf_generated_request_status","fieldtype": "Data","description": "static","idx": 2}]
-				,doctype=doctype)
-			##### calling enqueing_creation_of_roadmap for creating roadmap for this particular mentioned form
-			enqueing_creation_of_roadmap(doctype=doctype,property_name=business_unit,bulk_request=False)
+			# add_customized_fields_for_dynamic_doc(fields=[
+			# 	{"label": "Company Field","fieldname": "company_field","fieldtype": "Link","description": "static","idx": 0,"options":"Ezy Business Unit"},
+			# 	{"label": "WF Generated Request Id","fieldname": "wf_generated_request_id","fieldtype": "Data","description": "static","idx": 1},
+			# 	{"label": "WF Generated Request Status","fieldname": "wf_generated_request_status","fieldtype": "Data","description": "static","idx": 2}]
+			# 	,doctype=doctype)
+			# ##### calling enqueing_creation_of_roadmap for creating roadmap for this particular mentioned form
+			# enqueing_creation_of_roadmap(doctype=doctype,property_name=business_unit,bulk_request=False)
 		if len(fields)>0:
 			add_customized_fields_for_dynamic_doc(fields=fields,doctype=doctype)
 		return {"success":True,"message":doctype}
