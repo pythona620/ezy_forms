@@ -40,7 +40,7 @@ router.beforeEach((to, from, next) => {
   }
   // If the user is logged in and tries to access LoginPage, redirect to DashBoard
   else if (isLoggedIn && to.name === 'LoginPage') {
-    next({ name: 'Created' });
+    next({ path: '/dashboard/maindash' });
   }
   // If the user is not logged in and tries to access any protected route, redirect to LoginPage
   else if (!isLoggedIn && to.name !== 'LoginPage') {
