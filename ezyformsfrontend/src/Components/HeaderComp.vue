@@ -573,7 +573,7 @@ const handleBuChange = (tab) => {
 
 .changepass {
     width: 214px;
-    height: 32px;
+    height: 35px;
     border-radius: 4px;
     background-color: #F2F2FF;
     padding: 9px 30px 9px 9px;
@@ -585,7 +585,7 @@ const handleBuChange = (tab) => {
 
 .logout {
     width: 214px;
-    height: 32px;
+    height: 35px;
     border-radius: 4px;
     background-color: #FFF2F3;
     padding: 9px 30px 9px 9px;
