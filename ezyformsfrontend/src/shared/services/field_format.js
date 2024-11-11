@@ -14,7 +14,7 @@ export function extractFieldsWithBreaks(data) {
 
           column.fields.forEach((field) => {
             // Add the "insert_after" key to the current field
-            field['reqd'] = field.reqd ? 1 : 0
+            // field['reqd'] = field.reqd ? 1 : 0
             const generatedFieldname = convertLabelToFieldName(field?.label);
             result.push({
               // ...field,
@@ -24,7 +24,8 @@ export function extractFieldsWithBreaks(data) {
               fieldtype: field.fieldtype,
               idx: index++, // Assign index
               label: field.label,
-              reqd: field.reqd ? 1 : 0
+              reqd: field.reqd ? 1 : 0,
+              value: field.value ? field.value : null
             });
 
             // Update previousFieldname for the next field in this column
@@ -96,6 +97,7 @@ export function extractFieldsWithBreaks(data) {
 
 
 export function rebuildToStructuredArray(flatArray) {
+  console.log(" Flat Array === ", flatArray)
   const result = [];
   let currentBlock = null;
   let currentSection = null;
