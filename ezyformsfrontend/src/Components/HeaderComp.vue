@@ -239,6 +239,7 @@ function deptData(value = null) {
 const employeeData = ref({});
 
 function raiseRequest() {
+console.log( " Raise req ")
     const storedData = localStorage.getItem("employeeData");
     if (storedData) {
         employeeData.value = JSON.parse(storedData);
@@ -259,7 +260,7 @@ function raiseRequest() {
 function changingCategory(value) {
     if (value) {
         const dataObj = {
-            "role": value,
+            "role": employeeData.value.designation,
             "business_unit": EzyBusinessUnit.value
         };
 
