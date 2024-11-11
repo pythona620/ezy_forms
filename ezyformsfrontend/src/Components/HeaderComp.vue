@@ -38,26 +38,28 @@
                                         <ul class="dropdown-menu dropdown-menu-start p-2">
                                             <div class="d-flex gap-3 align-items-center">
                                                 <div>
-                                                <li class="d-flex justify-content-center align-items-center btn btn-dark">
-                                                
-                                                {{ userInitial }}
+                                                    <li
+                                                        class="d-flex justify-content-center align-items-center btn btn-dark">
 
-                                            </li>
-                                            </div>
-                                            <div>
-                                                <li>
-                                                <div class=" ">
-                                                    <span class="fw-medium font-13 "> {{ userEmail }}</span>
-                                                   
+                                                        {{ userInitial }}
+
+                                                    </li>
                                                 </div>
-                                                <div class=" ">
-                                                  
-                                                    <span class="fw-medium font-11">{{ userDesigination }}</span>
+                                                <div>
+                                                    <li>
+                                                        <div class=" ">
+                                                            <span class="fw-medium font-13 "> {{ userEmail }}</span>
+
+                                                        </div>
+                                                        <div class=" ">
+
+                                                            <span class="fw-medium font-11">{{ userDesigination
+                                                                }}</span>
+                                                        </div>
+                                                    </li>
                                                 </div>
-                                            </li>
                                             </div>
-                                            </div>
-                                          
+
                                             <li class="mt-2">
                                                 <div class="d-flex justify-content-center align-items-center">
                                                     <ButtonComp class="changepass rounded-2 text-left" icon="lock"
@@ -66,8 +68,9 @@
                                             </li>
                                             <li class="mt-2">
                                                 <div class="d-flex justify-content-center align-items-center">
-                                                    <ButtonComp class=" logout rounded-2 text-left" icon="box-arrow-right" @click="logout()"
-                                                        name="Log Out"></ButtonComp>
+                                                    <ButtonComp class=" logout rounded-2 text-left"
+                                                        icon="box-arrow-right" @click="logout()" name="Log Out">
+                                                    </ButtonComp>
                                                 </div>
                                             </li>
                                         </ul>
@@ -158,7 +161,7 @@ const business_unit = ref('');
 const userInitial = ref('');
 
 const userEmail = ref('');
-const userDesigination=ref('')
+const userDesigination = ref('')
 
 const EzyFormsCompanys = ref([]);
 const formSideBarData = ref([]);
@@ -166,6 +169,8 @@ const deptartmentData = ref([]);
 const activeTab = ref('')
 function logout() {
     localStorage.removeItem('UserName');
+    localStorage.removeItem('employeeData');
+    localStorage.removeItem('Bu');
 
 
     router.push({ path: '/' }).then(() => {
@@ -175,13 +180,12 @@ function logout() {
 const props = defineProps(['id']);
 onMounted(() => {
     ezyForms();
-    // console.log(route, "================");
     activeTab.value = route.path
-    const userData = JSON.parse(localStorage.getItem('UserName'));
-    if (userData && userData.full_name) {
-        userInitial.value = userData.full_name.charAt(0).toUpperCase();
-        userEmail.value = userData.email;
-        userDesigination.value=userData.desigination
+    const userData = JSON.parse(localStorage.getItem('employeeData'));
+    if (userData) {
+        userInitial.value = userData.emp_name.charAt(0).toUpperCase();
+        userEmail.value = userData.name;
+        userDesigination.value = userData.designation
     }
 
 });
@@ -361,27 +365,29 @@ const handleBuChange = (tab) => {
     align-items: center;
     margin-bottom: 7px;
 }
-.changepass{
+
+.changepass {
     width: 214px;
     height: 32px;
     border-radius: 4px;
-    background-color:#F2F2FF;
+    background-color: #F2F2FF;
     padding: 9px 30px 9px 9px;
     font-size: 11px;
     color: #2124FE;
     text-align: left;
-    
+
 }
-.logout{
+
+.logout {
     width: 214px;
     height: 32px;
     border-radius: 4px;
-    background-color:#FFF2F3;
+    background-color: #FFF2F3;
     padding: 9px 30px 9px 9px;
     font-size: 11px;
     color: #FE212E;
     text-align: left;
-    
+
 }
 
 @media (min-width: 1604px) and (max-width: 2400px) {

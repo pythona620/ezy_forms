@@ -10,10 +10,13 @@ import createrRoutes from "./Pages/Formscreator/formscratorroute";
 import archivedroutes from "./Pages/Archived/archivedroutes";
 import dashBoardroutes from "./Pages/Dashboard/dashboardroute";
 import Login from "./views/Login.vue";
+import isAuthenticated from "../src/shared/services/auth";
+
 const routes = [
   {
     path: '/',
-    component: Login
+    component: Login,
+    name:'LoginPage'
   },
   ...Masterroutes,
   ...settingRoutes,
@@ -26,6 +29,27 @@ const routes = [
 const router = createRouter({
   history: createWebHashHistory("/ezyformsfrontend"),
   routes,
+});
+router.beforeEach((to, from, next) => {
+  const isLoggedIn = isAuthenticated();  // Check if the user is authenticated
+  const requiresAuth = to.matched.some((record) => record.meta.LoginRequire);
+
+  // If the route requires authentication and the user is not logged in, redirect to LoginPage
+  if (requiresAuth && !isLoggedIn) {
+    next({ name: 'LoginPage' });
+  }
+  // If the user is logged in and tries to access LoginPage, redirect to DashBoard
+  else if (isLoggedIn && to.name === 'LoginPage') {
+    next({ name: 'Created' });
+  }
+  // If the user is not logged in and tries to access any protected route, redirect to LoginPage
+  else if (!isLoggedIn && to.name !== 'LoginPage') {
+    next({ name: 'LoginPage' });
+  }
+  // For all other cases, proceed normally
+  else {
+    next();
+  }
 });
 // router.beforeEach((to, from, next) => {
 //   to.matched.forEach(record => {
