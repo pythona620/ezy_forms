@@ -86,7 +86,7 @@
         </div>
         <div class="modal fade" id="riaseRequestModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
             aria-labelledby="riaseRequestModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-dialog modal-dialog-centered modal-xl">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title font-14 fw-bold" id="riaseRequestModalLabel">Raise Request</h5>
@@ -96,17 +96,29 @@
                         <!-- <FormFields tag="select" placeholder="Category" class="mb-3" name="roles" id="roles"
                             @change="changingCategory" :Required="false" :options="categoryOptions"
                             v-model="selectedData.selectedCategory" /> -->
-                        <div class=" mb-2">
-                            <label class="raise-label" for="">Category</label>
-                            <Multiselect :options="categoryOptions" @change="changingCategory"
-                                v-model="selectedData.selectedCategory" placeholder="Select" :multiple="false"
-                                class="font-11" :searchable="true" />
+                        <div class="row">
+                            <div class="col">
+                                <div class=" mb-2">
+                                    <label class="raise-label" for="">Category</label>
+                                    <Multiselect :options="categoryOptions" @change="changingCategory"
+                                        v-model="selectedData.selectedCategory" placeholder="Select" :multiple="false"
+                                        class="font-11" :searchable="true" />
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class=" mb-2">
+                                    <label class="raise-label" for="">Form</label>
+                                    <Multiselect :options="formList" v-model="selectedData.selectedform"
+                                        placeholder="Select" @change="SelectedFromchange" :multiple="false"
+                                        class="font-11" :searchable="true" />
+                                </div>
+                            </div>
+
                         </div>
-                        <div class=" mb-2">
-                            <label class="raise-label" for="">Form</label>
-                            <Multiselect :options="formList" v-model="selectedData.selectedform" placeholder="Select"
-                                :multiple="false" class="font-11" :searchable="true" />
+                        <div v-if="blockArr.length">
+                            <RequestPreview :blockArr="blockArr" @updateField="handleFieldUpdate" />
                         </div>
+
                         <!-- <FormFields tag="select" placeholder="Form" class="mb-3" name="roles" id="roles"
                             :Required="false" :options="formList" v-model="selectedData.selectedform" /> -->
                     </div>
@@ -135,8 +147,12 @@ import FormFields from './FormFields.vue';
 import TabsComp from './TabsComp.vue';
 import Multiselect from "@vueform/multiselect";
 import "@vueform/multiselect/themes/default.css";
-
 import { EzyBusinessUnit } from "../shared/services/business_unit";
+import { rebuildToStructuredArray } from "../shared/services/field_format";
+import RequestPreview from './RequestPreview.vue';
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
+
 const router = useRouter(); // Initialize router
 
 // Define reactive variables
@@ -162,11 +178,15 @@ const userInitial = ref('');
 
 const userEmail = ref('');
 const userDesigination = ref('')
-
+const blockArr = ref([])
 const EzyFormsCompanys = ref([]);
 const formSideBarData = ref([]);
 const deptartmentData = ref([]);
 const activeTab = ref('')
+const filterObj = ref({
+    limit_start: 0,
+    limitPageLength: 100,
+})
 function logout() {
     localStorage.removeItem('UserName');
     localStorage.removeItem('employeeData');
@@ -269,7 +289,7 @@ function deptData(value = null) {
 const employeeData = ref({});
 
 function raiseRequest() {
-console.log( " Raise req ")
+    console.log(" Raise req ")
     const storedData = localStorage.getItem("employeeData");
     if (storedData) {
         employeeData.value = JSON.parse(storedData);
@@ -304,7 +324,56 @@ function changingCategory(value) {
             });
     }
 }
+function SelectedFromchange(value) {
+    if (value) {
 
+        formDefinations(value)
+    }
+}
+function formDefinations(value) {
+    const filters = [
+        ["business_unit", "like", `%${business_unit.value}%`]
+    ];
+    if (selectedData.value.selectedCategory) {
+        filters.push(["form_category", "like", `${selectedData.value.selectedCategory}`]);
+    }
+    if (value) {
+        filters.push(["form_short_name", "like", `%${value}%`]);
+    }
+
+    const queryParams = {
+        fields: JSON.stringify(["*"]),
+        filters: JSON.stringify(filters),
+        limit_page_length: filterObj.value.limitPageLength,
+        limit_start: filterObj.value.limit_start,
+        order_by: "`tabEzy Form Definitions`.`creation` desc"
+    };
+    // const queryParamsCount = {
+    //     fields: JSON.stringify(["count( `tabEzy Form Definitions`.`name`) AS total_count"]),
+    //     limitPageLength: "None",
+    //     filters: JSON.stringify(filters),
+    // }
+    // axiosInstance.get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParamsCount })
+    //     .then((res) => {
+    //         // console.log(res.data[0].total_count);
+    //         totalRecords.value = res.data[0].total_count
+
+    //     })
+    //     .catch((error) => {
+    //         console.error("Error fetching ezyForms data:", error);
+    //     });
+
+
+    axiosInstance.get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParams })
+        .then(res => {
+            const form_json = res.data[0].form_json
+            blockArr.value = rebuildToStructuredArray(JSON.parse(form_json).fields)
+            blockArr.value.splice(1)
+        })
+        .catch(error => {
+            console.error("Error fetching ezyForms data:", error);
+        });
+}
 function categoriesdata(departmentId) {
     axiosInstance.get(`${apis.resource}${doctypes.departments}/${departmentId}`)
         .then((res) => {
@@ -316,22 +385,56 @@ function categoriesdata(departmentId) {
             console.error("Error fetching categories data:", error);
         });
 }
+const emittedFormData = ref([]);
+
+const handleFieldUpdate = (fieldValues) => {
+    emittedFormData.value = emittedFormData.value.concat(fieldValues);
+};
+
 function raiseRequestSubmission() {
-    console.log(selectedData.value, "--------------");
-    // const dataObj = {
+    let form = {};
+    form['doctype'] = selectedData.value.selectedform;
+    form['company_field'] = business_unit.value
+    if(emittedFormData.value.length){
+        emittedFormData.value.map((each)=>{
+            form[each.label] = each.value
+        })
+    }
 
-    // }
-    // axiosInstance.post(apis.raiseRequest, dataObj)
-    //     .then((response) => {
-    //         console.log(response);
-    toast.success("Rquest Raised", { autoClose: 500 })
+    console.log(" ==== ", form)
+    
+    // form['form_json']
+    const formData = new FormData();
+    formData.append('doc', JSON.stringify(form));
+    formData.append('action', 'Save');
+    axiosInstance.post(apis.savedocs, formData)
+        .then((response) => {
+            console.log(response);
+            request_raising_fn(response.docs[0])
+            // toast.success("Rquest Raised", { autoClose: 500 })
 
-    const modal = bootstrap.Modal.getInstance(document.getElementById('riaseRequestModal'));
-    modal.hide();
-    //     })
-    //     .catch((error) => {
-    //         console.error("Error fetching data:", error);
-    //     });
+            // const modal = bootstrap.Modal.getInstance(document.getElementById('riaseRequestModal'));
+            // modal.hide();
+        })
+        .catch((error) => {
+            console.error("Error fetching data:", error);
+        });
+}
+
+function request_raising_fn(item){
+    let data_obj= {
+        module_name:'Ezy Forms',
+        doctype_name: selectedData.value.selectedform,
+        ids: [item.name], //docs name,
+        reason:'',
+        url_for_request_id:'',
+        files:[],
+        property: business_unit.value,
+        
+    }
+    axiosInstance.post(apis.raising_request,data_obj).then((resp)=>{
+        console.log(resp)
+    })
 }
 
 const handleTabChange = (tab) => {
@@ -343,6 +446,10 @@ const handleBuChange = (tab) => {
     if (tab.route.includes('/forms')) {
         router.push(tab.route);
     }
+    // Now you can handle the field update here, for example:
+    //   const { blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex, value } = payload;
+    // Update the field in your blockArr data
+    //   blockArr.value[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex].value = value;
 };
 
 
