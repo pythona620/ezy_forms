@@ -307,6 +307,9 @@ function passwordChange() {
     axiosInstance.put(`${apis.resource}${doctypes.users}/${userName.name}`, payload)
         .then((res) => {
             console.log("Password updated successfully:", res.data);
+            toast.success('Password changed Successfully',{autoClose:300});
+              const modal = bootstrap.Modal.getInstance(document.getElementById('changePassword'));
+            modal.hide();
         })
         .catch((error) => {
             console.error("Error:", error);
