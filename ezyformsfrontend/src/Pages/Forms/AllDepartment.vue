@@ -7,7 +7,7 @@
             Forms in {{ id }}
           </h1>
           <p class="m-0 font-11 pt-1">
-            2 forms available
+          {{ totalRecords }} forms available
           </p>
         </div>
         <div class="d-flex gap-2 align-items-center">
@@ -57,36 +57,41 @@
 
             </div>
           </div>
-          <div class="modal fade" id="fileterModal" tabindex="-1" aria-labelledby="fileterModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-              <div class="modal-content">
+          
+                <div class="modal fade" id="fileterModal" tabindex="-1" aria-labelledby="fileterModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
 
-                <div class="modal-body">
-                  <div class="row">
-                    <div class="col-6">
-                      <label class="font-13 ps-1" for="Requested">Form Name:</label>
-                      <FormFields class="mb-3" tag="input" type="search" name="Requested" id="Requested"
-                        placeholder="Search" v-model="filterOnModal.form_name" />
-                    </div>
-                    <div class="col-6">
-                      <label class="font-13 ps-1" for="dept">Form Category:</label>
-                      <FormFields tag="select" placeholder="Form Category" class="mb-3" name="dept"
-                        v-model="filterOnModal.form_category" id="dept" :Required="false" :options="formCategory" />
-                    </div>
-                    <div class="col-6">
-                      <label class="font-13 ps-1" for="dept">Accessible departments:</label>
-                      <FormFields tag="select" placeholder="Accessible departments" class="mb-3" name="dept"
-                        v-model="filterOnModal.accessible_departments" id="dept" :Required="false"
-                        :options="accessibleDepartments" />
-                    </div>
-                    <div class="col-6">
-                      <label class="font-13 ps-1" for="dept">Status:</label>
-                      <FormFields tag="select" placeholder="Status" class="mb-3" name="dept"
-                        v-model="filterOnModal.form_status" id="dept" :Required="false"
-                        :options="['Active', 'Draft']" />
-                    </div>
-                    <!-- <div class="col-3">
+                            <div class="modal-body">
+                                <div class="row">
+                                  <div class="col-6">
+                                        <label class="font-13 ps-1" for="Requested">Form Name:</label>
+                                        <FormFields class="mb-3" tag="input" type="search" name="Requested"
+                                            id="Requested" placeholder="Search" v-model="filterOnModal.form_name" />
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="font-13 ps-1" for="dept">Form Category:</label>
+                                        <FormFields tag="select" placeholder="Form Category" class="mb-3"
+                                            name="dept" v-model="filterOnModal.form_category" id="dept" :Required="false"
+                                            :options="formCategory" />
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="font-13 ps-1" for="dept">Accessible departments:</label>
+                                        <!-- <FormFields tag="select" placeholder="Accessible departments" class="mb-3"
+                                            name="dept" v-model="filterOnModal.accessible_departments" id="dept" :Required="false"
+                                            :options="accessibleDepartments" /> -->
+                                            <FormFields class="" tag="input" type="search" name="Requested"
+                                            id="Requested" placeholder="Search" v-model="filterOnModal.accessible_departments" />
+                                           <span class="m-0 font-10 ps-2">Note:Please seperate departments with commas</span>
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="font-13 ps-1" for="dept">Status:</label>
+                                        <FormFields tag="select" placeholder="Status" class="mb-3"
+                                            name="dept" v-model="filterOnModal.form_status" id="dept" :Required="false"
+                                            :options="['Active','Draft']" />
+                                    </div>
+                                    <!-- <div class="col-3">
                                         <label class="font-13 ps-1 fw-medium" for="dept">Requested Dept:</label>
                                         <FormFields tag="select" placeholder="Select Department" class="mb-3"
                                             name="dept" v-model="filterOnModal.department_name" id="dept"
@@ -104,7 +109,7 @@
                     Filter</button>
 
                   <button type="button"
-                    class="applyfilter text-nowrap border-0 bg-primary text-white font-10 d-flex justify-content-center align-items-center"
+                    class=" applyfilter btn btn-dark text-nowrap border-0  text-white font-10 d-flex justify-content-center align-items-center"
                     data-bs-dismiss="modal" @click="applyFilters"><span class="font-16 me-1"><i
                         class="bi bi-check2 "></i></span>
                     Apply
@@ -174,17 +179,17 @@ const props = defineProps(['id']);
 const formDescriptions = ref({})
 const selectedForm = ref(null);
 const tableData = ref([]);
-const formCategory = ref([]);
-const accessibleDepartments = ref([])
-const filterOnModal = reactive({
-  appliedform_name: false,
-  appliedform_category: false,
-  appliedaccessible_departments: false,
-  appliedStatus: false,
-  form_name: '',
-  form_category: '',
-  accessible_departments: '',
-  form_status: ''
+const formCategory=ref([]);
+
+const filterOnModal=reactive({
+  appliedform_name:false,
+  appliedform_category:false,
+  appliedaccessible_departments:false,
+  appliedStatus:false,
+form_name:'',
+form_category:'',
+accessible_departments:'',
+form_status:''
 })
 const appliedFiltersCount = computed(() => {
   return [
@@ -337,7 +342,7 @@ function fetchDepartmentDetails(id) {
       tableData.value = response.data;
 
       formCategory.value = [...new Set(response.data.map((formCategory) => formCategory.form_category))];
-      accessibleDepartments.value = [...new Set(response.data.map((accessibleDepartments) => accessibleDepartments.accessible_departments))];
+      
 
     })
     .catch((error) => {
@@ -367,17 +372,6 @@ function fetchDepartmentDetails(id) {
 }
 
 
-.filterbtn {
-  border: 1px solid #CCCCCC;
-  font-size: 16px;
-  border-radius: 4px;
-  color: #999999;
-  padding: 8px;
-  width: 100%;
-}
-
-
-
 .cancelfilter {
   width: 150px;
   height: 34px;
@@ -391,8 +385,20 @@ function fetchDepartmentDetails(id) {
   width: 150px;
   height: 34px;
   border-radius: 6px;
-  /* background-color: #f1f1f1; */
-  /* color: #111111; */
+   /* background-color: #f1f1f1; 
+  color: #111111;  */
   padding: 8px 20px;
 }
+
+
+.filterbtn {
+  border: 1px solid #CCCCCC;
+  font-size: 16px;
+  border-radius: 4px;
+  color: #999999;
+  padding: 8px;
+  width: 100%;
+}
+
+
 </style>

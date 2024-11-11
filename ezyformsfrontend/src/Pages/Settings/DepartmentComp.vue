@@ -76,7 +76,7 @@
                                     Filter</button>
 
                                 <button type="button"
-                                    class="applyfilter text-nowrap border-0 bg-primary text-white font-10 d-flex justify-content-center align-items-center"
+                                    class="applyfilter text-nowrap border-0 btn btn-dark text-white font-10 d-flex justify-content-center align-items-center"
                                     data-bs-dismiss="modal" @click="applyFilters"><span class="font-16 me-1"><i
                                             class="bi bi-check2 "></i></span>
                                     Apply
@@ -334,6 +334,13 @@ const appliedFiltersCount = computed(() => {
 
     ].filter((filter) => filter.applied && filter.value).length;
 });
+function resetFilters() {
+    filterOnModal.value = {
+        department_name: "",
+        department_code: "",
+       
+    };
+}
 
 function clearFilter(type) {
     if (type === "department_name") {
@@ -424,13 +431,7 @@ function applyFilters() {
     deptData();
 }
 
-function resetFilters() {
-    filterOnModal.value = {
-        department_name: "",
-        department_code: ''
-    };
-    deptData()
-}
+
 const designiations = ref([]);
 
 function deptData() {

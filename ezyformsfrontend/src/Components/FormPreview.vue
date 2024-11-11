@@ -116,91 +116,100 @@
                             </div>
                         </div>
                         <div class="card border-0 ">
-                            <div v-for="(blockItem, blockIndex) in blockArr " :key="blockIndex" class="block-container">
-                                <!-- <div class="blockName">
-                                    <span>{{ blockItem.label }}</span>
-                                </div> -->
-                                <div v-for="(section, sectionIndex) in blockItem.sections"
-                                    :key="'preview-' + sectionIndex" class="preview-section">
-                                    <div class="section-label">
-                                        <h5 class=" m-0 font-13">{{ section.label || 'Untitled Section' }}</h5>
-                                    </div>
-                                    <div class="px-2">
-                                        <div class=" container-fluid">
-                                            <div class="row" v-for="(row, rowIndex) in section.rows" :key="rowIndex">
-                                                <div v-for="(column, columnIndex) in row.columns"
-                                                    :key="'column-preview-' + columnIndex" class="col dynamicColumn">
-                                                    <div class=" p-3 border-bottom">
-                                                        <h6 class="m-0 font-12">{{ column.label || '-' }}</h6>
-                                                    </div>
-                                                    <div class="mx-3 my-2">
-                                                        <div v-for="(field, fieldIndex) in column.fields"
-                                                            :key="'field-preview-' + fieldIndex">
-                                                            <div v-if="field.label">
-                                                                <label :for="'field-' +
-                                                            sectionIndex +
-                                                            '-' +
-                                                            columnIndex +
-                                                            '-' +
-                                                            fieldIndex
-                                                            ">
+                            <div class="accordion" id="blockAccordion">
+                                <div v-for="(blockItem, blockIndex) in blockArr" :key="blockIndex"
+                                    class="accordion-item">
+                                    <h2 class="accordion-header" :id="'heading-' + blockIndex">
+                                        <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                            :data-bs-target="'#collapse-' + blockIndex" aria-expanded="true"
+                                            :aria-controls="'collapse-' + blockIndex">
+                                            {{ blockIndex === 0 ? 'Requestor' : 'Approver' }}
+                                        </button>
+                                    </h2>
 
-                                                                    <span class=" font-12">{{ field.label
-                                                                        }}</span></label>
-                                                                <template v-if="field.fieldtype == 'Select' ||
-                                                            field.fieldtype == 'multiselect'
-                                                            ">
-                                                                    <select :multiple="field.fieldtype == 'multiselect'"
-                                                                        :placeholder="'Select' + field.label"
-                                                                        v-model="field.value"
-                                                                        class="form-select mb-2 font-13">
-                                                                        <option v-for="(
-                                                        option, index
-                                                      ) in field.options?.split('\n')" :key="index" :value="option">
-                                                                            {{ option }}
-                                                                        </option>
-                                                                    </select>
-                                                                </template>
-                                                                <template v-else-if="field.fieldtype == 'checkbox' ||
-                                                            field.fieldtype == 'radio'
-                                                            ">
-                                                                    <div class="row">
-                                                                        <div class="form-check col-4 mb-4" v-for="(
-                                                        option, index
-                                                      ) in field?.options?.split('\n')" :key="index">
-                                                                            <div
-                                                                                class="d-flex gap-2 align-items-center">
-                                                                                <div>
-                                                                                    <input class=""
-                                                                                        :type="field.fieldtype"
-                                                                                        :name="option" :id="option"
-                                                                                        readonly />
+                                    <div :id="'collapse-' + blockIndex" class="accordion-collapse collapse"
+                                        :class="{ show: blockIndex === 0 }" aria-labelledby="'heading-' + blockIndex"
+                                        data-bs-parent="#blockAccordion">
+                                        <div class="accordion-body block-container">
+                                            <div v-for="(section, sectionIndex) in blockItem.sections"
+                                                :key="'preview-' + sectionIndex" class="preview-section">
+                                                <div class="section-label">
+                                                    <h5 class="m-0 font-13">{{ section.label || 'Untitled Section' }}
+                                                    </h5>
+                                                </div>
+                                                <div class="px-2">
+                                                    <div class="container-fluid">
+                                                        <div class="row" v-for="(row, rowIndex) in section.rows"
+                                                            :key="rowIndex">
+                                                            <div v-for="(column, columnIndex) in row.columns"
+                                                                :key="'column-preview-' + columnIndex"
+                                                                class="col dynamicColumn">
+                                                                <div class="p-3 border-bottom">
+                                                                    <h6 class="m-0 font-12">{{ column.label || '-' }}
+                                                                    </h6>
+                                                                </div>
+                                                                <div class="mx-3 my-2">
+                                                                    <div v-for="(field, fieldIndex) in column.fields"
+                                                                        :key="'field-preview-' + fieldIndex">
+                                                                        <div v-if="field.label">
+                                                                            <label
+                                                                                :for="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex">
+                                                                                <span class="font-12">{{ field.label
+                                                                                    }}</span>
+                                                                            </label>
+                                                                            <template
+                                                                                v-if="field.fieldtype == 'Select' || field.fieldtype == 'multiselect'">
+                                                                                <select
+                                                                                    :multiple="field.fieldtype == 'multiselect'"
+                                                                                    :placeholder="'Select ' + field.label"
+                                                                                    v-model="field.value"
+                                                                                    class="form-select mb-2 font-13">
+                                                                                    <option
+                                                                                        v-for="(option, index) in field.options?.split('\n')"
+                                                                                        :key="index" :value="option">
+                                                                                        {{ option }}
+                                                                                    </option>
+                                                                                </select>
+                                                                            </template>
+                                                                            <template
+                                                                                v-else-if="field.fieldtype == 'checkbox' || field.fieldtype == 'radio'">
+                                                                                <div class="row">
+                                                                                    <div class="form-check col-4 mb-4"
+                                                                                        v-for="(option, index) in field?.options?.split('\n')"
+                                                                                        :key="index">
+                                                                                        <div
+                                                                                            class="d-flex gap-2 align-items-center">
+                                                                                            <div>
+                                                                                                <input class=""
+                                                                                                    :type="field.fieldtype"
+                                                                                                    :name="option"
+                                                                                                    :id="option"
+                                                                                                    readonly />
+                                                                                            </div>
+                                                                                            <div>
+                                                                                                <label
+                                                                                                    class="form-check-label m-0"
+                                                                                                    :for="option">
+                                                                                                    {{ option }}
+                                                                                                </label>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
                                                                                 </div>
-                                                                                <div>
-                                                                                    <label class="form-check-label m-0"
-                                                                                        :for="option">
-                                                                                        {{
-                                                            option
-                                                        }}
-                                                                                    </label>
-                                                                                </div>
-                                                                            </div>
+                                                                            </template>
+                                                                            <template v-else>
+                                                                                <component readonly
+                                                                                    :is="getFieldComponent(field.fieldtype)"
+                                                                                    v-model="field.value"
+                                                                                    :type="field.fieldtype"
+                                                                                    :placeholder="'Enter ' + field.label"
+                                                                                    :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                                                                                    class="form-control previewInputHeight">
+                                                                                </component>
+                                                                            </template>
                                                                         </div>
                                                                     </div>
-                                                                </template>
-                                                                <template v-else>
-                                                                    <component readonly
-                                                                        :is="getFieldComponent(field.fieldtype)"
-                                                                        v-model="field.value" :type="field.fieldtype"
-                                                                        :placeholder="'Enter ' + field.label" :name="'field-' +
-                                                            sectionIndex +
-                                                            '-' +
-                                                            columnIndex +
-                                                            '-' +
-                                                            fieldIndex
-                                                            " class="form-control previewInputHeight">
-                                                                    </component>
-                                                                </template>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -210,6 +219,7 @@
                                     </div>
                                 </div>
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -304,18 +314,38 @@ const getFieldComponent = (type) => {
 
 .block-container {
     /* background-color: #f9f9f9; */
-    border-radius: 10px;
-    border: 1px solid #cccccc;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    border-radius: 7px;
+    /* border-radius: 10px; */
+    /* border: 1px solid #cccccc; */
+    /* margin-top: 10px;
+    margin-bottom: 10px; */
     /* background-color: #fafafa; */
     background-color: #eeeeee;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    height: 60vh;
 
 }
 
 input::-webkit-input-placeholder {
     font-size: 10px;
 
+}
+
+.accordion-button:focus {
+    box-shadow: None;
+
+}
+
+.accordion-button {
+    background-color: #eeeeee;
+    font-size: 14px;
+    font-weight: 500;
+
+}
+
+.accordion-button:not(.collapsed) {
+    background-color: #eeeeee;
+    color: #000;
+    box-shadow: None;
 }
 </style>

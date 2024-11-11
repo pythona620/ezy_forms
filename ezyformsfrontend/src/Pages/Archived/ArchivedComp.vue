@@ -109,7 +109,7 @@
                         data-bs-dismiss="modal"><span class="font-14 me-1">x</span>Cancel Filter</button>
 
                     <button type="button"
-                        class="applyfilter text-nowrap border-0 bg-primary text-white font-10 d-flex justify-content-center align-items-center"
+                        class="applyfilter text-nowrap border-0 btn btn-dark text-white font-10 d-flex justify-content-center align-items-center"
                         data-bs-dismiss="modal" @click="applyFilter()"><span class="font-16 me-1"><i
                                 class="bi bi-check2 "></i></span>
                         Apply

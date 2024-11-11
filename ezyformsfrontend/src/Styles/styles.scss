@@ -143,3 +143,30 @@ body {
   top:-3px;
   right:0px;
 }
+.cancelfilter {
+  width: 150px;
+  height: 34px;
+  border-radius: 6px;
+  background-color: #f1f1f1;
+  color: #111111;
+  padding: 8px 20px;
+}
+
+.applyfilter {
+  width: 150px;
+  height: 34px;
+  border-radius: 6px;
+  /* background-color: #f1f1f1; */
+  /* color: #111111; */
+  padding: 8px 20px;
+}
+
+
+.filterbtn {
+  border: 1px solid #CCCCCC;
+  font-size: 16px;
+  border-radius: 4px;
+  color: #999999;
+  padding: 8px;
+  width: 100%;
+}

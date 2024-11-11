@@ -3,7 +3,7 @@
         <div class="d-flex justify-content-between align-items-center formsticky">
             <div>
                 <h1 class="m-0 font-13">Forms Master</h1>
-                <p class="m-0 font-11 pt-1">374 forms available</p>
+                <p class="m-0 font-11 pt-1">{{ totalRecords }} forms available</p>
             </div>
             <div class="d-flex gap-2 align-items-center">
                 <div>
@@ -97,9 +97,13 @@
                             </div>
                             <div class="col-4">
                                 <label class="font-13 ps-1" for="dept">Accessible departments:</label>
-                                <FormFields tag="select" placeholder="Accessible departments" class="mb-3" name="dept"
-                                    v-model="filterOnModal.accessible_departments" id="dept" :Required="false"
-                                    :options="accessibleDepartments" />
+                                <!-- <FormFields tag="select" placeholder="Accessible departments" class="mb-3"
+                                            name="dept" v-model="filterOnModal.accessible_departments" id="dept" :Required="false"
+                                            :options="accessibleDepartments" /> -->
+                                <FormFields class="" tag="input" type="search" name="Requested" id="Requested"
+                                    placeholder="Search" v-model="filterOnModal.accessible_departments" />
+                                <span class="m-0 font-10 ps-2">Note:Please seperate departments with commas</span>
+
                             </div>
                             <div class="col-4">
                                 <label class="font-13 ps-1" for="dept">Status:</label>
@@ -120,7 +124,7 @@
                             data-bs-dismiss="modal"><span class="font-14 me-1">x</span>Cancel Filter</button>
 
                         <button type="button"
-                            class="applyfilter text-nowrap border-0 bg-primary text-white font-10 d-flex justify-content-center align-items-center"
+                            class="applyfilter text-nowrap border-0 btn btn-dark text-white font-10 d-flex justify-content-center align-items-center"
                             data-bs-dismiss="modal" @click="applyFilters"><span class="font-16 me-1"><i
                                     class="bi bi-check2 "></i></span>
                             Apply
@@ -163,7 +167,6 @@ function actionCreated(rowData, actionEvent) {
     if (actionEvent.name === 'View form') {
         if (rowData?.form_json) {
             formDescriptions.value = { ...rowData }
-            console.log(rowData, "iiiiiiiiiiiii");
             selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json).fields)
             const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});// raise a modal
             modal.show();
@@ -285,7 +288,7 @@ const filterObj = ref({
     owner_of_the_form: "",
     search: "",
 });
-const radioOptions = ref(["yes", "no"])
+
 watch(
     businessUnit,
     (newVal) => {
@@ -400,7 +403,7 @@ function fetchTable() {
             if (filterObj.value.limit_start === 0) {
                 tableData.value = newData;
                 formCategory.value = [...new Set(newData.map((formCategory) => formCategory.form_category))];
-                accessibleDepartments.value = [...new Set(newData.map((accessibleDepartments) => accessibleDepartments.accessible_departments))];
+
                 ownerForms.value = [...new Set(newData.map((ownerForms) => ownerForms.owner_of_the_form))]
             } else {
                 tableData.value = tableData.value.concat(newData);
