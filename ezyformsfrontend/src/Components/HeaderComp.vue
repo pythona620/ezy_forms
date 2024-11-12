@@ -103,7 +103,8 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title font-14 fw-bold" id="riaseRequestModalLabel">Raise Request</h5>
-                        <button @click="raiseRequstClearForm()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button @click="raiseRequstClearForm()" type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <!-- <FormFields tag="select" placeholder="Category" class="mb-3" name="roles" id="roles"
@@ -147,41 +148,42 @@
             </div>
         </div>
         <div class="modal fade" id="changePassword" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-        aria-labelledby="changePasswordLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title font-14 fw-bold" id="changePasswordLabel">Change Password</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <!-- <FormFields tag="select" placeholder="Category" class="mb-3" name="roles" id="roles"
+            aria-labelledby="changePasswordLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title font-14 fw-bold" id="changePasswordLabel">Change Password</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- <FormFields tag="select" placeholder="Category" class="mb-3" name="roles" id="roles"
                             @change="changingCategory" :Required="false" :options="categoryOptions"
                             v-model="selectedData.selectedCategory" /> -->
-                    <div class=" mb-2">
-                        <label class="raise-label" for="changepass">New Password</label>
-                        <FormFields class="mb-3" tag="input" type="text" name="changepass" id="changepass"
-                            placeholder="Enter" v-model="new_password" />
-                    </div>
-                    <div class=" mb-2">
-                        <label class="raise-label" for="confirmpass">Confirm Password</label>
-                        <FormFields class="" tag="input" type="text" name="confirmpass" id="confirmpass"
-                            placeholder="Enter" v-model="confirm_password" />
-                            <span v-if="passwordsMismatch" class="text-danger font-10 m-0 ps-2">Passwords do not match.</span>
-                    </div>
-                    <!-- <FormFields tag="select" placeholder="Form" class="mb-3" name="roles" id="roles"
+                        <div class=" mb-2">
+                            <label class="raise-label" for="changepass">New Password</label>
+                            <FormFields class="mb-3" tag="input" type="text" name="changepass" id="changepass"
+                                placeholder="Enter" v-model="new_password" />
+                        </div>
+                        <div class=" mb-2">
+                            <label class="raise-label" for="confirmpass">Confirm Password</label>
+                            <FormFields class="" tag="input" type="text" name="confirmpass" id="confirmpass"
+                                placeholder="Enter" v-model="confirm_password" />
+                            <span v-if="passwordsMismatch" class="text-danger font-10 m-0 ps-2">Passwords do not
+                                match.</span>
+                        </div>
+                        <!-- <FormFields tag="select" placeholder="Form" class="mb-3" name="roles" id="roles"
                             :Required="false" :options="formList" v-model="selectedData.selectedform" /> -->
-                </div>
-                <div>
-                    <div class=" d-flex justify-content-center align-items-center p-3">
-                        <button class="btn btn-dark font-12 w-100" type="submit" @click="passwordChange()">
-                            Confirm New Password</button>
                     </div>
-                </div>
+                    <div>
+                        <div class=" d-flex justify-content-center align-items-center p-3">
+                            <button class="btn btn-dark font-12 w-100" type="submit" @click="passwordChange()">
+                                Confirm New Password</button>
+                        </div>
+                    </div>
 
+                </div>
             </div>
         </div>
-    </div>
     </div>
 
 </template>
@@ -257,10 +259,10 @@ function logout() {
 
     });
 }
-function raiseRequstClearForm(){
-    selectedData.value.selectedCategory='',
-    selectedData.value.selectedform='',
-    blockArr.value=[]
+function raiseRequstClearForm() {
+    selectedData.value.selectedCategory = '',
+        selectedData.value.selectedform = '',
+        blockArr.value = []
 }
 const props = defineProps(['id']);
 onMounted(() => {
@@ -270,7 +272,7 @@ onMounted(() => {
     // Retrieve data from localStorage
     const userData = JSON.parse(localStorage.getItem('employeeData'));
     const userName = JSON.parse(localStorage.getItem('UserName'));
-const syetemmanger=JSON.parse(localStorage.getItem('systemManager'))
+    const syetemmanger = JSON.parse(localStorage.getItem('systemManager'))
     if (userName) {
         // Set the username based on the UserName data, which is used to check if the user is Admin
         username.value = userName.full_name;
@@ -295,7 +297,7 @@ const shouldShowButton = computed(() => {
     const pathsToMatch = ['/forms/department', '/todo'];
     return pathsToMatch.some(path => route.path.includes(path));
 });
-const passwordsMismatch = computed(() => 
+const passwordsMismatch = computed(() =>
     new_password.value && confirm_password.value && new_password.value !== confirm_password.value
 );
 function passwordChange() {
@@ -312,8 +314,8 @@ function passwordChange() {
     axiosInstance.put(`${apis.resource}${doctypes.users}/${userName.name}`, payload)
         .then((res) => {
             console.log("Password updated successfully:", res.data);
-            toast.success('Password changed Successfully',{autoClose:300});
-              const modal = bootstrap.Modal.getInstance(document.getElementById('changePassword'));
+            toast.success('Password changed Successfully', { autoClose: 300 });
+            const modal = bootstrap.Modal.getInstance(document.getElementById('changePassword'));
             modal.hide();
         })
         .catch((error) => {
@@ -501,14 +503,14 @@ function raiseRequestSubmission() {
     let form = {};
     form['doctype'] = selectedData.value.selectedform;
     form['company_field'] = business_unit.value
-    if(emittedFormData.value.length){
-        emittedFormData.value.map((each)=>{
+    if (emittedFormData.value.length) {
+        emittedFormData.value.map((each) => {
             form[each.label] = each.value
         })
     }
 
     console.log(" ==== ", form)
-    
+
     // form['form_json']
     const formData = new FormData();
     formData.append('doc', JSON.stringify(form));
@@ -527,18 +529,18 @@ function raiseRequestSubmission() {
         });
 }
 
-function request_raising_fn(item){
-    let data_obj= {
-        module_name:'Ezy Forms',
+function request_raising_fn(item) {
+    let data_obj = {
+        module_name: 'Ezy Forms',
         doctype_name: selectedData.value.selectedform,
         ids: [item.name], //docs name,
-        reason:'',
-        url_for_request_id:'',
-        files:[],
+        reason: '',
+        url_for_request_id: '',
+        files: [],
         property: business_unit.value,
-        
+
     }
-    axiosInstance.post(apis.raising_request,data_obj).then((resp)=>{
+    axiosInstance.post(apis.raising_request, data_obj).then((resp) => {
         console.log(resp)
     })
 }
