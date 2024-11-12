@@ -13,11 +13,16 @@
 			</div>
 
 			<div class="input-box mt-5">
-				<span class="icon"><i class="bi bi-lock-fill"></i></span>
-				<input class="text-white" type="password" id="password" v-model="formdata.pwd" @input="validatepassword"
+				<!-- <span class="icon"><i class="bi bi-lock-fill"></i></span> -->
+				<input class="text-white" :type="showPassword ? 'text' : 'password'" id="password"
+					v-model="formdata.pwd" @input="validatepassword" @keydown.enter="Login"
 					:class="{ 'is-invalid': errors.pwd }" />
 				<label>Password</label>
-				<div class="invalid-feedback font-11 mt-3" v-if="errors.pwd">
+				<!-- Toggle icon for show/hide password -->
+				<span class="toggle-icon" @click="togglePasswordVisibility">
+					<i :class="showPassword ? 'bi bi-eye' : 'bi bi-eye-slash'"></i>
+				</span>
+				<div class="invalid-feedback" v-if="errors.pwd">
 					{{ errors.pwd }}
 				</div>
 			</div>
@@ -43,7 +48,9 @@ export default {
 			},
 			storeData: [],
 			errors: {},
-			email: ""
+			email: "",
+			showPassword: false,
+
 		};
 	},
 	methods: {
@@ -61,6 +68,9 @@ export default {
 				delete this.errors.pwd;
 			}
 		},
+		togglePasswordVisibility() {
+			this.showPassword = !this.showPassword;
+		},
 		Login() {
 			this.validatename();
 			this.validatepassword();
@@ -70,7 +80,7 @@ export default {
 					if (res) {
 						toast.success("Login Successfully", { autoClose: 2000 });
 						setTimeout(() => {
-							this.$router.push({ path: '/create-form/created' });
+							this.$router.push({ path: '/dashboard/maindash' });
 						}, 700);
 						this.storeData = res;
 						localStorage.setItem('UserName', JSON.stringify(this.storeData));
@@ -159,6 +169,16 @@ button {
 	/* margin: 30px; */
 	font-size: 18px;
 
+}
+
+
+.toggle-icon {
+	position: absolute;
+	top: 50%;
+	right: 10px;
+	transform: translateY(-50%);
+	cursor: pointer;
+	color: #ffffff;
 }
 
 .input-box label {
