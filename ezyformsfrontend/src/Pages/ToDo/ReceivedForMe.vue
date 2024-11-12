@@ -5,7 +5,7 @@
                 Requests received for me
             </h1>
             <p class="m-0 font-11 pt-1">
-                {{  }} request
+                {{ totalRecords }} request
             </p>
         </div>
         <div class="d-flex gap-3 align-items-center">
@@ -165,6 +165,7 @@ import axiosInstance from '../../shared/services/interceptor';
 import { apis, doctypes } from '../../shared/apiurls';
 import { callWithErrorHandling, onMounted, ref,reactive,computed,watch } from 'vue';
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
+import PaginationComp from '../../Components/PaginationComp.vue';
 const businessUnit = computed(() => {
     return EzyBusinessUnit.value;
 });
@@ -292,6 +293,19 @@ filterOnModal.appliedrequested_department=Boolean(filterOnModal.requested_depart
 
 
 }
+const PaginationUpdateValue = (itemsPerPage) => {
+  filterObj.value.limitPageLength = itemsPerPage;
+  filterObj.value.limit_start = 0;
+  fetchTable();
+
+};
+// Handle updating the limit start
+const PaginationLimitStart = ([itemsPerPage, start]) => {
+  filterObj.value.limitPageLength = itemsPerPage;
+  filterObj.value.limit_start = start;
+  fetchTable();
+
+};
 function receivedForMe(){
   const filters = [
     // ["business_unit", "like", `%${newBusinessUnit.value.business_unit}%`]

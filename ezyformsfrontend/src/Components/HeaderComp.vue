@@ -15,7 +15,7 @@
                         </div>
                         <div class="col-7">
                             <div class="mt-2">
-                                <TabsComp :tabs="filteredTabsData" @changeTab="handleTabChange" />
+                                <TabsComp :tabs="tabsData" @changeTab="handleTabChange" />
                             </div>
                         </div>
                         <div class="col-3">
@@ -36,7 +36,7 @@
                                             <img src="../assets/Image.svg" />
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-start p-2">
-                                            <div class="d-flex gap-3 align-items-center">
+                                            <div class="d-flex gap-2 align-items-center">
                                                 <div>
                                                     <li
                                                         class="d-flex justify-content-center align-items-center btn btn-dark">
@@ -103,7 +103,7 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title font-14 fw-bold" id="riaseRequestModalLabel">Raise Request</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button @click="raiseRequstClearForm()" type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <!-- <FormFields tag="select" placeholder="Category" class="mb-3" name="roles" id="roles"
@@ -241,12 +241,12 @@ const filterObj = ref({
     limit_start: 0,
     limitPageLength: 100,
 })
-const filteredTabsData = computed(() => {
+// const filteredTabsData = computed(() => {
 
-return username.value === 'Administrator'
-    ? tabsData.value
-    : tabsData.value.filter(tab => tab.name !== 'Form');
-});
+// return username.value === 'Administrator'
+//     ? tabsData.value
+//     : tabsData.value.filter(tab => tab.name !== 'Form');
+// });
 function logout() {
     localStorage.removeItem('UserName');
     localStorage.removeItem('employeeData');
@@ -257,6 +257,11 @@ function logout() {
 
     });
 }
+function raiseRequstClearForm(){
+    selectedData.value.selectedCategory='',
+    selectedData.value.selectedform='',
+    blockArr.value=[]
+}
 const props = defineProps(['id']);
 onMounted(() => {
     ezyForms();
@@ -265,7 +270,7 @@ onMounted(() => {
     // Retrieve data from localStorage
     const userData = JSON.parse(localStorage.getItem('employeeData'));
     const userName = JSON.parse(localStorage.getItem('UserName'));
-
+const syetemmanger=JSON.parse(localStorage.getItem('systemManager'))
     if (userName) {
         // Set the username based on the UserName data, which is used to check if the user is Admin
         username.value = userName.full_name;
