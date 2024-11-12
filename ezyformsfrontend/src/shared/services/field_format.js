@@ -25,7 +25,7 @@ export function extractFieldsWithBreaks(data) {
               idx: index++, // Assign index
               label: field.label,
               reqd: field.reqd ? 1 : 0,
-              value: field.value ? field.value : null
+              value: field.value ? field.value : "null"
             });
 
             // Update previousFieldname for the next field in this column
@@ -434,13 +434,30 @@ export function addErrorMessagesToStructuredArray(structuredArray) {
         row.columns.forEach((column, columnIndex) => {
           // Traverse fields in each column
           column.fields.forEach((field, fieldIndex) => {
-            if (!field.fieldtype || field.fieldtype.trim() === "") {
-              // Add an error message for missing fieldtype
-              field.error = `Field "${field.label}" has no valid fieldtype. Please select a fieldtype.`;
-            } else {
-              // Clear the error if fieldtype is valid
-              field.error = "";
+
+
+            // if (!field.fieldtype || field.fieldtype.trim() === "") {
+            //   // Add an error message for missing fieldtype
+            //   field.error = `Field "${field.label}" has no valid fieldtype. Please select a fieldtype.`;
+            // } else {
+            //   // Clear the error if fieldtype is valid
+            //   field.error = "";
+            // }
+            let errors = [];
+
+            // Check for empty Field label
+            if (!field.label || field.label.trim() === "") {
+              errors.push("Field label is required.");
             }
+
+            // Check for empty field type
+            if (!field.fieldtype || field.fieldtype.trim() === "") {
+              errors.push(`Field "${field.label || 'unnamed'}" has no valid fieldtype. Please select a fieldtype.`);
+            }
+
+            // Combine errors into a single error property
+            field.error = errors.length ? errors.join(" ") : "";
+
           });
         });
       });

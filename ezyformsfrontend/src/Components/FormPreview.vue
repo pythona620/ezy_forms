@@ -172,7 +172,7 @@
                                                                                 </select>
                                                                             </template>
                                                                             <template
-                                                                                v-else-if="field.fieldtype == 'checkbox' || field.fieldtype == 'radio'">
+                                                                                v-else-if="field.fieldtype == 'check' || field.fieldtype == 'radio'">
                                                                                 <div class="row">
                                                                                     <div class="form-check col-4 mb-4"
                                                                                         v-for="(option, index) in field?.options?.split('\n')"
@@ -196,6 +196,14 @@
                                                                                         </div>
                                                                                     </div>
                                                                                 </div>
+                                                                            </template>
+                                                                            <template
+                                                                                v-else-if="field.fieldtype == 'Attach'">
+                                                                                <input type="file"
+                                                                                    :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                                                                                    class="form-control previewInputHeight"
+                                                                                    @change="handleFileChange($event, field)"
+                                                                                    disabled />
                                                                             </template>
                                                                             <template v-else>
                                                                                 <component readonly
@@ -261,7 +269,7 @@ const getFieldComponent = (type) => {
             return "input";
         case "Text":
             return "textarea";
-        case "checkbox":
+        case "Check":
             return "input";
         case "Select":
             return "select";
@@ -271,8 +279,7 @@ const getFieldComponent = (type) => {
             return "file";
         case "radio":
             return "input";
-        default:
-            return "input";
+
     }
 };
 </script>
@@ -322,7 +329,7 @@ const getFieldComponent = (type) => {
     background-color: #eeeeee;
     overflow-y: scroll;
     overflow-x: hidden;
-    height: 60vh;
+    height: 40vh;
 
 }
 

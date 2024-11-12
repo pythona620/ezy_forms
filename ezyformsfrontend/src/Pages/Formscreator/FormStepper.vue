@@ -339,24 +339,20 @@
                         )
                         " class="border-less-input columnFieldInput font-14 p-0" />
 
-                                                                                                <span
-                                                                                                    v-if="field.errorTypeMessage"
-                                                                                                    class="error text-danger font-10 mb-1">{{
-                        field.errorMessage
-                    }}</span>
+
                                                                                             </div>
                                                                                             <div>
                                                                                                 <button
                                                                                                     class="btn btn-light btn-sm">
                                                                                                     <i class="ri-file-copy-line copyIcon"
                                                                                                         @click="
-                    copyField(
-                        blockIndex,
-                        sectionIndex,
-                        rowIndex,
-                        columnIndex,
-                        fieldIndex
-                    )
+                        copyField(
+                            blockIndex,
+                            sectionIndex,
+                            rowIndex,
+                            columnIndex,
+                            fieldIndex
+                        )
                         "></i>
                                                                                                 </button>
 
@@ -378,7 +374,7 @@
                                                                                         </div>
                                                                                         <select
                                                                                             v-model="field.fieldtype"
-                                                                                            class="form-select mb-2 font-13 searchSelect"
+                                                                                            class="form-select mb-2 mt-1 font-13 searchSelect"
                                                                                             @change="
                         onFieldTypeChange(
                             blockIndex,
@@ -397,11 +393,8 @@
                                                                                                 {{ section.label }}
                                                                                             </option>
                                                                                         </select>
-                                                                                        <div v-if="field.fieldtype == 'checkbox' ||
-                        field.fieldtype == 'radio' ||
-                        field.fieldtype == 'Select' ||
-                        field.fieldtype == 'multiselect'
-                        ">
+                                                                                        <div
+                                                                                            v-if="['Check', 'radio', 'Select', 'multiselect'].includes(field.fieldtype)">
                                                                                             <label
                                                                                                 class="font-12 fw-light"
                                                                                                 for="options">Enter
@@ -411,6 +404,7 @@
                                                                                                 v-model="field.options"
                                                                                                 class="form-control shadow-none mb-1 font-12"></textarea>
                                                                                         </div>
+
                                                                                         <div
                                                                                             class="d-flex gap-2 align-items-center">
                                                                                             <div>
@@ -635,12 +629,12 @@
                                                                                         class="form-select mb-2 font-13">
                                                                                         <option v-for="(
                                                 option, index
-                                              ) in field.options.split('\n')" :key="index" :value="option">
+                                              ) in field.options?.split('\n')" :key="index" :value="option">
                                                                                             {{ option }}
                                                                                         </option>
                                                                                     </select>
                                                                                 </template>
-                                                                                <template v-else-if="field.fieldtype == 'checkbox' ||
+                                                                                <template v-else-if="field.fieldtype == 'check' ||
                         field.fieldtype == 'radio'
                         ">
                                                                                     <div class="row">
@@ -667,6 +661,14 @@
                                                                                             </div>
                                                                                         </div>
                                                                                     </div>
+                                                                                </template>
+                                                                                <template
+                                                                                    v-else-if="field.fieldtype == 'Attach'">
+                                                                                    <input type="file"
+                                                                                        :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                                                                                        class="form-control previewInputHeight"
+                                                                                        @change="handleFileChange($event, field)"
+                                                                                        disabled />
                                                                                 </template>
                                                                                 <template v-else>
                                                                                     <component readonly
@@ -850,8 +852,8 @@ const fieldTypes = [
         type: "Data",
     },
     {
-        label: "Checkbox",
-        type: "checkbox",
+        label: "Check",
+        type: "Check",
     },
     {
         label: "Radio",
@@ -1191,7 +1193,7 @@ const onFieldTypeChange = (blockIndex, sectionIndex, rowIndex, columnIndex, fiel
     blockArr.splice(0, blockArr.length, ...checkFieldType)
 
     let fieldType = blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex].fieldtype
-    if (fieldType !== 'checkbox' || fieldType !== 'Select' || fieldType !== 'radio' || fieldType !== 'multiselect') {
+    if (fieldType !== 'Check' || fieldType !== 'Select' || fieldType !== 'radio' || fieldType !== 'multiselect') {
         blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex].options = ''
     }
     // const field =
@@ -1439,7 +1441,7 @@ const getFieldComponent = (type) => {
             return "input";
         case "Text":
             return "textarea";
-        case "checkbox":
+        case "Check":
             return "input";
         case "Select":
             return "select";
@@ -1725,7 +1727,7 @@ select {
     border-radius: 7px;
     position: sticky;
     z-index: 1;
-    top: 30px;
+    top: 36px;
 }
 
 .previewInputHeight {

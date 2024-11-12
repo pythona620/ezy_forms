@@ -29,7 +29,7 @@
                                             <select :multiple="field.fieldtype === 'multiselect'" v-model="field.value"
                                                 @input="logFieldValue(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
                                                 class="form-select mb-2 font-13">
-                                                <option v-for="(option, index) in field.options.split('\n')"
+                                                <option v-for="(option, index) in field.options?.split('\n')"
                                                     :key="index" :value="option">
                                                     {{ option }}
                                                 </option>
@@ -37,7 +37,7 @@
                                         </template>
 
                                         <template
-                                            v-else-if="field.fieldtype === 'checkbox' || field.fieldtype === 'radio'">
+                                            v-else-if="field.fieldtype === 'check' || field.fieldtype === 'radio'">
                                             <div class="row">
                                                 <div class="form-check col-4 mb-4"
                                                     v-for="(option, index) in field?.options?.split('\n')" :key="index">
@@ -55,6 +55,13 @@
                                                 </div>
                                             </div>
                                         </template>
+                                        <template v-else-if="field.fieldtype == 'Attach'">
+                                            <input type="file"
+                                                :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                                                class="form-control previewInputHeight"
+                                                @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
+                                        </template>
+
 
                                         <template v-else>
                                             <component :is="getFieldComponent(field.fieldtype)" v-model="field.value"
@@ -91,7 +98,7 @@ const getFieldComponent = (type) => {
             return "input";
         case "Text":
             return "textarea";
-        case "checkbox":
+        case "Check":
             return "input";
         case "Select":
             return "select";
@@ -123,6 +130,16 @@ const logFieldValue = (eve, blockIndex, sectionIndex, rowIndex, columnIndex, fie
     console.log(eve.target.value, "Field Value:", field);
 
 };
+// const handleFileChange = (event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) => {
+//     const file = event.target.files[0]; // Get the first file selected
+//     if (file) {
+//         const field = props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex];
+//         field.value = file.name; // Store the file name in the field's value
+//         emit('updateField', field); // Emit the updated field to the parent
+//         console.log("Selected file:", file.name);
+//     }
+// };
+
 </script>
 <style setup>
 .previewInputHeight {
