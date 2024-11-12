@@ -10,7 +10,7 @@
           <th v-for="(column, index) in tHeaders" :key="index" :class="{ 'text-center': column.th === 'Users' }">
             {{ column.th }}
           </th>
-          <th class="text-center" v-if="isAction == 'true'">Action</th>
+          <th class="text-center fixed-column" v-if="isAction == 'true'">Action</th>
         </tr>
       </thead>
       <tbody>
@@ -49,7 +49,7 @@
           <td :selectedOption="selectoption"></td>
           column.td_key, -->
 
-            <td v-if="actionType === 'dropdown'" class="text-center position-relative">
+            <td v-if="actionType === 'dropdown'" class="text-center fixed-column position-relative">
               <div class="dropdown">
                 <p class="p-0 actions" data-bs-toggle="dropdown" aria-expanded="false">
                   <span>...</span>
@@ -205,6 +205,12 @@ onMounted(() => {
 </script>
 
 <style lang="scss">
+.fixed-column {
+  position: sticky !important;
+  right: 0 !important;
+  background: white !important;
+
+}
 .activeform {
   font-size: 11px;
   font-weight: 400;

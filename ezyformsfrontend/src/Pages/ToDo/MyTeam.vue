@@ -2,7 +2,7 @@
   <div class="d-flex justify-content-between align-items-center ">
       <div>
           <h1 class="m-0 font-13">
-              Requests received for My team
+              Requests raised for My Team
           </h1>
           <p class="m-0 font-11 pt-1">
               {{ totalRecords }} request
@@ -12,17 +12,17 @@
           <div class="d-flex  align-items-center">
                 <div>
                       <div class="me-2">
-              <span v-if="filterOnModal.form_name && filterOnModal.appliedform_name" class="process-date font-12 m-0">
-                {{ filterOnModal.form_name }}
-                <span v-if="filterOnModal.form_name" class="badge badge-icon rounded-3   text-white "
-                  @click="clearFilter('form_name')">
+              <span v-if="filterOnModal.name && filterOnModal.appliedname" class="process-date font-12 m-0">
+                {{ filterOnModal.name }}
+                <span v-if="filterOnModal.name" class="badge badge-icon rounded-3   text-white "
+                  @click="clearFilter('name')">
                   <i class="ri-close-line close-icon text-dark rounded-3"></i>
                 </span>
               </span>
-              <span v-if="filterOnModal.form_category && filterOnModal.appliedform_category" class="process-date font-12 m-0">
-                {{ filterOnModal.form_category }}
-                <span v-if="filterOnModal.form_category" class="badge badge-icon rounded-3   text-white "
-                  @click="clearFilter('form_category')">
+              <span v-if="filterOnModal.doctype_name && filterOnModal.applieddoctype_name" class="process-date font-12 m-0">
+                {{ filterOnModal.doctype_name }}
+                <span v-if="filterOnModal.doctype_name" class="badge badge-icon rounded-3   text-white "
+                  @click="clearFilter('doctype_name')">
                   <i class="ri-close-line close-icon text-dark rounded-3"></i>
                 </span>
               </span>
@@ -33,31 +33,31 @@
                   <i class="ri-close-line close-icon text-dark rounded-3"></i>
                 </span>
               </span>
-              <span v-if="filterOnModal.form_status && filterOnModal.appliedStatus" class="process-date font-12 m-0">
-                {{ filterOnModal.form_status }}
-                <span v-if="filterOnModal.form_status" class="badge badge-icon rounded-3   text-white"
-                  @click="clearFilter('form_status')">
+              <span v-if="filterOnModal.status && filterOnModal.appliedStatus" class="process-date font-12 m-0">
+                {{ filterOnModal.status }}
+                <span v-if="filterOnModal.status" class="badge badge-icon rounded-3   text-white"
+                  @click="clearFilter('status')">
                   <i class="ri-close-line close-icon text-dark rounded-3"></i>
                 </span>
               </span>
               <span v-if="filterOnModal.request_id && filterOnModal.appliedrequest_id" class="process-date font-12 m-0">
                 {{ filterOnModal.request_id }}
                 <span v-if="filterOnModal.request_id" class="badge badge-icon rounded-3   text-white"
-                  @click="clearFilter('form_status')">
+                  @click="clearFilter('request_id')">
                   <i class="ri-close-line close-icon text-dark rounded-3"></i>
                 </span>
               </span>
-              <span v-if="filterOnModal.requested_by && filterOnModal.appliedrequest_by" class="process-date font-12 m-0">
-                {{ filterOnModal.requested_by }}
-                <span v-if="filterOnModal.requested_by" class="badge badge-icon rounded-3   text-white"
-                  @click="clearFilter('form_status')">
+              <span v-if="filterOnModal.requested_on && filterOnModal.appiedrequestedOn" class="process-date font-12 m-0">
+                {{ filterOnModal.requested_on }}
+                <span v-if="filterOnModal.requested_on" class="badge badge-icon rounded-3   text-white"
+                  @click="clearFilter('requested_on')">
                   <i class="ri-close-line close-icon text-dark rounded-3"></i>
                 </span>
               </span>
-              <span v-if="filterOnModal.requested_department && filterOnModal.appliedrequested_department" class="process-date font-12 m-0">
-                {{ filterOnModal.requested_department }}
-                <span v-if="filterOnModal.requested_department" class="badge badge-icon rounded-3   text-white"
-                  @click="clearFilter('form_status')">
+              <span v-if="filterOnModal.owner && filterOnModal.appliedowner" class="process-date font-12 m-0">
+                {{ filterOnModal.owner }}
+                <span v-if="filterOnModal.owner" class="badge badge-icon rounded-3   text-white"
+                  @click="clearFilter('owner')">
                   <i class="ri-close-line close-icon text-dark rounded-3"></i>
                 </span>
               </span>
@@ -84,46 +84,46 @@
                               <div class="row">
                                   <div class="col-6">
                                       <label class="font-13 ps-1" for="Requested">Request Id:</label>
-                                      <FormFields class="mb-3" tag="input" type="search" name="Requested"
-                                          id="Requested" placeholder="Search" v-model="filterOnModal.request_id" />
+                                      <FormFields tag="select" placeholder="Requested Id" class="mb-3"
+                                            name="dept" v-model="filterOnModal.name" id="id" :Required="false"
+                                            :options="idDta" />
                                   </div>
                                 <div class="col-6">
                                       <label class="font-13 ps-1" for="Requested">Form Name:</label>
-                                      <FormFields class="mb-3" tag="input" type="search" name="Requested"
-                                          id="Requested" placeholder="Search" v-model="filterOnModal.form_name" />
+                                      <FormFields tag="select" placeholder="Form Name" class="mb-3"
+                                            name="dept" v-model="filterOnModal.doctype_name" id="id" :Required="false"
+                                            :options="docTypeName" />
                                   </div>
-                                  <div class="col-6">
+                                  <!-- <div class="col-6">
                                       <label class="font-13 ps-1" for="dept">Form Category:</label>
                                       <FormFields tag="select" placeholder="Form Category" class="mb-3"
-                                          name="dept" v-model="filterOnModal.form_category" id="dept" :Required="false"
+                                          name="dept" v-model="filterOnModal.doctype_name" id="dept" :Required="false"
                                            />
-                                  </div>
+                                  </div> -->
                                   <div class="col-6">
-                                      <label class="font-13 ps-1" for="dept">Accessible departments:</label>
-                                      <!-- <FormFields tag="select" placeholder="Accessible departments" class="mb-3"
-                                          name="dept" v-model="filterOnModal.accessible_departments" id="dept" :Required="false"
-                                          :options="accessibleDepartments" /> -->
+                                      <label class="font-13 ps-1" for="dept">Requested On:</label>
+                                    
                                           <FormFields class="" tag="input" type="search" name="Requested"
-                                          id="Requested" placeholder="Search" v-model="filterOnModal.accessible_departments" />
-                                         <span class="m-0 font-10 ps-2">Note:Please seperate departments with commas</span>
+                                          id="Requested" placeholder="Search" v-model="filterOnModal.requested_on" />
+                                         <!-- <span class="m-0 font-10 ps-2">Note:Please seperate departments with commas</span> -->
                                   </div>
                                   <div class="col-6">
                                       <label class="font-13 ps-1" for="dept">Status:</label>
-                                      <FormFields tag="select" placeholder="Status" class="mb-3"
-                                          name="dept" v-model="filterOnModal.form_status" id="dept" :Required="false"
-                                          :options="['Active','Draft']" />
+                                      <FormFields tag="input" type="search" placeholder="Status" class="mb-3"
+                                          name="dept" v-model="filterOnModal.status" id="dept" :Required="false"
+                                           />
                                   </div>
                                 
                                   <div class="col-6">
-                                      <label class="font-13 ps-1" for="Requested">Requested By:</label>
+                                      <label class="font-13 ps-1" for="Requested">Owner Of Form:</label>
                                       <FormFields class="mb-3" tag="input" type="search" name="Requested"
-                                          id="Requested" placeholder="Search" v-model="filterOnModal.requested_by" />
+                                          id="Requested" placeholder="Search" v-model="filterOnModal.owner" />
                                   </div>
-                                  <div class="col-6">
+                                  <!-- <div class="col-6">
                                       <label class="font-13 ps-1" for="Requested">Requested Department:</label>
                                       <FormFields class="mb-3" tag="input" type="search" name="Requested"
-                                          id="Requested" placeholder="Search" v-model="filterOnModal.requested_department" />
-                                  </div>
+                                          id="Requested" placeholder="Search" v-model="filterOnModal.owner" />
+                                  </div> -->
                                 
 
                               </div>
@@ -176,11 +176,11 @@ const totalRecords = ref(0);
 
 const tableheaders = ref([
   { th: "Request ID", td_key: "name" },
-  { th: "Form name", td_key: "name" },
-  { th: "Form category", td_key: "form_category" },
+  { th: "Form name", td_key: "doctype_name" },
+  // { th: "Form category", td_key: "doctype_name" },
   { th: "Owner of form", td_key: "owner" },
-  { th: "Requested by", td_key: "acess" },
-  { th: "Requested department", td_key: "acess" },
+  { th: "Requested on", td_key: "requested_on" },
+  // { th: "Requested department", td_key: "acess" },
   { th: "Approval Status", td_key: "status" },
 
 ]
@@ -198,30 +198,30 @@ const actions = ref(
 )
 const tableData = ref([]);
 const filterOnModal=reactive({
-appliedform_name:false,
-appliedform_category:false,
+appliedname:false,
+applieddoctype_name:false,
 appliedaccessible_departments:false,
 appliedStatus:false,
 appliedrequest_id:false,
-appliedrequest_by:false,
-appliedrequested_department:false,
-form_name:'',
-form_category:'',
+appiedrequestedOn:false,
+appliedowner:false,
+name:'',
+doctype_name:'',
 accessible_departments:'',
-form_status:'',
+status:'',
 request_id:'',
-requested_by:'',
-requested_department:''
+requested_on:'',
+owner:''
 })
 const appliedFiltersCount = computed(() => {
   return [
-      { value: filterOnModal.form_category, applied: filterOnModal.appliedform_category },
+      { value: filterOnModal.doctype_name, applied: filterOnModal.applieddoctype_name },
       {
-          value: filterOnModal.form_name,
-          applied: filterOnModal.appliedform_name,
+          value: filterOnModal.name,
+          applied: filterOnModal.appliedname,
       },
       {
-          value: filterOnModal.form_status,
+          value: filterOnModal.status,
           applied: filterOnModal.appliedStatus,
       },
       {
@@ -233,24 +233,24 @@ const appliedFiltersCount = computed(() => {
           applied: filterOnModal.appliedrequest_id,
       },
       {
-          value: filterOnModal.requested_by,
-          applied: filterOnModal.appliedrequest_by,
+          value: filterOnModal.requested_on,
+          applied: filterOnModal.appiedrequestedOn,
       },
       {
-          value: filterOnModal.requested_department,
-          applied: filterOnModal.appliedrequested_department,
+          value: filterOnModal.owner,
+          applied: filterOnModal.appliedowner,
       },
     
      
   ].filter((filter) => filter.applied && filter.value).length;
 });
 function clearFilter(type) {
-  if (type === "form_name") {
-    filterOnModal.form_name = "";
-    filterOnModal.appliedform_name = false;
-  } else if (type === "form_category") {
-    filterOnModal.form_category = "";
-    filterOnModal.appliedform_category = false;
+  if (type === "name") {
+    filterOnModal.name = "";
+    filterOnModal.appliedname = false;
+  } else if (type === "doctype_name") {
+    filterOnModal.doctype_name = "";
+    filterOnModal.applieddoctype_name = false;
   
   }
   else if (type === "accessible_departments") {
@@ -258,8 +258,8 @@ function clearFilter(type) {
     filterOnModal.appliedaccessible_departments = false;
   
   }
-  else if (type === "form_status") {
-    filterOnModal.form_status = "";
+  else if (type === "status") {
+    filterOnModal.status = "";
     filterOnModal.appliedStatus = false;
   
   }
@@ -268,14 +268,14 @@ function clearFilter(type) {
     filterOnModal.appliedrequest_id = false;
   
   }
-  else if (type === "requested_by") {
-    filterOnModal.requested_by = "";
-    filterOnModal.appliedrequest_by = false;
+  else if (type === "requested_on") {
+    filterOnModal.requested_on = "";
+    filterOnModal.appiedrequestedOn = false;
   
   }
-  else if (type === "requested_department") {
-    filterOnModal.requested_department = "";
-    filterOnModal.appliedrequested_department = false;
+  else if (type === "owner") {
+    filterOnModal.owner = "";
+    filterOnModal.appliedowner = false;
   
   }
 
@@ -283,81 +283,98 @@ function clearFilter(type) {
   applyFilters();
 }
 function applyFilters() {
-filterOnModal.appliedform_name=Boolean(filterOnModal.form_name);
-filterOnModal.appliedform_category=Boolean(filterOnModal.form_category);
+filterOnModal.appliedname=Boolean(filterOnModal.name);
+filterOnModal.applieddoctype_name=Boolean(filterOnModal.doctype_name);
 filterOnModal.appliedaccessible_departments=Boolean(filterOnModal.accessible_departments);
-filterOnModal.appliedStatus=Boolean(filterOnModal.form_status);
+filterOnModal.appliedStatus=Boolean(filterOnModal.status);
 filterOnModal.appliedrequest_id=Boolean(filterOnModal.request_id);
-filterOnModal.appliedrequest_by=Boolean(filterOnModal.requested_by);
-filterOnModal.appliedrequested_department=Boolean(filterOnModal.requested_department);
+filterOnModal.appiedrequestedOn=Boolean(filterOnModal.requested_on);
+filterOnModal.appliedowner=Boolean(filterOnModal.owner);
 
-
+receivedForMe()
 }
 const PaginationUpdateValue = (itemsPerPage) => {
 filterObj.value.limitPageLength = itemsPerPage;
 filterObj.value.limit_start = 0;
-fetchTable();
+receivedForMe()
+
 
 };
 // Handle updating the limit start
 const PaginationLimitStart = ([itemsPerPage, start]) => {
 filterObj.value.limitPageLength = itemsPerPage;
 filterObj.value.limit_start = start;
-fetchTable();
+receivedForMe()
+
 
 };
-function receivedForMe(){
-const filters = [
-  // ["business_unit", "like", `%${newBusinessUnit.value.business_unit}%`]
-];
+const idDta=ref([]);
+const docTypeName=ref([])
+function receivedForMe() {
+    // Initialize filters array for building dynamic query parameters
+    const filters = [];
 
-if (filterOnModal.form_name) {
-  filters.push(["form_name", "like", `${filterOnModal.form_name}`]);
-}
-if (filterOnModal.form_category) {
-  filters.push(["form_category", "like", `${filterOnModal.form_category}`]);
-}
-if (filterOnModal.accessible_departments) {
-  filters.push(["accessible_departments", "like", `${filterOnModal.accessible_departments}`]);
-}
-if (filterOnModal.form_status) {
-  filters.push(["form_status", "like", `${filterOnModal.form_status}`]);
-}
-if (filterOnModal.request_id) {
-  filters.push(["request_id", "like", `${filterOnModal.request_id}`]);
-}
-if (filterOnModal.requested_by) {
-  filters.push(["requested_by", "like", `${filterOnModal.requested_by}`]);
-}
-if (filterOnModal.requested_department) {
-  filters.push(["requested_department", "like", `${filterOnModal.requested_department}`]);
-}
-const queryParams = {
-  fields: JSON.stringify(["*"]),
-  limit_page_length: filterObj.value.limitPageLength,
-  limit_start: filterObj.value.limit_start,
-  filters: JSON.stringify(filters),
-  order_by: "`tabWF Workflow Requests`.`creation` desc",
-};
-const queryParamsCount = {
-  fields: JSON.stringify(["count( `tabWF Workflow Requests`.`name`) AS total_count"]),
-  limitPageLength: "None",
-  filters: JSON.stringify(filters),
-}
-axiosInstance.get(`${apis.resource}${doctypes.WFWorkflowRequests}`, { params: queryParamsCount })
-  .then((res) => {
+    // Conditionally add filters based on available fields in filterOnModal
+    if (filterOnModal.name) {
+        filters.push(["name", "=", filterOnModal.name]);
+    }
+    if (filterOnModal.doctype_name) {
+        filters.push(["doctype_name", "=", filterOnModal.doctype_name]);
+    }
+    if (filterOnModal.accessible_departments) {
+        filters.push(["accessible_departments", "like", filterOnModal.accessible_departments]);
+    }
+    if (filterOnModal.status) {
+        filters.push(["status", "like", filterOnModal.status]);
+    }
+    if (filterOnModal.request_id) {
+        filters.push(["request_id", "like", filterOnModal.request_id]);
+    }
+    if (filterOnModal.requested_on) {
+        filters.push(["requested_on", "like", filterOnModal.requested_on]);
+    }
+    if (filterOnModal.owner) {
+        filters.push(["owner", "like", filterOnModal.owner]);
+    }
 
-    totalRecords.value = res.data[0].total_count
+    // Define query parameters for data and count retrieval
+    const queryParams = {
+        fields: JSON.stringify(["*"]),
+        limit_page_length: filterObj.value.limitPageLength,
+        limit_start: filterObj.value.limit_start,
+        filters: JSON.stringify(filters),
+        order_by: "`tabWF Workflow Requests`.`creation` desc",
+    };
 
-  })
-  .catch((error) => {
-    console.error("Error fetching ezyForms data:", error);
-  });
-axiosInstance.get(apis.resource+doctypes.WFWorkflowRequests,{params:queryParams}).then((res)=>{
-console.log(`output-res`,res)
-tableData.value=res.data;
-})
+    const queryParamsCount = {
+        fields: JSON.stringify(["count(`tabWF Workflow Requests`.`name`) AS total_count"]),
+        limitPageLength: "None",
+        filters: JSON.stringify(filters),
+    };
+
+    // Fetch total count of records matching filters
+    axiosInstance.get(`${apis.resource}${doctypes.WFWorkflowRequests}`, { params: queryParamsCount })
+        .then((res) => {
+            totalRecords.value = res.data[0].total_count;
+        })
+        .catch((error) => {
+            console.error("Error fetching total count:", error);
+        });
+
+    // Fetch the records matching filters
+    axiosInstance.get(`${apis.resource}${doctypes.WFWorkflowRequests}`, { params: queryParams })
+        .then((res) => {
+            console.log("output-res", res);
+            tableData.value = res.data;
+            idDta.value = [...new Set(res.data.map((id) => id.name))];
+            docTypeName.value=[...new Set(res.data.map((docTypeName)=>docTypeName.doctype_name))]
+
+        })
+        .catch((error) => {
+            console.error("Error fetching records:", error);
+        });
 }
+
 watch(
   businessUnit,
   (newVal) => {
