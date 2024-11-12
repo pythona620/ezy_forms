@@ -5,7 +5,7 @@
                 Requests received for me
             </h1>
             <p class="m-0 font-11 pt-1">
-                39 request
+                {{  }} request
             </p>
         </div>
         <div class="d-flex gap-3 align-items-center">
@@ -96,7 +96,7 @@
                                         <label class="font-13 ps-1" for="dept">Form Category:</label>
                                         <FormFields tag="select" placeholder="Form Category" class="mb-3"
                                             name="dept" v-model="filterOnModal.form_category" id="dept" :Required="false"
-                                            :options="formCategory" />
+                                             />
                                     </div>
                                     <div class="col-6">
                                         <label class="font-13 ps-1" for="dept">Accessible departments:</label>
@@ -153,21 +153,26 @@
     <div class="mt-2">
         <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction='true' actionType="dropdown"
             isCheckbox='true':actions="actions" />
+            <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
+            @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
     </div>
 </template>
 <script setup>
 import FormFields from '../../Components/FormFields.vue';
 import ButtonComp from '../../Components/ButtonComp.vue';
 import GlobalTable from '../../Components/GlobalTable.vue';
-// import axiosInstance from '../../shared/services/interceptor';
-// import { apis, doctypes } from '../../shared/apiurls';
-import { callWithErrorHandling, onMounted, ref,reactive,computed } from 'vue';
-const filterObj = ref({
-    search: '',
-    selectoption: ''
+import axiosInstance from '../../shared/services/interceptor';
+import { apis, doctypes } from '../../shared/apiurls';
+import { callWithErrorHandling, onMounted, ref,reactive,computed,watch } from 'vue';
+import { EzyBusinessUnit } from "../../shared/services/business_unit";
+const businessUnit = computed(() => {
+    return EzyBusinessUnit.value;
+});
+const newBusinessUnit = ref({ business_unit: '' });
 
+const filterObj = ref({ limitPageLength: 'None', limit_start: 0 });
+const totalRecords = ref(0);
 
-})
 const tableheaders = ref([
     { th: "Request ID", td_key: "name" },
     { th: "Form name", td_key: "name" },
@@ -287,8 +292,72 @@ filterOnModal.appliedrequested_department=Boolean(filterOnModal.requested_depart
 
 
 }
+function receivedForMe(){
+  const filters = [
+    // ["business_unit", "like", `%${newBusinessUnit.value.business_unit}%`]
+  ];
+ 
+  if (filterOnModal.form_name) {
+    filters.push(["form_name", "like", `${filterOnModal.form_name}`]);
+  }
+  if (filterOnModal.form_category) {
+    filters.push(["form_category", "like", `${filterOnModal.form_category}`]);
+  }
+  if (filterOnModal.accessible_departments) {
+    filters.push(["accessible_departments", "like", `${filterOnModal.accessible_departments}`]);
+  }
+  if (filterOnModal.form_status) {
+    filters.push(["form_status", "like", `${filterOnModal.form_status}`]);
+  }
+  if (filterOnModal.request_id) {
+    filters.push(["request_id", "like", `${filterOnModal.request_id}`]);
+  }
+  if (filterOnModal.requested_by) {
+    filters.push(["requested_by", "like", `${filterOnModal.requested_by}`]);
+  }
+  if (filterOnModal.requested_department) {
+    filters.push(["requested_department", "like", `${filterOnModal.requested_department}`]);
+  }
+  const queryParams = {
+    fields: JSON.stringify(["*"]),
+    limit_page_length: filterObj.value.limitPageLength,
+    limit_start: filterObj.value.limit_start,
+    filters: JSON.stringify(filters),
+    order_by: "`tabWF Workflow Requests`.`creation` desc",
+  };
+  const queryParamsCount = {
+    fields: JSON.stringify(["count( `tabWF Workflow Requests`.`name`) AS total_count"]),
+    limitPageLength: "None",
+    filters: JSON.stringify(filters),
+  }
+  axiosInstance.get(`${apis.resource}${doctypes.WFWorkflowRequests}`, { params: queryParamsCount })
+    .then((res) => {
+
+      totalRecords.value = res.data[0].total_count
+
+    })
+    .catch((error) => {
+      console.error("Error fetching ezyForms data:", error);
+    });
+axiosInstance.get(apis.resource+doctypes.WFWorkflowRequests,{params:queryParams}).then((res)=>{
+  console.log(`output-res`,res)
+  tableData.value=res.data;
+})
+}
+watch(
+    businessUnit,
+    (newVal) => {
+      newBusinessUnit.value.business_unit = newVal;
+
+        if (newVal.length) {
+            console.log(newVal, "new value of business unit");
+            receivedForMe()
+        }
+    },
+    { immediate: true }
+);
 onMounted(() => {
-  
+  // receivedForMe()
 })
 </script>
 <style scoped>
