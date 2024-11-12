@@ -96,7 +96,7 @@
                                         <label class="font-13 ps-1" for="dept">Form Category:</label>
                                         <FormFields tag="select" placeholder="Form Category" class="mb-3"
                                             name="dept" v-model="filterOnModal.form_category" id="dept" :Required="false"
-                                            :options="formCategory" />
+                                             />
                                     </div>
                                     <div class="col-6">
                                         <label class="font-13 ps-1" for="dept">Accessible departments:</label>
