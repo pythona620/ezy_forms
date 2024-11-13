@@ -15,7 +15,7 @@ export const doctypes = {
   EzyEmployeeList: "Ezy Employee",
   roles: 'Role',
   WFRoleMatrix: "WF Role Matrix",
-  WFWorkflowRequests:'WF Workflow Requests'
+  WFWorkflowRequests: 'WF Workflow Requests'
 
 
 };
@@ -32,7 +32,8 @@ export const apis = {
   checkRecord: domain + '/method/frappe.client.get_list',
   add_roles_WF: domain + '/method/ezy_forms.ezy_forms.doctype.ezy_form_definitions.linking_flow_and_forms.add_roles_to_wf_requestors',
   raiseFormdata: domain + '/method/ezy_forms.ezy_forms.doctype.ezy_employee.ezy_employee.role_based_accessible_requests',
-  raising_request: domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.raising_requests`
+  raising_request: domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.raising_requests`,
+  requestApproval: domain + `method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.updating_wf_workflow_requests`
 };
 
 // export const tokens = {

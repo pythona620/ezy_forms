@@ -158,14 +158,26 @@
     </div>
     <div class="modal fade" id="viewRequest" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
       aria-labelledby="viewRequestLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="viewRequestLabel">Request</h5>
+            <h5 class="modal-title font-13" id="viewRequestLabel">Request Id: {{ selectedRequest.name }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            {{ selectedRequest }}
+            <ApproverPreview :blockArr="showRequest" @updateField="updateFormData" />
+          </div>
+          <div class="modal-footer">
+            <div class="d-flex justify-content-between align-items-center mt-3 gap-2">
+              <div>
+                <ButtonComp @click="ApproverFormSubmission(formData, 'Reject')" type="button" icon="x"
+                  class="rejectbtn border-1 text-nowrap font-10 " name="Reject" />
+              </div>
+              <div>
+                <ButtonComp type="button" icon="check2" class="approvebtn border-1 text-nowrap font-10 "
+                  @click="ApproverFormSubmission(formData, 'Approve')" name="Approve" />
+              </div>
+            </div>
           </div>
 
         </div>
@@ -184,6 +196,10 @@ import { apis, doctypes } from '../../shared/apiurls';
 import { callWithErrorHandling, onMounted, ref, reactive, computed, watch } from 'vue';
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
 import PaginationComp from '../../Components/PaginationComp.vue';
+import { rebuildToStructuredArray } from '../../shared/services/field_format';
+import ApproverPreview from '../../Components/ApproverPreview.vue';
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 const businessUnit = computed(() => {
   return EzyBusinessUnit.value;
 });
@@ -231,22 +247,134 @@ const filterOnModal = reactive({
   requested_on: '',
   owner: ''
 })
-const selectedRequest = ref({})
+const selectedRequest = ref({});
+const showRequest = ref(null);
+const doctypeForm = ref([]);
+
 function actionCreated(rowData, actionEvent) {
   if (actionEvent.name === 'View Request') {
     if (rowData) {
+      selectedRequest.value = { ...rowData };
+      // Rebuild the structured array from JSON
+      showRequest.value = rebuildToStructuredArray(JSON.parse(selectedRequest.value?.json_columns).fields);
+      console.log(showRequest.value, "selected Request");
 
-      selectedRequest.value = { ...rowData }
-      // selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json).fields)
-      const modal = new bootstrap.Modal(document.getElementById('viewRequest'), {});// raise a modal
+      // Prepare the filters for fetching data
+      const filters = [
+        ["wf_generated_request_id", "like", `%${selectedRequest.value.name}%`]
+      ];
+      const queryParams = {
+        fields: JSON.stringify(["*"]),
+        limit_page_length: "None",
+        limit_start: 0,
+        filters: JSON.stringify(filters),
+        order_by: `\`tab${selectedRequest.value.doctype_name}\`.\`creation\` desc`
+      };
+
+      // Fetch the doctype data
+      axiosInstance.get(`${apis.resource}${selectedRequest.value.doctype_name}`, { params: queryParams })
+        .then((res) => {
+          if (res.data) {
+            doctypeForm.value = res.data;
+            // Map values from doctypeForm to showRequest fields
+            mapFormFieldsToRequest(doctypeForm.value[0], showRequest.value);
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching categories data:", error);
+        });
+
+      const modal = new bootstrap.Modal(document.getElementById('viewRequest'), {});
       modal.show();
-
     } else {
-      console.warn(" There is no form fields ")
-
+      console.warn(" There is no form fields ");
     }
   }
+}
+const emittedFormData = ref([]);
+// Function to capture the form data from ApproverPreview
+const updateFormData = (fieldValues) => {
+  emittedFormData.value = emittedFormData.value.concat(fieldValues);
+  // console.log(formData.value, "-----------========ApproverFormData====-=-==-==");
+};
 
+// Function to handle form submission
+function ApproverFormSubmission(dataObj, type) {
+  let form = {};
+  form['doctype'] = selectedRequest.value.doctype_name;
+  form['company_field'] = selectedRequest.value.property
+  form['name'] = doctypeForm.value.name
+  if (emittedFormData.value.length) {
+    emittedFormData.value.map((each) => {
+      form[each.fieldname] = each.value
+    })
+  }
+
+  console.log(" ==== ", form)
+
+  // form['form_json']
+  const formData = new FormData();
+  formData.append('doc', JSON.stringify(form));
+  formData.append('action', 'Save');
+  axiosInstance.post(apis.savedocs, formData)
+    .then((response) => {
+      console.log(response);
+      approvalStatusFn(dataObj, type)
+      toast.success("Request Approved", { autoClose: 1000 })
+
+      const modal = bootstrap.Modal.getInstance(document.getElementById('riaseRequestModal'));
+      modal.hide();
+    })
+    .catch((error) => {
+      console.error("Error fetching data:", error);
+    });
+
+};
+
+function approvalStatusFn(dataObj, type) {
+  let data = {
+    "property": selectedRequest.value.property,
+    "doctype": selectedRequest.value.doctype_name,
+    "request_ids": selectedRequest.value.name,
+    "reason": "",
+    "action": type,
+    "files": "[]",
+    "cluster_name": null,
+    "url_for_approval_id": '',
+    // https://ezyrecon.ezyinvoicing.com/home/wf-requests
+    "current_level": selectedRequest.value.current_level
+  }
+  console.log(dataObj, { request_details: [data] }, "---------------------================");
+  // need to check this api not working 
+  axiosInstance.post(apis.requestApproval, { request_details: [data] })
+    .then((response) => {
+      console.log(response);
+
+      toast.success("Rquest Approved", { autoClose: 1000 })
+      const modal = bootstrap.Modal.getInstance(document.getElementById('viewRequest'));
+      modal.hide();
+    })
+    .catch((error) => {
+      console.error("Error fetching data:", error);
+    });
+}
+
+function mapFormFieldsToRequest(doctypeData, showRequestData) {
+  showRequestData.forEach(block => {
+    block.sections.forEach(section => {
+      section.rows.forEach(row => {
+        row.columns.forEach(column => {
+          column.fields.forEach(field => {
+            // Check if the fieldname exists in the doctypeForm and assign the value
+            if (doctypeData.hasOwnProperty(field.fieldname)) {
+              field.value = doctypeData[field.fieldname]; // Assign the value from doctypeForm to the field
+              // console.log(`Mapping field: ${field.fieldname} with value: ${field.value}`);
+            }
+          });
+        });
+      });
+    });
+  });
 }
 const appliedFiltersCount = computed(() => {
   return [
@@ -352,7 +480,7 @@ function receivedForMe() {
   console.log(EmpRequestdesignation, "---------------------");
   const filters = [
     // assigned_to_users
-    ["assigned_to_users", "like", EmpRequestdesignation.designation]
+    ["assigned_to_users", "like", `%${EmpRequestdesignation.designation}%`]
   ];
 
   // Conditionally add filters based on available fields in filterOnModal
@@ -434,4 +562,28 @@ onMounted(() => {
   // receivedForMe()
 })
 </script>
-<style scoped></style>
+<style scoped>
+.approvebtn {
+  width: 146px;
+  height: 30px;
+  background: #14D82B;
+  color: white;
+  padding: 5px 15px 5px 15px;
+  gap: 7px;
+  border-radius: 4px;
+  opacity: 0px;
+
+}
+
+.rejectbtn {
+  width: 146px;
+  height: 30px;
+  background: #FE212E;
+  color: white;
+  padding: 5px 15px 5px 15px;
+  gap: 7px;
+  border-radius: 4px;
+  opacity: 0px;
+
+}
+</style>

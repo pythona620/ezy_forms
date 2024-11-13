@@ -157,14 +157,25 @@
     </div>
     <div class="modal fade" id="viewRequest" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
       aria-labelledby="viewRequestLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="viewRequestLabel">Request</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <!-- {{ selectedRequest }} -->
+            <ApproverPreview :blockArr="showRequest" @updateField="updateFormData" />
+          </div>
+          <div class="modal-footer">
+            <div class="d-flex justify-content-between align-items-center mt-3 gap-2">
+              <!-- <div>
+                <ButtonComp type="button" icon="x" class="rejectbtn border-1 text-nowrap font-10 " name="Reject" />
+              </div> -->
+              <div>
+                <ButtonComp type="button" icon="x" class="btn btn-dark approvebtn border-1 text-nowrap font-10 "
+                  @click="ApproverFormSubmission(formData)" name="Cancel Request" />
+              </div>
+            </div>
           </div>
 
         </div>
@@ -182,6 +193,10 @@ import { apis, doctypes } from '../../shared/apiurls';
 import { callWithErrorHandling, onMounted, ref, reactive, computed, watch } from 'vue';
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
 import PaginationComp from '../../Components/PaginationComp.vue';
+import { rebuildToStructuredArray } from '../../shared/services/field_format';
+import ApproverPreview from '../../Components/ApproverPreview.vue';
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 const businessUnit = computed(() => {
   return EzyBusinessUnit.value;
 });
@@ -202,13 +217,20 @@ const tableheaders = ref([
 ]
 
 )
-const selectedRequest = ref({})
+
+const selectedRequest = ref({});
+const showRequest = ref(null);
+const doctypeForm = ref([]);
 
 function actionCreated(rowData, actionEvent) {
   if (actionEvent.name === 'View Request') {
     if (rowData) {
-      selectedRequest.value = { ...rowData }
-      console.log(selectedRequest.value, "selected Request")
+      selectedRequest.value = { ...rowData };
+      // Rebuild the structured array from JSON
+      showRequest.value = rebuildToStructuredArray(JSON.parse(selectedRequest.value?.json_columns).fields);
+      console.log(showRequest.value, "selected Request");
+
+      // Prepare the filters for fetching data
       const filters = [
         ["wf_generated_request_id", "like", `%${selectedRequest.value.name}%`]
       ];
@@ -219,25 +241,87 @@ function actionCreated(rowData, actionEvent) {
         filters: JSON.stringify(filters),
         order_by: `\`tab${selectedRequest.value.doctype_name}\`.\`creation\` desc`
       };
+
+      // Fetch the doctype data
       axiosInstance.get(`${apis.resource}${selectedRequest.value.doctype_name}`, { params: queryParams })
         .then((res) => {
           if (res.data) {
-            console.log(res.data)
+            doctypeForm.value = res.data;
+            // Map values from doctypeForm to showRequest fields
+            mapFormFieldsToRequest(doctypeForm.value[0], showRequest.value);
           }
         })
         .catch((error) => {
           console.error("Error fetching categories data:", error);
         });
-      // selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json).fields)
-      const modal = new bootstrap.Modal(document.getElementById('viewRequest'), {});// raise a modal
+
+      const modal = new bootstrap.Modal(document.getElementById('viewRequest'), {});
       modal.show();
-
     } else {
-      console.warn(" There is no form fields ")
-
+      console.warn(" There is no form fields ");
     }
   }
+}
+const formData = ref([]);
+// Function to capture the form data from ApproverPreview
+const updateFormData = (fieldValues) => {
+  formData.value = formData.value.concat(fieldValues);
+  // console.log(formData.value, "-----------========ApproverFormData====-=-==-==");
+};
 
+// Function to handle form submission
+const ApproverFormSubmission = () => {
+
+  // if (emittedFormData.value.length) {
+  //       emittedFormData.value.map((each) => {
+  //           form[each.fieldname] = each.value
+  //       })
+  //   }
+
+
+  let data = {
+    "property": selectedRequest.value.property,
+    "doctype": selectedRequest.value.doctype_name,
+    "request_ids": selectedRequest.value.name,
+    "reason": "",
+    "action": selectedRequest.value.action,
+    "files": "[]",
+    "cluster_name": null,
+    "url_for_approval_id": '',
+    // https://ezyrecon.ezyinvoicing.com/home/wf-requests
+    "current_level": selectedRequest.value.current_level
+  }
+  console.log(formData.value, { request_details: [data] }, "---------------------================");
+  // axiosInstance.post(apis.requestApproval, { request_details: [data] })
+  //   .then((response) => {
+  //     console.log(response);
+
+  toast.success("Rquest Approved", { autoClose: 1000 })
+  const modal = bootstrap.Modal.getInstance(document.getElementById('viewRequest'));
+  modal.hide();
+  // })
+  // .catch((error) => {
+  //   console.error("Error fetching data:", error);
+  // });
+
+};
+
+function mapFormFieldsToRequest(doctypeData, showRequestData) {
+  showRequestData.forEach(block => {
+    block.sections.forEach(section => {
+      section.rows.forEach(row => {
+        row.columns.forEach(column => {
+          column.fields.forEach(field => {
+            // Check if the fieldname exists in the doctypeForm and assign the value
+            if (doctypeData.hasOwnProperty(field.fieldname)) {
+              field.value = doctypeData[field.fieldname]; // Assign the value from doctypeForm to the field
+              // console.log(`Mapping field: ${field.fieldname} with value: ${field.value}`);
+            }
+          });
+        });
+      });
+    });
+  });
 }
 const actions = ref(
   [
@@ -450,4 +534,28 @@ onMounted(() => {
   // receivedForMe()
 })
 </script>
-<style scoped></style>
+<style scoped>
+.approvebtn {
+  width: 146px;
+  height: 30px;
+  /* background: #14D82B; */
+  color: white;
+  padding: 5px 15px 5px 15px;
+  gap: 7px;
+  border-radius: 4px;
+  opacity: 0px;
+
+}
+
+.rejectbtn {
+  width: 146px;
+  height: 30px;
+  background: #FE212E;
+  color: white;
+  padding: 5px 15px 5px 15px;
+  gap: 7px;
+  border-radius: 4px;
+  opacity: 0px;
+
+}
+</style>
