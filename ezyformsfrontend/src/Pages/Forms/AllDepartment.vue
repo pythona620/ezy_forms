@@ -119,8 +119,9 @@
             </div>
           </div>
           <div class="d-flex align-items-center ">
-            <ButtonComp class="buttoncomp font-10" name="CreateForm" data-bs-toggle="offcanvas"
-              data-bs-target="#offcanvasRight" aria-controls="offcanvasRight"></ButtonComp>
+            <ButtonComp class="buttoncomp font-10" name="CreateForm" ></ButtonComp>
+            <!-- data-bs-toggle="offcanvas"
+              data-bs-target="#offcanvasRight" aria-controls="offcanvasRight" -->
           </div>
 
         </div>

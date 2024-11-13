@@ -164,7 +164,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            {{ selectedRequest }}
+            <!-- {{ selectedRequest }} -->
           </div>
 
         </div>
@@ -208,7 +208,28 @@ function actionCreated(rowData, actionEvent) {
   if (actionEvent.name === 'View Request') {
     if (rowData) {
 
+
       selectedRequest.value = { ...rowData }
+      console.log(selectedRequest.value,"selected Request")
+      const filters = [
+    ["wf_generated_request_id", "like", `%${selectedRequest.value.name}%`]
+  ];
+      const queryParams = {
+    fields: JSON.stringify(["*"]),
+    limit_page_length: "None",
+    limit_start: 0,
+    filters: JSON.stringify(filters),
+    order_by: `\`tab${selectedRequest.value.doctype_name}\`.\`creation\` desc`
+  };
+      axiosInstance.get(`${apis.resource}${selectedRequest.value.doctype_name}`, { params: queryParams })
+                .then((res) => {
+                    if (res.data) {
+                        console.log(res.data)
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error fetching categories data:", error);
+                });
       // selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json).fields)
       const modal = new bootstrap.Modal(document.getElementById('viewRequest'), {});// raise a modal
       modal.show();
@@ -224,9 +245,9 @@ const actions = ref(
   [
     { name: 'View Request', icon: 'fa-solid fa-eye' },
 
-    { name: 'Share this form', icon: 'fa-solid fa-share-alt' },
-    { name: 'Download Form', icon: 'fa-solid fa-download' },
-    { name: 'Edit Form', icon: 'fa-solid fa-edit' },
+    // { name: 'Share this form', icon: 'fa-solid fa-share-alt' },
+    // { name: 'Download Form', icon: 'fa-solid fa-download' },
+    // { name: 'Edit Form', icon: 'fa-solid fa-edit' },
 
   ]
 )
@@ -344,10 +365,11 @@ const PaginationLimitStart = ([itemsPerPage, start]) => {
 };
 const idDta = ref([]);
 const docTypeName = ref([])
+const statusOptions = ref([])
+
 function receivedForMe() {
   // Initialize filters array for building dynamic query parameters
   const EmpRequestMail = JSON.parse(localStorage.getItem('employeeData'));
-  console.log(EmpRequestMail, "-----------------");
   const filters = [
     ["requested_by", "like", EmpRequestMail.emp_mail_id]
   ];
@@ -402,7 +424,6 @@ function receivedForMe() {
   // Fetch the records matching filters
   axiosInstance.get(`${apis.resource}${doctypes.WFWorkflowRequests}`, { params: queryParams })
     .then((res) => {
-      console.log("output-res", res);
       tableData.value = res.data;
       idDta.value = [...new Set(res.data.map((id) => id.name))];
       docTypeName.value = [...new Set(res.data.map((docTypeName) => docTypeName.doctype_name))]

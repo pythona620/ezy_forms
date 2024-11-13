@@ -542,6 +542,9 @@ function request_raising_fn(item) {
     }
     axiosInstance.post(apis.raising_request, data_obj).then((resp) => {
         console.log(resp)
+        if(resp?.message?.success){
+            window.location.reload()
+        }
     })
 }
 

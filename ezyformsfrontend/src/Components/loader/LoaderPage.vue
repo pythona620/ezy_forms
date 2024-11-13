@@ -41,7 +41,7 @@ export default {
     width: 15px;
     height: 15px;
     border-radius: 50%;
-    background-color: #00000041;
+    background-color: #000;
     animation: bounce 1s infinite ease-in-out;
 }
 
