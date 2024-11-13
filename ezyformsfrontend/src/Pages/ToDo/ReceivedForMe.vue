@@ -109,9 +109,10 @@
                     <!-- <span class="m-0 font-10 ps-2">Note:Please seperate departments with commas</span> -->
                   </div>
                   <div class="col-6">
-                    <label class="font-13 ps-1" for="dept">Status:</label>
-                    <FormFields tag="input" type="search" placeholder="Status" class="mb-3" name="dept"
-                      v-model="filterOnModal.status" id="dept" :Required="false" />
+                    <label class="font-13 ps-1" for="status">Status:</label>
+                    
+                      <FormFields tag="select" placeholder="Status" class="mb-3" name="status"
+                      v-model="filterOnModal.status" id="status" :Required="false" :options="statusOptions" />
                   </div>
 
                   <div class="col-6">
@@ -344,6 +345,7 @@ const PaginationLimitStart = ([itemsPerPage, start]) => {
 };
 const idDta = ref([]);
 const docTypeName = ref([])
+const statusOptions=ref([])
 function receivedForMe() {
   // Initialize filters array for building dynamic query parameters
   const EmpRequestdesignation = JSON.parse(localStorage.getItem('employeeData'));
@@ -407,6 +409,8 @@ function receivedForMe() {
       tableData.value = res.data;
       idDta.value = [...new Set(res.data.map((id) => id.name))];
       docTypeName.value = [...new Set(res.data.map((docTypeName) => docTypeName.doctype_name))]
+      statusOptions.value = [...new Set(res.data.map((status) => status.status))]
+
 
     })
     .catch((error) => {
