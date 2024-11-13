@@ -161,6 +161,7 @@ input {
 	padding: 7px;
 	margin-top: 16px;
 	border-radius: 6px;
+	font-size: 13px;
 }
 
 button {
@@ -182,7 +183,7 @@ button {
 
 .toggle-icon {
 	position: absolute;
-	top: 96%;
+	top: 77%;
 	right: 10px;
 	transform: translateY(-50%);
 	cursor: pointer;
