@@ -151,9 +151,24 @@
     </div>
     <div class="mt-2">
       <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction='true' actionType="dropdown" isCheckbox='true'
-        :actions="actions" />
+        :actions="actions" @actionClicked="actionCreated" />
       <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
         @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
+    </div>
+    <div class="modal fade" id="viewRequest" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+      aria-labelledby="viewRequestLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="viewRequestLabel">Request</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            {{ selectedRequest }}
+          </div>
+
+        </div>
+      </div>
     </div>
   </div>
 
@@ -187,6 +202,24 @@ const tableheaders = ref([
 ]
 
 )
+const selectedRequest = ref({})
+
+function actionCreated(rowData, actionEvent) {
+  if (actionEvent.name === 'View Request') {
+    if (rowData) {
+
+      selectedRequest.value = { ...rowData }
+      // selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json).fields)
+      const modal = new bootstrap.Modal(document.getElementById('viewRequest'), {});// raise a modal
+      modal.show();
+
+    } else {
+      console.warn(" There is no form fields ")
+
+    }
+  }
+
+}
 const actions = ref(
   [
     { name: 'View Request', icon: 'fa-solid fa-eye' },
