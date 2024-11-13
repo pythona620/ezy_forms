@@ -205,12 +205,12 @@ onMounted(() => {
 </script>
 
 <style lang="scss">
-.fixed-column {
-  position: sticky !important;
-  right: 0 !important;
-  background: white !important;
+// .fixed-column {
+//   position: sticky !important;
+//   right: 0 !important;
+//   background: white !important;
 
-}
+// }
 .activeform {
   font-size: 11px;
   font-weight: 400;
