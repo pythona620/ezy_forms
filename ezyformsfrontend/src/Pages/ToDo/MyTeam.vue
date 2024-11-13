@@ -311,7 +311,10 @@ const statusOptions = ref([])
 
 function receivedForMe() {
   // Initialize filters array for building dynamic query parameters
-  const filters = [];
+  const filters = [
+  ["property", "like", `%${newBusinessUnit.value.business_unit}%`]
+
+  ];
 
   // Conditionally add filters based on available fields in filterOnModal
   if (filterOnModal.name) {

@@ -1,33 +1,42 @@
 <template>
+	
 	<div class="bg-img">
 		<div class="input-div p-5">
-			<h3 class="text-center mb-5 fw-bolder"><b>EZY FORMS</b></h3>
-			<div class="input-box">
-				<span class="icon"><i class="bi bi-envelope-fill"></i></span>
-				<input type="text" class=" text-white " id="name" v-model="formdata.usr" @input="validatename"
+			<div class="d-flex gap-2 p-2 justify-content-center align-items-center">
+                                <div><img class="imgmix" src="../assets/favicon.jpg" /></div>
+                                <div class="m-0">
+                                    <p class="fontimgtext fw-bold m-0">EZY | Forms</p>
+                                </div>
+                            </div>
+				
+			<div class="mt-3">
+				
+				<label for="name" class="font-13">UserName</label><br>
+				<input type="text" class=" form-control m-0 " id="name" v-model="formdata.usr" @input="validatename"
 					:class="{ 'is-invalid': errors.usr }" />
-				<label>Email</label>
-				<div class="invalid-feedback font-11 mt-3" v-if="errors.usr">
+				
+				<div class="invalid-feedback font-11 mt-1" v-if="errors.usr">
 					{{ errors.usr }}
 				</div>
 			</div>
 
-			<div class="input-box mt-5">
+			<div class="inputbox mt-3">
+				<label for="password" class="font-13">Password</label><br>
 				<!-- <span class="icon"><i class="bi bi-lock-fill"></i></span> -->
-				<input class="text-white" :type="showPassword ? 'text' : 'password'" id="password"
+				<input class="form-control m-0" :type="showPassword ? 'text' : 'password'" id="password"
 					v-model="formdata.pwd" @input="validatepassword" @keydown.enter="Login"
 					:class="{ 'is-invalid': errors.pwd }" />
-				<label>Password</label>
+				
 				<!-- Toggle icon for show/hide password -->
 				<span class="toggle-icon" @click="togglePasswordVisibility">
 					<i :class="showPassword ? 'bi bi-eye' : 'bi bi-eye-slash'"></i>
 				</span>
-				<div class="invalid-feedback" v-if="errors.pwd">
+				<div class="invalid-feedback font-10" v-if="errors.pwd">
 					{{ errors.pwd }}
 				</div>
 			</div>
 			<br>
-			<button @click="Login" type="submit" class="border-0 button w-100 py-2 text-white rounded-1">
+			<button @click="Login" type="submit" class="border-0  btn btn-dark button w-100 py-2 text-white rounded-1">
 				Log In
 			</button>
 		</div>
@@ -124,28 +133,28 @@ export default {
 </script>
 
 <style scoped>
+.loginpageheight{
+	height: 100vh;
+
+}
+.fontimgtext{
+	font-size: 17px;
+	color: #111111;
+	margin: 0;
+}
 .bg-img {
 	/* background-image: url(../assets/ElektronicsDevice.webp) !important; */
 	background-size: 100vw 100vh;
 	/* width: 100vw; */
 	height: 100vh;
-	color: white;
+	color: #111111;
 	display: flex;
-	justify-content: end;
+	justify-content: center;
 	align-items: center;
 }
 
-.input-div {
-	background: transparent;
-	backdrop-filter: blur(7px);
-	/* background-color: rgba(0, 0, 0, 0.5); */
-	background-color: rgba(0, 0, 0, 0.39);
-	border-radius: 20px;
-	margin-right: 100px;
-	box-shadow: 0 4px 8px 0 rgba(219, 216, 216, 0.2),
-		0 -7px 20px 0 rgba(226, 190, 190, 0.19) inset;
-	width: 30vw;
-	height: 450px;
+.label{
+	color: #111111;
 }
 
 input {
@@ -157,28 +166,27 @@ input {
 button {
 	/* padding: 9px; */
 	margin-top: 25px;
-	background-color: rgb(231, 90, 90);
+	/* background-color: rgb(231, 90, 90); */
 	font-weight: bold;
 }
 
-.input-box {
+.inputbox {
 	position: relative;
 	width: 100%;
 	height: 50px;
-	border-bottom: 2px solid white;
-	/* margin: 30px; */
-	font-size: 18px;
+
+	font-size: 13px;
 
 }
 
 
 .toggle-icon {
 	position: absolute;
-	top: 50%;
+	top: 96%;
 	right: 10px;
 	transform: translateY(-50%);
 	cursor: pointer;
-	color: #ffffff;
+	
 }
 
 .input-box label {
@@ -202,8 +210,8 @@ button {
 	width: 100%;
 	/* height: 100%; */
 	background: transparent;
-	border: none;
-	outline: none;
+	/* border: none; */
+	/* outline: none; */
 	font-size: 1em;
 	font-weight: 600;
 	padding: 0 35px 0 5px;
