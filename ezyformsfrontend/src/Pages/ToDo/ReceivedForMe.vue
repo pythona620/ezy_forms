@@ -352,7 +352,7 @@ function receivedForMe() {
   console.log(EmpRequestdesignation, "-----------------");
   const filters = [
     // assigned_to_users
-    ["assigned_to_users", "like", EmpRequestdesignation.designation]
+    ["assigned_to_users", "like", `%${EmpRequestdesignation.designation}%`]
   ];
 
   // Conditionally add filters based on available fields in filterOnModal

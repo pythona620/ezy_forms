@@ -128,7 +128,7 @@ def enqueued_add_customized_fields_for_dynamic_doc(fields:list[dict],doctype:str
 				if not doc_exists_name_or_not:
 					name_of_existing_doc = frappe.db.get_all("DocField",filters={"fieldname":dicts_of_docs_entries["fieldname"],"parent":doctype},pluck="name")[0]
 					doc_for_existing_custom_field = frappe.get_doc("DocField",name_of_existing_doc)
-					if "reqd" in dicts_of_docs_entries:doc_for_existing_custom_field.reqd = dicts_of_docs_entries["reqd"]
+					# if "reqd" in dicts_of_docs_entries:doc_for_existing_custom_field.reqd = dicts_of_docs_entries["reqd"]
 					if "options" in dicts_of_docs_entries:
 						if isinstance(dicts_of_docs_entries["options"],str):
 							dicts_of_docs_entries["options"] = literal_eval(dicts_of_docs_entries["options"])
