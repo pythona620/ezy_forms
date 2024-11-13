@@ -110,8 +110,8 @@
                   </div>
                   <div class="col-6">
                     <label class="font-13 ps-1" for="status">Status:</label>
-                    
-                      <FormFields tag="select" placeholder="Status" class="mb-3" name="status"
+
+                    <FormFields tag="select" placeholder="Status" class="mb-3" name="status"
                       v-model="filterOnModal.status" id="status" :Required="false" :options="statusOptions" />
                   </div>
 
@@ -345,10 +345,15 @@ const PaginationLimitStart = ([itemsPerPage, start]) => {
 };
 const idDta = ref([]);
 const docTypeName = ref([])
-const statusOptions=ref([])
+const statusOptions = ref([])
 function receivedForMe() {
   // Initialize filters array for building dynamic query parameters
-  const filters = [];
+  const EmpRequestdesignation = JSON.parse(localStorage.getItem('employeeData'));
+  console.log(EmpRequestdesignation, "-----------------");
+  const filters = [
+    // assigned_to_users
+    ["assigned_to_users", "like", EmpRequestdesignation.designation]
+  ];
 
   // Conditionally add filters based on available fields in filterOnModal
   if (filterOnModal.name) {

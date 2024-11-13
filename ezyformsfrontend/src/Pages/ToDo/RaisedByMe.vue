@@ -1,158 +1,177 @@
 <template>
-  <div class="d-flex justify-content-between align-items-center ">
-    <div>
-      <h1 class="m-0 font-13">
-        Requests raised for me
-      </h1>
-      <p class="m-0 font-11 pt-1">
-        {{ totalRecords }} request
-      </p>
-    </div>
-    <div class="d-flex gap-3 align-items-center">
-      <div class="d-flex  align-items-center">
-        <div>
-          <div class="me-2">
-            <span v-if="filterOnModal.name && filterOnModal.appliedname" class="process-date font-12 m-0">
-              {{ filterOnModal.name }}
-              <span v-if="filterOnModal.name" class="badge badge-icon rounded-3   text-white "
-                @click="clearFilter('name')">
-                <i class="ri-close-line close-icon text-dark rounded-3"></i>
+  <div>
+    <div class="d-flex justify-content-between align-items-center ">
+      <div>
+        <h1 class="m-0 font-13">
+          Requests raised for me
+        </h1>
+        <p class="m-0 font-11 pt-1">
+          {{ totalRecords }} request
+        </p>
+      </div>
+      <div class="d-flex gap-3 align-items-center">
+        <div class="d-flex  align-items-center">
+          <div>
+            <div class="me-2">
+              <span v-if="filterOnModal.name && filterOnModal.appliedname" class="process-date font-12 m-0">
+                {{ filterOnModal.name }}
+                <span v-if="filterOnModal.name" class="badge badge-icon rounded-3   text-white "
+                  @click="clearFilter('name')">
+                  <i class="ri-close-line close-icon text-dark rounded-3"></i>
+                </span>
               </span>
-            </span>
-            <span v-if="filterOnModal.doctype_name && filterOnModal.applieddoctype_name"
-              class="process-date font-12 m-0">
-              {{ filterOnModal.doctype_name }}
-              <span v-if="filterOnModal.doctype_name" class="badge badge-icon rounded-3   text-white "
-                @click="clearFilter('doctype_name')">
-                <i class="ri-close-line close-icon text-dark rounded-3"></i>
+              <span v-if="filterOnModal.doctype_name && filterOnModal.applieddoctype_name"
+                class="process-date font-12 m-0">
+                {{ filterOnModal.doctype_name }}
+                <span v-if="filterOnModal.doctype_name" class="badge badge-icon rounded-3   text-white "
+                  @click="clearFilter('doctype_name')">
+                  <i class="ri-close-line close-icon text-dark rounded-3"></i>
+                </span>
               </span>
-            </span>
-            <span v-if="filterOnModal.accessible_departments && filterOnModal.appliedaccessible_departments"
-              class="process-date font-12 m-0">
-              {{ filterOnModal.accessible_departments }}
-              <span v-if="filterOnModal.accessible_departments" class="badge badge-icon rounded-3   text-white "
-                @click="clearFilter('accessible_departments')">
-                <i class="ri-close-line close-icon text-dark rounded-3"></i>
+              <span v-if="filterOnModal.accessible_departments && filterOnModal.appliedaccessible_departments"
+                class="process-date font-12 m-0">
+                {{ filterOnModal.accessible_departments }}
+                <span v-if="filterOnModal.accessible_departments" class="badge badge-icon rounded-3   text-white "
+                  @click="clearFilter('accessible_departments')">
+                  <i class="ri-close-line close-icon text-dark rounded-3"></i>
+                </span>
               </span>
-            </span>
-            <span v-if="filterOnModal.status && filterOnModal.appliedStatus" class="process-date font-12 m-0">
-              {{ filterOnModal.status }}
-              <span v-if="filterOnModal.status" class="badge badge-icon rounded-3   text-white"
-                @click="clearFilter('status')">
-                <i class="ri-close-line close-icon text-dark rounded-3"></i>
+              <span v-if="filterOnModal.status && filterOnModal.appliedStatus" class="process-date font-12 m-0">
+                {{ filterOnModal.status }}
+                <span v-if="filterOnModal.status" class="badge badge-icon rounded-3   text-white"
+                  @click="clearFilter('status')">
+                  <i class="ri-close-line close-icon text-dark rounded-3"></i>
+                </span>
               </span>
-            </span>
-            <span v-if="filterOnModal.request_id && filterOnModal.appliedrequest_id" class="process-date font-12 m-0">
-              {{ filterOnModal.request_id }}
-              <span v-if="filterOnModal.request_id" class="badge badge-icon rounded-3   text-white"
-                @click="clearFilter('request_id')">
-                <i class="ri-close-line close-icon text-dark rounded-3"></i>
+              <span v-if="filterOnModal.request_id && filterOnModal.appliedrequest_id" class="process-date font-12 m-0">
+                {{ filterOnModal.request_id }}
+                <span v-if="filterOnModal.request_id" class="badge badge-icon rounded-3   text-white"
+                  @click="clearFilter('request_id')">
+                  <i class="ri-close-line close-icon text-dark rounded-3"></i>
+                </span>
               </span>
-            </span>
-            <span v-if="filterOnModal.requested_on && filterOnModal.appiedrequestedOn" class="process-date font-12 m-0">
-              {{ filterOnModal.requested_on }}
-              <span v-if="filterOnModal.requested_on" class="badge badge-icon rounded-3   text-white"
-                @click="clearFilter('requested_on')">
-                <i class="ri-close-line close-icon text-dark rounded-3"></i>
+              <span v-if="filterOnModal.requested_on && filterOnModal.appiedrequestedOn"
+                class="process-date font-12 m-0">
+                {{ filterOnModal.requested_on }}
+                <span v-if="filterOnModal.requested_on" class="badge badge-icon rounded-3   text-white"
+                  @click="clearFilter('requested_on')">
+                  <i class="ri-close-line close-icon text-dark rounded-3"></i>
+                </span>
               </span>
-            </span>
-            <span v-if="filterOnModal.owner && filterOnModal.appliedowner" class="process-date font-12 m-0">
-              {{ filterOnModal.owner }}
-              <span v-if="filterOnModal.owner" class="badge badge-icon rounded-3   text-white"
-                @click="clearFilter('owner')">
-                <i class="ri-close-line close-icon text-dark rounded-3"></i>
+              <span v-if="filterOnModal.owner && filterOnModal.appliedowner" class="process-date font-12 m-0">
+                {{ filterOnModal.owner }}
+                <span v-if="filterOnModal.owner" class="badge badge-icon rounded-3   text-white"
+                  @click="clearFilter('owner')">
+                  <i class="ri-close-line close-icon text-dark rounded-3"></i>
+                </span>
               </span>
-            </span>
+            </div>
+          </div>
+          <div>
+            <button type="button" class=" filterbtn d-flex align-items-center position-relative " data-bs-toggle="modal"
+              data-bs-target="#fileterModal">
+              <span> <i class="ri-filter-2-line"></i></span>
+              <span v-if="appliedFiltersCount !== 0" class=" badge badge-light colorappiled ">
+                ( {{ appliedFiltersCount }})
+              </span>
+            </button>
+
           </div>
         </div>
-        <div>
-          <button type="button" class=" filterbtn d-flex align-items-center position-relative " data-bs-toggle="modal"
-            data-bs-target="#fileterModal">
-            <span> <i class="ri-filter-2-line"></i></span>
-            <span v-if="appliedFiltersCount !== 0" class=" badge badge-light colorappiled ">
-              ( {{ appliedFiltersCount }})
-            </span>
-          </button>
+        <div class="modal fade" id="fileterModal" tabindex="-1" aria-labelledby="fileterModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-lg">
+            <div class="modal-content">
 
-        </div>
-      </div>
-      <div class="modal fade" id="fileterModal" tabindex="-1" aria-labelledby="fileterModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-          <div class="modal-content">
-
-            <div class="modal-body">
-              <div class="row">
-                <div class="col-6">
-                  <label class="font-13 ps-1" for="Requested">Request Id:</label>
-                  <FormFields tag="select" placeholder="Requested Id" class="mb-3" name="dept"
-                    v-model="filterOnModal.name" id="id" :Required="false" :options="idDta" />
-                </div>
-                <div class="col-6">
-                  <label class="font-13 ps-1" for="Requested">Form Name:</label>
-                  <FormFields tag="select" placeholder="Form Name" class="mb-3" name="dept"
-                    v-model="filterOnModal.doctype_name" id="id" :Required="false" :options="docTypeName" />
-                </div>
-                <!-- <div class="col-6">
+              <div class="modal-body">
+                <div class="row">
+                  <div class="col-6">
+                    <label class="font-13 ps-1" for="Requested">Request Id:</label>
+                    <FormFields tag="select" placeholder="Requested Id" class="mb-3" name="dept"
+                      v-model="filterOnModal.name" id="id" :Required="false" :options="idDta" />
+                  </div>
+                  <div class="col-6">
+                    <label class="font-13 ps-1" for="Requested">Form Name:</label>
+                    <FormFields tag="select" placeholder="Form Name" class="mb-3" name="dept"
+                      v-model="filterOnModal.doctype_name" id="id" :Required="false" :options="docTypeName" />
+                  </div>
+                  <!-- <div class="col-6">
                                       <label class="font-13 ps-1" for="dept">Form Category:</label>
                                       <FormFields tag="select" placeholder="Form Category" class="mb-3"
                                           name="dept" v-model="filterOnModal.doctype_name" id="dept" :Required="false"
                                            />
                                   </div> -->
-                <div class="col-6">
-                  <label class="font-13 ps-1" for="dept">Requested On:</label>
+                  <div class="col-6">
+                    <label class="font-13 ps-1" for="dept">Requested On:</label>
 
-                  <FormFields class="" tag="input" type="search" name="Requested" id="Requested" placeholder="Search"
-                    v-model="filterOnModal.requested_on" />
-                  <!-- <span class="m-0 font-10 ps-2">Note:Please seperate departments with commas</span> -->
-                </div>
-                <div class="col-6">
-                  <label class="font-13 ps-1" for="status">Status:</label>
+                    <FormFields class="" tag="input" type="search" name="Requested" id="Requested" placeholder="Search"
+                      v-model="filterOnModal.requested_on" />
+                    <!-- <span class="m-0 font-10 ps-2">Note:Please seperate departments with commas</span> -->
+                  </div>
+                  <div class="col-6">
+                    <label class="font-13 ps-1" for="status">Status:</label>
 
-                  <FormFields tag="select" placeholder="Status" class="mb-3" name="status"
-                    v-model="filterOnModal.status" id="status" :Required="false" :options="statusOptions" />
-                </div>
+                    <FormFields tag="select" placeholder="Status" class="mb-3" name="status"
+                      v-model="filterOnModal.status" id="status" :Required="false" :options="statusOptions" />
+                  </div>
 
-                <div class="col-6">
-                  <label class="font-13 ps-1" for="Requested">Owner Of Form:</label>
-                  <FormFields class="mb-3" tag="input" type="search" name="Requested" id="Requested"
-                    placeholder="Search" v-model="filterOnModal.owner" />
-                </div>
-                <!-- <div class="col-6">
+                  <div class="col-6">
+                    <label class="font-13 ps-1" for="Requested">Owner Of Form:</label>
+                    <FormFields class="mb-3" tag="input" type="search" name="Requested" id="Requested"
+                      placeholder="Search" v-model="filterOnModal.owner" />
+                  </div>
+                  <!-- <div class="col-6">
                                       <label class="font-13 ps-1" for="Requested">Requested Department:</label>
                                       <FormFields class="mb-3" tag="input" type="search" name="Requested"
                                           id="Requested" placeholder="Search" v-model="filterOnModal.owner" />
                                   </div> -->
 
 
+                </div>
               </div>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="cancelfilter border-0 text-nowrap font-10 " @click="resetFilters"
-                data-bs-dismiss="modal"><span class="font-14 me-1">x</span>Cancel
-                Filter</button>
+              <div class="modal-footer">
+                <button type="button" class="cancelfilter border-0 text-nowrap font-10 " @click="resetFilters"
+                  data-bs-dismiss="modal"><span class="font-14 me-1">x</span>Cancel
+                  Filter</button>
 
-              <button type="button"
-                class="applyfilter text-nowrap border-0 btn btn-dark text-white font-10 d-flex justify-content-center align-items-center"
-                data-bs-dismiss="modal" @click="applyFilters"><span class="font-16 me-1"><i
-                    class="bi bi-check2 "></i></span>
-                Apply
-                Filter</button>
+                <button type="button"
+                  class="applyfilter text-nowrap border-0 btn btn-dark text-white font-10 d-flex justify-content-center align-items-center"
+                  data-bs-dismiss="modal" @click="applyFilters"><span class="font-16 me-1"><i
+                      class="bi bi-check2 "></i></span>
+                  Apply
+                  Filter</button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="d-flex align-items-center mb-1">
-        <ButtonComp class="buttoncomp" name="Action"></ButtonComp>
+        <div class="d-flex align-items-center mb-1">
+          <ButtonComp class="buttoncomp" name="Action"></ButtonComp>
+        </div>
+      </div>
+    </div>
+    <div class="mt-2">
+      <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction='true' actionType="dropdown" isCheckbox='true'
+        :actions="actions" @actionClicked="actionCreated" />
+      <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
+        @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
+    </div>
+    <div class="modal fade" id="viewRequest" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+      aria-labelledby="viewRequestLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="viewRequestLabel">Request</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            {{ selectedRequest }}
+          </div>
+
+        </div>
       </div>
     </div>
   </div>
-  <div class="mt-2">
-    <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction='true' actionType="dropdown" isCheckbox='true'
-      :actions="actions" />
-    <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords" @updateValue="PaginationUpdateValue"
-      @limitStart="PaginationLimitStart" />
-  </div>
+
 </template>
 <script setup>
 import FormFields from '../../Components/FormFields.vue';
@@ -183,6 +202,24 @@ const tableheaders = ref([
 ]
 
 )
+const selectedRequest = ref({})
+
+function actionCreated(rowData, actionEvent) {
+  if (actionEvent.name === 'View Request') {
+    if (rowData) {
+
+      selectedRequest.value = { ...rowData }
+      // selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json).fields)
+      const modal = new bootstrap.Modal(document.getElementById('viewRequest'), {});// raise a modal
+      modal.show();
+
+    } else {
+      console.warn(" There is no form fields ")
+
+    }
+  }
+
+}
 const actions = ref(
   [
     { name: 'View Request', icon: 'fa-solid fa-eye' },
@@ -306,12 +343,14 @@ const PaginationLimitStart = ([itemsPerPage, start]) => {
 
 };
 const idDta = ref([]);
-const docTypeName = ref([]);
-const statusOptions = ref([])
-
+const docTypeName = ref([])
 function receivedForMe() {
   // Initialize filters array for building dynamic query parameters
-  const filters = [];
+  const EmpRequestMail = JSON.parse(localStorage.getItem('employeeData'));
+  console.log(EmpRequestMail, "-----------------");
+  const filters = [
+    ["requested_by", "like", EmpRequestMail.emp_mail_id]
+  ];
 
   // Conditionally add filters based on available fields in filterOnModal
   if (filterOnModal.name) {
