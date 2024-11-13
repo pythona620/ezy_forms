@@ -453,7 +453,9 @@ function receivedForMe() {
   // Initialize filters array for building dynamic query parameters
   const EmpRequestMail = JSON.parse(localStorage.getItem('employeeData'));
   const filters = [
-    ["requested_by", "like", EmpRequestMail.emp_mail_id]
+    ["requested_by", "like", EmpRequestMail.emp_mail_id],
+    ["property", "like", `%${newBusinessUnit.value.business_unit}%`]
+
   ];
 
   // Conditionally add filters based on available fields in filterOnModal
