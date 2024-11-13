@@ -505,7 +505,7 @@ function raiseRequestSubmission() {
     form['company_field'] = business_unit.value
     if (emittedFormData.value.length) {
         emittedFormData.value.map((each) => {
-            form[each.label] = each.value
+            form[each.fieldname] = each.value
         })
     }
 
