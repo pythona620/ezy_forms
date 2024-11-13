@@ -619,7 +619,12 @@
                         ">
                                                                                     <span class="font-12">{{
                         field.label
-                    }}</span></label>
+                    }}</span>
+                                                                                    <span class=" text-danger">{{
+                            field.reqd
+                                === 1 ? '*' : ''
+                        }}</span>
+                                                                                </label>
                                                                                 <template v-if="field.fieldtype == 'Select' ||
                         field.fieldtype == 'multiselect'
                         ">

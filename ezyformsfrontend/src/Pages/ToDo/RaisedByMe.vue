@@ -207,29 +207,27 @@ const selectedRequest = ref({})
 function actionCreated(rowData, actionEvent) {
   if (actionEvent.name === 'View Request') {
     if (rowData) {
-
-
       selectedRequest.value = { ...rowData }
-      console.log(selectedRequest.value,"selected Request")
+      console.log(selectedRequest.value, "selected Request")
       const filters = [
-    ["wf_generated_request_id", "like", `%${selectedRequest.value.name}%`]
-  ];
+        ["wf_generated_request_id", "like", `%${selectedRequest.value.name}%`]
+      ];
       const queryParams = {
-    fields: JSON.stringify(["*"]),
-    limit_page_length: "None",
-    limit_start: 0,
-    filters: JSON.stringify(filters),
-    order_by: `\`tab${selectedRequest.value.doctype_name}\`.\`creation\` desc`
-  };
+        fields: JSON.stringify(["*"]),
+        limit_page_length: "None",
+        limit_start: 0,
+        filters: JSON.stringify(filters),
+        order_by: `\`tab${selectedRequest.value.doctype_name}\`.\`creation\` desc`
+      };
       axiosInstance.get(`${apis.resource}${selectedRequest.value.doctype_name}`, { params: queryParams })
-                .then((res) => {
-                    if (res.data) {
-                        console.log(res.data)
-                    }
-                })
-                .catch((error) => {
-                    console.error("Error fetching categories data:", error);
-                });
+        .then((res) => {
+          if (res.data) {
+            console.log(res.data)
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching categories data:", error);
+        });
       // selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json).fields)
       const modal = new bootstrap.Modal(document.getElementById('viewRequest'), {});// raise a modal
       modal.show();

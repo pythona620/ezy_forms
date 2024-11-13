@@ -119,11 +119,12 @@
                             <div class="accordion" id="blockAccordion">
                                 <div v-for="(blockItem, blockIndex) in blockArr" :key="blockIndex"
                                     class="accordion-item">
-                                    <h2 class="accordion-header" :id="'heading-' + blockIndex">
-                                        <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                                            :data-bs-target="'#collapse-' + blockIndex" aria-expanded="true"
-                                            :aria-controls="'collapse-' + blockIndex">
+                                    <h2 class="accordion-header " :id="'heading-' + blockIndex">
+                                        <button class="accordion-button  d-flex justify-content-between" type="button"
+                                            data-bs-toggle="collapse" :data-bs-target="'#collapse-' + blockIndex"
+                                            aria-expanded="true" :aria-controls="'collapse-' + blockIndex">
                                             {{ blockIndex === 0 ? 'Requestor' : 'Approver' }}
+
                                         </button>
                                     </h2>
 
@@ -133,9 +134,16 @@
                                         <div class="accordion-body block-container">
                                             <div v-for="(section, sectionIndex) in blockItem.sections"
                                                 :key="'preview-' + sectionIndex" class="preview-section">
-                                                <div class="section-label">
+                                                <div class="section-label d-flex justify-content-between">
                                                     <h5 class="m-0 font-13">{{ section.label || 'Untitled Section' }}
                                                     </h5>
+                                                    <div>
+                                                        <!-- Displaying roles based on workflowRoles -->
+                                                        <span class="font-12" v-if="workFlowRoles.length > 0">
+                                                            Role : <b>{{ workFlowRoles[blockIndex]?.roles?.join(', ')
+                                                            || 'No Role' }}</b>
+                                                        </span>
+                                                    </div>
                                                 </div>
                                                 <div class="px-2">
                                                     <div class="container-fluid">
@@ -155,7 +163,12 @@
                                                                             <label
                                                                                 :for="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex">
                                                                                 <span class="font-12">{{ field.label
-                                                                                    }}</span>
+                                                                                    }} </span>
+                                                                                <span class="ms-1 text-danger">{{
+                                                            field.reqd
+                                                                === 1 ? '*' : ''
+                                                        }}</span>
+
                                                                             </label>
                                                                             <template
                                                                                 v-if="field.fieldtype == 'Select' || field.fieldtype == 'multiselect'">
@@ -239,7 +252,7 @@
 </template>
 
 <script setup>
-import { defineProps, watch } from "vue";
+import { defineProps, watch, ref } from "vue";
 
 const props = defineProps({
     blockArr: {
@@ -252,15 +265,27 @@ const props = defineProps({
         required: true,
     },
 });
+const workFlowRoles = ref([]);
 
-// Watch for changes in formDescriptions
 watch(
     () => props.formDescriptions,
     (newVal) => {
         console.log("Updated formDescriptions in child:", newVal);
+
+        if (newVal && newVal.form_json) {
+            try {
+                workFlowRoles.value = JSON.parse(newVal.form_json).workflow || [];
+            } catch (e) {
+                console.error("Error parsing form_json:", e);
+            }
+        }
+
+        console.log(workFlowRoles.value, "============");
     },
-    { deep: true } // Enables deep watching for nested object changes
+    { deep: true }
 );
+
+
 const getFieldComponent = (type) => {
     switch (type) {
         case "Data":
@@ -344,14 +369,14 @@ input::-webkit-input-placeholder {
 }
 
 .accordion-button {
-    background-color: #eeeeee;
+    background-color: #fff;
     font-size: 14px;
     font-weight: 500;
 
 }
 
 .accordion-button:not(.collapsed) {
-    background-color: #eeeeee;
+    background-color: #fff;
     color: #000;
     box-shadow: None;
 }

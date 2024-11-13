@@ -181,7 +181,8 @@ export function rebuildToStructuredArray(flatArray) {
             fieldname: item.fieldname,
             fieldtype: item.fieldtype,
             parent: item.parent,
-            label: item.label
+            label: item.label,
+            reqd: item.reqd
           });
         }
         break;

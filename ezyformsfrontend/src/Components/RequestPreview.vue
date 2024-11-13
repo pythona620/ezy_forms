@@ -21,6 +21,9 @@
                                             <label
                                                 :for="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex">
                                                 <span class="font-12">{{ field.label }}</span>
+                                                <span class="ms-1 text-danger">{{ field.reqd
+            === 1 ? '*' : ''
+                                                    }}</span>
                                             </label>
                                         </div>
 
