@@ -346,7 +346,12 @@ const idDta = ref([]);
 const docTypeName = ref([])
 function receivedForMe() {
   // Initialize filters array for building dynamic query parameters
-  const filters = [];
+  const EmpRequestdesignation = JSON.parse(localStorage.getItem('employeeData'));
+  console.log(EmpRequestdesignation, "-----------------");
+  const filters = [
+    // assigned_to_users
+    ["assigned_to_users", "like", EmpRequestdesignation.designation]
+  ];
 
   // Conditionally add filters based on available fields in filterOnModal
   if (filterOnModal.name) {
