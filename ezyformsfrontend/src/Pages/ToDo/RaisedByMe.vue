@@ -173,7 +173,7 @@
               </div> -->
               <div>
                 <ButtonComp type="button" icon="x" class="btn btn-dark approvebtn border-1 text-nowrap font-10 "
-                  @click="ApproverFormSubmission(formData)" name="Cancel Request" />
+                  @click="approvalStatusFn(formData,'Request Cancelled')" name="Cancel Request" />
               </div>
             </div>
           </div>
@@ -269,42 +269,101 @@ const updateFormData = (fieldValues) => {
   // console.log(formData.value, "-----------========ApproverFormData====-=-==-==");
 };
 
-// Function to handle form submission
-const ApproverFormSubmission = () => {
 
-  // if (emittedFormData.value.length) {
-  //       emittedFormData.value.map((each) => {
-  //           form[each.fieldname] = each.value
-  //       })
-  //   }
+function ApproverFormSubmission(dataObj, type) {
+  let form = {};
+  form['doctype'] = selectedRequest.value.doctype_name;
+  form['company_field'] = selectedRequest.value.property
+  form['name'] = doctypeForm.value.name
+  if (emittedFormData.value.length) {
+    emittedFormData.value.map((each) => {
+      form[each.fieldname] = each.value
+    })
+  }
 
+  console.log(" ==== ", form)
 
+  // form['form_json']
+  const formData = new FormData();
+  formData.append('doc', JSON.stringify(form));
+  formData.append('action', 'Save');
+  axiosInstance.post(apis.savedocs, formData)
+    .then((response) => {
+      if (response?.docs) {
+        approvalStatusFn(dataObj, type)
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching data:", error);
+    });
+
+};
+
+function approvalStatusFn(dataObj, type) {
   let data = {
     "property": selectedRequest.value.property,
     "doctype": selectedRequest.value.doctype_name,
-    "request_ids": selectedRequest.value.name,
-    "reason": "",
-    "action": selectedRequest.value.action,
-    "files": "[]",
+    "request_ids": [selectedRequest.value.name],
+    "reason": type== 'Request Cancelled'? "Cancelled" : "",
+    "action": type,
+    "files": null,
     "cluster_name": null,
     "url_for_approval_id": '',
     // https://ezyrecon.ezyinvoicing.com/home/wf-requests
     "current_level": selectedRequest.value.current_level
   }
-  console.log(formData.value, { request_details: [data] }, "---------------------================");
-  // axiosInstance.post(apis.requestApproval, { request_details: [data] })
-  //   .then((response) => {
-  //     console.log(response);
+  console.log(dataObj, { request_details: [data] }, "---------------------================");
+  // need to check this api not working 
+  axiosInstance.post(apis.requestApproval, { request_details: [data] })
+    .then((response) => {
+      if (response?.message?.success) {
+        toast.success(`${type}`, { autoClose: 1000 })
+        const modal = bootstrap.Modal.getInstance(document.getElementById('viewRequest'));
+        modal.hide();
+        receivedForMe()
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching data:", error);
+    });
+}
 
-  toast.success("Rquest Approved", { autoClose: 1000 })
-  const modal = bootstrap.Modal.getInstance(document.getElementById('viewRequest'));
-  modal.hide();
-  // })
-  // .catch((error) => {
-  //   console.error("Error fetching data:", error);
-  // });
+// // Function to handle form submission
+// const ApproverFormSubmission = () => {
 
-};
+//   // if (emittedFormData.value.length) {
+//   //       emittedFormData.value.map((each) => {
+//   //           form[each.fieldname] = each.value
+//   //       })
+//   //   }
+
+
+//   let data = {
+//     "property": selectedRequest.value.property,
+//     "doctype": selectedRequest.value.doctype_name,
+//     "request_ids": selectedRequest.value.name,
+//     "reason": "",
+//     "action": selectedRequest.value.action,
+//     "files": "[]",
+//     "cluster_name": null,
+//     "url_for_approval_id": '',
+//     // https://ezyrecon.ezyinvoicing.com/home/wf-requests
+//     "current_level": selectedRequest.value.current_level
+//   }
+//   console.log(formData.value, { request_details: [data] }, "---------------------================");
+//   // axiosInstance.post(apis.requestApproval, { request_details: [data] })
+//   //   .then((response) => {
+//   //     console.log(response);
+
+//   toast.success("Rquest Approved", { autoClose: 1000 })
+//   const modal = bootstrap.Modal.getInstance(document.getElementById('viewRequest'));
+//   modal.hide();
+//   // })
+//   // .catch((error) => {
+//   //   console.error("Error fetching data:", error);
+//   // });
+
+// };
 
 function mapFormFieldsToRequest(doctypeData, showRequestData) {
   showRequestData.forEach(block => {

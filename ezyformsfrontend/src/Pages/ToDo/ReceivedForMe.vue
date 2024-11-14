@@ -255,8 +255,9 @@ function actionCreated(rowData, actionEvent) {
   if (actionEvent.name === 'View Request') {
     if (rowData) {
       selectedRequest.value = { ...rowData };
+      console.log(" === selectedReq ==== ", selectedRequest.value)
       // Rebuild the structured array from JSON
-      showRequest.value = rebuildToStructuredArray(JSON.parse(selectedRequest.value?.json_columns).fields);
+      showRequest.value = rebuildToStructuredArray(JSON.parse(selectedRequest.value?.json_columns)?.fields);
       console.log(showRequest.value, "selected Request");
 
       // Prepare the filters for fetching data
@@ -275,9 +276,10 @@ function actionCreated(rowData, actionEvent) {
       axiosInstance.get(`${apis.resource}${selectedRequest.value.doctype_name}`, { params: queryParams })
         .then((res) => {
           if (res.data) {
-            doctypeForm.value = res.data;
+            doctypeForm.value = res.data[0];
+            console.log("doctype Form === ", doctypeForm.value)
             // Map values from doctypeForm to showRequest fields
-            mapFormFieldsToRequest(doctypeForm.value[0], showRequest.value);
+            mapFormFieldsToRequest(doctypeForm.value, showRequest.value);
           }
         })
         .catch((error) => {
@@ -301,33 +303,17 @@ const updateFormData = (fieldValues) => {
 // Function to handle form submission
 function ApproverFormSubmission(dataObj, type) {
   let form = {};
-  form['doctype'] = selectedRequest.value.doctype_name;
-  form['company_field'] = selectedRequest.value.property
-  form['name'] = doctypeForm.value.name
   if (emittedFormData.value.length) {
     emittedFormData.value.map((each) => {
       form[each.fieldname] = each.value
     })
   }
-
-  console.log(" ==== ", form)
-
-  // form['form_json']
-  const formData = new FormData();
-  formData.append('doc', JSON.stringify(form));
-  formData.append('action', 'Save');
-  axiosInstance.post(apis.savedocs, formData)
-    .then((response) => {
-      console.log(response);
+  axiosInstance.put(`${apis.resource}/${selectedRequest.value.doctype_name}/${doctypeForm.value.name}`, form).then((response) => {
+    console.log()
+    if (response?.data) {
       approvalStatusFn(dataObj, type)
-      toast.success("Request Approved", { autoClose: 1000 })
-
-      const modal = bootstrap.Modal.getInstance(document.getElementById('riaseRequestModal'));
-      modal.hide();
-    })
-    .catch((error) => {
-      console.error("Error fetching data:", error);
-    });
+    }
+  })
 
 };
 
@@ -335,10 +321,10 @@ function approvalStatusFn(dataObj, type) {
   let data = {
     "property": selectedRequest.value.property,
     "doctype": selectedRequest.value.doctype_name,
-    "request_ids": selectedRequest.value.name,
+    "request_ids": [selectedRequest.value.name],
     "reason": "",
     "action": type,
-    "files": "[]",
+    "files": null,
     "cluster_name": null,
     "url_for_approval_id": '',
     // https://ezyrecon.ezyinvoicing.com/home/wf-requests
@@ -348,11 +334,16 @@ function approvalStatusFn(dataObj, type) {
   // need to check this api not working 
   axiosInstance.post(apis.requestApproval, { request_details: [data] })
     .then((response) => {
-      console.log(response);
-
-      toast.success("Rquest Approved", { autoClose: 1000 })
-      const modal = bootstrap.Modal.getInstance(document.getElementById('viewRequest'));
-      modal.hide();
+      if (response?.message?.success) {
+        if (type == 'Reject') {
+          toast.error(`Request ${type}ed`, { autoClose: 1000 })
+        } else {
+          toast.success(`Request ${type}ed`, { autoClose: 1000 })
+        }
+        const modal = bootstrap.Modal.getInstance(document.getElementById('viewRequest'));
+        modal.hide();
+        receivedForMe()
+      }
     })
     .catch((error) => {
       console.error("Error fetching data:", error);
