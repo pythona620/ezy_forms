@@ -519,11 +519,7 @@ function raiseRequestSubmission() {
         .then((response) => {
             console.log(response);
             request_raising_fn(response.docs[0])
-            toast.success("Request Raised", { autoClose: 1000 })
-router.push({path:'/todo/raisedbyme'})
-            const modal = bootstrap.Modal.getInstance(document.getElementById('riaseRequestModal'));
-            modal.hide();
-
+           
         })
         .catch((error) => {
             console.error("Error fetching data:", error);
@@ -541,9 +537,13 @@ function request_raising_fn(item) {
         property: business_unit.value,
 
     }
-    axiosInstance.post(apis.raising_request, data_obj).then((resp) => {
+    axiosInstance.post(apis.raising_request, data_obj).then( async (resp) => {
         console.log(resp)
-        if(resp?.message?.success){
+        if (resp?.message?.success) {
+            toast.success("Request Raised", { autoClose: 1000 })
+            const modal = await bootstrap.Modal.getInstance(document.getElementById('riaseRequestModal'));
+            modal.hide();
+            await router.push({ path: '/todo/raisedbyme' })
             window.location.reload()
         }
     })
