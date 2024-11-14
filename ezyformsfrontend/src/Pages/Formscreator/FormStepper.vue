@@ -982,7 +982,7 @@ function designationData(departments) {
         .then((res) => {
             if (res.data) {
                 console.log(res.data, "Fetched Designations");
-                DesignationList.value = res.data.users.map(user => (user.role_name));
+                DesignationList.value = [...new Set(res.data.users.map(user => user.role_name))];
             }
         })
         .catch((error) => {
