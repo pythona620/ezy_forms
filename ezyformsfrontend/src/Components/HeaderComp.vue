@@ -15,7 +15,7 @@
                         </div>
                         <div class="col-7">
                             <div class="mt-2">
-                                <TabsComp :tabs="tabsData" @changeTab="handleTabChange" />
+                                <TabsComp :tabs="filteredTabsData" @changeTab="handleTabChange" />
                             </div>
                         </div>
                         <div class="col-3">
@@ -58,18 +58,7 @@
                                                         </div>
                                                     </li>
                                                 </div>
-                                                <div v-if="username === 'Administrator'">
-                                                    <li>
-                                                        <div class=" ">
-                                                            <span class="fw-medium font-13 "> {{ userAdmin }}</span>
-
-                                                        </div>
-                                                        <!-- <div class=" ">
-                                                  
-                                                    <span class="fw-medium font-11">{{ userDesigination }}</span>
-                                                </div> -->
-                                                    </li>
-                                                </div>
+                                              
                                             </div>
 
                                             <li class="mt-2">
@@ -243,12 +232,12 @@ const filterObj = ref({
     limit_start: 0,
     limitPageLength: 100,
 })
-// const filteredTabsData = computed(() => {
+const filteredTabsData = computed(() => {
 
-// return username.value === 'Administrator'
-//     ? tabsData.value
-//     : tabsData.value.filter(tab => tab.name !== 'Form');
-// });
+return userDesigination.value === 'IT'
+    ? tabsData.value
+    : tabsData.value.filter(tab => tab.name !== 'Form');
+});
 function logout() {
     localStorage.removeItem('UserName');
     localStorage.removeItem('employeeData');
