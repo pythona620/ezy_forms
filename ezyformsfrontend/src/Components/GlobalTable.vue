@@ -3,9 +3,9 @@
     <table class="global-table border-0 position-relative" :class="props.class">
       <thead class="position-sticky">
         <tr>
-          <th v-if="isCheckbox == 'true'">
+          <!-- <th v-if="isCheckbox == 'true'">
             <input type="checkbox" class="checkbox form-check-input" @change="SelectedAll()" />
-          </th>
+          </th> -->
           <th>#</th>
           <th v-for="(column, index) in tHeaders" :key="index" :class="{ 'text-center': column.th === 'Users' }">
             {{ column.th }}
@@ -16,10 +16,10 @@
       <tbody>
         <template v-if="tData.length">
           <tr v-for="(row, rowIndex) in tData" :key="rowIndex">
-            <td>
+            <!-- <td>
               <input type="checkbox" class="form-check-input" v-model="row.isSelected"
                 @change="selectedCheckList(row, rowIndex)" />
-            </td>
+            </td> -->
             <td class="">{{ rowIndex + 1 }}</td>
             <td v-for="(column, colIndex) in tHeaders" :key="colIndex">
   <!-- Condition for Action Column -->

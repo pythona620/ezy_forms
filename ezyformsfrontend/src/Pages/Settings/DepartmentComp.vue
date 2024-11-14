@@ -155,8 +155,9 @@
 
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="cancelfilter border-1 text-nowrap font-10 "
-                                    @click="cancelCreate" data-bs-dismiss="modal">Cancel
+                                <button type="button" class="cancelfilter border-1 text-nowrap font-10 d-flex justify-content-center align-items-center"
+                                    @click="cancelCreate" data-bs-dismiss="modal"><span class="font-16 me-1"><i
+                                        class="bi bi-x "></i></span>Cancel
                                 </button>
 
                                 <button type="button"
