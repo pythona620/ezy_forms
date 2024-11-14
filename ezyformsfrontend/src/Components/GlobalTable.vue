@@ -25,9 +25,9 @@
   <!-- Condition for Action Column -->
   <span v-if="column.td_key === 'status'" :class="{
       'text-warning': row[column.td_key] === 'Request Raised',
-      'text-success': row[column.td_key] === 'Completed',
+      'textcompleted': row[column.td_key] === 'Completed',
       'text-primary': row[column.td_key] === 'In Progress',
-      'text-info': row[column.td_key] === 'Cancel',
+      'textcancel': row[column.td_key] === 'Cancel',
       'text-danger': row[column.td_key] === 'Rejected',
     }">
     <i class="bi bi-circle-fill status-circle font-10 text-center pe-2"></i>
@@ -230,7 +230,7 @@ onMounted(() => {
   font-size: 11px;
   font-weight: 400;
   text-align: left;
-  color: #16EC2F;
+  color: green;
 }
 
 .spinner-grow {
@@ -412,5 +412,11 @@ th:first-child {
 
 .checkbox {
   margin-left: 2px;
+}
+.textcompleted{
+  color: green ;
+}
+.textcancel{
+  color:#17a2b8 ;
 }
 </style>

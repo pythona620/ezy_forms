@@ -90,7 +90,7 @@ export default {
 					if (res) {
 						toast.success("Login Successfully", { autoClose: 2000 });
 						setTimeout(() => {
-							this.$router.push({ path: '/forms/department/:id' });
+							this.$router.push({ path: '/todo/receivedform' });
 						}, 700);
 						this.storeData = res;
 						localStorage.setItem('UserName', JSON.stringify(this.storeData));
