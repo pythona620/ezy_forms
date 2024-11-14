@@ -142,9 +142,9 @@
         </div>
       </div>
 
-      <div class="d-flex align-items-center mb-1">
+      <!-- <div class="d-flex align-items-center mb-1">
         <ButtonComp class="buttoncomp" name="Action"></ButtonComp>
-      </div>
+      </div> -->
     </div>
   </div>
   <div class="mt-2">

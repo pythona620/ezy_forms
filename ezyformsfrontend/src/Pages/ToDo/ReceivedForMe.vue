@@ -145,9 +145,9 @@
           </div>
         </div>
 
-        <div class="d-flex align-items-center mb-1">
+        <!-- <div class="d-flex align-items-center mb-1">
           <ButtonComp class="buttoncomp" name="Action"></ButtonComp>
-        </div>
+        </div> -->
       </div>
     </div>
     <div class="mt-2">
@@ -170,7 +170,7 @@
           <div class="modal-footer">
             <div class="d-flex justify-content-between align-items-center mt-3 gap-2">
               <div>
-                <ButtonComp type="button" icon="x" class="cancelbtn border-1 text-nowrap font-10"
+                <ButtonComp type="button" icon="ban" class="cancelbtn border-1 text-nowrap font-10"
                   @click="approvalCancelFn(formData, 'Request Cancelled')" name="Cancel Request" />
               </div>
               <div>

@@ -519,10 +519,11 @@ function raiseRequestSubmission() {
         .then((response) => {
             console.log(response);
             request_raising_fn(response.docs[0])
-            toast.success("Rquest Raised", { autoClose: 1000 })
-
+            toast.success("Request Raised", { autoClose: 1000 })
+router.push({path:'/todo/raisedbyme'})
             const modal = bootstrap.Modal.getInstance(document.getElementById('riaseRequestModal'));
             modal.hide();
+
         })
         .catch((error) => {
             console.error("Error fetching data:", error);

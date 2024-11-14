@@ -22,19 +22,33 @@
             </td>
             <td class="">{{ rowIndex + 1 }}</td>
             <td v-for="(column, colIndex) in tHeaders" :key="colIndex">
-              <span v-if="column.td_key == 'active'" :class="{
+  <!-- Condition for Action Column -->
+  <span v-if="column.td_key === 'status'" :class="{
+      'text-warning': row[column.td_key] === 'Request Raised',
+      'text-success': row[column.td_key] === 'Completed',
+      'text-primary': row[column.td_key] === 'In Progress',
+      'text-info': row[column.td_key] === 'Cancel',
+      'text-danger': row[column.td_key] === 'Rejected',
+    }">
+    <i class="bi bi-circle-fill status-circle font-10 text-center pe-2"></i>
+    {{ row[column.td_key] }}
+  </span>
+
+  <!-- Condition for Active Column -->
+  <span v-else-if="column.td_key === 'active'" :class="{
       activeform: row[column.td_key] == '1',
       'text-danger': row[column.td_key] == '0',
     }">
-                <i class="bi bi-circle-fill status-circle font-10 text-center pe-2"></i>
-              </span>
-              <span v-if="column.td_key === 'active'">
-                {{ row[column.td_key] === 1 ? 'Active' : 'Inactive' }}
-              </span>
-              <span v-else>
-                {{ row[column.td_key] || '-' }}
-              </span>
-            </td>
+    <i class="bi bi-circle-fill status-circle font-10 text-center pe-2"></i>
+    {{ row[column.td_key] === 1 ? 'Active' : 'Inactive' }}
+  </span>
+
+  <!-- Default Column Rendering -->
+  <span v-else>
+    {{ row[column.td_key] || '-' }}
+  </span>
+</td>
+
             <td v-if="actionType === 'viewPdf'" class="text-center">
               <span>
                 <i @click="handleCellClick(row, rowIndex)" class="ri-eye-line eye-cursor"></i>
@@ -85,6 +99,7 @@
             ></ButtonComp>
           </td> -->
           </tr>
+          
         </template>
         <template v-else>
           <tr>

@@ -49,6 +49,7 @@ import axiosInstance from '../shared/services/interceptor';
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 export default {
+	props: ['id'],
 	data() {
 		return {
 			formdata: {
@@ -89,7 +90,7 @@ export default {
 					if (res) {
 						toast.success("Login Successfully", { autoClose: 2000 });
 						setTimeout(() => {
-							this.$router.push({ path: '/dashboard/maindash' });
+							this.$router.push({ path: '/forms/department/:id' });
 						}, 700);
 						this.storeData = res;
 						localStorage.setItem('UserName', JSON.stringify(this.storeData));
