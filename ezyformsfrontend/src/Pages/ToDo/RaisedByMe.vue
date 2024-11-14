@@ -168,9 +168,6 @@
           </div>
           <div class="modal-footer">
             <div class="d-flex justify-content-between align-items-center mt-3 gap-2">
-              <!-- <div>
-                <ButtonComp type="button" icon="x" class="rejectbtn border-1 text-nowrap font-10 " name="Reject" />
-              </div> -->
               <div>
                 <ButtonComp type="button" icon="x" class="btn btn-dark approvebtn border-1 text-nowrap font-10 "
                   @click="approvalStatusFn(formData,'Request Cancelled')" name="Cancel Request" />

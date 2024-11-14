@@ -170,6 +170,10 @@
           <div class="modal-footer">
             <div class="d-flex justify-content-between align-items-center mt-3 gap-2">
               <div>
+                <ButtonComp type="button" icon="x" class="cancelbtn border-1 text-nowrap font-10"
+                  @click="approvalCancelFn(formData, 'Request Cancelled')" name="Cancel Request" />
+              </div>
+              <div>
                 <ButtonComp @click="ApproverFormSubmission(formData, 'Reject')" type="button" icon="x"
                   class="rejectbtn border-1 text-nowrap font-10 " name="Reject" />
               </div>
@@ -348,6 +352,28 @@ function approvalStatusFn(dataObj, type) {
     .catch((error) => {
       console.error("Error fetching data:", error);
     });
+}
+
+function approvalCancelFn(dataObj, type) {
+  // let files = this.selectedFileAttachments.map((res: any) => res.url);
+  let data = {
+    "property": selectedRequest.value.property,
+    "doctype": selectedRequest.value.doctype_name,
+    "request_id": selectedRequest.value.name,
+    "reason": "",
+    "action": type,
+    "files": [],
+    'url_for_cancelling_id': '',
+    "current_level": selectedRequest.value.current_level
+  }
+  axiosInstance.post(apis.wf_cancelling_request, data)
+    .then((response) => {
+      if (response.message?.success) {
+        const modal = bootstrap.Modal.getInstance(document.getElementById('viewRequest'));
+        modal.hide();
+        receivedForMe()
+      }
+    })
 }
 
 function mapFormFieldsToRequest(doctypeData, showRequestData) {
@@ -578,5 +604,16 @@ onMounted(() => {
   border-radius: 4px;
   opacity: 0px;
 
+}
+
+.cancelbtn {
+  width: 146px;
+  height: 30px;
+  background: #d1d0d0;
+  color: white;
+  padding: 5px 15px 5px 15px;
+  gap: 7px;
+  border-radius: 4px;
+  opacity: 0px;
 }
 </style>
