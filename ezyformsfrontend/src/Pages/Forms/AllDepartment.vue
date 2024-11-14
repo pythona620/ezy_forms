@@ -37,10 +37,10 @@
                     <i class="ri-close-line close-icon text-dark rounded-3"></i>
                   </span>
                 </span>
-                <span v-if="filterOnModal.form_status && filterOnModal.appliedStatus" class="process-date font-12 m-0">
-                  {{ filterOnModal.form_status }}
-                  <span v-if="filterOnModal.form_status" class="badge badge-icon rounded-3   text-white"
-                    @click="clearFilter('form_status')">
+                <span v-if="filterOnModal.active && filterOnModal.appliedStatus" class="process-date font-12 m-0">
+                  {{ filterOnModal.active }}
+                  <span v-if="filterOnModal.active" class="badge badge-icon rounded-3   text-white"
+                    @click="clearFilter('active')">
                     <i class="ri-close-line close-icon text-dark rounded-3"></i>
                   </span>
                 </span>
@@ -88,8 +88,8 @@
                                     <div class="col-6">
                                         <label class="font-13 ps-1" for="dept">Status:</label>
                                         <FormFields tag="select" placeholder="Status" class="mb-3"
-                                            name="dept" v-model="filterOnModal.form_status" id="dept" :Required="false"
-                                            :options="['Active','Draft']" />
+                                            name="dept" v-model="filterOnModal.active" id="dept" :Required="false"
+                                            :options="['Yes','No']" />
                                     </div>
                                     <!-- <div class="col-3">
                                         <label class="font-13 ps-1 fw-medium" for="dept">Requested Dept:</label>
@@ -174,7 +174,7 @@ const tableheaders = ref([
   { th: "Form name", td_key: "form_name" },
   { th: "Form category", td_key: "form_category" },
   { th: "Accessible departments", td_key: "accessible_departments" },
-  { th: "Status", td_key: "form_status" },
+  { th: "Status", td_key: "active" },
 ]);
 const props = defineProps(['id']);
 const formDescriptions = ref({})
@@ -190,7 +190,7 @@ const filterOnModal=reactive({
 form_name:'',
 form_category:'',
 accessible_departments:'',
-form_status:''
+active:''
 })
 const appliedFiltersCount = computed(() => {
   return [
@@ -200,7 +200,7 @@ const appliedFiltersCount = computed(() => {
       applied: filterOnModal.appliedform_name,
     },
     {
-      value: filterOnModal.form_status,
+      value: filterOnModal.active,
       applied: filterOnModal.appliedStatus,
     },
     {
@@ -225,8 +225,8 @@ function clearFilter(type) {
     filterOnModal.appliedaccessible_departments = false;
 
   }
-  else if (type === "form_status") {
-    filterOnModal.form_status = "";
+  else if (type === "active") {
+    filterOnModal.active = "";
     filterOnModal.appliedStatus = false;
 
   }
@@ -262,7 +262,7 @@ function applyFilters() {
   filterOnModal.appliedform_name = Boolean(filterOnModal.form_name);
   filterOnModal.appliedform_category = Boolean(filterOnModal.form_category);
   filterOnModal.appliedaccessible_departments = Boolean(filterOnModal.accessible_departments);
-  filterOnModal.appliedStatus = Boolean(filterOnModal.form_status);
+  filterOnModal.appliedStatus = Boolean(filterOnModal.active);
 
   fetchDepartmentDetails()
 }
@@ -312,8 +312,8 @@ function fetchDepartmentDetails(id) {
   if (filterOnModal.accessible_departments) {
     filters.push(["accessible_departments", "like", `${filterOnModal.accessible_departments}`]);
   }
-  if (filterOnModal.form_status) {
-    filters.push(["form_status", "like", `${filterOnModal.form_status}`]);
+  if (filterOnModal.active) {
+    filters.push(["active", "=", `${filterOnModal.active}`]);
   }
   const queryParams = {
     fields: JSON.stringify(["*"]),

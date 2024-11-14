@@ -261,7 +261,7 @@ onMounted(() => {
     // Retrieve data from localStorage
     const userData = JSON.parse(localStorage.getItem('employeeData'));
     const userName = JSON.parse(localStorage.getItem('UserName'));
-    const syetemmanger = JSON.parse(localStorage.getItem('systemManager'))
+    // const syetemmanger = JSON.parse(localStorage.getItem('systemManager'))
     if (userName) {
         // Set the username based on the UserName data, which is used to check if the user is Admin
         username.value = userName.full_name;
