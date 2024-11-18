@@ -77,7 +77,7 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
 			frappe.db.commit()
 			doc.reload()
 			"""need to add perms in this step itself for system manager to access the DocType"""
-			activating_perms(doctype=doctype)
+			activating_perms(doctype=doctype,role="System Manager")
 			"""need to migrate in this step itself as DocType is created need to update in DB."""
 			bench_migrating_from_code()
 			form_defs = frappe.new_doc("Ezy Form Definitions")
@@ -191,11 +191,11 @@ def bench_migrating_from_code():
 	os.chdir(frappe.utils.get_bench_path()+"/sites")
 	subprocess.run(["bench","migrate"])
  
-def activating_perms(doctype):
+def activating_perms(doctype,role):
 	perm_doc = frappe.new_doc("DocPerm")
 	perm_doc.parent = doctype
 	perm_doc.parentfield="permissions"
 	perm_doc.parenttype="DocType"
-	perm_doc.role="System Manager"
+	perm_doc.role=role
 	perm_doc.insert(ignore_permissions=True)
 	frappe.db.commit()

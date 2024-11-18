@@ -4,6 +4,7 @@
 import frappe
 from frappe.model.document import Document
 import sys
+from ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions import activating_perms
 
 class EzyEmployee(Document):
 	def after_insert(self):
@@ -27,7 +28,9 @@ class EzyEmployee(Document):
 				adding_role_doc.role = self.designation
 				adding_role_doc.insert(ignore_permissions=True)
 				frappe.db.commit()
-		
+			for doc_name in ["Ezy Employee","WF Workflow Requests","WF Roadmap","Ezy Business Unit","WF Roles"]:
+				if not frappe.db.exists("DocPerm",{"parent":doc_name,"parenttype":"DocType","role":self.designation,"parentfield":"permissions"}):
+					activating_perms(doc_name,self.designation)
 		###### Adding role to User after creating role in Role DocType
 		user_doc = frappe.get_doc("User",self.emp_mail_id)
 		user_doc.append("roles",{"role":self.designation})
