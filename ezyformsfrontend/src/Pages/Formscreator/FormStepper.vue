@@ -599,14 +599,20 @@
                                                 <div v-for="(block, blockIndex) in blockArr" :key="blockIndex">
                                                     <div v-for="(section, sectionIndex) in block.sections"
                                                         :key="'preview-' + sectionIndex" class="preview-section m-2">
-                                                        <h5>{{ section.label || "-" }}</h5>
+                                                        <div class="section-label">
+                        <h5 class="m-0 font-13">{{ section.label || 'Untitled Section' }}</h5>
+                    </div>
+                                                        <!-- <h5>{{ section.label || "-" }}</h5> -->
                                                         <div class="container-fluid">
                                                             <div class="row" v-for="(row, rowIndex) in section.rows"
                                                                 :key="rowIndex">
                                                                 <div v-for="(column, columnIndex) in row.columns"
-                                                                    :key="'column-preview-' + columnIndex" class="col">
-                                                                    <h6>{{ column.label || "-" }}</h6>
-                                                                    <div class="mb-2 ms-2">
+                                                                    :key="'column-preview-' + columnIndex" class="col dynamicColumn">
+                                                                    <!-- <h6>{{ column.label || "-" }}</h6> -->
+                                                                    <div class="p-3 border-bottom">
+                                    <h6 class="m-0 font-12">{{ column.label || '-' }}</h6>
+                                </div>
+                                                                    <div class="mx-3 my-2">
                                                                         <div v-for="(field, fieldIndex) in column.fields"
                                                                             :key="'field-preview-' + fieldIndex">
                                                                             <div v-if="field.label">
@@ -1577,7 +1583,10 @@ input {
 
 
 .preview-section {
-    background-color: #f9f9f9;
+    background-color: #eeeeee;
+    // overflow-y: scroll;
+    // overflow-x: hidden;
+    // height: 40vh;
     padding: 8px;
     border-radius: 10px;
 }
@@ -1880,5 +1889,17 @@ select {
     padding: 5px 10px;
     background-color: #e5e5e5;
     position: relative;
+}
+.section-label {
+    padding: 10px 3px;
+}
+.dynamicColumn {
+    border: 1px solid #cccccc;
+    border-radius: 7px;
+    margin: 3px 3px 10px 3px;
+    background-color: #ffffff;
+    padding: 0;
+    padding-bottom: 5px;
+
 }
 </style>
