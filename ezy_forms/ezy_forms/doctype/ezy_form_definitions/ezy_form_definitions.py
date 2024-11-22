@@ -13,7 +13,7 @@ from ezy_forms.ezy_forms.doctype.ezy_form_definitions.linking_flow_and_forms imp
 
 class EzyFormDefinitions(Document):
 	pass
- 
+
 @frappe.whitelist()
 def add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:str,form_name:str,accessible_departments:str,form_short_name:str,fields:list[dict],form_status:str):
 	return_response_for_doc_add = enqueue(
@@ -190,7 +190,7 @@ def enqueued_deleting_customized_field_from_custom_dynamic_doc(doctype:str,delet
 def bench_migrating_from_code():
 	os.chdir(frappe.utils.get_bench_path()+"/sites")
 	subprocess.run(["bench","migrate"])
- 
+
 def activating_perms(doctype,role):
 	perm_doc = frappe.new_doc("DocPerm")
 	perm_doc.parent = doctype
