@@ -58,7 +58,7 @@
                                                         </div>
                                                     </li>
                                                 </div>
-                                              
+
                                             </div>
 
                                             <li class="mt-2">
@@ -119,7 +119,8 @@
 
                         </div>
                         <div v-if="blockArr.length">
-                            <RequestPreview :blockArr="blockArr" @updateField="handleFieldUpdate" />
+                            <RequestPreview :blockArr="blockArr" :formName="selectedData.selectedform"
+                                @updateField="handleFieldUpdate" />
                         </div>
 
                         <!-- <FormFields tag="select" placeholder="Form" class="mb-3" name="roles" id="roles"
@@ -234,9 +235,9 @@ const filterObj = ref({
 })
 const filteredTabsData = computed(() => {
 
-return userDesigination.value === 'IT'
-    ? tabsData.value
-    : tabsData.value.filter(tab => tab.name !== 'Form');
+    return userDesigination.value === 'IT'
+        ? tabsData.value
+        : tabsData.value.filter(tab => tab.name !== 'Form');
 });
 function logout() {
     localStorage.removeItem('UserName');
@@ -440,9 +441,9 @@ function formDefinations(value) {
 
     const queryParams = {
         fields: JSON.stringify(["*"]),
-        filters: JSON.stringify(filters),
         limit_page_length: filterObj.value.limitPageLength,
         limit_start: filterObj.value.limit_start,
+        filters: JSON.stringify(filters),
         order_by: "`tabEzy Form Definitions`.`creation` desc"
     };
     // const queryParamsCount = {
@@ -463,6 +464,7 @@ function formDefinations(value) {
 
     axiosInstance.get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParams })
         .then(res => {
+            console.log(res, "===================0000000000=====================");
             const form_json = res.data[0].form_json
             blockArr.value = rebuildToStructuredArray(JSON.parse(form_json).fields)
             blockArr.value.splice(1)
@@ -483,15 +485,33 @@ function categoriesdata(departmentId) {
         });
 }
 const emittedFormData = ref([]);
+const filepaths = ref('')
+const handleFieldUpdate = (field) => {
 
-const handleFieldUpdate = (fieldValues) => {
-    emittedFormData.value = emittedFormData.value.concat(fieldValues);
+    const fieldExists = emittedFormData.value.some(item => item.fieldname === field.fieldname);
+
+
+    if (!fieldExists) {
+        if (field.fieldtype === 'Attach') {
+            if (!Array.isArray(field.value)) {
+                filepaths.value = field.value;
+                console.log(filepaths.value, "777777777777777");
+            }
+            emittedFormData.value.push(field);
+        } else {
+            emittedFormData.value = emittedFormData.value.concat(field);
+        }
+        console.log(emittedFormData.value, "--------emittedFormData-------");
+    } else {
+        console.log(`Field with name "${field.fieldname}" already exists in emittedFormData.`);
+    }
 };
 
 function raiseRequestSubmission() {
     let form = {};
     form['doctype'] = selectedData.value.selectedform;
-    form['company_field'] = business_unit.value
+    form['company_field'] = business_unit.value;
+    // form['supporting_files'] = [];
     if (emittedFormData.value.length) {
         emittedFormData.value.map((each) => {
             form[each.fieldname] = each.value
@@ -508,7 +528,7 @@ function raiseRequestSubmission() {
         .then((response) => {
             console.log(response);
             request_raising_fn(response.docs[0])
-           
+
         })
         .catch((error) => {
             console.error("Error fetching data:", error);
@@ -516,27 +536,27 @@ function raiseRequestSubmission() {
 }
 
 function request_raising_fn(item) {
+    const filesArray = filepaths.value ? filepaths.value.split(',').map(filePath => filePath.trim()) : [];
     let data_obj = {
         module_name: 'Ezy Forms',
         doctype_name: selectedData.value.selectedform,
-        ids: [item.name], //docs name,
+        ids: [item.name],
         reason: '',
         url_for_request_id: '',
-        files: [],
+        files: filesArray,
         property: business_unit.value,
-
-    }
-    axiosInstance.post(apis.raising_request, data_obj).then( async (resp) => {
-        console.log(resp)
+    }; axiosInstance.post(apis.raising_request, data_obj).then(async (resp) => {
+        console.log(resp);
         if (resp?.message?.success) {
-            toast.success("Request Raised", { autoClose: 1000 })
+            toast.success("Request Raised", { autoClose: 1000 });
             const modal = await bootstrap.Modal.getInstance(document.getElementById('riaseRequestModal'));
             modal.hide();
-            await router.push({ path: '/todo/raisedbyme' })
-            window.location.reload()
+            await router.push({ path: '/todo/raisedbyme' });
+            window.location.reload();
         }
-    })
+    });
 }
+
 
 const handleTabChange = (tab) => {
     activeTab.value = tab.route; // Update the active tab

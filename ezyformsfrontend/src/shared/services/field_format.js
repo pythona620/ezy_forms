@@ -25,7 +25,8 @@ export function extractFieldsWithBreaks(data) {
               idx: index++, // Assign index
               label: field.label,
               reqd: field.reqd ? 1 : 0,
-              value: field.value ? field.value : "null"
+              value: field.value ? field.value : "",
+              options: field.fieldtype === "Select" || "Check" ? field.options : ""
             });
 
             // Update previousFieldname for the next field in this column
@@ -182,7 +183,8 @@ export function rebuildToStructuredArray(flatArray) {
             fieldtype: item.fieldtype,
             parent: item.parent,
             label: item.label,
-            reqd: item.reqd
+            reqd: item.reqd,
+            options: item.options
           });
         }
         break;

@@ -151,7 +151,7 @@
                 </div>
                 <div class="d-flex align-items-center ">
                     <button type="button" class="btn btn-dark buttoncomp CreateDepartments d-flex align-items-center "
-                        data-bs-toggle="modal" data-bs-target="#createDepartments">
+                        data-bs-toggle="modal" data-bs-target="#createDepartments" @click="createEmplBtn">
                         Create Employee
                     </button>
                 </div>
@@ -298,15 +298,19 @@ import GlobalTable from '../../Components/GlobalTable.vue';
 import PaginationComp from '../../Components/PaginationComp.vue';
 import axiosInstance from '../../shared/services/interceptor';
 import { apis, doctypes } from '../../shared/apiurls';
-import { onMounted, reactive, ref, computed } from 'vue';
+import { onMounted, reactive, ref, computed, watch } from 'vue';
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
+import { EzyBusinessUnit } from "../../shared/services/business_unit";
 
-
+const businessUnit = computed(() => {
+    return EzyBusinessUnit.value;
+});
 onMounted(() => {
-    deptData();
-    employeeData();
+
+
 })
+const newbusiness = ref("");
 const totalRecords = ref(0);
 const designiations = ref([]);
 const reportingTo = ref([]);
@@ -319,7 +323,9 @@ const createEmployee = ref({
     department: "",
     designation: "",
     reporting_to: "",
-    reporting_designation: ""
+    reporting_designation: "",
+    company_field: "",
+
 });
 
 const actions = ref(
@@ -328,6 +334,9 @@ const actions = ref(
 
     ]
 )
+function createEmplBtn() {
+    deptData();
+}
 function actionCreated(rowData, actionEvent) {
     if (actionEvent.name === 'Edit Employee') {
         if (rowData) {
@@ -472,7 +481,7 @@ function resetFilters() {
         Approval_status: "",
 
     };
-    
+
 }
 function cancelCreate() {
     createEmployee.value = {
@@ -521,7 +530,9 @@ const PaginationLimitStart = ([itemsPerPage, start]) => {
 
 };
 function employeeData() {
-    const filters = [];
+    const filters = [
+        ["company_field", "like", `%${newbusiness.value}%`]
+    ];
     if (filterOnModal.emp_code) {
         filters.push(["emp_code", "like", `%${filterOnModal.emp_code}%`]);
     }
@@ -583,7 +594,19 @@ function employeeData() {
             console.error("Error fetching department data:", error);
         });
 }
+watch(
+    businessUnit,
+    (newVal) => {
+        createEmployee.value.company_field = newVal;
+        newbusiness.value = newVal;
 
+        if (newVal.length) {
+            console.log(newVal, "new value of business unit");
+            employeeData();
+        }
+    },
+    { immediate: true }
+);
 function createEmpl() {
     const dataObj = {
         ...createEmployee.value,

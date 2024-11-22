@@ -320,8 +320,9 @@
                                                                                 </div>
                                                                                 <!-- Dynamically added fields within the column -->
                                                                                 <div v-for="(field, fieldIndex) in column.fields"
-                                                                                    :key="fieldIndex" class="mt-2">
-                                                                                    <div class="px-1  field-border">
+                                                                                    :key="fieldIndex"
+                                                                                    class="mt-2 dynamicField">
+                                                                                    <div class="px-1 field-border">
                                                                                         <div
                                                                                             class="d-flex justify-content-between">
                                                                                             <div
@@ -394,7 +395,7 @@
                                                                                             </option>
                                                                                         </select>
                                                                                         <div
-                                                                                            v-if="['Check', 'radio', 'Select', 'multiselect'].includes(field.fieldtype)">
+                                                                                            v-if="['Select', 'multiselect'].includes(field.fieldtype)">
                                                                                             <label
                                                                                                 class="font-12 fw-light"
                                                                                                 for="options">Enter
@@ -856,14 +857,7 @@ const fieldTypes = [
         label: "Text",
         type: "Data",
     },
-    {
-        label: "Check",
-        type: "Check",
-    },
-    {
-        label: "Radio",
-        type: "radio",
-    },
+
     {
         label: "Attach",
         type: "Attach",
@@ -871,6 +865,14 @@ const fieldTypes = [
     {
         label: "Number",
         type: "number",
+    },
+    {
+        label: "Time",
+        type: "Time",
+    },
+    {
+        label: "Color",
+        type: "Color",
     },
     {
         label: "TextArea",
@@ -881,6 +883,18 @@ const fieldTypes = [
         type: "Date",
     },
     {
+        label: "Datetime",
+        type: "Datetime",
+    },
+    {
+        label: "Check",
+        type: "Check",
+    },
+    {
+        label: "Radio",
+        type: "radio",
+    },
+    {
         label: "Select",
         type: "Select",
     },
@@ -888,6 +902,10 @@ const fieldTypes = [
         label: "MultiSelect",
         type: "multiselect",
     },
+    {
+        label: "Signature",
+        type: "Signature",
+    }
 ];
 
 const isAllSelected = computed({
@@ -1444,13 +1462,19 @@ const getFieldComponent = (type) => {
             return "input";
         case "number":
             return "input";
+        case "Time":
+            return "input";
         case "Text":
             return "textarea";
+        case "Color":
+            return "color";
         case "Check":
             return "input";
         case "Select":
             return "select";
         case "Date":
+            return "input";
+        case "Datetime":
             return "input";
         case "Attach":
             return "file";
@@ -1542,7 +1566,7 @@ input {
 
 .column_name {
     /* border-bottom: 1px solid #f1f1f1; */
-    padding: 1px 10px;
+    padding: 1px 3px;
 }
 
 .main-section {

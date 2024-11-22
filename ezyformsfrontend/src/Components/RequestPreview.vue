@@ -40,39 +40,62 @@
                                         </template>
 
                                         <template
-                                            v-else-if="field.fieldtype === 'check' || field.fieldtype === 'radio'">
-                                            <div class="row">
-                                                <div class="form-check col-4 mb-4"
-                                                    v-for="(option, index) in field?.options?.split('\n')" :key="index">
-                                                    <div class="d-flex gap-2 align-items-center">
+                                            v-else-if="field.fieldtype === 'Check' || field.fieldtype === 'radio'">
+                                            <div class="container-fluid">
+                                                <div class="row">
+                                                    <div class="form-check col-4 mb-4"
+                                                        v-for="(option, index) in field?.options?.split('\n')"
+                                                        :key="index">
                                                         <div>
-                                                            <input :type="field.fieldtype" :name="option" :id="option"
-                                                                v-model="field.value"
+
+                                                            <input v-if="field.fieldtype === 'Check'"
+                                                                class="form-check-input" type="checkbox"
+                                                                :value="field.value"
+                                                                :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
+                                                                :id="`${option}-${index}`" v-model="field.value"
+                                                                @blur="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
+
+                                                            <input v-else-if="field.fieldtype === 'radio'"
+                                                                class="form-check-input" type="radio"
+                                                                :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
+                                                                :id="`${option}-${index}`" v-model="field.value"
                                                                 @blur="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
                                                         </div>
                                                         <div>
-                                                            <label class="form-check-label m-0" :for="option">{{ option
-                                                                }}</label>
+                                                            <label class="form-check-label m-0"
+                                                                :for="`${option}-${index}`">
+                                                                {{ option }}
+                                                            </label>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </template>
+
+
                                         <template v-else-if="field.fieldtype == 'Attach'">
-                                            <input type="file"
+                                            <input type="file" accept="image/jpeg,image/png/,application/pdf"
                                                 :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
-                                                class="form-control previewInputHeight"
+                                                class="form-control previewInputHeight" multiple
                                                 @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
                                         </template>
-
+                                        <template v-else-if="field.fieldtype == 'Datetime'">
+                                            <input type="datetime-local" v-model="field.value"
+                                                :placeholder="'Enter ' + field.label"
+                                                :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                                                @blur="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+                                                class="form-control previewInputHeight" />
+                                        </template>
 
                                         <template v-else>
                                             <component :is="getFieldComponent(field.fieldtype)" v-model="field.value"
-                                                :type="field.fieldtype"
+                                                :type="field.fieldtype === 'Color' ? 'color' : field.fieldtype"
                                                 :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
                                                 @blur="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
-                                                class="form-control previewInputHeight"></component>
+                                                class="form-control previewInputHeight">
+                                            </component>
                                         </template>
+
                                     </div>
                                 </div>
                             </div>
@@ -85,54 +108,102 @@
 </template>
 <script setup>
 import { defineProps } from "vue";
+import moment from "moment";
+import axiosInstance from "../shared/services/interceptor";
+import { apis } from "../shared/apiurls";
 
 const props = defineProps({
     blockArr: {
         type: [Array, null],
         required: true
     },
+    formName: {
+        type: String,
+        required: true
+    }
 });
 const emit = defineEmits();
 const getFieldComponent = (type) => {
     switch (type) {
         case "Data":
-            return "input";
         case "number":
+        case "Check":
+        case "Date":
+        case "Datetime":
+        case "radio":
             return "input";
         case "Text":
             return "textarea";
-        case "Check":
+        case "Time":
             return "input";
         case "Select":
             return "select";
-        case "Date":
-            return "input";
         case "Attach":
             return "file";
-        case "radio":
-            return "input";
-        default:
+        case "Color":
             return "input";
     }
 };
 
-
 const logFieldValue = (eve, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) => {
     const field = props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex];
-    field['value'] = eve.target.value
-    emit('updateField',
-        field
-        // blockIndex,
-        // sectionIndex,
-        // rowIndex,
-        // columnIndex,
-        // fieldIndex,
-        // value: field,  // Send the updated field value
-    );
-    //   console.log(`Block: ${blockIndex}, Section: ${sectionIndex}, Row: ${rowIndex}, Column: ${columnIndex}, Field: ${fieldIndex}`);
-    console.log(eve.target.value, "Field Value:", field);
 
+    if (eve.target.files && eve.target.files.length > 0) {
+        const files = eve.target.files;
+        field['value'] = "";
+        for (let i = 0; i < files.length; i++) {
+            uploadFile(files[i], field);
+        }
+        emit('updateField', field);
+        console.log('Selected files:', files, "Field Value:", field);
+    } else if (eve.target.type === 'checkbox') {
+
+        field['value'] = eve.target.checked;
+
+        emit('updateField', field);
+        console.log('Field Value (Checkbox):', field);
+
+    } else {
+        field['value'] = eve.target.value;
+
+        emit('updateField', field);
+        console.log('Entered value:', eve.target.value, "Field Value:", field);
+    }
 };
+
+const generateRandomNumber = () => {
+    return Math.floor(Math.random() * 1000000);
+};
+
+const uploadFile = (file, field) => {
+    const randomNumber = generateRandomNumber();
+    let fileName = `${props.formName}-${randomNumber}-@${file.name}`;
+
+    const formData = new FormData();
+    formData.append("file", file, fileName);
+    formData.append("is_private", "1");
+    formData.append("folder", "Home");
+    axiosInstance
+        .post(apis.uploadfile, formData)
+        .then((res) => {
+            console.log('Upload response:', res);
+            if (res.message && res.message.file_url) {
+                if (field['value']) {
+                    field['value'] += `, ${res.message.file_url}`;
+                } else {
+                    field['value'] = res.message.file_url;
+                }
+                emit('updateField', field);
+            } else {
+                console.error("file_url not found in the response.");
+            }
+        })
+        .catch((error) => {
+            console.error('Upload error:', error);
+        });
+};
+
+
 // const handleFileChange = (event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) => {
 //     const file = event.target.files[0]; // Get the first file selected
 //     if (file) {

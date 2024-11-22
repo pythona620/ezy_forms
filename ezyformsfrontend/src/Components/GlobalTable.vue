@@ -22,32 +22,32 @@
             </td> -->
             <td class="">{{ rowIndex + 1 }}</td>
             <td v-for="(column, colIndex) in tHeaders" :key="colIndex">
-  <!-- Condition for Action Column -->
-  <span v-if="column.td_key === 'status'" :class="{
+              <!-- Condition for Action Column -->
+              <span v-if="column.td_key === 'status'" :class="{
       'text-warning': row[column.td_key] === 'Request Raised',
       'textcompleted': row[column.td_key] === 'Completed',
       'text-primary': row[column.td_key] === 'In Progress',
       'textcancel': row[column.td_key] === 'Cancel',
       'text-danger': row[column.td_key] === 'Rejected',
     }">
-    <i class="bi bi-circle-fill status-circle font-10 text-center pe-2"></i>
-    {{ row[column.td_key] }}
-  </span>
+                <i class="bi bi-circle-fill status-circle font-10 text-center pe-2"></i>
+                {{ row[column.td_key] }}
+              </span>
 
-  <!-- Condition for Active Column -->
-  <span v-else-if="column.td_key === 'active'" :class="{
+              <!-- Condition for Active Column -->
+              <span v-else-if="column.td_key === 'active'" :class="{
       activeform: row[column.td_key] == '1',
       'text-danger': row[column.td_key] == '0',
     }">
-    <i class="bi bi-circle-fill status-circle font-10 text-center pe-2"></i>
-    {{ row[column.td_key] === 1 ? 'Active' : 'Inactive' }}
-  </span>
+                <i class="bi bi-circle-fill status-circle font-10 text-center pe-2"></i>
+                {{ row[column.td_key] === 1 ? 'Active' : 'In active' }}
+              </span>
 
-  <!-- Default Column Rendering -->
-  <span v-else>
-    {{ row[column.td_key] || '-' }}
-  </span>
-</td>
+              <!-- Default Column Rendering -->
+              <span v-else>
+                {{ row[column.td_key] || '-' }}
+              </span>
+            </td>
 
             <td v-if="actionType === 'viewPdf'" class="text-center">
               <span>
@@ -99,7 +99,7 @@
             ></ButtonComp>
           </td> -->
           </tr>
-          
+
         </template>
         <template v-else>
           <tr>
@@ -298,6 +298,10 @@ onMounted(() => {
   }
 }
 
+.global-table tbody tr:hover {
+  background-color: #f2f2f2;
+}
+
 .actions {
   display: flex;
   align-items: center;
@@ -413,10 +417,12 @@ th:first-child {
 .checkbox {
   margin-left: 2px;
 }
-.textcompleted{
-  color: green ;
+
+.textcompleted {
+  color: green;
 }
-.textcancel{
-  color:#17a2b8 ;
+
+.textcancel {
+  color: #17a2b8;
 }
 </style>

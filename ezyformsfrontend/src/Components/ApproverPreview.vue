@@ -29,6 +29,7 @@
                                         <template
                                             v-if="field.fieldtype === 'Select' || field.fieldtype === 'multiselect'">
                                             <select :multiple="field.fieldtype === 'multiselect'" :value="field.value"
+                                                readOnly
                                                 @input="logFieldValue(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
                                                 class="form-select mb-2 font-13">
                                                 <option v-for="(option, index) in field.options?.split('\n')"
@@ -40,33 +41,84 @@
 
                                         <!-- Field Type Check or Radio -->
                                         <template
-                                            v-else-if="field.fieldtype === 'check' || field.fieldtype === 'radio'">
-                                            <div class="row">
-                                                <div class="form-check col-4 mb-4"
-                                                    v-for="(option, index) in field?.options?.split('\n')" :key="index">
-                                                    <div class="d-flex gap-2 align-items-center">
-                                                        <input :type="field.fieldtype" :name="option" :id="option"
-                                                            :value="field.value"
-                                                            @blur="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
-                                                        <label class="form-check-label m-0" :for="option">{{ option
-                                                            }}</label>
+                                            v-else-if="field.fieldtype === 'Check' || field.fieldtype === 'radio'">
+                                            <div class="container-fluid">
+                                                <div class="row">
+                                                    <div class="form-check col-4 mb-4"
+                                                        v-for="(option, index) in field?.options?.split('\n')"
+                                                        :key="index">
+                                                        <div>
+                                                            <input v-if="field.fieldtype === 'Check'"
+                                                                class="form-check-input" type="checkbox"
+                                                                :checked="field.value === 1" :value="field.value"
+                                                                disabled
+                                                                :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
+                                                                :id="`${option}-${index}`"
+                                                                @blur="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
+
+                                                            <input v-else-if="field.fieldtype === 'radio'" disabled
+                                                                class="form-check-input" type="radio"
+                                                                :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
+                                                                :id="`${option}-${index}`" :value="field.value"
+                                                                :checked="field.value === 1"
+                                                                @blur="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
+                                                        </div>
+                                                        <div>
+                                                            <label class="form-check-label m-0"
+                                                                :for="`${option}-${index}`">
+                                                                {{ option }}
+                                                            </label>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </template>
 
                                         <!-- Field Type File (Attach) -->
-                                        <template v-else-if="field.fieldtype == 'Attach'">
+                                        <!-- <template v-else-if="field.fieldtype == 'Attach'">
                                             <input type="file"
                                                 :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
-                                                class="form-control previewInputHeight"
+                                                class="form-control previewInputHeight" disabled
                                                 @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
+                                            <iframe :src="field.value" type="application/pdf" width="100%"
+                                                height="300px">
+                                                Your Browser Do not support pdf
+                                            </iframe>
+
+                                        </template> -->
+                                        <template v-else-if="field.fieldtype == 'Attach'">
+                                            <div class=" container">
+                                                <div class="row">
+                                                    <div class="col-3 card file-cards m-1"
+                                                        v-for="(filePath, index) in filePaths" :key="index">
+                                                        <div class="card-body p-2">
+                                                            <div
+                                                                class="d-flex gap-1 align-items-center justify-content-between">
+                                                                <div>
+                                                                    <i class="bi bi-file-earmark-text"></i>
+                                                                    <span class="font-12 fw-bold ps-1">
+                                                                        {{ `File ${index + 1}` }}
+                                                                    </span>
+                                                                </div>
+                                                                <i title="view file" class="bi bi-eye"
+                                                                    @click="openFile(filePath)"></i>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+                                        <template v-else-if="field.fieldtype == 'Datetime'">
+                                            <input type="datetime-local" v-model="field.value"
+                                                :placeholder="'Enter ' + field.label" :value="field.value"
+                                                :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                                                class="form-control previewInputHeight" />
                                         </template>
 
                                         <!-- Field Type Default -->
                                         <template v-else>
                                             <component :is="getFieldComponent(field.fieldtype)" :value="field.value"
-                                                :type="field.fieldtype"
+                                                readOnly :type="field.fieldtype"
                                                 :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
                                                 @blur="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
                                                 class="form-control previewInputHeight"></component>
@@ -83,7 +135,7 @@
 </template>
 
 <script setup>
-import { defineProps, onMounted, watch } from 'vue';
+import { defineProps, onMounted, ref, watch } from 'vue';
 
 const props = defineProps({
     blockArr: {
@@ -92,6 +144,7 @@ const props = defineProps({
     },
 });
 const emit = defineEmits();
+const filePaths = ref([]);
 
 const getAllFieldsData = () => {
     const fieldsData = [];
@@ -103,6 +156,9 @@ const getAllFieldsData = () => {
                 row.columns?.forEach(column => {
                     column.fields?.forEach(field => {
                         fieldsData.push({ ...field });
+                        if (field.fieldtype === 'Attach' && field.value) {
+                            filePaths.value = field.value.split(',').map(path => path.trim());
+                        }
                     });
                 });
             });
@@ -112,13 +168,15 @@ const getAllFieldsData = () => {
     return fieldsData;
 };
 
+const openFile = (filePath) => {
+    const fileUrl = `${filePath}`;
+    window.open(fileUrl, '_blank');
+};
 
-// Emit all fields' data when component is mounted
 onMounted(() => {
     emit('updateField', getAllFieldsData());
 });
 
-// Watch for any changes in blockArr and emit the updated fields
 watch(
     () => props.blockArr,
     () => {
@@ -127,31 +185,40 @@ watch(
     { deep: true }
 );
 
-// Function to dynamically get the field component based on field type
+
 const getFieldComponent = (type) => {
     switch (type) {
-        case 'Data':
-        case 'number':
-        case 'Text':
-        case 'Check':
-        case 'Date':
-        case 'radio':
-            return 'input';
-        case 'Attach':
-            return 'file';
-        case 'Select':
-            return 'select';
+        case "Data":
+            return "input";
+        case "number":
+            return "input";
+        case "Text":
+            return "textarea";
+        case "Time":
+            return "input";
+        case "Color":
+            return "input";
+        case "Check":
+            return "input";
+        case "Select":
+            return "select";
+        case "Date":
+            return "input";
+        case "Datetime":
+            return "input";
+        case "Attach":
+            return "file";
+        case "radio":
+            return "input";
         default:
-            return 'input';
+            return "input";
     }
 };
 
-// Function to log the field value on change or blur
+
 const logFieldValue = (event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) => {
     const field = props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex];
     field.value = event.target.value;
-
-    // Emit all fields' data after any field change
     emit('updateField', getAllFieldsData());
     console.log('Field Value Updated:', field);
 };
@@ -200,5 +267,13 @@ const logFieldValue = (event, blockIndex, sectionIndex, rowIndex, columnIndex, f
 input::-webkit-input-placeholder {
     font-size: 10px;
 
+}
+
+.file-cards {
+    transition: all 0.1s ease-in-out;
+}
+
+.file-cards:hover {
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
 }
 </style>

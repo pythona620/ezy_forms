@@ -185,26 +185,29 @@
                                                                                 </select>
                                                                             </template>
                                                                             <template
-                                                                                v-else-if="field.fieldtype == 'check' || field.fieldtype == 'radio'">
-                                                                                <div class="row">
-                                                                                    <div class="form-check col-4 mb-4"
-                                                                                        v-for="(option, index) in field?.options?.split('\n')"
-                                                                                        :key="index">
-                                                                                        <div
-                                                                                            class="d-flex gap-2 align-items-center">
-                                                                                            <div>
-                                                                                                <input class=""
-                                                                                                    :type="field.fieldtype"
-                                                                                                    :name="option"
-                                                                                                    :id="option"
-                                                                                                    readonly />
-                                                                                            </div>
-                                                                                            <div>
-                                                                                                <label
-                                                                                                    class="form-check-label m-0"
-                                                                                                    :for="option">
-                                                                                                    {{ option }}
-                                                                                                </label>
+                                                                                v-else-if="field.fieldtype == 'Check' || field.fieldtype == 'radio'">
+                                                                                <div class="container-fluid">
+                                                                                    <div class="row">
+                                                                                        <div class="form-check col-4 mb-4"
+                                                                                            v-for="(option, index) in field?.options?.split('\n')"
+                                                                                            :key="index">
+                                                                                            <div
+                                                                                                class="d-flex gap-2 align-items-center">
+                                                                                                <div>
+                                                                                                    <input
+                                                                                                        class=" form-check-input"
+                                                                                                        :type="field.fieldtype"
+                                                                                                        :name="option"
+                                                                                                        :id="option"
+                                                                                                        readonly />
+                                                                                                </div>
+                                                                                                <div>
+                                                                                                    <label
+                                                                                                        class="form-check-label m-0"
+                                                                                                        :for="option">
+                                                                                                        {{ option }}
+                                                                                                    </label>
+                                                                                                </div>
                                                                                             </div>
                                                                                         </div>
                                                                                     </div>
@@ -219,7 +222,15 @@
                                                                                     disabled />
                                                                             </template>
                                                                             <template v-else>
-                                                                                <component readonly
+                                                                                <input
+                                                                                    v-if="field.fieldtype === 'Datetime'"
+                                                                                    type="datetime-local"
+                                                                                    v-model="field.value"
+                                                                                    :placeholder="'Enter ' + field.label"
+                                                                                    :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                                                                                    class="form-control previewInputHeight" />
+
+                                                                                <component readOnly
                                                                                     :is="getFieldComponent(field.fieldtype)"
                                                                                     v-model="field.value"
                                                                                     :type="field.fieldtype"
@@ -227,6 +238,7 @@
                                                                                     :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
                                                                                     class="form-control previewInputHeight">
                                                                                 </component>
+
                                                                             </template>
                                                                         </div>
                                                                     </div>
@@ -289,22 +301,22 @@ watch(
 const getFieldComponent = (type) => {
     switch (type) {
         case "Data":
-            return "input";
         case "number":
+        case "Check":
+        case "Date":
+        case "Datetime":
+        case "radio":
             return "input";
         case "Text":
             return "textarea";
-        case "Check":
+        case "Time":
             return "input";
         case "Select":
             return "select";
-        case "Date":
-            return "input";
         case "Attach":
             return "file";
-        case "radio":
+        case "Color":
             return "input";
-
     }
 };
 </script>

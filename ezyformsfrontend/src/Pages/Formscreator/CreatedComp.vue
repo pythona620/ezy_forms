@@ -163,39 +163,66 @@ onMounted(() => {
 
 })
 const selectedForm = ref(null);
+const actions = ref([
+    { name: 'View form', icon: 'fa-solid fa-eye' },
+    { name: 'Edit Form', icon: 'fa-solid fa-edit' },
+    { name: 'Activate this form', icon: 'fa-solid fa-check-circle' },
+    { name: 'In-active this form', icon: 'fa-solid fa-ban' },
+    { name: 'Edit accessibility to dept.', icon: 'fa-solid fa-users' },
+    // { name: 'Share this form', icon: 'fa-solid fa-share-alt' },
+    // { name: 'Download Print format', icon: 'fa-solid fa-download' },
+]);
+
 function actionCreated(rowData, actionEvent) {
     if (actionEvent.name === 'View form') {
         if (rowData?.form_json) {
-            formDescriptions.value = { ...rowData }
-            selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json).fields)
-            const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});// raise a modal
+            formDescriptions.value = { ...rowData };
+            selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json).fields);
+            const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});
             modal.show();
-
         } else {
-            console.warn(" There is no form fields ")
-            formCreation(rowData)
+            console.warn("There are no form fields");
+            formCreation(rowData);
         }
+    } else if (actionEvent.name === 'Edit Form') {
+        formCreation(rowData);
     }
-    if (actionEvent.name === 'Edit Form') {
-        formCreation(rowData)
+    else if (actionEvent.name === 'Edit accessibility to dept.') {
+        formCreation(rowData);
+    }
+    else if (actionEvent.name === 'In-active this form') {
+        // Inactivate the form
+        updateFormStatus(rowData, '0');
+    } else if (actionEvent.name === 'Activate this form') {
+        // Activate the form
+        updateFormStatus(rowData, '1');
     }
 }
+
+// Function to update the form status based on active/inactive
+function updateFormStatus(rowData, status) {
+    if (rowData) {
+        const formId = rowData.name;
+        const statusUpdate = { active: status };
+
+        axiosInstance.put(`${apis.resource}${doctypes.EzyFormDefinitions}/${formId}`, statusUpdate)
+            .then((res) => {
+                console.log(`Form status updated to ${status === '1' ? 'Active' : 'Inactive'}`, res);
+                fetchTable();
+            })
+            .catch((error) => {
+                console.error("Error updating form status:", error);
+            });
+    }
+}
+
 const hideModal = () => {
     const modal = bootstrap.Modal.getInstance(document.getElementById('formViewModal'));
     modal.hide();
 };
 
 
-const actions = ref(
-    [
-        { name: 'View form', icon: 'fa-solid fa-eye' },
-        { name: 'Edit Form', icon: 'fa-solid fa-edit' },
-        { name: 'Edit accessibility to dept.', icon: 'fa-solid fa-users' },
-        { name: 'Share this form', icon: 'fa-solid fa-share-alt' },
-        { name: 'Download Print format', icon: 'fa-solid fa-download' },
-        { name: 'In-active this form', icon: 'fa-solid fa-ban' }
-    ]
-)
+
 const formDescriptions = ref({})
 const tableData = ref([]);
 
