@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="p-0">
         <HeaderComp v-if="!isFormStepsRoute" />
 
         <div class="container-fluid">

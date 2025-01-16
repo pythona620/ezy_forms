@@ -17,9 +17,9 @@
 
           <!-- Adjust column size based on route -->
           <!-- :class="[(isFormStepsRoute || isArchivedRoute) ? 'col-12' : 'col-10']" -->
-          <div>
-            <RouterView></RouterView>
-          </div>
+
+          <RouterView></RouterView>
+
         </div>
       </div>
     </section>

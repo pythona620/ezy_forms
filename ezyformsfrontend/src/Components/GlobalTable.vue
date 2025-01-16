@@ -69,9 +69,10 @@
                   <span>...</span>
                 </p>
                 <ul class="dropdown-menu actionsdropdown">
-                  <li class="" @click="selectedAction(row, action)" v-for="(action, index) in actions" :key="index">
-                    <a class="dropdown-item d-flex gap-2"> <i :class="action.icon"></i>
-                      <h1 class="font-10"> {{ action.name }}</h1>
+                  <li class=" py-1" @click="selectedAction(row, action)" v-for="(action, index) in actions"
+                    :key="index">
+                    <a class="dropdown-item py-2 d-flex align-items-center gap-2"> <i :class="action.icon"></i>
+                      <h1 class="font-10 mb-0"> {{ action.name }}</h1>
                     </a>
                   </li>
                 </ul>
