@@ -1,5 +1,5 @@
 <template>
-    <div class="container-fluid">
+    <div class="">
         <div class="sidebar pt-2">
             <!-- Title for the overall sidebar -->
             <h1 class="font-12 m-0 text-muted ps-2">{{ sidebarTitle }}</h1>
@@ -256,15 +256,15 @@ const iconClasses = [
 
 ];
 watch(
-  [businessUnit, isMasterRoute],
-  ([newBusinessUnitVal, isMaster]) => {
-    newBusinessUnit.value.business_unit = newBusinessUnitVal;
+    [businessUnit, isMasterRoute],
+    ([newBusinessUnitVal, isMaster]) => {
+        newBusinessUnit.value.business_unit = newBusinessUnitVal;
 
-    if (isMaster && newBusinessUnitVal.length) {
-      deptData();
-    }
-  },
-  { immediate: true }
+        if (isMaster && newBusinessUnitVal.length) {
+            deptData();
+        }
+    },
+    { immediate: true }
 );
 // function getIconByDepartmentName(name) {
 //     const icons = {
@@ -311,8 +311,8 @@ li {
     line-height: 26px;
     text-align: left;
     border-radius: 6px;
-    
-   
+
+
 
 }
 

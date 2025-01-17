@@ -76,7 +76,7 @@
                                         <template v-else-if="field.fieldtype == 'Attach'">
                                             <input type="file" accept="image/jpeg,image/png/,application/pdf"
                                                 :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
-                                                class="form-control previewInputHeight" multiple
+                                                class="form-control previewInputHeight font-10" multiple
                                                 @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
                                         </template>
                                         <template v-else-if="field.fieldtype == 'Datetime'">
@@ -84,17 +84,26 @@
                                                 :placeholder="'Enter ' + field.label"
                                                 :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
                                                 @blur="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
-                                                class="form-control previewInputHeight" />
+                                                class="form-control previewInputHeight font-10" />
                                         </template>
 
                                         <template v-else>
                                             <component :is="getFieldComponent(field.fieldtype)" v-model="field.value"
+                                                :maxlength="field.fieldtype === 'Phone' ? '10' : null"
                                                 :type="field.fieldtype === 'Color' ? 'color' : field.fieldtype"
                                                 :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
                                                 @blur="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
-                                                class="form-control previewInputHeight">
+                                                class="form-control previewInputHeight font-10">
                                             </component>
+
                                         </template>
+                                        <div v-if="errorMessages[`${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`]"
+                                            class="text-danger font-10 mt-1">
+                                            {{
+            errorMessages[`${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`]
+                                            }}
+                                        </div>
+
 
                                     </div>
                                 </div>
@@ -107,8 +116,8 @@
     </section>
 </template>
 <script setup>
-import { defineProps } from "vue";
-import moment from "moment";
+import { computed, defineProps, ref, watch } from "vue";
+// import moment from "moment";
 import axiosInstance from "../shared/services/interceptor";
 import { apis } from "../shared/apiurls";
 
@@ -123,10 +132,11 @@ const props = defineProps({
     }
 });
 const emit = defineEmits();
+const errorMessages = ref({});
 const getFieldComponent = (type) => {
     switch (type) {
         case "Data":
-        case "number":
+        case "Phone":
         case "Check":
         case "Date":
         case "Datetime":
@@ -144,6 +154,31 @@ const getFieldComponent = (type) => {
             return "input";
     }
 };
+const allFieldsFilled = computed(() => {
+    if (!props.blockArr || props.blockArr.length === 0) return false;
+
+    for (const block of props.blockArr) {
+        for (const section of block.sections) {
+            for (const row of section.rows) {
+                for (const column of row.columns) {
+                    for (const field of column.fields) {
+                        // field.reqd === 1 && (----)
+                        if (!field.value || field.value.toString().trim() === "") {
+                            return false; // If any required field is empty, return false
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return true; // All required fields are filled
+});
+
+// Watch `allFieldsFilled` and emit value
+watch(allFieldsFilled, (newValue) => {
+    console.log(newValue, "++++++++++++++++++++++++++++");
+    emit("formValidation", newValue); // Emit true if all fields are filled, false otherwise
+});
 
 const logFieldValue = (eve, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) => {
     const field = props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex];
@@ -154,20 +189,40 @@ const logFieldValue = (eve, blockIndex, sectionIndex, rowIndex, columnIndex, fie
         for (let i = 0; i < files.length; i++) {
             uploadFile(files[i], field);
         }
-        emit('updateField', field);
+        // emit('updateField', field);
         console.log('Selected files:', files, "Field Value:", field);
     } else if (eve.target.type === 'checkbox') {
 
         field['value'] = eve.target.checked;
 
-        emit('updateField', field);
+        // emit('updateField', field);
         console.log('Field Value (Checkbox):', field);
 
     } else {
         field['value'] = eve.target.value;
 
-        emit('updateField', field);
-        console.log('Entered value:', eve.target.value, "Field Value:", field);
+        console.log('Entered value--------------------------:', eve.target.value, "Field Value:", field);
+    }
+    validateField(field, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex);
+    emit('updateField', field);
+};
+
+const validateField = (field, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) => {
+    const fieldKey = `${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`;
+
+    if (field.reqd === 1 && (!field.value || field.value.toString().trim() === "")) {
+        errorMessages.value[fieldKey] = `${field.label || "This field"} is required.`;
+    }
+    else if (field.fieldtype === "Phone") {
+        const phoneRegex = /^[0-9]{10}$/; // Adjust if needed
+        if (!phoneRegex.test(field.value)) {
+            errorMessages.value[fieldKey] = "Enter a valid 10-digit phone number.";
+        } else {
+            delete errorMessages.value[fieldKey]; // Clear error if valid
+        }
+    }
+    else {
+        delete errorMessages.value[fieldKey]; // Clear error if valid
     }
 };
 
@@ -217,7 +272,7 @@ const uploadFile = (file, field) => {
 </script>
 <style setup>
 .previewInputHeight {
-    height: 35px;
+
     margin-bottom: 5px;
 }
 

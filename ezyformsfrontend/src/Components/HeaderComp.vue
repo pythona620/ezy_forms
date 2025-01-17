@@ -118,9 +118,9 @@
                             </div>
 
                         </div>
-                        <div v-if="blockArr.length">
+                        <div v-if="blockArr.length && selectedData.selectedCategory && selectedData.selectedform">
                             <RequestPreview :blockArr="blockArr" :formName="selectedData.selectedform"
-                                @updateField="handleFieldUpdate" />
+                                @formValidation="isFormValid = $event" @updateField="handleFieldUpdate" />
                         </div>
 
                         <!-- <FormFields tag="select" placeholder="Form" class="mb-3" name="roles" id="roles"
@@ -128,7 +128,7 @@
                     </div>
                     <div>
                         <div class=" d-flex justify-content-center align-items-center p-3">
-                            <button class="btn btn-dark font-12 w-100" type="submit"
+                            <button :disabled="!isFormValid" class="btn btn-dark font-12 w-100" type="submit"
                                 @click="raiseRequestSubmission">Raise
                                 Request</button>
                         </div>
@@ -210,7 +210,7 @@ const selectedData = ref({
     selectedCategory: "",
     selectedform: ""
 });
-
+const isFormValid = ref(false);
 const route = useRoute(); // Initialize route to access route parameters
 const categoryOptions = ref([])
 const formList = ref([])
@@ -391,7 +391,7 @@ function raiseRequest() {
     const storedData = localStorage.getItem("employeeData");
     if (storedData) {
         employeeData.value = JSON.parse(storedData);
-        categoriesdata(employeeData.value.department);
+        categoriesdata(employeeData?.value.department);
     } else {
         console.error("No employee data found in local storage.");
     }
@@ -406,6 +406,8 @@ function raiseRequest() {
 // );
 
 function changingCategory(value) {
+    blockArr.value = [];
+    selectedData.value.selectedform = '';
     if (value) {
         const dataObj = {
             "role": employeeData.value.designation,
@@ -423,6 +425,7 @@ function changingCategory(value) {
     }
 }
 function SelectedFromchange(value) {
+    blockArr.value = [];
     if (value) {
 
         formDefinations(value)
@@ -489,7 +492,7 @@ const filepaths = ref('')
 const handleFieldUpdate = (field) => {
 
     const fieldExists = emittedFormData.value.some(item => item.fieldname === field.fieldname);
-
+    console.log(fieldExists, "888888888888888");
 
     if (!fieldExists) {
         if (field.fieldtype === 'Attach') {
@@ -501,7 +504,7 @@ const handleFieldUpdate = (field) => {
         } else {
             emittedFormData.value = emittedFormData.value.concat(field);
         }
-        console.log(emittedFormData.value, "--------emittedFormData-------");
+        console.log(...emittedFormData.value, "--------emittedFormData-------");
     } else {
         console.log(`Field with name "${field.fieldname}" already exists in emittedFormData.`);
     }
@@ -518,7 +521,7 @@ function raiseRequestSubmission() {
         })
     }
 
-    console.log(" ==== ", form)
+    console.log(" ==== ", form, "-------------------------------------------")
 
     // form['form_json']
     const formData = new FormData();

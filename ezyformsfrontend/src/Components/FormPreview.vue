@@ -217,7 +217,7 @@
                                                                                 v-else-if="field.fieldtype == 'Attach'">
                                                                                 <input type="file"
                                                                                     :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
-                                                                                    class="form-control previewInputHeight"
+                                                                                    class="form-control font-10 "
                                                                                     @change="handleFileChange($event, field)"
                                                                                     disabled />
                                                                             </template>
@@ -228,15 +228,16 @@
                                                                                     v-model="field.value"
                                                                                     :placeholder="'Enter ' + field.label"
                                                                                     :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
-                                                                                    class="form-control previewInputHeight" />
+                                                                                    class="form-control previewInputHeight font-10" />
 
                                                                                 <component readOnly
+                                                                                    v-if="field.fieldtype !== 'Datetime'"
                                                                                     :is="getFieldComponent(field.fieldtype)"
                                                                                     v-model="field.value"
                                                                                     :type="field.fieldtype"
                                                                                     :placeholder="'Enter ' + field.label"
                                                                                     :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
-                                                                                    class="form-control previewInputHeight">
+                                                                                    class="form-control previewInputHeight font-10">
                                                                                 </component>
 
                                                                             </template>
@@ -301,7 +302,7 @@ watch(
 const getFieldComponent = (type) => {
     switch (type) {
         case "Data":
-        case "number":
+        case "Phone":
         case "Check":
         case "Date":
         case "Datetime":
@@ -323,7 +324,7 @@ const getFieldComponent = (type) => {
 
 <style scoped>
 .previewInputHeight {
-    height: 35px;
+    /* height: 35px; */
     margin-bottom: 5px;
 }
 
