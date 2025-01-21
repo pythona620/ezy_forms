@@ -11,12 +11,13 @@ import archivedroutes from "./Pages/Archived/archivedroutes";
 import dashBoardroutes from "./Pages/Dashboard/dashboardroute";
 import Login from "./views/Login.vue";
 import isAuthenticated from "../src/shared/services/auth";
+import RaiseRequest from './Components/RaiseRequest.vue';
 
 const routes = [
   {
     path: '/',
     component: Login,
-    name:'LoginPage'
+    name: 'LoginPage'
   },
   ...Masterroutes,
   ...settingRoutes,
@@ -24,6 +25,11 @@ const routes = [
   ...createrRoutes,
   ...archivedroutes,
   ...dashBoardroutes,
+  {
+    path: '/raiserequest',
+    component: RaiseRequest,
+    name: 'RaiseRequest'
+  }
 ];
 
 const router = createRouter({

@@ -177,7 +177,9 @@ function actionCreated(rowData, actionEvent) {
     if (actionEvent.name === 'View form') {
         if (rowData?.form_json) {
             formDescriptions.value = { ...rowData };
+            console.log(formDescriptions, "lllllllllll");
             selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json).fields);
+            console.log(selectedForm.value, "ooooo");
             const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});
             modal.show();
         } else {

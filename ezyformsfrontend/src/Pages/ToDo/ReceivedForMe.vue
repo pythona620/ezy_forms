@@ -152,7 +152,8 @@
     </div>
     <div class="mt-2">
       <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction='true' actionType="dropdown" isCheckbox='true'
-        :actions="actions" @actionClicked="actionCreated" />
+        @updateFilters="inLineFiltersData" :field-mapping="fieldMapping" isFiltersoption="true" :actions="actions"
+        @actionClicked="actionCreated" />
       <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
         @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
     </div>
@@ -164,7 +165,7 @@
             <h5 class="modal-title font-13" id="viewRequestLabel">Request Id: {{ selectedRequest.name }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <div class="modal-body">
+          <div class="modal-body approvermodalbody">
             <ApproverPreview :blockArr="showRequest" @updateField="updateFormData" />
           </div>
           <div class="modal-footer">
@@ -211,6 +212,9 @@ const newBusinessUnit = ref({ business_unit: '' });
 
 const filterObj = ref({ limitPageLength: 'None', limit_start: 0 });
 const totalRecords = ref(0);
+const idDta = ref([]);
+const docTypeName = ref([])
+const statusOptions = ref([])
 
 const tableheaders = ref([
   { th: "Request ID", td_key: "name" },
@@ -224,6 +228,13 @@ const tableheaders = ref([
 ]
 
 )
+const fieldMapping = ref({
+  // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
+  // invoice_date: { type: "date" },
+  // credit_irn_generated: { type: "select", options: ["Pending", "Completed", "Error"] },
+  name: { type: "input" },
+  doctype_name: { type: "input" },
+});
 const actions = ref(
   [
     { name: 'View Request', icon: 'fa-solid fa-eye' },
@@ -488,9 +499,43 @@ const PaginationLimitStart = ([itemsPerPage, start]) => {
 
 
 };
-const idDta = ref([]);
-const docTypeName = ref([])
-const statusOptions = ref([])
+
+function inLineFiltersData(searchedData) {
+  console.log("Applied searchedData:", searchedData);
+
+  // Initialize filters array
+  const filters = [];
+
+  // Loop through the tableheaders and build dynamic filters based on the `searchedData`
+  tableheaders.value.forEach((header) => {
+    const key = header.td_key;
+
+    // If there is a match for the key in searchedData, create a 'like' filter
+    if (searchedData[key]) {
+      filters.push([key, "like", `%${searchedData[key]}%`]);
+    }
+    // // Add filter for selected option
+    // if (key === "selectedOption" && searchedData.selectedOption) {
+    //   filters.push([key, "=", searchedData.selectedOption]);
+    // }
+    // // Special handling for 'invoice_date' to create a 'Between' filter (if it's a date)
+    // if (key === "invoice_date" && searchedData[key]) {
+    //   filters.push([key, "Between", [searchedData[key], searchedData[key]]]);
+    // }
+
+    // // Special handling for 'invoice_type' or 'irn_generated' to create an '=' filter
+    // if ((key === "invoice_type" || key === "credit_irn_generated") && searchedData[key]) {
+    //   filters.push([key, "=", searchedData[key]]);
+    // }
+  });
+
+  // Log filters to verify
+  console.log("Dynamic Filters:", filters);
+
+  // Once the filters are built, pass them to fetchData function
+  receivedForMe();
+
+}
 function receivedForMe() {
   // Initialize filters array for building dynamic query parameters
   const EmpRequestdesignation = JSON.parse(localStorage.getItem('employeeData'));

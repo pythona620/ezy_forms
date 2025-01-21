@@ -163,14 +163,14 @@
             <h5 class="modal-title" id="viewRequestLabel">Request</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <div class="modal-body">
+          <div class="modal-body approvermodalbody">
             <ApproverPreview :blockArr="showRequest" @updateField="updateFormData" />
           </div>
           <div class="modal-footer">
             <div class="d-flex justify-content-between align-items-center mt-3 gap-2">
               <div>
                 <ButtonComp type="button" icon="x" class="btn btn-dark approvebtn border-1 text-nowrap font-10 "
-                  @click="approvalStatusFn(formData,'Request Cancelled')" name="Cancel Request" />
+                  @click="approvalStatusFn(formData, 'Request Cancelled')" name="Cancel Request" />
               </div>
             </div>
           </div>
@@ -301,7 +301,7 @@ function approvalStatusFn(dataObj, type) {
     "property": selectedRequest.value.property,
     "doctype": selectedRequest.value.doctype_name,
     "request_ids": [selectedRequest.value.name],
-    "reason": type== 'Request Cancelled'? "Cancelled" : "",
+    "reason": type == 'Request Cancelled' ? "Cancelled" : "",
     "action": type,
     "files": null,
     "cluster_name": null,

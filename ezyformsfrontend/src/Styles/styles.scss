@@ -190,3 +190,7 @@ body {
   // transform: translateY(1px) scale(1.01);
   transition: all 0.3s ease;
 }
+.approvermodalbody {
+  height: 70vh;
+  overflow: scroll;
+}

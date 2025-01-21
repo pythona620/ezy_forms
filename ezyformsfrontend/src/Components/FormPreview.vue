@@ -331,12 +331,13 @@ const getFieldComponent = (type) => {
 
 
 .dynamicColumn {
-    border: 1px solid #cccccc;
+    border: 1px dotted #cccccc;
     border-radius: 7px;
     margin: 3px 3px 10px 3px;
     background-color: #ffffff;
     padding: 0;
     padding-bottom: 5px;
+
 
 }
 
@@ -364,7 +365,7 @@ const getFieldComponent = (type) => {
     /* margin-top: 10px;
     margin-bottom: 10px; */
     /* background-color: #fafafa; */
-    background-color: #eeeeee;
+    background-color: #f5f5f5;
     overflow-y: scroll;
     overflow-x: hidden;
     height: 40vh;

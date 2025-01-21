@@ -21,7 +21,8 @@
                         <div class="col-3">
                             <div class="d-flex gap-3 justify-content-end align-items-center m-0">
                                 <div class="mb-1">
-                                    <ButtonComp v-if="shouldShowButton" class="btn-outline-primary text-nowrap font-10"
+                                    <ButtonComp v-if="shouldShowButton"
+                                        class="btn-outline-primary d-flex justify-content-center align-items-center bg-white text-nowrap font-10"
                                         name="Raise request" data-bs-toggle="modal" data-bs-target="#riaseRequestModal"
                                         @click="raiseRequest" />
                                 </div>
@@ -88,7 +89,7 @@
         </div>
         <div class="modal fade" id="riaseRequestModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
             aria-labelledby="riaseRequestModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-dialog modal-dialog-centered modal-md">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title font-14 fw-bold" id="riaseRequestModalLabel">Raise Request</h5>
@@ -99,38 +100,40 @@
                         <!-- <FormFields tag="select" placeholder="Category" class="mb-3" name="roles" id="roles"
                             @change="changingCategory" :Required="false" :options="categoryOptions"
                             v-model="selectedData.selectedCategory" /> -->
-                        <div class="row">
-                            <div class="col">
-                                <div class=" mb-2">
-                                    <label class="raise-label" for="">Category</label>
-                                    <Multiselect :options="categoryOptions" @change="changingCategory"
-                                        v-model="selectedData.selectedCategory" placeholder="Select" :multiple="false"
-                                        class="font-11" :searchable="true" />
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class=" mb-2">
-                                    <label class="raise-label" for="">Form</label>
-                                    <Multiselect :options="formList" v-model="selectedData.selectedform"
-                                        placeholder="Select" @change="SelectedFromchange" :multiple="false"
-                                        class="font-11" :searchable="true" />
-                                </div>
-                            </div>
-
+                        <!-- <div class="row">
+                            <div class="col"> -->
+                        <div class=" mb-2">
+                            <label class="raise-label" for="">Category</label>
+                            <Multiselect :options="categoryOptions" @change="changingCategory"
+                                v-model="selectedData.selectedCategory" placeholder="Select" :multiple="false"
+                                class="font-11" :searchable="true" />
                         </div>
-                        <div v-if="blockArr.length && selectedData.selectedCategory && selectedData.selectedform">
+                        <!-- </div> -->
+                        <!-- <div class="col"> -->
+                        <div class=" mb-2">
+                            <label class="raise-label" for="">Form</label>
+                            <Multiselect :options="formList" v-model="selectedData.selectedform" placeholder="Select"
+                                @change="SelectedFromchange" :multiple="false" class="font-11" :searchable="true" />
+                        </div>
+                        <!-- </div> -->
+
+                        <!-- </div> -->
+                        <!-- <div v-if="blockArr.length && selectedData.selectedCategory && selectedData.selectedform">
                             <RequestPreview :blockArr="blockArr" :formName="selectedData.selectedform"
                                 @formValidation="isFormValid = $event" @updateField="handleFieldUpdate" />
-                        </div>
+                        </div> -->
 
                         <!-- <FormFields tag="select" placeholder="Form" class="mb-3" name="roles" id="roles"
                             :Required="false" :options="formList" v-model="selectedData.selectedform" /> -->
                     </div>
                     <div>
                         <div class=" d-flex justify-content-center align-items-center p-3">
-                            <button :disabled="!isFormValid" class="btn btn-dark font-12 w-100" type="submit"
+                            <!-- <button :disabled="!isFormValid" class="btn btn-dark font-12 w-100" type="submit"
                                 @click="raiseRequestSubmission">Raise
-                                Request</button>
+                                Request</button> -->
+                            <button class="btn btn-dark font-12 w-100" @click="toRaiseRequest" type="submit"> Raise
+                                Request
+                            </button>
                         </div>
                     </div>
 
@@ -426,6 +429,7 @@ function changingCategory(value) {
 }
 function SelectedFromchange(value) {
     blockArr.value = [];
+    selectedData.value.selectedform = value
     if (value) {
 
         formDefinations(value)
@@ -559,7 +563,18 @@ function request_raising_fn(item) {
         }
     });
 }
-
+function toRaiseRequest() {
+    const modal = bootstrap.Modal.getInstance(document.getElementById('riaseRequestModal'));
+    modal.hide();
+    router.push({
+        name: "RaiseRequest", // Ensure this route is defined in your router
+        query: {
+            selectedCategory: selectedData.value.selectedCategory,
+            selectedForm: selectedData.value.selectedform,
+            business_unit: business_unit.value
+        }
+    });
+}
 
 const handleTabChange = (tab) => {
     activeTab.value = tab.route; // Update the active tab

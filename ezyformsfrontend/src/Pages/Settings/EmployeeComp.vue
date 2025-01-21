@@ -188,9 +188,12 @@
                                         </div>
                                         <div class=" col">
                                             <label class="font-13 ps-1" for="Designation">Designation</label>
-                                            <FormFields class="mb-3" tag="input" type="text" name="Designation"
+                                            <!-- <FormFields class="mb-3" tag="input" type="text" name="Designation"
                                                 id="Designation" placeholder="Enter Designation"
-                                                v-model="createEmployee.designation" />
+                                                v-model="createEmployee.designation" /> -->
+                                            <FormFields tag="select" placeholder="Select Desigination" class="mb-3"
+                                                name="Designation" v-model="createEmployee.designation" id="dept"
+                                                :Required="false" :options="designiations" />
                                             <label class="font-13 ps-1" for="reporting_to">Reporting To</label>
                                             <FormFields class="mb-3" tag="input" type="text" name="reporting_to"
                                                 id="reporting_to" placeholder="Enter Reporting To"
@@ -587,6 +590,7 @@ function employeeData() {
                 designiations.value = [...new Set(res.data.map((designation) => designation.designation))];
                 reportingTo.value = [...new Set(res.data.map((reporting) => reporting.reporting_to))];
                 reportingDesigination.value = [...new Set(res.data.map((reportingDesigination) => reportingDesigination.reporting_designation))]
+                console.log(designiations.value, "%%%%%%%%%%%%");
 
             }
         })
