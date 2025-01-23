@@ -13,29 +13,34 @@ export function extractFieldsWithBreaks(data) {
         row.columns.forEach((column) => {
 
           column.fields.forEach((field) => {
-            // Add the "insert_after" key to the current field
-            // field['reqd'] = field.reqd ? 1 : 0
             const generatedFieldname = convertLabelToFieldName(field?.label);
-            result.push({
-              // ...field,
 
-              description: "Field",
-              fieldname: generatedFieldname,
-              fieldtype: field.fieldtype,
-              idx: index++, // Assign index
-              label: field.label,
-              reqd: field.reqd ? 1 : 0,
-              value: field.value ? field.value : "",
-              // options: field.fieldtype === "Select" || "Check" ? field.options : ""
-            });
-            if (field.fieldtype === "Select")
-              result.push({
-                options: field.options
-              })
+            // Add the field to the result if it's not already added
+            let existingField = result.find(f => f.fieldname === generatedFieldname);
+
+            if (!existingField) {
+              // If the field doesn't exist, add it to the result
+              existingField = {
+                description: "Field",
+                fieldname: generatedFieldname,
+                fieldtype: field.fieldtype,
+                idx: index++, // Assign index
+                label: field.label,
+                reqd: field.reqd ? 1 : 0,
+                value: field.value ? field.value : ""
+              };
+              result.push(existingField);
+            }
+
+            // Add options if the field is of type "Select" or "Check"
+            if (field.fieldtype === "Select") {
+              existingField.options = field.options; // Add options to the existing field
+            }
 
             // Update previousFieldname for the next field in this column
             previousFieldname = generatedFieldname;
           });
+
           const columnFieldname = convertLabelToFieldName(column?.label);
 
           // Add "Column Break" marker after each column
@@ -45,17 +50,13 @@ export function extractFieldsWithBreaks(data) {
             fieldtype: "Column Break",
             idx: index++, // Assign index
             label: column.label,
-            // doctype: "DocField",
-            // parent: section.parent,
-            // insert_after: previousFieldname, // Track the break
-            // "parentfield": "fields",
-            // "parenttype": "DocType",
           });
 
-          // Update previousFieldname to the column break
           previousFieldname = columnFieldname;
         });
+
         const rowFieldname = convertLabelToFieldName(row?.label);
+
         // Add "Row Break" marker after each row
         result.push({
           description: "Row Break",
@@ -64,11 +65,12 @@ export function extractFieldsWithBreaks(data) {
           idx: index++,
           label: rowFieldname
         });
-        // Update previousFieldname to the row break
+
         previousFieldname = rowFieldname;
       });
 
       const sectionFieldname = convertLabelToFieldName(section?.label);
+
       // Add "Section Break" marker after each section
       result.push({
         description: "Section Break",
@@ -77,7 +79,7 @@ export function extractFieldsWithBreaks(data) {
         label: section.label,
         idx: index++
       });
-      // Update previousFieldname to the section break
+
       previousFieldname = sectionFieldname;
     });
 
@@ -86,12 +88,16 @@ export function extractFieldsWithBreaks(data) {
     result.push({
       description: "Block Break",
       fieldname: blockFieldname,
-      fieldtype: "Section Break ",
+      fieldtype: "Section Break",
       label: block.label,
       idx: index++
-    })
+    });
+
     previousFieldname = blockFieldname;
   });
+
+  return result;
+
 
   return result;
 }

@@ -133,6 +133,32 @@
                 </div>
             </div>
         </div>
+        <div class="modal fade" id="pdfView" tabindex="-1" aria-labelledby="pdfViewLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header py-2 d-block bg-dark text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="m-0 text-white font-13" id="exampleModalLabel">
+                                    PDF format
+                                </h5>
+                            </div>
+                            <div class="">
+                                <button type="button" class="btn btn-dark text-white font-13" @click="closemodal"
+                                    data-bs-dismiss="modal">Close
+                                    <i class="bi bi-x"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-body">
+                        pdf
+                    </div>
+                    <div class="modal-footer">
+
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <FormPreview :blockArr="selectedForm" :formDescriptions="formDescriptions" />
 
@@ -166,6 +192,7 @@ const selectedForm = ref(null);
 const actions = ref([
     { name: 'View form', icon: 'fa-solid fa-eye' },
     { name: 'Edit Form', icon: 'fa-solid fa-edit' },
+    { name: 'PDF Format', icon: 'bi bi-filetype-pdf' },
     { name: 'Activate this form', icon: 'fa-solid fa-check-circle' },
     { name: 'In-active this form', icon: 'fa-solid fa-ban' },
     { name: 'Edit accessibility to dept.', icon: 'fa-solid fa-users' },
@@ -188,6 +215,23 @@ function actionCreated(rowData, actionEvent) {
         }
     } else if (actionEvent.name === 'Edit Form') {
         formCreation(rowData);
+    }
+    else if (actionEvent.name === 'PDF Format') {
+        // pdfView
+        const dataObj = {
+            "form_short_name": "Latest"
+        };
+
+        axiosInstance.post(apis.preview_dynamic_form, dataObj)
+            .then((response) => {
+                console.log(response, "form pdf responce");
+
+            })
+            .catch((error) => {
+                console.error("Error fetching data:", error);
+            });
+        const modal = new bootstrap.Modal(document.getElementById('pdfView'), {});
+        modal.show();
     }
     else if (actionEvent.name === 'Edit accessibility to dept.') {
         formCreation(rowData);

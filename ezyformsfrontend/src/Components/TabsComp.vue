@@ -134,5 +134,11 @@ li.active::after {
 ul li a.active-link {
   border-bottom: 3px solid var(--text-color);
   padding-bottom: 5px;
+  font-weight: 600;
+}
+
+ul li a.active-link i {
+  font-weight: 900;
+  color: black;
 }
 </style>
