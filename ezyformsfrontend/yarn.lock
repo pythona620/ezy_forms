@@ -53,14 +53,6 @@
   resolved "https://registry.npmjs.org/@rollup/rollup-linux-x64-musl/-/rollup-linux-x64-musl-4.24.0.tgz"
   integrity sha512-w1i+L7kAXZNdYl+vFvzSZy8Y1arS7vMgIy8wusXJzRrPyof5LAb02KGr1PD2EkRcl73kHulIID0M501lN+vobQ==
 
-"@selemondev/vue3-signature-pad@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.npmjs.org/@selemondev/vue3-signature-pad/-/vue3-signature-pad-1.1.0.tgz"
-  integrity sha512-bs8dmHe1lQ5DNQisK+BgU6nwtZRuTNMfECLVKMb+M8dKxi0Qxgm7fWpVcns7pkYOo7Gan7a44lDSHEPsR5WRug==
-  dependencies:
-    nanoid "^5.0.7"
-    signature_pad "^5.0.2"
-
 "@socket.io/component-emitter@~3.1.0":
   version "3.1.2"
   resolved "https://registry.npmjs.org/@socket.io/component-emitter/-/component-emitter-3.1.2.tgz"
@@ -327,11 +319,6 @@ nanoid@^3.3.7:
   resolved "https://registry.npmjs.org/nanoid/-/nanoid-3.3.7.tgz"
   integrity sha512-eSRppjcPIatRIMC1U6UngP8XFcz8MQWGQdt1MTBQ7NaAmvXDfvNxbvWV3x2y6CdEUciCSsDHDQZbhYaB8QEo2g==
 
-nanoid@^5.0.7:
-  version "5.0.8"
-  resolved "https://registry.npmjs.org/nanoid/-/nanoid-5.0.8.tgz"
-  integrity sha512-TcJPw+9RV9dibz1hHUzlLVy8N4X9TnwirAjrU08Juo6BNKggzVfP2ZJ/3ZUSq15Xl5i85i+Z89XBO90pB2PghQ==
-
 picocolors@^1.1.0:
   version "1.1.0"
   resolved "https://registry.npmjs.org/picocolors/-/picocolors-1.1.0.tgz"
@@ -426,11 +413,6 @@ sass-embedded@*, sass-embedded@^1.79.4:
     sass-embedded-win32-arm64 "1.79.4"
     sass-embedded-win32-ia32 "1.79.4"
     sass-embedded-win32-x64 "1.79.4"
-
-signature_pad@^5.0.2:
-  version "5.0.4"
-  resolved "https://registry.npmjs.org/signature_pad/-/signature_pad-5.0.4.tgz"
-  integrity sha512-nngOixbwLAUOuH3QnZwlgwmynQblxmo4iWacKFwfymJfiY+Qt+9icNtcIe/okqXKun4hJ5QTFmHyC7dmv6lf2w==
 
 socket.io-client@^4.5.1:
   version "4.8.0"

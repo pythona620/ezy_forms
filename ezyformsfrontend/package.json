@@ -10,7 +10,6 @@
     "copy-html-entry": "cp ../ezy_forms/public/ezyformsfrontend/index.html ../ezy_forms/www/ezyformsfrontend.html"
   },
   "dependencies": {
-    "@selemondev/vue3-signature-pad": "^1.1.0",
     "@vueform/multiselect": "^2.6.10",
     "axios": "^1.7.7",
     "form-data": "^4.0.1",
