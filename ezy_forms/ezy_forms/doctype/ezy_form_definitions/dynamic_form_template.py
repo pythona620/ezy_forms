@@ -422,8 +422,8 @@ def download_filled_form(form_short_name:str,name:str):
     json_object = literal_eval(json_object)
     user_doc = frappe.get_doc(form_short_name,name).as_dict()
     for iteration in json_object:
-        if iteration.get("value"):
-            iteration["value"] = user_doc[iteration["field"]] if user_doc[iteration["field"]] else ""
+        if "value" in iteration:
+            iteration["value"] = user_doc[iteration["fieldname"]] if user_doc[iteration["field"]] else ""
     html_view = json_structure_call_for_html_view(json_obj=json_object)
     # Generate PDF
-    convert_html_to_pdf(html_content = html_view, pdf_path = pdf_path)
+    return convert_html_to_pdf(html_content = html_view, pdf_path = pdf_path)
