@@ -1,20 +1,20 @@
 <template>
-	
+
 	<div class="bg-img">
 		<div class="input-div p-5">
 			<div class="d-flex gap-2 p-2 justify-content-center align-items-center">
-                                <div><img class="imgmix" src="../assets/favicon.jpg" /></div>
-                                <div class="m-0">
-                                    <p class="fontimgtext fw-bold m-0">EZY | Forms</p>
-                                </div>
-                            </div>
-				
+				<div><img class="imgmix" src="../assets/favicon.jpg" /></div>
+				<div class="m-0">
+					<p class="fontimgtext fw-medium m-0">EZY | Forms</p>
+				</div>
+			</div>
+
 			<div class="mt-3">
-				
-				<label for="name" class="font-13">UserName</label><br>
-				<input type="text" class=" form-control m-0 " id="name" v-model="formdata.usr" @input="validatename"
-					:class="{ 'is-invalid': errors.usr }" />
-				
+
+				<label for="name" class="font-13">User name</label><br>
+				<input type="text" class=" form-control m-0 bg-white " id="name" v-model="formdata.usr"
+					@input="validatename" :class="{ 'is-invalid': errors.usr }" />
+
 				<div class="invalid-feedback font-11 mt-1" v-if="errors.usr">
 					{{ errors.usr }}
 				</div>
@@ -26,7 +26,7 @@
 				<input class="form-control m-0" :type="showPassword ? 'text' : 'password'" id="password"
 					v-model="formdata.pwd" @input="validatepassword" @keydown.enter="Login"
 					:class="{ 'is-invalid': errors.pwd }" />
-				
+
 				<!-- Toggle icon for show/hide password -->
 				<span class="toggle-icon" @click="togglePasswordVisibility">
 					<i :class="showPassword ? 'bi bi-eye' : 'bi bi-eye-slash'"></i>
@@ -36,7 +36,8 @@
 				</div>
 			</div>
 			<br>
-			<button @click="Login" type="submit" class="border-0  btn btn-dark button w-100 py-2 text-white rounded-1">
+			<button @click="Login" type="submit"
+				class="border-0  btn btn-dark button w-100 py-2 font-13 text-white rounded-1">
 				Log In
 			</button>
 		</div>
@@ -134,27 +135,53 @@ export default {
 </script>
 
 <style scoped>
-.loginpageheight{
+.loginpageheight {
 	height: 100vh;
 
 }
-.fontimgtext{
+
+.fontimgtext {
 	font-size: 17px;
 	color: #111111;
 	margin: 0;
 }
+
 .bg-img {
-	/* background-image: url(../assets/ElektronicsDevice.webp) !important; */
-	background-size: 100vw 100vh;
-	/* width: 100vw; */
+	position: relative;
+	width: 100vw;
 	height: 100vh;
-	color: #111111;
 	display: flex;
 	justify-content: center;
 	align-items: center;
+
 }
 
-.label{
+.bg-img::before {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-image: url(../assets/backgroundimage.jpeg);
+	background-size: cover;
+	background-position: center;
+	opacity: 0.1;
+	/* Set your desired opacity */
+	z-index: -1;
+}
+
+.input-div {
+	border: 1px solid #EEEEEE;
+	box-shadow: 0px 2px 14px 0px #00000017;
+	background-color: #ffffff59;
+	border-radius: 6px;
+	z-index: 1;
+	/* Ensure it's above the background */
+	position: relative;
+}
+
+.label {
 	color: #111111;
 }
 
@@ -188,7 +215,7 @@ button {
 	right: 10px;
 	transform: translateY(-50%);
 	cursor: pointer;
-	
+
 }
 
 .input-box label {
@@ -211,12 +238,18 @@ button {
 .input-box input {
 	width: 100%;
 	/* height: 100%; */
-	background: transparent;
+	background: #FFFFFF;
 	/* border: none; */
 	/* outline: none; */
 	font-size: 1em;
 	font-weight: 600;
 	padding: 0 35px 0 5px;
+}
+
+input:focus {
+	border: 1px solid #999999;
+	outline: none;
+	box-shadow: none;
 }
 
 .input-box .icon {
@@ -225,7 +258,9 @@ button {
 	font-size: 1.2em;
 	color: white;
 	line-height: 57px;
+
 }
+
 
 
 

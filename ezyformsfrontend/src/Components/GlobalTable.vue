@@ -15,6 +15,43 @@
       </thead>
       <tbody>
         <template v-if="tData.length">
+          <tr v-if="isFiltersoption == 'true'">
+            <td></td>
+            <td></td>
+            <td v-for="(column, index) in tHeaders" :key="index">
+              <template v-if="fieldMapping[column.td_key]">
+                <!-- Text input -->
+                <input v-if="fieldMapping[column.td_key].type === 'input'" type="search"
+                  class="form-control font-12 py-1 px-2 input-search" v-model="filters[column.td_key]"
+                  @input="handleFilterChange" />
+
+                <!-- Date input -->
+                <input v-else-if="fieldMapping[column.td_key].type === 'date'" type="date"
+                  class="form-control font-12 input-search py-1 px-2" v-model="filters[column.td_key]"
+                  @input="handleFilterChange" />
+
+                <!-- Select dropdown -->
+                <select v-else-if="fieldMapping[column.td_key].type === 'select'"
+                  class="form-control form-select input-search font-12 py-1 px-2 w-100" v-model="filters[column.td_key]"
+                  @change="handleFilterChange">
+                  <option class="font-12" value="">Select</option>
+                  <option class="font-12" v-for="(option, optionIndex) in fieldMapping[column.td_key].options"
+                    :key="optionIndex" :value="option">
+                    {{ option }}
+                  </option>
+                </select>
+              </template>
+
+              <!-- Empty TD -->
+              <template v-else>
+                <span></span>
+              </template>
+            </td>
+            <td class="text-center fixed-column" v-if="isAction == 'true'">
+
+            </td>
+
+          </tr>
           <tr v-for="(row, rowIndex) in tData" :key="rowIndex">
             <!-- <td>
               <input type="checkbox" class="form-check-input" v-model="row.isSelected"
@@ -150,12 +187,18 @@ const props = defineProps({
   isCheckbox: {
     type: String,
   },
+  isFiltersoption: {
+    type: String
+  },
+  fieldMapping: {
+    type: Object,
+    required: true,
+  },
 });
 
 const emits = defineEmits([
-  "actionClicked"
+  "actionClicked", "updateFilters"
 ]);
-
 
 function selectedAction(row, action) {
   emits("actionClicked", row, action);
@@ -182,7 +225,19 @@ function selectedCheckList(row, index) {
   console.log("Selected Data:", selectedData);
   emits("checkbox-click", row, index);
 }
-
+const filters = ref(
+  props.tHeaders.reduce((acc, column) => {
+    acc[column.td_key] = ""; // Initialize with empty strings
+    return acc;
+  }, {})
+);
+// Handle filter change
+function handleFilterChange() {
+  const activeFilters = Object.fromEntries(
+    Object.entries(filters.value).filter(([key, value]) => value.trim() !== "")
+  );
+  emits("updateFilters", activeFilters); // Emit only non-empty filters
+}
 watch(
   () => props.tData.map(row => row.isSelected),
   (newVal) => {
@@ -282,7 +337,7 @@ onMounted(() => {
 .global-table th,
 .global-table td {
   padding: 8px;
-  border-bottom: 1px solid var(--border-bottom) !important;
+  // border-bottom: 1px solid #eeeeee !important;
 }
 
 .global-table th {
@@ -298,6 +353,8 @@ onMounted(() => {
     top: -1px;
   }
 }
+
+
 
 .global-table tbody tr:hover {
   background-color: #f2f2f2;

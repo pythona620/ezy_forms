@@ -101,7 +101,7 @@
                                             class="text-danger font-10 mt-1">
                                             {{
             errorMessages[`${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`]
-                                            }}
+        }}
                                         </div>
 
 
@@ -279,7 +279,7 @@ const uploadFile = (file, field) => {
 
 
 .dynamicColumn {
-    border: 1px solid #cccccc;
+    border: 1px dotted #cccccc;
     border-radius: 7px;
     margin: 3px 3px 10px 3px;
     background-color: #ffffff;
@@ -306,7 +306,7 @@ const uploadFile = (file, field) => {
 }
 
 .block-container {
-    background-color: #eeeeee;
+    background-color: #f5f5f5;
 }
 
 input::-webkit-input-placeholder {

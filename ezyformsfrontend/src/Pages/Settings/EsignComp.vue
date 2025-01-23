@@ -2,10 +2,11 @@
     <div class="grid place-items-center w-full min-h-screen">
         <div class="flex flex-col items-center space-y-4">
             <div class="bg-gray-100 p-6">
-                <VueSignaturePad ref="signature" height="400px" width="1280px" :maxWidth="2" :minWidth="2"
+                <!-- <VueSignaturePad ref="signature" height="400px" width="1280px" :maxWidth="2" :minWidth="2"
                     :disabled="state.disabled" :options="{
                     penColor: state.options.penColor, backgroundColor: state.options.backgroundColor
-                }" />
+                }" /> -->
+
             </div>
 
             <button type="button" class=" btn btn-outline-dark mx-1 my-1"
@@ -24,7 +25,7 @@
 </template>
 
 <script setup>
-import { VueSignaturePad } from "@selemondev/vue3-signature-pad"
+// import { VueSignaturePad } from "@selemondev/vue3-signature-pad"
 import { onMounted, ref } from "vue";
 
 const state = ref({

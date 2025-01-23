@@ -1,5 +1,5 @@
 <template>
-  <div class="m-1 position-relative">
+  <div class=" position-relative">
     <!-- Input Field -->
     <label v-if="labeltext" class="form-check-label mb-2" :for="id">
       {{ labeltext }}
@@ -200,6 +200,7 @@ select {
     font-weight: 400;
     border-left: none;
     border-right: none;
+
   }
 
   padding: 0px 3px;
@@ -292,7 +293,8 @@ select {
 .form-control {
   width: 100%;
   height: 32px;
-  font-size: var(--ten);
+  font-size: var(--thirteen);
+  border-radius: 3px;
   // max-width: 200px;
 }
 
@@ -304,14 +306,6 @@ select {
 //   transform: translateY(-50%);
 //   cursor: pointer;
 // }
-
-.icon-wrapper {
-  position: absolute;
-  right: 33px;
-  top: 54%;
-  transform: translateY(-50%);
-  cursor: pointer;
-}
 
 // input[type="date"]::-webkit-calendar-picker-indicator {
 //   font-size: 10px;
@@ -325,4 +319,12 @@ select {
 //   height: auto;
 //   background-position: right;
 //   background-size: 13px 13px;
-// }</style>
+// }
+.icon-wrapper {
+  position: absolute;
+  right: 33px;
+  top: 54%;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+</style>

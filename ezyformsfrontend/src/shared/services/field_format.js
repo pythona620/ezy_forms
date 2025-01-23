@@ -26,8 +26,12 @@ export function extractFieldsWithBreaks(data) {
               label: field.label,
               reqd: field.reqd ? 1 : 0,
               value: field.value ? field.value : "",
-              options: field.fieldtype === "Select" || "Check" ? field.options : ""
+              // options: field.fieldtype === "Select" || "Check" ? field.options : ""
             });
+            if (field.fieldtype === "Select")
+              result.push({
+                options: field.options
+              })
 
             // Update previousFieldname for the next field in this column
             previousFieldname = generatedFieldname;
@@ -77,7 +81,7 @@ export function extractFieldsWithBreaks(data) {
       previousFieldname = sectionFieldname;
     });
 
-    const blockFieldname = convertLabelToFieldName(block?.label || `block_${index}`);
+    const blockFieldname = convertLabelToFieldName(block?.label);
 
     result.push({
       description: "Block Break",
@@ -374,7 +378,7 @@ export function deletedFieldsExtraction(data) {
       previousFieldname = sectionFieldname;
     });
 
-    const blockFieldname = convertLabelToFieldName(block?.label || `block_${index}`);
+    const blockFieldname = convertLabelToFieldName(block?.label);
 
     result.push({
       fieldtype: "Section Break", description: "Block Break", doctype: "DocField", label: block.label, parent: block.parent, fieldname: blockFieldname,

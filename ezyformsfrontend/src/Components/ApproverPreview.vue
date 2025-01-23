@@ -241,6 +241,7 @@ const logFieldValue = (event, blockIndex, sectionIndex, rowIndex, columnIndex, f
     padding: 0;
     padding-bottom: 5px;
 
+
 }
 
 .section-label {
@@ -261,7 +262,7 @@ const logFieldValue = (event, blockIndex, sectionIndex, rowIndex, columnIndex, f
 }
 
 .block-container {
-    background-color: #eeeeee;
+    background-color: #f5f5f5;
 }
 
 input::-webkit-input-placeholder {
