@@ -201,6 +201,35 @@
         </div>
       </div>
     </div>
+    <div class="modal fade" id="pdfView" tabindex="-1" aria-labelledby="pdfViewLabel" aria-hidden="true">
+      <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+          <div class="modal-header py-2 d-block bg-dark text-white">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h5 class="m-0 text-white font-13" id="exampleModalLabel">
+                  PDF format
+                </h5>
+              </div>
+              <div class="">
+                <button button="button" class=" btn btn-dark text-white font-13" @click="downloadPdf">Download Pdf<span
+                    class=" ms-2"><i class="bi bi-download"></i></span> </button>
+                <button type="button" class="btn btn-dark text-white font-13" @click="closemodal"
+                  data-bs-dismiss="modal">Close
+                  <i class="bi bi-x"></i></button>
+              </div>
+            </div>
+          </div>
+          <div class="modal-body">
+
+            <div v-html="pdfPreview"></div>
+          </div>
+          <div class="modal-footer">
+
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
 </template>
@@ -209,7 +238,7 @@ import FormFields from '../../Components/FormFields.vue';
 import ButtonComp from '../../Components/ButtonComp.vue';
 import GlobalTable from '../../Components/GlobalTable.vue';
 import axiosInstance from '../../shared/services/interceptor';
-import { apis, doctypes } from '../../shared/apiurls';
+import { apis, doctypes, domain } from '../../shared/apiurls';
 import { callWithErrorHandling, onMounted, ref, reactive, computed, watch } from 'vue';
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
 import PaginationComp from '../../Components/PaginationComp.vue';
@@ -248,6 +277,8 @@ const filterOnModal = reactive({
   requested_on: '',
   owner: ''
 })
+const pdfPreview = ref('')
+
 const tableheaders = ref([
   { th: "Request ID", td_key: "name" },
   { th: "Form name", td_key: "doctype_name" },
@@ -257,10 +288,17 @@ const tableheaders = ref([
   // { th: "Requested department", td_key: "acess" },
   { th: "Approval Status", td_key: "status" },
 
-]
+])
+const actions = ref(
+  [
+    { name: 'View Request', icon: 'fa-solid fa-eye' },
+    { name: 'PDF Format', icon: 'bi bi-filetype-pdf' },
+    // { name: 'Share this form', icon: 'fa-solid fa-share-alt' },
+    // { name: 'Download Form', icon: 'fa-solid fa-download' },
+    // { name: 'Edit Form', icon: 'fa-solid fa-edit' },
 
+  ]
 )
-
 
 
 
@@ -302,11 +340,55 @@ function actionCreated(rowData, actionEvent) {
     } else {
       console.warn(" There is no form fields ");
     }
+  } else if (actionEvent.name === 'PDF Format') {
+    // pdfView
+    selectedRequest.value = rowData
+    // Prepare the filters for fetching data
+    const filters = [
+      ["wf_generated_request_id", "like", `%${selectedRequest.value.name}%`]
+    ];
+    const queryParams = {
+      fields: JSON.stringify(["*"]),
+      limit_page_length: "None",
+      limit_start: 0,
+      filters: JSON.stringify(filters),
+      order_by: `\`tab${selectedRequest.value.doctype_name}\`.\`creation\` desc`
+    };
+
+    // Fetch the doctype data
+    axiosInstance.get(`${apis.resource}${selectedRequest.value.doctype_name}`, { params: queryParams })
+      .then((res) => {
+        if (res.data) {
+          doctypeForm.value = res.data;
+
+          const dataObj = {
+            "form_short_name": rowData.doctype_name,
+            "name": doctypeForm.value[0].name
+          };
+
+          axiosInstance.post(apis.preview_dynamic_form, dataObj)
+            .then((response) => {
+              console.log(response, "form pdf responce");
+              pdfPreview.value = response.message
+
+            })
+            .catch((error) => {
+              console.error("Error fetching data:", error);
+            });
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching categories data:", error);
+      });
+    console.log(rowData, "form_short_name");
+
+    const modal = new bootstrap.Modal(document.getElementById('pdfView'), {});
+    modal.show();
   }
 }
 
 function downloadPdf() {
-  console.log(doctypeForm.value[0].name, "ppp");
+  console.log(doctypeForm.value, selectedRequest.value, "ppp");
   const dataObj = {
     "form_short_name": selectedRequest.value.doctype_name,
     "name": doctypeForm.value[0].name
@@ -314,13 +396,20 @@ function downloadPdf() {
 
   axiosInstance.post(apis.download_pdf_form, dataObj)
     .then((response) => {
-      console.log(response, "download pdf");
+      console.log(response.message, "download pdf");
+
+      // Assuming 'domain' contains the base URL like 'https://example.com/api/'
+      let pdfUrl = domain + response.message;
+
+      // Remove 'api' from the URL if present
+      pdfUrl = pdfUrl.replace('/api', '');
+
+      window.open(pdfUrl);
     })
     .catch((error) => {
       console.error("Error fetching data:", error);
     });
 }
-
 // Function to capture the form data from ApproverPreview
 const updateFormData = (fieldValues) => {
   formData.value = formData.value.concat(fieldValues);
@@ -440,16 +529,7 @@ function mapFormFieldsToRequest(doctypeData, showRequestData) {
     });
   });
 }
-const actions = ref(
-  [
-    { name: 'View Request', icon: 'fa-solid fa-eye' },
 
-    // { name: 'Share this form', icon: 'fa-solid fa-share-alt' },
-    // { name: 'Download Form', icon: 'fa-solid fa-download' },
-    // { name: 'Edit Form', icon: 'fa-solid fa-edit' },
-
-  ]
-)
 
 const appliedFiltersCount = computed(() => {
   return [

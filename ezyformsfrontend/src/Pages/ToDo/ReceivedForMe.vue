@@ -174,9 +174,14 @@
                 <ButtonComp type="button" icon="ban" class="cancelbtn border-1 text-nowrap font-10"
                   @click="approvalCancelFn(formData, 'Request Cancelled')" name="Cancel Request" />
               </div> -->
+              <input type="text" class=" form-control" placeholder="Reason...">
               <div>
-                <ButtonComp @click="approvalCancelFn(formData, 'Request Cancelled')" type="button" icon="x"
-                  class="rejectbtn border-1 text-nowrap font-10 " name="Reject" />
+                <!-- <ButtonComp @click="approvalCancelFn(formData, 'Request Cancelled')" type="button" icon="x"
+                  class="rejectbtn border-1 text-nowrap font-10 " name="Reject" /> -->
+                <button class=" btn btn-outline-danger font-10 py-0 rejectbtn" type="button" data-bs-dismiss="modal"
+                  @click="approvalCancelFn(formData, 'Request Cancelled')">
+                  <span><i class=" bi bi-x-lg me-2"></i></span>Reject
+                </button>
               </div>
               <div>
                 <ButtonComp type="button" icon="check2" class="approvebtn border-1 text-nowrap font-10 "
@@ -381,7 +386,7 @@ function approvalCancelFn(dataObj, type) {
   }
   axiosInstance.post(apis.wf_cancelling_request, data)
     .then((response) => {
-      if (response.message?.success) {
+      if (response?.message?.success) {
         const modal = bootstrap.Modal.getInstance(document.getElementById('viewRequest'));
         modal.hide();
         receivedForMe()

@@ -1616,7 +1616,7 @@ function add_Wf_roles_setup() {
             if (selectedBlockIndex.value == 0) {
                 toast.success("Requestor Added");
             } else {
-                toast.success("Acceptor Added");
+                toast.success("Approver Added");
             }
         });
 }

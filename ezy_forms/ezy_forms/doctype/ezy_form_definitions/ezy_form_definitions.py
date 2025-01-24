@@ -150,7 +150,7 @@ def enqueued_add_customized_fields_for_dynamic_doc(fields:list[dict],doctype:str
 				doc_for_new_custom_field = frappe.get_doc('DocType', doctype)
 				# appending records in child with get_doc
 				doc_for_new_custom_field.append('fields', dicts_of_docs_entries)
-				doc_for_new_custom_field.save()
+				doc_for_new_custom_field.save(ignore_permissions=True)
 				frappe.db.commit()
 				doc_for_new_custom_field.db_update()
 				doc_for_new_custom_field.reload()
