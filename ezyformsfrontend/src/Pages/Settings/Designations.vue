@@ -10,12 +10,12 @@
             </p> -->
             </div>
             <div class="d-flex gap-2 align-items-center">
-                <div class="d-flex">
-                    <div>
-                        <FormFields labeltext="" class="mb-3" tag="input" type="search" placeholder="Search Name"
-                            name="Value" id="Value" v-model="filterObj.search" @input="designationData()" />
-                    </div>
+
+                <div>
+                    <FormFields labeltext="" class="my-1" tag="input" type="search" placeholder="Search Name"
+                        name="Value" id="Value" v-model="filterObj.search" @input="designationData()" />
                 </div>
+
             </div>
         </div>
         <div class="mt-2">

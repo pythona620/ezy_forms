@@ -31,10 +31,11 @@
 
     <div class="input-group select-section shadow-none" v-if="tag === 'select'">
       <p class="fw-normal ps-2 m-0 text-secondary">{{ placeholder }}</p>
-      <select v-if="tag === 'select'" class="form-select selectForm shadow-none border-0" :required="Required"
+      <select v-if="tag === 'select'" class="form-select selectForm shadow-none ms-1 border-0" :required="Required"
         :name="name" :id="id" v-model="localModel">
         <!-- <option class="selectOption" value="" selected>All</option> -->
-        <option class="selectOption" v-for="(item, index) in options" :key="index" :value="item">{{ item }}</option>
+        <option class="selectOption py-2" v-for="(item, index) in options" :key="index" :value="item">{{ item }}
+        </option>
       </select>
     </div>
     <div class="input-group select-section shadow-none" v-if="tag === 'multiselect'">
@@ -274,17 +275,17 @@ select {
   font-size: var(--ten);
 }
 
-.selectForm .selectOption {
-  padding: 2px 4px !important;
-}
+// .selectForm .selectOption {
+//   padding: 2px 4px !important;
+// }
 
-.input-group {
-  .selectionForm {
-    .selectionOption {
-      padding: 8px 16px !important;
-    }
-  }
-}
+// .input-group {
+//   .selectionForm {
+//     .selectionOption {
+//       padding: 8px 16px !important;
+//     }
+//   }
+// }
 
 .input-wrapper {
   position: relative;
@@ -326,5 +327,23 @@ select {
   top: 54%;
   transform: translateY(-50%);
   cursor: pointer;
+}
+
+.selectForm .selectOption {
+  padding: 10px 0px !important;
+  background-color: white;
+  color: black;
+}
+
+/* Hover effect */
+.selectOption:hover {
+  background-color: #333;
+  color: white;
+}
+
+/* Style selected option */
+.selectForm option:checked {
+  background-color: #444;
+  color: white;
 }
 </style>

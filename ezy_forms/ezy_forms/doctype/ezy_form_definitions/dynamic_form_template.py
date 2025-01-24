@@ -89,7 +89,7 @@ def rebuild_to_structured_array(flat_array):
                     "label": item.get("label"),
                     "reqd": item.get("reqd"),
                     "options": item.get("options"),
-                    "values": item.get("values")
+                    "values": item.get("value") if item.get("value") else ""
                     }
                 current_column["fields"].insert(0, updated_field)
  
@@ -103,114 +103,6 @@ def rebuild_to_structured_array(flat_array):
     if current_block:
         result.insert(0, current_block)
     return result
-
-# json_object = [
-#         {"description": "Field","fieldname": "guest_name","fieldtype": "Data","idx": 0,"label": "Guest name","reqd": 0,
-#             "value": ""
- 
-#         },
- 
-#         {"description": "Column Break","fieldname": "","fieldtype": "Column Break","idx": 1,"label": ""},
-#         {"description": "Field","fieldname": "company_name","fieldtype": "Data","idx": 2,"label": "Company name","reqd": 0,
-#             "value": ""
- 
-#         },
- 
-#         {"description": "Column Break","fieldname": "","fieldtype": "Column Break","idx": 3,"label": ""},
-#         {"description": "Field","fieldname": "position","fieldtype": "Data","idx": 4,"label": "Position","reqd": 0,
-#             "value": ""
- 
-#         },
- 
-#         {"description": "Column Break","fieldname": "","fieldtype": "Column Break","idx": 5,"label": ""},
-#         {"description": "Row Break","fieldname": "row_0_0_0","fieldtype": "Column Break","idx": 6,"label": "row_0_0_0"},
-#         {"description": "Section Break","fieldname": "guest_details","fieldtype": "Section Break","label": "guest details","idx": 7},
-#         {"description": "Field","fieldname": "arrival_date","fieldtype": "Date","idx": 8,"label": "Arrival date","reqd": 0,
-#             "value": ""
- 
-#         },
- 
-#         {"description": "Column Break","fieldname": "","fieldtype": "Column Break","idx": 9,"label": ""},
-#         {"description": "Field","fieldname": "departure_date","fieldtype": "Date","idx": 10,"label": "Departure date","reqd": 0,
-#             "value": ""
- 
-#         },
- 
-#         {"description": "Column Break","fieldname": "","fieldtype": "Column Break","idx": 11,"label": ""},
-#         {"description": "Row Break","fieldname": "row_0_1_0","fieldtype": "Column Break","idx": 12,"label": "row_0_1_0"},
-#         {"description": "Section Break","fieldname": "stay_details","fieldtype": "Section Break","label": "stay details","idx": 13},
-#         {"description": "Field","fieldname": "number_of_persons","fieldtype": "Data","idx": 14,"label": "Number of persons","reqd": 0,
-#             "value": ""
- 
-#         },
- 
-#         {"description": "Column Break","fieldname": "","fieldtype": "Column Break","idx": 15,"label": ""},
-#         {"description": "Field","fieldname": "number_of_nights","fieldtype": "Data","idx": 16,"label": "Number of nights","reqd": 0,
-#             "value": ""
- 
-#         },
- 
-#         {"description": "Column Break","fieldname": "","fieldtype": "Column Break","idx": 17,"label": ""},
-#         {"description": "Field","fieldname": "number_of_rooms","fieldtype": "Check","idx": 18,"label": "Number of rooms","reqd": 0,
-#             "value": ""
- 
-#         },
- 
-#         {"description": "Column Break","fieldname": "","fieldtype": "Column Break","idx": 19,"label": ""},
-#         {"description": "Row Break","fieldname": "row_0_2_0","fieldtype": "Column Break","idx": 20,"label": "row_0_2_0"},
-#         {"description": "Section Break","fieldname": "","fieldtype": "Section Break","label": "","idx": 21},
-#         {"description": "Field","fieldname": "allocated_rooms_in_standard","fieldtype": "Data","idx": 22,"label": "Allocated rooms in standard","reqd": 0,
-#             "value": ""
- 
-#         },
- 
-#         {"description": "Field","fieldname": "total_persons_stayed_in_standard","fieldtype": "Data","idx": 23,"label": "Total persons stayed in standard","reqd": 0,
-#             "value": ""
- 
-#         },
- 
-#         {"description": "Column Break","fieldname": "standard_room","fieldtype": "Column Break","idx": 24,"label": "Standard room"},
-#         {"description": "Field","fieldname": "allocated_rooms_in_premier","fieldtype": "Data","idx": 25,"label": "Allocated rooms in premier","reqd": 0,
-#             "value": ""
- 
-#         },
- 
-#         {"description": "Field","fieldname": "total_persons_stayed_in_premier","fieldtype": "Data","idx": 26,"label": "Total persons stayed in premier","reqd": 0,
-#             "value": ""
- 
-#         },
- 
-#         {"description": "Column Break","fieldname": "premier_room","fieldtype": "Column Break","idx": 27,"label": "Premier room"},
-#         {"description": "Field","fieldname": "allocated_room_in_suite","fieldtype": "Data","idx": 28,"label": "Allocated room in suite","reqd": 0,
-#             "value": ""
- 
-#         },
- 
-#         {"description": "Field","fieldname": "total_persons_stayed_in_suite","fieldtype": "Data","idx": 29,"label": "Total persons stayed in suite","reqd": 0,
-#             "value": ""
- 
-#         },
- 
-#         {"description": "Column Break","fieldname": "suite_room","fieldtype": "Column Break","idx": 30,"label": "Suite room"},
-#         {"description": "Row Break","fieldname": "row_0_3_0","fieldtype": "Column Break","idx": 31,"label": "row_0_3_0"},
-#         {"description": "Section Break","fieldname": "room_details","fieldtype": "Section Break","label": "Room details","idx": 32},
-#         {"description": "Block Break","fieldname": "requestor","fieldtype": "Section Break ","label": "Requestor","idx": 33},
-#         {"description": "Field","fieldname": "reservation_number","fieldtype": "Data","idx": 34,"label": "Reservation number","reqd": 0,
-#             "value": ""
- 
-#         },
- 
-#         {"description": "Column Break","fieldname": "","fieldtype": "Column Break","idx": 35,"label": ""},
-#         {"description": "Field","fieldname": "reservation_made_by","fieldtype": "Data","idx": 36,"label": "Reservation made by","reqd": 0,
-#             "value": ""
- 
-#         },
- 
-#         {"description": "Column Break","fieldname": "","fieldtype": "Column Break","idx": 37,"label": ""},
-#         {"description": "Row Break","fieldname": "row_0_0_1","fieldtype": "Column Break","idx": 38,"label": "row_0_0_1"},
-#         {"description": "Section Break","fieldname": "reservtaion_details","fieldtype": "Section Break","label": "Reservtaion details","idx": 39},
-#         {"description": "Block Break","fieldname": "approver1","fieldtype": "Section Break ","label": "Approver-1","idx": 40}
-#     ]
 
 # Jinja2 template string
 template_str = """
@@ -416,7 +308,7 @@ def json_structure_call_for_html_view(json_obj:list):
 @frappe.whitelist()
 def preview_dynamic_form(form_short_name:str):
     json_object = frappe.db.get_value("Ezy Form Definitions",form_short_name,"form_json")
-    json_object = literal_eval(json_object)
+    json_object = literal_eval(json_object)["fields"]
     html_view = json_structure_call_for_html_view(json_obj=json_object)
     return html_view
 
@@ -424,7 +316,7 @@ def preview_dynamic_form(form_short_name:str):
 def download_filled_form(form_short_name:str,name:str):
     try:
         json_object = frappe.db.get_value("Ezy Form Definitions",form_short_name,"form_json")
-        json_object = literal_eval(json_object)
+        json_object = literal_eval(json_object)["fields"]
         user_doc = frappe.get_doc(form_short_name,name).as_dict()
         for iteration in json_object:
             if "value" in iteration:
@@ -440,7 +332,7 @@ def download_filled_form(form_short_name:str,name:str):
         payload_new = {'is_private': 1, 'folder': 'Home'}
         os.remove(pdf_path)
         host = frappe.get_single("Global Site Settings").site
-        file_response = requests.post(host+"api/method/upload_file", files=files_new,
+        file_response = requests.post(host+"/api/method/upload_file", files=files_new,
                                                 data=payload_new, verify=False).json()
         frappe.db.set_value("File", file_response["message"]["name"], {"attached_to_doctype": form_short_name, "attached_to_name":"qr_code_image", "attached_to_name": name})
         return pdf_path

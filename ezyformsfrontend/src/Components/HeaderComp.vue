@@ -18,7 +18,7 @@
                                 <TabsComp :tabs="filteredTabsData" @changeTab="handleTabChange" />
                             </div>
                         </div>
-                        <div class="col-3">
+                        <div class="col-3 pe-1">
                             <div class="d-flex gap-3 justify-content-end align-items-center m-0">
                                 <div class="mb-1">
                                     <ButtonComp v-if="shouldShowButton"
@@ -203,10 +203,10 @@ const router = useRouter(); // Initialize router
 const tabsData = ref([
     { name: 'Dashboard', icon: 'bi bi-columns-gap', route: '/dashboard' },
     { name: 'To do', icon: 'fa-solid fa-list-check', route: '/todo' },
-    { name: 'Forms', icon: 'fa-solid fa-clipboard', route: '/forms' },
-    { name: 'Settings', icon: 'fa-solid fa-gear', route: '/settings' },
+    { name: 'Forms', icon: 'bi bi-file-earmark-text', route: '/forms' },
+    { name: 'Settings', icon: 'bi bi-gear', route: '/settings' },
     { name: 'Archive', icon: 'bi bi-archive', route: '/archived' },
-    { name: 'Form', icon: 'fa-solid fa-clipboard', route: '/create-form' }
+    { name: 'Form', icon: 'bi bi-file-earmark-text', route: '/create-form' }
 ]);
 
 const selectedData = ref({
@@ -237,8 +237,7 @@ const filterObj = ref({
     limitPageLength: 100,
 })
 const filteredTabsData = computed(() => {
-
-    return userDesigination.value === 'IT'
+    return userDesigination.value.toLowerCase().includes('it')
         ? tabsData.value
         : tabsData.value.filter(tab => tab.name !== 'Form');
 });
@@ -279,7 +278,8 @@ onMounted(() => {
             userAdmin.value = userName.full_name;
             userInitial.value = userData.emp_name.charAt(0).toUpperCase();
             userEmail.value = userData.name;
-            userDesigination.value = userData.designation;
+            userDesigination.value = userData.designation || '';
+
         }
     } else {
         console.warn("No user data found in localStorage.");
