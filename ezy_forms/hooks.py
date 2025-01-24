@@ -20,7 +20,7 @@ app_license = "mit"
 # 		"has_permission": "ezy_forms.api.permission.has_app_permission"
 # 	}
 # ]
-
+after_migrate = ["ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions.activating_perms_for_all_roles_in_wf_roadmap"]
 # Includes in <head>
 # ------------------
 
