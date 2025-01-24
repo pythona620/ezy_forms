@@ -48,8 +48,8 @@
                             class="block-container">
                             <div v-for="(section, sectionIndex) in blockItem.sections" :key="'preview-' + sectionIndex"
                                 class="preview-section">
-                                <div class="section-label d-flex justify-content-between">
-                                    <h5 class="m-0 font-13">{{ section.label || 'Untitled Section' }}</h5>
+                                <div v-if="section.label" class="section-label d-flex justify-content-between">
+                                    <h5 class="m-0 font-13">{{ section.label }}</h5>
                                 </div>
                                 <div class="px-2">
                                     <div class="container-fluid">
@@ -117,7 +117,7 @@
                                                                     type="datetime-local" v-model="field.value"
                                                                     class="form-control previewInputHeight font-10" />
                                                                 <component v-if="field.fieldtype !== 'Datetime'"
-                                                                    :is="getFieldComponent(field.fieldtype)"
+                                                                    readonly :is="getFieldComponent(field.fieldtype)"
                                                                     v-model="field.value" :type="field.fieldtype"
                                                                     class="form-control previewInputHeight font-10" />
                                                             </template>
@@ -150,27 +150,28 @@ const props = defineProps({
 
     formDescriptions: {
         type: Object,
-        required: true,
+        required: false,
     },
 });
 
 const selectedView = ref('Requestor');  // Default to Requestor
 const displayedBlocks = ref([]);
 
-
 watch(
     () => props.blockArr,
     (newVal) => {
         if (newVal && Array.isArray(newVal)) {
+            console.log(props.blockArr, "gggggggggggg");
             // Set the default display block as Requestor
             displayedBlocks.value = filterBlocksByFieldname('Requestor', newVal);
+            console.log(displayedBlocks.value, "displayedBlocks");
         }
     },
     { immediate: true }
 );
 function closemodal() {
     selectedView.value = 'Requestor'
-    props.blockArr = []
+    // props.blockArr = []
 }
 function setView(view) {
     selectedView.value = view;
@@ -178,14 +179,15 @@ function setView(view) {
 }
 
 function filterBlocksByFieldname(view, blocks) {
+    console.log(blocks);
     let filteredBlocks = [];
 
     // Define the block order for each view
     const blockOrder = {
-        'Requestor': ['requestor'],
-        'Approver-1': ['requestor', 'approver1'],
-        'Approver-2': ['requestor', 'approver1', 'approver2'],
-        'Approver-3': ['requestor', 'approver1', 'approver2', 'approver3']
+        'requestor': ['requestor'],
+        'approver-1': ['requestor', 'approver1'],
+        'approver-2': ['requestor', 'approver1', 'approver2'],
+        'approver-3': ['requestor', 'approver1', 'approver2', 'approver3']
     };
 
     // Get the fieldnames for the selected view from blockOrder
@@ -193,7 +195,7 @@ function filterBlocksByFieldname(view, blocks) {
 
     // Iterate through the fieldnames and push matching blocks into filteredBlocks
     viewOrder.forEach(type => {
-        const block = blocks.find(b => b.fieldname === type);
+        const block = blocks.find(b => b.label === type);
         if (block) {
             filteredBlocks.push(block); // Add the block if it exists
         }

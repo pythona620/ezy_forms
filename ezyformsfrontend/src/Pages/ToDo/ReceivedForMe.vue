@@ -152,7 +152,7 @@
     </div>
     <div class="mt-2">
       <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction='true' actionType="dropdown" isCheckbox='true'
-        @updateFilters="inLineFiltersData" :field-mapping="fieldMapping" isFiltersoption="true" :actions="actions"
+        @updateFilters="inLineFiltersData" :field-mapping="fieldMapping" isFiltersoption="false" :actions="actions"
         @actionClicked="actionCreated" />
       <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
         @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />

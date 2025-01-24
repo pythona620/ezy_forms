@@ -192,7 +192,7 @@ const props = defineProps({
   },
   fieldMapping: {
     type: Object,
-    required: true,
+    required: false,
   },
 });
 

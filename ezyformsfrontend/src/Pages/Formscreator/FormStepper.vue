@@ -199,9 +199,10 @@
                                                 </h1>
                                                 <div class="d-flex gap-2 align-items-center">
                                                     <div v-if="blockArr.length">
-                                                        <button class="btn btn-light previewBtn font-13" type="button"
-                                                            @click="previewForm">
-                                                            <i class="bi bi-eye me-1"></i>Preview
+                                                        <button
+                                                            class="btn btn-light previewBtn d-flex align-items-baseline font-13"
+                                                            type="button" @click="previewForm">
+                                                            <i class="bi bi-eye me-1 mt-1  ms-1  mb-0"></i>Preview
                                                         </button>
                                                     </div>
 
@@ -220,7 +221,8 @@
                                                     </button> -->
                                                 </div>
                                             </div>
-                                            <FormPreview :blockArr="blockArr" :formDescriptions="formDescriptions" />
+                                            <FormPreview :blockArr="selectedform"
+                                                :formDescriptions="formDescriptions" />
                                             <div class="main-block">
                                                 <!-- Here is block level starts -->
                                                 <div class="block-level" v-for="(block, blockIndex) in blockArr"
@@ -1164,7 +1166,7 @@ const addBlock = () => {
     const blockIndex = blockArr.length; // Get current length before adding new block
 
     const newBlock = {
-        label: blockIndex === 0 ? "Requestor" : `Approver-${blockIndex}`,
+        label: blockIndex === 0 ? "requestor" : `approver-${blockIndex}`,
         parent: `${businessUnit.value?.value}-${filterObj.value?.form_short_name}`,
         sections: [
             {
@@ -1483,14 +1485,17 @@ const getRowSuffix = (index) => {
         return `${index + 1}th row`;
     }
 };
-
+const selectedform = ref([])
 // Trigger the creation of form and show the preview
 const previewForm = () => {
-    const modal = new bootstrap.Modal(
-        document.getElementById("formViewModal"),
-        {}
-    ); // raise a modal
-    modal.show();
+    if (blockArr.length) {
+        selectedform.value = blockArr
+        const modal = new bootstrap.Modal(
+            document.getElementById("formViewModal"),
+
+        ); // raise a modal
+        modal.show();
+    }
 };
 
 function deptData() {

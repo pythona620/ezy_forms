@@ -74,7 +74,7 @@
         <div class="mt-2">
 
             <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" actionType="dropdown"
-                @actionClicked="actionCreated" :actions="actions" isCheckbox="true" />
+                @actionClicked="actionCreated" :field-mapping="fieldMapping" :actions="actions" isCheckbox="true" />
             <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
                 @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
         </div>
@@ -144,6 +144,9 @@
                                 </h5>
                             </div>
                             <div class="">
+                                <button button="button" class=" btn btn-dark text-white font-13"
+                                    @click="downloadPdf">Download Pdf<span class=" ms-2"><i
+                                            class="bi bi-download"></i></span> </button>
                                 <button type="button" class="btn btn-dark text-white font-13" @click="closemodal"
                                     data-bs-dismiss="modal">Close
                                     <i class="bi bi-x"></i></button>
@@ -151,7 +154,8 @@
                         </div>
                     </div>
                     <div class="modal-body">
-                        pdf
+
+                        <div v-html="pdfPreview"></div>
                     </div>
                     <div class="modal-footer">
 
@@ -179,6 +183,10 @@ import { rebuildToStructuredArray } from "../../shared/services/field_format";
 import FormPreview from '../../Components/FormPreview.vue'
 
 const totalRecords = ref(0);
+const pdfPreview = ref('')
+
+const formDescriptions = ref({})
+const tableData = ref([]);
 
 const businessUnit = computed(() => {
     return EzyBusinessUnit.value;
@@ -188,6 +196,14 @@ onMounted(() => {
     // fetchTable()
 
 })
+
+const fieldMapping = ref({
+    // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
+    // invoice_date: { type: "date" },
+    // credit_irn_generated: { type: "select", options: ["Pending", "Completed", "Error"] },
+    Name: { type: "input" },
+
+});
 const selectedForm = ref(null);
 const actions = ref([
     { name: 'View form', icon: 'fa-solid fa-eye' },
@@ -204,7 +220,7 @@ function actionCreated(rowData, actionEvent) {
     if (actionEvent.name === 'View form') {
         if (rowData?.form_json) {
             formDescriptions.value = { ...rowData };
-            console.log(formDescriptions, "lllllllllll");
+            console.log(formDescriptions.value, "lllllllllll");
             selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json).fields);
             console.log(selectedForm.value, "ooooo");
             const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});
@@ -218,13 +234,16 @@ function actionCreated(rowData, actionEvent) {
     }
     else if (actionEvent.name === 'PDF Format') {
         // pdfView
+        formDescriptions.value = rowData
+        console.log(rowData.form_short_name, "form_short_name");
         const dataObj = {
-            "form_short_name": "Latest"
+            "form_short_name": rowData.form_short_name
         };
 
         axiosInstance.post(apis.preview_dynamic_form, dataObj)
             .then((response) => {
                 console.log(response, "form pdf responce");
+                pdfPreview.value = response.message
 
             })
             .catch((error) => {
@@ -243,6 +262,21 @@ function actionCreated(rowData, actionEvent) {
         // Activate the form
         updateFormStatus(rowData, '1');
     }
+}
+function downloadPdf() {
+    console.log(formDescriptions.value, "selectedForm");
+    const dataObj = {
+        "form_short_name": formDescriptions.value.form_short_name,
+        "name": formDescriptions.value.name
+    };
+
+    axiosInstance.post(apis.preview_dynamic_form, dataObj)
+        .then((response) => {
+            console.log(response, "download pdf");
+        })
+        .catch((error) => {
+            console.error("Error fetching data:", error);
+        });
 }
 
 // Function to update the form status based on active/inactive
@@ -269,8 +303,6 @@ const hideModal = () => {
 
 
 
-const formDescriptions = ref({})
-const tableData = ref([]);
 
 const filterOnModal = reactive({
     appliedform_name: false,

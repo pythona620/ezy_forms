@@ -18,7 +18,7 @@
                                 <TabsComp :tabs="filteredTabsData" @changeTab="handleTabChange" />
                             </div>
                         </div>
-                        <div class="col-3">
+                        <div class="col-3 pe-1">
                             <div class="d-flex gap-3 justify-content-end align-items-center m-0">
                                 <div class="mb-1">
                                     <ButtonComp v-if="shouldShowButton"
@@ -279,7 +279,7 @@ onMounted(() => {
             userInitial.value = userData.emp_name.charAt(0).toUpperCase();
             userEmail.value = userData.name;
             userDesigination.value = userData.designation || '';
-            console.log(userDesigination.value, "----------");
+
         }
     } else {
         console.warn("No user data found in localStorage.");
