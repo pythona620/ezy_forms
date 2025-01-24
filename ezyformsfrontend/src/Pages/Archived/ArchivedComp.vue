@@ -10,7 +10,7 @@
                 </p>
             </div>
             <div class="d-flex gap-3 align-items-center">
-                <div class="d-flex mt-2">
+                <div class="d-flex mt-2 gap-2">
                     <div>
                         <FormFields labeltext="" class="mb-3" tag="input" type="search" placeholder="Search File Name"
                             name="Value" id="Value" v-model="filterObj.search" isCheckbox='true' />

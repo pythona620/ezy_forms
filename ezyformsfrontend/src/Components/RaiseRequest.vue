@@ -258,7 +258,7 @@ function request_raising_fn(item) {
             toast.success("Request Raised", { autoClose: 1000 });
 
             await router.push({ path: '/todo/raisedbyme' });
-            window.location.reload();
+            // window.location.reload();
         }
     });
 }

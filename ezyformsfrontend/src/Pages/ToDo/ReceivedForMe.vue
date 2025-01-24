@@ -170,12 +170,12 @@
           </div>
           <div class="modal-footer">
             <div class="d-flex justify-content-between align-items-center mt-3 gap-2">
-              <div>
+              <!-- <div>
                 <ButtonComp type="button" icon="ban" class="cancelbtn border-1 text-nowrap font-10"
                   @click="approvalCancelFn(formData, 'Request Cancelled')" name="Cancel Request" />
-              </div>
+              </div> -->
               <div>
-                <ButtonComp @click="ApproverFormSubmission(formData, 'Reject')" type="button" icon="x"
+                <ButtonComp @click="approvalCancelFn(formData, 'Request Cancelled')" type="button" icon="x"
                   class="rejectbtn border-1 text-nowrap font-10 " name="Reject" />
               </div>
               <div>
@@ -215,6 +215,7 @@ const totalRecords = ref(0);
 const idDta = ref([]);
 const docTypeName = ref([])
 const statusOptions = ref([])
+const emittedFormData = ref([]);
 
 const tableheaders = ref([
   { th: "Request ID", td_key: "name" },
@@ -308,7 +309,7 @@ function actionCreated(rowData, actionEvent) {
     }
   }
 }
-const emittedFormData = ref([]);
+
 // Function to capture the form data from ApproverPreview
 const updateFormData = (fieldValues) => {
   emittedFormData.value = emittedFormData.value.concat(fieldValues);
@@ -367,11 +368,12 @@ function approvalStatusFn(dataObj, type) {
 
 function approvalCancelFn(dataObj, type) {
   // let files = this.selectedFileAttachments.map((res: any) => res.url);
+  console.log(dataObj);
   let data = {
     "property": selectedRequest.value.property,
     "doctype": selectedRequest.value.doctype_name,
     "request_id": selectedRequest.value.name,
-    "reason": "",
+    "reason": type == 'Request Cancelled' ? "Cancelled" : "",
     "action": type,
     "files": [],
     'url_for_cancelling_id': '',
@@ -394,7 +396,7 @@ function mapFormFieldsToRequest(doctypeData, showRequestData) {
         row.columns.forEach(column => {
           column.fields.forEach(field => {
             // Check if the fieldname exists in the doctypeForm and assign the value
-            if (doctypeData.hasOwnProperty(field.fieldname)) {
+            if (doctypeData?.hasOwnProperty(field?.fieldname)) {
               field.value = doctypeData[field.fieldname]; // Assign the value from doctypeForm to the field
               // console.log(`Mapping field: ${field.fieldname} with value: ${field.value}`);
             }

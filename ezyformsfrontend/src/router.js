@@ -33,7 +33,7 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHashHistory("/ezyformsfrontend"),
+  history: createWebHashHistory("/ezyformsfrontend/"),
   routes,
 });
 router.beforeEach((to, from, next) => {

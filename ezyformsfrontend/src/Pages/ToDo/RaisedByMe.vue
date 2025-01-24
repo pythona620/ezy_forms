@@ -169,7 +169,7 @@
           <div class="modal-header py-2 d-block ">
             <div class="d-flex justify-content-between align-items-center">
               <div>
-                <h5 class="m-0  font-13" id="exampleModalLabel">
+                <h5 class="m-0  font-13" id="viewRequest">
                   Request
                 </h5>
               </div>
@@ -185,7 +185,7 @@
           <div class="modal-body approvermodalbody">
             <ApproverPreview :blockArr="showRequest" @updateField="updateFormData" />
           </div>
-          <div class="modal-footer">
+          <!-- <div class="modal-footer">
             <div class="d-flex justify-content-between align-items-center mt-3 gap-2">
               <button type="button" class="btn btn-white text-dark  font-13" @click="closemodal"
                 data-bs-dismiss="modal">Close
@@ -193,10 +193,10 @@
               <div>
                 <ButtonComp type="button" icon="x"
                   class="btn btn-dark d-flex align-items-center  approvebtn border-1 text-nowrap font-10 "
-                  @click="approvalStatusFn(formData, 'Request Cancelled')" name="Cancel Request" />
+                  @click="approvalCancelFn(formData, 'Request Cancelled')" name="Cancel Request" />
               </div>
             </div>
-          </div>
+          </div> -->
 
         </div>
       </div>
@@ -224,7 +224,30 @@ const newBusinessUnit = ref({ business_unit: '' });
 
 const filterObj = ref({ limitPageLength: 'None', limit_start: 0 });
 const totalRecords = ref(0);
-
+const selectedRequest = ref({});
+const showRequest = ref(null);
+const doctypeForm = ref([]);
+const idDta = ref([]);
+const docTypeName = ref([])
+const statusOptions = ref([])
+const formData = ref([]);
+const tableData = ref([]);
+const filterOnModal = reactive({
+  appliedname: false,
+  applieddoctype_name: false,
+  appliedaccessible_departments: false,
+  appliedStatus: false,
+  appliedrequest_id: false,
+  appiedrequestedOn: false,
+  appliedowner: false,
+  name: '',
+  doctype_name: '',
+  accessible_departments: '',
+  status: '',
+  request_id: '',
+  requested_on: '',
+  owner: ''
+})
 const tableheaders = ref([
   { th: "Request ID", td_key: "name" },
   { th: "Form name", td_key: "doctype_name" },
@@ -238,9 +261,8 @@ const tableheaders = ref([
 
 )
 
-const selectedRequest = ref({});
-const showRequest = ref(null);
-const doctypeForm = ref([]);
+
+
 
 function actionCreated(rowData, actionEvent) {
   if (actionEvent.name === 'View Request') {
@@ -299,7 +321,6 @@ function downloadPdf() {
     });
 }
 
-const formData = ref([]);
 // Function to capture the form data from ApproverPreview
 const updateFormData = (fieldValues) => {
   formData.value = formData.value.concat(fieldValues);
@@ -327,7 +348,7 @@ function ApproverFormSubmission(dataObj, type) {
   axiosInstance.post(apis.savedocs, formData)
     .then((response) => {
       if (response?.docs) {
-        approvalStatusFn(dataObj, type)
+        approvalCancelFn(dataObj, type)
       }
     })
     .catch((error) => {
@@ -336,22 +357,22 @@ function ApproverFormSubmission(dataObj, type) {
 
 };
 
-function approvalStatusFn(dataObj, type) {
+function approvalCancelFn(dataObj, type) {
   let data = {
     "property": selectedRequest.value.property,
     "doctype": selectedRequest.value.doctype_name,
-    "request_ids": [selectedRequest.value.name],
+    "current_level": selectedRequest.value.current_level,
+    "request_id": selectedRequest.value.name,
     "reason": type == 'Request Cancelled' ? "Cancelled" : "",
-    "action": type,
-    "files": null,
-    "cluster_name": null,
-    "url_for_approval_id": '',
+    "files": [],
+    "url_for_cancelling_id": '',
+    // "action": type,
+    // "cluster_name": null,
     // https://ezyrecon.ezyinvoicing.com/home/wf-requests
-    "current_level": selectedRequest.value.current_level
   }
-  console.log(dataObj, { request_details: [data] }, "---------------------================");
+  console.log(dataObj, [data], "---------------------================");
   // need to check this api not working 
-  axiosInstance.post(apis.requestApproval, { request_details: [data] })
+  axiosInstance.post(apis.wf_cancelling_request, data)
     .then((response) => {
       if (response?.message?.success) {
         toast.success(`${type}`, { autoClose: 1000 })
@@ -429,23 +450,7 @@ const actions = ref(
 
   ]
 )
-const tableData = ref([]);
-const filterOnModal = reactive({
-  appliedname: false,
-  applieddoctype_name: false,
-  appliedaccessible_departments: false,
-  appliedStatus: false,
-  appliedrequest_id: false,
-  appiedrequestedOn: false,
-  appliedowner: false,
-  name: '',
-  doctype_name: '',
-  accessible_departments: '',
-  status: '',
-  request_id: '',
-  requested_on: '',
-  owner: ''
-})
+
 const appliedFiltersCount = computed(() => {
   return [
     { value: filterOnModal.doctype_name, applied: filterOnModal.applieddoctype_name },
@@ -541,9 +546,6 @@ const PaginationLimitStart = ([itemsPerPage, start]) => {
 
 
 };
-const idDta = ref([]);
-const docTypeName = ref([])
-const statusOptions = ref([])
 
 function receivedForMe() {
   // Initialize filters array for building dynamic query parameters
@@ -580,8 +582,8 @@ function receivedForMe() {
   // Define query parameters for data and count retrieval
   const queryParams = {
     fields: JSON.stringify(["*"]),
-    limit_page_length: filterObj.value.limitPageLength,
-    limit_start: filterObj.value.limit_start,
+    limit_page_length: filterObj.value?.limitPageLength,
+    limit_start: filterObj.value?.limit_start,
     filters: JSON.stringify(filters),
     order_by: "`tabWF Workflow Requests`.`creation` desc",
   };
@@ -593,7 +595,7 @@ function receivedForMe() {
   };
 
   // Fetch total count of records matching filters
-  axiosInstance.get(`${apis.resource}${doctypes.WFWorkflowRequests}`, { params: queryParamsCount })
+  axiosInstance.get(`${apis?.resource}${doctypes?.WFWorkflowRequests}`, { params: queryParamsCount })
     .then((res) => {
       totalRecords.value = res.data[0].total_count;
     })
