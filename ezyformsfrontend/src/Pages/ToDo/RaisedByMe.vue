@@ -159,17 +159,40 @@
       aria-labelledby="viewRequestLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
-          <div class="modal-header">
+          <!-- <div class="modal-header">
             <h5 class="modal-title" id="viewRequestLabel">Request</h5>
+            <button button="button" class=" btn btn-dark text-white font-13" @click="downloadPdf">Download Pdf<span
+                class=" ms-2"><i class="bi bi-download"></i></span> </button>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div> -->
+          <!-- bg-dark text-white -->
+          <div class="modal-header py-2 d-block ">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h5 class="m-0  font-13" id="exampleModalLabel">
+                  Request
+                </h5>
+              </div>
+              <div class="">
+                <button button="button" class=" btn btn-white text-dark  font-13" @click="downloadPdf">Download Pdf<span
+                    class=" ms-2"><i class="bi bi-download"></i></span> </button>
+                <button type="button" class="btn btn-white text-dark  font-13" @click="closemodal"
+                  data-bs-dismiss="modal">Close
+                  <i class="bi bi-x"></i></button>
+              </div>
+            </div>
           </div>
           <div class="modal-body approvermodalbody">
             <ApproverPreview :blockArr="showRequest" @updateField="updateFormData" />
           </div>
           <div class="modal-footer">
             <div class="d-flex justify-content-between align-items-center mt-3 gap-2">
+              <button type="button" class="btn btn-white text-dark  font-13" @click="closemodal"
+                data-bs-dismiss="modal">Close
+                <i class="bi bi-x"></i></button>
               <div>
-                <ButtonComp type="button" icon="x" class="btn btn-dark approvebtn border-1 text-nowrap font-10 "
+                <ButtonComp type="button" icon="x"
+                  class="btn btn-dark d-flex align-items-center  approvebtn border-1 text-nowrap font-10 "
                   @click="approvalStatusFn(formData, 'Request Cancelled')" name="Cancel Request" />
               </div>
             </div>
@@ -259,6 +282,23 @@ function actionCreated(rowData, actionEvent) {
     }
   }
 }
+
+function downloadPdf() {
+  console.log(doctypeForm.value[0].name, "ppp");
+  const dataObj = {
+    "form_short_name": selectedRequest.value.doctype_name,
+    "name": doctypeForm.value[0].name
+  };
+
+  axiosInstance.post(apis.download_pdf_form, dataObj)
+    .then((response) => {
+      console.log(response, "download pdf");
+    })
+    .catch((error) => {
+      console.error("Error fetching data:", error);
+    });
+}
+
 const formData = ref([]);
 // Function to capture the form data from ApproverPreview
 const updateFormData = (fieldValues) => {

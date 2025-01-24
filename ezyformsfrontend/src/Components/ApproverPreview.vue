@@ -5,14 +5,14 @@
                 <div v-for="(section, sectionIndex) in block.sections" :key="'preview-' + sectionIndex"
                     class="preview-section m-2">
                     <div class="section-label">
-                        <h5 class="m-0 font-13">{{ section.label || 'Untitled Section' }}</h5>
+                        <h5 class="m-0 font-13">{{ section.label }}</h5>
                     </div>
                     <div class="container-fluid">
                         <div class="row" v-for="(row, rowIndex) in section.rows" :key="rowIndex">
                             <div v-for="(column, columnIndex) in row.columns" :key="'column-preview-' + columnIndex"
                                 class="col dynamicColumn">
-                                <div class="p-3 border-bottom">
-                                    <h6 class="m-0 font-12">{{ column.label || '-' }}</h6>
+                                <div v-if="column.label" class="p-3 border-bottom">
+                                    <h6 class="m-0 font-12">{{ column.label }}</h6>
                                 </div>
                                 <div class="mx-3 my-2">
                                     <div v-for="(field, fieldIndex) in column.fields"

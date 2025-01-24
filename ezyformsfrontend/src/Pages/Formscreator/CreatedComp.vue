@@ -270,7 +270,7 @@ function downloadPdf() {
         "name": formDescriptions.value.name
     };
 
-    axiosInstance.post(apis.preview_dynamic_form, dataObj)
+    axiosInstance.post(apis.download_pdf_form, dataObj)
         .then((response) => {
             console.log(response, "download pdf");
         })
