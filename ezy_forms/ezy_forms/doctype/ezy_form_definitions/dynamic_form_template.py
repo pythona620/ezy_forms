@@ -2,6 +2,10 @@ from jinja2 import Template
 import pdfkit
 import frappe
 from ast import literal_eval
+import requests
+from random import randint
+import os, sys
+import traceback
 
 def rebuild_to_structured_array(flat_array):
     result = []
@@ -246,28 +250,31 @@ template_str = """
         }
         .field {
             display: flex;
-            align-items: center;
-            border-bottom: 1px solid #cccccc; /* Single border for both label and input */
-            padding: 1px 0;
-            margin-bottom: 30px;
+            align-items: baseline;
+            # border-bottom: 1px solid #cccccc; 
+            padding: 0px ;
+            margin: 15px;
         }
         .field label {
             font-weight: bold;
-            white-space: nowrap; /* Prevents label from breaking into multiple lines */
-            margin-right: 10px; /* Space between label and input */
+            white-space: nowrap;
+            margin-right: 10px; 
             font-size: 13px;
+            margin-bottom: 0px;
+            padding-bottom: 0px;
         }
         .field input {
             border: none;
             outline: none;
-            padding: 5px;
+            padding: 0px 5px;
             background: transparent;
-            flex: 1; /* Takes remaining space */
+            flex: 1; 
+            border-bottom: 1px solid #cccccc; 
         }
-        .field input, .field select, .field textarea {
+        .field select, .field textarea {
             border: none;
             outline: none;
-            padding: 5px;
+            padding: 0px 5px;
             background: transparent;
             flex: 1;
         }
@@ -302,25 +309,25 @@ template_str = """
                                         <label for="{{ field.fieldname }}">{{ field.label }}:</label>
 
                                            {% if field.fieldtype == 'Data' %}
-                                            <input type="text" id="{{ field.fieldname }}" name="{{ field.fieldname }}">
+                                            <input type="text" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
                                         {% elif field.fieldtype == 'Attach' %}
-                                            <input type="file" id="{{ field.fieldname }}" name="{{ field.fieldname }}">
+                                            <input type="file" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
                                         {% elif field.fieldtype == 'Phone' %}
-                                            <input type="tel" id="{{ field.fieldname }}" name="{{ field.fieldname }}">
+                                            <input type="tel" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
                                         {% elif field.fieldtype == 'Time' %}
-                                            <input type="time" id="{{ field.fieldname }}" name="{{ field.fieldname }}">
+                                            <input type="time" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
                                         {% elif field.fieldtype == 'Color' %}
-                                            <input type="color" id="{{ field.fieldname }}" name="{{ field.fieldname }}">
+                                            <input type="color" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
                                         {% elif field.fieldtype == 'Text' %}
-                                            <textarea id="{{ field.fieldname }}" name="{{ field.fieldname }}"></textarea>
+                                            <textarea id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}"></textarea>
                                         {% elif field.fieldtype == 'Date' %}
-                                            <input type="text" id="{{ field.fieldname }}" name="{{ field.fieldname }}" class="date-input" placeholder="__/__/____">
+                                            <input type="text" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}" class="date-input" placeholder="__/__/____">
                                         {% elif field.fieldtype == 'Datetime' %}
-                                            <input type="datetime-local" id="{{ field.fieldname }}" name="{{ field.fieldname }}">
+                                            <input type="datetime-local" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
                                         {% elif field.fieldtype == 'Check' %}
-                                            <input type="checkbox" id="{{ field.fieldname }}" name="{{ field.fieldname }}">
+                                            <input type="checkbox" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
                                         {% elif field.fieldtype == 'radio' %}
-                                            <input type="radio" id="{{ field.fieldname }}" name="{{ field.fieldname }}">
+                                            <input type="radio" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
                                         {% elif field.fieldtype == 'Select' %}
                                             <select id="{{ field.fieldname }}" name="{{ field.fieldname }}">
                                                 <option value="">Select an option</option>
@@ -400,9 +407,6 @@ def convert_html_to_pdf(html_content, pdf_path):
     except Exception as e:
         print(f"PDF generation failed: {e}")
 
-# PDF path to save
-pdf_path = '/home/caratred/jinja_to_form.pdf'
-
 def json_structure_call_for_html_view(json_obj:list):
     structered_data = rebuild_to_structured_array(flat_array=json_obj)
     html_output = Template(template_str).render(data=structered_data)
@@ -418,12 +422,30 @@ def preview_dynamic_form(form_short_name:str):
 
 @frappe.whitelist()
 def download_filled_form(form_short_name:str,name:str):
-    json_object = frappe.db.get_value("Ezy Form Definitions",form_short_name,"form_json")
-    json_object = literal_eval(json_object)
-    user_doc = frappe.get_doc(form_short_name,name).as_dict()
-    for iteration in json_object:
-        if "value" in iteration:
-            iteration["value"] = user_doc[iteration["fieldname"]] if user_doc[iteration["field"]] else ""
-    html_view = json_structure_call_for_html_view(json_obj=json_object)
-    # Generate PDF
-    return convert_html_to_pdf(html_content = html_view, pdf_path = pdf_path)
+    try:
+        json_object = frappe.db.get_value("Ezy Form Definitions",form_short_name,"form_json")
+        json_object = literal_eval(json_object)
+        user_doc = frappe.get_doc(form_short_name,name).as_dict()
+        for iteration in json_object:
+            if "value" in iteration:
+                iteration["value"] = user_doc[iteration["fieldname"]] if user_doc[iteration["fieldname"]] else ""
+        html_view = json_structure_call_for_html_view(json_obj=json_object)
+        random_number = randint(111,999)
+        pdf_path = frappe.local.site + f"/private/files/{form_short_name}_{name}_{random_number}.pdf"
+        
+        # Generate PDF
+        convert_html_to_pdf(html_content = html_view, pdf_path = pdf_path)
+
+        files_new = {"file": open(pdf_path, 'rb')}
+        payload_new = {'is_private': 1, 'folder': 'Home'}
+        os.remove(pdf_path)
+        host = frappe.get_single("Global Site Settings").site
+        file_response = requests.post(host+"api/method/upload_file", files=files_new,
+                                                data=payload_new, verify=False).json()
+        frappe.db.set_value("File", file_response["message"]["name"], {"attached_to_doctype": form_short_name, "attached_to_name":"qr_code_image", "attached_to_name": name})
+        return pdf_path
+    except Exception as e:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            frappe.log_error("Error Downloading File","line No:{}\n{}".format(exc_tb.tb_lineno,traceback.format_exc()))
+            frappe.throw(e)
+            return {"success":False,"message":str(e)}
