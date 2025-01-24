@@ -10,6 +10,7 @@ import os
 from ast import literal_eval
 from frappe.utils.background_jobs import enqueue
 from ezy_forms.ezy_forms.doctype.ezy_form_definitions.linking_flow_and_forms import enqueing_creation_of_roadmap
+from itertools import chain
 
 class EzyFormDefinitions(Document):
 	pass
@@ -192,10 +193,31 @@ def bench_migrating_from_code():
 	subprocess.run(["bench","migrate"])
 
 def activating_perms(doctype,role):
-	perm_doc = frappe.new_doc("DocPerm")
-	perm_doc.parent = doctype
-	perm_doc.parentfield="permissions"
-	perm_doc.parenttype="DocType"
-	perm_doc.role=role
-	perm_doc.insert(ignore_permissions=True)
+	if not frappe.db.exists("DocPerm",{"parent" : doctype,"parentfield":"permissions","parenttype":"DocType","role":role}):
+		perm_doc = frappe.new_doc("DocPerm")
+		perm_doc.parent = doctype
+		perm_doc.parentfield="permissions"
+		perm_doc.parenttype="DocType"
+		perm_doc.role=role
+		perm_doc.insert(ignore_permissions=True)
+		frappe.db.commit()
+
+def activating_perms_for_all_roles_in_wf_roadmap():
+	all_requestors = frappe.db.sql("""Select Unique(requestor) from `tabWF Requestors`;""",as_dict=True)
+	all_approvers = frappe.db.sql("""Select Unique(role) from `tabWF Level Setup`;""",as_dict=True)
+	all_roles_from_list_ofdicts_to_one_list_of_dict = all_requestors + all_approvers
+	only_roles_to_list = list(chain.from_iterable(map(dict.values, all_roles_from_list_ofdicts_to_one_list_of_dict)))
+	unique_roles_from_all_roles = list(set(only_roles_to_list))
+	for role in unique_roles_from_all_roles:
+		if not frappe.db.exists("Custom DocPerm",{"parent":"Ezy Form Definitions","role":role}):
+			form_perms = frappe.new_doc("Custom DocPerm")
+			form_perms.parent = "Ezy Form Definitions"
+			form_perms.role = role
+			form_perms.delete = 1
+			form_perms.select = 1
+			form_perms.read = 1
+			form_perms.write = 1
+			form_perms.create = 1
+			form_perms.delete = 1
+			form_perms.insert(ignore_permissions=True)
 	frappe.db.commit()
