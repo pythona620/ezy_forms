@@ -387,6 +387,29 @@ function actionCreated(rowData, actionEvent) {
   }
 }
 
+// function downloadPdf() {
+//   console.log(doctypeForm.value, selectedRequest.value, "ppp");
+//   const dataObj = {
+//     "form_short_name": selectedRequest.value.doctype_name,
+//     "name": doctypeForm.value[0].name
+//   };
+
+//   axiosInstance.post(apis.download_pdf_form, dataObj)
+//     .then((response) => {
+//       console.log(response.message, "download pdf");
+
+//       // Assuming 'domain' contains the base URL like 'https://example.com/api/'
+//       let pdfUrl = domain + response.message;
+
+//       // Remove 'api' from the URL if present
+//       pdfUrl = pdfUrl.replace('/api', '');
+
+//       window.open(pdfUrl);
+//     })
+//     .catch((error) => {
+//       console.error("Error fetching data:", error);
+//     });
+// }
 function downloadPdf() {
   console.log(doctypeForm.value, selectedRequest.value, "ppp");
   const dataObj = {
@@ -404,12 +427,20 @@ function downloadPdf() {
       // Remove 'api' from the URL if present
       pdfUrl = pdfUrl.replace('/api', '');
 
-      window.open(pdfUrl);
+      // Create an anchor element to trigger the download
+      const link = document.createElement('a');
+      link.href = pdfUrl;
+      link.download = response.message.split('/').pop(); // Use the file name from the URL
+      link.click();
     })
     .catch((error) => {
       console.error("Error fetching data:", error);
     });
 }
+
+
+
+
 // Function to capture the form data from ApproverPreview
 const updateFormData = (fieldValues) => {
   formData.value = formData.value.concat(fieldValues);
