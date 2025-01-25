@@ -306,7 +306,7 @@ def json_structure_call_for_html_view(json_obj:list):
 
 # Sample nested data structure
 @frappe.whitelist()
-def preview_dynamic_form(form_short_name:str,name):
+def preview_dynamic_form(form_short_name:str,name=None):
 	json_object = frappe.db.get_value("Ezy Form Definitions",form_short_name,"form_json")
 	json_object = literal_eval(json_object)["fields"]
 	if name:
