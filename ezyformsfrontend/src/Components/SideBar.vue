@@ -221,7 +221,7 @@ function deptData() {
         limitstart: filterObj.value.limitstart,
         filters: JSON.stringify(filters),
 
-        order_by: "`tabEzy Departments`.`creation` asc",
+        order_by: "`tabEzy Departments`.`creation` desc",
 
     };
 
@@ -238,6 +238,7 @@ function deptData() {
 
                     //   id: department.id 
                 }));
+                console.log(formSideBarData.value);
             }
         })
         .catch((error) => {

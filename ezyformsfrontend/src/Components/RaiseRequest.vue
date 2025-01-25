@@ -7,11 +7,11 @@
                 form</router-link>
         </div>
         <div class="container">
-            <div>
+            <div v-if="blockArr.length">
                 <RequestPreview :blockArr="blockArr" :formName="selectedData.selectedform"
                     @updateField="handleFieldUpdate" />
                 <!-- @formValidation="isFormValid = $event" -->
-                <div v-if="blockArr.length">
+                <div>
                     <div class=" d-flex justify-content-end align-items-center p-3">
                         <button class=" btn btn-white font-13" @click="clearFrom"> <span> <i
                                     class=" bi bi-x"></i></span>Clear
@@ -20,6 +20,12 @@
                         <button class="btn btn-dark font-12 " type="submit" @click="raiseRequestSubmission">Raise
                             Request</button>
                     </div>
+                </div>
+            </div>
+            <div v-else>
+                <div class=" no-form">
+
+                    No Form
                 </div>
             </div>
         </div>
@@ -150,10 +156,10 @@ function formDefinations() {
         ["business_unit", "like", `%${business_unit.value}%`]
     ];
     if (selectedData.value.selectedCategory) {
-        filters.push(["form_category", "like", `${selectedData.value.selectedCategory}`]);
+        filters.push(["form_category", "like", `${selectedData.value?.selectedCategory}`]);
     }
     if (selectedData.value.selectedform) {
-        filters.push(["form_short_name", "like", `%${selectedData.value.selectedform}%`]);
+        filters.push(["form_short_name", "like", `%${selectedData.value?.selectedform}%`]);
     }
 
     const queryParams = {
@@ -258,7 +264,7 @@ function request_raising_fn(item) {
             toast.success("Request Raised", { autoClose: 1000 });
 
             await router.push({ path: '/todo/raisedbyme' });
-            window.location.reload();
+            // window.location.reload();
         }
     });
 }
@@ -305,5 +311,16 @@ function request_raising_fn(item) {
 .backtofromPage {
     background-color: #ffffff;
     padding: 5px;
+}
+
+.no-form {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 15px;
+    font-weight: 500;
+
 }
 </style>

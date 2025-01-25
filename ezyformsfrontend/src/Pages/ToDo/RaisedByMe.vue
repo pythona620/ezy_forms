@@ -169,7 +169,7 @@
           <div class="modal-header py-2 d-block ">
             <div class="d-flex justify-content-between align-items-center">
               <div>
-                <h5 class="m-0  font-13" id="exampleModalLabel">
+                <h5 class="m-0  font-13" id="viewRequest">
                   Request
                 </h5>
               </div>
@@ -185,7 +185,7 @@
           <div class="modal-body approvermodalbody">
             <ApproverPreview :blockArr="showRequest" @updateField="updateFormData" />
           </div>
-          <div class="modal-footer">
+          <!-- <div class="modal-footer">
             <div class="d-flex justify-content-between align-items-center mt-3 gap-2">
               <button type="button" class="btn btn-white text-dark  font-13" @click="closemodal"
                 data-bs-dismiss="modal">Close
@@ -193,11 +193,40 @@
               <div>
                 <ButtonComp type="button" icon="x"
                   class="btn btn-dark d-flex align-items-center  approvebtn border-1 text-nowrap font-10 "
-                  @click="approvalStatusFn(formData, 'Request Cancelled')" name="Cancel Request" />
+                  @click="approvalCancelFn(formData, 'Request Cancelled')" name="Cancel Request" />
+              </div>
+            </div>
+          </div> -->
+
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" id="pdfView" tabindex="-1" aria-labelledby="pdfViewLabel" aria-hidden="true">
+      <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+          <div class="modal-header py-2 d-block bg-dark text-white">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h5 class="m-0 text-white font-13" id="exampleModalLabel">
+                  PDF format
+                </h5>
+              </div>
+              <div class="">
+                <button button="button" class=" btn btn-dark text-white font-13" @click="downloadPdf">Download Pdf<span
+                    class=" ms-2"><i class="bi bi-download"></i></span> </button>
+                <button type="button" class="btn btn-dark text-white font-13" @click="closemodal"
+                  data-bs-dismiss="modal">Close
+                  <i class="bi bi-x"></i></button>
               </div>
             </div>
           </div>
+          <div class="modal-body">
 
+            <div v-html="pdfPreview"></div>
+          </div>
+          <div class="modal-footer">
+
+          </div>
         </div>
       </div>
     </div>
@@ -209,7 +238,7 @@ import FormFields from '../../Components/FormFields.vue';
 import ButtonComp from '../../Components/ButtonComp.vue';
 import GlobalTable from '../../Components/GlobalTable.vue';
 import axiosInstance from '../../shared/services/interceptor';
-import { apis, doctypes } from '../../shared/apiurls';
+import { apis, doctypes, domain } from '../../shared/apiurls';
 import { callWithErrorHandling, onMounted, ref, reactive, computed, watch } from 'vue';
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
 import PaginationComp from '../../Components/PaginationComp.vue';
@@ -224,6 +253,31 @@ const newBusinessUnit = ref({ business_unit: '' });
 
 const filterObj = ref({ limitPageLength: 'None', limit_start: 0 });
 const totalRecords = ref(0);
+const selectedRequest = ref({});
+const showRequest = ref(null);
+const doctypeForm = ref([]);
+const idDta = ref([]);
+const docTypeName = ref([])
+const statusOptions = ref([])
+const formData = ref([]);
+const tableData = ref([]);
+const filterOnModal = reactive({
+  appliedname: false,
+  applieddoctype_name: false,
+  appliedaccessible_departments: false,
+  appliedStatus: false,
+  appliedrequest_id: false,
+  appiedrequestedOn: false,
+  appliedowner: false,
+  name: '',
+  doctype_name: '',
+  accessible_departments: '',
+  status: '',
+  request_id: '',
+  requested_on: '',
+  owner: ''
+})
+const pdfPreview = ref('')
 
 const tableheaders = ref([
   { th: "Request ID", td_key: "name" },
@@ -234,13 +288,19 @@ const tableheaders = ref([
   // { th: "Requested department", td_key: "acess" },
   { th: "Approval Status", td_key: "status" },
 
-]
+])
+const actions = ref(
+  [
+    { name: 'View Request', icon: 'fa-solid fa-eye' },
+    { name: 'PDF Format', icon: 'bi bi-filetype-pdf' },
+    // { name: 'Share this form', icon: 'fa-solid fa-share-alt' },
+    // { name: 'Download Form', icon: 'fa-solid fa-download' },
+    // { name: 'Edit Form', icon: 'fa-solid fa-edit' },
 
+  ]
 )
 
-const selectedRequest = ref({});
-const showRequest = ref(null);
-const doctypeForm = ref([]);
+
 
 function actionCreated(rowData, actionEvent) {
   if (actionEvent.name === 'View Request') {
@@ -280,11 +340,78 @@ function actionCreated(rowData, actionEvent) {
     } else {
       console.warn(" There is no form fields ");
     }
+  } else if (actionEvent.name === 'PDF Format') {
+    // pdfView
+    selectedRequest.value = rowData
+    // Prepare the filters for fetching data
+    const filters = [
+      ["wf_generated_request_id", "like", `%${selectedRequest.value.name}%`]
+    ];
+    const queryParams = {
+      fields: JSON.stringify(["*"]),
+      limit_page_length: "None",
+      limit_start: 0,
+      filters: JSON.stringify(filters),
+      order_by: `\`tab${selectedRequest.value.doctype_name}\`.\`creation\` desc`
+    };
+
+    // Fetch the doctype data
+    axiosInstance.get(`${apis.resource}${selectedRequest.value.doctype_name}`, { params: queryParams })
+      .then((res) => {
+        if (res.data) {
+          doctypeForm.value = res.data;
+
+          const dataObj = {
+            "form_short_name": rowData.doctype_name,
+            "name": doctypeForm.value[0].name
+          };
+
+          axiosInstance.post(apis.preview_dynamic_form, dataObj)
+            .then((response) => {
+              console.log(response, "form pdf responce");
+              pdfPreview.value = response.message
+
+            })
+            .catch((error) => {
+              console.error("Error fetching data:", error);
+            });
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching categories data:", error);
+      });
+    console.log(rowData, "form_short_name");
+
+    const modal = new bootstrap.Modal(document.getElementById('pdfView'), {});
+    modal.show();
   }
 }
 
+// function downloadPdf() {
+//   console.log(doctypeForm.value, selectedRequest.value, "ppp");
+//   const dataObj = {
+//     "form_short_name": selectedRequest.value.doctype_name,
+//     "name": doctypeForm.value[0].name
+//   };
+
+//   axiosInstance.post(apis.download_pdf_form, dataObj)
+//     .then((response) => {
+//       console.log(response.message, "download pdf");
+
+//       // Assuming 'domain' contains the base URL like 'https://example.com/api/'
+//       let pdfUrl = domain + response.message;
+
+//       // Remove 'api' from the URL if present
+//       pdfUrl = pdfUrl.replace('/api', '');
+
+//       window.open(pdfUrl);
+//     })
+//     .catch((error) => {
+//       console.error("Error fetching data:", error);
+//     });
+// }
 function downloadPdf() {
-  console.log(doctypeForm.value[0].name, "ppp");
+  console.log(doctypeForm.value, selectedRequest.value, "ppp");
   const dataObj = {
     "form_short_name": selectedRequest.value.doctype_name,
     "name": doctypeForm.value[0].name
@@ -292,14 +419,28 @@ function downloadPdf() {
 
   axiosInstance.post(apis.download_pdf_form, dataObj)
     .then((response) => {
-      console.log(response, "download pdf");
+      console.log(response.message, "download pdf");
+
+      // Assuming 'domain' contains the base URL like 'https://example.com/api/'
+      let pdfUrl = domain + response.message;
+
+      // Remove 'api' from the URL if present
+      pdfUrl = pdfUrl.replace('/api', '');
+
+      // Create an anchor element to trigger the download
+      const link = document.createElement('a');
+      link.href = pdfUrl;
+      link.download = response.message.split('/').pop(); // Use the file name from the URL
+      link.click();
     })
     .catch((error) => {
       console.error("Error fetching data:", error);
     });
 }
 
-const formData = ref([]);
+
+
+
 // Function to capture the form data from ApproverPreview
 const updateFormData = (fieldValues) => {
   formData.value = formData.value.concat(fieldValues);
@@ -327,7 +468,7 @@ function ApproverFormSubmission(dataObj, type) {
   axiosInstance.post(apis.savedocs, formData)
     .then((response) => {
       if (response?.docs) {
-        approvalStatusFn(dataObj, type)
+        approvalCancelFn(dataObj, type)
       }
     })
     .catch((error) => {
@@ -336,22 +477,22 @@ function ApproverFormSubmission(dataObj, type) {
 
 };
 
-function approvalStatusFn(dataObj, type) {
+function approvalCancelFn(dataObj, type) {
   let data = {
     "property": selectedRequest.value.property,
     "doctype": selectedRequest.value.doctype_name,
-    "request_ids": [selectedRequest.value.name],
+    "current_level": selectedRequest.value.current_level,
+    "request_id": selectedRequest.value.name,
     "reason": type == 'Request Cancelled' ? "Cancelled" : "",
-    "action": type,
-    "files": null,
-    "cluster_name": null,
-    "url_for_approval_id": '',
+    "files": [],
+    "url_for_cancelling_id": '',
+    // "action": type,
+    // "cluster_name": null,
     // https://ezyrecon.ezyinvoicing.com/home/wf-requests
-    "current_level": selectedRequest.value.current_level
   }
-  console.log(dataObj, { request_details: [data] }, "---------------------================");
+  console.log(dataObj, [data], "---------------------================");
   // need to check this api not working 
-  axiosInstance.post(apis.requestApproval, { request_details: [data] })
+  axiosInstance.post(apis.wf_cancelling_request, data)
     .then((response) => {
       if (response?.message?.success) {
         toast.success(`${type}`, { autoClose: 1000 })
@@ -419,33 +560,8 @@ function mapFormFieldsToRequest(doctypeData, showRequestData) {
     });
   });
 }
-const actions = ref(
-  [
-    { name: 'View Request', icon: 'fa-solid fa-eye' },
 
-    // { name: 'Share this form', icon: 'fa-solid fa-share-alt' },
-    // { name: 'Download Form', icon: 'fa-solid fa-download' },
-    // { name: 'Edit Form', icon: 'fa-solid fa-edit' },
 
-  ]
-)
-const tableData = ref([]);
-const filterOnModal = reactive({
-  appliedname: false,
-  applieddoctype_name: false,
-  appliedaccessible_departments: false,
-  appliedStatus: false,
-  appliedrequest_id: false,
-  appiedrequestedOn: false,
-  appliedowner: false,
-  name: '',
-  doctype_name: '',
-  accessible_departments: '',
-  status: '',
-  request_id: '',
-  requested_on: '',
-  owner: ''
-})
 const appliedFiltersCount = computed(() => {
   return [
     { value: filterOnModal.doctype_name, applied: filterOnModal.applieddoctype_name },
@@ -541,9 +657,6 @@ const PaginationLimitStart = ([itemsPerPage, start]) => {
 
 
 };
-const idDta = ref([]);
-const docTypeName = ref([])
-const statusOptions = ref([])
 
 function receivedForMe() {
   // Initialize filters array for building dynamic query parameters
@@ -580,8 +693,8 @@ function receivedForMe() {
   // Define query parameters for data and count retrieval
   const queryParams = {
     fields: JSON.stringify(["*"]),
-    limit_page_length: filterObj.value.limitPageLength,
-    limit_start: filterObj.value.limit_start,
+    limit_page_length: filterObj.value?.limitPageLength,
+    limit_start: filterObj.value?.limit_start,
     filters: JSON.stringify(filters),
     order_by: "`tabWF Workflow Requests`.`creation` desc",
   };
@@ -593,7 +706,7 @@ function receivedForMe() {
   };
 
   // Fetch total count of records matching filters
-  axiosInstance.get(`${apis.resource}${doctypes.WFWorkflowRequests}`, { params: queryParamsCount })
+  axiosInstance.get(`${apis?.resource}${doctypes?.WFWorkflowRequests}`, { params: queryParamsCount })
     .then((res) => {
       totalRecords.value = res.data[0].total_count;
     })

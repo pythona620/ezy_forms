@@ -88,7 +88,12 @@
                                         </template>
 
                                         <template v-else>
-                                            <component :is="getFieldComponent(field.fieldtype)" v-model="field.value"
+                                            <input v-if="field.fieldtype === 'Datetime'" type="datetime-local"
+                                                v-model="field.value" class="form-control previewInputHeight font-10" />
+                                            <!-- <input v-if="field.fieldtype === 'Date'" type="date" v-model="field.value"
+                                                class="form-control previewInputHeight font-10" /> -->
+                                            <component v-if="field.fieldtype !== 'Datetime'"
+                                                :is="getFieldComponent(field.fieldtype)" v-model="field.value"
                                                 :maxlength="field.fieldtype === 'Phone' ? '10' : null"
                                                 :type="field.fieldtype === 'Color' ? 'color' : field.fieldtype"
                                                 :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
@@ -101,7 +106,7 @@
                                             class="text-danger font-10 mt-1">
                                             {{
             errorMessages[`${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`]
-        }}
+                                            }}
                                         </div>
 
 
@@ -137,9 +142,8 @@ const getFieldComponent = (type) => {
     switch (type) {
         case "Data":
         case "Phone":
-        case "Check":
         case "Date":
-        case "Datetime":
+        case "Check":
         case "radio":
             return "input";
         case "Text":

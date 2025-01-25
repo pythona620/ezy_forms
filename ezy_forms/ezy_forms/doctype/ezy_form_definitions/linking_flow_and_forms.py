@@ -63,7 +63,7 @@ def add_roles_to_wf_requestors(business_unit:str,doctype:str,workflow_setup:list
 		if len(approvers_section)>0:
 			roadmap_doc.workflow_levels = max([max_level['level'] for max_level in approvers_section])
 		for single_requestor in requestors_section:
-			activating_perms(doctype=doctype,role=single_requestor["role"])
+			activating_perms(doctype=doctype,role=single_requestor["requestor"])
 			roadmap_doc.append("wf_requestors", single_requestor)
 		for single_approver in approvers_section:
 			activating_perms(doctype=doctype,role=single_approver["role"])
