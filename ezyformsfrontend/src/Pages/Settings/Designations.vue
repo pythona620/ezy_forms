@@ -98,7 +98,7 @@ function designationData() {
         order_by: "`tabWF Roles`.`creation` desc"
     };
     const queryParamsCount = {
-        fields: JSON.stringify(["count( `tabWF Roles`.`name`) AS total_count"]),
+        fields: JSON.stringify(["count(name) AS total_count"]),
         limitPageLength: "None",
         filters: JSON.stringify(filters),
     }

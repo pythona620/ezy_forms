@@ -455,7 +455,7 @@ function deptData() {
         order_by: "`tabEzy Departments`.`creation` desc"
     };
     const queryParamsCount = {
-        fields: JSON.stringify(["count( `tabEzy Departments`.`name`) AS total_count"]),
+        fields: JSON.stringify(["count(name) AS total_count"]),
         limitPageLength: "None",
         filters: JSON.stringify(filters),
     }

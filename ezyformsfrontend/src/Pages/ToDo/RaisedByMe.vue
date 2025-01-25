@@ -700,7 +700,7 @@ function receivedForMe() {
   };
 
   const queryParamsCount = {
-    fields: JSON.stringify(["count(`tabWF Workflow Requests`.`name`) AS total_count"]),
+    fields: JSON.stringify(["count(name) AS total_count"]),
     limitPageLength: "None",
     filters: JSON.stringify(filters),
   };

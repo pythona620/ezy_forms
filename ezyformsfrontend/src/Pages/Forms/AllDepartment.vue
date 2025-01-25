@@ -323,7 +323,7 @@ function fetchDepartmentDetails(id) {
     order_by: "`tabEzy Form Definitions`.`creation` desc",
   };
   const queryParamsCount = {
-    fields: JSON.stringify(["count( `tabEzy Form Definitions`.`name`) AS total_count"]),
+    fields: JSON.stringify(["count(name) AS total_count"]),
     limitPageLength: "None",
     filters: JSON.stringify(filters),
   }
