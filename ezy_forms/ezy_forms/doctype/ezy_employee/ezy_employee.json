@@ -40,8 +40,9 @@
   },
   {
    "fieldname": "designation",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Designation",
+   "options": "WF Roles",
    "search_index": 1
   },
   {
@@ -64,7 +65,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-11-18 14:40:19.886925",
+ "modified": "2025-01-25 10:52:37.983326",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
  "name": "Ezy Employee",
