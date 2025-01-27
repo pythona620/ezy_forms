@@ -70,8 +70,9 @@
                                     : '' }}</span>
                                                             </label>
                                                             <template
-                                                                v-if="field.fieldtype == 'Select' || field.fieldtype == 'multiselect'">
-                                                                <select :multiple="field.fieldtype == 'multiselect'"
+                                                                v-if="field.fieldtype == 'Select' || field.fieldtype == 'Table MultiSelect'">
+                                                                <select
+                                                                    :multiple="field.fieldtype == 'Table MultiSelect'"
                                                                     v-model="field.value"
                                                                     class="form-select mb-2 font-13">
                                                                     <option
@@ -232,6 +233,8 @@ const getFieldComponent = (type) => {
         case "Time":
             return "input";
         case "Select":
+            return "select";
+        case "Table MultiSelect":
             return "select";
         case "Attach":
             return "file";

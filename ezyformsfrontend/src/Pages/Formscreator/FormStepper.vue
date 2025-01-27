@@ -380,7 +380,7 @@
                                                                                         <div
                                                                                             class="d-flex justify-content-between">
                                                                                             <div
-                                                                                                class="d-flex flex-column">
+                                                                                                class=" flex-column d-flex ">
                                                                                                 <input
                                                                                                     v-model="field.label"
                                                                                                     placeholder="Name the field"
@@ -424,7 +424,7 @@
                                                                                         </select>
 
                                                                                         <div
-                                                                                            v-if="['Select', 'multiselect'].includes(field.fieldtype)">
+                                                                                            v-if="['Select', 'Table MultiSelect'].includes(field.fieldtype)">
                                                                                             <label
                                                                                                 class="font-12 fw-light"
                                                                                                 for="options">Enter
@@ -982,7 +982,7 @@ const fieldTypes = [
     },
     {
         label: "MultiSelect",
-        type: "multiselect",
+        type: "Table MultiSelect",
     },
     {
         label: "Signature",
@@ -1394,7 +1394,6 @@ function handleFieldChange(
         fieldIndex !== undefined &&
         fieldIndex >= 0 &&
         columnIndex !== undefined &&
-        columnIndex >= 0 &&
         sectionIndex !== undefined
     ) {
         blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
@@ -1405,7 +1404,7 @@ function handleFieldChange(
     // Assign error message for the column if fieldIndex is not valid
     if (
         sectionIndex !== undefined &&
-        columnIndex === undefined && columnIndex >= 0 &&
+        columnIndex !== undefined &&
         fieldIndex === undefined
     ) {
         blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
@@ -1426,6 +1425,59 @@ function handleFieldChange(
         console.log(blockArr[blockIndex].sections[sectionIndex].errorMsg, "===============");
     }
 }
+
+
+// function handleFieldChange(
+//     blockIndex,
+//     sectionIndex,
+//     rowIndex,
+//     columnIndex,
+//     fieldIndex
+// ) {
+//     const flatArr = blockArr.flatMap(extractfieldlabels);
+//     const isDuplicate = hasDuplicates(flatArr); // Check once to reuse this result
+//     console.log(isDuplicate, "0000000000000");
+//     const checkFieldType = addErrorMessagesToStructuredArray(blockArr);
+//     blockArr.splice(0, blockArr.length, ...checkFieldType);
+
+//     // Assign error message for the specific field if fieldIndex is valid
+//     if (
+//         fieldIndex !== undefined &&
+//         fieldIndex >= 0 &&
+//         columnIndex !== undefined &&
+//         columnIndex >= 0 &&
+//         sectionIndex !== undefined
+//     ) {
+//         blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
+//             columnIndex
+//         ].fields[fieldIndex].errorMsg = isDuplicate ? "Duplicate Label Name" : "";
+//     }
+
+//     // Assign error message for the column if fieldIndex is not valid
+//     if (
+//         sectionIndex !== undefined &&
+//         columnIndex !== undefined && // Ensure columnIndex is defined
+//         fieldIndex === undefined
+//     ) {
+//         blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
+//             columnIndex
+//         ].errorMsg = isDuplicate ? "Duplicate Label Name in Column" : "";
+//     }
+
+//     // Assign error message for the section if both columnIndex and fieldIndex are not valid
+//     if (
+//         columnIndex === undefined &&
+//         fieldIndex === undefined &&
+//         sectionIndex !== undefined
+//     ) {
+//         console.log(sectionIndex, "------", isDuplicate);
+//         blockArr[blockIndex].sections[sectionIndex].errorMsg = isDuplicate
+//             ? "Duplicate Label Name in Section"
+//             : "";
+//         console.log(blockArr[blockIndex].sections[sectionIndex].errorMsg, "===============");
+//     }
+// }
+
 function handleInputChange(event, fieldType) {
     const inputValue = event.target.value;
     console.log(`${fieldType} input change === `, inputValue);
@@ -1638,6 +1690,8 @@ const getFieldComponent = (type) => {
         case "Check":
             return "input";
         case "Select":
+            return "select";
+        case "Table MultiSelect":
             return "select";
         case "Date":
             return "input";

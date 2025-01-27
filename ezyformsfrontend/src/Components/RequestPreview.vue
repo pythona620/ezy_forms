@@ -28,8 +28,9 @@
                                         </div>
 
                                         <template
-                                            v-if="field.fieldtype === 'Select' || field.fieldtype === 'multiselect'">
-                                            <select :multiple="field.fieldtype === 'multiselect'" v-model="field.value"
+                                            v-if="field.fieldtype === 'Select' || field.fieldtype === 'Table MultiSelect'">
+                                            <select :multiple="field.fieldtype === 'Table MultiSelect'"
+                                                v-model="field.value"
                                                 @input="logFieldValue(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
                                                 class="form-select mb-2 font-13">
                                                 <option v-for="(option, index) in field.options?.split('\n')"
