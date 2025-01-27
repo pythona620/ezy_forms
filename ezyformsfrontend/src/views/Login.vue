@@ -179,6 +179,7 @@ export default {
 	z-index: 1;
 	/* Ensure it's above the background */
 	position: relative;
+	min-width: 420px;
 }
 
 .label {

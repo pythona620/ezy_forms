@@ -175,20 +175,33 @@ function closemodal() {
 }
 function setView(view) {
     selectedView.value = view;
+
     displayedBlocks.value = filterBlocksByFieldname(view, props.blockArr);
 }
 
 function filterBlocksByFieldname(view, blocks) {
-    console.log(blocks);
+
     let filteredBlocks = [];
 
     // Define the block order for each view
+    // const blockOrder = {
+    //     'requestor': ['requestor'],
+    //     'approver-1': ['requestor', 'approver1'],
+    //     'approver-2': ['requestor', 'approver1', 'approver2'],
+    //     'approver-3': ['requestor', 'approver1', 'approver2', 'approver3']
+    // };
     const blockOrder = {
         'requestor': ['requestor'],
-        'approver-1': ['requestor', 'approver1'],
-        'approver-2': ['requestor', 'approver1', 'approver2'],
-        'approver-3': ['requestor', 'approver1', 'approver2', 'approver3']
+        'approver-1': ['requestor', 'approver-1'],
+        'approver-2': ['requestor', 'approver-1', 'approver-2'],
+        'approver-3': ['requestor', 'approver-1', 'approver-2', 'approver-3'],
+        'approver-4': ['requestor', 'approver-1', 'approver-2', 'approver-3', 'approver-4'],
+        'approver-5': ['requestor', 'approver-1', 'approver-2', 'approver-3', 'approver-4', 'approver-5'],
+        'approver-6': ['requestor', 'approver-1', 'approver-2', 'approver-3', 'approver-4', 'approver-5', 'approver-6'],
+        'approver-7': ['requestor', 'approver-1', 'approver-2', 'approver-3', 'approver-4', 'approver-5', 'approver-6', 'approver-7'],
+        'approver-8': ['requestor', 'approver-1', 'approver-2', 'approver-3', 'approver-4', 'approver-5', 'approver-6', 'approver-7', 'approver-8']
     };
+
 
     // Get the fieldnames for the selected view from blockOrder
     const viewOrder = blockOrder[view] || ['requestor'];
@@ -196,6 +209,7 @@ function filterBlocksByFieldname(view, blocks) {
     // Iterate through the fieldnames and push matching blocks into filteredBlocks
     viewOrder.forEach(type => {
         const block = blocks.find(b => b.label === type);
+
         if (block) {
             filteredBlocks.push(block); // Add the block if it exists
         }

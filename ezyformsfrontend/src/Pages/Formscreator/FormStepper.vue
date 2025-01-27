@@ -283,23 +283,24 @@
                                                             </div>
                                                         </div>
                                                     </div>
+                                                    <!-- draggable="true" @dragstart="handleDragStart($event, sectionIndex, 'section', blockIndex)"
+                                                            @dragover="handleDragOver($event)"
+                                                            @drop="handleDrop($event, sectionIndex, 'section', blockIndex)" -->
                                                     <div class="mt-2 section_block">
                                                         <div v-for="(section, sectionIndex) in block.sections"
-                                                            :key="'section-' + sectionIndex" draggable="true"
-                                                            @dragstart="handleDragStart($event, sectionIndex, 'section', blockIndex)"
-                                                            @dragover="handleDragOver($event)"
-                                                            @drop="handleDrop($event, sectionIndex, 'section', blockIndex)"
+                                                            :key="'section-' + sectionIndex"
                                                             class="dynamicSection section">
                                                             <section
                                                                 class="d-flex justify-content-between align-items-center">
-                                                                <div class="d-flex">
+                                                                <div class="d-flex flex-column">
                                                                     <input v-model="section.label" type="text" :class="[
                         'border-less-input',
                         'font-14',
                         { 'italic-style': !section.label },
                         { 'fw-medium': section.label },
-                    ]" @change="handleFieldChange(sectionIndex)" placeholder="Untitled section" />
-                                                                    <small v-if="section.errorMsg" class="text-danger">
+                    ]" @change="handleFieldChange(blockIndex, sectionIndex)" placeholder="Untitled section" />
+                                                                    <small v-if="section.errorMsg"
+                                                                        class="text-danger font-10">
                                                                         {{ section.errorMsg }}
                                                                     </small>
                                                                 </div>
@@ -311,14 +312,13 @@
                                                                     </button>
                                                                 </div>
                                                             </section>
-
+                                                            <!-- draggable="true" @dragstart="handleDragStart($event, rowIndex, 'row', blockIndex, sectionIndex)"
+                                                                    @dragover="handleDragOver"
+                                                                    @drop="handleDrop($event, rowIndex, 'row', blockIndex, sectionIndex)" -->
                                                             <div class="container-fluid">
                                                                 <section class="row dynamicRow row-container"
                                                                     v-for="(row, rowIndex) in section.rows"
-                                                                    :key="'row-' + rowIndex" draggable="true"
-                                                                    @dragstart="handleDragStart($event, rowIndex, 'row', blockIndex, sectionIndex)"
-                                                                    @dragover="handleDragOver"
-                                                                    @drop="handleDrop($event, rowIndex, 'row', blockIndex, sectionIndex)">
+                                                                    :key="'row-' + rowIndex">
                                                                     <div
                                                                         class="d-flex justify-content-between align-items-center">
                                                                         <label class="rownames">{{
@@ -337,21 +337,22 @@
                                                                             </button>
                                                                         </div>
                                                                     </div>
+                                                                    <!-- draggable="true"
+                                                                                @dragstart="handleDragStart($event, columnIndex, 'column', blockIndex, sectionIndex, rowIndex)"
+                                                                                @dragover="handleDragOver"
+                                                                                @drop="handleDrop($event, columnIndex, 'column', blockIndex, sectionIndex, rowIndex)" -->
                                                                     <div class="col">
                                                                         <div class="row">
                                                                             <div v-for="(column, columnIndex) in row.columns"
                                                                                 :key="'column-' + columnIndex"
-                                                                                draggable="true"
-                                                                                @dragstart="handleDragStart($event, columnIndex, 'column', blockIndex, sectionIndex, rowIndex)"
-                                                                                @dragover="handleDragOver"
-                                                                                @drop="handleDrop($event, columnIndex, 'column', blockIndex, sectionIndex, rowIndex)"
                                                                                 class="col p-0 dynamicColumn column-container">
                                                                                 <div
                                                                                     class="column_name d-flex align-items-center justify-content-between">
-                                                                                    <div class="d-flex">
+                                                                                    <div
+                                                                                        class="d-flex flex-column ps-2">
                                                                                         <input v-model="column.label"
                                                                                             type="text" :class="[
-                        'border-less-input',
+                        'border-less-input', 'ps-1',
                         'font-14',
                         { 'italic-style': !column.label },
                         { 'fw-medium': column.label },
@@ -368,23 +369,29 @@
                                                                                         <i class="bi bi-trash"></i>
                                                                                     </button>
                                                                                 </div>
-
-                                                                                <div v-for="(field, fieldIndex) in column.fields"
-                                                                                    :key="'field-' + fieldIndex"
-                                                                                    draggable="true"
+                                                                                <!-- draggable="true"
                                                                                     @dragstart="handleDragStart($event, fieldIndex, 'field', blockIndex, sectionIndex, rowIndex, columnIndex)"
                                                                                     @dragover="handleDragOver"
-                                                                                    @drop="handleDrop($event, fieldIndex, 'field', blockIndex, sectionIndex, rowIndex, columnIndex)"
+                                                                                    @drop="handleDrop($event, fieldIndex, 'field', blockIndex, sectionIndex, rowIndex, columnIndex)" -->
+                                                                                <div v-for="(field, fieldIndex) in column.fields"
+                                                                                    :key="'field-' + fieldIndex"
                                                                                     class="dynamicField">
                                                                                     <div class="px-1 field-border">
                                                                                         <div
                                                                                             class="d-flex justify-content-between">
-                                                                                            <div class="d-flex">
+                                                                                            <div
+                                                                                                class="d-flex flex-column">
                                                                                                 <input
                                                                                                     v-model="field.label"
                                                                                                     placeholder="Name the field"
                                                                                                     :class="['border-less-input', 'font-14', 'p-0', { 'italic-style': !field.label }, { 'fw-medium': field.label }]"
                                                                                                     @change="handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
+                                                                                                <small
+                                                                                                    v-if="field.errorMsg"
+                                                                                                    class="text-danger font-10">
+                                                                                                    {{ field.errorMsg
+                                                                                                    }}
+                                                                                                </small>
                                                                                             </div>
                                                                                             <div>
                                                                                                 <button
@@ -1082,7 +1089,7 @@ function designationData(departments) {
         )
         .then((res) => {
             if (res.data) {
-                console.log(res.data, "Fetched Designations");
+
                 DesignationList.value = [
                     ...new Set(res.data.users.map((user) => user.role_name)),
                 ];
@@ -1136,10 +1143,7 @@ function formData() {
         form_status: "Draft",
     };
     dataObj.accessible_departments = dataObj.accessible_departments.toString(); //JSON.stringify(dataObj.accessible_departments) dataObj.accessible_departments.toString()
-    console.log(
-        dataObj,
-        "---------------------------------------------------------"
-    );
+
 
     axiosInstance
         .post(apis.savedata, dataObj)
@@ -1298,11 +1302,7 @@ const removeField = (
     columnIndex,
     fieldIndex
 ) => {
-    console.log(
-        rowIndex,
-        " field remove === ",
-        blockArr[blockIndex].sections[sectionIndex]
-    );
+
     let item =
         blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
             columnIndex
@@ -1385,6 +1385,7 @@ function handleFieldChange(
 ) {
     const flatArr = blockArr.flatMap(extractfieldlabels);
     const isDuplicate = hasDuplicates(flatArr); // Check once to reuse this result
+    console.log(isDuplicate, "0000000000000");
     const checkFieldType = addErrorMessagesToStructuredArray(blockArr);
     blockArr.splice(0, blockArr.length, ...checkFieldType);
 
@@ -1403,25 +1404,26 @@ function handleFieldChange(
 
     // Assign error message for the column if fieldIndex is not valid
     if (
-        fieldIndex === undefined &&
-        columnIndex !== undefined &&
-        columnIndex >= 0 &&
-        sectionIndex !== undefined
+        sectionIndex !== undefined &&
+        columnIndex === undefined && columnIndex >= 0 &&
+        fieldIndex === undefined
     ) {
         blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
             columnIndex
         ].errorMsg = isDuplicate ? "Duplicate Label Name in Column" : "";
     }
 
-    // Assign error message for the section if both columnIndex and fieldIndex are not valid
+    // Assign error message for the section if both columnIndex and fieldIndex are not valid columnIndex === undefined &&
     if (
         columnIndex === undefined &&
         fieldIndex === undefined &&
         sectionIndex !== undefined
     ) {
+        console.log(sectionIndex, "------", isDuplicate);
         blockArr[blockIndex].sections[sectionIndex].errorMsg = isDuplicate
             ? "Duplicate Label Name in Section"
             : "";
+        console.log(blockArr[blockIndex].sections[sectionIndex].errorMsg, "===============");
     }
 }
 function handleInputChange(event, fieldType) {
@@ -1612,7 +1614,7 @@ function add_Wf_roles_setup() {
             business_unit: filterObj.value.business_unit,
         })
         .then((res) => {
-            console.log(" =====   ", res);
+
             if (selectedBlockIndex.value == 0) {
                 toast.success("Requestor Added");
             } else {
@@ -1649,108 +1651,108 @@ const getFieldComponent = (type) => {
             return "input";
     }
 };
-const swapItems = (arr, fromIndex, toIndex) => {
-    if (!Array.isArray(arr) || fromIndex < 0 || toIndex < 0 || fromIndex >= arr.length || toIndex >= arr.length) {
-        console.warn(`Invalid swap indices: ${fromIndex}, ${toIndex} for array`, arr);
-        return;
-    }
-    [arr[fromIndex], arr[toIndex]] = [arr[toIndex], arr[fromIndex]];
-    console.log(`Swapped items at index ${fromIndex} and ${toIndex}`);
-};
+// const swapItems = (arr, fromIndex, toIndex) => {
+//     if (!Array.isArray(arr) || fromIndex < 0 || toIndex < 0 || fromIndex >= arr.length || toIndex >= arr.length) {
+//         console.warn(`Invalid swap indices: ${fromIndex}, ${toIndex} for array`, arr);
+//         return;
+//     }
+//     [arr[fromIndex], arr[toIndex]] = [arr[toIndex], arr[fromIndex]];
+//     console.log(`Swapped items at index ${fromIndex} and ${toIndex}`);
+// };
 
-// Swap Sections
-const swapSections = (fromIndex, toIndex, blockIndex) => {
-    if (blockArr?.[blockIndex]?.sections) {
-        swapItems(blockArr[blockIndex].sections, fromIndex, toIndex);
-    }
-};
+// // Swap Sections
+// const swapSections = (fromIndex, toIndex, blockIndex) => {
+//     if (blockArr?.[blockIndex]?.sections) {
+//         swapItems(blockArr[blockIndex].sections, fromIndex, toIndex);
+//     }
+// };
 
-// Swap Rows
-const swapRows = (fromIndex, toIndex, sectionIndex, blockIndex) => {
-    if (blockArr?.[blockIndex]?.sections?.[sectionIndex]?.rows) {
-        swapItems(blockArr[blockIndex].sections[sectionIndex].rows, fromIndex, toIndex);
-    } else {
-        console.warn(`Row swap failed: Invalid section index ${sectionIndex} or block index ${blockIndex}`);
-    }
-};
+// // Swap Rows
+// const swapRows = (fromIndex, toIndex, sectionIndex, blockIndex) => {
+//     if (blockArr?.[blockIndex]?.sections?.[sectionIndex]?.rows) {
+//         swapItems(blockArr[blockIndex].sections[sectionIndex].rows, fromIndex, toIndex);
+//     } else {
+//         console.warn(`Row swap failed: Invalid section index ${sectionIndex} or block index ${blockIndex}`);
+//     }
+// };
 
 
-// Swap Columns
-const swapColumns = (fromIndex, toIndex, sectionIndex, rowIndex, blockIndex) => {
-    if (blockArr?.[blockIndex]?.sections?.[sectionIndex]?.rows?.[rowIndex]?.columns) {
-        swapItems(blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns, fromIndex, toIndex);
-    } else {
-        console.warn(`Column swap failed: Invalid indices - section: ${sectionIndex}, row: ${rowIndex}, block: ${blockIndex}`);
-    }
-};
+// // Swap Columns
+// const swapColumns = (fromIndex, toIndex, sectionIndex, rowIndex, blockIndex) => {
+//     if (blockArr?.[blockIndex]?.sections?.[sectionIndex]?.rows?.[rowIndex]?.columns) {
+//         swapItems(blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns, fromIndex, toIndex);
+//     } else {
+//         console.warn(`Column swap failed: Invalid indices - section: ${sectionIndex}, row: ${rowIndex}, block: ${blockIndex}`);
+//     }
+// };
 
-// Swap Fields (Corrected to move field between columns)
-const swapFields = (fromIndex, toIndex, sectionIndex, rowIndex, fromColumnIndex, toColumnIndex, blockIndex) => {
-    const fromColumn = blockArr?.[blockIndex]?.sections?.[sectionIndex]?.rows?.[rowIndex]?.columns?.[fromColumnIndex];
-    const toColumn = blockArr?.[blockIndex]?.sections?.[sectionIndex]?.rows?.[rowIndex]?.columns?.[toColumnIndex];
+// // Swap Fields (Corrected to move field between columns)
+// const swapFields = (fromIndex, toIndex, sectionIndex, rowIndex, fromColumnIndex, toColumnIndex, blockIndex) => {
+//     const fromColumn = blockArr?.[blockIndex]?.sections?.[sectionIndex]?.rows?.[rowIndex]?.columns?.[fromColumnIndex];
+//     const toColumn = blockArr?.[blockIndex]?.sections?.[sectionIndex]?.rows?.[rowIndex]?.columns?.[toColumnIndex];
 
-    if (fromColumn?.fields && toColumn?.fields) {
-        if (fromColumnIndex !== toColumnIndex) {
-            // Move field between different columns
-            const fieldToMove = fromColumn.fields.splice(fromIndex, 1)[0];
-            toColumn.fields.splice(toIndex, 0, fieldToMove);
-            console.log(`Moved field from column ${fromColumnIndex} to column ${toColumnIndex}`);
-        } else {
-            // Swap fields within the same column
-            swapItems(fromColumn.fields, fromIndex, toIndex);
-        }
-    } else {
-        console.warn(`Field swap failed: Invalid indices - section: ${sectionIndex}, row: ${rowIndex}, fromColumn: ${fromColumnIndex}, toColumn: ${toColumnIndex}, block: ${blockIndex}`);
-    }
-};
+//     if (fromColumn?.fields && toColumn?.fields) {
+//         if (fromColumnIndex !== toColumnIndex) {
+//             // Move field between different columns
+//             const fieldToMove = fromColumn.fields.splice(fromIndex, 1)[0];
+//             toColumn.fields.splice(toIndex, 0, fieldToMove);
+//             console.log(`Moved field from column ${fromColumnIndex} to column ${toColumnIndex}`);
+//         } else {
+//             // Swap fields within the same column
+//             swapItems(fromColumn.fields, fromIndex, toIndex);
+//         }
+//     } else {
+//         console.warn(`Field swap failed: Invalid indices - section: ${sectionIndex}, row: ${rowIndex}, fromColumn: ${fromColumnIndex}, toColumn: ${toColumnIndex}, block: ${blockIndex}`);
+//     }
+// };
 
-// Drag-and-Drop Methods
-const handleDragStart = (event, index, type, blockIndex = null, sectionIndex = null, rowIndex = null, columnIndex = null) => {
-    event.dataTransfer.setData('index', index);
-    event.dataTransfer.setData('type', type);
-    if (blockIndex !== null) event.dataTransfer.setData('blockIndex', blockIndex);
-    if (sectionIndex !== null) event.dataTransfer.setData('sectionIndex', sectionIndex);
-    if (rowIndex !== null) event.dataTransfer.setData('rowIndex', rowIndex);
-    if (columnIndex !== null) event.dataTransfer.setData('columnIndex', columnIndex);
-    console.log(`Dragging ${type} from index ${index}`);
-};
+// // Drag-and-Drop Methods
+// const handleDragStart = (event, index, type, blockIndex = null, sectionIndex = null, rowIndex = null, columnIndex = null) => {
+//     event.dataTransfer.setData('index', index);
+//     event.dataTransfer.setData('type', type);
+//     if (blockIndex !== null) event.dataTransfer.setData('blockIndex', blockIndex);
+//     if (sectionIndex !== null) event.dataTransfer.setData('sectionIndex', sectionIndex);
+//     if (rowIndex !== null) event.dataTransfer.setData('rowIndex', rowIndex);
+//     if (columnIndex !== null) event.dataTransfer.setData('columnIndex', columnIndex);
+//     console.log(`Dragging ${type} from index ${index}`);
+// };
 
-// Handle drag over event (necessary for drop to work)
-const handleDragOver = (event) => {
-    event.preventDefault();
-};
+// // Handle drag over event (necessary for drop to work)
+// const handleDragOver = (event) => {
+//     event.preventDefault();
+// };
 
-// Handle drop event to swap items
-const handleDrop = (event, index, type, blockIndex = null, sectionIndex = null, rowIndex = null, columnIndex = null) => {
-    event.preventDefault();
+// // Handle drop event to swap items
+// const handleDrop = (event, index, type, blockIndex = null, sectionIndex = null, rowIndex = null, columnIndex = null) => {
+//     event.preventDefault();
 
-    const draggedIndex = Number(event.dataTransfer.getData('index'));
-    const draggedType = event.dataTransfer.getData('type');
-    const draggedBlockIndex = Number(event.dataTransfer.getData('blockIndex'));
-    const draggedSectionIndex = Number(event.dataTransfer.getData('sectionIndex'));
-    const draggedRowIndex = Number(event.dataTransfer.getData('rowIndex'));
-    const draggedColumnIndex = Number(event.dataTransfer.getData('columnIndex'));
+//     const draggedIndex = Number(event.dataTransfer.getData('index'));
+//     const draggedType = event.dataTransfer.getData('type');
+//     const draggedBlockIndex = Number(event.dataTransfer.getData('blockIndex'));
+//     const draggedSectionIndex = Number(event.dataTransfer.getData('sectionIndex'));
+//     const draggedRowIndex = Number(event.dataTransfer.getData('rowIndex'));
+//     const draggedColumnIndex = Number(event.dataTransfer.getData('columnIndex'));
 
-    console.log(`Dropping ${draggedType} from index ${draggedIndex} to ${index}`);
+//     console.log(`Dropping ${draggedType} from index ${draggedIndex} to ${index}`);
 
-    if (draggedType === 'section' && type === 'section') {
-        swapSections(draggedIndex, index, draggedBlockIndex);
-    } else if (draggedType === 'row' && type === 'row') {
-        swapRows(draggedIndex, index, draggedSectionIndex, draggedBlockIndex);
-    } else if (draggedType === 'column' && type === 'column') {
-        swapColumns(draggedIndex, index, draggedSectionIndex, draggedRowIndex, draggedBlockIndex);
-    } else if (draggedType === 'field' && type === 'field') {
-        if (draggedColumnIndex !== columnIndex) {
-            swapFields(draggedIndex, index, draggedSectionIndex, draggedRowIndex, draggedColumnIndex, columnIndex, draggedBlockIndex);
-        } else {
-            swapItems(
-                blockArr[draggedBlockIndex].sections[draggedSectionIndex].rows[draggedRowIndex].columns[draggedColumnIndex].fields,
-                draggedIndex,
-                index
-            );
-        }
-    }
-};
+//     if (draggedType === 'section' && type === 'section') {
+//         swapSections(draggedIndex, index, draggedBlockIndex);
+//     } else if (draggedType === 'row' && type === 'row') {
+//         swapRows(draggedIndex, index, draggedSectionIndex, draggedBlockIndex);
+//     } else if (draggedType === 'column' && type === 'column') {
+//         swapColumns(draggedIndex, index, draggedSectionIndex, draggedRowIndex, draggedBlockIndex);
+//     } else if (draggedType === 'field' && type === 'field') {
+//         if (draggedColumnIndex !== columnIndex) {
+//             swapFields(draggedIndex, index, draggedSectionIndex, draggedRowIndex, draggedColumnIndex, columnIndex, draggedBlockIndex);
+//         } else {
+//             swapItems(
+//                 blockArr[draggedBlockIndex].sections[draggedSectionIndex].rows[draggedRowIndex].columns[draggedColumnIndex].fields,
+//                 draggedIndex,
+//                 index
+//             );
+//         }
+//     }
+// };
 
 
 

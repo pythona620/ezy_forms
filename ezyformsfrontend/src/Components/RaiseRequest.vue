@@ -9,7 +9,7 @@
         <div class="container">
             <div v-if="blockArr.length">
                 <RequestPreview :blockArr="blockArr" :formName="selectedData.selectedform"
-                    @updateField="handleFieldUpdate" />
+                    @updateField="handleFieldUpdate" @formValidation="isFormValid = $event" />
                 <!-- @formValidation="isFormValid = $event" -->
                 <div>
                     <div class=" d-flex justify-content-end align-items-center p-3">
@@ -17,7 +17,8 @@
                                     class=" bi bi-x"></i></span>Clear
                             form</button>
                         <!-- :disabled="!isFormValid" -->
-                        <button class="btn btn-dark font-12 " type="submit" @click="raiseRequestSubmission">Raise
+                        <button :disabled="!isFormValid" class="btn btn-dark font-12 " type="submit"
+                            @click="raiseRequestSubmission">Raise
                             Request</button>
                     </div>
                 </div>
@@ -57,7 +58,7 @@ const selectedData = ref({
     selectedform: route.query.selectedForm || ""          // Retrieve from query
 });
 const business_unit = ref(route.query.business_unit || ""); // Retrieve from query
-
+const isFormValid = ref(false);
 const blockArr = ref([])
 const categoryOptions = ref([])
 const employeeData = ref({});

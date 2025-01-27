@@ -14,28 +14,45 @@ export function extractFieldsWithBreaks(data) {
 
           column.fields.forEach((field) => {
             const generatedFieldname = convertLabelToFieldName(field?.label);
+            // Directly push the field to the result
+            result.push({
+              description: "Field",
+              fieldname: generatedFieldname,
+              fieldtype: field.fieldtype,
+              idx: index++, // Assign index
+              label: field.label,
+              reqd: field.reqd ? 1 : 0,
+              value: field.value ? field.value : "",
+              options: (field.fieldtype === "Select" || field.fieldtype === "Check") ? `\n${field.options}` : "", // Add options with a newline if fieldtype is "Select" or "Check"
+            });
+
 
             // Add the field to the result if it's not already added
-            let existingField = result.find(f => f.fieldname === generatedFieldname);
+            // let existingField = result.find(f => f.fieldname === generatedFieldname);
 
-            if (!existingField) {
-              // If the field doesn't exist, add it to the result
-              existingField = {
-                description: "Field",
-                fieldname: generatedFieldname,
-                fieldtype: field.fieldtype,
-                idx: index++, // Assign index
-                label: field.label,
-                reqd: field.reqd ? 1 : 0,
-                value: field.value ? field.value : ""
-              };
-              result.push(existingField);
-            }
+            // if (!existingField) {
+            //   // If the field doesn't exist, add it to the result
+            //   existingField = {
+            //     description: "Field",
+            //     fieldname: generatedFieldname,
+            //     fieldtype: field.fieldtype,
+            //     idx: index++, // Assign index
+            //     label: field.label,
+            //     reqd: field.reqd ? 1 : 0,
+            //     value: field.value ? field.value : "",
+            //     options: field.fieldtype === "Select" || "Check" ? `\n${field.options}` : ""
+            //   };
+            //   result.push(existingField);
+            // }
 
-            // Add options if the field is of type "Select" or "Check"
-            if (field.fieldtype === "Select") {
-              existingField.options = field.options; // Add options to the existing field
-            }
+            // // Add options if the field is of type "Select" or "Check"
+            // if (field.fieldtype === "Select") {
+
+            //   let optionsString = field.options ? `\n${field.options}` : "\n";
+            //   // Insert null at the first index
+            //   existingField.options = optionsString;
+            //   console.log(" Field options === ", existingField.options);
+            // }
 
             // Update previousFieldname for the next field in this column
             previousFieldname = generatedFieldname;

@@ -176,7 +176,7 @@ import GlobalTable from "../../Components/GlobalTable.vue";
 import { callWithErrorHandling, onMounted, ref, computed, watch, reactive } from "vue";
 import PaginationComp from '../../Components/PaginationComp.vue'
 import axiosInstance from '../../shared/services/interceptor';
-import { apis, doctypes } from "../../shared/apiurls";
+import { apis, doctypes, domain } from "../../shared/apiurls";
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
 import { useRouter } from "vue-router";
 import { rebuildToStructuredArray } from "../../shared/services/field_format";
@@ -267,12 +267,22 @@ function downloadPdf() {
     console.log(formDescriptions.value, "selectedForm");
     const dataObj = {
         "form_short_name": formDescriptions.value.form_short_name,
-        "name": formDescriptions.value.name
+        "name": null
     };
 
     axiosInstance.post(apis.download_pdf_form, dataObj)
         .then((response) => {
             console.log(response, "download pdf");
+            let pdfUrl = domain + response.message;
+
+            // Remove 'api' from the URL if present
+            pdfUrl = pdfUrl.replace('/api', '');
+
+            // Create an anchor element to trigger the download
+            const link = document.createElement('a');
+            link.href = pdfUrl;
+            link.download = response.message.split('/').pop(); // Use the file name from the URL
+            link.click();
         })
         .catch((error) => {
             console.error("Error fetching data:", error);

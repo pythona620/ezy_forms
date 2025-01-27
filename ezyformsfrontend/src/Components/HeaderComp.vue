@@ -21,7 +21,8 @@
                         <div class="col-3 pe-1">
                             <div class="d-flex gap-3 justify-content-end align-items-center m-0">
                                 <div class="mb-1">
-                                    <ButtonComp v-if="shouldShowButton"
+                                    <!-- v-if="shouldShowButton" -->
+                                    <ButtonComp
                                         class="btn-outline-primary d-flex justify-content-center align-items-center bg-white text-nowrap font-10"
                                         name="Raise request" data-bs-toggle="modal" data-bs-target="#riaseRequestModal"
                                         @click="raiseRequest" />
@@ -287,10 +288,10 @@ onMounted(() => {
     }
 });
 
-const shouldShowButton = computed(() => {
-    const pathsToMatch = ['/forms/department', '/todo'];
-    return pathsToMatch.some(path => route.path.includes(path));
-});
+// const shouldShowButton = computed(() => {
+//     const pathsToMatch = ['/forms/department', '/todo'];
+//     return pathsToMatch.some(path => route.path.includes(path));
+// });
 const passwordsMismatch = computed(() =>
     new_password.value && confirm_password.value && new_password.value !== confirm_password.value
 );
