@@ -232,9 +232,12 @@
                                                             <div>
                                                                 <h6 class="ps-2 pt-2">
                                                                     {{
-                        blockIndex === 0 ? "Requestor" : "Approver"
+                        blockIndex === 0 ? "Requestor Block" : `Approver
+                                                                    Block ${blockIndex}
+                                                                    `
                     }}
-                                                                    Block
+                                                                    <!-- ${blockIndex++} -->
+
                                                                 </h6>
                                                             </div>
                                                             <div class="d-flex">
@@ -1019,28 +1022,33 @@ function handleSingleSelect() {
 }
 
 function addDesignationBtn() {
+    console.log(selectedBlockIndex.value, "tttttttttt");
+    const block = blockArr[selectedBlockIndex.value];
+    console.log(block);
+    if (!block || !block.sections) {
+        console.error('Error: Invalid block or sections not found.');
+        return; // Prevent further execution
+    }
+
     let xyz = {
         type: selectedBlockIndex.value == 0 ? "requestor" : "approver",
         roles: designationValue.value,
-        fields:
-            blockArr[selectedBlockIndex.value].sections.flatMap(extractFieldnames),
+        fields: block.sections.flatMap(extractFieldnames),
         idx: selectedBlockIndex.value,
     };
 
     // workflowSetup.push(xyz)
 
-    // Check if an object with the same blockIdx already exists in workflowSetup
     const existingIndex = workflowSetup.findIndex((item) => item.idx === xyz.idx);
     if (existingIndex !== -1) {
-        // Replace the existing object
         workflowSetup[existingIndex] = xyz;
     } else {
-        // No duplicate, push the new object
         workflowSetup.push(xyz);
     }
 
     add_Wf_roles_setup();
 }
+
 
 // const getWorkflowSetup = (blockIndex) => {
 //     return workflowSetup.find((setup) => setup.idx === blockIndex);
@@ -1670,7 +1678,7 @@ function add_Wf_roles_setup() {
             if (selectedBlockIndex.value == 0) {
                 toast.success("Requestor Added");
             } else {
-                toast.success("Approver Added");
+                toast.success(`Approver-${selectedBlockIndex.value} Added`);
             }
         });
 }
