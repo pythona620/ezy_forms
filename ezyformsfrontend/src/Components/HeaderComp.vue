@@ -208,7 +208,7 @@ const tabsData = ref([
     { name: 'Forms', icon: 'bi bi-file-earmark-text', route: '/forms' },
     { name: 'Settings', icon: 'bi bi-gear', route: '/settings' },
     { name: 'Archive', icon: 'bi bi-archive', route: '/archived' },
-    { name: 'Form', icon: 'bi bi-file-earmark-text', route: '/create-form' }
+    { name: 'Form Creation', icon: 'bi bi-file-earmark-text', route: '/create-form' }
 ]);
 
 const selectedData = ref({
@@ -241,7 +241,7 @@ const filterObj = ref({
 const filteredTabsData = computed(() => {
     return userDesigination.value.toLowerCase().includes('it')
         ? tabsData.value
-        : tabsData.value.filter(tab => tab.name !== 'Form');
+        : tabsData.value.filter(tab => tab.name !== 'Form Creation');
 });
 function logout() {
     localStorage.removeItem('UserName');
