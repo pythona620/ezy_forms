@@ -31,6 +31,7 @@ import path from "path";
 import { defineConfig, loadEnv } from "vite";
 import vue from "@vitejs/plugin-vue";
 
+
 // Update this import based on how you export proxy options
 // import proxyOptions from "./proxyOptions";
 
