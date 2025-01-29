@@ -2,7 +2,7 @@
     <div>
 
         <div class="position-sticky top-0 stickyheader">
-            <div class="container-fluid">
+            <div class="container-fluid p-0">
                 <div class="headerbackgound mt-2">
                     <div class="row">
                         <div class="col-2">
@@ -14,25 +14,25 @@
                             </div>
                         </div>
                         <div class="col-7">
-                            <div class="mt-2">
+                            <div class="mt-2 ms-2">
                                 <TabsComp :tabs="filteredTabsData" @changeTab="handleTabChange" />
                             </div>
                         </div>
-                        <div class="col-3 pe-1">
+                        <div class="col-3 d-flex justify-content-end align-items-center pe-1">
                             <div class="d-flex gap-3 justify-content-end align-items-center m-0">
-                                <div class="mb-1">
+                                <div class="">
                                     <!-- v-if="shouldShowButton" -->
                                     <ButtonComp
-                                        class="btn-outline-primary d-flex justify-content-center align-items-center bg-white text-nowrap font-10"
+                                        class="btn-outline-primary d-flex justify-content-center align-items-center bg-white m-0 text-nowrap font-10"
                                         name="Raise request" data-bs-toggle="modal" data-bs-target="#riaseRequestModal"
                                         @click="raiseRequest" />
                                 </div>
-                                <div class="mt-1">
+                                <div class="">
 
-                                    <FormFields tag="select" placeholder="" class="mb-3" name="roles" id="roles"
+                                    <FormFields tag="select" placeholder="" class="" name="roles" id="roles"
                                         :Required="false" v-model="business_unit" :options="EzyFormsCompanys" />
                                 </div>
-                                <div class="logooutbtn">
+                                <div class="logooutbtn m-0">
                                     <div class="btn-group dropdown navbar-nav ms-auto">
                                         <button type="button" class="btn border-0 p-0 me-2 mt-0"
                                             data-bs-toggle="dropdown" aria-expanded="false">

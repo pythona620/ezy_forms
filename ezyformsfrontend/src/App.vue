@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="app-div">
     <!-- Conditionally show the loader -->
     <LoaderPage v-if="loadValue"></LoaderPage>
     <section>
@@ -57,5 +57,9 @@ const isFormStepsRoute = computed(() => route.path.includes('/create-form/formst
   .col-12 {
     width: 100%;
   }
+}
+
+.app-div {
+  overflow-x: hidden;
 }
 </style>
