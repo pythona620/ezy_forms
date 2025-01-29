@@ -1,3 +1,5 @@
+//"IN THE DEVELOPING MODE NEED TO UNCOMMENT THE BELOW CODE"
+
 // import path from 'path';
 // import { defineConfig } from 'vite';
 // import vue from '@vitejs/plugin-vue';
@@ -23,7 +25,7 @@
 // });
 
 
-
+// "IN THE PODUCTION MODE NEED TO UNCOMMENT THE BELOW CODE" 
 
 import path from "path";
 import { defineConfig, loadEnv } from "vite";
