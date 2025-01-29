@@ -10,81 +10,8 @@
             </p> -->
             </div>
             <div class="d-flex gap-2 align-items-center">
-                <div class="d-flex align-items-center">
-                    <div>
-                        <div class="me-2">
-                            <span v-if="filterOnModal.department_name && filterOnModal.applieddepartment_name"
-                                class="process-date font-11 m-0">
-                                {{ filterOnModal.department_name }}
-                                <span v-if="filterOnModal.department_name"
-                                    class="badge badge-icon rounded-3   text-white "
-                                    @click="clearFilter('department_name')">
-                                    <i class="ri-close-line close-icon text-dark rounded-3"></i>
-                                </span>
-                            </span>
-                            <span v-if="filterOnModal.department_code && filterOnModal.applieddepartment_code"
-                                class="process-date font-11 m-0">
-                                {{ filterOnModal.department_code }}
-                                <span v-if="filterOnModal.department_code"
-                                    class="badge badge-icon rounded-3   text-white "
-                                    @click="clearFilter('department_code')">
-                                    <i class="ri-close-line close-icon text-dark rounded-3"></i>
-                                </span>
-                            </span>
-                        </div>
-                    </div>
-                    <div>
-                        <button type="button" class=" filterbtn d-flex align-items-center position-relative "
-                            data-bs-toggle="modal" data-bs-target="#fileterModal">
-                            <span> <i class="ri-filter-2-line"></i></span>
-                            <span v-if="appliedFiltersCount !== 0" class=" badge badge-light colorappiled ">
-                                ( {{ appliedFiltersCount }})
-                            </span>
-                        </button>
-
-                    </div>
-                </div>
-                <div class="modal fade" id="fileterModal" tabindex="-1" aria-labelledby="fileterModalLabel"
-                    aria-hidden="true">
-                    <div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-
-                            <div class="modal-body">
-                                <div class="row">
-                                    <div class="col-6">
-                                        <label class="font-13 ps-1" for="Requested">Department Code:</label>
-                                        <FormFields class="mb-3" tag="input" type="search" name="Requested"
-                                            id="Requested" placeholder="Search"
-                                            v-model="filterOnModal.department_code" />
-                                    </div>
-
-                                    <div class="col-6">
-                                        <label class="font-13 ps-1 fw-medium" for="dept">Requested Dept:</label>
-                                        <FormFields tag="select" placeholder="Select Department" class="mb-3"
-                                            name="dept" v-model="filterOnModal.department_name" id="dept"
-                                            :Required="false" :options="designiations" />
-                                    </div>
 
 
-
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="cancelfilter border-0 text-nowrap font-10 "
-                                    @click="resetFilters" data-bs-dismiss="modal"><span
-                                        class="font-14 me-1">x</span>Cancel
-                                    Filter</button>
-
-                                <button type="button"
-                                    class="applyfilter text-nowrap border-0 btn btn-dark text-white font-10 d-flex justify-content-center align-items-center"
-                                    data-bs-dismiss="modal" @click="applyFilters"><span class="font-16 me-1"><i
-                                            class="bi bi-check2 "></i></span>
-                                    Apply
-                                    Filter</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
                 <div class="d-flex align-items-center ">
 
                     <button type="button" class="btn btn-dark buttoncomp CreateDepartments d-flex align-items-center "
@@ -155,9 +82,10 @@
 
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="cancelfilter border-1 text-nowrap font-10 d-flex justify-content-center align-items-center"
+                                <button type="button"
+                                    class="cancelfilter border-1 text-nowrap font-10 d-flex justify-content-center align-items-center"
                                     @click="cancelCreate" data-bs-dismiss="modal"><span class="font-16 me-1"><i
-                                        class="bi bi-x "></i></span>Cancel
+                                            class="bi bi-x "></i></span>Cancel
                                 </button>
 
                                 <button type="button"
@@ -173,7 +101,8 @@
         </div>
         <div class="mt-2">
             <GlobalTable :tHeaders="tableheaders" :tData="tableData" @actionClicked="actionCreated" isAction='true'
-                :actions="actions" actionType="dropdown" isCheckbox="true" />
+                :actions="actions" actionType="dropdown" isCheckbox="true" isFiltersoption="true"
+                :field-mapping="fieldMapping" @updateFilters="inLineFiltersData" />
             <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
                 @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
         </div>
@@ -252,6 +181,7 @@ const editIndex = ref(null);
 const editCategory = ref("");
 const categoriesData = ref([])
 const categoriesDataEdit = ref({ ezy_departments_items: [] });
+const designiations = ref([]);
 const actions = ref(
     [
         { name: 'View Categories', icon: 'fa-solid fa-eye' },
@@ -300,12 +230,21 @@ function actionCreated(rowData, actionEvent) {
     }
 }
 const tableheaders = ref([
+    { th: "Name", td_key: "name" },
     { th: "Department Code", td_key: "department_code" },
     { th: "Department Name", td_key: "department_name" },
     { th: "Business Unit", td_key: "business_unit" },
     { th: "Status", td_key: "docstatus" },
 
 ])
+const fieldMapping = ref({
+    // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
+    // invoice_date: { type: "date" },
+    department_code: { type: "input" },
+    department_name: { type: "input" },
+    form_category: { type: "select", options: ["Software", "Hardware"] },
+
+});
 const CreateDepartments = ref({
     department_code: "",
     department_name: "",
@@ -324,37 +263,7 @@ const filterOnModal = reactive({
 
 
 })
-const appliedFiltersCount = computed(() => {
-    return [
-        { value: filterOnModal.department_code, applied: filterOnModal.applieddepartment_code },
-        {
-            value: filterOnModal.department_name,
-            applied: filterOnModal.applieddepartment_name,
-        },
 
-
-    ].filter((filter) => filter.applied && filter.value).length;
-});
-function resetFilters() {
-    filterOnModal.value = {
-        department_name: "",
-        department_code: "",
-       
-    };
-}
-
-function clearFilter(type) {
-    if (type === "department_name") {
-        filterOnModal.department_name = "";
-        filterOnModal.applieddepartment_name = false;
-    } else if (type === "department_code") {
-        filterOnModal.department_code = "";
-        filterOnModal.applieddepartment_code = false;
-    }
-
-
-    applyFilters();
-}
 watch(
     businessUnit,
     (newVal) => {
@@ -424,27 +333,59 @@ function saveCategories() {
             console.error("Error saving categories:", error);
         });
 }
-function applyFilters() {
 
-    filterOnModal.applieddepartment_code = Boolean(filterOnModal.department_code);
-    filterOnModal.applieddepartment_name = Boolean(filterOnModal.department_name)
+function inLineFiltersData(searchedData) {
+    console.log("Applied searchedData:", searchedData);
 
-    deptData();
+    //   // Initialize filters array
+    const filters = [];
+
+    //   // Loop through the tableheaders and build dynamic filters based on the `searchedData`
+    tableheaders.value.forEach((header) => {
+        const key = header.td_key;
+
+        //     // If there is a match for the key in searchedData, create a 'like' filter
+        if (searchedData[key]) {
+            filters.push(key, "like", `%${searchedData[key]}%`);
+        }
+        //     // Add filter for selected option
+        //     if (key === "selectedOption" && searchedData.selectedOption) {
+        //       filters.push([key, "=", searchedData.selectedOption]);
+        //     }
+        //     // Special handling for 'invoice_date' to create a 'Between' filter (if it's a date)
+        //     if (key === "invoice_date" && searchedData[key]) {
+        //       filters.push([key, "Between", [searchedData[key], searchedData[key]]]);
+        //     }
+
+        //     // Special handling for 'invoice_type' or 'irn_generated' to create an '=' filter
+        //     if ((key === "invoice_type" || key === "credit_irn_generated") && searchedData[key]) {
+        //       filters.push([key, "=", searchedData[key]]);
+        //     }
+    });
+
+    //   // Log filters to verify
+    //   console.log("Dynamic Filters:", filters);
+
+    //   // Once the filters are built, pass them to fetchData function
+    if (filters.length) {
+        deptData(filters);
+    }
+    else {
+        deptData();
+    }
+    //   fetchTotalRecords(filters);
 }
 
 
-const designiations = ref([]);
 
-function deptData() {
+function deptData(data) {
     const filters = [
         ["business_unit", "like", `%${CreateDepartments.value.business_unit}%`]
     ];
-    if (filterOnModal.department_code) {
-        filters.push(["department_code", "like", `%${filterOnModal.department_code}%`]);
+    if (data) {
+        filters.push(data)
     }
-    if (filterOnModal.department_name) {
-        filters.push(["department_name", "like", `%${filterOnModal.department_name}%`]);
-    }
+
 
 
     const queryParams = {

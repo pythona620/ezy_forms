@@ -23,11 +23,11 @@ export function extractFieldsWithBreaks(data) {
               label: field.label,
               reqd: field.reqd ? 1 : 0,
               value: field.value ? field.value : "",
-              options: field.options
-                ? (field.fieldtype === "Select" || field.fieldtype === "Table MultiSelect"
-                  ? `\n${field.options}`
-                  : field.options)
-                : "", // Add options with a newline if fieldtype is "Select" or "Check"
+              // options: field.options  ? (field.fieldtype === "Select" || field.fieldtype === "Table MultiSelect" ? `\n${field.options}` : field.options) : "",
+              ...(["Select", "Table MultiSelect"].includes(field.fieldtype) && field.options
+                ? { options: field.options.startsWith("\n") ? field.options : `\n${field.options}` }
+                : {}),
+              // Add options with a newline if fieldtype is "Select" or "Check"
             });
 
 
@@ -451,6 +451,7 @@ export function validateFields(flatArray) {
         label: item.label,
         message: `Field "${item.label}" at index ${index} has no valid fieldtype. Please select a fieldtype.`
       });
+      console.log(flatArray);
     }
   });
 

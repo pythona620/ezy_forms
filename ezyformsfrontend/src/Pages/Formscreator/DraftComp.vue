@@ -6,64 +6,8 @@
                 <p class="m-0 font-11 pt-1">{{ totalRecords }} forms available</p>
             </div>
             <div class="d-flex gap-2 align-items-center">
-                <div>
-                    <!-- <FormFields labeltext="" class="" tag="input" type="search" placeholder="Search Form Name"
-                        name="Value" id="Value" v-model="filterObj.search" @input="fetchTable()" /> -->
-                    <div class="me-2">
-                        <span v-if="filterOnModal.form_name && filterOnModal.appliedform_name"
-                            class="process-date font-12 m-0">
-                            {{ filterOnModal.form_name }}
-                            <span v-if="filterOnModal.form_name" class="badge badge-icon rounded-3   text-white "
-                                @click="clearFilter('form_name')">
-                                <i class="ri-close-line close-icon text-dark rounded-3"></i>
-                            </span>
-                        </span>
-                        <span v-if="filterOnModal.form_category && filterOnModal.appliedform_category"
-                            class="process-date font-12 m-0">
-                            {{ filterOnModal.form_category }}
-                            <span v-if="filterOnModal.form_category" class="badge badge-icon rounded-3   text-white "
-                                @click="clearFilter('form_category')">
-                                <i class="ri-close-line close-icon text-dark rounded-3"></i>
-                            </span>
-                        </span>
-                        <span v-if="filterOnModal.accessible_departments && filterOnModal.appliedaccessible_departments"
-                            class="process-date font-12 m-0">
-                            {{ filterOnModal.accessible_departments }}
-                            <span v-if="filterOnModal.accessible_departments"
-                                class="badge badge-icon rounded-3   text-white "
-                                @click="clearFilter('accessible_departments')">
-                                <i class="ri-close-line close-icon text-dark rounded-3"></i>
-                            </span>
-                        </span>
-                        <span v-if="filterOnModal.active && filterOnModal.appliedStatus"
-                            class="process-date font-12 m-0">
-                            {{ filterOnModal.active }}
-                            <span v-if="filterOnModal.active" class="badge badge-icon rounded-3   text-white "
-                                @click="clearFilter('active')">
-                                <i class="ri-close-line close-icon text-dark rounded-3"></i>
-                            </span>
-                        </span>
-                        <span v-if="filterOnModal.owner_of_the_form && filterOnModal.appledowner_of_the_form"
-                            class="process-date font-12 m-0">
-                            {{ filterOnModal.owner_of_the_form }}
-                            <span v-if="filterOnModal.owner_of_the_form"
-                                class="badge badge-icon rounded-3   text-white "
-                                @click="clearFilter('owner_of_the_form')">
-                                <i class="ri-close-line close-icon text-dark rounded-3"></i>
-                            </span>
-                        </span>
-                    </div>
-                </div>
-                <div>
-                    <button type="button" class=" filterbtn d-flex align-items-center position-relative "
-                        data-bs-toggle="modal" data-bs-target="#exampleModal">
-                        <span> <i class="ri-filter-2-line"></i></span>
-                        <span v-if="appliedFiltersCount !== 0" class=" badge badge-light colorappiled ">
-                            ( {{ appliedFiltersCount }})
-                        </span>
-                    </button>
 
-                </div>
+
 
                 <!-- <div class="d-flex align-items-center ">
                     <ButtonComp class="buttoncomp" @click="formCreation()" name="Create form"></ButtonComp>
@@ -74,65 +18,12 @@
         <div class="mt-2">
 
             <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" actionType="dropdown"
-                @actionClicked="actionCreated" :actions="actions" isCheckbox="true" />
+                @actionClicked="actionCreated" isFiltersoption="true" :field-mapping="fieldMapping" :actions="actions"
+                @updateFilters="inLineFiltersData" isCheckbox="true" />
             <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
                 @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
         </div>
-        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-xl">
-                <div class="modal-content">
 
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="col-4">
-                                <label class="font-13 ps-1" for="Requested">Form Name:</label>
-                                <FormFields class="mb-3" tag="input" type="search" name="Requested" id="Requested"
-                                    placeholder="Search" v-model="filterOnModal.form_name" />
-                            </div>
-                            <div class="col-4">
-                                <label class="font-13 ps-1" for="dept">Form Category:</label>
-                                <FormFields tag="select" placeholder="Form Category" class="mb-3" name="dept"
-                                    v-model="filterOnModal.form_category" id="dept" :Required="false"
-                                    :options="formCategory" />
-                            </div>
-                            <div class="col-4">
-                                <label class="font-13 ps-1" for="dept">Accessible departments:</label>
-                                <!-- <FormFields tag="select" placeholder="Accessible departments" class="mb-3"
-                                            name="dept" v-model="filterOnModal.accessible_departments" id="dept" :Required="false"
-                                            :options="accessibleDepartments" /> -->
-                                <FormFields class="" tag="input" type="search" name="Requested" id="Requested"
-                                    placeholder="Search" v-model="filterOnModal.accessible_departments" />
-                                <span class="m-0 font-10 ps-2">Note:Please seperate departments with commas</span>
-
-                            </div>
-                            <div class="col-4">
-                                <label class="font-13 ps-1" for="dept">Status:</label>
-                                <FormFields tag="select" placeholder="Status" class="mb-3" name="dept"
-                                    v-model="filterOnModal.active" id="dept" :Required="false"
-                                    :options="['Active', 'Draft']" />
-                            </div>
-                            <div class="col-4">
-                                <label class="font-13 ps-1" for="dept">Owner OF Form:</label>
-                                <FormFields tag="select" placeholder="Owner Of The Form" class="mb-3" name="dept"
-                                    v-model="filterOnModal.owner_of_the_form" id="dept" :Required="false"
-                                    :options="ownerForms" />
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="cancelfilter border-0 text-nowrap font-10 " @click="resetFilters"
-                            data-bs-dismiss="modal"><span class="font-14 me-1">x</span>Cancel Filter</button>
-
-                        <button type="button"
-                            class="applyfilter text-nowrap border-0 btn btn-dark text-white font-10 d-flex justify-content-center align-items-center"
-                            data-bs-dismiss="modal" @click="applyFilters"><span class="font-16 me-1"><i
-                                    class="bi bi-check2 "></i></span>
-                            Apply
-                            Filter</button>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <FormPreview :blockArr="selectedForm" :formDescriptions="formDescriptions" />
 
@@ -140,8 +31,7 @@
     </div>
 </template>
 <script setup>
-import FormFields from "../../Components/FormFields.vue";
-import ButtonComp from "../../Components/ButtonComp.vue";
+
 import GlobalTable from "../../Components/GlobalTable.vue";
 import { callWithErrorHandling, onMounted, ref, computed, watch, reactive } from "vue";
 import PaginationComp from '../../Components/PaginationComp.vue'
@@ -153,7 +43,13 @@ import { rebuildToStructuredArray } from "../../shared/services/field_format";
 import FormPreview from '../../Components/FormPreview.vue'
 
 const totalRecords = ref(0);
-
+const formDescriptions = ref({})
+const tableData = ref([]);
+const formCategory = ref([]);
+const accessibleDepartments = ref([]);
+const ownerForms = ref([])
+const router = useRouter();
+const selectedForm = ref(null);
 const businessUnit = computed(() => {
     return EzyBusinessUnit.value;
 });
@@ -162,7 +58,9 @@ onMounted(() => {
     // fetchTable()
 
 })
-const selectedForm = ref(null);
+
+
+
 function actionCreated(rowData, actionEvent) {
     if (actionEvent.name === 'View form') {
         if (rowData?.form_json) {
@@ -196,87 +94,7 @@ const actions = ref(
         { name: 'In-active this form', icon: 'fa-solid fa-ban' }
     ]
 )
-const formDescriptions = ref({})
-const tableData = ref([]);
 
-const filterOnModal = reactive({
-    appliedform_name: false,
-    appliedform_category: false,
-    appliedaccessible_departments: false,
-    appliedStatus: false,
-    appledowner_of_the_form: false,
-    form_name: '',
-    form_category: '',
-    accessible_departments: '',
-    active: '',
-    owner_of_the_form: ''
-})
-const appliedFiltersCount = computed(() => {
-    return [
-        { value: filterOnModal.form_category, applied: filterOnModal.appliedform_category },
-        {
-            value: filterOnModal.form_name,
-            applied: filterOnModal.appliedform_name,
-        },
-        {
-            value: filterOnModal.active,
-            applied: filterOnModal.appliedStatus,
-        },
-        {
-            value: filterOnModal.accessible_departments,
-            applied: filterOnModal.appliedaccessible_departments,
-        },
-        {
-            value: filterOnModal.owner_of_the_form,
-            applied: filterOnModal.appledowner_of_the_form,
-        },
-
-
-    ].filter((filter) => filter.applied && filter.value).length;
-});
-function clearFilter(type) {
-    if (type === "form_name") {
-        filterOnModal.form_name = "";
-        filterOnModal.appliedform_name = false;
-    } else if (type === "form_category") {
-        filterOnModal.form_category = "";
-        filterOnModal.appliedform_category = false;
-
-    }
-    else if (type === "accessible_departments") {
-        filterOnModal.accessible_departments = "";
-        filterOnModal.appliedaccessible_departments = false;
-
-    }
-    else if (type === "active") {
-        filterOnModal.active = "";
-        filterOnModal.appliedStatus = false;
-
-    }
-    else if (type === "owner_of_the_form") {
-        filterOnModal.owner_of_the_form = "";
-        filterOnModal.appledowner_of_the_form = false;
-
-    }
-
-
-    applyFilters();
-}
-function applyFilters() {
-    filterOnModal.appliedform_name = Boolean(filterOnModal.form_name);
-    filterOnModal.appliedform_category = Boolean(filterOnModal.form_category);
-    filterOnModal.appliedaccessible_departments = Boolean(filterOnModal.accessible_departments);
-    filterOnModal.appliedStatus = Boolean(filterOnModal.active);
-    filterOnModal.appledowner_of_the_form = Boolean(filterOnModal.owner_of_the_form);
-
-
-
-
-    // filterOnModal.applieddepartment_code=Boolean(filterOnModal.department_code);
-    // filterOnModal.applieddepartment_name=Boolean(filterOnModal.department_name)
-
-    fetchTable()
-}
 const filterObj = ref({
     limit_start: 0,
     limitPageLength: 100,
@@ -309,10 +127,17 @@ const tableheaders = ref([
     { th: "Form category", td_key: "form_category" },
     { th: "Owner of form", td_key: "owner_of_the_form" },
     { th: "Accessible departments", td_key: "accessible_departments" },
-    { th: "Status", td_key: "active" },
+    { th: "Status", td_key: "form_status" },
 ]);
+const fieldMapping = ref({
+    // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
+    // invoice_date: { type: "date" },
+    form_category: { type: "select", options: ["Software", "Hardware"] },
+    name: { type: "input" },
+    owner_of_the_form: { type: "input" }
 
-const router = useRouter();
+});
+
 function formCreation(item = null) {
     if (item == null) {
         router.push({ name: "FormStepper" });
@@ -339,40 +164,61 @@ const PaginationLimitStart = ([itemsPerPage, start]) => {
 
 };
 
-function resetFilters() {
-    filterOnModal.value = {
-        Requested_id: "",
-        Requested_dept: "",
-        Owner_OF_Form: "",
-        Form_Category: "",
-        Form_Name: "",
-        Requested_Period: "",
-        Approval_status: "",
-        RequestedId: ""
-    };
+
+
+function inLineFiltersData(searchedData) {
+    console.log("Applied searchedData:", searchedData);
+
+    //   // Initialize filters array
+    const filters = [];
+
+    //   // Loop through the tableheaders and build dynamic filters based on the `searchedData`
+    tableheaders.value.forEach((header) => {
+        const key = header.td_key;
+
+        //     // If there is a match for the key in searchedData, create a 'like' filter
+        if (searchedData[key]) {
+            filters.push(key, "like", `%${searchedData[key]}%`);
+        }
+        //     // Add filter for selected option
+        //     if (key === "selectedOption" && searchedData.selectedOption) {
+        //       filters.push([key, "=", searchedData.selectedOption]);
+        //     }
+        //     // Special handling for 'invoice_date' to create a 'Between' filter (if it's a date)
+        //     if (key === "invoice_date" && searchedData[key]) {
+        //       filters.push([key, "Between", [searchedData[key], searchedData[key]]]);
+        //     }
+
+        //     // Special handling for 'invoice_type' or 'irn_generated' to create an '=' filter
+        //     if ((key === "invoice_type" || key === "credit_irn_generated") && searchedData[key]) {
+        //       filters.push([key, "=", searchedData[key]]);
+        //     }
+    });
+    console.log(filters.length == 0, "------------filters--------");
+
+    //   // Log filters to verify
+    //   console.log("Dynamic Filters:", filters);
+
+    //   // Once the filters are built, pass them to fetchData function
+    if (filters.length) {
+        fetchTable(filters);
+    }
+    else {
+        fetchTable();
+    }
+    //   fetchTotalRecords(filters);
 }
-const formCategory = ref([]);
-const accessibleDepartments = ref([]);
-const ownerForms = ref([])
-function fetchTable() {
+
+
+
+
+function fetchTable(data) {
     const filters = [
         ["business_unit", "like", `%${filterObj.value.business_unit}%`],
         ["form_status", "=", "Draft"]
     ];
-    if (filterOnModal.form_name) {
-        filters.push(["form_name", "like", `%${filterOnModal.form_name}%`]);
-    }
-    if (filterOnModal.form_category) {
-        filters.push(["form_category", "like", `${filterOnModal.form_category}`]);
-    }
-    if (filterOnModal.accessible_departments) {
-        filters.push(["accessible_departments", "like", `${filterOnModal.accessible_departments}`]);
-    }
-    if (filterOnModal.active) {
-        filters.push(["active", "like", `${filterOnModal.active}`]);
-    }
-    if (filterOnModal.owner_of_the_form) {
-        filters.push(["owner_of_the_form", "like", filterOnModal.owner_of_the_form]);
+    if (data) {
+        filters.push(data)
     }
 
     const queryParams = {

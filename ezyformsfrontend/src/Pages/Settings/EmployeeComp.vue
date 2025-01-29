@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div class="d-flex justify-content-between align-items-center ">
+        <div class="d-flex justify-content-between align-items-center p-2">
             <div>
                 <h1 class="m-0 font-13">
                     User Management
@@ -9,218 +9,81 @@
                 374 users
             </p> -->
             </div>
-            <div class="d-flex gap-2 align-items-center">
-                <div class="d-flex align-items-center">
-                    <div class="me-2">
-                        <span v-if="filterOnModal.emp_code && filterOnModal.appliedeEmp_code"
-                            class="process-date font-12 m-0">
-                            {{ filterOnModal.emp_code }}
-                            <span v-if="filterOnModal.emp_code" class="badge badge-icon rounded-3   text-white "
-                                @click="clearFilter('emp_code')">
-                                <i class="ri-close-line close-icon text-dark rounded-3"></i>
-                            </span>
-                        </span>
+            <div class="d-flex align-items-center ">
+                <button type="button" class="btn btn-dark buttoncomp CreateDepartments d-flex align-items-center "
+                    data-bs-toggle="modal" data-bs-target="#createDepartments" @click="createEmplBtn">
+                    Create Employee
+                </button>
+            </div>
+            <div class="modal fade" id="createDepartments" data-bs-backdrop="static" tabindex="-1"
+                data-bs-keyboard="false" aria-labelledby="createDepartmentsLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="createDepartmentsLabel">Ezy Employee</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" @click="cancelCreate"
+                                aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="container-fluid">
+                                <div class=" row">
+                                    <div class=" col">
+                                        <label class="font-13 ps-1" for="emp_code">Emp code</label>
+                                        <FormFields class="mb-3" tag="input" type="text" name="emp_code" id="emp_code"
+                                            placeholder="Enter Emp code" v-model="createEmployee.emp_code" />
+                                        <label class="font-13 ps-1" for="emp_name">Emp Name</label>
+                                        <FormFields class="mb-3" tag="input" type="text" name="emp_name" id="emp_name"
+                                            placeholder="Enter Emp Name" v-model="createEmployee.emp_name" />
 
-                        <span v-if="filterOnModal.designation && filterOnModal.applieddesignation"
-                            class="process-date font-12 m-0"> {{
-                            filterOnModal.designation }}
-                            <span v-if="filterOnModal.designation" class="badge badge-icon rounded-3   text-white "
-                                @click="clearFilter('designation')">
-                                <i class="ri-close-line close-icon text-dark rounded-3"></i>
-                            </span>
-                        </span>
-                        <span v-if="filterOnModal.department && filterOnModal.applieddepartment"
-                            class="process-date font-12 m-0"> {{
-                            filterOnModal.department }}
-                            <span v-if="filterOnModal.department" class="badge badge-icon rounded-3   text-white "
-                                @click="clearFilter('department')">
-                                <i class="ri-close-line close-icon text-dark rounded-3"></i>
-                            </span>
-                        </span>
-                        <span v-if="filterOnModal.emp_mail_id && filterOnModal.appliedEmp_mail_id"
-                            class="process-date font-12 m-0"> {{
-                            filterOnModal.emp_mail_id }}
-                            <span v-if="filterOnModal.emp_mail_id" class="badge badge-icon rounded-3   text-white "
-                                @click="clearFilter('emp_mail_id')">
-                                <i class="ri-close-line close-icon text-dark rounded-3"></i>
-                            </span>
-                        </span>
-                        <span v-if="filterOnModal.emp_code && filterOnModal.appliedeEmp_code"
-                            class="process-date font-12 m-0"> {{
-                            filterOnModal.emp_name }}
-                            <span v-if="filterOnModal.emp_name" class="badge badge-icon rounded-3   text-white "
-                                @click="clearFilter('emp_name')">
-                                <i class="ri-close-line close-icon text-dark rounded-3"></i>
-                            </span>
-                        </span>
-                        <span v-if="filterOnModal.reporting_designation && filterOnModal.appliedreporting_designation"
-                            class="process-date font-12 m-0"> {{
-                            filterOnModal.reporting_designation }}
-                            <span v-if="filterOnModal.reporting_designation"
-                                class="badge badge-icon rounded-3   text-white "
-                                @click="clearFilter('reporting_designation')">
-                                <i class="ri-close-line close-icon text-dark rounded-3"></i>
-                            </span>
-                        </span>
-                        <span v-if="filterOnModal.reporting_to && filterOnModal.appliedreporting_to"
-                            class="process-date font-12 m-0"> {{
-                            filterOnModal.reporting_to }}
-                            <span v-if="filterOnModal.reporting_to" class="badge badge-icon rounded-3   text-white "
-                                @click="clearFilter('reporting_to')">
-                                <i class="ri-close-line close-icon text-dark rounded-3"></i>
-                            </span>
-                        </span>
-                    </div>
-                    <div>
-                        <button type="button" class=" filterbtn d-flex align-items-center position-relative "
-                            data-bs-toggle="modal" data-bs-target="#fileterModal">
-                            <span> <i class="ri-filter-2-line"></i></span>
-                            <span v-if="appliedFiltersCount !== 0" class=" badge badge-light colorappiled ">
-                                ( {{ appliedFiltersCount }})
-                            </span>
-                        </button>
-
-
-                    </div>
-                </div>
-                <div class="modal fade" id="fileterModal" tabindex="-1" aria-labelledby="fileterModalLabel"
-                    aria-hidden="true">
-                    <div class="modal-dialog modal-xl">
-                        <div class="modal-content">
-
-                            <div class="modal-body">
-                                <div class="row">
-                                    <div class="col-3">
-                                        <label class="font-13 ps-1" for="Employee">Employee Name:</label>
-                                        <FormFields class="mb-3" tag="input" type="search" name="Employee" id="Employee"
-                                            placeholder="Search" v-model="filterOnModal.emp_name" />
-                                    </div>
-                                    <div class="col-3">
-                                        <label class="font-13 ps-1" for="Requested">Employee code:</label>
-                                        <FormFields class="mb-3" tag="input" type="search" name="Employee" id="Employee"
-                                            placeholder="Search" v-model="filterOnModal.emp_code" />
-                                    </div>
-                                    <div class="col-3">
-                                        <label class="font-13 ps-1" for="emp_mail_id">Employee mail:</label>
-                                        <FormFields class="mb-3" tag="input" type="search" name="emp_mail_id"
-                                            id="emp_mail_id" placeholder="Search" v-model="filterOnModal.emp_mail_id" />
-                                    </div>
-
-                                    <div class="col-3">
-                                        <label class="font-13 ps-1" for="dept">Employee Department:</label>
+                                        <label class="font-13 ps-1" for="emp_mail_id">Emp Mail ID</label>
+                                        <FormFields class="mb-3" tag="input" type="text" name="emp_mail_id"
+                                            id="emp_mail_id" placeholder="Enter Email"
+                                            v-model="createEmployee.emp_mail_id" />
+                                        <label class="font-13 ps-1 fw-medium" for="dept">Departments</label>
                                         <FormFields tag="select" placeholder="Select Department" class="mb-3"
-                                            name="dept" v-model="filterOnModal.department" id="dept" :Required="false"
+                                            name="dept" v-model="createEmployee.department" id="dept" :Required="false"
                                             :options="departmentsList" />
                                     </div>
-                                    <div class="col-3">
-                                        <label class="font-13 ps-1" for="dept">Employee Desigination:</label>
-                                        <FormFields tag="select" placeholder="Select Desigination" class="mb-3"
-                                            name="dept" v-model="filterOnModal.designation" id="dept" :Required="false"
-                                            :options="designiations" />
-                                    </div>
-                                    <div class="col-3">
-                                        <label class="font-13 ps-1" for="Requested">Reporting To:</label>
-                                        <FormFields tag="select" placeholder="Reporting To" class="mb-3" name="dept"
-                                            v-model="filterOnModal.reporting_to" id="dept" :Required="false"
-                                            :options="reportingTo" />
-                                    </div>
-                                    <div class="col-3">
-                                        <label class="font-13 ps-1" for="Requested">Reporting Desigination:</label>
-                                        <FormFields tag="select" placeholder="Reporting To" class="mb-3" name="dept"
-                                            v-model="filterOnModal.reporting_designation" id="dept" :Required="false"
-                                            :options="reportingDesigination" />
-                                    </div>
-
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="cancelfilter border-0 text-nowrap font-10 "
-                                    @click="resetFilters" data-bs-dismiss="modal"><span
-                                        class="font-14 me-1">x</span>Cancel
-                                    Filter</button>
-
-                                <button type="button"
-                                    class="applyfilter text-nowrap border-0 btn btn-dark text-white font-10 d-flex justify-content-center align-items-center"
-                                    data-bs-dismiss="modal" @click="applyFilters"><span class="font-16 me-1"><i
-                                            class="bi bi-check2 "></i></span>
-                                    Apply
-                                    Filter</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="d-flex align-items-center ">
-                    <button type="button" class="btn btn-dark buttoncomp CreateDepartments d-flex align-items-center "
-                        data-bs-toggle="modal" data-bs-target="#createDepartments" @click="createEmplBtn">
-                        Create Employee
-                    </button>
-                </div>
-                <div class="modal fade" id="createDepartments" data-bs-backdrop="static" tabindex="-1"
-                    data-bs-keyboard="false" aria-labelledby="createDepartmentsLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="createDepartmentsLabel">Ezy Employee</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" @click="cancelCreate"
-                                    aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <div class="container-fluid">
-                                    <div class=" row">
-                                        <div class=" col">
-                                            <label class="font-13 ps-1" for="emp_code">Emp code</label>
-                                            <FormFields class="mb-3" tag="input" type="text" name="emp_code"
-                                                id="emp_code" placeholder="Enter Emp code"
-                                                v-model="createEmployee.emp_code" />
-                                            <label class="font-13 ps-1" for="emp_name">Emp Name</label>
-                                            <FormFields class="mb-3" tag="input" type="text" name="emp_name"
-                                                id="emp_name" placeholder="Enter Emp Name"
-                                                v-model="createEmployee.emp_name" />
-
-                                            <label class="font-13 ps-1" for="emp_mail_id">Emp Mail ID</label>
-                                            <FormFields class="mb-3" tag="input" type="text" name="emp_mail_id"
-                                                id="emp_mail_id" placeholder="Enter Email"
-                                                v-model="createEmployee.emp_mail_id" />
-                                            <label class="font-13 ps-1 fw-medium" for="dept">Departments</label>
-                                            <FormFields tag="select" placeholder="Select Department" class="mb-3"
-                                                name="dept" v-model="createEmployee.department" id="dept"
-                                                :Required="false" :options="departmentsList" />
-                                        </div>
-                                        <div class=" col">
-                                            <label class="font-13 ps-1" for="Designation">Designation</label>
-                                            <!-- <FormFields class="mb-3" tag="input" type="text" name="Designation"
+                                    <div class=" col">
+                                        <label class="font-13 ps-1" for="Designation">Designation</label>
+                                        <!-- <FormFields class="mb-3" tag="input" type="text" name="Designation"
                                                 id="Designation" placeholder="Enter Designation"
                                                 v-model="createEmployee.designation" /> -->
-                                            <FormFields tag="select" placeholder="Select Desigination" class="mb-3"
-                                                name="Designation" v-model="createEmployee.designation" id="dept"
-                                                :Required="false" :options="designiations" />
-                                            <label class="font-13 ps-1" for="reporting_to">Reporting To</label>
-                                            <FormFields class="mb-3" tag="input" type="text" name="reporting_to"
-                                                id="reporting_to" placeholder="Enter Reporting To"
-                                                v-model="createEmployee.reporting_to" />
-                                            <label class="font-13 ps-1" for="reporting_designation">Reporting
-                                                Designation</label>
-                                            <FormFields class="mb-3" tag="input" type="text"
-                                                name="reporting_designation" id="reporting_designation"
-                                                placeholder="Enter Reporting Designation"
-                                                v-model="createEmployee.reporting_designation" />
+                                        <FormFields tag="select" placeholder="Select Desigination" class="mb-0"
+                                            name="Designation" v-model="createEmployee.designation" id="dept"
+                                            :Required="false" :options="designiations" />
+                                        <!-- <div class=""><button @click="addnewDesignation" type="button"
+                                                class="btn btn-white text-decoration-underline font-11">Add new
+                                                designation <span><i class=" bi bi-plus"></i></span></button>
                                         </div>
-
+                                        <FormFields v-if="newDesignation" class="mb-3" tag="input" type="text"
+                                            name="emp_code" id="emp_code" placeholder="Enter Designation"
+                                            v-model="inputDesignation" /> -->
+                                        <label class="font-13 ps-1" for="reporting_to">Reporting To</label>
+                                        <FormFields class="mb-3" tag="input" type="text" name="reporting_to"
+                                            id="reporting_to" placeholder="Enter Reporting To"
+                                            v-model="createEmployee.reporting_to" />
+                                        <label class="font-13 ps-1" for="reporting_designation">Reporting
+                                            Designation</label>
+                                        <FormFields class="mb-3" tag="input" type="text" name="reporting_designation"
+                                            id="reporting_designation" placeholder="Enter Reporting Designation"
+                                            v-model="createEmployee.reporting_designation" />
                                     </div>
+
                                 </div>
-
                             </div>
-                            <div class="modal-footer">
-                                <ButtonComp type="button" class="cancelfilter border-1 text-nowrap font-10 "
-                                    name="Cancel" @click="cancelCreate" data-bs-dismiss="modal" />
+
+                        </div>
+                        <div class="modal-footer">
+                            <ButtonComp type="button" class="cancelfilter border-1 text-nowrap font-10 " name="Cancel"
+                                @click="cancelCreate" data-bs-dismiss="modal" />
 
 
-                                <button type="button"
-                                    class="applyfilter btn btn-dark text-nowrap font-10 d-flex justify-content-center align-items-center"
-                                    data-bs-dismiss="modal" @click="createEmpl"><span class="font-16 me-1"><i
-                                            class="bi bi-check2 "></i></span>
-                                    Create Employee</button>
-                            </div>
+                            <button type="button"
+                                class="applyfilter btn btn-dark text-nowrap font-10 d-flex justify-content-center align-items-center"
+                                data-bs-dismiss="modal" @click="createEmpl"><span class="font-16 me-1"><i
+                                        class="bi bi-check2 "></i></span>
+                                Create Employee</button>
                         </div>
                     </div>
                 </div>
@@ -228,7 +91,8 @@
         </div>
         <div class="mt-2">
             <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction='true' :actions="actions"
-                @actionClicked="actionCreated" actionType="dropdown" isCheckbox="true" />
+                @actionClicked="actionCreated" actionType="dropdown" isCheckbox="true" isFiltersoption="true"
+                :field-mapping="fieldMapping" @updateFilters="inLineFiltersData" />
             <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
                 @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
         </div>
@@ -309,16 +173,15 @@ import { EzyBusinessUnit } from "../../shared/services/business_unit";
 const businessUnit = computed(() => {
     return EzyBusinessUnit.value;
 });
-onMounted(() => {
 
-
-})
+const tableData = ref([]);
 const newbusiness = ref("");
 const totalRecords = ref(0);
 const designiations = ref([]);
 const reportingTo = ref([]);
 const reportingDesigination = ref([]);
 const departmentsList = ref([])
+// const newDesignation = ref(false);
 const createEmployee = ref({
     emp_code: "",
     emp_name: "",
@@ -330,7 +193,9 @@ const createEmployee = ref({
     company_field: "",
 
 });
-
+// function addnewDesignation() {
+//     newDesignation.value = !newDesignation.value
+// }
 const actions = ref(
     [
         { name: 'Edit Employee', icon: 'fa-solid fa-eye' },
@@ -339,6 +204,8 @@ const actions = ref(
 )
 function createEmplBtn() {
     deptData();
+    designationData();
+
 }
 function actionCreated(rowData, actionEvent) {
     if (actionEvent.name === 'Edit Employee') {
@@ -366,126 +233,17 @@ const tableheaders = ref([
     { th: "Reporting Designation", td_key: "reporting_designation" },
 
 ])
+const fieldMapping = ref({
 
-const filtersBeforeApplyingCount = computed(() => {
-    return [filterOnModal.designation, filterOnModal.emp_code, filterOnModal.department, filterOnModal.emp_mail_id, filterOnModal.emp_name, filterOnModal.reporting_designation, filterOnModal.reporting_to].filter(
-        (value) => value
-    ).length;
+    emp_code: { type: "input" },
+    emp_name: { type: "input" }
+
 });
-
-// Count of filters that are both applied and have non-empty values
-const appliedFiltersCount = computed(() => {
-    return [
-        { value: filterOnModal.designation, applied: filterOnModal.applieddesignation },
-        {
-            value: filterOnModal.emp_code,
-            applied: filterOnModal.appliedeEmp_code,
-        },
-        {
-            value: filterOnModal.emp_mail_id,
-            applied: filterOnModal.appliedEmp_mail_id,
-        },
-        {
-            value: filterOnModal.department,
-            applied: filterOnModal.applieddepartment,
-        },
-        {
-            value: filterOnModal.emp_name,
-            applied: filterOnModal.appliedEmp_name,
-        },
-
-        {
-            value: filterOnModal.reporting_designation,
-            applied: filterOnModal.appliedreporting_designation,
-        },
-        {
-            value: filterOnModal.reporting_to,
-            applied: filterOnModal.appliedreporting_to,
-        },
-
-    ].filter((filter) => filter.applied && filter.value).length;
-});
-const filterOnModal = reactive({
-    appliedeEmp_code: false,
-    appliedEmp_name: false,
-    appliedEmp_mail_id: false,
-    applieddepartment: false,
-    applieddesignation: false,
-    appliedreporting_to: false,
-    appliedreporting_designation: false,
-
-    emp_code: "",
-    emp_name: "",
-    emp_mail_id: "",
-
-    department: "",
-    designation: "",
-    reporting_to: "",
-    reporting_designation: "",
-
-
-})
-function clearFilter(type) {
-    if (type === "emp_code") {
-        filterOnModal.emp_code = "";
-        filterOnModal.appliedeEmp_code = false;
-    } else if (type === "designation") {
-        filterOnModal.designation = "";
-        filterOnModal.applieddesignation = false;
-    }
-    else if (type === "department") {
-        filterOnModal.department = "";
-        filterOnModal.applieddepartment = false;
-    }
-    else if (type === "emp_mail_id") {
-        filterOnModal.emp_mail_id = "";
-        filterOnModal.appliedEmp_mail_id = false;
-    }
-    else if (type === "emp_name") {
-        filterOnModal.emp_name = "";
-        filterOnModal.appliedEmp_name = false;
-    }
-    else if (type === "reporting_designation") {
-        filterOnModal.reporting_designation = "";
-        filterOnModal.appliedreporting_designation = false;
-    }
-    else if (type === "reporting_to") {
-        filterOnModal.reporting_to = "";
-        filterOnModal.appliedreporting_to = false;
-    }
-
-
-    applyFilters();
-}
-const tableData = ref([]);
-
-function applyFilters() {
-
-    filterOnModal.appliedeEmp_code = Boolean(filterOnModal.emp_code);
-    filterOnModal.appliedEmp_name = Boolean(filterOnModal.emp_name);
-    filterOnModal.appliedEmp_mail_id = Boolean(filterOnModal.emp_mail_id);
-    filterOnModal.applieddepartment = Boolean(filterOnModal.department);
-    filterOnModal.applieddesignation = Boolean(filterOnModal.designation);
-    filterOnModal.appliedreporting_to = Boolean(filterOnModal.reporting_to);
-    filterOnModal.appliedreporting_designation = Boolean(filterOnModal.reporting_designation);
-
-    employeeData();
-}
-
-
-function resetFilters() {
-    filterOnModal.value = {
-        emp_code: "",
-
-        Owner_OF_Form: "",
-        Form_Category: "",
-        Form_Name: "",
-        Requested_Period: "",
-        Approval_status: "",
-
-    };
-
-}
+// const filtersBeforeApplyingCount = computed(() => {
+//     return [filterOnModal.designation, filterOnModal.emp_code, filterOnModal.department, filterOnModal.emp_mail_id, filterOnModal.emp_name, filterOnModal.reporting_designation, filterOnModal.reporting_to].filter(
+//         (value) => value
+//     ).length;
+// });
 function cancelCreate() {
     createEmployee.value = {
         emp_code: "",
@@ -532,32 +290,60 @@ const PaginationLimitStart = ([itemsPerPage, start]) => {
     fetchTable();
 
 };
-function employeeData() {
+
+
+
+
+function inLineFiltersData(searchedData) {
+    console.log("Applied searchedData:", searchedData);
+
+    //   // Initialize filters array
+    const filters = [];
+
+    //   // Loop through the tableheaders and build dynamic filters based on the `searchedData`
+    tableheaders.value.forEach((header) => {
+        const key = header.td_key;
+
+        //     // If there is a match for the key in searchedData, create a 'like' filter
+        if (searchedData[key]) {
+            filters.push(key, "like", `%${searchedData[key]}%`);
+        }
+        //     // Add filter for selected option
+        //     if (key === "selectedOption" && searchedData.selectedOption) {
+        //       filters.push([key, "=", searchedData.selectedOption]);
+        //     }
+        //     // Special handling for 'invoice_date' to create a 'Between' filter (if it's a date)
+        //     if (key === "invoice_date" && searchedData[key]) {
+        //       filters.push([key, "Between", [searchedData[key], searchedData[key]]]);
+        //     }
+
+        //     // Special handling for 'invoice_type' or 'irn_generated' to create an '=' filter
+        //     if ((key === "invoice_type" || key === "credit_irn_generated") && searchedData[key]) {
+        //       filters.push([key, "=", searchedData[key]]);
+        //     }
+    });
+    console.log(filters.length == 0, "------------filters--------");
+
+    //   // Log filters to verify
+    //   console.log("Dynamic Filters:", filters);
+
+    //   // Once the filters are built, pass them to fetchData function
+    if (filters.length) {
+        employeeData(filters);
+    }
+    else {
+        employeeData();
+    }
+    //   fetchTotalRecords(filters);
+}
+
+function employeeData(data) {
     const filters = [
         ["company_field", "like", `%${newbusiness.value}%`]
     ];
-    if (filterOnModal.emp_code) {
-        filters.push(["emp_code", "like", `%${filterOnModal.emp_code}%`]);
+    if (data) {
+        filters.push(data)
     }
-    if (filterOnModal.emp_name) {
-        filters.push(["emp_name", "like", `%${filterOnModal.emp_name}%`]);
-    }
-    if (filterOnModal.emp_mail_id) {
-        filters.push(["emp_mail_id", "like", `%${filterOnModal.emp_mail_id}%`]);
-    }
-    if (filterOnModal.department) {
-        filters.push(["department", "=", `${filterOnModal.department}`]);
-    }
-    if (filterOnModal.designation) {
-        filters.push(["designation", "like", `${filterOnModal.designation}`]);
-    }
-    if (filterOnModal.reporting_to) {
-        filters.push(["reporting_to", "like", `${filterOnModal.reporting_to}`]);
-    }
-    if (filterOnModal.reporting_designation) {
-        filters.push(["reporting_designation", "like", `%${filterOnModal.reporting_designation}%`]);
-    }
-
 
     const queryParams = {
         fields: JSON.stringify(["*"]),
@@ -587,7 +373,7 @@ function employeeData() {
             if (res.data) {
                 console.log(res.data, "Fetched departments");
                 tableData.value = res.data;
-                designiations.value = [...new Set(res.data.map((designation) => designation.designation))];
+                // designiations.value = [...new Set(res.data.map((designation) => designation.designation))];
                 reportingTo.value = [...new Set(res.data.map((reporting) => reporting.reporting_to))];
                 reportingDesigination.value = [...new Set(res.data.map((reportingDesigination) => reportingDesigination.reporting_designation))]
                 console.log(designiations.value, "%%%%%%%%%%%%");
@@ -598,6 +384,35 @@ function employeeData() {
             console.error("Error fetching department data:", error);
         });
 }
+function designationData() {
+    const filters = [];
+    const queryParams = {
+        fields: JSON.stringify(["*"]),
+        filters: JSON.stringify(filters),
+        limit_page_length: filterObj.value.limitPageLength,
+        limit_start: filterObj.value.limit_start,
+        order_by: "`tabWF Roles`.`creation` desc"
+    };
+
+
+    axiosInstance.get(apis.resource + doctypes.designations, { params: queryParams })
+        .then((res) => {
+            if (res.data) {
+                console.log(res.data.name, "Fetched Designations");
+                designiations.value = [
+                    ...new Set(res.data.map((user) => user.role)),
+                ];
+                console.log(designiations.value, "%%%%%%%%%");
+            }
+        })
+        .catch((error) => {
+            console.error("Error fetching designations data:", error);
+        });
+}
+
+
+
+
 watch(
     businessUnit,
     (newVal) => {

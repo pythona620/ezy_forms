@@ -2,21 +2,21 @@
     <div class="ps-2">
         <div class="d-flex justify-content-between align-items-center ">
             <div>
-                <h1 class="m-0 font-13">
+                <!-- <h1 class="m-0 font-13">
                     Archived forms
                 </h1>
                 <p class="m-0 font-11 pt-1">
                     1239 Requests
-                </p>
+                </p> -->
             </div>
-            <div class="d-flex gap-3 align-items-center">
-                <div class="d-flex mt-2 gap-2">
-                    <div>
-                        <FormFields labeltext="" class="mb-3" tag="input" type="search" placeholder="Search File Name"
+            <div class="d-flex p-1 gap-3 align-items-center">
+                <div class="d-flex  gap-2">
+                    <div class=" d-flex align-items-center">
+                        <FormFields labeltext="" class="" tag="input" type="search" placeholder="Search File Name"
                             name="Value" id="Value" v-model="filterObj.search" isCheckbox='true' />
                     </div>
                     <div>
-                        <FormFields tag="select" placeholder="Filter By" class="mb-3" name="roles"
+                        <FormFields tag="select" placeholder="Filter By" class="p-1" name="roles"
                             v-model="filterObj.selectoption" id="roles" :Required="false"
                             :options="['JW Marriott Golfshire Banglore', 'JW Marriott Golfshire Banglore']" />
                     </div>

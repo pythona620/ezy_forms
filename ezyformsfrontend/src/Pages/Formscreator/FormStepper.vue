@@ -2,15 +2,16 @@
     <div>
         <div class="">
             <div class="">
-                <div class="d-flex justify-content-between align-items-center CancelNdSave my-2 mx-1">
-                    <div class="ps-1 m-0 d-flex align-items-center" @click="cancelForm()">
+                <div class="d-flex justify-content-between align-items-center CancelNdSave my-2 py-2 mx-1">
+                    <div class="ps-1 my-2 d-flex align-items-center " @click="cancelForm()">
                         <h1 class="font-13 m-0">
                             <i class="bi bi-arrow-left"></i><span class="ms-2">Back</span>
                         </h1>
                     </div>
                     <div>
                         <!-- <ButtonComp class="font-13 rounded-2" name="Save as Draft"></ButtonComp> -->
-                        <button type="butoon" class="btn font-13 btn-light" @click="SaveAsDrafts()">
+                        <button v-if="activeStep === 2 && blockArr.length" type="butoon" class="btn font-13 btn-light"
+                            @click="saveFormData('draft')">
                             <i class="bi bi-bookmark-check-fill"></i> Save As Draft
                         </button>
                     </div>
@@ -22,9 +23,11 @@
                                 <ul class="steps">
                                     <li v-for="step in steps" :key="step.id" :class="{
                         active: activeStep === step.id,
-                        completed: activeStep > step.id,
+                        completed: activeStep > step.id
                     }">
-                                        <div class="d-flex gap-3 align-items-center" @click="handleStepClick(step.id)">
+
+                                        <div class="d-flex gap-3 align-items-center" @click="handleStepClick(step.id)"
+                                            :class="{ 'not-allowed': isNextDisabled && activeStep + 1 === step.id }">
                                             <i v-if="activeStep > step.id"
                                                 class="ri-checkbox-circle-fill completedStepIcon"></i>
                                             <i v-else :class="step.icon"></i>
@@ -50,13 +53,10 @@
                                                         Form</span>
                                                 </h1>
                                                 <h1 class="font-14 fw-bold m-0">About Form</h1>
-                                                <ButtonComp :disabled="formNameError.length ||
-                        formShortNameError.length ||
-                        !filterObj.accessible_departments.length ||
-                        !filterObj.form_category.length ||
-                        !filterObj.owner_of_the_form.length
-                        " class="btn btn-dark bg-dark text-white fw-bold font-13" name="Next" v-if="activeStep < 3"
-                                                    @click="nextStep" />
+                                                <ButtonComp :disabled="isNextDisabled"
+                                                    :class="{ 'disabled-btn': isNextDisabled }"
+                                                    class="btn btn-dark bg-dark text-white fw-bold font-13" name="Next"
+                                                    v-if="activeStep < 3" @click="nextStep" />
                                             </div>
                                         </div>
                                         <div class="row">
@@ -200,18 +200,20 @@
                                                 <div class="d-flex gap-2 align-items-center">
                                                     <div v-if="blockArr.length">
                                                         <button
-                                                            class="btn btn-light previewBtn d-flex align-items-baseline font-13"
+                                                            class="btn btn-light previewBtn d-flex align-items-center font-13"
                                                             type="button" @click="previewForm">
-                                                            <i class="bi bi-eye me-1 mt-1  ms-1  mb-0"></i>Preview
+                                                            <i class="bi bi-eye me-1  ms-1  mb-0"></i>Preview
                                                         </button>
                                                     </div>
 
                                                     <!-- <ButtonComp
                                                         class="buttoncomp btn btn-dark font-10 Withborder border"
                                                         name="Next" v-if="activeStep < 3" @click="nextStep" /> -->
-                                                    <button :disabled="!blockArr.length"
+                                                    <button v-if="blockArr.length"
+                                                        :disabled="hasErrors || isNextDisabled"
+                                                        :style="{ cursor: hasErrors ? 'not-allowed' : 'pointer' }"
                                                         class="btn btn-dark font-10 Withborder border" type="button"
-                                                        @click="saveFormData()">
+                                                        @click="saveFormData('save')">
                                                         Save data
                                                     </button>
                                                     <!-- <button class="btn btn-light font-10" type="button"
@@ -1114,10 +1116,13 @@ function cancelForm() {
     });
 }
 const handleStepClick = (stepId) => {
-    if (stepId < activeStep.value) {
-        prevStep(stepId);
-    } else if (stepId > activeStep.value) {
-        nextStep(stepId);
+    if (isNextDisabled.value === false) {
+
+        if (stepId < activeStep.value) {
+            prevStep(stepId);
+        } else if (stepId > activeStep.value) {
+            nextStep(stepId);
+        }
     }
 };
 
@@ -1141,14 +1146,17 @@ watch(
     }
 );
 
-function formData() {
+function formData(status) {
+    console.log(status, "*************");
     const fields = extractFieldsWithBreaks(blockArr);
     const dataObj = {
         ...filterObj.value,
         fields,
         doctype: doctypes.EzyFormDefinitions,
         workflow_setup: workflowSetup,
-        form_status: "Draft",
+        form_status: status === "save" ? "Created" : "Draft",
+        // form_status: "Draft",
+
     };
     dataObj.accessible_departments = dataObj.accessible_departments.toString(); //JSON.stringify(dataObj.accessible_departments) dataObj.accessible_departments.toString()
 
@@ -1165,6 +1173,12 @@ function formData() {
                 if (paramId.value !== "new") {
                     blockArr.splice(0, blockArr.length);
                     getFormData();
+                }
+                if (status === "draft") {
+                    router.push({
+                        name: "Draft"
+                    })
+
                 }
             }
         })
@@ -1231,7 +1245,15 @@ const addSection = (blockIndex) => {
                 columns: [
                     {
                         label: "",
-                        fields: [], // Initialize with an empty fields array
+                        fields: [
+                            {
+                                label: "",
+                                fieldtype: "",
+                                // value: ref(""), // Keeping the value as a ref for reactivity
+                                options: "",
+                                reqd: false,
+                            }
+                        ], // Initialize with an empty fields array
                     },
                 ],
             },
@@ -1254,7 +1276,15 @@ const addRow = (blockIndex, sectionIndex) => {
         label: `row_${rowIndex}_${sectionIndex}_${blockIndex}`,
         columns: [
             {
-                fields: [], // Initialize with an empty fields array
+                fields: [
+                    {
+                        label: "",
+                        fieldtype: "",
+                        // value: ref(""), // Keeping the value as a ref for reactivity
+                        options: "",
+                        reqd: false,
+                    }
+                ], // Initialize with an empty fields array
             },
         ],
     });
@@ -1271,7 +1301,15 @@ const removeRow = (blockIndex, sectionIndex, rowIndex) => {
 const addColumn = (blockIndex, sectionIndex, rowIndex) => {
     blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns.push({
         label: "",
-        fields: [],
+        fields: [
+            {
+                label: "",
+                fieldtype: "",
+                // value: ref(""), // Keeping the value as a ref for reactivity
+                options: "",
+                reqd: false,
+            }
+        ],
     });
 };
 
@@ -1396,12 +1434,13 @@ function handleFieldChange(
     console.log(isDuplicate, "0000000000000");
     const checkFieldType = addErrorMessagesToStructuredArray(blockArr);
     blockArr.splice(0, blockArr.length, ...checkFieldType);
-
+    console.log(blockArr, "******************************");
     // Assign error message for the specific field if fieldIndex is valid
     if (
         fieldIndex !== undefined &&
         fieldIndex >= 0 &&
         columnIndex !== undefined &&
+        columnIndex >= 0 &&
         sectionIndex !== undefined
     ) {
         blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
@@ -1411,9 +1450,11 @@ function handleFieldChange(
 
     // Assign error message for the column if fieldIndex is not valid
     if (
-        sectionIndex !== undefined &&
+        fieldIndex === undefined &&
         columnIndex !== undefined &&
-        fieldIndex === undefined
+        columnIndex >= 0 &&
+        sectionIndex !== undefined
+
     ) {
         blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
             columnIndex
@@ -1434,7 +1475,23 @@ function handleFieldChange(
     }
 }
 
+const hasErrors = computed(() => {
+    function checkErrors(obj) {
+        if (!obj || typeof obj !== "object") return false;
 
+        if (obj.error || obj.errorMsg) {
+            return true;
+        }
+
+        if (Array.isArray(obj)) {
+            return obj.some(checkErrors);
+        }
+
+        return Object.values(obj).some(checkErrors);
+    }
+
+    return checkErrors(blockArr);
+});
 // function handleFieldChange(
 //     blockIndex,
 //     sectionIndex,
@@ -1485,6 +1542,16 @@ function handleFieldChange(
 //         console.log(blockArr[blockIndex].sections[sectionIndex].errorMsg, "===============");
 //     }
 // }
+const isNextDisabled = computed(() => {
+    return (
+        formNameError.value.length > 0 ||
+        formShortNameError.value.length > 0 ||
+        !filterObj.value.accessible_departments.length ||
+        !filterObj.value.form_category.length ||
+        !filterObj.value.owner_of_the_form.length
+    );
+});
+
 
 function handleInputChange(event, fieldType) {
     const inputValue = event.target.value;
@@ -1651,7 +1718,7 @@ function delete_form_items_fields() {
         });
 }
 
-async function saveFormData() {
+async function saveFormData(type) {
     let data = deleted_items.flatMap(extractFieldnames);
     if (
         paramId != undefined &&
@@ -1662,7 +1729,7 @@ async function saveFormData() {
         delete_form_items_fields();
         //    console.log(" result", result)
     } else {
-        formData();
+        formData(type);
     }
 }
 
@@ -2405,5 +2472,16 @@ select {
 ::v-deep(.multiselect__option:hover) {
     background-color: #eeeeee !important;
     color: #000 !important;
+}
+
+.disabled-btn {
+    cursor: not-allowed;
+    opacity: 0.6;
+    /* Optional: Reduce opacity for a disabled effect */
+}
+
+.not-allowed {
+    cursor: not-allowed;
+    /* Show "not-allowed" cursor */
 }
 </style>

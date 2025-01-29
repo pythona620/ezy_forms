@@ -29,16 +29,23 @@
       </div>
     </div>
 
-    <div class="input-group select-section shadow-none" v-if="tag === 'select'">
+    <div class="input-group select-dropdown shadow-none" v-if="tag === 'select'">
       <p class="fw-normal ps-2 m-0 text-secondary">{{ placeholder }}</p>
-      <select v-if="tag === 'select'" class="form-select selectForm shadow-none ms-1 border-0" :required="Required"
-        :name="name" :id="id" v-model="localModel">
-        <!-- <option class="selectOption" value="" selected>All</option> -->
-        <option class="selectOption py-2" v-for="(item, index) in options" :key="index" :value="item">{{ item }}
-        </option>
-      </select>
+      <div class="dropdown w-100">
+        <button class="btn btn-white dropdown-toggle w-100 border-0 font-12" type="button" id="dropdownMenuButton"
+          data-bs-toggle="dropdown" aria-expanded="false">
+          {{ selectedOption }}
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+          <li v-for="(item, index) in options" :key="index">
+            <a class="dropdown-item" href="#" @click.prevent="selectOption(item)">
+              {{ item }}
+            </a>
+          </li>
+        </ul>
+      </div>
     </div>
-    <div class="input-group select-section shadow-none" v-if="tag === 'multiselect'">
+    <div class="input-group select-selection shadow-none" v-if="tag === 'multiselect'">
       <p class="fw-normal ps-2 m-0 text-secondary">{{ placeholder }}</p>
       <select v-if="tag === 'multiselect'" class="form-select selectForm shadow-none border-0" :required="Required"
         multiple :name="name" :id="id" v-model="localModel">
@@ -130,7 +137,17 @@ const props = defineProps({
 const emit = defineEmits(["update:modelValue"]);
 
 const localModel = ref(props.modelValue);
+const selectedOption = ref(props.modelValue);
 
+const selectOption = (option) => {
+  selectedOption.value = option;
+  emit('update:modelValue', option);
+};
+
+// Sync v-model with selected option
+watch(() => props.modelValue, (newVal) => {
+  selectedOption.value = newVal;
+});
 watch(
   () => props.modelValue,
   (newVal) => {
@@ -169,7 +186,9 @@ const maxDate = computed(() => {
 }
 
 .form-control:focus {
-  border-color: #dee2e6;
+  border: 1px solid #0000005e;
+  box-shadow: none;
+  outline: none;
 }
 
 .input-height {
@@ -213,11 +232,24 @@ select {
   justify-content: start;
 }
 
+.select-dropdown {
+  border: 1px solid #e2e2e2;
+  display: flex;
+  align-items: center;
+  // justify-content: center;
+  padding: 0px 3px;
+  border-radius: var(--border-radius-sm);
+  background-color: var(--whiteColor);
+  font-size: var(--twelve);
+  // max-width: 247px;
+  width: 100%;
+}
+
 .select-section {
   border: 1px solid #e2e2e2;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   padding: 0px 3px;
   border-radius: var(--border-radius-sm);
   background-color: var(--whiteColor);
@@ -254,7 +286,7 @@ select {
 }
 
 .input-group {
-  height: 32px;
+  height: 32px !important;
   flex-wrap: nowrap;
 }
 
@@ -299,6 +331,8 @@ select {
   // max-width: 200px;
 }
 
+
+
 // .calendar-icon {
 //   position: absolute;
 //   right: 0px;
@@ -335,15 +369,19 @@ select {
   color: black;
 }
 
+/* Style selected option */
+// .selectForm option:checked {
+//   background-color: #444;
+//   color: white;
+// }
 /* Hover effect */
 .selectOption:hover {
   background-color: #333;
   color: white;
 }
 
-/* Style selected option */
-.selectForm option:checked {
-  background-color: #444;
-  color: white;
+
+.dropdown-item {
+  cursor: pointer;
 }
 </style>
