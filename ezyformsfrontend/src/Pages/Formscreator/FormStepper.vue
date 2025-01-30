@@ -10,8 +10,9 @@
                     </div>
                     <div>
                         <!-- <ButtonComp class="font-13 rounded-2" name="Save as Draft"></ButtonComp> -->
-                        <button v-if="activeStep === 2 && blockArr.length" type="butoon" class="btn font-13 btn-light"
-                            @click="saveFormData('draft')">
+                        <button v-if="activeStep === 2 && blockArr.length" :disabled="hasErrors || isNextDisabled"
+                            :style="{ cursor: hasErrors ? 'not-allowed' : 'pointer' }" type="butoon"
+                            class="btn font-13 btn-light" @click="saveFormData('draft')">
                             <i class="bi bi-bookmark-check-fill"></i> Save As Draft
                         </button>
                     </div>
