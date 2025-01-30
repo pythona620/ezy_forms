@@ -955,18 +955,18 @@ const fieldTypes = [
         label: "Attach",
         type: "Attach",
     },
-    {
-        label: "Phone",
-        type: "Phone",
-    },
+    // {
+    //     label: "Phone",
+    //     type: "Phone",
+    // },
     {
         label: "Time",
         type: "Time",
     },
-    {
-        label: "Color",
-        type: "Color",
-    },
+    // {
+    //     label: "Color",
+    //     type: "Color",
+    // },
     {
         label: "TextArea",
         type: "Text",
@@ -979,26 +979,26 @@ const fieldTypes = [
         label: "Datetime",
         type: "Datetime",
     },
-    {
-        label: "Check",
-        type: "Check",
-    },
-    {
-        label: "Radio",
-        type: "radio",
-    },
+    // {
+    //     label: "Check",
+    //     type: "Check",
+    // },
+    // {
+    //     label: "Radio",
+    //     type: "radio",
+    // },
     {
         label: "Select",
         type: "Select",
     },
-    {
-        label: "MultiSelect",
-        type: "Table MultiSelect",
-    },
-    {
-        label: "Signature",
-        type: "Signature",
-    },
+    // {
+    //     label: "MultiSelect",
+    //     type: "Table MultiSelect",
+    // },
+    // {
+    //     label: "Signature",
+    //     type: "Signature",
+    // },
 ];
 
 const isAllSelected = computed({
