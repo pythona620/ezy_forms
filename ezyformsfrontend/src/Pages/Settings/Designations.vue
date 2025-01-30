@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div class="d-flex justify-content-between align-items-center ">
+        <div class="d-flex justify-content-between align-items-center py-2 ">
             <div>
                 <h1 class="m-0 font-13">
                     Designations
@@ -104,7 +104,7 @@ function designationData() {
     }
     axiosInstance.get(`${apis.resource}${doctypes.designations}`, { params: queryParamsCount })
         .then((res) => {
-            // console.log(res.data[0].total_count);
+
             totalRecords.value = res.data[0].total_count
 
         })
@@ -115,7 +115,7 @@ function designationData() {
     axiosInstance.get(apis.resource + doctypes.designations, { params: queryParams })
         .then((res) => {
             if (res.data) {
-                console.log(res.data, "Fetched Designations");
+
                 tableData.value = res.data;
             }
         })

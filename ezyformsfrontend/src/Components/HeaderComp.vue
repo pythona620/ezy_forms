@@ -3,7 +3,7 @@
 
         <div class="position-sticky top-0 stickyheader">
             <div class="container-fluid p-0">
-                <div class="headerbackgound mt-2">
+                <div class="headerbackgound py-1">
                     <div class="row">
                         <div class="col-2">
                             <div class="d-flex gap-2 p-2 align-items-center">
@@ -24,8 +24,9 @@
                                     <!-- v-if="shouldShowButton" -->
                                     <ButtonComp
                                         class="btn-outline-primary d-flex justify-content-center align-items-center bg-white m-0 text-nowrap font-10"
-                                        name="Raise request" data-bs-toggle="modal" data-bs-target="#riaseRequestModal"
-                                        @click="raiseRequest" />
+                                        name="Raise request" data-bs-toggle="modal"
+                                        data-bs-target="#riaseRequestModal" />
+                                    <!-- @click="raiseRequest" -->
                                 </div>
                                 <div class="">
 
@@ -104,6 +105,13 @@
                             v-model="selectedData.selectedCategory" /> -->
                         <!-- <div class="row">
                             <div class="col"> -->
+
+                        <div class=" mb-2">
+                            <label class="raise-label" for="">Department</label>
+                            <Multiselect :options="deptartmentData.map(dept => dept.name)" @change="SelectedDepartment"
+                                v-model="selectedData.SelectedDepartment" placeholder="Select" :multiple="false"
+                                class="font-11" :searchable="true" />
+                        </div>
                         <div class=" mb-2">
                             <label class="raise-label" for="">Category</label>
                             <Multiselect :options="categoryOptions" @change="changingCategory"
@@ -114,8 +122,9 @@
                         <!-- <div class="col"> -->
                         <div class=" mb-2">
                             <label class="raise-label" for="">Form</label>
-                            <Multiselect :options="formList" v-model="selectedData.selectedform" placeholder="Select"
-                                @change="SelectedFromchange" :multiple="false" class="font-11" :searchable="true" />
+                            <Multiselect :options="formList.map(list => list.name)" v-model="selectedData.selectedform"
+                                placeholder="Select" @change="SelectedFromchange" :multiple="false" class="font-11"
+                                :searchable="true" />
                         </div>
                         <!-- </div> -->
 
@@ -133,9 +142,9 @@
                             <!-- <button :disabled="!isFormValid" class="btn btn-dark font-12 w-100" type="submit"
                                 @click="raiseRequestSubmission">Raise
                                 Request</button> -->
-                            <button class="btn btn-dark font-12 w-100" @click="toRaiseRequest" type="submit"> Raise
+                            <!-- <button class="btn btn-dark font-12 w-100" @click="toRaiseRequest" type="submit"> Raise
                                 Request
-                            </button>
+                            </button> -->
                         </div>
                     </div>
 
@@ -212,6 +221,7 @@ const tabsData = ref([
 ]);
 
 const selectedData = ref({
+    SelectedDepartment: '',
     selectedCategory: "",
     selectedform: ""
 });
@@ -233,6 +243,7 @@ const blockArr = ref([])
 const EzyFormsCompanys = ref([]);
 const formSideBarData = ref([]);
 const deptartmentData = ref([]);
+const departmentList = ref([]);
 const activeTab = ref('')
 const filterObj = ref({
     limit_start: 0,
@@ -315,7 +326,7 @@ function passwordChange() {
 
     axiosInstance.put(`${apis.resource}${doctypes.users}/${userName.name}`, payload)
         .then((res) => {
-            console.log("Password updated successfully:", res.data);
+            // console.log("Password updated successfully:", res.data);
             toast.success('Password changed Successfully', { autoClose: 300 });
             const modal = bootstrap.Modal.getInstance(document.getElementById('changePassword'));
             modal.hide();
@@ -368,7 +379,9 @@ function deptData(value = null) {
         .then((res) => {
             if (res.data) {
                 deptartmentData.value = res.data;
+                departmentList.value = deptartmentData.value
 
+                // departmentList.value = res.data.map((dept) => (dept.name));
                 // Update the route for the "Forms" tab with the first department's route
                 const newFormsRoute = deptartmentData.value.length > 0
                     ? `/forms/department/${deptartmentData.value[0].name.replace(/\s+/g, '-').toLowerCase()}`
@@ -398,16 +411,17 @@ function deptData(value = null) {
 }
 const employeeData = ref({});
 
-function raiseRequest() {
-    console.log(" Raise req ")
-    const storedData = localStorage.getItem("employeeData");
-    if (storedData) {
-        employeeData.value = JSON.parse(storedData);
-        categoriesdata(employeeData?.value.department);
-    } else {
-        console.error("No employee data found in local storage.");
-    }
-}
+// function raiseRequest() {
+
+// const storedData = localStorage.getItem("employeeData");
+// if (storedData) {
+//     employeeData.value = JSON.parse(storedData);
+// employeeData?.value.department
+// categoriesdata();
+// } else {
+//     console.error("No employee data found in local storage.");
+// }
+// }
 // watch(
 //     () => selectedData.value.selectedCategory,
 //     (newVal, oldVal) => {
@@ -418,42 +432,18 @@ function raiseRequest() {
 // );
 
 function changingCategory(value) {
-    blockArr.value = [];
-    selectedData.value.selectedform = '';
-    if (value) {
-        const dataObj = {
-            "role": employeeData.value.designation,
-            "business_unit": EzyBusinessUnit.value
-        };
 
-        axiosInstance.post(apis.raiseFormdata, dataObj)
-            .then((response) => {
-                formList.value = response.message.list_of_roadmaps
 
-            })
-            .catch((error) => {
-                console.error("Error fetching data:", error);
-            });
-    }
-}
-function SelectedFromchange(value) {
-    blockArr.value = [];
-    selectedData.value.selectedform = value
-    if (value) {
 
-        formDefinations(value)
-    }
-}
-function formDefinations(value) {
-    const filters = [
-        ["business_unit", "like", `%${business_unit.value}%`]
-    ];
-    if (selectedData.value.selectedCategory) {
-        filters.push(["form_category", "like", `${selectedData.value.selectedCategory}`]);
+    const filters = [];
+    if (selectedData.value.SelectedDepartment) {
+        filters.push(["owner_of_the_form", "like", `${selectedData.value.SelectedDepartment}`]);
     }
     if (value) {
-        filters.push(["form_short_name", "like", `%${value}%`]);
+        filters.push(["form_category", "like", `%${value}%`]);
     }
+
+
 
     const queryParams = {
         fields: JSON.stringify(["*"]),
@@ -462,32 +452,102 @@ function formDefinations(value) {
         filters: JSON.stringify(filters),
         order_by: "`tabEzy Form Definitions`.`creation` desc"
     };
-    // const queryParamsCount = {
-    //     fields: JSON.stringify(["count( `tabEzy Form Definitions`.`name`) AS total_count"]),
-    //     limitPageLength: "None",
-    //     filters: JSON.stringify(filters),
-    // }
-    // axiosInstance.get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParamsCount })
-    //     .then((res) => {
-    //         // console.log(res.data[0].total_count);
-    //         totalRecords.value = res.data[0].total_count
-
-    //     })
-    //     .catch((error) => {
-    //         console.error("Error fetching ezyForms data:", error);
-    //     });
-
 
     axiosInstance.get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParams })
         .then(res => {
-            console.log(res, "===================0000000000=====================");
-            const form_json = res.data[0].form_json
-            blockArr.value = rebuildToStructuredArray(JSON.parse(form_json).fields)
-            blockArr.value.splice(1)
+
+            formList.value = res.data; // Store the form list
         })
         .catch(error => {
             console.error("Error fetching ezyForms data:", error);
         });
+    // blockArr.value = [];
+    // selectedData.value.selectedform = '';
+    // if (value) {
+    //     const dataObj = {
+    //         "role": employeeData.value.designation,
+    //         "business_unit": EzyBusinessUnit.value
+    //     };
+
+    //     axiosInstance.post(apis.raiseFormdata, dataObj)
+    //         .then((response) => {
+    //             formList.value = response.message.list_of_roadmaps
+
+    //         })
+    //         .catch((error) => {
+    //             console.error("Error fetching data:", error);
+    //         });
+    // }
+}
+function SelectedFromchange(value) {
+    blockArr.value = [];
+    selectedData.value.selectedform = value;
+
+    if (value) {
+        // Check if the selected form exists in formList
+        const formExists = formList.value.some(form => form.form_short_name === value);
+
+        if (formExists) {
+            toRaiseRequest();
+        } else {
+            toast.error("Selected form does not exist in the fetched list.", { autoClose: 2000 });
+        }
+    }
+}
+// function formDefinations(value) {
+//     const filters = [
+//         ["business_unit", "like", `%${business_unit.value}%`]
+//     ];
+//     if (selectedData.value.selectedCategory) {
+//         filters.push(["form_category", "like", `${selectedData.value.selectedCategory}`]);
+//     }
+//     if (value) {
+//         filters.push(["form_short_name", "like", `%${value}%`]);
+//     }
+
+//     const queryParams = {
+//         fields: JSON.stringify(["*"]),
+//         limit_page_length: filterObj.value.limitPageLength,
+//         limit_start: filterObj.value.limit_start,
+//         filters: JSON.stringify(filters),
+//         order_by: "`tabEzy Form Definitions`.`creation` desc"
+//     };
+//     // const queryParamsCount = {
+//     //     fields: JSON.stringify(["count( `tabEzy Form Definitions`.`name`) AS total_count"]),
+//     //     limitPageLength: "None",
+//     //     filters: JSON.stringify(filters),
+//     // }
+//     // axiosInstance.get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParamsCount })
+//     //     .then((res) => {
+//     //        
+//     //         totalRecords.value = res.data[0].total_count
+
+//     //     })
+//     //     .catch((error) => {
+//     //         console.error("Error fetching ezyForms data:", error);
+//     //     });
+
+
+//     axiosInstance.get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParams })
+//         .then(res => {
+//           
+//             if (res.data.length) {
+//                 toRaiseRequest()
+//             } else {
+//                 toast.error("No Forms Found", { autoClose: 2000 });
+//             }
+
+//         })
+//         .catch(error => {
+//             console.error("Error fetching ezyForms data:", error);
+//         });
+// }
+function SelectedDepartment(departmentName) {
+    const selectedDept = deptartmentData.value.find(dept => dept.name === departmentName);
+    if (selectedDept) {
+
+        categoriesdata(selectedDept.name); // Sending department 'name' instead of 'department_name'
+    }
 }
 function categoriesdata(departmentId) {
     axiosInstance.get(`${apis.resource}${doctypes.departments}/${departmentId}`)
@@ -505,19 +565,19 @@ const filepaths = ref('')
 const handleFieldUpdate = (field) => {
 
     const fieldExists = emittedFormData.value.some(item => item.fieldname === field.fieldname);
-    console.log(fieldExists, "888888888888888");
+
 
     if (!fieldExists) {
         if (field.fieldtype === 'Attach') {
             if (!Array.isArray(field.value)) {
                 filepaths.value = field.value;
-                console.log(filepaths.value, "777777777777777");
+
             }
             emittedFormData.value.push(field);
         } else {
             emittedFormData.value = emittedFormData.value.concat(field);
         }
-        console.log(...emittedFormData.value, "--------emittedFormData-------");
+
     } else {
         console.log(`Field with name "${field.fieldname}" already exists in emittedFormData.`);
     }
@@ -534,7 +594,6 @@ function raiseRequestSubmission() {
         })
     }
 
-    console.log(" ==== ", form, "-------------------------------------------")
 
     // form['form_json']
     const formData = new FormData();
@@ -542,7 +601,7 @@ function raiseRequestSubmission() {
     formData.append('action', 'Save');
     axiosInstance.post(apis.savedocs, formData)
         .then((response) => {
-            console.log(response);
+
             request_raising_fn(response.docs[0])
 
         })
@@ -562,7 +621,7 @@ function request_raising_fn(item) {
         files: filesArray,
         property: business_unit.value,
     }; axiosInstance.post(apis.raising_request, data_obj).then(async (resp) => {
-        console.log(resp);
+
         if (resp?.message?.success) {
             toast.success("Request Raised", { autoClose: 1000 });
             const modal = await bootstrap.Modal.getInstance(document.getElementById('riaseRequestModal'));

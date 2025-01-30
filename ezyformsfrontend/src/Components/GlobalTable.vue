@@ -228,13 +228,13 @@ function formatDate(dateString) {
 }
 function SelectedAll() {
 	allCheck.value = !allCheck.value;
-	console.log("All Check Toggled:", allCheck.value);
+	// console.log("All Check Toggled:", allCheck.value);
 
 	props.tData.forEach(row => {
 		row.isSelected = allCheck.value;
 	});
 	const selectedData = props.tData.filter(row => row.isSelected);
-	console.log("Selected Data:", selectedData);
+	// console.log("Selected Data:", selectedData);
 	emits("all-Check", allCheck.value);
 }
 
@@ -242,7 +242,7 @@ function selectedCheckList(row, index) {
 	const allChecked = props.tData.every(row => row.isSelected);
 	allCheck.value = allChecked;
 	const selectedData = props.tData.filter(row => row.isSelected);
-	console.log("Selected Data:", selectedData);
+	// console.log("Selected Data:", selectedData);
 	emits("checkbox-click", row, index);
 }
 const filters = ref(
@@ -257,7 +257,7 @@ function handleFilterChange() {
 		Object.entries(filters.value).filter(([key, value]) => value.trim() !== "")
 	);
 	emits("updateFilters", activeFilters); // Emit only non-empty filters
-	console.log(activeFilters, "========");
+	// console.log(activeFilters, "========");
 }
 watch(
 	() => props.tData.map(row => row.isSelected),
@@ -278,7 +278,7 @@ onMounted(() => {
 // function handleFileChange(event) {
 //   const file = event.target.files[0];
 //   emits("upload-file", file);
-//   // console.log(file.name,'jkgbjd')
+// console.log(file.name,'jkgbjd')
 // }
 // function handleCellClick(check, index) {
 //   emits("cell-click", check, index);

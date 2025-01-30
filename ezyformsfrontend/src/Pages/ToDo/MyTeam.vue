@@ -1,5 +1,5 @@
 <template>
-  <div class="d-flex justify-content-between align-items-center ">
+  <div class="d-flex justify-content-between align-items-center py-2 ">
     <div>
       <h1 class="m-0 font-13">
         Requests raised for My Team
@@ -83,7 +83,7 @@ const PaginationLimitStart = ([itemsPerPage, start]) => {
 
 };
 function inLineFiltersData(searchedData) {
-  console.log("Applied searchedData:", searchedData);
+
 
   //   // Initialize filters array
   const filters = [];
@@ -110,10 +110,10 @@ function inLineFiltersData(searchedData) {
     //       filters.push([key, "=", searchedData[key]]);
     //     }
   });
-  console.log(filters.length == 0, "------------filters--------");
+
 
   //   // Log filters to verify
-  //   console.log("Dynamic Filters:", filters);
+
 
   //   // Once the filters are built, pass them to fetchData function
   if (filters.length) {
@@ -163,7 +163,7 @@ function receivedForMe(data) {
   // Fetch the records matching filters
   axiosInstance.get(`${apis.resource}${doctypes.WFWorkflowRequests}`, { params: queryParams })
     .then((res) => {
-      console.log("output-res", res);
+
       tableData.value = res.data;
       idDta.value = [...new Set(res.data.map((id) => id.name))];
       docTypeName.value = [...new Set(res.data.map((docTypeName) => docTypeName.doctype_name))]
@@ -182,7 +182,7 @@ watch(
     newBusinessUnit.value.business_unit = newVal;
 
     if (newVal.length) {
-      console.log(newVal, "new value of business unit");
+
       receivedForMe()
     }
   },

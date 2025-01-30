@@ -2,9 +2,9 @@
     <div>
         <div class="">
             <div class="">
-                <div class="d-flex justify-content-between align-items-center CancelNdSave my-2 py-2 mx-1">
+                <div class="d-flex justify-content-between align-items-center CancelNdSave my-2 py-2">
                     <div class="ps-1 my-2 d-flex align-items-center " @click="cancelForm()">
-                        <h1 class="font-13 m-0">
+                        <h1 class="font-13 ms-3">
                             <i class="bi bi-arrow-left"></i><span class="ms-2">Back</span>
                         </h1>
                     </div>
@@ -193,12 +193,12 @@
                                         <div class="">
                                             <div
                                                 class="stepperbackground ps-2 pe-2 m-0 d-flex justify-content-between align-items-center">
-                                                <h1 class="font-11 m-0">
-                                                    <i @click="prevStep(1)" class="bi bi-chevron-left"></i><span
-                                                        class="ms-2">Back To About Form</span>
+                                                <h1 @click="prevStep(1)" class="font-11 m-0">
+                                                    <i class="bi bi-chevron-left"></i><span class="ms-2">Back To About
+                                                        Form</span>
                                                 </h1>
                                                 <div class="d-flex gap-2 align-items-center">
-                                                    <div v-if="blockArr.length">
+                                                    <div v-if="!hasErrors || blockArr.length">
                                                         <button
                                                             class="btn btn-light previewBtn d-flex align-items-center font-13"
                                                             type="button" @click="previewForm">
@@ -244,23 +244,32 @@
                                                             </div>
                                                             <div class="d-flex">
                                                                 <div v-if="paramId && workflowSetup.length"
-                                                                    class="d-flex align-items-center">
-                                                                    <span class="font-10 pe-1">
-                                                                        {{
-                        blockIndex == 0
-                            ? "Requestor : "
-                            : "Approver:"
-                    }}
+                                                                    class="role-container">
+                                                                    <span class="role-label">
+                                                                        {{ blockIndex == 0 ? "Requestor: " : "Approver:"
+                                                                        }}
                                                                     </span>
-                                                                    <label class="ps-1"
+                                                                    <label class="role-text"
                                                                         v-if="getWorkflowSetup(blockIndex)">
-                                                                        {{
-                        getWorkflowSetup(blockIndex).roles.join(
-                            ", "
-                        )
+                                                                        <span class="role-names">
+                                                                            {{
+                        getWorkflowSetup(blockIndex).roles.slice(0,
+                            2).join(", ")
                     }}
+                                                                        </span>
+                                                                        <span data-bs-toggle="offcanvas"
+                                                                            data-bs-target="#offcanvasRight"
+                                                                            aria-controls="offcanvasRight"
+                                                                            @click="AddDesignCanvas(blockIndex)"
+                                                                            v-if="getWorkflowSetup(blockIndex).roles.length > 2"
+                                                                            class="more-count">
+                                                                            +{{
+                        getWorkflowSetup(blockIndex).roles.length -
+                        2 }} more
+                                                                        </span>
                                                                     </label>
                                                                 </div>
+
 
                                                                 <button v-if="paramId != undefined &&
                         paramId != null &&
@@ -802,11 +811,10 @@
                     aria-label="Close"></button>
             </div>
             <div class="offcanvas-body">
-                <div class="d-flex align-items-center gap-2 ps-2">
-                    <div v-if="DesignationList.length" class="position-relative">
-                        <input type="checkbox" id="selectAll" v-model="isAllSelected"
-                            class="designationCheckBox position-absolute bg-transparent form-control border-0 ms-1" />
-                        <label for="selectAll fw-bold" class="SelectallDesignation">Select all</label>
+                <div class="">
+                    <div class="form-check ps-2" v-if="DesignationList.length">
+                        <input type="checkbox" id="selectAll" v-model="isAllSelected" class="me-2 form-check-input" />
+                        <label for="selectAll fw-bold" class="SelectallDesignation form-check-label">Select all</label>
                     </div>
                 </div>
                 <ul v-if="DesignationList.length" class="list-unstyled">
@@ -876,7 +884,6 @@ const selectedBlockIndex = ref("");
 let workflowSetup = reactive([]);
 let paramId = ref("");
 const businessUnit = computed(() => {
-    console.log(EzyBusinessUnit.value, "businessUnit from global======");
     return EzyBusinessUnit;
 });
 
@@ -905,16 +912,14 @@ watch(
 onMounted(() => {
     deptData();
     paramId = route.params.paramid || "new";
-    console.log(" === paramId:", paramId);
+
     if (paramId != undefined && paramId != null && paramId != "new") {
         getFormData();
     }
     let Bu_Unit = localStorage.getItem("Bu");
     filterObj.value.business_unit = Bu_Unit;
-    console.log(
-        "businessUnit from LocalStorage======",
-        filterObj.value.business_unit
-    );
+
+
 });
 
 
@@ -1024,9 +1029,9 @@ function handleSingleSelect() {
 }
 
 function addDesignationBtn() {
-    console.log(selectedBlockIndex.value, "tttttttttt");
+
     const block = blockArr[selectedBlockIndex.value];
-    console.log(block);
+
     if (!block || !block.sections) {
         console.error('Error: Invalid block or sections not found.');
         return; // Prevent further execution
@@ -1046,6 +1051,7 @@ function addDesignationBtn() {
         workflowSetup[existingIndex] = xyz;
     } else {
         workflowSetup.push(xyz);
+        // console.log(workflowSetup, workflowSetup.length, "--workflowSetup---");
     }
 
     add_Wf_roles_setup();
@@ -1147,7 +1153,7 @@ watch(
 );
 
 function formData(status) {
-    console.log(status, "*************");
+
     const fields = extractFieldsWithBreaks(blockArr);
     const dataObj = {
         ...filterObj.value,
@@ -1220,7 +1226,10 @@ const addBlock = () => {
         ],
     };
 
+
     blockArr.splice(blockArr.length, 0, newBlock);
+    // console.log(blockArr.length, blockArr, "00000");
+
 };
 
 // function to delete block
@@ -1233,8 +1242,8 @@ const removeBlock = (blockIndex) => {
 // Function to add a new section with a default column
 const addSection = (blockIndex) => {
     let sectionIndex = blockArr[blockIndex].sections.length;
-    let rowIndex = blockArr[blockIndex].sections;
-    console.log(blockIndex, "====", sectionIndex, " ========== ", rowIndex);
+    // let rowIndex = blockArr[blockIndex].sections;
+
 
     blockArr[blockIndex].sections.push({
         label: "",
@@ -1413,13 +1422,12 @@ const onFieldTypeChange = (
     // const field =
     //     sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex];
     // Handle additional logic for field type change if needed
-    // console.log(fieldType, "field === ", field);
-    // console.log(" sections === ", sections);
 
-    // console.log(" deleted items sections === ", deleted_items)
+
+
 
     // const xyz = extractFieldsWithBreaks(sections)
-    // console.log(" extracted Format === ", xyz)
+
 };
 
 function handleFieldChange(
@@ -1431,10 +1439,10 @@ function handleFieldChange(
 ) {
     const flatArr = blockArr.flatMap(extractfieldlabels);
     const isDuplicate = hasDuplicates(flatArr); // Check once to reuse this result
-    console.log(isDuplicate, "0000000000000");
+
     const checkFieldType = addErrorMessagesToStructuredArray(blockArr);
     blockArr.splice(0, blockArr.length, ...checkFieldType);
-    console.log(blockArr, "******************************");
+
     // Assign error message for the specific field if fieldIndex is valid
     if (
         fieldIndex !== undefined &&
@@ -1467,31 +1475,37 @@ function handleFieldChange(
         fieldIndex === undefined &&
         sectionIndex !== undefined
     ) {
-        console.log(sectionIndex, "------", isDuplicate);
+
         blockArr[blockIndex].sections[sectionIndex].errorMsg = isDuplicate
             ? "Duplicate Label Name in Section"
             : "";
-        console.log(blockArr[blockIndex].sections[sectionIndex].errorMsg, "===============");
+
     }
 }
 
 const hasErrors = computed(() => {
-    function checkErrors(obj) {
+    function checkFieldErrors(obj) {
         if (!obj || typeof obj !== "object") return false;
 
-        if (obj.error || obj.errorMsg) {
+        // Check if `fieldtype` is empty, or if `error` or `errorMsg` exist
+        if (
+            ("fieldtype" in obj && obj.fieldtype === "") ||
+            ("error" in obj && obj.error) ||
+            ("errorMsg" in obj && obj.errorMsg)
+        ) {
             return true;
         }
 
         if (Array.isArray(obj)) {
-            return obj.some(checkErrors);
+            return obj.some(checkFieldErrors);
         }
 
-        return Object.values(obj).some(checkErrors);
+        return Object.values(obj).some(checkFieldErrors);
     }
 
-    return checkErrors(blockArr);
+    return checkFieldErrors(blockArr);
 });
+
 // function handleFieldChange(
 //     blockIndex,
 //     sectionIndex,
@@ -1500,8 +1514,7 @@ const hasErrors = computed(() => {
 //     fieldIndex
 // ) {
 //     const flatArr = blockArr.flatMap(extractfieldlabels);
-//     const isDuplicate = hasDuplicates(flatArr); // Check once to reuse this result
-//     console.log(isDuplicate, "0000000000000");
+//     const isDuplicate = hasDuplicates(flatArr); // Check once to reuse this result 
 //     const checkFieldType = addErrorMessagesToStructuredArray(blockArr);
 //     blockArr.splice(0, blockArr.length, ...checkFieldType);
 
@@ -1535,11 +1548,11 @@ const hasErrors = computed(() => {
 //         fieldIndex === undefined &&
 //         sectionIndex !== undefined
 //     ) {
-//         console.log(sectionIndex, "------", isDuplicate);
+//        
 //         blockArr[blockIndex].sections[sectionIndex].errorMsg = isDuplicate
 //             ? "Duplicate Label Name in Section"
 //             : "";
-//         console.log(blockArr[blockIndex].sections[sectionIndex].errorMsg, "===============");
+//        
 //     }
 // }
 const isNextDisabled = computed(() => {
@@ -1555,7 +1568,7 @@ const isNextDisabled = computed(() => {
 
 function handleInputChange(event, fieldType) {
     const inputValue = event.target.value;
-    console.log(`${fieldType} input change === `, inputValue);
+
 
     // Set filter based on fieldType
     const filters = [[fieldType, "like", `%${inputValue}%`]];
@@ -1569,7 +1582,7 @@ function handleInputChange(event, fieldType) {
             params: queryParams,
         })
         .then((res) => {
-            console.log(`${fieldType} response === `, res.data);
+
             ezyFormsData.value = res.data;
 
             // Check for duplicates and set appropriate error message
@@ -1636,12 +1649,13 @@ function deptData() {
         .get(apis.resource + doctypes.departments, { params: queryParams })
         .then((res) => {
             if (res?.data?.length) {
-                // console.log(res.data, "Fetched departments");
+
                 // Mapping department names
                 // label="name" track-by="name"
                 OwnerOfTheFormData.value = res.data.map((dept) => dept.name);
                 formOptions.value = res.data.map((dept) => dept.name); // Store the full data for accessible departments
-                // console.log(formOptions.value, 'Accessible Departments');
+                // departments.value = res.data.map(item => item.category)
+
             }
         })
         .catch((error) => {
@@ -1688,14 +1702,14 @@ function getFormData() {
                 );
 
                 // workflowSetup.push(JSON.parse(res_data?.form_json).workflow)
-                // console.log(" structure === ", structuredArr)
+
                 structuredArr.forEach((item, index) => {
                     blockArr.push(item);
                 });
 
                 JSON.parse(res_data?.form_json).workflow.forEach((item, index) => {
                     workflowSetup.push(item);
-                    console.log(" Work flow setup === ", workflowSetup);
+
                 });
             }
         })
@@ -1727,7 +1741,7 @@ async function saveFormData(type) {
         data.length
     ) {
         delete_form_items_fields();
-        //    console.log(" result", result)
+
     } else {
         formData(type);
     }
@@ -1786,7 +1800,7 @@ const getFieldComponent = (type) => {
 //         return;
 //     }
 //     [arr[fromIndex], arr[toIndex]] = [arr[toIndex], arr[fromIndex]];
-//     console.log(`Swapped items at index ${fromIndex} and ${toIndex}`);
+
 // };
 
 // // Swap Sections
@@ -1825,7 +1839,7 @@ const getFieldComponent = (type) => {
 //             // Move field between different columns
 //             const fieldToMove = fromColumn.fields.splice(fromIndex, 1)[0];
 //             toColumn.fields.splice(toIndex, 0, fieldToMove);
-//             console.log(`Moved field from column ${fromColumnIndex} to column ${toColumnIndex}`);
+//             
 //         } else {
 //             // Swap fields within the same column
 //             swapItems(fromColumn.fields, fromIndex, toIndex);
@@ -1843,7 +1857,7 @@ const getFieldComponent = (type) => {
 //     if (sectionIndex !== null) event.dataTransfer.setData('sectionIndex', sectionIndex);
 //     if (rowIndex !== null) event.dataTransfer.setData('rowIndex', rowIndex);
 //     if (columnIndex !== null) event.dataTransfer.setData('columnIndex', columnIndex);
-//     console.log(`Dragging ${type} from index ${index}`);
+//    
 // };
 
 // // Handle drag over event (necessary for drop to work)
@@ -1862,7 +1876,7 @@ const getFieldComponent = (type) => {
 //     const draggedRowIndex = Number(event.dataTransfer.getData('rowIndex'));
 //     const draggedColumnIndex = Number(event.dataTransfer.getData('columnIndex'));
 
-//     console.log(`Dropping ${draggedType} from index ${draggedIndex} to ${index}`);
+
 
 //     if (draggedType === 'section' && type === 'section') {
 //         swapSections(draggedIndex, index, draggedBlockIndex);
@@ -2483,5 +2497,44 @@ select {
 .not-allowed {
     cursor: not-allowed;
     /* Show "not-allowed" cursor */
+}
+
+.role-container {
+    max-width: 280px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
+}
+
+.role-label {
+    font-size: 10px;
+    padding-right: 4px;
+}
+
+.role-text {
+    display: flex;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.role-names {
+    display: inline-block;
+    // max-width: calc(100% - 50px);
+    /* Leave space for "+X more" */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.more-count {
+    color: #000;
+    font-weight: 500;
+    display: inline;
+    cursor: pointer;
+    padding-left: 5px;
 }
 </style>

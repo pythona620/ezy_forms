@@ -1,7 +1,7 @@
 <template>
   <div>
     <div>
-      <div class="d-flex justify-content-between align-items-center">
+      <div class="d-flex justify-content-between align-items-center py-2">
         <div>
           <h1 class="m-0 font-13">
             Forms in {{ id }}
@@ -132,7 +132,7 @@ const PaginationLimitStart = ([itemsPerPage, start]) => {
 
 
 function inLineFiltersData(searchedData) {
-  console.log("Applied searchedData:", searchedData);
+
 
   //   // Initialize filters array
   const filters = [];
@@ -159,10 +159,10 @@ function inLineFiltersData(searchedData) {
     //       filters.push([key, "=", searchedData[key]]);
     //     }
   });
-  console.log(filters.length == 0, "------------filters--------");
+
 
   //   // Log filters to verify
-  //   console.log("Dynamic Filters:", filters);
+
 
   //   // Once the filters are built, pass them to fetchData function
   if (filters.length) {
@@ -176,7 +176,7 @@ function inLineFiltersData(searchedData) {
 
 // Fetch department details function
 function fetchDepartmentDetails(id, data) {
-  console.log(id, data, "---id");
+
   const filters = [
     ["business_unit", "like", `%${newBusinessUnit.value.business_unit}%`]
   ];

@@ -66,7 +66,7 @@
                 'bi-icon',
                 'fs-6',
                 'bg-transparent',
-                'bi',
+
                 iconClasses[index % iconClasses.length],
                 'me-3',
 
@@ -126,8 +126,8 @@ const settingsSideBarData = [
     // { name: 'Notifications', icon: 'bi bi-bell', route: 'notifications' },
     { name: 'Department', icon: 'bi bi-clock-history', route: 'department' },
     { name: 'Designation', icon: 'bi bi-people', route: 'designations' },
+    { name: 'Categories', icon: 'bi bi-tags', route: 'categories' },
     { name: 'Employees', icon: 'bi bi-people', route: 'employee' },
-    // { name: 'Categories', icon: 'bi bi-tags', route: 'categories' },
 
 ];
 // Define the title for the first and second settings sections
@@ -140,9 +140,8 @@ const forthSettingsTitle = 'Form';
 
 const todoSideBarData = [
     { name: 'Received for me', icon: 'bi bi-bucket', route: 'receivedform' },
-
     { name: 'Raised by me', icon: 'bi bi-send', route: 'raisedbyme' },
-    { name: 'My team', icon: 'bi bi-microsoft-teams', route: 'myteam' },
+    { name: 'My team', icon: 'bi bi-people', route: 'myteam' },
     { name: 'History', icon: 'bi bi-clock-history', route: 'history' },
 
 ];
@@ -177,8 +176,8 @@ const sidebarData = computed(() => {
 });
 const firstSettingsGroup = computed(() => settingsSideBarData.slice(0, 2)); // First 4 items
 // const secondSettingsGroup = computed(() => settingsSideBarData.slice(2, 6));
-const thirdSettingsGroup = computed(() => settingsSideBarData.slice(2, 4)); // Remaining items
-const forthSettingsGroup = computed(() => settingsSideBarData.slice(4));
+const thirdSettingsGroup = computed(() => settingsSideBarData.slice(2, 5)); // Remaining items
+const forthSettingsGroup = computed(() => settingsSideBarData.slice(5));
 // Define the title based on the current route
 const sidebarTitle = computed(() => {
     if (isMasterRoute.value) {
@@ -238,7 +237,7 @@ function deptData() {
 
                     //   id: department.id 
                 }));
-                console.log(formSideBarData.value);
+
             }
         })
         .catch((error) => {

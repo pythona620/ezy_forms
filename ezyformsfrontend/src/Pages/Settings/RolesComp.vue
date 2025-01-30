@@ -171,7 +171,7 @@ const filterOnModal = ref({
 //         filterObj.value.business_unit = newVal;
 
 //         if (newVal.length) {
-//             console.log(newVal, "new value of business unit");
+//             
 //             rolesData()
 //         }
 //     },
@@ -223,7 +223,7 @@ function rolesData() {
     axiosInstance.get(apis.resource + '/' + doctypes.roles, { params: queryParams })
         .then((res) => {
             if (res.data) {
-                console.log(res.data, "Fetched roles");
+
                 tableData.value = res.data;
             }
         })

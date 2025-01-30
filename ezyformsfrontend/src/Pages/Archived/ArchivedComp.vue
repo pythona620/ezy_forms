@@ -1,6 +1,6 @@
 <template>
     <div class="ps-2">
-        <div class="d-flex justify-content-between align-items-center ">
+        <div class="d-flex justify-content-between align-items-center py-2 ">
             <div>
                 <!-- <h1 class="m-0 font-13">
                     Archived forms

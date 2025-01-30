@@ -129,7 +129,7 @@ export function extractFieldsWithBreaks(data) {
 
 
 export function rebuildToStructuredArray(flatArray) {
-  console.log(" Flat Array === ", flatArray)
+  // console.log(" Flat Array === ", flatArray)
   const result = [];
   let currentBlock = null;
   let currentSection = null;

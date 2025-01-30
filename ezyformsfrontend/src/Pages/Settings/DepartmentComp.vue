@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div class="d-flex justify-content-between align-items-center ">
+        <div class="d-flex justify-content-between align-items-center  py-2">
             <div>
                 <h1 class="m-0 font-13">
                     Departments
@@ -214,7 +214,7 @@ function actionCreated(rowData, actionEvent) {
                 .then((res) => {
                     if (res.data) {
                         categoriesDataEdit.value = res.data;
-                        console.log(categoriesData.value);
+
                     }
                 })
                 .catch((error) => {
@@ -270,7 +270,7 @@ watch(
         CreateDepartments.value.business_unit = newVal;
 
         if (newVal.length) {
-            console.log(newVal, "new value of business unit");
+
             deptData()
         }
     },
@@ -321,13 +321,13 @@ function removeCategoryForm(index) {
 }
 
 function saveCategories() {
-    console.log(categoriesDataEdit.value, "---------------", categoriesDataEdit.value.name);
+
     axiosInstance.put(`${apis.resource}${doctypes.departments}/${categoriesDataEdit.value.name}`, categoriesDataEdit.value)
         .then((response) => {
             toast.success("Changes Saved", { autoClose: 500 })
             const modal = bootstrap.Modal.getInstance(document.getElementById('viewCategory'));
             modal.hide();
-            console.log("Categories saved successfully:", response.data);
+
         })
         .catch((error) => {
             console.error("Error saving categories:", error);
@@ -335,7 +335,7 @@ function saveCategories() {
 }
 
 function inLineFiltersData(searchedData) {
-    console.log("Applied searchedData:", searchedData);
+
 
     //   // Initialize filters array
     const filters = [];

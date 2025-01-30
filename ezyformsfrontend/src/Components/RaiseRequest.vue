@@ -7,11 +7,14 @@
                 form</router-link>
         </div>
         <div class="container">
-            <div v-if="blockArr.length">
-                <RequestPreview :blockArr="blockArr" :formName="selectedData.selectedform"
-                    @updateField="handleFieldUpdate" @formValidation="isFormValid = $event" />
+            <div v-if="blockArr.length" class="position-relative">
+                <div class="requestPreviewDiv">
+
+                    <RequestPreview :blockArr="blockArr" :formName="selectedData.selectedform"
+                        @updateField="handleFieldUpdate" @formValidation="isFormValid = $event" />
+                </div>
                 <!-- @formValidation="isFormValid = $event" -->
-                <div>
+                <div class="raiserequestBtnDiv">
                     <div class=" d-flex justify-content-end align-items-center p-3">
                         <button class=" btn btn-white font-13" @click="clearFrom"> <span> <i
                                     class=" bi bi-x"></i></span>Clear
@@ -70,7 +73,7 @@ const filterObj = ref({
     limitPageLength: 100,
 })
 onMounted(() => {
-    console.log(selectedData.value);
+
     formDefinations()
     raiseRequest()
 })
@@ -130,7 +133,7 @@ function deptData(value = null) {
         });
 }
 function raiseRequest() {
-    console.log(" Raise req ")
+
     const storedData = localStorage.getItem("employeeData");
     if (storedData) {
         employeeData.value = JSON.parse(storedData);
@@ -177,7 +180,7 @@ function formDefinations() {
     // }
     // axiosInstance.get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParamsCount })
     //     .then((res) => {
-    //         // console.log(res.data[0].total_count);
+    //       
     //         totalRecords.value = res.data[0].total_count
 
     //     })
@@ -188,7 +191,7 @@ function formDefinations() {
 
     axiosInstance.get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParams })
         .then(res => {
-            console.log(res, "===================0000000000=====================");
+
             const form_json = res.data[0].form_json
             blockArr.value = rebuildToStructuredArray(JSON.parse(form_json).fields)
             blockArr.value.splice(1)
@@ -203,19 +206,18 @@ function formDefinations() {
 const handleFieldUpdate = (field) => {
 
     const fieldExists = emittedFormData.value.some(item => item.fieldname === field.fieldname);
-    console.log(fieldExists, "888888888888888");
+
 
     if (!fieldExists) {
         if (field.fieldtype === 'Attach') {
             if (!Array.isArray(field.value)) {
                 filepaths.value = field.value;
-                console.log(filepaths.value, "777777777777777");
+
             }
             emittedFormData.value.push(field);
         } else {
             emittedFormData.value = emittedFormData.value.concat(field);
         }
-        console.log(...emittedFormData.value, "--------emittedFormData-------");
     } else {
         console.log(`Field with name "${field.fieldname}" already exists in emittedFormData.`);
     }
@@ -232,7 +234,7 @@ function raiseRequestSubmission() {
         })
     }
 
-    console.log(" ==== ", form, "-------------------------------------------")
+
 
     // form['form_json']
     const formData = new FormData();
@@ -240,7 +242,7 @@ function raiseRequestSubmission() {
     formData.append('action', 'Save');
     axiosInstance.post(apis.savedocs, formData)
         .then((response) => {
-            console.log(response);
+
             request_raising_fn(response.docs[0])
 
         })
@@ -260,7 +262,7 @@ function request_raising_fn(item) {
         files: filesArray,
         property: business_unit.value,
     }; axiosInstance.post(apis.raising_request, data_obj).then(async (resp) => {
-        console.log(resp);
+
         if (resp?.message?.success) {
             toast.success("Request Raised", { autoClose: 1000 });
 
@@ -287,6 +289,21 @@ function request_raising_fn(item) {
 </script>
 
 <style scoped>
+.requestPreviewDiv {
+    height: 80vh;
+    overflow-y: auto;
+    padding: 20px 0px;
+}
+
+.raiserequestBtnDiv {
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #fff;
+    z-index: 1;
+}
+
 .raisePreview {
     background-color: #EEEEEE;
     padding: 10px;

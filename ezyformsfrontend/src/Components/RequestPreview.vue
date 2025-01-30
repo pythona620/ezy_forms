@@ -5,14 +5,14 @@
                 <div v-for="(section, sectionIndex) in block.sections" :key="'preview-' + sectionIndex"
                     class="preview-section m-2">
                     <div class="section-label">
-                        <h5 class="m-0 font-13">{{ section.label || 'Untitled Section' }}</h5>
+                        <h5 class="m-0 font-13">{{ section.label }}</h5>
                     </div>
                     <div class="container-fluid">
                         <div class="row" v-for="(row, rowIndex) in section.rows" :key="rowIndex">
                             <div v-for="(column, columnIndex) in row.columns" :key="'column-preview-' + columnIndex"
                                 class="col dynamicColumn">
-                                <div class="p-3 border-bottom">
-                                    <h6 class="m-0 font-12">{{ column.label || '-' }}</h6>
+                                <div v-if="column.label" class="p-3 border-bottom">
+                                    <h6 class="m-0 font-12">{{ column.label }}</h6>
                                 </div>
                                 <div class="mx-3 my-2">
                                     <div v-for="(field, fieldIndex) in column.fields"
@@ -107,7 +107,7 @@
                                             class="text-danger font-10 mt-1">
                                             {{
             errorMessages[`${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`]
-                                            }}
+        }}
                                         </div>
 
 
@@ -181,7 +181,7 @@ const allFieldsFilled = computed(() => {
 
 // Watch `allFieldsFilled` and emit value
 watch(allFieldsFilled, (newValue) => {
-    console.log(newValue, "++++++++++++++++++++++++++++");
+
     emit("formValidation", newValue); // Emit true if all fields are filled, false otherwise
 });
 
@@ -195,18 +195,18 @@ const logFieldValue = (eve, blockIndex, sectionIndex, rowIndex, columnIndex, fie
             uploadFile(files[i], field);
         }
         // emit('updateField', field);
-        console.log('Selected files:', files, "Field Value:", field);
+
     } else if (eve.target.type === 'checkbox') {
 
         field['value'] = eve.target.checked;
 
         // emit('updateField', field);
-        console.log('Field Value (Checkbox):', field);
+
 
     } else {
         field['value'] = eve.target.value;
 
-        console.log('Entered value--------------------------:', eve.target.value, "Field Value:", field);
+
     }
     validateField(field, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex);
     emit('updateField', field);
@@ -246,7 +246,7 @@ const uploadFile = (file, field) => {
     axiosInstance
         .post(apis.uploadfile, formData)
         .then((res) => {
-            console.log('Upload response:', res);
+
             if (res.message && res.message.file_url) {
                 if (field['value']) {
                     field['value'] += `, ${res.message.file_url}`;
@@ -270,7 +270,7 @@ const uploadFile = (file, field) => {
 //         const field = props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex];
 //         field.value = file.name; // Store the file name in the field's value
 //         emit('updateField', field); // Emit the updated field to the parent
-//         console.log("Selected file:", file.name);
+//         
 //     }
 // };
 

@@ -11,6 +11,7 @@ export const doctypes = {
   departments: "Ezy Departments",
   wfSettingEzyForms: "Ezy Business Unit",
   EzyFormDefinitions: "Ezy Form Definitions",
+  EzyCategories: "Ezy Category",
   designations: "WF Roles",
   EzyEmployeeList: "Ezy Employee",
   roles: 'Role',

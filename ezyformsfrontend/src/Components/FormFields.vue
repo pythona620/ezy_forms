@@ -29,14 +29,14 @@
       </div>
     </div>
 
-    <div class="input-group select-dropdown shadow-none" v-if="tag === 'select'">
+    <div class="input-group select-dropdown shadow-none d-flex justify-content-between" v-if="tag === 'select'">
       <p class="fw-normal ps-2 m-0 text-secondary">{{ placeholder }}</p>
-      <div class="dropdown w-100">
+      <div class="dropdown ms-auto">
         <button class="btn btn-white dropdown-toggle w-100 border-0 font-12" type="button" id="dropdownMenuButton"
           data-bs-toggle="dropdown" aria-expanded="false">
           {{ selectedOption }}
         </button>
-        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
           <li v-for="(item, index) in options" :key="index">
             <a class="dropdown-item" href="#" @click.prevent="selectOption(item)">
               {{ item }}
@@ -381,7 +381,17 @@ select {
 }
 
 
+
+.dropdown-menu {
+  width: 100%;
+}
+
 .dropdown-item {
   cursor: pointer;
+}
+
+.dropdown-menu-end {
+  right: 0;
+  left: auto;
 }
 </style>

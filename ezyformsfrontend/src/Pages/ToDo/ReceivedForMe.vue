@@ -1,7 +1,7 @@
 <template>
   <div>
 
-    <div class="d-flex justify-content-between align-items-center ">
+    <div class="d-flex justify-content-between align-items-center py-2 ">
       <div>
         <h1 class="m-0 font-13">
           Requests received for me
@@ -122,10 +122,9 @@ function actionCreated(rowData, actionEvent) {
   if (actionEvent.name === 'View Request') {
     if (rowData) {
       selectedRequest.value = { ...rowData };
-      console.log(" === selectedReq ==== ", selectedRequest.value)
+
       // Rebuild the structured array from JSON
       showRequest.value = rebuildToStructuredArray(JSON.parse(selectedRequest.value?.json_columns)?.fields);
-      console.log(showRequest.value, "selected Request");
 
       // Prepare the filters for fetching data
       const filters = [
@@ -144,7 +143,7 @@ function actionCreated(rowData, actionEvent) {
         .then((res) => {
           if (res.data) {
             doctypeForm.value = res.data[0];
-            console.log("doctype Form === ", doctypeForm.value)
+
             // Map values from doctypeForm to showRequest fields
             mapFormFieldsToRequest(doctypeForm.value, showRequest.value);
           }
@@ -164,7 +163,7 @@ function actionCreated(rowData, actionEvent) {
 // Function to capture the form data from ApproverPreview
 const updateFormData = (fieldValues) => {
   emittedFormData.value = emittedFormData.value.concat(fieldValues);
-  // console.log(formData.value, "-----------========ApproverFormData====-=-==-==");
+
 };
 
 // Function to handle form submission
@@ -176,7 +175,7 @@ function ApproverFormSubmission(dataObj, type) {
     })
   }
   axiosInstance.put(`${apis.resource}/${selectedRequest.value.doctype_name}/${doctypeForm.value.name}`, form).then((response) => {
-    console.log()
+
     if (response?.data) {
       approvalStatusFn(dataObj, type)
     }
@@ -197,7 +196,7 @@ function approvalStatusFn(dataObj, type) {
     // https://ezyrecon.ezyinvoicing.com/home/wf-requests
     "current_level": selectedRequest.value.current_level
   }
-  console.log(dataObj, { request_details: [data] }, "---------------------================");
+
   // need to check this api not working 
   axiosInstance.post(apis.requestApproval, { request_details: [data] })
     .then((response) => {
@@ -219,7 +218,7 @@ function approvalStatusFn(dataObj, type) {
 
 function approvalCancelFn(dataObj, type) {
   // let files = this.selectedFileAttachments.map((res: any) => res.url);
-  console.log(dataObj);
+
   let data = {
     "property": selectedRequest.value.property,
     "doctype": selectedRequest.value.doctype_name,
@@ -249,7 +248,7 @@ function mapFormFieldsToRequest(doctypeData, showRequestData) {
             // Check if the fieldname exists in the doctypeForm and assign the value
             if (doctypeData?.hasOwnProperty(field?.fieldname)) {
               field.value = doctypeData[field.fieldname]; // Assign the value from doctypeForm to the field
-              // console.log(`Mapping field: ${field.fieldname} with value: ${field.value}`);
+
             }
           });
         });
@@ -277,7 +276,7 @@ const PaginationLimitStart = ([itemsPerPage, start]) => {
 };
 
 function inLineFiltersData(searchedData) {
-  console.log("Applied searchedData:", searchedData);
+
 
   //   // Initialize filters array
   const filters = [];
@@ -304,10 +303,10 @@ function inLineFiltersData(searchedData) {
     //       filters.push([key, "=", searchedData[key]]);
     //     }
   });
-  console.log(filters.length == 0, "------------filters--------");
+
 
   //   // Log filters to verify
-  //   console.log("Dynamic Filters:", filters);
+
 
   //   // Once the filters are built, pass them to fetchData function
   if (filters.length) {
@@ -321,7 +320,7 @@ function inLineFiltersData(searchedData) {
 function receivedForMe(data) {
   // Initialize filters array for building dynamic query parameters
   const EmpRequestdesignation = JSON.parse(localStorage.getItem('employeeData'));
-  console.log(EmpRequestdesignation, "---------------------");
+
   const filters = [
     // assigned_to_users
     ["assigned_to_users", "like", `%${EmpRequestdesignation?.designation}%`],
@@ -358,7 +357,7 @@ function receivedForMe(data) {
   // Fetch the records matching filters
   axiosInstance.get(`${apis.resource}${doctypes.WFWorkflowRequests}`, { params: queryParams })
     .then((res) => {
-      console.log("output-res", res);
+
       tableData.value = res.data;
       idDta.value = [...new Set(res.data.map((id) => id.name))];
       docTypeName.value = [...new Set(res.data.map((docTypeName) => docTypeName.doctype_name))]
@@ -377,7 +376,7 @@ watch(
     newBusinessUnit.value.business_unit = newVal;
 
     if (newVal.length) {
-      console.log(newVal, "new value of business unit");
+
       receivedForMe()
     }
   },

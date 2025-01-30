@@ -103,7 +103,7 @@ watch(
         filterObj.value.business_unit = newVal;
 
         if (newVal.length) {
-            console.log(newVal, "new value of business unit");
+            // console.log(newVal, "new value of business unit");
             // localStorage.setItem("Bu", filterObj.value.business_unit)
             tableData.value = []
             fetchTable()
@@ -145,9 +145,9 @@ function actionCreated(rowData, actionEvent) {
     if (actionEvent.name === 'View form') {
         if (rowData?.form_json) {
             formDescriptions.value = { ...rowData };
-            console.log(formDescriptions.value, "lllllllllll");
+            // console.log(formDescriptions.value, "lllllllllll");
             selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json).fields);
-            console.log(selectedForm.value, "ooooo");
+            // console.log(selectedForm.value, "ooooo");
             const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});
             modal.show();
         } else {
@@ -160,14 +160,14 @@ function actionCreated(rowData, actionEvent) {
     else if (actionEvent.name === 'PDF Format') {
         // pdfView
         formDescriptions.value = rowData
-        console.log(rowData.form_short_name, "form_short_name");
+
         const dataObj = {
             "form_short_name": rowData.form_short_name
         };
 
         axiosInstance.post(apis.preview_dynamic_form, dataObj)
             .then((response) => {
-                console.log(response, "form pdf responce");
+
                 pdfPreview.value = response.message
 
             })
@@ -189,7 +189,7 @@ function actionCreated(rowData, actionEvent) {
     }
 }
 function downloadPdf() {
-    console.log(formDescriptions.value, "selectedForm");
+
     const dataObj = {
         "form_short_name": formDescriptions.value.form_short_name,
         "name": null
@@ -197,7 +197,7 @@ function downloadPdf() {
 
     axiosInstance.post(apis.download_pdf_form, dataObj)
         .then((response) => {
-            console.log(response, "download pdf");
+
             let pdfUrl = domain + response.message;
 
             // Remove 'api' from the URL if present
@@ -222,7 +222,7 @@ function updateFormStatus(rowData, status) {
 
         axiosInstance.put(`${apis.resource}${doctypes.EzyFormDefinitions}/${formId}`, statusUpdate)
             .then((res) => {
-                console.log(`Form status updated to ${status === '1' ? 'Active' : 'Inactive'}`, res);
+
                 fetchTable();
             })
             .catch((error) => {
@@ -237,7 +237,7 @@ const hideModal = () => {
 };
 
 function inLineFiltersData(searchedData) {
-    console.log("Applied searchedData:", searchedData);
+
 
     //   // Initialize filters array
     const filters = [];
@@ -264,10 +264,10 @@ function inLineFiltersData(searchedData) {
         //       filters.push([key, "=", searchedData[key]]);
         //     }
     });
-    console.log(filters.length == 0, "------------filters--------");
+
 
     //   // Log filters to verify
-    //   console.log("Dynamic Filters:", filters);
+
 
     //   // Once the filters are built, pass them to fetchData function
     if (filters.length) {
@@ -336,7 +336,7 @@ function fetchTable(data) {
     }
     axiosInstance.get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParamsCount })
         .then((res) => {
-            // console.log(res.data[0].total_count);
+
             totalRecords.value = res.data[0].total_count
 
         })

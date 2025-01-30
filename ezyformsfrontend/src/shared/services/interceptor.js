@@ -18,7 +18,7 @@ axiosInstance.interceptors.request.use(
   },
   (error) => {
     loadValue.value = false;
-    console.log(error, "request");
+
     return Promise.reject(error);
   }
 );
@@ -32,20 +32,19 @@ axiosInstance.interceptors.response.use(
   (error) => {
     loadValue.value = false;
     if (error.response) {
+      const statusText = error.response.statusText.toLowerCase();
       if (error.response.status === 400) {
-        toast.error("Bad Request: " + error.response.statusText);
+        toast.error(`Bad Request: ${statusText}`);
       } else if (error.response.status === 401) {
-        toast.error("Unauthorized: " + error.response.statusText);
+        toast.error(`Unauthorized: ${statusText}`);
       } else if (error.response.status === 403) {
-        toast.error("Forbidden: " + error.response.statusText);
+        toast.error(`Forbidden: ${statusText}`);
       } else if (error.response.status === 404) {
-        toast.error("Not Found: " + error.response.statusText);
+        toast.error(`Not Found: ${statusText}`);
       } else if (error.response.status === 500) {
-        toast.error("Internal Server Error: " + error.response.statusText);
+        toast.error(`Internal Server Error: ${statusText}`);
       } else {
-        toast.error(
-          `Error ${error.response.status}: ` + error.response.statusText
-        );
+        toast.error(`Error ${error.response.status}: ${statusText}`);
       }
     } else if (error.request) {
       toast.error("No response received: Please check your network connection");

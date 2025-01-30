@@ -220,7 +220,7 @@ const logFieldValue = (event, blockIndex, sectionIndex, rowIndex, columnIndex, f
     const field = props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex];
     field.value = event.target.value;
     emit('updateField', getAllFieldsData());
-    console.log('Field Value Updated:', field);
+    // console.log('Field Value Updated:', field);
 };
 </script>
 

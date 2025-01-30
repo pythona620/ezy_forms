@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="d-flex justify-content-between align-items-center ">
+    <div class="d-flex justify-content-between align-items-center py-2 ">
       <div>
         <h1 class="m-0 font-13">
           Requests raised for me
@@ -166,7 +166,6 @@ function actionCreated(rowData, actionEvent) {
       selectedRequest.value = { ...rowData };
       // Rebuild the structured array from JSON
       showRequest.value = rebuildToStructuredArray(JSON.parse(selectedRequest.value?.json_columns).fields);
-      console.log(showRequest.value, "selected Request");
 
       // Prepare the filters for fetching data
       const filters = [
@@ -226,7 +225,7 @@ function actionCreated(rowData, actionEvent) {
 
           axiosInstance.post(apis.preview_dynamic_form, dataObj)
             .then((response) => {
-              console.log(response, "form pdf responce");
+
               pdfPreview.value = response.message
 
             })
@@ -238,7 +237,7 @@ function actionCreated(rowData, actionEvent) {
       .catch((error) => {
         console.error("Error fetching categories data:", error);
       });
-    console.log(rowData, "form_short_name");
+
 
     const modal = new bootstrap.Modal(document.getElementById('pdfView'), {});
     modal.show();
@@ -246,7 +245,7 @@ function actionCreated(rowData, actionEvent) {
 }
 
 // function downloadPdf() {
-//   console.log(doctypeForm.value, selectedRequest.value, "ppp");
+
 //   const dataObj = {
 //     "form_short_name": selectedRequest.value.doctype_name,
 //     "name": doctypeForm.value[0].name
@@ -254,7 +253,7 @@ function actionCreated(rowData, actionEvent) {
 
 //   axiosInstance.post(apis.download_pdf_form, dataObj)
 //     .then((response) => {
-//       console.log(response.message, "download pdf");
+
 
 //       // Assuming 'domain' contains the base URL like 'https://example.com/api/'
 //       let pdfUrl = domain + response.message;
@@ -269,7 +268,7 @@ function actionCreated(rowData, actionEvent) {
 //     });
 // }
 function downloadPdf() {
-  console.log(doctypeForm.value, selectedRequest.value, "ppp");
+
   const dataObj = {
     "form_short_name": selectedRequest.value.doctype_name,
     "name": doctypeForm.value[0].name
@@ -277,7 +276,6 @@ function downloadPdf() {
 
   axiosInstance.post(apis.download_pdf_form, dataObj)
     .then((response) => {
-      console.log(response.message, "download pdf");
 
       // Assuming 'domain' contains the base URL like 'https://example.com/api/'
       let pdfUrl = domain + response.message;
@@ -302,7 +300,7 @@ function downloadPdf() {
 // Function to capture the form data from ApproverPreview
 const updateFormData = (fieldValues) => {
   formData.value = formData.value.concat(fieldValues);
-  // console.log(formData.value, "-----------========ApproverFormData====-=-==-==");
+
 };
 
 
@@ -317,7 +315,7 @@ function ApproverFormSubmission(dataObj, type) {
     })
   }
 
-  console.log(" ==== ", form)
+
 
   // form['form_json']
   const formData = new FormData();
@@ -348,7 +346,7 @@ function approvalCancelFn(dataObj, type) {
     // "cluster_name": null,
     // https://ezyrecon.ezyinvoicing.com/home/wf-requests
   }
-  console.log(dataObj, [data], "---------------------================");
+
   // need to check this api not working 
   axiosInstance.post(apis.wf_cancelling_request, data)
     .then((response) => {
@@ -386,10 +384,10 @@ function approvalCancelFn(dataObj, type) {
 //     // https://ezyrecon.ezyinvoicing.com/home/wf-requests
 //     "current_level": selectedRequest.value.current_level
 //   }
-//   console.log(formData.value, { request_details: [data] }, "---------------------================");
+
 //   // axiosInstance.post(apis.requestApproval, { request_details: [data] })
 //   //   .then((response) => {
-//   //     console.log(response);
+
 
 //   toast.success("Rquest Approved", { autoClose: 1000 })
 //   const modal = bootstrap.Modal.getInstance(document.getElementById('viewRequest'));
@@ -410,7 +408,7 @@ function mapFormFieldsToRequest(doctypeData, showRequestData) {
             // Check if the fieldname exists in the doctypeForm and assign the value
             if (doctypeData.hasOwnProperty(field.fieldname)) {
               field.value = doctypeData[field.fieldname]; // Assign the value from doctypeForm to the field
-              // console.log(`Mapping field: ${field.fieldname} with value: ${field.value}`);
+
             }
           });
         });
@@ -438,7 +436,7 @@ const PaginationLimitStart = ([itemsPerPage, start]) => {
 
 };
 function inLineFiltersData(searchedData) {
-  console.log("Applied searchedData:", searchedData);
+
 
   //   // Initialize filters array
   const filters = [];
@@ -465,10 +463,9 @@ function inLineFiltersData(searchedData) {
     //       filters.push([key, "=", searchedData[key]]);
     //     }
   });
-  console.log(filters.length == 0, "------------filters--------");
 
   //   // Log filters to verify
-  //   console.log("Dynamic Filters:", filters);
+
 
   //   // Once the filters are built, pass them to fetchData function
   if (filters.length) {
@@ -540,7 +537,7 @@ watch(
     newBusinessUnit.value.business_unit = newVal;
 
     if (newVal.length) {
-      console.log(newVal, "new value of business unit");
+
       receivedForMe()
     }
   },

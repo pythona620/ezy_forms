@@ -162,10 +162,10 @@ watch(
     () => props.blockArr,
     (newVal) => {
         if (newVal && Array.isArray(newVal)) {
-            console.log(props.blockArr, "gggggggggggg");
+            // console.log(props.blockArr, "gggggggggggg");
             // Set the default display block as Requestor
             displayedBlocks.value = filterBlocksByFieldname('Requestor', newVal);
-            console.log(displayedBlocks.value, "displayedBlocks");
+            // console.log(displayedBlocks.value, "displayedBlocks");
         }
     },
     { immediate: true }
@@ -295,7 +295,7 @@ const getFieldComponent = (type) => {
 .modal-body {
     overflow-y: scroll;
     overflow-x: hidden;
-    height: 60vh;
+    height: 70vh;
 
 }
 

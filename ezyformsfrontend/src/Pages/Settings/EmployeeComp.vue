@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div class="d-flex justify-content-between align-items-center p-2">
+        <div class="d-flex justify-content-between align-items-center py-2">
             <div>
                 <h1 class="m-0 font-13">
                     User Management
@@ -49,7 +49,7 @@
                                         <!-- <FormFields class="mb-3" tag="input" type="text" name="Designation"
                                                 id="Designation" placeholder="Enter Designation"
                                                 v-model="createEmployee.designation" /> -->
-                                        <FormFields tag="select" placeholder="Select Desigination" class="mb-0"
+                                        <FormFields tag="select" placeholder="Select Desigination" class="mb-3"
                                             name="Designation" v-model="createEmployee.designation" id="dept"
                                             :Required="false" :options="designiations" />
                                         <!-- <div class=""><button @click="addnewDesignation" type="button"
@@ -265,7 +265,7 @@ function deptData() {
     axiosInstance.get(apis.resource + doctypes.departments, { params: queryParams })
         .then((res) => {
             if (res.data) {
-                console.log(res.data, "Fetched departments");
+
 
                 departmentsList.value = res.data.map((department) => department.name);
 
@@ -295,7 +295,7 @@ const PaginationLimitStart = ([itemsPerPage, start]) => {
 
 
 function inLineFiltersData(searchedData) {
-    console.log("Applied searchedData:", searchedData);
+
 
     //   // Initialize filters array
     const filters = [];
@@ -322,10 +322,9 @@ function inLineFiltersData(searchedData) {
         //       filters.push([key, "=", searchedData[key]]);
         //     }
     });
-    console.log(filters.length == 0, "------------filters--------");
 
     //   // Log filters to verify
-    //   console.log("Dynamic Filters:", filters);
+
 
     //   // Once the filters are built, pass them to fetchData function
     if (filters.length) {
@@ -359,7 +358,7 @@ function employeeData(data) {
     }
     axiosInstance.get(`${apis.resource}${doctypes.EzyEmployeeList}`, { params: queryParamsCount })
         .then((res) => {
-            // console.log(res.data[0].total_count);
+
             totalRecords.value = res.data[0].total_count
 
         })
@@ -371,12 +370,12 @@ function employeeData(data) {
     axiosInstance.get(apis.resource + doctypes.EzyEmployeeList, { params: queryParams })
         .then((res) => {
             if (res.data) {
-                console.log(res.data, "Fetched departments");
+
                 tableData.value = res.data;
                 // designiations.value = [...new Set(res.data.map((designation) => designation.designation))];
                 reportingTo.value = [...new Set(res.data.map((reporting) => reporting.reporting_to))];
                 reportingDesigination.value = [...new Set(res.data.map((reportingDesigination) => reportingDesigination.reporting_designation))]
-                console.log(designiations.value, "%%%%%%%%%%%%");
+
 
             }
         })
@@ -398,11 +397,11 @@ function designationData() {
     axiosInstance.get(apis.resource + doctypes.designations, { params: queryParams })
         .then((res) => {
             if (res.data) {
-                console.log(res.data.name, "Fetched Designations");
+
                 designiations.value = [
                     ...new Set(res.data.map((user) => user.role)),
                 ];
-                console.log(designiations.value, "%%%%%%%%%");
+
             }
         })
         .catch((error) => {
@@ -420,7 +419,7 @@ watch(
         newbusiness.value = newVal;
 
         if (newVal.length) {
-            console.log(newVal, "new value of business unit");
+
             employeeData();
         }
     },
@@ -431,7 +430,7 @@ function createEmpl() {
         ...createEmployee.value,
         "doctype": doctypes.EzyEmployeeList
     }
-    console.log(dataObj, "------------------");
+
     axiosInstance.post(apis.resource + doctypes.EzyEmployeeList, dataObj).then((res) => {
         if (res.data) {
             toast.success("Employee Created", { autoClose: 500 })
@@ -441,14 +440,14 @@ function createEmpl() {
     })
 }
 function SaveEditEmp() {
-    console.log(createEmployee.value, "---------------", createEmployee.value.name);
+
     axiosInstance.put(`${apis.resource}${doctypes.EzyEmployeeList}/${createEmployee.value.name}`, createEmployee.value)
         .then((response) => {
             if (response.data) {
                 toast.success("Changes Saved", { autoClose: 500 })
                 employeeData()
             }
-            console.log("Categories saved successfully:", response.data);
+
         })
         .catch((error) => {
             console.error("Error saving categories:", error);

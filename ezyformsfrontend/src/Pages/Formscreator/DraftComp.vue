@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div class="d-flex justify-content-between align-items-center formsticky">
+        <div class="d-flex justify-content-between align-items-center formsticky py-2">
             <div>
                 <h1 class="m-0 font-13">Forms Master</h1>
                 <p class="m-0 font-11 pt-1">{{ totalRecords }} forms available</p>
@@ -113,7 +113,7 @@ watch(
         filterObj.value.business_unit = newVal;
 
         if (newVal.length) {
-            console.log(newVal, "new value of business unit");
+
             // localStorage.setItem("Bu", filterObj.value.business_unit)
             tableData.value = []
             fetchTable()
@@ -167,7 +167,7 @@ const PaginationLimitStart = ([itemsPerPage, start]) => {
 
 
 function inLineFiltersData(searchedData) {
-    console.log("Applied searchedData:", searchedData);
+
 
     //   // Initialize filters array
     const filters = [];
@@ -194,10 +194,10 @@ function inLineFiltersData(searchedData) {
         //       filters.push([key, "=", searchedData[key]]);
         //     }
     });
-    console.log(filters.length == 0, "------------filters--------");
+
 
     //   // Log filters to verify
-    //   console.log("Dynamic Filters:", filters);
+
 
     //   // Once the filters are built, pass them to fetchData function
     if (filters.length) {
