@@ -1,4 +1,6 @@
 <template>
+    <div>
+
     <div class="ps-2">
         <div class="d-flex justify-content-between align-items-center py-2 ">
             <div>
@@ -15,11 +17,11 @@
                         <FormFields labeltext="" class="" tag="input" type="search" placeholder="Search File Name"
                             name="Value" id="Value" v-model="filterObj.search" isCheckbox='true' />
                     </div>
-                    <div>
+                    <!-- <div>
                         <FormFields tag="select" placeholder="Filter By" class="p-1" name="roles"
                             v-model="filterObj.selectoption" id="roles" :Required="false"
                             :options="['JW Marriott Golfshire Banglore', 'JW Marriott Golfshire Banglore']" />
-                    </div>
+                    </div> -->
                 </div>
                 <div v-if="tableShow" class="d-flex align-items-center mb-1">
                     <ButtonComp class="buttoncomp font-10" data-bs-toggle="modal" data-bs-target="#exampleModal"
@@ -123,6 +125,8 @@
             <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction='true' actionType="dropdown" />
         </div>
     </div>
+</div>
+
 </template>
 <script setup>
 import FormFields from '../../Components/FormFields.vue';

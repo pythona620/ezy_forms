@@ -119,7 +119,7 @@ const filterObj = ref({
 const formSideBarData = ref([])
 const settingsSideBarData = [
     { name: 'Profile', icon: 'bi bi-person-circle', route: 'profile' },
-    { name: 'E-Signature', icon: 'bi bi-person-circle', route: 'esign' },
+    // { name: 'E-Signature', icon: 'bi bi-person-circle', route: 'esign' },
     // { name: 'Role', icon: 'bi bi-shield-lock', route: 'role' },
     // { name: 'Role Matrix', icon: 'bi bi-grid-3x3-gap', route: 'rolematrix' },
     // { name: 'Work Flow', icon: 'bi bi-diagram-3', route: 'workflow' },
@@ -174,10 +174,10 @@ const sidebarData = computed(() => {
     }
     return [];
 });
-const firstSettingsGroup = computed(() => settingsSideBarData.slice(0, 2)); // First 4 items
+const firstSettingsGroup = computed(() => settingsSideBarData.slice(0, 1)); // First 4 items
 // const secondSettingsGroup = computed(() => settingsSideBarData.slice(2, 6));
-const thirdSettingsGroup = computed(() => settingsSideBarData.slice(2, 5)); // Remaining items
-const forthSettingsGroup = computed(() => settingsSideBarData.slice(5));
+const thirdSettingsGroup = computed(() => settingsSideBarData.slice(1, 4)); // Remaining items
+const forthSettingsGroup = computed(() => settingsSideBarData.slice(4));
 // Define the title based on the current route
 const sidebarTitle = computed(() => {
     if (isMasterRoute.value) {

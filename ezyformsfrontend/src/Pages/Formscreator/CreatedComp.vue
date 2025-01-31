@@ -134,9 +134,9 @@ const actions = ref([
     { name: 'View form', icon: 'fa-solid fa-eye' },
     { name: 'Edit Form', icon: 'fa-solid fa-edit' },
     { name: 'PDF Format', icon: 'bi bi-filetype-pdf' },
-    { name: 'Activate this form', icon: 'fa-solid fa-check-circle' },
-    { name: 'In-active this form', icon: 'fa-solid fa-ban' },
-    { name: 'Edit accessibility to dept.', icon: 'fa-solid fa-users' },
+    // { name: 'Activate this form', icon: 'fa-solid fa-check-circle' },
+    // { name: 'In-active this form', icon: 'fa-solid fa-ban' },
+    // { name: 'Edit accessibility to dept.', icon: 'fa-solid fa-users' },
     // { name: 'Share this form', icon: 'fa-solid fa-share-alt' },
     // { name: 'Download Print format', icon: 'fa-solid fa-download' },
 ]);

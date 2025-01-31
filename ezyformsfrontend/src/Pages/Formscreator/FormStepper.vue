@@ -1591,10 +1591,9 @@ const isNextDisabled = computed(() => {
     );
 });
 
-
+//spaces removed version
 function handleInputChange(event, fieldType) {
-    const inputValue = event.target.value;
-
+    let inputValue = event.target.value.trim().replace(/\s+/g, ""); // Remove all spaces
 
     // Set filter based on fieldType
     const filters = [[fieldType, "like", `%${inputValue}%`]];
@@ -1608,28 +1607,27 @@ function handleInputChange(event, fieldType) {
             params: queryParams,
         })
         .then((res) => {
-
             ezyFormsData.value = res.data;
 
             // Check for duplicates and set appropriate error message
             if (fieldType === "form_name") {
                 formNameError.value =
                     inputValue &&
-                        ezyFormsData.value.some(
-                            (item) =>
-                                item.form_name &&
-                                item.form_name.toLowerCase() === inputValue.toLowerCase()
-                        )
+                    ezyFormsData.value.some(
+                        (item) =>
+                            item.form_name &&
+                            item.form_name.replace(/\s+/g, "").toLowerCase() === inputValue.toLowerCase()
+                    )
                         ? "Name already exists"
                         : "";
             } else if (fieldType === "form_short_name") {
                 formShortNameError.value =
                     inputValue &&
-                        ezyFormsData.value.some(
-                            (item) =>
-                                item.form_short_name &&
-                                item.form_short_name.toLowerCase() === inputValue.toLowerCase()
-                        )
+                    ezyFormsData.value.some(
+                        (item) =>
+                            item.form_short_name &&
+                            item.form_short_name.replace(/\s+/g, "").toLowerCase() === inputValue.toLowerCase()
+                    )
                         ? "Short name already exists"
                         : "";
             }
@@ -1641,6 +1639,57 @@ function handleInputChange(event, fieldType) {
             else if (fieldType === "form_short_name") formShortNameError.value = "";
         });
 }
+
+
+// function handleInputChange(event, fieldType) {
+//     const inputValue = event.target.value;
+
+
+//     // Set filter based on fieldType
+//     const filters = [[fieldType, "like", `%${inputValue}%`]];
+//     const queryParams = {
+//         fields: JSON.stringify(["*"]),
+//         filters: JSON.stringify(filters),
+//     };
+
+//     axiosInstance
+//         .get(`${apis.resource}${doctypes.EzyFormDefinitions}`, {
+//             params: queryParams,
+//         })
+//         .then((res) => {
+
+//             ezyFormsData.value = res.data;
+
+//             // Check for duplicates and set appropriate error message
+//             if (fieldType === "form_name") {
+//                 formNameError.value =
+//                     inputValue &&
+//                         ezyFormsData.value.some(
+//                             (item) =>
+//                                 item.form_name &&
+//                                 item.form_name.toLowerCase() === inputValue.toLowerCase()
+//                         )
+//                         ? "Name already exists"
+//                         : "";
+//             } else if (fieldType === "form_short_name") {
+//                 formShortNameError.value =
+//                     inputValue &&
+//                         ezyFormsData.value.some(
+//                             (item) =>
+//                                 item.form_short_name &&
+//                                 item.form_short_name.toLowerCase() === inputValue.toLowerCase()
+//                         )
+//                         ? "Short name already exists"
+//                         : "";
+//             }
+//         })
+//         .catch((error) => {
+//             console.error("Error fetching ezyForms data:", error);
+//             // Clear error message on fetch error
+//             if (fieldType === "form_name") formNameError.value = "";
+//             else if (fieldType === "form_short_name") formShortNameError.value = "";
+//         });
+// }
 
 const getRowSuffix = (index) => {
     if (index === 0) {
