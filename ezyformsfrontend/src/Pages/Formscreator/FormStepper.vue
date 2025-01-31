@@ -1021,6 +1021,9 @@ const isAllSelected = computed({
 
 watch(designationValue, (newValue) => {
     console.log("Selected Designations:", newValue);
+    console.log(designationValue.value, "designationValue");
+    console.log(DesignationList.value, "list");
+    console.log(listofselected.value, "------------------------");
 });
 
 function handleSingleSelect() {
@@ -1032,6 +1035,7 @@ function handleSingleSelect() {
 function addDesignationBtn() {
 
     const block = blockArr[selectedBlockIndex.value];
+
 
     if (!block || !block.sections) {
         console.error('Error: Invalid block or sections not found.');
@@ -1076,13 +1080,14 @@ function initializeDesignationValue(blockIndex) {
 }
 
 const AddDesignCanvas = (idx) => {
+    console.log(idx, "---clicked idex", selectedBlockIndex.value);
     if (filterObj.value.accessible_departments.length) {
         designationData(filterObj.value.accessible_departments);
     }
     selectedBlockIndex.value = idx;
     initializeDesignationValue(idx);
 };
-
+const userlist = ref([])
 function designationData(departments) {
     const filters = [];
 
@@ -1106,14 +1111,34 @@ function designationData(departments) {
         )
         .then((res) => {
             if (res.data) {
+                console.log(res.data.users, "wf role matrix");
+                userlist.value = res.data.users;
+
 
                 DesignationList.value = [
                     ...new Set(res.data.users.map((user) => user.role_name)),
                 ];
+
             }
         })
         .catch((error) => {
             console.error("Error fetching designations data:", error);
+        });
+}
+function add_Wf_roles_setup() {
+    axiosInstance
+        .post(apis.add_roles_WF, {
+            workflow_setup: workflowSetup,
+            doctype: filterObj.value.form_short_name,
+            business_unit: filterObj.value.business_unit,
+        })
+        .then((res) => {
+
+            if (selectedBlockIndex.value == 0) {
+                toast.success("Requestor Added");
+            } else {
+                toast.success(`Approver-${selectedBlockIndex.value} Added`);
+            }
         });
 }
 
@@ -1748,22 +1773,6 @@ async function saveFormData(type) {
     }
 }
 
-function add_Wf_roles_setup() {
-    axiosInstance
-        .post(apis.add_roles_WF, {
-            workflow_setup: workflowSetup,
-            doctype: filterObj.value.form_short_name,
-            business_unit: filterObj.value.business_unit,
-        })
-        .then((res) => {
-
-            if (selectedBlockIndex.value == 0) {
-                toast.success("Requestor Added");
-            } else {
-                toast.success(`Approver-${selectedBlockIndex.value} Added`);
-            }
-        });
-}
 
 const getFieldComponent = (type) => {
     switch (type) {

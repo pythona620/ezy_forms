@@ -3,7 +3,8 @@
         <div class="d-flex justify-content-between align-items-center py-2">
             <div>
                 <h1 class="m-0 font-13">
-                    User Management
+                    Employees
+                    <!-- ({{ totalRecords }}) -->
                 </h1>
                 <!-- <p class="m-0 font-11 pt-1">
                 374 users
@@ -40,18 +41,61 @@
                                             id="emp_mail_id" placeholder="Enter Email"
                                             v-model="createEmployee.emp_mail_id" />
                                         <label class="font-13 ps-1 fw-medium" for="dept">Departments</label>
-                                        <FormFields tag="select" placeholder="Select Department" class="mb-3"
+                                        <!-- <FormFields tag="select" placeholder="Select Department" class="mb-3"
                                             name="dept" v-model="createEmployee.department" id="dept" :Required="false"
-                                            :options="departmentsList" />
+                                            :options="departmentsList" /> -->
+                                        <VueMultiselect v-model="createEmployee.department" :options="departmentsList"
+                                            :multiple="false" :close-on-select="false" :clear-on-select="false"
+                                            :preserve-search="true" placeholder="Select Reporting To"
+                                            class="font-11 mb-3">
+                                            <!-- <template #option="{ option }">
+                                                <div class="custom-option">
+                                                    <input type="checkbox" :checked="createEmployee.department.includes(
+                        option
+                    )
+                        " class="custom-checkbox" />
+                                                    <span>{{ option }}</span>
+                                                </div>
+                                            </template> -->
+
+                                            <template #selection="{ values, isOpen }">
+                                                <span class="multiselect__single font-10" v-if="values.length"
+                                                    v-show="!isOpen">
+                                                    {{ values.join(", ") }} selected
+                                                </span>
+                                            </template>
+                                        </VueMultiselect>
                                     </div>
                                     <div class=" col">
                                         <label class="font-13 ps-1" for="Designation">Designation</label>
                                         <!-- <FormFields class="mb-3" tag="input" type="text" name="Designation"
                                                 id="Designation" placeholder="Enter Designation"
                                                 v-model="createEmployee.designation" /> -->
-                                        <FormFields tag="select" placeholder="Select Desigination" class="mb-3"
+                                        <!-- <FormFields tag="select" placeholder="Select Desigination" class="mb-3"
                                             name="Designation" v-model="createEmployee.designation" id="dept"
-                                            :Required="false" :options="designiations" />
+                                            :Required="false" :options="designations" /> -->
+                                        <VueMultiselect v-model="createEmployee.designation" :options="designations"
+                                            :multiple="true" :close-on-select="false" :clear-on-select="false"
+                                            :preserve-search="true" placeholder="Select Reporting To"
+                                            class="font-11 mb-3" taggable @tag="addDesignation"
+                                            tag-placeholder="Press enter to add designation">
+                                            <!-- <template #option="{ option }">
+                                                <div class="custom-option">
+                                                    <input type="checkbox" :checked="createEmployee.designation.includes(
+                        option
+                    )
+                        " class="custom-checkbox" />
+                                                    <span>{{ option }}</span>
+                                                </div>
+                                            </template> -->
+
+                                            <template #selection="{ values, isOpen }">
+                                                <span class="multiselect__single font-10" v-if="values.length"
+                                                    v-show="!isOpen">
+                                                    {{ values.join(", ") }} selected
+                                                </span>
+                                            </template>
+                                        </VueMultiselect>
                                         <!-- <div class=""><button @click="addnewDesignation" type="button"
                                                 class="btn btn-white text-decoration-underline font-11">Add new
                                                 designation <span><i class=" bi bi-plus"></i></span></button>
@@ -60,14 +104,64 @@
                                             name="emp_code" id="emp_code" placeholder="Enter Designation"
                                             v-model="inputDesignation" /> -->
                                         <label class="font-13 ps-1" for="reporting_to">Reporting To</label>
-                                        <FormFields class="mb-3" tag="input" type="text" name="reporting_to"
+                                        <!-- <FormFields class="mb-3" tag="input" type="text" name="reporting_to"
                                             id="reporting_to" placeholder="Enter Reporting To"
-                                            v-model="createEmployee.reporting_to" />
+                                            v-model="createEmployee.reporting_to" /> -->
+                                        <VueMultiselect v-model="createEmployee.reporting_to"
+                                            :options="tableData.map(dept => dept.emp_name)" :multiple="false"
+                                            :close-on-select="false" :clear-on-select="false" :preserve-search="true"
+                                            placeholder="Select Reporting To" class="font-11 mb-3">
+                                            <template #option="{ option }">
+                                                <div class="custom-option">
+                                                    <input type="checkbox" :checked="createEmployee.reporting_to.includes(
+                        option
+                    )
+                        " class="custom-checkbox" />
+                                                    <span>{{ option }}</span>
+                                                </div>
+                                            </template>
+
+                                            <template #selection="{ values, isOpen }">
+                                                <span class="multiselect__single font-10" v-if="values.length"
+                                                    v-show="!isOpen">
+                                                    {{ values.join(", ") }} selected
+                                                </span>
+                                            </template>
+                                        </VueMultiselect>
                                         <label class="font-13 ps-1" for="reporting_designation">Reporting
                                             Designation</label>
-                                        <FormFields class="mb-3" tag="input" type="text" name="reporting_designation"
+                                        <!-- <FormFields class="mb-3" tag="input" type="text" name="reporting_designation"
                                             id="reporting_designation" placeholder="Enter Reporting Designation"
-                                            v-model="createEmployee.reporting_designation" />
+                                            v-model="createEmployee.reporting_designation" /> -->
+                                        <VueMultiselect v-model="createEmployee.reporting_designation"
+                                            :options="designations" :multiple="false" :close-on-select="false"
+                                            :clear-on-select="false" :preserve-search="true"
+                                            placeholder="Select Reporting Designation" class="font-11 mb-3">
+                                            <!-- <template #option="{ option }">
+                                                <div class="custom-option">
+                                                    <input type="checkbox" :checked="createEmployee.designation.includes(
+                        option
+                    )
+                        " class="custom-checkbox" />
+                                                    <span>{{ option }}</span>
+                                                </div>
+                                            </template> -->
+
+                                            <template #selection="{ values, isOpen }">
+                                                <span class="multiselect__single font-10" v-if="values.length"
+                                                    v-show="!isOpen">
+                                                    {{ values.join(", ") }} selected
+                                                </span>
+                                            </template>
+                                        </VueMultiselect>
+                                        <div class="mb-3 font-11">
+                                            <label for="" class="form-label mb-0 font-13 ps-1">Add Signature</label>
+                                            <input type="file" class="form-control font-12" name="" id="" placeholder=""
+                                                @change="selectedSignature" aria-describedby="fileHelpId" />
+
+                                        </div>
+
+
                                     </div>
 
                                 </div>
@@ -137,6 +231,12 @@
                                     <FormFields class="mb-3" tag="input" type="text" name="reporting_designation"
                                         id="reporting_designation" placeholder="Enter department code"
                                         v-model="createEmployee.reporting_designation" />
+                                    <div class="mb-3 font-11">
+                                        <label for="" class="form-label mb-0 font-13 ps-1">Add Signature</label>
+                                        <input type="file" class="form-control font-12" name="" id="" placeholder=""
+                                            @change="selectedSignature" aria-describedby="fileHelpId" />
+
+                                    </div>
                                 </div>
 
                             </div>
@@ -166,6 +266,9 @@ import PaginationComp from '../../Components/PaginationComp.vue';
 import axiosInstance from '../../shared/services/interceptor';
 import { apis, doctypes } from '../../shared/apiurls';
 import { onMounted, reactive, ref, computed, watch } from 'vue';
+// import Multiselect from "@vueform/multiselect";
+import "@vueform/multiselect/themes/default.css";
+import VueMultiselect from "vue-multiselect";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
@@ -177,11 +280,14 @@ const businessUnit = computed(() => {
 const tableData = ref([]);
 const newbusiness = ref("");
 const totalRecords = ref(0);
-const designiations = ref([]);
+const designations = ref([]);
 const reportingTo = ref([]);
 const reportingDesigination = ref([]);
 const departmentsList = ref([])
 // const newDesignation = ref(false);
+const signaturePath = ref("");
+
+
 const createEmployee = ref({
     emp_code: "",
     emp_name: "",
@@ -191,10 +297,23 @@ const createEmployee = ref({
     reporting_to: "",
     reporting_designation: "",
     company_field: "",
+    signature: signaturePath.value
 
 });
+const filterObj = ref({
+    limitPageLength: 'None',
+    limit_start: 0
+});
+const addDesignation = (newTag) => {
+    if (!designations.value.includes(newTag)) {
+        designations.value.push(newTag);
+    }
+    createEmployee.value.designation = newTag;
+
+};
+
 // function addnewDesignation() {
-//     newDesignation.value = !newDesignation.value
+//     newDesignation.value = !newDesignation.value   
 // }
 const actions = ref(
     [
@@ -219,20 +338,19 @@ function actionCreated(rowData, actionEvent) {
         }
     }
 }
-const filterObj = ref({
-    limitPageLength: 'None',
-    limit_start: 0
-});
 const tableheaders = ref([
-    { th: "Employee Code", td_key: "emp_code" },
-    { th: "Name", td_key: "emp_name" },
-    { th: "Mail", td_key: "emp_mail_id" },
-    { th: "Department", td_key: "department" },
+    { th: "Emp Code", td_key: "emp_code" },
+    { th: "Emp Name", td_key: "emp_name" },
+    // { th: "Mail", td_key: "emp_mail_id" },
     { th: "Designation", td_key: "designation" },
+    { th: "Department", td_key: "department" },
+    { th: "Signature", td_key: "signature" },
+
     { th: "Reporting To", td_key: "reporting_to" },
-    { th: "Reporting Designation", td_key: "reporting_designation" },
+    // { th: "Reporting Designation", td_key: "reporting_designation" },
 
 ])
+
 const fieldMapping = ref({
 
     emp_code: { type: "input" },
@@ -252,9 +370,50 @@ function cancelCreate() {
         department: "",
         designation: "",
         reporting_to: "",
-        reporting_designation: ""
+        reporting_designation: "",
+
     }
 }
+
+
+
+
+function selectedSignature(event) {
+    const file = event.target.files[0];
+    if (file) {
+        uploadFile(file, 'signature');
+    }
+}
+
+// const generateRandomNumber = () => {
+//     return Math.floor(Math.random() * 1000000);
+// };
+
+const uploadFile = (file, field) => {
+
+    let fileName = `${file.name}`;
+
+    const formData = new FormData();
+    formData.append("file", file, fileName);
+    formData.append("is_private", "0");
+    formData.append("folder", "Home");
+
+    axiosInstance
+        .post(apis.uploadfile, formData)
+        .then((res) => {
+            if (res.message && res.message.file_url) {
+                if (field === 'signature') {
+                    createEmployee.value.signature = res.message.file_url;
+                }
+                console.log("Uploaded file URL:", res.message.file_url);
+            } else {
+                console.error("file_url not found in the response.");
+            }
+        })
+        .catch((error) => {
+            console.error('Upload error:', error);
+        });
+};
 function deptData() {
     const queryParams = {
         fields: JSON.stringify(["*"]),
@@ -336,6 +495,7 @@ function inLineFiltersData(searchedData) {
     //   fetchTotalRecords(filters);
 }
 
+
 function employeeData(data) {
     const filters = [
         ["company_field", "like", `%${newbusiness.value}%`]
@@ -372,7 +532,7 @@ function employeeData(data) {
             if (res.data) {
 
                 tableData.value = res.data;
-                // designiations.value = [...new Set(res.data.map((designation) => designation.designation))];
+                // designations.value = [...new Set(res.data.map((designation) => designation.designation))];
                 reportingTo.value = [...new Set(res.data.map((reporting) => reporting.reporting_to))];
                 reportingDesigination.value = [...new Set(res.data.map((reportingDesigination) => reportingDesigination.reporting_designation))]
 
@@ -383,6 +543,19 @@ function employeeData(data) {
             console.error("Error fetching department data:", error);
         });
 }
+watch(
+    businessUnit,
+    (newVal) => {
+        createEmployee.value.company_field = newVal;
+        newbusiness.value = newVal;
+
+        if (newVal.length) {
+
+            employeeData();
+        }
+    },
+    { immediate: true }
+);
 function designationData() {
     const filters = [];
     const queryParams = {
@@ -398,7 +571,7 @@ function designationData() {
         .then((res) => {
             if (res.data) {
 
-                designiations.value = [
+                designations.value = [
                     ...new Set(res.data.map((user) => user.role)),
                 ];
 
@@ -412,19 +585,7 @@ function designationData() {
 
 
 
-watch(
-    businessUnit,
-    (newVal) => {
-        createEmployee.value.company_field = newVal;
-        newbusiness.value = newVal;
 
-        if (newVal.length) {
-
-            employeeData();
-        }
-    },
-    { immediate: true }
-);
 function createEmpl() {
     const dataObj = {
         ...createEmployee.value,
@@ -454,7 +615,8 @@ function SaveEditEmp() {
         });
 }
 </script>
-<style scoped>
+<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
+<style lang="scss" scoped>
 .global-table th {
     background-color: #f2f2f2 !important;
     text-align: left;
@@ -492,5 +654,185 @@ function SaveEditEmp() {
     /* background-color: #f1f1f1; */
     /* color: #111111; */
     padding: 8px 20px;
+}
+
+::v-deep(.multiselect__select) {
+    position: absolute;
+    width: 40px;
+    height: 32px;
+    right: 1px;
+    /* top: 1px; */
+    padding: 4px 8px;
+    text-align: center;
+    transition: transform 0.2s ease;
+}
+
+::v-deep(.multiselect) {
+    height: 32px !important;
+    min-height: 32px !important;
+}
+
+::v-deep(.multiselect__tags) {
+    height: 32px !important;
+    min-height: 32px !important;
+    display: flex;
+    align-items: center;
+}
+
+::v-deep(.multiselect__single) {
+    font-size: 11px !important;
+    color: #000;
+}
+
+::v-deep(.multiselect-wrapper),
+::v-deep(.multiselect-search) {
+    height: 32px !important;
+    min-height: 32px !important;
+    line-height: 32px !important;
+    display: flex;
+    align-items: center;
+}
+
+::v-deep(.multiselect-search) {
+    height: 32px !important;
+    min-height: 32px !important;
+    display: flex;
+    align-items: center;
+}
+
+::v-deep(.multiselect-wrapper) {
+    height: 32px !important;
+    min-height: 32px !important;
+    line-height: 32px !important;
+}
+
+::v-deep(.multiselect-search) {
+    position: absolute;
+    width: 40px !important;
+    height: 32px !important;
+    right: 1px;
+
+    padding: 4px 8px;
+    text-align: center;
+    transition: transform 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+::v-deep(.multiselect__element:hover) {
+    background-color: #eeeeee !important;
+}
+
+::v-deep(.multiselect__element:hover .multiselect__option) {
+    background-color: #eeeeee !important;
+    color: #000 !important;
+}
+
+::v-deep(.multiselect__element:hover .multiselect__option--highlight) {
+    background-color: #eeeeee !important;
+    color: #000 !important;
+}
+
+/* Additional specific rule for `.multiselect__option` when hovered */
+::v-deep(.multiselect__option:hover) {
+    background-color: #eeeeee !important;
+    color: #000 !important;
+}
+
+.custom-option {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.multiselect-option {
+    font-size: 11px !important;
+}
+
+.multiselect {
+    height: 30px !important;
+}
+
+.multiselect {
+    margin: initial;
+    font-size: 11px !important;
+    border: 1px solid #e2e2e2 !important;
+    height: 30px !important;
+
+    .multiselect-wrapper {
+        height: 30px !important;
+    }
+
+    .multiselect-dropdown {
+        .multiselect-options {
+            font-size: 11px;
+
+            li.multiselect-option span {
+                font-size: 11px !important;
+            }
+
+            li.multiselect-option .is-selected {
+                background-color: grey !important;
+                font-size: 11px;
+            }
+        }
+    }
+}
+
+.multiselect__option span {
+    font-size: 11px;
+    /* Change this value to whatever size you need */
+}
+
+.multiselect .multiselect-option {
+    font-size: 11px;
+}
+
+.multiselect .multiselect-wrapper {
+    min-height: 30px !important;
+}
+
+.multiselect .multiselect--above {
+    min-height: 30px !important;
+}
+
+.multiselect__tags {
+    min-height: 30px !important;
+    padding: 0px;
+}
+
+.multiselect .multiselect__tags {
+    min-height: 30px !important;
+    font-size: 11px !important;
+}
+
+.multiselect .multiselect__placeholder {
+    font-size: 11px;
+}
+
+.multiselect .multiselect__single {
+    font-size: 11px !important;
+}
+
+.multiselect__single {
+    font-size: 11px !important;
+}
+
+.multiselect__single {
+    font-size: 11px !important;
+
+}
+
+.multiselect .multiselect__tags .multiselect__placeholder {
+    font-size: 11px;
+}
+
+::v-deep(.multiselect__placeholder) {
+    color: #343434;
+    display: inline-block;
+    margin-bottom: 10px;
+    padding-top: 2px;
+    font-size: 10px !important;
 }
 </style>

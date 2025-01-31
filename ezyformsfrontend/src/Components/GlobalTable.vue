@@ -97,6 +97,15 @@
 							<span v-else-if="column.td_key === 'requested_on' || column.td_key === 'invoice_date'">
 								{{ formatDate(row[column.td_key]) }}
 							</span>
+							<span v-else-if="column.td_key === 'signature'">
+								<div v-if="row[column.td_key]">
+									<i class="bi bi-check2 fw-bolder font-13 text-success"></i>
+									<!-- <img :src="row[column.td_key]" alt="Signature" class="img-fluid"> -->
+								</div>
+								<span v-else>
+									<i class="bi bi-x-lg fw-bolder text-danger "></i>
+								</span>
+							</span>
 							<span v-else>
 								{{ row[column.td_key] || '-' }}
 							</span>
