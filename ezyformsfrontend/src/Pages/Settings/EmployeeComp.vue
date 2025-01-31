@@ -61,7 +61,7 @@
                                             <template #selection="{ values, isOpen }">
                                                 <span class="multiselect__single font-10" v-if="values.length"
                                                     v-show="!isOpen">
-                                                    {{ values.join(", ") }} selected
+                                                    {{ values.join(", ") }}
                                                 </span>
                                             </template>
                                         </VueMultiselect>
@@ -75,7 +75,7 @@
                                             name="Designation" v-model="createEmployee.designation" id="dept"
                                             :Required="false" :options="designations" /> -->
                                         <VueMultiselect v-model="createEmployee.designation" :options="designations"
-                                            :multiple="true" :close-on-select="false" :clear-on-select="false"
+                                            :multiple="false" :close-on-select="false" :clear-on-select="false"
                                             :preserve-search="true" placeholder="Select Reporting To"
                                             class="font-11 mb-3" taggable @tag="addDesignation"
                                             tag-placeholder="Press enter to add designation">
@@ -92,7 +92,7 @@
                                             <template #selection="{ values, isOpen }">
                                                 <span class="multiselect__single font-10" v-if="values.length"
                                                     v-show="!isOpen">
-                                                    {{ values.join(", ") }} selected
+                                                    {{ values.join(", ") }}
                                                 </span>
                                             </template>
                                         </VueMultiselect>
@@ -111,7 +111,7 @@
                                             :options="tableData.map(dept => dept.emp_name)" :multiple="false"
                                             :close-on-select="false" :clear-on-select="false" :preserve-search="true"
                                             placeholder="Select Reporting To" class="font-11 mb-3">
-                                            <template #option="{ option }">
+                                            <!-- <template #option="{ option }">
                                                 <div class="custom-option">
                                                     <input type="checkbox" :checked="createEmployee.reporting_to.includes(
                         option
@@ -119,12 +119,12 @@
                         " class="custom-checkbox" />
                                                     <span>{{ option }}</span>
                                                 </div>
-                                            </template>
+                                            </template> -->
 
                                             <template #selection="{ values, isOpen }">
                                                 <span class="multiselect__single font-10" v-if="values.length"
                                                     v-show="!isOpen">
-                                                    {{ values.join(", ") }} selected
+                                                    {{ values.join(", ") }}
                                                 </span>
                                             </template>
                                         </VueMultiselect>
@@ -172,7 +172,7 @@
                             <ButtonComp type="button" class="cancelfilter border-1 text-nowrap font-10 " name="Cancel"
                                 @click="cancelCreate" data-bs-dismiss="modal" />
 
-
+                            <!-- :disabled="isFormEmpty" -->
                             <button type="button"
                                 class="applyfilter btn btn-dark text-nowrap font-10 d-flex justify-content-center align-items-center"
                                 data-bs-dismiss="modal" @click="createEmpl"><span class="font-16 me-1"><i
@@ -300,6 +300,8 @@ const createEmployee = ref({
     signature: signaturePath.value
 
 });
+
+
 const filterObj = ref({
     limitPageLength: 'None',
     limit_start: 0
@@ -309,6 +311,7 @@ const addDesignation = (newTag) => {
         designations.value.push(newTag);
     }
     createEmployee.value.designation = newTag;
+    console.log(createEmployee.value.designation, "000000000000");
 
 };
 
@@ -318,9 +321,13 @@ const addDesignation = (newTag) => {
 const actions = ref(
     [
         { name: 'Edit Employee', icon: 'fa-solid fa-eye' },
-
     ]
 )
+
+
+// const isFormEmpty = computed(() => {
+//     return Object.values(createEmployee.value).every(value => value === "" || value === null || value === undefined);
+// });
 function createEmplBtn() {
     deptData();
     designationData();
@@ -371,6 +378,7 @@ function cancelCreate() {
         designation: "",
         reporting_to: "",
         reporting_designation: "",
+        signature: ""
 
     }
 }
@@ -595,6 +603,7 @@ function createEmpl() {
     axiosInstance.post(apis.resource + doctypes.EzyEmployeeList, dataObj).then((res) => {
         if (res.data) {
             toast.success("Employee Created", { autoClose: 500 })
+            cancelCreate()
             employeeData()
         }
 
