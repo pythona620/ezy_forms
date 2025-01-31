@@ -36,7 +36,7 @@
                 <ButtonComp type="button" icon="ban" class="cancelbtn border-1 text-nowrap font-10"
                   @click="approvalCancelFn(formData, 'Request Cancelled')" name="Cancel Request" />
               </div> -->
-              <input type="text" class=" form-control" placeholder="Reason...">
+              <!-- <input type="text" class=" form-control" placeholder="Reason..."> -->
               <div>
                 <!-- <ButtonComp @click="approvalCancelFn(formData, 'Request Cancelled')" type="button" icon="x"
                   class="rejectbtn border-1 text-nowrap font-10 " name="Reject" /> -->
@@ -174,7 +174,7 @@ function ApproverFormSubmission(dataObj, type) {
       form[each.fieldname] = each.value
     })
   }
-  axiosInstance.put(`${apis.resource}/${selectedRequest.value.doctype_name}/${doctypeForm.value.name}`, form).then((response) => {
+  axiosInstance.put(`${apis.resource}${selectedRequest.value.doctype_name}/${doctypeForm.value.name}`, form).then((response) => {
 
     if (response?.data) {
       approvalStatusFn(dataObj, type)
