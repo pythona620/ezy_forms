@@ -839,6 +839,7 @@
                 </div>
             </div>
         </div>
+
     </div>
 </template>
 
@@ -1023,7 +1024,7 @@ watch(designationValue, (newValue) => {
     console.log("Selected Designations:", newValue);
     console.log(designationValue.value, "designationValue");
     console.log(DesignationList.value, "list");
-    console.log(listofselected.value, "------------------------");
+    // console.log(listofselected.value, "------------------------");
 });
 
 function handleSingleSelect() {
@@ -1206,6 +1207,12 @@ function formData(status) {
                     blockArr.splice(0, blockArr.length);
                     getFormData();
                 }
+                // if (paramId.value === "new") {
+                //     router.push({
+                //         name: "Created"
+                //     })
+
+                // }
                 if (status === "draft") {
                     router.push({
                         name: "Draft"
@@ -1613,21 +1620,21 @@ function handleInputChange(event, fieldType) {
             if (fieldType === "form_name") {
                 formNameError.value =
                     inputValue &&
-                    ezyFormsData.value.some(
-                        (item) =>
-                            item.form_name &&
-                            item.form_name.replace(/\s+/g, "").toLowerCase() === inputValue.toLowerCase()
-                    )
+                        ezyFormsData.value.some(
+                            (item) =>
+                                item.form_name &&
+                                item.form_name.replace(/\s+/g, "").toLowerCase() === inputValue.toLowerCase()
+                        )
                         ? "Name already exists"
                         : "";
             } else if (fieldType === "form_short_name") {
                 formShortNameError.value =
                     inputValue &&
-                    ezyFormsData.value.some(
-                        (item) =>
-                            item.form_short_name &&
-                            item.form_short_name.replace(/\s+/g, "").toLowerCase() === inputValue.toLowerCase()
-                    )
+                        ezyFormsData.value.some(
+                            (item) =>
+                                item.form_short_name &&
+                                item.form_short_name.replace(/\s+/g, "").toLowerCase() === inputValue.toLowerCase()
+                        )
                         ? "Short name already exists"
                         : "";
             }

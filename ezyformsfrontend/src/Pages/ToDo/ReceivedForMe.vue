@@ -28,9 +28,10 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body approvermodalbody">
-            <ApproverPreview :blockArr="showRequest" @updateField="updateFormData" />
+            <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel"
+              @updateField="updateFormData" />
           </div>
-          <div class="modal-footer">
+          <div v-if="selectedRequest.status !== 'In Progress'" class="modal-footer">
             <div class="d-flex justify-content-between align-items-center mt-3 gap-2">
               <!-- <div>
                 <ButtonComp type="button" icon="ban" class="cancelbtn border-1 text-nowrap font-10"
@@ -83,7 +84,7 @@ const idDta = ref([]);
 const docTypeName = ref([])
 const statusOptions = ref([])
 const emittedFormData = ref([]);
-
+const selectedcurrentLevel = ref("");
 const tableheaders = ref([
   { th: "Request ID", td_key: "name" },
   { th: "Form name", td_key: "doctype_name" },
@@ -122,6 +123,7 @@ function actionCreated(rowData, actionEvent) {
   if (actionEvent.name === 'View Request') {
     if (rowData) {
       selectedRequest.value = { ...rowData };
+      selectedcurrentLevel.value = selectedRequest.value.current_level
 
       // Rebuild the structured array from JSON
       showRequest.value = rebuildToStructuredArray(JSON.parse(selectedRequest.value?.json_columns)?.fields);
@@ -184,11 +186,12 @@ function ApproverFormSubmission(dataObj, type) {
 };
 
 function approvalStatusFn(dataObj, type) {
+  console.log(dataObj);
   let data = {
     "property": selectedRequest.value.property,
     "doctype": selectedRequest.value.doctype_name,
     "request_ids": [selectedRequest.value.name],
-    "reason": "",
+    "reason": type,
     "action": type,
     "files": null,
     "cluster_name": null,

@@ -1,7 +1,7 @@
 <template>
     <section>
-        <div v-if="blockArr" class="card">
-            <div v-for="(block, blockIndex) in blockArr" :key="blockIndex" class="block-container">
+        <div v-if="filteredBlocks.length" class="card">
+            <div v-for="(block, blockIndex) in filteredBlocks" :key="blockIndex" class="block-container">
                 <div v-for="(section, sectionIndex) in block.sections" :key="'preview-' + sectionIndex"
                     class="preview-section m-2">
                     <div class="section-label">
@@ -29,7 +29,6 @@
                                         <template
                                             v-if="field.fieldtype === 'Select' || field.fieldtype === 'multiselect'">
                                             <select :multiple="field.fieldtype === 'multiselect'" :value="field.value"
-                                                readOnly
                                                 @input="logFieldValue(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
                                                 class="form-select mb-2 font-13">
                                                 <option v-for="(option, index) in field.options?.split('\n')"
@@ -118,7 +117,7 @@
                                         <!-- Field Type Default -->
                                         <template v-else>
                                             <component :is="getFieldComponent(field.fieldtype)" :value="field.value"
-                                                readOnly :type="field.fieldtype"
+                                                :type="field.fieldtype" :readOnly="blockIndex === 0"
                                                 :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
                                                 @blur="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
                                                 class="form-control previewInputHeight"></component>
@@ -135,22 +134,41 @@
 </template>
 
 <script setup>
-import { defineProps, onMounted, ref, watch } from 'vue';
+import { computed, defineProps, onMounted, ref, watch } from 'vue';
 
 const props = defineProps({
     blockArr: {
         type: [Array, null],
         required: true,
     },
+    currentLevel: {
+        type: String,
+        // required: true,
+    }
 });
 const emit = defineEmits();
 const filePaths = ref([]);
 
+
+const filteredBlocks = computed(() => {
+    if (!props.blockArr || props.blockArr.length === 0) return [];
+
+    // Always include the first block (Requestor Block)
+    const filtered = [props.blockArr[0]];
+
+    // Include approver blocks based on the current level
+    for (let i = 1; i <= props.currentLevel; i++) {
+        if (props.blockArr[i]) {
+            filtered.push(props.blockArr[i]);
+        }
+    }
+    return filtered;
+});
+
+// Get all fields data
 const getAllFieldsData = () => {
     const fieldsData = [];
-
-    // Iterate through blockArr to extract fields data with null checks
-    props.blockArr?.forEach(block => {
+    filteredBlocks.value.forEach(block => {
         block.sections?.forEach(section => {
             section.rows?.forEach(row => {
                 row.columns?.forEach(column => {
@@ -164,9 +182,29 @@ const getAllFieldsData = () => {
             });
         });
     });
-
     return fieldsData;
 };
+// const getAllFieldsData = () => {
+//     const fieldsData = [];
+
+//     // Iterate through blockArr to extract fields data with null checks
+//     props.blockArr?.forEach(block => {
+//         block.sections?.forEach(section => {
+//             section.rows?.forEach(row => {
+//                 row.columns?.forEach(column => {
+//                     column.fields?.forEach(field => {
+//                         fieldsData.push({ ...field });
+//                         if (field.fieldtype === 'Attach' && field.value) {
+//                             filePaths.value = field.value.split(',').map(path => path.trim());
+//                         }
+//                     });
+//                 });
+//             });
+//         });
+//     });
+
+//     return fieldsData;
+// };
 
 const openFile = (filePath) => {
     const fileUrl = `${filePath}`;
