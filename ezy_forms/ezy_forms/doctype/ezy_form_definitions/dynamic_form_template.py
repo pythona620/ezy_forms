@@ -115,8 +115,15 @@ template_str = """
 	<style>
 	  body {
 			font-family: Arial, sans-serif;
-			margin: 15px;
+			
+   
 		}
+  		.main-body{
+	  		margin: 15px;
+   			border: 1px solid #000;
+   			padding: 10px;
+   			border-radius: 5px;
+  		}
 		 .row {
 			display: flex;
 			flex-wrap: wrap;
@@ -134,7 +141,8 @@ template_str = """
 		
 		.section {
 			margin: 10px;
-			border: 1px solid #eeeeee;
+			border: 1px solid #000;
+   			# border-bottom: 1px solid #000;
 			padding: 15px;
 		}
 		.section h3 {
@@ -159,6 +167,7 @@ template_str = """
 			border: none;
 			outline: none;
 			padding: 0px 5px;
+   			padding-left: 50px ;
 			background: transparent;
 			flex: 1; 
 			border-bottom: 1px solid #cccccc; 
@@ -170,6 +179,16 @@ template_str = """
 			background: transparent;
 			flex: 1;
 		}
+  		.field textarea {
+    		border: none;
+   			 outline: none;
+    		padding: 0px 5px;
+    		background: transparent;
+    		flex: 1;
+    		border-bottom: 1px solid #cccccc;
+    		min-height: 70px; /* Adjust as needed */
+    		resize: vertical; /* Allows users to resize the textarea */
+}
 		.field input[type="checkbox"], .field input[type="radio"] {
 			flex: 0;
 			width: 16px;
@@ -177,11 +196,71 @@ template_str = """
 			margin-left: 5px;
 			border: 1px solid #000;
 		}
+  		.header-container{
+	  		display: flex;
+   			justify-content: space-between;
+      		
+      		align-items: center;
+   			padding: 10px;
+			padding-bottom: 0px;
+      		border-bottom: 1px solid #000;
+   			# background-color: #f0f0f0;
+   			margin: 0px 10px;
+  		}
+    	.footer-container{
+         	display: flex;
+         	justify-content: center;
+         	padding: 10px;
+         	# background-color: #f0f0f0;
+        	margin: 0px 10px;
+			positon: fixed;
+   			bottom: 0px;
+   			left: 0px;
+   			width: 100%;
+   			right: 0px;
+		}
+  		.footer-container span{
+      		margin: 0px;
+      		padding: 0px;
+      		font-weight: bold;
+  		}
+  		.header-container h4{
+      		font-size: 25px;
+      		font-weight: bold;
+      		margin: 0px;
+      
+  		}
+		.logo-div{
+			max-width: 300px;
+  			min-width: 200px;
+		}
+ 		.header-left{
+	 		display: flex;
+  			justify-content: center;
+ 		}
+ 		.header-right{
+			 min-width: 200px;
+ 		}
+   
 	   
 	</style>
 </head>
 <body>
-
+<div class="main-body">
+<div class="header-container">
+	<div class="logo-div">	
+	<img src="/files/CompanyLogo.png" alt="logo" style="height: 70px; width: 200px; margin-bottom:0px">
+	 </div>
+  <div class="header-left">
+  
+ 
+	<h4>Authorization Form</h4>
+  </div>
+ 	<div class="header-right">
+	
+ 	</div>
+	
+</div>
 {% for block in data %}
 	<div class="block">
 		{% for section in block.sections %}
@@ -246,7 +325,8 @@ template_str = """
 		{% endfor %}
 	</div>
 {% endfor %}
-
+<div class="footer-container"><span>305, Block 2, White House, Kundanbagh Colony, Begumpet, Hyderabad, Telangana 500016</span></div>
+</div>
 
 <script>
 	document.addEventListener("DOMContentLoaded", function () {
@@ -290,6 +370,7 @@ template_str = """
 
 </body>
 </html>
+
 """
  
 def convert_html_to_pdf(html_content, pdf_path):
