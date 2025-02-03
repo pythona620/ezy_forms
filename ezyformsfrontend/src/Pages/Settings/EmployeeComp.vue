@@ -428,13 +428,12 @@ const filterObj = ref({
 //         designations.value.push(newTag);
 //     }
 //     createEmployee.value.department = newTag;
-
 // };
 const addDesignation = (newTag) => {
     if (!designations.value.includes(newTag)) {
         // Send the new designation to the server
         axiosInstance
-            .post(apis.resource + '/' + doctypes.roles, { role_name: newTag }) // Adjust payload as needed
+            .post(apis.resource + doctypes.roles, { role_name: newTag }) // Adjust payload as needed
             .then((response) => {
                 if (response.data) {
                     console.log('Role:', response.data);
@@ -443,7 +442,7 @@ const addDesignation = (newTag) => {
                     // designations.value.push(newTag);
                     // createEmployee.value.designation = newTag;
                     axiosInstance
-                        .post(apis.resource + '/' + doctypes.designations, { role: response.data.role_name }) // Adjust payload as needed
+                        .post(apis.resource + doctypes.designations, { role: response.data.role_name }) // Adjust payload as needed
                         .then((response) => {
                             if (response.data) {
                                 console.log('Wf role:', response.data);

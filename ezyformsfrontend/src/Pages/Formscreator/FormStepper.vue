@@ -1021,9 +1021,9 @@ const isAllSelected = computed({
 });
 
 watch(designationValue, (newValue) => {
-    console.log("Selected Designations:", newValue);
-    console.log(designationValue.value, "designationValue");
-    console.log(DesignationList.value, "list");
+    console.log("Selected Designations:", typeof newValue);
+    console.log(typeof designationValue.value, "designationValue");
+    console.log(typeof DesignationList.value, "list");
     // console.log(listofselected.value, "------------------------");
 });
 
