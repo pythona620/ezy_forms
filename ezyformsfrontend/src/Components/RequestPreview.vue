@@ -107,7 +107,7 @@
                                             class="text-danger font-10 mt-1">
                                             {{
             errorMessages[`${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`]
-        }}
+                                            }}
                                         </div>
 
 
@@ -204,7 +204,22 @@ const logFieldValue = (eve, blockIndex, sectionIndex, rowIndex, columnIndex, fie
 
 
     } else {
-        field['value'] = eve.target.value;
+
+        // field['value'] = eve.target.value;
+        let inputValue = eve.target.value;
+
+        // Ensure only numbers are stored and +91 is prefixed
+        if (field.fieldtype === "Phone") {
+            inputValue = inputValue.replace(/\D/g, ''); // Remove non-numeric characters
+
+            if (inputValue.length > 10) {
+                inputValue = inputValue.slice(-10); // Keep only last 10 digits
+            }
+
+            inputValue = "+91" + inputValue; // Add +91 prefix
+        }
+
+        field['value'] = inputValue;
 
 
     }
@@ -219,7 +234,8 @@ const validateField = (field, blockIndex, sectionIndex, rowIndex, columnIndex, f
         errorMessages.value[fieldKey] = `${field.label || "This field"} is required.`;
     }
     else if (field.fieldtype === "Phone") {
-        const phoneRegex = /^[0-9]{10}$/; // Adjust if needed
+        const phoneRegex = /^\+91[0-9]{10}$/; // Accepts +91 followed by exactly 10 digits
+
         if (!phoneRegex.test(field.value)) {
             errorMessages.value[fieldKey] = "Enter a valid 10-digit phone number.";
         } else {

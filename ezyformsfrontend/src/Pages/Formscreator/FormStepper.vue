@@ -956,10 +956,10 @@ const fieldTypes = [
         label: "Attach",
         type: "Attach",
     },
-    // {
-    //     label: "Phone",
-    //     type: "Phone",
-    // },
+    {
+        label: "Phone",
+        type: "Phone",
+    },
     {
         label: "Time",
         type: "Time",
