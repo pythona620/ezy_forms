@@ -36,9 +36,30 @@
                                     v-model="CreateDepartments.department_name" />
                                 <label class="font-13 ps-1" for="business_unit">Business Unit</label>
 
-                                <FormFields tag="select" placeholder="" class="mb-3" name="business_unit"
+                                <!-- <FormFields tag="select" placeholder="" class="mb-3" name="business_unit"
                                     id="business_unit" v-model="CreateDepartments.business_unit"
-                                    :options="EzyFormsCompanys" />
+                                    :options="EzyFormsCompanys" /> -->
+                                <VueMultiselect v-model="CreateDepartments.business_unit" :options="EzyFormsCompanys"
+                                    :multiple="false" :close-on-select="false" :clear-on-select="false"
+                                    :preserve-search="true" placeholder="Select department" class="font-11 mb-3">
+                                    <!-- taggable @tag="addDepartment"
+                                            tag-placeholder="Press enter to add department" -->
+                                    <!-- <template #option="{ option }">
+                                                <div class="custom-option">
+                                                    <input type="checkbox" :checked="createEmployee.department.includes(
+                        option
+                    )
+                        " class="custom-checkbox" />
+                                                    <span>{{ option }}</span>
+                                                </div>
+                                            </template> -->
+
+                                    <template #selection="{ values, isOpen }">
+                                        <span class="multiselect__single font-10" v-if="values.length" v-show="!isOpen">
+                                            {{ values.join(", ") }}
+                                        </span>
+                                    </template>
+                                </VueMultiselect>
                                 <div class="d-flex align-items-center">
                                     <div class="w-100">
                                         <label class="font-13 ps-1" for="ezy_departments_items">Ezy Departments
@@ -163,7 +184,8 @@ import { onMounted, ref, computed, watch, reactive } from 'vue';
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
-
+import "@vueform/multiselect/themes/default.css";
+import VueMultiselect from "vue-multiselect";
 
 const businessUnit = computed(() => {
     return EzyBusinessUnit.value;
@@ -465,7 +487,9 @@ function createDepart() {
     })
 }
 </script>
-<style scoped>
+<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
+
+<style lang="scss" scoped>
 .global-table th {
     background-color: #f2f2f2 !important;
     text-align: left;
@@ -503,5 +527,185 @@ function createDepart() {
     /* background-color: #f1f1f1; */
     /* color: #111111; */
     padding: 8px 20px;
+}
+
+::v-deep(.multiselect__select) {
+    position: absolute;
+    width: 40px;
+    height: 32px;
+    right: 1px;
+    /* top: 1px; */
+    padding: 4px 8px;
+    text-align: center;
+    transition: transform 0.2s ease;
+}
+
+::v-deep(.multiselect) {
+    height: 32px !important;
+    min-height: 32px !important;
+}
+
+::v-deep(.multiselect__tags) {
+    height: 32px !important;
+    min-height: 32px !important;
+    display: flex;
+    align-items: center;
+}
+
+::v-deep(.multiselect__single) {
+    font-size: 11px !important;
+    color: #000;
+}
+
+::v-deep(.multiselect-wrapper),
+::v-deep(.multiselect-search) {
+    height: 32px !important;
+    min-height: 32px !important;
+    line-height: 32px !important;
+    display: flex;
+    align-items: center;
+}
+
+::v-deep(.multiselect-search) {
+    height: 32px !important;
+    min-height: 32px !important;
+    display: flex;
+    align-items: center;
+}
+
+::v-deep(.multiselect-wrapper) {
+    height: 32px !important;
+    min-height: 32px !important;
+    line-height: 32px !important;
+}
+
+::v-deep(.multiselect-search) {
+    position: absolute;
+    width: 40px !important;
+    height: 32px !important;
+    right: 1px;
+
+    padding: 4px 8px;
+    text-align: center;
+    transition: transform 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+::v-deep(.multiselect__element:hover) {
+    background-color: #eeeeee !important;
+}
+
+::v-deep(.multiselect__element:hover .multiselect__option) {
+    background-color: #eeeeee !important;
+    color: #000 !important;
+}
+
+::v-deep(.multiselect__element:hover .multiselect__option--highlight) {
+    background-color: #eeeeee !important;
+    color: #000 !important;
+}
+
+/* Additional specific rule for `.multiselect__option` when hovered */
+::v-deep(.multiselect__option:hover) {
+    background-color: #eeeeee !important;
+    color: #000 !important;
+}
+
+.custom-option {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.multiselect-option {
+    font-size: 11px !important;
+}
+
+.multiselect {
+    height: 30px !important;
+}
+
+.multiselect {
+    margin: initial;
+    font-size: 11px !important;
+    border: 1px solid #e2e2e2 !important;
+    height: 30px !important;
+
+    .multiselect-wrapper {
+        height: 30px !important;
+    }
+
+    .multiselect-dropdown {
+        .multiselect-options {
+            font-size: 11px;
+
+            li.multiselect-option span {
+                font-size: 11px !important;
+            }
+
+            li.multiselect-option .is-selected {
+                background-color: grey !important;
+                font-size: 11px;
+            }
+        }
+    }
+}
+
+.multiselect__option span {
+    font-size: 11px;
+    /* Change this value to whatever size you need */
+}
+
+.multiselect .multiselect-option {
+    font-size: 11px;
+}
+
+.multiselect .multiselect-wrapper {
+    min-height: 30px !important;
+}
+
+.multiselect .multiselect--above {
+    min-height: 30px !important;
+}
+
+.multiselect__tags {
+    min-height: 30px !important;
+    padding: 0px;
+}
+
+.multiselect .multiselect__tags {
+    min-height: 30px !important;
+    font-size: 11px !important;
+}
+
+.multiselect .multiselect__placeholder {
+    font-size: 11px;
+}
+
+.multiselect .multiselect__single {
+    font-size: 11px !important;
+}
+
+.multiselect__single {
+    font-size: 11px !important;
+}
+
+.multiselect__single {
+    font-size: 11px !important;
+
+}
+
+.multiselect .multiselect__tags .multiselect__placeholder {
+    font-size: 11px;
+}
+
+::v-deep(.multiselect__placeholder) {
+    color: #343434;
+    display: inline-block;
+    margin-bottom: 10px;
+    padding-top: 2px;
+    font-size: 10px !important;
 }
 </style>

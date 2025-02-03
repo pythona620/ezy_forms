@@ -12,13 +12,13 @@
             <div class="d-flex gap-2 align-items-center">
 
 
-                <div class="d-flex align-items-center ">
+                <!-- <div class="d-flex align-items-center ">
 
                     <button type="button" class="btn btn-dark buttoncomp CreateDepartments d-flex align-items-center "
                         data-bs-toggle="modal" data-bs-target="#createDepartments">
                         Create Departments
                     </button>
-                </div>
+                </div> -->
                 <div class="modal fade" id="createDepartments" tabindex="-1" aria-labelledby="createDepartmentsLabel"
                     aria-hidden="true">
                     <div class="modal-dialog modal-lg">

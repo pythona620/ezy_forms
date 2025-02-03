@@ -118,8 +118,9 @@
                                         <VueMultiselect v-model="createEmployee.reporting_to"
                                             :options="tableData.map(dept => dept.emp_name)" :multiple="false"
                                             :close-on-select="false" :clear-on-select="false" :preserve-search="true"
-                                            placeholder="Select Reporting To" class="font-11 mb-3" taggable
-                                            @tag="addReportingTo" tag-placeholder="Press enter to add reporting to">
+                                            placeholder="Select Reporting To" class="font-11 mb-3">
+                                            <!-- taggable
+                                            @tag="addReportingTo" tag-placeholder="Press enter to add reporting to" -->
                                             <!-- <template #option="{ option }">
                                                 <div class="custom-option">
                                                     <input type="checkbox" :checked="createEmployee.reporting_to.includes(
@@ -145,9 +146,10 @@
                                         <VueMultiselect v-model="createEmployee.reporting_designation"
                                             :options="designations" :multiple="false" :close-on-select="false"
                                             :clear-on-select="false" :preserve-search="true"
-                                            placeholder="Select Reporting Designation" class="font-11 mb-3" taggable
+                                            placeholder="Select Reporting Designation" class="font-11 mb-3">
+                                            <!-- taggable
                                             @tag="addReportingDesignation"
-                                            tag-placeholder="Press enter to add reporting designation">
+                                            tag-placeholder="Press enter to add reporting designation" -->
                                             <!-- <template #option="{ option }">
                                                 <div class="custom-option">
                                                     <input type="checkbox" :checked="createEmployee.designation.includes(
@@ -290,8 +292,9 @@
                                     <VueMultiselect v-model="createEmployee.reporting_to"
                                         :options="tableData.map(dept => dept.emp_name)" :multiple="false"
                                         :close-on-select="false" :clear-on-select="false" :preserve-search="true"
-                                        placeholder="Select Reporting To" class="font-11 mb-3" taggable
-                                        @tag="addReportingTo" tag-placeholder="Press enter to add reporting to">
+                                        placeholder="Select Reporting To" class="font-11 mb-3">
+                                        <!-- taggable
+                                        @tag="addReportingTo" tag-placeholder="Press enter to add reporting to" -->
                                         <!-- <template #option="{ option }">
                                                 <div class="custom-option">
                                                     <input type="checkbox" :checked="createEmployee.reporting_to.includes(
@@ -314,9 +317,10 @@
                                     <VueMultiselect v-model="createEmployee.reporting_designation"
                                         :options="designations" :multiple="false" :close-on-select="false"
                                         :clear-on-select="false" :preserve-search="true"
-                                        placeholder="Select Reporting Designation" class="font-11 mb-3" taggable
+                                        placeholder="Select Reporting Designation" class="font-11 mb-3">
+                                        <!-- taggable
                                         @tag="addReportingDesignation"
-                                        tag-placeholder="Press enter to add reporting designation">
+                                        tag-placeholder="Press enter to add reporting designation" -->
                                         <!-- <template #option="{ option }">
                                                 <div class="custom-option">
                                                     <input type="checkbox" :checked="createEmployee.designation.includes(
@@ -428,10 +432,41 @@ const filterObj = ref({
 // };
 const addDesignation = (newTag) => {
     if (!designations.value.includes(newTag)) {
-        designations.value.push(newTag);
-    }
-    createEmployee.value.designation = newTag;
+        // Send the new designation to the server
+        axiosInstance
+            .post(apis.resource + '/' + doctypes.roles, { role_name: newTag }) // Adjust payload as needed
+            .then((response) => {
+                if (response.data) {
+                    console.log('Role:', response.data);
 
+                    // Update local designations list
+                    // designations.value.push(newTag);
+                    // createEmployee.value.designation = newTag;
+                    axiosInstance
+                        .post(apis.resource + '/' + doctypes.designations, { role: response.data.role_name }) // Adjust payload as needed
+                        .then((response) => {
+                            if (response.data) {
+                                console.log('Wf role:', response.data);
+
+                                // Update local designations list
+                                designations.value.push(response.data.role);
+                                createEmployee.value.designation = response.data.role;
+
+                                // Fetch updated roles after adding a new one
+
+                            }
+                        })
+                        .catch((error) => {
+                            console.error("Error creating designation:", error);
+                        });
+                    // Fetch updated roles after adding a new one
+
+                }
+            })
+            .catch((error) => {
+                console.error("Error creating designation:", error);
+            });
+    }
 };
 const addReportingTo = (newTag) => {
     if (!tableData.value.map(dept => dept.emp_name).includes(newTag)) {
@@ -704,19 +739,7 @@ function employeeData(data) {
             console.error("Error fetching department data:", error);
         });
 }
-watch(
-    businessUnit,
-    (newVal) => {
-        createEmployee.value.company_field = newVal;
-        newbusiness.value = newVal;
 
-        if (newVal.length) {
-
-            employeeData();
-        }
-    },
-    { immediate: true }
-);
 function designationData() {
     const filters = [];
     const queryParams = {
@@ -743,7 +766,20 @@ function designationData() {
         });
 }
 
+watch(
+    businessUnit,
+    (newVal) => {
+        createEmployee.value.company_field = newVal;
+        newbusiness.value = newVal;
 
+        if (newVal.length) {
+            // console.log(createEmployee.value.company_field, "-----");
+
+            employeeData();
+        }
+    },
+    { immediate: true }
+);
 
 
 
