@@ -54,7 +54,7 @@ export default defineConfig(({ mode }) => {
     plugins: [vue()],
     server: {
       port: 8080,
-      proxy: updatedProxyOptions, // // Use updated proxy settings
+      proxy: updatedProxyOptions, // // Use updated proxy settings 
     },
     resolve: {
       alias: {

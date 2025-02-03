@@ -472,12 +472,13 @@ function cancelCreate() {
         ]
     }
 }
+
 function createDepart() {
     const dataObj = {
         ...CreateDepartments.value,
         "doctype": doctypes.departments
     }
-    console.log(dataObj, "------------------");
+    // console.log(dataObj, "------------------");
     axiosInstance.post(apis.resource + doctypes.departments, dataObj).then((res) => {
         if (res.data) {
             toast.success("Department Created", { autoClose: 500 })
