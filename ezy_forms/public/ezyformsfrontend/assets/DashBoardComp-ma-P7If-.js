@@ -1,1 +1,0 @@
-import{p as e,o as s,c as a,b as r}from"./index-B-ZWE6ER.js";const t={};function n(c,o,p,d,l,f){return s(),a("div",null,o[0]||(o[0]=[r("h6",null,"Dashboard",-1)]))}const _=e(t,[["render",n]]);export{_ as default};
