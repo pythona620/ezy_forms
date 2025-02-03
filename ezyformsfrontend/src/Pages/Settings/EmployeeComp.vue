@@ -467,19 +467,19 @@ const addDesignation = (newTag) => {
             });
     }
 };
-const addReportingTo = (newTag) => {
-    if (!tableData.value.map(dept => dept.emp_name).includes(newTag)) {
-        tableData.value.push({ emp_name: newTag });
-    }
-    createEmployee.value.reporting_to = newTag;
-};
+// const addReportingTo = (newTag) => {
+//     if (!tableData.value.map(dept => dept.emp_name).includes(newTag)) {
+//         tableData.value.push({ emp_name: newTag });
+//     }
+//     createEmployee.value.reporting_to = newTag;
+// };
 
-const addReportingDesignation = (newTag) => {
-    if (!designations.value.includes(newTag)) {
-        designations.value.push(newTag);
-    }
-    createEmployee.value.reporting_designation = newTag;
-};
+// const addReportingDesignation = (newTag) => {
+//     if (!designations.value.includes(newTag)) {
+//         designations.value.push(newTag);
+//     }
+//     createEmployee.value.reporting_designation = newTag;
+// };
 
 watch(() => createEmployee.value.reporting_to, (newValue) => {
     if (newValue) {
