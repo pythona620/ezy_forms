@@ -152,12 +152,15 @@ const emit = defineEmits();
 const filePaths = ref([]);
 
 
+
+
 const filteredBlocks = computed(() => {
     if (!props.blockArr || props.blockArr.length === 0) return [];
 
     // Always include the first block (Requestor Block)
     const filtered = [props.blockArr[0]];
 
+    // Include approver
     // Include approver blocks based on the current level
     for (let i = 1; i <= props.currentLevel; i++) {
         if (props.blockArr[i]) {
