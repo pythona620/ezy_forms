@@ -13,7 +13,8 @@
   "department",
   "designation",
   "reporting_to",
-  "reporting_designation"
+  "reporting_designation",
+  "signature"
  ],
  "fields": [
   {
@@ -61,11 +62,16 @@
    "fieldtype": "Link",
    "label": "Company Field",
    "options": "Ezy Business Unit"
+  },
+  {
+   "fieldname": "signature",
+   "fieldtype": "Attach",
+   "label": "Signature"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-01-25 10:52:37.983326",
+ "modified": "2025-02-03 13:04:20.284311",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
  "name": "Ezy Employee",
