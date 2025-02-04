@@ -31,7 +31,8 @@
             <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel"
               @updateField="updateFormData" />
           </div>
-          <div v-if="selectedRequest.status !== 'In Progress'" class="modal-footer">
+          <!-- v-if="selectedRequest.status !== 'In Progress'" -->
+          <div  class="modal-footer">
             <div class="d-flex justify-content-between align-items-center mt-3 gap-2">
               <!-- <div>
                 <ButtonComp type="button" icon="ban" class="cancelbtn border-1 text-nowrap font-10"
