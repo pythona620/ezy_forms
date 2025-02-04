@@ -83,7 +83,7 @@
               </div>
             </div>
           </div>
-          <div class="modal-body">
+          <div class="modal-body pdf-body">
 
             <div v-html="pdfPreview"></div>
           </div>
@@ -570,5 +570,13 @@ onMounted(() => {
   border-radius: 4px;
   opacity: 0px;
 
+
+}
+
+.pdf-body {
+  width: 100%;
+  height: 70vh;
+  overflow-y: scroll;
+  /* overflow: hidden; */
 }
 </style>
