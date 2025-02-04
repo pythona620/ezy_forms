@@ -9,9 +9,12 @@
     <div class="shadow-none"
       v-if="tag === 'input' && (type === 'text' || type === 'number' || type === 'email' || type === 'search')">
       <input :type="type" :placeholder="placeholder" :labeltext="labeltext" :name="name" :id="id" :min="min" :max="max"
-        v-model="localModel" :required="Required" class="form-control  input-width" :class="{
+        v-model="localModel" :required="Required ? true : false" class="form-control  input-width" :class="{
       'border-end-0 shadow-none': type === ('text' || type === 'number' || type === 'email' || type === 'search') && icon && label,
     }" />
+      <div v-if="emailInvalid && type === 'email'" class="text-danger font-13 ps-1">
+        Invalid email address.
+      </div>
       <!-- <span v-if="(type === 'number' || type === 'email' || type === 'search') && icon"
         class="input-group-text pe-3 bg-white border-start-0">
         <i class="ri-search-line"></i>
@@ -143,7 +146,19 @@ const selectOption = (option) => {
   selectedOption.value = option;
   emit('update:modelValue', option);
 };
+const emailInvalid = ref(false);
 
+// Watch for changes in the input field (localModel)
+watch(() => props.localModel, (newValue) => {
+  if (props.type === 'email') {
+    emailInvalid.value = !validateEmail(newValue);
+  }
+});
+
+function validateEmail(email) {
+  const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  return re.test(String(email).toLowerCase());
+}
 // Sync v-model with selected option
 watch(() => props.modelValue, (newVal) => {
   selectedOption.value = newVal;

@@ -38,11 +38,13 @@
                                         <FormFields class="mb-3" tag="input" type="text" name="emp_name" id="emp_name"
                                             placeholder="Enter Emp Name" v-model="createEmployee.emp_name" />
 
-                                        <label class="font-13 ps-1" for="emp_mail_id">Emp Mail ID<span
-                                                class="text-danger ps-1">*</span></label>
-                                        <FormFields class="mb-3" tag="input" type="text" name="emp_mail_id"
-                                            id="emp_mail_id" placeholder="Enter Email"
-                                            v-model="createEmployee.emp_mail_id" />
+                                        <div class=" mb-3"> <label class="font-13 ps-1" for="emp_mail_id">Emp Mail
+                                                ID<span class="text-danger ps-1">*</span></label>
+                                            <FormFields class="mb-1" tag="input" type="email" name="emp_mail_id"
+                                                @change="validateEmail" :required="true" id="emp_mail_id"
+                                                placeholder="Enter Email" v-model="createEmployee.emp_mail_id" />
+                                            <p v-if="emailError" class="text-danger font-11 ps-1">{{ emailError }}</p>
+                                        </div>
                                         <label class="font-13 ps-1 fw-medium" for="dept">Departments<span
                                                 class="text-danger ps-1">*</span></label>
                                         <!-- <FormFields tag="select" placeholder="Select Department" class="mb-3"
@@ -234,10 +236,13 @@
                                     <FormFields class="mb-3" tag="input" type="text" name="emp_name" id="emp_name"
                                         placeholder="Enter department code" v-model="createEmployee.emp_name" />
 
-                                    <label class="font-13 ps-1" for="emp_mail_id">Emp Mail ID<span
-                                            class="text-danger ps-1">*</span></label>
-                                    <FormFields class="mb-3" tag="input" type="text" name="emp_mail_id" id="emp_mail_id"
-                                        placeholder="Enter department code" v-model="createEmployee.emp_mail_id" />
+                                    <div class=" mb-3"> <label class="font-13 ps-1" for="emp_mail_id">Emp Mail
+                                            ID<span class="text-danger ps-1">*</span></label>
+                                        <FormFields class="mb-1" tag="input" type="email" name="emp_mail_id"
+                                            @change="validateEmail" :required="true" id="emp_mail_id"
+                                            placeholder="Enter Email" v-model="createEmployee.emp_mail_id" />
+                                        <p v-if="emailError" class="text-danger font-11 ps-1">{{ emailError }}</p>
+                                    </div>
                                     <label class="font-13 ps-1 fw-medium" for="dept">Departments<span
                                             class="text-danger ps-1">*</span></label>
                                     <VueMultiselect v-model="createEmployee.department" :options="departmentsList"
@@ -417,7 +422,18 @@ const createEmployee = ref({
     signature: ''
 
 });
+const emailError = ref('');
 
+const validateEmail = () => {
+    const email = createEmployee.value.emp_mail_id;
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    if (!emailPattern.test(email)) {
+        emailError.value = "Invalid email address.";
+    } else {
+        emailError.value = "";
+    }
+};
 
 const filterObj = ref({
     limitPageLength: 'None',
@@ -565,7 +581,8 @@ function cancelCreate() {
         designation: "",
         reporting_to: "",
         reporting_designation: "",
-        signature: ""
+        signature: "",
+        company_field: businessUnit.value
 
     }
 }
@@ -730,7 +747,7 @@ function employeeData(data) {
                 // designations.value = [...new Set(res.data.map((designation) => designation.designation))];
                 reportingTo.value = [...new Set(res.data.map((reporting) => reporting.reporting_to))];
                 reportingDesigination.value = [...new Set(res.data.map((reportingDesigination) => reportingDesigination.reporting_designation))]
-
+                createEmployee.value.company_field = businessUnit.value;
 
             }
         })
@@ -768,11 +785,11 @@ function designationData() {
 watch(
     businessUnit,
     (newVal) => {
-        createEmployee.value.company_field = newVal;
-        newbusiness.value = newVal;
 
-        if (newVal.length) {
-            // console.log(createEmployee.value.company_field, "-----");
+        if (newVal && newVal.length) {
+            createEmployee.value.company_field = newVal;
+            newbusiness.value = newVal;
+            console.log(createEmployee.value.company_field, "-----");
 
             employeeData();
         }
@@ -783,6 +800,7 @@ watch(
 
 
 function createEmpl() {
+    createEmployee.value.company_field = businessUnit.value;
     const dataObj = {
         ...createEmployee.value,
         "doctype": doctypes.EzyEmployeeList
