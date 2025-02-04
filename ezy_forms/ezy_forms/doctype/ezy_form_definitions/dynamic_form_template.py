@@ -249,7 +249,7 @@ template_str = """
 <div class="main-body">
 <div class="header-container">
 	<div class="logo-div">	
-	<img src="/files/CompanyLogo.png" alt="logo" style="height: 70px; width: 200px; margin-bottom:0px">
+	<img src="https://ezysuite.ezyforms.co/files/CompanyLogo.png" alt="logo" style="height: 70px; width: 200px; margin-bottom:0px">
 	 </div>
   <div class="header-left">
   
@@ -409,13 +409,13 @@ def download_filled_form(form_short_name:str,name:str):
 				iteration["value"] = user_doc[iteration["fieldname"]] if user_doc[iteration["fieldname"]] else ""
 		html_view = json_structure_call_for_html_view(json_obj=json_object)
 		random_number = randint(111,999)
-		pdf_path = frappe.local.site + f"/private/files/{form_short_name}_{name}_{random_number}.pdf"
+		pdf_path = frappe.local.site + f"/files/{form_short_name}_{name}_{random_number}.pdf"
 		
 		# Generate PDF
 		convert_html_to_pdf(html_content = html_view, pdf_path = pdf_path)
 
 		files_new = {"file": open(pdf_path, 'rb')}
-		payload_new = {'is_private': 1, 'folder': 'Home'}
+		payload_new = {'is_private': 0, 'folder': 'Home'}
 		os.remove(pdf_path)
 		host = frappe.get_single("Global Site Settings").site
 		file_response = requests.post(host+"/api/method/upload_file", files=files_new,
