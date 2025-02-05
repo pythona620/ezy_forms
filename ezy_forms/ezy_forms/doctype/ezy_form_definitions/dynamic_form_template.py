@@ -6,6 +6,8 @@ import requests
 from random import randint
 import os, sys
 import traceback
+from frappe.utils import get_bench_path, cstr
+from frappe.utils import get_bench_path, cstr, get_url
 
 def rebuild_to_structured_array(flat_array):
     result = []
@@ -417,32 +419,51 @@ def preview_dynamic_form(form_short_name:str,name=None):
     html_view = json_structure_call_for_html_view(json_obj=json_object,form_name=form_name)
     return html_view
 
-@frappe.whitelist()
-def download_filled_form(form_short_name:str,name:str):
-	try:
-		json_object = frappe.db.get_value("Ezy Form Definitions",form_short_name,"form_json")
-		json_object = literal_eval(json_object)["fields"]
-		user_doc = frappe.get_doc(form_short_name,name).as_dict()
-		for iteration in json_object:
-			if "value" in iteration:
-				iteration["value"] = user_doc[iteration["fieldname"]] if user_doc[iteration["fieldname"]] else ""
-		html_view = json_structure_call_for_html_view(json_obj=json_object)
-		random_number = randint(111,999)
-		pdf_path = frappe.local.site + f"/files/{form_short_name}_{name}_{random_number}.pdf"
-		
-		# Generate PDF
-		convert_html_to_pdf(html_content = html_view, pdf_path = pdf_path)
 
-		files_new = {"file": open(pdf_path, 'rb')}
-		payload_new = {'is_private': 0, 'folder': 'Home'}
-		os.remove(pdf_path)
-		host = frappe.get_single("Global Site Settings").site
-		file_response = requests.post(host+"/api/method/upload_file", files=files_new,
-												data=payload_new, verify=False).json()
-		frappe.db.set_value("File", file_response["message"]["name"], {"attached_to_doctype": form_short_name, "attached_to_name": name})
-		return file_response['message']["file_url"]
-	except Exception as e:
-			exc_type, exc_obj, exc_tb = sys.exc_info()
-			frappe.log_error("Error Downloading File","line No:{}\n{}".format(exc_tb.tb_lineno,traceback.format_exc()))
-			frappe.throw(e)
-			return {"success":False,"message":str(e)}
+
+@frappe.whitelist()
+def download_filled_form(form_short_name: str, name: str):
+    try:
+        json_object = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_json")
+        json_object = literal_eval(json_object)["fields"]
+        user_doc = frappe.get_doc(form_short_name, name).as_dict()
+
+        for iteration in json_object:
+            if "value" in iteration:
+                iteration["value"] = user_doc.get(iteration["fieldname"], "")
+
+        html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_short_name)
+        random_number = randint(111, 999)
+
+        pdf_filename = f"{form_short_name}_{name}_{random_number}.pdf"
+        pdf_path = f"private/files/{pdf_filename}"
+        absolute_pdf_path = os.path.join(get_bench_path(), "sites", cstr(frappe.local.site), pdf_path)
+
+        convert_html_to_pdf(html_content=html_view, pdf_path=absolute_pdf_path)
+
+        new_file = frappe.get_doc({
+            "doctype": "File",
+            "file_name": pdf_filename,
+            "file_url": f"/{pdf_path}",
+            "is_private": 1,
+            "attached_to_doctype": form_short_name,
+            "attached_to_name": name
+        })
+        new_file.insert(ignore_permissions=True)
+        frappe.db.commit()
+
+        file_url = get_url(new_file.file_url)
+
+        return file_url
+
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        frappe.log_error("Error Downloading File", f"line No:{exc_tb.tb_lineno}\n{traceback.format_exc()}")
+        frappe.throw(str(e))
+
+
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        frappe.log_error("Error Downloading File", "line No:{}\n{}".format(exc_tb.tb_lineno, traceback.format_exc()))
+        frappe.throw(str(e))
+        return {"success": False, "message": str(e)}

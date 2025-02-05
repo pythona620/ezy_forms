@@ -118,7 +118,7 @@ export default {
 						.then((responce) => {
 							const employeeData = responce.data
 							localStorage.setItem('employeeData', JSON.stringify(employeeData));
-
+							localStorage.setItem('USERROLE', JSON.stringify(employeeData.designation));
 
 						})
 						.catch((error) => {
