@@ -43,26 +43,29 @@ def list_to_dict_with_ones(x):
 @frappe.whitelist()
 def add_roles_to_wf_requestors(business_unit:str,doctype:str,workflow_setup:list[dict]):
 	try:
+		from ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions import activating_perms
 		if not len(workflow_setup)>0 or not business_unit or not doctype:return {"success":False,"message":"Please pass levels or requestors for adding Workflow Level Setup."}
 		doc_rec = "_".join(business_unit.split()).upper() + "_" + "_".join(doctype.split()).upper().replace(" ", "_")
 		requestors_df = pl.DataFrame(workflow_setup)
 		requestors_df = requestors_df.explode("roles")
 		requestors_df = requestors_df.with_columns(pl.col("fields").list.join(" ,").map_elements(list_to_dict_with_ones).alias("fields"))
 		requestors_section = requestors_df.filter(pl.col('type').str.contains("requestor")).select("roles","fields").rename({"roles":"requestor","fields":"columns_allowed"}).to_dicts()
-		approvers_section = requestors_df.filter(pl.col('type').str.contains("approver"))
+		approvers_section = requestors_df.filter(pl.col('type').str.contains("approver")).with_columns(pl.lit(1).alias('cancel_request')).with_columns(pl.lit(1).alias('mandatory')).with_columns(pl.lit("Approve/Reject").alias('action'))
 		if approvers_section.shape[0]>0:
-			approvers_section = approvers_section.select("roles","fields","idx").rename({"roles":"role","fields":"columns_allowed","idx":"level"}).to_dicts()
+			approvers_section = approvers_section.select("roles","fields","idx","cancel_request","mandatory","action").rename({"roles":"role","fields":"columns_allowed","idx":"level"}).to_dicts()
 		else:approvers_section=[]
 		frappe.db.sql(f"""delete from `tabWF Requestors` where parent = '{doc_rec}' and parentfield = 'wf_requestors' and parenttype = 'WF Roadmap';""")
 		frappe.db.commit()
-		frappe.db.sql(f"""delete from `tabWF Level Setup` where parent ='{doc_rec}' and parentfield='wf_level_setup' and parenttype='WF Roadmap';""")
+		frappe.db.sql(f"""delete from `tabWF Level Setup` where parent ='{doc_rec}' and parentfield = 'wf_level_setup' and parenttype='WF Roadmap';""")
 		frappe.db.commit()
 		roadmap_doc = frappe.get_doc("WF Roadmap",doc_rec)
 		if len(approvers_section)>0:
 			roadmap_doc.workflow_levels = max([max_level['level'] for max_level in approvers_section])
 		for single_requestor in requestors_section:
+			activating_perms(doctype=doctype,role=single_requestor["requestor"])
 			roadmap_doc.append("wf_requestors", single_requestor)
 		for single_approver in approvers_section:
+			activating_perms(doctype=doctype,role=single_approver["role"])
 			roadmap_doc.append("wf_level_setup", single_approver)
 		roadmap_doc.save(ignore_permissions=True)
 		frappe.db.commit()
