@@ -41,7 +41,7 @@
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-start p-2">
                                             <div class="d-flex gap-2 align-items-center">
-                                                <div>
+                                                <div v-if="userInitial">
                                                     <li
                                                         class="d-flex justify-content-center align-items-center btn btn-dark">
 
@@ -51,11 +51,11 @@
                                                 </div>
                                                 <div>
                                                     <li>
-                                                        <div class=" ">
+                                                        <div v-if="userEmail" class=" ">
                                                             <span class="fw-medium font-13 "> {{ userEmail }}</span>
 
                                                         </div>
-                                                        <div class=" ">
+                                                        <div v-if="userDesigination" class=" ">
 
                                                             <span class="fw-medium font-11">{{ userDesigination
                                                                 }}</span>
@@ -296,7 +296,7 @@ onMounted(() => {
         } else if (userData) {
             // Non-admin login: Set both employee and user-specific data
             userAdmin.value = userName.full_name;
-            userInitial.value = userData.emp_name.charAt(0).toUpperCase();
+            userInitial.value = userData.emp_name.charAt(0).toUpperCase() || userData.full_name.charAt(0).toUpperCase();
             userEmail.value = userData.name;
             userDesigination.value = userData.designation || '';
 
@@ -483,17 +483,80 @@ function SelectedFromchange(value) {
     blockArr.value = [];
     selectedData.value.selectedform = value;
 
-    if (value) {
-        // Check if the selected form exists in formList
-        const formExists = formList.value.some(form => form.form_short_name === value);
+    if (!value) return;
 
-        if (formExists) {
-            toRaiseRequest();
-        } else {
-            toast.error("Selected form does not exist in the fetched list.", { autoClose: 2000 });
+    // Get USERROLE from localStorage and normalize
+    let userRole = localStorage.getItem("USERROLE")?.trim().toLowerCase();
+    // Remove any extra quotes (if present) around the userRole
+    userRole = userRole?.replace(/^"|"$/g, ''); // Remove surrounding quotes
+    console.log("UserRole from localStorage:", `"${userRole}"`);
+
+    if (!userRole) {
+        toast.error("User role is missing. Please log in again.", { autoClose: 2000 });
+        return;
+    }
+
+    // Find the selected form in formList
+    const selectedForm = formList.value.find(form => form.form_short_name === value);
+    console.log("Selected Form from formList:", selectedForm);
+
+    if (!selectedForm) {
+        toast.error("Selected form does not exist in the fetched list.", { autoClose: 2000 });
+        return;
+    }
+
+    try {
+        // Parse form_json since it's stored as a string
+        const formJson = JSON.parse(selectedForm.form_json);
+        console.log("Parsed formJson:", formJson);
+
+        // Find the requestor object in the workflow array
+        const requestor = formJson.workflow?.find(item => item.type === "requestor");
+        console.log("Requestor:", requestor);
+
+        if (!requestor || !Array.isArray(requestor.roles)) {
+            console.log("No requestor object or roles found.");
+            toast.error("Invalid requestor data.", { autoClose: 2000 });
+            return;
         }
+
+        // Ensure requestor.roles is an array of strings and normalize
+        const normalizedRoles = requestor.roles.map(role => role.trim().toLowerCase());
+        console.log("Normalized Roles:", normalizedRoles);
+
+        // Clean the strings to remove any non-alphanumeric characters (like invisible characters)
+        const cleanRole = (str) => str.replace(/[^\x20-\x7E]/g, '').trim().toLowerCase();
+
+        const cleanedNormalizedRoles = normalizedRoles.map(role => cleanRole(role));
+        const cleanedNormalizedUserRole = cleanRole(userRole);
+
+        console.log("Cleaned Normalized Roles:", cleanedNormalizedRoles);
+        console.log("Cleaned Normalized User Role:", cleanedNormalizedUserRole);
+
+        // Explicit comparison check with logs
+        cleanedNormalizedRoles.forEach((role, index) => {
+            console.log(`Comparing role[${index}]: "${role}" with userRole: "${cleanedNormalizedUserRole}"`);
+        });
+
+        // Check if the user's role exists in the cleaned requestor's roles array
+        const isRoleMatched = cleanedNormalizedRoles.some(role => role === cleanedNormalizedUserRole);
+        console.log("Role Matching Result:", isRoleMatched);
+
+        if (isRoleMatched) {
+            console.log("Match found! Calling toRaiseRequest()");
+            toRaiseRequest(); // Call toRaiseRequest() when there's a match
+        } else {
+            console.log("No matching role found.");
+            toast.error("You do not have permission to raise this request.", { autoClose: 2000 });
+        }
+    } catch (error) {
+        console.error("Error parsing form_json:", error);
+        toast.error("Invalid form data. Please contact support.", { autoClose: 2000 });
     }
 }
+
+
+
 // function formDefinations(value) {
 //     const filters = [
 //         ["business_unit", "like", `%${business_unit.value}%`]

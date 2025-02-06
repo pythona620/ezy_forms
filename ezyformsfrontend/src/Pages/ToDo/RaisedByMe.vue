@@ -46,7 +46,7 @@
             </div>
           </div>
           <div class="modal-body approvermodalbody">
-            <ApproverPreview :blockArr="showRequest" @updateField="updateFormData" />
+            <ApproverPreview :blockArr="showRequest" :current-level="totalLevels" @updateField="updateFormData" />
           </div>
           <!-- <div class="modal-footer">
             <div class="d-flex justify-content-between align-items-center mt-3 gap-2">
@@ -124,7 +124,7 @@ const docTypeName = ref([])
 const statusOptions = ref([])
 const formData = ref([]);
 const tableData = ref([]);
-
+const totalLevels = ref('');
 const pdfPreview = ref('')
 
 const tableheaders = ref([
@@ -164,6 +164,7 @@ function actionCreated(rowData, actionEvent) {
   if (actionEvent.name === 'View Request') {
     if (rowData) {
       selectedRequest.value = { ...rowData };
+      totalLevels.value = selectedRequest.value.total_levels
       // Rebuild the structured array from JSON
       showRequest.value = rebuildToStructuredArray(JSON.parse(selectedRequest.value?.json_columns).fields);
 

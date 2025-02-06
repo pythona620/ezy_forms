@@ -139,10 +139,10 @@ const forthSettingsTitle = 'Form';
 
 
 const todoSideBarData = [
-    { name: 'Received for me', icon: 'bi bi-bucket', route: 'receivedform' },
-    { name: 'Raised by me', icon: 'bi bi-send', route: 'raisedbyme' },
+    { name: 'My tasks', icon: 'bi bi-bucket', route: 'receivedform' },
+    { name: 'My forms', icon: 'bi bi-send', route: 'raisedbyme' },
     { name: 'My team', icon: 'bi bi-people', route: 'myteam' },
-    { name: 'History', icon: 'bi bi-clock-history', route: 'history' },
+    // { name: 'History', icon: 'bi bi-clock-history', route: 'history' },
 
 ];
 const userFormSideBarData = [

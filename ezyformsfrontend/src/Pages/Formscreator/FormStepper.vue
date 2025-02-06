@@ -439,7 +439,7 @@
                                                                                         </select>
 
                                                                                         <div
-                                                                                            v-if="['Select', 'Table MultiSelect'].includes(field.fieldtype)">
+                                                                                            v-if="['Select', 'Table MultiSelect', 'Check'].includes(field.fieldtype)">
                                                                                             <label
                                                                                                 class="font-12 fw-light"
                                                                                                 for="options">Enter
@@ -980,10 +980,10 @@ const fieldTypes = [
         label: "Datetime",
         type: "Datetime",
     },
-    // {
-    //     label: "Check",
-    //     type: "Check",
-    // },
+    {
+        label: "Check",
+        type: "Check",
+    },
     // {
     //     label: "Radio",
     //     type: "radio",

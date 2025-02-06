@@ -5,7 +5,7 @@
 // import vue from '@vitejs/plugin-vue';
 // import proxyOptions from './proxyOptions';
 
-// // //  https://vitejs.dev/config/
+// //  https://vitejs.dev/config/
 // export default defineConfig({
 //   plugins: [vue()],
 //   server: {

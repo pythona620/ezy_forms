@@ -108,22 +108,27 @@ export default {
 			}
 		},
 		userData(email) {
+			console.log(email, "1");
 			axiosInstance.get(`${apis.resource}${doctypes.users}/${email}`)
 				.then((res) => {
 					this.email = res.data.email
-						;
+					console.log(this.email, "2");
+					if (this.email) {
+						axiosInstance.get(`${apis.resource}${doctypes.EzyEmployeeList}/${this.email}`)
+							.then((responce) => {
+								const employeeData = responce.data
+								localStorage.setItem('employeeData', JSON.stringify(employeeData));
+								localStorage.setItem('USERROLE', JSON.stringify(employeeData.designation));
 
+							})
+							.catch((error) => {
+								console.error("Error fetching user data:", error);
+							});
+					}
+					else {
+						localStorage.setItem('employeeData', JSON.stringify(this.storeData));
 
-					axiosInstance.get(`${apis.resource}${doctypes.EzyEmployeeList}/${this.email}`)
-						.then((responce) => {
-							const employeeData = responce.data
-							localStorage.setItem('employeeData', JSON.stringify(employeeData));
-							localStorage.setItem('USERROLE', JSON.stringify(employeeData.designation));
-
-						})
-						.catch((error) => {
-							console.error("Error fetching user data:", error);
-						});
+					}
 
 				})
 				.catch((error) => {

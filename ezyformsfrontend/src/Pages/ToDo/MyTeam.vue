@@ -56,11 +56,11 @@ const fieldMapping = ref({
 });
 const actions = ref(
   [
-    { name: 'View Request', icon: 'fa-solid fa-eye' },
+    // { name: 'View Request', icon: 'fa-solid fa-eye' },
 
-    { name: 'Share this form', icon: 'fa-solid fa-share-alt' },
-    { name: 'Download Form', icon: 'fa-solid fa-download' },
-    { name: 'Edit Form', icon: 'fa-solid fa-edit' },
+    // { name: 'Share this form', icon: 'fa-solid fa-share-alt' },
+    // { name: 'Download Form', icon: 'fa-solid fa-download' },
+    // { name: 'Edit Form', icon: 'fa-solid fa-edit' },
 
   ]
 )
