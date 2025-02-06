@@ -13,14 +13,14 @@
 
 				<label for="name" class="font-13">User name</label><br>
 				<input type="text" class=" form-control m-0 bg-white " id="name" v-model="formdata.usr"
-					@input="validatename" :class="{ 'is-invalid': errors.usr }" />
+					@input="validatename" @change="checkUserMail()" :class="{ 'is-invalid': errors.usr }" />
 
 				<div class="invalid-feedback font-11 mt-1" v-if="errors.usr">
 					{{ errors.usr }}
 				</div>
 			</div>
 
-			<div class="inputbox mt-3">
+			<div class="inputbox mt-3" v-if="showPwdField">
 				<label for="password" class="font-13">Password</label><br>
 				<!-- <span class="icon"><i class="bi bi-lock-fill"></i></span> -->
 				<input class="form-control m-0" :type="showPassword ? 'text' : 'password'" id="password"
@@ -41,16 +41,59 @@
 				Log In
 			</button>
 		</div>
+
+		<div class="modal fade" id="changePassword" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+			aria-labelledby="changePasswordLabel" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered modal-sm">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title font-14 fw-bold" id="changePasswordLabel">Change Password</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<!-- <FormFields tag="select" placeholder="Category" class="mb-3" name="roles" id="roles"
+                            @change="changingCategory" :Required="false" :options="categoryOptions"
+                            v-model="selectedData.selectedCategory" /> -->
+						<div class=" mb-2">
+							<label class="raise-label" for="changepass">New Password</label>
+							<FormFields class="mb-3" tag="input" type="text" name="changepass" id="changepass"
+								placeholder="Enter" v-model="new_password" />
+						</div>
+						<div class=" mb-2">
+							<label class="raise-label" for="confirmpass">Confirm Password</label>
+							<FormFields class="" tag="input" type="text" name="confirmpass" id="confirmpass"
+								placeholder="Enter" v-model="confirm_password" />
+							<span v-if="passwordsMismatch" class="text-danger font-10 m-0 ps-2">Passwords do not
+								match.</span>
+						</div>
+						<!-- <FormFields tag="select" placeholder="Form" class="mb-3" name="roles" id="roles"
+                            :Required="false" :options="formList" v-model="selectedData.selectedform" /> -->
+					</div>
+					<div>
+						<div class=" d-flex justify-content-center align-items-center p-3">
+							<button class="btn btn-dark font-12 w-100" type="submit" @click="passwordChange()">
+								Confirm New Password</button>
+						</div>
+					</div>
+
+				</div>
+			</div>
+		</div>
+
 	</div>
 </template>
 
 <script>
 import { apis, doctypes } from '../shared/apiurls';
 import axiosInstance from '../shared/services/interceptor';
+import FormFields from '../Components/FormFields.vue';
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 export default {
 	props: ['id'],
+	components: {
+		FormFields
+	},
 	data() {
 		return {
 			formdata: {
@@ -61,6 +104,10 @@ export default {
 			errors: {},
 			email: "",
 			showPassword: false,
+			new_password: "",
+			confirm_password: "",
+			showPwdField: false,
+			user_id: ''
 
 		};
 	},
@@ -82,6 +129,91 @@ export default {
 		togglePasswordVisibility() {
 			this.showPassword = !this.showPassword;
 		},
+
+		checkUserMail() {
+			const queryParams = {
+				fields: JSON.stringify(["*"]),
+				filters: JSON.stringify([["user_id", "=", this.formdata.usr]]),
+			};
+
+			axiosInstance.get(`${apis.resource}${doctypes.CheckUser}`, { params: queryParams })
+				.then((res) => {
+					if (res.data.length > 0) {
+
+						const isFirstLogin = res.data[0].is_first_login;
+						this.user_id = res.data[0].name
+						console.log(isFirstLogin, "-----");
+						if (isFirstLogin === 0) {
+							const modal = new bootstrap.Modal(document.getElementById('changePassword'));
+							modal.show();
+							this.showPwdField = false;
+
+						}
+						if (isFirstLogin === 1) {
+							this.showPwdField = true;
+
+							console.log("User is logging in for the first time.");
+						} else {
+							console.log("User has logged in before.");
+						}
+					} else {
+						console.log("No user data found.");
+						this.showPwdField = true; // Show password field when no user data is found
+					}
+				})
+				.catch((error) => {
+					console.error("Login error: ", error);
+					this.showPwdField = true; // Show password field in case of an error
+				});
+		},
+
+
+		checkboxChange() {
+			const payload = {
+				is_first_login: 1,
+			};
+
+			axiosInstance.put(`${apis.resource}${doctypes.CheckUser}/${this.user_id}`, payload)
+				.then((res) => {
+					console.log("Password updated successfully:", res.data);
+					if (res.data.is_first_login === 1) {
+						this.showPwdField = true;
+					}
+				})
+				.catch((error) => {
+					console.error("Error:", error);
+				});
+		},
+
+
+		passwordChange() {
+			// if (passwordsMismatch) {
+			// 	console.error("Passwords do not match.");
+			// 	return;
+			// }
+			// console.log(this.new_password);
+
+			const payload = {
+				new_password: this.new_password,
+			};
+
+			axiosInstance.put(`${apis.resource}${doctypes.users}/${this.formdata.usr}`, payload)
+				.then((res) => {
+					if (res.data) {
+						console.log("Password updated successfully:", res.data);
+						toast.success('Password changed Successfully', { autoClose: 300 });
+						const modal = bootstrap.Modal.getInstance(document.getElementById('changePassword'));
+						modal.hide();
+						this.checkboxChange()
+					}
+
+				})
+				.catch((error) => {
+					console.error("Error:", error);
+				});
+		},
+
+
 		Login() {
 			this.validatename();
 			this.validatepassword();
@@ -107,6 +239,7 @@ export default {
 
 			}
 		},
+
 		userData(email) {
 			console.log(email, "1");
 			axiosInstance.get(`${apis.resource}${doctypes.users}/${email}`)
@@ -136,6 +269,15 @@ export default {
 				});
 		}
 	},
+	// computed: {
+	// 	passwordsMismatch() {
+	// 		return (
+	// 			this.new_password &&
+	// 			this.confirm_password &&
+	// 			this.new_password !== this.confirm_password
+	// 		);
+	// 	}
+	// }
 };
 </script>
 
