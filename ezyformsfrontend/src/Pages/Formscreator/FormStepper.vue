@@ -916,7 +916,9 @@ onMounted(() => {
     paramId = route.params.paramid || "new";
 
     if (paramId != undefined && paramId != null && paramId != "new") {
+        OwnerOftheForm()
         getFormData();
+
     }
     let Bu_Unit = localStorage.getItem("Bu");
     filterObj.value.business_unit = Bu_Unit;
@@ -980,10 +982,10 @@ const fieldTypes = [
         label: "Datetime",
         type: "Datetime",
     },
-    {
-        label: "Check",
-        type: "Check",
-    },
+    // {
+    //     label: "Check",
+    //     type: "Check",
+    // },
     // {
     //     label: "Radio",
     //     type: "radio",
@@ -1180,6 +1182,7 @@ watch(
 );
 
 function formData(status) {
+    console.log(blockArr, "blockarray");
 
     const fields = extractFieldsWithBreaks(blockArr);
     const dataObj = {
