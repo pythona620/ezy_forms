@@ -48,6 +48,20 @@
           <div class="modal-body approvermodalbody">
             <ApproverPreview :blockArr="showRequest" :current-level="totalLevels" @updateField="updateFormData" />
           </div>
+          <div class="activity-log-container">
+            <div v-for="(item, index) in activityData" :key="index" class="activity-log-item"
+              :class="{ 'last-item': index === activityData.length - 1 }">
+              <div class="activity-log-dot"></div>
+              <div class="activity-log-content">
+                <p class="font-12 mb-1">
+                  On <strong class="strong-content">{{ formatDate(item.creation) }}</strong>,
+                  <strong class="strong-content">{{ item.user_name }}</strong> ({{ item.role }})
+                  has <strong class="strong-content">{{ formatAction(item.action) }}</strong> the request
+                  with the comments: <strong class="strong-content">{{ item.reason || 'N/A' }}</strong>.
+                </p>
+              </div>
+            </div>
+          </div>
           <!-- <div class="modal-footer">
             <div class="d-flex justify-content-between align-items-center mt-3 gap-2">
               <button type="button" class="btn btn-white text-dark  font-13" @click="closemodal"
@@ -126,6 +140,7 @@ const formData = ref([]);
 const tableData = ref([]);
 const totalLevels = ref('');
 const pdfPreview = ref('')
+const activityData = ref([]);
 
 const tableheaders = ref([
   { th: "Request ID", td_key: "name" },
@@ -192,7 +207,17 @@ function actionCreated(rowData, actionEvent) {
         .catch((error) => {
           console.error("Error fetching categories data:", error);
         });
-
+      axiosInstance
+        .get(`${apis.resource}${doctypes.WFActivityLog}/${selectedRequest.value.name}`)
+        .then((res) => {
+          if (res.data) {
+            console.log(res.data);
+            activityData.value = res.data.reason || []; // Ensure it's always an array
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching activity data:", error);
+        });
       const modal = new bootstrap.Modal(document.getElementById('viewRequest'), {});
       modal.show();
     } else {
@@ -579,5 +604,68 @@ onMounted(() => {
   height: 70vh;
   overflow-y: scroll;
   /* overflow: hidden; */
+}
+
+/* Activity log container */
+.activity-log-container {
+  width: 100%;
+  margin-top: 20px;
+  padding-left: 30px;
+  position: relative;
+}
+
+/* Activity log item */
+.activity-log-item {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  /* Ensure dot and text align properly */
+  gap: 10px;
+  /* Space between dot and text */
+  margin-bottom: 20px;
+  /* Space between logs */
+}
+
+/* Dot styling */
+.activity-log-dot {
+  position: relative;
+  width: 12px;
+  height: 12px;
+  background-color: #676767;
+  border-radius: 50%;
+  border: 2px solid white;
+  z-index: 1;
+  /* Ensure dot is above */
+}
+
+/* Add vertical line using ::after */
+.activity-log-dot::after {
+  content: "";
+  position: absolute;
+  top: 13px;
+  /* Start line from bottom of dot */
+  left: 50%;
+  width: 2px;
+  height: 22px;
+  /* Adjust line height */
+  background-color: #ddd;
+  transform: translateX(-50%);
+}
+
+/* Remove line for the last item */
+.activity-log-item.last-item .activity-log-dot::after {
+  content: none;
+}
+
+/* Activity log content */
+.activity-log-content {
+  font-size: 16px;
+  color: #333;
+  flex: 1;
+  /* Ensure text takes up remaining space */
+}
+
+.activity-log-content strong {
+  color: #333;
 }
 </style>
