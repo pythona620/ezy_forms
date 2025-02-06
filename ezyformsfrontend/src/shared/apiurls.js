@@ -16,7 +16,8 @@ export const doctypes = {
   EzyEmployeeList: "Ezy Employee",
   roles: 'Role',
   WFRoleMatrix: "WF Role Matrix",
-  WFWorkflowRequests: 'WF Workflow Requests'
+  WFWorkflowRequests: 'WF Workflow Requests',
+  CheckUser: 'Login Check',
 
 
 };
@@ -37,7 +38,7 @@ export const apis = {
   requestApproval: domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.updating_wf_workflow_requests`,
   wf_cancelling_request: domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.wf_cancelling_request`,
   preview_dynamic_form: domain + `/method/ezy_forms.ezy_forms.doctype.ezy_form_definitions.dynamic_form_template.preview_dynamic_form`,
-  download_pdf_form: domain + `/method/ezy_forms.ezy_forms.doctype.ezy_form_definitions.dynamic_form_template.download_filled_form`
+  download_pdf_form: domain + `/method/ezy_forms.ezy_forms.doctype.ezy_form_definitions.dynamic_form_template.download_filled_form`,
 };
 
 // export const tokens = {
