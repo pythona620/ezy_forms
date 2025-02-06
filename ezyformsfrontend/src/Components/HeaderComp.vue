@@ -213,8 +213,8 @@ const router = useRouter(); // Initialize router
 // Define reactive variables
 const tabsData = ref([
     { name: 'Dashboard', icon: 'bi bi-columns-gap', route: '/dashboard' },
-    { name: 'To do', icon: 'fa-solid fa-list-check', route: '/todo' },
     { name: 'Forms', icon: 'bi bi-file-earmark-text', route: '/forms' },
+    { name: 'To do', icon: 'fa-solid fa-list-check', route: '/todo' },
     { name: 'Settings', icon: 'bi bi-gear', route: '/settings' },
     { name: 'Archive', icon: 'bi bi-archive', route: '/archived' },
     { name: 'Form Creation', icon: 'bi bi-file-earmark-text', route: '/create-form' }
