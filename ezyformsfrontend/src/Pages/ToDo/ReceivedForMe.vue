@@ -185,7 +185,7 @@ function actionCreated(rowData, actionEvent) {
         .get(`${apis.resource}${doctypes.WFActivityLog}/${selectedRequest.value.name}`)
         .then((res) => {
           if (res.data) {
-            console.log(res.data);
+            // console.log(res.data);
             activityData.value = res.data.reason || []; // Ensure it's always an array
           }
         })
@@ -328,7 +328,7 @@ function mapFormFieldsToRequest(doctypeData, showRequestData) {
           column.fields.forEach(field => {
             // Check if the fieldname exists in the doctypeForm and assign the value
             if (doctypeData?.hasOwnProperty(field?.fieldname)) {
-              field.value = doctypeData[field.fieldname]; // Assign the value from doctypeForm to the field
+              field.value = doctypeData[field?.fieldname]; // Assign the value from doctypeForm to the field
 
             }
           });

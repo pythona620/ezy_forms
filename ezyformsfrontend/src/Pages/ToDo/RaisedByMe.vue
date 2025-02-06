@@ -55,9 +55,12 @@
               <div class="activity-log-content">
                 <p class="font-12 mb-1">
                   On <strong class="strong-content">{{ formatDate(item.creation) }}</strong>,
-                  <strong class="strong-content">{{ item.user_name }}</strong> ({{ item.role }})
-                  has <strong class="strong-content">{{ formatAction(item.action) }}</strong> the request
-                  with the comments: <strong class="strong-content">{{ item.reason || 'N/A' }}</strong>.
+                  <strong class="strong-content">
+                    <!-- {{ item.user_name }} -->
+                    you
+                  </strong> ({{ item.role }})
+                  <strong class="strong-content">{{ formatAction(item.action) }}</strong> the request
+                  <!-- with the comments: <strong class="strong-content">{{ item.reason || 'N/A' }}</strong>. -->
                 </p>
               </div>
             </div>
@@ -211,7 +214,7 @@ function actionCreated(rowData, actionEvent) {
         .get(`${apis.resource}${doctypes.WFActivityLog}/${selectedRequest.value.name}`)
         .then((res) => {
           if (res.data) {
-            console.log(res.data);
+            // console.log(res.data);
             activityData.value = res.data.reason || []; // Ensure it's always an array
           }
         })
@@ -269,7 +272,22 @@ function actionCreated(rowData, actionEvent) {
     modal.show();
   }
 }
+// Format the date for display
+const formatDate = (dateString) => {
+  if (!dateString) return 'N/A';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-GB');
+};
 
+// Format action text (cancelled or raised)
+const formatAction = (action) => {
+  if (!action) return 'performed an action on';
+  const actionMap = {
+    'Request Cancelled': 'cancelled',
+    'Request Raised': 'raised',
+  };
+  return actionMap[action] || action.toLowerCase();
+};
 // function downloadPdf() {
 
 //   const dataObj = {
@@ -297,7 +315,7 @@ function downloadPdf() {
 
   const dataObj = {
     "form_short_name": selectedRequest.value.doctype_name,
-    "name": doctypeForm.value[0].name
+    "name": doctypeForm.value[0]?.name
   };
 
   axiosInstance.post(apis.download_pdf_form, dataObj)
@@ -432,8 +450,8 @@ function mapFormFieldsToRequest(doctypeData, showRequestData) {
         row.columns.forEach(column => {
           column.fields.forEach(field => {
             // Check if the fieldname exists in the doctypeForm and assign the value
-            if (doctypeData.hasOwnProperty(field.fieldname)) {
-              field.value = doctypeData[field.fieldname]; // Assign the value from doctypeForm to the field
+            if (doctypeData?.hasOwnProperty(field?.fieldname)) {
+              field.value = doctypeData[field?.fieldname]; // Assign the value from doctypeForm to the field
 
             }
           });
