@@ -11,8 +11,8 @@
 
   </div>
   <div class="mt-2">
-    <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction='true' actionType="dropdown" isCheckbox='true'
-      :actions="actions" isFiltersoption="true" :field-mapping="fieldMapping" @updateFilters="inLineFiltersData" />
+    <GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox='true' :actions="actions" isFiltersoption="true"
+      :field-mapping="fieldMapping" @updateFilters="inLineFiltersData" />
     <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords" @updateValue="PaginationUpdateValue"
       @limitStart="PaginationLimitStart" />
   </div>
@@ -36,7 +36,7 @@ const filterObj = ref({ limitPageLength: 'None', limit_start: 0 });
 const totalRecords = ref(0);
 
 const tableheaders = ref([
-  { th: "Request ID", td_key: "name" },
+  // { th: "Request ID", td_key: "name" },
   { th: "Form name", td_key: "doctype_name" },
   // { th: "Form category", td_key: "doctype_name" },
   { th: "Owner of form", td_key: "owner" },
@@ -49,7 +49,7 @@ const tableheaders = ref([
 const fieldMapping = ref({
   // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
   status: { type: "select", options: ["Request Raised", "In Progress", "Completed", "Request Cancelled"] },
-  name: { type: "input" },
+  doctype_name: { type: "input" },
   requested_on: { type: "date" },
 
 

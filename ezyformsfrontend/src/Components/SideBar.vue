@@ -142,7 +142,7 @@ const todoSideBarData = [
     { name: 'My Tasks', icon: 'bi bi-bucket', route: 'receivedform' },
     { name: 'My Forms', icon: 'bi bi-send', route: 'raisedbyme' },
     { name: 'My Team', icon: 'bi bi-people', route: 'myteam' },
-    // { name: 'History', icon: 'bi bi-clock-history', route: 'history' },
+    { name: 'History', icon: 'bi bi-clock-history', route: 'history' },
 
 ];
 const userFormSideBarData = [

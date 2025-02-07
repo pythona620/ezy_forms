@@ -25,7 +25,8 @@
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title font-13" id="viewRequestLabel">Request Id: {{ selectedRequest.name }}</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" @click="closeModal"
+              aria-label="Close"></button>
           </div>
           <div class="modal-body approvermodalbody">
             <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel"
@@ -112,7 +113,7 @@ const selectedcurrentLevel = ref("");
 const activityData = ref([]);
 
 const tableheaders = ref([
-  { th: "Request ID", td_key: "name" },
+  // { th: "Request ID", td_key: "name" },
   { th: "Form name", td_key: "doctype_name" },
   // { th: "Form category", td_key: "doctype_name" },
   { th: "Owner of form", td_key: "owner" },
@@ -126,7 +127,7 @@ const tableheaders = ref([
 const fieldMapping = ref({
   // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
   // credit_irn_generated: { type: "select", options: ["Pending", "Completed", "Error"] },
-  name: { type: "input" },
+  // name: { type: "input" },
   doctype_name: { type: "input" },
   requested_on: { type: "date" },
 });
@@ -235,7 +236,7 @@ const handleApproveClick = () => {
   } else {
     // Proceed with the Approve action if comments are valid
     isCommentsValid.value = true;
-    ApproverFormSubmission(formData, 'Approve');
+    ApproverFormSubmission(emittedFormData.value, 'Approve'); // Use emittedFormData instead of formData
   }
 };
 
@@ -286,6 +287,7 @@ function approvalStatusFn(dataObj, type) {
           toast.error(`Request ${type}ed`, { autoClose: 1000 })
         } else {
           toast.success(`Request ${type}ed`, { autoClose: 1000 })
+          ApproverReason.value = ''
         }
         const modal = bootstrap.Modal.getInstance(document.getElementById('viewRequest'));
         modal.hide();
@@ -338,7 +340,10 @@ function mapFormFieldsToRequest(doctypeData, showRequestData) {
   });
 }
 
+function closeModal() {
+  isCommentsValid.value = true;
 
+}
 
 const PaginationUpdateValue = (itemsPerPage) => {
   filterObj.value.limitPageLength = itemsPerPage;

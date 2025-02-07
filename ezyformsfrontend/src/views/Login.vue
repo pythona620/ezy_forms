@@ -107,7 +107,8 @@ export default {
 			new_password: "",
 			confirm_password: "",
 			showPwdField: false,
-			user_id: ''
+			user_id: '',
+			passwordsMismatch: false
 
 		};
 	},
@@ -221,7 +222,7 @@ export default {
 			if (!this.errors.usr && !this.errors.pwd) {
 				axiosInstance.post(apis.login, this.formdata).then((res) => {
 					if (res) {
-						toast.success("Login Successfully", { autoClose: 2000 });
+						toast.success("Login Successfully", { autoClose: 2000, "transition": "zoom" });
 						setTimeout(() => {
 							this.$router.push({ path: '/todo/receivedform' });
 						}, 700);

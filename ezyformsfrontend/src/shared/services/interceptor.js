@@ -38,7 +38,8 @@ axiosInstance.interceptors.response.use(
       } else if (error.response.status === 401) {
         toast.error(`Unauthorized: ${statusText}`);
       } else if (error.response.status === 403) {
-        toast.error(`Forbidden: ${statusText}`);
+        // Forbidden:
+        toast.error(` ${error.response.data.exc_type}`);
       } else if (error.response.status === 404) {
         toast.error(`Not Found: ${statusText}`);
       } else if (error.response.status === 500) {

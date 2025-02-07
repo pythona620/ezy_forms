@@ -146,7 +146,7 @@ const pdfPreview = ref('')
 const activityData = ref([]);
 
 const tableheaders = ref([
-  { th: "Request ID", td_key: "name" },
+  // { th: "Request ID", td_key: "name" },
   { th: "Form name", td_key: "doctype_name" },
   // { th: "Form category", td_key: "doctype_name" },
   { th: "Owner of form", td_key: "owner" },
@@ -158,7 +158,8 @@ const tableheaders = ref([
 const fieldMapping = ref({
   // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
   status: { type: "select", options: ["Request Raised", "In Progress", "Completed", "Request Cancelled"] },
-  name: { type: "input" },
+  // name: { type: "input" },
+  doctype_name: { type: "input" },
   requested_on: { type: "date" },
 
 
@@ -231,7 +232,9 @@ function actionCreated(rowData, actionEvent) {
     selectedRequest.value = rowData
     // Prepare the filters for fetching data
     const filters = [
-      ["wf_generated_request_id", "like", `%${selectedRequest.value.name}%`]
+      ["wf_generated_request_id", "like", `%${selectedRequest.value.name}%`],
+
+
     ];
     const queryParams = {
       fields: JSON.stringify(["*"]),
@@ -528,7 +531,8 @@ function receivedForMe(data) {
   const EmpRequestMail = JSON.parse(localStorage.getItem('employeeData'));
   const filters = [
     ["requested_by", "like", EmpRequestMail.emp_mail_id],
-    ["property", "like", `%${newBusinessUnit.value.business_unit}%`]
+    ["property", "like", `%${newBusinessUnit.value.business_unit}%`],
+    ["status", "=", "Request Raised"],
 
   ];
 

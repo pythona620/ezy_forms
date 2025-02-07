@@ -23,11 +23,11 @@
 							<!-- Text input -->
 							<div v-if="fieldMapping[column.td_key].type === 'input'"
 								class="input-group  border-none-input ">
-								<span class="input-group-text font-12" id="basic-addon1"><i
-										class="bi bi-search"></i></span>
 								<input type="search" aria-describedby="basic-addon1"
 									class="form-control font-12 py-1 px-2 border-left-class input-search"
 									v-model="filters[column.td_key]" @input="handleFilterChange" />
+								<span class="input-group-text font-12" id="basic-addon1"><i
+										class="bi bi-search"></i></span>
 							</div>
 							<!-- Date input -->
 							<input v-else-if="fieldMapping[column.td_key].type === 'date'" type="date"
@@ -106,6 +106,7 @@
 									<i class="bi bi-x-lg fw-bolder text-danger "></i>
 								</span>
 							</span>
+							<!-- v-tooltip.top="row[column.td_key]" -->
 							<span v-else>
 								{{ row[column.td_key] || '-' }}
 							</span>
