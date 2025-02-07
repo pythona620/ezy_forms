@@ -9,6 +9,7 @@
   "company_field",
   "emp_code",
   "emp_name",
+  "emp_phone",
   "emp_mail_id",
   "department",
   "designation",
@@ -67,11 +68,16 @@
    "fieldname": "signature",
    "fieldtype": "Attach",
    "label": "Signature"
+  },
+  {
+   "fieldname": "emp_phone",
+   "fieldtype": "Data",
+   "label": "Emp Phone"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-02-03 13:04:20.284311",
+ "modified": "2025-02-07 16:48:02.270603",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
  "name": "Ezy Employee",
@@ -87,6 +93,42 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "IT",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "junior Consultant",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Tl",
    "share": 1,
    "write": 1
   }
