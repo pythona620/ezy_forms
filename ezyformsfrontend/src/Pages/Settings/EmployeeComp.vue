@@ -37,7 +37,15 @@
                                                 class="text-danger ps-1">*</span></label>
                                         <FormFields class="mb-3" tag="input" type="text" name="emp_name" id="emp_name"
                                             placeholder="Enter Emp Name" v-model="createEmployee.emp_name" />
-
+                                        <!-- <div class="mb-3">
+                                            <label class="font-13 ps-1" for="emp_phone">Emp Mobile Number<span
+                                                    class="text-danger ps-1">*</span></label>
+                                            <FormFields tag="input" type="text" name="emp_phone" id="emp_phone"
+                                                maxlength="10" @change="validatephone"
+                                                placeholder="Enter department code"
+                                                v-model="createEmployee.emp_phone" />
+                                            <p v-if="phoneError" class="text-danger font-11 ps-1">{{ phoneError }}</p>
+                                        </div> -->
                                         <div class=" mb-3"> <label class="font-13 ps-1" for="emp_mail_id">Emp Mail
                                                 ID<span class="text-danger ps-1">*</span></label>
                                             <FormFields class="mb-1" tag="input" type="email" name="emp_mail_id"
@@ -227,15 +235,22 @@
                         <div class="container-fluid">
                             <div class=" row">
                                 <div class=" col">
-                                    <label class="font-13 ps-1" for="emp_code">Emp code<span
-                                            class="text-danger ps-1">*</span></label>
-                                    <FormFields class="mb-3" tag="input" type="text" name="emp_code" id="emp_code"
-                                        placeholder="Enter department code" v-model="createEmployee.emp_code" />
                                     <label class="font-13 ps-1" for="emp_name">Emp Name<span
                                             class="text-danger ps-1">*</span></label>
                                     <FormFields class="mb-3" tag="input" type="text" name="emp_name" id="emp_name"
                                         placeholder="Enter department code" v-model="createEmployee.emp_name" />
-
+                                    <label class="font-13 ps-1" for="emp_code">Emp code<span
+                                            class="text-danger ps-1">*</span></label>
+                                    <FormFields class="mb-3" tag="input" type="text" name="emp_code" id="emp_code"
+                                        placeholder="Enter department code" v-model="createEmployee.emp_code" />
+                                    <!-- <div class="mb-3">
+                                        <label class="font-13 ps-1" for="emp_phone">Emp Mobile Number<span
+                                                class="text-danger ps-1">*</span></label>
+                                        <FormFields tag="input" type="text" name="emp_phone" id="emp_phone"
+                                            maxlength="10" @change="validatephone" placeholder="Enter department code"
+                                            v-model="createEmployee.emp_phone" />
+                                        <p v-if="phoneError" class="text-danger font-11 ps-1">{{ phoneError }}</p>
+                                    </div> -->
                                     <div class=" mb-3"> <label class="font-13 ps-1" for="emp_mail_id">Emp Mail
                                             ID<span class="text-danger ps-1">*</span></label>
                                         <FormFields class="mb-1" tag="input" type="email" name="emp_mail_id"
@@ -346,7 +361,8 @@
                                     <div>
                                         <div class="mb-3 font-11">
                                             <div v-if="createEmployee.signature">
-                                                <img :src="createEmployee.signature" alt="Signature" class="img-fluid">
+                                                <img :src="createEmployee.signature" alt="Signature"
+                                                    class="img-fluid signature-img">
                                             </div>
                                             <div v-else>
 
@@ -408,11 +424,12 @@ const reportingDesigination = ref([]);
 const departmentsList = ref([])
 // const newDesignation = ref(false);
 // const signaturePath = ref("");
-
+const phoneError = ref('');
 
 const createEmployee = ref({
     emp_code: "",
     emp_name: "",
+    // emp_phone: '',
     emp_mail_id: "",
     department: "",
     designation: "",
@@ -434,7 +451,11 @@ const validateEmail = () => {
         emailError.value = "";
     }
 };
-
+// const validatephone = () => {
+//     const phone = createEmployee.value.emp_phone;
+//     const phonePattern = /^\d{10}$/;
+//     phoneError.value = phonePattern.test(phone) ? "" : "Invalid phone number.";
+// };
 const filterObj = ref({
     limitPageLength: 'None',
     limit_start: 0
@@ -522,6 +543,7 @@ const isFormFilled = computed(() => {
     return createEmployee.value.emp_code.trim() &&
         createEmployee.value.emp_name.trim() &&
         createEmployee.value.emp_mail_id.trim() &&
+        // createEmployee.value.emp_phone.trim() &&
         createEmployee.value.department.trim() &&
         createEmployee.value.designation.trim() &&
         createEmployee.value.reporting_to.trim() &&
@@ -576,6 +598,7 @@ function cancelCreate() {
     createEmployee.value = {
         emp_code: "",
         emp_name: "",
+        // emp_phone:"",
         emp_mail_id: "",
         department: "",
         designation: "",
@@ -1052,6 +1075,6 @@ function SaveEditEmp() {
 }
 
 .signature-img {
-    width: 50px;
+    width: 80px;
 }
 </style>
