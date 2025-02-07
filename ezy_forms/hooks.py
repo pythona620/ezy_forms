@@ -137,13 +137,16 @@ after_migrate = ["ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_defi
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
+doc_events = {
 # 	"*": {
 # 		"on_update": "method",
 # 		"on_cancel": "method",
 # 		"on_trash": "method"
 # 	}
-# }
+"Ezy Employee":{
+        "after_insert":"ezy_forms.ezy_forms.doctype.login_check.login_check.after_insert_user"
+    }
+}
 
 # Scheduled Tasks
 # ---------------
