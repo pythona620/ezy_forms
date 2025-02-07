@@ -17,6 +17,7 @@ export const doctypes = {
   roles: 'Role',
   WFRoleMatrix: "WF Role Matrix",
   WFWorkflowRequests: 'WF Workflow Requests',
+  WFActivityLog: 'WF Activity Log',
   CheckUser: 'Login Check',
 
 

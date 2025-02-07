@@ -47,10 +47,9 @@
                                                         v-for="(option, index) in field?.options?.split('\n')"
                                                         :key="index">
                                                         <div>
-                                                            <input v-if="field.fieldtype === 'Check'"
-                                                                class="form-check-input" type="checkbox"
-                                                                :checked="field.value === 1" :value="field.value"
-                                                                disabled
+                                                            <input v-if="field.fieldtype === 'Check' && index !== 0"
+                                                                class="form-check-input" type="checkbox" disabled
+                                                                :checked="field.value === option" :value="option"
                                                                 :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
                                                                 :id="`${option}-${index}`"
                                                                 @blur="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
@@ -58,8 +57,8 @@
                                                             <input v-else-if="field.fieldtype === 'radio'" disabled
                                                                 class="form-check-input" type="radio"
                                                                 :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
-                                                                :id="`${option}-${index}`" :value="field.value"
-                                                                :checked="field.value === 1"
+                                                                :id="`${option}-${index}`" :value="option"
+                                                                :checked="field.value === option"
                                                                 @blur="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
                                                         </div>
                                                         <div>

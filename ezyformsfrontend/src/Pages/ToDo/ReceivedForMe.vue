@@ -31,17 +31,33 @@
             <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel"
               @updateField="updateFormData" />
           </div>
-          <!-- v-if="selectedRequest.status !== 'In Progress'" -->
-          <div class="modal-footer">
+          <div class="p-2">
+            <div class="activity-log-container">
+              <div v-for="(item, index) in activityData" :key="index" class="activity-log-item"
+                :class="{ 'last-item': index === activityData.length - 1 }">
+                <div class="activity-log-dot"></div>
+                <div class="activity-log-content">
+                  <p class="font-12 mb-1">
+                    On <strong class="strong-content">{{ formatDate(item.creation) }}</strong>,
+                    <strong class="strong-content">{{ item.user_name }}</strong> ({{ item.role }})
+                    has <strong class="strong-content">{{ formatAction(item.action) }}</strong> the request
+                    with the comments: <strong class="strong-content">{{ item.reason || 'N/A' }}</strong>.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div v-if="!requestcancelled" class="form-floating p-1">
+              <textarea class="form-control font-12" placeholder="Leave a comment here" id="floatingTextarea"
+                @input="resetCommentsValidation" :class="{ 'is-invalid': !isCommentsValid }"
+                v-model="ApproverReason"></textarea>
+              <label class="font-11" for="floatingTextarea">Comments..</label>
+            </div>
+
+          </div>
+          <div v-if="!requestcancelled" class="modal-footer">
             <div class="d-flex justify-content-between align-items-center mt-3 gap-2">
-              <!-- <div>
-                <ButtonComp type="button" icon="ban" class="cancelbtn border-1 text-nowrap font-10"
-                  @click="approvalCancelFn(formData, 'Request Cancelled')" name="Cancel Request" />
-              </div> -->
-              <!-- <input type="text" class=" form-control" placeholder="Reason..."> -->
+
               <div>
-                <!-- <ButtonComp @click="approvalCancelFn(formData, 'Request Cancelled')" type="button" icon="x"
-                  class="rejectbtn border-1 text-nowrap font-10 " name="Reject" /> -->
                 <button class=" btn btn-outline-danger font-10 py-0 rejectbtn" type="button" data-bs-dismiss="modal"
                   @click="approvalCancelFn(formData, 'Request Cancelled')">
                   <span><i class=" bi bi-x-lg me-2"></i></span>Reject
@@ -49,7 +65,7 @@
               </div>
               <div>
                 <ButtonComp type="button" icon="check2" class="approvebtn border-1 text-nowrap font-10 "
-                  @click="ApproverFormSubmission(formData, 'Approve')" name="Approve" />
+                  @click="handleApproveClick" name="Approve" />
               </div>
             </div>
           </div>
@@ -57,6 +73,13 @@
         </div>
       </div>
     </div>
+    <!-- <div>
+                <ButtonComp type="button" icon="ban" class="cancelbtn border-1 text-nowrap font-10"
+                  @click="approvalCancelFn(formData, 'Request Cancelled')" name="Cancel Request" />
+              </div> -->
+
+    <!-- <ButtonComp @click="approvalCancelFn(formData, 'Request Cancelled')" type="button" icon="x"
+                  class="rejectbtn border-1 text-nowrap font-10 " name="Reject" /> -->
   </div>
 
 
@@ -86,6 +109,8 @@ const docTypeName = ref([])
 const statusOptions = ref([])
 const emittedFormData = ref([]);
 const selectedcurrentLevel = ref("");
+const activityData = ref([]);
+
 const tableheaders = ref([
   { th: "Request ID", td_key: "name" },
   { th: "Form name", td_key: "doctype_name" },
@@ -119,12 +144,13 @@ const tableData = ref([]);
 const selectedRequest = ref({});
 const showRequest = ref(null);
 const doctypeForm = ref([]);
-
+const ApproverReason = ref("");
 function actionCreated(rowData, actionEvent) {
   if (actionEvent.name === 'View Request') {
     if (rowData) {
       selectedRequest.value = { ...rowData };
       selectedcurrentLevel.value = selectedRequest.value.current_level
+      console.log(selectedRequest.value.name);
 
       // Rebuild the structured array from JSON
       showRequest.value = rebuildToStructuredArray(JSON.parse(selectedRequest.value?.json_columns)?.fields);
@@ -155,6 +181,17 @@ function actionCreated(rowData, actionEvent) {
           console.error("Error fetching categories data:", error);
         });
 
+      axiosInstance
+        .get(`${apis.resource}${doctypes.WFActivityLog}/${selectedRequest.value.name}`)
+        .then((res) => {
+          if (res.data) {
+            // console.log(res.data);
+            activityData.value = res.data.reason || []; // Ensure it's always an array
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching activity data:", error);
+        });
       const modal = new bootstrap.Modal(document.getElementById('viewRequest'), {});
       modal.show();
     } else {
@@ -162,13 +199,53 @@ function actionCreated(rowData, actionEvent) {
     }
   }
 }
+// Computed property to determine if any action is cancelled
+const requestcancelled = computed(() => {
+  return activityData.value.some(item => item.action === 'Request Cancelled');
+});
 
+// Format the date for display
+const formatDate = (dateString) => {
+  if (!dateString) return 'N/A';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-GB');
+};
+
+// Format action text (cancelled or raised)
+const formatAction = (action) => {
+  if (!action) return 'performed an action on';
+  const actionMap = {
+    'Request Cancelled': 'cancelled',
+    'Request Raised': 'raised',
+  };
+  return actionMap[action] || action.toLowerCase();
+};
 // Function to capture the form data from ApproverPreview
 const updateFormData = (fieldValues) => {
   emittedFormData.value = emittedFormData.value.concat(fieldValues);
 
 };
+const isCommentsValid = ref(true);  // Flag to validate comment field
 
+// Function to handle approve button click
+const handleApproveClick = () => {
+  if (ApproverReason.value.trim() === "") {
+    // Set the validation flag to false if comment is empty
+    isCommentsValid.value = false;
+  } else {
+    // Proceed with the Approve action if comments are valid
+    isCommentsValid.value = true;
+    ApproverFormSubmission(formData, 'Approve');
+  }
+};
+
+
+const resetCommentsValidation = () => {
+  if (ApproverReason.value.trim() !== "") {
+    // If comment is not empty, set isCommentsValid to true
+    isCommentsValid.value = true;
+  }
+}
 // Function to handle form submission
 function ApproverFormSubmission(dataObj, type) {
   let form = {};
@@ -192,7 +269,7 @@ function approvalStatusFn(dataObj, type) {
     "property": selectedRequest.value.property,
     "doctype": selectedRequest.value.doctype_name,
     "request_ids": [selectedRequest.value.name],
-    "reason": type,
+    "reason": ApproverReason.value,
     "action": type,
     "files": null,
     "cluster_name": null,
@@ -251,7 +328,7 @@ function mapFormFieldsToRequest(doctypeData, showRequestData) {
           column.fields.forEach(field => {
             // Check if the fieldname exists in the doctypeForm and assign the value
             if (doctypeData?.hasOwnProperty(field?.fieldname)) {
-              field.value = doctypeData[field.fieldname]; // Assign the value from doctypeForm to the field
+              field.value = doctypeData[field?.fieldname]; // Assign the value from doctypeForm to the field
 
             }
           });
@@ -425,5 +502,73 @@ onMounted(() => {
   gap: 7px;
   border-radius: 4px;
   opacity: 0px;
+}
+
+
+.is-invalid {
+  border: 1px solid red;
+}
+
+/* Activity log container */
+.activity-log-container {
+  width: 100%;
+  margin-top: 20px;
+  padding-left: 30px;
+  position: relative;
+}
+
+/* Activity log item */
+.activity-log-item {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  /* Ensure dot and text align properly */
+  gap: 10px;
+  /* Space between dot and text */
+  margin-bottom: 20px;
+  /* Space between logs */
+}
+
+/* Dot styling */
+.activity-log-dot {
+  position: relative;
+  width: 12px;
+  height: 12px;
+  background-color: #676767;
+  border-radius: 50%;
+  border: 2px solid white;
+  z-index: 1;
+  /* Ensure dot is above */
+}
+
+/* Add vertical line using ::after */
+.activity-log-dot::after {
+  content: "";
+  position: absolute;
+  top: 13px;
+  /* Start line from bottom of dot */
+  left: 50%;
+  width: 2px;
+  height: 22px;
+  /* Adjust line height */
+  background-color: #ddd;
+  transform: translateX(-50%);
+}
+
+/* Remove line for the last item */
+.activity-log-item.last-item .activity-log-dot::after {
+  content: none;
+}
+
+/* Activity log content */
+.activity-log-content {
+  font-size: 16px;
+  color: #333;
+  flex: 1;
+  /* Ensure text takes up remaining space */
+}
+
+.activity-log-content strong {
+  color: #333;
 }
 </style>

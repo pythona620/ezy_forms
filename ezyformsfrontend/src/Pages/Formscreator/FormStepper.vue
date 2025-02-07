@@ -439,7 +439,7 @@
                                                                                         </select>
 
                                                                                         <div
-                                                                                            v-if="['Select', 'Table MultiSelect'].includes(field.fieldtype)">
+                                                                                            v-if="['Select', 'Table MultiSelect', 'Check'].includes(field.fieldtype)">
                                                                                             <label
                                                                                                 class="font-12 fw-light"
                                                                                                 for="options">Enter
@@ -916,7 +916,9 @@ onMounted(() => {
     paramId = route.params.paramid || "new";
 
     if (paramId != undefined && paramId != null && paramId != "new") {
+        OwnerOftheForm()
         getFormData();
+
     }
     let Bu_Unit = localStorage.getItem("Bu");
     filterObj.value.business_unit = Bu_Unit;
@@ -1180,6 +1182,7 @@ watch(
 );
 
 function formData(status) {
+    console.log(blockArr, "blockarray");
 
     const fields = extractFieldsWithBreaks(blockArr);
     const dataObj = {

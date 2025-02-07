@@ -49,18 +49,18 @@
                                                         :key="index">
                                                         <div>
 
-                                                            <input v-if="field.fieldtype === 'Check'"
-                                                                class="form-check-input" type="checkbox"
-                                                                :value="field.value"
+                                                            <input v-if="field.fieldtype === 'Check' && index !== 0"
+                                                                class="form-check-input" type="checkbox" :value="option"
                                                                 :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
-                                                                :id="`${option}-${index}`" v-model="field.value"
-                                                                @blur="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
+                                                                :id="`${option}-${index}`"
+                                                                :checked="field.value === option"
+                                                                @change="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
 
                                                             <input v-else-if="field.fieldtype === 'radio'"
                                                                 class="form-check-input" type="radio"
                                                                 :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
                                                                 :id="`${option}-${index}`" v-model="field.value"
-                                                                @blur="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
+                                                                @change="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
                                                         </div>
                                                         <div>
                                                             <label class="form-check-label m-0"
@@ -84,7 +84,7 @@
                                             <input type="datetime-local" v-model="field.value"
                                                 :placeholder="'Enter ' + field.label"
                                                 :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
-                                                @blur="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+                                                @change="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
                                                 class="form-control previewInputHeight font-10" />
                                         </template>
 
@@ -98,7 +98,7 @@
                                                 :maxlength="field.fieldtype === 'Phone' ? '10' : null"
                                                 :type="field.fieldtype === 'Color' ? 'color' : field.fieldtype"
                                                 :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
-                                                @blur="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+                                                @change="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
                                                 class="form-control previewInputHeight font-10">
                                             </component>
 
@@ -107,7 +107,7 @@
                                             class="text-danger font-10 mt-1">
                                             {{
             errorMessages[`${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`]
-                                            }}
+        }}
                                         </div>
 
 
@@ -198,10 +198,21 @@ const logFieldValue = (eve, blockIndex, sectionIndex, rowIndex, columnIndex, fie
 
     } else if (eve.target.type === 'checkbox') {
 
-        field['value'] = eve.target.checked;
-
+        if (field.fieldtype === "Check") {
+            // Ensure value is a string, not an array
+            if (eve.target.checked) {
+                // If checked, set the value as a string
+                field['value'] = eve.target.value;
+                console.log(field.value);
+            } else {
+                // If unchecked, set the value as an empty string (or use any default value)
+                field.value = "";
+            }
+        } else {
+            // For other types of fields, store the checkbox checked state as boolean (true/false)
+            field['value'] = eve.target.checked;
+        }
         // emit('updateField', field);
-
 
     } else {
 

@@ -20,15 +20,15 @@
 				</div>
 			</div>
 
-			<div class="inputbox mt-3" v-if="showPwdField">
+			<div class="inputbox mt-3">
 				<label for="password" class="font-13">Password</label><br>
 				<!-- <span class="icon"><i class="bi bi-lock-fill"></i></span> -->
-				<input class="form-control m-0" :type="showPassword ? 'text' : 'password'" id="password"
-					v-model="formdata.pwd" @input="validatepassword" @keydown.enter="Login"
+				<input :disabled="!showPwdField" class="form-control m-0" :type="showPassword ? 'text' : 'password'"
+					id="password" v-model="formdata.pwd" @input="validatepassword" @keydown.enter="Login"
 					:class="{ 'is-invalid': errors.pwd }" />
 
 				<!-- Toggle icon for show/hide password -->
-				<span class="toggle-icon" @click="togglePasswordVisibility">
+				<span v-if="!errors.pwd" class="toggle-icon" @click="togglePasswordVisibility">
 					<i :class="showPassword ? 'bi bi-eye' : 'bi bi-eye-slash'"></i>
 				</span>
 				<div class="invalid-feedback font-10" v-if="errors.pwd">
@@ -36,7 +36,7 @@
 				</div>
 			</div>
 			<br>
-			<button @click="Login" type="submit"
+			<button :disabled="!showPwdField" @click="Login" type="submit"
 				class="border-0  btn btn-dark button w-100 py-2 font-13 text-white rounded-1">
 				Log In
 			</button>
@@ -47,23 +47,25 @@
 			<div class="modal-dialog modal-dialog-centered modal-sm">
 				<div class="modal-content">
 					<div class="modal-header">
-						<h5 class="modal-title font-14 fw-bold" id="changePasswordLabel">Change Password</h5>
+						<h5 class="modal-title font-14 fw-bold" id="changePasswordLabel">Set New Password</h5>
 						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 					</div>
 					<div class="modal-body">
 						<!-- <FormFields tag="select" placeholder="Category" class="mb-3" name="roles" id="roles"
                             @change="changingCategory" :Required="false" :options="categoryOptions"
                             v-model="selectedData.selectedCategory" /> -->
-						<div class=" mb-2">
+						<div class="mb-3">
 							<label class="raise-label" for="changepass">New Password</label>
-							<FormFields class="mb-3" tag="input" type="text" name="changepass" id="changepass"
-								placeholder="Enter" v-model="new_password" />
+							<FormFields class="mb-1" tag="input" type="text" name="changepass" id="changepass"
+								placeholder="Enter New Password" v-model="new_password" @change="validateNewPassword" />
+
+							<p v-if="passwordError" class="text-danger font-11 m-0 ps-2">{{ passwordError }}</p>
 						</div>
 						<div class=" mb-2">
 							<label class="raise-label" for="confirmpass">Confirm Password</label>
 							<FormFields class="" tag="input" type="text" name="confirmpass" id="confirmpass"
-								placeholder="Enter" v-model="confirm_password" />
-							<span v-if="passwordsMismatch" class="text-danger font-10 m-0 ps-2">Passwords do not
+								placeholder="Enter Confirm Password" v-model="confirm_password" />
+							<span v-if="passwordsMismatch" class="text-danger font-11 m-0 ps-2">Passwords do not
 								match.</span>
 						</div>
 						<!-- <FormFields tag="select" placeholder="Form" class="mb-3" name="roles" id="roles"
@@ -71,8 +73,11 @@
 					</div>
 					<div>
 						<div class=" d-flex justify-content-center align-items-center p-3">
-							<button class="btn btn-dark font-12 w-100" type="submit" @click="passwordChange()">
-								Confirm New Password</button>
+							<button :disabled="!isFormValid" class="btn btn-dark font-12 w-100" type="submit"
+								@click="passwordChange">
+								Create New Password
+							</button>
+
 						</div>
 					</div>
 
@@ -107,8 +112,9 @@ export default {
 			new_password: "",
 			confirm_password: "",
 			showPwdField: false,
-			user_id:''
-
+			user_id: '',
+			passwordsMismatch: false,
+			passwordError: ""
 		};
 	},
 	methods: {
@@ -130,6 +136,17 @@ export default {
 			this.showPassword = !this.showPassword;
 		},
 
+		validateNewPassword() {
+			if (!this.new_password) {
+				this.passwordError = "Password is required.";
+			} else if (this.new_password.length < 6) {
+				this.passwordError = "Password must be at least 6 characters long.";
+			} else {
+				this.passwordError = "";
+			}
+		},
+
+
 		checkUserMail() {
 			const queryParams = {
 				fields: JSON.stringify(["*"]),
@@ -142,7 +159,6 @@ export default {
 
 						const isFirstLogin = res.data[0].is_first_login;
 						this.user_id = res.data[0].name
-console.log(isFirstLogin,"-----");
 						if (isFirstLogin === 0) {
 							const modal = new bootstrap.Modal(document.getElementById('changePassword'));
 							modal.show();
@@ -150,7 +166,7 @@ console.log(isFirstLogin,"-----");
 
 						}
 						if (isFirstLogin === 1) {
-						this.showPwdField = true;
+							this.showPwdField = true;
 
 							console.log("User is logging in for the first time.");
 						} else {
@@ -163,7 +179,6 @@ console.log(isFirstLogin,"-----");
 				})
 				.catch((error) => {
 					console.error("Login error: ", error);
-					this.showPwdField = true; // Show password field in case of an error
 				});
 		},
 
@@ -176,9 +191,9 @@ console.log(isFirstLogin,"-----");
 			axiosInstance.put(`${apis.resource}${doctypes.CheckUser}/${this.user_id}`, payload)
 				.then((res) => {
 					console.log("Password updated successfully:", res.data);
-					if(res.data.is_first_login === 1){
+					if (res.data.is_first_login === 1) {
 						this.showPwdField = true;
-						}
+					}
 				})
 				.catch((error) => {
 					console.error("Error:", error);
@@ -187,11 +202,10 @@ console.log(isFirstLogin,"-----");
 
 
 		passwordChange() {
-			// if (passwordsMismatch) {
-			// 	console.error("Passwords do not match.");
-			// 	return;
-			// }
-			// console.log(this.new_password);
+			if (this.passwordsMismatch) {
+				console.error("Passwords do not match.");
+				return;
+			}
 
 			const payload = {
 				new_password: this.new_password,
@@ -200,8 +214,7 @@ console.log(isFirstLogin,"-----");
 			axiosInstance.put(`${apis.resource}${doctypes.users}/${this.formdata.usr}`, payload)
 				.then((res) => {
 					if (res.data) {
-						console.log("Password updated successfully:", res.data);
-						toast.success('Password changed Successfully', { autoClose: 300 });
+						toast.success('Password updated Successfully', { autoClose: 300 });
 						const modal = bootstrap.Modal.getInstance(document.getElementById('changePassword'));
 						modal.hide();
 						this.checkboxChange()
@@ -241,21 +254,27 @@ console.log(isFirstLogin,"-----");
 		},
 
 		userData(email) {
+			console.log(email, "1");
 			axiosInstance.get(`${apis.resource}${doctypes.users}/${email}`)
 				.then((res) => {
 					this.email = res.data.email
-						;
+					console.log(this.email, "2");
+					if (this.email) {
+						axiosInstance.get(`${apis.resource}${doctypes.EzyEmployeeList}/${this.email}`)
+							.then((responce) => {
+								const employeeData = responce.data
+								localStorage.setItem('employeeData', JSON.stringify(employeeData));
+								localStorage.setItem('USERROLE', JSON.stringify(employeeData.designation));
 
-					axiosInstance.get(`${apis.resource}${doctypes.EzyEmployeeList}/${this.email}`)
-						.then((responce) => {
-							const employeeData = responce.data
-							localStorage.setItem('employeeData', JSON.stringify(employeeData));
-							localStorage.setItem('USERROLE', JSON.stringify(employeeData.designation));
+							})
+							.catch((error) => {
+								console.error("Error fetching user data:", error);
+							});
+					}
+					else {
+						localStorage.setItem('employeeData', JSON.stringify(this.storeData));
 
-						})
-						.catch((error) => {
-							console.error("Error fetching user data:", error);
-						});
+					}
 
 				})
 				.catch((error) => {
@@ -263,15 +282,19 @@ console.log(isFirstLogin,"-----");
 				});
 		}
 	},
-	// computed: {
-	// 	passwordsMismatch() {
-	// 		return (
-	// 			this.new_password &&
-	// 			this.confirm_password &&
-	// 			this.new_password !== this.confirm_password
-	// 		);
-	// 	}
-	// }
+	computed: {
+		passwordsMismatch() {
+			return (
+				this.new_password &&
+				this.confirm_password &&
+				this.new_password !== this.confirm_password
+			);
+
+		},
+		isFormValid() {
+			return this.new_password.length >= 6 && this.new_password === this.confirm_password;
+		}
+	}
 };
 </script>
 

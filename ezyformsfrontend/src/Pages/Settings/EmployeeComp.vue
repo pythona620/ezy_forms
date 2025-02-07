@@ -51,7 +51,7 @@
                                             name="dept" v-model="createEmployee.department" id="dept" :Required="false"
                                             :options="departmentsList" /> -->
                                         <VueMultiselect v-model="createEmployee.department" :options="departmentsList"
-                                            :multiple="false" :close-on-select="false" :clear-on-select="false"
+                                            :multiple="false" :close-on-select="true" :clear-on-select="false"
                                             :preserve-search="true" placeholder="Select department"
                                             class="font-11 mb-3">
                                             <!-- taggable @tag="addDepartment"
@@ -84,7 +84,7 @@
                                             name="Designation" v-model="createEmployee.designation" id="dept"
                                             :Required="false" :options="designations" /> -->
                                         <VueMultiselect v-model="createEmployee.designation" :options="designations"
-                                            :multiple="false" :close-on-select="false" :clear-on-select="false"
+                                            :multiple="false" :close-on-select="true" :clear-on-select="false"
                                             :preserve-search="true" placeholder="Select designation"
                                             class="font-11 mb-3" taggable @tag="addDesignation"
                                             tag-placeholder="Press enter to add designation">
@@ -119,7 +119,7 @@
                                             v-model="createEmployee.reporting_to" /> -->
                                         <VueMultiselect v-model="createEmployee.reporting_to"
                                             :options="tableData.map(dept => dept.emp_name)" :multiple="false"
-                                            :close-on-select="false" :clear-on-select="false" :preserve-search="true"
+                                            :close-on-select="true" :clear-on-select="false" :preserve-search="true"
                                             placeholder="Select Reporting To" class="font-11 mb-3">
                                             <!-- taggable
                                             @tag="addReportingTo" tag-placeholder="Press enter to add reporting to" -->
@@ -146,7 +146,7 @@
                                             id="reporting_designation" placeholder="Enter Reporting Designation"
                                             v-model="createEmployee.reporting_designation" /> -->
                                         <VueMultiselect v-model="createEmployee.reporting_designation"
-                                            :options="designations" :multiple="false" :close-on-select="false"
+                                            :options="designations" :multiple="false" :close-on-select="true"
                                             :clear-on-select="false" :preserve-search="true"
                                             placeholder="Select Reporting Designation" class="font-11 mb-3">
                                             <!-- taggable
@@ -246,7 +246,7 @@
                                     <label class="font-13 ps-1 fw-medium" for="dept">Departments<span
                                             class="text-danger ps-1">*</span></label>
                                     <VueMultiselect v-model="createEmployee.department" :options="departmentsList"
-                                        :multiple="false" :close-on-select="false" :clear-on-select="false"
+                                        :multiple="false" :close-on-select="true" :clear-on-select="false"
                                         :preserve-search="true" placeholder="Select department" class="font-11 mb-3">
                                         <!-- taggable @tag="addDepartment"
                                             tag-placeholder="Press enter to add department" -->
@@ -272,7 +272,7 @@
                                     <label class="font-13 ps-1" for="Designation">Designation<span
                                             class="text-danger ps-1">*</span></label>
                                     <VueMultiselect v-model="createEmployee.designation" :options="designations"
-                                        :multiple="false" :close-on-select="false" :clear-on-select="false"
+                                        :multiple="false" :close-on-select="true" :clear-on-select="false"
                                         :preserve-search="true" placeholder="Select designation" class="font-11 mb-3"
                                         taggable @tag="addDesignation" tag-placeholder="Press enter to add designation">
                                         <!-- <template #option="{ option }">
@@ -296,7 +296,7 @@
                                             class="text-danger ps-1">*</span></label>
                                     <VueMultiselect v-model="createEmployee.reporting_to"
                                         :options="tableData.map(dept => dept.emp_name)" :multiple="false"
-                                        :close-on-select="false" :clear-on-select="false" :preserve-search="true"
+                                        :close-on-select="true" :clear-on-select="false" :preserve-search="true"
                                         placeholder="Select Reporting To" class="font-11 mb-3">
                                         <!-- taggable
                                         @tag="addReportingTo" tag-placeholder="Press enter to add reporting to" -->
@@ -320,7 +320,7 @@
                                     <label class="font-13 ps-1" for="reporting_designation">Reporting
                                         Designation<span class="text-danger ps-1">*</span></label>
                                     <VueMultiselect v-model="createEmployee.reporting_designation"
-                                        :options="designations" :multiple="false" :close-on-select="false"
+                                        :options="designations" :multiple="false" :close-on-select="true"
                                         :clear-on-select="false" :preserve-search="true"
                                         placeholder="Select Reporting Designation" class="font-11 mb-3">
                                         <!-- taggable
