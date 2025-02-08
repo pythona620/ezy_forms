@@ -132,8 +132,11 @@ def enqueued_add_customized_fields_for_dynamic_doc(fields:list[dict],doctype:str
 					# if "reqd" in dicts_of_docs_entries:doc_for_existing_custom_field.reqd = dicts_of_docs_entries["reqd"]
 					if "options" in dicts_of_docs_entries:
 						if isinstance(dicts_of_docs_entries["options"],str):
-							dicts_of_docs_entries["options"] = literal_eval(dicts_of_docs_entries["options"])
+							pass
+							# dicts_of_docs_entries["options"] = literal_eval(dicts_of_docs_entries["options"])
+       
 						doc_for_existing_custom_field.options = "\n".join(dicts_of_docs_entries["options"])
+      
 					if "default" in dicts_of_docs_entries:
 						doc_for_existing_custom_field.default = dicts_of_docs_entries["default"]
 					if "description" in dicts_of_docs_entries:
