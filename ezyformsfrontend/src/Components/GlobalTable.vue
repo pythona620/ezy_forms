@@ -67,11 +67,11 @@
 						<td v-for="(column, colIndex) in tHeaders" :key="colIndex">
 							<!-- Condition for Action Column -->
 							<span v-if="column.td_key === 'status'" :class="{
-			'text-warning': row[column.td_key] === 'Request Raised',
-			'textcompleted': row[column.td_key] === 'Completed',
-			'text-primary': row[column.td_key] === 'In Progress',
-			'textcancel': row[column.td_key] === 'Cancel',
-			'text-danger': row[column.td_key] === 'Request Cancelled',
+			'text-warning fw-medium': row[column.td_key] === 'Request Raised',
+			'textcompleted fw-medium': row[column.td_key] === 'Completed',
+			'text-primary fw-medium': row[column.td_key] === 'In Progress',
+			'textcancel fw-medium': row[column.td_key] === 'Cancelled',
+			'text-danger fw-medium': row[column.td_key] === 'Request Cancelled',
 		}">
 								<i class="bi bi-circle-fill status-circle font-10 text-center pe-2"></i>
 								{{ row[column.td_key] }}

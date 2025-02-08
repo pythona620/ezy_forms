@@ -346,7 +346,7 @@ function saveCategories() {
 
     axiosInstance.put(`${apis.resource}${doctypes.departments}/${categoriesDataEdit.value.name}`, categoriesDataEdit.value)
         .then((response) => {
-            toast.success("Changes Saved", { autoClose: 500 })
+            toast.success("Changes Saved", { autoClose: 500, "transition": "zoom" })
             const modal = bootstrap.Modal.getInstance(document.getElementById('viewCategory'));
             modal.hide();
 
@@ -481,7 +481,7 @@ function createDepart() {
     // console.log(dataObj, "------------------");
     axiosInstance.post(apis.resource + doctypes.departments, dataObj).then((res) => {
         if (res.data) {
-            toast.success("Department Created", { autoClose: 500 })
+            toast.success("Department Created", { autoClose: 500, "transition": "zoom" })
             deptData()
         }
 

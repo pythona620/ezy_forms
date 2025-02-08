@@ -7,6 +7,8 @@ import "vue3-toastify/dist/index.css";
 // import PrimeVue from 'primevue/config';
 // import Aura from '@primevue/themes/aura';
 // import Tooltip from 'primevue/tooltip';
+// import * as echarts from 'echarts';
+
 
 
 const app = createApp(App);

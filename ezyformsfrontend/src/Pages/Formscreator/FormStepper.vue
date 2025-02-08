@@ -1138,9 +1138,9 @@ function add_Wf_roles_setup() {
         .then((res) => {
 
             if (selectedBlockIndex.value == 0) {
-                toast.success("Requestor Added");
+                toast.success("Requestor Added", { autoClose: 1000, "transition": "zoom" });
             } else {
-                toast.success(`Approver-${selectedBlockIndex.value} Added`);
+                toast.success(`Approver-${selectedBlockIndex.value} Added`, { autoClose: 1000, "transition": "zoom" });
             }
         });
 }
@@ -1201,7 +1201,7 @@ function formData(status) {
         .post(apis.savedata, dataObj)
         .then((res) => {
             if (res) {
-                toast.success("Form Created Successfully", { autoClose: 2000 });
+                toast.success("Form Created Successfully", { autoClose: 2000, "transition": "zoom" });
                 router.push({
                     params: { paramid: res.message.message },
                 });
@@ -1603,7 +1603,17 @@ const isNextDisabled = computed(() => {
 
 //spaces removed version
 function handleInputChange(event, fieldType) {
-    let inputValue = event.target.value.trim().replace(/\s+/g, ""); // Remove all spaces
+    let inputValue = event.target.value.trim().replace(/\s+/g, "");
+
+    // Check if the first character is a number
+    if (/^\d/.test(inputValue)) {
+        if (fieldType === "form_short_name") {
+            formShortNameError.value = "First character must be a letter";
+        }
+        return;
+    } else {
+        formShortNameError.value = ""; // Clear error if input is valid
+    }
 
     // Set filter based on fieldType
     const filters = [[fieldType, "like", `%${inputValue}%`]];
@@ -1619,7 +1629,7 @@ function handleInputChange(event, fieldType) {
         .then((res) => {
             ezyFormsData.value = res.data;
 
-            // Check for duplicates and set appropriate error message
+            // Check for duplicates
             if (fieldType === "form_name") {
                 formNameError.value =
                     inputValue &&
@@ -1644,11 +1654,11 @@ function handleInputChange(event, fieldType) {
         })
         .catch((error) => {
             console.error("Error fetching ezyForms data:", error);
-            // Clear error message on fetch error
             if (fieldType === "form_name") formNameError.value = "";
             else if (fieldType === "form_short_name") formShortNameError.value = "";
         });
 }
+
 
 
 // function handleInputChange(event, fieldType) {

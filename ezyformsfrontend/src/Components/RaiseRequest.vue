@@ -257,7 +257,7 @@ function request_raising_fn(item) {
         module_name: 'Ezy Forms',
         doctype_name: selectedData.value.selectedform,
         ids: [item.name],
-        reason: '',
+        reason: 'Request Raised',
         url_for_request_id: '',
         files: filesArray,
         property: business_unit.value,

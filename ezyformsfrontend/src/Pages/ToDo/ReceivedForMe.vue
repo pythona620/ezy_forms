@@ -284,9 +284,9 @@ function approvalStatusFn(dataObj, type) {
     .then((response) => {
       if (response?.message?.success) {
         if (type == 'Reject') {
-          toast.error(`Request ${type}ed`, { autoClose: 1000 })
+          toast.error(`Request ${type}ed`, { autoClose: 1000, "transition": "zoom" })
         } else {
-          toast.success(`Request ${type}ed`, { autoClose: 1000 })
+          toast.success(`Request ${type}ed`, { autoClose: 1000, "transition": "zoom" })
           ApproverReason.value = ''
         }
         const modal = bootstrap.Modal.getInstance(document.getElementById('viewRequest'));
@@ -477,12 +477,13 @@ onMounted(() => {
 .approvebtn {
   width: 146px;
   height: 30px;
-  background: #14D82B;
+  background: #099819;
   color: white;
   padding: 5px 15px 5px 15px;
   gap: 7px;
   border-radius: 4px;
   opacity: 0px;
+  font-weight: bold;
 
 }
 
@@ -495,6 +496,8 @@ onMounted(() => {
   gap: 7px;
   border-radius: 4px;
   opacity: 0px;
+  font-weight: bold;
+
 
 }
 
