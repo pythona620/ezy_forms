@@ -242,14 +242,14 @@ export default {
 
     checkboxChange() {
       const payload = {
-        is_first_login: 1,
+        user_id_name: this.user_id_name,
       };
 
       axiosInstance
-        .put(`${apis.resource}${doctypes.CheckUser}/${this.user_id_name}`, payload)
+        .put(`${apis.loginCheckuseermethod}`, payload)
         .then((res) => {
           console.log("Password updated successfully:", res.data);
-          if (res.data.is_first_login === 1) {
+          if (res.message.is_first_login === 1) {
             this.showPwdField = true;
           }
         })
