@@ -213,7 +213,7 @@ def activating_perms_for_all_roles_in_wf_roadmap():
 	# unique_roles_from_all_roles = list(set(only_roles_to_list))
 	unique_roles_from_all_roles = frappe.db.get_list("WF Roles",pluck="name")
 
-	doctypes = ["Ezy Business Unit","Ezy Form Definitions","Ezy Employee","Ezy Departments","WF Role Matrix"]
+	doctypes = ["Ezy Business Unit","Ezy Form Definitions","Ezy Employee","Ezy Departments","WF Role Matrix","WF Workflow Requests","WF Roadmap","WF Activity Log","Ezy Category","Login Check"]
 	for doc in doctypes:
 		for role in unique_roles_from_all_roles:
 			if not frappe.db.exists("Custom DocPerm",{"parent":doc,"role":role}):
