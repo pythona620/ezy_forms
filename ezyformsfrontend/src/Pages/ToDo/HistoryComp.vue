@@ -189,12 +189,12 @@ const pdfPreview = ref("");
 const activityData = ref([]);
 
 const tableheaders = ref([
-  // { th: "Request ID", td_key: "name" },
+  { th: "Request ID", td_key: "name" },
   { th: "Form name", td_key: "doctype_name" },
   // { th: "Form category", td_key: "doctype_name" },
-  { th: "Owner of form", td_key: "owner" },
+  { th: "Owner of form", td_key: "role" },
   { th: "Requested on", td_key: "requested_on" },
-  // { th: "Requested department", td_key: "acess" },
+  { th: "Requested department", td_key: "role" },
   { th: "Approval Status", td_key: "status" },
 ]);
 const fieldMapping = ref({
@@ -205,7 +205,7 @@ const fieldMapping = ref({
   },
   // name: { type: "input" },
   doctype_name: { type: "input" },
-  requested_on: { type: "date" },
+  // requested_on: { type: "date" },
 });
 
 const actions = ref([

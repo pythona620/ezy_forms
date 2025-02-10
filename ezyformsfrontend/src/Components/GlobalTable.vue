@@ -28,6 +28,9 @@
                 v-if="fieldMapping[column.td_key].type === 'input'"
                 class="input-group border-none-input"
               >
+                <span class="input-group-text font-12" id="basic-addon1"
+                  ><i class="bi bi-search"></i
+                ></span>
                 <input
                   type="search"
                   aria-describedby="basic-addon1"
@@ -35,9 +38,6 @@
                   v-model="filters[column.td_key]"
                   @input="handleFilterChange"
                 />
-                <span class="input-group-text font-12" id="basic-addon1"
-                  ><i class="bi bi-search"></i
-                ></span>
               </div>
               <!-- Date input -->
               <input
@@ -94,8 +94,10 @@
                     'text-danger fw-medium': row[column.td_key] === 'Request Cancelled',
                   }"
                 ></i>
-                {{ row[column.td_key] }}
-                <span v-if="row.current_level && row.total_levels">
+                {{ row[column.td_key]
+                }}<span
+                  v-if="row.current_level !== undefined && row.total_levels !== undefined"
+                >
                   ({{ row.current_level }} / {{ row.total_levels }})
                 </span>
               </span>
@@ -139,6 +141,9 @@
                   <i class="bi bi-x-lg fw-bolder text-danger"></i>
                 </span>
               </span>
+              <!-- <span v-else-if="column.td_key === 'total_levels'">
+                {{ row[column.td_key] }}
+              </span> -->
               <!-- v-tooltip.top="row[column.td_key]" -->
               <span v-else>
                 {{ row[column.td_key] || "-" }}
@@ -287,6 +292,7 @@ function formatDate(dateString) {
     "0"
   )}.${year} @ ${hours}:${minutes}:${seconds.slice(0, 2)}`;
 }
+
 function SelectedAll() {
   allCheck.value = !allCheck.value;
   // console.log("All Check Toggled:", allCheck.value);
