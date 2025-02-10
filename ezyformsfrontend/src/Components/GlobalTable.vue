@@ -83,18 +83,21 @@
             <td class="">{{ rowIndex + 1 }}</td>
             <td v-for="(column, colIndex) in tHeaders" :key="colIndex">
               <!-- Condition for Action Column -->
-              <span
-                v-if="column.td_key === 'status'"
-                :class="{
-                  'text-warning fw-medium': row[column.td_key] === 'Request Raised',
-                  'textcompleted fw-medium': row[column.td_key] === 'Completed',
-                  'text-primary fw-medium': row[column.td_key] === 'In Progress',
-                  'textcancel fw-medium': row[column.td_key] === 'Cancelled',
-                  'text-danger fw-medium': row[column.td_key] === 'Request Cancelled',
-                }"
-              >
-                <i class="bi bi-circle-fill status-circle font-10 text-center pe-2"></i>
+              <span v-if="column.td_key === 'status'">
+                <i
+                  class="bi bi-circle-fill status-circle font-10 text-center pe-2"
+                  :class="{
+                    'text-warning fw-medium': row[column.td_key] === 'Request Raised',
+                    'textcompleted fw-medium': row[column.td_key] === 'Completed',
+                    'text-primary fw-medium': row[column.td_key] === 'In Progress',
+                    'textcancel fw-medium': row[column.td_key] === 'Cancelled',
+                    'text-danger fw-medium': row[column.td_key] === 'Request Cancelled',
+                  }"
+                ></i>
                 {{ row[column.td_key] }}
+                <span v-if="row.current_level && row.total_levels">
+                  ({{ row.current_level }} / {{ row.total_levels }})
+                </span>
               </span>
 
               <!-- Condition for Active Column -->
@@ -269,8 +272,20 @@ function selectedAction(row, action) {
 }
 const allCheck = ref(false);
 function formatDate(dateString) {
-  const [year, month, day] = dateString.split(" ")[0].split("/");
-  return `${day}/${month}/${year}`;
+  if (!dateString) return "-"; // Handle empty or null values
+
+  // Extract date and time parts
+  const [datePart, timePart] = dateString.split(" ");
+  const [year, month, day] = datePart.split("/");
+
+  // Extract hours, minutes, and seconds from timePart
+  let [hours, minutes, seconds] = timePart.split(":");
+
+  // Format output as DD.MM.YYYY @ HH:MM:SS
+  return `${day.padStart(2, "0")}.${month.padStart(
+    2,
+    "0"
+  )}.${year} @ ${hours}:${minutes}:${seconds.slice(0, 2)}`;
 }
 function SelectedAll() {
   allCheck.value = !allCheck.value;

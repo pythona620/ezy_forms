@@ -1,14 +1,18 @@
 <template>
   <div>
-    <div class="backtofromPage py-2">
-      <router-link to="/todo/receivedform" class="text-decoration-none text-dark font-13"
-        ><span> <i class="bi bi-arrow-left"></i></span>Asset request form</router-link
-      >
+    <div class="container-fluid">
+      <div class="backtofromPage px-2 py-2">
+        <router-link
+          to="/todo/receivedform"
+          class="text-decoration-none text-dark font-13"
+          ><span> <i class="bi bi-arrow-left"></i></span>Asset request form</router-link
+        >
+      </div>
     </div>
     <div class="container-fluid">
       <div class="row">
-        <div class="col-2"></div>
-        <div class="col-8">
+        <div class="col-3"></div>
+        <div class="col-6">
           <div class="position-relative">
             <div class="requestPreviewDiv">
               <ApproverPreview
@@ -56,7 +60,7 @@
             </div>
           </div>
         </div>
-        <div class="col-2">
+        <div class="col-3">
           <div class="activity-log-container">
             <div class="shadow w-100">
               <h5 class="font-13 fw-bold py-3 ps-2">Asset request form approval</h5>
@@ -433,8 +437,8 @@ watch(
 /* Activity log container */
 .activity-log-container {
   width: 100%;
-  margin-top: 20px;
-  // padding-left: 30px;
+  // margin-top: 20px;
+  padding: 20px;
   position: relative;
 }
 
