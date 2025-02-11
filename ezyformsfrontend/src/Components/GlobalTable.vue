@@ -151,10 +151,16 @@
             </td>
 
             <td v-if="actionType === 'viewPdf'" class="text-center">
-              <span>
+              <span class="px-2">
                 <i
-                  @click="handleCellClick(row, rowIndex)"
+                  @click="handleCellClick(row, rowIndex, 'view')"
                   class="ri-eye-line eye-cursor"
+                ></i>
+              </span>
+              <span v-if="download === 'true'">
+                <i
+                  class="bi bi-download eye-cursor"
+                  @click="handleCellClick(row, rowIndex, 'download')"
                 ></i>
               </span>
             </td>
@@ -247,6 +253,9 @@ const props = defineProps({
   },
   actions: {
     type: Array,
+  },
+  download: {
+    type: String,
   },
   actionType: {
     type: String,
@@ -346,8 +355,8 @@ onMounted(() => {
 //   emits("upload-file", file);
 // console.log(file.name,'jkgbjd')
 // }
-function handleCellClick(check, index) {
-  emits("cell-click", check, index);
+function handleCellClick(check, index, type) {
+  emits("cell-click", check, index, type);
 }
 // function formatDate(dateString) {
 // 	return moment(dateString).format("DD-MM-YYYY");

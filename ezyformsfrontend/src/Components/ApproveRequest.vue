@@ -106,9 +106,9 @@ import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 
 onMounted(() => {
-  receivedForMe();
-  Wfactivitylog();
   getdata();
+  Wfactivitylog();
+  receivedForMe();
 });
 
 const router = useRouter();
@@ -254,7 +254,63 @@ function approvalCancelFn(dataObj, type) {
     }
   });
 }
+function receivedForMe(data) {
+  // Initialize filters array for building dynamic query parameters
+  const EmpRequestdesignation = JSON.parse(localStorage.getItem("employeeData"));
 
+  const filters = [
+    // assigned_to_users
+    ["assigned_to_users", "like", `%${EmpRequestdesignation?.designation}%`],
+    ["property", "like", `%${newBusinessUnit.value.business_unit}%`],
+    ["name", "like", `%${selectedData.value.formname}%`],
+  ];
+  if (data) {
+    filters.push(data);
+  }
+
+  const queryParams = {
+    fields: JSON.stringify(["*"]),
+    limit_page_length: filterObj.value.limitPageLength,
+    limit_start: filterObj.value.limit_start,
+    filters: JSON.stringify(filters),
+    order_by: "`tabWF Workflow Requests`.`creation` desc",
+  };
+
+  const queryParamsCount = {
+    fields: JSON.stringify(["count(name) AS total_count"]),
+    limitPageLength: "None",
+    filters: JSON.stringify(filters),
+  };
+
+  // Fetch total count of records matching filters
+  axiosInstance
+    .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, {
+      params: queryParamsCount,
+    })
+    .then((res) => {
+      totalRecords.value = res.data[0].total_count;
+    })
+    .catch((error) => {
+      console.error("Error fetching total count:", error);
+    });
+
+  // Fetch the records matching filters
+  axiosInstance
+    .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, {
+      params: queryParams,
+    })
+    .then((res) => {
+      tableData.value = res.data[0];
+      showRequest.value = rebuildToStructuredArray(
+        JSON.parse(tableData.value?.json_columns)?.fields
+      );
+      selectedcurrentLevel.value = tableData.value.current_level;
+      console.log(selectedcurrentLevel.value);
+    })
+    .catch((error) => {
+      console.error("Error fetching records:", error);
+    });
+}
 function getdata() {
   const filters = [
     ["wf_generated_request_id", "like", `%${selectedData.value.formname}%`],
@@ -324,63 +380,7 @@ watch(activityData, (newVal) => {
   console.log("Updated Activity Data:", newVal);
   console.log("Request Cancelled?", requestcancelled.value);
 });
-function receivedForMe(data) {
-  // Initialize filters array for building dynamic query parameters
-  const EmpRequestdesignation = JSON.parse(localStorage.getItem("employeeData"));
 
-  const filters = [
-    // assigned_to_users
-    ["assigned_to_users", "like", `%${EmpRequestdesignation?.designation}%`],
-    ["property", "like", `%${newBusinessUnit.value.business_unit}%`],
-    ["name", "like", `%${selectedData.value.formname}%`],
-  ];
-  if (data) {
-    filters.push(data);
-  }
-
-  const queryParams = {
-    fields: JSON.stringify(["*"]),
-    limit_page_length: filterObj.value.limitPageLength,
-    limit_start: filterObj.value.limit_start,
-    filters: JSON.stringify(filters),
-    order_by: "`tabWF Workflow Requests`.`creation` desc",
-  };
-
-  const queryParamsCount = {
-    fields: JSON.stringify(["count(name) AS total_count"]),
-    limitPageLength: "None",
-    filters: JSON.stringify(filters),
-  };
-
-  // Fetch total count of records matching filters
-  axiosInstance
-    .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, {
-      params: queryParamsCount,
-    })
-    .then((res) => {
-      totalRecords.value = res.data[0].total_count;
-    })
-    .catch((error) => {
-      console.error("Error fetching total count:", error);
-    });
-
-  // Fetch the records matching filters
-  axiosInstance
-    .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, {
-      params: queryParams,
-    })
-    .then((res) => {
-      tableData.value = res.data[0];
-      showRequest.value = rebuildToStructuredArray(
-        JSON.parse(tableData.value?.json_columns)?.fields
-      );
-      selectedcurrentLevel.value = tableData.value.current_level;
-      console.log(selectedcurrentLevel.value);
-    })
-    .catch((error) => {
-      console.error("Error fetching records:", error);
-    });
-}
 watch(
   businessUnit,
   (newVal) => {

@@ -142,7 +142,8 @@ import { rebuildToStructuredArray } from "../../shared/services/field_format";
 import ApproverPreview from "../../Components/ApproverPreview.vue";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
-import router from "../../router";
+import { useRouter } from "vue-router";
+const router = useRouter();
 const businessUnit = computed(() => {
   return EzyBusinessUnit.value;
 });

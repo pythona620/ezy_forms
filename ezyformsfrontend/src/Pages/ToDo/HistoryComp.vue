@@ -11,8 +11,10 @@
         :tHeaders="tableheaders"
         :tData="tableData"
         isAction="true"
-        actionType="dropdown"
+        actionType="viewPdf"
         isCheckbox="true"
+        @cell-click="viewPreview"
+        download="true"
         :actions="actions"
         @actionClicked="actionCreated"
         isFiltersoption="true"
@@ -295,6 +297,109 @@ function actionCreated(rowData, actionEvent) {
 
           const dataObj = {
             form_short_name: rowData.doctype_name,
+            name: doctypeForm.value[0].name,
+          };
+
+          axiosInstance
+            .post(apis.preview_dynamic_form, dataObj)
+            .then((response) => {
+              pdfPreview.value = response.message;
+            })
+            .catch((error) => {
+              console.error("Error fetching data:", error);
+            });
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching categories data:", error);
+      });
+
+    const modal = new bootstrap.Modal(document.getElementById("pdfView"), {});
+    modal.show();
+  }
+}
+
+function viewPreview(data, index, type) {
+  console.log(data, index, type);
+
+  if (type === "view") {
+    if (data) {
+      selectedRequest.value = { ...data };
+      totalLevels.value = selectedRequest.value.total_levels;
+      // Rebuild the structured array from JSON
+      showRequest.value = rebuildToStructuredArray(
+        JSON.parse(selectedRequest.value?.json_columns).fields
+      );
+
+      // Prepare the filters for fetching data
+      const filters = [
+        ["wf_generated_request_id", "like", `%${selectedRequest.value.name}%`],
+      ];
+      const queryParams = {
+        fields: JSON.stringify(["*"]),
+        limit_page_length: "None",
+        limit_start: 0,
+        filters: JSON.stringify(filters),
+        order_by: `\`tab${selectedRequest.value.doctype_name}\`.\`creation\` desc`,
+      };
+
+      // Fetch the doctype data
+      axiosInstance
+        .get(`${apis.resource}${selectedRequest.value.doctype_name}`, {
+          params: queryParams,
+        })
+        .then((res) => {
+          if (res.data) {
+            doctypeForm.value = res.data;
+            // Map values from doctypeForm to showRequest fields
+            mapFormFieldsToRequest(doctypeForm.value[0], showRequest.value);
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching categories data:", error);
+        });
+      axiosInstance
+        .get(`${apis.resource}${doctypes.WFActivityLog}/${selectedRequest.value.name}`)
+        .then((res) => {
+          if (res.data) {
+            // console.log(res.data);
+            activityData.value = res.data.reason || []; // Ensure it's always an array
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching activity data:", error);
+        });
+      const modal = new bootstrap.Modal(document.getElementById("viewRequest"), {});
+      modal.show();
+    } else {
+      console.warn(" There is no form fields ");
+    }
+  }
+  if (type === "download") {
+    selectedRequest.value = data;
+    // Prepare the filters for fetching data
+    const filters = [
+      ["wf_generated_request_id", "like", `%${selectedRequest.value.name}%`],
+    ];
+    const queryParams = {
+      fields: JSON.stringify(["*"]),
+      limit_page_length: "None",
+      limit_start: 0,
+      filters: JSON.stringify(filters),
+      order_by: `\`tab${selectedRequest.value.doctype_name}\`.\`creation\` desc`,
+    };
+
+    // Fetch the doctype data
+    axiosInstance
+      .get(`${apis.resource}${selectedRequest.value.doctype_name}`, {
+        params: queryParams,
+      })
+      .then((res) => {
+        if (res.data) {
+          doctypeForm.value = res.data;
+
+          const dataObj = {
+            form_short_name: data.doctype_name,
             name: doctypeForm.value[0].name,
           };
 
