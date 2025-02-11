@@ -46,6 +46,14 @@
                     <div class="card border-0">
                         <div v-for="(blockItem, blockIndex) in displayedBlocks" :key="blockIndex"
                             class="block-container">
+                            <div class=" d-flex justify-content-end align-items-center">
+                                <span class="font-12 px-2 py-1" v-if="workFlowRoles[blockIndex]?.roles.length > 0">
+                                    {{
+                        blockIndex === 0 ? "Requestor" : `Approver ${blockIndex}
+                                                                    `
+                    }}: <b>{{ workFlowRoles[blockIndex].roles.join(', ') }}</b>
+    </span>
+                            </div>
                             <div v-for="(section, sectionIndex) in blockItem.sections" :key="'preview-' + sectionIndex"
                                 class="preview-section">
                                 <div v-if="section.label" class="section-label d-flex justify-content-between">
@@ -141,7 +149,7 @@
 
 
 <script setup>
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 
 const props = defineProps({
     blockArr: {
@@ -157,40 +165,74 @@ const props = defineProps({
 
 const selectedView = ref('Requestor');  // Default to Requestor
 const displayedBlocks = ref([]);
+const workFlowRoles = ref([]);
 
+// ✅ Parse form_json safely
+const parsedFormJson = computed(() => {
+    try {
+        return JSON.parse(props.formDescriptions?.form_json || "{}");
+    } catch (error) {
+        console.error("Error parsing form_json:", error);
+        return {};
+    }
+});
+
+// ✅ Extract workflow data
+const workflowData = computed(() => parsedFormJson.value?.workflow || []);
+
+// 🔄 Watch for changes in blockArr or workflow
 watch(
-    () => props.blockArr,
-    (newVal) => {
-        if (newVal && Array.isArray(newVal)) {
-            // console.log(props.blockArr, "gggggggggggg");
-            // Set the default display block as Requestor
-            displayedBlocks.value = filterBlocksByFieldname('Requestor', newVal);
-            // console.log(displayedBlocks.value, "displayedBlocks");
-        }
+    () => [props.blockArr, workflowData.value],
+    () => {
+        displayedBlocks.value = filterBlocksByFieldname(selectedView.value, props.blockArr);
+        updateWorkFlowRoles();
     },
-    { immediate: true }
+    { immediate: true, deep: true }
 );
+
+// Close modal and reset selection
 function closemodal() {
-    selectedView.value = 'Requestor'
-    // props.blockArr = []
+    selectedView.value = 'Requestor';
 }
+
+// Update selected view
 function setView(view) {
+    if (!view) return;
     selectedView.value = view;
-
     displayedBlocks.value = filterBlocksByFieldname(view, props.blockArr);
+    updateWorkFlowRoles();
 }
 
+// ✅ Match roles to blocks correctly (supports multiple approvers)
+function updateWorkFlowRoles() {
+    let approverIndex = 1; // Keep track of approvers
+
+    workFlowRoles.value = displayedBlocks.value.map(block => {
+        let roles = [];
+
+        if (block.fieldname === "requestor") {
+            // Find requestor roles
+            const requestorWorkflow = workflowData.value.find(wf => wf.type === "requestor");
+            roles = requestorWorkflow ? requestorWorkflow.roles : [];
+        } else if (block.label.startsWith("approver-")) {
+            // Get the next approver role in order
+            const approverWorkflow = workflowData.value.filter(wf => wf.type === "approver");
+
+            // Assign roles to the correct "approver-1", "approver-2", etc.
+            if (approverWorkflow[approverIndex - 1]) {
+                roles = approverWorkflow[approverIndex - 1].roles || [];
+            }
+            approverIndex++; // Move to the next approver
+        }
+
+        return { roles };
+    });
+}
+
+// ✅ Filter blocks based on the view
 function filterBlocksByFieldname(view, blocks) {
+    if (!blocks || !Array.isArray(blocks)) return []; // Ensure `blocks` is valid
 
-    let filteredBlocks = [];
-
-    // Define the block order for each view
-    // const blockOrder = {
-    //     'requestor': ['requestor'],
-    //     'approver-1': ['requestor', 'approver1'],
-    //     'approver-2': ['requestor', 'approver1', 'approver2'],
-    //     'approver-3': ['requestor', 'approver1', 'approver2', 'approver3']
-    // };
     const blockOrder = {
         'requestor': ['requestor'],
         'approver-1': ['requestor', 'approver-1'],
@@ -203,21 +245,74 @@ function filterBlocksByFieldname(view, blocks) {
         'approver-8': ['requestor', 'approver-1', 'approver-2', 'approver-3', 'approver-4', 'approver-5', 'approver-6', 'approver-7', 'approver-8']
     };
 
+    const viewOrder = blockOrder[view] ?? ['requestor'];
 
-    // Get the fieldnames for the selected view from blockOrder
-    const viewOrder = blockOrder[view] || ['requestor'];
-
-    // Iterate through the fieldnames and push matching blocks into filteredBlocks
-    viewOrder.forEach(type => {
-        const block = blocks.find(b => b.label === type);
-
-        if (block) {
-            filteredBlocks.push(block); // Add the block if it exists
-        }
-    });
-
-    return filteredBlocks;
+    return viewOrder
+        .map(type => blocks?.find(b => b?.label === type)) // Use optional chaining
+        .filter(Boolean); // Remove null values
 }
+// watch(
+//     () => props.blockArr,
+//     (newVal) => {
+//         if (newVal && Array.isArray(newVal)) {
+//             // console.log(props.blockArr, "gggggggggggg");
+//             // Set the default display block as Requestor
+//             displayedBlocks.value = filterBlocksByFieldname('Requestor', newVal);
+//             // console.log(displayedBlocks.value, "displayedBlocks");
+//         }
+//     },
+//     { immediate: true }
+// );
+
+// function closemodal() {
+//     selectedView.value = 'Requestor'
+//     // props.blockArr = []
+// }
+// function setView(view) {
+//     selectedView.value = view;
+
+//     displayedBlocks.value = filterBlocksByFieldname(view, props.blockArr);
+// }
+
+
+// function filterBlocksByFieldname(view, blocks) {
+
+//     let filteredBlocks = [];
+
+//     // Define the block order for each view
+//     // const blockOrder = {
+//     //     'requestor': ['requestor'],
+//     //     'approver-1': ['requestor', 'approver1'],
+//     //     'approver-2': ['requestor', 'approver1', 'approver2'],
+//     //     'approver-3': ['requestor', 'approver1', 'approver2', 'approver3']
+//     // };
+//     const blockOrder = {
+//         'requestor': ['requestor'],
+//         'approver-1': ['requestor', 'approver-1'],
+//         'approver-2': ['requestor', 'approver-1', 'approver-2'],
+//         'approver-3': ['requestor', 'approver-1', 'approver-2', 'approver-3'],
+//         'approver-4': ['requestor', 'approver-1', 'approver-2', 'approver-3', 'approver-4'],
+//         'approver-5': ['requestor', 'approver-1', 'approver-2', 'approver-3', 'approver-4', 'approver-5'],
+//         'approver-6': ['requestor', 'approver-1', 'approver-2', 'approver-3', 'approver-4', 'approver-5', 'approver-6'],
+//         'approver-7': ['requestor', 'approver-1', 'approver-2', 'approver-3', 'approver-4', 'approver-5', 'approver-6', 'approver-7'],
+//         'approver-8': ['requestor', 'approver-1', 'approver-2', 'approver-3', 'approver-4', 'approver-5', 'approver-6', 'approver-7', 'approver-8']
+//     };
+
+
+//     // Get the fieldnames for the selected view from blockOrder
+//     const viewOrder = blockOrder[view] || ['requestor'];
+
+//     // Iterate through the fieldnames and push matching blocks into filteredBlocks
+//     viewOrder.forEach(type => {
+//         const block = blocks.find(b => b.label === type);
+
+//         if (block) {
+//             filteredBlocks.push(block); // Add the block if it exists
+//         }
+//     });
+
+//     return filteredBlocks;
+// }
 
 const getFieldComponent = (type) => {
     switch (type) {
