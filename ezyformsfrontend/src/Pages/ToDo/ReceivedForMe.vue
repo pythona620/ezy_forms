@@ -11,11 +11,10 @@
         :tHeaders="tableheaders"
         :tData="tableData"
         isAction="true"
-        actionType="viewPdf"
+        actionType="dropdown"
         isCheckbox="true"
         @updateFilters="inLineFiltersData"
         :field-mapping="fieldMapping"
-        @cell-click="viewPreview"
         isFiltersoption="true"
         :actions="actions"
         @actionClicked="actionCreated"
@@ -27,7 +26,6 @@
         @limitStart="PaginationLimitStart"
       />
     </div>
-
     <div
       class="modal fade"
       id="viewRequest"
@@ -71,9 +69,9 @@
                   <p class="font-12 mb-1">
                     On
                     <strong class="strong-content">{{ formatDate(item.creation) }}</strong
-                    >,
-                    <strong class="strong-content">{{ item.user_name }}</strong>
-                    ({{ item.role }}) has
+                    >, <strong class="strong-content">{{ item.user_name }}</strong> ({{
+                      item.role
+                    }}) has
                     <strong class="strong-content">{{
                       formatAction(item.action)
                     }}</strong>
@@ -159,20 +157,21 @@ const selectedcurrentLevel = ref("");
 const activityData = ref([]);
 
 const tableheaders = ref([
-  // { th: "Request ID", td_key: "name" },
+  { th: "Request ID", td_key: "name" },
   { th: "Form name", td_key: "doctype_name" },
   // { th: "Form category", td_key: "doctype_name" },
-  { th: "Owner of form", td_key: "owner" },
-  { th: "Requested on", td_key: "requested_on" },
-  // { th: "Requested department", td_key: "acess" },
+  // { th: "Owner of form", td_key: "owner" },
+  { th: "Requested By", td_key: "requested_by" },
+  { th: "Requested department", td_key: "role" },
+  // { th: "Requested on", td_key: "requested_on" },
   { th: "Approval Status", td_key: "status" },
 ]);
 const fieldMapping = ref({
   // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
   // credit_irn_generated: { type: "select", options: ["Pending", "Completed", "Error"] },
-  // name: { type: "input" },
+  // role: { type: "input" },
   doctype_name: { type: "input" },
-  requested_on: { type: "date" },
+  // requested_on: { type: "date" },
 });
 const actions = ref([
   { name: "View Request", icon: "fa-solid fa-eye" },
@@ -343,15 +342,9 @@ function approvalStatusFn(dataObj, type) {
     .then((response) => {
       if (response?.message?.success) {
         if (type == "Reject") {
-          toast.error(`Request ${type}ed`, {
-            autoClose: 1000,
-            transition: "zoom",
-          });
+          toast.error(`Request ${type}ed`, { autoClose: 1000, transition: "zoom" });
         } else {
-          toast.success(`Request ${type}ed`, {
-            autoClose: 1000,
-            transition: "zoom",
-          });
+          toast.success(`Request ${type}ed`, { autoClose: 1000, transition: "zoom" });
           ApproverReason.value = "";
         }
         const modal = bootstrap.Modal.getInstance(document.getElementById("viewRequest"));
@@ -485,9 +478,7 @@ function receivedForMe(data) {
 
   // Fetch total count of records matching filters
   axiosInstance
-    .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, {
-      params: queryParamsCount,
-    })
+    .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, { params: queryParamsCount })
     .then((res) => {
       totalRecords.value = res.data[0].total_count;
     })
@@ -497,9 +488,7 @@ function receivedForMe(data) {
 
   // Fetch the records matching filters
   axiosInstance
-    .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, {
-      params: queryParams,
-    })
+    .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, { params: queryParams })
     .then((res) => {
       tableData.value = res.data;
       idDta.value = [...new Set(res.data.map((id) => id.name))];

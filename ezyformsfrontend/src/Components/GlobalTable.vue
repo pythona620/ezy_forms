@@ -28,6 +28,9 @@
                 v-if="fieldMapping[column.td_key].type === 'input'"
                 class="input-group border-none-input"
               >
+                <span class="input-group-text font-12" id="basic-addon1"
+                  ><i class="bi bi-search"></i
+                ></span>
                 <input
                   type="search"
                   aria-describedby="basic-addon1"
@@ -35,9 +38,6 @@
                   v-model="filters[column.td_key]"
                   @input="handleFilterChange"
                 />
-                <span class="input-group-text font-12" id="basic-addon1"
-                  ><i class="bi bi-search"></i
-                ></span>
               </div>
               <!-- Date input -->
               <input
@@ -83,18 +83,23 @@
             <td class="">{{ rowIndex + 1 }}</td>
             <td v-for="(column, colIndex) in tHeaders" :key="colIndex">
               <!-- Condition for Action Column -->
-              <span
-                v-if="column.td_key === 'status'"
-                :class="{
-                  'text-warning fw-medium': row[column.td_key] === 'Request Raised',
-                  'textcompleted fw-medium': row[column.td_key] === 'Completed',
-                  'text-primary fw-medium': row[column.td_key] === 'In Progress',
-                  'textcancel fw-medium': row[column.td_key] === 'Cancelled',
-                  'text-danger fw-medium': row[column.td_key] === 'Request Cancelled',
-                }"
-              >
-                <i class="bi bi-circle-fill status-circle font-10 text-center pe-2"></i>
-                {{ row[column.td_key] }}
+              <span v-if="column.td_key === 'status'">
+                <i
+                  class="bi bi-circle-fill status-circle font-10 text-center pe-2"
+                  :class="{
+                    'text-warning fw-medium': row[column.td_key] === 'Request Raised',
+                    'textcompleted fw-medium': row[column.td_key] === 'Completed',
+                    'text-primary fw-medium': row[column.td_key] === 'In Progress',
+                    'textcancel fw-medium': row[column.td_key] === 'Cancelled',
+                    'text-danger fw-medium': row[column.td_key] === 'Request Cancelled',
+                  }"
+                ></i>
+                {{ row[column.td_key]
+                }}<span
+                  v-if="row.current_level !== undefined && row.total_levels !== undefined"
+                >
+                  ({{ row.current_level }} / {{ row.total_levels }})
+                </span>
               </span>
 
               <!-- Condition for Active Column -->
@@ -136,6 +141,9 @@
                   <i class="bi bi-x-lg fw-bolder text-danger"></i>
                 </span>
               </span>
+              <!-- <span v-else-if="column.td_key === 'total_levels'">
+                {{ row[column.td_key] }}
+              </span> -->
               <!-- v-tooltip.top="row[column.td_key]" -->
               <span v-else>
                 {{ row[column.td_key] || "-" }}
@@ -262,16 +270,29 @@ const props = defineProps({
   },
 });
 
-const emits = defineEmits(["actionClicked", "updateFilters", "cell-click"]);
+const emits = defineEmits(["actionClicked", "updateFilters"]);
 
 function selectedAction(row, action) {
   emits("actionClicked", row, action);
 }
 const allCheck = ref(false);
 function formatDate(dateString) {
-  const [year, month, day] = dateString.split(" ")[0].split("/");
-  return `${day}/${month}/${year}`;
+  if (!dateString) return "-"; // Handle empty or null values
+
+  // Extract date and time parts
+  const [datePart, timePart] = dateString.split(" ");
+  const [year, month, day] = datePart.split("/");
+
+  // Extract hours, minutes, and seconds from timePart
+  let [hours, minutes, seconds] = timePart.split(":");
+
+  // Format output as DD.MM.YYYY @ HH:MM:SS
+  return `${day.padStart(2, "0")}.${month.padStart(
+    2,
+    "0"
+  )}.${year} @ ${hours}:${minutes}:${seconds.slice(0, 2)}`;
 }
+
 function SelectedAll() {
   allCheck.value = !allCheck.value;
   // console.log("All Check Toggled:", allCheck.value);
@@ -585,8 +606,5 @@ th:first-child {
 .border-none-input {
   border: 1px solid #dee2e6;
   border-radius: 0.375rem;
-}
-.eye-cursor {
-  cursor: pointer;
 }
 </style>

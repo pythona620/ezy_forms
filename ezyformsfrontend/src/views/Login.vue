@@ -1,6 +1,6 @@
 <template>
   <div class="bg-img">
-    <div class="input-div p-5">
+    <div v-if="ShowLoginPage" class="input-div p-5">
       <div class="d-flex gap-2 p-2 justify-content-center align-items-center">
         <div><img class="imgmix" src="../assets/favicon.jpg" /></div>
         <div class="m-0">
@@ -8,87 +8,97 @@
         </div>
       </div>
 
-      <div class="mt-3">
-        <label for="name" class="font-13">User name</label><br />
-        <input
-          type="text"
-          class="form-control m-0 bg-white"
-          id="name"
-          v-model="formdata.usr"
-          @input="validatename"
-          @change="checkUserMail()"
-          :class="{ 'is-invalid': errors.usr }"
-        />
+      <div>
+        <div class="mt-3">
+          <label for="name" class="font-13">User name</label><br />
+          <input type="text" class="form-control m-0 bg-white" id="name" v-model="formdata.usr" @input="validatename"
+            @change="checkUserMail()" :class="{ 'is-invalid': errors.usr }" />
 
-        <div class="invalid-feedback font-11 mt-1" v-if="errors.usr">
-          {{ errors.usr }}
+          <div class="invalid-feedback font-11 mt-1" v-if="errors.usr">
+            {{ errors.usr }}
+          </div>
         </div>
-      </div>
 
-      <div class="inputbox mt-3">
-        <label for="password" class="font-13">Password</label><br />
-        <!-- <span class="icon"><i class="bi bi-lock-fill"></i></span> -->
-        <input
-          :disabled="!showPwdField"
-          class="form-control m-0"
-          :type="showPassword ? 'text' : 'password'"
-          id="password"
-          v-model="formdata.pwd"
-          @input="validatepassword"
-          @keydown.enter="Login"
-          :class="{ 'is-invalid': errors.pwd }"
-        />
+        <div class="inputbox mt-3">
+          <label for="password" class="font-13">Password</label><br />
+          <!-- <span class="icon"><i class="bi bi-lock-fill"></i></span> -->
+          <input :disabled="!showPwdField" class="form-control m-0" :type="showPassword ? 'text' : 'password'"
+            id="password" v-model="formdata.pwd" @input="validatepassword" @keydown.enter="Login"
+            :class="{ 'is-invalid': errors.pwd }" />
 
-        <!-- Toggle icon for show/hide password -->
-        <span
-          v-if="!errors.pwd"
-          class="toggle-icon"
-          @click="togglePasswordVisibility"
-        >
-          <i :class="showPassword ? 'bi bi-eye' : 'bi bi-eye-slash'"></i>
-        </span>
-        <div class="invalid-feedback font-10" v-if="errors.pwd">
-          {{ errors.pwd }}
+          <!-- Toggle icon for show/hide password -->
+          <span v-if="!errors.pwd" class="toggle-icon" @click="togglePasswordVisibility">
+            <i :class="showPassword ? 'bi bi-eye' : 'bi bi-eye-slash'"></i>
+          </span>
+          <div class="invalid-feedback font-10" v-if="errors.pwd">
+            {{ errors.pwd }}
+          </div>
         </div>
+        <br />
+        <button :disabled="!showPwdField" @click="Login" type="submit"
+          class="border-0 btn btn-dark button w-100 py-2 font-13 text-white rounded-1">
+          <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          <span v-if="!loading">Log In</span>
+        </button>
       </div>
-      <br />
-      <button
-        :disabled="!showPwdField"
-        @click="Login"
-        type="submit"
-        class="border-0 btn btn-dark button w-100 py-2 font-13 text-white rounded-1"
-      >
-        <span
-          v-if="loading"
-          class="spinner-border spinner-border-sm"
-          role="status"
-          aria-hidden="true"
-        ></span>
-        <span v-if="!loading">Log In</span>
-      </button>
     </div>
 
-    <div
-      class="modal fade"
-      id="changePassword"
-      data-bs-backdrop="static"
-      data-bs-keyboard="false"
-      tabindex="-1"
-      aria-labelledby="changePasswordLabel"
-      aria-hidden="true"
-    >
+
+    <div v-if="showOtpPage">
+      <div class="d-flex gap-2 p-2 justify-content-center align-items-center">
+        <div><img class="imgmix" src="../assets/favicon.jpg" /></div>
+        <div class="m-0">
+          <p class="fontimgtext fw-medium m-0">EZY | Forms</p>
+        </div>
+      </div>
+      <div>
+      </div>
+      <div class="input-div mt-3">
+        <div class="back-to-login">
+          <span @click="backTologin()">Back to Login</span>
+        </div>
+
+        <div class="Message-div mb-1">
+          Please enter OTP sent to your registered mail ID<br><strong>{{ formdata.usr }}</strong>
+        </div>
+
+        <div class="p-4 fw-medium">
+          <p v-if="resentMessage && timeLeft > 0" class="text-success font-12">{{ resentMessage }}</p>
+
+          <h6>OTP</h6>
+          <div class="d-flex justify-content-between mb-3">
+            <input v-for="(digit, index) in otp" :key="index" ref="otpInputs" class="input-field m-0 form-control"
+              type="text" maxlength="1" v-model="otp[index]" :class="{ 'error-border': errorMessage }"
+              @input="handleInput($event, index)" @keydown.delete="handleBackspace(index)"
+              @paste="handlePaste($event)" />
+
+          </div>
+          <!-- Error Message -->
+          <p v-if="errorMessage" class="text-danger font-13">{{ errorMessage }}</p>
+
+          <div class="font-12 text-end">
+            <p v-if="timeLeft > 0">OTP expires in <strong>{{ formattedTime }}</strong></p>
+          </div>
+
+          <div class="d-flex justify-content-between mb-3">
+            <ButtonComp @click="resendOtp" class="resend-button" name="Resend"></ButtonComp>
+            <ButtonComp @click="validateOtp()" class="submit-button" name="Submit"></ButtonComp>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="changePassword" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+      aria-labelledby="changePasswordLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title font-14 fw-bold" id="changePasswordLabel">
               Set New Password
             </h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-            ></button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
             <!-- <FormFields tag="select" placeholder="Category" class="mb-3" name="roles" id="roles"
@@ -96,51 +106,25 @@
                             v-model="selectedData.selectedCategory" /> -->
             <div class="mb-3">
               <label class="raise-label" for="changepass">New Password</label>
-              <FormFields
-                class="mb-1"
-                tag="input"
-                type="text"
-                name="changepass"
-                id="changepass"
-                placeholder="Enter New Password"
-                v-model="new_password"
-                @change="validateNewPassword"
-              />
+              <FormFields class="mb-1" tag="input" type="text" name="changepass" id="changepass"
+                placeholder="Enter New Password" v-model="new_password" @change="validateNewPassword" />
 
               <p v-if="passwordError" class="text-danger font-11 m-0 ps-2">
                 {{ passwordError }}
               </p>
             </div>
             <div class="mb-2">
-              <label class="raise-label" for="confirmpass"
-                >Confirm Password</label
-              >
-              <FormFields
-                class=""
-                tag="input"
-                type="text"
-                name="confirmpass"
-                id="confirmpass"
-                placeholder="Enter Confirm Password"
-                v-model="confirm_password"
-              />
-              <span
-                v-if="passwordsMismatch"
-                class="text-danger font-11 m-0 ps-2"
-                >Passwords do not match.</span
-              >
+              <label class="raise-label" for="confirmpass">Confirm Password</label>
+              <FormFields class="" tag="input" type="text" name="confirmpass" id="confirmpass"
+                placeholder="Enter Confirm Password" v-model="confirm_password" />
+              <span v-if="passwordsMismatch" class="text-danger font-11 m-0 ps-2">Passwords do not match.</span>
             </div>
             <!-- <FormFields tag="select" placeholder="Form" class="mb-3" name="roles" id="roles"
                             :Required="false" :options="formList" v-model="selectedData.selectedform" /> -->
           </div>
           <div>
             <div class="d-flex justify-content-center align-items-center p-3">
-              <button
-                :disabled="!isFormValid"
-                class="btn btn-dark font-12 w-100"
-                type="submit"
-                @click="passwordChange"
-              >
+              <button :disabled="!isFormValid" class="btn btn-dark font-12 w-100" type="submit" @click="passwordChange">
                 Create New Password
               </button>
             </div>
@@ -155,12 +139,14 @@
 import { apis, doctypes } from "../shared/apiurls";
 import axiosInstance from "../shared/services/interceptor";
 import FormFields from "../Components/FormFields.vue";
+import ButtonComp from '../Components/ButtonComp.vue'
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 export default {
   props: ["id"],
   components: {
     FormFields,
+    ButtonComp
   },
   data() {
     return {
@@ -175,13 +161,24 @@ export default {
       new_password: "",
       confirm_password: "",
       showPwdField: false,
-      user_id: "",
+      user_id_name: "",
       //   passwordsMismatch: false,
       passwordError: "",
       loading: false,
+      showOtpPage: false,
+      ShowLoginPage: true,
+      otp: ["", "", "", "", "", ""],
+      errorMessage: "",
+      timeLeft: 60, // 2 minutes in seconds
+      timer: null,
+      resentMessage: "",
     };
   },
   methods: {
+    // ShowOtp(){
+    //   this.showOtpPage=true;
+    //   this.ShowLoginPage=false;
+    // },
     validatename() {
       if (!this.formdata.usr) {
         this.errors.usr = "Please Enter Valid Email Address *";
@@ -210,18 +207,101 @@ export default {
       }
     },
 
+    handleInput(event, index) {
+      const value = event.target.value;
+
+      // Ensure only numbers are entered
+      if (!/^\d*$/.test(value)) {
+        this.otp[index] = "";
+        return;
+      }
+
+      // Move to the next input if a number is entered
+      if (value && index < this.otp.length - 1) {
+        this.$refs.otpInputs[index + 1].focus();
+      }
+
+      // Clear error message when user starts typing
+      this.errorMessage = "";
+    },
+    handleBackspace(index) {
+      if (index > 0 && this.otp[index] === "") {
+        this.$refs.otpInputs[index - 1].focus();
+      }
+    },
+    handlePaste(event) {
+      event.preventDefault();
+      const pastedData = event.clipboardData.getData("text").trim();
+
+      // Ensure only numbers are pasted and length matches
+      if (/^\d{6}$/.test(pastedData)) {
+        this.otp = pastedData.split("");
+
+        // Move focus to the last input field
+        this.$refs.otpInputs[5].focus();
+        this.errorMessage = "";
+      } else {
+        this.errorMessage = "Invalid OTP. Please enter a 6-digit number.";
+      }
+    },
+    preventUndo(event, index) {
+      if (event.ctrlKey && event.key === "Z") {
+        event.preventDefault();
+        this.otp[index] = ""; // Clear the current input to prevent undo
+      }
+    },
+    validateOtp() {
+      const otpValue = this.otp.join("");
+
+      if (otpValue.length < 6) {
+        this.errorMessage = "OTP must be 6 digits.";
+      } else {
+        this.errorMessage = "";
+        localStorage.setItem("UserName", JSON.stringify(this.storeData));
+        setTimeout(() => {
+          this.$router.push({ path: "/todo/receivedform" });
+        }, 700);
+      }
+    },
+
+    startCountdown() {
+      if (this.timer) clearInterval(this.timer);
+
+      this.timer = setInterval(() => {
+        if (this.timeLeft > 0) {
+          this.timeLeft--;
+        } else {
+          clearInterval(this.timer);
+        }
+      }, 1000);
+    },
+    resendOtp() {
+      this.otp = ["", "", "", "", "", ""]; // Clear input fields
+      this.timeLeft = 60; // Reset timer
+      this.errorMessage = "";
+      this.resentMessage = "Resent OTP successfully!"; // Show message
+      this.startCountdown(); // Restart countdown
+    },
+
+    backTologin() {
+      this.ShowLoginPage = true;
+      this.showOtpPage = false;
+    },
+
     checkUserMail() {
-      const queryParams = {
-        fields: JSON.stringify(["*"]),
-        filters: JSON.stringify([["user_id", "=", this.formdata.usr]]),
-      };
+      // const user_id = {
+      //   user_id: this.formdata.usr,
+      // };
 
       axiosInstance
-        .get(`${apis.resource}${doctypes.CheckUser}`, { params: queryParams })
+        .get(`${apis.loginCheckmethod}`, {
+          params: { user_id: this.formdata.usr },
+        })
         .then((res) => {
-          if (res.data.length > 0) {
-            const isFirstLogin = res.data[0].is_first_login;
-            this.user_id = res.data[0].name;
+          if (res.message) {
+            const isFirstLogin = res.message.is_first_login;
+            this.user_id_name = res.message.name;
+            console.log(this.user_id_name, "======");
             if (isFirstLogin === 0) {
               const modal = new bootstrap.Modal(
                 document.getElementById("changePassword")
@@ -248,14 +328,14 @@ export default {
 
     checkboxChange() {
       const payload = {
-        is_first_login: 1,
+        user_id_name: this.user_id_name,
       };
 
       axiosInstance
-        .put(`${apis.resource}${doctypes.CheckUser}/${this.user_id}`, payload)
+        .put(`${apis.loginCheckuseermethod}`, payload)
         .then((res) => {
           console.log("Password updated successfully:", res.data);
-          if (res.data.is_first_login === 1) {
+          if (res.message.is_first_login === 1) {
             this.showPwdField = true;
           }
         })
@@ -271,13 +351,14 @@ export default {
       }
 
       const payload = {
+        user_id: this.formdata.usr,
         new_password: this.new_password,
       };
 
       axiosInstance
-        .put(`${apis.resource}${doctypes.users}/${this.formdata.usr}`, payload)
+        .put(`${apis.loginUpdatePassword}`, payload)
         .then((res) => {
-          if (res.data) {
+          if (res.message) {
             toast.success("Password updated Successfully", { autoClose: 300 });
             const modal = bootstrap.Modal.getInstance(
               document.getElementById("changePassword")
@@ -302,17 +383,21 @@ export default {
           .post(apis.login, this.formdata)
           .then((res) => {
             if (res) {
-              toast.success("Login Successfully", {
-                autoClose: 2000,
-                transition: "zoom",
-              });
+              this.showOtpPage = true;
+              this.ShowLoginPage = false;
+              this.otp = ["", "", "", "", "", ""],
+                this.startCountdown();
+              // toast.success("Login Successfully", {
+              //   autoClose: 2000,
+              //   transition: "zoom",
+              // });
 
-              setTimeout(() => {
-                this.$router.push({ path: "/todo/receivedform" });
-              }, 700);
+              // setTimeout(() => {
+              //   this.$router.push({ path: "/todo/receivedform" });
+              // }, 700);
 
               this.storeData = res;
-              localStorage.setItem("UserName", JSON.stringify(this.storeData));
+              // localStorage.setItem("UserName", JSON.stringify(this.storeData));
 
               if (this.formdata.usr) {
                 this.userData(this.formdata.usr);
@@ -341,10 +426,7 @@ export default {
               .get(`${apis.resource}${doctypes.EzyEmployeeList}/${this.email}`)
               .then((responce) => {
                 const employeeData = responce.data;
-                localStorage.setItem(
-                  "employeeData",
-                  JSON.stringify(employeeData)
-                );
+                localStorage.setItem("employeeData", JSON.stringify(employeeData));
                 localStorage.setItem(
                   "USERROLE",
                   JSON.stringify(employeeData.designation)
@@ -354,10 +436,7 @@ export default {
                 console.error("Error fetching user data:", error);
               });
           } else {
-            localStorage.setItem(
-              "employeeData",
-              JSON.stringify(this.storeData)
-            );
+            localStorage.setItem("employeeData", JSON.stringify(this.storeData));
           }
         })
         .catch((error) => {
@@ -365,6 +444,7 @@ export default {
         });
     },
   },
+
   computed: {
     passwordsMismatch() {
       return (
@@ -374,11 +454,19 @@ export default {
       );
     },
     isFormValid() {
-      return (
-        this.new_password.length >= 6 &&
-        this.new_password === this.confirm_password
-      );
+      return this.new_password.length >= 6 && this.new_password === this.confirm_password;
     },
+    formattedTime() {
+      const minutes = Math.floor(this.timeLeft / 60);
+      const seconds = this.timeLeft % 60;
+      return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+    },
+  },
+  mounted() {
+    this.startCountdown(); // Start timer when component loads
+  },
+  beforeUnmount() {
+    clearInterval(this.timer);
   },
 };
 </script>
@@ -386,6 +474,59 @@ export default {
 <style scoped>
 .loginpageheight {
   height: 100vh;
+}
+
+.Message-div {
+  background-color: #DEFDE9;
+  padding: 20px 50px;
+  text-align: center;
+  font-size: 12px;
+}
+
+
+.input-field {
+  font-size: 18px;
+  font-weight: 500;
+  width: 38px;
+  height: 38px;
+  border-radius: 6px;
+  border-width: 1px;
+  border: 1px solid #EEEEEE;
+  box-shadow: 0px 1px 8px 0px #00000017;
+  text-align: center;
+}
+
+.resend-button {
+  border: 1px solid #EEEEEE !important;
+  background: transparent;
+  border-radius: 10px;
+  text-align: center;
+  font-weight: 500;
+  font-size: 13px;
+  padding: 10px 30px;
+}
+
+.submit-button {
+  background-color: #1B14DF;
+  border-radius: 10px;
+  text-align: center;
+  font-weight: 500;
+  font-size: 13px;
+  color: white;
+  padding: 10px 30px;
+}
+
+.otp-input.error-border {
+  border: 1px solid red !important;
+}
+
+.back-to-login {
+  color: #1B14DF;
+  padding: 15px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 .fontimgtext {
@@ -475,8 +616,8 @@ button {
   transition: 0.5s;
 }
 
-.input-box input:focus ~ label,
-.input-box input:valid ~ label {
+.input-box input:focus~label,
+.input-box input:valid~label {
   top: 3px;
 }
 
