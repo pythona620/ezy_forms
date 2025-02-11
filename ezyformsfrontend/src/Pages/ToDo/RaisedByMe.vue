@@ -551,6 +551,7 @@ function receivedForMe(data) {
     ["requested_by", "like", EmpRequestMail.emp_mail_id],
     ["property", "like", `%${newBusinessUnit.value.business_unit}%`],
     ["status", "=", "Request Raised"],
+    ["status", "=", "In Progress"]
   ];
 
   if (data) {

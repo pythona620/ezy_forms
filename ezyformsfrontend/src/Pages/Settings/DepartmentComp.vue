@@ -41,7 +41,7 @@
                                     :options="EzyFormsCompanys" /> -->
                                 <VueMultiselect v-model="CreateDepartments.business_unit" :options="EzyFormsCompanys"
                                     :multiple="false" :close-on-select="false" :clear-on-select="false"
-                                    :preserve-search="true" placeholder="Select department" class="font-11 mb-3">
+                                    :preserve-search="true" placeholder="Select Business unit" class="font-11 mb-3">
                                     <!-- taggable @tag="addDepartment"
                                             tag-placeholder="Press enter to add department" -->
                                     <!-- <template #option="{ option }">
