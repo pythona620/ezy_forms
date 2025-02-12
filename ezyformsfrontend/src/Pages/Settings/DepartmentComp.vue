@@ -256,7 +256,7 @@ const tableheaders = ref([
     { th: "Department Code", td_key: "department_code" },
     { th: "Department Name", td_key: "department_name" },
     { th: "Business Unit", td_key: "business_unit" },
-    { th: "Status", td_key: "docstatus" },
+    // { th: "Status", td_key: "docstatus" },
 
 ])
 const fieldMapping = ref({

@@ -107,21 +107,21 @@
                             <div class="col"> -->
 
                         <div class=" mb-2">
-                            <label class="raise-label" for="">Department</label>
+                            <label class="raise-label" for="">Department to raise</label>
                             <Multiselect :options="deptartmentData.map(dept => dept.name)" @change="SelectedDepartment"
                                 v-model="selectedData.SelectedDepartment" placeholder="Select" :multiple="false"
                                 class="font-11" :searchable="true" />
                         </div>
-                        <div class=" mb-2">
+                        <!-- <div class=" mb-2">
                             <label class="raise-label" for="">Category</label>
                             <Multiselect :options="categoryOptions" @change="changingCategory"
                                 v-model="selectedData.selectedCategory" placeholder="Select" :multiple="false"
                                 class="font-11" :searchable="true" />
-                        </div>
+                        </div> -->
                         <!-- </div> -->
                         <!-- <div class="col"> -->
                         <div class=" mb-2">
-                            <label class="raise-label" for="">Form</label>
+                            <label class="raise-label" for="">Form list</label>
                             <Multiselect :options="formList.map(list => list.name)" v-model="selectedData.selectedform"
                                 placeholder="Select" @change="SelectedFromchange" :multiple="false" class="font-11"
                                 :searchable="true" />
@@ -431,54 +431,54 @@ const employeeData = ref({});
 //     }
 // );
 
-function changingCategory(value) {
+// function changingCategory(value) {
 
 
 
-    const filters = [];
-    if (selectedData.value.SelectedDepartment) {
-        filters.push(["owner_of_the_form", "like", `${selectedData.value.SelectedDepartment}`]);
-    }
-    if (value) {
-        filters.push(["form_category", "like", `%${value}%`]);
-    }
+//     const filters = [];
+//     if (selectedData.value.SelectedDepartment) {
+//         filters.push(["owner_of_the_form", "like", `${selectedData.value.SelectedDepartment}`]);
+//     }
+//     // if (value) {
+//     //     filters.push(["form_category", "like", `%${value}%`]);
+//     // }
 
 
 
-    const queryParams = {
-        fields: JSON.stringify(["*"]),
-        limit_page_length: filterObj.value.limitPageLength,
-        limit_start: filterObj.value.limit_start,
-        filters: JSON.stringify(filters),
-        order_by: "`tabEzy Form Definitions`.`creation` desc"
-    };
+//     const queryParams = {
+//         fields: JSON.stringify(["*"]),
+//         limit_page_length: filterObj.value.limitPageLength,
+//         limit_start: filterObj.value.limit_start,
+//         filters: JSON.stringify(filters),
+//         order_by: "`tabEzy Form Definitions`.`creation` desc"
+//     };
 
-    axiosInstance.get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParams })
-        .then(res => {
+//     axiosInstance.get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParams })
+//         .then(res => {
 
-            formList.value = res.data; // Store the form list
-        })
-        .catch(error => {
-            console.error("Error fetching ezyForms data:", error);
-        });
-    // blockArr.value = [];
-    // selectedData.value.selectedform = '';
-    // if (value) {
-    //     const dataObj = {
-    //         "role": employeeData.value.designation,
-    //         "business_unit": EzyBusinessUnit.value
-    //     };
+//             formList.value = res.data; // Store the form list
+//         })
+//         .catch(error => {
+//             console.error("Error fetching ezyForms data:", error);
+//         });
+//     // blockArr.value = [];
+//     // selectedData.value.selectedform = '';
+//     // if (value) {
+//     //     const dataObj = {
+//     //         "role": employeeData.value.designation,
+//     //         "business_unit": EzyBusinessUnit.value
+//     //     };
 
-    //     axiosInstance.post(apis.raiseFormdata, dataObj)
-    //         .then((response) => {
-    //             formList.value = response.message.list_of_roadmaps
+//     //     axiosInstance.post(apis.raiseFormdata, dataObj)
+//     //         .then((response) => {
+//     //             formList.value = response.message.list_of_roadmaps
 
-    //         })
-    //         .catch((error) => {
-    //             console.error("Error fetching data:", error);
-    //         });
-    // }
-}
+//     //         })
+//     //         .catch((error) => {
+//     //             console.error("Error fetching data:", error);
+//     //         });
+//     // }
+// }
 function SelectedFromchange(value) {
     blockArr.value = [];
     selectedData.value.selectedform = value;
@@ -605,24 +605,131 @@ function SelectedFromchange(value) {
 //             console.error("Error fetching ezyForms data:", error);
 //         });
 // }
-function SelectedDepartment(departmentName) {
-    const selectedDept = deptartmentData.value.find(dept => dept.name === departmentName);
-    if (selectedDept) {
 
-        categoriesdata(selectedDept.name); // Sending department 'name' instead of 'department_name'
-    }
+
+
+// function SelectedDepartment(departmentName) {
+//     // const selectedDept = deptartmentData.value.find(dept => dept.name === departmentName);
+//     console.log(departmentName);
+    
+//         const filters = [];
+//     if (departmentName) {
+//         filters.push(["owner_of_the_form", "like", `${departmentName}`]);
+//     }
+//     // if (value) {
+//     //     filters.push(["form_category", "like", `%${value}%`]);
+//     // }
+
+
+
+//     const queryParams = {
+//         fields: JSON.stringify(["*"]),
+//         limit_page_length: filterObj.value.limitPageLength,
+//         limit_start: filterObj.value.limit_start,
+//         filters: JSON.stringify(filters),
+//         order_by: "`tabEzy Form Definitions`.`creation` desc"
+//     };
+
+//     axiosInstance.get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParams })
+//         .then(res => {
+
+//             formList.value = res.data; // Store the form list
+//         })
+//         .catch(error => {
+//             console.error("Error fetching ezyForms data:", error);
+//         });
+
+//         // categoriesdata(selectedDept.name); // Sending department 'name' instead of 'department_name'
+    
+// }
+
+// Function to fetch and filter forms based on role
+function SelectedDepartment(departmentName) {
+  console.log("Selected Department:", departmentName);
+
+  // Get USERROLE from localStorage and normalize
+  let userRole = localStorage.getItem("USERROLE")?.trim().toLowerCase();
+  userRole = userRole?.replace(/^"|"$/g, ""); // Remove surrounding quotes
+  console.log("UserRole from localStorage:", `"${userRole}"`);
+
+  if (!userRole) {
+    toast.error("User role is missing. Please log in again.", { autoClose: 2000 });
+    return;
+  }
+
+  const filters = [];
+  if (departmentName) {
+    filters.push(["owner_of_the_form", "like", departmentName]);
+  }
+
+  const queryParams = {
+    fields: JSON.stringify(["*"]),
+    limit_page_length: filterObj.value.limitPageLength,
+    limit_start: filterObj.value.limit_start,
+    filters: JSON.stringify(filters),
+    order_by: "`tabEzy Form Definitions`.`creation` desc",
+  };
+
+  axiosInstance
+  .get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParams })
+    .then((res) => {
+      let allForms = res.data; // Store fetched form list
+      console.log("Fetched Forms List:", allForms);
+
+      // Filter forms based on user role
+      let allowedForms = allForms.filter((form) => {
+        try {
+          const formJson = JSON.parse(form.form_json); // Parse JSON
+          const requestor = formJson.workflow?.find((item) => item.type === "requestor");
+
+          if (!requestor || !Array.isArray(requestor.roles)) {
+            console.log(`Form ${form.form_short_name} has no valid requestor roles.`);
+            return false;
+          }
+
+          // Normalize and clean roles
+          const normalizedRoles = requestor.roles.map((role) => role.trim().toLowerCase());
+          const cleanRole = (str) => str.replace(/[^\x20-\x7E]/g, "").trim().toLowerCase();
+          const cleanedRoles = normalizedRoles.map(cleanRole);
+          const cleanedUserRole = cleanRole(userRole);
+
+          console.log(`Checking Form: ${form.form_short_name}`);
+          console.log("Allowed Roles:", cleanedRoles);
+          console.log("User Role:", cleanedUserRole);
+
+          // Check if userRole exists in cleaned roles
+          return cleanedRoles.includes(cleanedUserRole);
+        } catch (error) {
+          console.error("Error parsing form_json for form:", form.form_short_name, error);
+          return false;
+        }
+      });
+
+      console.log("Allowed Forms after Role Filtering:", allowedForms);
+      if (allowedForms.length === 0) {
+        toast.warning("No forms have been created in this department.", { autoClose: 2000,transition: "zoom", });
+      }
+      formList.value = allowedForms; // Only store role-matched forms
+    })
+    .catch((error) => {
+      console.error("Error fetching ezyForms data:", error);
+      toast.error("Error fetching forms. Please try again.", { autoClose: 2000 ,transition: "zoom",});
+    });
 }
-function categoriesdata(departmentId) {
-    axiosInstance.get(`${apis.resource}${doctypes.departments}/${departmentId}`)
-        .then((res) => {
-            if (res.data && res.data.ezy_departments_items) {
-                categoryOptions.value = res.data.ezy_departments_items.map(item => item.category);
-            }
-        })
-        .catch((error) => {
-            console.error("Error fetching categories data:", error);
-        });
-}
+
+
+
+// function categoriesdata(departmentId) {
+//     axiosInstance.get(`${apis.resource}${doctypes.departments}/${departmentId}`)
+//         .then((res) => {
+//             if (res.data && res.data.ezy_departments_items) {
+//                 categoryOptions.value = res.data.ezy_departments_items.map(item => item.category);
+//             }
+//         })
+//         .catch((error) => {
+//             console.error("Error fetching categories data:", error);
+//         });
+// }
 const emittedFormData = ref([]);
 const filepaths = ref('')
 const handleFieldUpdate = (field) => {
@@ -725,7 +832,7 @@ const handleBuChange = (tab) => {
 
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .headerbackgound {
     height: 50px;
     background-color: var(--sidebar-color);
@@ -783,5 +890,96 @@ const handleBuChange = (tab) => {
     font-size: 12px;
     font-weight: 500;
     margin-bottom: 2px;
+}
+
+
+.multiselect-option {
+    font-size: 11px !important;
+}
+
+.multiselect {
+    height: 30px !important;
+}
+
+.multiselect {
+    margin: initial;
+    font-size: 11px !important;
+    border: 1px solid #e2e2e2 !important;
+    height: 30px !important;
+
+    .multiselect-wrapper {
+        height: 30px !important;
+    }
+
+    .multiselect-dropdown {
+        .multiselect-options {
+            font-size: 11px;
+
+            li.multiselect-option span {
+                font-size: 11px !important;
+            }
+
+            li.multiselect-option .is-selected {
+                background-color: grey !important;
+                font-size: 11px;
+            }
+        }
+    }
+}
+
+.multiselect__option span {
+    font-size: 11px;
+    /* Change this value to whatever size you need */
+}
+
+.multiselect .multiselect-option {
+    font-size: 11px;
+}
+
+.multiselect .multiselect-wrapper {
+    min-height: 30px !important;
+}
+
+.multiselect .multiselect--above {
+    min-height: 30px !important;
+}
+
+.multiselect__tags {
+    min-height: 30px !important;
+    padding: 0px;
+}
+
+.multiselect .multiselect__tags {
+    min-height: 30px !important;
+    font-size: 11px !important;
+}
+
+.multiselect .multiselect__placeholder {
+    font-size: 11px;
+}
+
+.multiselect .multiselect__single {
+    font-size: 11px !important;
+}
+
+.multiselect__single {
+    font-size: 11px !important;
+}
+
+.multiselect__single {
+    font-size: 11px !important;
+
+}
+
+.multiselect .multiselect__tags .multiselect__placeholder {
+    font-size: 11px;
+}
+
+::v-deep(.multiselect__placeholder) {
+    color: #343434;
+    display: inline-block;
+    margin-bottom: 10px;
+    padding-top: 2px;
+    font-size: 10px !important;
 }
 </style>

@@ -221,11 +221,10 @@ function actionCreated(rowData, actionEvent) {
   if (actionEvent.name === "View Request") {
     if (rowData) {
       selectedRequest.value = { ...rowData };
-      totalLevels.value = selectedRequest.value.total_levels;
+      totalLevels.value = selectedRequest.value?.total_levels;
+      console.log(selectedRequest.value,"0000");
       // Rebuild the structured array from JSON
-      showRequest.value = rebuildToStructuredArray(
-        JSON.parse(selectedRequest.value?.json_columns).fields
-      );
+      showRequest.value = rebuildToStructuredArray(JSON.parse(selectedRequest.value?.json_columns).fields);
 
       // Prepare the filters for fetching data
       const filters = [
@@ -550,8 +549,7 @@ function receivedForMe(data) {
   const filters = [
     ["requested_by", "like", EmpRequestMail.emp_mail_id],
     ["property", "like", `%${newBusinessUnit.value.business_unit}%`],
-    ["status", "=", "Request Raised"],
-    ["status", "=", "In Progress"]
+    
   ];
 
   if (data) {

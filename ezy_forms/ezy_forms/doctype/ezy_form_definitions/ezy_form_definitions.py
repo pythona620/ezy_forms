@@ -33,11 +33,12 @@ def add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:st
 	return return_response_for_doc_add
 
 @frappe.whitelist()
-def add_customized_fields_for_dynamic_doc(fields:list[dict],doctype:str):
+def add_customized_fields_for_dynamic_doc(fields:list[dict],doctype:str,accessible_departments:str):
 	return_response_for_add_or_edit_fields = enqueue(
 		enqueued_add_customized_fields_for_dynamic_doc,
 		fields=fields,
 		doctype=doctype,
+  		accessible_departments=accessible_departments,
 		now=True,
 		is_async=True,
 		queue="short")
@@ -105,7 +106,7 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
 			##### calling enqueing_creation_of_roadmap for creating roadmap for this particular mentioned form
 			enqueing_creation_of_roadmap(doctype=doctype,property_name=business_unit,bulk_request=False)
 		if len(fields)>0:
-			add_customized_fields_for_dynamic_doc(fields=fields,doctype=doctype)
+			add_customized_fields_for_dynamic_doc(fields=fields,doctype=doctype,accessible_departments=accessible_departments)
 		return {"success":True,"message":doctype}
 	except Exception as e:
 		exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -117,7 +118,7 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
 		frappe.throw(str(e))
 		return {"success": False, "message": str(e)}
 
-def enqueued_add_customized_fields_for_dynamic_doc(fields:list[dict],doctype:str):
+def enqueued_add_customized_fields_for_dynamic_doc(fields:list[dict],doctype:str,accessible_departments:str):
 	try:
 		if isinstance(fields,str):fields = literal_eval(fields)
 		if not len(fields)>0:return {"success":False,"message":"Pass Fields for storing."}
@@ -165,7 +166,7 @@ def enqueued_add_customized_fields_for_dynamic_doc(fields:list[dict],doctype:str
 			workflow_from_defs = literal_eval(workflow_from_defs)["workflow"]
 			workflow_from_defs = {"workflow":workflow_from_defs}
 		field_with_workflow = {"fields":fields} | workflow_from_defs
-		frappe.db.set_value("Ezy Form Definitions",doctype,{"form_json":str(field_with_workflow).replace("'",'"').replace("None","null")})
+		frappe.db.set_value("Ezy Form Definitions",doctype,{"form_json":str(field_with_workflow).replace("'",'"').replace("None","null"),'accessible_departments':accessible_departments})
 		frappe.db.commit()
 		return {"success":True,"message":fields}
 	except Exception as e:
