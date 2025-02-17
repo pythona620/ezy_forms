@@ -42,7 +42,7 @@
                                                     class="text-danger ps-1">*</span></label>
                                             <FormFields tag="input" type="text" name="emp_phone" id="emp_phone"
                                                 maxlength="10" @change="validatephone"
-                                                placeholder="Enter department code"
+                                                placeholder="Enter Phone Numver"
                                                 v-model="createEmployee.emp_phone" />
                                             <p v-if="phoneError" class="text-danger font-11 ps-1">{{ phoneError }}</p>
                                         </div>
@@ -247,7 +247,7 @@
                                         <label class="font-13 ps-1" for="emp_phone">Emp Phone<span
                                                 class="text-danger ps-1">*</span></label>
                                         <FormFields tag="input" type="text" name="emp_phone" id="emp_phone"
-                                            maxlength="10" @change="validatephone" placeholder="Enter department code"
+                                            maxlength="10" @change="validatephone" placeholder="Enter Phone Number"
                                             v-model="createEmployee.emp_phone" />
                                         <p v-if="phoneError" class="text-danger font-11 ps-1">{{ phoneError }}</p>
                                     </div>
@@ -410,7 +410,7 @@ import VueMultiselect from "vue-multiselect";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
-
+import { domain } from '../../shared/apiurls';
 const businessUnit = computed(() => {
     return EzyBusinessUnit.value;
 });
@@ -537,20 +537,32 @@ const actions = ref(
         { name: 'Edit Employee', icon: 'fa-solid fa-eye' },
     ]
 )
-
-
 const isFormFilled = computed(() => {
-    return createEmployee.value.emp_code.trim() &&
-        createEmployee.value.emp_name.trim() &&
-        createEmployee.value.emp_mail_id.trim() &&
-        createEmployee.value.emp_phone.trim() &&
-        createEmployee.value.department.trim() &&
-        createEmployee.value.designation.trim() &&
-        createEmployee.value.reporting_to.trim() &&
-        createEmployee.value.reporting_designation.trim()
-        &&
-        createEmployee.value.signature; // Excludes company_field
+    return [
+        createEmployee.value.emp_code,
+        createEmployee.value.emp_name,
+        createEmployee.value.emp_mail_id,
+        createEmployee.value.department,
+        createEmployee.value.designation,
+        createEmployee.value.reporting_to,
+        createEmployee.value.reporting_designation,
+        createEmployee.value.signature // Excludes company_field
+    ].every(field => field && field.toString().trim() !== "");
 });
+
+
+// const isFormFilled = computed(() => {
+//     return createEmployee.value.emp_code &&
+//         createEmployee.value.emp_name &&
+//         createEmployee.value.emp_mail_id &&
+//         createEmployee.value.emp_phone &&
+//         createEmployee.value.department &&
+//         createEmployee.value.designation &&
+//         createEmployee.value.reporting_to &&
+//         createEmployee.value.reporting_designation
+//         &&
+//         createEmployee.value.signature; // Excludes company_field
+// });
 function createEmplBtn() {
     deptData();
     designationData();

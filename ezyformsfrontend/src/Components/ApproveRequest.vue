@@ -92,13 +92,13 @@
               <div class="activity-log-dot"></div>
               <div class="activity-log-content">
                 <p class="font-12 mb-1">
-                  <span>{{ formatAction(item.action) }}</span> on
+                  <strong>{{ formatAction(item.action) }} on </strong>
                   <strong class="strong-content">{{ item.creation }} </strong><br />
                   <strong class="strong-content"> {{ item.user_name }}</strong
                   ><br />
                   <span>{{ item.role }}</span
                   ><br />
-                  <span>{{ item.reason || "N/A" }}</span
+                  <span class="font-12 text-secondary">{{ item.reason || "N/A" }}</span
                   >.
                 </p>
               </div>

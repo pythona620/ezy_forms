@@ -349,9 +349,7 @@
                                       v-if="getWorkflowSetup(blockIndex).roles.length > 2"
                                       class="more-count"
                                     >
-                                      +{{
-                                        getWorkflowSetup(blockIndex).roles.length - 2
-                                      }}
+                                      +{{ getWorkflowSetup(blockIndex).roles.length - 2 }}
                                       more
                                     </span>
                                   </label>
@@ -1205,8 +1203,8 @@ onMounted(() => {
   paramId = route.params.paramid || "new";
 
   if (paramId != undefined && paramId != null && paramId != "new") {
-    OwnerOftheForm();
     getFormData();
+    OwnerOftheForm();
   }
   let Bu_Unit = localStorage.getItem("Bu");
   filterObj.value.business_unit = Bu_Unit;
@@ -1444,14 +1442,116 @@ const prevStep = () => {
     activeStep.value -= 1;
   }
 };
+// watch(
+//     () => filterObj.owner_of_the_form,
+//     (newVal, oldVal) => {
+//         if (newVal !== oldVal) {
+//             OwnerOftheForm(newVal, oldVal);
+//         }
+//     }
+// );
+
+// Get form by ID
+function getFormData() {
+  axiosInstance
+    .get(apis.resource + doctypes.EzyFormDefinitions + `/${paramId}`)
+    .then((res) => {
+      let res_data = res?.data;
+      if (res_data) {
+        if (res_data.accessible_departments) {
+          res_data.accessible_departments = res_data.accessible_departments.split(",");
+        }
+        filterObj.value = {
+          ...filterObj.value,
+          ...res_data,
+          owner_of_the_form:
+            res_data.owner_of_the_form || filterObj.value.owner_of_the_form || "",
+        };
+
+        // Only fetch categories if `form_category` is empty
+        // if (!filterObj.value.form_category && filterObj.value.owner_of_the_form) {
+        //     categoriesData(filterObj.value.owner_of_the_form);
+        // }
+
+        // let structuredArr = rebuildToStructuredArray((JSON.parse(res_data?.form_json?.fields).fields)?.replace(/\\\"/g, '"'))
+        let structuredArr = rebuildToStructuredArray(
+          JSON.parse(res_data?.form_json).fields
+        );
+
+        // workflowSetup.push(JSON.parse(res_data?.form_json).workflow)
+
+        structuredArr.forEach((item, index) => {
+          blockArr.push(item);
+        });
+
+        JSON.parse(res_data?.form_json).workflow.forEach((item, index) => {
+          workflowSetup.push(item);
+        });
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching  data:", error);
+    });
+}
+function deptData() {
+  const queryParams = {
+    fields: JSON.stringify(["*"]),
+  };
+
+  axiosInstance
+    .get(apis.resource + doctypes.departments, { params: queryParams })
+    .then((res) => {
+      if (res?.data?.length) {
+        console.log(res.data, "000000000");
+
+        // Mapping department names
+        // label="name" track-by="name"
+        OwnerOfTheFormData.value = res.data.map((dept) => dept.name);
+        formOptions.value = res.data.map((dept) => dept.name); // Store the full data for accessible departments
+        // departments.value = res.data.map(item => item.category)
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching department data:", error);
+    });
+}
 watch(
   () => filterObj.value.owner_of_the_form,
-  (newVal, oldVal) => {
-    if (newVal !== oldVal) {
-      OwnerOftheForm(newVal, oldVal);
+  (newVal) => {
+    if (newVal) {
+      OwnerOftheForm(newVal); // Fetch categories when owner_of_the_form changes
     }
   }
 );
+
+// function OwnerOftheForm(newVal) {
+//     if (newVal) {
+//         console.log(newVal, "ppppp");
+//         categoriesData(newVal); // No need to check filterObj.value.owner_of_the_form again
+//     }
+// }
+function OwnerOftheForm(newVal) {
+  if (newVal && typeof newVal === "string" && newVal.trim() !== "") {
+    console.log("Owner Of The Form Changed:", newVal);
+    categoriesData(newVal);
+  } else {
+    console.log("Owner Of The Form is empty or undefined.");
+  }
+}
+
+function categoriesData(newVal) {
+  axiosInstance
+    .get(apis.resource + doctypes.departments + `/${newVal}`)
+    .then((res) => {
+      if (res?.data?.ezy_departments_items) {
+        departments.value = res.data.ezy_departments_items.map((item) => item.category);
+        console.log(departments.value, "--=-=-=-=-");
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching categories data:", error);
+    });
+}
 
 function formData(status) {
   console.log(blockArr, "blockarray");
@@ -1833,9 +1933,9 @@ const isNextDisabled = computed(() => {
   return (
     formNameError.value.length > 0 ||
     formShortNameError.value.length > 0 ||
-    !filterObj.value.accessible_departments.length ||
-    !filterObj.value.form_category.length ||
-    !filterObj.value.owner_of_the_form.length
+    !filterObj.value.accessible_departments ||
+    !filterObj.value.form_category ||
+    !filterObj.value.owner_of_the_form
   );
 });
 
@@ -1968,78 +2068,6 @@ const previewForm = () => {
     modal.show();
   }
 };
-
-function deptData() {
-  const queryParams = {
-    fields: JSON.stringify(["*"]),
-  };
-
-  axiosInstance
-    .get(apis.resource + doctypes.departments, { params: queryParams })
-    .then((res) => {
-      if (res?.data?.length) {
-        // Mapping department names
-        // label="name" track-by="name"
-        OwnerOfTheFormData.value = res.data.map((dept) => dept.name);
-        formOptions.value = res.data.map((dept) => dept.name); // Store the full data for accessible departments
-        // departments.value = res.data.map(item => item.category)
-      }
-    })
-    .catch((error) => {
-      console.error("Error fetching department data:", error);
-    });
-}
-
-function OwnerOftheForm(newVal) {
-  if (newVal) {
-    categoriesData(newVal);
-  }
-}
-
-function categoriesData(newVal) {
-  axiosInstance
-    .get(apis.resource + doctypes.departments + `/${newVal}`)
-    .then((res) => {
-      if (res?.data?.ezy_departments_items) {
-        departments.value = res.data.ezy_departments_items.map((item) => item.category);
-      }
-    })
-    .catch((error) => {
-      console.error("Error fetching categories data:", error);
-    });
-}
-// Get form by ID
-function getFormData() {
-  axiosInstance
-    .get(apis.resource + doctypes.EzyFormDefinitions + `/${paramId}`)
-    .then((res) => {
-      let res_data = res?.data;
-      if (res_data) {
-        if (res_data.accessible_departments) {
-          res_data.accessible_departments = res_data.accessible_departments.split(",");
-        }
-        filterObj.value = res_data;
-
-        // let structuredArr = rebuildToStructuredArray((JSON.parse(res_data?.form_json?.fields).fields)?.replace(/\\\"/g, '"'))
-        let structuredArr = rebuildToStructuredArray(
-          JSON.parse(res_data?.form_json).fields
-        );
-
-        // workflowSetup.push(JSON.parse(res_data?.form_json).workflow)
-
-        structuredArr.forEach((item, index) => {
-          blockArr.push(item);
-        });
-
-        JSON.parse(res_data?.form_json).workflow.forEach((item, index) => {
-          workflowSetup.push(item);
-        });
-      }
-    })
-    .catch((error) => {
-      console.error("Error fetching  data:", error);
-    });
-}
 
 function delete_form_items_fields() {
   axiosInstance

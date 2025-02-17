@@ -264,7 +264,7 @@ function request_raising_fn(item) {
     }; axiosInstance.post(apis.raising_request, data_obj).then(async (resp) => {
 
         if (resp?.message?.success) {
-            toast.success("Request Raised", { autoClose: 1000 });
+            toast.success("Request Raised", { autoClose: 2000 ,transition: "zoom",});
 
             await router.push({ path: '/todo/raisedbyme' });
             // window.location.reload();

@@ -40,11 +40,7 @@
         />
 
         <!-- Toggle icon for show/hide password -->
-        <span
-          v-if="!errors.pwd"
-          class="toggle-icon"
-          @click="togglePasswordVisibility"
-        >
+        <span v-if="!errors.pwd" class="toggle-icon" @click="togglePasswordVisibility">
           <i :class="showPassword ? 'bi bi-eye' : 'bi bi-eye-slash'"></i>
         </span>
         <div class="invalid-feedback font-10" v-if="errors.pwd">
@@ -112,9 +108,7 @@
               </p>
             </div>
             <div class="mb-2">
-              <label class="raise-label" for="confirmpass"
-                >Confirm Password</label
-              >
+              <label class="raise-label" for="confirmpass">Confirm Password</label>
               <FormFields
                 class=""
                 tag="input"
@@ -124,9 +118,7 @@
                 placeholder="Enter Confirm Password"
                 v-model="confirm_password"
               />
-              <span
-                v-if="passwordsMismatch"
-                class="text-danger font-11 m-0 ps-2"
+              <span v-if="passwordsMismatch" class="text-danger font-11 m-0 ps-2"
                 >Passwords do not match.</span
               >
             </div>
@@ -175,7 +167,7 @@ export default {
       new_password: "",
       confirm_password: "",
       showPwdField: false,
-      user_id: "",
+      user_id_name: "",
       //   passwordsMismatch: false,
       passwordError: "",
       loading: false,
@@ -211,17 +203,19 @@ export default {
     },
 
     checkUserMail() {
-      const queryParams = {
-        fields: JSON.stringify(["*"]),
-        filters: JSON.stringify([["user_id", "=", this.formdata.usr]]),
-      };
+      // const user_id = {
+      //   user_id: this.formdata.usr,
+      // };
 
       axiosInstance
-        .get(`${apis.resource}${doctypes.CheckUser}`, { params: queryParams })
+        .get(`${apis.loginCheckmethod}`, {
+          params: { user_id: this.formdata.usr },
+        })
         .then((res) => {
-          if (res.data.length > 0) {
-            const isFirstLogin = res.data[0].is_first_login;
-            this.user_id = res.data[0].name;
+          if (res.message) {
+            const isFirstLogin = res.message.is_first_login;
+            this.user_id_name = res.message.name;
+            console.log(this.user_id_name, "======");
             if (isFirstLogin === 0) {
               const modal = new bootstrap.Modal(
                 document.getElementById("changePassword")
@@ -248,14 +242,14 @@ export default {
 
     checkboxChange() {
       const payload = {
-        is_first_login: 1,
+        user_id_name: this.user_id_name,
       };
 
       axiosInstance
-        .put(`${apis.resource}${doctypes.CheckUser}/${this.user_id}`, payload)
+        .put(`${apis.loginCheckuseermethod}`, payload)
         .then((res) => {
           console.log("Password updated successfully:", res.data);
-          if (res.data.is_first_login === 1) {
+          if (res.message.is_first_login === 1) {
             this.showPwdField = true;
           }
         })
@@ -271,13 +265,14 @@ export default {
       }
 
       const payload = {
+        user_id: this.formdata.usr,
         new_password: this.new_password,
       };
 
       axiosInstance
-        .put(`${apis.resource}${doctypes.users}/${this.formdata.usr}`, payload)
+        .put(`${apis.loginUpdatePassword}`, payload)
         .then((res) => {
-          if (res.data) {
+          if (res.message) {
             toast.success("Password updated Successfully", { autoClose: 300 });
             const modal = bootstrap.Modal.getInstance(
               document.getElementById("changePassword")
@@ -341,10 +336,7 @@ export default {
               .get(`${apis.resource}${doctypes.EzyEmployeeList}/${this.email}`)
               .then((responce) => {
                 const employeeData = responce.data;
-                localStorage.setItem(
-                  "employeeData",
-                  JSON.stringify(employeeData)
-                );
+                localStorage.setItem("employeeData", JSON.stringify(employeeData));
                 localStorage.setItem(
                   "USERROLE",
                   JSON.stringify(employeeData.designation)
@@ -354,10 +346,7 @@ export default {
                 console.error("Error fetching user data:", error);
               });
           } else {
-            localStorage.setItem(
-              "employeeData",
-              JSON.stringify(this.storeData)
-            );
+            localStorage.setItem("employeeData", JSON.stringify(this.storeData));
           }
         })
         .catch((error) => {
@@ -374,10 +363,7 @@ export default {
       );
     },
     isFormValid() {
-      return (
-        this.new_password.length >= 6 &&
-        this.new_password === this.confirm_password
-      );
+      return this.new_password.length >= 6 && this.new_password === this.confirm_password;
     },
   },
 };

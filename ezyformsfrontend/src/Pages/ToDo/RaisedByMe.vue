@@ -240,7 +240,8 @@ function actionCreated(rowData, actionEvent) {
   if (actionEvent.name === "View Request") {
     if (rowData) {
       selectedRequest.value = { ...rowData };
-      totalLevels.value = selectedRequest.value.total_levels;
+      totalLevels.value = selectedRequest.value?.total_levels;
+      console.log(selectedRequest.value, "0000");
       // Rebuild the structured array from JSON
       showRequest.value = rebuildToStructuredArray(
         JSON.parse(selectedRequest.value?.json_columns).fields
