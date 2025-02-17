@@ -149,51 +149,55 @@
                 {{ row[column.td_key] || "-" }}
               </span>
             </td>
-
-            <td v-if="actionType === 'viewPdf'" class="text-center">
-              <span class="px-2">
-                <i
-                  @click="handleCellClick(row, rowIndex, 'view')"
-                  class="ri-eye-line eye-cursor"
-                ></i>
-              </span>
-              <span v-if="download === 'true'">
-                <i
-                  class="bi bi-download eye-cursor"
-                  @click="handleCellClick(row, rowIndex, 'download')"
-                ></i>
-              </span>
-            </td>
-            <!-- 'Reviewpending': row[column.td_key] == 'Pending Review',
+            <td
+              class="text-center d-flex justify-content-center"
+              v-if="isAction == 'true'"
+            >
+              <div v-if="viewType === 'viewPdf'" class="text-center">
+                <span class="px-2">
+                  <i
+                    @click="handleCellClick(row, rowIndex, 'view')"
+                    class="ri-eye-line eye-cursor"
+                  ></i>
+                </span>
+                <span v-if="download === 'true'">
+                  <i
+                    class="bi bi-download eye-cursor"
+                    @click="handleCellClick(row, rowIndex, 'download')"
+                  ></i>
+                </span>
+              </div>
+              <!-- 'Reviewpending': row[column.td_key] == 'Pending Review',
 			'Reviewed': row[column.td_key] == 'Reviewed',
 			'Completed': row[column.td_key] == 'Completed',
 			'text-danger': row[column.td_key] == 'Error' -->
 
-            <!-- <td :selectedText="text"></td>
+              <!-- <td :selectedText="text"></td>
 					<td :selectedOption="selectoption"></td>
 					column.td_key, -->
 
-            <td
-              v-if="actionType === 'dropdown'"
-              class="text-center fixed-column position-relative"
-            >
-              <div class="dropdown">
-                <p class="p-0 actions" data-bs-toggle="dropdown" aria-expanded="false">
-                  <span>...</span>
-                </p>
-                <ul class="dropdown-menu actionsdropdown">
-                  <li
-                    class="py-1"
-                    @click="selectedAction(row, action)"
-                    v-for="(action, index) in actions"
-                    :key="index"
-                  >
-                    <a class="dropdown-item py-2 d-flex align-items-center gap-2">
-                      <i :class="action.icon"></i>
-                      <h1 class="font-10 mb-0">{{ action.name }}</h1>
-                    </a>
-                  </li>
-                </ul>
+              <div
+                v-if="actionType === 'dropdown'"
+                class="fixed-column position-relative"
+              >
+                <div class="dropdown">
+                  <p class="p-0 actions" data-bs-toggle="dropdown" aria-expanded="false">
+                    <span>...</span>
+                  </p>
+                  <ul class="dropdown-menu actionsdropdown">
+                    <li
+                      class="py-1"
+                      @click="selectedAction(row, action)"
+                      v-for="(action, index) in actions"
+                      :key="index"
+                    >
+                      <a class="dropdown-item py-2 d-flex align-items-center gap-2">
+                        <i :class="action.icon"></i>
+                        <h1 class="font-10 mb-0">{{ action.name }}</h1>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
               </div>
             </td>
             <!-- <td
@@ -258,6 +262,9 @@ const props = defineProps({
     type: String,
   },
   actionType: {
+    type: String,
+  },
+  viewType: {
     type: String,
   },
   // class: {

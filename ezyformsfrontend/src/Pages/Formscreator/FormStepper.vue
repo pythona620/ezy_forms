@@ -1,174 +1,241 @@
 <template>
-    <div>
-        <div class="">
-            <div class="">
-                <div class="d-flex justify-content-between align-items-center CancelNdSave my-2 py-2">
-                    <div class="ps-1 my-2 d-flex align-items-center " @click="cancelForm()">
-                        <h1 class="font-13 ms-3">
-                            <i class="bi bi-arrow-left"></i><span class="ms-2">Back</span>
+  <div>
+    <div class="">
+      <div class="">
+        <div
+          class="d-flex justify-content-between align-items-center CancelNdSave my-2 py-2"
+        >
+          <div class="ps-1 my-2 d-flex align-items-center" @click="cancelForm()">
+            <h1 class="font-13 ms-3">
+              <i class="bi bi-arrow-left"></i><span class="ms-2">Back</span>
+            </h1>
+          </div>
+          <div>
+            <!-- <ButtonComp class="font-13 rounded-2" name="Save as Draft"></ButtonComp> -->
+            <button
+              v-if="activeStep === 2 && blockArr.length"
+              :disabled="hasErrors || isNextDisabled"
+              :style="{ cursor: hasErrors ? 'not-allowed' : 'pointer' }"
+              type="butoon"
+              class="btn font-13 btn-light"
+              @click="saveFormData('draft')"
+            >
+              <i class="bi bi-bookmark-check-fill"></i> Save As Draft
+            </button>
+          </div>
+        </div>
+        <div class="form-container container-fluid mt-1">
+          <div class="row">
+            <div class="col-2">
+              <div class="steps-sticky-div">
+                <ul class="steps">
+                  <li
+                    v-for="step in steps"
+                    :key="step.id"
+                    :class="{
+                      active: activeStep === step.id,
+                      completed: activeStep > step.id,
+                    }"
+                  >
+                    <div
+                      class="d-flex gap-3 align-items-center"
+                      @click="handleStepClick(step.id)"
+                      :class="{
+                        'not-allowed': isNextDisabled && activeStep + 1 === step.id,
+                      }"
+                    >
+                      <i
+                        v-if="activeStep > step.id"
+                        class="ri-checkbox-circle-fill completedStepIcon"
+                      ></i>
+                      <i v-else :class="step.icon"></i>
+                      <div class="step-text">
+                        <span class="font-11">{{ step.stepno }}</span
+                        ><br />
+                        <span class="font-14">{{ step.label }}</span>
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div class="col-10 formbackground-color">
+              <div class="">
+                <div class="form-content stepsDiv">
+                  <!-- About Form Step -->
+                  <div v-if="activeStep === 1">
+                    <div class="">
+                      <div
+                        class="stepperbackground ps-2 pe-2 m-0 d-flex justify-content-between align-items-center"
+                      >
+                        <h1 class="font-14 m-0" @click="cancelForm()">
+                          <i class="bi bi-chevron-left"></i
+                          ><span class="ms-2">Cancel Form</span>
                         </h1>
+                        <h1 class="font-14 fw-bold m-0">About Form</h1>
+                        <ButtonComp
+                          :disabled="isNextDisabled"
+                          :class="{ 'disabled-btn': isNextDisabled }"
+                          class="btn btn-dark bg-dark text-white fw-bold font-13"
+                          name="Next"
+                          v-if="activeStep < 3"
+                          @click="nextStep"
+                        />
+                      </div>
                     </div>
-                    <div>
-                        <!-- <ButtonComp class="font-13 rounded-2" name="Save as Draft"></ButtonComp> -->
-                        <button v-if="activeStep === 2 && blockArr.length" :disabled="hasErrors || isNextDisabled"
-                            :style="{ cursor: hasErrors ? 'not-allowed' : 'pointer' }" type="butoon"
-                            class="btn font-13 btn-light" @click="saveFormData('draft')">
-                            <i class="bi bi-bookmark-check-fill"></i> Save As Draft
-                        </button>
-                    </div>
-                </div>
-                <div class="form-container container-fluid mt-1">
                     <div class="row">
-                        <div class="col-2">
-                            <div class="steps-sticky-div">
-                                <ul class="steps">
-                                    <li v-for="step in steps" :key="step.id" :class="{
-                        active: activeStep === step.id,
-                        completed: activeStep > step.id
-                    }">
-
-                                        <div class="d-flex gap-3 align-items-center" @click="handleStepClick(step.id)"
-                                            :class="{ 'not-allowed': isNextDisabled && activeStep + 1 === step.id }">
-                                            <i v-if="activeStep > step.id"
-                                                class="ri-checkbox-circle-fill completedStepIcon"></i>
-                                            <i v-else :class="step.icon"></i>
-                                            <div class="step-text">
-                                                <span class="font-11">{{ step.stepno }}</span><br />
-                                                <span class="font-14">{{ step.label }}</span>
-                                            </div>
-                                        </div>
-                                    </li>
-                                </ul>
-                            </div>
+                      <div class="col-4"></div>
+                      <div class="col-4">
+                        <div class="mt-3">
+                          <div class="">
+                            <FormFields
+                              :disabled="
+                                paramId != undefined &&
+                                paramId != null &&
+                                paramId != 'new'
+                              "
+                              labeltext="Form Name"
+                              class="formHeight"
+                              type="text"
+                              tag="input"
+                              name="Value"
+                              id="formName"
+                              placeholder="Untitled Form"
+                              @change="(event) => handleInputChange(event, 'form_name')"
+                              v-model="filterObj.form_name"
+                            />
+                            <span v-if="formNameError" class="text-danger ErrorMsg ms-2">
+                              {{ formNameError }}</span
+                            >
+                          </div>
                         </div>
-                        <div class="col-10 formbackground-color">
-                            <div class="">
-                                <div class="form-content stepsDiv">
-                                    <!-- About Form Step -->
-                                    <div v-if="activeStep === 1">
-                                        <div class="">
-                                            <div
-                                                class="stepperbackground ps-2 pe-2 m-0 d-flex justify-content-between align-items-center">
-                                                <h1 class="font-14 m-0" @click="cancelForm()">
-                                                    <i class="bi bi-chevron-left"></i><span class="ms-2">Cancel
-                                                        Form</span>
-                                                </h1>
-                                                <h1 class="font-14 fw-bold m-0">About Form</h1>
-                                                <ButtonComp :disabled="isNextDisabled"
-                                                    :class="{ 'disabled-btn': isNextDisabled }"
-                                                    class="btn btn-dark bg-dark text-white fw-bold font-13" name="Next"
-                                                    v-if="activeStep < 3" @click="nextStep" />
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-4"></div>
-                                            <div class="col-4">
-                                                <div class="mt-3">
-                                                    <div class="">
-                                                        <FormFields :disabled="paramId != undefined &&
-                        paramId != null &&
-                        paramId != 'new'
-                        " labeltext="Form Name" class="formHeight" type="text" tag="input" name="Value" id="formName"
-                                                            placeholder="Untitled Form" @change="(event) => handleInputChange(event, 'form_name')
-                        " v-model="filterObj.form_name" />
-                                                        <span v-if="formNameError" class="text-danger ErrorMsg ms-2">
-                                                            {{ formNameError }}</span>
-                                                    </div>
-                                                </div>
-                                                <div class="mt-3">
-                                                    <div class="">
-                                                        <FormFields :disabled="paramId != undefined &&
-                        paramId != null &&
-                        paramId != 'new'
-                        " labeltext="Form Short Code" class="formHeight" type="text" tag="input" name="Value"
-                                                            id="formShortCode" placeholder="Untitled Form" @change="(event) =>
-                        handleInputChange(event, 'form_short_name')
-                        " v-model="filterObj.form_short_name" />
-                                                        <span v-if="formShortNameError"
-                                                            class="text-danger ErrorMsg ms-2">
-                                                            {{ formShortNameError }}</span>
-                                                        <!-- <label for="">Form Short Code</label>
+                        <div class="mt-3">
+                          <div class="">
+                            <FormFields
+                              :disabled="
+                                paramId != undefined &&
+                                paramId != null &&
+                                paramId != 'new'
+                              "
+                              labeltext="Form Short Code"
+                              class="formHeight"
+                              type="text"
+                              tag="input"
+                              name="Value"
+                              id="formShortCode"
+                              placeholder="Untitled Form"
+                              @change="
+                                (event) => handleInputChange(event, 'form_short_name')
+                              "
+                              v-model="filterObj.form_short_name"
+                            />
+                            <span
+                              v-if="formShortNameError"
+                              class="text-danger ErrorMsg ms-2"
+                            >
+                              {{ formShortNameError }}</span
+                            >
+                            <!-- <label for="">Form Short Code</label>
 
                                                         <Multiselect :options=formOptions
                                                             v-model="filterObj.form_short_name"
                                                             placeholder="Untitle Form" :multiple="true"
                                                             :searchable="true" /> -->
-                                                    </div>
-                                                </div>
-                                                <div class="mt-3">
-                                                    <div class="">
-                                                        <!-- <FormFields labeltext="Owner Of The Form" class="mb-3 w-100"
+                          </div>
+                        </div>
+                        <div class="mt-3">
+                          <div class="">
+                            <!-- <FormFields labeltext="Owner Of The Form" class="mb-3 w-100"
                                                             tag="select" name="dept" id="dept"
                                                             placeholder="Select Department" :options=formOptions
                                                             v-model="filterObj.owner_of_the_form" /> -->
-                                                        <label for="">Owner Of The Form</label>
+                            <label for="">Owner Of The Form</label>
 
-                                                        <Multiselect :options="OwnerOfTheFormData"
-                                                            @change="OwnerOftheForm"
-                                                            v-model="filterObj.owner_of_the_form"
-                                                            placeholder="Select Department" :multiple="false"
-                                                            class="font-11 multiselect" :searchable="true" />
-                                                    </div>
-                                                </div>
-                                                <div class="mt-3">
-                                                    <div class="">
-                                                        <!-- <FormFields labeltext="Form Cateogry" class="mb-3" tag="select"
+                            <Multiselect
+                              :options="OwnerOfTheFormData"
+                              @change="OwnerOftheForm"
+                              v-model="filterObj.owner_of_the_form"
+                              placeholder="Select Department"
+                              :multiple="false"
+                              class="font-11 multiselect"
+                              :searchable="true"
+                            />
+                          </div>
+                        </div>
+                        <div class="mt-3">
+                          <div class="">
+                            <!-- <FormFields labeltext="Form Cateogry" class="mb-3" tag="select"
                                                             name="desgination" id="desgination"
                                                             placeholder="Select Cateogry" :options=departments
                                                             v-model="filterObj.form_category" /> -->
 
-                                                        <label for="">Form Cateogry</label>
+                            <label for="">Form Cateogry</label>
 
-                                                        <Multiselect :options="departments"
-                                                            v-model="filterObj.form_category"
-                                                            placeholder="Select Cateogry" :multiple="false"
-                                                            :searchable="true" class="font-11 multiselect" />
-                                                    </div>
-                                                </div>
-                                                <div class="mt-3">
-                                                    <div class="">
-                                                        <!-- <FormFields labeltext="Accessbility Departments" class="mb-3"
+                            <Multiselect
+                              :options="departments"
+                              v-model="filterObj.form_category"
+                              placeholder="Select Cateogry"
+                              :multiple="false"
+                              :searchable="true"
+                              class="font-11 multiselect"
+                            />
+                          </div>
+                        </div>
+                        <div class="mt-3">
+                          <div class="">
+                            <!-- <FormFields labeltext="Accessbility Departments" class="mb-3"
                                                             tag="multiselect" name="desgination" id="Departments"
                                                             placeholder="Select Desigination" :options=formOptions
                                                             v-model="filterObj.accessible_departments" /> -->
-                                                        <!-- <v-select v-model="filterObj.accessible_departments"
+                            <!-- <v-select v-model="filterObj.accessible_departments"
                                                             :options="formOptions"></v-select> -->
-                                                    </div>
-                                                    <!-- <label for="">Accessbility Departments</label> -->
-                                                    <!-- <Multiselect :options=formOptions
+                          </div>
+                          <!-- <label for="">Accessbility Departments</label> -->
+                          <!-- <Multiselect :options=formOptions
                                                         v-model="filterObj.accessible_departments"
                                                         placeholder="Select Desigination" :multiple="true"
                                                         track-by="code" :close-on-select="false"
                                                         :clear-on-select="false" :searchable="true" /> -->
 
-                                                    <div>
-                                                        <label class="typo__label">
-                                                            <label for="">Accessibility Departments</label>
-                                                        </label>
-                                                        <VueMultiselect v-model="filterObj.accessible_departments"
-                                                            :options="formOptions" :multiple="true"
-                                                            :close-on-select="false" :clear-on-select="false"
-                                                            :preserve-search="true" placeholder="Select Designation"
-                                                            class="font-11">
-                                                            <template #option="{ option }">
-                                                                <div class="custom-option">
-                                                                    <input type="checkbox" :checked="filterObj.accessible_departments.includes(
-                        option
-                    )
-                        " class="custom-checkbox" />
-                                                                    <span>{{ option }}</span>
-                                                                </div>
-                                                            </template>
+                          <div>
+                            <label class="typo__label">
+                              <label for="">Accessibility Departments</label>
+                            </label>
+                            <VueMultiselect
+                              v-model="filterObj.accessible_departments"
+                              :options="formOptions"
+                              :multiple="true"
+                              :close-on-select="false"
+                              :clear-on-select="false"
+                              :preserve-search="true"
+                              placeholder="Select Designation"
+                              class="font-11"
+                            >
+                              <template #option="{ option }">
+                                <div class="custom-option">
+                                  <input
+                                    type="checkbox"
+                                    :checked="
+                                      filterObj.accessible_departments.includes(option)
+                                    "
+                                    class="custom-checkbox"
+                                  />
+                                  <span>{{ option }}</span>
+                                </div>
+                              </template>
 
-                                                            <template #selection="{ values, isOpen }">
-                                                                <span class="multiselect__single font-10"
-                                                                    v-if="values.length" v-show="!isOpen">
-                                                                    {{ values.join(", ") }} selected
-                                                                </span>
-                                                            </template>
-                                                        </VueMultiselect>
+                              <template #selection="{ values, isOpen }">
+                                <span
+                                  class="multiselect__single font-10"
+                                  v-if="values.length"
+                                  v-show="!isOpen"
+                                >
+                                  {{ values.join(", ") }} selected
+                                </span>
+                              </template>
+                            </VueMultiselect>
 
-                                                        <!-- <VueMultiselect v-model="filterObj.accessible_departments"
+                            <!-- <VueMultiselect v-model="filterObj.accessible_departments"
                                                             :options="formOptions" :multiple="true"
                                                             :close-on-select="false" :clear-on-select="false"
                                                             :preserve-search="true" placeholder="Select Designation"
@@ -181,666 +248,888 @@
                                                                 </span>
                                                             </template>
                                                         </VueMultiselect> -->
-                                                    </div>
-                                                </div>
-                                            </div>
+                          </div>
+                        </div>
+                      </div>
 
-                                            <div class="col-4"></div>
-                                        </div>
-                                    </div>
+                      <div class="col-4"></div>
+                    </div>
+                  </div>
 
-                                    <!-- Questions in Form Step -->
-                                    <div v-if="activeStep === 2">
-                                        <div class="">
-                                            <div
-                                                class="stepperbackground ps-2 pe-2 m-0 d-flex justify-content-between align-items-center">
-                                                <h1 @click="prevStep(1)" class="font-11 m-0">
-                                                    <i class="bi bi-chevron-left"></i><span class="ms-2">Back To About
-                                                        Form</span>
-                                                </h1>
-                                                <div class="d-flex gap-2 align-items-center">
-                                                    <div v-if="!hasErrors || blockArr.length">
-                                                        <button
-                                                            class="btn btn-light previewBtn d-flex align-items-center font-13"
-                                                            type="button" @click="previewForm">
-                                                            <i class="bi bi-eye me-1  ms-1  mb-0"></i>Preview
-                                                        </button>
-                                                    </div>
+                  <!-- Questions in Form Step -->
+                  <div v-if="activeStep === 2">
+                    <div class="">
+                      <div
+                        class="stepperbackground ps-2 pe-2 m-0 d-flex justify-content-between align-items-center"
+                      >
+                        <h1 @click="prevStep(1)" class="font-11 m-0">
+                          <i class="bi bi-chevron-left"></i
+                          ><span class="ms-2">Back To About Form</span>
+                        </h1>
+                        <div class="d-flex gap-2 align-items-center">
+                          <div v-if="!hasErrors || blockArr.length">
+                            <button
+                              class="btn btn-light previewBtn d-flex align-items-center font-13"
+                              type="button"
+                              @click="previewForm"
+                            >
+                              <i class="bi bi-eye me-1 ms-1 mb-0"></i>Preview
+                            </button>
+                          </div>
 
-                                                    <!-- <ButtonComp
+                          <!-- <ButtonComp
                                                         class="buttoncomp btn btn-dark font-10 Withborder border"
                                                         name="Next" v-if="activeStep < 3" @click="nextStep" /> -->
-                                                    <button v-if="blockArr.length"
-                                                        :disabled="hasErrors || isNextDisabled"
-                                                        :style="{ cursor: hasErrors ? 'not-allowed' : 'pointer' }"
-                                                        class="btn btn-dark font-10 Withborder border" type="button"
-                                                        @click="saveFormData('save')">
-                                                        Save data
-                                                    </button>
-                                                    <!-- <button class="btn btn-light font-10" type="button"
+                          <button
+                            v-if="blockArr.length"
+                            :disabled="hasErrors || isNextDisabled"
+                            :style="{ cursor: hasErrors ? 'not-allowed' : 'pointer' }"
+                            class="btn btn-dark font-10 Withborder border"
+                            type="button"
+                            @click="saveFormData('save')"
+                          >
+                            Save data
+                          </button>
+                          <!-- <button class="btn btn-light font-10" type="button"
                                                         data-bs-toggle="modal" data-bs-target="#exampleModal"
                                                         @click="createForm">
                                                         <i class="bi bi-eye me-1"></i>Preview
                                                     </button> -->
-                                                </div>
-                                            </div>
-                                            <FormPreview :blockArr="selectedform"
-                                                :formDescriptions="formDescriptions" />
-                                            <div class="main-block">
-                                                <!-- Here is block level starts -->
-                                                <div class="block-level" v-for="(block, blockIndex) in blockArr"
-                                                    :key="blockIndex">
-                                                    <div class="requestandAppHeader">
-                                                        <div class="d-flex justify-content-between">
-                                                            <div>
-                                                                <h6 class="ps-2 pt-2">
-                                                                    {{
-                        blockIndex === 0 ? "Requestor Block" : `Approver
+                        </div>
+                      </div>
+                      <FormPreview
+                        :blockArr="selectedform"
+                        :formDescriptions="formDescriptions"
+                      />
+                      <div class="main-block">
+                        <!-- Here is block level starts -->
+                        <div
+                          class="block-level"
+                          v-for="(block, blockIndex) in blockArr"
+                          :key="blockIndex"
+                        >
+                          <div class="requestandAppHeader">
+                            <div class="d-flex justify-content-between">
+                              <div>
+                                <h6 class="ps-2 pt-2">
+                                  {{
+                                    blockIndex === 0
+                                      ? "Requestor Block"
+                                      : `Approver
                                                                     Block ${blockIndex}
                                                                     `
-                    }}
-                                                                    <!-- ${blockIndex++} -->
+                                  }}
+                                  <!-- ${blockIndex++} -->
+                                </h6>
+                              </div>
+                              <div class="d-flex">
+                                <div
+                                  v-if="paramId && workflowSetup.length"
+                                  class="role-container"
+                                >
+                                  <span class="role-label">
+                                    {{ blockIndex == 0 ? "Requestor: " : "Approver:" }}
+                                  </span>
+                                  <label
+                                    class="role-text"
+                                    v-if="getWorkflowSetup(blockIndex)"
+                                  >
+                                    <span class="role-names">
+                                      {{
+                                        getWorkflowSetup(blockIndex)
+                                          .roles.slice(0, 2)
+                                          .join(", ")
+                                      }}
+                                    </span>
+                                    <span
+                                      data-bs-toggle="offcanvas"
+                                      data-bs-target="#offcanvasRight"
+                                      aria-controls="offcanvasRight"
+                                      @click="AddDesignCanvas(blockIndex)"
+                                      v-if="getWorkflowSetup(blockIndex).roles.length > 2"
+                                      class="more-count"
+                                    >
+                                      +{{
+                                        getWorkflowSetup(blockIndex).roles.length - 2
+                                      }}
+                                      more
+                                    </span>
+                                  </label>
+                                </div>
 
-                                                                </h6>
-                                                            </div>
-                                                            <div class="d-flex">
-                                                                <div v-if="paramId && workflowSetup.length"
-                                                                    class="role-container">
-                                                                    <span class="role-label">
-                                                                        {{ blockIndex == 0 ? "Requestor: " : "Approver:"
-                                                                        }}
-                                                                    </span>
-                                                                    <label class="role-text"
-                                                                        v-if="getWorkflowSetup(blockIndex)">
-                                                                        <span class="role-names">
-                                                                            {{
-                        getWorkflowSetup(blockIndex).roles.slice(0,
-                            2).join(", ")
-                    }}
-                                                                        </span>
-                                                                        <span data-bs-toggle="offcanvas"
-                                                                            data-bs-target="#offcanvasRight"
-                                                                            aria-controls="offcanvasRight"
-                                                                            @click="AddDesignCanvas(blockIndex)"
-                                                                            v-if="getWorkflowSetup(blockIndex).roles.length > 2"
-                                                                            class="more-count">
-                                                                            +{{
-                        getWorkflowSetup(blockIndex).roles.length -
-                        2 }} more
-                                                                        </span>
-                                                                    </label>
-                                                                </div>
+                                <button
+                                  v-if="
+                                    paramId != undefined &&
+                                    paramId != null &&
+                                    paramId != 'new'
+                                  "
+                                  class="btn btn-light designationBtn d-flex align-items-center"
+                                  type="button"
+                                  data-bs-toggle="offcanvas"
+                                  data-bs-target="#offcanvasRight"
+                                  aria-controls="offcanvasRight"
+                                  @click="AddDesignCanvas(blockIndex)"
+                                >
+                                  <template v-if="paramId && workflowSetup.length">
+                                    <i class="bi bi-pencil font-14"></i>
+                                  </template>
+                                  <template v-else>
+                                    <img
+                                      src="../../assets/oui_app-users-roles.svg"
+                                      alt="Add"
+                                      class="me-1"
+                                    />
+                                    Add designations
+                                  </template>
+                                </button>
 
-
-                                                                <button v-if="paramId != undefined &&
-                        paramId != null &&
-                        paramId != 'new'
-                        " class="btn btn-light designationBtn d-flex align-items-center" type="button"
-                                                                    data-bs-toggle="offcanvas"
-                                                                    data-bs-target="#offcanvasRight"
-                                                                    aria-controls="offcanvasRight"
-                                                                    @click="AddDesignCanvas(blockIndex)">
-                                                                    <template v-if="paramId && workflowSetup.length">
-                                                                        <i class="bi bi-pencil font-14"></i>
-                                                                    </template>
-                                                                    <template v-else>
-                                                                        <img src="../../assets/oui_app-users-roles.svg"
-                                                                            alt="Add" class="me-1" />
-                                                                        Add designations
-                                                                    </template>
-                                                                </button>
-
-                                                                <button
-                                                                    class="btn btn-light bg-transparent border-0 font-13 deleteBlock"
-                                                                    @click="removeBlock(blockIndex)">
-                                                                    <i class="bi bi-trash me-1"></i> Delete Block
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <!-- draggable="true" @dragstart="handleDragStart($event, sectionIndex, 'section', blockIndex)"
+                                <button
+                                  class="btn btn-light bg-transparent border-0 font-13 deleteBlock"
+                                  @click="removeBlock(blockIndex)"
+                                >
+                                  <i class="bi bi-trash me-1"></i> Delete Block
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                          <!-- draggable="true" @dragstart="handleDragStart($event, sectionIndex, 'section', blockIndex)"
                                                             @dragover="handleDragOver($event)"
                                                             @drop="handleDrop($event, sectionIndex, 'section', blockIndex)" -->
-                                                    <div class="mt-2 section_block">
-                                                        <div v-for="(section, sectionIndex) in block.sections"
-                                                            :key="'section-' + sectionIndex"
-                                                            class="dynamicSection section">
-                                                            <section
-                                                                class="d-flex justify-content-between align-items-center">
-                                                                <div class="d-flex flex-column">
-                                                                    <input v-model="section.label" type="text" :class="[
-                        'border-less-input',
-                        'font-14',
-                        { 'italic-style': !section.label },
-                        { 'fw-medium': section.label },
-                    ]" @change="handleFieldChange(blockIndex, sectionIndex)" placeholder="Untitled section" />
-                                                                    <small v-if="section.errorMsg"
-                                                                        class="text-danger font-10">
-                                                                        {{ section.errorMsg }}
-                                                                    </small>
-                                                                </div>
-                                                                <div class="d-flex">
-                                                                    <button
-                                                                        class="btn btn-light bg-transparent border-0 font-13 deleteSection"
-                                                                        @click="removeSection(blockIndex, sectionIndex)">
-                                                                        <i class="bi bi-trash me-1"></i> Delete Section
-                                                                    </button>
-                                                                </div>
-                                                            </section>
-                                                            <!-- draggable="true" @dragstart="handleDragStart($event, rowIndex, 'row', blockIndex, sectionIndex)"
+                          <div class="mt-2 section_block">
+                            <div
+                              v-for="(section, sectionIndex) in block.sections"
+                              :key="'section-' + sectionIndex"
+                              class="dynamicSection section"
+                            >
+                              <section
+                                class="d-flex justify-content-between align-items-center"
+                              >
+                                <div class="d-flex flex-column">
+                                  <input
+                                    v-model="section.label"
+                                    type="text"
+                                    :class="[
+                                      'border-less-input',
+                                      'font-14',
+                                      { 'italic-style': !section.label },
+                                      { 'fw-medium': section.label },
+                                    ]"
+                                    @change="handleFieldChange(blockIndex, sectionIndex)"
+                                    placeholder="Untitled section"
+                                  />
+                                  <small
+                                    v-if="section.errorMsg"
+                                    class="text-danger font-10"
+                                  >
+                                    {{ section.errorMsg }}
+                                  </small>
+                                </div>
+                                <div class="d-flex">
+                                  <button
+                                    class="btn btn-light bg-transparent border-0 font-13 deleteSection"
+                                    @click="removeSection(blockIndex, sectionIndex)"
+                                  >
+                                    <i class="bi bi-trash me-1"></i> Delete Section
+                                  </button>
+                                </div>
+                              </section>
+                              <!-- draggable="true" @dragstart="handleDragStart($event, rowIndex, 'row', blockIndex, sectionIndex)"
                                                                     @dragover="handleDragOver"
                                                                     @drop="handleDrop($event, rowIndex, 'row', blockIndex, sectionIndex)" -->
-                                                            <div class="container-fluid">
-                                                                <section class="row dynamicRow row-container"
-                                                                    v-for="(row, rowIndex) in section.rows"
-                                                                    :key="'row-' + rowIndex">
-                                                                    <div
-                                                                        class="d-flex justify-content-between align-items-center">
-                                                                        <label class="rownames">{{
-                        getRowSuffix(rowIndex) }}</label>
-                                                                        <div>
-                                                                            <button v-if="row.columns.length < 3"
-                                                                                class="btn btn-light bg-transparent border-0 font-13"
-                                                                                @click="addColumn(blockIndex, sectionIndex, rowIndex)">
-                                                                                <i class="bi bi-plus"></i> Add Column
-                                                                            </button>
-                                                                            <button
-                                                                                class="btn btn-light bg-transparent border-0 font-12 deleteRow"
-                                                                                @click="removeRow(blockIndex, sectionIndex, rowIndex)">
-                                                                                <i class="ri-subtract-line"></i> Delete
-                                                                                row
-                                                                            </button>
-                                                                        </div>
-                                                                    </div>
-                                                                    <!-- draggable="true"
+                              <div class="container-fluid">
+                                <section
+                                  class="row dynamicRow row-container"
+                                  v-for="(row, rowIndex) in section.rows"
+                                  :key="'row-' + rowIndex"
+                                >
+                                  <div
+                                    class="d-flex justify-content-between align-items-center"
+                                  >
+                                    <label class="rownames">{{
+                                      getRowSuffix(rowIndex)
+                                    }}</label>
+                                    <div>
+                                      <button
+                                        v-if="row.columns.length < 3"
+                                        class="btn btn-light bg-transparent border-0 font-13"
+                                        @click="
+                                          addColumn(blockIndex, sectionIndex, rowIndex)
+                                        "
+                                      >
+                                        <i class="bi bi-plus"></i> Add Column
+                                      </button>
+                                      <button
+                                        class="btn btn-light bg-transparent border-0 font-12 deleteRow"
+                                        @click="
+                                          removeRow(blockIndex, sectionIndex, rowIndex)
+                                        "
+                                      >
+                                        <i class="ri-subtract-line"></i> Delete row
+                                      </button>
+                                    </div>
+                                  </div>
+                                  <!-- draggable="true"
                                                                                 @dragstart="handleDragStart($event, columnIndex, 'column', blockIndex, sectionIndex, rowIndex)"
                                                                                 @dragover="handleDragOver"
                                                                                 @drop="handleDrop($event, columnIndex, 'column', blockIndex, sectionIndex, rowIndex)" -->
-                                                                    <div class="col">
-                                                                        <div class="row">
-                                                                            <div v-for="(column, columnIndex) in row.columns"
-                                                                                :key="'column-' + columnIndex"
-                                                                                class="col p-0 dynamicColumn column-container">
-                                                                                <div
-                                                                                    class="column_name d-flex align-items-center justify-content-between">
-                                                                                    <div
-                                                                                        class="d-flex flex-column ps-2">
-                                                                                        <input v-model="column.label"
-                                                                                            type="text" :class="[
-                        'border-less-input', 'ps-1',
-                        'font-14',
-                        { 'italic-style': !column.label },
-                        { 'fw-medium': column.label },
-                    ]" @change="handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex)"
-                                                                                            placeholder="Column Name" />
-                                                                                        <small v-if="column.errorMsg"
-                                                                                            class="text-danger font-10">
-                                                                                            {{ column.errorMsg }}
-                                                                                        </small>
-                                                                                    </div>
-                                                                                    <button
-                                                                                        class="btn btn-light bg-transparent btn-sm"
-                                                                                        @click="removeColumn(blockIndex, sectionIndex, rowIndex, columnIndex)">
-                                                                                        <i class="bi bi-trash"></i>
-                                                                                    </button>
-                                                                                </div>
-                                                                                <!-- draggable="true"
+                                  <div class="col">
+                                    <div class="row">
+                                      <div
+                                        v-for="(column, columnIndex) in row.columns"
+                                        :key="'column-' + columnIndex"
+                                        class="col p-0 dynamicColumn column-container"
+                                      >
+                                        <div
+                                          class="column_name d-flex align-items-center justify-content-between"
+                                        >
+                                          <div class="d-flex flex-column ps-2">
+                                            <input
+                                              v-model="column.label"
+                                              type="text"
+                                              :class="[
+                                                'border-less-input',
+                                                'ps-1',
+                                                'font-14',
+                                                { 'italic-style': !column.label },
+                                                { 'fw-medium': column.label },
+                                              ]"
+                                              @change="
+                                                handleFieldChange(
+                                                  blockIndex,
+                                                  sectionIndex,
+                                                  rowIndex,
+                                                  columnIndex
+                                                )
+                                              "
+                                              placeholder="Column Name"
+                                            />
+                                            <small
+                                              v-if="column.errorMsg"
+                                              class="text-danger font-10"
+                                            >
+                                              {{ column.errorMsg }}
+                                            </small>
+                                          </div>
+                                          <button
+                                            class="btn btn-light bg-transparent btn-sm"
+                                            @click="
+                                              removeColumn(
+                                                blockIndex,
+                                                sectionIndex,
+                                                rowIndex,
+                                                columnIndex
+                                              )
+                                            "
+                                          >
+                                            <i class="bi bi-trash"></i>
+                                          </button>
+                                        </div>
+                                        <!-- draggable="true"
                                                                                     @dragstart="handleDragStart($event, fieldIndex, 'field', blockIndex, sectionIndex, rowIndex, columnIndex)"
                                                                                     @dragover="handleDragOver"
                                                                                     @drop="handleDrop($event, fieldIndex, 'field', blockIndex, sectionIndex, rowIndex, columnIndex)" -->
-                                                                                <div v-for="(field, fieldIndex) in column.fields"
-                                                                                    :key="'field-' + fieldIndex"
-                                                                                    class="dynamicField">
-                                                                                    <div class="px-1 field-border">
-                                                                                        <div
-                                                                                            class="d-flex justify-content-between">
-                                                                                            <div
-                                                                                                class=" flex-column d-flex ">
-                                                                                                <input
-                                                                                                    v-model="field.label"
-                                                                                                    placeholder="Name the field"
-                                                                                                    :class="['border-less-input', 'font-14', 'p-0', { 'italic-style': !field.label }, { 'fw-medium': field.label }]"
-                                                                                                    @change="handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
-                                                                                                <small
-                                                                                                    v-if="field.errorMsg"
-                                                                                                    class="text-danger font-10">
-                                                                                                    {{ field.errorMsg
-                                                                                                    }}
-                                                                                                </small>
-                                                                                            </div>
-                                                                                            <div>
-                                                                                                <button
-                                                                                                    class="btn btn-light btn-sm bg-transparent py-0"
-                                                                                                    @click="copyField(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
-                                                                                                    <i
-                                                                                                        class="ri-file-copy-line copyIcon"></i>
-                                                                                                </button>
-                                                                                                <button
-                                                                                                    class="btn btn-light btn-sm bg-transparent trash-btn py-0"
-                                                                                                    @click="removeField(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
-                                                                                                    <i
-                                                                                                        class="bi bi-trash"></i>
-                                                                                                </button>
-                                                                                            </div>
-                                                                                        </div>
-
-                                                                                        <select
-                                                                                            v-model="field.fieldtype"
-                                                                                            class="form-select mb-2 mt-1 font-13 searchSelect"
-                                                                                            @change="onFieldTypeChange(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
-                                                                                            <option value="">Select Type
-                                                                                            </option>
-                                                                                            <option
-                                                                                                v-for="section in fieldTypes"
-                                                                                                :key="section"
-                                                                                                :value="section.type">
-                                                                                                {{ section.label }}
-                                                                                            </option>
-                                                                                        </select>
-
-                                                                                        <div
-                                                                                            v-if="['Select', 'Table MultiSelect', 'Check'].includes(field.fieldtype)">
-                                                                                            <label
-                                                                                                class="font-12 fw-light"
-                                                                                                for="options">Enter
-                                                                                                Options:</label>
-                                                                                            <textarea id="options"
-                                                                                                placeholder="Enter your Options"
-                                                                                                v-model="field.options"
-                                                                                                class="form-control shadow-none mb-1 font-12"></textarea>
-                                                                                        </div>
-
-                                                                                        <div
-                                                                                            class="d-flex gap-2 align-items-center">
-                                                                                            <div
-                                                                                                class="d-flex align-items-center">
-                                                                                                <input class="font-12"
-                                                                                                    v-model="field.reqd"
-                                                                                                    placeholder="Field Name"
-                                                                                                    type="checkbox" />
-                                                                                            </div>
-                                                                                            <div>
-                                                                                                <label for="mandatory"
-                                                                                                    class="font-12 m-0 fw-light">Mandatory</label>
-                                                                                            </div>
-                                                                                        </div>
-                                                                                        <small v-if="field.error"
-                                                                                            class="text-danger font-10">{{
-                        field.error
-                    }}</small>
-                                                                                    </div>
-                                                                                </div>
-
-                                                                                <div
-                                                                                    class="d-flex justify-content-center align-items-center my-2">
-                                                                                    <button
-                                                                                        class="btn btn-light btn-sm d-flex align-items-center addField m-2"
-                                                                                        @click="addField(blockIndex, sectionIndex, rowIndex, columnIndex)">
-                                                                                        <i class="bi bi-plus fs-5"></i>
-                                                                                        <span>Add Field</span>
-                                                                                    </button>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                </section>
-                                                            </div>
-
-                                                            <div
-                                                                class="d-flex justify-content-start align-items-center my-2">
-                                                                <button class="btn btn-light addRow m-2"
-                                                                    @click="addRow(blockIndex, sectionIndex, rowIndex)">
-                                                                    <i class="bi bi-plus"></i> Add row in section
-                                                                </button>
-                                                            </div>
-                                                        </div>
-
-                                                        <div
-                                                            class="d-flex justify-content-center align-items-center py-2 add-section-btn">
-                                                            <button class="btn btn-light border font-12"
-                                                                @click="addSection(blockIndex)">
-                                                                <i class="bi bi-plus-circle me-1 fs-6"></i> Add Section
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <!-- class="d-flex justify-content-center align-items-center add-block-btn-div py-4 pb-4" -->
-                                                <div :class="[
-                        'd-flex justify-content-center align-items-center add-block-btn-div py-4 ',
-                        {
-                            'background-color-white': blockArr.length,
-                        },
-                    ]">
-                                                    <button
-                                                        class="btn btn-light border d-flex align-items-center  font-12"
-                                                        @click="addBlock">
-                                                        <i class="bi bi-plus-circle me-1 fs-6"></i>
-                                                        {{
-                        blockArr.length === 0
-                            ? "Add Requestor Block"
-                            : "Add Approval Block"
-                    }}
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div v-if="activeStep === 3">
                                         <div
-                                            class="stepperbackground ps-2 pe-2 m-0 d-flex justify-content-between align-items-center">
-                                            <h1 class="font-11 m-0">
-                                                <i @click="prevStep(2)" class="bi bi-chevron-left"></i><span
-                                                    class="ms-2">Back To Fields & Workflow</span>
-                                            </h1>
-                                            <div class="d-flex gap-2">
-                                                <button :disabled="!sections.length"
-                                                    class="btn btn-dark font-10 Withborder border" type="button"
-                                                    @click="saveFormData()">
-                                                    Save Data
+                                          v-for="(field, fieldIndex) in column.fields"
+                                          :key="'field-' + fieldIndex"
+                                          class="dynamicField"
+                                        >
+                                          <div class="px-1 field-border">
+                                            <div class="d-flex justify-content-between">
+                                              <div class="flex-column d-flex">
+                                                <input
+                                                  v-model="field.label"
+                                                  placeholder="Name the field"
+                                                  :class="[
+                                                    'border-less-input',
+                                                    'font-14',
+                                                    'p-0',
+                                                    { 'italic-style': !field.label },
+                                                    { 'fw-medium': field.label },
+                                                  ]"
+                                                  @change="
+                                                    handleFieldChange(
+                                                      blockIndex,
+                                                      sectionIndex,
+                                                      rowIndex,
+                                                      columnIndex,
+                                                      fieldIndex
+                                                    )
+                                                  "
+                                                />
+                                                <small
+                                                  v-if="field.errorMsg"
+                                                  class="text-danger font-10"
+                                                >
+                                                  {{ field.errorMsg }}
+                                                </small>
+                                              </div>
+                                              <div>
+                                                <button
+                                                  class="btn btn-light btn-sm bg-transparent py-0"
+                                                  @click="
+                                                    copyField(
+                                                      blockIndex,
+                                                      sectionIndex,
+                                                      rowIndex,
+                                                      columnIndex,
+                                                      fieldIndex
+                                                    )
+                                                  "
+                                                >
+                                                  <i
+                                                    class="ri-file-copy-line copyIcon"
+                                                  ></i>
                                                 </button>
+                                                <button
+                                                  class="btn btn-light btn-sm bg-transparent trash-btn py-0"
+                                                  @click="
+                                                    removeField(
+                                                      blockIndex,
+                                                      sectionIndex,
+                                                      rowIndex,
+                                                      columnIndex,
+                                                      fieldIndex
+                                                    )
+                                                  "
+                                                >
+                                                  <i class="bi bi-trash"></i>
+                                                </button>
+                                              </div>
                                             </div>
+
+                                            <select
+                                              v-model="field.fieldtype"
+                                              class="form-select mb-2 mt-1 font-13 searchSelect"
+                                              @change="
+                                                onFieldTypeChange(
+                                                  blockIndex,
+                                                  sectionIndex,
+                                                  rowIndex,
+                                                  columnIndex,
+                                                  fieldIndex
+                                                )
+                                              "
+                                            >
+                                              <option value="">Select Type</option>
+                                              <option
+                                                v-for="section in fieldTypes"
+                                                :key="section"
+                                                :value="section.type"
+                                              >
+                                                {{ section.label }}
+                                              </option>
+                                            </select>
+
+                                            <div
+                                              v-if="
+                                                [
+                                                  'Select',
+                                                  'Table MultiSelect',
+                                                  'Check',
+                                                ].includes(field.fieldtype)
+                                              "
+                                            >
+                                              <label
+                                                class="font-12 fw-light"
+                                                for="options"
+                                                >Enter Options:</label
+                                              >
+                                              <textarea
+                                                id="options"
+                                                placeholder="Enter your Options"
+                                                v-model="field.options"
+                                                class="form-control shadow-none mb-1 font-12"
+                                              ></textarea>
+                                            </div>
+
+                                            <div class="d-flex gap-2 align-items-center">
+                                              <div class="d-flex align-items-center">
+                                                <input
+                                                  class="font-12"
+                                                  v-model="field.reqd"
+                                                  placeholder="Field Name"
+                                                  type="checkbox"
+                                                />
+                                              </div>
+                                              <div>
+                                                <label
+                                                  for="mandatory"
+                                                  class="font-12 m-0 fw-light"
+                                                  >Mandatory</label
+                                                >
+                                              </div>
+                                            </div>
+                                            <small
+                                              v-if="field.error"
+                                              class="text-danger font-10"
+                                              >{{ field.error }}</small
+                                            >
+                                          </div>
                                         </div>
-                                        <div>
-                                            <div class="card py-3 px-0 mb-2 mt-2">
-                                                <div class="container-fluid">
-                                                    <div class="row">
-                                                        <div class="col">
-                                                            <div class="container">
-                                                                <div class="row">
-                                                                    <div class="col-3">
-                                                                        <div
-                                                                            class="d-flex align-items-center justify-content-between">
-                                                                            <span class="font-10"> Form Name </span>
-                                                                            <span class="text-right">:</span>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-9">
-                                                                        <span class="font-12 fw-bold">
-                                                                            {{ formDescriptions.form_name }}
-                                                                        </span>
-                                                                    </div>
-                                                                    <div class="col-3">
-                                                                        <div
-                                                                            class="d-flex align-items-center justify-content-between">
-                                                                            <span class="font-10">
-                                                                                Form Short Code
-                                                                            </span>
-                                                                            <span class="text-right">:</span>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-9">
-                                                                        <span class="font-12 fw-bold">
-                                                                            {{ formDescriptions.form_short_name }}
-                                                                        </span>
-                                                                    </div>
-                                                                    <div class="col-3">
-                                                                        <div
-                                                                            class="d-flex align-items-center justify-content-between">
-                                                                            <span class="font-10">
-                                                                                Form category
-                                                                            </span>
-                                                                            <span class="text-right">:</span>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-9">
-                                                                        <span class="font-12 fw-bold">
-                                                                            {{ formDescriptions.form_category }}
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col">
-                                                            <div class="container">
-                                                                <div class="row">
-                                                                    <div class="col-4">
-                                                                        <div
-                                                                            class="d-flex align-items-center justify-content-between">
-                                                                            <span class="font-10">
-                                                                                Owner of the form
-                                                                            </span>
-                                                                            <span class="text-right">:</span>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-8">
-                                                                        <span class="font-12 fw-bold">
-                                                                            {{ formDescriptions.owner_of_the_form }}
-                                                                        </span>
-                                                                    </div>
-                                                                    <div class="col-4">
-                                                                        <div
-                                                                            class="d-flex align-items-center justify-content-between">
-                                                                            <span class="font-10">
-                                                                                Accessibility to departments
-                                                                            </span>
-                                                                            <span class="text-right">:</span>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-8">
-                                                                        <span class="font-12 fw-bold">
-                                                                            <template v-if="Array.isArray(
-                        formDescriptions.accessible_departments
-                    ) &&
-                        formDescriptions
-                            .accessible_departments.length === 1
-                        ">
-                                                                                {{
-                        formDescriptions
-                            .accessible_departments[0]
-                    }}
-                                                                            </template>
-                                                                            <template v-else-if="Array.isArray(
-                            formDescriptions.accessible_departments
-                        ) &&
-                        formDescriptions
-                            .accessible_departments.length > 1
-                        ">
-                                                                                <ul class="p-0 mb-0 list-unstyled mt-1">
-                                                                                    <li v-for="(
+
+                                        <div
+                                          class="d-flex justify-content-center align-items-center my-2"
+                                        >
+                                          <button
+                                            class="btn btn-light btn-sm d-flex align-items-center addField m-2"
+                                            @click="
+                                              addField(
+                                                blockIndex,
+                                                sectionIndex,
+                                                rowIndex,
+                                                columnIndex
+                                              )
+                                            "
+                                          >
+                                            <i class="bi bi-plus fs-5"></i>
+                                            <span>Add Field</span>
+                                          </button>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </section>
+                              </div>
+
+                              <div
+                                class="d-flex justify-content-start align-items-center my-2"
+                              >
+                                <button
+                                  class="btn btn-light addRow m-2"
+                                  @click="addRow(blockIndex, sectionIndex, rowIndex)"
+                                >
+                                  <i class="bi bi-plus"></i> Add row in section
+                                </button>
+                              </div>
+                            </div>
+
+                            <div
+                              class="d-flex justify-content-center align-items-center py-2 add-section-btn"
+                            >
+                              <button
+                                class="btn btn-light border font-12"
+                                @click="addSection(blockIndex)"
+                              >
+                                <i class="bi bi-plus-circle me-1 fs-6"></i> Add Section
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                        <!-- class="d-flex justify-content-center align-items-center add-block-btn-div py-4 pb-4" -->
+                        <div
+                          :class="[
+                            'd-flex justify-content-center align-items-center add-block-btn-div py-4 ',
+                            {
+                              'background-color-white': blockArr.length,
+                            },
+                          ]"
+                        >
+                          <button
+                            class="btn btn-light border d-flex align-items-center font-12"
+                            @click="addBlock"
+                          >
+                            <i class="bi bi-plus-circle me-1 fs-6"></i>
+                            {{
+                              blockArr.length === 0
+                                ? "Add Requestor Block"
+                                : "Add Approval Block"
+                            }}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div v-if="activeStep === 3">
+                    <div
+                      class="stepperbackground ps-2 pe-2 m-0 d-flex justify-content-between align-items-center"
+                    >
+                      <h1 class="font-11 m-0">
+                        <i @click="prevStep(2)" class="bi bi-chevron-left"></i
+                        ><span class="ms-2">Back To Fields & Workflow</span>
+                      </h1>
+                      <div class="d-flex gap-2">
+                        <button
+                          :disabled="!sections.length"
+                          class="btn btn-dark font-10 Withborder border"
+                          type="button"
+                          @click="saveFormData()"
+                        >
+                          Save Data
+                        </button>
+                      </div>
+                    </div>
+                    <div>
+                      <div class="card py-3 px-0 mb-2 mt-2">
+                        <div class="container-fluid">
+                          <div class="row">
+                            <div class="col">
+                              <div class="container">
+                                <div class="row">
+                                  <div class="col-3">
+                                    <div
+                                      class="d-flex align-items-center justify-content-between"
+                                    >
+                                      <span class="font-10"> Form Name </span>
+                                      <span class="text-right">:</span>
+                                    </div>
+                                  </div>
+                                  <div class="col-9">
+                                    <span class="font-12 fw-bold">
+                                      {{ formDescriptions.form_name }}
+                                    </span>
+                                  </div>
+                                  <div class="col-3">
+                                    <div
+                                      class="d-flex align-items-center justify-content-between"
+                                    >
+                                      <span class="font-10"> Form Short Code </span>
+                                      <span class="text-right">:</span>
+                                    </div>
+                                  </div>
+                                  <div class="col-9">
+                                    <span class="font-12 fw-bold">
+                                      {{ formDescriptions.form_short_name }}
+                                    </span>
+                                  </div>
+                                  <div class="col-3">
+                                    <div
+                                      class="d-flex align-items-center justify-content-between"
+                                    >
+                                      <span class="font-10"> Form category </span>
+                                      <span class="text-right">:</span>
+                                    </div>
+                                  </div>
+                                  <div class="col-9">
+                                    <span class="font-12 fw-bold">
+                                      {{ formDescriptions.form_category }}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col">
+                              <div class="container">
+                                <div class="row">
+                                  <div class="col-4">
+                                    <div
+                                      class="d-flex align-items-center justify-content-between"
+                                    >
+                                      <span class="font-10"> Owner of the form </span>
+                                      <span class="text-right">:</span>
+                                    </div>
+                                  </div>
+                                  <div class="col-8">
+                                    <span class="font-12 fw-bold">
+                                      {{ formDescriptions.owner_of_the_form }}
+                                    </span>
+                                  </div>
+                                  <div class="col-4">
+                                    <div
+                                      class="d-flex align-items-center justify-content-between"
+                                    >
+                                      <span class="font-10">
+                                        Accessibility to departments
+                                      </span>
+                                      <span class="text-right">:</span>
+                                    </div>
+                                  </div>
+                                  <div class="col-8">
+                                    <span class="font-12 fw-bold">
+                                      <template
+                                        v-if="
+                                          Array.isArray(
+                                            formDescriptions.accessible_departments
+                                          ) &&
+                                          formDescriptions.accessible_departments
+                                            .length === 1
+                                        "
+                                      >
+                                        {{ formDescriptions.accessible_departments[0] }}
+                                      </template>
+                                      <template
+                                        v-else-if="
+                                          Array.isArray(
+                                            formDescriptions.accessible_departments
+                                          ) &&
+                                          formDescriptions.accessible_departments.length >
+                                            1
+                                        "
+                                      >
+                                        <ul class="p-0 mb-0 list-unstyled mt-1">
+                                          <li
+                                            v-for="(
                                               department, index
-                                            ) in formDescriptions.accessible_departments" :key="index">
-                                                                                        {{ department }},
-                                                                                    </li>
-                                                                                </ul>
-                                                                            </template>
-                                                                            <template v-else>
-                                                                                {{
-                        formDescriptions.accessible_departments
-                    }}
-                                                                            </template>
-                                                                        </span>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div v-if="blockArr.length" class="card p-1">
-                                                <div v-for="(block, blockIndex) in blockArr" :key="blockIndex">
-                                                    <div v-for="(section, sectionIndex) in block.sections"
-                                                        :key="'preview-' + sectionIndex" class="preview-section m-2">
-                                                        <div class="section-label">
-                                                            <h5 class="m-0 font-13">
-                                                                {{ section.label || "Untitled Section" }}
-                                                            </h5>
-                                                        </div>
-                                                        <!-- <h5>{{ section.label || "-" }}</h5> -->
-                                                        <div class="container-fluid">
-                                                            <div class="row" v-for="(row, rowIndex) in section.rows"
-                                                                :key="rowIndex">
-                                                                <div v-for="(column, columnIndex) in row.columns"
-                                                                    :key="'column-preview-' + columnIndex"
-                                                                    class="col dynamicColumn">
-                                                                    <!-- <h6>{{ column.label || "-" }}</h6> -->
-                                                                    <div class="p-3 border-bottom">
-                                                                        <h6 class="m-0 font-12">
-                                                                            {{ column.label || "-" }}
-                                                                        </h6>
-                                                                    </div>
-                                                                    <div class="mx-3 my-2">
-                                                                        <div v-for="(
-                                        field, fieldIndex
-                                      ) in column.fields" :key="'field-preview-' + fieldIndex">
-                                                                            <div v-if="field.label">
-                                                                                <label :for="'field-' +
-                        sectionIndex +
-                        '-' +
-                        columnIndex +
-                        '-' +
-                        fieldIndex
-                        ">
-                                                                                    <span class="font-12">{{
-                        field.label
-                    }}</span>
-                                                                                    <span class="text-danger">{{
-                            field.reqd === 1 ? "*" : ""
-                        }}</span>
-                                                                                </label>
-                                                                                <template v-if="field.fieldtype == 'Select' ||
-                        field.fieldtype == 'multiselect'
-                        ">
-                                                                                    <select :multiple="field.fieldtype == 'multiselect'
-                        " v-model="field.value" class="form-select mb-2 font-13">
-                                                                                        <option v-for="(
+                                            ) in formDescriptions.accessible_departments"
+                                            :key="index"
+                                          >
+                                            {{ department }},
+                                          </li>
+                                        </ul>
+                                      </template>
+                                      <template v-else>
+                                        {{ formDescriptions.accessible_departments }}
+                                      </template>
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div v-if="blockArr.length" class="card p-1">
+                        <div v-for="(block, blockIndex) in blockArr" :key="blockIndex">
+                          <div
+                            v-for="(section, sectionIndex) in block.sections"
+                            :key="'preview-' + sectionIndex"
+                            class="preview-section m-2"
+                          >
+                            <div class="section-label">
+                              <h5 class="m-0 font-13">
+                                {{ section.label || "Untitled Section" }}
+                              </h5>
+                            </div>
+                            <!-- <h5>{{ section.label || "-" }}</h5> -->
+                            <div class="container-fluid">
+                              <div
+                                class="row"
+                                v-for="(row, rowIndex) in section.rows"
+                                :key="rowIndex"
+                              >
+                                <div
+                                  v-for="(column, columnIndex) in row.columns"
+                                  :key="'column-preview-' + columnIndex"
+                                  class="col dynamicColumn"
+                                >
+                                  <!-- <h6>{{ column.label || "-" }}</h6> -->
+                                  <div class="p-3 border-bottom">
+                                    <h6 class="m-0 font-12">
+                                      {{ column.label || "-" }}
+                                    </h6>
+                                  </div>
+                                  <div class="mx-3 my-2">
+                                    <div
+                                      v-for="(field, fieldIndex) in column.fields"
+                                      :key="'field-preview-' + fieldIndex"
+                                    >
+                                      <div v-if="field.label">
+                                        <label
+                                          :for="
+                                            'field-' +
+                                            sectionIndex +
+                                            '-' +
+                                            columnIndex +
+                                            '-' +
+                                            fieldIndex
+                                          "
+                                        >
+                                          <span class="font-12">{{ field.label }}</span>
+                                          <span class="text-danger">{{
+                                            field.reqd === 1 ? "*" : ""
+                                          }}</span>
+                                        </label>
+                                        <template
+                                          v-if="
+                                            field.fieldtype == 'Select' ||
+                                            field.fieldtype == 'multiselect'
+                                          "
+                                        >
+                                          <select
+                                            :multiple="field.fieldtype == 'multiselect'"
+                                            v-model="field.value"
+                                            class="form-select mb-2 font-13"
+                                          >
+                                            <option
+                                              v-for="(
                                                 option, index
-                                              ) in field.options?.split('\n')" :key="index" :value="option">
-                                                                                            {{ option }}
-                                                                                        </option>
-                                                                                    </select>
-                                                                                </template>
-                                                                                <template v-else-if="field.fieldtype == 'Check' ||
-                        field.fieldtype == 'radio'
-                        ">
-                                                                                    <div class="container-fluid">
-                                                                                        <div class="row">
-                                                                                            <div class="form-check col-4 mb-4"
-                                                                                                v-for="(
+                                              ) in field.options?.split('\n')"
+                                              :key="index"
+                                              :value="option"
+                                            >
+                                              {{ option }}
+                                            </option>
+                                          </select>
+                                        </template>
+                                        <template
+                                          v-else-if="
+                                            field.fieldtype == 'Check' ||
+                                            field.fieldtype == 'radio'
+                                          "
+                                        >
+                                          <div class="container-fluid">
+                                            <div class="row">
+                                              <div
+                                                class="form-check col-4 mb-4"
+                                                v-for="(
                                                   option, index
-                                                ) in field?.options?.split(
-                        '\n'
-                    )" :key="index">
-                                                                                                <div
-                                                                                                    class="d-flex gap-2 align-items-center">
-                                                                                                    <div>
-                                                                                                        <input
-                                                                                                            class="form-check-input"
-                                                                                                            :type="field.fieldtype"
-                                                                                                            :name="option"
-                                                                                                            :id="option"
-                                                                                                            readonly />
-                                                                                                    </div>
-                                                                                                    <div>
-                                                                                                        <label
-                                                                                                            class="form-check-label m-0"
-                                                                                                            :for="option">
-                                                                                                            {{ option }}
-                                                                                                        </label>
-                                                                                                    </div>
-                                                                                                </div>
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                </template>
-                                                                                <template v-else-if="field.fieldtype == 'Attach'
-                        ">
-                                                                                    <input type="file" :id="'field-' +
-                        sectionIndex +
-                        '-' +
-                        columnIndex +
-                        '-' +
-                        fieldIndex
-                        " class="form-control previewInputHeight" @change="
-                        handleFileChange($event, field)
-                        " disabled />
-                                                                                </template>
-                                                                                <template v-else>
-                                                                                    <input v-if="field.fieldtype === 'Datetime'
-                        " type="datetime-local" v-model="field.value" :placeholder="'Enter ' + field.label
-                        " :name="'field-' +
-                        sectionIndex +
-                        '-' +
-                        columnIndex +
-                        '-' +
-                                              fieldIndex
-                                            " class="form-control previewInputHeight" />
-                                                                                    <component readonly v-if="
-                                              field.fieldtype !== 'Datetime'
-                                            " :is="
-                                              getFieldComponent(field.fieldtype)
-                                            " v-model="field.value" :placeholder="
-                                              'Enter ' + field.label
-                                            " :type="field.fieldtype" :name="
+                                                ) in field?.options?.split('\n')"
+                                                :key="index"
+                                              >
+                                                <div
+                                                  class="d-flex gap-2 align-items-center"
+                                                >
+                                                  <div>
+                                                    <input
+                                                      class="form-check-input"
+                                                      :type="field.fieldtype"
+                                                      :name="option"
+                                                      :id="option"
+                                                      readonly
+                                                    />
+                                                  </div>
+                                                  <div>
+                                                    <label
+                                                      class="form-check-label m-0"
+                                                      :for="option"
+                                                    >
+                                                      {{ option }}
+                                                    </label>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </template>
+                                        <template v-else-if="field.fieldtype == 'Attach'">
+                                          <input
+                                            type="file"
+                                            :id="
                                               'field-' +
                                               sectionIndex +
                                               '-' +
                                               columnIndex +
                                               '-' +
                                               fieldIndex
-                                            " class="form-control previewInputHeight font-10">
-                                                                                    </component>
-                                                                                </template>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+                                            "
+                                            class="form-control previewInputHeight"
+                                            @change="handleFileChange($event, field)"
+                                            disabled
+                                          />
+                                        </template>
+                                        <template v-else>
+                                          <input
+                                            v-if="field.fieldtype === 'Datetime'"
+                                            type="datetime-local"
+                                            v-model="field.value"
+                                            :placeholder="'Enter ' + field.label"
+                                            :name="
+                                              'field-' +
+                                              sectionIndex +
+                                              '-' +
+                                              columnIndex +
+                                              '-' +
+                                              fieldIndex
+                                            "
+                                            class="form-control previewInputHeight"
+                                          />
+                                          <component
+                                            readonly
+                                            v-if="field.fieldtype !== 'Datetime'"
+                                            :is="getFieldComponent(field.fieldtype)"
+                                            v-model="field.value"
+                                            :placeholder="'Enter ' + field.label"
+                                            :type="field.fieldtype"
+                                            :name="
+                                              'field-' +
+                                              sectionIndex +
+                                              '-' +
+                                              columnIndex +
+                                              '-' +
+                                              fieldIndex
+                                            "
+                                            class="form-control previewInputHeight font-10"
+                                          >
+                                          </component>
+                                        </template>
+                                      </div>
                                     </div>
+                                  </div>
                                 </div>
+                              </div>
                             </div>
+                          </div>
                         </div>
+                      </div>
                     </div>
+                  </div>
                 </div>
+              </div>
             </div>
+          </div>
         </div>
-
-        <!-- /***** Add designations for WF */ -->
-
-        <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
-            <div class="offcanvas-header add_designationHeader">
-                <span id="offcanvasRightLabel font-14">
-                    Add designation for
-                    {{ selectedBlockIndex == 0 ? "Requestor" : "Approver" }}
-                </span>
-
-                <button type="button" class="btn-close bg-light text-reset" data-bs-dismiss="offcanvas"
-                    aria-label="Close"></button>
-            </div>
-            <div class="offcanvas-body">
-                <div class="">
-                    <div class="form-check ps-2" v-if="DesignationList.length">
-                        <input type="checkbox" id="selectAll" v-model="isAllSelected" class="me-2 form-check-input" />
-                        <label for="selectAll fw-bold" class="SelectallDesignation form-check-label">Select all</label>
-                    </div>
-                </div>
-                <ul v-if="DesignationList.length" class="list-unstyled">
-                    <li v-for="(item, index) in DesignationList" :key="index" class="designationList">
-                        <input type="checkbox" v-model="designationValue" :value="item" class="designationCheckBox"
-                            @change="handleSingleSelect" />
-                        <span class="ps-2">{{ item }}</span>
-                    </li>
-                </ul>
-                <div v-else>
-                    <div class="d-flex justify-content-center">
-                        <span>No Designations Found</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="offcanvas-footer">
-                <div class="text-end p-3">
-                    <ButtonComp class="btn btn-dark addingDesignations" data-bs-dismiss="offcanvas"
-                        @click="addDesignationBtn" name=" Add Designations" />
-                </div>
-            </div>
-        </div>
-
+      </div>
     </div>
+
+    <!-- /***** Add designations for WF */ -->
+
+    <div
+      class="offcanvas offcanvas-end"
+      tabindex="-1"
+      id="offcanvasRight"
+      aria-labelledby="offcanvasRightLabel"
+    >
+      <div class="offcanvas-header add_designationHeader">
+        <span id="offcanvasRightLabel font-14">
+          Add designation for
+          {{ selectedBlockIndex == 0 ? "Requestor" : "Approver" }}
+        </span>
+
+        <button
+          type="button"
+          class="btn-close bg-light text-reset"
+          data-bs-dismiss="offcanvas"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="offcanvas-body">
+        <div class="">
+          <div class="form-check ps-2" v-if="DesignationList.length">
+            <input
+              type="checkbox"
+              id="selectAll"
+              v-model="isAllSelected"
+              class="me-2 form-check-input"
+            />
+            <label for="selectAll fw-bold" class="SelectallDesignation form-check-label"
+              >Select all</label
+            >
+          </div>
+        </div>
+        <ul v-if="DesignationList.length" class="list-unstyled">
+          <li
+            v-for="(item, index) in DesignationList"
+            :key="index"
+            class="designationList"
+          >
+            <input
+              type="checkbox"
+              v-model="designationValue"
+              :value="item"
+              class="designationCheckBox"
+              @change="handleSingleSelect"
+            />
+            <span class="ps-2">{{ item }}</span>
+          </li>
+        </ul>
+        <div v-else>
+          <div class="d-flex justify-content-center">
+            <span>No Designations Found</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="offcanvas-footer">
+        <div class="text-end p-3">
+          <ButtonComp
+            class="btn btn-dark addingDesignations"
+            data-bs-dismiss="offcanvas"
+            @click="addDesignationBtn"
+            name=" Add Designations"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -849,11 +1138,11 @@ import { onMounted, ref, reactive, computed, watch } from "vue";
 import ButtonComp from "../../Components/ButtonComp.vue";
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
 import {
-    extractFieldsWithBreaks,
-    rebuildToStructuredArray,
-    extractFieldnames,
-    extractfieldlabels,
-    addErrorMessagesToStructuredArray,
+  extractFieldsWithBreaks,
+  rebuildToStructuredArray,
+  extractFieldnames,
+  extractfieldlabels,
+  addErrorMessagesToStructuredArray,
 } from "../../shared/services/field_format";
 import axiosInstance from "../../shared/services/interceptor";
 import { apis, doctypes } from "../../shared/apiurls";
@@ -864,7 +1153,7 @@ import "@vueform/multiselect/themes/default.css";
 import VueMultiselect from "vue-multiselect";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
-import { useDragAndDrop } from '../../shared/services/draggable';
+import { useDragAndDrop } from "../../shared/services/draggable";
 
 const route = useRoute();
 const router = useRouter();
@@ -886,660 +1175,609 @@ const selectedBlockIndex = ref("");
 let workflowSetup = reactive([]);
 let paramId = ref("");
 const businessUnit = computed(() => {
-    return EzyBusinessUnit;
+  return EzyBusinessUnit;
 });
 
 const filterObj = ref({
-    form_name: "",
-    form_short_name: "",
-    accessible_departments: [],
-    business_unit: `${businessUnit.value.value}`,
-    form_category: "",
-    owner_of_the_form: "",
+  form_name: "",
+  form_short_name: "",
+  accessible_departments: [],
+  business_unit: `${businessUnit.value.value}`,
+  form_category: "",
+  owner_of_the_form: "",
 });
 const formDescriptions = computed(() => filterObj.value);
 
 // const formDescriptions = ref({ ...filterObj.value });
 
 watch(
-    businessUnit,
-    (newVal) => {
-        if (newVal && newVal.value) {
-            filterObj.value.business_unit = newVal.value;
-        }
-    },
-    { immediate: true }
+  businessUnit,
+  (newVal) => {
+    if (newVal && newVal.value) {
+      filterObj.value.business_unit = newVal.value;
+    }
+  },
+  { immediate: true }
 );
 
 onMounted(() => {
-    deptData();
-    paramId = route.params.paramid || "new";
+  deptData();
+  paramId = route.params.paramid || "new";
 
-    if (paramId != undefined && paramId != null && paramId != "new") {
-        OwnerOftheForm()
-        getFormData();
-
-    }
-    let Bu_Unit = localStorage.getItem("Bu");
-    filterObj.value.business_unit = Bu_Unit;
-
-
+  if (paramId != undefined && paramId != null && paramId != "new") {
+    OwnerOftheForm();
+    getFormData();
+  }
+  let Bu_Unit = localStorage.getItem("Bu");
+  filterObj.value.business_unit = Bu_Unit;
 });
 
-
-
 const steps = ref([
-    {
-        id: 1,
-        label: "About Form",
-        stepno: "Step 1",
-        icon: "bi bi-info-circle",
-    },
-    {
-        id: 2,
-        label: "Fields & Workflow",
-        stepno: "Step 2",
-        icon: "bi bi-question-circle",
-    },
-    // {
-    //     id: 3,
-    //     label: "Preview & Save",
-    //     stepno: "Step 3",
-    //     icon: "ri-checkbox-circle-line",
-    // },
+  {
+    id: 1,
+    label: "About Form",
+    stepno: "Step 1",
+    icon: "bi bi-info-circle",
+  },
+  {
+    id: 2,
+    label: "Fields & Workflow",
+    stepno: "Step 2",
+    icon: "bi bi-question-circle",
+  },
+  // {
+  //     id: 3,
+  //     label: "Preview & Save",
+  //     stepno: "Step 3",
+  //     icon: "ri-checkbox-circle-line",
+  // },
 ]);
 const fieldTypes = [
-    {
-        label: "Text",
-        type: "Data",
-    },
+  {
+    label: "Text",
+    type: "Data",
+  },
 
-    {
-        label: "Attach",
-        type: "Attach",
-    },
-    {
-        label: "Phone",
-        type: "Phone",
-    },
-    {
-        label: "Time",
-        type: "Time",
-    },
-    // {
-    //     label: "Color",
-    //     type: "Color",
-    // },
-    {
-        label: "TextArea",
-        type: "Text",
-    },
-    {
-        label: "Date",
-        type: "Date",
-    },
-    {
-        label: "Datetime",
-        type: "Datetime",
-    },
-    // {
-    //     label: "Check",
-    //     type: "Check",
-    // },
-    // {
-    //     label: "Radio",
-    //     type: "radio",
-    // },
-    {
-        label: "Select",
-        type: "Select",
-    },
-    // {
-    //     label: "MultiSelect",
-    //     type: "Table MultiSelect",
-    // },
-    // {
-    //     label: "Signature",
-    //     type: "Signature",
-    // },
+  {
+    label: "Attach",
+    type: "Attach",
+  },
+  {
+    label: "Phone",
+    type: "Phone",
+  },
+  {
+    label: "Time",
+    type: "Time",
+  },
+  // {
+  //     label: "Color",
+  //     type: "Color",
+  // },
+  {
+    label: "TextArea",
+    type: "Text",
+  },
+  {
+    label: "Date",
+    type: "Date",
+  },
+  {
+    label: "Datetime",
+    type: "Datetime",
+  },
+  // {
+  //     label: "Check",
+  //     type: "Check",
+  // },
+  // {
+  //     label: "Radio",
+  //     type: "radio",
+  // },
+  {
+    label: "Select",
+    type: "Select",
+  },
+  // {
+  //     label: "MultiSelect",
+  //     type: "Table MultiSelect",
+  // },
+  // {
+  //     label: "Signature",
+  //     type: "Signature",
+  // },
 ];
 
 const isAllSelected = computed({
-    get() {
-        return (
-            DesignationList.value.length > 0 &&
-            DesignationList.value.every((item) =>
-                designationValue.value.includes(item)
-            )
-        );
-    },
-    set(value) {
-        if (value) {
-            designationValue.value = [...DesignationList.value];
-        } else {
-            designationValue.value = [];
-        }
-    },
+  get() {
+    return (
+      DesignationList.value.length > 0 &&
+      DesignationList.value.every((item) => designationValue.value.includes(item))
+    );
+  },
+  set(value) {
+    if (value) {
+      designationValue.value = [...DesignationList.value];
+    } else {
+      designationValue.value = [];
+    }
+  },
 });
 
 watch(designationValue, (newValue) => {
-    console.log("Selected Designations:", typeof newValue);
-    console.log(typeof designationValue.value, "designationValue");
-    console.log(typeof DesignationList.value, "list");
-    // console.log(listofselected.value, "------------------------");
+  console.log("Selected Designations:", typeof newValue);
+  console.log(typeof designationValue.value, "designationValue");
+  console.log(typeof DesignationList.value, "list");
+  // console.log(listofselected.value, "------------------------");
 });
 
 function handleSingleSelect() {
-    if (!isAllSelected.value && designationValue.value.length === 1) {
-        console.log("Selected only one designation:", designationValue.value[0]);
-    }
+  if (!isAllSelected.value && designationValue.value.length === 1) {
+    console.log("Selected only one designation:", designationValue.value[0]);
+  }
 }
 
 function addDesignationBtn() {
+  const block = blockArr[selectedBlockIndex.value];
 
-    const block = blockArr[selectedBlockIndex.value];
+  if (!block || !block.sections) {
+    console.error("Error: Invalid block or sections not found.");
+    return; // Prevent further execution
+  }
 
+  let xyz = {
+    type: selectedBlockIndex.value == 0 ? "requestor" : "approver",
+    roles: designationValue.value,
+    fields: block.sections.flatMap(extractFieldnames),
+    idx: selectedBlockIndex.value,
+  };
 
-    if (!block || !block.sections) {
-        console.error('Error: Invalid block or sections not found.');
-        return; // Prevent further execution
-    }
+  // workflowSetup.push(xyz)
 
-    let xyz = {
-        type: selectedBlockIndex.value == 0 ? "requestor" : "approver",
-        roles: designationValue.value,
-        fields: block.sections.flatMap(extractFieldnames),
-        idx: selectedBlockIndex.value,
-    };
+  const existingIndex = workflowSetup.findIndex((item) => item.idx === xyz.idx);
+  if (existingIndex !== -1) {
+    workflowSetup[existingIndex] = xyz;
+  } else {
+    workflowSetup.push(xyz);
+    // console.log(workflowSetup, workflowSetup.length, "--workflowSetup---");
+  }
 
-    // workflowSetup.push(xyz)
-
-    const existingIndex = workflowSetup.findIndex((item) => item.idx === xyz.idx);
-    if (existingIndex !== -1) {
-        workflowSetup[existingIndex] = xyz;
-    } else {
-        workflowSetup.push(xyz);
-        // console.log(workflowSetup, workflowSetup.length, "--workflowSetup---");
-    }
-
-    add_Wf_roles_setup();
+  add_Wf_roles_setup();
 }
-
 
 // const getWorkflowSetup = (blockIndex) => {
 //     return workflowSetup.find((setup) => setup.idx === blockIndex);
 // };
 
 function getWorkflowSetup(blockIndex) {
-    return (
-        workflowSetup.find((setup) => setup.idx === blockIndex) || { roles: [] }
-    );
+  return workflowSetup.find((setup) => setup.idx === blockIndex) || { roles: [] };
 }
 
 // Initialize `designationValue` based on the roles for the given block index
 function initializeDesignationValue(blockIndex) {
-    const rolesForBlock = getWorkflowSetup(blockIndex).roles || [];
-    designationValue.value = [...rolesForBlock]; // Reset designationValue to match only roles for the current block
+  const rolesForBlock = getWorkflowSetup(blockIndex).roles || [];
+  designationValue.value = [...rolesForBlock]; // Reset designationValue to match only roles for the current block
 }
 
 const AddDesignCanvas = (idx) => {
-    console.log(idx, "---clicked idex", selectedBlockIndex.value);
-    if (filterObj.value.accessible_departments.length) {
-        designationData(filterObj.value.accessible_departments);
-    }
-    selectedBlockIndex.value = idx;
-    initializeDesignationValue(idx);
+  console.log(idx, "---clicked idex", selectedBlockIndex.value);
+  if (filterObj.value.accessible_departments.length) {
+    designationData(filterObj.value.accessible_departments);
+  }
+  selectedBlockIndex.value = idx;
+  initializeDesignationValue(idx);
 };
-const userlist = ref([])
+const userlist = ref([]);
 function designationData(departments) {
-    const filters = [];
+  const filters = [];
 
-    if (Array.isArray(departments) && departments.length > 0) {
-        filters.push(["ezy_departments", "in", departments]);
-    }
+  if (Array.isArray(departments) && departments.length > 0) {
+    filters.push(["ezy_departments", "in", departments]);
+  }
 
-    // const queryParams = {
-    //     fields: JSON.stringify(["*"]),
-    //     // filters: JSON.stringify(filters),
-    //     limit_page_length: filterObj.value.limitPageLength,
-    //     limitstart: filterObj.value.limitstart,
-    //     order_by: "`tabWF Role Matrix`.`creation` desc",
-    // };
+  // const queryParams = {
+  //     fields: JSON.stringify(["*"]),
+  //     // filters: JSON.stringify(filters),
+  //     limit_page_length: filterObj.value.limitPageLength,
+  //     limitstart: filterObj.value.limitstart,
+  //     order_by: "`tabWF Role Matrix`.`creation` desc",
+  // };
 
-    axiosInstance
-        .get(
-            apis.resource +
-            doctypes.WFRoleMatrix +
-            `/${filterObj.value.business_unit}`
-        )
-        .then((res) => {
-            if (res.data) {
-                console.log(res.data.users, "wf role matrix");
-                userlist.value = res.data.users;
+  axiosInstance
+    .get(apis.resource + doctypes.WFRoleMatrix + `/${filterObj.value.business_unit}`)
+    .then((res) => {
+      if (res.data) {
+        console.log(res.data.users, "wf role matrix");
+        userlist.value = res.data.users;
 
-
-                DesignationList.value = [
-                    ...new Set(res.data.users.map((user) => user.role_name)),
-                ];
-
-            }
-        })
-        .catch((error) => {
-            console.error("Error fetching designations data:", error);
-        });
+        DesignationList.value = [
+          ...new Set(res.data.users.map((user) => user.role_name)),
+        ];
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching designations data:", error);
+    });
 }
 function add_Wf_roles_setup() {
-    axiosInstance
-        .post(apis.add_roles_WF, {
-            workflow_setup: workflowSetup,
-            doctype: filterObj.value.form_short_name,
-            business_unit: filterObj.value.business_unit,
-        })
-        .then((res) => {
-
-            if (selectedBlockIndex.value == 0) {
-                toast.success("Requestor Added", { autoClose: 1000, "transition": "zoom" });
-            } else {
-                toast.success(`Approver-${selectedBlockIndex.value} Added`, { autoClose: 1000, "transition": "zoom" });
-            }
+  axiosInstance
+    .post(apis.add_roles_WF, {
+      workflow_setup: workflowSetup,
+      doctype: filterObj.value.form_short_name,
+      business_unit: filterObj.value.business_unit,
+    })
+    .then((res) => {
+      if (selectedBlockIndex.value == 0) {
+        toast.success("Requestor Added", { autoClose: 1000, transition: "zoom" });
+      } else {
+        toast.success(`Approver-${selectedBlockIndex.value} Added`, {
+          autoClose: 1000,
+          transition: "zoom",
         });
+      }
+    });
 }
 
 function cancelForm() {
-    router.push({
-        name: "Created",
-    });
+  router.push({
+    name: "Created",
+  });
 }
 const handleStepClick = (stepId) => {
-    if (isNextDisabled.value === false) {
-
-        if (stepId < activeStep.value) {
-            prevStep(stepId);
-        } else if (stepId > activeStep.value) {
-            nextStep(stepId);
-        }
+  if (isNextDisabled.value === false) {
+    if (stepId < activeStep.value) {
+      prevStep(stepId);
+    } else if (stepId > activeStep.value) {
+      nextStep(stepId);
     }
+  }
 };
 
 const nextStep = () => {
-    if (activeStep.value < 3) {
-        activeStep.value += 1;
-    }
+  if (activeStep.value < 3) {
+    activeStep.value += 1;
+  }
 };
 
 const prevStep = () => {
-    if (activeStep.value > 1) {
-        activeStep.value -= 1;
-    }
+  if (activeStep.value > 1) {
+    activeStep.value -= 1;
+  }
 };
 watch(
-    () => filterObj.owner_of_the_form,
-    (newVal, oldVal) => {
-        if (newVal !== oldVal) {
-            OwnerOftheForm(newVal, oldVal);
-        }
+  () => filterObj.value.owner_of_the_form,
+  (newVal, oldVal) => {
+    if (newVal !== oldVal) {
+      OwnerOftheForm(newVal, oldVal);
     }
+  }
 );
 
 function formData(status) {
-    console.log(blockArr, "blockarray");
+  console.log(blockArr, "blockarray");
 
-    const fields = extractFieldsWithBreaks(blockArr);
-    const dataObj = {
-        ...filterObj.value,
-        fields,
-        doctype: doctypes.EzyFormDefinitions,
-        workflow_setup: workflowSetup,
-        form_status: status === "save" ? "Created" : "Draft",
-        // form_status: "Draft",
+  const fields = extractFieldsWithBreaks(blockArr);
+  const dataObj = {
+    ...filterObj.value,
+    fields,
+    doctype: doctypes.EzyFormDefinitions,
+    workflow_setup: workflowSetup,
+    form_status: status === "save" ? "Created" : "Draft",
+    // form_status: "Draft",
+  };
+  dataObj.accessible_departments = dataObj.accessible_departments.toString(); //JSON.stringify(dataObj.accessible_departments) dataObj.accessible_departments.toString()
 
-    };
-    dataObj.accessible_departments = dataObj.accessible_departments.toString(); //JSON.stringify(dataObj.accessible_departments) dataObj.accessible_departments.toString()
-
-
-    axiosInstance
-        .post(apis.savedata, dataObj)
-        .then((res) => {
-            if (res) {
-                toast.success("Form Created Successfully", { autoClose: 2000, "transition": "zoom" });
-                router.push({
-                    params: { paramid: res.message.message },
-                });
-                paramId = res.message.message;
-                if (paramId.value !== "new") {
-                    blockArr.splice(0, blockArr.length);
-                    getFormData();
-                }
-                // if (paramId.value === "new") {
-                //     router.push({
-                //         name: "Created"
-                //     })
-
-                // }
-                if (status === "draft") {
-                    router.push({
-                        name: "Draft"
-                    })
-
-                }
-            }
-        })
-        .catch((error) => {
-            console.error("Error saving form data:", error);
+  axiosInstance
+    .post(apis.savedata, dataObj)
+    .then((res) => {
+      if (res) {
+        toast.success("Form Created Successfully", {
+          autoClose: 2000,
+          transition: "zoom",
         });
+        router.push({
+          params: { paramid: res.message.message },
+        });
+        paramId = res.message.message;
+        if (paramId.value !== "new") {
+          blockArr.splice(0, blockArr.length);
+          getFormData();
+        }
+        // if (paramId.value === "new") {
+        //     router.push({
+        //         name: "Created"
+        //     })
+
+        // }
+        if (status === "draft") {
+          router.push({
+            name: "Draft",
+          });
+        }
+      }
+    })
+    .catch((error) => {
+      console.error("Error saving form data:", error);
+    });
 }
 
 // Function to add a new block
 const addBlock = () => {
-    const blockIndex = blockArr.length; // Get current length before adding new block
+  const blockIndex = blockArr.length; // Get current length before adding new block
 
-    const newBlock = {
-        label: blockIndex === 0 ? "requestor" : `approver-${blockIndex}`,
-        parent: `${businessUnit.value?.value}-${filterObj.value?.form_short_name}`,
-        sections: [
-            {
+  const newBlock = {
+    label: blockIndex === 0 ? "requestor" : `approver-${blockIndex}`,
+    parent: `${businessUnit.value?.value}-${filterObj.value?.form_short_name}`,
+    sections: [
+      {
+        label: "",
+        parent: `${businessUnit.value.value}-${filterObj.value.form_short_name}`,
+        rows: [
+          {
+            label: `row_0_0_${blockIndex}`,
+            columns: [
+              {
                 label: "",
-                parent: `${businessUnit.value.value}-${filterObj.value.form_short_name}`,
-                rows: [
-                    {
-                        label: `row_0_0_${blockIndex}`,
-                        columns: [
-                            {
-                                label: "",
-                                fields: [
-                                    {
-                                        label: "",
-                                        fieldtype: "",
-                                        options: "",
-                                        reqd: false,
-                                    },
-                                ],
-                            },
-                        ],
-                    },
+                fields: [
+                  {
+                    label: "",
+                    fieldtype: "",
+                    options: "",
+                    reqd: false,
+                  },
                 ],
-            },
+              },
+            ],
+          },
         ],
-    };
+      },
+    ],
+  };
 
-
-    blockArr.splice(blockArr.length, 0, newBlock);
-    // console.log(blockArr.length, blockArr, "00000");
-
+  blockArr.splice(blockArr.length, 0, newBlock);
+  // console.log(blockArr.length, blockArr, "00000");
 };
 
 // function to delete block
 const removeBlock = (blockIndex) => {
-    let item = blockArr[blockIndex];
-    if (item.parent) deleted_items.push(item);
-    blockArr.splice(blockIndex, 1);
+  let item = blockArr[blockIndex];
+  if (item.parent) deleted_items.push(item);
+  blockArr.splice(blockIndex, 1);
 };
 
 // Function to add a new section with a default column
 const addSection = (blockIndex) => {
-    let sectionIndex = blockArr[blockIndex].sections.length;
-    // let rowIndex = blockArr[blockIndex].sections;
+  let sectionIndex = blockArr[blockIndex].sections.length;
+  // let rowIndex = blockArr[blockIndex].sections;
 
-
-    blockArr[blockIndex].sections.push({
-        label: "",
-        parent: `${businessUnit.value.value}-${filterObj.value.form_short_name}`,
-        rows: [
-            {
-                label: `row_0_${sectionIndex}_${blockIndex}`,
-                columns: [
-                    {
-                        label: "",
-                        fields: [
-                            {
-                                label: "",
-                                fieldtype: "",
-                                // value: ref(""), // Keeping the value as a ref for reactivity
-                                options: "",
-                                reqd: false,
-                            }
-                        ], // Initialize with an empty fields array
-                    },
-                ],
-            },
-        ],
-    });
-};
-// Function to remove a section
-const removeSection = (blockIndex, sectionIndex) => {
-    let item = blockArr[blockIndex].sections[sectionIndex];
-    if (item.parent) deleted_items.push(item);
-    blockArr[blockIndex].sections.splice(sectionIndex, 1);
-    // toast.success("Section removed", { autoClose: 500 })
-};
-
-const addRow = (blockIndex, sectionIndex) => {
-    const rowIndex = blockArr[blockIndex].sections[sectionIndex].rows.length; // Get the current row index
-    const rowSuffix = getRowSuffix(rowIndex);
-
-    blockArr[blockIndex].sections[sectionIndex].rows.push({
-        label: `row_${rowIndex}_${sectionIndex}_${blockIndex}`,
+  blockArr[blockIndex].sections.push({
+    label: "",
+    parent: `${businessUnit.value.value}-${filterObj.value.form_short_name}`,
+    rows: [
+      {
+        label: `row_0_${sectionIndex}_${blockIndex}`,
         columns: [
-            {
-                fields: [
-                    {
-                        label: "",
-                        fieldtype: "",
-                        // value: ref(""), // Keeping the value as a ref for reactivity
-                        options: "",
-                        reqd: false,
-                    }
-                ], // Initialize with an empty fields array
-            },
-        ],
-    });
-};
-
-const removeRow = (blockIndex, sectionIndex, rowIndex) => {
-    let item = blockArr[blockIndex].sections[sectionIndex].rows[rowIndex];
-    if (item.parent) deleted_items.push(item);
-    blockArr[blockIndex].sections[sectionIndex].rows.splice(rowIndex, 1);
-    // toast.success("Row removed", { autoClose: 500 })
-};
-
-// Function to add a new column inside a section
-const addColumn = (blockIndex, sectionIndex, rowIndex) => {
-    blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns.push({
-        label: "",
-        fields: [
-            {
+          {
+            label: "",
+            fields: [
+              {
                 label: "",
                 fieldtype: "",
                 // value: ref(""), // Keeping the value as a ref for reactivity
                 options: "",
                 reqd: false,
-            }
+              },
+            ], // Initialize with an empty fields array
+          },
         ],
-    });
+      },
+    ],
+  });
+};
+// Function to remove a section
+const removeSection = (blockIndex, sectionIndex) => {
+  let item = blockArr[blockIndex].sections[sectionIndex];
+  if (item.parent) deleted_items.push(item);
+  blockArr[blockIndex].sections.splice(sectionIndex, 1);
+  // toast.success("Section removed", { autoClose: 500 })
 };
 
-// Function to remove a column inside a section
-const removeColumn = (blockIndex, sectionIndex, rowIndex, columnIndex) => {
-    let item =
-        blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
-        columnIndex
-        ];
-    if (item.parent) deleted_items.push(item);
-    blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns.splice(
-        columnIndex,
-        1
-    );
-    // toast.success("Column removed", { autoClose: 500 })
+const addRow = (blockIndex, sectionIndex) => {
+  const rowIndex = blockArr[blockIndex].sections[sectionIndex].rows.length; // Get the current row index
+  const rowSuffix = getRowSuffix(rowIndex);
+
+  blockArr[blockIndex].sections[sectionIndex].rows.push({
+    label: `row_${rowIndex}_${sectionIndex}_${blockIndex}`,
+    columns: [
+      {
+        fields: [
+          {
+            label: "",
+            fieldtype: "",
+            // value: ref(""), // Keeping the value as a ref for reactivity
+            options: "",
+            reqd: false,
+          },
+        ], // Initialize with an empty fields array
+      },
+    ],
+  });
 };
 
-// Function to add a new field inside a column
-const addField = (blockIndex, sectionIndex, rowIndex, columnIndex) => {
-    blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
-        columnIndex
-    ].fields.push({
+const removeRow = (blockIndex, sectionIndex, rowIndex) => {
+  let item = blockArr[blockIndex].sections[sectionIndex].rows[rowIndex];
+  if (item.parent) deleted_items.push(item);
+  blockArr[blockIndex].sections[sectionIndex].rows.splice(rowIndex, 1);
+  // toast.success("Row removed", { autoClose: 500 })
+};
+
+// Function to add a new column inside a section
+const addColumn = (blockIndex, sectionIndex, rowIndex) => {
+  blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns.push({
+    label: "",
+    fields: [
+      {
         label: "",
         fieldtype: "",
         // value: ref(""), // Keeping the value as a ref for reactivity
         options: "",
         reqd: false,
-    });
+      },
+    ],
+  });
+};
+
+// Function to remove a column inside a section
+const removeColumn = (blockIndex, sectionIndex, rowIndex, columnIndex) => {
+  let item =
+    blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex];
+  if (item.parent) deleted_items.push(item);
+  blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns.splice(
+    columnIndex,
+    1
+  );
+  // toast.success("Column removed", { autoClose: 500 })
+};
+
+// Function to add a new field inside a column
+const addField = (blockIndex, sectionIndex, rowIndex, columnIndex) => {
+  blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
+    columnIndex
+  ].fields.push({
+    label: "",
+    fieldtype: "",
+    // value: ref(""), // Keeping the value as a ref for reactivity
+    options: "",
+    reqd: false,
+  });
 };
 
 // Function to remove a field inside a column
-const removeField = (
-    blockIndex,
-    sectionIndex,
-    rowIndex,
-    columnIndex,
-    fieldIndex
-) => {
-
-    let item =
-        blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
-            columnIndex
-        ].fields[fieldIndex];
-    if (item.parent) deleted_items.push(item);
-    blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
-        columnIndex
-    ].fields.splice(fieldIndex, 1);
-    // toast.success("Field removed", { autoClose: 500 })
+const removeField = (blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) => {
+  let item =
+    blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex]
+      .fields[fieldIndex];
+  if (item.parent) deleted_items.push(item);
+  blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
+    columnIndex
+  ].fields.splice(fieldIndex, 1);
+  // toast.success("Field removed", { autoClose: 500 })
 };
 
 // Function to copy a field and add it below the original field inside a column
-const copyField = (
-    blockIndex,
-    sectionIndex,
-    rowIndex,
-    columnIndex,
-    fieldIndex
-) => {
-    // Get the field to copy
-    const fieldToCopy =
-        blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
-            columnIndex
-        ].fields[fieldIndex];
+const copyField = (blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) => {
+  // Get the field to copy
+  const fieldToCopy =
+    blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex]
+      .fields[fieldIndex];
 
-    // Create a shallow copy of the field
-    const newField = { ...fieldToCopy };
+  // Create a shallow copy of the field
+  const newField = { ...fieldToCopy };
 
-    // Optionally, you can modify some properties (e.g., rename the field)
-    newField.name = `${fieldToCopy.name} Name the field`;
+  // Optionally, you can modify some properties (e.g., rename the field)
+  newField.name = `${fieldToCopy.name} Name the field`;
 
-    // Insert the copied field after the original one
-    blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
-        columnIndex
-    ].fields.splice(fieldIndex + 1, 0, newField);
+  // Insert the copied field after the original one
+  blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
+    columnIndex
+  ].fields.splice(fieldIndex + 1, 0, newField);
 };
 // Handle the change of field type to display the correct input
 const onFieldTypeChange = (
-    blockIndex,
-    sectionIndex,
-    rowIndex,
-    columnIndex,
-    fieldIndex
+  blockIndex,
+  sectionIndex,
+  rowIndex,
+  columnIndex,
+  fieldIndex
 ) => {
-    const checkFieldType = addErrorMessagesToStructuredArray(blockArr);
-    blockArr.splice(0, blockArr.length, ...checkFieldType);
+  const checkFieldType = addErrorMessagesToStructuredArray(blockArr);
+  blockArr.splice(0, blockArr.length, ...checkFieldType);
 
-    let fieldType =
-        blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
-            columnIndex
-        ].fields[fieldIndex].fieldtype;
-    if (
-        fieldType !== "Check" ||
-        fieldType !== "Select" ||
-        fieldType !== "radio" ||
-        fieldType !== "multiselect"
-    ) {
-        blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
-            columnIndex
-        ].fields[fieldIndex].options = "";
-    }
-    // const field =
-    //     sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex];
-    // Handle additional logic for field type change if needed
+  let fieldType =
+    blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex]
+      .fields[fieldIndex].fieldtype;
+  if (
+    fieldType !== "Check" ||
+    fieldType !== "Select" ||
+    fieldType !== "radio" ||
+    fieldType !== "multiselect"
+  ) {
+    blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
+      columnIndex
+    ].fields[fieldIndex].options = "";
+  }
+  // const field =
+  //     sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex];
+  // Handle additional logic for field type change if needed
 
-
-
-
-    // const xyz = extractFieldsWithBreaks(sections)
-
+  // const xyz = extractFieldsWithBreaks(sections)
 };
 
-function handleFieldChange(
-    blockIndex,
-    sectionIndex,
-    rowIndex,
-    columnIndex,
-    fieldIndex
-) {
-    const flatArr = blockArr.flatMap(extractfieldlabels);
-    const isDuplicate = hasDuplicates(flatArr); // Check once to reuse this result
+function handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) {
+  const flatArr = blockArr.flatMap(extractfieldlabels);
+  const isDuplicate = hasDuplicates(flatArr); // Check once to reuse this result
 
-    const checkFieldType = addErrorMessagesToStructuredArray(blockArr);
-    blockArr.splice(0, blockArr.length, ...checkFieldType);
+  const checkFieldType = addErrorMessagesToStructuredArray(blockArr);
+  blockArr.splice(0, blockArr.length, ...checkFieldType);
 
-    // Assign error message for the specific field if fieldIndex is valid
-    if (
-        fieldIndex !== undefined &&
-        fieldIndex >= 0 &&
-        columnIndex !== undefined &&
-        columnIndex >= 0 &&
-        sectionIndex !== undefined
-    ) {
-        blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
-            columnIndex
-        ].fields[fieldIndex].errorMsg = isDuplicate ? "Duplicate Label Name" : "";
-    }
+  // Assign error message for the specific field if fieldIndex is valid
+  if (
+    fieldIndex !== undefined &&
+    fieldIndex >= 0 &&
+    columnIndex !== undefined &&
+    columnIndex >= 0 &&
+    sectionIndex !== undefined
+  ) {
+    blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
+      columnIndex
+    ].fields[fieldIndex].errorMsg = isDuplicate ? "Duplicate Label Name" : "";
+  }
 
-    // Assign error message for the column if fieldIndex is not valid
-    if (
-        fieldIndex === undefined &&
-        columnIndex !== undefined &&
-        columnIndex >= 0 &&
-        sectionIndex !== undefined
+  // Assign error message for the column if fieldIndex is not valid
+  if (
+    fieldIndex === undefined &&
+    columnIndex !== undefined &&
+    columnIndex >= 0 &&
+    sectionIndex !== undefined
+  ) {
+    blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
+      columnIndex
+    ].errorMsg = isDuplicate ? "Duplicate Label Name in Column" : "";
+  }
 
-    ) {
-        blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
-            columnIndex
-        ].errorMsg = isDuplicate ? "Duplicate Label Name in Column" : "";
-    }
-
-    // Assign error message for the section if both columnIndex and fieldIndex are not valid columnIndex === undefined &&
-    if (
-        columnIndex === undefined &&
-        fieldIndex === undefined &&
-        sectionIndex !== undefined
-    ) {
-
-        blockArr[blockIndex].sections[sectionIndex].errorMsg = isDuplicate
-            ? "Duplicate Label Name in Section"
-            : "";
-
-    }
+  // Assign error message for the section if both columnIndex and fieldIndex are not valid columnIndex === undefined &&
+  if (
+    columnIndex === undefined &&
+    fieldIndex === undefined &&
+    sectionIndex !== undefined
+  ) {
+    blockArr[blockIndex].sections[sectionIndex].errorMsg = isDuplicate
+      ? "Duplicate Label Name in Section"
+      : "";
+  }
 }
 
 const hasErrors = computed(() => {
-    function checkFieldErrors(obj) {
-        if (!obj || typeof obj !== "object") return false;
+  function checkFieldErrors(obj) {
+    if (!obj || typeof obj !== "object") return false;
 
-        // Check if `fieldtype` is empty, or if `error` or `errorMsg` exist
-        if (
-            ("fieldtype" in obj && obj.fieldtype === "") ||
-            ("error" in obj && obj.error) ||
-            ("errorMsg" in obj && obj.errorMsg)
-        ) {
-            return true;
-        }
-
-        if (Array.isArray(obj)) {
-            return obj.some(checkFieldErrors);
-        }
-
-        return Object.values(obj).some(checkFieldErrors);
+    // Check if `fieldtype` is empty, or if `error` or `errorMsg` exist
+    if (
+      ("fieldtype" in obj && obj.fieldtype === "") ||
+      ("error" in obj && obj.error) ||
+      ("errorMsg" in obj && obj.errorMsg)
+    ) {
+      return true;
     }
 
-    return checkFieldErrors(blockArr);
+    if (Array.isArray(obj)) {
+      return obj.some(checkFieldErrors);
+    }
+
+    return Object.values(obj).some(checkFieldErrors);
+  }
+
+  return checkFieldErrors(blockArr);
 });
 
 // function handleFieldChange(
@@ -1550,7 +1788,7 @@ const hasErrors = computed(() => {
 //     fieldIndex
 // ) {
 //     const flatArr = blockArr.flatMap(extractfieldlabels);
-//     const isDuplicate = hasDuplicates(flatArr); // Check once to reuse this result 
+//     const isDuplicate = hasDuplicates(flatArr); // Check once to reuse this result
 //     const checkFieldType = addErrorMessagesToStructuredArray(blockArr);
 //     blockArr.splice(0, blockArr.length, ...checkFieldType);
 
@@ -1584,86 +1822,85 @@ const hasErrors = computed(() => {
 //         fieldIndex === undefined &&
 //         sectionIndex !== undefined
 //     ) {
-//        
+//
 //         blockArr[blockIndex].sections[sectionIndex].errorMsg = isDuplicate
 //             ? "Duplicate Label Name in Section"
 //             : "";
-//        
+//
 //     }
 // }
 const isNextDisabled = computed(() => {
-    return (
-        formNameError.value.length > 0 ||
-        formShortNameError.value.length > 0 ||
-        !filterObj.value.accessible_departments.length ||
-        !filterObj.value.form_category.length ||
-        !filterObj.value.owner_of_the_form.length
-    );
+  return (
+    formNameError.value.length > 0 ||
+    formShortNameError.value.length > 0 ||
+    !filterObj.value.accessible_departments.length ||
+    !filterObj.value.form_category.length ||
+    !filterObj.value.owner_of_the_form.length
+  );
 });
 
 //spaces removed version
 function handleInputChange(event, fieldType) {
-    let inputValue = event.target.value.trim().replace(/\s+/g, "");
+  let inputValue = event.target.value.trim().replace(/\s+/g, "");
 
-    // Check if the first character is a number
-    if (/^\d/.test(inputValue)) {
-        if (fieldType === "form_short_name") {
-            formShortNameError.value = "First character must be a letter";
-        }
-        return;
-    } else {
-        formShortNameError.value = ""; // Clear error if input is valid
+  // Check if the first character is a number
+  if (/^\d/.test(inputValue)) {
+    if (fieldType === "form_short_name") {
+      formShortNameError.value = "First character must be a letter";
     }
+    return;
+  } else {
+    formShortNameError.value = ""; // Clear error if input is valid
+  }
 
-    // Set filter based on fieldType
-    const filters = [[fieldType, "like", `%${inputValue}%`]];
-    const queryParams = {
-        fields: JSON.stringify(["*"]),
-        filters: JSON.stringify(filters),
-    };
+  // Set filter based on fieldType
+  const filters = [[fieldType, "like", `%${inputValue}%`]];
+  const queryParams = {
+    fields: JSON.stringify(["*"]),
+    filters: JSON.stringify(filters),
+  };
 
-    axiosInstance
-        .get(`${apis.resource}${doctypes.EzyFormDefinitions}`, {
-            params: queryParams,
-        })
-        .then((res) => {
-            ezyFormsData.value = res.data;
+  axiosInstance
+    .get(`${apis.resource}${doctypes.EzyFormDefinitions}`, {
+      params: queryParams,
+    })
+    .then((res) => {
+      ezyFormsData.value = res.data;
 
-            // Check for duplicates
-            if (fieldType === "form_name") {
-                formNameError.value =
-                    inputValue &&
-                        ezyFormsData.value.some(
-                            (item) =>
-                                item.form_name &&
-                                item.form_name.replace(/\s+/g, "").toLowerCase() === inputValue.toLowerCase()
-                        )
-                        ? "Name already exists"
-                        : "";
-            } else if (fieldType === "form_short_name") {
-                formShortNameError.value =
-                    inputValue &&
-                        ezyFormsData.value.some(
-                            (item) =>
-                                item.form_short_name &&
-                                item.form_short_name.replace(/\s+/g, "").toLowerCase() === inputValue.toLowerCase()
-                        )
-                        ? "Short name already exists"
-                        : "";
-            }
-        })
-        .catch((error) => {
-            console.error("Error fetching ezyForms data:", error);
-            if (fieldType === "form_name") formNameError.value = "";
-            else if (fieldType === "form_short_name") formShortNameError.value = "";
-        });
+      // Check for duplicates
+      if (fieldType === "form_name") {
+        formNameError.value =
+          inputValue &&
+          ezyFormsData.value.some(
+            (item) =>
+              item.form_name &&
+              item.form_name.replace(/\s+/g, "").toLowerCase() ===
+                inputValue.toLowerCase()
+          )
+            ? "Name already exists"
+            : "";
+      } else if (fieldType === "form_short_name") {
+        formShortNameError.value =
+          inputValue &&
+          ezyFormsData.value.some(
+            (item) =>
+              item.form_short_name &&
+              item.form_short_name.replace(/\s+/g, "").toLowerCase() ===
+                inputValue.toLowerCase()
+          )
+            ? "Short name already exists"
+            : "";
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching ezyForms data:", error);
+      if (fieldType === "form_name") formNameError.value = "";
+      else if (fieldType === "form_short_name") formShortNameError.value = "";
+    });
 }
-
-
 
 // function handleInputChange(event, fieldType) {
 //     const inputValue = event.target.value;
-
 
 //     // Set filter based on fieldType
 //     const filters = [[fieldType, "like", `%${inputValue}%`]];
@@ -1712,166 +1949,150 @@ function handleInputChange(event, fieldType) {
 // }
 
 const getRowSuffix = (index) => {
-    if (index === 0) {
-        return "1st row";
-    } else if (index === 1) {
-        return "2nd row";
-    } else if (index === 2) {
-        return "3rd row";
-    } else {
-        return `${index + 1}th row`;
-    }
+  if (index === 0) {
+    return "1st row";
+  } else if (index === 1) {
+    return "2nd row";
+  } else if (index === 2) {
+    return "3rd row";
+  } else {
+    return `${index + 1}th row`;
+  }
 };
-const selectedform = ref([])
+const selectedform = ref([]);
 // Trigger the creation of form and show the preview
 const previewForm = () => {
-    if (blockArr.length) {
-        selectedform.value = blockArr
-        const modal = new bootstrap.Modal(
-            document.getElementById("formViewModal"),
-
-        ); // raise a modal
-        modal.show();
-    }
+  if (blockArr.length) {
+    selectedform.value = blockArr;
+    const modal = new bootstrap.Modal(document.getElementById("formViewModal")); // raise a modal
+    modal.show();
+  }
 };
 
 function deptData() {
-    const queryParams = {
-        fields: JSON.stringify(["*"]),
-    };
+  const queryParams = {
+    fields: JSON.stringify(["*"]),
+  };
 
-    axiosInstance
-        .get(apis.resource + doctypes.departments, { params: queryParams })
-        .then((res) => {
-            if (res?.data?.length) {
-
-                // Mapping department names
-                // label="name" track-by="name"
-                OwnerOfTheFormData.value = res.data.map((dept) => dept.name);
-                formOptions.value = res.data.map((dept) => dept.name); // Store the full data for accessible departments
-                // departments.value = res.data.map(item => item.category)
-
-            }
-        })
-        .catch((error) => {
-            console.error("Error fetching department data:", error);
-        });
+  axiosInstance
+    .get(apis.resource + doctypes.departments, { params: queryParams })
+    .then((res) => {
+      if (res?.data?.length) {
+        // Mapping department names
+        // label="name" track-by="name"
+        OwnerOfTheFormData.value = res.data.map((dept) => dept.name);
+        formOptions.value = res.data.map((dept) => dept.name); // Store the full data for accessible departments
+        // departments.value = res.data.map(item => item.category)
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching department data:", error);
+    });
 }
 
 function OwnerOftheForm(newVal) {
-    if (newVal) {
-        categoriesData(newVal);
-    }
+  if (newVal) {
+    categoriesData(newVal);
+  }
 }
 
 function categoriesData(newVal) {
-    axiosInstance
-        .get(apis.resource + doctypes.departments + `/${newVal}`)
-        .then((res) => {
-            if (res?.data?.ezy_departments_items) {
-                departments.value = res.data.ezy_departments_items.map(
-                    (item) => item.category
-                );
-            }
-        })
-        .catch((error) => {
-            console.error("Error fetching categories data:", error);
-        });
+  axiosInstance
+    .get(apis.resource + doctypes.departments + `/${newVal}`)
+    .then((res) => {
+      if (res?.data?.ezy_departments_items) {
+        departments.value = res.data.ezy_departments_items.map((item) => item.category);
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching categories data:", error);
+    });
 }
 // Get form by ID
 function getFormData() {
-    axiosInstance
-        .get(apis.resource + doctypes.EzyFormDefinitions + `/${paramId}`)
-        .then((res) => {
-            let res_data = res?.data;
-            if (res_data) {
-                if (res_data.accessible_departments) {
-                    res_data.accessible_departments =
-                        res_data.accessible_departments.split(",");
-                }
-                filterObj.value = res_data;
+  axiosInstance
+    .get(apis.resource + doctypes.EzyFormDefinitions + `/${paramId}`)
+    .then((res) => {
+      let res_data = res?.data;
+      if (res_data) {
+        if (res_data.accessible_departments) {
+          res_data.accessible_departments = res_data.accessible_departments.split(",");
+        }
+        filterObj.value = res_data;
 
-                // let structuredArr = rebuildToStructuredArray((JSON.parse(res_data?.form_json?.fields).fields)?.replace(/\\\"/g, '"'))
-                let structuredArr = rebuildToStructuredArray(
-                    JSON.parse(res_data?.form_json).fields
-                );
+        // let structuredArr = rebuildToStructuredArray((JSON.parse(res_data?.form_json?.fields).fields)?.replace(/\\\"/g, '"'))
+        let structuredArr = rebuildToStructuredArray(
+          JSON.parse(res_data?.form_json).fields
+        );
 
-                // workflowSetup.push(JSON.parse(res_data?.form_json).workflow)
+        // workflowSetup.push(JSON.parse(res_data?.form_json).workflow)
 
-                structuredArr.forEach((item, index) => {
-                    blockArr.push(item);
-                });
-
-                JSON.parse(res_data?.form_json).workflow.forEach((item, index) => {
-                    workflowSetup.push(item);
-
-                });
-            }
-        })
-        .catch((error) => {
-            console.error("Error fetching  data:", error);
+        structuredArr.forEach((item, index) => {
+          blockArr.push(item);
         });
+
+        JSON.parse(res_data?.form_json).workflow.forEach((item, index) => {
+          workflowSetup.push(item);
+        });
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching  data:", error);
+    });
 }
 
 function delete_form_items_fields() {
-    axiosInstance
-        .post(apis.delete_form_items, {
-            deleted_fields: deleted_items.flatMap(extractFieldnames),
-            doctype: paramId,
-        })
-        .then((res) => {
-            if (res?.message?.success) {
-                // return res;
-                formData();
-            }
-        });
+  axiosInstance
+    .post(apis.delete_form_items, {
+      deleted_fields: deleted_items.flatMap(extractFieldnames),
+      doctype: paramId,
+    })
+    .then((res) => {
+      if (res?.message?.success) {
+        // return res;
+        formData();
+      }
+    });
 }
 
 async function saveFormData(type) {
-    let data = deleted_items.flatMap(extractFieldnames);
-    if (
-        paramId != undefined &&
-        paramId != null &&
-        paramId != "new" &&
-        data.length
-    ) {
-        delete_form_items_fields();
-
-    } else {
-        formData(type);
-    }
+  let data = deleted_items.flatMap(extractFieldnames);
+  if (paramId != undefined && paramId != null && paramId != "new" && data.length) {
+    delete_form_items_fields();
+  } else {
+    formData(type);
+  }
 }
 
-
 const getFieldComponent = (type) => {
-    switch (type) {
-        case "Data":
-            return "input";
-        case "Phone":
-            return "input";
-        case "Time":
-            return "input";
-        case "Text":
-            return "textarea";
-        case "Color":
-            return "input";
-        case "Check":
-            return "input";
-        case "Select":
-            return "select";
-        case "Table MultiSelect":
-            return "select";
-        case "Date":
-            return "input";
-        case "Datetime":
-            return "input";
-        case "Attach":
-            return "file";
-        case "radio":
-            return "input";
-        default:
-            return "input";
-    }
+  switch (type) {
+    case "Data":
+      return "input";
+    case "Phone":
+      return "input";
+    case "Time":
+      return "input";
+    case "Text":
+      return "textarea";
+    case "Color":
+      return "input";
+    case "Check":
+      return "input";
+    case "Select":
+      return "select";
+    case "Table MultiSelect":
+      return "select";
+    case "Date":
+      return "input";
+    case "Datetime":
+      return "input";
+    case "Attach":
+      return "file";
+    case "radio":
+      return "input";
+    default:
+      return "input";
+  }
 };
 // const swapItems = (arr, fromIndex, toIndex) => {
 //     if (!Array.isArray(arr) || fromIndex < 0 || toIndex < 0 || fromIndex >= arr.length || toIndex >= arr.length) {
@@ -1898,7 +2119,6 @@ const getFieldComponent = (type) => {
 //     }
 // };
 
-
 // // Swap Columns
 // const swapColumns = (fromIndex, toIndex, sectionIndex, rowIndex, blockIndex) => {
 //     if (blockArr?.[blockIndex]?.sections?.[sectionIndex]?.rows?.[rowIndex]?.columns) {
@@ -1918,7 +2138,7 @@ const getFieldComponent = (type) => {
 //             // Move field between different columns
 //             const fieldToMove = fromColumn.fields.splice(fromIndex, 1)[0];
 //             toColumn.fields.splice(toIndex, 0, fieldToMove);
-//             
+//
 //         } else {
 //             // Swap fields within the same column
 //             swapItems(fromColumn.fields, fromIndex, toIndex);
@@ -1936,7 +2156,7 @@ const getFieldComponent = (type) => {
 //     if (sectionIndex !== null) event.dataTransfer.setData('sectionIndex', sectionIndex);
 //     if (rowIndex !== null) event.dataTransfer.setData('rowIndex', rowIndex);
 //     if (columnIndex !== null) event.dataTransfer.setData('columnIndex', columnIndex);
-//    
+//
 // };
 
 // // Handle drag over event (necessary for drop to work)
@@ -1954,8 +2174,6 @@ const getFieldComponent = (type) => {
 //     const draggedSectionIndex = Number(event.dataTransfer.getData('sectionIndex'));
 //     const draggedRowIndex = Number(event.dataTransfer.getData('rowIndex'));
 //     const draggedColumnIndex = Number(event.dataTransfer.getData('columnIndex'));
-
-
 
 //     if (draggedType === 'section' && type === 'section') {
 //         swapSections(draggedIndex, index, draggedBlockIndex);
@@ -1976,86 +2194,82 @@ const getFieldComponent = (type) => {
 //     }
 // };
 
-
-
-
 const hasDuplicates = (array) => new Set(array).size !== array.length;
-
 </script>
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 
 <style lang="scss" scoped>
 /* @import '@vueform/multiselect/themes/default.css'; */
 .formHeight input {
-    border-radius: 3px !important;
+  border-radius: 3px !important;
 }
 
 .add_designationHeader {
-    box-shadow: 0px 4px 4px 0px #0000000d;
-    font-size: 14px;
+  box-shadow: 0px 4px 4px 0px #0000000d;
+  font-size: 14px;
 }
 
 .ErrorMsg {
-    font-size: 11px;
+  font-size: 11px;
 }
 
 .SelectallDesignation {
-    color: #1b14df;
+  color: #1b14df;
 }
 
 .CancelNdSave {
-    background-color: #fafafa;
-    position: sticky;
-    top: 0;
-    z-index: 1;
+  background-color: #fafafa;
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 
 .stepsDiv {
-    margin-top: 25px;
+  margin-top: 25px;
 }
 
 .steps-sticky-div {
-    position: sticky;
-    z-index: 1;
-    top: 30px;
+  position: sticky;
+  z-index: 1;
+  top: 30px;
 }
 
 input {
-    font-size: 13px !important;
+  font-size: 13px !important;
 
-    // height: 35px;
+  // height: 35px;
 }
 
 .rownames {
-    opacity: 0;
+  opacity: 0;
 }
 
 .formsticky {
-    position: sticky;
-    top: 50px;
-    z-index: 100;
-    background: white;
+  position: sticky;
+  top: 50px;
+  z-index: 100;
+  background: white;
 }
 
 .dynamicSection {
-    border: 1px solid #eeeeee;
-    margin-bottom: 20px;
-    border-radius: 7px;
-    background-color: #f5f5f5;
-    position: relative;
-    transition: all 2s ease-in;
-    margin: 8px;
-    padding: 10px;
+  border: 1px solid #eeeeee;
+  margin-bottom: 20px;
+  border-radius: 7px;
+  background-color: #f5f5f5;
+  position: relative;
+  transition: all 2s ease-in;
+  margin: 8px;
+  padding: 10px;
 }
 
 .dynamicColumn {
-    // border: 1px solid #cccccc;
-    border: 1.5px dashed #cccccc;
-    border-radius: 10px;
-    margin: 5px;
-    margin-top: 0;
-    position: relative;
-    background-color: #ffffff;
+  // border: 1px solid #cccccc;
+  border: 1.5px dashed #cccccc;
+  border-radius: 10px;
+  margin: 5px;
+  margin-top: 0;
+  position: relative;
+  background-color: #ffffff;
 }
 
 // .dynamicColumn {
@@ -2069,207 +2283,207 @@ input {
 // }
 
 .dynamicColumn:hover {
-    border: 1px solid rgb(119, 119, 119);
+  border: 1px solid rgb(119, 119, 119);
 }
 
 .column_name {
-    /* border-bottom: 1px solid #f1f1f1; */
-    padding: 1px 3px;
+  /* border-bottom: 1px solid #f1f1f1; */
+  padding: 1px 3px;
 }
 
 .main-section {
-    background-color: #fff;
-    border-radius: 10px;
-    padding: 20px;
-    border: 1px solid rgb(236, 236, 236);
-    margin: 10px;
-    position: relative;
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 20px;
+  border: 1px solid rgb(236, 236, 236);
+  margin: 10px;
+  position: relative;
 }
 
 .border-less-input {
-    border: 0;
-    background: transparent;
-    padding-left: 10px;
+  border: 0;
+  background: transparent;
+  padding-left: 10px;
 }
 
 .italic-style {
-    font-style: italic;
+  font-style: italic;
 }
 
 .border-less-input:focus {
-    border: 0;
-    background: transparent;
-    outline: 0;
+  border: 0;
+  background: transparent;
+  outline: 0;
 }
 
 .field-border {
-    /* border: 1px solid rgb(221, 221, 221); */
-    border-radius: 10px;
-    margin: 0px 10px 5px 10px;
-    background-color: #fafafa;
-    position: relative;
+  /* border: 1px solid rgb(221, 221, 221); */
+  border-radius: 10px;
+  margin: 0px 10px 5px 10px;
+  background-color: #fafafa;
+  position: relative;
 }
 
 .preview-section {
-    background-color: #eeeeee;
-    // overflow-y: scroll;
-    // overflow-x: hidden;
-    // height: 40vh;
-    padding: 8px;
-    border-radius: 10px;
+  background-color: #eeeeee;
+  // overflow-y: scroll;
+  // overflow-x: hidden;
+  // height: 40vh;
+  padding: 8px;
+  border-radius: 10px;
 }
 
 input[type="checkbox"] {
-    margin-left: 5px;
-    height: 15px;
+  margin-left: 5px;
+  height: 15px;
 }
 
 has context menu .form-container {
-    /* max-width: 900px; */
-    margin: 0 auto;
-    padding-top: 20px;
+  /* max-width: 900px; */
+  margin: 0 auto;
+  padding-top: 20px;
 
-    border-radius: 8px;
-    background-color: #fff;
+  border-radius: 8px;
+  background-color: #fff;
 }
 
 .form-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .steps {
-    /* display: flex;
+  /* display: flex;
     justify-content: space-evenly; */
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    width: 100%;
-    position: relative;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  position: relative;
 }
 
 .steps li {
-    padding: 25px 20px;
-    font-size: 14px;
-    font-weight: 400;
-    cursor: pointer;
-    transition: 0.3s all ease;
-    width: 100%;
-    position: relative;
+  padding: 25px 20px;
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: 0.3s all ease;
+  width: 100%;
+  position: relative;
 }
 
 .steps li.active {
-    color: #1b14df;
-    font-weight: bold;
+  color: #1b14df;
+  font-weight: bold;
 }
 
 .completedStepIcon {
-    color: #1b14df;
-    font-size: 14px;
+  color: #1b14df;
+  font-size: 14px;
 }
 
 .steps li.completed {
-    color: #000;
-    font-size: 14px;
-    font-weight: 400;
-    font-weight: normal;
-    opacity: 0.7;
+  color: #000;
+  font-size: 14px;
+  font-weight: 400;
+  font-weight: normal;
+  opacity: 0.7;
 }
 
 .steps li.completed::after {
-    content: "";
-    display: block;
-    width: 1px;
-    height: 40px;
-    background-color: #d9d9d9;
-    /* Customize the color */
-    position: absolute;
-    border-radius: 2px;
-    left: 25px;
-    /* Adjust position relative to the icon */
-    top: 75%;
-    /* Position the line below the step */
+  content: "";
+  display: block;
+  width: 1px;
+  height: 40px;
+  background-color: #d9d9d9;
+  /* Customize the color */
+  position: absolute;
+  border-radius: 2px;
+  left: 25px;
+  /* Adjust position relative to the icon */
+  top: 75%;
+  /* Position the line below the step */
 }
 
 .form-group {
-    margin-bottom: 20px;
+  margin-bottom: 20px;
 }
 
 label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: 500;
-    margin-top: 5px;
-    font-size: 13px;
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+  margin-top: 5px;
+  font-size: 13px;
 }
 
 input,
 select {
-    /* width: 100%; */
-    // padding: 10px;
-    border: 1px solid #ccc;
+  /* width: 100%; */
+  // padding: 10px;
+  border: 1px solid #ccc;
 }
 
 .searchSelect {
-    border-radius: 10px !important;
+  border-radius: 10px !important;
 }
 
 .form-footer {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
 }
 
 .backTo {
-    color: #000;
-    border: none;
-    border-bottom: 2px solid black;
-    background: transparent;
-    padding-bottom: 0px;
-    height: 25px;
+  color: #000;
+  border: none;
+  border-bottom: 2px solid black;
+  background: transparent;
+  padding-bottom: 0px;
+  height: 25px;
 }
 
 .Savedraft {
-    color: #000;
-    border: none;
-    background: transparent;
+  color: #000;
+  border: none;
+  background: transparent;
 }
 
 .NextSave {
-    padding: 6px 12px;
-    border: none;
-    background-color: #000;
-    color: #fff;
-    cursor: pointer;
-    border-radius: 4px;
+  padding: 6px 12px;
+  border: none;
+  background-color: #000;
+  color: #fff;
+  cursor: pointer;
+  border-radius: 4px;
 }
 
 .NextSave:hover {
-    background-color: #444;
+  background-color: #444;
 }
 
 .saveForm {
-    padding: 6px 12px;
-    border: none;
-    background-color: #000;
-    color: #fff;
-    cursor: pointer;
-    border-radius: 4px;
-    margin-top: 20px;
+  padding: 6px 12px;
+  border: none;
+  background-color: #000;
+  color: #fff;
+  cursor: pointer;
+  border-radius: 4px;
+  margin-top: 20px;
 }
 
 .saveForm:hover {
-    background-color: #000;
+  background-color: #000;
 }
 
 .stepperbackground {
-    background-color: #eeeeee;
-    height: 50px;
-    border-radius: 7px;
-    position: sticky;
-    z-index: 1;
-    top: 36px;
+  background-color: #eeeeee;
+  height: 50px;
+  border-radius: 7px;
+  position: sticky;
+  z-index: 1;
+  top: 36px;
 }
 
 // .previewInputHeight {
@@ -2277,343 +2491,343 @@ select {
 // }
 
 .addField {
-    font-size: 12px;
-    font-weight: 400;
+  font-size: 12px;
+  font-weight: 400;
 }
 
 .addRow {
-    // border: 1px solid #ccc;
-    font-size: 12px;
-    font-weight: 400;
-    border-radius: 6px;
-    background-color: transparent;
+  // border: 1px solid #ccc;
+  font-size: 12px;
+  font-weight: 400;
+  border-radius: 6px;
+  background-color: transparent;
 }
 
 .copyIcon {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 .deleteSection {
-    color: #fe212e;
+  color: #fe212e;
 
-    font-weight: 400;
+  font-weight: 400;
 }
 
 .deleteBlock {
-    color: #fe212e;
-    font-weight: 400;
+  color: #fe212e;
+  font-weight: 400;
 }
 
 .designationBtn {
-    color: #1b14df;
-    font-size: 13px;
-    font-weight: 400;
-    background-color: transparent;
-    border: none;
+  color: #1b14df;
+  font-size: 13px;
+  font-weight: 400;
+  background-color: transparent;
+  border: none;
 }
 
 .designationList {
-    border: 1px solid #eeeeee;
-    font-size: 14px;
-    font-weight: 400;
-    padding: 15px 5px;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    margin-bottom: 4px;
+  border: 1px solid #eeeeee;
+  font-size: 14px;
+  font-weight: 400;
+  padding: 15px 5px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
 }
 
 .designationCheckBox {
-    font-size: 20px !important;
+  font-size: 20px !important;
 }
 
 .designationCheckBox:focus {
-    box-shadow: none;
+  box-shadow: none;
 }
 
 .addingDesignations {
-    font-size: 14px;
-    font-weight: 600;
-    /* margin-right: 30px; */
+  font-size: 14px;
+  font-weight: 600;
+  /* margin-right: 30px; */
 }
 
 .Withborder {
-    border: 1px solid #eeeeee;
+  border: 1px solid #eeeeee;
 }
 
 .multiselect-option {
-    font-size: 11px !important;
+  font-size: 11px !important;
 }
 
 .multiselect {
-    height: 30px !important;
+  height: 30px !important;
 }
 
 .multiselect {
-    margin: initial;
-    font-size: 11px !important;
-    border: 1px solid #e2e2e2 !important;
+  margin: initial;
+  font-size: 11px !important;
+  border: 1px solid #e2e2e2 !important;
+  height: 30px !important;
+
+  .multiselect-wrapper {
     height: 30px !important;
+  }
 
-    .multiselect-wrapper {
-        height: 30px !important;
+  .multiselect-dropdown {
+    .multiselect-options {
+      font-size: 11px;
+
+      li.multiselect-option span {
+        font-size: 11px !important;
+      }
+
+      li.multiselect-option .is-selected {
+        background-color: grey !important;
+        font-size: 11px;
+      }
     }
-
-    .multiselect-dropdown {
-        .multiselect-options {
-            font-size: 11px;
-
-            li.multiselect-option span {
-                font-size: 11px !important;
-            }
-
-            li.multiselect-option .is-selected {
-                background-color: grey !important;
-                font-size: 11px;
-            }
-        }
-    }
+  }
 }
 
 .multiselect__option span {
-    font-size: 11px;
-    /* Change this value to whatever size you need */
+  font-size: 11px;
+  /* Change this value to whatever size you need */
 }
 
 .multiselect .multiselect-option {
-    font-size: 11px;
+  font-size: 11px;
 }
 
 .multiselect .multiselect-wrapper {
-    min-height: 30px !important;
+  min-height: 30px !important;
 }
 
 .multiselect .multiselect--above {
-    min-height: 30px !important;
+  min-height: 30px !important;
 }
 
 .multiselect__tags {
-    min-height: 30px !important;
-    padding: 0px;
+  min-height: 30px !important;
+  padding: 0px;
 }
 
 .multiselect .multiselect__tags {
-    min-height: 30px !important;
-    font-size: 11px !important;
+  min-height: 30px !important;
+  font-size: 11px !important;
 }
 
 .multiselect .multiselect__placeholder {
-    font-size: 11px;
+  font-size: 11px;
 }
 
 .multiselect .multiselect__single {
-    font-size: 11px;
+  font-size: 11px;
 }
 
 .multiselect .multiselect__tags .multiselect__placeholder {
-    font-size: 11px;
+  font-size: 11px;
 }
 
 ::v-deep(.multiselect__placeholder) {
-    color: #adadad;
-    display: inline-block;
-    margin-bottom: 10px;
-    padding-top: 2px;
-    font-size: 12px !important;
+  color: #adadad;
+  display: inline-block;
+  margin-bottom: 10px;
+  padding-top: 2px;
+  font-size: 12px !important;
 }
 
 .add-section-btn {
-    position: sticky;
-    bottom: 80px;
-    z-index: 1;
-    background-color: #ffffff;
+  position: sticky;
+  bottom: 80px;
+  z-index: 1;
+  background-color: #ffffff;
 }
 
 .add-block-btn-div {
-    position: sticky;
-    bottom: 0;
-    z-index: 1;
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
 }
 
 .background-color-white {
-    background-color: #ffffff;
+  background-color: #ffffff;
 }
 
 .block-level {
-    margin-top: 10px;
-    border: 1px solid #e5e5e5;
-    border-radius: 5px;
-    // padding: 5px 10px;
-    background-color: #fff;
-    position: relative;
+  margin-top: 10px;
+  border: 1px solid #e5e5e5;
+  border-radius: 5px;
+  // padding: 5px 10px;
+  background-color: #fff;
+  position: relative;
 }
 
 .main-block {
-    height: 80vh;
-    overflow-y: scroll;
+  height: 80vh;
+  overflow-y: scroll;
 }
 
 .section-label {
-    padding: 10px 3px;
+  padding: 10px 3px;
 }
 
 .formbackground-color {
-    background-color: #fafafa;
-    border: 1px solid #f1f1f1;
-    height: 90vh;
-    border-radius: 8px;
+  background-color: #fafafa;
+  border: 1px solid #f1f1f1;
+  height: 90vh;
+  border-radius: 8px;
 }
 
 .requestandAppHeader {
-    padding: 10px 6px;
-    box-shadow: 0px 4px 4px 0px #0000000d;
+  padding: 10px 6px;
+  box-shadow: 0px 4px 4px 0px #0000000d;
 }
 
 .section_block {
-    padding: 10px;
+  padding: 10px;
 }
 
 .border-less-input:focus {
-    font-weight: 600;
+  font-weight: 600;
 }
 
 .custom-option {
-    display: flex;
-    align-items: center;
-    gap: 5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
 .custom-checkbox {
-    width: 16px;
-    height: 16px;
+  width: 16px;
+  height: 16px;
 }
 
 ::v-deep(.multiselect__select) {
-    position: absolute;
-    width: 40px;
-    height: 32px;
-    right: 1px;
-    /* top: 1px; */
-    padding: 4px 8px;
-    text-align: center;
-    transition: transform 0.2s ease;
+  position: absolute;
+  width: 40px;
+  height: 32px;
+  right: 1px;
+  /* top: 1px; */
+  padding: 4px 8px;
+  text-align: center;
+  transition: transform 0.2s ease;
 }
 
 ::v-deep(.multiselect) {
-    height: 32px !important;
-    min-height: 32px !important;
+  height: 32px !important;
+  min-height: 32px !important;
 }
 
 ::v-deep(.multiselect__tags) {
-    height: 32px !important;
-    min-height: 32px !important;
-    display: flex;
-    align-items: center;
+  height: 32px !important;
+  min-height: 32px !important;
+  display: flex;
+  align-items: center;
 }
 
 ::v-deep(.multiselect-wrapper),
 ::v-deep(.multiselect-search) {
-    height: 32px !important;
-    min-height: 32px !important;
-    line-height: 32px !important;
-    display: flex;
-    align-items: center;
+  height: 32px !important;
+  min-height: 32px !important;
+  line-height: 32px !important;
+  display: flex;
+  align-items: center;
 }
 
 ::v-deep(.multiselect-search) {
-    height: 32px !important;
-    min-height: 32px !important;
-    display: flex;
-    align-items: center;
+  height: 32px !important;
+  min-height: 32px !important;
+  display: flex;
+  align-items: center;
 }
 
 ::v-deep(.multiselect-wrapper) {
-    height: 32px !important;
-    min-height: 32px !important;
-    line-height: 32px !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  line-height: 32px !important;
 }
 
 ::v-deep(.multiselect-search) {
-    position: absolute;
-    width: 40px !important;
-    height: 32px !important;
-    right: 1px;
+  position: absolute;
+  width: 40px !important;
+  height: 32px !important;
+  right: 1px;
 
-    padding: 4px 8px;
-    text-align: center;
-    transition: transform 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  padding: 4px 8px;
+  text-align: center;
+  transition: transform 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 ::v-deep(.multiselect__element:hover) {
-    background-color: #eeeeee !important;
+  background-color: #eeeeee !important;
 }
 
 ::v-deep(.multiselect__element:hover .multiselect__option) {
-    background-color: #eeeeee !important;
-    color: #000 !important;
+  background-color: #eeeeee !important;
+  color: #000 !important;
 }
 
 ::v-deep(.multiselect__element:hover .multiselect__option--highlight) {
-    background-color: #eeeeee !important;
-    color: #000 !important;
+  background-color: #eeeeee !important;
+  color: #000 !important;
 }
 
 /* Additional specific rule for `.multiselect__option` when hovered */
 ::v-deep(.multiselect__option:hover) {
-    background-color: #eeeeee !important;
-    color: #000 !important;
+  background-color: #eeeeee !important;
+  color: #000 !important;
 }
 
 .disabled-btn {
-    cursor: not-allowed;
-    opacity: 0.6;
-    /* Optional: Reduce opacity for a disabled effect */
+  cursor: not-allowed;
+  opacity: 0.6;
+  /* Optional: Reduce opacity for a disabled effect */
 }
 
 .not-allowed {
-    cursor: not-allowed;
-    /* Show "not-allowed" cursor */
+  cursor: not-allowed;
+  /* Show "not-allowed" cursor */
 }
 
 .role-container {
-    max-width: 280px;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    display: flex;
-    align-items: center;
+  max-width: 280px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
 }
 
 .role-label {
-    font-size: 10px;
-    padding-right: 4px;
+  font-size: 10px;
+  padding-right: 4px;
 }
 
 .role-text {
-    display: flex;
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  display: flex;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .role-names {
-    display: inline-block;
-    // max-width: calc(100% - 50px);
-    /* Leave space for "+X more" */
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  display: inline-block;
+  // max-width: calc(100% - 50px);
+  /* Leave space for "+X more" */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .more-count {
-    color: #000;
-    font-weight: 500;
-    display: inline;
-    cursor: pointer;
-    padding-left: 5px;
+  color: #000;
+  font-weight: 500;
+  display: inline;
+  cursor: pointer;
+  padding-left: 5px;
 }
 </style>

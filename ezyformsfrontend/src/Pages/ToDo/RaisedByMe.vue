@@ -7,12 +7,14 @@
       </div>
     </div>
     <div class="mt-2">
+      <!-- actionType="dropdown" -->
       <GlobalTable
         :tHeaders="tableheaders"
         :tData="tableData"
         isAction="true"
-        actionType="dropdown"
+        viewType="viewPdf"
         isCheckbox="true"
+        @cell-click="viewPreview"
         :actions="actions"
         @actionClicked="actionCreated"
         isFiltersoption="true"
@@ -170,9 +172,14 @@ import { rebuildToStructuredArray } from "../../shared/services/field_format";
 import ApproverPreview from "../../Components/ApproverPreview.vue";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
+import { useRoute, useRouter } from "vue-router";
+
 const businessUnit = computed(() => {
   return EzyBusinessUnit.value;
 });
+const router = useRouter();
+const route = useRoute();
+
 const newBusinessUnit = ref({ business_unit: "" });
 
 const filterObj = ref({ limitPageLength: "None", limit_start: 0 });
@@ -216,6 +223,18 @@ const actions = ref([
   // { name: 'Download Form', icon: 'fa-solid fa-download' },
   // { name: 'Edit Form', icon: 'fa-solid fa-edit' },
 ]);
+
+function viewPreview(data) {
+  router.push({
+    name: "ApproveRequest",
+    query: {
+      routepath: route.path,
+      name: data.name,
+      doctype_name: data.doctype_name,
+      type: "myforms",
+    },
+  });
+}
 
 function actionCreated(rowData, actionEvent) {
   if (actionEvent.name === "View Request") {
@@ -550,7 +569,7 @@ function receivedForMe(data) {
   const filters = [
     ["requested_by", "like", EmpRequestMail.emp_mail_id],
     ["property", "like", `%${newBusinessUnit.value.business_unit}%`],
-    ["status", "=", "Request Raised"],
+    // ["status", "!=", "Completed"],
   ];
 
   if (data) {

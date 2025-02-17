@@ -11,7 +11,7 @@
         :tHeaders="tableheaders"
         :tData="tableData"
         isAction="true"
-        actionType="viewPdf"
+        viewType="viewPdf"
         isCheckbox="true"
         @updateFilters="inLineFiltersData"
         :field-mapping="fieldMapping"
@@ -142,8 +142,10 @@ import { rebuildToStructuredArray } from "../../shared/services/field_format";
 import ApproverPreview from "../../Components/ApproverPreview.vue";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 const router = useRouter();
+const route = useRoute();
+
 const businessUnit = computed(() => {
   return EzyBusinessUnit.value;
 });
@@ -221,7 +223,7 @@ function actionCreated(rowData, actionEvent) {
             doctypeForm.value = res.data[0];
 
             // Map values from doctypeForm to showRequest fields
-            mapFormFieldsToRequest(doctypeForm.value, showRequest.value);
+            // mapFormFieldsToRequest(doctypeForm.value, showRequest.value);
           }
         })
         .catch((error) => {
@@ -249,9 +251,11 @@ function actionCreated(rowData, actionEvent) {
 
 function viewPreview(data) {
   console.log(data);
+  console.log(route.path, "===-----");
   router.push({
     name: "ApproveRequest",
     query: {
+      routepath: route.path,
       name: data.name,
       doctype_name: data.doctype_name,
     },
@@ -381,22 +385,22 @@ function approvalCancelFn(dataObj, type) {
   });
 }
 
-function mapFormFieldsToRequest(doctypeData, showRequestData) {
-  showRequestData.forEach((block) => {
-    block.sections.forEach((section) => {
-      section.rows.forEach((row) => {
-        row.columns.forEach((column) => {
-          column.fields.forEach((field) => {
-            // Check if the fieldname exists in the doctypeForm and assign the value
-            if (doctypeData?.hasOwnProperty(field?.fieldname)) {
-              field.value = doctypeData[field?.fieldname]; // Assign the value from doctypeForm to the field
-            }
-          });
-        });
-      });
-    });
-  });
-}
+// function mapFormFieldsToRequest(doctypeData, showRequestData) {
+//   showRequestData.forEach((block) => {
+//     block.sections.forEach((section) => {
+//       section.rows.forEach((row) => {
+//         row.columns.forEach((column) => {
+//           column.fields.forEach((field) => {
+//             // Check if the fieldname exists in the doctypeForm and assign the value
+//             if (doctypeData?.hasOwnProperty(field?.fieldname)) {
+//               field.value = doctypeData[field?.fieldname]; // Assign the value from doctypeForm to the field
+//             }
+//           });
+//         });
+//       });
+//     });
+//   });
+// }
 
 function closeModal() {
   isCommentsValid.value = true;

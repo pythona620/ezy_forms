@@ -2,9 +2,7 @@
   <div>
     <div class="container-fluid">
       <div class="backtofromPage px-2 py-2">
-        <router-link
-          to="/todo/receivedform"
-          class="text-decoration-none text-dark font-13"
+        <router-link :to="backTo" class="text-decoration-none text-dark font-13"
           ><span> <i class="bi bi-arrow-left"></i></span>Asset request form</router-link
         >
       </div>
@@ -13,47 +11,60 @@
       <div class="row">
         <div class="col-3"></div>
         <div class="col-6">
-          <div class="position-relative">
-            <div class="requestPreviewDiv">
-              <ApproverPreview
-                :blockArr="showRequest"
-                :current-level="selectedcurrentLevel"
-                @updateField="updateFormData"
-              />
-            </div>
-            <div class="d-flex justify-content-end align-item-center">
-              <!-- v-if="!requestcancelled" -->
-              <div class="form-floating p-1">
-                <textarea
-                  class="form-control font-12"
-                  placeholder="Leave a comment here"
-                  id="floatingTextarea"
-                  @input="resetCommentsValidation"
-                  :class="{ 'is-invalid': !isCommentsValid }"
-                  v-model="ApproverReason"
-                ></textarea>
-                <label class="font-11" for="floatingTextarea">Comments..</label>
+          <div class="mt-2">
+            <div class="text-center">
+              <!-- <div class="card border-0 shadow-none">
+              <div class="card-body">
+                <h5 class="card-title">{{ selectedData.doctype_name }}</h5>
               </div>
-              <div>
-                <div class="d-flex justify-content-between align-items-center mt-3 gap-2">
-                  <div>
-                    <button
-                      class="btn btn-outline-danger font-10 py-0 rejectbtn"
-                      type="button"
-                      data-bs-dismiss="modal"
-                      @click="approvalCancelFn(formData, 'Request Cancelled')"
-                    >
-                      <span><i class="bi bi-x-lg me-2"></i></span>Reject
-                    </button>
+            </div> -->
+            </div>
+            <div class="position-relative h-100">
+              <div class="requestPreviewDiv">
+                <ApproverPreview
+                  :blockArr="showRequest"
+                  :current-level="selectedcurrentLevel"
+                  @updateField="updateFormData"
+                />
+              </div>
+              <div v-if="selectedData.type === ''" class="approveBtns">
+                <div class="d-flex justify-content-end align-item-center">
+                  <!-- v-if="!requestcancelled" -->
+                  <div class="form-floating p-1">
+                    <textarea
+                      class="form-control font-12"
+                      placeholder="Leave a comment here"
+                      id="floatingTextarea"
+                      @input="resetCommentsValidation"
+                      :class="{ 'is-invalid': !isCommentsValid }"
+                      v-model="ApproverReason"
+                    ></textarea>
+                    <label class="font-11" for="floatingTextarea">Comments..</label>
                   </div>
                   <div>
-                    <ButtonComp
-                      type="button"
-                      icon="check2"
-                      class="approvebtn border-1 text-nowrap font-10"
-                      @click="handleApproveClick"
-                      name="Approve"
-                    />
+                    <div
+                      class="d-flex justify-content-between align-items-center mt-3 gap-2"
+                    >
+                      <div>
+                        <button
+                          class="btn btn-outline-danger font-10 py-0 rejectbtn"
+                          type="button"
+                          data-bs-dismiss="modal"
+                          @click="approvalCancelFn(formData, 'Request Cancelled')"
+                        >
+                          <span><i class="bi bi-x-lg me-2"></i></span>Reject
+                        </button>
+                      </div>
+                      <div>
+                        <ButtonComp
+                          type="button"
+                          icon="check2"
+                          class="approvebtn border-1 text-nowrap font-10"
+                          @click="handleApproveClick"
+                          name="Approve"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -62,8 +73,15 @@
         </div>
         <div class="col-3">
           <div class="activity-log-container">
-            <div class="shadow w-100">
-              <h5 class="font-13 fw-bold py-3 ps-2">Asset request form approval</h5>
+            <div class="asset_request w-100 py-2 px-3 mb-2">
+              <h5 class="font-13 fw-bold">Asset request form approval</h5>
+              <span class="text-warning font-12 fw-bold">
+                Pending ({{ tableData.current_level }} /
+                {{ tableData.total_levels }})</span
+              >
+            </div>
+            <div>
+              <h6 class="font-14 ps-3 mb-3">Activity log</h6>
             </div>
             <div
               v-for="(item, index) in activityData"
@@ -74,14 +92,13 @@
               <div class="activity-log-dot"></div>
               <div class="activity-log-content">
                 <p class="font-12 mb-1">
-                  On
-                  <!-- formatDate(item.creation) -->
+                  <span>{{ formatAction(item.action) }}</span> on
                   <strong class="strong-content">{{ item.creation }} </strong><br />
-                  <strong class="strong-content"> {{ item.user_name }}</strong>
-                  ({{ item.role }}) has
-                  <strong class="strong-content">{{ formatAction(item.action) }}</strong>
-                  the request with the comments:
-                  <strong class="strong-content">{{ item.reason || "N/A" }}</strong
+                  <strong class="strong-content"> {{ item.user_name }}</strong
+                  ><br />
+                  <span>{{ item.role }}</span
+                  ><br />
+                  <span>{{ item.reason || "N/A" }}</span
                   >.
                 </p>
               </div>
@@ -104,12 +121,20 @@ import { rebuildToStructuredArray } from "../shared/services/field_format";
 import ButtonComp from "./ButtonComp.vue";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
+const route = useRoute();
 
-onMounted(() => {
-  getdata();
-  Wfactivitylog();
-  receivedForMe();
+const selectedData = ref({
+  routepath: route.query.routepath,
+  formname: route.query.name || "", // Retrieve from query
+  doctype_name: route.query.doctype_name || "", // Retrieve from query
+  type: route.query.type || "", // Retrieve from query
 });
+const backTo = ref(selectedData.value.routepath);
+// onMounted(() => {
+//   receivedForMe();
+//   // Wfactivitylog(selectedData.value.formname);
+//   // getdata(selectedData.value.formname);
+// });
 
 const router = useRouter();
 
@@ -117,12 +142,7 @@ const businessUnit = computed(() => {
   return EzyBusinessUnit.value;
 });
 const newBusinessUnit = ref({ business_unit: "" });
-const route = useRoute();
 const filterObj = ref({ limitPageLength: "None", limit_start: 0 });
-const selectedData = ref({
-  formname: route.query.name || "", // Retrieve from query
-  doctype_name: route.query.doctype_name || "", // Retrieve from query
-});
 const totalRecords = ref(0);
 const tableData = ref([]);
 const emittedFormData = ref([]);
@@ -150,9 +170,9 @@ const formatAction = (action) => {
   if (!action) return "performed an action on";
   const actionMap = {
     "Request Cancelled": "cancelled",
-    "Request Raised": "raised",
+    "Request Raised": "Request initiated",
   };
-  return actionMap[action] || action.toLowerCase();
+  return actionMap[action] || action;
 };
 // Function to capture the form data from ApproverPreview
 const updateFormData = (fieldValues) => {
@@ -248,24 +268,30 @@ function approvalCancelFn(dataObj, type) {
   };
   axiosInstance.post(apis.wf_cancelling_request, data).then((response) => {
     if (response?.message?.success) {
-      const modal = bootstrap.Modal.getInstance(document.getElementById("viewRequest"));
-      modal.hide();
-      receivedForMe();
+      router.push({
+        name: "ReceivedForMe",
+      });
     }
   });
 }
 function receivedForMe(data) {
   // Initialize filters array for building dynamic query parameters
   const EmpRequestdesignation = JSON.parse(localStorage.getItem("employeeData"));
-
   const filters = [
-    // assigned_to_users
-    ["assigned_to_users", "like", `%${EmpRequestdesignation?.designation}%`],
     ["property", "like", `%${newBusinessUnit.value.business_unit}%`],
     ["name", "like", `%${selectedData.value.formname}%`],
   ];
   if (data) {
     filters.push(data);
+  }
+  if (selectedData.value.type == "myforms") {
+    filters.push(["requested_by", "like", EmpRequestdesignation.emp_mail_id]);
+  } else {
+    filters.push([
+      "assigned_to_users",
+      "like",
+      `%${EmpRequestdesignation?.designation}%`,
+    ]);
   }
 
   const queryParams = {
@@ -302,19 +328,21 @@ function receivedForMe(data) {
     .then((res) => {
       tableData.value = res.data[0];
       showRequest.value = rebuildToStructuredArray(
-        JSON.parse(tableData.value?.json_columns)?.fields
+        JSON.parse(tableData.value?.json_columns).fields
       );
+      if (res.data.length) {
+        Wfactivitylog(tableData.value.name);
+        getdata(tableData.value.name);
+      }
+
       selectedcurrentLevel.value = tableData.value.current_level;
-      console.log(selectedcurrentLevel.value);
     })
     .catch((error) => {
       console.error("Error fetching records:", error);
     });
 }
-function getdata() {
-  const filters = [
-    ["wf_generated_request_id", "like", `%${selectedData.value.formname}%`],
-  ];
+function getdata(formname) {
+  const filters = [["wf_generated_request_id", "like", `%${formname}%`]];
   const queryParams = {
     fields: JSON.stringify(["*"]),
     limit_page_length: "None",
@@ -330,14 +358,28 @@ function getdata() {
     })
     .then((res) => {
       if (res.data) {
-        console.log(res.data);
         doctypeForm.value = res.data[0];
         mapFormFieldsToRequest(doctypeForm.value, showRequest.value);
+
         // Map values from doctypeForm to showRequest fields
       }
     })
     .catch((error) => {
       console.error("Error fetching categories data:", error);
+    });
+}
+
+function Wfactivitylog(formname) {
+  axiosInstance
+    .get(`${apis.resource}${doctypes.WFActivityLog}/${formname}`)
+    .then((res) => {
+      if (res.data) {
+        console.log("Activity Data:", res.data);
+        activityData.value = res.data.reason || []; // Ensure it's always an array
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching activity data:", error);
     });
 }
 
@@ -358,19 +400,6 @@ function mapFormFieldsToRequest(doctypeData, showRequestData) {
   });
 }
 
-function Wfactivitylog() {
-  axiosInstance
-    .get(`${apis.resource}${doctypes.WFActivityLog}/${selectedData.value.formname}`)
-    .then((res) => {
-      if (res.data) {
-        console.log("Activity Data:", res.data);
-        activityData.value = res.data.reason || []; // Ensure it's always an array
-      }
-    })
-    .catch((error) => {
-      console.error("Error fetching activity data:", error);
-    });
-}
 const requestcancelled = computed(() => {
   if (activityData.value.length === 0) return false;
   const lastAction = activityData.value[activityData.value.length - 1];
@@ -384,9 +413,9 @@ watch(activityData, (newVal) => {
 watch(
   businessUnit,
   (newVal) => {
-    newBusinessUnit.value.business_unit = newVal;
-
-    if (newVal.length) {
+    if (newVal) {
+      console.log(newVal, businessUnit.value);
+      newBusinessUnit.value.business_unit = newVal;
       receivedForMe();
     }
   },
@@ -429,7 +458,15 @@ watch(
   border-radius: 4px;
   opacity: 0px;
 }
-
+.approveBtns {
+  position: fixed;
+  bottom: 0;
+  background-color: #fff;
+  padding: 5px 10px;
+}
+.asset_request {
+  box-shadow: 0px 2px 4px 0px #0000000d;
+}
 .is-invalid {
   border: 1px solid red;
 }
@@ -437,8 +474,8 @@ watch(
 /* Activity log container */
 .activity-log-container {
   width: 100%;
-  // margin-top: 20px;
-  padding: 20px;
+  margin-top: 20px;
+  //padding-left: 30px;
   position: relative;
 }
 
@@ -449,6 +486,7 @@ watch(
   align-items: flex-start;
   /* Ensure dot and text align properly */
   gap: 10px;
+  padding-left: 15px;
   /* Space between dot and text */
   margin-bottom: 20px;
   /* Space between logs */
@@ -463,6 +501,7 @@ watch(
   border-radius: 50%;
   border: 2px solid white;
   z-index: 1;
+  margin-top: 3px;
   /* Ensure dot is above */
 }
 
@@ -470,7 +509,7 @@ watch(
 .activity-log-dot::after {
   content: "";
   position: absolute;
-  top: 15px;
+  top: 13px;
   /* Start line from bottom of dot */
   left: 50%;
   width: 2px;
@@ -495,11 +534,5 @@ watch(
 
 .activity-log-content strong {
   color: #333;
-}
-.requestPreviewDiv {
-  overflow-x: hidden;
-  overflow-y: auto;
-  padding: 10px;
-  height: 80vh;
 }
 </style>

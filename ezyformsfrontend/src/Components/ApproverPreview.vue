@@ -369,7 +369,7 @@ const logFieldValue = (
 };
 </script>
 
-<style setup>
+<style lang="scss" setup>
 .previewInputHeight {
   height: 35px;
   margin-bottom: 5px;
