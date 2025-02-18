@@ -1245,10 +1245,10 @@ const fieldTypes = [
     label: "Time",
     type: "Time",
   },
-  {
-    label: "Table",
-    type: "Table",
-  },
+  // {
+  //   label: "Table",
+  //   type: "Table",
+  // },
   {
     label: "TextArea",
     type: "Text",
