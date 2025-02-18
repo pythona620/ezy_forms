@@ -57,8 +57,7 @@
                   </strong>
                   ({{ item.role }})
                   <strong class="strong-content">{{ formatAction(item.action) }}</strong>
-                  the request
-                  <!-- with the comments: <strong class="strong-content">{{ item.reason || 'N/A' }}</strong>. -->
+                  the request with the comments: <strong class="strong-content">{{ item.reason || 'N/A' }}</strong>.
                 </p>
               </div>
             </div>
@@ -397,7 +396,7 @@ function approvalCancelFn(dataObj, type) {
     doctype: selectedRequest.value.doctype_name,
     current_level: selectedRequest.value.current_level,
     request_id: selectedRequest.value.name,
-    reason: type == "Request Cancelled" ? "Cancelled" : "",
+    reason: ApproverReason.value,
     files: [],
     url_for_cancelling_id: "",
     // "action": type,

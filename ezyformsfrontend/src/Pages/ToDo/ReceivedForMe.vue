@@ -350,7 +350,7 @@ function approvalCancelFn(dataObj, type) {
     property: selectedRequest.value.property,
     doctype: selectedRequest.value.doctype_name,
     request_id: selectedRequest.value.name,
-    reason: type == "Request Cancelled" ? "Cancelled" : "",
+    reason: ApproverReason.value,
     action: type,
     files: [],
     url_for_cancelling_id: "",
