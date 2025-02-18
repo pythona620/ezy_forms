@@ -24,7 +24,7 @@ export function extractFieldsWithBreaks(data) {
               reqd: field.reqd ? 1 : 0,
               value: field.value ? field.value : "",
               // options: field.options  ? (field.fieldtype === "Select" || field.fieldtype === "Table MultiSelect" ? `\n${field.options}` : field.options) : "",
-              ...(["Select", "Table MultiSelect", "Check"].includes(field.fieldtype) && field.options
+              ...(["Select", "Table MultiSelect", "Check", "Table"].includes(field.fieldtype) && field.options
                 ? { options: field.options.startsWith("\n") ? field.options : `\n${field.options}` }
                 : {}),
               // Add options with a newline if fieldtype is "Select" or "Check"
@@ -120,7 +120,7 @@ export function extractFieldsWithBreaks(data) {
   return result;
 
 
-  return result;
+  // return result;
 }
 
 // Usage

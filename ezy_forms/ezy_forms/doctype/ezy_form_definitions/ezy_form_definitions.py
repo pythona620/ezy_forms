@@ -233,3 +233,41 @@ def activating_perms_for_all_roles_in_wf_roadmap():
                 form_perms.delete = 1
                 form_perms.insert(ignore_permissions=True)
     frappe.db.commit()
+#  Child Table Creation
+@frappe.whitelist()
+def add_child_doctype(form_short_name:str,fields:list[dict]):
+    try:
+        doc = frappe.new_doc("DocType")
+        doc.name = form_short_name
+        doc.creation = frappe_now()
+        doc.modified = frappe_now()
+        doc.modified_by = frappe.session.user
+        doc.module = "User Forms"
+        doc.app = "ezy_forms"
+        doc.custom = 1
+        doc.istable = 1
+        # doc.description = business_unit
+        doc.insert(ignore_permissions=True)
+        frappe.db.commit()
+        doc.reload()
+        
+        if len(fields)>0:
+            # add_customized_fields_for_dynamic_doc(fields=fields,doctype=doctype,accessible_departments=accessible_departments)
+            add_customized_fields_for_dynamic_doc(fields=fields,doctype=form_short_name)
+        return [
+                {
+                    "child_doc": {
+                        "description": "Field",
+                        "fieldname": f"{doc.name}",
+                        "fieldtype": "Table",   
+                        "idx": 0,
+                        "label": f"{doc.name}",
+                        "reqd": 0,
+                        "value": "",
+                        "options":f"{doc.name}"
+                    }
+                }
+            ],"Table Added Successfully"
+    except Exception as e:
+        return e
+ 
