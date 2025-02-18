@@ -11,10 +11,11 @@
         :tHeaders="tableheaders"
         :tData="tableData"
         isAction="true"
-        actionType="dropdown"
+        viewType="viewPdf"
         isCheckbox="true"
         @updateFilters="inLineFiltersData"
         :field-mapping="fieldMapping"
+        @cell-click="viewPreview"
         isFiltersoption="true"
         :actions="actions"
         @actionClicked="actionCreated"
@@ -69,9 +70,9 @@
                   <p class="font-12 mb-1">
                     On
                     <strong class="strong-content">{{ formatDate(item.creation) }}</strong
-                    >, <strong class="strong-content">{{ item.user_name }}</strong> ({{
-                      item.role
-                    }}) has
+                    >,
+                    <strong class="strong-content">{{ item.user_name }}</strong>
+                    ({{ item.role }}) has
                     <strong class="strong-content">{{
                       formatAction(item.action)
                     }}</strong>
@@ -121,12 +122,12 @@
       </div>
     </div>
     <!-- <div>
-                <ButtonComp type="button" icon="ban" class="cancelbtn border-1 text-nowrap font-10"
-                  @click="approvalCancelFn(formData, 'Request Cancelled')" name="Cancel Request" />
-              </div> -->
+								<ButtonComp type="button" icon="ban" class="cancelbtn border-1 text-nowrap font-10"
+									@click="approvalCancelFn(formData, 'Request Cancelled')" name="Cancel Request" />
+							</div> -->
 
     <!-- <ButtonComp @click="approvalCancelFn(formData, 'Request Cancelled')" type="button" icon="x"
-                  class="rejectbtn border-1 text-nowrap font-10 " name="Reject" /> -->
+									class="rejectbtn border-1 text-nowrap font-10 " name="Reject" /> -->
   </div>
 </template>
 <script setup>
@@ -141,6 +142,10 @@ import { rebuildToStructuredArray } from "../../shared/services/field_format";
 import ApproverPreview from "../../Components/ApproverPreview.vue";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
+import { useRoute, useRouter } from "vue-router";
+const router = useRouter();
+const route = useRoute();
+
 const businessUnit = computed(() => {
   return EzyBusinessUnit.value;
 });
@@ -218,7 +223,7 @@ function actionCreated(rowData, actionEvent) {
             doctypeForm.value = res.data[0];
 
             // Map values from doctypeForm to showRequest fields
-            mapFormFieldsToRequest(doctypeForm.value, showRequest.value);
+            // mapFormFieldsToRequest(doctypeForm.value, showRequest.value);
           }
         })
         .catch((error) => {
@@ -243,6 +248,20 @@ function actionCreated(rowData, actionEvent) {
     }
   }
 }
+
+function viewPreview(data) {
+  console.log(data);
+  console.log(route.path, "===-----");
+  router.push({
+    name: "ApproveRequest",
+    query: {
+      routepath: route.path,
+      name: data.name,
+      doctype_name: data.doctype_name,
+    },
+  });
+}
+
 // Computed property to determine if any action is cancelled
 const requestcancelled = computed(() => {
   return activityData.value.some((item) => item.action === "Request Cancelled");
@@ -366,22 +385,22 @@ function approvalCancelFn(dataObj, type) {
   });
 }
 
-function mapFormFieldsToRequest(doctypeData, showRequestData) {
-  showRequestData.forEach((block) => {
-    block.sections.forEach((section) => {
-      section.rows.forEach((row) => {
-        row.columns.forEach((column) => {
-          column.fields.forEach((field) => {
-            // Check if the fieldname exists in the doctypeForm and assign the value
-            if (doctypeData?.hasOwnProperty(field?.fieldname)) {
-              field.value = doctypeData[field?.fieldname]; // Assign the value from doctypeForm to the field
-            }
-          });
-        });
-      });
-    });
-  });
-}
+// function mapFormFieldsToRequest(doctypeData, showRequestData) {
+//   showRequestData.forEach((block) => {
+//     block.sections.forEach((section) => {
+//       section.rows.forEach((row) => {
+//         row.columns.forEach((column) => {
+//           column.fields.forEach((field) => {
+//             // Check if the fieldname exists in the doctypeForm and assign the value
+//             if (doctypeData?.hasOwnProperty(field?.fieldname)) {
+//               field.value = doctypeData[field?.fieldname]; // Assign the value from doctypeForm to the field
+//             }
+//           });
+//         });
+//       });
+//     });
+//   });
+// }
 
 function closeModal() {
   isCommentsValid.value = true;
@@ -435,6 +454,7 @@ function inLineFiltersData(searchedData) {
     receivedForMe();
   }
 }
+
 function receivedForMe(data) {
   // Initialize filters array for building dynamic query parameters
   const EmpRequestdesignation = JSON.parse(localStorage.getItem("employeeData"));
@@ -464,7 +484,9 @@ function receivedForMe(data) {
 
   // Fetch total count of records matching filters
   axiosInstance
-    .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, { params: queryParamsCount })
+    .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, {
+      params: queryParamsCount,
+    })
     .then((res) => {
       totalRecords.value = res.data[0].total_count;
     })
@@ -474,7 +496,9 @@ function receivedForMe(data) {
 
   // Fetch the records matching filters
   axiosInstance
-    .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, { params: queryParams })
+    .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, {
+      params: queryParams,
+    })
     .then((res) => {
       tableData.value = res.data;
       idDta.value = [...new Set(res.data.map((id) => id.name))];

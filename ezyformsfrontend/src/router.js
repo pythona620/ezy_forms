@@ -13,6 +13,10 @@ import Login from "./views/Login.vue";
 import isAuthenticated from "../src/shared/services/auth";
 import RaiseRequest from './Components/RaiseRequest.vue';
 import NotFound from './Components/NotFound.vue'
+import ApproveRequest from "./Components/ApproveRequest.vue";
+import FormPreview from "./Components/FormPreview.vue";
+
+
 const routes = [
   {
     path: '/',
@@ -29,6 +33,16 @@ const routes = [
     path: '/raiserequest',
     component: RaiseRequest,
     name: 'RaiseRequest'
+  },
+  {
+    path: '/approverequest',
+    component: ApproveRequest,
+    name: 'ApproveRequest'
+  },
+  {
+    path: '/formpreview',
+    component: FormPreview,
+    name: 'FormPreview'
   },
   { path: "/:pathMatch(.*)*", name: "NotFound", component: NotFound },
 ];
