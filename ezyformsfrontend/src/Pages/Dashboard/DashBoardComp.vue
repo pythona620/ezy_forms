@@ -1,15 +1,11 @@
 <template>
     <div class="container-fluid">
-        <div class="d-flex justify-content-end m-3 mb-2">
-            <FormFields class="w-auto" tag="input" type="date" name="dateId" placeholder="Date of report" id="dateId"
-                @change="selectedDate" v-model="dateId" :Required="false" />
-        </div>
-        <div class="row">
+        <div class="row mt-3">
             <!-- Total Checks Status -->
             <div class="col-4">
                 <div class="chart-wrapper">
                     <div>
-                        <h6 class="fw13">Total Forms in Circulation</h6>
+                        <h6 class="fw13 font-13 text-nowrap">Received to me (4 requests)</h6>
                         <div class="chart-container" ref="totalChecksChartRef"></div>
                     </div>
                     <div class="chart-info">
@@ -21,79 +17,29 @@
                             <div class="legend">
                                 <div class="legend-item">
                                     <span class="color-box scanned"></span>
-                                    <span class="label"><b>{{ scanned }}</b> Approved</span>
+                                    <span class="label"><b>{{ Approved }}</b> Approved</span>
                                 </div>
                                 <div class="legend-item">
                                     <span class="color-box InProgress"></span>
-                                    <span class="label"><b>{{ unScanned }}</b> In Progress</span>
+                                    <span class="label"><b>{{ Request_Cancelled }}</b> Request Cancelled</span>
                                 </div>
                                 <!-- </div>
                             <div class="legend"> -->
                                 <div class="legend-item">
-                                    <span class="color-box Rejected"></span>
-                                    <span class="label"><b>{{ scanned }}</b> Rejected</span>
+                                    <span class="color-box Pending"></span>
+                                    <span class="label"><b>{{ Pending }}</b> Pending</span>
                                 </div>
                                 <div class="legend-item">
-                                    <span class="color-box Pending"></span>
-                                    <span class="label"><b>{{ unScanned }}</b> Pending</span>
+                                    <span class="color-box Rejected"></span>
+                                    <span class="label"><b>{{ Rejected }}</b> Rejected</span>
                                 </div>
+
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-
-            <!-- Scanned Checks -->
-            <!-- <div class="col-4">
-                <div class="chart-wrapper">
-                    <div>
-                        <h6 class="fw13">Scanned checks</h6>
-                        <div class="chart-container" ref="scannedChecksChartRef"></div>
-                    </div>
-                    <div class="chart-info">
-                        <div class="total-count">
-                            <strong>{{ totalscannedChecksData }}</strong>
-                            <span>Total checks scanned</span>
-                        </div>
-                        <div class="legend">
-                            <div class="legend-item">
-                                <span class="color-box Pending "></span>
-                                <span class="label"><b>{{ scannedChecks }}</b> Reviewed</span>
-                            </div>
-                            <div class="legend-item">
-                                <span class="color-box Reviewed"></span>
-                                <span class="label"><b>{{ pendingReview }}</b> Pending review</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-4">
-                <div class="chart-wrapper">
-                    <div>
-                        <h6 class="fw13">Reviewed status</h6>
-                        <div class="chart-container" ref="reviewedStatusChartRef"></div>
-                    </div>
-                    <div class="chart-info">
-                        <div class="total-count">
-                            <strong>{{ reviewChecks }}</strong>
-                            <span>Total reviewed checks</span>
-                        </div>
-                        <div class="legend">
-                            <div class="legend-item">
-                                <span class="color-box Missing"></span>
-                                <span class="label"><b>{{ orphanChecks }}</b> Orphaned checks</span>
-                            </div>
-                            <div class="legend-item">
-                                <span class="color-box Orphaned "></span>
-                                <span class="label"><b>{{ missingSymphony }}</b> Missing in symphony</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div> -->
 
         </div>
     </div>
@@ -101,129 +47,96 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import FormFields from '../../Components/FormFields.vue';
+import { ref, onMounted, watch } from 'vue';
 import * as echarts from 'echarts';
-import { getPreviousDate } from "@/shared/services/Default_prev_date";
+import { apis } from "../../shared/apiurls";
+import axiosInstance from "../../shared/services/interceptor";
 
-// Dummy data
-const scanned = ref(50);
-const unScanned = ref(30);
-const InProgress = ref(30);
-const pending = ref(30);
-
-const totalChecks = ref(scanned.value + unScanned.value + InProgress.value + pending.value);
-
-const reviewChecks = ref(120);
-const orphanChecks = ref(10);
-const missingSymphony = ref(5);
-
-const scannedChecks = ref(80);
-const pendingReview = ref(40);
-const totalscannedChecksData = ref(scannedChecks.value + pendingReview.value);
-
+// Reactive state for API data
+const Approved = ref(0);
+const Request_Cancelled = ref(0);
+const Rejected = ref(0);
+const Pending = ref(0);
+const totalChecks = ref(0);
 const totalChecksChartRef = ref(null);
-const scannedChecksChartRef = ref(null);
-const reviewedStatusChartRef = ref(null);
-const dateId = ref(getPreviousDate());
 
-async function selectedDate(e) {
-    dateId.value = await e.target.value;
-    // Simulate the data fetching
-    DailyTracking();
+async function fetchData() {
+    try {
+        const response = await axiosInstance.get(`${apis.dashboard}`);
+        if (response.message) {
+            const newData = response.message;
+            Approved.value = newData.Approved || 0;
+            Request_Cancelled.value = newData["Request Cancelled"] || 0;
+            Pending.value = newData.Pending || 0;
+            Rejected.value = newData.Rejected || 0;
+
+            // Update total count
+            totalChecks.value = Approved.value + Request_Cancelled.value + Rejected.value + Pending.value;
+
+            // Update the chart
+            updateChart();
+        }
+    } catch (error) {
+        console.error("Error fetching data:", error);
+    }
 }
 
-// Simulated function to update charts with dummy data
-function updateCharts() {
+// Function to render ECharts
+function updateChart() {
     if (totalChecksChartRef.value) {
         const chart = echarts.init(totalChecksChartRef.value);
-        const options = {
+        chart.setOption({
             tooltip: {
                 trigger: 'item',
-                formatter: '{b}: {c} ({d}%)',
+                formatter: '{c}', // Show only value
             },
-            series: [
-                {
-                    name: 'Check Status',
-                    type: 'pie',
-                    radius: ['55%', '80%'],
-                    avoidLabelOverlap: false,
-                    label: {
-                        show: false,
-                    },
-                    data: [
-                        { value: unScanned.value, name: 'Un-Scanned', itemStyle: { color: '#FF0000' } },
-                        { value: scanned.value, name: 'Scanned', itemStyle: { color: '#00FF00' } },
-                        { value: pending.value, name: 'Pending', itemStyle: { color: '#ECE51F' } },
-                        { value: InProgress.value, name: 'In Progress', itemStyle: { color: '#594DFA' } },
-                    ],
+            series: [{
+                type: 'pie',
+                radius: ['50%', '70%'], // Donut chart
+                center: ['50%', '50%'],
+                label: {
+                    show: true,
+                    position: 'inside',
+                    color: '#fff',
+                    fontSize: 12,
+                    formatter: '{c}', // Show values inside sections
                 },
-            ],
-        };
-        chart.setOption(options);
-    }
-
-    if (scannedChecksChartRef.value) {
-        const chart = echarts.init(scannedChecksChartRef.value);
-        const options = {
-            tooltip: {
-                trigger: 'item',
-                formatter: '{b}: {c} ({d}%)',
-            },
-            series: [
-                {
-                    name: 'Scanned Checks',
-                    type: 'pie',
-                    radius: ['55%', '80%'],
-                    avoidLabelOverlap: false,
-                    label: {
-                        show: false,
-                    },
-                    data: [
-                        { value: scannedChecks.value, name: 'Reviewed', itemStyle: { color: '#2FEB1E' } },
-                        { value: pendingReview.value, name: 'Pending Review', itemStyle: { color: '#1511EC' } },
-                    ],
-                },
-            ],
-        };
-        chart.setOption(options);
-    }
-
-    if (reviewedStatusChartRef.value) {
-        const chart = echarts.init(reviewedStatusChartRef.value);
-        const options = {
-            tooltip: {
-                trigger: 'item',
-                formatter: '{b}: {c} ({d}%)',
-            },
-            series: [
-                {
-                    name: 'Reviewed Status',
-                    type: 'pie',
-                    radius: ['55%', '80%'],
-                    avoidLabelOverlap: false,
-                    label: {
-                        show: false,
-                    },
-                    data: [
-                        { value: orphanChecks.value, name: 'Orphaned Checks', itemStyle: { color: '#FF8992' } },
-                        { value: missingSymphony.value, name: 'Missing Symphony', itemStyle: { color: '#979797' } },
-                    ],
-                },
-            ],
-        };
-        chart.setOption(options);
+                labelLine: { show: false },
+                data: [
+                    { value: Approved.value, name: 'Approved', itemStyle: { color: '#00FF00' } },
+                    { value: Request_Cancelled.value, name: 'In Progress', itemStyle: { color: '#594DFA' } },
+                    { value: Pending.value, name: 'Pending', itemStyle: { color: '#ECE51F' } },
+                    { value: Rejected.value, name: 'Rejected', itemStyle: { color: '#FF0000' } },
+                ]
+            }],
+            graphic: {
+                type: 'text',
+                left: 'center',
+                top: 'center',
+                style: {
+                    text: `${totalChecks.value}\nTotal forms`,
+                    textAlign: 'center',
+                    fontSize: 12,
+                    fontWeight: 'bold',
+                    fill: '#000',
+                }
+            }
+        });
     }
 }
 
-onMounted(async () => {
-    // Call updateCharts immediately for dummy data
-    updateCharts();
-});
+// Watch for changes in data & update chart
+watch([Approved, Request_Cancelled, Rejected, Pending], updateChart);
+
+// Fetch data when component mounts
+onMounted(fetchData);
 </script>
 
-
 <style scoped>
+.main-div {
+    background-color: #fafafa;
+}
+
 .chart-wrapper {
     display: flex;
     align-items: center;
@@ -310,14 +223,8 @@ h3 {
 }
 
 .label {
-    font-size: 14px;
+    font-size: 13px;
     color: #333;
-}
-
-.bar-chart {
-    margin-top: 20px;
-    height: 280px;
-    /* width: 100%; */
-    background-color: white;
+    white-space: nowrap;
 }
 </style>

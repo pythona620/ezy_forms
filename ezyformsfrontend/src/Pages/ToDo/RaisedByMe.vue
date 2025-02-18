@@ -7,34 +7,14 @@
       </div>
     </div>
     <div class="mt-2">
-      <GlobalTable
-        :tHeaders="tableheaders"
-        :tData="tableData"
-        isAction="true"
-        actionType="dropdown"
-        isCheckbox="true"
-        :actions="actions"
-        @actionClicked="actionCreated"
-        isFiltersoption="true"
-        :field-mapping="fieldMapping"
-        @updateFilters="inLineFiltersData"
-      />
-      <PaginationComp
-        :currentRecords="tableData.length"
-        :totalRecords="totalRecords"
-        @updateValue="PaginationUpdateValue"
-        @limitStart="PaginationLimitStart"
-      />
+      <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" actionType="dropdown" isCheckbox="true"
+        :actions="actions" @actionClicked="actionCreated" isFiltersoption="true" :field-mapping="fieldMapping"
+        @updateFilters="inLineFiltersData" />
+      <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
+        @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
     </div>
-    <div
-      class="modal fade"
-      id="viewRequest"
-      data-bs-backdrop="static"
-      data-bs-keyboard="false"
-      tabindex="-1"
-      aria-labelledby="viewRequestLabel"
-      aria-hidden="true"
-    >
+    <div class="modal fade" id="viewRequest" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+      aria-labelledby="viewRequestLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
           <!-- <div class="modal-header">
@@ -50,44 +30,27 @@
                 <h5 class="m-0 font-13" id="viewRequest">Request</h5>
               </div>
               <div class="">
-                <button
-                  button="button"
-                  class="btn btn-white text-dark font-13"
-                  @click="downloadPdf"
-                >
+                <button button="button" class="btn btn-white text-dark font-13" @click="downloadPdf">
                   Download Pdf<span class="ms-2"><i class="bi bi-download"></i></span>
                 </button>
-                <button
-                  type="button"
-                  class="btn btn-white text-dark font-13"
-                  @click="closemodal"
-                  data-bs-dismiss="modal"
-                >
+                <button type="button" class="btn btn-white text-dark font-13" @click="closemodal"
+                  data-bs-dismiss="modal">
                   Close <i class="bi bi-x"></i>
                 </button>
               </div>
             </div>
           </div>
           <div class="modal-body approvermodalbody">
-            <ApproverPreview
-              :blockArr="showRequest"
-              :current-level="totalLevels"
-              @updateField="updateFormData"
-            />
+            <ApproverPreview :blockArr="showRequest" :current-level="totalLevels" @updateField="updateFormData" />
           </div>
           <div class="activity-log-container">
-            <div
-              v-for="(item, index) in activityData"
-              :key="index"
-              class="activity-log-item"
-              :class="{ 'last-item': index === activityData.length - 1 }"
-            >
+            <div v-for="(item, index) in activityData" :key="index" class="activity-log-item"
+              :class="{ 'last-item': index === activityData.length - 1 }">
               <div class="activity-log-dot"></div>
               <div class="activity-log-content">
                 <p class="font-12 mb-1">
                   On
-                  <strong class="strong-content">{{ formatDate(item.creation) }}</strong
-                  >,
+                  <strong class="strong-content">{{ formatDate(item.creation) }}</strong>,
                   <strong class="strong-content">
                     <!-- {{ item.user_name }} -->
                     you
@@ -100,8 +63,8 @@
               </div>
             </div>
           </div>
-          <!-- <div class="modal-footer">
-            <div class="d-flex justify-content-between align-items-center mt-3 gap-2">
+          <div class="modal-footer">
+            <!-- <div class="d-flex justify-content-between align-items-center mt-3 gap-2">
               <button type="button" class="btn btn-white text-dark  font-13" @click="closemodal"
                 data-bs-dismiss="modal">Close
                 <i class="bi bi-x"></i></button>
@@ -110,18 +73,16 @@
                   class="btn btn-dark d-flex align-items-center  approvebtn border-1 text-nowrap font-10 "
                   @click="approvalCancelFn(formData, 'Request Cancelled')" name="Cancel Request" />
               </div>
+            </div> -->
+            <div v-if="requestcancelled">
+              <ButtonComp type="button" class="border-1 edit-btn text-nowrap font-10" @click="handleEditClick"
+                name="Edit" />
             </div>
-          </div> -->
+          </div>
         </div>
       </div>
     </div>
-    <div
-      class="modal fade"
-      id="pdfView"
-      tabindex="-1"
-      aria-labelledby="pdfViewLabel"
-      aria-hidden="true"
-    >
+    <div class="modal fade" id="pdfView" tabindex="-1" aria-labelledby="pdfViewLabel" aria-hidden="true">
       <div class="modal-dialog modal-xl">
         <div class="modal-content">
           <div class="modal-header py-2 d-block bg-dark text-white">
@@ -130,19 +91,11 @@
                 <h5 class="m-0 text-white font-13" id="exampleModalLabel">PDF format</h5>
               </div>
               <div class="">
-                <button
-                  button="button"
-                  class="btn btn-dark text-white font-13"
-                  @click="downloadPdf"
-                >
+                <button button="button" class="btn btn-dark text-white font-13" @click="downloadPdf">
                   Download Pdf<span class="ms-2"><i class="bi bi-download"></i></span>
                 </button>
-                <button
-                  type="button"
-                  class="btn btn-dark text-white font-13"
-                  @click="closemodal"
-                  data-bs-dismiss="modal"
-                >
+                <button type="button" class="btn btn-dark text-white font-13" @click="closemodal"
+                  data-bs-dismiss="modal">
                   Close <i class="bi bi-x"></i>
                 </button>
               </div>
@@ -159,7 +112,7 @@
 </template>
 <script setup>
 // import FormFields from "../../Components/FormFields.vue";
-// import ButtonComp from "../../Components/ButtonComp.vue";
+import ButtonComp from "../../Components/ButtonComp.vue";
 import GlobalTable from "../../Components/GlobalTable.vue";
 import axiosInstance from "../../shared/services/interceptor";
 import { apis, doctypes, domain } from "../../shared/apiurls";
@@ -170,6 +123,7 @@ import { rebuildToStructuredArray } from "../../shared/services/field_format";
 import ApproverPreview from "../../Components/ApproverPreview.vue";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
+import router from "../../router";
 const businessUnit = computed(() => {
   return EzyBusinessUnit.value;
 });
@@ -217,12 +171,37 @@ const actions = ref([
   // { name: 'Edit Form', icon: 'fa-solid fa-edit' },
 ]);
 
+function handleEditClick() {
+  const modalElement = document.getElementById('viewRequest');
+  if (modalElement) {
+    const modalInstance = bootstrap.Modal.getInstance(modalElement); // Get existing modal instance
+    if (modalInstance) {
+      modalInstance.hide();
+    }
+  }
+  // console.log("selectedRequest",selectedRequest.value);
+
+  // Navigate to the new route
+  router.push({
+    name: "RaiseRequest",
+    query: {
+      business_unit: selectedRequest.value.property,
+      selectedForm: selectedRequest.value.doctype_name,
+      selectedFormId:selectedRequest.value.name,
+    }
+  });
+}
+
+const requestcancelled = computed(() => {
+  return activityData.value.some((item) => item.action === "Request Cancelled");
+});
+
 function actionCreated(rowData, actionEvent) {
   if (actionEvent.name === "View Request") {
     if (rowData) {
       selectedRequest.value = { ...rowData };
       totalLevels.value = selectedRequest.value?.total_levels;
-      console.log(selectedRequest.value,"0000");
+      // console.log(selectedRequest.value,"0000");
       // Rebuild the structured array from JSON
       showRequest.value = rebuildToStructuredArray(JSON.parse(selectedRequest.value?.json_columns).fields);
 
@@ -549,7 +528,6 @@ function receivedForMe(data) {
   const filters = [
     ["requested_by", "like", EmpRequestMail.emp_mail_id],
     ["property", "like", `%${newBusinessUnit.value.business_unit}%`],
-    
   ];
 
   if (data) {
@@ -622,6 +600,14 @@ onMounted(() => {
   gap: 7px;
   border-radius: 4px;
   opacity: 0px;
+}
+
+.edit-btn {
+  background-color: #333;
+  color: white;
+  padding: 5px 15px 5px 15px;
+  border-radius: 4px;
+  font-weight: bold;
 }
 
 .rejectbtn {

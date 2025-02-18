@@ -82,6 +82,7 @@ const businessUnit = computed(() => {
 const sections = reactive([]);
 onMounted(() => {
     // fetchTable()
+    fetchCategory()
 
 })
 
@@ -125,7 +126,7 @@ const fieldMapping = ref({
     // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
     // invoice_date: { type: "date" },
     form_name: { type: "input" },
-    form_category: { type: "select", options: ["Software", "Hardware"] },
+    form_category: { type: "select", options: [] },
     owner_of_the_form: { type: "input" }
 
 });
@@ -307,6 +308,50 @@ const PaginationLimitStart = ([itemsPerPage, start]) => {
     fetchTable();
 
 };
+
+async function fetchCategory() {
+    try {
+        // Fetch all department names
+        const queryParams = { fields: JSON.stringify(["name"]) };
+        const response = await axiosInstance.get(`${apis.resource}${doctypes.departments}`, { params: queryParams });
+
+        if (response.data) {
+            const departments = response.data;
+
+            // Fetch full details of each department (including child table)
+            const departmentDetailsPromises = departments.map(department =>
+                axiosInstance.get(`${apis.resource}${doctypes.departments}/${department.name}`)
+            );
+
+            // Resolve all department requests
+            const detailedResponses = await Promise.all(departmentDetailsPromises);
+            const detailedDepartments = detailedResponses.map(res => res.data);
+
+            // Extract all category names from child tables
+            const allCategories = [];
+            detailedDepartments.forEach(department => {
+
+                if (department.ezy_departments_items) {
+                    department.ezy_departments_items.forEach(child => {
+                        if (child.category) {
+                            allCategories.push(child.category);
+                        }
+                    });
+                } else {
+                    console.log("No child table found for:", department.name);
+                }
+            });
+
+
+            // Remove duplicates and store in options
+            fieldMapping.value.form_category.options = [...new Set(allCategories)];
+            // console.log(fieldMapping.value.form_category.options, "======== Categories");
+        }
+    } catch (error) {
+        console.error("Error fetching categories:", error);
+    }
+}
+
 
 
 const formCategory = ref([]);

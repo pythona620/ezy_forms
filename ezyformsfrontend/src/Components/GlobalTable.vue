@@ -81,7 +81,11 @@
 								@change="selectedCheckList(row, rowIndex)" />
 						</td> -->
             <td class="">{{ rowIndex + 1 }}</td>
-            <td v-for="(column, colIndex) in tHeaders" :key="colIndex">
+            <td :title="row[column.td_key] ? row[column.td_key].toString() : '-'" v-for="(column, colIndex) in tHeaders" :key="colIndex">
+
+              <!-- <span :class="{'accessible-departments': column.td_key === 'accessible_departments'}" v-if="column.td_key === 'accessible_departments'">
+                
+              </span> -->
               <!-- Condition for Action Column -->
               <span v-if="column.td_key === 'status'">
                 <i
@@ -369,6 +373,23 @@ function handleCellClick(check, index) {
 //   background: white !important;
 
 // }
+// .accessible-departments {
+//   // max-width: 30%;
+//   display: inline-block;
+//   overflow: hidden;
+//   text-overflow: ellipsis;
+//   white-space: nowrap;
+//   vertical-align: middle;
+// }
+.actionsdropdown {
+  position: absolute !important;
+  z-index: 1050; /* Ensures it appears above the table */
+  left: auto;
+  right: 0; /* Aligns the dropdown properly */
+  min-width: 150px; /* Adjust as needed */
+  background-color: white;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
 .activeform {
   font-size: 11px;
   font-weight: 400;
@@ -380,6 +401,15 @@ function handleCellClick(check, index) {
   width: 13px !important;
   height: 13px !important;
 }
+// td.accessible-departments {
+//   max-width: 30%;
+//   width: 30%;
+//   overflow: hidden;
+// }
+td.fixed-column {
+  position: relative;
+  overflow: visible !important;
+}
 
 .global-table {
   width: 100%;
@@ -389,9 +419,9 @@ function handleCellClick(check, index) {
   // table-layout: fixed;
 
   td {
-    // max-width: 80px;
-    // overflow: hidden;
-    text-overflow: ellipsis;
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis; 
     white-space: nowrap;
     color: var(--muted) !important;
     font-size: var(--twelve);

@@ -360,17 +360,16 @@
                                     </VueMultiselect>
                                     <div>
                                         <div class="mb-3 font-11">
-                                            <div v-if="createEmployee.signature">
-                                                <img :src="createEmployee.signature" alt="Signature"
-                                                    class="img-fluid signature-img">
-                                            </div>
-                                            <div v-else>
-
+                                            <div>
                                                 <label for="" class="form-label mb-0 font-13 ps-1">Add Signature<span
                                                         class="text-danger ps-1">*</span></label>
                                                 <input type="file" class="form-control font-12" name="" id=""
                                                     placeholder="" @change="selectedSignature"
                                                     aria-describedby="fileHelpId" />
+                                            </div>
+                                            <div class="mt-3" v-if="createEmployee.signature">
+                                                <img :src="createEmployee.signature" alt="Signature"
+                                                    class="img-fluid signature-img">
                                             </div>
 
                                         </div>

@@ -2,8 +2,9 @@
     <div>
         <div class=" backtofromPage py-2">
 
-            <router-link to="/todo/receivedform" class=" text-decoration-none text-dark font-13"><span> <i
-                        class="bi bi-arrow-left"></i></span>Asset request
+            <router-link to="/todo/receivedform" @click="backToForm()"
+                class=" text-decoration-none text-dark font-13"><span> <i class="bi bi-arrow-left"></i></span>Asset
+                request
                 form</router-link>
         </div>
         <div class="container">
@@ -20,8 +21,11 @@
                                     class=" bi bi-x"></i></span>Clear
                             form</button>
                         <!-- :disabled="!isFormValid" -->
-                        <button :disabled="!isFormValid" class="btn btn-dark font-12 " type="submit"
-                            @click="raiseRequestSubmission">Raise
+                        <button v-if="!$route.query.selectedFormId" :disabled="!isFormValid"
+                            class="btn btn-dark font-12 " type="submit" @click="raiseRequestSubmission">Raise
+                            Request</button>
+                        <button v-if="$route.query.selectedFormId" @click="RequestUpdate" :disabled="!isFormValid"
+                            class="btn btn-dark font-12 " type="submit">Update
                             Request</button>
                     </div>
                 </div>
@@ -72,6 +76,10 @@ const filterObj = ref({
     limit_start: 0,
     limitPageLength: 100,
 })
+
+function backToForm() {
+    blockArr.value = []
+}
 onMounted(() => {
 
     formDefinations()
@@ -88,9 +96,44 @@ watch(business_unit, (newBu, oldBu) => {
         deptData();
     }
 });
-function clearFrom() {
 
+
+function RequestUpdate() { // Accept form as a parameter
+
+const filesArray = filepaths.value ? filepaths.value.split(',').map(filePath => filePath.trim()) : [];
+let form = {};
+// form['doctype'] = selectedData.value.selectedform;
+// form['company_field'] = business_unit.value;
+// form['name']=route.query.selectedFormId;
+
+// form['supporting_files'] = [];
+if (emittedFormData.value.length) {
+    emittedFormData.value.map((each) => {
+        form[each.fieldname] = each.value
+    })
 }
+// console.log(form,'formform');
+
+// const formData = new FormData();
+// formData.append('doc', JSON.stringify(form));
+// formData.append('action', 'Save');
+
+let data_obj = {
+    form_id: route.query.selectedFormId,
+    updated_fields: form,  // Pass the form JSON here
+};
+
+axiosInstance.post(apis.Update_raising_request, data_obj).then(async (resp) => {
+    if (resp?.message?.success) {
+        toast.success("Request Raised", { autoClose: 2000, transition: "zoom" });
+
+        await router.push({ path: '/todo/raisedbyme' });
+    }
+});
+}
+
+
+
 function deptData(value = null) {
     const filters = [
         ["business_unit", "like", `%${business_unit.value}%`]

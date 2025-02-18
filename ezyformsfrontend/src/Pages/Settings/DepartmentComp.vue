@@ -111,7 +111,9 @@
 
                                 <button type="button"
                                     class="applyfilter btn btn-dark text-nowrap font-10 d-flex justify-content-center align-items-center"
-                                    data-bs-dismiss="modal" @click="createDepart"><span class="font-16 me-1"><i
+                                    data-bs-dismiss="modal"
+                                    :disabled="!CreateDepartments.department_code || !CreateDepartments.department_name || !CreateDepartments.business_unit || !newCategory"
+                                    @click="createDepart"><span class="font-16 me-1"><i
                                             class="bi bi-check2 "></i></span>
                                     Create Department</button>
                             </div>

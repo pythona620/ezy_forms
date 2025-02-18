@@ -7,116 +7,75 @@
       </div>
     </div>
     <div class="mt-2">
-      <GlobalTable
-        :tHeaders="tableheaders"
-        :tData="tableData"
-        isAction="true"
-        actionType="dropdown"
-        isCheckbox="true"
-        @updateFilters="inLineFiltersData"
-        :field-mapping="fieldMapping"
-        isFiltersoption="true"
-        :actions="actions"
-        @actionClicked="actionCreated"
-      />
-      <PaginationComp
-        :currentRecords="tableData.length"
-        :totalRecords="totalRecords"
-        @updateValue="PaginationUpdateValue"
-        @limitStart="PaginationLimitStart"
-      />
+      <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" actionType="dropdown" isCheckbox="true"
+        @updateFilters="inLineFiltersData" :field-mapping="fieldMapping" isFiltersoption="true" :actions="actions"
+        @actionClicked="actionCreated" />
+      <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
+        @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
     </div>
-    <div
-      class="modal fade"
-      id="viewRequest"
-      data-bs-backdrop="static"
-      data-bs-keyboard="false"
-      tabindex="-1"
-      aria-labelledby="viewRequestLabel"
-      aria-hidden="true"
-    >
+    <div class="modal fade" id="viewRequest" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+      aria-labelledby="viewRequestLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title font-13" id="viewRequestLabel">
               Request Id: {{ selectedRequest.name }}
             </h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              @click="closeModal"
-              aria-label="Close"
-            ></button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" @click="closeModal"
+              aria-label="Close"></button>
           </div>
           <div class="modal-body approvermodalbody">
-            <ApproverPreview
-              :blockArr="showRequest"
-              :current-level="selectedcurrentLevel"
-              @updateField="updateFormData"
-            />
+            <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel"
+              @updateField="updateFormData" />
           </div>
           <div class="p-2">
             <div class="activity-log-container">
-              <div
-                v-for="(item, index) in activityData"
-                :key="index"
-                class="activity-log-item"
-                :class="{ 'last-item': index === activityData.length - 1 }"
-              >
+              <div v-for="(item, index) in activityData" :key="index" class="activity-log-item"
+                :class="{ 'last-item': index === activityData.length - 1 }">
                 <div class="activity-log-dot"></div>
                 <div class="activity-log-content">
                   <p class="font-12 mb-1">
                     On
-                    <strong class="strong-content">{{ formatDate(item.creation) }}</strong
-                    >, <strong class="strong-content">{{ item.user_name }}</strong> ({{
-                      item.role
-                    }}) has
+                    <strong class="strong-content">{{ formatDate(item.creation) }}</strong>, <strong
+                      class="strong-content">{{ item.user_name }}</strong> ({{
+                        item.role
+                      }}) has
                     <strong class="strong-content">{{
                       formatAction(item.action)
-                    }}</strong>
+                      }}</strong>
                     the request with the comments:
-                    <strong class="strong-content">{{ item.reason || "N/A" }}</strong
-                    >.
+                    <strong class="strong-content">{{ item.reason || "N/A" }}</strong>.
                   </p>
                 </div>
               </div>
             </div>
             <div v-if="!requestcancelled" class="form-floating p-1">
-              <textarea
-                class="form-control font-12"
-                placeholder="Leave a comment here"
-                id="floatingTextarea"
-                @input="resetCommentsValidation"
-                :class="{ 'is-invalid': !isCommentsValid }"
-                v-model="ApproverReason"
-              ></textarea>
+              <textarea class="form-control font-12" placeholder="Leave a comment here" id="floatingTextarea"
+                @input="resetCommentsValidation" :class="{ 'is-invalid': !isCommentsValid }"
+                v-model="ApproverReason"></textarea>
               <label class="font-11" for="floatingTextarea">Comments..</label>
             </div>
           </div>
-          <div v-if="!requestcancelled" class="modal-footer">
-            <div class="d-flex justify-content-between align-items-center mt-3 gap-2">
+          <div class="modal-footer">
+            <div v-if="!requestcancelled" class="d-flex justify-content-between align-items-center mt-3 gap-2">
               <div>
-                <button
-                  class="btn btn-outline-danger font-10 py-0 rejectbtn"
-                  type="button"
-                  data-bs-dismiss="modal"
-                  @click="approvalCancelFn(formData, 'Request Cancelled')"
-                >
+                <button class="btn btn-outline-danger font-10 py-0 rejectbtn" type="button" data-bs-dismiss="modal"
+                  @click="approvalCancelFn(formData, 'Request Cancelled')">
                   <span><i class="bi bi-x-lg me-2"></i></span>Reject
                 </button>
               </div>
               <div>
-                <ButtonComp
-                  type="button"
-                  icon="check2"
-                  class="approvebtn border-1 text-nowrap font-10"
-                  @click="handleApproveClick"
-                  name="Approve"
-                />
+                <ButtonComp type="button" icon="check2" class="approvebtn border-1 text-nowrap font-10"
+                  @click="handleApproveClick" name="Approve" />
               </div>
             </div>
+
+            <!-- <div v-if="requestcancelled">
+              <ButtonComp type="button" class="border-1 edit-btn text-nowrap font-10" @click="handleEditClick"
+                name="Edit" />
+            </div> -->
           </div>
+
         </div>
       </div>
     </div>
@@ -190,7 +149,9 @@ function actionCreated(rowData, actionEvent) {
     if (rowData) {
       selectedRequest.value = { ...rowData };
       selectedcurrentLevel.value = selectedRequest.value.current_level;
-      console.log(selectedRequest.value.name);
+      // console.log("doctype_name",selectedRequest.value.doctype_name);
+      // console.log("Property name",selectedRequest.value.property);
+
 
       // Rebuild the structured array from JSON
       showRequest.value = rebuildToStructuredArray(
@@ -282,6 +243,31 @@ const updateFormData = (fieldValues) => {
   emittedFormData.value = emittedFormData.value.concat(fieldValues);
 };
 const isCommentsValid = ref(true); // Flag to validate comment field
+
+// function handleEditClick() {
+//   console.log("item", selectedRequest.value);
+
+//   // Hide the modal properly
+//   const modalElement = document.getElementById('viewRequest');
+//   if (modalElement) {
+//     const modalInstance = bootstrap.Modal.getInstance(modalElement); // Get existing modal instance
+//     if (modalInstance) {
+//       modalInstance.hide();
+//     }
+//   }
+
+//   // Navigate to the new route
+//   router.push({
+//     name: "RaiseRequest",
+//     query: {
+//       business_unit: selectedRequest.value.property,
+//       selectedForm: selectedRequest.value.doctype_name,
+//     }
+//   });
+// }
+
+
+
 
 // Function to handle approve button click
 const handleApproveClick = () => {
@@ -528,6 +514,14 @@ onMounted(() => {
   gap: 7px;
   border-radius: 4px;
   opacity: 0px;
+  font-weight: bold;
+}
+
+.edit-btn {
+  background-color: #333;
+  color: white;
+  padding: 5px 15px 5px 15px;
+  border-radius: 4px;
   font-weight: bold;
 }
 

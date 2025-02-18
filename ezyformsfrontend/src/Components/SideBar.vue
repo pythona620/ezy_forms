@@ -233,7 +233,7 @@ function deptData() {
                 formSideBarData.value = deptartmentData.value.map(department => ({
                     name: department.department_name,
                     // icon: iconClasses,
-                    route: department.name.replace(/\s+/g, '-').toLowerCase(),
+                    route: department.name,
 
                     //   id: department.id 
                 }));
