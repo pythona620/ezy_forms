@@ -76,7 +76,7 @@
                   <strong class="strong-content"> {{ item.user_name }}</strong>
                   ({{ item.role }}) has
                   <strong class="strong-content">{{ formatAction(item.action) }}</strong>
-                  the request with the comments:
+                  the request with the comments:  
                   <strong class="strong-content">{{ item.reason || "N/A" }}</strong
                   >.
                 </p>
