@@ -127,6 +127,18 @@ def enqueued_add_customized_fields_for_dynamic_doc(fields:list[dict],doctype:str
         if not len(fields)>0:return {"success":False,"message":"Pass Fields for storing."}
         # if not frappe.db.exists("Ezy Form Definitions",{"name":doctype}): return {"success":False,"message":f"pass a valid Form's Short Name - {doctype} which exists."}
         fields_in_mentioned_doctype = [_[0] for _ in frappe.db.sql(f"select fieldname from `tabDocField` where parent ='{doctype}';")]
+        
+        table_fieldnames = [item["fieldname"] for item in fields if item.get("fieldtype") == "Table"]
+        child_table_fields = {"child_table_fields": []}
+        if table_fieldnames:
+            table_name = table_fieldnames[0]  # Get the first table fieldname
+            fields_in_child_doctype = frappe.db.sql(
+                f"select fieldname,fieldtype,idx,label from `tabDocField` where parent ='{table_name}';",
+                as_dict=True
+            )
+            [each_child.update({'value':''}) for each_child in fields_in_child_doctype]
+            child_table_fields = {"child_table_fields":fields_in_child_doctype }
+            
         for dicts_of_docs_entries in fields:
             if dicts_of_docs_entries["fieldname"] in fields_in_mentioned_doctype:
                 doc_exists_name_or_not = frappe.db.exists("DocField",dicts_of_docs_entries)             
@@ -168,7 +180,7 @@ def enqueued_add_customized_fields_for_dynamic_doc(fields:list[dict],doctype:str
         else:
             workflow_from_defs = literal_eval(workflow_from_defs)["workflow"]
             workflow_from_defs = {"workflow":workflow_from_defs}
-        field_with_workflow = {"fields":fields} | workflow_from_defs
+        field_with_workflow = {"fields":fields} | workflow_from_defs | child_table_fields
         frappe.db.set_value("Ezy Form Definitions",doctype,{"form_json":str(field_with_workflow).replace("'",'"').replace("None","null")})
         # frappe.db.set_value("Ezy Form Definitions",doctype,{"form_json":str(field_with_workflow).replace("'",'"').replace("None","null"),'accessible_departments':accessible_departments})
         frappe.db.commit()
@@ -239,6 +251,7 @@ def add_child_doctype(form_short_name:str,fields:list[dict]):
     try:
         doc = frappe.new_doc("DocType")
         doc.name = form_short_name
+        doc.description = f"{doc.name}"
         doc.creation = frappe_now()
         doc.modified = frappe_now()
         doc.modified_by = frappe.session.user
@@ -257,7 +270,7 @@ def add_child_doctype(form_short_name:str,fields:list[dict]):
         return [
                 {
                     "child_doc": {
-                        "description": "Field",
+                        "description": f"{doc.name}",
                         "fieldname": f"{doc.name}",
                         "fieldtype": "Table",   
                         "idx": 0,
