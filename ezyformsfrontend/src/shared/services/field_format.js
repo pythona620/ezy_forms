@@ -120,7 +120,7 @@ export function extractFieldsWithBreaks(data) {
   return result;
 
 
-  return result;
+  // return result;
 }
 
 // Usage

@@ -116,7 +116,7 @@ const selectedcurrentLevel = ref("");
 const activityData = ref([]);
 
 const tableheaders = ref([
-  { th: "Request ID", td_key: "name" },
+  // { th: "Request ID", td_key: "name" },
   { th: "Form name", td_key: "doctype_name" },
   // { th: "Form category", td_key: "doctype_name" },
   // { th: "Owner of form", td_key: "owner" },
@@ -307,7 +307,13 @@ function ApproverFormSubmission(dataObj, type) {
     });
 }
 
+const storedData = localStorage.getItem("employeeData");
+const employee = JSON.parse(storedData);
+console.log(employee.signature,"ppp");
 function approvalStatusFn(dataObj, type) {
+
+
+
   console.log(dataObj);
   let data = {
     property: selectedRequest.value.property,
@@ -315,7 +321,7 @@ function approvalStatusFn(dataObj, type) {
     request_ids: [selectedRequest.value.name],
     reason: ApproverReason.value,
     action: type,
-    files: null,
+    files: employee.signature,
     cluster_name: null,
     url_for_approval_id: "",
     // https://ezyrecon.ezyinvoicing.com/home/wf-requests

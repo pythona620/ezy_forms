@@ -99,7 +99,9 @@
                                                                             <div
                                                                                 class="d-flex gap-2 align-items-center">
                                                                                 <div>
-                                                                                    <input class="form-check-input"
+                                                                                    <input  v-if="
+                                  field.fieldtype === 'Check' && index !== 0
+                                " class="form-check-input"
                                                                                         :type="field.fieldtype"
                                                                                         :name="option" :id="option"
                                                                                         readonly />

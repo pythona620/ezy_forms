@@ -143,7 +143,7 @@ const pdfPreview = ref("");
 const activityData = ref([]);
 
 const tableheaders = ref([
-  { th: "Request ID", td_key: "name" },
+  // { th: "Request ID", td_key: "name" },
   { th: "Form name", td_key: "doctype_name" },
   // { th: "Form category", td_key: "doctype_name" },
   { th: "Owner of form", td_key: "role" },
