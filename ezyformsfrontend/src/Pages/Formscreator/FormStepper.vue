@@ -779,14 +779,14 @@
                               <div
                                 class="d-flex justify-content-start align-items-center my-2"
                               >
-                                <button
+                                <!-- <button
                                   class="btn btn-light addRow m-2"
                                   @click="
                                     addRow(blockIndex, sectionIndex, rowIndex)
                                   "
                                 >
                                   <i class="bi bi-plus"></i> Add row in section
-                                </button>
+                                </button> -->
                               </div>
                             </div>
 
@@ -1756,27 +1756,27 @@ const removeSection = (blockIndex, sectionIndex) => {
   // toast.success("Section removed", { autoClose: 500 })
 };
 
-const addRow = (blockIndex, sectionIndex) => {
-  const rowIndex = blockArr[blockIndex].sections[sectionIndex].rows.length; // Get the current row index
-  const rowSuffix = getRowSuffix(rowIndex);
+// const addRow = (blockIndex, sectionIndex) => {
+//   const rowIndex = blockArr[blockIndex].sections[sectionIndex].rows.length; // Get the current row index
+//   const rowSuffix = getRowSuffix(rowIndex);
 
-  blockArr[blockIndex].sections[sectionIndex].rows.push({
-    label: `row_${rowIndex}_${sectionIndex}_${blockIndex}`,
-    columns: [
-      {
-        fields: [
-          {
-            label: "",
-            fieldtype: "",
-            // value: ref(""), // Keeping the value as a ref for reactivity
-            options: "",
-            reqd: false,
-          },
-        ], // Initialize with an empty fields array
-      },
-    ],
-  });
-};
+//   blockArr[blockIndex].sections[sectionIndex].rows.push({
+//     label: `row_${rowIndex}_${sectionIndex}_${blockIndex}`,
+//     columns: [
+//       {
+//         fields: [
+//           {
+//             label: "",
+//             fieldtype: "",
+//             // value: ref(""), // Keeping the value as a ref for reactivity
+//             options: "",
+//             reqd: false,
+//           },
+//         ], // Initialize with an empty fields array
+//       },
+//     ],
+//   });
+// };
 
 const removeRow = (blockIndex, sectionIndex, rowIndex) => {
   let item = blockArr[blockIndex].sections[sectionIndex].rows[rowIndex];

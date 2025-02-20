@@ -3,7 +3,8 @@
     <div class="container-fluid">
       <div class="backtofromPage px-2 py-2">
         <router-link :to="backTo" class="text-decoration-none text-dark font-13"
-          ><span> <i class="bi bi-arrow-left"></i></span>Asset request form</router-link
+          ><span> <i class="bi bi-arrow-left"></i></span>Asset request
+          form</router-link
         >
       </div>
     </div>
@@ -26,6 +27,45 @@
                   :current-level="selectedcurrentLevel"
                   @updateField="updateFormData"
                 />
+                <div class="mt-2">
+                  <div>
+                    <span class="font-13 fw-bold">{{ tableName }}</span>
+                  </div>
+                  <table class="table table-bordered table-striped">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th
+                          v-for="field in tableHeaders"
+                          :key="field.fieldname"
+                        >
+                          {{ field.label }}
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="(row, index) in tableRows" :key="index">
+                        <td>{{ index + 1 }}</td>
+                        <td
+                          v-for="field in tableHeaders"
+                          :key="field.fieldname"
+                        >
+                          <span
+                            v-if="isFilePath(row[field.fieldname])"
+                            class="cursor-pointer"
+                            @click="openFile(row[field.fieldname])"
+                          >
+                            <!-- {{ row[field.fieldname] }} -->
+                            <span>View Attachment <i class="bi bi-eye-fill ps-1"></i></span>
+                          </span>
+                          <span v-else>
+                            {{ row[field.fieldname] || "-" }}
+                          </span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
               <div v-if="selectedData.type === ''" class="approveBtns">
                 <div class="d-flex justify-content-end align-item-center">
@@ -39,7 +79,9 @@
                       :class="{ 'is-invalid': !isCommentsValid }"
                       v-model="ApproverReason"
                     ></textarea>
-                    <label class="font-11" for="floatingTextarea">Comments..</label>
+                    <label class="font-11" for="floatingTextarea"
+                      >Comments..</label
+                    >
                   </div>
                   <div>
                     <div
@@ -50,7 +92,9 @@
                           class="btn btn-outline-danger font-10 py-0 rejectbtn"
                           type="button"
                           data-bs-dismiss="modal"
-                          @click="approvalCancelFn(formData, 'Request Cancelled')"
+                          @click="
+                            approvalCancelFn(formData, 'Request Cancelled')
+                          "
                         >
                           <span><i class="bi bi-x-lg me-2"></i></span>Reject
                         </button>
@@ -93,12 +137,15 @@
               <div class="activity-log-content">
                 <p class="font-12 mb-1">
                   <strong>{{ formatAction(item.action) }} on </strong>
-                  <strong class="strong-content">{{ item.creation }} </strong><br />
+                  <strong class="strong-content">{{ item.creation }} </strong
+                  ><br />
                   <strong class="strong-content"> {{ item.user_name }}</strong
                   ><br />
                   <span>{{ item.role }}</span
                   ><br />
-                  <span class="font-12 text-secondary">{{ item.reason || "N/A" }}</span
+                  <span class="font-12 text-secondary">{{
+                    item.reason || "N/A"
+                  }}</span
                   >.
                 </p>
               </div>
@@ -152,6 +199,11 @@ const activityData = ref([]);
 const ApproverReason = ref("");
 const selectedcurrentLevel = ref("");
 const doctypeForm = ref([]);
+
+const tableRows = ref([]);
+const tableHeaders = ref([]);
+const tableName = ref("");
+const responseData = ref([]);
 const resetCommentsValidation = () => {
   if (ApproverReason.value.trim() !== "") {
     // If comment is not empty, set isCommentsValid to true
@@ -276,7 +328,9 @@ function approvalCancelFn(dataObj, type) {
 }
 function receivedForMe(data) {
   // Initialize filters array for building dynamic query parameters
-  const EmpRequestdesignation = JSON.parse(localStorage.getItem("employeeData"));
+  const EmpRequestdesignation = JSON.parse(
+    localStorage.getItem("employeeData")
+  );
   const filters = [
     ["property", "like", `%${newBusinessUnit.value.business_unit}%`],
     ["name", "like", `%${selectedData.value.formname}%`],
@@ -330,6 +384,11 @@ function receivedForMe(data) {
       showRequest.value = rebuildToStructuredArray(
         JSON.parse(tableData.value?.json_columns).fields
       );
+      tableHeaders.value = JSON.parse(
+        tableData.value?.json_columns
+      ).child_table_fields;
+
+      console.log(tableHeaders.value, "req");
       if (res.data.length) {
         Wfactivitylog(tableData.value.name);
         getdata(tableData.value.name);
@@ -361,6 +420,37 @@ function getdata(formname) {
         doctypeForm.value = res.data[0];
         mapFormFieldsToRequest(doctypeForm.value, showRequest.value);
 
+        axiosInstance
+          .get(`${apis.resource}${selectedData.value.doctype_name}`)
+          .then((res) => {
+            console.log(`Data for :`, res.data[0]);
+          })
+          .catch((error) => {
+            console.error(`Error fetching data for :`, error);
+          });
+        axiosInstance
+          .get(
+            `${apis.resource}${selectedData.value.doctype_name}/${res.data[0].name}`
+          )
+          .then((res) => {
+            console.log(`Data for :`, res.data);
+            // Identify the child table key dynamically
+            const childTableKey = Object.keys(res.data).find((key) =>
+              Array.isArray(res.data[key])
+            );
+            tableName.value = childTableKey.replace(/_/g, " ");
+            console.log(tableName.value);
+
+            if (childTableKey) {
+              responseData.value = res.data[childTableKey];
+              tableRows.value = responseData.value; // Assign table rows
+              console.log(responseData.value, "Dynamic Child Table Data");
+            }
+          })
+          .catch((error) => {
+            console.error(`Error fetching data for :`, error);
+          });
+
         // Map values from doctypeForm to showRequest fields
       }
     })
@@ -368,6 +458,30 @@ function getdata(formname) {
       console.error("Error fetching categories data:", error);
     });
 }
+const openFile = (filePath) => {
+  if (!filePath) return;
+  const fileUrl = `${filePath}`;
+  window.open(fileUrl, "_blank");
+};
+
+const isFilePath = (value) => {
+  if (!value) return false;
+  return /\.(png|jpg|jpeg|gif|pdf|docx|xlsx|txt)$/i.test(value);
+};
+
+// function childFunction() {
+//   axiosInstance
+//     .get(
+//       `${apis.resource}${selectedData.value?.selectedform}/${childIDs.value}`
+//     )
+//     .then((res) => {
+//       console.log(`Data for :`, res.data);
+//       responseData.value = res.data;
+//     })
+//     .catch((error) => {
+//       console.error(`Error fetching data for :`, error);
+//     });
+// }
 
 function Wfactivitylog(formname) {
   axiosInstance
@@ -534,5 +648,19 @@ watch(
 
 .activity-log-content strong {
   color: #333;
+}
+
+table {
+  border-collapse: collapse;
+}
+th {
+  background-color: #f2f2f2 !important;
+  text-align: left;
+  color: #999999;
+  font-size: 12px;
+}
+
+td {
+  font-size: 12px;
 }
 </style>
