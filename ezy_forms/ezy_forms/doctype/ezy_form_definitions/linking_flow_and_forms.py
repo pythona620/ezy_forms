@@ -73,7 +73,8 @@ def add_roles_to_wf_requestors(business_unit:str,doctype:str,workflow_setup:list
 		workflow_from_defs = frappe.db.get_value("Ezy Form Definitions",doctype,"form_json")
 		fields_from_defs = literal_eval(workflow_from_defs)["fields"]
 		fields_from_defs = {"fields":fields_from_defs}
-		field_with_workflow = fields_from_defs | {"workflow":workflow_setup}
+		child_table_fields = literal_eval(workflow_from_defs)["child_table_fields"]
+		field_with_workflow = fields_from_defs | {"workflow":workflow_setup} | {"child_table_fields":child_table_fields}
 		frappe.db.set_value("Ezy Form Definitions",doctype,{"form_json":str(field_with_workflow).replace("'",'"').replace("None","null")})
 		frappe.db.commit()
 	except Exception as e:

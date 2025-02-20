@@ -349,7 +349,7 @@
                                   <span class="role-label">
                                     {{ 
     (getWorkflowSetup(blockIndex).roles.length > 0) 
-      ? (blockIndex === 0 ? "Requestor: " : blockIndex === 1 ? "Approver: " : "") 
+      ? (blockIndex === 0 ? "Requestor: " :  "Approver: ") 
       : "" 
   }}
                                   </span>
@@ -467,9 +467,10 @@
                                     {{ section.errorMsg }}
                                   </small>
                                 </div>
-                                <div class="d-flex">
+                                <div class="d-flex align-items-center">
+                                  
                                   <!-- Button trigger modal -->
-                                  <button
+                                  <button 
                                     type="button"
                                     class="btn btn-white font-12"
                                     data-bs-toggle="modal"
