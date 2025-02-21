@@ -43,8 +43,8 @@
                     <strong class="strong-content">{{
                       formatAction(item.action)
                       }}</strong>
-                    the request with the comments:
-                    <strong class="strong-content">{{ item.reason || "N/A" }}</strong>.
+                      the request<span v-if="index !== 0 && item.reason">with the comments:</span>
+                    <strong v-if="index !== 0 && item.reason" class="strong-content">{{ item.reason || "N/A" }}</strong>.
                   </p>
                 </div>
               </div>
@@ -54,19 +54,20 @@
                 @input="resetCommentsValidation" :class="{ 'is-invalid': !isCommentsValid }"
                 v-model="ApproverReason"></textarea>
               <label class="font-11" for="floatingTextarea">Comments..</label>
+              <span v-if="!isCommentsValid" class="font-11 text-danger ps-1">Please enter comments**</span>
             </div>
           </div>
           <div class="modal-footer">
             <div v-if="!requestcancelled" class="d-flex justify-content-between align-items-center mt-3 gap-2">
               <div>
-                <button class="btn btn-outline-danger font-10 py-0 rejectbtn" type="button" data-bs-dismiss="modal"
+                <button class="btn btn-outline-danger font-10 py-0 rejectbtn" type="button" 
                   @click="approvalCancelFn(formData, 'Request Cancelled')">
                   <span><i class="bi bi-x-lg me-2"></i></span>Reject
                 </button>
               </div>
               <div>
                 <ButtonComp type="button" icon="check2" class="approvebtn border-1 text-nowrap font-10"
-                  @click="handleApproveClick" name="Approve" />
+                  @click="ApproverFormSubmission('formData','Approve')" name="Approve" />
               </div>
             </div>
 
@@ -270,16 +271,16 @@ const isCommentsValid = ref(true); // Flag to validate comment field
 
 
 // Function to handle approve button click
-const handleApproveClick = () => {
-  if (ApproverReason.value.trim() === "") {
-    // Set the validation flag to false if comment is empty
-    isCommentsValid.value = false;
-  } else {
-    // Proceed with the Approve action if comments are valid
-    isCommentsValid.value = true;
-    ApproverFormSubmission(emittedFormData.value, "Approve"); // Use emittedFormData instead of formData
-  }
-};
+// const handleApproveClick = () => {
+//   if (ApproverReason.value.trim() === "") {
+//     // Set the validation flag to false if comment is empty
+//     isCommentsValid.value = false;
+//   } else {
+//     // Proceed with the Approve action if comments are valid
+//     isCommentsValid.value = true;
+//     ApproverFormSubmission(emittedFormData.value, "Approve"); // Use emittedFormData instead of formData
+//   }
+// };
 
 const resetCommentsValidation = () => {
   if (ApproverReason.value.trim() !== "") {
@@ -289,6 +290,19 @@ const resetCommentsValidation = () => {
 };
 // Function to handle form submission
 function ApproverFormSubmission(dataObj, type) {
+
+  if (ApproverReason.value.trim() === "") {
+    // Set the validation flag to false if the comment is empty
+    isCommentsValid.value = false;
+
+    return; // Stop function execution
+  } else {
+    // Proceed if comments are valid
+    isCommentsValid.value = true;
+  }
+
+
+
   let form = {};
   if (emittedFormData.value.length) {
     emittedFormData.value.map((each) => {
@@ -307,12 +321,10 @@ function ApproverFormSubmission(dataObj, type) {
     });
 }
 
-const storedData = localStorage.getItem("employeeData");
-const employee = JSON.parse(storedData);
-console.log(employee.signature,"ppp");
+
 function approvalStatusFn(dataObj, type) {
-
-
+  const storedData = localStorage.getItem("employeeData");
+  const employee = JSON.parse(storedData);
 
   console.log(dataObj);
   let data = {
@@ -352,6 +364,15 @@ function approvalStatusFn(dataObj, type) {
 function approvalCancelFn(dataObj, type) {
   // let files = this.selectedFileAttachments.map((res: any) => res.url);
 
+  if (ApproverReason.value.trim() === "") {
+    // Set the validation flag to false if the comment is empty
+    isCommentsValid.value = false;
+    return; // Stop function execution
+  } else {
+    // Proceed if comments are valid
+    isCommentsValid.value = true;
+  }
+
   let data = {
     property: selectedRequest.value.property,
     doctype: selectedRequest.value.doctype_name,
@@ -363,7 +384,7 @@ function approvalCancelFn(dataObj, type) {
     current_level: selectedRequest.value.current_level,
   };
   axiosInstance.post(apis.wf_cancelling_request, data).then((response) => {
-    if (response?.message?.success) {
+    if (response?.message) {
       const modal = bootstrap.Modal.getInstance(document.getElementById("viewRequest"));
       modal.hide();
       receivedForMe();

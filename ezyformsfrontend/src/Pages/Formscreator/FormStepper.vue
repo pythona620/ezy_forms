@@ -986,6 +986,41 @@
                 </button>
               </div>
             </div>
+            <div  class="mt-2">
+              <div>
+                <span class="font-13 fw-bold">{{ tableName }}</span>
+              </div>
+              <table class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th v-for="field in childtableHeaders" :key="field.fieldname">
+                      {{ field.label }}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(row, index) in childtableRows" :key="index">
+                    <td>{{ index + 1 }}</td>
+                    <td v-for="field in childtableHeaders" :key="field.fieldname">
+                      <span
+                        v-if="isFilePath(row[field.fieldname])"
+                        class="cursor-pointer"
+                        @click="openFile(row[field.fieldname])"
+                      >
+                        <!-- {{ row[field.fieldname] }} -->
+                        <span
+                          >View Attachment <i class="bi bi-eye-fill ps-1"></i
+                        ></span>
+                      </span>
+                      <span v-else>
+                        {{ row[field.fieldname] || "-" }}
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
           <div class="modal-footer">
             <button
@@ -1121,6 +1156,11 @@ const formShortNameError = ref("");
 const selectedBlockIndex = ref("");
 let workflowSetup = reactive([]);
 const tableFieldsCache = ref([]);
+
+const childtableRows = ref([]);
+const childtableHeaders = ref([]);
+const childtableName = ref("");
+const childTableresponseData = ref([]);
 
 const tableName = ref("");
 let paramId = ref("");
@@ -1307,10 +1347,10 @@ const fieldTypes = [
     label: "Datetime",
     type: "Datetime",
   },
-  {
-      label: "Check",
-      type: "Check",
-  },
+  // {
+  //     label: "Check",
+  //     type: "Check",
+  // },
   // {
   //     label: "Radio",
   //     type: "radio",
@@ -1649,21 +1689,58 @@ function getFormData() {
         // if (!filterObj.value.form_category && filterObj.value.owner_of_the_form) {
         //     categoriesData(filterObj.value.owner_of_the_form);
         // }
+        childtableHeaders.value = JSON.parse(
+        res.data?.form_json
+      ).child_table_fields;
+      console.log(childtableHeaders.value,"---child");
+      console.log(res.data,"7777777777777777");
 
-        // let structuredArr = rebuildToStructuredArray((JSON.parse(res_data?.form_json?.fields).fields)?.replace(/\\\"/g, '"'))
-        let structuredArr = rebuildToStructuredArray(
-          JSON.parse(res_data?.form_json).fields
-        );
+      // let structuredArr = rebuildToStructuredArray((JSON.parse(res_data?.form_json?.fields).fields)?.replace(/\\\"/g, '"'))
+      let structuredArr = rebuildToStructuredArray(
+        JSON.parse(res_data?.form_json).fields
+      );
+      
+      // workflowSetup.push(JSON.parse(res_data?.form_json).workflow)
+      
+      structuredArr.forEach((item, index) => {
+        blockArr.push(item);
+      });
+      
+      JSON.parse(res_data?.form_json).workflow.forEach((item, index) => {
+        workflowSetup.push(item);
+      });
+      // const childId = ''
+      // axiosInstance
+      //         .get(`${apis.resource}${res.data.name}`)
+      //         .then((res) => {
+      //           console.log(`Data for11111111111111111111111 :`, res.data[0].name);
+      //           childId = res.data[0].name;
+      //         })
+      //         .catch((error) => {
+      //           console.error(`Error fetching data for :`, error);
+      //         });
+            // axiosInstance
+            //   .get(
+            //     `${apis.resource}${childId}${res.data.name}`
+            //   )
+            //   .then((res) => {
+            //     console.log(`Data for66666666666666666 :`, res.data);
+            //     // Identify the child table key dynamically
+            //     const childTableKey = Object.keys(res.data).find((key) =>
+            //       Array.isArray(res.data[key])
+            //     );
+            //     tableName.value = childTableKey?.replace(/_/g, " ");
+            //     console.log(tableName.value);
 
-        // workflowSetup.push(JSON.parse(res_data?.form_json).workflow)
-
-        structuredArr.forEach((item, index) => {
-          blockArr.push(item);
-        });
-
-        JSON.parse(res_data?.form_json).workflow.forEach((item, index) => {
-          workflowSetup.push(item);
-        });
+            //     if (childTableKey) {
+            //       childTableresponseData.value = res.data[childTableKey];
+            //       childtableRows.value = childTableresponseData.value; // Assign table rows
+            //       console.log(responseData.value, "Dynamic Child Table Data");
+            //     }
+            //   })
+            //   .catch((error) => {
+            //     console.error(`Error fetching data for :`, error);
+            //   });
       }
     })
     .catch((error) => {

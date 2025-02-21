@@ -67,7 +67,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { apis, doctypes, domain } from "../shared/apiurls";
 import RequestPreview from "./RequestPreview.vue";
 import Multiselect from "@vueform/multiselect";
@@ -89,6 +89,7 @@ const selectedData = ref({
 });
 const business_unit = ref(route.query.business_unit || ""); // Retrieve from query
 const isFormValid = ref(false);
+// const isFormValid = computed(() => allFieldsFilled.value);
 const blockArr = ref([]);
 const categoryOptions = ref([]);
 const employeeData = ref({});
@@ -402,59 +403,66 @@ const handleFieldUpdate = (field) => {
     );
   }
 };
-// const ChildTableData = () => {
-//   const childName = tableName.value[0].options;
-//   let form = {};
-//   form["doctype"] = selectedData.value.selectedform;
-//   form["company_field"] = business_unit.value;
-//   form[childName] = tableRows.value;
-
-//   // form['form_json']
-//   const formData = new FormData();
-//   formData.append("doc", JSON.stringify(form));
-//   formData.append("action", "Save");
-
-//   console.log(form);
-//   axiosInstance
-//     .post(apis.savedocs, formData)
-//     .then((response) => {
-//       console.log(response);
-//     })
-//     .catch((error) => {
-//       console.error("Error fetching data:", error);
-//     });
-// };
-
-
-
-function raiseRequestSubmission() {
-  // ChildTableData();
+const ChildTableData = () => {
   const childName = tableName.value[0]?.options;
   let form = {};
   form["doctype"] = selectedData.value.selectedform;
   form["company_field"] = business_unit.value;
-  if(tableName.value.length){
-    form[childName] = tableRows.value;
-  }
-  // form['supporting_files'] = [];
-  if (emittedFormData.value.length) {
-    emittedFormData.value.map((each) => {
-      form[each.fieldname] = each.value;
-    });
-  }
+  form[childName] = tableRows.value;
 
   // form['form_json']
   const formData = new FormData();
   formData.append("doc", JSON.stringify(form));
   formData.append("action", "Save");
+
+  console.log(form);
   axiosInstance
     .post(apis.savedocs, formData)
     .then((response) => {
-      request_raising_fn(response.docs[0]);
+      console.log(response);
     })
     .catch((error) => {
       console.error("Error fetching data:", error);
     });
+};
+
+function raiseRequestSubmission() {
+  console.log(isFormValid.value);
+  if (!isFormValid.value) {
+    toast.error("Please Fill Mandatory Fields");
+    return; // Stop execution if the form is invalid
+  } else {
+    if (tableName.value[0]?.options) {
+      ChildTableData();
+    }
+    const childName = tableName.value[0]?.options;
+    let form = {};
+    form["doctype"] = selectedData.value.selectedform;
+    form["company_field"] = business_unit.value;
+    if (tableName.value.length) {
+      form[childName] = tableRows.value;
+    }
+    // form['supporting_files'] = [];
+    if (emittedFormData.value.length) {
+      emittedFormData.value.map((each) => {
+        form[each.fieldname] = each.value;
+      });
+    }
+
+    // form['form_json']
+    const formData = new FormData();
+    formData.append("doc", JSON.stringify(form));
+    formData.append("action", "Save");
+    console.log(formData);
+    // axiosInstance
+    //   .post(apis.savedocs, formData)
+    //   .then((response) => {
+    //     request_raising_fn(response.docs[0]);
+    //   })
+    //   .catch((error) => {
+    //     console.error("Error fetching data:", error);
+    //   });
+  }
 }
 
 function request_raising_fn(item) {

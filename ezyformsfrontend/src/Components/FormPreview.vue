@@ -77,8 +77,9 @@
                                                                 <span class="ms-1 text-danger">{{ field.reqd === 1 ? '*'
                                     : '' }}</span>
                                                             </label>
+                                                            <!-- field.fieldtype == 'Select' || -->
                                                             <template
-                                                                v-if="field.fieldtype == 'Select' || field.fieldtype == 'Table MultiSelect'">
+                                                                v-if=" field.fieldtype == 'Table MultiSelect'">
                                                                 <select
                                                                     :multiple="field.fieldtype == 'Table MultiSelect'"
                                                                     v-model="field.value"
@@ -90,7 +91,7 @@
                                                                 </select>
                                                             </template>
                                                             <template
-                                                                v-else-if="field.fieldtype == 'Check' || field.fieldtype == 'radio'">
+                                                                v-else-if="field.fieldtype == 'Check' || field.fieldtype == 'radio' || field.fieldtype == 'Select' ">
                                                                 <div class="container-fluid">
                                                                     <div class="row">
                                                                         <div class="form-check col-4 mb-4"

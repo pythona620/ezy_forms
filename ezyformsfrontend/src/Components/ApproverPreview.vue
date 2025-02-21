@@ -50,11 +50,11 @@
                         }}</span>
                       </label>
                     </div>
-
+                    <!-- field.fieldtype === 'Select' || -->
                     <!-- Field Type Select or Multiselect -->
                     <template
                       v-if="
-                        field.fieldtype === 'Select' ||
+                        
                         field.fieldtype === 'multiselect'
                       "
                     >
@@ -85,7 +85,7 @@
                     <!-- Field Type Check or Radio -->
                     <template
                       v-else-if="
-                        field.fieldtype === 'Check' ||
+                        field.fieldtype === 'Check' || field.fieldtype === 'Select' ||
                         field.fieldtype === 'radio'
                       "
                     >

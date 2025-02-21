@@ -193,7 +193,7 @@ function downloadPdf() {
 
     const dataObj = {
         "form_short_name": formDescriptions.value.form_short_name,
-        "name": null
+        "name": ""
     };
 
     axiosInstance.post(apis.download_pdf_form, dataObj)
