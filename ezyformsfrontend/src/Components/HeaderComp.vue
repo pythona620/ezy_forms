@@ -550,7 +550,7 @@ function SelectedFromchange(value) {
             toast.error("You do not have permission to raise this request.", { autoClose: 2000 });
         }
     } catch (error) {
-        console.error("Error parsing form_json:", error);
+        
         toast.error("Invalid form data. Please contact support.", { autoClose: 2000 });
     }
 }
@@ -680,7 +680,7 @@ function SelectedDepartment(departmentName) {
       let allowedForms = allForms.filter((form) => {
         try {
           const formJson = JSON.parse(form.form_json); // Parse JSON
-          const requestor = formJson.workflow?.find((item) => item.type === "requestor");
+          const requestor = formJson?.workflow?.find((item) => item.type === "requestor");
 
           if (!requestor || !Array.isArray(requestor.roles)) {
             console.log(`Form ${form.form_short_name} has no valid requestor roles.`);

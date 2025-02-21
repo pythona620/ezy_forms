@@ -15,7 +15,11 @@
             <h5 class="m-0 font-13">{{ section.label }}</h5>
           </div>
           <div class="container-fluid">
-            <div class="row" v-for="(row, rowIndex) in section.rows" :key="rowIndex">
+            <div
+              class="row"
+              v-for="(row, rowIndex) in section.rows"
+              :key="rowIndex"
+            >
               <div
                 v-for="(column, columnIndex) in row.columns"
                 :key="'column-preview-' + columnIndex"
@@ -32,7 +36,12 @@
                     <div v-if="field.label">
                       <label
                         :for="
-                          'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex
+                          'field-' +
+                          sectionIndex +
+                          '-' +
+                          columnIndex +
+                          '-' +
+                          fieldIndex
                         "
                       >
                         <span class="font-12">{{ field.label }}</span>
@@ -45,7 +54,8 @@
                     <!-- Field Type Select or Multiselect -->
                     <template
                       v-if="
-                        field.fieldtype === 'Select' || field.fieldtype === 'multiselect'
+                        field.fieldtype === 'Select' ||
+                        field.fieldtype === 'multiselect'
                       "
                     >
                       <select
@@ -75,19 +85,24 @@
                     <!-- Field Type Check or Radio -->
                     <template
                       v-else-if="
-                        field.fieldtype === 'Check' || field.fieldtype === 'radio'
+                        field.fieldtype === 'Check' ||
+                        field.fieldtype === 'radio'
                       "
                     >
                       <div class="container-fluid">
                         <div class="row">
                           <div
                             class="form-check col-4 mb-4"
-                            v-for="(option, index) in field?.options?.split('\n')"
+                            v-for="(option, index) in field?.options?.split(
+                              '\n'
+                            )"
                             :key="index"
                           >
                             <div>
                               <input
-                                v-if="field.fieldtype === 'Check' && index !== 0"
+                                v-if="
+                                  field.fieldtype === 'Check' && index !== 0
+                                "
                                 class="form-check-input"
                                 type="checkbox"
                                 disabled
@@ -155,7 +170,7 @@
                                             </iframe>
 
                                         </template> -->
-                    <template v-else-if="field.fieldtype == 'Attach'">
+                    <!-- <template v-else-if="field.fieldtype == 'Attach'">
                       <div class="container">
                         <div class="row">
                           <div
@@ -183,6 +198,24 @@
                           </div>
                         </div>
                       </div>
+                    </template> -->
+                    <template v-else-if="field.fieldtype == 'Attach'">
+                      <div v-if="field.value">
+                        <img
+                        :src="domain + field.value"
+                        alt="Signature"
+                        class="img-fluid signature-img"
+                      />
+                      </div>
+                      <input v-else
+                        type="file"
+                        class="form-control font-12"
+                        name=""
+                        id=""
+                        placeholder=""
+                        @change="selectedSignature"
+                        aria-describedby="fileHelpId"
+                      />
                     </template>
                     <template v-else-if="field.fieldtype == 'Datetime'">
                       <input
@@ -191,7 +224,12 @@
                         :placeholder="'Enter ' + field.label"
                         :value="field.value"
                         :name="
-                          'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex
+                          'field-' +
+                          sectionIndex +
+                          '-' +
+                          columnIndex +
+                          '-' +
+                          fieldIndex
                         "
                         class="form-control previewInputHeight"
                       />
@@ -216,7 +254,12 @@
                         :type="field.fieldtype"
                         :readOnly="blockIndex === 0"
                         :name="
-                          'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex
+                          'field-' +
+                          sectionIndex +
+                          '-' +
+                          columnIndex +
+                          '-' +
+                          fieldIndex
                         "
                         @blur="
                           (event) =>
@@ -245,6 +288,7 @@
 
 <script setup>
 import { computed, defineProps, onMounted, ref, watch } from "vue";
+import { domain } from "../shared/apiurls";
 
 const props = defineProps({
   blockArr: {
@@ -286,7 +330,9 @@ const getAllFieldsData = () => {
           column.fields?.forEach((field) => {
             fieldsData.push({ ...field });
             if (field.fieldtype === "Attach" && field.value) {
-              filePaths.value = field.value.split(",").map((path) => path.trim());
+              filePaths.value = field.value
+                .split(",")
+                .map((path) => path.trim());
             }
           });
         });
@@ -372,8 +418,9 @@ const logFieldValue = (
   fieldIndex
 ) => {
   const field =
-    props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex]
-      .fields[fieldIndex];
+    props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
+      columnIndex
+    ].fields[fieldIndex];
   field.value = event.target.value;
   emit("updateField", getAllFieldsData());
   // console.log('Field Value Updated:', field);
@@ -424,6 +471,7 @@ input::-webkit-input-placeholder {
 }
 
 .file-cards:hover {
-  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
+    rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
 }
 </style>

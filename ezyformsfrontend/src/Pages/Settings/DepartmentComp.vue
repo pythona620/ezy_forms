@@ -60,7 +60,7 @@
                                         </span>
                                     </template>
                                 </VueMultiselect>
-                                <div class="d-flex align-items-center">
+                                <div class="d-flex align-items-center gap-2">
                                     <div class="w-100">
                                         <label class="font-13 ps-1" for="ezy_departments_items">Ezy Departments
                                             Items</label>
@@ -76,7 +76,7 @@
                                             <tr>
                                                 <th>#</th>
                                                 <th>Category Name</th>
-                                                <th>Actions</th>
+                                                <th class="text-center">Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -88,7 +88,7 @@
                                                     <input type="text" v-model="editCategory" @change="saveEdit(index)"
                                                         placeholder="Edit Category" />
                                                 </td>
-                                                <td>
+                                                <td class="text-center">
                                                     <!-- Pencil icon for editing -->
                                                     <i v-if="editIndex !== index" class="bi bi-pencil"
                                                         @click="startEdit(index, item.category)"></i>
@@ -138,12 +138,19 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <table class="table mt-3 global-table">
+                        <div class="d-flex w-100 gap-3">
+                            <FormFields class="w-100" tag="input" type="text" name="ezy_departments_items"
+                                            id="ezy_departments_items" placeholder="Enter category"
+                                            v-model="newCategory" />
+                            <ButtonComp class="buttoncomp" name="Add" @click="addCategoryInView" />
+                        </div>
+
+                        <table v-if="categoriesDataEdit.ezy_departments_items.length >0 " class="table mt-3 global-table">
                             <thead>
                                 <tr>
                                     <th>#</th>
                                     <th>Category Name</th>
-                                    <th>Actions</th>
+                                    <th class="text-center">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -154,7 +161,7 @@
                                         <input type="text" v-model="editCategory" @change="saveEditForm(index)"
                                             placeholder="Edit Category" />
                                     </td>
-                                    <td>
+                                    <td class="text-center">
                                         <i v-if="editIndex !== index" class="bi bi-pencil"
                                             @click="startEditForm(index, item.category)"></i>
                                         <i v-else class="bi bi-check font-20" @click="saveEditForm(index)"></i>
@@ -166,8 +173,6 @@
                     </div>
                     <div class="modal-footer">
                         <ButtonComp class="btn btn-dark  font-11" name="Save Categories" @click="saveCategories()" />
-
-
                     </div>
                 </div>
             </div>
@@ -310,6 +315,17 @@ function addCategory() {
         newCategory.value = "";
     }
 }
+
+function addCategoryInView() {
+    if (newCategory.value) {
+        categoriesDataEdit.value.ezy_departments_items.push({
+            category: newCategory.value,
+            parentfield: 'ezy_departments_items'
+        });
+        newCategory.value = "";
+    }
+}
+
 function startEdit(index, category) {
     editIndex.value = index;
     editCategory.value = category;
