@@ -54,6 +54,7 @@ import PaginationComp from "../../Components/PaginationComp.vue"
 import FormPreview from '../../Components/FormPreview.vue'
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
+import router from '../../router';
 const totalRecords = ref(0);
 const tableheaders = ref([
   { th: "Form name", td_key: "form_name" },
@@ -76,6 +77,7 @@ const filterObj = ref({ limitPageLength: 'None', limit_start: 0 });
 const actions = ref(
   [
     { name: 'View form', icon: 'fa-solid fa-eye' },
+    { name: 'Raise Request', icon: 'fa-solid fa-eye' },
 
   ]
 )
@@ -101,6 +103,17 @@ function actionCreated(rowData, actionEvent) {
     }
   }
 
+  if (actionEvent.name === 'Raise Request') {
+console.log("rowData",rowData);
+
+router.push({
+    name: "RaiseRequest",
+    query: {
+      selectedForm: rowData.form_short_name,
+      business_unit: rowData.business_unit,
+    },
+  });
+  }
 }
 
 // Watch business unit and department ID changes
