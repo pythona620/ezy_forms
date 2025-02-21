@@ -167,23 +167,23 @@ const allFieldsFilled = computed(() => {
             for (const row of section.rows) {
                 for (const column of row.columns) {
                     for (const field of column.fields) {
-                        // field.reqd === 1 && (----)
-                        if (!field.value || field.value.toString().trim() === "") {
-                            return false; // If any required field is empty, return false
+                        // If field is required and value is empty, return false
+                        if (field.reqd === 1 && (!field.value || field.value.toString().trim() === "")) {
+                            return false;
                         }
                     }
                 }
             }
         }
     }
-    return true; // All required fields are filled
+    return true; // If all required fields are filled, return true
 });
+
 
 // Watch `allFieldsFilled` and emit value
 watch(allFieldsFilled, (newValue) => {
-
-    emit("formValidation", newValue); // Emit true if all fields are filled, false otherwise
-});
+  emit("formValidation", newValue);
+}, { immediate: true });
 
 const logFieldValue = (eve, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) => {
     const field = props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex];

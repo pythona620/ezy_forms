@@ -7,14 +7,34 @@
       </div>
     </div>
     <div class="mt-2">
-      <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" actionType="dropdown" isCheckbox="true"
-        :actions="actions" @actionClicked="actionCreated" isFiltersoption="true" :field-mapping="fieldMapping"
-        @updateFilters="inLineFiltersData" />
-      <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
-        @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
+      <GlobalTable
+        :tHeaders="tableheaders"
+        :tData="tableData"
+        isAction="true"
+        actionType="dropdown"
+        isCheckbox="true"
+        :actions="actions"
+        @actionClicked="actionCreated"
+        isFiltersoption="true"
+        :field-mapping="fieldMapping"
+        @updateFilters="inLineFiltersData"
+      />
+      <PaginationComp
+        :currentRecords="tableData.length"
+        :totalRecords="totalRecords"
+        @updateValue="PaginationUpdateValue"
+        @limitStart="PaginationLimitStart"
+      />
     </div>
-    <div class="modal fade" id="viewRequest" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-      aria-labelledby="viewRequestLabel" aria-hidden="true">
+    <div
+      class="modal fade"
+      id="viewRequest"
+      data-bs-backdrop="static"
+      data-bs-keyboard="false"
+      tabindex="-1"
+      aria-labelledby="viewRequestLabel"
+      aria-hidden="true"
+    >
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
           <!-- <div class="modal-header">
@@ -30,34 +50,96 @@
                 <h5 class="m-0 font-13" id="viewRequest">Request</h5>
               </div>
               <div class="">
-                <button button="button" class="btn btn-white text-dark font-13" @click="downloadPdf">
-                  Download Pdf<span class="ms-2"><i class="bi bi-download"></i></span>
+                <button
+                  button="button"
+                  class="btn btn-white text-dark font-13"
+                  @click="downloadPdf"
+                >
+                  Download Pdf<span class="ms-2"
+                    ><i class="bi bi-download"></i
+                  ></span>
                 </button>
-                <button type="button" class="btn btn-white text-dark font-13" @click="closemodal"
-                  data-bs-dismiss="modal">
+                <button
+                  type="button"
+                  class="btn btn-white text-dark font-13"
+                  @click="closemodal"
+                  data-bs-dismiss="modal"
+                >
                   Close <i class="bi bi-x"></i>
                 </button>
               </div>
             </div>
           </div>
           <div class="modal-body approvermodalbody">
-            <ApproverPreview :blockArr="showRequest" :current-level="totalLevels" @updateField="updateFormData" />
+            <ApproverPreview
+              :blockArr="showRequest"
+              :current-level="totalLevels"
+              @updateField="updateFormData"
+            />
+            <div v-if="tableName.length" class="mt-2">
+              <div>
+                <span class="font-13 fw-bold">{{ tableName }}</span>
+              </div>
+              <table class="table table-bordered table-striped">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th v-for="field in tableHeaders" :key="field.fieldname">
+                      {{ field.label }}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(row, index) in tableRows" :key="index">
+                    <td>{{ index + 1 }}</td>
+                    <td v-for="field in tableHeaders" :key="field.fieldname">
+                      <span
+                        v-if="isFilePath(row[field.fieldname])"
+                        class="cursor-pointer"
+                        @click="openFile(row[field.fieldname])"
+                      >
+                        <!-- {{ row[field.fieldname] }} -->
+                        <span
+                          >View Attachment <i class="bi bi-eye-fill ps-1"></i
+                        ></span>
+                      </span>
+                      <span v-else>
+                        {{ row[field.fieldname] || "-" }}
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
           <div class="activity-log-container">
-            <div v-for="(item, index) in activityData" :key="index" class="activity-log-item"
-              :class="{ 'last-item': index === activityData.length - 1 }">
+            <div
+              v-for="(item, index) in activityData"
+              :key="index"
+              class="activity-log-item"
+              :class="{ 'last-item': index === activityData.length - 1 }"
+            >
               <div class="activity-log-dot"></div>
               <div class="activity-log-content">
                 <p class="font-12 mb-1">
                   On
-                  <strong class="strong-content">{{ formatDate(item.creation) }}</strong>,
+                  <strong class="strong-content">{{
+                    formatDate(item.creation)
+                  }}</strong
+                  >,
                   <strong class="strong-content">
                     <!-- {{ item.user_name }} -->
                     you
                   </strong>
                   ({{ item.role }})
-                  <strong class="strong-content">{{ formatAction(item.action) }}</strong>
-                  the request with the comments: <strong class="strong-content">{{ item.reason || 'N/A' }}</strong>.
+                  <strong class="strong-content">{{
+                    formatAction(item.action)
+                  }}</strong>
+                  the request with the comments:
+                  <strong class="strong-content">{{
+                    item.reason || "N/A"
+                  }}</strong
+                  >.
                 </p>
               </div>
             </div>
@@ -74,27 +156,49 @@
               </div>
             </div> -->
             <div v-if="requestcancelled">
-              <ButtonComp type="button" class="border-1 edit-btn text-nowrap font-10" @click="handleEditClick"
-                name="Edit" />
+              <ButtonComp
+                type="button"
+                class="border-1 edit-btn text-nowrap font-10"
+                @click="handleEditClick"
+                name="Edit"
+              />
             </div>
           </div>
         </div>
       </div>
     </div>
-    <div class="modal fade" id="pdfView" tabindex="-1" aria-labelledby="pdfViewLabel" aria-hidden="true">
+    <div
+      class="modal fade"
+      id="pdfView"
+      tabindex="-1"
+      aria-labelledby="pdfViewLabel"
+      aria-hidden="true"
+    >
       <div class="modal-dialog modal-xl">
         <div class="modal-content">
           <div class="modal-header py-2 d-block bg-dark text-white">
             <div class="d-flex justify-content-between align-items-center">
               <div>
-                <h5 class="m-0 text-white font-13" id="exampleModalLabel">PDF format</h5>
+                <h5 class="m-0 text-white font-13" id="exampleModalLabel">
+                  PDF format
+                </h5>
               </div>
               <div class="">
-                <button button="button" class="btn btn-dark text-white font-13" @click="downloadPdf">
-                  Download Pdf<span class="ms-2"><i class="bi bi-download"></i></span>
+                <button
+                  button="button"
+                  class="btn btn-dark text-white font-13"
+                  @click="downloadPdf"
+                >
+                  Download Pdf<span class="ms-2"
+                    ><i class="bi bi-download"></i
+                  ></span>
                 </button>
-                <button type="button" class="btn btn-dark text-white font-13" @click="closemodal"
-                  data-bs-dismiss="modal">
+                <button
+                  type="button"
+                  class="btn btn-dark text-white font-13"
+                  @click="closemodal"
+                  data-bs-dismiss="modal"
+                >
                   Close <i class="bi bi-x"></i>
                 </button>
               </div>
@@ -115,7 +219,14 @@ import ButtonComp from "../../Components/ButtonComp.vue";
 import GlobalTable from "../../Components/GlobalTable.vue";
 import axiosInstance from "../../shared/services/interceptor";
 import { apis, doctypes, domain } from "../../shared/apiurls";
-import { callWithErrorHandling, onMounted, ref, reactive, computed, watch } from "vue";
+import {
+  callWithErrorHandling,
+  onMounted,
+  ref,
+  reactive,
+  computed,
+  watch,
+} from "vue";
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
 import PaginationComp from "../../Components/PaginationComp.vue";
 import { rebuildToStructuredArray } from "../../shared/services/field_format";
@@ -141,6 +252,10 @@ const tableData = ref([]);
 const totalLevels = ref("");
 const pdfPreview = ref("");
 const activityData = ref([]);
+const tableRows = ref([]);
+const tableHeaders = ref([]);
+const tableName = ref("");
+const responseData = ref([]);
 
 const tableheaders = ref([
   // { th: "Request ID", td_key: "name" },
@@ -155,7 +270,12 @@ const fieldMapping = ref({
   // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
   status: {
     type: "select",
-    options: ["Request Raised", "In Progress", "Completed", "Request Cancelled"],
+    options: [
+      "Request Raised",
+      "In Progress",
+      "Completed",
+      "Request Cancelled",
+    ],
   },
   // name: { type: "input" },
   doctype_name: { type: "input" },
@@ -171,7 +291,7 @@ const actions = ref([
 ]);
 
 function handleEditClick() {
-  const modalElement = document.getElementById('viewRequest');
+  const modalElement = document.getElementById("viewRequest");
   if (modalElement) {
     const modalInstance = bootstrap.Modal.getInstance(modalElement); // Get existing modal instance
     if (modalInstance) {
@@ -186,8 +306,8 @@ function handleEditClick() {
     query: {
       business_unit: selectedRequest.value.property,
       selectedForm: selectedRequest.value.doctype_name,
-      selectedFormId:selectedRequest.value.name,
-    }
+      selectedFormId: selectedRequest.value.name,
+    },
   });
 }
 
@@ -199,10 +319,20 @@ function actionCreated(rowData, actionEvent) {
   if (actionEvent.name === "View Request") {
     if (rowData) {
       selectedRequest.value = { ...rowData };
+
       totalLevels.value = selectedRequest.value?.total_levels;
+
+      tableHeaders.value = JSON.parse(
+        selectedRequest.value?.json_columns
+      ).child_table_fields;
+
+      console.log(tableHeaders.value, "req");
+
       // console.log(selectedRequest.value,"0000");
       // Rebuild the structured array from JSON
-      showRequest.value = rebuildToStructuredArray(JSON.parse(selectedRequest.value?.json_columns).fields);
+      showRequest.value = rebuildToStructuredArray(
+        JSON.parse(selectedRequest.value?.json_columns).fields
+      );
 
       // Prepare the filters for fetching data
       const filters = [
@@ -224,15 +354,48 @@ function actionCreated(rowData, actionEvent) {
         .then((res) => {
           if (res.data) {
             doctypeForm.value = res.data;
+            console.log(doctypeForm.value, "doctype");
             // Map values from doctypeForm to showRequest fields
             mapFormFieldsToRequest(doctypeForm.value[0], showRequest.value);
+            axiosInstance
+              .get(`${apis.resource}${selectedRequest.value.doctype_name}`)
+              .then((res) => {
+                console.log(`Data for :`, res.data[0]);
+              })
+              .catch((error) => {
+                console.error(`Error fetching data for :`, error);
+              });
+            axiosInstance
+              .get(
+                `${apis.resource}${selectedRequest.value.doctype_name}/${res.data[0].name}`
+              )
+              .then((res) => {
+                console.log(`Data for :`, res.data);
+                // Identify the child table key dynamically
+                const childTableKey = Object.keys(res.data).find((key) =>
+                  Array.isArray(res.data[key])
+                );
+                tableName.value = childTableKey.replace(/_/g, " ");
+                console.log(tableName.value);
+
+                if (childTableKey) {
+                  responseData.value = res.data[childTableKey];
+                  tableRows.value = responseData.value; // Assign table rows
+                  console.log(responseData.value, "Dynamic Child Table Data");
+                }
+              })
+              .catch((error) => {
+                console.error(`Error fetching data for :`, error);
+              });
           }
         })
         .catch((error) => {
           console.error("Error fetching categories data:", error);
         });
       axiosInstance
-        .get(`${apis.resource}${doctypes.WFActivityLog}/${selectedRequest.value.name}`)
+        .get(
+          `${apis.resource}${doctypes.WFActivityLog}/${selectedRequest.value.name}`
+        )
         .then((res) => {
           if (res.data) {
             // console.log(res.data);
@@ -242,7 +405,10 @@ function actionCreated(rowData, actionEvent) {
         .catch((error) => {
           console.error("Error fetching activity data:", error);
         });
-      const modal = new bootstrap.Modal(document.getElementById("viewRequest"), {});
+      const modal = new bootstrap.Modal(
+        document.getElementById("viewRequest"),
+        {}
+      );
       modal.show();
     } else {
       console.warn(" There is no form fields ");
@@ -294,6 +460,21 @@ function actionCreated(rowData, actionEvent) {
     modal.show();
   }
 }
+function closemodal() {
+  responseData.value = [];
+  tableName.value = "";
+}
+const openFile = (filePath) => {
+  if (!filePath) return;
+  const fileUrl = `${filePath}`;
+  window.open(fileUrl, "_blank");
+};
+
+const isFilePath = (value) => {
+  if (!value) return false;
+  return /\.(png|jpg|jpeg|gif|pdf|docx|xlsx|txt)$/i.test(value);
+};
+
 // Format the date for display
 const formatDate = (dateString) => {
   if (!dateString) return "N/A";
@@ -410,7 +591,9 @@ function approvalCancelFn(dataObj, type) {
     .then((response) => {
       if (response?.message?.success) {
         toast.success(`${type}`, { autoClose: 1000 });
-        const modal = bootstrap.Modal.getInstance(document.getElementById("viewRequest"));
+        const modal = bootstrap.Modal.getInstance(
+          document.getElementById("viewRequest")
+        );
         modal.hide();
         receivedForMe();
       }
@@ -550,7 +733,9 @@ function receivedForMe(data) {
 
   // Fetch total count of records matching filters
   axiosInstance
-    .get(`${apis?.resource}${doctypes?.WFWorkflowRequests}`, { params: queryParamsCount })
+    .get(`${apis?.resource}${doctypes?.WFWorkflowRequests}`, {
+      params: queryParamsCount,
+    })
     .then((res) => {
       totalRecords.value = res.data[0].total_count;
     })
@@ -560,14 +745,18 @@ function receivedForMe(data) {
 
   // Fetch the records matching filters
   axiosInstance
-    .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, { params: queryParams })
+    .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, {
+      params: queryParams,
+    })
     .then((res) => {
       tableData.value = res.data;
       idDta.value = [...new Set(res.data.map((id) => id.name))];
       docTypeName.value = [
         ...new Set(res.data.map((docTypeName) => docTypeName.doctype_name)),
       ];
-      statusOptions.value = [...new Set(res.data.map((status) => status.status))];
+      statusOptions.value = [
+        ...new Set(res.data.map((status) => status.status)),
+      ];
     })
     .catch((error) => {
       console.error("Error fetching records:", error);
@@ -688,5 +877,19 @@ onMounted(() => {
 
 .activity-log-content strong {
   color: #333;
+}
+
+table {
+  border-collapse: collapse;
+}
+th {
+  background-color: #f2f2f2 !important;
+  text-align: left;
+  color: #999999;
+  font-size: 12px;
+}
+
+td {
+  font-size: 12px;
 }
 </style>
