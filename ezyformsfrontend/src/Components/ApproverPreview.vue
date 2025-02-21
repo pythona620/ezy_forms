@@ -199,7 +199,18 @@
 
                     <!-- Field Type Default -->
                     <template v-else>
-                      <component
+                      <input
+                      v-if="field.fieldtype == 'Int'"
+                        type="number"
+                        v-model="field.value"
+                        :placeholder="'Enter ' + field.label"
+                        :value="field.value"
+                        :name="
+                          'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex
+                        "
+                        class="form-control previewInputHeight"
+                      />
+                      <component v-if="field.fieldtype !== 'Int'"
                         :is="getFieldComponent(field.fieldtype)"
                         :value="field.value"
                         :type="field.fieldtype"
@@ -327,7 +338,7 @@ const getFieldComponent = (type) => {
   switch (type) {
     case "Data":
       return "input";
-    case "number":
+    case "Int":
       return "input";
     case "Text":
       return "textarea";

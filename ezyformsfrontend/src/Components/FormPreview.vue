@@ -122,10 +122,13 @@
                                                                     disabled />
                                                             </template>
                                                             <template v-else>
+                                                                <input v-if="field.fieldtype === 'Int'"
+                                                                    type="number" v-model="field.value"
+                                                                    readonly class="form-control previewInputHeight font-10" />
                                                                 <input v-if="field.fieldtype === 'Datetime'"
                                                                     type="datetime-local" v-model="field.value"
                                                                     class="form-control previewInputHeight font-10" />
-                                                                <component v-if="field.fieldtype !== 'Datetime'"
+                                                                <component v-if="field.fieldtype !== 'Datetime' && field.fieldtype !== 'Int'"
                                                                     readonly :is="getFieldComponent(field.fieldtype)"
                                                                     v-model="field.value" :type="field.fieldtype"
                                                                     class="form-control previewInputHeight font-10" />
@@ -320,6 +323,7 @@ const getFieldComponent = (type) => {
         case "Phone":
         case "Check":
         case "Date":
+        case "Int":
         case "Datetime":
         case "radio":
             return "input";

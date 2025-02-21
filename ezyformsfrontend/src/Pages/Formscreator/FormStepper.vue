@@ -122,7 +122,7 @@
                                                         <Multiselect :options="departments"
                                                             v-model="filterObj.form_category"
                                                             placeholder="Select Cateogry" :multiple="false"
-                                                            :searchable="true" class="font-11 multiselect" />
+                                                            searchable="true" class="font-11 multiselect" />
                                                     </div>
                                                 </div>
                                                 <div class="mt-3">
@@ -859,7 +859,7 @@ import axiosInstance from "../../shared/services/interceptor";
 import { apis, doctypes } from "../../shared/apiurls";
 import { useRoute, useRouter } from "vue-router";
 import FormPreview from "../../Components/FormPreview.vue";
-import Multiselect from "@vueform/multiselect";
+import Multiselect from "vue-multiselect";
 import "@vueform/multiselect/themes/default.css";
 import VueMultiselect from "vue-multiselect";
 import { toast } from "vue3-toastify";
@@ -955,7 +955,10 @@ const fieldTypes = [
         label: "Text",
         type: "Data",
     },
-
+    {
+        label: "Number",
+        type: "Int",
+    },
     {
         label: "Attach",
         type: "Attach",

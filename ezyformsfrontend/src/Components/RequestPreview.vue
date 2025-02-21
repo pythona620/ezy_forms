@@ -93,7 +93,18 @@
                                                 v-model="field.value" class="form-control previewInputHeight font-10" />
                                             <!-- <input v-if="field.fieldtype === 'Date'" type="date" v-model="field.value"
                                                 class="form-control previewInputHeight font-10" /> -->
-                                            <component v-if="field.fieldtype !== 'Datetime'"
+                                                <input
+                      v-if="field.fieldtype == 'Int'"
+                        type="number"
+                        v-model="field.value"
+                        :placeholder="'Enter ' + field.label"
+                        :value="field.value"
+                        :name="
+                          'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex
+                        "
+                        class="form-control previewInputHeight"
+                      />
+                                            <component v-if="field.fieldtype !== 'Datetime' && field.fieldtype !== 'Int'"
                                                 :is="getFieldComponent(field.fieldtype)" v-model="field.value"
                                                 :maxlength="field.fieldtype === 'Phone' ? '10' : null"
                                                 :type="field.fieldtype === 'Color' ? 'color' : field.fieldtype"
@@ -144,6 +155,7 @@ const getFieldComponent = (type) => {
         case "Data":
         case "Phone":
         case "Date":
+        case "Int":
         case "Check":
         case "radio":
             return "input";

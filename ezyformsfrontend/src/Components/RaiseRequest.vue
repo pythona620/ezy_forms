@@ -76,12 +76,13 @@ const filterObj = ref({
     limit_start: 0,
     limitPageLength: 100,
 })
+const formData=ref(null)
 
 function backToForm() {
     blockArr.value = []
 }
 onMounted(() => {
-
+    actionCreated()
     formDefinations()
     raiseRequest()
 })
@@ -100,36 +101,36 @@ watch(business_unit, (newBu, oldBu) => {
 
 function RequestUpdate() { // Accept form as a parameter
 
-const filesArray = filepaths.value ? filepaths.value.split(',').map(filePath => filePath.trim()) : [];
-let form = {};
-// form['doctype'] = selectedData.value.selectedform;
-// form['company_field'] = business_unit.value;
-// form['name']=route.query.selectedFormId;
+    const filesArray = filepaths.value ? filepaths.value.split(',').map(filePath => filePath.trim()) : [];
+    let form = {};
+    // form['doctype'] = selectedData.value.selectedform;
+    // form['company_field'] = business_unit.value;
+    // form['name']=route.query.selectedFormId;
 
-// form['supporting_files'] = [];
-if (emittedFormData.value.length) {
-    emittedFormData.value.map((each) => {
-        form[each.fieldname] = each.value
-    })
-}
-// console.log(form,'formform');
-
-// const formData = new FormData();
-// formData.append('doc', JSON.stringify(form));
-// formData.append('action', 'Save');
-
-let data_obj = {
-    form_id: route.query.selectedFormId,
-    updated_fields: form,  // Pass the form JSON here
-};
-
-axiosInstance.post(apis.Update_raising_request, data_obj).then(async (resp) => {
-    if (resp?.message?.success) {
-        toast.success("Request Raised", { autoClose: 2000, transition: "zoom" });
-
-        await router.push({ path: '/todo/raisedbyme' });
+    // form['supporting_files'] = [];
+    if (emittedFormData.value.length) {
+        emittedFormData.value.map((each) => {
+            form[each.fieldname] = each.value
+        })
     }
-});
+    // console.log(form,'formform');
+
+    // const formData = new FormData();
+    // formData.append('doc', JSON.stringify(form));
+    // formData.append('action', 'Save');
+
+    let data_obj = {
+        form_id: route.query.selectedFormId,
+        updated_fields: form,  // Pass the form JSON here
+    };
+
+    axiosInstance.post(apis.Update_raising_request, data_obj).then(async (resp) => {
+        if (resp?.message?.success) {
+            toast.success("Request Raised", { autoClose: 2000, transition: "zoom" });
+
+            await router.push({ path: '/todo/raisedbyme' });
+        }
+    });
 }
 
 
@@ -307,7 +308,7 @@ function request_raising_fn(item) {
     }; axiosInstance.post(apis.raising_request, data_obj).then(async (resp) => {
 
         if (resp?.message?.success) {
-            toast.success("Request Raised", { autoClose: 2000 ,transition: "zoom",});
+            toast.success("Request Raised", { autoClose: 2000, transition: "zoom", });
 
             await router.push({ path: '/todo/raisedbyme' });
             // window.location.reload();
@@ -316,7 +317,42 @@ function request_raising_fn(item) {
 }
 
 
+function actionCreated() {
+    //   selectedRequest.value = { ...rowData };
+    //   totalLevels.value = selectedRequest.value?.total_levels;
+    // console.log(selectedRequest.value,"0000");
+    // Rebuild the structured array from JSON
+    // blockArr.value = rebuildToStructuredArray(JSON.parse(selectedRequest.value?.json_columns).fields);
 
+    // Prepare the filters for fetching data
+    const filters = [
+        ["wf_generated_request_id", "like", `%${route.query.selectedFormId}%`],
+    ];
+    const queryParams = {
+        fields: JSON.stringify(["*"]),
+        limit_page_length: "None",
+        limit_start: 0,
+        filters: JSON.stringify(filters),
+        // order_by: `\`tab${selectedRequest.value.doctype_name}\`.\`creation\` desc`,
+    };
+
+    // Fetch the doctype data
+    axiosInstance
+        .get(`${apis.resource}${route.query.selectedForm}`, {
+            params: queryParams,
+        })
+        .then((res) => {
+            if (res.data) {
+                formData.value = res.data;
+                console.log("formData.value",formData.value);
+                // Map values from formData to showRequest fields
+                // mapFormFieldsToRequest(formData.value[0], blockArr.value);
+            }
+        })
+        .catch((error) => {
+            console.error("Error fetching categories data:", error);
+        });
+}
 
 
 
