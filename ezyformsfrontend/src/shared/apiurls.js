@@ -33,6 +33,11 @@ export const apis = {
 
   childtable:domain +
     `/method/ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions.add_child_doctype`,
+
+  update_child_doctype:domain +
+  `/method/ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions.add_child_doctype`,
+
+    
   savedocs: domain + '/method/frappe.desk.form.save.savedocs',
   delete_form_items: domain + '/method/ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions.deleting_customized_field_from_custom_dynamic_doc',
   checkRecord: domain + '/method/frappe.client.get_list',

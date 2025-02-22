@@ -424,6 +424,42 @@ def preview_dynamic_form(form_short_name:str,name=None):
 @frappe.whitelist()
 def download_filled_form(form_short_name: str, name: str):
     try:
+        
+        if not name:
+            json_object = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_json")
+            json_object = literal_eval(json_object)["fields"]
+            user_doc = frappe.get_doc("DocType", form_short_name).as_dict()
+
+            for iteration in json_object:
+                if "value" in iteration:
+                    iteration["value"] = user_doc.get(iteration["fieldname"], "")
+
+            html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_short_name)
+            random_number = randint(111, 999)
+
+            pdf_filename = f"{form_short_name}_{random_number}.pdf"
+            pdf_path = f"private/files/{pdf_filename}"
+            absolute_pdf_path = os.path.join(get_bench_path(), "sites", cstr(frappe.local.site), pdf_path)
+
+            convert_html_to_pdf(html_content=html_view, pdf_path=absolute_pdf_path)
+
+            new_file = frappe.get_doc({
+                "doctype": "File",
+                "file_name": pdf_filename,
+                "file_url": f"/{pdf_path}",
+                "is_private": 1,
+                "attached_to_doctype": form_short_name,
+                "attached_to_name": form_short_name
+            })
+            new_file.insert(ignore_permissions=True)
+            frappe.db.commit()
+
+            file_url = get_url(new_file.file_url)
+
+            return file_url
+    
+
+    
         json_object = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_json")
         json_object = literal_eval(json_object)["fields"]
         user_doc = frappe.get_doc(form_short_name, name).as_dict()

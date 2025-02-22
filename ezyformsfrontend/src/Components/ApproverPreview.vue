@@ -52,12 +52,7 @@
                     </div>
                     <!-- field.fieldtype === 'Select' || -->
                     <!-- Field Type Select or Multiselect -->
-                    <template
-                      v-if="
-                        
-                        field.fieldtype === 'multiselect'
-                      "
-                    >
+                    <template v-if="field.fieldtype === 'multiselect'">
                       <select
                         :multiple="field.fieldtype === 'multiselect'"
                         :value="field.value"
@@ -85,7 +80,8 @@
                     <!-- Field Type Check or Radio -->
                     <template
                       v-else-if="
-                        field.fieldtype === 'Check' || field.fieldtype === 'Select' ||
+                        field.fieldtype === 'Check' ||
+                        field.fieldtype === 'Select' ||
                         field.fieldtype === 'radio'
                       "
                     >
@@ -202,12 +198,13 @@
                     <template v-else-if="field.fieldtype == 'Attach'">
                       <div v-if="field.value">
                         <img
-                        :src="domain + field.value"
-                        alt="Signature"
-                        class="img-fluid signature-img"
-                      />
+                          :src="domain + field.value"
+                          alt="Signature"
+                          class="img-fluid signature-img"
+                        />
                       </div>
-                      <input v-else
+                      <input
+                        v-else
                         type="file"
                         class="form-control font-12"
                         name=""
@@ -238,17 +235,23 @@
                     <!-- Field Type Default -->
                     <template v-else>
                       <input
-                      v-if="field.fieldtype == 'Int'"
+                        v-if="field.fieldtype == 'Int'"
                         type="number"
                         v-model="field.value"
                         :placeholder="'Enter ' + field.label"
                         :value="field.value"
                         :name="
-                          'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex
+                          'field-' +
+                          sectionIndex +
+                          '-' +
+                          columnIndex +
+                          '-' +
+                          fieldIndex
                         "
                         class="form-control previewInputHeight"
                       />
-                      <component v-if="field.fieldtype !== 'Int'"
+                      <component
+                        v-if="field.fieldtype !== 'Int'"
                         :is="getFieldComponent(field.fieldtype)"
                         :value="field.value"
                         :type="field.fieldtype"
@@ -281,6 +284,49 @@
             </div>
           </div>
         </div>
+        <div v-if="blockIndex === 0 && tableName" class="mt-2 mx-2">
+          <div>
+            <span class="font-13 fw-bold tablename">{{ tableName }}</span>
+          </div>
+          <div class="tableborder-child">
+            <table class="table mt-2 table-striped">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th
+                    v-for="field in props.childHeaders"
+                    :key="field.fieldname"
+                  >
+                    {{ field.label }}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(row, index) in props.childData" :key="index">
+                  <td>{{ index + 1 }}</td>
+                  <td
+                    v-for="field in props.childHeaders"
+                    :key="field.fieldname"
+                  >
+                    <span
+                      v-if="isFilePath(row[field.fieldname])"
+                      class="cursor-pointer"
+                      @click="openFile(row[field.fieldname])"
+                    >
+                      <!-- {{ row[field.fieldname] }} -->
+                      <span
+                        >View Attachment <i class="bi bi-eye-fill ps-1"></i
+                      ></span>
+                    </span>
+                    <span v-else>
+                      {{ row[field.fieldname] || "-" }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -299,10 +345,29 @@ const props = defineProps({
     type: String,
     // required: true,
   },
+  childHeaders: {
+    type: Array,
+  },
+  childData: {
+    type: Array,
+  },
 });
 
 const emit = defineEmits();
 const filePaths = ref([]);
+const tableName = ref("");
+// Watch for changes in childData and update tableName
+watch(
+  () => props.childData,
+  (newValue) => {
+    if (newValue?.length && newValue[0]?.doctype) {
+      tableName.value = newValue[0].doctype.replace(/_/g, " ");
+    } else {
+      tableName.value = "";
+    }
+  },
+  { immediate: true }
+); // Runs immediately in case childData already has a value
 
 const filteredBlocks = computed(() => {
   if (!props.blockArr || props.blockArr.length === 0) return [];
@@ -367,6 +432,10 @@ const openFile = (filePath) => {
   const fileUrl = `${filePath}`;
   window.open(fileUrl, "_blank");
 };
+const isFilePath = (value) => {
+  if (!value) return false;
+  return /\.(png|jpg|jpeg|gif|pdf|docx|xlsx|txt)$/i.test(value);
+};
 
 onMounted(() => {
   emit("updateField", getAllFieldsData());
@@ -427,7 +496,7 @@ const logFieldValue = (
 };
 </script>
 
-<style setup>
+<style setup scoped>
 .previewInputHeight {
   height: 35px;
   margin-bottom: 5px;
@@ -457,7 +526,9 @@ const logFieldValue = (
   font-weight: 500;
   font-size: 15px;
 }
-
+.tablename {
+  color: #999999;
+}
 .block-container {
   background-color: #f5f5f5;
 }
@@ -473,5 +544,29 @@ input::-webkit-input-placeholder {
 .file-cards:hover {
   box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px,
     rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
+}
+
+table {
+  border-collapse: collapse;
+  background-color: #000;
+}
+th {
+  background-color: #f2f2f2 !important;
+  text-align: left;
+  color: #999999;
+  font-size: 12px;
+}
+
+td {
+  font-size: 12px;
+}
+.tableborder-child {
+  border: 1px solid #ccc !important;
+  border-radius: 10px !important;
+  padding: 0;
+  margin: 1px;
+}
+.cursor-pointer{
+  cursor: pointer;
 }
 </style>

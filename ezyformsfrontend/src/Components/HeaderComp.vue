@@ -23,7 +23,7 @@
                                 <div class="">
                                     <!-- v-if="shouldShowButton" -->
                                     <ButtonComp
-                                        class="btn-outline-primary d-flex justify-content-center align-items-center bg-white m-0 text-nowrap font-10"
+                                        class="btn btn-outline-danger raiseReqBtn d-flex justify-content-center align-items-center  m-0 text-nowrap font-10"
                                         name="Raise request" data-bs-toggle="modal"
                                         data-bs-target="#riaseRequestModal" />
                                     <!-- @click="raiseRequest" -->
@@ -873,6 +873,15 @@ const handleBuChange = (tab) => {
     text-align: left;
 
 }
+.raiseReqBtn{
+    border: 1px solid #FE212E !important;
+}
+.raiseReqBtn:hover {
+
+    background-color: #FE212E;
+    color: #fff;
+
+}
 
 @media (min-width: 1604px) and (max-width: 2400px) {
     .col-3 {
@@ -884,6 +893,7 @@ const handleBuChange = (tab) => {
 
 .stickyheader {
     z-index: 10;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
 }
 
 .raise-label {

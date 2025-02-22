@@ -72,11 +72,11 @@
           </div>
           <div class="modal-body approvermodalbody">
             <ApproverPreview
-              :blockArr="showRequest"
+              :blockArr="showRequest" :childHeaders="tableHeaders" :childData="responseData"
               :current-level="totalLevels"
               @updateField="updateFormData"
             />
-            <div v-if="tableName.length" class="mt-2">
+            <!-- <div v-if="tableName" class="mt-2">
               <div>
                 <span class="font-13 fw-bold">{{ tableName }}</span>
               </div>
@@ -98,7 +98,7 @@
                         class="cursor-pointer"
                         @click="openFile(row[field.fieldname])"
                       >
-                        <!-- {{ row[field.fieldname] }} -->
+                        
                         <span
                           >View Attachment <i class="bi bi-eye-fill ps-1"></i
                         ></span>
@@ -110,7 +110,7 @@
                   </tr>
                 </tbody>
               </table>
-            </div>
+            </div> -->
           </div>
           <div class="activity-log-container">
             <div
@@ -354,7 +354,7 @@ function actionCreated(rowData, actionEvent) {
         .then((res) => {
           if (res.data) {
             doctypeForm.value = res.data;
-            console.log(doctypeForm.value, "doctype");
+            console.log(typeof doctypeForm.value, "doctype", typeof showRequest.value);
             // Map values from doctypeForm to showRequest fields
             mapFormFieldsToRequest(doctypeForm.value[0], showRequest.value);
             axiosInstance

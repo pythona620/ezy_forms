@@ -30,7 +30,7 @@
                                         <template
                                             v-if="field.fieldtype === 'Select' || field.fieldtype === 'Table MultiSelect'">
                                             <select :multiple="field.fieldtype === 'Table MultiSelect'"
-                                                v-model="field.value"
+                                                :value="field.value"
                                                 @input="logFieldValue(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
                                                 class="form-select mb-2 font-13">
                                                 <option v-for="(option, index) in field.options?.split('\n')"
@@ -59,7 +59,7 @@
                                                             <input v-else-if="field.fieldtype === 'radio'"
                                                                 class="form-check-input" type="radio"
                                                                 :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
-                                                                :id="`${option}-${index}`" v-model="field.value"
+                                                                :id="`${option}-${index}`" :value="field.value"
                                                                 @change="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
                                                         </div>
                                                         <div>
@@ -81,7 +81,7 @@
                                                 @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
                                         </template>
                                         <template v-else-if="field.fieldtype == 'Datetime'">
-                                            <input type="datetime-local" v-model="field.value"
+                                            <input type="datetime-local" :value="field.value"
                                                 :placeholder="'Enter ' + field.label"
                                                 :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
                                                 @change="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
@@ -90,13 +90,13 @@
 
                                         <template v-else>
                                             <input v-if="field.fieldtype === 'Datetime'" type="datetime-local"
-                                                v-model="field.value" class="form-control previewInputHeight font-10" />
-                                            <!-- <input v-if="field.fieldtype === 'Date'" type="date" v-model="field.value"
+                                                :value="field.value" class="form-control previewInputHeight font-10" />
+                                            <!-- <input v-if="field.fieldtype === 'Date'" type="date" :value="field.value"
                                                 class="form-control previewInputHeight font-10" /> -->
                                                 <input
                       v-if="field.fieldtype == 'Int'"
                         type="number"
-                        v-model="field.value"
+                        
                         :placeholder="'Enter ' + field.label"
                         :value="field.value"
                         :name="
@@ -104,8 +104,9 @@
                         "
                         class="form-control previewInputHeight"
                       />
+                      <!-- :value="field.value"  -->
                                             <component v-if="field.fieldtype !== 'Datetime' && field.fieldtype !== 'Int'"
-                                                :is="getFieldComponent(field.fieldtype)" v-model="field.value"
+                                                :is="getFieldComponent(field.fieldtype)" :value="field.value"
                                                 :maxlength="field.fieldtype === 'Phone' ? '10' : null"
                                                 :type="field.fieldtype === 'Color' ? 'color' : field.fieldtype"
                                                 :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
@@ -148,6 +149,7 @@ const props = defineProps({
         required: true
     }
 });
+console.log(props.blockArr,"pppp");
 const emit = defineEmits();
 const errorMessages = ref({});
 const getFieldComponent = (type) => {

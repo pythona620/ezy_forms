@@ -126,7 +126,7 @@ const settingsSideBarData = [
     // { name: 'Notifications', icon: 'bi bi-bell', route: 'notifications' },
     { name: 'Department', icon: 'bi bi-clock-history', route: 'department' },
     { name: 'Designation', icon: 'bi bi-people', route: 'designations' },
-    { name: 'Categories', icon: 'bi bi-tags', route: 'categories' },
+    // { name: 'Categories', icon: 'bi bi-tags', route: 'categories' },
     { name: 'Employees', icon: 'bi bi-people', route: 'employee' },
 
 ];
@@ -176,8 +176,8 @@ const sidebarData = computed(() => {
 });
 const firstSettingsGroup = computed(() => settingsSideBarData.slice(0, 1)); // First 4 items
 // const secondSettingsGroup = computed(() => settingsSideBarData.slice(2, 6));
-const thirdSettingsGroup = computed(() => settingsSideBarData.slice(1, 4)); // Remaining items
-const forthSettingsGroup = computed(() => settingsSideBarData.slice(4));
+const thirdSettingsGroup = computed(() => settingsSideBarData.slice(1, 3)); // Remaining items
+const forthSettingsGroup = computed(() => settingsSideBarData.slice(3));
 // Define the title based on the current route
 const sidebarTitle = computed(() => {
     if (isMasterRoute.value) {
@@ -300,6 +300,8 @@ li {
     height: 93.5dvh;
     background-color: var(--sidebar-color);
     padding-top: 12px;
+    border-radius: 10px;
+    margin-top: 10px;
 
 }
 
@@ -311,6 +313,7 @@ li {
     line-height: 26px;
     text-align: left;
     border-radius: 6px;
+    
 
 
 

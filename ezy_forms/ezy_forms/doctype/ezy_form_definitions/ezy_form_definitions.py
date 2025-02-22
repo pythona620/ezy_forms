@@ -284,3 +284,50 @@ def add_child_doctype(form_short_name:str,fields:list[dict]):
     except Exception as e:
         return e
  
+ 
+ 
+# import frappe
+# from frappe.utils import now as frappe_now
+
+# @frappe.whitelist()
+# def add_child_doctype(form_short_name: str, fields: list[dict]):
+#     try:
+#         # Check if the DocType exists
+#         if frappe.db.exists("DocType", form_short_name):
+#             exist_child_table = frappe.get_doc("DocType", form_short_name)
+#             for field in fields:
+#                 exist_child_table.append("fields", field)
+#             exist_child_table.save()
+#         else:
+#             # Create new DocType
+#             doc = frappe.new_doc("DocType")
+#             doc.name = form_short_name
+  
+#             doc.module = "User Forms"
+#             doc.app = "ezy_forms"
+#             doc.custom = 1
+#             doc.istable = 1
+#             doc.fields = []
+#             doc.insert(ignore_permissions=True)
+#             frappe.db.commit()
+#             doc.reload()
+
+#         if len(fields)>0:
+#             add_customized_fields_for_dynamic_doc(fields=fields, doctype=form_short_name)
+
+#         return [{
+#             "child_doc": {
+#                 "description": form_short_name,
+#                 "fieldname": form_short_name,
+#                 "fieldtype": "Table",
+#                 "idx": 0,
+#                 "label": form_short_name,
+#                 "reqd": 0,
+#                 "value": "",
+#                 "options": form_short_name
+#             }
+#         }], "Table Added Successfully"
+
+#     except Exception as e:
+#         frappe.log_error(frappe.get_traceback(), "Error in add_child_doctype")
+#         return {"error": str(e)}

@@ -1,15 +1,23 @@
 <template>
   <div>
     <div class="backtofromPage py-2">
-      <router-link to="/todo/receivedform" @click="backToForm" class="text-decoration-none text-dark font-13"><span> <i
-            class="bi bi-arrow-left"></i></span>Asset request
-        form</router-link>
+      <router-link
+        to="/todo/receivedform"
+        @click="backToForm"
+        class="text-decoration-none text-dark font-13"
+        ><span> <i class="bi bi-arrow-left"></i></span>Asset request
+        form</router-link
+      >
     </div>
     <div class="container">
       <div v-if="blockArr.length" class="position-relative">
         <div class="requestPreviewDiv">
-          <RequestPreview :blockArr="blockArr" :formName="selectedData.selectedform" @updateField="handleFieldUpdate"
-            @formValidation="isFormValid = $event" />
+          <RequestPreview
+            :blockArr="blockArr"
+            :formName="selectedData.selectedform"
+            @updateField="handleFieldUpdate"
+            @formValidation="isFormValid = $event"
+          />
 
           <div v-if="tableName.length" class="mt-3">
             <div>
@@ -29,11 +37,18 @@
                   <td>{{ index + 1 }}</td>
                   <td v-for="field in tableHeaders" :key="field.fieldname">
                     <template v-if="field.fieldtype === 'Data'">
-                      <input type="text" class="form-control" v-model="row[field.fieldname]" />
+                      <input
+                        type="text"
+                        class="form-control"
+                        v-model="row[field.fieldname]"
+                      />
                     </template>
                     <template v-else-if="field.fieldtype === 'Attach'">
-                      <input type="file" class="form-control"
-                        @change="handleFileUpload($event, row, field.fieldname)" />
+                      <input
+                        type="file"
+                        class="form-control"
+                        @change="handleFileUpload($event, row, field.fieldname)"
+                      />
                     </template>
                   </td>
                 </tr>
@@ -49,13 +64,24 @@
               <span> <i class="bi bi-x"></i></span>Clear form
             </button>
             <!-- :disabled="!isFormValid" -->
-            <button v-if="!$route.query.selectedFormId" :disabled="!isFormValid" class="btn btn-dark font-12 "
-              type="submit" @click="raiseRequestSubmission">Raise
-              Request</button>
-            <button v-if="$route.query.selectedFormId" @click="RequestUpdate" :disabled="!isFormValid"
-              class="btn btn-dark font-12 " type="submit">Update
-              Request</button>
-
+            <button
+              v-if="!$route.query.selectedFormId"
+              :disabled="!isFormValid"
+              class="btn btn-dark font-12"
+              type="submit"
+              @click="raiseRequestSubmission"
+            >
+              Raise Request
+            </button>
+            <button
+              v-if="$route.query.selectedFormId"
+              @click="RequestUpdate"
+              :disabled="!isFormValid"
+              class="btn btn-dark font-12"
+              type="submit"
+            >
+              Update Request
+            </button>
           </div>
         </div>
       </div>
@@ -86,6 +112,7 @@ const route = useRoute(); // Get query params from route
 const selectedData = ref({
   selectedCategory: route.query.selectedCategory || "", // Retrieve from query
   selectedform: route.query.selectedForm || "", // Retrieve from query
+  selectedFormId: route.query.selectedFormId || "", // Retrieve from query
 });
 const business_unit = ref(route.query.business_unit || ""); // Retrieve from query
 const isFormValid = ref(false);
@@ -111,47 +138,56 @@ const filterObj = ref({
 });
 
 function backToForm() {
-    blockArr.value = []
+  blockArr.value = [];
 }
 
+function RequestUpdate() {
+  // Accept form as a parameter
 
-function RequestUpdate() { // Accept form as a parameter
+  const filesArray = filepaths.value
+    ? filepaths.value.split(",").map((filePath) => filePath.trim())
+    : [];
+  let form = {};
+  // form['doctype'] = selectedData.value.selectedform;
+  // form['company_field'] = business_unit.value;
+  // form['name']=route.query.selectedFormId;
 
-const filesArray = filepaths.value ? filepaths.value.split(',').map(filePath => filePath.trim()) : [];
-let form = {};
-// form['doctype'] = selectedData.value.selectedform;
-// form['company_field'] = business_unit.value;
-// form['name']=route.query.selectedFormId;
-
-// form['supporting_files'] = [];
-if (emittedFormData.value.length) {
+  // form['supporting_files'] = [];
+  if (emittedFormData.value.length) {
     emittedFormData.value.map((each) => {
-        form[each.fieldname] = each.value
-    })
-}
-// console.log(form,'formform');
+      form[each.fieldname] = each.value;
+    });
+  }
+  // console.log(form,'formform');
 
-// const formData = new FormData();
-// formData.append('doc', JSON.stringify(form));
-// formData.append('action', 'Save');
+  // const formData = new FormData();
+  // formData.append('doc', JSON.stringify(form));
+  // formData.append('action', 'Save');
 
-let data_obj = {
+  let data_obj = {
     form_id: route.query.selectedFormId,
-    updated_fields: form,  // Pass the form JSON here
-};
+    updated_fields: form, // Pass the form JSON here
+  };
 
-axiosInstance.post(apis.Update_raising_request, data_obj).then(async (resp) => {
-    if (resp?.message?.success) {
-        toast.success("Request Raised", { autoClose: 2000, transition: "zoom" });
+  axiosInstance
+    .post(apis.Update_raising_request, data_obj)
+    .then(async (resp) => {
+      if (resp?.message?.success) {
+        toast.success("Request Raised", {
+          autoClose: 2000,
+          transition: "zoom",
+        });
+        blockArr.value = []
 
-        await router.push({ path: '/todo/raisedbyme' });
-    }
-});
+        await router.push({ path: "/todo/raisedbyme" });
+      }
+    });
 }
 onMounted(() => {
   formDefinations();
   raiseRequest();
 });
+
 const addRow = () => {
   const newRow = Object.fromEntries(
     tableHeaders.value.map((field) => [field.fieldname, ""])
@@ -187,8 +223,8 @@ function deptData(value = null) {
         const newFormsRoute =
           deptartmentData.value.length > 0
             ? `/forms/department/${deptartmentData.value[0].name
-              .replace(/\s+/g, "-")
-              .toLowerCase()}`
+                .replace(/\s+/g, "-")
+                .toLowerCase()}`
             : "/forms";
 
         tabsData.value = tabsData.value.map((tab) => {
@@ -261,8 +297,8 @@ function formDefinations() {
   if (selectedData.value.selectedform) {
     filters.push([
       "form_short_name",
-      "like",
-      `%${selectedData.value?.selectedform}%`,
+      "=",
+      `${selectedData.value?.selectedform}`,
     ]);
   }
 
@@ -282,6 +318,9 @@ function formDefinations() {
       const form_json = res.data[0].form_json;
 
       blockArr.value = rebuildToStructuredArray(JSON.parse(form_json).fields);
+      if (selectedData.value.selectedFormId) {
+        WfRequestUpdate();
+      }
 
       // console.log(form_json, typeof form_json, "=-------------");
       blockArr.value.splice(1);
@@ -454,17 +493,70 @@ function raiseRequestSubmission() {
     formData.append("doc", JSON.stringify(form));
     formData.append("action", "Save");
     console.log(formData);
-    // axiosInstance
-    //   .post(apis.savedocs, formData)
-    //   .then((response) => {
-    //     request_raising_fn(response.docs[0]);
-    //   })
-    //   .catch((error) => {
-    //     console.error("Error fetching data:", error);
-    //   });
+    axiosInstance
+      .post(apis.savedocs, formData)
+      .then((response) => {
+        request_raising_fn(response.docs[0]);
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
   }
 }
+function WfRequestUpdate() {
+  const filters = [
+    [
+      "wf_generated_request_id",
+      "like",
+      `%${selectedData.value.selectedFormId}%`,
+    ],
+  ];
 
+  const queryParams = {
+    fields: JSON.stringify(["*"]),
+    limit_page_length: null, 
+    limit_start: 0,
+    filters: JSON.stringify(filters),
+    order_by: `\`tab${selectedData.value.selectedform}\`.\`creation\` desc`,
+  };
+
+  axiosInstance
+    .get(`${apis.resource}${selectedData.value.selectedform}`, {
+      params: queryParams,
+    })
+    .then((res) => {
+      if (res.data && res.data.length > 0) {
+        const doctypeForm = res.data[0]; 
+        console.log(doctypeForm, "doctype",);
+        console.log( blockArr.value);
+        
+        // Map response data to UI fields
+        mapFormFieldsToRequest(doctypeForm, blockArr.value);
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching data:", error);
+    });
+}
+
+function mapFormFieldsToRequest(doctypeData, blockArr) {
+  if (!doctypeData) return; // Ensure valid data
+
+  blockArr.forEach((block) => {
+    block.sections?.forEach((section) => {
+      section.rows?.forEach((row) => {
+        row.columns?.forEach((column) => {
+          column.fields?.forEach((field) => {
+            // Check if the field exists in the API response
+            if (doctypeData.hasOwnProperty(field.fieldname)) {
+              field.value = doctypeData[field.fieldname] ?? ""; // Set value reactively
+            }
+          });
+        });
+      });
+    });
+  });
+}
 function request_raising_fn(item) {
   const filesArray = filepaths.value
     ? filepaths.value.split(",").map((filePath) => filePath.trim())
