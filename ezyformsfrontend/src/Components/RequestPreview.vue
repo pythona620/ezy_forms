@@ -282,7 +282,7 @@ const uploadFile = (file, field) => {
 
     const formData = new FormData();
     formData.append("file", file, fileName);
-    formData.append("is_private", "1");
+    formData.append("is_private", "0");
     formData.append("folder", "Home");
     axiosInstance
         .post(apis.uploadfile, formData)

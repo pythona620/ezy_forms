@@ -195,43 +195,51 @@
                         </div>
                       </div>
                     </template> -->
-                                            <template v-else-if="field.fieldtype == 'Attach'">
-                          <div v-if="field.value" class="position-relative d-inline-block">
-                            <img
-                              v-if="isImageFile(field.value)"
-                              :src="field.value"
-                              alt="Attachment Preview"
-                              class="img-thumbnail mt-2 cursor-pointer border-0"
-                              style="max-width: 100px; max-height: 100px;"
-                              @click="openInNewWindow(field.value)"
-                              @mouseover="showPreview = true"
-                              @mouseleave="showPreview = false"
-                            />
-                            
-                            <!-- Pop-up Enlarged Image -->
-                            <div
-                              v-if="showPreview"
-                              class="image-popup position-absolute"
-                              style="top: 0; left: 110%; width: 200px; height: auto; z-index: 10; background: white; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2); border-radius: 5px; padding: 5px;"
-                            >
-                              <img
-                                :src="field.value"
-                                alt="Enlarged Preview"
-                                style="width: 100%; height: auto; border-radius: 5px;"
-                              />
-                            </div>
-                          </div>
-                          
-                          <input
-                            v-else
-                            type="file"
-                            accept="image/jpeg,image/png,application/pdf"
-                            :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
-                            class="form-control previewInputHeight font-10"
-                            multiple
-                            @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
-                          />
-                        </template>
+                    <!-- @click="openInNewWindow(field.value)" -->
+                    <template v-else-if="field.fieldtype == 'Attach'">
+  <div v-if="field.value" class="position-relative d-inline-block">
+    <img
+      v-if="isImageFile(field.value)"
+      :src="field.value"
+      alt="Attachment Preview"
+      class="img-thumbnail mt-2 cursor-pointer border-0"
+      style="max-width: 100px; max-height: 100px;"
+      
+      @mouseover="showPreview = true"
+      @mouseleave="showPreview = false"
+    />
+
+    <!-- Close Icon to Remove Image -->
+    <i 
+      class="bi bi-x-lg position-absolute text-danger cursor-pointer"
+      style="top: -10px; right: -5px; font-size: 13px; background: white; border-radius: 50%; padding: 3px;"
+      @click="clearImage(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+    ></i>
+
+    <!-- Pop-up Enlarged Image -->
+    <div
+      v-if="showPreview"
+      class="image-popup position-absolute"
+      style="top: 0; left: 110%; width: 200px; height: auto; z-index: 10; background: white; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2); border-radius: 5px; padding: 5px;"
+    >
+      <img
+        :src="field.value"
+        alt="Enlarged Preview"
+        style="width: 100%; height: auto; border-radius: 5px;"
+      />
+    </div>
+  </div>
+
+  <input
+    v-else
+    type="file"
+    accept="image/jpeg,image/png,application/pdf"
+    :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+    class="form-control previewInputHeight font-10"
+    multiple
+    @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+  />
+</template>
 
 
                     <template v-else-if="field.fieldtype == 'Datetime'">
@@ -388,9 +396,15 @@ const isImageFile = (value) => {
   return /\.(png|jpg|jpeg|gif)$/i.test(value);
 };
 
-const openInNewWindow = (url) => {
-  window.open(url, '_blank');
-};    
+const clearImage = (blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) => {
+  const field = props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex];
+  field.value = ""; // Reset the field value
+};
+
+
+// const openInNewWindow = (url) => {
+//   window.open(url, '_blank');
+// };    
 // Watch for changes in childData and update tableName
 watch(
   () => props.childData,
@@ -596,7 +610,7 @@ const uploadFile = (file, field) => {
 
     const formData = new FormData();
     formData.append("file", file, fileName);
-    formData.append("is_private", "1");
+    formData.append("is_private", "0");
     formData.append("folder", "Home");
     axiosInstance
         .post(apis.uploadfile, formData)
