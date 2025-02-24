@@ -325,6 +325,7 @@ function ApproverFormSubmission(dataObj, type) {
 function approvalStatusFn(dataObj, type) {
   const storedData = localStorage.getItem("employeeData");
   const employee = JSON.parse(storedData);
+  console.log([employee.signature]);
 
   console.log(dataObj);
   let data = {
@@ -333,7 +334,7 @@ function approvalStatusFn(dataObj, type) {
     request_ids: [selectedRequest.value.name],
     reason: ApproverReason.value,
     action: type,
-    files: [employee.signature],
+    files: null,
     cluster_name: null,
     url_for_approval_id: "",
     // https://ezyrecon.ezyinvoicing.com/home/wf-requests
