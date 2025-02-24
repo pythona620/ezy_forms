@@ -558,6 +558,7 @@ function mapFormFieldsToRequest(doctypeData, blockArr) {
   });
 }
 function request_raising_fn(item) {
+  console.log(filepaths.value,"---filepaths");
   const filesArray = filepaths.value
     ? filepaths.value.split(",").map((filePath) => filePath.trim())
     : [];

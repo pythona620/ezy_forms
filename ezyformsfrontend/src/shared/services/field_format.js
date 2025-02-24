@@ -1,20 +1,22 @@
 import { doctypes } from "../apiurls";
-
 export function extractFieldsWithBreaks(data) {
   const result = [];
   let previousFieldname = null; // Track the previous fieldname
   let index = 0;
 
+  // Add a Map to track field names
+  const fieldnameTracker = new Map();
 
   data.forEach((block) => {
     block.sections.forEach((section) => {
-
       section.rows.forEach((row) => {
         row.columns.forEach((column) => {
-
           column.fields.forEach((field) => {
-            const generatedFieldname = convertLabelToFieldName(field?.label);
-            // Directly push the field to the result
+            let generatedFieldname = convertLabelToFieldName(field?.label);
+
+            // Ensure unique fieldname
+            generatedFieldname = getUniqueFieldname(generatedFieldname, fieldnameTracker);
+
             result.push({
               description: "Field",
               fieldname: generatedFieldname,
@@ -23,48 +25,16 @@ export function extractFieldsWithBreaks(data) {
               label: field.label,
               reqd: field.reqd ? 1 : 0,
               value: field.value ? field.value : "",
-              // options: field.options  ? (field.fieldtype === "Select" || field.fieldtype === "Table MultiSelect" ? `\n${field.options}` : field.options) : "",
               ...(["Select", "Table MultiSelect", "Check"].includes(field.fieldtype) && field.options
                 ? { options: field.options.startsWith("\n") ? field.options : `\n${field.options}` }
                 : {}),
-              // Add options with a newline if fieldtype is "Select" or "Check"
             });
 
-
-            // Add the field to the result if it's not already added
-            // let existingField = result.find(f => f.fieldname === generatedFieldname);
-
-            // if (!existingField) {
-            //   // If the field doesn't exist, add it to the result
-            //   existingField = {
-            //     description: "Field",
-            //     fieldname: generatedFieldname,
-            //     fieldtype: field.fieldtype,
-            //     idx: index++, // Assign index
-            //     label: field.label,
-            //     reqd: field.reqd ? 1 : 0,
-            //     value: field.value ? field.value : "",
-            //     options: field.fieldtype === "Select" || "Check" ? `\n${field.options}` : ""
-            //   };
-            //   result.push(existingField);
-            // }
-
-            // // Add options if the field is of type "Select" or "Check"
-            // if (field.fieldtype === "Select") {
-
-            //   let optionsString = field.options ? `\n${field.options}` : "\n";
-            //   // Insert null at the first index
-            //   existingField.options = optionsString;
-            //   console.log(" Field options === ", existingField.options);
-            // }
-
-            // Update previousFieldname for the next field in this column
             previousFieldname = generatedFieldname;
           });
 
-          const columnFieldname = convertLabelToFieldName(column?.label);
+          const columnFieldname = getUniqueFieldname(convertLabelToFieldName(column?.label), fieldnameTracker);
 
-          // Add "Column Break" marker after each column
           result.push({
             description: "Column Break",
             fieldname: columnFieldname,
@@ -76,52 +46,184 @@ export function extractFieldsWithBreaks(data) {
           previousFieldname = columnFieldname;
         });
 
-        const rowFieldname = convertLabelToFieldName(row?.label);
+        const rowFieldname = getUniqueFieldname(convertLabelToFieldName(row?.label), fieldnameTracker);
 
-        // Add "Row Break" marker after each row
         result.push({
           description: "Row Break",
           fieldname: rowFieldname,
           fieldtype: "Column Break",
           idx: index++,
-          label: rowFieldname
+          label: row.label,
         });
 
         previousFieldname = rowFieldname;
       });
 
-      const sectionFieldname = convertLabelToFieldName(section?.label);
+      const sectionFieldname = getUniqueFieldname(convertLabelToFieldName(section?.label), fieldnameTracker);
 
-      // Add "Section Break" marker after each section
       result.push({
         description: "Section Break",
         fieldname: sectionFieldname,
         fieldtype: "Section Break",
         label: section.label,
-        idx: index++
+        idx: index++,
       });
 
       previousFieldname = sectionFieldname;
     });
 
-    const blockFieldname = convertLabelToFieldName(block?.label);
+    const blockFieldname = getUniqueFieldname(convertLabelToFieldName(block?.label), fieldnameTracker);
 
     result.push({
       description: "Block Break",
       fieldname: blockFieldname,
       fieldtype: "Section Break",
       label: block.label,
-      idx: index++
+      idx: index++,
     });
 
     previousFieldname = blockFieldname;
   });
 
   return result;
-
-
-  // return result;
 }
+
+// Function to ensure unique field names
+function getUniqueFieldname(baseName, tracker) {
+  let newName = baseName;
+  let counter = 1;
+
+  while (tracker.has(newName)) {
+    newName = `${baseName}_${counter}`;
+    counter++;
+  }
+
+  tracker.set(newName, true);
+  return newName;
+}
+
+// export function extractFieldsWithBreaks(data) {
+//   const result = [];
+//   let previousFieldname = null; // Track the previous fieldname
+//   let index = 0;
+
+
+//   data.forEach((block) => {
+//     block.sections.forEach((section) => {
+
+//       section.rows.forEach((row) => {
+//         row.columns.forEach((column) => {
+
+//           column.fields.forEach((field) => {
+//             const generatedFieldname = convertLabelToFieldName(field?.label);
+//             // Directly push the field to the result
+//             result.push({
+//               description: "Field",
+//               fieldname: generatedFieldname,
+//               fieldtype: field.fieldtype,
+//               idx: index++, // Assign index
+//               label: field.label,
+//               reqd: field.reqd ? 1 : 0,
+//               value: field.value ? field.value : "",
+//               // options: field.options  ? (field.fieldtype === "Select" || field.fieldtype === "Table MultiSelect" ? `\n${field.options}` : field.options) : "",
+//               ...(["Select", "Table MultiSelect", "Check"].includes(field.fieldtype) && field.options
+//                 ? { options: field.options.startsWith("\n") ? field.options : `\n${field.options}` }
+//                 : {}),
+//               // Add options with a newline if fieldtype is "Select" or "Check"
+//             });
+
+
+//             // Add the field to the result if it's not already added
+//             // let existingField = result.find(f => f.fieldname === generatedFieldname);
+
+//             // if (!existingField) {
+//             //   // If the field doesn't exist, add it to the result
+//             //   existingField = {
+//             //     description: "Field",
+//             //     fieldname: generatedFieldname,
+//             //     fieldtype: field.fieldtype,
+//             //     idx: index++, // Assign index
+//             //     label: field.label,
+//             //     reqd: field.reqd ? 1 : 0,
+//             //     value: field.value ? field.value : "",
+//             //     options: field.fieldtype === "Select" || "Check" ? `\n${field.options}` : ""
+//             //   };
+//             //   result.push(existingField);
+//             // }
+
+//             // // Add options if the field is of type "Select" or "Check"
+//             // if (field.fieldtype === "Select") {
+
+//             //   let optionsString = field.options ? `\n${field.options}` : "\n";
+//             //   // Insert null at the first index
+//             //   existingField.options = optionsString;
+//             //   console.log(" Field options === ", existingField.options);
+//             // }
+
+//             // Update previousFieldname for the next field in this column
+//             previousFieldname = generatedFieldname;
+//           });
+
+//           const columnFieldname = convertLabelToFieldName(column?.label);
+
+//           // Add "Column Break" marker after each column
+//           result.push({
+//             description: "Column Break",
+//             fieldname: columnFieldname,
+//             fieldtype: "Column Break",
+//             idx: index++, // Assign index
+//             label: column.label,
+//           });
+
+//           previousFieldname = columnFieldname;
+//         });
+
+//         const rowFieldname = convertLabelToFieldName(row?.label);
+
+//         // Add "Row Break" marker after each row
+//         result.push({
+//           description: "Row Break",
+//           fieldname: rowFieldname,
+//           fieldtype: "Column Break",
+//           idx: index++,
+//           label: rowFieldname
+//         });
+
+//         previousFieldname = rowFieldname;
+//       });
+
+//       const sectionFieldname = convertLabelToFieldName(section?.label);
+
+//       // Add "Section Break" marker after each section
+//       result.push({
+//         description: "Section Break",
+//         fieldname: sectionFieldname,
+//         fieldtype: "Section Break",
+//         label: section.label,
+//         idx: index++
+//       });
+
+//       previousFieldname = sectionFieldname;
+//     });
+
+//     const blockFieldname = convertLabelToFieldName(block?.label);
+
+//     result.push({
+//       description: "Block Break",
+//       fieldname: blockFieldname,
+//       fieldtype: "Section Break",
+//       label: block.label,
+//       idx: index++
+//     });
+
+//     previousFieldname = blockFieldname;
+//   });
+
+//   return result;
+// }
+
+
+// return result;
 
 // Usage
 // const flattenedFieldsWithBreaks = extractFieldsWithBreaks(dataObj);
@@ -432,13 +534,29 @@ export function extractFieldnames(obj) {
 
 export function extractfieldlabels(obj) {
   let fieldlabels = [];
-  if (obj.label) fieldlabels.push(obj.label);
+  const excludedLabels = ["Approver", "Approved on", "Approved By"];
+
+  if (obj.label && !excludedLabels.includes(obj.label.trim())) {
+    fieldlabels.push(obj.label);
+  }
+  
   if (obj.sections) obj.sections.forEach(section => fieldlabels.push(...extractfieldlabels(section)));
   if (obj.rows) obj.rows.forEach(row => fieldlabels.push(...extractfieldlabels(row)));
   if (obj.columns) obj.columns.forEach(column => fieldlabels.push(...extractfieldlabels(column)));
   if (obj.fields) obj.fields.forEach(field => fieldlabels.push(...extractfieldlabels(field)));
+
   return fieldlabels;
 }
+
+// export function extractfieldlabels(obj) {
+//   let fieldlabels = [];
+//   if (obj.label) fieldlabels.push(obj.label);
+//   if (obj.sections) obj.sections.forEach(section => fieldlabels.push(...extractfieldlabels(section)));
+//   if (obj.rows) obj.rows.forEach(row => fieldlabels.push(...extractfieldlabels(row)));
+//   if (obj.columns) obj.columns.forEach(column => fieldlabels.push(...extractfieldlabels(column)));
+//   if (obj.fields) obj.fields.forEach(field => fieldlabels.push(...extractfieldlabels(field)));
+//   return fieldlabels;
+// }
 
 export function validateFields(flatArray) {
   console.log(" flat Array == ", flatArray)

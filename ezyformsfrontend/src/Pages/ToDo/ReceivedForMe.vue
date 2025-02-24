@@ -333,7 +333,7 @@ function approvalStatusFn(dataObj, type) {
     request_ids: [selectedRequest.value.name],
     reason: ApproverReason.value,
     action: type,
-    files: employee.signature,
+    files: [employee.signature],
     cluster_name: null,
     url_for_approval_id: "",
     // https://ezyrecon.ezyinvoicing.com/home/wf-requests

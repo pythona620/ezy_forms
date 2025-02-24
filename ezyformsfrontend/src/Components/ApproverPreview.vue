@@ -195,25 +195,45 @@
                         </div>
                       </div>
                     </template> -->
-                    <template v-else-if="field.fieldtype == 'Attach'">
-                      <div v-if="field.value">
-                        <img
-                          :src="domain + field.value"
-                          alt="Signature"
-                          class="img-fluid signature-img"
-                        />
-                      </div>
-                      <input
-                        v-else
-                        type="file"
-                        class="form-control font-12"
-                        name=""
-                        id=""
-                        placeholder=""
-                        @change="selectedSignature"
-                        aria-describedby="fileHelpId"
-                      />
-                    </template>
+                                            <template v-else-if="field.fieldtype == 'Attach'">
+                          <div v-if="field.value" class="position-relative d-inline-block">
+                            <img
+                              v-if="isImageFile(field.value)"
+                              :src="field.value"
+                              alt="Attachment Preview"
+                              class="img-thumbnail mt-2 cursor-pointer border-0"
+                              style="max-width: 100px; max-height: 100px;"
+                              @click="openInNewWindow(field.value)"
+                              @mouseover="showPreview = true"
+                              @mouseleave="showPreview = false"
+                            />
+                            
+                            <!-- Pop-up Enlarged Image -->
+                            <div
+                              v-if="showPreview"
+                              class="image-popup position-absolute"
+                              style="top: 0; left: 110%; width: 200px; height: auto; z-index: 10; background: white; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2); border-radius: 5px; padding: 5px;"
+                            >
+                              <img
+                                :src="field.value"
+                                alt="Enlarged Preview"
+                                style="width: 100%; height: auto; border-radius: 5px;"
+                              />
+                            </div>
+                          </div>
+                          
+                          <input
+                            v-else
+                            type="file"
+                            accept="image/jpeg,image/png,application/pdf"
+                            :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                            class="form-control previewInputHeight font-10"
+                            multiple
+                            @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+                          />
+                        </template>
+
+
                     <template v-else-if="field.fieldtype == 'Datetime'">
                       <input
                         type="datetime-local"
@@ -334,7 +354,8 @@
 
 <script setup>
 import { computed, defineProps, onMounted, ref, watch } from "vue";
-import { domain } from "../shared/apiurls";
+import { apis, domain } from "../shared/apiurls";
+import axiosInstance from "../shared/services/interceptor";
 
 const props = defineProps({
   blockArr: {
@@ -356,6 +377,20 @@ const props = defineProps({
 const emit = defineEmits();
 const filePaths = ref([]);
 const tableName = ref("");
+const errorMessages = ref({});
+
+
+
+const showPreview = ref(false);
+
+const isImageFile = (value) => {
+  if (!value) return false;
+  return /\.(png|jpg|jpeg|gif)$/i.test(value);
+};
+
+const openInNewWindow = (url) => {
+  window.open(url, '_blank');
+};    
 // Watch for changes in childData and update tableName
 watch(
   () => props.childData,
@@ -478,22 +513,129 @@ const getFieldComponent = (type) => {
   }
 };
 
-const logFieldValue = (
-  event,
-  blockIndex,
-  sectionIndex,
-  rowIndex,
-  columnIndex,
-  fieldIndex
-) => {
-  const field =
-    props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
-      columnIndex
-    ].fields[fieldIndex];
-  field.value = event.target.value;
-  emit("updateField", getAllFieldsData());
-  // console.log('Field Value Updated:', field);
+const logFieldValue = (eve, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) => {
+    const field = props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex];
+
+    if (eve.target.files && eve.target.files.length > 0) {
+        const files = eve.target.files;
+        field['value'] = "";
+        for (let i = 0; i < files.length; i++) {
+            uploadFile(files[i], field);
+        }
+        // emit('updateField', field);
+
+    } else if (eve.target.type === 'checkbox') {
+
+        if (field.fieldtype === "Check") {
+            // Ensure value is a string, not an array
+            if (eve.target.checked) {
+                // If checked, set the value as a string
+                field['value'] = eve.target.value;
+                console.log(field.value);
+            } else {
+                // If unchecked, set the value as an empty string (or use any default value)
+                field.value = "";
+            }
+        } else {
+            // For other types of fields, store the checkbox checked state as boolean (true/false)
+            field['value'] = eve.target.checked;
+        }
+        // emit('updateField', field);
+
+    } else {
+
+        // field['value'] = eve.target.value;
+        let inputValue = eve.target.value;
+
+        // Ensure only numbers are stored and +91 is prefixed
+        if (field.fieldtype === "Phone") {
+            inputValue = inputValue.replace(/\D/g, ''); // Remove non-numeric characters
+
+            if (inputValue.length > 10) {
+                inputValue = inputValue.slice(-10); // Keep only last 10 digits
+            }
+
+            inputValue = "+91" + inputValue; // Add +91 prefix
+        }
+
+        field['value'] = inputValue;
+
+
+    }
+    validateField(field, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex);
+    emit('updateField', field);
 };
+
+const validateField = (field, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) => {
+    const fieldKey = `${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`;
+
+    if (field.reqd === 1 && (!field.value || field.value.toString().trim() === "")) {
+        errorMessages.value[fieldKey] = `${field.label || "This field"} is required.`;
+    }
+    else if (field.fieldtype === "Phone") {
+        const phoneRegex = /^\+91[0-9]{10}$/; // Accepts +91 followed by exactly 10 digits
+
+        if (!phoneRegex.test(field.value)) {
+            errorMessages.value[fieldKey] = "Enter a valid 10-digit phone number.";
+        } else {
+            delete errorMessages.value[fieldKey]; // Clear error if valid
+        }
+    }
+    else {
+        delete errorMessages.value[fieldKey]; // Clear error if valid
+    }
+};
+
+const generateRandomNumber = () => {
+    return Math.floor(Math.random() * 1000000);
+};
+
+const uploadFile = (file, field) => {
+    const randomNumber = generateRandomNumber();
+    let fileName = `${props.formName}-${randomNumber}-@${file.name}`;
+
+    const formData = new FormData();
+    formData.append("file", file, fileName);
+    formData.append("is_private", "1");
+    formData.append("folder", "Home");
+    axiosInstance
+        .post(apis.uploadfile, formData)
+        .then((res) => {
+
+            if (res.message && res.message.file_url) {
+                if (field['value']) {
+                    field['value'] += `, ${res.message.file_url}`;
+                } else {
+                    field['value'] = res.message.file_url;
+                }
+                emit('updateField', field);
+            } else {
+                console.error("file_url not found in the response.");
+            }
+        })
+        .catch((error) => {
+            console.error('Upload error:', error);
+        });
+};
+
+
+
+// const logFieldValue = (
+//   event,
+//   blockIndex,
+//   sectionIndex,
+//   rowIndex,
+//   columnIndex,
+//   fieldIndex
+// ) => {
+//   const field =
+//     props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
+//       columnIndex
+//     ].fields[fieldIndex];
+//   field.value = event.target.value;
+//   emit("updateField", getAllFieldsData());
+//   // console.log('Field Value Updated:', field);
+// };
 </script>
 
 <style setup scoped>
@@ -567,6 +709,9 @@ td {
   margin: 1px;
 }
 .cursor-pointer{
+  cursor: pointer;
+}
+.img-thumbnail{
   cursor: pointer;
 }
 </style>

@@ -78,7 +78,6 @@
                         </h1>
                         <h1 class="font-14 fw-bold m-0">About Form</h1>
                         <ButtonComp
-                          
                           class="btn btn-dark bg-dark text-white fw-bold font-13"
                           name="Next"
                           v-if="activeStep < 3"
@@ -106,6 +105,7 @@
                                 tag="input"
                                 name="Value"
                                 id="formName"
+                                validationStar="true"
                                 placeholder="Untitled Form"
                                 @change="
                                   (event) =>
@@ -135,6 +135,7 @@
                                 tag="input"
                                 name="Value"
                                 id="formShortCode"
+                                validationStar="true"
                                 placeholder="Untitled Form"
                                 @change="
                                   (event) =>
@@ -162,7 +163,14 @@
                                                             tag="select" name="dept" id="dept"
                                                             placeholder="Select Department" :options=formOptions
                                                             v-model="filterObj.owner_of_the_form" /> -->
-                              <label for="">Owner Of The Form</label>
+                              <label for=""
+                                >Owner Of The Form
+                                <span
+                                  v-if="!filterObj.owner_of_the_form"
+                                  class="text-danger"
+                                  >*</span
+                                ></label
+                              >
 
                               <Multiselect
                                 :options="OwnerOfTheFormData"
@@ -182,7 +190,14 @@
                                                             placeholder="Select Cateogry" :options=departments
                                                             v-model="filterObj.form_category" /> -->
 
-                              <label for="">Form Cateogry</label>
+                              <label for=""
+                                >Form Cateogry
+                                <span
+                                  v-if="!filterObj.form_category"
+                                  class="text-danger"
+                                  >*</span
+                                ></label
+                              >
 
                               <Multiselect
                                 :options="departments"
@@ -225,7 +240,16 @@
 
                             <div>
                               <label class="typo__label">
-                                <label for="">Accessibility Departments</label>
+                                <label for=""
+                                  >Accessibility Departments
+                                  <span
+                                    v-if="
+                                      !filterObj.accessible_departments.length
+                                    "
+                                    class="text-danger"
+                                    >*</span
+                                  ></label
+                                >
                               </label>
                               <VueMultiselect
                                 v-model="filterObj.accessible_departments"
@@ -363,7 +387,9 @@
                             type="button"
                             @click="saveFormData('save')"
                           >
-                            {{ paramId ? "Update From" : "Create From" }}
+                            {{
+                              paramId !== "new" ? "Update Form" : "Create Form"
+                            }}
                           </button>
                           <!-- <button class="btn btn-light font-10" type="button"
                                                         data-bs-toggle="modal" data-bs-target="#exampleModal"
@@ -1009,10 +1035,12 @@
                                             />
                                           </div>
                                           <div>
-                                                                                             
-                                                  <button class="btn btn-light btn-sm bg-transparent trash-btn py-0" @click="removeField(fieldIndex)">
-                                                    <i class="bi bi-x-lg"></i>
-                                                  </button> 
+                                            <button
+                                              class="btn btn-light btn-sm bg-transparent trash-btn py-0"
+                                              @click="removeField(fieldIndex)"
+                                            >
+                                              <i class="bi bi-x-lg"></i>
+                                            </button>
                                           </div>
                                         </div>
 
@@ -1111,7 +1139,8 @@
                                                     :class="[
                                                       'border-less-input',
                                                       'font-14',
-                                                      'p-0' ,'inputHeight',
+                                                      'p-0',
+                                                      'inputHeight',
                                                       {
                                                         'italic-style':
                                                           !field.label,
@@ -1127,7 +1156,9 @@
                                                   <button
                                                     class="btn btn-light btn-sm bg-transparent trash-btn py-0"
                                                     @click="
-                                                    removechildField(fieldIndex)
+                                                      removechildField(
+                                                        fieldIndex
+                                                      )
                                                     "
                                                   >
                                                     <i class="bi bi-x-lg"></i>
@@ -1353,6 +1384,9 @@ const formNameError = ref("");
 const formShortNameError = ref("");
 const selectedBlockIndex = ref("");
 let workflowSetup = reactive([]);
+
+const wrkAfterGetData = ref([]);
+// const hasWorkflowToastShown = ref(false);
 const tableFieldsCache = ref([]);
 const childName = ref("");
 const childtableRows = ref([]);
@@ -1473,10 +1507,14 @@ const isHoveredColumn = (blockIndex, sectionIndex, rowIndex, columnIndex) => {
 };
 onMounted(() => {
   deptData();
-  paramId = route.params.paramid || "new";
-  console.log(paramId, "ggggg");
+  paramId.value = route.params.paramid || "new";
+  console.log(paramId.value, "ggggg");
 
-  if (paramId != undefined && paramId != null && paramId != "new") {
+  if (
+    paramId.value != undefined &&
+    paramId.value != null &&
+    paramId.value != "new"
+  ) {
     getFormData();
     OwnerOftheForm();
   }
@@ -1494,7 +1532,6 @@ const tableField = () => {
   };
   columns.push(newField);
 };
-
 
 const removechildField = (index) => {
   columns.splice(index, 1);
@@ -1953,7 +1990,10 @@ function cancelForm() {
 }
 const handleStepClick = (stepId) => {
   if (isNextDisabled.value) {
-    toast.error('Please complete all required fields before proceeding.',{ autoClose:2000, transition: 'zoom' });
+    toast.error("Please complete all required fields before proceeding.", {
+      autoClose: 2000,
+      transition: "zoom",
+    });
     return;
   }
 
@@ -1966,7 +2006,10 @@ const handleStepClick = (stepId) => {
 
 const nextStep = () => {
   if (isNextDisabled.value) {
-    toast.error('Please complete all required fields before proceeding.',{ autoClose:2000, transition: 'zoom' });
+    toast.error("Please complete all required fields before proceeding.", {
+      autoClose: 2000,
+      transition: "zoom",
+    });
     return;
   }
 
@@ -2006,10 +2049,9 @@ const prevStep = () => {
 // );
 
 // Get form by ID
-
 function getFormData() {
   axiosInstance
-    .get(apis.resource + doctypes.EzyFormDefinitions + `/${paramId}`)
+    .get(apis.resource + doctypes.EzyFormDefinitions + `/${paramId.value}`)
     .then((res) => {
       let res_data = res?.data;
       if (res_data) {
@@ -2039,8 +2081,11 @@ function getFormData() {
           typeof childtableHeaders.value,
           "---child"
         );
+
         console.log(res.data, "7777777777777777");
         const parsedFormJson = JSON.parse(res.data?.form_json);
+        wrkAfterGetData.value = parsedFormJson.workflow;
+        console.log(parsedFormJson.workflow, "parsedFormJson");
         tableName.value = parsedFormJson.fields.filter(
           (field) => field.fieldtype === "Table"
         );
@@ -2186,10 +2231,12 @@ function categoriesData(newVal) {
 //   fields = [...fields, ...storedTableFields];
 //   // Clear localStorage after merging and using the data
 // }
+
 function formData(status) {
   console.log(blockArr, "blockarray");
 
   let fields = extractFieldsWithBreaks(blockArr);
+  console.log(fields, "Extracted Fields");
   if (tableFieldsCache.value.length) {
     console.log("Using stored Table field from variable cache...");
     fields = [...fields, ...tableFieldsCache.value];
@@ -2207,66 +2254,73 @@ function formData(status) {
   axiosInstance
     .post(apis.savedata, dataObj)
     .then((res) => {
-      if (res) {
+      if (res && res.message && res.message.message) {
         tableFieldsCache.value = [];
-        // localStorage.removeItem("tableFields");
-        toast.success("Form Created Successfully", {
-          autoClose: 2000,
-          transition: "zoom",
+        router.push({
+          params: { paramid: res.message.message },
         });
+        paramId.value = res.message.message;
+        // paramId = res.message.message; 
 
-        // Wait for the toast to complete before proceeding
-        setTimeout(() => {
-          if (!route.params.paramid) {
-            toast.info("Add Workflow", {
-              autoClose: 2000,
-              transition: "zoom",
-            });
-
-            // If no paramid, store the response message but don't navigate
-            paramId = res.message.message;
-            if (paramId && paramId !== "new") {
+        if (paramId && paramId !== "new") {
               blockArr.splice(0, blockArr.length);
               getFormData();
             }
-          } else {
-            console.log(blockArr.length, workflowSetup.length, "length");
+        console.log(paramId.value, "Updated paramId");
 
-            if (workflowSetup.length >= blockArr.length) {
-              // Navigate only if workflows match or exceed blocks
+       
+        if (workflowSetup.length < blockArr.length) {
+          toast.info("Add Workflow", {
+            autoClose: 2000,
+            transition: "zoom",
+          });
+        } else {
+          toast.success("Form Created Successfully!", {
+            autoClose: 2000,
+            transition: "zoom",
+            onClose: () => {
               if (status === "save") {
                 router.push({ name: "Created" });
               } else if (status === "draft") {
                 router.push({ name: "Draft" });
               }
-            } else {
-              // Calculate how many workflows are missing
-              const missingWorkflows = blockArr.length - workflowSetup.length;
-              toast.error(`${missingWorkflows} more workflow(s) left to add.`, {
-                autoClose: 2000,
-                transition: "zoom",
-              });
-            }
-          }
-        }, 2000); // Wait for the success toast to complete before executing the next steps
-
-        // router.push({
-        //   params: { paramid: res.message.message },
-        // });
-        // paramId = res.message.message;
-        // if (paramId.value !== "new") {
-        //   blockArr.splice(0, blockArr.length);
-        //   getFormData();
-        // }
-        // if (status === "draft") {
-        //   router.push({ name: "Draft" });
-        // }
+            },
+          });
+        }
+      } else {
+        console.error("Invalid response structure:", res);
       }
     })
     .catch((error) => {
       console.error("Error saving form data:", error);
     });
-}
+  }
+  // setTimeout(() => {
+  //   console.log(blockArr.length, workflowSetup.length, "length");
+
+  //   if (workflowSetup.length < blockArr.length) {
+  //     // ✅ If workflows are missing, show error toast
+  //     const missingWorkflows = blockArr.length - workflowSetup.length;
+  //     toast.error(`${missingWorkflows} more workflow(s) left to add.`, {
+  //       autoClose: 2000,
+  //       transition: "zoom",
+  //     });
+  //   } else {
+  //     // ✅ If all workflows are added, show success toast
+  //     toast.success("Form Created Successfully!", {
+  //       autoClose: 2000,
+  //       transition: "zoom",
+  //       onClose: () => {
+  //         // ✅ Route only after success toast disappears
+  //         if (status === "save") {
+  //           router.push({ name: "Created" });
+  //         } else if (status === "draft") {
+  //           router.push({ name: "Draft" });
+  //         }
+  //       },
+  //     });
+  //   }
+  // }, 2000);
 
 // function formData(status) {
 //     console.log(blockArr, "blockarray");
@@ -2318,6 +2372,49 @@ function formData(status) {
 // Function to add a new block
 
 const mainBlockRef = ref("");
+// const addBlock = () => {
+//   const blockIndex = blockArr.length; // Get current length before adding new block
+
+//   const newBlock = {
+//     label: blockIndex === 0 ? "requestor" : `approver-${blockIndex}`,
+//     parent: `${businessUnit.value?.value}-${filterObj.value?.form_short_name}`,
+//     sections: [
+//       {
+//         label: "",
+//         parent: `${businessUnit.value.value}-${filterObj.value.form_short_name}`,
+//         rows: [
+//           {
+//             label: `row_0_0_${blockIndex}`,
+//             columns: [
+//               {
+//                 label: "",
+//                 fields: [
+//                   {
+//                     label: "",
+//                     fieldtype: "",
+//                     options: "",
+//                     reqd: false,
+//                   },
+//                 ],
+//               },
+//             ],
+//           },
+//         ],
+//       },
+//     ],
+//   };
+
+//   blockArr.splice(blockArr.length, 0, newBlock);
+//   nextTick(() => {
+//     if (mainBlockRef.value) {
+//       mainBlockRef.value.scrollTo({
+//         top: mainBlockRef.value.scrollHeight,
+//         behavior: "smooth",
+//       });
+//     }
+//   });
+//   // console.log(blockArr.length, blockArr, "00000");
+// };
 const addBlock = () => {
   const blockIndex = blockArr.length; // Get current length before adding new block
 
@@ -2334,14 +2431,29 @@ const addBlock = () => {
             columns: [
               {
                 label: "",
-                fields: [
-                  {
-                    label: "",
-                    fieldtype: "",
-                    options: "",
-                    reqd: false,
-                  },
-                ],
+                fields:
+                  blockIndex === 0
+                    ? [{ label: "", fieldtype: "", options: "", reqd: false }] // Only one field for blockIndex 0
+                    : [
+                        {
+                          label: "Approver",
+                          fieldtype: "Data",
+                          options: "",
+                          reqd: false,
+                        },
+                        {
+                          label: "Approved on",
+                          fieldtype: "Datetime",
+                          options: "",
+                          reqd: false,
+                        },
+                        {
+                          label: "Approved By",
+                          fieldtype: "Attach",
+                          options: "",
+                          reqd: false,
+                        },
+                      ],
               },
             ],
           },
@@ -2350,7 +2462,7 @@ const addBlock = () => {
     ],
   };
 
-  blockArr.splice(blockArr.length, 0, newBlock);
+  blockArr.push(newBlock);
   nextTick(() => {
     if (mainBlockRef.value) {
       mainBlockRef.value.scrollTo({
@@ -2359,7 +2471,6 @@ const addBlock = () => {
       });
     }
   });
-  // console.log(blockArr.length, blockArr, "00000");
 };
 
 // function to delete block
