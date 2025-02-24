@@ -244,6 +244,11 @@ template_str = """
          .header-right{
              min-width: 200px;
          }
+         .signature-Imge{
+             min-width:100px !important;
+             max-width:120px !important;
+             
+         }
 #            @media print {
 #             @page {
 #                 size: A4;
@@ -302,7 +307,7 @@ template_str = """
                                            {% if field.fieldtype == 'Data' %}
                                             <input type="text" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
                                         {% elif field.fieldtype == 'Attach' %}
-                                            <input type="file" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
+                                            <img type="file" id="{{ field.fieldname }}" src="{{ field['values'] }}" class="signature-Imge" name="{{ field.fieldname }}">
                                         {% elif field.fieldtype == 'Phone' %}
                                             <input type="tel" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
                                         {% elif field.fieldtype == 'Time' %}
@@ -314,7 +319,7 @@ template_str = """
                                         {% elif field.fieldtype == 'Date' %}
                                             <input type="text" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}" class="date-input" placeholder="__/__/____">
                                         {% elif field.fieldtype == 'Datetime' %}
-                                            <input type="datetime-local" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
+                                            <input type="text" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
                                         {% elif field.fieldtype == 'Check' %}
                                             <input type="checkbox" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
                                         {% elif field.fieldtype == 'radio' %}
