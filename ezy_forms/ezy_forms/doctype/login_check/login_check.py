@@ -12,16 +12,17 @@ class LoginCheck(Document):
 @frappe.whitelist(allow_guest=True)
 def after_insert_user(self, method=None):
     try:
-        existing_user = frappe.db.get_value("Login Check",{"user_id": self.email},["user_id"])
+        existing_user = frappe.db.get_value("Login Check",{"user_id": self.emp_mail_id},["user_id"])
         
         if not existing_user:
             new_doc = frappe.new_doc("Login Check")
-            new_doc.user = self.email
+            new_doc.user = self.emp_mail_id
             new_doc.insert(ignore_permissions=True)
             frappe.db.commit()
+            
  
     except Exception as e:
-        frappe.log_error(f"Error in after_insert_user for {self.email}: {str(e)}")
+        frappe.log_error(f"Error in after_insert_user for {self.emp_mail_id}: {str(e)}")
         
 @frappe.whitelist(allow_guest=True)
 def update_is_first_value(user_id_name,company=None):
