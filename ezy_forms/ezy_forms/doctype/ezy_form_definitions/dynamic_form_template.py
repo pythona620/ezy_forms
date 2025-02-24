@@ -341,7 +341,7 @@ template_str = """
                                             <input type="text" id="{{ field.fieldname }}" name="{{ field.fieldname }}" placeholder="Signature input (future implementation)">
                                         {% endif %}
                                     </div>
-                                {% endfor %}f
+                                {% endfor %}
                             </div>
                         {% endfor %}
                     </div>
