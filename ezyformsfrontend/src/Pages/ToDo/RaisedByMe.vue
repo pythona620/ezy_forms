@@ -7,34 +7,14 @@
       </div>
     </div>
     <div class="mt-2">
-      <GlobalTable
-        :tHeaders="tableheaders"
-        :tData="tableData"
-        isAction="true"
-        actionType="dropdown"
-        isCheckbox="true"
-        :actions="actions"
-        @actionClicked="actionCreated"
-        isFiltersoption="true"
-        :field-mapping="fieldMapping"
-        @updateFilters="inLineFiltersData"
-      />
-      <PaginationComp
-        :currentRecords="tableData.length"
-        :totalRecords="totalRecords"
-        @updateValue="PaginationUpdateValue"
-        @limitStart="PaginationLimitStart"
-      />
+      <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" actionType="dropdown" isCheckbox="true"
+        :actions="actions" @actionClicked="actionCreated" isFiltersoption="true" :field-mapping="fieldMapping"
+        @updateFilters="inLineFiltersData" />
+      <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
+        @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
     </div>
-    <div
-      class="modal fade"
-      id="viewRequest"
-      data-bs-backdrop="static"
-      data-bs-keyboard="false"
-      tabindex="-1"
-      aria-labelledby="viewRequestLabel"
-      aria-hidden="true"
-    >
+    <div class="modal fade" id="viewRequest" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+      aria-labelledby="viewRequestLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
           <!-- <div class="modal-header">
@@ -50,32 +30,19 @@
                 <h5 class="m-0 font-13" id="viewRequest">Request</h5>
               </div>
               <div class="">
-                <button
-                  button="button"
-                  class="btn btn-white text-dark font-13"
-                  @click="downloadPdf"
-                >
-                  Download Pdf<span class="ms-2"
-                    ><i class="bi bi-download"></i
-                  ></span>
+                <button button="button" class="btn btn-white text-dark font-13" @click="downloadPdf">
+                  Download Pdf<span class="ms-2"><i class="bi bi-download"></i></span>
                 </button>
-                <button
-                  type="button"
-                  class="btn btn-white text-dark font-13"
-                  @click="closemodal"
-                  data-bs-dismiss="modal"
-                >
+                <button type="button" class="btn btn-white text-dark font-13" @click="closemodal"
+                  data-bs-dismiss="modal">
                   Close <i class="bi bi-x"></i>
                 </button>
               </div>
             </div>
           </div>
           <div class="modal-body approvermodalbody">
-            <ApproverPreview
-              :blockArr="showRequest" :childHeaders="tableHeaders" :childData="responseData"
-              :current-level="totalLevels"
-              @updateField="updateFormData"
-            />
+            <ApproverPreview :blockArr="showRequest" :childHeaders="tableHeaders" :childData="responseData"
+              :current-level="totalLevels" @updateField="updateFormData" />
             <!-- <div v-if="tableName" class="mt-2">
               <div>
                 <span class="font-13 fw-bold">{{ tableName }}</span>
@@ -113,20 +80,15 @@
             </div> -->
           </div>
           <div class="activity-log-container">
-            <div
-              v-for="(item, index) in activityData"
-              :key="index"
-              class="activity-log-item"
-              :class="{ 'last-item': index === activityData.length - 1 }"
-            >
+            <div v-for="(item, index) in activityData" :key="index" class="activity-log-item"
+              :class="{ 'last-item': index === activityData.length - 1 }">
               <div class="activity-log-dot"></div>
               <div class="activity-log-content">
                 <p class="font-12 mb-1">
                   On
                   <strong class="strong-content">{{
                     formatDate(item.creation)
-                  }}</strong
-                  >,
+                  }}</strong>,
                   <strong class="strong-content">
                     <!-- {{ item.user_name }} -->
                     you
@@ -138,42 +100,31 @@
                   the request with the comments:
                   <strong class="strong-content">{{
                     item.reason || "N/A"
-                  }}</strong
-                  >.
+                  }}</strong>.
                 </p>
               </div>
             </div>
           </div>
           <div class="modal-footer">
-            <!-- <div class="d-flex justify-content-between align-items-center mt-3 gap-2">
-              <button type="button" class="btn btn-white text-dark  font-13" @click="closemodal"
+            <div class="d-flex justify-content-between align-items-center gap-2">
+              <!-- <button type="button" class="btn btn-white text-dark  font-13" @click="closemodal"
                 data-bs-dismiss="modal">Close
-                <i class="bi bi-x"></i></button>
-              <div>
+                <i class="bi bi-x"></i></button> -->
+              <div v-if="selectedRequestStatus == 'Request Raised'">
                 <ButtonComp type="button" icon="x"
-                  class="btn btn-dark d-flex align-items-center  approvebtn border-1 text-nowrap font-10 "
+                  class="btn btn-dark d-flex align-items-center edit-btn border-1 text-nowrap font-10 "
                   @click="approvalCancelFn(formData, 'Request Cancelled')" name="Cancel Request" />
               </div>
-            </div> -->
-            <div v-if="requestcancelled">
-              <ButtonComp
-                type="button"
-                class="border-1 edit-btn text-nowrap font-10"
-                @click="handleEditClick"
-                name="Edit"
-              />
+            </div>
+            <div v-if="requestcancelled || selectedRequestStatus == 'Request Raised'">
+              <ButtonComp type="button" class="border-1 edit-btn text-nowrap font-10" @click="handleEditClick"
+                name="Edit" />
             </div>
           </div>
         </div>
       </div>
     </div>
-    <div
-      class="modal fade"
-      id="pdfView"
-      tabindex="-1"
-      aria-labelledby="pdfViewLabel"
-      aria-hidden="true"
-    >
+    <div class="modal fade" id="pdfView" tabindex="-1" aria-labelledby="pdfViewLabel" aria-hidden="true">
       <div class="modal-dialog modal-xl">
         <div class="modal-content">
           <div class="modal-header py-2 d-block bg-dark text-white">
@@ -184,21 +135,11 @@
                 </h5>
               </div>
               <div class="">
-                <button
-                  button="button"
-                  class="btn btn-dark text-white font-13"
-                  @click="downloadPdf"
-                >
-                  Download Pdf<span class="ms-2"
-                    ><i class="bi bi-download"></i
-                  ></span>
+                <button button="button" class="btn btn-dark text-white font-13" @click="downloadPdf">
+                  Download Pdf<span class="ms-2"><i class="bi bi-download"></i></span>
                 </button>
-                <button
-                  type="button"
-                  class="btn btn-dark text-white font-13"
-                  @click="closemodal"
-                  data-bs-dismiss="modal"
-                >
+                <button type="button" class="btn btn-dark text-white font-13" @click="closemodal"
+                  data-bs-dismiss="modal">
                   Close <i class="bi bi-x"></i>
                 </button>
               </div>
@@ -252,6 +193,7 @@ const tableData = ref([]);
 const totalLevels = ref("");
 const pdfPreview = ref("");
 const activityData = ref([]);
+const selectedRequestStatus = ref("");
 const tableRows = ref([]);
 const tableHeaders = ref([]);
 const tableName = ref("");
@@ -298,7 +240,7 @@ function handleEditClick() {
       modalInstance.hide();
     }
   }
-  // console.log("selectedRequest",selectedRequest.value);
+  // console.log("selectedRequest",selectedRequest.value.status);
 
   // Navigate to the new route
   router.push({
@@ -307,6 +249,7 @@ function handleEditClick() {
       business_unit: selectedRequest.value.property,
       selectedForm: selectedRequest.value.doctype_name,
       selectedFormId: selectedRequest.value.name,
+      selectedFormStatus: selectedRequest.value.status,
     },
   });
 }
@@ -319,6 +262,7 @@ function actionCreated(rowData, actionEvent) {
   if (actionEvent.name === "View Request") {
     if (rowData) {
       selectedRequest.value = { ...rowData };
+      selectedRequestStatus.value = rowData.status;
 
       totalLevels.value = selectedRequest.value?.total_levels;
 
@@ -326,7 +270,7 @@ function actionCreated(rowData, actionEvent) {
         selectedRequest.value?.json_columns
       ).child_table_fields;
 
-      console.log(tableHeaders.value, "req");
+      // console.log(tableHeaders.value, "req");
 
       // console.log(selectedRequest.value,"0000");
       // Rebuild the structured array from JSON
@@ -354,7 +298,7 @@ function actionCreated(rowData, actionEvent) {
         .then((res) => {
           if (res.data) {
             doctypeForm.value = res.data;
-            console.log(typeof doctypeForm.value, "doctype", typeof showRequest.value);
+            // console.log(typeof doctypeForm.value, "doctype", typeof showRequest.value);
             // Map values from doctypeForm to showRequest fields
             mapFormFieldsToRequest(doctypeForm.value[0], showRequest.value);
             axiosInstance
@@ -370,18 +314,18 @@ function actionCreated(rowData, actionEvent) {
                 `${apis.resource}${selectedRequest.value.doctype_name}/${res.data[0].name}`
               )
               .then((res) => {
-                console.log(`Data for :`, res.data);
+                // console.log(`Data for :`, res.data);
                 // Identify the child table key dynamically
                 const childTableKey = Object.keys(res.data).find((key) =>
                   Array.isArray(res.data[key])
                 );
                 tableName.value = childTableKey.replace(/_/g, " ");
-                console.log(tableName.value);
+                // console.log(tableName.value);
 
                 if (childTableKey) {
                   responseData.value = res.data[childTableKey];
                   tableRows.value = responseData.value; // Assign table rows
-                  console.log(responseData.value, "Dynamic Child Table Data");
+                  // console.log(responseData.value, "Dynamic Child Table Data");
                 }
               })
               .catch((error) => {
@@ -577,7 +521,7 @@ function approvalCancelFn(dataObj, type) {
     doctype: selectedRequest.value.doctype_name,
     current_level: selectedRequest.value.current_level,
     request_id: selectedRequest.value.name,
-    reason: ApproverReason.value,
+    reason: "Cancel",
     files: [],
     url_for_cancelling_id: "",
     // "action": type,

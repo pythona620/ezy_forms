@@ -208,7 +208,7 @@ function actionCreated(rowData, actionEvent) {
 }
 
 function viewPreview(data) {
-  console.log(data);
+  // console.log(data);
   router.push({
     name: "ApproveRequest",
     query: {

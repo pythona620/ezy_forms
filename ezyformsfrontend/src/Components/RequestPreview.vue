@@ -217,7 +217,7 @@ const logFieldValue = (eve, blockIndex, sectionIndex, rowIndex, columnIndex, fie
             if (eve.target.checked) {
                 // If checked, set the value as a string
                 field['value'] = eve.target.value;
-                console.log(field.value);
+                // console.log(field.value);
             } else {
                 // If unchecked, set the value as an empty string (or use any default value)
                 field.value = "";

@@ -41,8 +41,7 @@
                                             <label class="font-13 ps-1" for="emp_phone">Emp Phone<span
                                                     class="text-danger ps-1">*</span></label>
                                             <FormFields tag="input" type="text" name="emp_phone" id="emp_phone"
-                                                maxlength="10" @change="validatephone"
-                                                placeholder="Enter Phone Numver"
+                                                maxlength="10" @change="validatephone" placeholder="Enter Phone Numver"
                                                 v-model="createEmployee.emp_phone" />
                                             <p v-if="phoneError" class="text-danger font-11 ps-1">{{ phoneError }}</p>
                                         </div>
@@ -217,8 +216,9 @@
         </div>
         <div class="mt-2">
             <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction='true' :actions="actions"
-                @actionClicked="actionCreated" actionType="dropdown" isCheckbox="true" isFiltersoption="true"
-                :field-mapping="fieldMapping" @updateFilters="inLineFiltersData" />
+                @actionClicked="actionCreated" @toggle-click="toggleFunction" actionType="Toogle&dropdown"
+                isCheckbox="true" isFiltersoption="true" :field-mapping="fieldMapping"
+                @updateFilters="inLineFiltersData" />
             <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
                 @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
         </div>
@@ -472,7 +472,7 @@ const addDesignation = (newTag) => {
             .post(apis.resource + doctypes.roles, { role_name: newTag }) // Adjust payload as needed
             .then((response) => {
                 if (response.data) {
-                    console.log('Role:', response.data);
+                    // console.log('Role:', response.data);
 
                     // Update local designations list
                     // designations.value.push(newTag);
@@ -481,7 +481,7 @@ const addDesignation = (newTag) => {
                         .post(apis.resource + doctypes.designations, { role: response.data.role_name }) // Adjust payload as needed
                         .then((response) => {
                             if (response.data) {
-                                console.log('Wf role:', response.data);
+                                // console.log('Wf role:', response.data);
 
                                 // Update local designations list
                                 designations.value.push(response.data.role);
@@ -567,8 +567,46 @@ function createEmplBtn() {
     designationData();
 
 }
-function actionCreated(rowData, actionEvent) {
-    if (actionEvent.name === 'Edit Employee') {
+// function actionCreated(rowData, action, actionEvent) {
+//     if (action.name === 'Edit Employee') {
+//         if (rowData) {
+//             deptData();
+//             designationData();
+//             createEmployee.value = { ...rowData }
+//             const modal = new bootstrap.Modal(document.getElementById('viewEmployee'), {});
+//             modal.show();
+//         } else {
+//             console.warn("No form fields provided.");
+//             formCreation(rowData);
+//         }
+//     }
+
+//     // For enable action from the checkbox
+//     if (actionType === 'enable') {
+//         console.log("rowData", rowData.name);
+
+//         rowData.enable = 0;
+
+//         if (confirm('Are you sure you want to delete this Empl?')) {
+//             axiosInstance
+//                 .put(apis.resource + doctypes.EzyEmployeeList + '/' + rowData.name, rowData)
+//                 .then((response) => {
+//                     const res = response.data;
+//                     // fetchData();
+//                     console.log("res", res);
+//                     toast.success("Employee Deleted Successfully", { autoClose: 700 });
+//                 })
+//                 .catch((error) => {
+//                     console.error("Error updating toggle:", error);
+//                 });
+//         }
+
+//     }
+// }
+
+
+function actionCreated(rowData, action, actionType) {
+    if (action && action.name === 'Edit Employee') {
         if (rowData) {
             deptData();
             designationData();
@@ -581,6 +619,38 @@ function actionCreated(rowData, actionEvent) {
         }
     }
 }
+
+function toggleFunction(rowData) {
+    // console.log("rowData", rowData);
+
+    // Decide the action based on the current state:
+    const isCurrentlyEnabled = rowData.enable == '1' || rowData.enable === 1;
+    const actionText = isCurrentlyEnabled ? 'Disable' : 'Enable';
+
+    // Show the confirmation dialog with dynamic messaging:
+    if (confirm(`Are you sure you want to ${actionText} ${rowData.emp_name} this Employee?`)) {
+        // Toggle the state:
+        rowData.enable = isCurrentlyEnabled ? 0 : 1;
+
+        axiosInstance
+            .put(`${apis.resource}${doctypes.EzyEmployeeList}/${rowData.name}`, rowData)
+            .then((response) => {
+                console.log("Response:", response.data);
+                // Adjust the toast message accordingly:
+                toast.success(`Form ${actionText}d successfully`, { autoClose: 700 });
+                // Refresh the table data after a short delay
+                employeeData();
+                window.location.reload()
+            })
+            .catch((error) => {
+                console.error("Error updating toggle:", error);
+            });
+    } else {
+        // If canceled, do nothing – the checkbox remains unchanged.
+        console.log("Action cancelled. Toggle remains unchanged.");
+    }
+}
+
 const tableheaders = ref([
     { th: "Emp Code", td_key: "emp_code" },
     { th: "Emp Name", td_key: "emp_name" },
@@ -651,7 +721,7 @@ const uploadFile = (file, field) => {
                 if (field === 'signature') {
                     createEmployee.value.signature = res.message.file_url;
                 }
-                console.log("Uploaded file URL:", res.message.file_url);
+                // console.log("Uploaded file URL:", res.message.file_url);
             } else {
                 console.error("file_url not found in the response.");
             }
@@ -823,7 +893,7 @@ watch(
         if (newVal && newVal.length) {
             createEmployee.value.company_field = newVal;
             newbusiness.value = newVal;
-            console.log(createEmployee.value.company_field, "-----");
+            // console.log(createEmployee.value.company_field, "-----");
 
             employeeData();
         }

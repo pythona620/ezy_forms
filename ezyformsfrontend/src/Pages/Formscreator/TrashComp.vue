@@ -122,10 +122,8 @@ watch(
     { immediate: true }
 );
 const tableheaders = ref([
-    { th: "Name", td_key: "name" },
     { th: "Form name", td_key: "form_name" },
     { th: "Form category", td_key: "form_category" },
-    { th: "Owner of form", td_key: "owner_of_the_form" },
     { th: "Accessible departments", td_key: "accessible_departments" },
     { th: "Status", td_key: "form_status" },
 ]);
@@ -215,7 +213,6 @@ function inLineFiltersData(searchedData) {
 function fetchTable(data) {
     const filters = [
         ["business_unit", "like", `%${filterObj.value.business_unit}%`],
-        ["form_status", "=", "Draft"]
     ];
     if (data) {
         filters.push(data)
@@ -226,7 +223,8 @@ function fetchTable(data) {
         filters: JSON.stringify(filters),
         limit_page_length: filterObj.value.limitPageLength,
         limit_start: filterObj.value.limit_start,
-        order_by: "`tabEzy Form Definitions`.`creation` desc"
+        order_by: "`tabEzy Form Definitions`.`creation` desc",
+        filters: JSON.stringify({ enable: 0 }),
     };
     const queryParamsCount = {
         fields: JSON.stringify(["count(name) AS total_count"]),

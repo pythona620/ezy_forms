@@ -270,7 +270,7 @@ function getdata() {
     })
     .then((res) => {
       if (res.data) {
-        console.log(res.data);
+        // console.log(res.data);
         doctypeForm.value = res.data[0];
         mapFormFieldsToRequest(doctypeForm.value, showRequest.value);
         // Map values from doctypeForm to showRequest fields
@@ -303,7 +303,7 @@ function Wfactivitylog() {
     .get(`${apis.resource}${doctypes.WFActivityLog}/${selectedData.value.formname}`)
     .then((res) => {
       if (res.data) {
-        console.log("Activity Data:", res.data);
+        // console.log("Activity Data:", res.data);
         activityData.value = res.data.reason || []; // Ensure it's always an array
       }
     })
@@ -371,7 +371,7 @@ function receivedForMe(data) {
         JSON.parse(tableData.value?.json_columns)?.fields
       );
       selectedcurrentLevel.value = tableData.value.current_level;
-      console.log(selectedcurrentLevel.value);
+      // console.log(selectedcurrentLevel.value);
     })
     .catch((error) => {
       console.error("Error fetching records:", error);

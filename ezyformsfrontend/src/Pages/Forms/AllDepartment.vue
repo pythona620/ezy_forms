@@ -13,9 +13,9 @@
 
       </div>
       <div class="mt-3">
-        <GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true" actionType="dropdown"
-          @actionClicked="actionCreated" :actions="actions" @updateFilters="inLineFiltersData"
-          :field-mapping="fieldMapping" isFiltersoption="true" />
+        <GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true"
+          actionType="Toogle&dropdown" @actionClicked="actionCreated" @toggle-click="toggleFunction" :actions="actions"
+          @updateFilters="inLineFiltersData" :field-mapping="fieldMapping" isFiltersoption="true" />
         <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
           @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
       </div>
@@ -77,8 +77,7 @@ const filterObj = ref({ limitPageLength: 'None', limit_start: 0 });
 const actions = ref(
   [
     { name: 'View form', icon: 'fa-solid fa-eye' },
-    { name: 'Raise Request', icon: 'fa-solid fa-eye' },
-
+    { name: 'Raise Request', icon: 'fa fa-file-text' },
   ]
 )
 const fieldMapping = ref({
@@ -115,6 +114,39 @@ router.push({
   });
   }
 }
+// Toggle function triggered when a checkbox is clicked
+function toggleFunction(rowData, rowIndex, event) {
+  // console.log("rowData", rowData);
+
+  // Decide the action based on the current state:
+  const isCurrentlyEnabled = rowData.enable == '1' || rowData.enable === 1;
+  const actionText = isCurrentlyEnabled ? 'delete' : 'restore';
+
+  // Show the confirmation dialog with dynamic messaging:
+  if (confirm(`Are you sure you want to ${actionText} this Form?`)) {
+    // Toggle the state:
+    rowData.enable = isCurrentlyEnabled ? 0 : 1;
+
+    axiosInstance
+      .put(`${apis.resource}${doctypes.EzyFormDefinitions}/${rowData.name}`, rowData)
+      .then((response) => {
+        console.log("Response:", response.data);
+        // Adjust the toast message accordingly:
+        toast.success(`Form ${actionText}d successfully`, { autoClose: 700 });
+        // Refresh the table data after a short delay
+        setTimeout(() => {
+          fetchDepartmentDetails();
+        }, 1000);
+      })
+      .catch((error) => {
+        console.error("Error updating toggle:", error);
+      });
+  } else {
+    // If canceled, do nothing – the checkbox remains unchanged.
+    console.log("Action cancelled. Toggle remains unchanged.");
+  }
+}
+
 
 // Watch business unit and department ID changes
 watch(
@@ -205,12 +237,14 @@ function fetchDepartmentDetails(id, data) {
     limit_page_length: filterObj.value.limitPageLength,
     limit_start: filterObj.value.limit_start,
     filters: JSON.stringify(filters),
+    filters: JSON.stringify({ enable: 1 }),
     order_by: "`tabEzy Form Definitions`.`creation` desc",
   };
   const queryParamsCount = {
     fields: JSON.stringify(["count(name) AS total_count"]),
     limitPageLength: "None",
     filters: JSON.stringify(filters),
+    filters: JSON.stringify({ enable: 1 }),
   }
   axiosInstance.get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParamsCount })
     .then((res) => {

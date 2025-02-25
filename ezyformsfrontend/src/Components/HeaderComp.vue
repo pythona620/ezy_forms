@@ -508,11 +508,11 @@ function SelectedFromchange(value) {
     try {
         // Parse form_json since it's stored as a string
         const formJson = JSON.parse(selectedForm.form_json);
-        console.log("Parsed formJson:", formJson);
+        // console.log("Parsed formJson:", formJson);
 
         // Find the requestor object in the workflow array
         const requestor = formJson.workflow?.find(item => item.type === "requestor");
-        console.log("Requestor:", requestor);
+        // console.log("Requestor:", requestor);
 
         if (!requestor || !Array.isArray(requestor.roles)) {
             console.log("No requestor object or roles found.");
@@ -522,7 +522,7 @@ function SelectedFromchange(value) {
 
         // Ensure requestor.roles is an array of strings and normalize
         const normalizedRoles = requestor.roles.map(role => role.trim().toLowerCase());
-        console.log("Normalized Roles:", normalizedRoles);
+        // console.log("Normalized Roles:", normalizedRoles);
 
         // Clean the strings to remove any non-alphanumeric characters (like invisible characters)
         const cleanRole = (str) => str.replace(/[^\x20-\x7E]/g, '').trim().toLowerCase();
@@ -530,8 +530,8 @@ function SelectedFromchange(value) {
         const cleanedNormalizedRoles = normalizedRoles.map(role => cleanRole(role));
         const cleanedNormalizedUserRole = cleanRole(userRole);
 
-        console.log("Cleaned Normalized Roles:", cleanedNormalizedRoles);
-        console.log("Cleaned Normalized User Role:", cleanedNormalizedUserRole);
+        // console.log("Cleaned Normalized Roles:", cleanedNormalizedRoles);
+        // console.log("Cleaned Normalized User Role:", cleanedNormalizedUserRole);
 
         // Explicit comparison check with logs
         cleanedNormalizedRoles.forEach((role, index) => {
@@ -543,7 +543,7 @@ function SelectedFromchange(value) {
         console.log("Role Matching Result:", isRoleMatched);
 
         if (isRoleMatched) {
-            console.log("Match found! Calling toRaiseRequest()");
+            // console.log("Match found! Calling toRaiseRequest()");
             toRaiseRequest(); // Call toRaiseRequest() when there's a match
         } else {
             console.log("No matching role found.");
@@ -645,7 +645,7 @@ function SelectedFromchange(value) {
 
 // Function to fetch and filter forms based on role
 function SelectedDepartment(departmentName) {
-  console.log("Selected Department:", departmentName);
+//   console.log("Selected Department:", departmentName);
 
   // Get USERROLE from localStorage and normalize
   let userRole = localStorage.getItem("USERROLE")?.trim().toLowerCase();
@@ -674,7 +674,7 @@ function SelectedDepartment(departmentName) {
   .get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParams })
     .then((res) => {
       let allForms = res.data; // Store fetched form list
-      console.log("Fetched Forms List:", allForms);
+    //   console.log("Fetched Forms List:", allForms);
 
       // Filter forms based on user role
       let allowedForms = allForms.filter((form) => {
@@ -694,8 +694,8 @@ function SelectedDepartment(departmentName) {
           const cleanedUserRole = cleanRole(userRole);
 
           console.log(`Checking Form: ${form.form_short_name}`);
-          console.log("Allowed Roles:", cleanedRoles);
-          console.log("User Role:", cleanedUserRole);
+        //   console.log("Allowed Roles:", cleanedRoles);
+        //   console.log("User Role:", cleanedUserRole);
 
           // Check if userRole exists in cleaned roles
           return cleanedRoles.includes(cleanedUserRole);
@@ -705,7 +705,7 @@ function SelectedDepartment(departmentName) {
         }
       });
 
-      console.log("Allowed Forms after Role Filtering:", allowedForms);
+    //   console.log("Allowed Forms after Role Filtering:", allowedForms);
       if (allowedForms.length === 0) {
         toast.warning("No forms have been created in this department.", { autoClose: 2000,transition: "zoom", });
       }
