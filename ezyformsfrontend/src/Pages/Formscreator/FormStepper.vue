@@ -1762,10 +1762,10 @@ const fieldTypes = [
     label: "Datetime",
     type: "Datetime",
   },
-  // {
-  //     label: "Check",
-  //     type: "Check",
-  // },
+  {
+      label: "Check",
+      type: "Check",
+  },  
   // {
   //     label: "Radio",
   //     type: "radio",
@@ -2434,22 +2434,21 @@ const addBlock = () => {
         rows: [
           {
             label: `row_0_0_${blockIndex}`,
-            columns: [
-              {
-                label: "",
-                fields:
-                  blockIndex === 0
-                    ? [{ label: "", fieldtype: "", options: "", reqd: false }] // Only one field for blockIndex 0
-                    : [
+            columns:
+              blockIndex === 0
+                ? [
+                    {
+                      label: "", // No extra empty column for the requestor block
+                      fields: [{ label: "", fieldtype: "", options: "", reqd: false }],
+                    },
+                  ]
+                : [
+                    {
+                      label: "", // First column with "Approver" & "Approved By"
+                      fields: [
                         {
                           label: "Approver",
                           fieldtype: "Data",
-                          options: "",
-                          reqd: false,
-                        },
-                        {
-                          label: "Approved on",
-                          fieldtype: "Datetime",
                           options: "",
                           reqd: false,
                         },
@@ -2460,8 +2459,19 @@ const addBlock = () => {
                           reqd: false,
                         },
                       ],
-              },
-            ],
+                    },
+                    {
+                      label: "", // Second column with "Approved On"
+                      fields: [
+                        {
+                          label: "Approved On",
+                          fieldtype: "Datetime",
+                          options: "",
+                          reqd: false,
+                        },
+                      ],
+                    },
+                  ],
           },
         ],
       },
@@ -2478,6 +2488,7 @@ const addBlock = () => {
     }
   });
 };
+
 
 // function to delete block
 const removeBlock = (blockIndex) => {

@@ -61,7 +61,7 @@
             <div v-if="!requestcancelled" class="d-flex justify-content-between align-items-center mt-3 gap-2">
               <div>
                 <button class="btn btn-outline-danger font-10 py-0 rejectbtn" type="button" 
-                  @click="approvalCancelFn(formData, 'Request Cancelled')">
+                  @click="ApproverCancelSubmission(formData, 'Request Cancelled')">
                   <span><i class="bi bi-x-lg me-2"></i></span>Reject
                 </button>
               </div>
@@ -325,6 +325,7 @@ function ApproverFormSubmission(dataObj, type) {
 function approvalStatusFn(dataObj, type) {
   const storedData = localStorage.getItem("employeeData");
   const employee = JSON.parse(storedData);
+  console.log([employee.signature]);
 
   console.log(dataObj);
   let data = {
@@ -333,7 +334,7 @@ function approvalStatusFn(dataObj, type) {
     request_ids: [selectedRequest.value.name],
     reason: ApproverReason.value,
     action: type,
-    files: [employee.signature],
+    files: null,
     cluster_name: null,
     url_for_approval_id: "",
     // https://ezyrecon.ezyinvoicing.com/home/wf-requests
@@ -361,18 +362,44 @@ function approvalStatusFn(dataObj, type) {
     });
 }
 
+
+function ApproverCancelSubmission(dataObj, type) {
+
+if (ApproverReason.value.trim() === "") {
+  // Set the validation flag to false if the comment is empty
+  isCommentsValid.value = false;
+
+  return; // Stop function execution
+} else {
+  // Proceed if comments are valid
+  isCommentsValid.value = true;
+}
+
+
+
+let form = {};
+if (emittedFormData.value.length) {
+  emittedFormData.value.map((each) => {
+    form[each.fieldname] = each.value;
+  });
+}
+axiosInstance
+  .put(
+    `${apis.resource}${selectedRequest.value.doctype_name}/${doctypeForm.value.name}`,
+    form
+  )
+  .then((response) => {
+    if (response?.data) {
+      approvalCancelFn(dataObj, type);
+    }
+  });
+}
+
+
 function approvalCancelFn(dataObj, type) {
   // let files = this.selectedFileAttachments.map((res: any) => res.url);
 
-  if (ApproverReason.value.trim() === "") {
-    // Set the validation flag to false if the comment is empty
-    isCommentsValid.value = false;
-    return; // Stop function execution
-  } else {
-    // Proceed if comments are valid
-    isCommentsValid.value = true;
-  }
-
+  console.log(dataObj,"data");
   let data = {
     property: selectedRequest.value.property,
     doctype: selectedRequest.value.doctype_name,
@@ -385,6 +412,9 @@ function approvalCancelFn(dataObj, type) {
   };
   axiosInstance.post(apis.wf_cancelling_request, data).then((response) => {
     if (response?.message) {
+      if (type == "Reject") {
+          toast.error(`Request ${type}ed`, { autoClose: 1000, transition: "zoom" });
+        }
       const modal = bootstrap.Modal.getInstance(document.getElementById("viewRequest"));
       modal.hide();
       receivedForMe();
