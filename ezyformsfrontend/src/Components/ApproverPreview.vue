@@ -55,14 +55,14 @@
                       field.fieldtype === 'radio'
                     ">
                       <div class="container-fluid">
-                        <div class="row">
+                        <div class="row" >
                           <div class="form-check col-4 mb-4" v-for="(option, index) in field?.options?.split(
                             '\n'
                           )" :key="index">
                             <div>
                               <input v-if="
                                 field.fieldtype === 'Check' ||
-                                (field.fieldtype === 'Select' && index !== 0)
+                                field.fieldtype === 'Select' && index !== 0
                               " class="form-check-input" type="checkbox" :disabled="blockIndex === 0 || props.readonlyFor === true
                                   " :checked="field.value === option" :value="option"
                                 :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"

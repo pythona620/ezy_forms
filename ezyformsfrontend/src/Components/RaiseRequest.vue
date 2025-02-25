@@ -57,11 +57,11 @@
               <span> <i class="bi bi-x"></i></span>Clear form
             </button>
             <!-- :disabled="!isFormValid" -->
-            <button v-if="!$route.query.selectedFormId && !$route.query.selectedFormStatus == 'Request Raised'"
+            <button v-if="!selectedData.selectedFormId "
                class="btn btn-dark font-12" type="submit" @click="raiseRequestSubmission">
               Raise Request
             </button>
-            <button v-if="$route.query.selectedFormId && !$route.query.selectedFormStatus == 'Request Raised'"
+            <button v-if="selectedData.selectedFormId && $route.query.selectedFormStatus == 'Request Cancelled'"
               @click="RequestUpdate"  class="btn btn-dark font-12" type="submit">
               Update Request
             </button>

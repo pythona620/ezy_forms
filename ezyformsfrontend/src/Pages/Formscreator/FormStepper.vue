@@ -1763,10 +1763,10 @@ const fieldTypes = [
     label: "Datetime",
     type: "Datetime",
   },
-  {
-      label: "Check",
-      type: "Check",
-  },  
+  // {
+  //     label: "Check",
+  //     type: "Check",
+  // },  
   // {
   //     label: "Radio",
   //     type: "radio",

@@ -36,9 +36,7 @@
                                             field.fieldtype === 'Select' ||
                                             field.fieldtype === 'Table MultiSelect'
                                         ">
-                                            <select :multiple="field.fieldtype === 'Table MultiSelect' ||
-                                                field.fieldtype === 'Select'
-                                                " :value="field.value" @change="
+                                            <select :multiple="field.fieldtype === 'Table MultiSelect' " :value="field.value" @change="
                                                     (event) =>
                                                         logFieldValue(
                                                             event,

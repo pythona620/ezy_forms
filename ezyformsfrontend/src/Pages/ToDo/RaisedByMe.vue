@@ -41,16 +41,11 @@
             </div>
           </div>
           <div class="modal-body approvermodalbody">
-<<<<<<< HEAD
             <ApproverPreview
               :blockArr="showRequest" :childHeaders="tableHeaders" :childData="responseData" :readonly-for="true"
               :current-level="totalLevels"
               @updateField="updateFormData"
             />
-=======
-            <ApproverPreview :blockArr="showRequest" :childHeaders="tableHeaders" :childData="responseData"
-              :current-level="totalLevels" @updateField="updateFormData" />
->>>>>>> e98f076e4cf8e22c1eb1c698fe50563e89f15cda
             <!-- <div v-if="tableName" class="mt-2">
               <div>
                 <span class="font-13 fw-bold">{{ tableName }}</span>
@@ -324,10 +319,10 @@ function actionCreated(rowData, actionEvent) {
               .then((res) => {
                 // console.log(`Data for :`, res.data);
                 // Identify the child table key dynamically
-                const childTableKey = Object.keys(res.data).find((key) =>
+                const childTableKey = Object.keys(res?.data).find((key) =>
                   Array.isArray(res.data[key])
                 );
-                tableName.value = childTableKey.replace(/_/g, " ");
+                tableName.value = childTableKey?.replace(/_/g, " ");
                 // console.log(tableName.value);
 
                 if (childTableKey) {
