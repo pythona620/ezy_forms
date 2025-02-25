@@ -109,6 +109,29 @@
                   <i class="bi bi-x-lg fw-bolder text-danger"></i>
                 </span>
               </span>
+              <span v-else-if="column.td_key === 'assigned_to_users'">
+                <div>
+                  <span>
+                    Pending at-
+ 
+                    {{
+                      (() => {
+                        try {
+                          let value = JSON.parse(
+                            row[column.td_key].replace(/'/g, '"')
+                          ); // Replace single quotes & parse
+                          return Array.isArray(value)
+                            ? value.join(", ")
+                            : value;
+                        } catch (error) {
+                          return row[column.td_key] || "-"; // Fallback if parsing fails
+                        }
+                      })()
+                    }}
+                  </span>
+                </div>
+              </span>
+ 
               <!-- <span v-else-if="column.td_key === 'total_levels'">
                 {{ row[column.td_key] }}
               </span> -->
