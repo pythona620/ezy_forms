@@ -286,24 +286,25 @@
                         for="signatureInput"
                         class="form-label mb-0 font-13 ps-1"
                       >
-                        Add Signature <span class="text-danger ps-1">*</span>
+                        Add Signature 
                       </label>
                       <input
                         type="file"
-                        class="form-control font-12"
+                        ref="signatureInputRef"
+                        class="form-control font-12 mb-2"
                         id="signatureInput"
                         @change="selectedSignature"
                         aria-describedby="fileHelpId"
                       />
 
                       <div
-                        v-if="createEmployee.signature"
+                        v-if="createEmployee.signature" style="max-width: 100px; max-height: 100px;"
                         class="d-flex justify-center position-relative mt-2"
                       >
                         <i
                           class="bi bi-x-lg position-absolute text-danger cursor-pointer"
                           style="
-                            top: -10px;
+                            top: -7px;
                             right: -5px;
                             font-size: 13px;
                             background: white;
@@ -314,9 +315,9 @@
                         >
                         </i>
                         <img
-                          :src="createEmployee.signature"
+                          :src="createEmployee.signature" style="max-width: 100px; max-height: 100px;"
                           alt="Signature"
-                          class="img-fluid signature-img"
+                          class="img-fluid signature-img border-1"
                         />
                       </div>
                     </div>
@@ -338,7 +339,6 @@
               <button
                 type="button"
                 class="applyfilter btn btn-dark text-nowrap font-10 d-flex justify-content-center align-items-center"
-                data-bs-dismiss="modal"
                 @click="createEmpl"
               >
                 <span class="font-16 me-1"><i class="bi bi-check2"></i></span>
@@ -601,25 +601,39 @@
                       </span>
                     </template>
                   </VueMultiselect>
-                  <div>
-                    <div class="mb-3 font-11">
-                      <div>
-                        <label for="" class="form-label mb-0 font-13 ps-1"
-                          >Add Signature<span class="text-danger ps-1"
-                            >*</span
-                          ></label
+                  <div class="mb-3 font-11">
+                      <label
+                        for="signatureInput"
+                        class="form-label mb-0 font-13 ps-1"
+                      >
+                        Add Signature 
+                      </label>
+                      <input
+                        type="file"
+                        ref="signatureInputRef"
+                        class="form-control font-12 mb-2"
+                        id="signatureInput"
+                        @change="selectedSignature"
+                        aria-describedby="fileHelpId"
+                      />
+
+                      <div
+                        v-if="createEmployee.signature"
+                        class="d-flex justify-center position-relative mt-2"
+                      >
+                        <i
+                          class="bi bi-x-lg position-absolute text-danger cursor-pointer"
+                          style="
+                            top: -7px;
+                            right: -5px;
+                            font-size: 13px;
+                            background: white;
+                            border-radius: 50%;
+                            padding: 3px;
+                          "
+                          @click="removeSignature"
                         >
-                        <input
-                          type="file"
-                          class="form-control font-12"
-                          name=""
-                          id=""
-                          placeholder=""
-                          @change="selectedSignature"
-                          aria-describedby="fileHelpId"
-                        />
-                      </div>
-                      <div class="mt-3" v-if="createEmployee.signature">
+                        </i>
                         <img
                           :src="createEmployee.signature"
                           alt="Signature"
@@ -627,7 +641,6 @@
                         />
                       </div>
                     </div>
-                  </div>
                 </div>
               </div>
             </div>
@@ -683,7 +696,7 @@ const departmentsList = ref([]);
 // const newDesignation = ref(false);
 // const signaturePath = ref("");
 const phoneError = ref("");
-
+const signatureInputRef = ref(null);
 const createEmployee = ref({
   emp_code: "",
   emp_name: "",
@@ -775,7 +788,12 @@ const addDesignation = (newTag) => {
 //     createEmployee.value.reporting_designation = newTag;
 // };
 const removeSignature = () => {
-    createEmployee.value.signature = null; // Reset the signature
+  createEmployee.value.signature = null; // Reset the signature
+
+  const fileInput = document.getElementById("signatureInput");
+  if (fileInput) {
+    fileInput.value = "";
+  }
 };
 watch(
   () => createEmployee.value.reporting_to,
@@ -798,18 +816,17 @@ watch(
 //     newDesignation.value = !newDesignation.value
 // }
 const actions = ref([{ name: "Edit Employee", icon: "fa-solid fa-eye" }]);
-// const isFormFilled = computed(() => {
-//     return [
-//         createEmployee.value.emp_code,
-//         createEmployee.value.emp_name,
-//         createEmployee.value.emp_mail_id,
-//         createEmployee.value.department,
-//         createEmployee.value.designation,
-//         createEmployee.value.reporting_to,
-//         createEmployee.value.reporting_designation,
-//         createEmployee.value.signature // Excludes company_field
-//     ].every(field => field && field.toString().trim() !== "");
-// });
+const isFormFilled = computed(() => {
+  return [
+    createEmployee.value.emp_code,
+    createEmployee.value.emp_name,
+    createEmployee.value.emp_mail_id,
+    createEmployee.value.department,
+    createEmployee.value.designation,
+    createEmployee.value.reporting_to,
+    createEmployee.value.reporting_designation,
+  ].every((field) => field && field.toString().trim() !== "");
+});
 
 // const isFormFilled = computed(() => {
 //     return createEmployee.value.emp_code &&
@@ -875,10 +892,13 @@ function cancelCreate() {
     designation: "",
     reporting_to: "",
     reporting_designation: "",
-    signature : null,
+    signature: null,
     company_field: businessUnit.value,
   };
-  
+  const fileInput = document.getElementById("signatureInput");
+  if (fileInput) {
+    fileInput.value = "";
+  }
 }
 
 function selectedSignature(event) {
@@ -1077,6 +1097,13 @@ watch(
 );
 
 function createEmpl() {
+  if (!isFormFilled.value) {
+    toast.error("Please fill all required fields", {
+      autoClose: 1000,
+      transition: "zoom",
+    });
+    return;
+  }
   createEmployee.value.company_field = businessUnit.value;
   const dataObj = {
     ...createEmployee.value,
@@ -1091,7 +1118,16 @@ function createEmpl() {
           autoClose: 500,
           transition: "zoom",
         });
+        const modal = bootstrap.Modal.getInstance(
+          document.getElementById("createDepartments")
+        );
+        modal.hide();
+
         cancelCreate();
+        const fileInput = document.getElementById("signatureInput");
+        if (fileInput) {
+          fileInput.value = "";
+        }
         employeeData();
       }
     });

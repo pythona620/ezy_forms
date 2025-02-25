@@ -58,6 +58,11 @@ import router from '../../router';
 const totalRecords = ref(0);
 const tableheaders = ref([
   { th: "Form name", td_key: "form_name" },
+  { th: "Form Short Code", td_key: "form_short_name" },
+
+
+
+
   { th: "Form category", td_key: "form_category" },
   { th: "Accessible departments", td_key: "accessible_departments" },
   { th: "Status", td_key: "form_status" },
@@ -97,22 +102,46 @@ function actionCreated(rowData, actionEvent) {
       selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json).fields)
       const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});// raise a modal
       modal.show();
-
+      
     } else {
       toast.warn(" There is no form fields ")
     }
   }
-
+  
   if (actionEvent.name === 'Raise Request') {
-console.log("rowData",rowData);
+    const parsedData = JSON.parse(rowData.form_json);
+    const storedData = localStorage.getItem("employeeData");
 
-router.push({
-    name: "RaiseRequest",
-    query: {
-      selectedForm: rowData.form_short_name,
-      business_unit: rowData.business_unit,
-    },
-  });
+    if (storedData) {
+        const designation = JSON.parse(storedData).designation;
+        console.log(designation);
+
+        const roles = parsedData.workflow[0].roles;
+        console.log(roles);
+
+        let hasAccess = false;
+
+        for (let i = 0; i < roles.length; i++) {
+            if (roles[i] === designation) {
+                hasAccess = true;
+                break;
+            }
+        }
+
+        if (hasAccess) {
+            router.push({
+                name: "RaiseRequest",
+                query: {
+                    selectedForm: rowData.form_short_name,
+                    business_unit: rowData.business_unit,
+                },
+            });
+        } else {
+          toast.info("You do not have permission to access this page.");
+        }
+    } else {
+        console.log("No employee data found in localStorage.");
+    }
   }
 }
 
