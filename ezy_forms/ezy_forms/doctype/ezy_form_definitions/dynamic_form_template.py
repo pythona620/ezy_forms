@@ -245,8 +245,8 @@ template_str = """
              min-width: 200px;
          }
          .signature-Imge{
-             min-width:100px !important;
-             max-width:120px !important;
+             min-width:100px ;
+             max-width:120px ;
              
          }
 #            @media print {
@@ -307,7 +307,7 @@ template_str = """
                                            {% if field.fieldtype == 'Data' %}
                                             <input type="text" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
                                         {% elif field.fieldtype == 'Attach' %}
-                                            <img type="file" id="{{ field.fieldname }}" src="{{ field['values'] }}" class="signature-Imge" name="{{ field.fieldname }}">
+                                            <img type="file" id="{{ field.fieldname }}" src="{{ "https://ezysuite.ezyforms.co"+field['values'] }}" class="signature-Imge" name="{{ field.fieldname }}">
                                         {% elif field.fieldtype == 'Phone' %}
                                             <input type="tel" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
                                         {% elif field.fieldtype == 'Time' %}
