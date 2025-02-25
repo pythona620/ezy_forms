@@ -25,7 +25,7 @@
               aria-label="Close"></button>
           </div>
           <div class="modal-body approvermodalbody">
-            <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel"
+            <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel" :employeeData="employeeData"
               @updateField="updateFormData" />
           </div>
           <div class="p-2">
@@ -123,7 +123,7 @@ const tableheaders = ref([
   // { th: "Owner of form", td_key: "owner" },
   { th: "Requested By", td_key: "requested_by" },
   { th: "Requested department", td_key: "role" },
-  // { th: "Requested on", td_key: "requested_on" },
+  { th: "Property", td_key: "property" },
   { th: "Approval Status", td_key: "status" },
 ]);
 const fieldMapping = ref({
@@ -145,11 +145,28 @@ const selectedRequest = ref({});
 const showRequest = ref(null);
 const doctypeForm = ref([]);
 const ApproverReason = ref("");
+const employeeData = ref([]);
+onMounted(() => {
+  const storedData = localStorage.getItem("employeeData");
+  try {
+    const parsedData = JSON.parse(storedData);
+    
+    // Ensure parsedData is an array
+    employeeData.value = Array.isArray(parsedData) ? parsedData : [parsedData];
+
+  } catch (error) {
+    console.error("Error parsing employeeData from localStorage:", error);
+    employeeData.value = []; // Fallback to empty array if there's an error
+  }
+});
+
 function actionCreated(rowData, actionEvent) {
   if (actionEvent.name === "View Request") {
     if (rowData) {
       selectedRequest.value = { ...rowData };
       selectedcurrentLevel.value = selectedRequest.value.current_level;
+
+      
       // console.log("doctype_name",selectedRequest.value.doctype_name);
       // console.log("Property name",selectedRequest.value.property);
 
@@ -323,9 +340,7 @@ function ApproverFormSubmission(dataObj, type) {
 
 
 function approvalStatusFn(dataObj, type) {
-  const storedData = localStorage.getItem("employeeData");
-  const employee = JSON.parse(storedData);
-  console.log([employee.signature]);
+ 
 
   console.log(dataObj);
   let data = {
@@ -557,9 +572,6 @@ watch(
   { immediate: true }
 );
 
-onMounted(() => {
-  // receivedForMe()
-});
 </script>
 <style scoped>
 .approvebtn {

@@ -1,112 +1,72 @@
 <template>
   <section>
     <div v-if="filteredBlocks.length" class="card">
-      <div
-        v-for="(block, blockIndex) in filteredBlocks"
-        :key="blockIndex"
-        class="block-container rounded-2"
-      >
-        <div
-          v-for="(section, sectionIndex) in block.sections"
-          :key="'preview-' + sectionIndex"
-          class="preview-section m-2"
-        >
+      <div v-for="(block, blockIndex) in filteredBlocks" :key="blockIndex" class="block-container rounded-2">
+        <div v-for="(section, sectionIndex) in block.sections" :key="'preview-' + sectionIndex"
+          class="preview-section m-2">
           <div class="section-label">
             <h5 class="m-0 font-13">{{ section.label }}</h5>
           </div>
           <div class="container-fluid">
-            <div
-              class="row"
-              v-for="(row, rowIndex) in section.rows"
-              :key="rowIndex"
-            >
-              <div
-                v-for="(column, columnIndex) in row.columns"
-                :key="'column-preview-' + columnIndex"
-                class="col dynamicColumn"
-              >
+            <div class="row" v-for="(row, rowIndex) in section.rows" :key="rowIndex">
+              <div v-for="(column, columnIndex) in row.columns" :key="'column-preview-' + columnIndex"
+                class="col dynamicColumn">
                 <div v-if="column.label" class="p-3 border-bottom">
                   <h6 class="m-0 font-12">{{ column.label }}</h6>
                 </div>
                 <div class="mx-3 my-2">
-                  <div
-                    v-for="(field, fieldIndex) in column.fields"
-                    :key="'field-preview-' + fieldIndex"
-                  >
+                  <div v-for="(field, fieldIndex) in column.fields" :key="'field-preview-' + fieldIndex">
                     <div v-if="field.label">
-                      <label
-                        :for="
-                          'field-' +
-                          sectionIndex +
-                          '-' +
-                          columnIndex +
-                          '-' +
-                          fieldIndex
-                        "
-                      >
+                      <label :for="'field-' +
+                        sectionIndex +
+                        '-' +
+                        columnIndex +
+                        '-' +
+                        fieldIndex
+                        ">
                         <span class="font-12">{{ field.label }}</span>
                         <span class="ms-1 text-danger">{{
                           field.reqd === 1 ? "*" : ""
-                        }}</span>
+                          }}</span>
                       </label>
                     </div>
                     <!-- field.fieldtype === 'Select' || -->
                     <!-- Field Type Select or Multiselect -->
                     <template v-if="field.fieldtype === 'multiselect'">
-                      <select
-                        :multiple="field.fieldtype === 'multiselect'"
-                        :value="field.value"
-                        @input="
-                          logFieldValue(
-                            blockIndex,
-                            sectionIndex,
-                            rowIndex,
-                            columnIndex,
-                            fieldIndex
-                          )
-                        "
-                        class="form-select mb-2 font-13"
-                      >
-                        <option
-                          v-for="(option, index) in field.options?.split('\n')"
-                          :key="index"
-                          :value="option"
-                        >
+                      <select :multiple="field.fieldtype === 'multiselect'" :value="field.value" @input="
+                        logFieldValue(
+                          blockIndex,
+                          sectionIndex,
+                          rowIndex,
+                          columnIndex,
+                          fieldIndex
+                        )
+                        " class="form-select mb-2 font-13">
+                        <option v-for="(option, index) in field.options?.split('\n')" :key="index" :value="option">
                           {{ option }}
                         </option>
                       </select>
                     </template>
 
                     <!-- Field Type Check or Radio -->
-                    <template
-                      v-else-if="
-                        field.fieldtype === 'Check' ||
-                        field.fieldtype === 'Select' ||
-                        field.fieldtype === 'radio'
-                      "
-                    >
+                    <template v-else-if="
+                      field.fieldtype === 'Check' ||
+                      field.fieldtype === 'Select' ||
+                      field.fieldtype === 'radio'
+                    ">
                       <div class="container-fluid">
                         <div class="row">
-                          <div
-                            class="form-check col-4 mb-4"
-                            v-for="(option, index) in field?.options?.split(
-                              '\n'
-                            )"
-                            :key="index"
-                          >
+                          <div class="form-check col-4 mb-4" v-for="(option, index) in field?.options?.split(
+                            '\n'
+                          )" :key="index">
                             <div>
-                              <input
-                                v-if="
-                                  field.fieldtype === 'Check' && index !== 0
-                                "
-                                class="form-check-input"
-                                type="checkbox"
-                                disabled
-                                :checked="field.value === option"
-                                :value="option"
+                              <input v-if="
+                                field.fieldtype === 'Check' ||
+                                (field.fieldtype === 'Select' && index !== 0)
+                              " class="form-check-input" type="checkbox" :disabled="blockIndex === 0 || props.readonlyFor === true
+                                  " :checked="field.value === option" :value="option"
                                 :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
-                                :id="`${option}-${index}`"
-                                @blur="
+                                :id="`${option}-${index}`" @blur="
                                   (event) =>
                                     logFieldValue(
                                       event,
@@ -116,19 +76,12 @@
                                       columnIndex,
                                       fieldIndex
                                     )
-                                "
-                              />
+                                " />
 
-                              <input
-                                v-else-if="field.fieldtype === 'radio'"
-                                disabled
-                                class="form-check-input"
-                                type="radio"
+                              <input v-else-if="field.fieldtype === 'radio'" :disabled="blockIndex === 0 || props.readonlyFor === true
+                                " class="form-check-input" type="radio"
                                 :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
-                                :id="`${option}-${index}`"
-                                :value="option"
-                                :checked="field.value === option"
-                                @blur="
+                                :id="`${option}-${index}`" :value="option" :checked="field.value === option" @blur="
                                   (event) =>
                                     logFieldValue(
                                       event,
@@ -138,14 +91,10 @@
                                       columnIndex,
                                       fieldIndex
                                     )
-                                "
-                              />
+                                " />
                             </div>
                             <div>
-                              <label
-                                class="form-check-label m-0"
-                                :for="`${option}-${index}`"
-                              >
+                              <label class="form-check-label m-0" :for="`${option}-${index}`">
                                 {{ option }}
                               </label>
                             </div>
@@ -154,145 +103,101 @@
                       </div>
                     </template>
 
-                    <!-- Field Type File (Attach) -->
-                    <!-- <template v-else-if="field.fieldtype == 'Attach'">
-                                            <input type="file"
-                                                :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
-                                                class="form-control previewInputHeight" disabled
-                                                @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
-                                            <iframe :src="field.value" type="application/pdf" width="100%"
-                                                height="300px">
-                                                Your Browser Do not support pdf
-                                            </iframe>
-
-                                        </template> -->
-                    <!-- <template v-else-if="field.fieldtype == 'Attach'">
-                      <div class="container">
-                        <div class="row">
-                          <div
-                            class="col-3 card file-cards m-1"
-                            v-for="(filePath, index) in filePaths"
-                            :key="index"
-                          >
-                            <div class="card-body p-2">
-                              <div
-                                class="d-flex gap-1 align-items-center justify-content-between"
-                              >
-                                <div>
-                                  <i class="bi bi-file-earmark-text"></i>
-                                  <span class="font-12 fw-bold ps-1">
-                                    {{ `File ${index + 1}` }}
-                                  </span>
-                                </div>
-                                <i
-                                  title="view file"
-                                  class="bi bi-eye"
-                                  @click="openFile(filePath)"
-                                ></i>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </template> -->
                     <!-- @click="openInNewWindow(field.value)" -->
                     <template v-else-if="field.fieldtype == 'Attach'">
-  <div v-if="field.value" class="position-relative d-inline-block">
-    <img
-      v-if="isImageFile(field.value)"
-      :src="field.value"
-      alt="Attachment Preview"
-      class="img-thumbnail mt-2 cursor-pointer border-0"
-      style="max-width: 100px; max-height: 100px;"
-      
-      @mouseover="showPreview = true"
-      @mouseleave="showPreview = false"
-    />
+                      <div v-if="field.value" class="position-relative d-inline-block">
+                        <img v-if="isImageFile(field.value)" :src="field.value" alt="Attachment Preview"
+                          class="img-thumbnail mt-2 cursor-pointer border-0" style="max-width: 100px; max-height: 100px"
+                          @mouseover="showPreview = true" @mouseleave="showPreview = false" />
 
-    <!-- Close Icon to Remove Image -->
-    <i 
-      class="bi bi-x-lg position-absolute text-danger cursor-pointer"
-      style="top: -10px; right: -5px; font-size: 13px; background: white; border-radius: 50%; padding: 3px;"
-      @click="clearImage(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
-    ></i>
+                        <!-- Close Icon to Remove Image -->
+                        <i class="bi bi-x-lg position-absolute text-danger cursor-pointer" style="
+                            top: -10px;
+                            right: -5px;
+                            font-size: 13px;
+                            background: white;
+                            border-radius: 50%;
+                            padding: 3px;
+                          " @click="
+                            clearImage(
+                              blockIndex,
+                              sectionIndex,
+                              rowIndex,
+                              columnIndex,
+                              fieldIndex
+                            )
+                            "></i>
 
-    <!-- Pop-up Enlarged Image -->
-    <div
-      v-if="showPreview"
-      class="image-popup position-absolute"
-      style="top: 0; left: 110%; width: 200px; height: auto; z-index: 10; background: white; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2); border-radius: 5px; padding: 5px;"
-    >
-      <img
-        :src="field.value"
-        alt="Enlarged Preview"
-        style="width: 100%; height: auto; border-radius: 5px;"
-      />
-    </div>
-  </div>
+                        <!-- Pop-up Enlarged Image -->
+                        <div v-if="showPreview" class="image-popup position-absolute" style="
+                            top: 0;
+                            left: 110%;
+                            width: 200px;
+                            height: auto;
+                            z-index: 10;
+                            background: white;
+                            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+                            border-radius: 5px;
+                            padding: 5px;
+                          ">
+                          <img :src="field.value" alt="Enlarged Preview" style="
+                              width: 100%;
+                              height: auto;
+                              border-radius: 5px;
+                            " />
+                        </div>
+                      </div>
 
-  <input
-    v-else
-    type="file"
-    accept="image/jpeg,image/png,application/pdf"
-    :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
-    class="form-control previewInputHeight font-10"
-    multiple
-    @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
-  />
-</template>
-
-
-                    <template v-else-if="field.fieldtype == 'Datetime'">
-                      <input
-                        type="datetime-local"
-                        v-model="field.value"
-                        :placeholder="'Enter ' + field.label"
-                        :value="field.value"
-                        :name="
-                          'field-' +
+                      <input :disabled="blockIndex === 0 || props.readonlyFor === true
+                        " v-else type="file" accept="image/jpeg,image/png,application/pdf" :id="'field-' +
                           sectionIndex +
                           '-' +
                           columnIndex +
                           '-' +
                           fieldIndex
-                        "
-                        class="form-control previewInputHeight"
-                      />
+                          " class="form-control previewInputHeight font-10" multiple @change="
+                          logFieldValue(
+                            $event,
+                            blockIndex,
+                            sectionIndex,
+                            rowIndex,
+                            columnIndex,
+                            fieldIndex
+                          )
+                          " />
+                    </template>
+
+                    <template v-else-if="field.fieldtype == 'Datetime'">
+                      <input type="datetime-local" v-model="field.value" :readOnly="blockIndex === 0 || props.readonlyFor === true
+                        " :placeholder="'Enter ' + field.label" :name="'field-' +
+                          sectionIndex +
+                          '-' +
+                          columnIndex +
+                          '-' +
+                          fieldIndex
+                          " class="form-control previewInputHeight" />
                     </template>
 
                     <!-- Field Type Default -->
                     <template v-else>
-                      <input
-                        v-if="field.fieldtype == 'Int'"
-                        type="number"
-                        v-model="field.value"
-                        :placeholder="'Enter ' + field.label"
-                        :value="field.value"
-                        :name="
-                          'field-' +
+                      <input v-if="field.fieldtype == 'Int'" :readOnly="blockIndex === 0 || props.readonlyFor === true
+                        " type="number" v-model="field.value" :placeholder="'Enter ' + field.label"
+                        :value="field.value" :name="'field-' +
                           sectionIndex +
                           '-' +
                           columnIndex +
                           '-' +
                           fieldIndex
-                        "
-                        class="form-control previewInputHeight"
-                      />
-                      <component
-                        v-if="field.fieldtype !== 'Int'"
-                        :is="getFieldComponent(field.fieldtype)"
-                        :value="field.value"
-                        :type="field.fieldtype"
-                        :readOnly="blockIndex === 0"
-                        :name="
-                          'field-' +
+                          " class="form-control previewInputHeight" />
+                      <component v-if="field.fieldtype !== 'Int'" :is="getFieldComponent(field.fieldtype)"
+                        :value="field.value" :type="field.fieldtype" :readOnly="blockIndex === 0 || props.readonlyFor === true
+                          " :name="'field-' +
                           sectionIndex +
                           '-' +
                           columnIndex +
                           '-' +
                           fieldIndex
-                        "
-                        @blur="
+                          " @blur="
                           (event) =>
                             logFieldValue(
                               event,
@@ -302,9 +207,7 @@
                               columnIndex,
                               fieldIndex
                             )
-                        "
-                        class="form-control previewInputHeight"
-                      ></component>
+                        " class="form-control previewInputHeight"></component>
                     </template>
                   </div>
                 </div>
@@ -321,10 +224,7 @@
               <thead>
                 <tr>
                   <th>#</th>
-                  <th
-                    v-for="field in props.childHeaders"
-                    :key="field.fieldname"
-                  >
+                  <th v-for="field in props.childHeaders" :key="field.fieldname">
                     {{ field.label }}
                   </th>
                 </tr>
@@ -332,19 +232,11 @@
               <tbody>
                 <tr v-for="(row, index) in props.childData" :key="index">
                   <td>{{ index + 1 }}</td>
-                  <td
-                    v-for="field in props.childHeaders"
-                    :key="field.fieldname"
-                  >
-                    <span
-                      v-if="isFilePath(row[field.fieldname])"
-                      class="cursor-pointer"
-                      @click="openFile(row[field.fieldname])"
-                    >
+                  <td v-for="field in props.childHeaders" :key="field.fieldname">
+                    <span v-if="isFilePath(row[field.fieldname])" class="cursor-pointer"
+                      @click="openFile(row[field.fieldname])">
                       <!-- {{ row[field.fieldname] }} -->
-                      <span
-                        >View Attachment <i class="bi bi-eye-fill ps-1"></i
-                      ></span>
+                      <span>View Attachment <i class="bi bi-eye-fill ps-1"></i></span>
                     </span>
                     <span v-else>
                       {{ row[field.fieldname] || "-" }}
@@ -380,14 +272,18 @@ const props = defineProps({
   childData: {
     type: Array,
   },
+  readonlyFor: {
+    type: Boolean,
+  },
+  employeeData: {
+    type: Array,
+  },
 });
 
 const emit = defineEmits();
 const filePaths = ref([]);
 const tableName = ref("");
 const errorMessages = ref({});
-
-
 
 const showPreview = ref(false);
 
@@ -396,15 +292,23 @@ const isImageFile = (value) => {
   return /\.(png|jpg|jpeg|gif)$/i.test(value);
 };
 
-const clearImage = (blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) => {
-  const field = props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex];
+const clearImage = (
+  blockIndex,
+  sectionIndex,
+  rowIndex,
+  columnIndex,
+  fieldIndex
+) => {
+  const field =
+    props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
+      columnIndex
+    ].fields[fieldIndex];
   field.value = ""; // Reset the field value
 };
 
-
 // const openInNewWindow = (url) => {
 //   window.open(url, '_blank');
-// };    
+// };
 // Watch for changes in childData and update tableName
 watch(
   () => props.childData,
@@ -418,24 +322,76 @@ watch(
   { immediate: true }
 ); // Runs immediately in case childData already has a value
 
+
 const filteredBlocks = computed(() => {
+
   if (!props.blockArr || props.blockArr.length === 0) return [];
 
-  // Always include the first block (Requestor Block)
   const filtered = [props.blockArr[0]];
 
-  // Include approver
-  // Include approver blocks based on the current level
   for (let i = 1; i <= props.currentLevel; i++) {
     if (props.blockArr[i]) {
       filtered.push(props.blockArr[i]);
     }
   }
-  return filtered;
+
+  // Ensure employeeData is valid
+  if (!props.employeeData || props.employeeData.length === 0) {
+    console.warn("No employeeData available.");
+    return filtered;
+  }
+
+  const employee = props.employeeData[0]; // Access first item
+
+  // Create a deep copy before modifying the data
+  const updatedBlocks = JSON.parse(JSON.stringify(filtered));
+
+  // Add employeeData values to the last block
+  const lastBlock = updatedBlocks[updatedBlocks.length - 1];
+
+  lastBlock.sections?.forEach((section) => {
+    section.rows?.forEach((row) => {
+      row.columns?.forEach((column) => {
+        column.fields?.forEach((field) => {
+          if (!props.employeeData) return;
+          if (field.label === "Approver") {
+            field.value = employee.emp_name;
+            emit("updateField", field);
+          }
+          if (field.label === "Approved By") {
+            field.value = employee.signature;
+            emit("updateField", field);
+
+            // if (field.value) {
+            //   logFieldValue({ target: { value: field.value } }, lastBlock, sectionIndex, rowIndex, columnIndex, fieldIndex);
+            // }
+          }
+          if (field.label === "Approved On") {
+            const now = new Date();
+
+            // Get local time offset in minutes and convert to milliseconds
+            const offset = now.getTimezoneOffset() * 60000;
+
+            // Adjust time to local timezone
+            const localTime = new Date(now.getTime() - offset)
+              .toISOString()
+              .slice(0, 16); // Format to 'YYYY-MM-DDTHH:mm'
+
+            field.value = localTime;
+            emit("updateField", field);
+          }
+
+        });
+      });
+    });
+  });
+
+  return updatedBlocks;
 });
 
 // Get all fields data
 const getAllFieldsData = () => {
+
   const fieldsData = [];
   filteredBlocks.value.forEach((block) => {
     block.sections?.forEach((section) => {
@@ -527,112 +483,129 @@ const getFieldComponent = (type) => {
   }
 };
 
-const logFieldValue = (eve, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) => {
-    const field = props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex];
+const logFieldValue = (
+  eve,
+  blockIndex,
+  sectionIndex,
+  rowIndex,
+  columnIndex,
+  fieldIndex
+) => {
+  const field =
+    props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
+      columnIndex
+    ].fields[fieldIndex];
 
-    if (eve.target.files && eve.target.files.length > 0) {
-        const files = eve.target.files;
-        field['value'] = "";
-        for (let i = 0; i < files.length; i++) {
-            uploadFile(files[i], field);
-        }
-        // emit('updateField', field);
-
-    } else if (eve.target.type === 'checkbox') {
-
-        if (field.fieldtype === "Check") {
-            // Ensure value is a string, not an array
-            if (eve.target.checked) {
-                // If checked, set the value as a string
-                field['value'] = eve.target.value;
-                console.log(field.value);
-            } else {
-                // If unchecked, set the value as an empty string (or use any default value)
-                field.value = "";
-            }
-        } else {
-            // For other types of fields, store the checkbox checked state as boolean (true/false)
-            field['value'] = eve.target.checked;
-        }
-        // emit('updateField', field);
-
-    } else {
-
-        // field['value'] = eve.target.value;
-        let inputValue = eve.target.value;
-
-        // Ensure only numbers are stored and +91 is prefixed
-        if (field.fieldtype === "Phone") {
-            inputValue = inputValue.replace(/\D/g, ''); // Remove non-numeric characters
-
-            if (inputValue.length > 10) {
-                inputValue = inputValue.slice(-10); // Keep only last 10 digits
-            }
-
-            inputValue = "+91" + inputValue; // Add +91 prefix
-        }
-
-        field['value'] = inputValue;
-
-
+  if (eve.target.files && eve.target.files.length > 0) {
+    const files = eve.target.files;
+    field["value"] = "";
+    for (let i = 0; i < files.length; i++) {
+      uploadFile(files[i], field);
     }
-    validateField(field, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex);
-    emit('updateField', field);
+    // emit('updateField', field);
+  } else if (eve.target.type === "checkbox") {
+    if (field.fieldtype === "Check") {
+      // Ensure value is a string, not an array
+      if (eve.target.checked) {
+        // If checked, set the value as a string
+        field["value"] = eve.target.value;
+        console.log(field.value);
+      } else {
+        // If unchecked, set the value as an empty string (or use any default value)
+        field.value = "";
+      }
+    } else {
+      // For other types of fields, store the checkbox checked state as boolean (true/false)
+      field["value"] = eve.target.checked;
+    }
+    // emit('updateField', field);
+  } else {
+    // field['value'] = eve.target.value;
+    let inputValue = eve.target.value;
+
+    // Ensure only numbers are stored and +91 is prefixed
+    if (field.fieldtype === "Phone") {
+      inputValue = inputValue.replace(/\D/g, ""); // Remove non-numeric characters
+
+      if (inputValue.length > 10) {
+        inputValue = inputValue.slice(-10); // Keep only last 10 digits
+      }
+
+      inputValue = "+91" + inputValue; // Add +91 prefix
+    }
+
+    field["value"] = inputValue;
+  }
+  validateField(
+    field,
+    blockIndex,
+    sectionIndex,
+    rowIndex,
+    columnIndex,
+    fieldIndex
+  );
+  emit("updateField", field);
 };
 
-const validateField = (field, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) => {
-    const fieldKey = `${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`;
+const validateField = (
+  field,
+  blockIndex,
+  sectionIndex,
+  rowIndex,
+  columnIndex,
+  fieldIndex
+) => {
+  const fieldKey = `${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`;
 
-    if (field.reqd === 1 && (!field.value || field.value.toString().trim() === "")) {
-        errorMessages.value[fieldKey] = `${field.label || "This field"} is required.`;
-    }
-    else if (field.fieldtype === "Phone") {
-        const phoneRegex = /^\+91[0-9]{10}$/; // Accepts +91 followed by exactly 10 digits
+  if (
+    field.reqd === 1 &&
+    (!field.value || field.value.toString().trim() === "")
+  ) {
+    errorMessages.value[fieldKey] = `${field.label || "This field"
+      } is required.`;
+  } else if (field.fieldtype === "Phone") {
+    const phoneRegex = /^\+91[0-9]{10}$/; // Accepts +91 followed by exactly 10 digits
 
-        if (!phoneRegex.test(field.value)) {
-            errorMessages.value[fieldKey] = "Enter a valid 10-digit phone number.";
-        } else {
-            delete errorMessages.value[fieldKey]; // Clear error if valid
-        }
+    if (!phoneRegex.test(field.value)) {
+      errorMessages.value[fieldKey] = "Enter a valid 10-digit phone number.";
+    } else {
+      delete errorMessages.value[fieldKey]; // Clear error if valid
     }
-    else {
-        delete errorMessages.value[fieldKey]; // Clear error if valid
-    }
+  } else {
+    delete errorMessages.value[fieldKey]; // Clear error if valid
+  }
 };
 
 const generateRandomNumber = () => {
-    return Math.floor(Math.random() * 1000000);
+  return Math.floor(Math.random() * 1000000);
 };
 
 const uploadFile = (file, field) => {
-    const randomNumber = generateRandomNumber();
-    let fileName = `${props.formName}-${randomNumber}-@${file.name}`;
+  const randomNumber = generateRandomNumber();
+  let fileName = `${props.formName}-${randomNumber}-@${file.name}`;
 
-    const formData = new FormData();
-    formData.append("file", file, fileName);
-    formData.append("is_private", "0");
-    formData.append("folder", "Home");
-    axiosInstance
-        .post(apis.uploadfile, formData)
-        .then((res) => {
-
-            if (res.message && res.message.file_url) {
-                if (field['value']) {
-                    field['value'] += `, ${res.message.file_url}`;
-                } else {
-                    field['value'] = res.message.file_url;
-                }
-                emit('updateField', field);
-            } else {
-                console.error("file_url not found in the response.");
-            }
-        })
-        .catch((error) => {
-            console.error('Upload error:', error);
-        });
+  const formData = new FormData();
+  formData.append("file", file, fileName);
+  formData.append("is_private", "0");
+  formData.append("folder", "Home");
+  axiosInstance
+    .post(apis.uploadfile, formData)
+    .then((res) => {
+      if (res.message && res.message.file_url) {
+        if (field["value"]) {
+          field["value"] += `, ${res.message.file_url}`;
+        } else {
+          field["value"] = res.message.file_url;
+        }
+        emit("updateField", field);
+      } else {
+        console.error("file_url not found in the response.");
+      }
+    })
+    .catch((error) => {
+      console.error("Upload error:", error);
+    });
 };
-
-
 
 // const logFieldValue = (
 //   event,
@@ -682,9 +655,11 @@ const uploadFile = (file, field) => {
   font-weight: 500;
   font-size: 15px;
 }
+
 .tablename {
   color: #999999;
 }
+
 .block-container {
   background-color: #f5f5f5;
 }
@@ -706,6 +681,7 @@ table {
   border-collapse: collapse;
   background-color: #000;
 }
+
 th {
   background-color: #f2f2f2 !important;
   text-align: left;
@@ -716,16 +692,19 @@ th {
 td {
   font-size: 12px;
 }
+
 .tableborder-child {
   border: 1px solid #ccc !important;
   border-radius: 10px !important;
   padding: 0;
   margin: 1px;
 }
-.cursor-pointer{
+
+.cursor-pointer {
   cursor: pointer;
 }
-.img-thumbnail{
+
+.img-thumbnail {
   cursor: pointer;
 }
 </style>

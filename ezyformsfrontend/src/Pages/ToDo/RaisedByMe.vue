@@ -72,7 +72,7 @@
           </div>
           <div class="modal-body approvermodalbody">
             <ApproverPreview
-              :blockArr="showRequest" :childHeaders="tableHeaders" :childData="responseData"
+              :blockArr="showRequest" :childHeaders="tableHeaders" :childData="responseData" :readonly-for="true"
               :current-level="totalLevels"
               @updateField="updateFormData"
             />
@@ -263,7 +263,7 @@ const tableheaders = ref([
   // { th: "Form category", td_key: "doctype_name" },
   { th: "Owner of form", td_key: "role" },
   { th: "Requested on", td_key: "requested_on" },
-  // { th: "Total Levels", td_key: "total_levels" },
+  { th: "Next Level", td_key: "assigned_to_users" },
   { th: "Approval Status", td_key: "status" },
 ]);
 const fieldMapping = ref({

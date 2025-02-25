@@ -18,21 +18,37 @@
                                     <div v-for="(field, fieldIndex) in column.fields"
                                         :key="'field-preview-' + fieldIndex">
                                         <div v-if="field.label">
-                                            <label
-                                                :for="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex">
+                                            <label :for="'field-' +
+                                                sectionIndex +
+                                                '-' +
+                                                columnIndex +
+                                                '-' +
+                                                fieldIndex
+                                                ">
                                                 <span class="font-12">{{ field.label }}</span>
-                                                <span class="ms-1 text-danger">{{ field.reqd
-            === 1 ? '*' : ''
-                                                    }}</span>
+                                                <span class="ms-1 text-danger">{{
+                                                    field.reqd === 1 ? "*" : ""
+                                                }}</span>
                                             </label>
                                         </div>
 
-                                        <template
-                                            v-if="field.fieldtype === 'Select' || field.fieldtype === 'Table MultiSelect'">
-                                            <select :multiple="field.fieldtype === 'Table MultiSelect'"
-                                                :value="field.value"
-                                                @input="logFieldValue(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
-                                                class="form-select mb-2 font-13">
+                                        <template v-if="
+                                            field.fieldtype === 'Select' ||
+                                            field.fieldtype === 'Table MultiSelect'
+                                        ">
+                                            <select :multiple="field.fieldtype === 'Table MultiSelect' ||
+                                                field.fieldtype === 'Select'
+                                                " :value="field.value" @change="
+                                                    (event) =>
+                                                        logFieldValue(
+                                                            event,
+                                                            blockIndex,
+                                                            sectionIndex,
+                                                            rowIndex,
+                                                            columnIndex,
+                                                            fieldIndex
+                                                        )
+                                                " class="form-select mb-2 font-13">
                                                 <option v-for="(option, index) in field.options?.split('\n')"
                                                     :key="index" :value="option">
                                                     {{ option }}
@@ -40,27 +56,47 @@
                                             </select>
                                         </template>
 
-                                        <template
-                                            v-else-if="field.fieldtype === 'Check' || field.fieldtype === 'radio'">
+                                        <template v-else-if="
+                                            field.fieldtype === 'Check' ||
+                                            field.fieldtype === 'radio'
+                                        ">
                                             <div class="container-fluid">
                                                 <div class="row">
-                                                    <div class="form-check col-4 mb-4"
-                                                        v-for="(option, index) in field?.options?.split('\n')"
-                                                        :key="index">
+                                                    <div class="form-check col-4 mb-4" v-for="(option, index) in field?.options?.split(
+                                                        '\n'
+                                                    )" :key="index">
                                                         <div>
-
-                                                            <input v-if="field.fieldtype === 'Check' && index !== 0"
-                                                                class="form-check-input" type="checkbox" :value="option"
+                                                            <input v-if="
+                                                                field.fieldtype === 'Check' && index !== 0
+                                                            " class="form-check-input" type="checkbox" :value="option"
                                                                 :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
                                                                 :id="`${option}-${index}`"
-                                                                :checked="field.value === option"
-                                                                @change="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
+                                                                :checked="field.value === option" @change="
+                                                                    (event) =>
+                                                                        logFieldValue(
+                                                                            event,
+                                                                            blockIndex,
+                                                                            sectionIndex,
+                                                                            rowIndex,
+                                                                            columnIndex,
+                                                                            fieldIndex
+                                                                        )
+                                                                " />
 
                                                             <input v-else-if="field.fieldtype === 'radio'"
                                                                 class="form-check-input" type="radio"
                                                                 :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
-                                                                :id="`${option}-${index}`" :value="field.value"
-                                                                @change="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
+                                                                :id="`${option}-${index}`" :value="field.value" @change="
+                                                                    (event) =>
+                                                                        logFieldValue(
+                                                                            event,
+                                                                            blockIndex,
+                                                                            sectionIndex,
+                                                                            rowIndex,
+                                                                            columnIndex,
+                                                                            fieldIndex
+                                                                        )
+                                                                " />
                                                         </div>
                                                         <div>
                                                             <label class="form-check-label m-0"
@@ -73,19 +109,43 @@
                                             </div>
                                         </template>
 
-
                                         <template v-else-if="field.fieldtype == 'Attach'">
-                                            <input type="file" accept="image/jpeg,image/png/,application/pdf"
-                                                :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
-                                                class="form-control previewInputHeight font-10" multiple
-                                                @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
+                                            <input type="file" accept="image/jpeg,image/png/,application/pdf" :id="'field-' +
+                                                sectionIndex +
+                                                '-' +
+                                                columnIndex +
+                                                '-' +
+                                                fieldIndex
+                                                " class="form-control previewInputHeight font-10" multiple @change="
+                                                    logFieldValue(
+                                                        $event,
+                                                        blockIndex,
+                                                        sectionIndex,
+                                                        rowIndex,
+                                                        columnIndex,
+                                                        fieldIndex
+                                                    )
+                                                    " />
                                         </template>
                                         <template v-else-if="field.fieldtype == 'Datetime'">
                                             <input type="datetime-local" :value="field.value"
-                                                :placeholder="'Enter ' + field.label"
-                                                :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
-                                                @change="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
-                                                class="form-control previewInputHeight font-10" />
+                                                :placeholder="'Enter ' + field.label" :name="'field-' +
+                                                    sectionIndex +
+                                                    '-' +
+                                                    columnIndex +
+                                                    '-' +
+                                                    fieldIndex
+                                                    " @change="
+                                                        (event) =>
+                                                            logFieldValue(
+                                                                event,
+                                                                blockIndex,
+                                                                sectionIndex,
+                                                                rowIndex,
+                                                                columnIndex,
+                                                                fieldIndex
+                                                            )
+                                                    " class="form-control previewInputHeight font-10" />
                                         </template>
 
                                         <template v-else>
@@ -93,36 +153,52 @@
                                                 :value="field.value" class="form-control previewInputHeight font-10" />
                                             <!-- <input v-if="field.fieldtype === 'Date'" type="date" :value="field.value"
                                                 class="form-control previewInputHeight font-10" /> -->
-                                                <input
-                      v-if="field.fieldtype == 'Int'"
-                        type="number"
-                        
-                        :placeholder="'Enter ' + field.label"
-                        :value="field.value"
-                        :name="
-                          'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex
-                        "
-                        class="form-control previewInputHeight"
-                      />
-                      <!-- :value="field.value"  -->
-                                            <component v-if="field.fieldtype !== 'Datetime' && field.fieldtype !== 'Int'"
-                                                :is="getFieldComponent(field.fieldtype)" :value="field.value"
-                                                :maxlength="field.fieldtype === 'Phone' ? '10' : null"
-                                                :type="field.fieldtype === 'Color' ? 'color' : field.fieldtype"
-                                                :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
-                                                @change="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
-                                                class="form-control previewInputHeight font-10">
+                                            <input v-if="field.fieldtype == 'Int'" type="number"
+                                                :placeholder="'Enter ' + field.label" :value="field.value" :name="'field-' +
+                                                    sectionIndex +
+                                                    '-' +
+                                                    columnIndex +
+                                                    '-' +
+                                                    fieldIndex
+                                                    " class="form-control previewInputHeight" />
+                                            <!-- :value="field.value"  -->
+                                            <component v-if="
+                                                field.fieldtype !== 'Datetime' &&
+                                                field.fieldtype !== 'Int'
+                                            " :is="getFieldComponent(field.fieldtype)" :value="field.value"
+                                                :maxlength="field.fieldtype === 'Phone' ? '10' : null" :type="field.fieldtype === 'Color'
+                                                    ? 'color'
+                                                    : field.fieldtype
+                                                    " :name="'field-' +
+                                                        sectionIndex +
+                                                        '-' +
+                                                        columnIndex +
+                                                        '-' +
+                                                        fieldIndex
+                                                        " @change="
+                                (event) =>
+                                    logFieldValue(
+                                        event,
+                                        blockIndex,
+                                        sectionIndex,
+                                        rowIndex,
+                                        columnIndex,
+                                        fieldIndex
+                                    )
+                            " class="form-control previewInputHeight font-10">
                                             </component>
-
                                         </template>
-                                        <div v-if="errorMessages[`${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`]"
-                                            class="text-danger font-10 mt-1">
+                                        <div v-if="
+                                            errorMessages[
+                                            `${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`
+                                            ]
+                                        " class="text-danger font-10 mt-1">
                                             {{
-            errorMessages[`${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`]
-        }}
+                                                errorMessages[
+                                                `${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`
+                                                ]
+                                            }}
                                         </div>
-
-
                                     </div>
                                 </div>
                             </div>
@@ -134,7 +210,7 @@
     </section>
 </template>
 <script setup>
-import { computed, defineProps, ref, watch } from "vue";
+import { computed, defineProps, onMounted, ref, watch } from "vue";
 // import moment from "moment";
 import axiosInstance from "../shared/services/interceptor";
 import { apis } from "../shared/apiurls";
@@ -142,14 +218,55 @@ import { apis } from "../shared/apiurls";
 const props = defineProps({
     blockArr: {
         type: [Array, null],
-        required: true
+        required: true,
     },
     formName: {
         type: String,
-        required: true
+        required: true,
+    },
+});
+
+
+// Function to get the current date and time in the correct format
+const getCurrentDateTime = () => {
+    return new Date().toISOString().slice(0, 16); // Formats to "YYYY-MM-DDTHH:MM"
+};
+
+// Initialize datetime fields on component mount
+onMounted(() => {
+    const storedData = localStorage.getItem("employeeData");
+    let parsedData = [];
+    if (storedData) {
+        try {
+            parsedData = JSON.parse(storedData) || [];
+        } catch (error) {
+            console.error("Error parsing employeeData from localStorage:", error);
+        }
+    }
+
+  
+    if (props.blockArr) {
+        props.blockArr.forEach((block) => {
+            block.sections.forEach((section) => {
+                section.rows.forEach((row) => {
+                    row.columns.forEach((column) => {
+                        column.fields.forEach((field) => {
+                            if (field.fieldtype === "Datetime" && !field.value) {
+                                field.value = getCurrentDateTime();
+                            }
+                            if (field.label.includes("Requested by")) {
+                                field.value = parsedData.emp_name;
+                                emit("updateField", field);
+
+                            }
+                        });
+                    });
+                });
+            });
+        });
     }
 });
-console.log(props.blockArr,"pppp");
+
 const emit = defineEmits();
 const errorMessages = ref({});
 const getFieldComponent = (type) => {
@@ -182,7 +299,10 @@ const allFieldsFilled = computed(() => {
                 for (const column of row.columns) {
                     for (const field of column.fields) {
                         // If field is required and value is empty, return false
-                        if (field.reqd === 1 && (!field.value || field.value.toString().trim() === "")) {
+                        if (
+                            field.reqd === 1 &&
+                            (!field.value || field.value.toString().trim() === "")
+                        ) {
                             return false;
                         }
                     }
@@ -193,49 +313,60 @@ const allFieldsFilled = computed(() => {
     return true; // If all required fields are filled, return true
 });
 
-
 // Watch `allFieldsFilled` and emit value
-watch(allFieldsFilled, (newValue) => {
-  emit("formValidation", newValue);
-}, { immediate: true });
+watch(
+    allFieldsFilled,
+    (newValue) => {
+        emit("formValidation", newValue);
+    },
+    { immediate: true }
+);
 
-const logFieldValue = (eve, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) => {
-    const field = props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex];
+const logFieldValue = (
+    eve,
+    blockIndex,
+    sectionIndex,
+    rowIndex,
+    columnIndex,
+    fieldIndex
+) => {
+    const field =
+        props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
+            columnIndex
+        ].fields[fieldIndex];
+    console.log(field, "0oip");
 
-    if (eve.target.files && eve.target.files.length > 0) {
-        const files = eve.target.files;
-        field['value'] = "";
-        for (let i = 0; i < files.length; i++) {
-            uploadFile(files[i], field);
+    if (eve.target?.files && eve.target.files.length > 0) {
+        let files = Array.from(eve.target.files); // Convert FileList to an array
+
+        if (files.length > 5) {
+            alert("You can upload a maximum of 5 files at a time.");
+            files = files.slice(0, 5); // Restrict to the first 5 files
         }
-        // emit('updateField', field);
 
-    } else if (eve.target.type === 'checkbox') {
+        field["value"] = ""; // Clear previous values before adding new ones
 
+        files.forEach((file) => uploadFile(file, field));
+    } else if (eve.target?.type === "checkbox") {
         if (field.fieldtype === "Check") {
-            // Ensure value is a string, not an array
-            if (eve.target.checked) {
-                // If checked, set the value as a string
-                field['value'] = eve.target.value;
-                console.log(field.value);
-            } else {
-                // If unchecked, set the value as an empty string (or use any default value)
-                field.value = "";
-            }
+            field.value = eve.target.checked ? eve.target.value : "";
         } else {
-            // For other types of fields, store the checkbox checked state as boolean (true/false)
-            field['value'] = eve.target.checked;
+            field.value = eve.target.checked;
         }
-        // emit('updateField', field);
-
+    } else if (eve.target?.type === "Select") {
+        field.value = eve.target.value;
+    } else if (eve.target?.type === "Table MultiSelect") {
+        field.value = Array.from(
+            eve.target.selectedOptions,
+            (option) => option.value
+        );
     } else {
-
         // field['value'] = eve.target.value;
         let inputValue = eve.target.value;
 
         // Ensure only numbers are stored and +91 is prefixed
         if (field.fieldtype === "Phone") {
-            inputValue = inputValue.replace(/\D/g, ''); // Remove non-numeric characters
+            inputValue = inputValue.replace(/\D/g, ""); // Remove non-numeric characters
 
             if (inputValue.length > 10) {
                 inputValue = inputValue.slice(-10); // Keep only last 10 digits
@@ -244,21 +375,37 @@ const logFieldValue = (eve, blockIndex, sectionIndex, rowIndex, columnIndex, fie
             inputValue = "+91" + inputValue; // Add +91 prefix
         }
 
-        field['value'] = inputValue;
-
-
+        field["value"] = inputValue;
+        console.log(inputValue, "---input value");
     }
-    validateField(field, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex);
-    emit('updateField', field);
+    validateField(
+        field,
+        blockIndex,
+        sectionIndex,
+        rowIndex,
+        columnIndex,
+        fieldIndex
+    );
+    emit("updateField", field);
 };
 
-const validateField = (field, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) => {
+const validateField = (
+    field,
+    blockIndex,
+    sectionIndex,
+    rowIndex,
+    columnIndex,
+    fieldIndex
+) => {
     const fieldKey = `${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`;
 
-    if (field.reqd === 1 && (!field.value || field.value.toString().trim() === "")) {
-        errorMessages.value[fieldKey] = `${field.label || "This field"} is required.`;
-    }
-    else if (field.fieldtype === "Phone") {
+    if (
+        field.reqd === 1 &&
+        (!field.value || field.value.toString().trim() === "")
+    ) {
+        errorMessages.value[fieldKey] = `${field.label || "This field"
+            } is required.`;
+    } else if (field.fieldtype === "Phone") {
         const phoneRegex = /^\+91[0-9]{10}$/; // Accepts +91 followed by exactly 10 digits
 
         if (!phoneRegex.test(field.value)) {
@@ -266,8 +413,7 @@ const validateField = (field, blockIndex, sectionIndex, rowIndex, columnIndex, f
         } else {
             delete errorMessages.value[fieldKey]; // Clear error if valid
         }
-    }
-    else {
+    } else {
         delete errorMessages.value[fieldKey]; // Clear error if valid
     }
 };
@@ -287,23 +433,21 @@ const uploadFile = (file, field) => {
     axiosInstance
         .post(apis.uploadfile, formData)
         .then((res) => {
-
             if (res.message && res.message.file_url) {
-                if (field['value']) {
-                    field['value'] += `, ${res.message.file_url}`;
+                if (field["value"]) {
+                    field["value"] += `, ${res.message.file_url}`;
                 } else {
-                    field['value'] = res.message.file_url;
+                    field["value"] = res.message.file_url;
                 }
-                emit('updateField', field);
+                emit("updateField", field);
             } else {
                 console.error("file_url not found in the response.");
             }
         })
         .catch((error) => {
-            console.error('Upload error:', error);
+            console.error("Upload error:", error);
         });
 };
-
 
 // const handleFileChange = (event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) => {
 //     const file = event.target.files[0]; // Get the first file selected
@@ -311,18 +455,14 @@ const uploadFile = (file, field) => {
 //         const field = props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex];
 //         field.value = file.name; // Store the file name in the field's value
 //         emit('updateField', field); // Emit the updated field to the parent
-//         
+//
 //     }
 // };
-
 </script>
 <style setup>
 .previewInputHeight {
-
     margin-bottom: 5px;
 }
-
-
 
 .dynamicColumn {
     border: 1px dotted #cccccc;
@@ -331,7 +471,6 @@ const uploadFile = (file, field) => {
     background-color: #ffffff;
     padding: 0;
     padding-bottom: 5px;
-
 }
 
 .section-label {
@@ -340,12 +479,10 @@ const uploadFile = (file, field) => {
 
 .description-div {
     padding: 0px 3px;
-
-
 }
 
 .blockName {
-    box-shadow: 0px 4px 4px 0px #0000000D;
+    box-shadow: 0px 4px 4px 0px #0000000d;
     padding: 18px 12px;
     font-weight: 500;
     font-size: 15px;
@@ -357,6 +494,5 @@ const uploadFile = (file, field) => {
 
 input::-webkit-input-placeholder {
     font-size: 10px;
-
 }
 </style>

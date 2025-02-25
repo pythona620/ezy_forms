@@ -4,8 +4,8 @@
       <router-link
         to="/todo/receivedform"
         @click="backToForm"
-        class="text-decoration-none text-dark font-13"
-        ><span> <i class="bi bi-arrow-left"></i></span>Asset request
+        class="text-decoration-none text-dark  ps-3 font-13"
+        ><span> <i class="bi bi-arrow-left pe-2"></i></span>Asset request
         form</router-link
       >
     </div>
@@ -15,9 +15,9 @@
           <RequestPreview
             :blockArr="blockArr"
             :formName="selectedData.selectedform"
-            @updateField="handleFieldUpdate"
-            @formValidation="isFormValid = $event"
+            @updateField="handleFieldUpdate" @formValidation="isFormValid = $event"
           />
+            <!-- @formValidation="isFormValid = $event" -->
 
           <div v-if="tableName.length" class="mt-3">
             <div>
@@ -66,7 +66,7 @@
             <!-- :disabled="!isFormValid" -->
             <button
               v-if="!$route.query.selectedFormId"
-              :disabled="!isFormValid"
+              
               class="btn btn-dark font-12"
               type="submit"
               @click="raiseRequestSubmission"
@@ -76,7 +76,6 @@
             <button
               v-if="$route.query.selectedFormId"
               @click="RequestUpdate"
-              :disabled="!isFormValid"
               class="btn btn-dark font-12"
               type="submit"
             >
@@ -466,11 +465,11 @@ const ChildTableData = () => {
 };
 
 function raiseRequestSubmission() {
-  console.log(isFormValid.value);
+  console.log(isFormValid.value,"ajsdasuyd");
   if (!isFormValid.value) {
     toast.error("Please Fill Mandatory Fields");
     return; // Stop execution if the form is invalid
-  } else {
+  } 
     if (tableName.value[0]?.options) {
       ChildTableData();
     }
@@ -501,7 +500,7 @@ function raiseRequestSubmission() {
       .catch((error) => {
         console.error("Error fetching data:", error);
       });
-  }
+  
 }
 function WfRequestUpdate() {
   const filters = [

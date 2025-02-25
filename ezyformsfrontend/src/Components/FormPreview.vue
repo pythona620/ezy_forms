@@ -153,7 +153,7 @@
                                 v-else-if="
                                   field.fieldtype == 'Check' ||
                                   field.fieldtype == 'radio' ||
-                                  field.fieldtype == 'Select'
+                                  field.fieldtype == 'Select'  
                                 "
                               >
                                 <div class="container-fluid">
@@ -171,7 +171,7 @@
                                         <div>
                                           <input
                                             v-if="
-                                              field.fieldtype === 'Check' &&
+                                              field.fieldtype === 'Check' || field.fieldtype === 'Select' &&
                                               index !== 0
                                             "
                                             class="form-check-input"
@@ -309,7 +309,7 @@ const props = defineProps({
   },
 });
 
-const selectedView = ref("Requestor"); // Default to Requestor
+const selectedView = ref("All"); // Default to Requestor
 const displayedBlocks = ref([]);
 const workFlowRoles = ref([]);
 // const tableName = ref("");
@@ -350,7 +350,7 @@ watch(
 
 // Close modal and reset selection
 function closemodal() {
-  selectedView.value = "Requestor";
+  selectedView.value = "All";
 }
 
 // Update selected view
@@ -361,29 +361,25 @@ function setView(view) {
   updateWorkFlowRoles();
 }
 
-//  Match roles to blocks correctly (supports multiple approvers)
 function updateWorkFlowRoles() {
-  let approverIndex = 1; // Keep track of approvers
+  let approverIndex = 0; // Keep track of approvers
 
   workFlowRoles.value = displayedBlocks.value.map((block) => {
     let roles = [];
 
     if (block.fieldname === "requestor") {
-      // Find requestor roles
-      const requestorWorkflow = workflowData.value.find(
-        (wf) => wf.type === "requestor"
-      );
+      // ✅ Find requestor roles
+      const requestorWorkflow = workflowData.value.find(wf => wf.type === "requestor");
       roles = requestorWorkflow ? requestorWorkflow.roles : [];
     } else if (block.label.startsWith("approver-")) {
-      // Get the next approver role in order
-      const approverWorkflow = workflowData.value.filter(
-        (wf) => wf.type === "approver"
-      );
+      // ✅ Get all approvers
+      const approverWorkflow = workflowData.value.filter(wf => wf.type === "approver");
 
-      // Assign roles to the correct "approver-1", "approver-2", etc.
-      if (approverWorkflow[approverIndex - 1]) {
-        roles = approverWorkflow[approverIndex - 1].roles || [];
+      // ✅ Assign correct role (removes `-1` mistake)
+      if (approverWorkflow[approverIndex]) {
+        roles = approverWorkflow[approverIndex].roles || [];
       }
+
       approverIndex++; // Move to the next approver
     }
 
@@ -394,6 +390,9 @@ function updateWorkFlowRoles() {
 //  Filter blocks based on the view
 function filterBlocksByFieldname(view, blocks) {
   if (!blocks || !Array.isArray(blocks)) return []; // Ensure `blocks` is valid
+  if (view === 'All') {
+        return blocks; // Show all blocks
+    }
 
   const blockOrder = {
     requestor: ["requestor"],

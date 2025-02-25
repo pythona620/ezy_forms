@@ -576,48 +576,86 @@ export function validateFields(flatArray) {
   return invalidFields;
 }
 
-
 export function addErrorMessagesToStructuredArray(structuredArray) {
-  structuredArray.forEach((block, blockIndex) => {
-    // Traverse sections in each block
-    block.sections.forEach((section, sectionIndex) => {
-      // Traverse rows in each section
-      section.rows.forEach((row, rowIndex) => {
-        // Traverse columns in each row
-        row.columns.forEach((column, columnIndex) => {
-          // Traverse fields in each column
-          column.fields.forEach((field, fieldIndex) => {
+  const excludedLabels = ["Approver", "Approved on", "Approved By"].map(label => label.toLowerCase().trim());
 
-
-            // if (!field.fieldtype || field.fieldtype.trim() === "") {
-            //   // Add an error message for missing fieldtype
-            //   field.error = `Field "${field.label}" has no valid fieldtype. Please select a fieldtype.`;
-            // } else {
-            //   // Clear the error if fieldtype is valid
-            //   field.error = "";
-            // }
+  structuredArray.forEach((block) => {
+    block.sections.forEach((section) => {
+      section.rows.forEach((row) => {
+        row.columns.forEach((column) => {
+          column.fields.forEach((field) => {
             let errors = [];
 
-            // Check for empty Field label
-            if (!field.label || field.label.trim() === "") {
-              errors.push("Field label is required.");
+            // Ensure label exists and trim spaces
+            const fieldLabel = field.label ? field.label.trim().toLowerCase() : "";
+
+            // ✅ Skip validation if the label is in the excluded list
+            if (!excludedLabels.includes(fieldLabel)) {
+              // Check for empty Field label
+              if (fieldLabel === "") {
+                errors.push("Field label is required.");
+              }
+
+              // Check for empty field type
+              if (!field.fieldtype || field.fieldtype.trim() === "") {
+                errors.push(
+                  `Field "${field.label || "unnamed"}" has no valid fieldtype. Please select a fieldtype.`
+                );
+              }
             }
 
-            // Check for empty field type
-            if (!field.fieldtype || field.fieldtype.trim() === "") {
-              errors.push(`Field "${field.label || 'unnamed'}" has no valid fieldtype. Please select a fieldtype.`);
-            }
-
-            // Combine errors into a single error property
-            field.error = errors.length ? errors.join(" ") : "";
-
+            // ✅ Only set error message if field is not excluded
+            field.error = excludedLabels.includes(fieldLabel) ? "" : errors.join(" ");
           });
         });
       });
     });
   });
+
   return structuredArray;
 }
+
+// export function addErrorMessagesToStructuredArray(structuredArray) {
+//   structuredArray.forEach((block, blockIndex) => {
+//     // Traverse sections in each block
+//     block.sections.forEach((section, sectionIndex) => {
+//       // Traverse rows in each section
+//       section.rows.forEach((row, rowIndex) => {
+//         // Traverse columns in each row
+//         row.columns.forEach((column, columnIndex) => {
+//           // Traverse fields in each column
+//           column.fields.forEach((field, fieldIndex) => {
+
+
+//             // if (!field.fieldtype || field.fieldtype.trim() === "") {
+//             //   // Add an error message for missing fieldtype
+//             //   field.error = `Field "${field.label}" has no valid fieldtype. Please select a fieldtype.`;
+//             // } else {
+//             //   // Clear the error if fieldtype is valid
+//             //   field.error = "";
+//             // }
+//             let errors = [];
+
+//             // Check for empty Field label
+//             if (!field.label || field.label.trim() === "") {
+//               errors.push("Field label is required.");
+//             }
+
+//             // Check for empty field type
+//             if (!field.fieldtype || field.fieldtype.trim() === "") {
+//               errors.push(`Field "${field.label || 'unnamed'}" has no valid fieldtype. Please select a fieldtype.`);
+//             }
+
+//             // Combine errors into a single error property
+//             field.error = errors.length ? errors.join(" ") : "";
+
+//           });
+//         });
+//       });
+//     });
+//   });
+//   return structuredArray;
+// }
 // export function addErrorMessagesToStructuredArray(structuredArray) {
 //   structuredArray.forEach((block) => {
 //     // Traverse sections in each block

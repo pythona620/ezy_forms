@@ -633,7 +633,7 @@
                                           )
                                         "
                                         @mouseleave="resetHoveredColumn"
-                                        class="col p-0 dynamicColumn column-container"
+                                        class="col p-0 dynamicColumn position-relative column-container"
                                       >
                                         <div
                                           class="column_name d-flex align-items-center justify-content-between"
@@ -669,7 +669,7 @@
                                               {{ column.errorMsg }}
                                             </small>
                                           </div>
-                                          <div
+                                          <div class="position-absolute top-0 end-0"
                                             v-show="
                                               isHoveredColumn(
                                                 blockIndex,
@@ -680,7 +680,7 @@
                                             "
                                           >
                                             <button
-                                              class="btn btn-light bg-transparent btn-sm"
+                                              class="btn btn-light bg-transparent me-1 btn-sm"
                                               @click="
                                                 removeColumn(
                                                   blockIndex,
@@ -715,7 +715,7 @@
                                           @mouseleave="resetHoveredField"
                                           class="dynamicField"
                                         >
-                                          <div class="px-1 field-border">
+                                          <div class="px-1 dynamic_fied field-border">
                                             <div
                                               class="d-flex justify-content-between"
                                             >
@@ -753,7 +753,7 @@
                                                   {{ field.errorMsg }}
                                                 </small>
                                               </div>
-                                              <div
+                                              <div class=" FieldcopyRemove"
                                                 v-show="
                                                   isHoveredField(
                                                     blockIndex,
@@ -865,7 +865,7 @@
                                                 <input
                                                   class="font-12"
                                                   v-model="field.reqd"
-                                                  placeholder="Field Name"
+                                                  placeholder="Field Name" 
                                                   type="checkbox"
                                                 />
                                               </div>
@@ -1330,6 +1330,7 @@
 
       <div class="offcanvas-footer">
         <div class="text-end p-3">
+          
           <ButtonComp
             class="btn btn-dark addingDesignations"
             data-bs-dismiss="offcanvas"
@@ -1787,13 +1788,12 @@ const formattedSelection = computed(() => {
   const selected = filterObj.value.accessible_departments;
 
   if (selected.includes(SELECT_ALL)) return "All Selected";
-  if (selected.length > 2) {
-    return `${selected.slice(0, 2).join(", ")}.. +${
-      selected.length - 2
-    } more selected`;
+  if (selected.length > 1) {
+    return `${selected[0]}.. +${selected.length - 1} more selected`;
   }
   return selected.join(", ");
 });
+
 
 // Check if an option should be checked
 const isChecked = (option) => {
@@ -2686,6 +2686,56 @@ const onFieldTypeChange = (
 //     processFields(blockArr);
 // };
 
+// function handleFieldChange(
+//   blockIndex,
+//   sectionIndex,
+//   rowIndex,
+//   columnIndex,
+//   fieldIndex
+// ) {
+//   const flatArr = blockArr.flatMap(extractfieldlabels);
+//   const isDuplicate = hasDuplicates(flatArr); // Check once to reuse this result
+
+//   const checkFieldType = addErrorMessagesToStructuredArray(blockArr);
+//   blockArr.splice(0, blockArr.length, ...checkFieldType);
+
+//   // Assign error message for the specific field if fieldIndex is valid
+//   if (
+//     fieldIndex !== undefined &&
+//     fieldIndex >= 0 &&
+//     columnIndex !== undefined &&
+//     columnIndex >= 0 &&
+//     sectionIndex !== undefined
+//   ) {
+//     blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
+//       columnIndex
+//     ].fields[fieldIndex].errorMsg = isDuplicate ? "Duplicate Label Name" : "";
+//   }
+
+//   // Assign error message for the column if fieldIndex is not valid
+//   if (
+//     fieldIndex === undefined &&
+//     columnIndex !== undefined &&
+//     columnIndex >= 0 &&
+//     sectionIndex !== undefined
+//   ) {
+//     blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
+//       columnIndex
+//     ].errorMsg = isDuplicate ? "Duplicate Label Name in Column" : "";
+//   }
+
+//   // Assign error message for the section if both columnIndex and fieldIndex are not valid columnIndex === undefined &&
+//   if (
+//     columnIndex === undefined &&
+//     fieldIndex === undefined &&
+//     sectionIndex !== undefined
+//   ) {
+//     blockArr[blockIndex].sections[sectionIndex].errorMsg = isDuplicate
+//       ? "Duplicate Label Name in Section"
+//       : "";
+//   }
+// }
+
 function handleFieldChange(
   blockIndex,
   sectionIndex,
@@ -2693,13 +2743,24 @@ function handleFieldChange(
   columnIndex,
   fieldIndex
 ) {
-  const flatArr = blockArr.flatMap(extractfieldlabels);
-  const isDuplicate = hasDuplicates(flatArr); // Check once to reuse this result
+  const excludedLabels = ["Approver", "Approved on", "Approved By"].map(label => label.toLowerCase().trim());
+
+  // Extract labels and filter out excluded ones
+  const flatArr = blockArr.flatMap(extractfieldlabels)
+    .map(label => label.trim().toLowerCase()) // Normalize labels
+    .filter(label => label !== "" && !excludedLabels.includes(label)); // Remove empty and excluded labels
+
+  const isDuplicate = hasDuplicates(flatArr); // Check duplicate only in filtered list
 
   const checkFieldType = addErrorMessagesToStructuredArray(blockArr);
   blockArr.splice(0, blockArr.length, ...checkFieldType);
 
-  // Assign error message for the specific field if fieldIndex is valid
+  function shouldSetError(fieldLabel) {
+    const normalizedLabel = fieldLabel?.trim().toLowerCase(); // Handle undefined labels
+    return isDuplicate && normalizedLabel && !excludedLabels.includes(normalizedLabel);
+  }
+
+  // ✅ Assign error message only if it's not in excluded labels
   if (
     fieldIndex !== undefined &&
     fieldIndex >= 0 &&
@@ -2707,32 +2768,30 @@ function handleFieldChange(
     columnIndex >= 0 &&
     sectionIndex !== undefined
   ) {
-    blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
-      columnIndex
-    ].fields[fieldIndex].errorMsg = isDuplicate ? "Duplicate Label Name" : "";
+    const fieldLabel = blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex].label;
+    blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex].errorMsg =
+      shouldSetError(fieldLabel) ? "Duplicate Label Name" : "";
   }
 
-  // Assign error message for the column if fieldIndex is not valid
   if (
     fieldIndex === undefined &&
     columnIndex !== undefined &&
     columnIndex >= 0 &&
     sectionIndex !== undefined
   ) {
-    blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
-      columnIndex
-    ].errorMsg = isDuplicate ? "Duplicate Label Name in Column" : "";
+    const columnLabel = blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].label;
+    blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].errorMsg =
+      shouldSetError(columnLabel) ? "Duplicate Label Name in Column" : "";
   }
 
-  // Assign error message for the section if both columnIndex and fieldIndex are not valid columnIndex === undefined &&
   if (
     columnIndex === undefined &&
     fieldIndex === undefined &&
     sectionIndex !== undefined
   ) {
-    blockArr[blockIndex].sections[sectionIndex].errorMsg = isDuplicate
-      ? "Duplicate Label Name in Section"
-      : "";
+    const sectionLabel = blockArr[blockIndex].sections[sectionIndex].label;
+    blockArr[blockIndex].sections[sectionIndex].errorMsg =
+      shouldSetError(sectionLabel) ? "Duplicate Label Name in Section" : "";
   }
 }
 
@@ -3167,9 +3226,19 @@ const hasDuplicates = (array) => new Set(array).size !== array.length;
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 
 <style lang="scss" scoped>
+
+.dynamic_fied{
+  position: relative;
+}
+.FieldcopyRemove{
+  position: absolute;
+  top: 0;
+  right: 0;
+
+}
 .inputHeight {
   height: 36px;
-  min-width: 380px;
+  // min-width: 350px;
   padding-left: 4px !important;
 }
 /* @import '@vueform/multiselect/themes/default.css'; */

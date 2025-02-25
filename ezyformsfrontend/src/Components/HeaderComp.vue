@@ -19,7 +19,7 @@
                             </div>
                         </div>
                         <div class="col-3 d-flex justify-content-end align-items-center pe-1">
-                            <div class="d-flex gap-3 justify-content-end align-items-center m-0">
+                            <div class="d-flex gap-3 justify-content-end align-items-center m-0 me-2">
                                 <div class="">
                                     <!-- v-if="shouldShowButton" -->
                                     <ButtonComp
