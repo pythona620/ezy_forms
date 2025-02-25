@@ -37,18 +37,11 @@
                   <td>{{ index + 1 }}</td>
                   <td v-for="field in tableHeaders" :key="field.fieldname">
                     <template v-if="field.fieldtype === 'Data'">
-                      <input
-                        type="text"
-                        class="form-control"
-                        v-model="row[field.fieldname]"
-                      />
+                      <input type="text" class="form-control" v-model="row[field.fieldname]" />
                     </template>
                     <template v-else-if="field.fieldtype === 'Attach'">
-                      <input
-                        type="file"
-                        class="form-control"
-                        @change="handleFileUpload($event, row, field.fieldname)"
-                      />
+                      <input type="file" class="form-control"
+                        @change="handleFileUpload($event, row, field.fieldname)" />
                     </template>
                   </td>
                 </tr>
@@ -64,23 +57,19 @@
               <span> <i class="bi bi-x"></i></span>Clear form
             </button>
             <!-- :disabled="!isFormValid" -->
-            <button
-              v-if="!$route.query.selectedFormId"
-              
-              class="btn btn-dark font-12"
-              type="submit"
-              @click="raiseRequestSubmission"
-            >
+            <button v-if="$route.query.selectedFormId && !$route.query.selectedFormStatus == 'Request Raised'"
+               class="btn btn-dark font-12" type="submit" @click="raiseRequestSubmission">
               Raise Request
             </button>
-            <button
-              v-if="$route.query.selectedFormId"
-              @click="RequestUpdate"
-              class="btn btn-dark font-12"
-              type="submit"
-            >
+            <button v-if="$route.query.selectedFormId && !$route.query.selectedFormStatus == 'Request Raised'"
+              @click="RequestUpdate"  class="btn btn-dark font-12" type="submit">
               Update Request
             </button>
+            <button v-if="$route.query.selectedFormStatus && $route.query.selectedFormStatus == 'Request Raised'"
+              @click="EditRequestUpdate"  class="btn btn-dark font-12" type="submit">
+              Edit Request
+            </button>
+
           </div>
         </div>
       </div>
@@ -140,28 +129,21 @@ function backToForm() {
   blockArr.value = [];
 }
 
-function RequestUpdate() {
-  // Accept form as a parameter
 
+onMounted(() => {
+  formDefinations();
+  raiseRequest();
+});
+function RequestUpdate() {
   const filesArray = filepaths.value
     ? filepaths.value.split(",").map((filePath) => filePath.trim())
     : [];
   let form = {};
-  // form['doctype'] = selectedData.value.selectedform;
-  // form['company_field'] = business_unit.value;
-  // form['name']=route.query.selectedFormId;
-
-  // form['supporting_files'] = [];
   if (emittedFormData.value.length) {
     emittedFormData.value.map((each) => {
       form[each.fieldname] = each.value;
     });
   }
-  // console.log(form,'formform');
-
-  // const formData = new FormData();
-  // formData.append('doc', JSON.stringify(form));
-  // formData.append('action', 'Save');
 
   let data_obj = {
     form_id: route.query.selectedFormId,
@@ -182,10 +164,41 @@ function RequestUpdate() {
       }
     });
 }
-onMounted(() => {
-  formDefinations();
-  raiseRequest();
-});
+
+function EditRequestUpdate() {
+  const filesArray = filepaths.value
+    ? filepaths.value.split(",").map((filePath) => filePath.trim())
+    : [];
+  let form = {};
+  if (emittedFormData.value.length) {
+    emittedFormData.value.map((each) => {
+      form[each.fieldname] = each.value;
+    });
+  }
+
+  let data_obj = {
+    form_id: route.query.selectedFormId,
+    updated_fields: form, // Pass the form JSON here
+  };
+
+  axiosInstance
+    .post(apis.edit_form_before_approve, data_obj)
+    .then(async (resp) => {
+      if (resp?.message?.success) {
+        toast.success("Request Updated Successfully", {
+          autoClose: 2000,
+          transition: "zoom",
+        });
+        blockArr.value = []
+
+        await router.push({ path: "/todo/raisedbyme" });
+      }
+    });
+
+}
+
+
+
 
 const addRow = () => {
   const newRow = Object.fromEntries(
@@ -204,7 +217,7 @@ watch(business_unit, (newBu, oldBu) => {
     deptData();
   }
 });
-function clearFrom() {}
+function clearFrom() { }
 function deptData(value = null) {
   const filters = [["business_unit", "like", `%${business_unit.value}%`]];
   const queryParams = {
@@ -222,8 +235,8 @@ function deptData(value = null) {
         const newFormsRoute =
           deptartmentData.value.length > 0
             ? `/forms/department/${deptartmentData.value[0].name
-                .replace(/\s+/g, "-")
-                .toLowerCase()}`
+              .replace(/\s+/g, "-")
+              .toLowerCase()}`
             : "/forms";
 
         tabsData.value = tabsData.value.map((tab) => {
@@ -328,14 +341,14 @@ function formDefinations() {
       tableName.value = parsedFormJson.fields.filter(
         (field) => field.fieldtype === "Table"
       );
-      console.log(tableName.value, "5555");
+      // console.log(tableName.value, "5555");
       childTableName.value = tableName.value[0]?.options.replace(/_/g, " ");
 
-      console.log(childTableName.value, "child====");
+      // console.log(childTableName.value, "child====");
 
       tableHeaders.value = parsedFormJson.child_table_fields;
       initializeTableRows();
-      console.log(tableHeaders.value, "table fields");
+      // console.log(tableHeaders.value, "table fields");
     })
     .catch((error) => {
       console.error("Error fetching ezyForms data:", error);
@@ -372,7 +385,7 @@ const uploadFile = (row, fieldname, file) => {
       if (res.message && res.message.file_url) {
         row[fieldname] = res.message.file_url;
 
-        console.log("Uploaded file URL:", res.message.file_url);
+        // console.log("Uploaded file URL:", res.message.file_url);
       } else {
         console.error("file_url not found in the response.");
       }
@@ -453,7 +466,7 @@ const ChildTableData = () => {
   formData.append("doc", JSON.stringify(form));
   formData.append("action", "Save");
 
-  console.log(form);
+  // console.log(form);
   axiosInstance
     .post(apis.savedocs, formData)
     .then((response) => {
@@ -465,7 +478,7 @@ const ChildTableData = () => {
 };
 
 function raiseRequestSubmission() {
-  console.log(isFormValid.value,"ajsdasuyd");
+  // console.log(isFormValid.value);
   if (!isFormValid.value) {
     toast.error("Please Fill Mandatory Fields");
     return; // Stop execution if the form is invalid
@@ -491,7 +504,7 @@ function raiseRequestSubmission() {
     const formData = new FormData();
     formData.append("doc", JSON.stringify(form));
     formData.append("action", "Save");
-    console.log(formData);
+    // console.log(formData);
     axiosInstance
       .post(apis.savedocs, formData)
       .then((response) => {
@@ -513,7 +526,7 @@ function WfRequestUpdate() {
 
   const queryParams = {
     fields: JSON.stringify(["*"]),
-    limit_page_length: null, 
+    limit_page_length: null,
     limit_start: 0,
     filters: JSON.stringify(filters),
     order_by: `\`tab${selectedData.value.selectedform}\`.\`creation\` desc`,
@@ -525,10 +538,10 @@ function WfRequestUpdate() {
     })
     .then((res) => {
       if (res.data && res.data.length > 0) {
-        const doctypeForm = res.data[0]; 
-        console.log(doctypeForm, "doctype",);
-        console.log( blockArr.value);
-        
+        const doctypeForm = res.data[0];
+        // console.log(doctypeForm, "doctype",);
+        // console.log( blockArr.value);
+
         // Map response data to UI fields
         mapFormFieldsToRequest(doctypeForm, blockArr.value);
       }
@@ -557,7 +570,7 @@ function mapFormFieldsToRequest(doctypeData, blockArr) {
   });
 }
 function request_raising_fn(item) {
-  console.log(filepaths.value,"---filepaths");
+  // console.log(filepaths.value,"---filepaths");
   const filesArray = filepaths.value
     ? filepaths.value.split(",").map((filePath) => filePath.trim())
     : [];
@@ -637,6 +650,7 @@ function request_raising_fn(item) {
 table {
   border-collapse: collapse;
 }
+
 th {
   background-color: #f2f2f2 !important;
   text-align: left;
@@ -647,6 +661,7 @@ th {
 td {
   font-size: 12px;
 }
+
 button {
   margin-top: 10px;
   padding: 5px 10px;

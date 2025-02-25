@@ -257,6 +257,7 @@
                       :preserve-search="true"
                       placeholder="Select Reporting Designation"
                       class="font-11 mb-3"
+                      disable="true"
                     >
                       <!-- taggable
                                             @tag="addReportingDesignation"
@@ -355,8 +356,8 @@
         :tData="tableData"
         isAction="true"
         :actions="actions"
-        @actionClicked="actionCreated"
-        actionType="dropdown"
+        @actionClicked="actionCreated" @toggle-click="toggleFunction"
+        actionType="Toogle&dropdown"
         isCheckbox="true"
         isFiltersoption="true"
         :field-mapping="fieldMapping"
@@ -577,6 +578,7 @@
                     :preserve-search="true"
                     placeholder="Select Reporting Designation"
                     class="font-11 mb-3"
+                    disable="true"
                   >
                     <!-- taggable
                                         @tag="addReportingDesignation"
@@ -844,23 +846,72 @@ function createEmplBtn() {
   deptData();
   designationData();
 }
-function actionCreated(rowData, actionEvent) {
-  if (actionEvent.name === "Edit Employee") {
-    if (rowData) {
-      deptData();
-      designationData();
-      createEmployee.value = { ...rowData };
-      const modal = new bootstrap.Modal(
-        document.getElementById("viewEmployee"),
-        {}
-      );
-      modal.show();
-    } else {
-      console.warn("No form fields provided.");
-      formCreation(rowData);
+function actionCreated(rowData, action, actionEvent) {
+    if (action.name === 'Edit Employee') {
+        if (rowData) {
+            deptData();
+            designationData();
+            createEmployee.value = { ...rowData }
+            const modal = new bootstrap.Modal(document.getElementById('viewEmployee'), {});
+            modal.show();
+        } else {
+            console.warn("No form fields provided.");
+            formCreation(rowData);
+        }
     }
-  }
+
+    // For enable action from the checkbox
+   
 }
+
+
+// function actionCreated(rowData, action, actionType) {
+//     if (action && action.name === 'Edit Employee') {
+//         if (rowData) {
+//             deptData();
+//             designationData();
+//             createEmployee.value = { ...rowData }
+//             const modal = new bootstrap.Modal(document.getElementById('viewEmployee'), {});
+//             modal.show();
+//         } else {
+//             console.warn("No form fields provided.");
+//             formCreation(rowData);
+//         }
+//     }
+//   }
+// }
+
+function toggleFunction(rowData) {
+    // console.log("rowData", rowData);
+
+    // Decide the action based on the current state:
+    const isCurrentlyEnabled = rowData.enable == '1' || rowData.enable === 1;
+    const actionText = isCurrentlyEnabled ? 'Disable' : 'Enable';
+
+    // Show the confirmation dialog with dynamic messaging:
+    if (confirm(`Are you sure you want to ${actionText} ${rowData.emp_name} this Employee?`)) {
+        // Toggle the state:
+        rowData.enable = isCurrentlyEnabled ? 0 : 1;
+
+        axiosInstance
+            .put(`${apis.resource}${doctypes.EzyEmployeeList}/${rowData.name}`, rowData)
+            .then((response) => {
+                console.log("Response:", response.data);
+                // Adjust the toast message accordingly:
+                toast.success(`Form ${actionText}d successfully`, { autoClose: 700 });
+                // Refresh the table data after a short delay
+                employeeData();
+                window.location.reload()
+            })
+            .catch((error) => {
+                console.error("Error updating toggle:", error);
+            });
+    } else {
+        // If canceled, do nothing – the checkbox remains unchanged.
+        console.log("Action cancelled. Toggle remains unchanged.");
+    }
+}
+
 const tableheaders = ref([
   { th: "Emp Code", td_key: "emp_code" },
   { th: "Emp Name", td_key: "emp_name" },

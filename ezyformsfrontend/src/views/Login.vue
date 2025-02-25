@@ -202,7 +202,7 @@ export default {
       axiosInstance
         .put(`${apis.loginCheckuseermethod}`, payload)
         .then((res) => {
-          console.log("Password updated:", res.data);
+          // console.log("Password updated:", res.data);
           if (res.message.is_first_login === 1) {
             this.showPwdField = true;
           }
@@ -278,13 +278,16 @@ export default {
     },
 
     userData(email) {
-      console.log(email, "1");
+      // console.log(email, "1");
       axiosInstance
         .get(`${apis.resource}${doctypes.users}/${email}`)
         .then((res) => {
           this.email = res.data.email;
-          console.log(this.email, "2");
+          // console.log(this.email, "2");
           if (this.email) {
+            // const queryParams = {
+            //   filters: JSON.stringify({ enable: 1 })
+            // }
             axiosInstance
               .get(`${apis.resource}${doctypes.EzyEmployeeList}/${this.email}`)
               .then((responce) => {

@@ -261,7 +261,7 @@
                                 placeholder="Select Designation"
                                 class="font-11"
                               >
-                                <!-- Custom Option Template -->
+                              
                                 <template #option="{ option }">
                                   <div class="custom-option">
                                     <input
@@ -274,7 +274,6 @@
                                   </div>
                                 </template>
 
-                                <!-- Custom Selection Template -->
                                 <template #selection="{ values, isOpen }">
                                   <span
                                     class="multiselect__single font-10"
@@ -1509,7 +1508,7 @@ const isHoveredColumn = (blockIndex, sectionIndex, rowIndex, columnIndex) => {
 onMounted(() => {
   deptData();
   paramId.value = route.params.paramid || "new";
-  console.log(paramId.value, "ggggg");
+  // console.log(paramId.value, "ggggg");
 
   if (
     paramId.value != undefined &&
@@ -1623,7 +1622,7 @@ const addmorechildfeildsFn = () => {
   const data = {
     ...updatedTableFields.value,
   };
-  console.log(data, ",,,,,,,,,,");
+  // console.log(data, ",,,,,,,,,,");
 
   // Call the API to process the fields
   axiosInstance
@@ -1650,22 +1649,22 @@ const processFields = () => {
     return;
   }
 
-  console.log(isEmptyFieldType.value);
-  console.log(tableName.value, "-=-=-=");
-  console.log(JSON.stringify(formattedData.value));
+  // console.log(isEmptyFieldType.value);
+  // console.log(tableName.value, "-=-=-=");
+  // console.log(JSON.stringify(formattedData.value));
 
   // console.log( filterObj.value,columns.value, tableName.value);
   const data = {
     ...formattedData.value,
   };
-  console.log(data);
+  // console.log(data);
 
   // Call the API to process the fields
   axiosInstance
     .post(apis.childtable, data)
     .then((res) => {
       if (res) {
-        console.log(res.message[0][0].child_doc); // Corrected response access
+        // console.log(res.message[0][0].child_doc); // Corrected response access
 
         // Extract the first "Table" field from the response
         const firstTableField = res.message[0][0].child_doc;
@@ -1719,6 +1718,10 @@ const childfield = [
     type: "Data",
   },
   {
+    label: "Number",
+    type: "Int",
+  },
+  {
     label: "Attach",
     type: "Attach",
   },
@@ -1728,7 +1731,10 @@ const fieldTypes = [
     label: "Text",
     type: "Data",
   },
-
+  {
+    label: "Number",
+    type: "Int",
+  },
   {
     label: "Attach",
     type: "Attach",
@@ -1859,15 +1865,15 @@ const isAllSelected = computed({
 });
 
 watch(designationValue, (newValue) => {
-  console.log("Selected Designations:", typeof newValue);
-  console.log(typeof designationValue.value, "designationValue");
-  console.log(typeof DesignationList.value, "list");
+  // console.log("Selected Designations:", typeof newValue);
+  // console.log(typeof designationValue.value, "designationValue");
+  // console.log(typeof DesignationList.value, "list");
   // console.log(listofselected.value, "------------------------");
 });
-
+console
 function handleSingleSelect() {
   if (!isAllSelected.value && designationValue.value.length === 1) {
-    console.log("Selected only one designation:", designationValue.value[0]);
+    // console.log("Selected only one designation:", designationValue.value[0]);
   }
 }
 
@@ -1916,7 +1922,7 @@ function initializeDesignationValue(blockIndex) {
 }
 
 const AddDesignCanvas = (idx) => {
-  console.log(idx, "---clicked idex", selectedBlockIndex.value);
+  // console.log(idx, "---clicked idex", selectedBlockIndex.value);
   if (filterObj.value.accessible_departments.length) {
     designationData(filterObj.value.accessible_departments);
   }
@@ -1947,7 +1953,7 @@ function designationData(departments) {
     )
     .then((res) => {
       if (res.data) {
-        console.log(res.data.users, "wf role matrix");
+        // console.log(res.data.users, "wf role matrix");
         userlist.value = res.data.users;
 
         DesignationList.value = [
@@ -2072,25 +2078,25 @@ function getFormData() {
         // if (!filterObj.value.form_category && filterObj.value.owner_of_the_form) {
         //     categoriesData(filterObj.value.owner_of_the_form);
         // }
-        console.log(res.data.form_json, "jjjjj");
+        // console.log(res.data.form_json, "jjjjj");
         childtableHeaders.value = JSON.parse(
           res.data.form_json
         ).child_table_fields;
-        console.log(
-          childtableHeaders.value,
-          typeof childtableHeaders.value,
-          "---child"
-        );
+        // console.log(
+        //   childtableHeaders.value,
+        //   typeof childtableHeaders.value,
+        //   "---child"
+        // );
 
-        console.log(res.data, "7777777777777777");
+        // console.log(res.data, "7777777777777777");
         const parsedFormJson = JSON.parse(res.data?.form_json);
         wrkAfterGetData.value = parsedFormJson.workflow;
-        console.log(parsedFormJson.workflow, "parsedFormJson");
+        // console.log(parsedFormJson.workflow, "parsedFormJson");
         tableName.value = parsedFormJson.fields.filter(
           (field) => field.fieldtype === "Table"
         );
         childName.value = tableName.value[0]?.options.replace(/_/g, " ");
-        console.log(childName.value, typeof childName.value, "5555");
+        // console.log(childName.value, typeof childName.value, "5555");
 
         // let structuredArr = rebuildToStructuredArray((JSON.parse(res_data?.form_json?.fields).fields)?.replace(/\\\"/g, '"'))
         let structuredArr = rebuildToStructuredArray(
@@ -2116,8 +2122,8 @@ function getFormData() {
               axiosInstance
                 .get(`${apis.resource}${res.data.name}/${child_id.value}`)
                 .then((res) => {
-                  console.log(child_id.value, "llll");
-                  console.log(`Data for66666666666666666 :`, res.data);
+                  // console.log(child_id.value, "llll");
+                  // console.log(`Data for66666666666666666 :`, res.data);
                   // Identify the child table key dynamically
                   // const childTableKey = Object.keys(res.data).find((key) =>
                   //   Array.isArray(res.data[key])
@@ -2193,7 +2199,7 @@ watch(
 // }
 function OwnerOftheForm(newVal) {
   if (newVal && typeof newVal === "string" && newVal.trim() !== "") {
-    console.log("Owner Of The Form Changed:", newVal);
+    // console.log("Owner Of The Form Changed:", newVal);
     categoriesData(newVal);
   } else {
     console.log("Owner Of The Form is empty or undefined.");
@@ -2233,12 +2239,12 @@ function categoriesData(newVal) {
 // }
 
 function formData(status) {
-  console.log(blockArr, "blockarray");
+  // console.log(blockArr, "blockarray");
 
   let fields = extractFieldsWithBreaks(blockArr);
-  console.log(fields, "Extracted Fields");
+  // console.log(fields, "Extracted Fields");
   if (tableFieldsCache.value.length) {
-    console.log("Using stored Table field from variable cache...");
+    // console.log("Using stored Table field from variable cache...");
     fields = [...fields, ...tableFieldsCache.value];
   }
   const dataObj = {
@@ -2250,7 +2256,7 @@ function formData(status) {
   };
 
   dataObj.accessible_departments = dataObj.accessible_departments.toString();
-  console.log(dataObj, "---data obj");
+  // console.log(dataObj, "---data obj");
   axiosInstance
     .post(apis.savedata, dataObj)
     .then((res) => {
@@ -2266,7 +2272,7 @@ function formData(status) {
               blockArr.splice(0, blockArr.length);
               getFormData();
             }
-        console.log(paramId.value, "Updated paramId");
+        // console.log(paramId.value, "Updated paramId");
 
        
         if (workflowSetup.length < blockArr.length) {
@@ -2519,6 +2525,14 @@ const addSection = (blockIndex) => {
       },
     ],
   });
+  nextTick(() => {
+    if (mainBlockRef.value) {
+      mainBlockRef.value.scrollTo({
+        top: mainBlockRef.value.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  });
 };
 // Function to remove a section
 const removeSection = (blockIndex, sectionIndex) => {
@@ -2598,6 +2612,16 @@ const addField = (blockIndex, sectionIndex, rowIndex, columnIndex) => {
     options: "",
     reqd: false,
   });
+
+  nextTick(() => {
+    if (mainBlockRef.value) {
+      mainBlockRef.value.scrollTo({
+        top: mainBlockRef.value.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  });
+
 };
 
 // Function to remove a field inside a column
