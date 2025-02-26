@@ -342,7 +342,7 @@ template_str = """
                                         {% elif field.fieldtype == 'Data' %}
                                             <input type="text" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
                                         {% elif field.fieldtype == 'Attach' %}
-                                            <img type="file" id="{{ field.fieldname }}" src="{{ field['values'] }}" class="signature-Imge" name="{{ field.fieldname }}">
+                                            <img  id="{{ field.fieldname }}" src="{{ 'https://ezysuite.ezyforms.co' + field['values']  }}" class="signature-Imge" name="{{ field.fieldname }}">
                                         {% elif field.fieldtype == 'Phone' %}
                                             <input type="tel" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
                                         {% elif field.fieldtype == 'Time' %}
