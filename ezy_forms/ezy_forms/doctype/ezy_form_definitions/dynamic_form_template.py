@@ -246,6 +246,11 @@ template_str = """
               margin: 0px;
       
           }
+          .signature-Imge{
+              min-width: 80px;
+              max-width: 100px;
+              
+          }
 
         .logo-div{
             max-width: 300px;
