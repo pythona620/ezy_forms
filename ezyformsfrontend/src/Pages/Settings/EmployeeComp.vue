@@ -544,6 +544,7 @@ const isFormFilled = computed(() => {
   return [
     createEmployee.value.emp_code,
     createEmployee.value.emp_name,
+    createEmployee.value.emp_phone,
     createEmployee.value.emp_mail_id,
     createEmployee.value.department,
     createEmployee.value.designation,

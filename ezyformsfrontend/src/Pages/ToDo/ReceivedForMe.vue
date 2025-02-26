@@ -42,9 +42,10 @@
                       }}) has
                     <strong class="strong-content">{{
                       formatAction(item.action)
-                      }}</strong>
-                      the request<span v-if="index !== 0 && item.reason">with the comments:</span>
-                    <strong v-if="index !== 0 && item.reason" class="strong-content">{{ item.reason || "N/A" }}</strong>.
+                    }}</strong>
+                    the request<span v-if="index !== 0 && item.reason">with the comments:</span>
+                    <strong v-if="index !== 0 && item.reason" class="strong-content">{{ item.reason || "N/A"
+                      }}</strong>.
                   </p>
                 </div>
               </div>
@@ -60,14 +61,21 @@
           <div class="modal-footer">
             <div v-if="!requestcancelled" class="d-flex justify-content-between align-items-center mt-3 gap-2">
               <div>
-                <button class="btn btn-outline-danger font-10 py-0 rejectbtn" type="button" 
+                <button class="btn btn-outline-danger font-12 py-0 rejectbtn" type="button"
                   @click="ApproverCancelSubmission(formData, 'Request Cancelled')">
                   <span><i class="bi bi-x-lg me-2"></i></span>Reject
                 </button>
               </div>
               <div>
-                <ButtonComp type="button" icon="check2" class="approvebtn border-1 text-nowrap font-10"
-                  @click="ApproverFormSubmission('formData','Approve')" name="Approve" />
+                <!-- <ButtonComp type="button" icon="check2" class="approvebtn border-1 text-nowrap font-10"
+                  @click="ApproverFormSubmission('formData','Approve')" name="Approve" /> -->
+                <button type="submit" class="btn btn-success approvebtn"
+                  @click.prevent="ApproverFormSubmission(emittedFormData, 'Approve')">
+                  <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                  <span v-if="!loading" ><i class="bi bi-check-lg font-15 me-2"></i><span class="font-12">Approve</span></span>
+                </button>
+
+
               </div>
             </div>
 
@@ -146,11 +154,12 @@ const showRequest = ref(null);
 const doctypeForm = ref([]);
 const ApproverReason = ref("");
 const employeeData = ref([]);
+const loading = ref(false)
 onMounted(() => {
   const storedData = localStorage.getItem("employeeData");
   try {
     const parsedData = JSON.parse(storedData);
-    
+
     // Ensure parsedData is an array
     employeeData.value = Array.isArray(parsedData) ? parsedData : [parsedData];
 
@@ -166,7 +175,7 @@ function actionCreated(rowData, actionEvent) {
       selectedRequest.value = { ...rowData };
       selectedcurrentLevel.value = selectedRequest.value.current_level;
 
-      
+
       // console.log("doctype_name",selectedRequest.value.doctype_name);
       // console.log("Property name",selectedRequest.value.property);
 
@@ -309,6 +318,86 @@ const resetCommentsValidation = () => {
 function ApproverFormSubmission(dataObj, type) {
 
   if (ApproverReason.value.trim() === "") {
+    isCommentsValid.value = false; // Show validation error
+    return; // Stop execution
+  }
+
+  isCommentsValid.value = true;
+  loading.value = true; // Start loader
+
+
+
+
+  let form = {};
+  if (emittedFormData.value.length) {
+    emittedFormData.value.map((each) => {
+      form[each.fieldname] = each.value;
+    });
+  }
+  axiosInstance
+    .put(
+      `${apis.resource}${selectedRequest.value.doctype_name}/${doctypeForm.value.name}`,
+      form
+    )
+    .then((response) => {
+      if (response?.data) {
+        approvalStatusFn(dataObj, type);
+        
+      }
+    })
+    .catch((error) => {
+      console.error("Error submitting form:", error);
+    })
+    
+}
+
+
+function approvalStatusFn(dataObj, type) {
+
+
+  console.log(dataObj);
+  let data = {
+    property: selectedRequest.value.property,
+    doctype: selectedRequest.value.doctype_name,
+    request_ids: [selectedRequest.value.name],
+    reason: ApproverReason.value,
+    action: type,
+    files: null,
+    cluster_name: null,
+    url_for_approval_id: "",
+    // https://ezyrecon.ezyinvoicing.com/home/wf-requests
+    current_level: selectedRequest.value.current_level,
+  };
+
+  // need to check this api not working
+  axiosInstance
+    .post(apis.requestApproval, { request_details: [data] })
+    .then((response) => {
+      if (response?.message?.success === true) {
+        toast.success(`Request ${type}ed`, { autoClose: 1000, transition: "zoom" });
+        const modal = bootstrap.Modal.getInstance(document.getElementById("viewRequest"));
+        modal.hide();
+        ApproverReason.value = ""; // Clear reason after success
+
+       
+        receivedForMe();
+      } else {
+        toast.error(`Failed to ${type} request`, { autoClose: 1000, transition: "zoom" });
+      }
+    })
+    .catch((error) => {
+      console.error("Error processing request:", error);
+      // toast.error("An error occurred while processing your request.", { autoClose: 1000, transition: "zoom" });
+    })
+    .finally(() => {
+      loading.value = false; // Ensure loader stops
+    });
+}
+
+
+function ApproverCancelSubmission(dataObj, type) {
+
+  if (ApproverReason.value.trim() === "") {
     // Set the validation flag to false if the comment is empty
     isCommentsValid.value = false;
 
@@ -333,88 +422,16 @@ function ApproverFormSubmission(dataObj, type) {
     )
     .then((response) => {
       if (response?.data) {
-        approvalStatusFn(dataObj, type);
+        approvalCancelFn(dataObj, type);
       }
     });
-}
-
-
-function approvalStatusFn(dataObj, type) {
- 
-
-  console.log(dataObj);
-  let data = {
-    property: selectedRequest.value.property,
-    doctype: selectedRequest.value.doctype_name,
-    request_ids: [selectedRequest.value.name],
-    reason: ApproverReason.value,
-    action: type,
-    files: null,
-    cluster_name: null,
-    url_for_approval_id: "",
-    // https://ezyrecon.ezyinvoicing.com/home/wf-requests
-    current_level: selectedRequest.value.current_level,
-  };
-
-  // need to check this api not working
-  axiosInstance
-    .post(apis.requestApproval, { request_details: [data] })
-    .then((response) => {
-      if (response?.message?.success) {
-        if (type == "Reject") {
-          toast.error(`Request ${type}ed`, { autoClose: 1000, transition: "zoom" });
-        } else {
-          toast.success(`Request ${type}ed`, { autoClose: 1000, transition: "zoom" });
-          ApproverReason.value = "";
-        }
-        const modal = bootstrap.Modal.getInstance(document.getElementById("viewRequest"));
-        modal.hide();
-        receivedForMe();
-      }
-    })
-    .catch((error) => {
-      console.error("Error fetching data:", error);
-    });
-}
-
-
-function ApproverCancelSubmission(dataObj, type) {
-
-if (ApproverReason.value.trim() === "") {
-  // Set the validation flag to false if the comment is empty
-  isCommentsValid.value = false;
-
-  return; // Stop function execution
-} else {
-  // Proceed if comments are valid
-  isCommentsValid.value = true;
-}
-
-
-
-let form = {};
-if (emittedFormData.value.length) {
-  emittedFormData.value.map((each) => {
-    form[each.fieldname] = each.value;
-  });
-}
-axiosInstance
-  .put(
-    `${apis.resource}${selectedRequest.value.doctype_name}/${doctypeForm.value.name}`,
-    form
-  )
-  .then((response) => {
-    if (response?.data) {
-      approvalCancelFn(dataObj, type);
-    }
-  });
 }
 
 
 function approvalCancelFn(dataObj, type) {
   // let files = this.selectedFileAttachments.map((res: any) => res.url);
 
-  console.log(dataObj,"data");
+  console.log(dataObj, "data");
   let data = {
     property: selectedRequest.value.property,
     doctype: selectedRequest.value.doctype_name,
@@ -428,8 +445,8 @@ function approvalCancelFn(dataObj, type) {
   axiosInstance.post(apis.wf_cancelling_request, data).then((response) => {
     if (response?.message) {
       if (type == "Reject") {
-          toast.error(`Request ${type}ed`, { autoClose: 1000, transition: "zoom" });
-        }
+        toast.error(`Request ${type}ed`, { autoClose: 1000, transition: "zoom" });
+      }
       const modal = bootstrap.Modal.getInstance(document.getElementById("viewRequest"));
       modal.hide();
       receivedForMe();
@@ -576,7 +593,7 @@ watch(
 <style scoped>
 .approvebtn {
   width: 146px;
-  height: 30px;
+  /* height: 30px; */
   background: #099819;
   color: white;
   padding: 5px 15px 5px 15px;
@@ -596,7 +613,7 @@ watch(
 
 .rejectbtn {
   width: 146px;
-  height: 30px;
+  /* height: 30px; */
   background: #fe212e;
   color: white;
   padding: 5px 15px 5px 15px;
