@@ -18,8 +18,8 @@
         <div class="mt-2">
 
             <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" actionType="dropdown"
-                @actionClicked="actionCreated" isFiltersoption="true" :field-mapping="fieldMapping" :actions="actions"
-                @updateFilters="inLineFiltersData" isCheckbox="true" />
+                @actionClicked="actionCreated" @toggle-click="toggleFunction" isFiltersoption="true"
+                :field-mapping="fieldMapping" :actions="actions" @updateFilters="inLineFiltersData" isCheckbox="true" />
             <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
                 @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
         </div>
@@ -41,6 +41,8 @@ import { EzyBusinessUnit } from "../../shared/services/business_unit";
 import { useRouter } from "vue-router";
 import { rebuildToStructuredArray } from "../../shared/services/field_format";
 import FormPreview from '../../Components/FormPreview.vue'
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 
 const totalRecords = ref(0);
 const formDescriptions = ref({})
@@ -59,6 +61,37 @@ onMounted(() => {
 
 })
 
+function toggleFunction(rowData, rowIndex, event) {
+    // console.log("rowData", rowData);
+
+    // Decide the action based on the current state:
+    const isCurrentlyEnabled = rowData.enable == '1' || rowData.enable === 1;
+    const actionText = isCurrentlyEnabled ? 'delete' : 'restore';
+
+    // Show the confirmation dialog with dynamic messaging:
+    if (confirm(`Are you sure you want to ${actionText} this Form?`)) {
+        // Toggle the state:
+        rowData.enable = isCurrentlyEnabled ? 0 : 1;
+
+        axiosInstance
+            .put(`${apis.resource}${doctypes.EzyFormDefinitions}/${rowData.name}`, rowData)
+            .then((response) => {
+                // console.log("Response:", response.data);
+                // Adjust the toast message accordingly:
+                toast.success(`Form ${actionText}d successfully`, { autoClose: 700 });
+                // Refresh the table data after a short delay
+                setTimeout(() => {
+                    fetchTable();
+                }, 1000);
+            })
+            .catch((error) => {
+                console.error("Error updating toggle:", error);
+            });
+    } else {
+        // If canceled, do nothing – the checkbox remains unchanged.
+        console.log("Action cancelled. Toggle remains unchanged.");
+    }
+}
 
 
 function actionCreated(rowData, actionEvent) {
@@ -77,7 +110,42 @@ function actionCreated(rowData, actionEvent) {
     if (actionEvent.name === 'Edit Form') {
         formCreation(rowData)
     }
+    if (actionEvent.name === 'Acive this form') {
+        if (rowData) {
+            const isCurrentlyEnabled = rowData.enable == '1' || rowData.enable === 1;
+            const actionText = isCurrentlyEnabled ? 'delete' : 'Active';
+
+            // Show the confirmation dialog with dynamic messaging:
+            if (confirm(`Are you sure you want to ${actionText} this Form?`)) {
+                // Toggle the state:
+                rowData.enable = isCurrentlyEnabled ? 0 : 1;
+
+                axiosInstance
+                    .put(`${apis.resource}${doctypes.EzyFormDefinitions}/${rowData.name}`, rowData)
+                    .then((response) => {
+                        // console.log("Response:", response.data);
+                        // Adjust the toast message accordingly:
+                        toast.success(`Form ${actionText}d successfully`, { autoClose: 700 });
+                        // Refresh the table data after a short delay
+                        setTimeout(() => {
+                            fetchTable();
+                        }, 1000);
+                    })
+                    .catch((error) => {
+                        console.error("Error updating toggle:", error);
+                    });
+            } else {
+                // If canceled, do nothing – the checkbox remains unchanged.
+                console.log("Action cancelled. Toggle remains unchanged.");
+            }
+
+        }
+    }
+
 }
+
+
+
 const hideModal = () => {
     const modal = bootstrap.Modal.getInstance(document.getElementById('formViewModal'));
     modal.hide();
@@ -87,11 +155,11 @@ const hideModal = () => {
 const actions = ref(
     [
         { name: 'View form', icon: 'fa-solid fa-eye' },
-        { name: 'Edit Form', icon: 'fa-solid fa-edit' },
-        { name: 'Edit accessibility to dept.', icon: 'fa-solid fa-users' },
-        { name: 'Share this form', icon: 'fa-solid fa-share-alt' },
-        { name: 'Download Print format', icon: 'fa-solid fa-download' },
-        { name: 'In-active this form', icon: 'fa-solid fa-ban' }
+        { name: 'Acive this form', icon: 'far fa-file-alt' }
+        // { name: 'Edit Form', icon: 'fa-solid fa-edit' },
+        // { name: 'Edit accessibility to dept.', icon: 'fa-solid fa-users' },
+        // { name: 'Share this form', icon: 'fa-solid fa-share-alt' },
+        // { name: 'Download Print format', icon: 'fa-solid fa-download' },
     ]
 )
 
