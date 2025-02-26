@@ -2525,14 +2525,14 @@ const addSection = (blockIndex) => {
       },
     ],
   });
-  nextTick(() => {
-    if (mainBlockRef.value) {
-      mainBlockRef.value.scrollTo({
-        top: mainBlockRef.value.scrollHeight,
-        behavior: "smooth",
-      });
-    }
-  });
+  // nextTick(() => {
+  //   if (mainBlockRef.value) {
+  //     mainBlockRef.value.scrollTo({
+  //       top: mainBlockRef.value.scrollHeight,
+  //       behavior: "smooth",
+  //     });
+  //   }
+  // });
 };
 // Function to remove a section
 const removeSection = (blockIndex, sectionIndex) => {
@@ -2613,14 +2613,14 @@ const addField = (blockIndex, sectionIndex, rowIndex, columnIndex) => {
     reqd: false,
   });
 
-  nextTick(() => {
-    if (mainBlockRef.value) {
-      mainBlockRef.value.scrollTo({
-        top: mainBlockRef.value.scrollHeight,
-        behavior: "smooth",
-      });
-    }
-  });
+  // nextTick(() => {
+  //   if (mainBlockRef.value) {
+  //     mainBlockRef.value.scrollTo({
+  //       top: mainBlockRef.value.scrollHeight,
+  //       behavior: "smooth",
+  //     });
+  //   }
+  // });
 
 };
 
