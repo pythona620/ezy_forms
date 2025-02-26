@@ -6,11 +6,11 @@
                 <div class="headerbackgound py-1">
                     <div class="row">
                         <div class="col-2">
-                            <div class="d-flex gap-2 p-2 align-items-center">
-                                <div><img class="imgmix" src="../assets/favicon.jpg" /></div>
-                                <div class="m-0">
+                            <div class="d-flex gap-2 align-items-center">
+                                <div><img class="imgmix img-fluid" src="../assets/Final-logo-ezyforms-removebg-preview.png"  /></div>
+                                <!-- <div class="m-0">
                                     <p class="font-13 m-0">EZY | Forms</p>
-                                </div>
+                                </div> -->
                             </div>
                         </div>
                         <div class="col-7">
