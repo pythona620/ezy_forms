@@ -2,7 +2,7 @@
   <div>
     <div class="backtofromPage py-2">
       <router-link
-        to="/todo/receivedform"
+        :to="backTo"
         @click="backToForm"
         class="text-decoration-none text-dark  ps-3 font-13"
         ><span> <i class="bi bi-arrow-left pe-2"></i></span>Asset request
@@ -101,6 +101,7 @@ const selectedData = ref({
   selectedCategory: route.query.selectedCategory || "", // Retrieve from query
   selectedform: route.query.selectedForm || "", // Retrieve from query
   selectedFormId: route.query.selectedFormId || "", // Retrieve from query
+  routepath: route.query.routepath,
 });
 const business_unit = ref(route.query.business_unit || ""); // Retrieve from query
 const isFormValid = ref(false);
@@ -110,8 +111,8 @@ const categoryOptions = ref([]);
 const employeeData = ref({});
 const formList = ref([]);
 const emittedFormData = ref([]);
-const filepaths = ref("");
-
+const filepaths = ref([]);
+const backTo = ref(selectedData.value.routepath);
 const tableRows = ref([]);
 const tableHeaders = ref([]);
 const childTableName = ref("");
@@ -135,9 +136,9 @@ onMounted(() => {
   raiseRequest();
 });
 function RequestUpdate() {
-  const filesArray = filepaths.value
-    ? filepaths.value.split(",").map((filePath) => filePath.trim())
-    : [];
+  // const filesArray = filepaths.value
+  //   ? filepaths.value.split(",").map((filePath) => filePath.trim())
+  //   : [];
   let form = {};
   if (emittedFormData.value.length) {
     emittedFormData.value.map((each) => {
@@ -166,9 +167,9 @@ function RequestUpdate() {
 }
 
 function EditRequestUpdate() {
-  const filesArray = filepaths.value
-    ? filepaths.value.split(",").map((filePath) => filePath.trim())
-    : [];
+  // const filesArray = filepaths.value
+  //   ? filepaths.value.split(",").map((filePath) => filePath.trim())
+  //   : [];
   let form = {};
   if (emittedFormData.value.length) {
     emittedFormData.value.map((each) => {
@@ -435,15 +436,23 @@ const uploadFile = (row, fieldname, file) => {
 //     });
 // }
 const handleFieldUpdate = (field) => {
+  console.log(field,"field");
   const fieldExists = emittedFormData.value.some(
     (item) => item.fieldname === field.fieldname
   );
-
   if (!fieldExists) {
     if (field.fieldtype === "Attach") {
-      if (!Array.isArray(field.value)) {
-        filepaths.value = field.value;
+      
+      if (field.value && typeof field.value === "string") {
+        filepaths.value = field.value
+          .split(",")
+          .map((filePath, index) => ({ [index]: filePath.trim() })) // Assign numeric keys
+          .filter((file) => Object.values(file)[0] !== ""); // Remove empty entries
+      } else {
+        filepaths.value = [];
       }
+      console.log(filepaths.value,"oooo");
+      console.log(emittedFormData.value,"emitteddata");
       emittedFormData.value.push(field);
     } else {
       emittedFormData.value = emittedFormData.value.concat(field);
@@ -570,17 +579,17 @@ function mapFormFieldsToRequest(doctypeData, blockArr) {
   });
 }
 function request_raising_fn(item) {
-  // console.log(filepaths.value,"---filepaths");
-  const filesArray = filepaths.value
-    ? filepaths.value.split(",").map((filePath) => filePath.trim())
-    : [];
+  console.log(filepaths.value,"---filepaths");
+  // const filesArray = filepaths.value
+  //   ? filepaths.value.split(",").map((filePath) => filePath.trim())
+  //   : [];
   let data_obj = {
     module_name: "Ezy Forms",
     doctype_name: selectedData.value.selectedform,
     ids: [item.name],
     reason: "Request Raised",
     url_for_request_id: "",
-    files: filesArray,
+    files: filepaths.value.length > 0 ? filepaths.value : [],
     property: business_unit.value,
   };
   axiosInstance.post(apis.raising_request, data_obj).then(async (resp) => {

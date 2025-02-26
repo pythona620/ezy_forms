@@ -112,26 +112,32 @@
               <span v-else-if="column.td_key === 'assigned_to_users'">
                 <div>
                   <span>
-                    Pending at-
- 
                     {{
                       (() => {
                         try {
-                          let value = JSON.parse(
-                            row[column.td_key].replace(/'/g, '"')
-                          ); // Replace single quotes & parse
-                          return Array.isArray(value)
-                            ? value.join(", ")
-                            : value;
+                          let value = JSON.parse(row[column.td_key].replace(/'/g, '"')); // Replace single quotes & parse
+
+                          // If status is 'Completed', return 'Completed'
+                          if (row.status === 'Completed') {
+                            return 'Completed';
+                          }
+
+                          // If value is an empty array, return "-"
+                          if (Array.isArray(value) && value.length === 0) {
+                            return "-";
+                          }
+
+                          return Array.isArray(value) ? `Pending at- ${value.join(", ")}` : `Pending at- ${value}`;
                         } catch (error) {
-                          return row[column.td_key] || "-"; // Fallback if parsing fails
+                          return row[column.td_key] || "User not assigned"; // Fallback if parsing fails
                         }
                       })()
                     }}
                   </span>
                 </div>
               </span>
- 
+
+
               <!-- <span v-else-if="column.td_key === 'total_levels'">
                 {{ row[column.td_key] }}
               </span> -->
@@ -189,13 +195,8 @@
               </div>
 
               <div class="form-check d-flex justify-content-end form-switch text-end w-50">
-                <input
-        class="form-check-input shadow-none"
-        type="checkbox"
-        role="switch"
-        :checked="row.enable == '1'"
-        @click.prevent="handleToggle(row, index, $event)"
-      />
+                <input class="form-check-input shadow-none" type="checkbox" role="switch" :checked="row.enable == '1'"
+                  @click.prevent="handleToggle(row, index, $event)" />
               </div>
             </td>
 
@@ -292,7 +293,7 @@ function selectedAction(row, action) {
 function handleToggle(row, index, event) {
   // Emit the custom event. The parent component will handle showing the confirmation.
   emits("toggle-click", row, index, event);
-  console.log("event",event);
+  console.log("event", event);
 }
 
 

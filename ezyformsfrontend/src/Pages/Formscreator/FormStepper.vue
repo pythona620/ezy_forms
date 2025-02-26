@@ -746,10 +746,10 @@
                                                   "
                                                 />
                                                 <small
-                                                  v-if="field.errorMsg"
-                                                  class="text-danger font-10"
+                                                  v-if="field.errorMsg "
+                                                  class="text-danger font-12"
                                                 >
-                                                  {{ field.errorMsg }}
+                                                  {{ field.errorMsg  }}
                                                 </small>
                                               </div>
                                               <div class=" FieldcopyRemove"
@@ -1864,12 +1864,12 @@ const isAllSelected = computed({
   },
 });
 
-watch(designationValue, (newValue) => {
-  // console.log("Selected Designations:", typeof newValue);
-  // console.log(typeof designationValue.value, "designationValue");
-  // console.log(typeof DesignationList.value, "list");
-  // console.log(listofselected.value, "------------------------");
-});
+// watch(designationValue, (newValue) => {
+//   // console.log("Selected Designations:", typeof newValue);
+//   // console.log(typeof designationValue.value, "designationValue");
+//   // console.log(typeof DesignationList.value, "list");
+//   // console.log(listofselected.value, "------------------------");
+// });
 console
 function handleSingleSelect() {
   if (!isAllSelected.value && designationValue.value.length === 1) {
@@ -2378,49 +2378,7 @@ function formData(status) {
 // Function to add a new block
 
 const mainBlockRef = ref("");
-// const addBlock = () => {
-//   const blockIndex = blockArr.length; // Get current length before adding new block
 
-//   const newBlock = {
-//     label: blockIndex === 0 ? "requestor" : `approver-${blockIndex}`,
-//     parent: `${businessUnit.value?.value}-${filterObj.value?.form_short_name}`,
-//     sections: [
-//       {
-//         label: "",
-//         parent: `${businessUnit.value.value}-${filterObj.value.form_short_name}`,
-//         rows: [
-//           {
-//             label: `row_0_0_${blockIndex}`,
-//             columns: [
-//               {
-//                 label: "",
-//                 fields: [
-//                   {
-//                     label: "",
-//                     fieldtype: "",
-//                     options: "",
-//                     reqd: false,
-//                   },
-//                 ],
-//               },
-//             ],
-//           },
-//         ],
-//       },
-//     ],
-//   };
-
-//   blockArr.splice(blockArr.length, 0, newBlock);
-//   nextTick(() => {
-//     if (mainBlockRef.value) {
-//       mainBlockRef.value.scrollTo({
-//         top: mainBlockRef.value.scrollHeight,
-//         behavior: "smooth",
-//       });
-//     }
-//   });
-//   // console.log(blockArr.length, blockArr, "00000");
-// };
 const addBlock = () => {
   const blockIndex = blockArr.length; // Get current length before adding new block
 
@@ -2760,62 +2718,121 @@ const onFieldTypeChange = (
 //   }
 // }
 
-function handleFieldChange(
-  blockIndex,
-  sectionIndex,
-  rowIndex,
-  columnIndex,
-  fieldIndex
-) {
+// function handleFieldChange(
+//   blockIndex,
+//   sectionIndex,
+//   rowIndex,
+//   columnIndex,
+//   fieldIndex
+// ) {
+//   const excludedLabels = ["Approver", "Approved on", "Approved By"].map(label => label.toLowerCase().trim());
+
+//   // Extract labels and filter out excluded ones
+//   const flatArr = blockArr.flatMap(extractfieldlabels)
+//     .map(label => label.trim().toLowerCase()) // Normalize labels
+//     .filter(label => label !== "" && !excludedLabels.includes(label)); // Remove empty and excluded labels
+
+//   const isDuplicate = hasDuplicates(flatArr); // Check duplicate only in filtered list
+
+//   const checkFieldType = addErrorMessagesToStructuredArray(blockArr);
+//   blockArr.splice(0, blockArr.length, ...checkFieldType);
+
+//   function shouldSetError(fieldLabel) {
+//     const normalizedLabel = fieldLabel?.trim().toLowerCase(); // Handle undefined labels
+//     return isDuplicate && normalizedLabel && !excludedLabels.includes(normalizedLabel);
+//   }
+
+//   // ✅ Assign error message only if it's not in excluded labels
+//   if (
+//     fieldIndex !== undefined &&
+//     fieldIndex >= 0 &&
+//     columnIndex !== undefined &&
+//     columnIndex >= 0 &&
+//     sectionIndex !== undefined
+//   ) {
+//     const fieldLabel = blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex].label;
+//     blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex].errorMsg =
+//       shouldSetError(fieldLabel) ? "Duplicate Label Name" : "";
+//   }
+
+//   if (
+//     fieldIndex === undefined &&
+//     columnIndex !== undefined &&
+//     columnIndex >= 0 &&
+//     sectionIndex !== undefined
+//   ) {
+//     const columnLabel = blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].label;
+//     blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].errorMsg =
+//       shouldSetError(columnLabel) ? "Duplicate Label Name in Column" : "";
+//   }
+
+//   if (
+//     columnIndex === undefined &&
+//     fieldIndex === undefined &&
+//     sectionIndex !== undefined
+//   ) {
+//     const sectionLabel = blockArr[blockIndex].sections[sectionIndex].label;
+//     blockArr[blockIndex].sections[sectionIndex].errorMsg =
+//       shouldSetError(sectionLabel) ? "Duplicate Label Name in Section" : "";
+//   }
+// }
+
+
+function handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) {
   const excludedLabels = ["Approver", "Approved on", "Approved By"].map(label => label.toLowerCase().trim());
+  const restrictedLabels = [
+    "name", "parent", "creation", "owner", "modified", "modified_by",
+    "parentfield", "parenttype", "file_list", "flags", "docstatus"
+  ].map(label => label.toLowerCase().trim()); // Normalize restricted labels
 
   // Extract labels and filter out excluded ones
-  const flatArr = blockArr.flatMap(extractfieldlabels)
+  const flatArr = blockArr
+    .flatMap(extractfieldlabels)
     .map(label => label.trim().toLowerCase()) // Normalize labels
     .filter(label => label !== "" && !excludedLabels.includes(label)); // Remove empty and excluded labels
 
-  const isDuplicate = hasDuplicates(flatArr); // Check duplicate only in filtered list
-
+  const isDuplicate = hasDuplicates(flatArr); // Check duplicates
   const checkFieldType = addErrorMessagesToStructuredArray(blockArr);
   blockArr.splice(0, blockArr.length, ...checkFieldType);
 
   function shouldSetError(fieldLabel) {
-    const normalizedLabel = fieldLabel?.trim().toLowerCase(); // Handle undefined labels
+    const normalizedLabel = fieldLabel?.trim().toLowerCase();
     return isDuplicate && normalizedLabel && !excludedLabels.includes(normalizedLabel);
   }
 
-  // ✅ Assign error message only if it's not in excluded labels
-  if (
-    fieldIndex !== undefined &&
-    fieldIndex >= 0 &&
-    columnIndex !== undefined &&
-    columnIndex >= 0 &&
-    sectionIndex !== undefined
-  ) {
+  function isRestricted(fieldLabel) {
+    const normalizedLabel = fieldLabel?.trim().toLowerCase();
+    return restrictedLabels.includes(normalizedLabel);
+  }
+
+  if (fieldIndex !== undefined && fieldIndex >= 0 && columnIndex !== undefined && columnIndex >= 0 && sectionIndex !== undefined) {
     const fieldLabel = blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex].label;
-    blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex].errorMsg =
-      shouldSetError(fieldLabel) ? "Duplicate Label Name" : "";
+    
+    if (isRestricted(fieldLabel)) {
+      blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex].errorMsg = "Entered label is restricted";
+    } else {
+      blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex].errorMsg = shouldSetError(fieldLabel) ? "Duplicate Label Name" : "";
+    }
   }
 
-  if (
-    fieldIndex === undefined &&
-    columnIndex !== undefined &&
-    columnIndex >= 0 &&
-    sectionIndex !== undefined
-  ) {
+  if (fieldIndex === undefined && columnIndex !== undefined && columnIndex >= 0 && sectionIndex !== undefined) {
     const columnLabel = blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].label;
-    blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].errorMsg =
-      shouldSetError(columnLabel) ? "Duplicate Label Name in Column" : "";
+    
+    if (isRestricted(columnLabel)) {
+      blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].errorMsg = "Entered label is restricted";
+    } else {
+      blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].errorMsg = shouldSetError(columnLabel) ? "Duplicate Label Name in Column" : "";
+    }
   }
 
-  if (
-    columnIndex === undefined &&
-    fieldIndex === undefined &&
-    sectionIndex !== undefined
-  ) {
+  if (columnIndex === undefined && fieldIndex === undefined && sectionIndex !== undefined) {
     const sectionLabel = blockArr[blockIndex].sections[sectionIndex].label;
-    blockArr[blockIndex].sections[sectionIndex].errorMsg =
-      shouldSetError(sectionLabel) ? "Duplicate Label Name in Section" : "";
+    
+    if (isRestricted(sectionLabel)) {
+      blockArr[blockIndex].sections[sectionIndex].errorMsg = "Entered label is restricted";
+    } else {
+      blockArr[blockIndex].sections[sectionIndex].errorMsg = shouldSetError(sectionLabel) ? "Duplicate Label Name in Section" : "";
+    }
   }
 }
 
@@ -2844,78 +2861,9 @@ const hasErrors = computed(() => {
   return checkFieldErrors(blockArr);
 });
 
-// const hasErrors = computed(() => {
-//   function checkFieldErrors(obj) {
-//     if (!obj || typeof obj !== "object") return false;
 
-//     // Check if `fieldtype` is empty, or if `error` or `errorMsg` exist
-//     if (
-//       ("fieldtype" in obj && obj.fieldtype === "") ||
-//       ("error" in obj && obj.error) ||
-//       ("errorMsg" in obj && obj.errorMsg)
-//     ) {
-//       return true;
-//     }
 
-//     if (Array.isArray(obj)) {
-//       return obj.some(checkFieldErrors);
-//     }
 
-//     return Object.values(obj).some(checkFieldErrors);
-//   }
-
-//   return checkFieldErrors(blockArr);
-// });
-
-// function handleFieldChange(
-//     blockIndex,
-//     sectionIndex,
-//     rowIndex,
-//     columnIndex,
-//     fieldIndex
-// ) {
-//     const flatArr = blockArr.flatMap(extractfieldlabels);
-//     const isDuplicate = hasDuplicates(flatArr); // Check once to reuse this result
-//     const checkFieldType = addErrorMessagesToStructuredArray(blockArr);
-//     blockArr.splice(0, blockArr.length, ...checkFieldType);
-
-//     // Assign error message for the specific field if fieldIndex is valid
-//     if (
-//         fieldIndex !== undefined &&
-//         fieldIndex >= 0 &&
-//         columnIndex !== undefined &&
-//         columnIndex >= 0 &&
-//         sectionIndex !== undefined
-//     ) {
-//         blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
-//             columnIndex
-//         ].fields[fieldIndex].errorMsg = isDuplicate ? "Duplicate Label Name" : "";
-//     }
-
-//     // Assign error message for the column if fieldIndex is not valid
-//     if (
-//         sectionIndex !== undefined &&
-//         columnIndex !== undefined && // Ensure columnIndex is defined
-//         fieldIndex === undefined
-//     ) {
-//         blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
-//             columnIndex
-//         ].errorMsg = isDuplicate ? "Duplicate Label Name in Column" : "";
-//     }
-
-//     // Assign error message for the section if both columnIndex and fieldIndex are not valid
-//     if (
-//         columnIndex === undefined &&
-//         fieldIndex === undefined &&
-//         sectionIndex !== undefined
-//     ) {
-//
-//         blockArr[blockIndex].sections[sectionIndex].errorMsg = isDuplicate
-//             ? "Duplicate Label Name in Section"
-//             : "";
-//
-//     }
-// }
 const isNextDisabled = computed(() => {
   return (
     formNameError.value.length > 0 ||
@@ -2997,55 +2945,6 @@ function handleInputChange(event, fieldType) {
     });
 }
 
-// function handleInputChange(event, fieldType) {
-//     const inputValue = event.target.value;
-
-//     // Set filter based on fieldType
-//     const filters = [[fieldType, "like", `%${inputValue}%`]];
-//     const queryParams = {
-//         fields: JSON.stringify(["*"]),
-//         filters: JSON.stringify(filters),
-//     };
-
-//     axiosInstance
-//         .get(`${apis.resource}${doctypes.EzyFormDefinitions}`, {
-//             params: queryParams,
-//         })
-//         .then((res) => {
-
-//             ezyFormsData.value = res.data;
-
-//             // Check for duplicates and set appropriate error message
-//             if (fieldType === "form_name") {
-//                 formNameError.value =
-//                     inputValue &&
-//                         ezyFormsData.value.some(
-//                             (item) =>
-//                                 item.form_name &&
-//                                 item.form_name.toLowerCase() === inputValue.toLowerCase()
-//                         )
-//                         ? "Name already exists"
-//                         : "";
-//           } else if (fieldType === "form_short_name") {
-//                 formShortNameError.value =
-//                     inputValue &&
-//                         ezyFormsData.value.some(
-//                             (item) =>
-//                                 item.form_short_name &&
-//                                 item.form_short_name.toLowerCase() === inputValue.toLowerCase()
-//                         )
-//                         ? "Short name already exists"
-//                         : "";
-//             }
-//         })
-//         .catch((error) => {
-//             console.error("Error fetching ezyForms data:", error);
-//             // Clear error message on fetch error
-//             if (fieldType === "form_name") formNameError.value = "";
-//             else if (fieldType === "form_short_name") formShortNameError.value = "";
-//         });
-// }
-
 const getRowSuffix = (index) => {
   if (index === 0) {
     return "1st row";
@@ -3115,36 +3014,6 @@ async function saveFormData(type) {
 //   }
 // }
 
-// const getFieldComponent = (type) => {
-//   switch (type) {
-//     case "Data":
-//       return "input";
-//     case "Phone":
-//       return "input";
-//     case "Time":
-//       return "input";
-//     case "Text":
-//       return "textarea";
-//     case "Color":
-//       return "input";
-//     case "Check":
-//       return "input";
-//     case "Select":
-//       return "select";
-//     case "Table MultiSelect":
-//       return "select";
-//     case "Date":
-//       return "input";
-//     case "Datetime":
-//       return "input";
-//     case "Attach":
-//       return "file";
-//     case "radio":
-//       return "input";
-//     default:
-//       return "input";
-//   }
-// };
 // const swapItems = (arr, fromIndex, toIndex) => {
 //     if (!Array.isArray(arr) || fromIndex < 0 || toIndex < 0 || fromIndex >= arr.length || toIndex >= arr.length) {
 //         console.warn(`Invalid swap indices: ${fromIndex}, ${toIndex} for array`, arr);

@@ -55,6 +55,7 @@ import FormPreview from '../../Components/FormPreview.vue'
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import router from '../../router';
+import { useRoute } from 'vue-router';
 const totalRecords = ref(0);
 const tableheaders = ref([
   { th: "Form name", td_key: "form_name" },
@@ -72,6 +73,7 @@ const formDescriptions = ref({})
 const selectedForm = ref(null);
 const tableData = ref([]);
 const formCategory = ref([]);
+const route = useRoute();
 
 
 
@@ -133,6 +135,9 @@ function actionCreated(rowData, actionEvent) {
                 query: {
                     selectedForm: rowData.form_short_name,
                     business_unit: rowData.business_unit,
+                    routepath: route.path,
+
+                    
                 },
             });
         } else {
@@ -252,7 +257,8 @@ function inLineFiltersData(searchedData) {
 function fetchDepartmentDetails(id, data) {
 
   const filters = [
-    ["business_unit", "like", `%${newBusinessUnit.value.business_unit}%`]
+    ["business_unit", "like", `%${newBusinessUnit.value.business_unit}%`],
+    ["enable", "=", 1]
   ];
   if (props.id) {
     filters.push(["owner_of_the_form", "=", props.id]);
@@ -266,14 +272,12 @@ function fetchDepartmentDetails(id, data) {
     limit_page_length: filterObj.value.limitPageLength,
     limit_start: filterObj.value.limit_start,
     filters: JSON.stringify(filters),
-    filters: JSON.stringify({ enable: 1 }),
     order_by: "`tabEzy Form Definitions`.`creation` desc",
   };
   const queryParamsCount = {
     fields: JSON.stringify(["count(name) AS total_count"]),
     limitPageLength: "None",
-    filters: JSON.stringify(filters),
-    filters: JSON.stringify({ enable: 1 }),
+    filters: JSON.stringify(filters)
   }
   axiosInstance.get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParamsCount })
     .then((res) => {

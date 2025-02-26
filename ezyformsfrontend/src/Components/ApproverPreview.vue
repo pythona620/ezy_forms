@@ -15,8 +15,9 @@
                   <h6 class="m-0 font-12">{{ column.label }}</h6>
                 </div>
                 <div class="mx-3 my-2">
-                  <div v-for="(field, fieldIndex) in column.fields" :key="'field-preview-' + fieldIndex" :class="props.readonlyFor === true ? 'd-flex align-items-end' : ''" >
-                    <div v-if="field.label" >
+                  <div v-for="(field, fieldIndex) in column.fields" :key="'field-preview-' + fieldIndex"
+                    :class="props.readonlyFor === true ? 'd-flex align-items-end' : ''">
+                    <div v-if="field.label">
                       <label :for="'field-' +
                         sectionIndex +
                         '-' +
@@ -27,10 +28,10 @@
                         <span class="font-12">{{ field.label }}</span>
                         <span class="ms-1 text-danger">{{
                           field.reqd === 1 ? "*" : ""
-                          }}
-                          
-                          </span>
-                      <span v-if="props.readonlyFor=== true">:</span>
+                        }}
+
+                        </span>
+                        <span v-if="props.readonlyFor === true">:</span>
                       </label>
                     </div>
                     <!-- field.fieldtype === 'Select' || -->
@@ -58,7 +59,7 @@
                       field.fieldtype === 'radio'
                     ">
                       <div class="container-fluid">
-                        <div class="row" >
+                        <div class="row">
                           <div class="form-check col-4 mb-1" v-for="(option, index) in field?.options?.split(
                             '\n'
                           )" :key="index">
@@ -67,7 +68,7 @@
                                 field.fieldtype === 'Check' ||
                                 field.fieldtype === 'Select' && index !== 0
                               " class="form-check-input" type="checkbox" :disabled="blockIndex === 0 || props.readonlyFor === true
-                                  " :checked="field.value === option" :value="option"
+                                " :checked="field.value === option" :value="option"
                                 :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
                                 :id="`${option}-${index}`" @blur="
                                   (event) =>
@@ -108,13 +109,15 @@
 
                     <!-- @click="openInNewWindow(field.value)" -->
                     <template v-else-if="field.fieldtype == 'Attach'">
-                      <div v-if="field.value" class="position-relative d-inline-block" :class="props.readonlyFor === true ? 'image-border-bottom' : ''">
+                      <div v-if="field.value" class="position-relative d-inline-block"
+                        :class="props.readonlyFor === true ? 'image-border-bottom' : ''">
                         <img v-if="isImageFile(field.value)" :src="field.value" alt="Attachment Preview"
                           class="img-thumbnail mt-2 cursor-pointer border-0" style="max-width: 100px; max-height: 100px"
                           @mouseover="showPreview = true" @mouseleave="showPreview = false" />
 
                         <!-- Close Icon to Remove Image -->
-                        <i class="bi bi-x-lg position-absolute  text-danger cursor-pointer" :class="props.readonlyFor === true ? 'd-none' : ''" style="
+                        <i class="bi bi-x-lg position-absolute  text-danger cursor-pointer"
+                          :class="props.readonlyFor === true ? 'd-none' : ''" style="
                             top: -10px;
                             right: -5px;
                             font-size: 13px;
@@ -152,27 +155,29 @@
                       </div>
 
                       <input :disabled="blockIndex === 0 || props.readonlyFor === true
-                        " v-else type="file" accept="image/jpeg,image/png,application/pdf" :class="props.readonlyFor === true ? 'd-none' :' '" :id="'field-' +
+                        " v-else type="file" accept="image/jpeg,image/png,application/pdf"
+                        :class="props.readonlyFor === true ? 'd-none' : ' '" :id="'field-' +
                           sectionIndex +
                           '-' +
                           columnIndex +
                           '-' +
                           fieldIndex
                           " class="form-control previewInputHeight font-10" multiple @change="
-                          logFieldValue(
-                            $event,
-                            blockIndex,
-                            sectionIndex,
-                            rowIndex,
-                            columnIndex,
-                            fieldIndex
-                          )
-                          " />
+                            logFieldValue(
+                              $event,
+                              blockIndex,
+                              sectionIndex,
+                              rowIndex,
+                              columnIndex,
+                              fieldIndex
+                            )
+                            " />
                     </template>
 
                     <template v-else-if="field.fieldtype == 'Datetime'">
-                      <input type="datetime-local" v-model="field.value" :class="props.readonlyFor === true ? 'border-0 image-border-bottom w-50 pb-0 ' :' '" :readOnly="blockIndex === 0 || props.readonlyFor === true
-                        " :placeholder="'Enter ' + field.label" :name="'field-' +
+                      <input type="datetime-local" v-model="field.value"
+                        :class="props.readonlyFor === true ? 'border-0 image-border-bottom w-50 pb-0 ' : ' '" :readOnly="blockIndex === 0 || props.readonlyFor === true
+                          " :placeholder="'Enter ' + field.label" :name="'field-' +
                           sectionIndex +
                           '-' +
                           columnIndex +
@@ -192,25 +197,26 @@
                           '-' +
                           fieldIndex
                           " class="form-control previewInputHeight" />
-                      <component v-if="field.fieldtype !== 'Int'" :is="getFieldComponent(field.fieldtype)" :class="props.readonlyFor === true ? 'border-0 image-border-bottom w-50' :' '"
+                      <component v-if="field.fieldtype !== 'Int'" :is="getFieldComponent(field.fieldtype)"
+                        :class="props.readonlyFor === true ? 'border-0 image-border-bottom w-50' : ' '"
                         :value="field.value" :type="field.fieldtype" :readOnly="blockIndex === 0 || props.readonlyFor === true
                           " :name="'field-' +
-                          sectionIndex +
-                          '-' +
-                          columnIndex +
-                          '-' +
-                          fieldIndex
-                          " @blur="
-                          (event) =>
-                            logFieldValue(
-                              event,
-                              blockIndex,
-                              sectionIndex,
-                              rowIndex,
-                              columnIndex,
-                              fieldIndex
-                            )
-                        " class="form-control previewInputHeight"></component>
+                            sectionIndex +
+                            '-' +
+                            columnIndex +
+                            '-' +
+                            fieldIndex
+                            " @blur="
+                            (event) =>
+                              logFieldValue(
+                                event,
+                                blockIndex,
+                                sectionIndex,
+                                rowIndex,
+                                columnIndex,
+                                fieldIndex
+                              )
+                          " class="form-control previewInputHeight"></component>
                     </template>
                   </div>
                 </div>
@@ -370,18 +376,33 @@ const filteredBlocks = computed(() => {
             // }
           }
           if (field.label === "Approved On") {
-            const now = new Date();
+            const localTime = new Date().toLocaleString("en-CA", {
+              timeZone: "Asia/Kolkata", // Change this to your target timezone
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: false,
+            }).replace(/,/, "").replace(/\//g, "-");
 
-            // Get local time offset in minutes and convert to milliseconds
-            const offset = now.getTimezoneOffset() * 60000;
-
-            // Adjust time to local timezone
-            const localTime = new Date(now.getTime() - offset)
-              .toISOString()
-              .slice(0, 16); // Format to 'YYYY-MM-DDTHH:mm'
-
+            console.log(localTime, "----");
             field.value = localTime;
             emit("updateField", field);
+
+            // const now = new Date();
+
+            // // Get local time offset in minutes and convert to milliseconds
+            // const offset = now.getTimezoneOffset() * 60000;
+
+            // // Adjust time to local timezone
+            // const localTime = new Date(now.getTime() - offset)
+            //   .toISOString()
+            //   .slice(0, 16); // Format to 'YYYY-MM-DDTHH:mm'
+            //   console.log(localTime,"----");
+
+            // field.value = localTime;
+            // emit("updateField", field);  
           }
 
         });
@@ -629,13 +650,13 @@ const uploadFile = (file, field) => {
 </script>
 
 <style setup scoped>
-
-.image-border-bottom{
+.image-border-bottom {
   border: none;
   padding-bottom: 0;
   border-radius: 0;
   border-bottom: 1px solid #ccc !important;
 }
+
 .previewInputHeight {
   /* height: 35px; */
   margin-bottom: 5px;
