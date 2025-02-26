@@ -93,8 +93,11 @@
                     formatDate(item.creation)
                   }}</strong>,
                   <strong class="strong-content">
-                    <!-- {{ item.user_name }} -->
-                    you
+                    <span v-if="index == 0">you</span>
+                    <span v-else>
+
+                    {{ item.user_name }}
+                    </span>
                   </strong>
                   ({{ item.role }})
                   <strong class="strong-content">{{

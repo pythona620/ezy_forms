@@ -72,7 +72,7 @@
           </div>
           <div class="modal-body approvermodalbody">
             <ApproverPreview
-              :blockArr="showRequest" :childHeaders="tableHeaders" :childData="responseData"
+              :blockArr="showRequest" :childHeaders="tableHeaders" :childData="responseData" :readonly-for="true"
               :current-level="totalLevels"
               @updateField="updateFormData"
             />
