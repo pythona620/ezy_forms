@@ -66,16 +66,18 @@ import PaginationComp from '../../Components/PaginationComp.vue'
 import axiosInstance from '../../shared/services/interceptor';
 import { apis, doctypes, domain } from "../../shared/apiurls";
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { rebuildToStructuredArray } from "../../shared/services/field_format";
 import FormPreview from '../../Components/FormPreview.vue'
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 
 const totalRecords = ref(0);
 const pdfPreview = ref('')
 
 const formDescriptions = ref({})
 const tableData = ref([]);
-
+const route = useRoute();
 const businessUnit = computed(() => {
     return EzyBusinessUnit.value;
 });
@@ -134,8 +136,8 @@ const selectedForm = ref(null);
 const actions = ref([
     { name: 'View form', icon: 'fa-solid fa-eye' },
     { name: 'Edit Form', icon: 'fa-solid fa-edit' },
-    { name: 'PDF Format', icon: 'bi bi-filetype-pdf' },
-    // { name: 'Activate this form', icon: 'fa-solid fa-check-circle' },
+    { name: 'Download Print format', icon: 'fa-solid fa-download' },
+    { name: 'Raise Request', icon: 'fa-solid fa-check-circle' },
     // { name: 'In-active this form', icon: 'fa-solid fa-ban' },
     // { name: 'Edit accessibility to dept.', icon: 'fa-solid fa-users' },
     // { name: 'Share this form', icon: 'fa-solid fa-share-alt' },
@@ -178,6 +180,44 @@ function actionCreated(rowData, actionEvent) {
         const modal = new bootstrap.Modal(document.getElementById('pdfView'), {});
         modal.show();
     }
+    if (actionEvent.name === 'Raise Request') {
+    const parsedData = JSON.parse(rowData.form_json);
+    const storedData = localStorage.getItem("employeeData");
+
+    if (storedData) {
+        const designation = JSON.parse(storedData).designation;
+        console.log(designation);
+
+        const roles = parsedData.workflow[0].roles;
+        console.log(roles);
+
+        let hasAccess = false;
+
+        for (let i = 0; i < roles.length; i++) {
+            if (roles[i] === designation) {
+                hasAccess = true;
+                break;
+            }
+        }
+
+        if (hasAccess) {
+            router.push({
+                name: "RaiseRequest",
+                query: {
+                    selectedForm: rowData.form_short_name,
+                    business_unit: rowData.business_unit,
+                    routepath: route.path,
+                    
+                },
+            });
+        } else {
+            toast.info("You are not assigned to raise a request.");
+
+        }
+    } else {
+        console.log("No employee data found in localStorage.");
+    }
+  }
     else if (actionEvent.name === 'Edit accessibility to dept.') {
         formCreation(rowData);
     }

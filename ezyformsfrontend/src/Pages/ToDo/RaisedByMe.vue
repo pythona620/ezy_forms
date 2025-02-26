@@ -181,6 +181,7 @@ import ApproverPreview from "../../Components/ApproverPreview.vue";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import router from "../../router";
+import { useRoute } from "vue-router";
 const businessUnit = computed(() => {
   return EzyBusinessUnit.value;
 });
@@ -204,6 +205,7 @@ const tableRows = ref([]);
 const tableHeaders = ref([]);
 const tableName = ref("");
 const responseData = ref([]);
+const route = useRoute();
 
 const tableheaders = ref([
   // { th: "Request ID", td_key: "name" },
@@ -211,8 +213,8 @@ const tableheaders = ref([
   // { th: "Form category", td_key: "doctype_name" },
   { th: "Owner of form", td_key: "role" },
   { th: "Requested on", td_key: "requested_on" },
-  { th: "Next Level", td_key: "assigned_to_users" },
   { th: "Approval Status", td_key: "status" },
+  { th: "Workflow Status", td_key: "assigned_to_users" },
 ]);
 const fieldMapping = ref({
   // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
@@ -256,6 +258,8 @@ function handleEditClick() {
       selectedForm: selectedRequest.value.doctype_name,
       selectedFormId: selectedRequest.value.name,
       selectedFormStatus: selectedRequest.value.status,
+      routepath: route.path,
+
     },
   });
 }

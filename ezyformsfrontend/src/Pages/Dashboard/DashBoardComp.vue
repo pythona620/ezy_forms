@@ -19,19 +19,19 @@
                                     <span class="color-box scanned"></span>
                                     <span class="label"><b>{{ Approved }}</b> Approved</span>
                                 </div>
-                                <div class="legend-item">
-                                    <span class="color-box InProgress"></span>
-                                    <span class="label"><b>{{ Request_Cancelled }}</b> Request Cancelled</span>
-                                </div>
                                 <!-- </div>
                             <div class="legend"> -->
                                 <div class="legend-item">
-                                    <span class="color-box Pending"></span>
+                                    <span class="color-box InProgress"></span>
                                     <span class="label"><b>{{ Pending }}</b> Pending</span>
                                 </div>
                                 <div class="legend-item">
+                                    <span class="color-box Pending"></span>
+                                    <span class="label"><b>{{ request_raised }}</b> Request Raised</span>
+                                </div>
+                                <div class="legend-item">
                                     <span class="color-box Rejected"></span>
-                                    <span class="label"><b>{{ Rejected }}</b> Rejected</span>
+                                    <span class="label"><b>{{ Request_cancelled }}</b> Request Cancelled</span>
                                 </div>
 
                             </div>
