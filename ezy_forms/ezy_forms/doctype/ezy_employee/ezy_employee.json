@@ -6,6 +6,7 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "enable",
   "company_field",
   "emp_code",
   "emp_name",
@@ -73,11 +74,17 @@
    "fieldname": "emp_phone",
    "fieldtype": "Data",
    "label": "Emp Phone"
+  },
+  {
+   "default": "1",
+   "fieldname": "enable",
+   "fieldtype": "Check",
+   "label": "enable"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-02-07 16:48:02.270603",
+ "modified": "2025-02-24 18:15:40.411593",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
  "name": "Ezy Employee",

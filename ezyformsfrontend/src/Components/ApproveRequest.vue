@@ -24,48 +24,10 @@
               <div class="requestPreviewDiv">
                 <ApproverPreview
                   :blockArr="showRequest"
-                  :current-level="selectedcurrentLevel"
+                  :current-level="selectedcurrentLevel" :employee-data="employeeData"
                   @updateField="updateFormData"
                 />
-                <div class="mt-2">
-                  <div>
-                    <span class="font-13 fw-bold">{{ tableName }}</span>
-                  </div>
-                  <table class="table table-bordered table-striped">
-                    <thead>
-                      <tr>
-                        <th>#</th>
-                        <th
-                          v-for="field in tableHeaders"
-                          :key="field.fieldname"
-                        >
-                          {{ field.label }}
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr v-for="(row, index) in tableRows" :key="index">
-                        <td>{{ index + 1 }}</td>
-                        <td
-                          v-for="field in tableHeaders"
-                          :key="field.fieldname"
-                        >
-                          <span
-                            v-if="isFilePath(row[field.fieldname])"
-                            class="cursor-pointer"
-                            @click="openFile(row[field.fieldname])"
-                          >
-                            <!-- {{ row[field.fieldname] }} -->
-                            <span>View Attachment <i class="bi bi-eye-fill ps-1"></i></span>
-                          </span>
-                          <span v-else>
-                            {{ row[field.fieldname] || "-" }}
-                          </span>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+                
               </div>
               <div v-if="selectedData.type === ''" class="approveBtns">
                 <div class="d-flex justify-content-end align-item-center">
@@ -100,13 +62,12 @@
                         </button>
                       </div>
                       <div>
-                        <ButtonComp
-                          type="button"
-                          icon="check2"
-                          class="approvebtn border-1 text-nowrap font-10"
-                          @click="handleApproveClick"
-                          name="Approve"
-                        />
+                        <button type="submit" class="btn btn-success approvebtn"
+                  @click.prevent="ApproverFormSubmission(emittedFormData, 'Approve')">
+                  <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                  <span v-if="!loading" ><i class="bi bi-check-lg font-15 me-2"></i><span class="font-12">Approve</span></span>
+                </button>
+
                       </div>
                     </div>
                   </div>
@@ -199,11 +160,13 @@ const activityData = ref([]);
 const ApproverReason = ref("");
 const selectedcurrentLevel = ref("");
 const doctypeForm = ref([]);
+const loading = ref(false)
 
 const tableRows = ref([]);
 const tableHeaders = ref([]);
 const tableName = ref("");
 const responseData = ref([]);
+const employeeData = ref([]);
 const resetCommentsValidation = () => {
   if (ApproverReason.value.trim() !== "") {
     // If comment is not empty, set isCommentsValid to true
@@ -218,6 +181,24 @@ const resetCommentsValidation = () => {
 // };
 
 // Format action text (cancelled or raised)
+
+onMounted(() => {
+  const storedData = localStorage.getItem("employeeData");
+  try {
+    const parsedData = JSON.parse(storedData);
+
+    // Ensure parsedData is an array
+    employeeData.value = Array.isArray(parsedData) ? parsedData : [parsedData];
+
+  } catch (error) {
+    console.error("Error parsing employeeData from localStorage:", error);
+    employeeData.value = []; // Fallback to empty array if there's an error
+  }
+});
+
+
+
+
 const formatAction = (action) => {
   if (!action) return "performed an action on";
   const actionMap = {
@@ -231,79 +212,76 @@ const updateFormData = (fieldValues) => {
   emittedFormData.value = emittedFormData.value.concat(fieldValues);
 };
 
-// Function to handle approve button click
-const handleApproveClick = () => {
-  if (ApproverReason.value.trim() === "") {
-    // Set the validation flag to false if comment is empty
-    isCommentsValid.value = false;
-  } else {
-    // Proceed with the Approve action if comments are valid
-    isCommentsValid.value = true;
-    ApproverFormSubmission(emittedFormData.value, "Approve"); // Use emittedFormData instead of formData
-  }
-};
-
 // Function to handle form submission
 function ApproverFormSubmission(dataObj, type) {
+  if (!ApproverReason.value.trim()) {
+    isCommentsValid.value = false; // Show validation error
+    return; // Stop execution
+  }
+
+  isCommentsValid.value = true;
+  loading.value = true; // Start loader
+
   let form = {};
-  if (emittedFormData.value.length) {
-    emittedFormData.value.map((each) => {
+  if (Array.isArray(emittedFormData.value) && emittedFormData.value.length) {
+    emittedFormData.value.forEach((each) => {
       form[each.fieldname] = each.value;
     });
   }
+
   axiosInstance
-    .put(
-      `${apis.resource}${selectedData.value.doctype_name}/${doctypeForm.value.name}`,
-      form
-    )
+    .put(`${apis.resource}${selectedData.value.doctype_name}/${doctypeForm.value.name}`, form)
     .then((response) => {
       if (response?.data) {
         approvalStatusFn(dataObj, type);
+      } else {
+        loading.value = false; // Stop loader on failure
+        toast.error("Failed to submit form", { autoClose: 1000, transition: "zoom" });
       }
+    })
+    .catch((error) => {
+      console.error("Error submitting form:", error);
+      loading.value = false; // Stop loader on error
+      toast.error("An error occurred while submitting the form.", { autoClose: 1000, transition: "zoom" });
     });
 }
 
+// Function to handle approval status
 function approvalStatusFn(dataObj, type) {
-  console.log(dataObj);
+  console.log("Approval Data:", dataObj);
+
   let data = {
     property: tableData.value.property,
     doctype: tableData.value.doctype_name,
     request_ids: [tableData.value.name],
     reason: ApproverReason.value,
     action: type,
-    files: null,
-    cluster_name: null,
     url_for_approval_id: "",
-    // https://ezyrecon.ezyinvoicing.com/home/wf-requests
     current_level: tableData.value.current_level,
   };
 
-  // need to check this api not working
   axiosInstance
     .post(apis.requestApproval, { request_details: [data] })
     .then((response) => {
-      if (response?.message?.success) {
-        if (type == "Reject") {
-          toast.error(`Request ${type}ed`, {
-            autoClose: 1000,
-            transition: "zoom",
-          });
-        } else {
-          toast.success(`Request ${type}ed`, {
-            autoClose: 1000,
-            transition: "zoom",
-          });
-          ApproverReason.value = "";
-        }
-        router.push({
-          name: "ReceivedForMe",
-        });
+      console.log("API Response:", response);
+      
+      if (response?.message?.success === true) {
+        toast.success(`Request ${type}ed`, { autoClose: 1000, transition: "zoom" });
+        ApproverReason.value = ""; // Clear reason after success
+      } else {
+        toast.error(`Failed to ${type} request`, { autoClose: 1000, transition: "zoom" });
       }
     })
     .catch((error) => {
-      console.error("Error fetching data:", error);
+      console.error("Error processing request:", error);
+      toast.error("An error occurred while processing your request.", { autoClose: 1000, transition: "zoom" });
+    })
+    .finally(() => {
+      loading.value = false; // Ensure loader stops
+      router.push({ name: "ReceivedForMe" });
     });
 }
+
 
 function approvalCancelFn(dataObj, type) {
   // let files = this.selectedFileAttachments.map((res: any) => res.url);
@@ -438,7 +416,7 @@ function getdata(formname) {
             const childTableKey = Object.keys(res.data).find((key) =>
               Array.isArray(res.data[key])
             );
-            tableName.value = childTableKey.replace(/_/g, " ");
+            tableName.value = childTableKey?.replace(/_/g, " ");
             console.log(tableName.value);
 
             if (childTableKey) {

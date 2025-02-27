@@ -8,83 +8,52 @@
         </div>
       </div>
 
-      <div class="mt-3">
-        <label for="name" class="font-13">User name</label><br />
-        <input
-          type="text"
-          class="form-control m-0 bg-white"
-          id="name"
-          v-model="formdata.usr"
-          @input="validatename"
-          @change="checkUserMail()"
-          :class="{ 'is-invalid': errors.usr }"
-        />
+      <div>
+        <div class="mt-3">
+          <label for="name" class="font-13">User name</label><br />
+          <input type="text" class="form-control m-0 bg-white" id="name" v-model="formdata.usr" @input="validatename"
+            @change="checkUserMail()" :class="{ 'is-invalid': errors.usr }" />
 
-        <div class="invalid-feedback font-11 mt-1" v-if="errors.usr">
-          {{ errors.usr }}
+          <div class="invalid-feedback font-11 mt-1" v-if="errors.usr">
+            {{ errors.usr }}
+          </div>
         </div>
-      </div>
 
-      <div class="inputbox mt-3">
-        <label for="password" class="font-13">Password</label><br />
-        <!-- <span class="icon"><i class="bi bi-lock-fill"></i></span> -->
-        <input
-          :disabled="!showPwdField"
-          class="form-control m-0"
-          :type="showPassword ? 'text' : 'password'"
-          id="password"
-          v-model="formdata.pwd"
-          @input="validatepassword"
-          @keydown.enter="Login"
-          :class="{ 'is-invalid': errors.pwd }"
-        />
+        <div class="inputbox mt-3">
+          <label for="password" class="font-13">Password</label><br />
+          <!-- <span class="icon"><i class="bi bi-lock-fill"></i></span> -->
+          <input :disabled="!showPwdField" class="form-control m-0" :type="showPassword ? 'text' : 'password'"
+            id="password" v-model="formdata.pwd" @input="validatepassword" @keydown.enter="Login"
+            :class="{ 'is-invalid': errors.pwd }" />
 
-        <!-- Toggle icon for show/hide password -->
-        <span v-if="!errors.pwd" class="toggle-icon" @click="togglePasswordVisibility">
-          <i :class="showPassword ? 'bi bi-eye' : 'bi bi-eye-slash'"></i>
-        </span>
-        <div class="invalid-feedback font-10" v-if="errors.pwd">
-          {{ errors.pwd }}
+          <!-- Toggle icon for show/hide password -->
+          <span v-if="!errors.pwd" class="toggle-icon" @click="togglePasswordVisibility">
+            <i :class="showPassword ? 'bi bi-eye' : 'bi bi-eye-slash'"></i>
+          </span>
+          <div class="invalid-feedback font-10" v-if="errors.pwd">
+            {{ errors.pwd }}
+          </div>
         </div>
+        <br />
+        <button :disabled="!showPwdField" @click="Login" type="submit"
+          class="border-0 btn btn-dark button w-100 py-2 font-13 text-white rounded-1">
+          <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          <span v-if="!loading">Log In</span>
+        </button>
       </div>
-      <br />
-      <button
-        :disabled="!showPwdField"
-        @click="Login"
-        type="submit"
-        class="border-0 btn btn-dark button w-100 py-2 font-13 text-white rounded-1"
-      >
-        <span
-          v-if="loading"
-          class="spinner-border spinner-border-sm"
-          role="status"
-          aria-hidden="true"
-        ></span>
-        <span v-if="!loading">Log In</span>
-      </button>
     </div>
 
-    <div
-      class="modal fade"
-      id="changePassword"
-      data-bs-backdrop="static"
-      data-bs-keyboard="false"
-      tabindex="-1"
-      aria-labelledby="changePasswordLabel"
-      aria-hidden="true"
-    >
+  
+
+    <div class="modal fade" id="changePassword" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+      aria-labelledby="changePasswordLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title font-14 fw-bold" id="changePasswordLabel">
               Set New Password
             </h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-            ></button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
             <!-- <FormFields tag="select" placeholder="Category" class="mb-3" name="roles" id="roles"
@@ -92,16 +61,8 @@
                             v-model="selectedData.selectedCategory" /> -->
             <div class="mb-3">
               <label class="raise-label" for="changepass">New Password</label>
-              <FormFields
-                class="mb-1"
-                tag="input"
-                type="text"
-                name="changepass"
-                id="changepass"
-                placeholder="Enter New Password"
-                v-model="new_password"
-                @change="validateNewPassword"
-              />
+              <FormFields class="mb-1" tag="input" type="text" name="changepass" id="changepass"
+                placeholder="Enter New Password" v-model="new_password" @change="validateNewPassword" />
 
               <p v-if="passwordError" class="text-danger font-11 m-0 ps-2">
                 {{ passwordError }}
@@ -109,30 +70,16 @@
             </div>
             <div class="mb-2">
               <label class="raise-label" for="confirmpass">Confirm Password</label>
-              <FormFields
-                class=""
-                tag="input"
-                type="text"
-                name="confirmpass"
-                id="confirmpass"
-                placeholder="Enter Confirm Password"
-                v-model="confirm_password"
-              />
-              <span v-if="passwordsMismatch" class="text-danger font-11 m-0 ps-2"
-                >Passwords do not match.</span
-              >
+              <FormFields class="" tag="input" type="text" name="confirmpass" id="confirmpass"
+                placeholder="Enter Confirm Password" v-model="confirm_password" />
+              <span v-if="passwordsMismatch" class="text-danger font-11 m-0 ps-2">Passwords do not match.</span>
             </div>
             <!-- <FormFields tag="select" placeholder="Form" class="mb-3" name="roles" id="roles"
                             :Required="false" :options="formList" v-model="selectedData.selectedform" /> -->
           </div>
           <div>
             <div class="d-flex justify-content-center align-items-center p-3">
-              <button
-                :disabled="!isFormValid"
-                class="btn btn-dark font-12 w-100"
-                type="submit"
-                @click="passwordChange"
-              >
+              <button :disabled="!isFormValid" class="btn btn-dark font-12 w-100" type="submit" @click="passwordChange">
                 Create New Password
               </button>
             </div>
@@ -147,12 +94,14 @@
 import { apis, doctypes } from "../shared/apiurls";
 import axiosInstance from "../shared/services/interceptor";
 import FormFields from "../Components/FormFields.vue";
+import ButtonComp from '../Components/ButtonComp.vue'
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 export default {
   props: ["id"],
   components: {
     FormFields,
+    ButtonComp
   },
   data() {
     return {
@@ -171,9 +120,14 @@ export default {
       //   passwordsMismatch: false,
       passwordError: "",
       loading: false,
+      errorMessage: "",
     };
   },
   methods: {
+    // ShowOtp(){
+    //   this.showOtpPage=true;
+    //   this.ShowLoginPage=false;
+    // },
     validatename() {
       if (!this.formdata.usr) {
         this.errors.usr = "Please Enter Valid Email Address *";
@@ -215,7 +169,7 @@ export default {
           if (res.message) {
             const isFirstLogin = res.message.is_first_login;
             this.user_id_name = res.message.name;
-            console.log(this.user_id_name, "======");
+            // console.log(this.user_id_name, "======");
             if (isFirstLogin === 0) {
               const modal = new bootstrap.Modal(
                 document.getElementById("changePassword")
@@ -226,7 +180,7 @@ export default {
             if (isFirstLogin === 1) {
               this.showPwdField = true;
 
-              console.log("User is logging in for the first time.");
+              // console.log("User is logging in for the first time.");
             } else {
               console.log("User has logged in before.");
             }
@@ -248,7 +202,7 @@ export default {
       axiosInstance
         .put(`${apis.loginCheckuseermethod}`, payload)
         .then((res) => {
-          console.log("Password updated successfully:", res.data);
+          // console.log("Password updated:", res.data);
           if (res.message.is_first_login === 1) {
             this.showPwdField = true;
           }
@@ -301,7 +255,6 @@ export default {
                 autoClose: 2000,
                 transition: "zoom",
               });
-
               setTimeout(() => {
                 this.$router.push({ path: "/todo/receivedform" });
               }, 700);
@@ -325,13 +278,16 @@ export default {
     },
 
     userData(email) {
-      console.log(email, "1");
+      // console.log(email, "1");
       axiosInstance
         .get(`${apis.resource}${doctypes.users}/${email}`)
         .then((res) => {
           this.email = res.data.email;
-          console.log(this.email, "2");
+          // console.log(this.email, "2");
           if (this.email) {
+            // const queryParams = {
+            //   filters: JSON.stringify({ enable: 1 })
+            // }
             axiosInstance
               .get(`${apis.resource}${doctypes.EzyEmployeeList}/${this.email}`)
               .then((responce) => {
@@ -354,6 +310,7 @@ export default {
         });
     },
   },
+
   computed: {
     passwordsMismatch() {
       return (
@@ -365,6 +322,11 @@ export default {
     isFormValid() {
       return this.new_password.length >= 6 && this.new_password === this.confirm_password;
     },
+    formattedTime() {
+      const minutes = Math.floor(this.timeLeft / 60);
+      const seconds = this.timeLeft % 60;
+      return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+    },
   },
 };
 </script>
@@ -372,6 +334,59 @@ export default {
 <style scoped>
 .loginpageheight {
   height: 100vh;
+}
+
+.Message-div {
+  background-color: #DEFDE9;
+  padding: 20px 50px;
+  text-align: center;
+  font-size: 12px;
+}
+
+
+.input-field {
+  font-size: 18px;
+  font-weight: 500;
+  width: 38px;
+  height: 38px;
+  border-radius: 6px;
+  border-width: 1px;
+  border: 1px solid #EEEEEE;
+  box-shadow: 0px 1px 8px 0px #00000017;
+  text-align: center;
+}
+
+.resend-button {
+  border: 1px solid #EEEEEE !important;
+  background: transparent;
+  border-radius: 10px;
+  text-align: center;
+  font-weight: 500;
+  font-size: 13px;
+  padding: 10px 30px;
+}
+
+.submit-button {
+  background-color: #1B14DF;
+  border-radius: 10px;
+  text-align: center;
+  font-weight: 500;
+  font-size: 13px;
+  color: white;
+  padding: 10px 30px;
+}
+
+.otp-input.error-border {
+  border: 1px solid red !important;
+}
+
+.back-to-login {
+  color: #1B14DF;
+  padding: 15px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
 .fontimgtext {
@@ -461,8 +476,8 @@ button {
   transition: 0.5s;
 }
 
-.input-box input:focus ~ label,
-.input-box input:valid ~ label {
+.input-box input:focus~label,
+.input-box input:valid~label {
   top: 3px;
 }
 

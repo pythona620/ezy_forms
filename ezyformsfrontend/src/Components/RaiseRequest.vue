@@ -2,9 +2,10 @@
   <div>
     <div class="backtofromPage py-2">
       <router-link
-        to="/todo/receivedform"
-        class="text-decoration-none text-dark font-13"
-        ><span> <i class="bi bi-arrow-left"></i></span>Asset request
+        :to="backTo"
+        @click="backToForm"
+        class="text-decoration-none text-dark  ps-3 font-13"
+        ><span> <i class="bi bi-arrow-left pe-2"></i></span>Asset request
         form</router-link
       >
     </div>
@@ -14,9 +15,9 @@
           <RequestPreview
             :blockArr="blockArr"
             :formName="selectedData.selectedform"
-            @updateField="handleFieldUpdate"
-            @formValidation="isFormValid = $event"
+            @updateField="handleFieldUpdate" @formValidation="isFormValid = $event"
           />
+            <!-- @formValidation="isFormValid = $event" -->
 
           <div v-if="tableName.length" class="mt-3">
             <div>
@@ -36,18 +37,11 @@
                   <td>{{ index + 1 }}</td>
                   <td v-for="field in tableHeaders" :key="field.fieldname">
                     <template v-if="field.fieldtype === 'Data'">
-                      <input
-                        type="text"
-                        class="form-control"
-                        v-model="row[field.fieldname]"
-                      />
+                      <input type="text" class="form-control" v-model="row[field.fieldname]" />
                     </template>
                     <template v-else-if="field.fieldtype === 'Attach'">
-                      <input
-                        type="file"
-                        class="form-control"
-                        @change="handleFileUpload($event, row, field.fieldname)"
-                      />
+                      <input type="file" class="form-control"
+                        @change="handleFileUpload($event, row, field.fieldname)" />
                     </template>
                   </td>
                 </tr>
@@ -63,14 +57,19 @@
               <span> <i class="bi bi-x"></i></span>Clear form
             </button>
             <!-- :disabled="!isFormValid" -->
-            <button
-              :disabled="!isFormValid"
-              class="btn btn-dark font-12"
-              type="submit"
-              @click="raiseRequestSubmission"
-            >
+            <button v-if="!selectedData.selectedFormId "
+               class="btn btn-dark font-12" type="submit" @click="raiseRequestSubmission">
               Raise Request
             </button>
+            <button v-if="selectedData.selectedFormId && $route.query.selectedFormStatus == 'Request Cancelled'"
+              @click="RequestUpdate"  class="btn btn-dark font-12" type="submit">
+              Update Request
+            </button>
+            <button v-if="$route.query.selectedFormStatus && $route.query.selectedFormStatus == 'Request Raised'"
+              @click="EditRequestUpdate"  class="btn btn-dark font-12" type="submit">
+              Edit Request
+            </button>
+
           </div>
         </div>
       </div>
@@ -82,7 +81,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { apis, doctypes, domain } from "../shared/apiurls";
 import RequestPreview from "./RequestPreview.vue";
 import Multiselect from "@vueform/multiselect";
@@ -101,16 +100,19 @@ const route = useRoute(); // Get query params from route
 const selectedData = ref({
   selectedCategory: route.query.selectedCategory || "", // Retrieve from query
   selectedform: route.query.selectedForm || "", // Retrieve from query
+  selectedFormId: route.query.selectedFormId || "", // Retrieve from query
+  routepath: route.query.routepath,
 });
 const business_unit = ref(route.query.business_unit || ""); // Retrieve from query
 const isFormValid = ref(false);
+// const isFormValid = computed(() => allFieldsFilled.value);
 const blockArr = ref([]);
 const categoryOptions = ref([]);
 const employeeData = ref({});
 const formList = ref([]);
 const emittedFormData = ref([]);
-const filepaths = ref("");
-
+const filepaths = ref([]);
+const backTo = ref(selectedData.value.routepath);
 const tableRows = ref([]);
 const tableHeaders = ref([]);
 const childTableName = ref("");
@@ -123,10 +125,82 @@ const filterObj = ref({
   limit_start: 0,
   limitPageLength: 100,
 });
+
+function backToForm() {
+  blockArr.value = [];
+}
+
+
 onMounted(() => {
   formDefinations();
   raiseRequest();
 });
+function RequestUpdate() {
+  // const filesArray = filepaths.value
+  //   ? filepaths.value.split(",").map((filePath) => filePath.trim())
+  //   : [];
+  let form = {};
+  if (emittedFormData.value.length) {
+    emittedFormData.value.map((each) => {
+      form[each.fieldname] = each.value;
+    });
+  }
+
+  let data_obj = {
+    form_id: route.query.selectedFormId,
+    updated_fields: form, // Pass the form JSON here
+  };
+
+  axiosInstance
+    .post(apis.Update_raising_request, data_obj)
+    .then(async (resp) => {
+      if (resp?.message?.success) {
+        toast.success("Request Raised", {
+          autoClose: 2000,
+          transition: "zoom",
+        });
+        blockArr.value = []
+
+        await router.push({ path: "/todo/raisedbyme" });
+      }
+    });
+}
+
+function EditRequestUpdate() {
+  // const filesArray = filepaths.value
+  //   ? filepaths.value.split(",").map((filePath) => filePath.trim())
+  //   : [];
+  let form = {};
+  if (emittedFormData.value.length) {
+    emittedFormData.value.map((each) => {
+      form[each.fieldname] = each.value;
+    });
+  }
+
+  let data_obj = {
+    form_id: route.query.selectedFormId,
+    updated_fields: form, // Pass the form JSON here
+  };
+
+  axiosInstance
+    .post(apis.edit_form_before_approve, data_obj)
+    .then(async (resp) => {
+      if (resp?.message?.success) {
+        toast.success("Request Updated Successfully", {
+          autoClose: 2000,
+          transition: "zoom",
+        });
+        blockArr.value = []
+
+        await router.push({ path: "/todo/raisedbyme" });
+      }
+    });
+
+}
+
+
+
+
 const addRow = () => {
   const newRow = Object.fromEntries(
     tableHeaders.value.map((field) => [field.fieldname, ""])
@@ -144,7 +218,7 @@ watch(business_unit, (newBu, oldBu) => {
     deptData();
   }
 });
-function clearFrom() {}
+function clearFrom() { }
 function deptData(value = null) {
   const filters = [["business_unit", "like", `%${business_unit.value}%`]];
   const queryParams = {
@@ -162,8 +236,8 @@ function deptData(value = null) {
         const newFormsRoute =
           deptartmentData.value.length > 0
             ? `/forms/department/${deptartmentData.value[0].name
-                .replace(/\s+/g, "-")
-                .toLowerCase()}`
+              .replace(/\s+/g, "-")
+              .toLowerCase()}`
             : "/forms";
 
         tabsData.value = tabsData.value.map((tab) => {
@@ -236,8 +310,8 @@ function formDefinations() {
   if (selectedData.value.selectedform) {
     filters.push([
       "form_short_name",
-      "like",
-      `%${selectedData.value?.selectedform}%`,
+      "=",
+      `${selectedData.value?.selectedform}`,
     ]);
   }
 
@@ -257,6 +331,9 @@ function formDefinations() {
       const form_json = res.data[0].form_json;
 
       blockArr.value = rebuildToStructuredArray(JSON.parse(form_json).fields);
+      if (selectedData.value.selectedFormId) {
+        WfRequestUpdate();
+      }
 
       // console.log(form_json, typeof form_json, "=-------------");
       blockArr.value.splice(1);
@@ -265,14 +342,14 @@ function formDefinations() {
       tableName.value = parsedFormJson.fields.filter(
         (field) => field.fieldtype === "Table"
       );
-      console.log(tableName.value, "5555");
+      // console.log(tableName.value, "5555");
       childTableName.value = tableName.value[0]?.options.replace(/_/g, " ");
 
-      console.log(childTableName.value, "child====");
+      // console.log(childTableName.value, "child====");
 
       tableHeaders.value = parsedFormJson.child_table_fields;
       initializeTableRows();
-      console.log(tableHeaders.value, "table fields");
+      // console.log(tableHeaders.value, "table fields");
     })
     .catch((error) => {
       console.error("Error fetching ezyForms data:", error);
@@ -309,7 +386,7 @@ const uploadFile = (row, fieldname, file) => {
       if (res.message && res.message.file_url) {
         row[fieldname] = res.message.file_url;
 
-        console.log("Uploaded file URL:", res.message.file_url);
+        // console.log("Uploaded file URL:", res.message.file_url);
       } else {
         console.error("file_url not found in the response.");
       }
@@ -359,15 +436,23 @@ const uploadFile = (row, fieldname, file) => {
 //     });
 // }
 const handleFieldUpdate = (field) => {
+  console.log(field,"field");
   const fieldExists = emittedFormData.value.some(
     (item) => item.fieldname === field.fieldname
   );
-
   if (!fieldExists) {
     if (field.fieldtype === "Attach") {
-      if (!Array.isArray(field.value)) {
-        filepaths.value = field.value;
+      
+      if (field.value && typeof field.value === "string") {
+        filepaths.value = field.value
+          .split(",")
+          .map((filePath, index) => ({ [index]: filePath.trim() })) // Assign numeric keys
+          .filter((file) => Object.values(file)[0] !== ""); // Remove empty entries
+      } else {
+        filepaths.value = [];
       }
+      console.log(filepaths.value,"oooo");
+      console.log(emittedFormData.value,"emitteddata");
       emittedFormData.value.push(field);
     } else {
       emittedFormData.value = emittedFormData.value.concat(field);
@@ -378,72 +463,133 @@ const handleFieldUpdate = (field) => {
     );
   }
 };
-// const ChildTableData = () => {
-//   const childName = tableName.value[0].options;
-//   let form = {};
-//   form["doctype"] = selectedData.value.selectedform;
-//   form["company_field"] = business_unit.value;
-//   form[childName] = tableRows.value;
-
-//   // form['form_json']
-//   const formData = new FormData();
-//   formData.append("doc", JSON.stringify(form));
-//   formData.append("action", "Save");
-
-//   console.log(form);
-//   axiosInstance
-//     .post(apis.savedocs, formData)
-//     .then((response) => {
-//       console.log(response);
-//     })
-//     .catch((error) => {
-//       console.error("Error fetching data:", error);
-//     });
-// };
-
-
-
-function raiseRequestSubmission() {
-  // ChildTableData();
+const ChildTableData = () => {
   const childName = tableName.value[0]?.options;
   let form = {};
   form["doctype"] = selectedData.value.selectedform;
   form["company_field"] = business_unit.value;
-  if(tableName.value.length){
-    form[childName] = tableRows.value;
-  }
-  // form['supporting_files'] = [];
-  if (emittedFormData.value.length) {
-    emittedFormData.value.map((each) => {
-      form[each.fieldname] = each.value;
-    });
-  }
+  form[childName] = tableRows.value;
 
   // form['form_json']
   const formData = new FormData();
   formData.append("doc", JSON.stringify(form));
   formData.append("action", "Save");
+
+  // console.log(form);
   axiosInstance
     .post(apis.savedocs, formData)
     .then((response) => {
-      request_raising_fn(response.docs[0]);
+      console.log(response);
+    })
+    .catch((error) => {
+      console.error("Error fetching data:", error);
+    });
+};
+
+function raiseRequestSubmission() {
+  // console.log(isFormValid.value);
+  if (!isFormValid.value) {
+    toast.error("Please Fill Mandatory Fields");
+    return; // Stop execution if the form is invalid
+  } 
+    if (tableName.value[0]?.options) {
+      ChildTableData();
+    }
+    const childName = tableName.value[0]?.options;
+    let form = {};
+    form["doctype"] = selectedData.value.selectedform;
+    form["company_field"] = business_unit.value;
+    if (tableName.value.length) {
+      form[childName] = tableRows.value;
+    }
+    // form['supporting_files'] = [];
+    if (emittedFormData.value.length) {
+      emittedFormData.value.map((each) => {
+        form[each.fieldname] = each.value;
+      });
+    }
+
+    // form['form_json']
+    const formData = new FormData();
+    formData.append("doc", JSON.stringify(form));
+    formData.append("action", "Save");
+    // console.log(formData);
+    axiosInstance
+      .post(apis.savedocs, formData)
+      .then((response) => {
+        request_raising_fn(response.docs[0]);
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
+  
+}
+function WfRequestUpdate() {
+  const filters = [
+    [
+      "wf_generated_request_id",
+      "like",
+      `%${selectedData.value.selectedFormId}%`,
+    ],
+  ];
+
+  const queryParams = {
+    fields: JSON.stringify(["*"]),
+    limit_page_length: null,
+    limit_start: 0,
+    filters: JSON.stringify(filters),
+    order_by: `\`tab${selectedData.value.selectedform}\`.\`creation\` desc`,
+  };
+
+  axiosInstance
+    .get(`${apis.resource}${selectedData.value.selectedform}`, {
+      params: queryParams,
+    })
+    .then((res) => {
+      if (res.data && res.data.length > 0) {
+        const doctypeForm = res.data[0];
+        // console.log(doctypeForm, "doctype",);
+        // console.log( blockArr.value);
+
+        // Map response data to UI fields
+        mapFormFieldsToRequest(doctypeForm, blockArr.value);
+      }
     })
     .catch((error) => {
       console.error("Error fetching data:", error);
     });
 }
 
+function mapFormFieldsToRequest(doctypeData, blockArr) {
+  if (!doctypeData) return; // Ensure valid data
+
+  blockArr.forEach((block) => {
+    block.sections?.forEach((section) => {
+      section.rows?.forEach((row) => {
+        row.columns?.forEach((column) => {
+          column.fields?.forEach((field) => {
+            // Check if the field exists in the API response
+            if (doctypeData.hasOwnProperty(field.fieldname)) {
+              field.value = doctypeData[field.fieldname] ?? ""; // Set value reactively
+            }
+          });
+        });
+      });
+    });
+  });
+}
 function request_raising_fn(item) {
-  const filesArray = filepaths.value
-    ? filepaths.value.split(",").map((filePath) => filePath.trim())
-    : [];
+  console.log(filepaths.value,"---filepaths");
+  // const filesArray = filepaths.value
+  //   ? filepaths.value.split(",").map((filePath) => filePath.trim())
+  //   : [];
   let data_obj = {
     module_name: "Ezy Forms",
     doctype_name: selectedData.value.selectedform,
     ids: [item.name],
     reason: "Request Raised",
     url_for_request_id: "",
-    files: filesArray,
+    files: filepaths.value.length > 0 ? filepaths.value : [],
     property: business_unit.value,
   };
   axiosInstance.post(apis.raising_request, data_obj).then(async (resp) => {
@@ -513,6 +659,7 @@ function request_raising_fn(item) {
 table {
   border-collapse: collapse;
 }
+
 th {
   background-color: #f2f2f2 !important;
   text-align: left;
@@ -523,6 +670,7 @@ th {
 td {
   font-size: 12px;
 }
+
 button {
   margin-top: 10px;
   padding: 5px 10px;

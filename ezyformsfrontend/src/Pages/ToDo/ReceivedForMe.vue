@@ -42,29 +42,17 @@
             <h5 class="modal-title font-13" id="viewRequestLabel">
               Request Id: {{ selectedRequest.name }}
             </h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              @click="closeModal"
-              aria-label="Close"
-            ></button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" @click="closeModal"
+              aria-label="Close"></button>
           </div>
           <div class="modal-body approvermodalbody">
-            <ApproverPreview
-              :blockArr="showRequest"
-              :current-level="selectedcurrentLevel"
-              @updateField="updateFormData"
-            />
+            <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel" :employeeData="employeeData"
+              @updateField="updateFormData" />
           </div>
           <div class="p-2">
             <div class="activity-log-container">
-              <div
-                v-for="(item, index) in activityData"
-                :key="index"
-                class="activity-log-item"
-                :class="{ 'last-item': index === activityData.length - 1 }"
-              >
+              <div v-for="(item, index) in activityData" :key="index" class="activity-log-item"
+                :class="{ 'last-item': index === activityData.length - 1 }">
                 <div class="activity-log-dot"></div>
                 <div class="activity-log-content">
                   <p class="font-12 mb-1">
@@ -76,48 +64,48 @@
                     <strong class="strong-content">{{
                       formatAction(item.action)
                     }}</strong>
-                    the request with the comments:
-                    <strong class="strong-content">{{ item.reason || "N/A" }}</strong
-                    >.
+                    the request<span v-if="index !== 0 && item.reason">with the comments:</span>
+                    <strong v-if="index !== 0 && item.reason" class="strong-content">{{ item.reason || "N/A"
+                      }}</strong>.
                   </p>
                 </div>
               </div>
             </div>
             <div v-if="!requestcancelled" class="form-floating p-1">
-              <textarea
-                class="form-control font-12"
-                placeholder="Leave a comment here"
-                id="floatingTextarea"
-                @input="resetCommentsValidation"
-                :class="{ 'is-invalid': !isCommentsValid }"
-                v-model="ApproverReason"
-              ></textarea>
+              <textarea class="form-control font-12" placeholder="Leave a comment here" id="floatingTextarea"
+                @input="resetCommentsValidation" :class="{ 'is-invalid': !isCommentsValid }"
+                v-model="ApproverReason"></textarea>
               <label class="font-11" for="floatingTextarea">Comments..</label>
+              <span v-if="!isCommentsValid" class="font-11 text-danger ps-1">Please enter comments**</span>
             </div>
           </div>
-          <div v-if="!requestcancelled" class="modal-footer">
-            <div class="d-flex justify-content-between align-items-center mt-3 gap-2">
+          <div class="modal-footer">
+            <div v-if="!requestcancelled" class="d-flex justify-content-between align-items-center mt-3 gap-2">
               <div>
-                <button
-                  class="btn btn-outline-danger font-10 py-0 rejectbtn"
-                  type="button"
-                  data-bs-dismiss="modal"
-                  @click="approvalCancelFn(formData, 'Request Cancelled')"
-                >
+                <button class="btn btn-outline-danger font-12 py-0 rejectbtn" type="button"
+                  @click="ApproverCancelSubmission(formData, 'Request Cancelled')">
                   <span><i class="bi bi-x-lg me-2"></i></span>Reject
                 </button>
               </div>
               <div>
-                <ButtonComp
-                  type="button"
-                  icon="check2"
-                  class="approvebtn border-1 text-nowrap font-10"
-                  @click="handleApproveClick"
-                  name="Approve"
-                />
+                <!-- <ButtonComp type="button" icon="check2" class="approvebtn border-1 text-nowrap font-10"
+                  @click="ApproverFormSubmission('formData','Approve')" name="Approve" /> -->
+                <button type="submit" class="btn btn-success approvebtn"
+                  @click.prevent="ApproverFormSubmission(emittedFormData, 'Approve')">
+                  <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                  <span v-if="!loading" ><i class="bi bi-check-lg font-15 me-2"></i><span class="font-12">Approve</span></span>
+                </button>
+
+
               </div>
             </div>
+
+            <!-- <div v-if="requestcancelled">
+              <ButtonComp type="button" class="border-1 edit-btn text-nowrap font-10" @click="handleEditClick"
+                name="Edit" />
+            </div> -->
           </div>
+
         </div>
       </div>
     </div>
@@ -161,13 +149,13 @@ const selectedcurrentLevel = ref("");
 const activityData = ref([]);
 
 const tableheaders = ref([
-  { th: "Request ID", td_key: "name" },
+  // { th: "Request ID", td_key: "name" },
   { th: "Form name", td_key: "doctype_name" },
   // { th: "Form category", td_key: "doctype_name" },
   // { th: "Owner of form", td_key: "owner" },
   { th: "Requested By", td_key: "requested_by" },
   { th: "Requested department", td_key: "role" },
-  // { th: "Requested on", td_key: "requested_on" },
+  { th: "Property", td_key: "property" },
   { th: "Approval Status", td_key: "status" },
 ]);
 const fieldMapping = ref({
@@ -189,12 +177,32 @@ const selectedRequest = ref({});
 const showRequest = ref(null);
 const doctypeForm = ref([]);
 const ApproverReason = ref("");
+const employeeData = ref([]);
+const loading = ref(false)
+onMounted(() => {
+  const storedData = localStorage.getItem("employeeData");
+  try {
+    const parsedData = JSON.parse(storedData);
+
+    // Ensure parsedData is an array
+    employeeData.value = Array.isArray(parsedData) ? parsedData : [parsedData];
+
+  } catch (error) {
+    console.error("Error parsing employeeData from localStorage:", error);
+    employeeData.value = []; // Fallback to empty array if there's an error
+  }
+});
+
 function actionCreated(rowData, actionEvent) {
   if (actionEvent.name === "View Request") {
     if (rowData) {
       selectedRequest.value = { ...rowData };
       selectedcurrentLevel.value = selectedRequest.value.current_level;
-      console.log(selectedRequest.value.name);
+
+
+      // console.log("doctype_name",selectedRequest.value.doctype_name);
+      // console.log("Property name",selectedRequest.value.property);
+
 
       // Rebuild the structured array from JSON
       showRequest.value = rebuildToStructuredArray(
@@ -250,8 +258,7 @@ function actionCreated(rowData, actionEvent) {
 }
 
 function viewPreview(data) {
-  console.log(data);
-  console.log(route.path, "===-----");
+  // console.log(data);
   router.push({
     name: "ApproveRequest",
     query: {
@@ -289,17 +296,42 @@ const updateFormData = (fieldValues) => {
 };
 const isCommentsValid = ref(true); // Flag to validate comment field
 
+// function handleEditClick() {
+//   console.log("item", selectedRequest.value);
+
+//   // Hide the modal properly
+//   const modalElement = document.getElementById('viewRequest');
+//   if (modalElement) {
+//     const modalInstance = bootstrap.Modal.getInstance(modalElement); // Get existing modal instance
+//     if (modalInstance) {
+//       modalInstance.hide();
+//     }
+//   }
+
+//   // Navigate to the new route
+//   router.push({
+//     name: "RaiseRequest",
+//     query: {
+//       business_unit: selectedRequest.value.property,
+//       selectedForm: selectedRequest.value.doctype_name,
+//     }
+//   });
+// }
+
+
+
+
 // Function to handle approve button click
-const handleApproveClick = () => {
-  if (ApproverReason.value.trim() === "") {
-    // Set the validation flag to false if comment is empty
-    isCommentsValid.value = false;
-  } else {
-    // Proceed with the Approve action if comments are valid
-    isCommentsValid.value = true;
-    ApproverFormSubmission(emittedFormData.value, "Approve"); // Use emittedFormData instead of formData
-  }
-};
+// const handleApproveClick = () => {
+//   if (ApproverReason.value.trim() === "") {
+//     // Set the validation flag to false if comment is empty
+//     isCommentsValid.value = false;
+//   } else {
+//     // Proceed with the Approve action if comments are valid
+//     isCommentsValid.value = true;
+//     ApproverFormSubmission(emittedFormData.value, "Approve"); // Use emittedFormData instead of formData
+//   }
+// };
 
 const resetCommentsValidation = () => {
   if (ApproverReason.value.trim() !== "") {
@@ -309,6 +341,18 @@ const resetCommentsValidation = () => {
 };
 // Function to handle form submission
 function ApproverFormSubmission(dataObj, type) {
+
+  if (ApproverReason.value.trim() === "") {
+    isCommentsValid.value = false; // Show validation error
+    return; // Stop execution
+  }
+
+  isCommentsValid.value = true;
+  loading.value = true; // Start loader
+
+
+
+
   let form = {};
   if (emittedFormData.value.length) {
     emittedFormData.value.map((each) => {
@@ -323,11 +367,19 @@ function ApproverFormSubmission(dataObj, type) {
     .then((response) => {
       if (response?.data) {
         approvalStatusFn(dataObj, type);
+        
       }
-    });
+    })
+    .catch((error) => {
+      console.error("Error submitting form:", error);
+    })
+    
 }
 
+
 function approvalStatusFn(dataObj, type) {
+
+
   console.log(dataObj);
   let data = {
     property: selectedRequest.value.property,
@@ -346,38 +398,80 @@ function approvalStatusFn(dataObj, type) {
   axiosInstance
     .post(apis.requestApproval, { request_details: [data] })
     .then((response) => {
-      if (response?.message?.success) {
-        if (type == "Reject") {
-          toast.error(`Request ${type}ed`, { autoClose: 1000, transition: "zoom" });
-        } else {
-          toast.success(`Request ${type}ed`, { autoClose: 1000, transition: "zoom" });
-          ApproverReason.value = "";
-        }
+      if (response?.message?.success === true) {
+        toast.success(`Request ${type}ed`, { autoClose: 1000, transition: "zoom" });
         const modal = bootstrap.Modal.getInstance(document.getElementById("viewRequest"));
         modal.hide();
+        ApproverReason.value = ""; // Clear reason after success
+
+       
         receivedForMe();
+      } else {
+        toast.error(`Failed to ${type} request`, { autoClose: 1000, transition: "zoom" });
       }
     })
     .catch((error) => {
-      console.error("Error fetching data:", error);
+      console.error("Error processing request:", error);
+      // toast.error("An error occurred while processing your request.", { autoClose: 1000, transition: "zoom" });
+    })
+    .finally(() => {
+      loading.value = false; // Ensure loader stops
     });
 }
+
+
+function ApproverCancelSubmission(dataObj, type) {
+
+  if (ApproverReason.value.trim() === "") {
+    // Set the validation flag to false if the comment is empty
+    isCommentsValid.value = false;
+
+    return; // Stop function execution
+  } else {
+    // Proceed if comments are valid
+    isCommentsValid.value = true;
+  }
+
+
+
+  let form = {};
+  if (emittedFormData.value.length) {
+    emittedFormData.value.map((each) => {
+      form[each.fieldname] = each.value;
+    });
+  }
+  axiosInstance
+    .put(
+      `${apis.resource}${selectedRequest.value.doctype_name}/${doctypeForm.value.name}`,
+      form
+    )
+    .then((response) => {
+      if (response?.data) {
+        approvalCancelFn(dataObj, type);
+      }
+    });
+}
+
 
 function approvalCancelFn(dataObj, type) {
   // let files = this.selectedFileAttachments.map((res: any) => res.url);
 
+  console.log(dataObj, "data");
   let data = {
     property: selectedRequest.value.property,
     doctype: selectedRequest.value.doctype_name,
     request_id: selectedRequest.value.name,
-    reason: type == "Request Cancelled" ? "Cancelled" : "",
+    reason: ApproverReason.value,
     action: type,
     files: [],
     url_for_cancelling_id: "",
     current_level: selectedRequest.value.current_level,
   };
   axiosInstance.post(apis.wf_cancelling_request, data).then((response) => {
-    if (response?.message?.success) {
+    if (response?.message) {
+      if (type == "Reject") {
+        toast.error(`Request ${type}ed`, { autoClose: 1000, transition: "zoom" });
+      }
       const modal = bootstrap.Modal.getInstance(document.getElementById("viewRequest"));
       modal.hide();
       receivedForMe();
@@ -524,14 +618,11 @@ watch(
   { immediate: true }
 );
 
-onMounted(() => {
-  // receivedForMe()
-});
 </script>
 <style scoped>
 .approvebtn {
   width: 146px;
-  height: 30px;
+  /* height: 30px; */
   background: #099819;
   color: white;
   padding: 5px 15px 5px 15px;
@@ -541,9 +632,17 @@ onMounted(() => {
   font-weight: bold;
 }
 
+.edit-btn {
+  background-color: #333;
+  color: white;
+  padding: 5px 15px 5px 15px;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
 .rejectbtn {
   width: 146px;
-  height: 30px;
+  /* height: 30px; */
   background: #fe212e;
   color: white;
   padding: 5px 15px 5px 15px;

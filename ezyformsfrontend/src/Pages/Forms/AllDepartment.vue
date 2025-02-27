@@ -13,9 +13,9 @@
 
       </div>
       <div class="mt-3">
-        <GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true" actionType="dropdown"
-          @actionClicked="actionCreated" :actions="actions" @updateFilters="inLineFiltersData"
-          :field-mapping="fieldMapping" isFiltersoption="true" />
+        <GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true"
+          actionType="Toogle&dropdown" @actionClicked="actionCreated" @toggle-click="toggleFunction" :actions="actions"
+          @updateFilters="inLineFiltersData" :field-mapping="fieldMapping" isFiltersoption="true" />
         <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
           @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
       </div>
@@ -54,9 +54,16 @@ import PaginationComp from "../../Components/PaginationComp.vue"
 import FormPreview from '../../Components/FormPreview.vue'
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
+import router from '../../router';
+import { useRoute } from 'vue-router';
 const totalRecords = ref(0);
 const tableheaders = ref([
   { th: "Form name", td_key: "form_name" },
+  { th: "Form Short Code", td_key: "form_short_name" },
+
+
+
+
   { th: "Form category", td_key: "form_category" },
   { th: "Accessible departments", td_key: "accessible_departments" },
   { th: "Status", td_key: "form_status" },
@@ -66,6 +73,7 @@ const formDescriptions = ref({})
 const selectedForm = ref(null);
 const tableData = ref([]);
 const formCategory = ref([]);
+const route = useRoute();
 
 
 
@@ -76,7 +84,7 @@ const filterObj = ref({ limitPageLength: 'None', limit_start: 0 });
 const actions = ref(
   [
     { name: 'View form', icon: 'fa-solid fa-eye' },
-
+    { name: 'Raise Request', icon: 'fa fa-file-text' },
   ]
 )
 const fieldMapping = ref({
@@ -95,13 +103,84 @@ function actionCreated(rowData, actionEvent) {
       selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json).fields)
       const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});// raise a modal
       modal.show();
-
+      
     } else {
       toast.warn(" There is no form fields ")
     }
   }
+  
+  if (actionEvent.name === 'Raise Request') {
+    const parsedData = JSON.parse(rowData.form_json);
+    const storedData = localStorage.getItem("employeeData");
 
+    if (storedData) {
+        const designation = JSON.parse(storedData).designation;
+        console.log(designation);
+
+        const roles = parsedData.workflow[0].roles;
+        console.log(roles);
+
+        let hasAccess = false;
+
+        for (let i = 0; i < roles.length; i++) {
+            if (roles[i] === designation) {
+                hasAccess = true;
+                break;
+            }
+        }
+
+        if (hasAccess) {
+            router.push({
+                name: "RaiseRequest",
+                query: {
+                    selectedForm: rowData.form_short_name,
+                    business_unit: rowData.business_unit,
+                    routepath: route.path,
+
+                    
+                },
+            });
+        } else {
+          toast.info("You do not have permission to access this page.");
+        }
+    } else {
+        console.log("No employee data found in localStorage.");
+    }
+  }
 }
+// Toggle function triggered when a checkbox is clicked
+function toggleFunction(rowData, rowIndex, event) {
+  // console.log("rowData", rowData);
+
+  // Decide the action based on the current state:
+  const isCurrentlyEnabled = rowData.enable == '1' || rowData.enable === 1;
+  const actionText = isCurrentlyEnabled ? 'delete' : 'restore';
+
+  // Show the confirmation dialog with dynamic messaging:
+  if (confirm(`Are you sure you want to ${actionText} this Form?`)) {
+    // Toggle the state:
+    rowData.enable = isCurrentlyEnabled ? 0 : 1;
+
+    axiosInstance
+      .put(`${apis.resource}${doctypes.EzyFormDefinitions}/${rowData.name}`, rowData)
+      .then((response) => {
+        console.log("Response:", response.data);
+        // Adjust the toast message accordingly:
+        toast.success(`Form ${actionText}d successfully`, { autoClose: 700 });
+        // Refresh the table data after a short delay
+        setTimeout(() => {
+          fetchDepartmentDetails();
+        }, 1000);
+      })
+      .catch((error) => {
+        console.error("Error updating toggle:", error);
+      });
+  } else {
+    // If canceled, do nothing – the checkbox remains unchanged.
+    console.log("Action cancelled. Toggle remains unchanged.");
+  }
+}
+
 
 // Watch business unit and department ID changes
 watch(
@@ -178,10 +257,11 @@ function inLineFiltersData(searchedData) {
 function fetchDepartmentDetails(id, data) {
 
   const filters = [
-    ["business_unit", "like", `%${newBusinessUnit.value.business_unit}%`]
+    ["business_unit", "like", `%${newBusinessUnit.value.business_unit}%`],
+    ["enable", "=", 1]
   ];
   if (props.id) {
-    filters.push(["owner_of_the_form", "like", `%${props.id}%`]);
+    filters.push(["owner_of_the_form", "=", props.id]);
   }
   if (data) {
     filters.push(data)
@@ -197,7 +277,7 @@ function fetchDepartmentDetails(id, data) {
   const queryParamsCount = {
     fields: JSON.stringify(["count(name) AS total_count"]),
     limitPageLength: "None",
-    filters: JSON.stringify(filters),
+    filters: JSON.stringify(filters)
   }
   axiosInstance.get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParamsCount })
     .then((res) => {

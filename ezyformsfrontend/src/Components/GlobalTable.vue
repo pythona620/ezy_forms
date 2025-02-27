@@ -7,11 +7,7 @@
 						<input type="checkbox" class="checkbox form-check-input" @change="SelectedAll()" />
 					</th> -->
           <th>#</th>
-          <th
-            v-for="(column, index) in tHeaders"
-            :key="index"
-            :class="{ 'text-center': column.th === 'Users' }"
-          >
+          <th v-for="(column, index) in tHeaders" :key="index" :class="{ 'text-center': column.th === 'Users' }">
             {{ column.th }}
           </th>
           <th class="text-center fixed-column" v-if="isAction == 'true'">Action</th>
@@ -40,28 +36,17 @@
                 />
               </div>
               <!-- Date input -->
-              <input
-                v-else-if="fieldMapping[column.td_key].type === 'date'"
-                type="date"
-                class="form-control font-12 input-search py-1 px-2"
-                v-model="filters[column.td_key]"
-                @input="handleFilterChange"
-              />
+              <input v-else-if="fieldMapping[column.td_key].type === 'date'" type="date"
+                class="form-control font-12 input-search py-1 px-2" v-model="filters[column.td_key]"
+                @input="handleFilterChange" />
 
               <!-- Select dropdown -->
-              <select
-                v-else-if="fieldMapping[column.td_key].type === 'select'"
-                class="form-control form-select input-search font-12 py-1 px-2 w-100"
-                v-model="filters[column.td_key]"
-                @change="handleFilterChange"
-              >
+              <select v-else-if="fieldMapping[column.td_key].type === 'select'"
+                class="form-control form-select input-search font-12 py-1 px-2 w-100" v-model="filters[column.td_key]"
+                @change="handleFilterChange">
                 <option class="font-12" value="">All</option>
-                <option
-                  class="font-12"
-                  v-for="(option, optionIndex) in fieldMapping[column.td_key].options"
-                  :key="optionIndex"
-                  :value="option"
-                >
+                <option class="font-12" v-for="(option, optionIndex) in fieldMapping[column.td_key].options"
+                  :key="optionIndex" :value="option">
                   {{ option }}
                 </option>
               </select>
@@ -81,55 +66,47 @@
 								@change="selectedCheckList(row, rowIndex)" />
 						</td> -->
             <td class="">{{ rowIndex + 1 }}</td>
-            <td v-for="(column, colIndex) in tHeaders" :key="colIndex">
+            <td :title="row[column.td_key] ? row[column.td_key].toString() : '-'" v-for="(column, colIndex) in tHeaders"
+              :key="colIndex">
+
+              <!-- <span :class="{'accessible-departments': column.td_key === 'accessible_departments'}" v-if="column.td_key === 'accessible_departments'">
+                
+              </span> -->
               <!-- Condition for Action Column -->
               <span v-if="column.td_key === 'status'">
-                <i
-                  class="bi bi-circle-fill status-circle font-10 text-center pe-2"
-                  :class="{
-                    'text-warning fw-medium': row[column.td_key] === 'Request Raised',
-                    'textcompleted fw-medium': row[column.td_key] === 'Completed',
-                    'text-primary fw-medium': row[column.td_key] === 'In Progress',
-                    'textcancel fw-medium': row[column.td_key] === 'Cancelled',
-                    'text-danger fw-medium': row[column.td_key] === 'Request Cancelled',
-                  }"
-                ></i>
+                <i class="bi bi-circle-fill status-circle font-10 text-center pe-2" :class="{
+                  'text-warning fw-medium': row[column.td_key] === 'Request Raised',
+                  'textcompleted fw-medium': row[column.td_key] === 'Completed',
+                  'text-primary fw-medium': row[column.td_key] === 'In Progress',
+                  'textcancel fw-medium': row[column.td_key] === 'Cancelled',
+                  'text-danger fw-medium': row[column.td_key] === 'Request Cancelled',
+                }"></i>
                 {{ row[column.td_key]
-                }}<span
-                  v-if="row.current_level !== undefined && row.total_levels !== undefined"
-                >
+                }}<span v-if="row.current_level !== undefined && row.total_levels !== undefined">
                   ({{ row.current_level }} / {{ row.total_levels }})
                 </span>
               </span>
 
               <!-- Condition for Active Column -->
-              <span
-                v-else-if="column.td_key === 'active'"
-                :class="{
-                  activeform: row[column.td_key] == '1',
-                  'text-danger': row[column.td_key] == '0',
-                }"
-              >
+              <span v-else-if="column.td_key === 'active'" :class="{
+                activeform: row[column.td_key] == '1',
+                'text-danger': row[column.td_key] == '0',
+              }">
                 <i class="bi bi-circle-fill status-circle font-10 text-center pe-2"></i>
                 {{ row[column.td_key] === 1 ? "Active" : "In active" }}
               </span>
 
-              <span
-                v-else-if="column.td_key === 'form_status'"
-                :class="{
-                  activeform: row[column.td_key] == 'Created',
-                  'text-warning': row[column.td_key] == 'Draft',
-                }"
-              >
+              <span v-else-if="column.td_key === 'form_status'" :class="{
+                activeform: row[column.td_key] == 'Created',
+                'text-warning': row[column.td_key] == 'Draft',
+              }">
                 <i class="bi bi-circle-fill status-circle font-10 text-center pe-2"></i>
                 {{ row[column.td_key] }}
               </span>
               <!-- Default Column Rendering -->
-              <span
-                v-else-if="
-                  column.td_key === 'requested_on' || column.td_key === 'invoice_date'
-                "
-              >
+              <span v-else-if="
+                column.td_key === 'requested_on' || column.td_key === 'invoice_date'
+              ">
                 {{ formatDate(row[column.td_key]) }}
               </span>
               <span v-else-if="column.td_key === 'signature'">
@@ -141,6 +118,35 @@
                   <i class="bi bi-x-lg fw-bolder text-danger"></i>
                 </span>
               </span>
+              <span v-else-if="column.td_key === 'assigned_to_users'">
+                <div>
+                  <span>
+                    {{
+                      (() => {
+                        try {
+                          let value = JSON.parse(row[column.td_key].replace(/'/g, '"')); // Replace single quotes & parse
+
+                          // If status is 'Completed', return 'Completed'
+                          if (row.status === 'Completed') {
+                            return 'Completed';
+                          }
+
+                          // If value is an empty array, return "-"
+                          if (Array.isArray(value) && value.length === 0) {
+                            return "-";
+                          }
+
+                          return Array.isArray(value) ? `Pending at- ${value.join(", ")}` : `Pending at- ${value}`;
+                        } catch (error) {
+                          return row[column.td_key] || "User not assigned"; // Fallback if parsing fails
+                        }
+                      })()
+                    }}
+                  </span>
+                </div>
+              </span>
+
+
               <!-- <span v-else-if="column.td_key === 'total_levels'">
                 {{ row[column.td_key] }}
               </span> -->
@@ -150,8 +156,8 @@
               </span>
             </td>
             <td
-              class="text-center d-flex justify-content-center"
-              v-if="isAction == 'true'"
+              class="text-center d-flex justify-content-center position-relative"
+              v-if="isAction == 'true' && viewType === 'viewPdf'"
             >
               <div v-if="viewType === 'viewPdf'" class="text-center">
                 <span class="px-2">
@@ -167,16 +173,17 @@
                   ></i>
                 </span>
               </div>
-              <!-- 'Reviewpending': row[column.td_key] == 'Pending Review',
-			'Reviewed': row[column.td_key] == 'Reviewed',
-			'Completed': row[column.td_key] == 'Completed',
-			'text-danger': row[column.td_key] == 'Error' -->
+                        <!-- 'Reviewpending': row[column.td_key] == 'Pending Review',
+                'Reviewed': row[column.td_key] == 'Reviewed',
+                'Completed': row[column.td_key] == 'Completed',
+                'text-danger': row[column.td_key] == 'Error' -->
 
-              <!-- <td :selectedText="text"></td>
-					<td :selectedOption="selectoption"></td>
-					column.td_key, -->
+                        <!-- <td :selectedText="text"></td>
+                    <td :selectedOption="selectoption"></td>
+                    column.td_key, -->
 
-              <div
+            </td>
+              <td
                 v-if="actionType === 'dropdown'"
                 class="fixed-column position-relative"
               >
@@ -198,8 +205,33 @@
                     </li>
                   </ul>
                 </div>
+              </td>
+            <td v-if="actionType === 'Toogle&dropdown' " 
+              class="text-end d-flex p-0 justify-content-center align-items-center gap-2 fixed-column ">
+              <div class="dropdown">
+                <p class="p-0 actions" data-bs-toggle="dropdown" aria-expanded="false">
+                  <span>...</span>
+                </p>
+                <ul class="dropdown-menu actionsdropdown">
+                  <li class="py-1" @click="selectedAction(row, action, 'edit')" v-for="(action, index) in actions"
+                    :key="index">
+                    <a class="dropdown-item py-2 d-flex align-items-center gap-2">
+                      <i :class="action.icon"></i>
+                      <h1 class="font-10 mb-0">{{ action.name }}</h1>
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+              <div  class="form-check d-flex justify-content-end form-switch text-end ">
+                <input class="form-check-input shadow-none" type="checkbox" role="switch" :checked="row.enable == '1'"
+                  @click.prevent="handleToggle(row, index, $event)" />
               </div>
             </td>
+
+
+
+
             <!-- <td
 						v-if="actionType === 'Modal'"
 						class="text-center d-flex justify-content-center"
@@ -286,11 +318,21 @@ const props = defineProps({
   },
 });
 
-const emits = defineEmits(["actionClicked", "updateFilters", "cell-click"]);
+const emits = defineEmits(["actionClicked", "updateFilters", "cell-click","toggle-click"]);
 
 function selectedAction(row, action) {
   emits("actionClicked", row, action);
 }
+
+
+function handleToggle(row, index, event) {
+  // Emit the custom event. The parent component will handle showing the confirmation.
+  emits("toggle-click", row, index, event);
+  console.log("event", event);
+}
+
+
+
 const allCheck = ref(false);
 function formatDate(dateString) {
   if (!dateString) return "-"; // Handle empty or null values
@@ -385,6 +427,39 @@ function handleCellClick(check, index, type) {
 //   background: white !important;
 
 // }
+// .accessible-departments {
+//   // max-width: 30%;
+//   display: inline-block;
+//   overflow: hidden;
+//   text-overflow: ellipsis;
+//   white-space: nowrap;
+//   vertical-align: middle;
+// }
+
+.form-check-input {
+  font-size: 15px;
+  margin-top: 5px;
+}
+
+.form-switch .form-check-input:checked {
+  background-position: right center;
+  background-color: #303030;
+  border: 0;
+}
+
+.actionsdropdown {
+  position: absolute !important;
+  z-index: 1050;
+  /* Ensures it appears above the table */
+  left: auto;
+  right: 0;
+  /* Aligns the dropdown properly */
+  min-width: 150px;
+  /* Adjust as needed */
+  background-color: white;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
 .activeform {
   font-size: 11px;
   font-weight: 400;
@@ -397,6 +472,16 @@ function handleCellClick(check, index, type) {
   height: 13px !important;
 }
 
+// td.accessible-departments {
+//   max-width: 30%;
+//   width: 30%;
+//   overflow: hidden;
+// }
+td.fixed-column {
+  position: relative;
+  overflow: visible !important;
+}
+
 .global-table {
   width: 100%;
   white-space: nowrap;
@@ -405,8 +490,8 @@ function handleCellClick(check, index, type) {
   // table-layout: fixed;
 
   td {
-    // max-width: 80px;
-    // overflow: hidden;
+    max-width: 100px;
+    overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     color: var(--muted) !important;

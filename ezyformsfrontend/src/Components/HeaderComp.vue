@@ -6,11 +6,11 @@
                 <div class="headerbackgound py-1">
                     <div class="row">
                         <div class="col-2">
-                            <div class="d-flex gap-2 p-2 align-items-center">
-                                <div><img class="imgmix" src="../assets/favicon.jpg" /></div>
-                                <div class="m-0">
+                            <div class="d-flex gap-2 align-items-center">
+                                <div><img class="imgmix img-fluid" src="../assets/Final-logo-ezyforms-removebg-preview.png"  /></div>
+                                <!-- <div class="m-0">
                                     <p class="font-13 m-0">EZY | Forms</p>
-                                </div>
+                                </div> -->
                             </div>
                         </div>
                         <div class="col-7">
@@ -19,11 +19,11 @@
                             </div>
                         </div>
                         <div class="col-3 d-flex justify-content-end align-items-center pe-1">
-                            <div class="d-flex gap-3 justify-content-end align-items-center m-0">
+                            <div class="d-flex gap-3 justify-content-end align-items-center m-0 me-2">
                                 <div class="">
                                     <!-- v-if="shouldShowButton" -->
                                     <ButtonComp
-                                        class="btn-outline-primary d-flex justify-content-center align-items-center bg-white m-0 text-nowrap font-10"
+                                        class="btn btn-outline-danger raiseReqBtn d-flex justify-content-center align-items-center  m-0 text-nowrap font-10"
                                         name="Raise request" data-bs-toggle="modal"
                                         data-bs-target="#riaseRequestModal" />
                                     <!-- @click="raiseRequest" -->
@@ -508,11 +508,11 @@ function SelectedFromchange(value) {
     try {
         // Parse form_json since it's stored as a string
         const formJson = JSON.parse(selectedForm.form_json);
-        console.log("Parsed formJson:", formJson);
+        // console.log("Parsed formJson:", formJson);
 
         // Find the requestor object in the workflow array
         const requestor = formJson.workflow?.find(item => item.type === "requestor");
-        console.log("Requestor:", requestor);
+        // console.log("Requestor:", requestor);
 
         if (!requestor || !Array.isArray(requestor.roles)) {
             console.log("No requestor object or roles found.");
@@ -522,7 +522,7 @@ function SelectedFromchange(value) {
 
         // Ensure requestor.roles is an array of strings and normalize
         const normalizedRoles = requestor.roles.map(role => role.trim().toLowerCase());
-        console.log("Normalized Roles:", normalizedRoles);
+        // console.log("Normalized Roles:", normalizedRoles);
 
         // Clean the strings to remove any non-alphanumeric characters (like invisible characters)
         const cleanRole = (str) => str.replace(/[^\x20-\x7E]/g, '').trim().toLowerCase();
@@ -530,8 +530,8 @@ function SelectedFromchange(value) {
         const cleanedNormalizedRoles = normalizedRoles.map(role => cleanRole(role));
         const cleanedNormalizedUserRole = cleanRole(userRole);
 
-        console.log("Cleaned Normalized Roles:", cleanedNormalizedRoles);
-        console.log("Cleaned Normalized User Role:", cleanedNormalizedUserRole);
+        // console.log("Cleaned Normalized Roles:", cleanedNormalizedRoles);
+        // console.log("Cleaned Normalized User Role:", cleanedNormalizedUserRole);
 
         // Explicit comparison check with logs
         cleanedNormalizedRoles.forEach((role, index) => {
@@ -543,7 +543,7 @@ function SelectedFromchange(value) {
         console.log("Role Matching Result:", isRoleMatched);
 
         if (isRoleMatched) {
-            console.log("Match found! Calling toRaiseRequest()");
+            // console.log("Match found! Calling toRaiseRequest()");
             toRaiseRequest(); // Call toRaiseRequest() when there's a match
         } else {
             console.log("No matching role found.");
@@ -645,7 +645,7 @@ function SelectedFromchange(value) {
 
 // Function to fetch and filter forms based on role
 function SelectedDepartment(departmentName) {
-  console.log("Selected Department:", departmentName);
+//   console.log("Selected Department:", departmentName);
 
   // Get USERROLE from localStorage and normalize
   let userRole = localStorage.getItem("USERROLE")?.trim().toLowerCase();
@@ -674,7 +674,7 @@ function SelectedDepartment(departmentName) {
   .get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParams })
     .then((res) => {
       let allForms = res.data; // Store fetched form list
-      console.log("Fetched Forms List:", allForms);
+    //   console.log("Fetched Forms List:", allForms);
 
       // Filter forms based on user role
       let allowedForms = allForms.filter((form) => {
@@ -694,8 +694,8 @@ function SelectedDepartment(departmentName) {
           const cleanedUserRole = cleanRole(userRole);
 
           console.log(`Checking Form: ${form.form_short_name}`);
-          console.log("Allowed Roles:", cleanedRoles);
-          console.log("User Role:", cleanedUserRole);
+        //   console.log("Allowed Roles:", cleanedRoles);
+        //   console.log("User Role:", cleanedUserRole);
 
           // Check if userRole exists in cleaned roles
           return cleanedRoles.includes(cleanedUserRole);
@@ -705,7 +705,7 @@ function SelectedDepartment(departmentName) {
         }
       });
 
-      console.log("Allowed Forms after Role Filtering:", allowedForms);
+    //   console.log("Allowed Forms after Role Filtering:", allowedForms);
       if (allowedForms.length === 0) {
         toast.warning("No forms have been created in this department.", { autoClose: 2000,transition: "zoom", });
       }
@@ -873,6 +873,15 @@ const handleBuChange = (tab) => {
     text-align: left;
 
 }
+.raiseReqBtn{
+    border: 1px solid #FE212E !important;
+}
+.raiseReqBtn:hover {
+
+    background-color: #FE212E;
+    color: #fff;
+
+}
 
 @media (min-width: 1604px) and (max-width: 2400px) {
     .col-3 {
@@ -884,6 +893,7 @@ const handleBuChange = (tab) => {
 
 .stickyheader {
     z-index: 10;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
 }
 
 .raise-label {

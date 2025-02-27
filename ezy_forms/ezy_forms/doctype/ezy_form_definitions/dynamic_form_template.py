@@ -9,16 +9,17 @@ import traceback
 from frappe.utils import get_bench_path, cstr
 from frappe.utils import get_bench_path, cstr, get_url
 
-def rebuild_to_structured_array(flat_array):
+def rebuild_to_structured_array(flat_array,child_data):
     result = []
     current_block = None
     current_section = None
     current_row = None
     current_column = None
+    child_table_row = None
  
     for item in reversed(flat_array):
         description = item.get("description")
- 
+        child_type =  item.get("fieldtype")
         if description == "Block Break":
             # Push current section, row, and block if they exist
             if current_row:
@@ -80,7 +81,17 @@ def rebuild_to_structured_array(flat_array):
                 "fields": []
             }
             current_row["columns"].insert(0, current_column)
- 
+        elif child_type == 'Table':
+    
+            child_table_row = {
+            "fieldtype": item.get("fieldtype"),
+            "fieldname": item.get("fieldname"),
+            "label": item.get("label"),
+            "parent": item.get("parent"),
+            "child_table": []
+            }
+            
+            child_table_row["child_table"].insert(0, item.get("value"))
         else:  # Regular field
             # Add field to the current column
             if current_column:
@@ -101,7 +112,9 @@ def rebuild_to_structured_array(flat_array):
  
     if current_section:
         current_block["sections"].insert(0, current_section)
- 
+    if  child_table_row:
+        result.insert(0, child_table_row)
+        child_table_row = None
     if current_block:
         result.insert(0, current_block)
     return result
@@ -233,6 +246,12 @@ template_str = """
               margin: 0px;
       
           }
+          .signature-Imge{
+              min-width: 80px;
+              max-width: 100px;
+              
+          }
+
         .logo-div{
             max-width: 300px;
               min-width: 200px;
@@ -244,23 +263,12 @@ template_str = """
          .header-right{
              min-width: 200px;
          }
-#            @media print {
-#             @page {
-#                 size: A4;
-#                 margin: 20mm;
-#             }
-
-# 			body {
-# 				margin: 0;
-# 				padding: 0;
-#     height: 100vh;
-# 			}
-#    .main-body{
-# 	   height:100vh;
-#    } 
-   
-#            }
-   
+        @media print {
+            .table, .table th, .table td {
+                border: 1px solid black !important;
+            }
+        }
+        
    
        
     </style>
@@ -291,18 +299,55 @@ template_str = """
                 
                 {% for row in section.rows %}
                     <div class="row">
-                        {% set total_columns = row.columns|length %}  <!-- Get the number of columns in the row -->
-
                         {% for column in row.columns %}
-                            <div class="column {% if total_columns == 3 %}flex-column{% endif %}">
+                            <div class="column">
                                 {% for field in column.fields %}
                                     <div class="field">
                                         <label for="{{ field.fieldname }}">{{ field.label }}:</label>
 
-                                           {% if field.fieldtype == 'Data' %}
+                                        {% if field.fieldtype in ['Check', 'Select', 'radio'] %}
+                                            <div class="container-fluid">
+                                                <div class="row">
+                                                    {% for option in field.options.split('\n') %}
+                                                        <div class="form-check col-4 mb-4">
+                                                            <div>
+                                                            
+                                                                {% if field.fieldtype == 'Check'  %}
+                                                                    <input 
+                                                                        type="checkbox" 
+                                                                        class="form-check-input"
+                                                                        id="{{ field.fieldname }}-{{ loop.index0 }}" 
+                                                                        name="{{ field.fieldname }}" 
+                                                                        value="{{ option }}"
+                                                                        {% if option in field.values %} checked {% endif %}
+                                                                        disabled
+                                                                    >
+                                                                {% elif field.fieldtype == 'radio' %}
+                                                                    <input 
+                                                                        type="radio" 
+                                                                        class="form-check-input"
+                                                                        id="{{ field.fieldname }}-{{ loop.index0 }}" 
+                                                                        name="{{ field.fieldname }}" 
+                                                                        value="{{ option }}"
+                                                                        {% if option == field.values %} checked {% endif %}
+                                                                        disabled
+                                                                    >
+                                                                {% endif %}
+                                                            </div>
+                                                            <div>
+                                                                <label class="form-check-label m-0" for="{{ field.fieldname }}-{{ loop.index0 }}">
+                                                                    {{ option }}
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+
+                                        {% elif field.fieldtype == 'Data' %}
                                             <input type="text" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
                                         {% elif field.fieldtype == 'Attach' %}
-                                            <input type="file" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
+                                            <img  id="{{ field.fieldname }}" src="{{ 'https://ezysuite.ezyforms.co' + field['values']  }}" class="signature-Imge" name="{{ field.fieldname }}">
                                         {% elif field.fieldtype == 'Phone' %}
                                             <input type="tel" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
                                         {% elif field.fieldtype == 'Time' %}
@@ -310,26 +355,15 @@ template_str = """
                                         {% elif field.fieldtype == 'Color' %}
                                             <input type="color" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
                                         {% elif field.fieldtype == 'Text' %}
-                                            <textarea id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}"></textarea>
+                                            <textarea id="{{ field.fieldname }}" name="{{ field.fieldname }}">{{ field['values'] }}</textarea>
                                         {% elif field.fieldtype == 'Date' %}
                                             <input type="text" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}" class="date-input" placeholder="__/__/____">
                                         {% elif field.fieldtype == 'Datetime' %}
-                                            <input type="datetime-local" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
-                                        {% elif field.fieldtype == 'Check' %}
-                                            <input type="checkbox" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
-                                        {% elif field.fieldtype == 'radio' %}
-                                            <input type="radio" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
-                                        {% elif field.fieldtype == 'Select' %}
-                                            <select id="{{ field.fieldname }}" name="{{ field.fieldname }}">
-                                                <option value="">Select an option</option>
-                                                {% for option in field.options %}
-                                                    <option value="{{ option }}">{{ option }}</option>
-                                                {% endfor %}
-                                            </select>
+                                            <input type="text" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
                                         {% elif field.fieldtype == 'multiselect' %}
                                             <select id="{{ field.fieldname }}" name="{{ field.fieldname }}" multiple>
-                                                {% for option in field.options %}
-                                                    <option value="{{ option }}">{{ option }}</option>
+                                                {% for option in field.options.split('\n') %}
+                                                    <option value="{{ option }}" {% if option in field.values %} selected {% endif %}>{{ option }}</option>
                                                 {% endfor %}
                                             </select>
                                         {% elif field.fieldtype == 'Signature' %}
@@ -345,6 +379,30 @@ template_str = """
         {% endfor %}
     </div>
 {% endfor %}
+
+{% if child_data %}
+<table style="width:98%; margin-left:10px; border-collapse: collapse; border: 1px solid black;">
+    <thead>
+        <tr>
+            {% for key in child_data[0].keys() %}
+                <th style="border: 1px solid black; padding: 8px; background-color: #f2f2f2;">{{ key }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for child in child_data %}
+            <tr>
+                {% for value in child.values() %}
+                    <td style="border: 1px solid black; padding: 8px;">{{ value }}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endif %}
+
+
 <div class="footer-container"><span>305, Block 2, White House, Kundanbagh Colony, Begumpet, Hyderabad, Telangana 500016</span></div>
 </div>
 
@@ -400,39 +458,88 @@ def convert_html_to_pdf(html_content, pdf_path):
     except Exception as e:
         print(f"PDF generation failed: {e}")
 
-def json_structure_call_for_html_view(json_obj:list, form_name: str):
-    structered_data = rebuild_to_structured_array(flat_array=json_obj)
-    html_output = Template(template_str).render(data=structered_data, form_name=form_name)
+def json_structure_call_for_html_view(json_obj:list, form_name: str,child_data):
+
+    structered_data = rebuild_to_structured_array(flat_array=json_obj,child_data=child_data)
+    
+    html_output = Template(template_str).render(data=structered_data, form_name=form_name,child_data=child_data)
     return html_output
 
 # Sample nested data structure
 @frappe.whitelist()
-def preview_dynamic_form(form_short_name:str,name=None):
-    json_object = frappe.db.get_value("Ezy Form Definitions",form_short_name,"form_json")
+def preview_dynamic_form(form_short_name: str, name=None):
+    """Previews a dynamic form with data populated"""
+    json_object = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_json")
     form_name = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_name")
     json_object = literal_eval(json_object)["fields"]
+    json_object = [
+        field for field in json_object
+        if field.get("fieldtype") != "Attach" or ("approved_by" in field.get("fieldname", "").lower())
+            ]
+    data_list =None
     if name:
-        user_doc = frappe.get_doc(form_short_name,name).as_dict()
-        for iteration in json_object:
-            if "value" in iteration:
-                iteration["value"] = user_doc[iteration["fieldname"]] if user_doc[iteration["fieldname"]] else ""
-    html_view = json_structure_call_for_html_view(json_obj=json_object,form_name=form_name)
-    return html_view
-
-
-
-@frappe.whitelist()
-def download_filled_form(form_short_name: str, name: str):
-    try:
-        json_object = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_json")
-        json_object = literal_eval(json_object)["fields"]
         user_doc = frappe.get_doc(form_short_name, name).as_dict()
-
+        
         for iteration in json_object:
             if "value" in iteration:
                 iteration["value"] = user_doc.get(iteration["fieldname"], "")
 
-        html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_short_name)
+            # Handling child table fields
+            if iteration.get("fieldtype") == "Table":
+                iteration["value"] = frappe.get_all(iteration["options"], filters={"parent": name}, fields=["*"])
+                doc = frappe.get_doc(form_short_name, name)
+                
+                # Dynamically access the child table
+                child_table_name = str(iteration["fieldname"])  
+                child_table_records = getattr(doc, child_table_name, [])
+
+                # Define field names dynamically
+                field_names = [df.fieldname for df in frappe.get_meta(child_table_name).fields]
+
+                # Define field_labels dynamically
+                field_labels = {df.fieldname: df.label for df in frappe.get_meta(child_table_name).fields}
+
+                # Generate the data_list with field labels
+                data_list = [{field_labels.get(field, field): record.get(field) for field in field_names} for record in child_table_records]
+
+    html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_name,child_data=data_list)
+    return html_view
+
+@frappe.whitelist()
+def download_filled_form(form_short_name: str, name: str):
+    """Generates a PDF for the dynamic form with filled data"""
+    try:
+        json_object = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_json")
+        json_object = literal_eval(json_object)["fields"]
+        json_object = [
+            field for field in json_object
+            if field.get("fieldtype") != "Attach" or ("approved_by" in field.get("fieldname", "").lower())
+                ]
+        user_doc = frappe.get_doc(form_short_name, name).as_dict()
+        data_list = None
+        for iteration in json_object:
+            if "value" in iteration:
+                iteration["value"] = user_doc.get(iteration["fieldname"], "")
+
+            # Handling child table fields
+            if iteration.get("fieldtype") == "Table":
+                iteration["value"] = frappe.get_all(iteration["options"], filters={"parent": name}, fields=["*"])
+                doc = frappe.get_doc(form_short_name, name)
+                
+                # Dynamically access the child table
+                child_table_name = str(iteration["fieldname"])  
+                child_table_records = getattr(doc, child_table_name, [])
+
+                # Define field names dynamically
+                field_names = [df.fieldname for df in frappe.get_meta(child_table_name).fields]
+
+                # Define field_labels dynamically
+                field_labels = {df.fieldname: df.label for df in frappe.get_meta(child_table_name).fields}
+
+                # Generate the data_list with field labels
+                data_list = [{field_labels.get(field, field): record.get(field) for field in field_names} for record in child_table_records]
+
+        html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_short_name,child_data=data_list)
         random_number = randint(111, 999)
 
         pdf_filename = f"{form_short_name}_{name}_{random_number}.pdf"

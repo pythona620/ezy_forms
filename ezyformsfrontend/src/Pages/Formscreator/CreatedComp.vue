@@ -14,7 +14,7 @@
         <!-- v-if="tableForm" -->
         <div class="mt-2">
 
-            <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" actionType="dropdown"
+            <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" actionType="Toogle&dropdown" 
                 @actionClicked="actionCreated" isFiltersoption="true" :field-mapping="fieldMapping" :actions="actions"
                 @updateFilters="inLineFiltersData" isCheckbox="true" />
             <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
@@ -66,22 +66,25 @@ import PaginationComp from '../../Components/PaginationComp.vue'
 import axiosInstance from '../../shared/services/interceptor';
 import { apis, doctypes, domain } from "../../shared/apiurls";
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { rebuildToStructuredArray } from "../../shared/services/field_format";
 import FormPreview from '../../Components/FormPreview.vue'
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 
 const totalRecords = ref(0);
 const pdfPreview = ref('')
 
 const formDescriptions = ref({})
 const tableData = ref([]);
-
+const route = useRoute();
 const businessUnit = computed(() => {
     return EzyBusinessUnit.value;
 });
 const sections = reactive([]);
 onMounted(() => {
     // fetchTable()
+    fetchCategory()
 
 })
 
@@ -125,7 +128,7 @@ const fieldMapping = ref({
     // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
     // invoice_date: { type: "date" },
     form_name: { type: "input" },
-    form_category: { type: "select", options: ["Software", "Hardware"] },
+    form_category: { type: "select", options: [] },
     owner_of_the_form: { type: "input" }
 
 });
@@ -133,8 +136,8 @@ const selectedForm = ref(null);
 const actions = ref([
     { name: 'View form', icon: 'fa-solid fa-eye' },
     { name: 'Edit Form', icon: 'fa-solid fa-edit' },
-    { name: 'PDF Format', icon: 'bi bi-filetype-pdf' },
-    // { name: 'Activate this form', icon: 'fa-solid fa-check-circle' },
+    { name: 'Download Print format', icon: 'fa-solid fa-download' },
+    { name: 'Raise Request', icon: 'fa-solid fa-check-circle' },
     // { name: 'In-active this form', icon: 'fa-solid fa-ban' },
     // { name: 'Edit accessibility to dept.', icon: 'fa-solid fa-users' },
     // { name: 'Share this form', icon: 'fa-solid fa-share-alt' },
@@ -157,7 +160,7 @@ function actionCreated(rowData, actionEvent) {
     } else if (actionEvent.name === 'Edit Form') {
         formCreation(rowData);
     }
-    else if (actionEvent.name === 'PDF Format') {
+    else if (actionEvent.name === 'Download Print format') {
         // pdfView
         formDescriptions.value = rowData
 
@@ -177,6 +180,44 @@ function actionCreated(rowData, actionEvent) {
         const modal = new bootstrap.Modal(document.getElementById('pdfView'), {});
         modal.show();
     }
+    if (actionEvent.name === 'Raise Request') {
+    const parsedData = JSON.parse(rowData.form_json);
+    const storedData = localStorage.getItem("employeeData");
+
+    if (storedData) {
+        const designation = JSON.parse(storedData).designation;
+        console.log(designation);
+
+        const roles = parsedData.workflow[0].roles;
+        console.log(roles);
+
+        let hasAccess = false;
+
+        for (let i = 0; i < roles.length; i++) {
+            if (roles[i] === designation) {
+                hasAccess = true;
+                break;
+            }
+        }
+
+        if (hasAccess) {
+            router.push({
+                name: "RaiseRequest",
+                query: {
+                    selectedForm: rowData.form_short_name,
+                    business_unit: rowData.business_unit,
+                    routepath: route.path,
+                    
+                },
+            });
+        } else {
+            toast.info("You are not assigned to raise a request.");
+
+        }
+    } else {
+        console.log("No employee data found in localStorage.");
+    }
+  }
     else if (actionEvent.name === 'Edit accessibility to dept.') {
         formCreation(rowData);
     }
@@ -192,7 +233,7 @@ function downloadPdf() {
 
     const dataObj = {
         "form_short_name": formDescriptions.value.form_short_name,
-        "name": null
+        "name": ""
     };
 
     axiosInstance.post(apis.download_pdf_form, dataObj)
@@ -307,6 +348,50 @@ const PaginationLimitStart = ([itemsPerPage, start]) => {
     fetchTable();
 
 };
+
+async function fetchCategory() {
+    try {
+        // Fetch all department names
+        const queryParams = { fields: JSON.stringify(["name"]) };
+        const response = await axiosInstance.get(`${apis.resource}${doctypes.departments}`, { params: queryParams });
+
+        if (response.data) {
+            const departments = response.data;
+
+            // Fetch full details of each department (including child table)
+            const departmentDetailsPromises = departments.map(department =>
+                axiosInstance.get(`${apis.resource}${doctypes.departments}/${department.name}`)
+            );
+
+            // Resolve all department requests
+            const detailedResponses = await Promise.all(departmentDetailsPromises);
+            const detailedDepartments = detailedResponses.map(res => res.data);
+
+            // Extract all category names from child tables
+            const allCategories = [];
+            detailedDepartments.forEach(department => {
+
+                if (department.ezy_departments_items) {
+                    department.ezy_departments_items.forEach(child => {
+                        if (child.category) {
+                            allCategories.push(child.category);
+                        }
+                    });
+                } else {
+                    console.log("No child table found for:", department.name);
+                }
+            });
+
+
+            // Remove duplicates and store in options
+            fieldMapping.value.form_category.options = [...new Set(allCategories)];
+            // console.log(fieldMapping.value.form_category.options, "======== Categories");
+        }
+    } catch (error) {
+        console.error("Error fetching categories:", error);
+    }
+}
+
 
 
 const formCategory = ref([]);
