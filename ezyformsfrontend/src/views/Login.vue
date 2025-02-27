@@ -1,6 +1,6 @@
 <template>
   <div class="bg-img">
-    <div v-if="ShowLoginPage" class="input-div p-5">
+    <div class="input-div p-5">
       <div class="d-flex gap-2 p-2 justify-content-center align-items-center">
         <div><img class="imgmix" src="../assets/favicon.jpg" /></div>
         <div class="m-0">
@@ -45,52 +45,6 @@
       </div>
     </div>
 
-
-    <div v-if="showOtpPage">
-      <div class="d-flex gap-2 p-2 justify-content-center align-items-center">
-        <div><img class="imgmix" src="../assets/favicon.jpg" /></div>
-        <div class="m-0">
-          <p class="fontimgtext fw-medium m-0">EZY | Forms</p>
-        </div>
-      </div>
-      <div>
-      </div>
-      <div class="input-div mt-3">
-        <div class="back-to-login">
-          <span @click="backTologin()">Back to Login</span>
-        </div>
-
-        <div class="Message-div mb-1">
-          Please enter OTP sent to your registered mail ID<br><strong>{{ formdata.usr }}</strong>
-        </div>
-
-        <div class="p-4 fw-medium">
-          <p v-if="resentMessage && timeLeft > 0" class="text-success font-12">{{ resentMessage }}</p>
-
-          <h6>OTP</h6>
-          <div class="d-flex justify-content-between mb-3">
-            <input v-for="(digit, index) in otp" :key="index" ref="otpInputs" class="input-field m-0 form-control"
-              type="text" maxlength="1" v-model="otp[index]" :class="{ 'error-border': errorMessage }"
-              @input="handleInput($event, index)" @keydown.delete="handleBackspace(index)"
-              @paste="handlePaste($event)" />
-
-          </div>
-          <!-- Error Message -->
-          <p v-if="errorMessage" class="text-danger font-13">{{ errorMessage }}</p>
-
-          <!-- <div class="font-12 text-end">
-            <p v-if="timeLeft > 0">OTP expires in <strong>{{ formattedTime }}</strong></p>
-          </div> -->
-
-          <div class="d-flex justify-content-end mb-3">
-            <!-- <ButtonComp @click="resendOtp" class="resend-button" name="Resend"></ButtonComp> -->
-            <ButtonComp @click="validateOtp()" class="submit-button" name="Submit"></ButtonComp>
-
-          </div>
-
-        </div>
-      </div>
-    </div>
 
     <div class="modal fade" id="changePassword" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
       aria-labelledby="changePasswordLabel" aria-hidden="true">
@@ -167,11 +121,7 @@ export default {
       //   passwordsMismatch: false,
       passwordError: "",
       loading: false,
-      showOtpPage: false,
-      ShowLoginPage: true,
-      otp: ["", "", "", "", "", ""],
       errorMessage: "",
-      tempId:[]
       // timeLeft: 60,
       // timer: null,
       // resentMessage: "",
@@ -208,82 +158,6 @@ export default {
       } else {
         this.passwordError = "";
       }
-    },
-
-    handleInput(event, index) {
-      const value = event.target.value;
-
-      if (!/^\d*$/.test(value)) {
-        this.otp[index] = "";
-        return;
-      }
-      if (value && index < this.otp.length - 1) {
-        this.$refs.otpInputs[index + 1].focus();
-      }
-
-      this.errorMessage = "";
-    },
-    handleBackspace(index) {
-      if (index > 0 && this.otp[index] === "") {
-        this.$refs.otpInputs[index - 1].focus();
-      }
-    },
-    handlePaste(event) {
-      event.preventDefault();
-      const pastedData = event.clipboardData.getData("text").trim();
-
-      if (/^\d{6}$/.test(pastedData)) {
-        this.otp = pastedData.split("");
-
-        this.$refs.otpInputs[5].focus();
-        this.errorMessage = "";
-      } else {
-        this.errorMessage = "Invalid OTP. Please enter a 6-digit number.";
-      }
-    },
-    preventUndo(event, index) {
-      if (event.ctrlKey && event.key === "Z") {
-        event.preventDefault();
-        this.otp[index] = "";
-      }
-    },
-    // validateOtp() {
-    //   const otpValue = this.otp.join("");
-
-    //   if (otpValue.length < 6) {
-    //     this.errorMessage = "OTP must be 6 digits.";
-    //   } else {
-    //     this.errorMessage = "";
-    //     localStorage.setItem("UserName", JSON.stringify(this.storeData));
-    //     setTimeout(() => {
-    //       this.$router.push({ path: "/todo/receivedform" });
-    //     }, 700);
-    //   }
-    // },
-
-    // startCountdown() {
-    //   if (this.timer) clearInterval(this.timer);
-
-    //   this.timer = setInterval(() => {
-    //     if (this.timeLeft > 0) {
-    //       this.timeLeft--;
-    //     } else {
-    //       clearInterval(this.timer);
-    //     }
-    //   }, 1000);
-    // },
-    // resendOtp() {
-    //   this.otp = ["", "", "", "", "", ""];
-    //   this.timeLeft = 60;
-    //   this.errorMessage = "";
-    //   this.resentMessage = "Resent OTP successfully!";
-    //   this.startCountdown();
-    // },
-
-    backTologin() {
-      this.ShowLoginPage = true;
-      this.showOtpPage = false;
-      this.formdata = {};
     },
 
     checkUserMail() {
@@ -380,31 +254,22 @@ export default {
           .post(apis.login, this.formdata)
           .then((res) => {
             if (res) {
-              this.showOtpPage = true;
-              this.ShowLoginPage = false;
-              this.otp = ["", "", "", "", "", ""],
-              this.tempId = res;
 
-              // this.tempId=res.temp_id,
-              // this.response=res;
-              // this.tempId = res.tmp_id;
-              // console.log("this.tempId",this.tempId);
+                toast.success("Login Successfully", {
+                  autoClose: 2000,
+                  transition: "zoom",
+                });
+                localStorage.setItem("UserName", JSON.stringify(this.storeData));
+                setTimeout(() => {
+                  this.$router.push({ path: "/todo/receivedform" });
+                }, 700);
 
-                // toast.success("Login Successfully", {
-                //   autoClose: 2000,
-                //   transition: "zoom",
-                // });
-                // localStorage.setItem("UserName", JSON.stringify(this.storeData));
-                // setTimeout(() => {
-                //   this.$router.push({ path: "/todo/receivedform" });
-                // }, 700);
-
-                
-              // localStorage.setItem("UserName", JSON.stringify(this.storeData));
-              // console.log("this.storeData", this.storeData);
-              // if (this.formdata.usr) {
-              //   this.userData(this.formdata.usr);
-              // }
+                this.storeData=res
+              localStorage.setItem("UserName", JSON.stringify(this.storeData));
+              console.log("this.storeData", this.storeData);
+              if (this.formdata.usr) {
+                this.userData(this.formdata.usr);
+              }
             }
           })
           .catch((error) => {
@@ -425,6 +290,9 @@ export default {
           this.email = res.data.email;
           // console.log(this.email, "2");
           if (this.email) {
+            // const queryParams = {
+            //   filters: JSON.stringify({ enable: 1 })
+            // }
             axiosInstance
               .get(`${apis.resource}${doctypes.EzyEmployeeList}/${this.email}`)
               .then((responce) => {
@@ -434,9 +302,6 @@ export default {
                   "USERROLE",
                   JSON.stringify(employeeData.designation)
                 );
-                setTimeout(() => {
-                  this.$router.push({ path: "/todo/receivedform" }); // Navigate dynamically
-                }, 700);
               })
               .catch((error) => {
                 console.error("Error fetching user data:", error);
@@ -450,43 +315,6 @@ export default {
         });
     },
 
-
-    validateOtp() {
-      const otpValue = this.otp.join("");
-
-      if (otpValue.length < 6) {
-        this.errorMessage = "OTP must be 6 digits.";
-      } else {
-        this.errorMessage = "";
-
-        const params = {
-          user: String(this.formdata.usr),
-          otp: this.otp.join(""),
-          tmp_id: String(this.tempId.tmp_id),
-          cmd: "login",
-        };
-
-        axiosInstance
-          .post(apis.login, params)
-          .then((message) => {
-            if (message) {
-              console.log("message", message);
-              this.storeData = message;
-              localStorage.setItem("UserName", JSON.stringify(this.storeData));
-              if (this.formdata.usr) {
-                this.userData(this.formdata.usr);
-              }
-              //  toast.success("Login Successfully", {
-              //     autoClose: 2000,
-              //     transition: "zoom",
-              //   });
-            }
-          })
-          .catch((error) => {
-            console.error("Login error: ", error);
-          });
-      }
-    },
 
   },
 
