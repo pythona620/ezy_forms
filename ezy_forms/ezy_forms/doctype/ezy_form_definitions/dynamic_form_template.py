@@ -582,7 +582,7 @@ def download_filled_form(form_short_name: str, name: str):
                 if field.get("fieldtype") != "Attach" or ("approved_by" in field.get("fieldname", "").lower())
                     ]
             user_doc = frappe.get_doc("DocType", form_short_name).as_dict()
- 
+            labels = None
             for iteration in json_object:
                 if "value" in iteration:
                     iteration["value"] = user_doc.get(iteration["fieldname"], "")
