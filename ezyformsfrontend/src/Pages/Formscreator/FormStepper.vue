@@ -1290,23 +1290,26 @@
       </div>
       <div class="offcanvas-body">
         <div class="">
-          <div class="form-check ps-2" v-if="DesignationList.length">
+          <input v-model="searchDesignation" class="px-2 py-1 rounded-2 form-control shadow-none my-3" type="text" placeholder="Search Designation" />
+
+          <div class="form-check ps-1" v-if="DesignationList.length">
             <input
               type="checkbox"
               id="selectAll"
               v-model="isAllSelected"
-              class="me-2 form-check-input"
+              class="me-2 mt-1 form-check-input"
             />
             <label
-              for="selectAll fw-bold"
+              for="selectAll fw-bold m-0"
               class="SelectallDesignation form-check-label"
               >Select all</label
             >
           </div>
+          
         </div>
         <ul v-if="DesignationList.length" class="list-unstyled">
           <li
-            v-for="(item, index) in DesignationList"
+            v-for="(item, index) in filteredDesignationList"
             :key="index"
             class="designationList"
           >
@@ -1384,6 +1387,7 @@ const formNameError = ref("");
 const formShortNameError = ref("");
 const selectedBlockIndex = ref("");
 let workflowSetup = reactive([]);
+const searchDesignation=ref('');
 
 const wrkAfterGetData = ref([]);
 // const hasWorkflowToastShown = ref(false);
@@ -1440,6 +1444,19 @@ watch(
   },
   { immediate: true }
 );
+
+const filteredDesignationList = computed(() => {
+  return DesignationList.value
+    .filter(item =>
+      item.toLowerCase().includes(searchDesignation.value.toLowerCase())
+    )
+    .sort((a, b) => {
+      const aSelected = designationValue.value.includes(a);
+      const bSelected = designationValue.value.includes(b);
+      if (aSelected === bSelected) return 0;
+      return aSelected ? -1 : 1;
+    });
+});
 
 const hoveredIndexes = ref(null);
 const hoveredColumnIndexes = ref(null);
