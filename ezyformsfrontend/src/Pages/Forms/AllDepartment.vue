@@ -128,14 +128,15 @@ function actionCreated(rowData, actionEvent) {
                 break;
             }
         }
+        console.log(route.path,"sadasda");
 
         if (hasAccess) {
             router.push({
                 name: "RaiseRequest",
                 query: {
+                    routepath: route.path,
                     selectedForm: rowData.form_short_name,
                     business_unit: rowData.business_unit,
-                    routepath: route.path,
 
                     
                 },
