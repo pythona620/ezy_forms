@@ -9,7 +9,7 @@ import traceback
 from frappe.utils import get_bench_path, cstr
 from frappe.utils import get_bench_path, cstr, get_url
 
-def rebuild_to_structured_array(flat_array,child_data):
+def rebuild_to_structured_array(flat_array):
     result = []
     current_block = None
     current_section = None
@@ -246,6 +246,11 @@ template_str = """
               margin: 0px;
       
           }
+          .signature-Imge{
+              min-width: 80px;
+              max-width: 100px;
+              
+          }
 
         .logo-div{
             max-width: 300px;
@@ -342,7 +347,7 @@ template_str = """
                                         {% elif field.fieldtype == 'Data' %}
                                             <input type="text" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
                                         {% elif field.fieldtype == 'Attach' %}
-                                            <img  id="{{ field.fieldname }}" src="{{ 'https://ezysuite.ezyforms.co' + field['values']  }}" class="signature-Imge" name="{{ field.fieldname }}">
+                                            <img  id="{{ field.fieldname }}" src="{{ 'https://ezysuite.ezyforms.co' + field['values'] or ''  }}" class="signature-Imge" name="{{ field.fieldname }}">
                                         {% elif field.fieldtype == 'Phone' %}
                                             <input type="tel" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
                                         {% elif field.fieldtype == 'Time' %}
@@ -376,25 +381,45 @@ template_str = """
 {% endfor %}
 
 {% if child_data %}
-<table style="width:98%; margin-left:10px; border-collapse: collapse; border: 1px solid black;">
-    <thead>
-        <tr>
-            {% for key in child_data[0].keys() %}
-                <th style="border: 1px solid black; padding: 8px; background-color: #f2f2f2;">{{ key }}</th>
-            {% endfor %}
-        </tr>
-    </thead>
-    <tbody>
-        {% for child in child_data %}
+    {% for child in child_data %}
+        {% if child is mapping %}
+            <table style="width:98%; margin-left:10px; border-collapse: collapse; border: 1px solid black;">
+                <thead>
+                    <tr>
+                        {% for key in child.keys() %}
+                            <th style="border: 1px solid black; padding: 8px; background-color: #f2f2f2;">{{ key }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        {% for value in child.values() %}
+                            <td style="border: 1px solid black; padding: 8px;">{{ value }}</td>
+                        {% endfor %}
+                    </tr>
+                </tbody>
+            </table>
+        {% endif %}
+    {% endfor %}
+{% endif %}
+{% if child_table_data  %}
+    <table style="width:98%; margin-left:10px; border-collapse: collapse; border: 1px solid black;">
+        <thead>
             <tr>
-                {% for value in child.values() %}
-                    <td style="border: 1px solid black; padding: 8px;">{{ value }}</td>
+                {% for key in child_table_data %}
+                    <th style="border: 1px solid black; padding: 8px; background-color: #f2f2f2;">{{ key }}</th>
                 {% endfor %}
             </tr>
-        {% endfor %}
-    </tbody>
-</table>
-
+        </thead>
+        <tbody>
+                <tr>
+                    {% for value in child_table_data %}
+                        <td style="border: 1px solid black; padding: 8px;">{{ '' }}</td>
+                    {% endfor %}
+                </tr>
+        </tbody>
+    </table>
+    
 {% endif %}
 
 
@@ -453,12 +478,23 @@ def convert_html_to_pdf(html_content, pdf_path):
     except Exception as e:
         print(f"PDF generation failed: {e}")
 
-def json_structure_call_for_html_view(json_obj:list, form_name: str,child_data):
-
-    structered_data = rebuild_to_structured_array(flat_array=json_obj,child_data=child_data)
+def json_structure_call_for_html_view(json_obj: list, form_name: str, child_data, child_table_data):
+    if child_data is None:
+        child_data = []
     
-    html_output = Template(template_str).render(data=structered_data, form_name=form_name,child_data=child_data)
+    if child_table_data is None:
+        child_table_data = []
+    
+    structered_data = rebuild_to_structured_array(flat_array=json_obj)
+    if structered_data is None:
+        structered_data = []  # Ensure it's iterable
+
+    html_output = Template(template_str).render(
+        data=structered_data, form_name=form_name, child_data=child_data, child_table_data=child_table_data
+    )
+    
     return html_output
+
 
 # Sample nested data structure
 @frappe.whitelist()
@@ -471,7 +507,41 @@ def preview_dynamic_form(form_short_name: str, name=None):
         field for field in json_object
         if field.get("fieldtype") != "Attach" or ("approved_by" in field.get("fieldname", "").lower())
             ]
+    labels = None
     data_list =None
+    if name == None:
+        user_doc = frappe.get_doc("DocType", form_short_name).as_dict()
+        
+        for iteration in json_object:
+            if "value" in iteration:
+                iteration["value"] = user_doc.get(iteration["fieldname"], "")
+
+            # Handling child table fields
+            if iteration.get("fieldtype") == "Table":
+                iteration["value"] = frappe.get_all(iteration["options"], filters={"parent": name}, fields=["*"])
+                doc = frappe.get_doc("DocType", form_short_name)
+                
+                # Dynamically access the child table
+                child_table_name = str(iteration["fieldname"])  
+                # Get the child table Doctype name
+                child_table_doctype = frappe.get_value(
+                    "DocField", 
+                    {"parent": form_short_name, "fieldname": child_table_name}, 
+                    "options"
+                )
+
+                if not child_table_doctype:
+                    return {"error": "Child table not found"}
+
+                # Get the fields (columns) of the child table
+                child_table_fields = frappe.get_all(
+                    "DocField",
+                    filters={"parent": child_table_doctype},
+                    fields=["label"]
+                )
+                labels = [field["label"] for field in child_table_fields]
+        html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_name,child_table_data=labels,child_data=None)
+        return html_view
     if name:
         user_doc = frappe.get_doc(form_short_name, name).as_dict()
         
@@ -496,14 +566,73 @@ def preview_dynamic_form(form_short_name: str, name=None):
 
                 # Generate the data_list with field labels
                 data_list = [{field_labels.get(field, field): record.get(field) for field in field_names} for record in child_table_records]
-
-    html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_name,child_data=data_list)
+           
+    html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_name,child_data=data_list,child_table_data=None)
     return html_view
 
 @frappe.whitelist()
 def download_filled_form(form_short_name: str, name: str):
     """Generates a PDF for the dynamic form with filled data"""
     try:
+        if not name:
+            json_object = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_json")
+            json_object = literal_eval(json_object)["fields"]
+            json_object = [
+                field for field in json_object
+                if field.get("fieldtype") != "Attach" or ("approved_by" in field.get("fieldname", "").lower())
+                    ]
+            user_doc = frappe.get_doc("DocType", form_short_name).as_dict()
+ 
+            for iteration in json_object:
+                if "value" in iteration:
+                    iteration["value"] = user_doc.get(iteration["fieldname"], "")
+
+                # Handling child table fields
+                if iteration.get("fieldtype") == "Table":
+                    iteration["value"] = frappe.get_all(iteration["options"], filters={"parent": name}, fields=["*"])
+                    doc = frappe.get_doc("DocType", form_short_name)
+                    
+                    # Dynamically access the child table
+                    child_table_name = str(iteration["fieldname"])  
+                    # Get the child table Doctype name
+                    child_table_doctype = frappe.get_value(
+                        "DocField", 
+                        {"parent": form_short_name, "fieldname": child_table_name}, 
+                        "options"
+                    )
+
+                    if not child_table_doctype:
+                        return {"error": "Child table not found"}
+
+                    # Get the fields (columns) of the child table
+                    child_table_fields = frappe.get_all(
+                        "DocField",
+                        filters={"parent": child_table_doctype},
+                        fields=["fieldname", "fieldtype", "label"]
+                    )
+                    labels = [field["label"] for field in child_table_fields]
+            html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_short_name,child_table_data=labels,child_data=None)
+            random_number = randint(111, 999)
+
+            pdf_filename = f"{form_short_name}_{random_number}.pdf"
+            pdf_path = f"private/files/{pdf_filename}"
+            absolute_pdf_path = os.path.join(get_bench_path(), "sites", cstr(frappe.local.site), pdf_path)
+
+            convert_html_to_pdf(html_content=html_view, pdf_path=absolute_pdf_path)
+
+            new_file = frappe.get_doc({
+                "doctype": "File",
+                "file_name": pdf_filename,
+                "file_url": f"/{pdf_path}",
+                "is_private": 1,
+
+            })
+            new_file.insert(ignore_permissions=True)
+            frappe.db.commit()
+
+            file_url = get_url(new_file.file_url)
+
+            return file_url
         json_object = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_json")
         json_object = literal_eval(json_object)["fields"]
         json_object = [
@@ -534,7 +663,7 @@ def download_filled_form(form_short_name: str, name: str):
                 # Generate the data_list with field labels
                 data_list = [{field_labels.get(field, field): record.get(field) for field in field_names} for record in child_table_records]
 
-        html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_short_name,child_data=data_list)
+        html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_short_name,child_data=data_list,child_table_data=None)
         random_number = randint(111, 999)
 
         pdf_filename = f"{form_short_name}_{name}_{random_number}.pdf"

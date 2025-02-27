@@ -112,7 +112,7 @@
                                 <button type="button"
                                     class="applyfilter btn btn-dark text-nowrap font-10 d-flex justify-content-center align-items-center"
                                     data-bs-dismiss="modal"
-                                    :disabled="!CreateDepartments.department_code || !CreateDepartments.department_name || !CreateDepartments.business_unit || !newCategory"
+                                    :disabled="!CreateDepartments.department_code || !CreateDepartments.department_name || !CreateDepartments.business_unit || !CreateDepartments.ezy_departments_items.length"
                                     @click="createDepart"><span class="font-16 me-1"><i
                                             class="bi bi-check2 "></i></span>
                                     Create Department</button>
@@ -501,6 +501,12 @@ function createDepart() {
         if (res.data) {
             toast.success("Department Created", { autoClose: 500, "transition": "zoom" })
             deptData()
+            CreateDepartments.value = {
+        department_code: "",
+        department_name: "",
+        ezy_departments_items: [
+        ]
+    }
         }
 
     })

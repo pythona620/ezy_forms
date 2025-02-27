@@ -14,9 +14,9 @@
         <!-- v-if="tableForm" -->
         <div class="mt-2">
 
-            <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" actionType="dropdown"
-                @actionClicked="actionCreated" isFiltersoption="true" :field-mapping="fieldMapping" :actions="actions"
-                @updateFilters="inLineFiltersData" isCheckbox="true" />
+            <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" actionType="Toogle&dropdown"
+                @actionClicked="actionCreated" @toggle-click="toggleFunction" isFiltersoption="true"
+                :field-mapping="fieldMapping" :actions="actions" @updateFilters="inLineFiltersData" isCheckbox="true" />
             <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
                 @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
         </div>
@@ -160,7 +160,7 @@ function actionCreated(rowData, actionEvent) {
     } else if (actionEvent.name === 'Edit Form') {
         formCreation(rowData);
     }
-    else if (actionEvent.name === 'PDF Format') {
+    else if (actionEvent.name === 'Download Print format') {
         // pdfView
         formDescriptions.value = rowData
 
@@ -229,11 +229,36 @@ function actionCreated(rowData, actionEvent) {
         updateFormStatus(rowData, '1');
     }
 }
+
+function toggleFunction(rowData, rowIndex, event) {
+    const isCurrentlyEnabled = rowData.enable == '1' || rowData.enable === 1;
+    const actionText = isCurrentlyEnabled ? 'Disable' : 'Enable';
+
+    if (confirm(`Are you sure you want to ${actionText} this Form?`)) {
+        rowData.enable = isCurrentlyEnabled ? 0 : 1;
+
+        axiosInstance
+            .put(`${apis.resource}${doctypes.EzyFormDefinitions}/${rowData.name}`, rowData)
+            .then((response) => {
+                toast.success(`Form ${actionText}d successfully`, { autoClose: 700 });
+                // setTimeout(() => {
+                //     fetchTable();
+                // }, 1000);
+                window.location.reload()
+            })
+            .catch((error) => {
+                console.error("Error updating toggle:", error);
+            });
+    } else {
+        console.log("Action cancelled. Toggle remains unchanged.");
+    }
+}
+
 function downloadPdf() {
 
     const dataObj = {
         "form_short_name": formDescriptions.value.form_short_name,
-        "name": ""
+        "name": "",
     };
 
     axiosInstance.post(apis.download_pdf_form, dataObj)
