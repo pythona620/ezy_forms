@@ -208,8 +208,9 @@
               <button type="button"
                 class="applyfilter btn btn-dark text-nowrap font-10 d-flex justify-content-center align-items-center"
                 @click="createEmpl">
-                <span class="font-16 me-1"><i class="bi bi-check2"></i></span>
-                Create Employee
+                <span v-if="!loading" class="font-16 me-1"><i class="bi bi-check2"></i></span>
+                <span v-if="!loading">Create Employee</span>
+                <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
               </button>
             </div>
           </div>
@@ -421,6 +422,7 @@ const departmentsList = ref([]);
 // const signaturePath = ref("");
 const phoneError = ref("");
 const signatureInputRef = ref(null);
+const loading = ref(false);
 const createEmployee = ref({
   emp_code: "",
   emp_name: "",
@@ -659,7 +661,7 @@ function toggleFunction(rowData) {
       .then((employeeResponse) => {
         console.log("Employee Response:", employeeResponse.data);
 
-        const userUpdateData = { enable: rowData.enable };
+        const userUpdateData = { enabled: rowData.enable };
 
         axiosInstance
           .put(`${apis.resource}${doctypes.users}/${rowData.name}`, userUpdateData)
@@ -924,12 +926,14 @@ function createEmpl() {
       transition: "zoom",
     });
     return;
+    
   }
   createEmployee.value.company_field = businessUnit.value;
   const dataObj = {
     ...createEmployee.value,
     doctype: doctypes.EzyEmployeeList,
   };
+  loading.value = true;
 
   axiosInstance
     .post(apis.resource + doctypes.EzyEmployeeList, dataObj)
@@ -950,7 +954,14 @@ function createEmpl() {
           fileInput.value = "";
         }
         employeeData();
+        loading.value = false;
       }
+    })
+    .catch((error) => {
+      console.error("Error creating employee:", error);
+    })
+    .finally(() => {
+      loading.value = false; // Ensure loading is false regardless of success or failure
     });
 }
 function SaveEditEmp() {
