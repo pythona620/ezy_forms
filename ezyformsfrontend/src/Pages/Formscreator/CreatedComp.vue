@@ -160,7 +160,7 @@ function actionCreated(rowData, actionEvent) {
     } else if (actionEvent.name === 'Edit Form') {
         formCreation(rowData);
     }
-    else if (actionEvent.name === 'PDF Format') {
+    else if (actionEvent.name === 'Download Print format') {
         // pdfView
         formDescriptions.value = rowData
 
@@ -233,7 +233,7 @@ function downloadPdf() {
 
     const dataObj = {
         "form_short_name": formDescriptions.value.form_short_name,
-        "name": ""
+        // "name": null
     };
 
     axiosInstance.post(apis.download_pdf_form, dataObj)
