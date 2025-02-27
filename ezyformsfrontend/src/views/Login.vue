@@ -26,7 +26,7 @@
             id="password" v-model="formdata.pwd" @input="validatepassword" @keydown.enter="Login"
             :class="{ 'is-invalid': errors.pwd }" />
 
-          <!-- Toggle icon for show/hide password -->
+          <!-- Toggle icon for show/hide sas  password -->
           <span v-if="!errors.pwd" class="toggle-icon" @click="togglePasswordVisibility">
             <i :class="showPassword ? 'bi bi-eye' : 'bi bi-eye-slash'"></i>
           </span>
@@ -34,6 +34,8 @@
             {{ errors.pwd }}
           </div>
         </div>
+
+
         <br />
         <button :disabled="!showPwdField" @click="Login" type="submit"
           class="border-0 btn btn-dark button w-100 py-2 font-13 text-white rounded-1">
