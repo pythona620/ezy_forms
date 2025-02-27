@@ -27,7 +27,9 @@
           <div class="modal-header py-2 d-block">
             <div class="d-flex justify-content-between align-items-center">
               <div>
-                <h5 class="m-0 font-13" id="viewRequest">Request</h5>
+                <h5 class="m-0 font-13" id="viewRequest">Request Id: {{ selectedRequest.name }}
+                </h5>
+                
               </div>
               <div class="">
                 <button button="button" class="btn btn-white text-dark font-13" @click="downloadPdf">
@@ -117,14 +119,17 @@
                 data-bs-dismiss="modal">Close
                 <i class="bi bi-x"></i></button> -->
               <div v-if="selectedRequestStatus == 'Request Raised'">
-                <ButtonComp type="button" icon="x"
-                  class="btn btn-dark d-flex align-items-center edit-btn border-1 text-nowrap font-10 "
-                  @click="approvalCancelFn(formData, 'Request Cancelled')" name="Cancel Request" />
+                  <button :disabled="loading" type="submit" class="btn edit-btn"
+                  @click="approvalCancelFn(formData, 'Request Cancelled')">
+                  <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                  <span v-if="!loading" ><i class="bi bi-check-lg font-11 me-2"></i><span class="font-10">Cancel Request</span></span>
+                </button>
+
               </div>
             </div>
             <div v-if="requestcancelled || selectedRequestStatus == 'Request Raised'">
               <ButtonComp type="button" class="border-1 edit-btn text-nowrap font-10" @click="handleEditClick"
-                name="Edit" />
+                name="Edit Form" />
             </div>
           </div>
         </div>
@@ -206,6 +211,7 @@ const tableHeaders = ref([]);
 const tableName = ref("");
 const responseData = ref([]);
 const route = useRoute();
+const loading = ref(false);
 
 const tableheaders = ref([
   // { th: "Request ID", td_key: "name" },
@@ -531,13 +537,14 @@ function approvalCancelFn(dataObj, type) {
     doctype: selectedRequest.value.doctype_name,
     current_level: selectedRequest.value.current_level,
     request_id: selectedRequest.value.name,
-    reason: "Cancel",
+    reason: "Request Cancelled",
     files: [],
     url_for_cancelling_id: "",
     // "action": type,
     // "cluster_name": null,
     // https://ezyrecon.ezyinvoicing.com/home/wf-requests
   };
+  loading.value = true;
 
   // need to check this api not working
   axiosInstance
@@ -548,12 +555,16 @@ function approvalCancelFn(dataObj, type) {
         const modal = bootstrap.Modal.getInstance(
           document.getElementById("viewRequest")
         );
+        loading.value = false;
         modal.hide();
         receivedForMe();
       }
     })
     .catch((error) => {
       console.error("Error fetching data:", error);
+    })
+    .finally(() => {
+      loading.value = false; // Ensure loading is false regardless of success or failure
     });
 }
 
@@ -750,6 +761,7 @@ onMounted(() => {
   padding: 5px 15px 5px 15px;
   border-radius: 4px;
   font-weight: bold;
+  width: 150px;
 }
 
 .rejectbtn {
