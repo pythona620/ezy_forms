@@ -98,10 +98,10 @@ const route = useRoute(); // Get query params from route
 
 //  Extract query parameters from URL
 const selectedData = ref({
+  routepath: route.query.routepath|| "",
   selectedCategory: route.query.selectedCategory || "", // Retrieve from query
   selectedform: route.query.selectedForm || "", // Retrieve from query
   selectedFormId: route.query.selectedFormId || "", // Retrieve from query
-  routepath: route.query.routepath,
 });
 const business_unit = ref(route.query.business_unit || ""); // Retrieve from query
 const isFormValid = ref(false);
