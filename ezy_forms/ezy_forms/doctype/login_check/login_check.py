@@ -16,7 +16,7 @@ def after_insert_user(self, method=None):
         
         if not existing_user:
             new_doc = frappe.new_doc("Login Check")
-            new_doc.user = self.emp_mail_id
+            new_doc.user_id = self.emp_mail_id
             new_doc.insert(ignore_permissions=True)
             frappe.db.commit()
             
