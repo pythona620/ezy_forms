@@ -8,7 +8,8 @@
  "field_order": [
   "bu_name",
   "bu_code",
-  "send_form_as_a_attach_through_mail"
+  "send_form_as_a_attach_through_mail",
+  "bu_logo"
  ],
  "fields": [
   {
@@ -23,15 +24,14 @@
    "unique": 1
   },
   {
-   "default": "0",
-   "fieldname": "send_form_as_a_attach_through_mail",
-   "fieldtype": "Check",
-   "label": "Send form as a attach through mail"
+   "fieldname": "bu_logo",
+   "fieldtype": "Attach",
+   "label": "BU Logo"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-02-27 18:21:25.431891",
+ "modified": "2025-02-28 10:46:17.796362",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
  "name": "Ezy Business Unit",
@@ -46,7 +46,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "DOF",
+   "role": "CS",
    "share": 1,
    "write": 1
   },
@@ -70,7 +70,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "IT",
+   "role": "Hd",
    "share": 1,
    "write": 1
   },
@@ -82,7 +82,19 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Tl",
+   "role": "re",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "IT Manager",
    "share": 1,
    "write": 1
   }
