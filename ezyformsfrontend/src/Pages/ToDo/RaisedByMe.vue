@@ -401,6 +401,7 @@ function actionCreated(rowData, actionEvent) {
           const dataObj = {
             form_short_name: rowData.doctype_name,
             name: doctypeForm.value[0].name,
+            business_unit:businessUnit.value
           };
 
           axiosInstance
@@ -478,6 +479,8 @@ function downloadPdf() {
   const dataObj = {
     form_short_name: selectedRequest.value.doctype_name,
     name: doctypeForm.value[0]?.name,
+    business_unit:businessUnit.value
+
   };
 
   axiosInstance

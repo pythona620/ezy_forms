@@ -145,7 +145,7 @@ const actions = ref([
 ]);
 
 function actionCreated(rowData, actionEvent) {
-    if (actionEvent.name === 'View form') {
+    if (actionEvent.name === 'View form') {``
         if (rowData?.form_json) {
             formDescriptions.value = { ...rowData };
             // console.log(formDescriptions.value, "lllllllllll");
@@ -165,7 +165,9 @@ function actionCreated(rowData, actionEvent) {
         formDescriptions.value = rowData
 
         const dataObj = {
-            "form_short_name": rowData.form_short_name
+            "form_short_name": rowData.form_short_name,
+             business_unit:businessUnit.value
+
         };
 
         axiosInstance.post(apis.preview_dynamic_form, dataObj)
@@ -259,6 +261,7 @@ function downloadPdf() {
     const dataObj = {
         "form_short_name": formDescriptions.value.form_short_name,
         "name": "",
+        business_unit:businessUnit.value
     };
 
     axiosInstance.post(apis.download_pdf_form, dataObj)
