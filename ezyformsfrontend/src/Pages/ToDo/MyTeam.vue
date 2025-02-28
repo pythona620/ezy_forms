@@ -47,7 +47,8 @@
           <div class="modal-header py-2 d-block">
             <div class="d-flex justify-content-between align-items-center">
               <div>
-                <h5 class="m-0 font-13" id="viewRequest">Request</h5>
+                <h5 class="m-0 font-13" id="viewRequest">Request Id: {{ selectedRequest.name }}
+                </h5>
               </div>
               <div class="">
                 <button

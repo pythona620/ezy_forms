@@ -17,21 +17,21 @@
                             <div class="legend">
                                 <div class="legend-item">
                                     <span class="color-box scanned"></span>
-                                    <span class="label"><b>{{ Approved }}</b> Approved</span>
+                                    <span class="label"><b>{{ Approved || 0 }}</b> Approved</span>
                                 </div>
                                 <!-- </div>
                             <div class="legend"> -->
                                 <div class="legend-item">
                                     <span class="color-box InProgress"></span>
-                                    <span class="label"><b>{{ Pending }}</b> Pending</span>
+                                    <span class="label"><b>{{ Pending || 0 }}</b> Pending</span>
                                 </div>
                                 <div class="legend-item">
                                     <span class="color-box Pending"></span>
-                                    <span class="label"><b>{{ request_raised }}</b> Request Raised</span>
+                                    <span class="label"><b>{{ request_raised || 0 }}</b> Request Raised</span>
                                 </div>
                                 <div class="legend-item">
                                     <span class="color-box Rejected"></span>
-                                    <span class="label"><b>{{ Request_cancelled }}</b> Request Cancelled</span>
+                                    <span class="label"><b>{{ Request_cancelled || 0 }}</b> Request Cancelled</span>
                                 </div>
 
                             </div>

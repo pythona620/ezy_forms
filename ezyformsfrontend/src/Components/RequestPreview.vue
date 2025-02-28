@@ -226,9 +226,28 @@ const props = defineProps({
 });
 
 
-// Function to get the current date and time in the correct format
 const getCurrentDateTime = () => {
-    return new Date().toISOString().slice(0, 16); // Formats to "YYYY-MM-DDTHH:MM"
+  return new Date().toISOString().slice(0, 16); // Adjust format as needed
+};
+
+// Function to update Datetime fields
+const updateDateTimeFields = () => {
+  if (props.blockArr) {
+    props.blockArr.forEach((block) => {
+      block.sections.forEach((section) => {
+        section.rows.forEach((row) => {
+          row.columns.forEach((column) => {
+            column.fields.forEach((field) => {
+              if (field.fieldtype === "Datetime" && !field.value) {
+                field.value = getCurrentDateTime();
+                emit("updateField", field);
+              }
+            });
+          });
+        });
+      });
+    });
+  }
 };
 
 // Initialize datetime fields on component mount
@@ -242,6 +261,7 @@ onMounted(() => {
             console.error("Error parsing employeeData from localStorage:", error);
         }
     }
+    updateDateTimeFields();
 
 
     if (props.blockArr) {
@@ -265,7 +285,14 @@ onMounted(() => {
         });
     }
 });
-
+// Watch blockArr for changes
+watch(
+  () => props.blockArr,
+  () => {
+    updateDateTimeFields();
+  },
+  { deep: true }
+);
 const emit = defineEmits();
 const errorMessages = ref({});
 const getFieldComponent = (type) => {

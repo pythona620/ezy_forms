@@ -8,7 +8,7 @@ import os, sys
 import traceback
 from frappe.utils import get_bench_path, cstr
 from frappe.utils import get_bench_path, cstr, get_url
-
+ 
 def rebuild_to_structured_array(flat_array):
     result = []
     current_block = None
@@ -118,7 +118,7 @@ def rebuild_to_structured_array(flat_array):
     if current_block:
         result.insert(0, current_block)
     return result
-
+ 
 # Jinja2 template string
 template_str = """
 <!DOCTYPE html>
@@ -145,12 +145,12 @@ template_str = """
             flex-wrap: wrap;
             margin-bottom: 20px;
         }
-
+ 
         .column {
             flex: 1;
             margin-right: 20px;
         }
-
+ 
         .section h3, .section h4 {
             margin: 10px 0;
         }
@@ -167,14 +167,14 @@ template_str = """
         .field {
             display: flex;
             align-items: baseline;
-            # border-bottom: 1px solid #cccccc; 
+            # border-bottom: 1px solid #cccccc;
             padding: 0px ;
             margin: 15px;
         }
         .field label {
             font-weight: bold;
             white-space: nowrap;
-            margin-right: 10px; 
+            margin-right: 10px;
             font-size: 13px;
             margin-bottom: 0px;
             padding-bottom: 0px;
@@ -185,8 +185,8 @@ template_str = """
             padding: 0px 5px;
                padding-left: 50px ;
             background: transparent;
-            flex: 1; 
-            border-bottom: 1px solid #cccccc; 
+            flex: 1;
+            border-bottom: 1px solid #cccccc;
         }
         .field select, .field textarea {
             border: none;
@@ -248,10 +248,12 @@ template_str = """
           }
           .signature-Imge{
               min-width: 80px;
-              max-width: 100px;
+              max-width: 90px;
+              padding-bottom: 5px;
+              border-bottom: 1px solid #cccccc;
               
           }
-
+ 
         .logo-div{
             max-width: 300px;
               min-width: 200px;
@@ -276,9 +278,10 @@ template_str = """
 <body>
 <div class="main-body">
 <div class="header-container">
-	<div class="logo-div">	
-	<img src="{{ company_logo }}" alt="logo" style="height: 70px; width: 200px; margin-bottom:0px">
-	 </div>
+    <div class="logo-div"> 
+    
+    <img src="{{ company_logo }}" alt="logo" style="height: 70px; width: 200px; margin-bottom:0px">
+     </div>
   <div class="header-left">
   
  
@@ -304,8 +307,8 @@ template_str = """
                                 {% for field in column.fields %}
                                     <div class="field">
                                         <label for="{{ field.fieldname }}">{{ field.label }}:</label>
-
-                                        {% if field.fieldtype in ['Check', 'Select', 'radio'] %}
+ 
+                                        {% if field.fieldtype in ['Check', 'radio'] %}
                                             <div class="container-fluid">
                                                 <div class="row">
                                                     {% for option in field.options.split('\n') %}
@@ -313,21 +316,21 @@ template_str = """
                                                             <div>
                                                             
                                                                 {% if field.fieldtype == 'Check'  %}
-                                                                    <input 
-                                                                        type="checkbox" 
+                                                                    <input
+                                                                        type="checkbox"
                                                                         class="form-check-input"
-                                                                        id="{{ field.fieldname }}-{{ loop.index0 }}" 
-                                                                        name="{{ field.fieldname }}" 
+                                                                        id="{{ field.fieldname }}-{{ loop.index0 }}"
+                                                                        name="{{ field.fieldname }}"
                                                                         value="{{ option }}"
                                                                         {% if option in field.values %} checked {% endif %}
                                                                         disabled
                                                                     >
                                                                 {% elif field.fieldtype == 'radio' %}
-                                                                    <input 
-                                                                        type="radio" 
+                                                                    <input
+                                                                        type="radio"
                                                                         class="form-check-input"
-                                                                        id="{{ field.fieldname }}-{{ loop.index0 }}" 
-                                                                        name="{{ field.fieldname }}" 
+                                                                        id="{{ field.fieldname }}-{{ loop.index0 }}"
+                                                                        name="{{ field.fieldname }}"
                                                                         value="{{ option }}"
                                                                         {% if option == field.values %} checked {% endif %}
                                                                         disabled
@@ -343,11 +346,15 @@ template_str = """
                                                     {% endfor %}
                                                 </div>
                                             </div>
-
+ 
                                         {% elif field.fieldtype == 'Data' or field.fieldtype == 'Select' %}
                                             <input type="text" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
                                         {% elif field.fieldtype == 'Attach' %}
-                                            <img  id="{{ field.fieldname }}" src="{{ site_url + field['values'] or ''  }}" class="signature-Imge" name="{{ field.fieldname }}">
+                                            {% if field['values'] %}
+                                                <img  id="{{ field.fieldname }}" src="{{ site_url + field['values'] or ''  }}" class="signature-Imge" name="{{ field.fieldname }}">
+                                            {% else %}
+                                                <input type="text" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
+                                            {% endif %}
                                         {% elif field.fieldtype == 'Phone' %}
                                             <input type="tel" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
                                         {% elif field.fieldtype == 'Time' %}
@@ -374,7 +381,7 @@ template_str = """
         {% endfor %}
     </div>
 {% endfor %}
-
+ 
 {% if child_data %}
     {% for child in child_data %}
         {% if child is mapping %}
@@ -416,41 +423,40 @@ template_str = """
     </table>
     
 {% endif %}
+ 
+ 
 
-
-<div class="footer-container"><span>305, Block 2, White House, Kundanbagh Colony, Begumpet, Hyderabad, Telangana 500016</span></div>
-</div>
-
+ 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-
+ 
         const dateInputs = document.querySelectorAll(".date-input");
-
+ 
         dateInputs.forEach(input => {
             // If input is empty, show slashes
             if (!input.value) {
                 input.value = "__/__/____";
             }
-
+ 
             // Handle user input
             input.addEventListener("input", function (event) {
                 let value = event.target.value.replace(/\D/g, ""); // Remove non-numeric characters
                 let formattedValue = "__/__/____";
-
+ 
                 if (value.length >= 2) formattedValue = value.slice(0, 2) + "/__/____";
                 if (value.length >= 4) formattedValue = value.slice(0, 2) + "/" + value.slice(2, 4) + "/____";
                 if (value.length >= 8) formattedValue = value.slice(0, 2) + "/" + value.slice(2, 4) + "/" + value.slice(4, 8);
-
+ 
                 event.target.value = formattedValue;
             });
-
+ 
             // Handle focus (clear placeholder slashes)
             input.addEventListener("focus", function () {
                 if (input.value === "__/__/____") {
                     input.value = "";
                 }
             });
-
+ 
             // Handle blur (restore slashes if empty)
             input.addEventListener("blur", function () {
                 if (!input.value.replace(/\D/g, "")) {
@@ -460,10 +466,10 @@ template_str = """
         });
     });
 </script>
-
+ 
 </body>
 </html>
-
+ 
 """
  
 def convert_html_to_pdf(html_content, pdf_path):
@@ -472,19 +478,19 @@ def convert_html_to_pdf(html_content, pdf_path):
         print(f"PDF generated and saved at {pdf_path}")
     except Exception as e:
         print(f"PDF generation failed: {e}")
-
+ 
 def json_structure_call_for_html_view(json_obj: list, form_name: str, child_data, child_table_data,business_unit):
-    logo_of_company = None
     if child_data is None:
         child_data = []
     site_url = frappe.utils.get_url()
+    logo_of_company = site_url + "/files/Final-logo-ezyforms-removebg-preview.png"
     if child_table_data is None:
         child_table_data = []
     
     structered_data = rebuild_to_structured_array(flat_array=json_obj)
     if structered_data is None:
         structered_data = []  # Ensure it's iterable
-
+ 
     company_logo = frappe.db.get_value("Ezy Business Unit",business_unit,"bu_logo")
     if company_logo:
         logo_of_company = site_url + company_logo
@@ -494,8 +500,8 @@ def json_structure_call_for_html_view(json_obj: list, form_name: str, child_data
     )
     
     return html_output
-
-
+ 
+ 
 # Sample nested data structure
 @frappe.whitelist()
 def preview_dynamic_form(form_short_name: str, business_unit=None, name=None):
@@ -509,14 +515,14 @@ def preview_dynamic_form(form_short_name: str, business_unit=None, name=None):
             ]
     labels = None
     data_list =None
-
+ 
     if name == None:
         user_doc = frappe.get_doc("DocType", form_short_name).as_dict()
         
         for iteration in json_object:
             if "value" in iteration:
                 iteration["value"] = user_doc.get(iteration["fieldname"], "")
-
+ 
             # Handling child table fields
             if iteration.get("fieldtype") == "Table":
                 iteration["value"] = frappe.get_all(iteration["options"], filters={"parent": name}, fields=["*"])
@@ -526,14 +532,14 @@ def preview_dynamic_form(form_short_name: str, business_unit=None, name=None):
                 child_table_name = str(iteration["fieldname"])  
                 # Get the child table Doctype name
                 child_table_doctype = frappe.get_value(
-                    "DocField", 
-                    {"parent": form_short_name, "fieldname": child_table_name}, 
+                    "DocField",
+                    {"parent": form_short_name, "fieldname": child_table_name},
                     "options"
                 )
-
+ 
                 if not child_table_doctype:
                     return {"error": "Child table not found"}
-
+ 
                 # Get the fields (columns) of the child table
                 child_table_fields = frappe.get_all(
                     "DocField",
@@ -549,7 +555,7 @@ def preview_dynamic_form(form_short_name: str, business_unit=None, name=None):
         for iteration in json_object:
             if "value" in iteration:
                 iteration["value"] = user_doc.get(iteration["fieldname"], "")
-
+ 
             # Handling child table fields
             if iteration.get("fieldtype") == "Table":
                 iteration["value"] = frappe.get_all(iteration["options"], filters={"parent": name}, fields=["*"])
@@ -558,19 +564,19 @@ def preview_dynamic_form(form_short_name: str, business_unit=None, name=None):
                 # Dynamically access the child table
                 child_table_name = str(iteration["fieldname"])  
                 child_table_records = getattr(doc, child_table_name, [])
-
+ 
                 # Define field names dynamically
                 field_names = [df.fieldname for df in frappe.get_meta(child_table_name).fields]
-
+ 
                 # Define field_labels dynamically
                 field_labels = {df.fieldname: df.label for df in frappe.get_meta(child_table_name).fields}
-
+ 
                 # Generate the data_list with field labels
                 data_list = [{field_labels.get(field, field): record.get(field) for field in field_names} for record in child_table_records]
            
     html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_name,child_data=data_list,child_table_data=None,business_unit=business_unit)
     return html_view
-
+ 
 @frappe.whitelist()
 def download_filled_form(form_short_name: str, name: str,business_unit=None):
     """Generates a PDF for the dynamic form with filled data"""
@@ -589,7 +595,7 @@ def download_filled_form(form_short_name: str, name: str,business_unit=None):
             for iteration in json_object:
                 if "value" in iteration:
                     iteration["value"] = user_doc.get(iteration["fieldname"], "")
-
+ 
                 # Handling child table fields
                 if iteration.get("fieldtype") == "Table":
                     iteration["value"] = frappe.get_all(iteration["options"], filters={"parent": name}, fields=["*"])
@@ -599,14 +605,14 @@ def download_filled_form(form_short_name: str, name: str,business_unit=None):
                     child_table_name = str(iteration["fieldname"])  
                     # Get the child table Doctype name
                     child_table_doctype = frappe.get_value(
-                        "DocField", 
-                        {"parent": form_short_name, "fieldname": child_table_name}, 
+                        "DocField",
+                        {"parent": form_short_name, "fieldname": child_table_name},
                         "options"
                     )
-
+ 
                     if not child_table_doctype:
                         return {"error": "Child table not found"}
-
+ 
                     # Get the fields (columns) of the child table
                     child_table_fields = frappe.get_all(
                         "DocField",
@@ -616,25 +622,25 @@ def download_filled_form(form_short_name: str, name: str,business_unit=None):
                     labels = [field["label"] for field in child_table_fields]
             html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_short_name,child_table_data=labels,child_data=None,business_unit=business_unit)
             random_number = randint(111, 999)
-
+ 
             pdf_filename = f"{form_short_name}_{random_number}.pdf"
             pdf_path = f"private/files/{pdf_filename}"
             absolute_pdf_path = os.path.join(get_bench_path(), "sites", cstr(frappe.local.site), pdf_path)
-
+ 
             convert_html_to_pdf(html_content=html_view, pdf_path=absolute_pdf_path)
-
+ 
             new_file = frappe.get_doc({
                 "doctype": "File",
                 "file_name": pdf_filename,
                 "file_url": f"/{pdf_path}",
                 "is_private": 1,
-
+ 
             })
             new_file.insert(ignore_permissions=True)
             frappe.db.commit()
-
+ 
             file_url = get_url(new_file.file_url)
-
+ 
             return file_url
         json_object = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_json")
         json_object = literal_eval(json_object)["fields"]
@@ -647,7 +653,7 @@ def download_filled_form(form_short_name: str, name: str,business_unit=None):
         for iteration in json_object:
             if "value" in iteration:
                 iteration["value"] = user_doc.get(iteration["fieldname"], "")
-
+ 
             # Handling child table fields
             if iteration.get("fieldtype") == "Table":
                 iteration["value"] = frappe.get_all(iteration["options"], filters={"parent": name}, fields=["*"])
@@ -656,25 +662,25 @@ def download_filled_form(form_short_name: str, name: str,business_unit=None):
                 # Dynamically access the child table
                 child_table_name = str(iteration["fieldname"])  
                 child_table_records = getattr(doc, child_table_name, [])
-
+ 
                 # Define field names dynamically
                 field_names = [df.fieldname for df in frappe.get_meta(child_table_name).fields]
-
+ 
                 # Define field_labels dynamically
                 field_labels = {df.fieldname: df.label for df in frappe.get_meta(child_table_name).fields}
-
+ 
                 # Generate the data_list with field labels
                 data_list = [{field_labels.get(field, field): record.get(field) for field in field_names} for record in child_table_records]
-
+ 
         html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_short_name,child_data=data_list,child_table_data=None,business_unit=business_unit)
         random_number = randint(111, 999)
-
+ 
         pdf_filename = f"{form_short_name}_{name}_{random_number}.pdf"
         pdf_path = f"private/files/{pdf_filename}"
         absolute_pdf_path = os.path.join(get_bench_path(), "sites", cstr(frappe.local.site), pdf_path)
-
+ 
         convert_html_to_pdf(html_content=html_view, pdf_path=absolute_pdf_path)
-
+ 
         new_file = frappe.get_doc({
             "doctype": "File",
             "file_name": pdf_filename,
@@ -685,17 +691,17 @@ def download_filled_form(form_short_name: str, name: str,business_unit=None):
         })
         new_file.insert(ignore_permissions=True)
         frappe.db.commit()
-
+ 
         file_url = get_url(new_file.file_url)
-
+ 
         return file_url
-
+ 
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         frappe.log_error("Error Downloading File", f"line No:{exc_tb.tb_lineno}\n{traceback.format_exc()}")
         frappe.throw(str(e))
-
-
+ 
+ 
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         frappe.log_error("Error Downloading File", "line No:{}\n{}".format(exc_tb.tb_lineno, traceback.format_exc()))
