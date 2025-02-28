@@ -185,8 +185,7 @@ import { rebuildToStructuredArray } from "../../shared/services/field_format";
 import ApproverPreview from "../../Components/ApproverPreview.vue";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
-import router from "../../router";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 const businessUnit = computed(() => {
   return EzyBusinessUnit.value;
 });
@@ -211,6 +210,8 @@ const tableHeaders = ref([]);
 const tableName = ref("");
 const responseData = ref([]);
 const route = useRoute();
+const router = useRouter();
+
 const loading = ref(false);
 
 const tableheaders = ref([
@@ -260,11 +261,11 @@ function handleEditClick() {
   router.push({
     name: "RaiseRequest",
     query: {
+      routepath: route.path,
       business_unit: selectedRequest.value.property,
       selectedForm: selectedRequest.value.doctype_name,
       selectedFormId: selectedRequest.value.name,
       selectedFormStatus: selectedRequest.value.status,
-      routepath: route.path,
 
     },
   });

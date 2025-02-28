@@ -698,7 +698,8 @@ export function addErrorMessagesToStructuredArray(structuredArray) {
 function convertLabelToFieldName(label) {
   return label
     .trim()                     // Remove leading/trailing spaces
-    .toLowerCase()               // Convert to lowercase
-    .replace(/\s+/g, '_')        // Replace spaces with underscores
-    .replace(/[^a-z0-9_]/g, ''); // Remove non-alphanumeric characters except underscores
+    .replace(/"/g, "'")         // Replace double quotes with single quotes
+    .toLowerCase()              // Convert to lowercase
+    .replace(/\s+/g, '_')       // Replace spaces with underscores
+    .replace(/[^a-z0-9_']/g, ''); // Remove non-alphanumeric characters except underscores and single quotes
 }

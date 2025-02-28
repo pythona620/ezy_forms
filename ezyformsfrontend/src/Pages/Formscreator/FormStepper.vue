@@ -1592,9 +1592,10 @@ const addUpdatetablefield = () => {
 //     field.errorMsg = "";
 //   }
 // };
+const formattedTableName = ref("");
 const gettingTablename = (e) => {
   if (e?.target?.value) {
-    tableName.value = e.target.value
+    formattedTableName.value = e.target.value
       .trim() // Remove leading/trailing spaces
       .toLowerCase() // Convert to lowercase
       .replace(/\s+/g, "_") // Replace spaces with underscores
@@ -1602,7 +1603,7 @@ const gettingTablename = (e) => {
   }
 };
 const formattedData = computed(() => ({
-  form_short_name: tableName.value,
+  form_short_name: formattedTableName.value,
   fields: columns,
 }));
 
@@ -1748,10 +1749,10 @@ const fieldTypes = [
     label: "Text",
     type: "Data",
   },
-  {
-    label: "Number",
-    type: "Int",
-  },
+  // {
+  //   label: "Number",
+  //   type: "Int",
+  // },
   {
     label: "Attach",
     type: "Attach",
@@ -2096,14 +2097,7 @@ function getFormData() {
         //     categoriesData(filterObj.value.owner_of_the_form);
         // }
         // console.log(res.data.form_json, "jjjjj");
-        childtableHeaders.value = JSON.parse(
-          res.data.form_json
-        ).child_table_fields;
-        // console.log(
-        //   childtableHeaders.value,
-        //   typeof childtableHeaders.value,
-        //   "---child"
-        // );
+        
 
         // console.log(res.data, "7777777777777777");
         const parsedFormJson = JSON.parse(res.data?.form_json);
@@ -2119,6 +2113,14 @@ function getFormData() {
         let structuredArr = rebuildToStructuredArray(
           JSON.parse(res_data?.form_json).fields
         );
+        childtableHeaders.value = JSON.parse(
+          res.data.form_json
+        ).child_table_fields;
+        // console.log(
+        //   childtableHeaders.value,
+        //   typeof childtableHeaders.value,
+        //   "---child"
+        // );
 
         // workflowSetup.push(JSON.parse(res_data?.form_json).workflow)
 
@@ -2130,38 +2132,38 @@ function getFormData() {
           workflowSetup.push(item);
         });
 
-        axiosInstance
-          .get(`${apis.resource}${res.data.name}`)
-          .then((responce) => {
-            child_id.value = responce.data[0]?.name;
+        // axiosInstance
+        //   .get(`${apis.resource}${res.data.name}`)
+        //   .then((responce) => {
+        //     child_id.value = responce.data[0]?.name;
 
-            if (child_id.value) {
-              axiosInstance
-                .get(`${apis.resource}${res.data.name}/${child_id.value}`)
-                .then((res) => {
-                  // console.log(child_id.value, "llll");
-                  // console.log(`Data for66666666666666666 :`, res.data);
-                  // Identify the child table key dynamically
-                  // const childTableKey = Object.keys(res.data).find((key) =>
-                  //   Array.isArray(res.data[key])
-                  // );
-                  // tableName.value = childTableKey?.replace(/_/g, " ");
-                  // console.log(tableName.value,"yyyyyyyyyy");
+            // if (child_id.value) {
+            //   axiosInstance
+            //     .get(`${apis.resource}${res.data.name}/${child_id.value}`)
+            //     .then((res) => {
+            //       // console.log(child_id.value, "llll");
+            //       // console.log(`Data for66666666666666666 :`, res.data);
+            //       // Identify the child table key dynamically
+            //       // const childTableKey = Object.keys(res.data).find((key) =>
+            //       //   Array.isArray(res.data[key])
+            //       // );
+            //       // tableName.value = childTableKey?.replace(/_/g, " ");
+            //       // console.log(tableName.value,"yyyyyyyyyy");
 
-                  // if (childTableKey) {
-                  //   childTableresponseData.value = res.data[childTableKey];
-                  //   childtableRows.value = childTableresponseData.value; // Assign table rows
-                  //   console.log(childtableRows.value, "Dynamic Child Table Data");
-                  // }
-                })
-                .catch((error) => {
-                  console.error(`Error fetching data for :`, error);
-                });
-            }
-          })
-          .catch((error) => {
-            console.error(`Error fetching data for :`, error);
-          });
+            //       // if (childTableKey) {
+            //       //   childTableresponseData.value = res.data[childTableKey];
+            //       //   childtableRows.value = childTableresponseData.value; // Assign table rows
+            //       //   console.log(childtableRows.value, "Dynamic Child Table Data");
+            //       // }
+            //     })
+            //     .catch((error) => {
+            //       console.error(`Error fetching data for :`, error);
+            //     });
+            // }
+          // })
+          // .catch((error) => {
+          //   console.error(`Error fetching data for :`, error);
+          // });
       }
     })
     .catch((error) => {
@@ -2259,10 +2261,15 @@ function formData(status) {
   // console.log(blockArr, "blockarray");
 
   let fields = extractFieldsWithBreaks(blockArr);
-  // console.log(fields, "Extracted Fields");
+  console.log( tableFieldsCache.value," Fields");
   if (tableFieldsCache.value.length) {
-    // console.log("Using stored Table field from variable cache...");
+    // Merge stored table fields
     fields = [...fields, ...tableFieldsCache.value];
+  }
+  
+  if (childtableHeaders.value && childtableHeaders.value.length) {
+    // Append child table headers instead of replacing
+    fields = [...fields, ...childtableHeaders.value];
   }
   const dataObj = {
     ...filterObj.value,
@@ -2273,12 +2280,12 @@ function formData(status) {
   };
 
   dataObj.accessible_departments = dataObj.accessible_departments.toString();
-  // console.log(dataObj, "---data obj");
+  console.log(dataObj, "---data obj");
   axiosInstance
     .post(apis.savedata, dataObj)
     .then((res) => {
       if (res && res.message && res.message.message) {
-        tableFieldsCache.value = [];
+        // tableFieldsCache.value = [];
         router.push({
           params: { paramid: res.message.message },
         });

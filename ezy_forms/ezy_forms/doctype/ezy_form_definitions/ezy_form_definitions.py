@@ -141,17 +141,22 @@ def enqueued_add_customized_fields_for_dynamic_doc(fields:list[dict],doctype:str
             
         for dicts_of_docs_entries in fields:
             if dicts_of_docs_entries["fieldname"] in fields_in_mentioned_doctype:
-                doc_exists_name_or_not = frappe.db.exists("DocField",dicts_of_docs_entries)             
+                doc_exists_name_or_not = frappe.db.exists("DocField", dicts_of_docs_entries)             
                 if not doc_exists_name_or_not:
-                    name_of_existing_doc = frappe.db.get_all("DocField",filters={"fieldname":dicts_of_docs_entries["fieldname"],"parent":doctype},pluck="name")[0]
-                    doc_for_existing_custom_field = frappe.get_doc("DocField",name_of_existing_doc)
-                    # if "reqd" in dicts_of_docs_entries:doc_for_existing_custom_field.reqd = dicts_of_docs_entries["reqd"]
+                    name_of_existing_doc = frappe.db.get_all(
+                        "DocField",
+                        filters={"fieldname": dicts_of_docs_entries["fieldname"], "parent": doctype},
+                        pluck="name"
+                    )[0]
+                    doc_for_existing_custom_field = frappe.get_doc("DocField", name_of_existing_doc)
+                    
                     if "options" in dicts_of_docs_entries:
-                        if isinstance(dicts_of_docs_entries["options"],str):
-                            pass
-                            # dicts_of_docs_entries["options"] = literal_eval(dicts_of_docs_entries["options"])
-       
-                        doc_for_existing_custom_field.options = "\n".join(dicts_of_docs_entries["options"])
+                        if isinstance(dicts_of_docs_entries["options"], str):
+                            doc_for_existing_custom_field.options = dicts_of_docs_entries["options"]
+                        else:
+                            doc_for_existing_custom_field.options = "\n".join(dicts_of_docs_entries["options"])
+
+
       
                     if "default" in dicts_of_docs_entries:
                         doc_for_existing_custom_field.default = dicts_of_docs_entries["default"]

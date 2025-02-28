@@ -28,7 +28,7 @@
                                                 <span class="font-12">{{ field.label }}</span>
                                                 <span class="ms-1 text-danger">{{
                                                     field.reqd === 1 ? "*" : ""
-                                                }}</span>
+                                                    }}</span>
                                             </label>
                                         </div>
 
@@ -36,7 +36,8 @@
                                             field.fieldtype === 'Select' ||
                                             field.fieldtype === 'Table MultiSelect'
                                         ">
-                                            <select :multiple="field.fieldtype === 'Table MultiSelect' " :value="field.value" @change="
+                                            <select :multiple="field.fieldtype === 'Table MultiSelect'"
+                                                :value="field.value" @change="
                                                     (event) =>
                                                         logFieldValue(
                                                             event,
@@ -151,39 +152,39 @@
                                                 :value="field.value" class="form-control previewInputHeight font-10" />
                                             <!-- <input v-if="field.fieldtype === 'Date'" type="date" :value="field.value"
                                                 class="form-control previewInputHeight font-10" /> -->
-                                            <input v-if="field.fieldtype == 'Int'" type="number"
+                                            <!-- <input v-if="field.fieldtype == 'Int'" type="number"
                                                 :placeholder="'Enter ' + field.label" :value="field.value" :name="'field-' +
                                                     sectionIndex +
                                                     '-' +
                                                     columnIndex +
                                                     '-' +
                                                     fieldIndex
-                                                    " class="form-control previewInputHeight" />
+                                                    " class="form-control previewInputHeight" /> -->
                                             <!-- :value="field.value"  -->
                                             <component v-if="
-                                                field.fieldtype !== 'Datetime' &&
-                                                field.fieldtype !== 'Int'
+                                                field.fieldtype !== 'Datetime'
                                             " :is="getFieldComponent(field.fieldtype)" :value="field.value"
-                                                :maxlength="field.fieldtype === 'Phone' ? '10' : null" :type="field.fieldtype === 'Color'
+                                                :maxlength="field.fieldtype === 'Phone' ? '10' : null" :Type="field.fieldtype === 'Color'
                                                     ? 'color'
-                                                    : field.fieldtype
-                                                    " :name="'field-' +
-                                                        sectionIndex +
-                                                        '-' +
-                                                        columnIndex +
-                                                        '-' +
-                                                        fieldIndex
-                                                        " @change="
-                                (event) =>
-                                    logFieldValue(
-                                        event,
-                                        blockIndex,
-                                        sectionIndex,
-                                        rowIndex,
-                                        columnIndex,
-                                        fieldIndex
-                                    )
-                            " class="form-control previewInputHeight font-10">
+                                                    : field.fieldtype === 'Int'
+                                                        ? 'number'
+                                                        : field.fieldtype" :name="'field-' +
+        sectionIndex +
+        '-' +
+        columnIndex +
+        '-' +
+        fieldIndex
+        " @change="
+                                                            (event) =>
+                                                                logFieldValue(
+                                                                    event,
+                                                                    blockIndex,
+                                                                    sectionIndex,
+                                                                    rowIndex,
+                                                                    columnIndex,
+                                                                    fieldIndex
+                                                                )
+                                                        " class="form-control previewInputHeight font-10">
                                             </component>
                                         </template>
                                         <div v-if="
@@ -242,7 +243,7 @@ onMounted(() => {
         }
     }
 
-  
+
     if (props.blockArr) {
         props.blockArr.forEach((block) => {
             block.sections.forEach((section) => {
@@ -363,7 +364,7 @@ const logFieldValue = (
         let inputValue = eve.target.value;
 
         // Ensure only numbers are stored and +91 is prefixed
-        if (field.fieldtype === "Phone") {
+        if (field.fieldtype === "Phone" || field.label.includes('phone' || 'telephone' || 'mobile')) {
             inputValue = inputValue.replace(/\D/g, ""); // Remove non-numeric characters
 
             if (inputValue.length > 10) {
