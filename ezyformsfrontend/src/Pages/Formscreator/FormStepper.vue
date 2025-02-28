@@ -1592,9 +1592,10 @@ const addUpdatetablefield = () => {
 //     field.errorMsg = "";
 //   }
 // };
+const formattedTableName = ref("");
 const gettingTablename = (e) => {
   if (e?.target?.value) {
-    tableName.value = e.target.value
+    formattedTableName.value = e.target.value
       .trim() // Remove leading/trailing spaces
       .toLowerCase() // Convert to lowercase
       .replace(/\s+/g, "_") // Replace spaces with underscores
@@ -1602,7 +1603,7 @@ const gettingTablename = (e) => {
   }
 };
 const formattedData = computed(() => ({
-  form_short_name: tableName.value,
+  form_short_name: formattedTableName.value,
   fields: columns,
 }));
 
@@ -2131,10 +2132,10 @@ function getFormData() {
           workflowSetup.push(item);
         });
 
-        axiosInstance
-          .get(`${apis.resource}${res.data.name}`)
-          .then((responce) => {
-            child_id.value = responce.data[0]?.name;
+        // axiosInstance
+        //   .get(`${apis.resource}${res.data.name}`)
+        //   .then((responce) => {
+        //     child_id.value = responce.data[0]?.name;
 
             // if (child_id.value) {
             //   axiosInstance
@@ -2159,10 +2160,10 @@ function getFormData() {
             //       console.error(`Error fetching data for :`, error);
             //     });
             // }
-          })
-          .catch((error) => {
-            console.error(`Error fetching data for :`, error);
-          });
+          // })
+          // .catch((error) => {
+          //   console.error(`Error fetching data for :`, error);
+          // });
       }
     })
     .catch((error) => {
