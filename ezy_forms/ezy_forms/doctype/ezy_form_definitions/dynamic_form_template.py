@@ -277,7 +277,7 @@ template_str = """
 <div class="main-body">
 <div class="header-container">
 	<div class="logo-div">	
-	<img src="https://ezysuite.ezyforms.co/files/CompanyLogo.png" alt="logo" style="height: 70px; width: 200px; margin-bottom:0px">
+	<img src="{{ company_logo }}" alt="logo" style="height: 70px; width: 200px; margin-bottom:0px">
 	 </div>
   <div class="header-left">
   
@@ -344,10 +344,10 @@ template_str = """
                                                 </div>
                                             </div>
 
-                                        {% elif field.fieldtype == 'Data' %}
+                                        {% elif field.fieldtype == 'Data' or field.fieldtype == 'Select' %}
                                             <input type="text" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
                                         {% elif field.fieldtype == 'Attach' %}
-                                            <img  id="{{ field.fieldname }}" src="{{ 'https://ezysuite.ezyforms.co' + field['values'] or ''  }}" class="signature-Imge" name="{{ field.fieldname }}">
+                                            <img  id="{{ field.fieldname }}" src="{{ site_url + field['values'] or ''  }}" class="signature-Imge" name="{{ field.fieldname }}">
                                         {% elif field.fieldtype == 'Phone' %}
                                             <input type="tel" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
                                         {% elif field.fieldtype == 'Time' %}
@@ -360,12 +360,7 @@ template_str = """
                                             <input type="text" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}" class="date-input" placeholder="__/__/____">
                                         {% elif field.fieldtype == 'Datetime' %}
                                             <input type="text" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
-                                        {% elif field.fieldtype == 'multiselect' %}
-                                            <select id="{{ field.fieldname }}" name="{{ field.fieldname }}" multiple>
-                                                {% for option in field.options.split('\n') %}
-                                                    <option value="{{ option }}" {% if option in field.values %} selected {% endif %}>{{ option }}</option>
-                                                {% endfor %}
-                                            </select>
+                        
                                         {% elif field.fieldtype == 'Signature' %}
                                             <input type="text" id="{{ field.fieldname }}" name="{{ field.fieldname }}" placeholder="Signature input (future implementation)">
                                         {% endif %}
@@ -478,10 +473,11 @@ def convert_html_to_pdf(html_content, pdf_path):
     except Exception as e:
         print(f"PDF generation failed: {e}")
 
-def json_structure_call_for_html_view(json_obj: list, form_name: str, child_data, child_table_data):
+def json_structure_call_for_html_view(json_obj: list, form_name: str, child_data, child_table_data,business_unit):
+    logo_of_company = None
     if child_data is None:
         child_data = []
-    
+    site_url = frappe.utils.get_url()
     if child_table_data is None:
         child_table_data = []
     
@@ -489,8 +485,12 @@ def json_structure_call_for_html_view(json_obj: list, form_name: str, child_data
     if structered_data is None:
         structered_data = []  # Ensure it's iterable
 
+    company_logo = frappe.db.get_value("Ezy Business Unit",business_unit,"bu_logo")
+    if company_logo:
+        logo_of_company = site_url + company_logo
+    
     html_output = Template(template_str).render(
-        data=structered_data, form_name=form_name, child_data=child_data, child_table_data=child_table_data
+        data=structered_data, form_name=form_name, child_data=child_data, child_table_data=child_table_data,company_logo=logo_of_company,site_url=site_url
     )
     
     return html_output
@@ -498,7 +498,7 @@ def json_structure_call_for_html_view(json_obj: list, form_name: str, child_data
 
 # Sample nested data structure
 @frappe.whitelist()
-def preview_dynamic_form(form_short_name: str, name=None):
+def preview_dynamic_form(form_short_name: str, business_unit=None, name=None):
     """Previews a dynamic form with data populated"""
     json_object = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_json")
     form_name = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_name")
@@ -509,6 +509,7 @@ def preview_dynamic_form(form_short_name: str, name=None):
             ]
     labels = None
     data_list =None
+
     if name == None:
         user_doc = frappe.get_doc("DocType", form_short_name).as_dict()
         
@@ -540,7 +541,7 @@ def preview_dynamic_form(form_short_name: str, name=None):
                     fields=["label"]
                 )
                 labels = [field["label"] for field in child_table_fields]
-        html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_name,child_table_data=labels,child_data=None)
+        html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_name,child_table_data=labels,child_data=None,business_unit=business_unit)
         return html_view
     if name:
         user_doc = frappe.get_doc(form_short_name, name).as_dict()
@@ -567,13 +568,14 @@ def preview_dynamic_form(form_short_name: str, name=None):
                 # Generate the data_list with field labels
                 data_list = [{field_labels.get(field, field): record.get(field) for field in field_names} for record in child_table_records]
            
-    html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_name,child_data=data_list,child_table_data=None)
+    html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_name,child_data=data_list,child_table_data=None,business_unit=business_unit)
     return html_view
 
 @frappe.whitelist()
-def download_filled_form(form_short_name: str, name: str):
+def download_filled_form(form_short_name: str, name: str,business_unit=None):
     """Generates a PDF for the dynamic form with filled data"""
     try:
+        
         if not name:
             json_object = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_json")
             json_object = literal_eval(json_object)["fields"]
@@ -581,6 +583,7 @@ def download_filled_form(form_short_name: str, name: str):
                 field for field in json_object
                 if field.get("fieldtype") != "Attach" or ("approved_by" in field.get("fieldname", "").lower())
                     ]
+    
             user_doc = frappe.get_doc("DocType", form_short_name).as_dict()
             labels = None
             for iteration in json_object:
@@ -611,7 +614,7 @@ def download_filled_form(form_short_name: str, name: str):
                         fields=["fieldname", "fieldtype", "label"]
                     )
                     labels = [field["label"] for field in child_table_fields]
-            html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_short_name,child_table_data=labels,child_data=None)
+            html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_short_name,child_table_data=labels,child_data=None,business_unit=business_unit)
             random_number = randint(111, 999)
 
             pdf_filename = f"{form_short_name}_{random_number}.pdf"
@@ -663,7 +666,7 @@ def download_filled_form(form_short_name: str, name: str):
                 # Generate the data_list with field labels
                 data_list = [{field_labels.get(field, field): record.get(field) for field in field_names} for record in child_table_records]
 
-        html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_short_name,child_data=data_list,child_table_data=None)
+        html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_short_name,child_data=data_list,child_table_data=None,business_unit=business_unit)
         random_number = randint(111, 999)
 
         pdf_filename = f"{form_short_name}_{name}_{random_number}.pdf"
