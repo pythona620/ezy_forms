@@ -7,7 +7,8 @@
  "engine": "InnoDB",
  "field_order": [
   "bu_name",
-  "bu_code"
+  "bu_code",
+  "send_form_as_a_attach_through_mail"
  ],
  "fields": [
   {
@@ -20,11 +21,17 @@
    "fieldtype": "Data",
    "label": "BU Code",
    "unique": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "send_form_as_a_attach_through_mail",
+   "fieldtype": "Check",
+   "label": "Send form as a attach through mail"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-10-21 10:32:50.223076",
+ "modified": "2025-02-27 18:21:25.431891",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
  "name": "Ezy Business Unit",
@@ -39,7 +46,43 @@
    "print": 1,
    "read": 1,
    "report": 1,
+   "role": "DOF",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "IT",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Tl",
    "share": 1,
    "write": 1
   }
