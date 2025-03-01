@@ -203,9 +203,8 @@ const fieldMapping = ref({
     type: "select",
     options: ["Request Raised", "In Progress", "Completed", "Request Cancelled"],
   },
-  // name: { type: "input" },
+  name: { type: "input" },
   doctype_name: { type: "input" },
-  // requested_on: { type: "date" },
 });
 
 const actions = ref([
