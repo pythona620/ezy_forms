@@ -42,10 +42,10 @@
                       }}) has
                     <strong class="strong-content">{{
                       formatAction(item.action)
-                    }}</strong>
+                      }}</strong>
                     the request<span v-if="index !== 0 && item.reason">with the comments:</span>
                     <strong v-if="index !== 0 && item.reason" class="strong-content">{{ item.reason || "N/A"
-                      }}</strong>.
+                    }}</strong>.
                   </p>
                 </div>
               </div>
@@ -72,7 +72,8 @@
                 <button type="submit" class="btn btn-success approvebtn"
                   @click.prevent="ApproverFormSubmission(emittedFormData, 'Approve')">
                   <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                  <span v-if="!loading" ><i class="bi bi-check-lg font-15 me-2"></i><span class="font-12">Approve</span></span>
+                  <span v-if="!loading"><i class="bi bi-check-lg font-15 me-2"></i><span
+                      class="font-12">Approve</span></span>
                 </button>
 
 
@@ -126,19 +127,27 @@ const activityData = ref([]);
 
 const tableheaders = ref([
   // { th: "Request ID", td_key: "name" },
-  { th: "Form name", td_key: "doctype_name" },
+  { th: "Form name", td_key: "name" },
   // { th: "Form category", td_key: "doctype_name" },
   // { th: "Owner of form", td_key: "owner" },
   { th: "Requested By", td_key: "requested_by" },
   { th: "Requested department", td_key: "role" },
-  { th: "Property", td_key: "property" },
+  // { th: "Property", td_key: "property" },
   { th: "Approval Status", td_key: "status" },
+  { th: "Workflow Status", td_key: "assigned_to_users" },
+
 ]);
 const fieldMapping = ref({
   // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
   // credit_irn_generated: { type: "select", options: ["Pending", "Completed", "Error"] },
   // role: { type: "input" },
-  doctype_name: { type: "input" },
+  name: { type: "input" },
+  requested_by: { type: "input" },
+  role: { type: "input" },
+
+
+  status: { type: "select", options: ["Completed","Request Raised", "In Progress", "Request Cancelled"] },
+
   // requested_on: { type: "date" },
 });
 const actions = ref([
@@ -342,13 +351,13 @@ function ApproverFormSubmission(dataObj, type) {
     .then((response) => {
       if (response?.data) {
         approvalStatusFn(dataObj, type);
-        
+
       }
     })
     .catch((error) => {
       console.error("Error submitting form:", error);
     })
-    
+
 }
 
 
@@ -379,7 +388,7 @@ function approvalStatusFn(dataObj, type) {
         modal.hide();
         ApproverReason.value = ""; // Clear reason after success
 
-       
+
         receivedForMe();
       } else {
         toast.error(`Failed to ${type} request`, { autoClose: 1000, transition: "zoom" });

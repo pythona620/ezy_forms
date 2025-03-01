@@ -237,6 +237,8 @@ const fieldMapping = ref({
   // name: { type: "input" },
   doctype_name: { type: "input" },
   // requested_on: { type: "date" },
+  role: { type: "input" },
+
 });
 
 const actions = ref([

@@ -278,7 +278,7 @@ const fieldMapping = ref({
       "Request Cancelled",
     ],
   },
-  // name: { type: "input" },
+  role: { type: "input" },
   doctype_name: { type: "input" },
   // requested_on: { type: "date" },
 });
