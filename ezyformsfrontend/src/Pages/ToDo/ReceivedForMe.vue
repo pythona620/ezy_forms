@@ -116,7 +116,7 @@ const businessUnit = computed(() => {
 });
 const newBusinessUnit = ref({ business_unit: "" });
 
-const filterObj = ref({ limitPageLength: "None", limit_start: 0 });
+const filterObj = ref({ limitPageLength: 20, limit_start: 0, filters:[] });
 const totalRecords = ref(0);
 const idDta = ref([]);
 const docTypeName = ref([]);
@@ -487,18 +487,27 @@ function closeModal() {
 const PaginationUpdateValue = (itemsPerPage) => {
   filterObj.value.limitPageLength = itemsPerPage;
   filterObj.value.limit_start = 0;
-  receivedForMe();
+  if (filterObj.value.filters.length) {
+    receivedForMe(filterObj.value.filters);
+  } else {
+    receivedForMe();
+  }
 };
 // Handle updating the limit start
 const PaginationLimitStart = ([itemsPerPage, start]) => {
   filterObj.value.limitPageLength = itemsPerPage;
   filterObj.value.limit_start = start;
-  receivedForMe();
+  if (filterObj.value.filters.length) {
+    receivedForMe(filterObj.value.filters);
+  } else {
+    receivedForMe();
+  }
 };
 
+const filters = ref([]);
 function inLineFiltersData(searchedData) {
   //   // Initialize filters array
-  const filters = [];
+  filterObj.value.filters = [];
 
   //   // Loop through the tableheaders and build dynamic filters based on the `searchedData`
   tableheaders.value.forEach((header) => {
@@ -506,8 +515,9 @@ function inLineFiltersData(searchedData) {
 
     //     // If there is a match for the key in searchedData, create a 'like' filter
     if (searchedData[key]) {
-      filters.push(key, "like", `%${searchedData[key]}%`);
+      filterObj.value.filters.push(key, "like", `%${searchedData[key]}%`);
     }
+    console.log(searchedData,"pppp");
     //     // Add filter for selected option
     //     if (key === "selectedOption" && searchedData.selectedOption) {
     //       filters.push([key, "=", searchedData.selectedOption]);
@@ -526,15 +536,12 @@ function inLineFiltersData(searchedData) {
   //   // Log filters to verify
 
   //   // Once the filters are built, pass them to fetchData function
-  if (filters.length) {
-    receivedForMe(filters);
-  } else {
-    receivedForMe();
-  }
+  receivedForMe(filterObj.value.filters.length ? filterObj.value.filters : []);
 }
 
 function receivedForMe(data) {
   // Initialize filters array for building dynamic query parameters
+
   const EmpRequestdesignation = JSON.parse(localStorage.getItem("employeeData"));
 
   const filters = [
@@ -574,12 +581,19 @@ function receivedForMe(data) {
   axiosInstance
     .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, { params: queryParams })
     .then((res) => {
-      tableData.value = res.data;
-      idDta.value = [...new Set(res.data.map((id) => id.name))];
-      docTypeName.value = [
-        ...new Set(res.data.map((docTypeName) => docTypeName.doctype_name)),
-      ];
-      statusOptions.value = [...new Set(res.data.map((status) => status.status))];
+      if(filterObj.value.limit_start === 0){
+
+        tableData.value = res.data;
+        idDta.value = [...new Set(res.data.map((id) => id.name))];
+        docTypeName.value = [
+          ...new Set(res.data.map((docTypeName) => docTypeName.doctype_name)),
+        ];
+        statusOptions.value = [...new Set(res.data.map((status) => status.status))];
+      }
+      else {
+                tableData.value = tableData.value.concat(res.data);
+            }
+
     })
     .catch((error) => {
       console.error("Error fetching records:", error);

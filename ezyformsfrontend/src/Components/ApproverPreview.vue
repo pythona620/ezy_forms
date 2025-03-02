@@ -55,7 +55,7 @@
                     <!-- Field Type Check or Radio -->
                     <template v-else-if="
                       field.fieldtype === 'Check' ||
-                      field.fieldtype === 'Select' ||
+                      
                       field.fieldtype === 'radio'
                     ">
                       <div class="container-fluid">
@@ -66,7 +66,7 @@
                             <div>
                               <input v-if="
                                 field.fieldtype === 'Check' ||
-                                field.fieldtype === 'Select' && index !== 0
+                                index !== 0
                               " class="form-check-input" type="checkbox" :disabled="blockIndex === 0 || props.readonlyFor === true
                                 " :checked="field.value === option" :value="option"
                                 :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
@@ -206,7 +206,7 @@
                           '-' +
                           fieldIndex
                           " class="form-control previewInputHeight"></textarea>
-                      <component v-if="field.fieldtype !== 'Int' && field.fieldtype !== 'Text'"  :is="getFieldComponent(field.fieldtype)"
+                      <component v-if="field.fieldtype !== 'Int' && field.fieldtype !== 'Text' "  :is="getFieldComponent(field.fieldtype)"
                         :class="props.readonlyFor === true || blockIndex === 0 ? 'border-0 image-border-bottom w-50' : ' '"
                         :value="field.value" :type="field.fieldtype" :readOnly="blockIndex === 0 || props.readonlyFor === true
                           " :name="'field-' +
@@ -502,7 +502,7 @@ const getFieldComponent = (type) => {
     case "Check":
       return "input";
     case "Select":
-      return "select";
+      return "input";
     case "Date":
       return "input";
     case "Datetime":

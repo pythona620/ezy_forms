@@ -120,7 +120,7 @@
                 <i class="bi bi-x"></i></button> -->
               <div v-if="selectedRequestStatus == 'Request Raised'">
                   <button :disabled="loading" type="submit" class="btn edit-btn"
-                  @click="approvalCancelFn(formData, 'Request Cancelled')">
+                  @click="approvalCancelFn('Request Cancelled')">
                   <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                   <span v-if="!loading" ><i class="bi bi-check-lg font-11 me-2"></i><span class="font-10">Cancel Request</span></span>
                 </button>
@@ -529,7 +529,7 @@ function ApproverFormSubmission(dataObj, type) {
     .post(apis.savedocs, formData)
     .then((response) => {
       if (response?.docs) {
-        approvalCancelFn(dataObj, type);
+        // approvalCancelFn(dataObj, type);
       }
     })
     .catch((error) => {
@@ -537,8 +537,9 @@ function ApproverFormSubmission(dataObj, type) {
     });
 }
 
-function approvalCancelFn(dataObj, type) {
+function approvalCancelFn( type) {
   let data = {
+    action: type,
     property: selectedRequest.value.property,
     doctype: selectedRequest.value.doctype_name,
     current_level: selectedRequest.value.current_level,
@@ -568,6 +569,8 @@ function approvalCancelFn(dataObj, type) {
     })
     .catch((error) => {
       console.error("Error fetching data:", error);
+      toast.error(`Cancell failed${type}`, { autoClose: 1000 });
+
     })
     .finally(() => {
       loading.value = false; // Ensure loading is false regardless of success or failure
