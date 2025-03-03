@@ -156,7 +156,7 @@
                                             v-model="createEmployee.reporting_designation" /> -->
                       <VueMultiselect v-model="createEmployee.reporting_designation" :options="designations"
                         :multiple="false" :close-on-select="true" :clear-on-select="false" :preserve-search="true"
-                        placeholder="Select Reporting Designation" class="font-11 mb-3" disable="true">
+                        placeholder="Select Reporting Designation" class="font-11 mb-3" :disabled="!!createEmployee.reporting_to">
                         <!-- taggable
                                             @tag="addReportingDesignation"
                                             tag-placeholder="Press enter to add reporting designation" -->
@@ -300,7 +300,7 @@
 
         </div>
 
-        <div class="modal fade" id="viewEmployee" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        <div class="modal fade" id="viewEmployee"   data-bs-keyboard="false" tabindex="-1"
           aria-labelledby="viewEmployeeLabel" aria-hidden="true">
           <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -447,6 +447,148 @@
 
 
     </div>
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+                <h5 class="modal-title" id="viewEmployeeLabel">Employee Data</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" @click="cancelCreate"
+                  aria-label="Close"></button>
+              </div>
+      <div class="modal-body">
+                <div class="container-fluid">
+                  <div class="row">
+                    <div class="col">
+                      <label class="font-13 ps-1" for="emp_name">Emp Name<span class="text-danger ps-1">*</span></label>
+                      <FormFields class="mb-3" tag="input" type="text" name="emp_name" id="emp_name"
+                        placeholder="Enter department code" v-model="createEmployee.emp_name" />
+                      <label class="font-13 ps-1" for="emp_code">Emp code<span class="text-danger ps-1">*</span></label>
+                      <FormFields class="mb-3" tag="input" type="text" name="emp_code" id="emp_code"
+                        placeholder="Enter department code" v-model="createEmployee.emp_code" />
+                      <div class="mb-3">
+                        <label class="font-13 ps-1" for="emp_phone">Emp Phone</label>
+                        <FormFields tag="input" type="text" name="emp_phone" id="emp_phone" maxlength="10"
+                          @change="validatephone" placeholder="Enter Phone Number" v-model="createEmployee.emp_phone" />
+                        <p v-if="phoneError" class="text-danger font-11 ps-1">
+                          {{ phoneError }}
+                        </p>
+                      </div>
+                      <div class="mb-3">
+                        <label class="font-13 ps-1" for="emp_mail_id">Emp Mail ID<span
+                            class="text-danger ps-1">*</span></label>
+                        <FormFields class="mb-1" tag="input" type="email" name="emp_mail_id" @change="validateEmail"
+                          :required="true" id="emp_mail_id" placeholder="Enter Email"
+                          v-model="createEmployee.emp_mail_id" />
+                        <p v-if="emailError" class="text-danger font-11 ps-1">
+                          {{ emailError }}
+                        </p>
+                      </div>
+                      <label class="font-13 ps-1 fw-medium" for="dept">Departments<span
+                          class="text-danger ps-1">*</span></label>
+                      <VueMultiselect v-model="createEmployee.department" :options="departmentsList" :multiple="false"
+                        :close-on-select="true" :clear-on-select="false" :preserve-search="true"
+                        placeholder="Select department" class="font-11 mb-3">
+                        <!-- taggable @tag="addDepartment"
+                                            tag-placeholder="Press enter to add department" -->
+                        <!-- <template #option="{ option }">
+                                                <div class="custom-option">
+                                                    <input type="checkbox" :checked="createEmployee.department.includes(
+                        option
+                    )
+                        " class="custom-checkbox" />
+                                                    <span>{{ option }}</span>
+                                                </div>
+                                            </template> -->
+
+                        <template #selection="{ values, isOpen }">
+                          <span class="multiselect__single font-10" v-if="values.length" v-show="!isOpen">
+                            {{ values.join(", ") }}
+                          </span>
+                        </template>
+                      </VueMultiselect>
+                    </div>
+                    <div class="col">
+                      <label class="font-13 ps-1" for="Designation">Designation<span
+                          class="text-danger ps-1">*</span></label>
+                      <VueMultiselect v-model="createEmployee.designation" :options="designations" :multiple="false"
+                        :close-on-select="true" :clear-on-select="false" :preserve-search="true"
+                        placeholder="Select designation" class="font-11 mb-3" taggable @tag="addDesignation"
+                        tag-placeholder="Press enter to add designation">
+                        <!-- <template #option="{ option }">
+                                                <div class="custom-option">
+                                                    <input type="checkbox" :checked="createEmployee.designation.includes(
+                        option
+                    )
+                        " class="custom-checkbox" />
+                                                    <span>{{ option }}</span>
+                                                </div>
+                                            </template> -->
+
+                        <template #selection="{ values, isOpen }">
+                          <span class="multiselect__single font-10" v-if="values.length" v-show="!isOpen">
+                            {{ values.join(", ") }}
+                          </span>
+                        </template>
+                      </VueMultiselect>
+                      <label class="font-13 ps-1" for="reporting_to">Reporting To</label>
+                      <VueMultiselect v-model="createEmployee.reporting_to"
+                        :options="tableData.map((dept) => dept.emp_name)" :multiple="false" :close-on-select="true"
+                        :clear-on-select="false" :preserve-search="true" placeholder="Select Reporting To"
+                        class="font-11 mb-3">
+
+
+                        <template #selection="{ values, isOpen }">
+                          <span class="multiselect__single font-10" v-if="values.length" v-show="!isOpen">
+                            {{ values.join(", ") }}
+                          </span>
+                        </template>
+                      </VueMultiselect>
+                      <label class="font-13 ps-1" for="reporting_designation">Reporting Designation</label>
+                      <VueMultiselect v-model="createEmployee.reporting_designation" :options="designations"
+                        :multiple="false" :close-on-select="true" :clear-on-select="false" :preserve-search="true"
+                        placeholder="Select Reporting Designation" class="font-11 mb-3" :disabled="!!createEmployee.reporting_to">
+
+
+                        <template #selection="{ values, isOpen }">
+                          <span class="multiselect__single font-10" v-if="values.length" v-show="!isOpen">
+                            {{ values.join(", ") }} selected
+                          </span>
+                        </template>
+                      </VueMultiselect>
+                      <div class="mb-3 font-11">
+                        <label for="signatureInput" class="form-label mb-0 font-13 ps-1">
+                          Add Signature
+                        </label>
+                        <input type="file" ref="signatureInputRef" class="form-control font-12 mb-2" id="signatureInput"
+                          @change="selectedSignature" aria-describedby="fileHelpId" />
+
+                        <div v-if="createEmployee.signature" class="d-flex justify-center position-relative mt-2">
+                          <i class="bi bi-x-lg position-absolute text-danger cursor-pointer" style="
+                            top: -7px;
+                            right: -5px;
+                            font-size: 13px;
+                            background: white;
+                            border-radius: 50%;
+                            padding: 3px;
+                          " @click="removeSignature">
+                          </i>
+                          <img :src="createEmployee.signature" alt="Signature" class="img-fluid signature-img" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <ButtonComp type="button" class="cancelfilter border-1 text-nowrap font-10" name="Cancel"
+                  @click="cancelCreate" data-bs-dismiss="modal" />
+
+                <ButtonComp type="button" class="btn btn-dark font-11" name="Save Employee" data-bs-dismiss="modal"
+                  @click="SaveEditEmp" />
+              </div>
+    </div>
+  </div>
+</div>
   </div>
 
 </template>
@@ -465,6 +607,7 @@ import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
 import { domain } from "../../shared/apiurls";
+
 const businessUnit = computed(() => {
   return EzyBusinessUnit.value;
 });
@@ -738,16 +881,16 @@ const downloadExcel = () => {
 //   document.body.removeChild(link);
 // };
 
-
 const downloadTemplate = () => {
-  const fileUrl = `${window.location.origin}/Employee_import.xlsx`; // Correct absolute path
+  const fileUrl = `${import.meta.env.BASE_URL}Employee_import.xlsx`; // Vue 3 Base URL
   const link = document.createElement("a");
   link.href = fileUrl;
-  link.setAttribute("download", "Employee_import.xlsx"); // Force download
+  link.setAttribute("download", "Employee_import.xlsx");
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
 };
+
 
 const emailError = ref("");
 
@@ -898,13 +1041,14 @@ function createEmplBtn() {
   deptData();
   designationData();
 }
-function actionCreated(rowData, action, actionEvent) {
-  if (action.name === 'Edit Employee') {
+function actionCreated(rowData, actionEvent) {
+  console.log(rowData,actionEvent,"---");
+  if (actionEvent?.name === 'Edit Employee') {
     if (rowData) {
       deptData();
       designationData();
       createEmployee.value = { ...rowData }
-      const modal = new bootstrap.Modal(document.getElementById('viewEmployee'), {});
+      const modal = new bootstrap.Modal(document.getElementById('exampleModal'), {});
       modal.show();
     } else {
       console.warn("No form fields provided.");
