@@ -536,7 +536,12 @@ function inLineFiltersData(searchedData) {
   //   // Log filters to verify
 
   //   // Once the filters are built, pass them to fetchData function
-  receivedForMe(filterObj.value.filters.length ? filterObj.value.filters : []);
+  if(filterObj.value.filters.length){
+
+    receivedForMe(filterObj.value.filters);
+  }else{
+    receivedForMe();
+  }
 }
 
 function receivedForMe(data) {
