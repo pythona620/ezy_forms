@@ -42,7 +42,9 @@
           <div class="modal-header py-2 d-block">
             <div class="d-flex justify-content-between align-items-center">
               <div>
-                <h5 class="m-0 font-13" id="viewRequest">Request</h5>
+                <h5 class="m-0 font-13" id="viewRequest">Request Id: {{ selectedRequest.name }}
+                </h5>
+                
               </div>
               <div class="">
                 <button button="button" class="btn btn-white text-dark font-13" @click="downloadPdf">
@@ -132,14 +134,17 @@
                 data-bs-dismiss="modal">Close
                 <i class="bi bi-x"></i></button> -->
               <div v-if="selectedRequestStatus == 'Request Raised'">
-                <ButtonComp type="button" icon="x"
-                  class="btn btn-dark d-flex align-items-center edit-btn border-1 text-nowrap font-10 "
-                  @click="approvalCancelFn(formData, 'Request Cancelled')" name="Cancel Request" />
+                  <button :disabled="loading" type="submit" class="btn edit-btn"
+                  @click="approvalCancelFn('Request Cancelled')">
+                  <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                  <span v-if="!loading" ><i class="bi bi-check-lg font-11 me-2"></i><span class="font-10">Cancel Request</span></span>
+                </button>
+
               </div>
             </div>
             <div v-if="requestcancelled || selectedRequestStatus == 'Request Raised'">
               <ButtonComp type="button" class="border-1 edit-btn text-nowrap font-10" @click="handleEditClick"
-                name="Edit" />
+                name="Edit Form" />
             </div>
           </div>
         </div>
@@ -196,7 +201,6 @@ import ApproverPreview from "../../Components/ApproverPreview.vue";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import { useRoute, useRouter } from "vue-router";
-
 const businessUnit = computed(() => {
   return EzyBusinessUnit.value;
 });
@@ -204,7 +208,7 @@ const router = useRouter();
 
 const newBusinessUnit = ref({ business_unit: "" });
 
-const filterObj = ref({ limitPageLength: "None", limit_start: 0 });
+const filterObj = ref({ limitPageLength: 20, limit_start: 0 });
 const totalRecords = ref(0);
 const selectedRequest = ref({});
 const showRequest = ref(null);
@@ -223,6 +227,8 @@ const tableHeaders = ref([]);
 const tableName = ref("");
 const responseData = ref([]);
 const route = useRoute();
+
+const loading = ref(false);
 
 const tableheaders = ref([
   // { th: "Request ID", td_key: "name" },
@@ -247,6 +253,8 @@ const fieldMapping = ref({
   // name: { type: "input" },
   doctype_name: { type: "input" },
   // requested_on: { type: "date" },
+  role: { type: "input" },
+
 });
 
 const actions = ref([
@@ -282,11 +290,11 @@ function handleEditClick() {
   router.push({
     name: "RaiseRequest",
     query: {
+      routepath: route.path,
       business_unit: selectedRequest.value.property,
       selectedForm: selectedRequest.value.doctype_name,
       selectedFormId: selectedRequest.value.name,
       selectedFormStatus: selectedRequest.value.status,
-      routepath: route.path,
 
     },
   });
@@ -415,6 +423,7 @@ function actionCreated(rowData, actionEvent) {
           const dataObj = {
             form_short_name: rowData.doctype_name,
             name: doctypeForm.value[0].name,
+            business_unit:businessUnit.value
           };
 
           axiosInstance
@@ -492,6 +501,8 @@ function downloadPdf() {
   const dataObj = {
     form_short_name: selectedRequest.value.doctype_name,
     name: doctypeForm.value[0]?.name,
+    business_unit:businessUnit.value
+
   };
 
   axiosInstance
@@ -538,7 +549,7 @@ function ApproverFormSubmission(dataObj, type) {
     .post(apis.savedocs, formData)
     .then((response) => {
       if (response?.docs) {
-        approvalCancelFn(dataObj, type);
+        // approvalCancelFn(dataObj, type);
       }
     })
     .catch((error) => {
@@ -546,19 +557,21 @@ function ApproverFormSubmission(dataObj, type) {
     });
 }
 
-function approvalCancelFn(dataObj, type) {
+function approvalCancelFn( type) {
   let data = {
+    action: type,
     property: selectedRequest.value.property,
     doctype: selectedRequest.value.doctype_name,
     current_level: selectedRequest.value.current_level,
     request_id: selectedRequest.value.name,
-    reason: "Cancel",
+    reason: "Request Cancelled",
     files: [],
     url_for_cancelling_id: "",
     // "action": type,
     // "cluster_name": null,
     // https://ezyrecon.ezyinvoicing.com/home/wf-requests
   };
+  loading.value = true;
 
   // need to check this api not working
   axiosInstance
@@ -569,12 +582,18 @@ function approvalCancelFn(dataObj, type) {
         const modal = bootstrap.Modal.getInstance(
           document.getElementById("viewRequest")
         );
+        loading.value = false;
         modal.hide();
         receivedForMe();
       }
     })
     .catch((error) => {
       console.error("Error fetching data:", error);
+      toast.error(`Cancell failed${type}`, { autoClose: 1000 });
+
+    })
+    .finally(() => {
+      loading.value = false; // Ensure loading is false regardless of success or failure
     });
 }
 
@@ -771,6 +790,7 @@ onMounted(() => {
   padding: 5px 15px 5px 15px;
   border-radius: 4px;
   font-weight: bold;
+  width: 150px;
 }
 
 .rejectbtn {

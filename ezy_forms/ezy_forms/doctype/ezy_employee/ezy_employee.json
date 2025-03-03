@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:emp_mail_id",
  "creation": "2024-10-14 15:44:35.657327",
@@ -84,7 +85,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-02-24 18:15:40.411593",
+ "modified": "2025-03-01 14:41:16.188870",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
  "name": "Ezy Employee",

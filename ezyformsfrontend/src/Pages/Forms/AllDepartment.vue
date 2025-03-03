@@ -60,10 +60,6 @@ const totalRecords = ref(0);
 const tableheaders = ref([
   { th: "Form name", td_key: "form_name" },
   { th: "Form Short Code", td_key: "form_short_name" },
-
-
-
-
   { th: "Form category", td_key: "form_category" },
   { th: "Accessible departments", td_key: "accessible_departments" },
   { th: "Status", td_key: "form_status" },
@@ -89,7 +85,9 @@ const actions = ref(
 )
 const fieldMapping = ref({
   // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
+  form_short_name: { type: "input" },
   form_category: { type: "select", options: ["Software", "Hardware"] },
+  form_status: { type: "select", options: ["Created", "Draft"] },
 
   form_status: { type: "select", options: ["Created", "Draft"] },
   form_name: { type: "input" },
@@ -128,20 +126,21 @@ function actionCreated(rowData, actionEvent) {
                 break;
             }
         }
+        console.log(route.path,"sadasda");
 
         if (hasAccess) {
             router.push({
                 name: "RaiseRequest",
                 query: {
+                    routepath: route.path,
                     selectedForm: rowData.form_short_name,
                     business_unit: rowData.business_unit,
-                    routepath: route.path,
 
                     
                 },
             });
         } else {
-          toast.info("You do not have permission to access this page.");
+          toast.info("You do not have permission to access this Form.");
         }
     } else {
         console.log("No employee data found in localStorage.");

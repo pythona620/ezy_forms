@@ -14,9 +14,9 @@
         <!-- v-if="tableForm" -->
         <div class="mt-2">
 
-            <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" actionType="Toogle&dropdown" 
-                @actionClicked="actionCreated" isFiltersoption="true" :field-mapping="fieldMapping" :actions="actions"
-                @updateFilters="inLineFiltersData" isCheckbox="true" />
+            <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" actionType="Toogle&dropdown"
+                @actionClicked="actionCreated" @toggle-click="toggleFunction" isFiltersoption="true"
+                :field-mapping="fieldMapping" :actions="actions" @updateFilters="inLineFiltersData" isCheckbox="true" />
             <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
                 @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
         </div>
@@ -90,7 +90,7 @@ onMounted(() => {
 
 const filterObj = ref({
     limit_start: 0,
-    limitPageLength: 100,
+    limitPageLength: 20,
     form_name: "",
     form_short_name: "",
     accessible_departments: "[]",
@@ -145,7 +145,7 @@ const actions = ref([
 ]);
 
 function actionCreated(rowData, actionEvent) {
-    if (actionEvent.name === 'View form') {
+    if (actionEvent.name === 'View form') {``
         if (rowData?.form_json) {
             formDescriptions.value = { ...rowData };
             // console.log(formDescriptions.value, "lllllllllll");
@@ -165,7 +165,9 @@ function actionCreated(rowData, actionEvent) {
         formDescriptions.value = rowData
 
         const dataObj = {
-            "form_short_name": rowData.form_short_name
+            "form_short_name": rowData.form_short_name,
+             business_unit:businessUnit.value
+
         };
 
         axiosInstance.post(apis.preview_dynamic_form, dataObj)
@@ -204,9 +206,9 @@ function actionCreated(rowData, actionEvent) {
             router.push({
                 name: "RaiseRequest",
                 query: {
+                    routepath: route.path,
                     selectedForm: rowData.form_short_name,
                     business_unit: rowData.business_unit,
-                    routepath: route.path,
                     
                 },
             });
@@ -229,11 +231,37 @@ function actionCreated(rowData, actionEvent) {
         updateFormStatus(rowData, '1');
     }
 }
+
+function toggleFunction(rowData, rowIndex, event) {
+    const isCurrentlyEnabled = rowData.enable == '1' || rowData.enable === 1;
+    const actionText = isCurrentlyEnabled ? 'Disable' : 'Enable';
+
+    if (confirm(`Are you sure you want to ${actionText} this Form?`)) {
+        rowData.enable = isCurrentlyEnabled ? 0 : 1;
+
+        axiosInstance
+            .put(`${apis.resource}${doctypes.EzyFormDefinitions}/${rowData.name}`, rowData)
+            .then((response) => {
+                toast.success(`Form ${actionText}d successfully`, { autoClose: 700 });
+                // setTimeout(() => {
+                //     fetchTable();
+                // }, 1000);
+                window.location.reload()
+            })
+            .catch((error) => {
+                console.error("Error updating toggle:", error);
+            });
+    } else {
+        console.log("Action cancelled. Toggle remains unchanged.");
+    }
+}
+
 function downloadPdf() {
 
     const dataObj = {
         "form_short_name": formDescriptions.value.form_short_name,
-        "name": ""
+        "name": "",
+        business_unit:businessUnit.value
     };
 
     axiosInstance.post(apis.download_pdf_form, dataObj)

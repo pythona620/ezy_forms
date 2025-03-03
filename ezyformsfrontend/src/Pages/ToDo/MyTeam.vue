@@ -2,7 +2,7 @@
   <div>
     <div class="d-flex justify-content-between align-items-center py-2">
       <div>
-        <h1 class="m-0 font-13">Requests raised for me</h1>
+        <h1 class="m-0 font-13">My Team</h1>
         <p class="m-0 font-11 pt-1">{{ totalRecords }} request</p>
       </div>
     </div>
@@ -47,7 +47,8 @@
           <div class="modal-header py-2 d-block">
             <div class="d-flex justify-content-between align-items-center">
               <div>
-                <h5 class="m-0 font-13" id="viewRequest">Request</h5>
+                <h5 class="m-0 font-13" id="viewRequest">Request Id: {{ selectedRequest.name }}
+                </h5>
               </div>
               <div class="">
                 <button
@@ -277,7 +278,7 @@ const fieldMapping = ref({
       "Request Cancelled",
     ],
   },
-  // name: { type: "input" },
+  role: { type: "input" },
   doctype_name: { type: "input" },
   // requested_on: { type: "date" },
 });
@@ -440,6 +441,8 @@ function actionCreated(rowData, actionEvent) {
           const dataObj = {
             form_short_name: rowData.doctype_name,
             name: doctypeForm.value[0].name,
+            business_unit:businessUnit.value
+
           };
 
           axiosInstance

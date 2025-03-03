@@ -130,6 +130,9 @@
                           if (row.status === 'Completed') {
                             return 'Completed';
                           }
+                          if (row.status === 'Request Cancelled') {
+              return 'Request Cancelled';
+            }
 
                           // If value is an empty array, return "-"
                           if (Array.isArray(value) && value.length === 0) {

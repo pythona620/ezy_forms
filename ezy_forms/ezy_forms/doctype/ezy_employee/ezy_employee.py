@@ -67,6 +67,21 @@ class EzyEmployee(Document):
 
 	def save(self):
 		super().save(self.name) # call the base save method
+		self.wf_role_matrix_update()
+  
+	# when employee desgnation are updated wf role matrix and user also updated
+	def wf_role_matrix_update(self):
+		previous_role = frappe.db.get_value("WF Users",{"mail":self.emp_mail_id},['role_name'])
+		if self.designation != previous_role:
+			frappe.db.set_value("WF Users",{"mail":self.emp_mail_id},{"role_name":self.designation})
+			user = frappe.get_doc("User",self.emp_mail_id)
+			
+			user.roles = []
+			
+			user.append("roles", {"role": self.designation})
+			user.save(ignore_permissions=True)
+			frappe.db.commit()
+			
 	
 @frappe.whitelist()
 def role_based_accessible_requests(role:str,business_unit:str):

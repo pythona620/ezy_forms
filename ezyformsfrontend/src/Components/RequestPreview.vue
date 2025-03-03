@@ -36,7 +36,8 @@
                                             field.fieldtype === 'Select' ||
                                             field.fieldtype === 'Table MultiSelect'
                                         ">
-                                            <select :multiple="field.fieldtype === 'Table MultiSelect' " :value="field.value" @change="
+                                            <select :multiple="field.fieldtype === 'Table MultiSelect'"
+                                                :value="field.value" @change="
                                                     (event) =>
                                                         logFieldValue(
                                                             event,
@@ -151,39 +152,57 @@
                                                 :value="field.value" class="form-control previewInputHeight font-10" />
                                             <!-- <input v-if="field.fieldtype === 'Date'" type="date" :value="field.value"
                                                 class="form-control previewInputHeight font-10" /> -->
-                                            <input v-if="field.fieldtype == 'Int'" type="number"
+                                            <!-- <input v-if="field.fieldtype == 'Int'" type="number"
                                                 :placeholder="'Enter ' + field.label" :value="field.value" :name="'field-' +
                                                     sectionIndex +
                                                     '-' +
                                                     columnIndex +
                                                     '-' +
                                                     fieldIndex
-                                                    " class="form-control previewInputHeight" />
+                                                    " class="form-control previewInputHeight" /> -->
                                             <!-- :value="field.value"  -->
+                                            <textarea v-if="field.fieldtype == 'Text'"  @change="
+                                                        (event) =>
+                                                            logFieldValue(
+                                                                event,
+                                                                blockIndex,
+                                                                sectionIndex,
+                                                                rowIndex,
+                                                                columnIndex,
+                                                                fieldIndex
+                                                            )
+                                                    "
+                                                v-model="field.value" :placeholder="'Enter ' + field.label"   :name="'field-' +
+                            sectionIndex +
+                            '-' +
+                            columnIndex +
+                            '-' +
+                            fieldIndex
+                            " class="form-control previewInputHeight"></textarea>
                                             <component v-if="
-                                                field.fieldtype !== 'Datetime' &&
-                                                field.fieldtype !== 'Int'
+                                                field.fieldtype !== 'Datetime' && field.fieldtype !== 'Text'
                                             " :is="getFieldComponent(field.fieldtype)" :value="field.value"
-                                                :maxlength="field.fieldtype === 'Phone' ? '10' : null" :type="field.fieldtype === 'Color'
+                                                :maxlength="field.fieldtype === 'Phone' ? '10' : null" :Type="field.fieldtype === 'Color'
                                                     ? 'color'
-                                                    : field.fieldtype
-                                                    " :name="'field-' +
-                                                        sectionIndex +
-                                                        '-' +
-                                                        columnIndex +
-                                                        '-' +
-                                                        fieldIndex
-                                                        " @change="
-                                (event) =>
-                                    logFieldValue(
-                                        event,
-                                        blockIndex,
-                                        sectionIndex,
-                                        rowIndex,
-                                        columnIndex,
-                                        fieldIndex
-                                    )
-                            " class="form-control previewInputHeight font-10">
+                                                    : field.fieldtype === 'Int'
+                                                        ? 'number'
+                                                        : field.fieldtype" :name="'field-' +
+                                                            sectionIndex +
+                                                            '-' +
+                                                            columnIndex +
+                                                            '-' +
+                                                            fieldIndex
+                                                            " @change="
+            (event) =>
+                logFieldValue(
+                    event,
+                    blockIndex,
+                    sectionIndex,
+                    rowIndex,
+                    columnIndex,
+                    fieldIndex
+                )
+        " class="form-control previewInputHeight font-10">
                                             </component>
                                         </template>
                                         <div v-if="
@@ -225,9 +244,28 @@ const props = defineProps({
 });
 
 
-// Function to get the current date and time in the correct format
 const getCurrentDateTime = () => {
-    return new Date().toISOString().slice(0, 16); // Formats to "YYYY-MM-DDTHH:MM"
+    return new Date().toISOString().slice(0, 16); // Adjust format as needed
+};
+
+// Function to update Datetime fields
+const updateDateTimeFields = () => {
+    if (props.blockArr) {
+        props.blockArr.forEach((block) => {
+            block.sections.forEach((section) => {
+                section.rows.forEach((row) => {
+                    row.columns.forEach((column) => {
+                        column.fields.forEach((field) => {
+                            if (field.fieldtype === "Datetime" && !field.value) {
+                                field.value = getCurrentDateTime();
+                                emit("updateField", field);
+                            }
+                        });
+                    });
+                });
+            });
+        });
+    }
 };
 
 // Initialize datetime fields on component mount
@@ -241,8 +279,9 @@ onMounted(() => {
             console.error("Error parsing employeeData from localStorage:", error);
         }
     }
+    updateDateTimeFields();
 
-  
+
     if (props.blockArr) {
         props.blockArr.forEach((block) => {
             block.sections.forEach((section) => {
@@ -264,7 +303,14 @@ onMounted(() => {
         });
     }
 });
-
+// Watch blockArr for changes
+watch(
+    () => props.blockArr,
+    () => {
+        updateDateTimeFields();
+    },
+    { deep: true }
+);
 const emit = defineEmits();
 const errorMessages = ref({});
 const getFieldComponent = (type) => {
@@ -358,12 +404,15 @@ const logFieldValue = (
             eve.target.selectedOptions,
             (option) => option.value
         );
+    }else if (field.fieldtype === "Text") {
+        field["value"] = eve.target.value; // Capture textarea value
+        emit("updateField", field.value); // Emit updated value
     } else {
         // field['value'] = eve.target.value;
         let inputValue = eve.target.value;
 
         // Ensure only numbers are stored and +91 is prefixed
-        if (field.fieldtype === "Phone") {
+        if (field.fieldtype === "Phone" || field.label.includes('phone' || 'telephone' || 'mobile')) {
             inputValue = inputValue.replace(/\D/g, ""); // Remove non-numeric characters
 
             if (inputValue.length > 10) {

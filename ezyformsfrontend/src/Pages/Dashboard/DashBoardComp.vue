@@ -17,21 +17,21 @@
                             <div class="legend">
                                 <div class="legend-item">
                                     <span class="color-box scanned"></span>
-                                    <span class="label"><b>{{ Approved }}</b> Approved</span>
+                                    <span class="label"><b>{{ Approved || 0 }}</b> Approved</span>
                                 </div>
                                 <!-- </div>
                             <div class="legend"> -->
                                 <div class="legend-item">
                                     <span class="color-box InProgress"></span>
-                                    <span class="label"><b>{{ Pending }}</b> Pending</span>
+                                    <span class="label"><b>{{ Pending || 0 }}</b> Pending</span>
                                 </div>
                                 <div class="legend-item">
                                     <span class="color-box Pending"></span>
-                                    <span class="label"><b>{{ request_raised }}</b> Request Raised</span>
+                                    <span class="label"><b>{{ request_raised || 0 }}</b> Request Raised</span>
                                 </div>
                                 <div class="legend-item">
-                                    <span class="color-box Rejected"></span>
-                                    <span class="label"><b>{{ Request_cancelled }}</b> Request Cancelled</span>
+                                    <span class="color-box request_raised"></span>
+                                    <span class="label"><b>{{ Request_cancelled || 0 }}</b> Request Cancelled</span>
                                 </div>
 
                             </div>
@@ -54,8 +54,8 @@ import axiosInstance from "../../shared/services/interceptor";
 
 // Reactive state for API data
 const Approved = ref(0);
-const Request_Cancelled = ref(0);
-const Rejected = ref(0);
+const Request_cancelled = ref(0);
+const request_raised = ref(0);
 const Pending = ref(0);
 const totalChecks = ref(0);
 const totalChecksChartRef = ref(null);
@@ -66,12 +66,12 @@ async function fetchData() {
         if (response.message) {
             const newData = response.message;
             Approved.value = newData.Approved || 0;
-            Request_Cancelled.value = newData["Request Cancelled"] || 0;
+            Request_cancelled.value = newData["Request_cancelled"] || 0;
             Pending.value = newData.Pending || 0;
-            Rejected.value = newData.Rejected || 0;
+            request_raised.value = newData.request_raised || 0;
 
             // Update total count
-            totalChecks.value = Approved.value + Request_Cancelled.value + Rejected.value + Pending.value;
+            totalChecks.value = Approved.value + Request_cancelled.value + request_raised.value + Pending.value;
 
             // Update the chart
             updateChart();
@@ -104,9 +104,9 @@ function updateChart() {
                 labelLine: { show: false },
                 data: [
                     { value: Approved.value, name: 'Approved', itemStyle: { color: '#00FF00' } },
-                    { value: Request_Cancelled.value, name: 'In Progress', itemStyle: { color: '#594DFA' } },
-                    { value: Pending.value, name: 'Pending', itemStyle: { color: '#ECE51F' } },
-                    { value: Rejected.value, name: 'Rejected', itemStyle: { color: '#FF0000' } },
+                    { value: Pending.value, name: 'Pending', itemStyle: { color: '#594DFA' } },
+                    { value: request_raised.value, name: 'request_raised', itemStyle: { color:'#ECE51F'  } },
+                    { value: Request_cancelled.value, name: 'Request_cancelled', itemStyle: { color:'#FF0000'  } },
                 ]
             }],
             graphic: {
@@ -126,7 +126,7 @@ function updateChart() {
 }
 
 // Watch for changes in data & update chart
-watch([Approved, Request_Cancelled, Rejected, Pending], updateChart);
+watch([Approved, Request_cancelled, request_raised, Pending], updateChart);
 
 // Fetch data when component mounts
 onMounted(fetchData);
@@ -202,7 +202,7 @@ h3 {
     background-color: #00ff00;
 }
 
-.Rejected {
+.request_raised {
     background-color: #ff0000;
 }
 

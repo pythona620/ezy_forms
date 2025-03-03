@@ -17,6 +17,7 @@
    "options": "User"
   },
   {
+   "fetch_from": "user_id.full_name",
    "fieldname": "full_name",
    "fieldtype": "Data",
    "label": "Full Name"
@@ -30,7 +31,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-02-03 12:44:48.214197",
+ "modified": "2025-02-26 18:44:06.687982",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
  "name": "Login Check",

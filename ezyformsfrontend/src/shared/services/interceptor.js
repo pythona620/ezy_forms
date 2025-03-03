@@ -34,7 +34,7 @@ axiosInstance.interceptors.response.use(
     if (error.response) {
       const statusText = error.response.statusText.toLowerCase();
       if (error.response.status === 400) {
-        toast.error(`Bad Request: ${statusText}`, { transition: "zoom" });
+        toast.error(`${statusText}`, { transition: "zoom" });
       } else if (error.response.status === 401) {
         // Unauthorized: 
         toast.error(`${error.response.data.message}`, { transition: "zoom" });
@@ -42,11 +42,11 @@ axiosInstance.interceptors.response.use(
         // Forbidden:
         toast.error(` ${error.response.data.exc_type}`, { transition: "zoom" });
       } else if (error.response.status === 404) {
-        toast.error(`Not Found: ${statusText}`, { transition: "zoom" });
+        toast.error(`${statusText}`, { transition: "zoom" });
       } else if (error.response.status === 500) {
-        toast.error(`Internal Server Error: ${statusText}`, { transition: "zoom" });
+        toast.error(`${statusText}`, { transition: "zoom" });
       } else {
-        toast.error(`Error ${error.response.status}: ${statusText}`, { transition: "zoom" });
+        toast.error(`${error.response.status}: ${statusText}`, { transition: "zoom" });
       }
     } else if (error.request) {
       toast.error("No response received: Please check your network connection");

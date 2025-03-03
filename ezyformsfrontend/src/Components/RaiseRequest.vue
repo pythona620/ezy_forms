@@ -5,8 +5,7 @@
         :to="backTo"
         @click="backToForm"
         class="text-decoration-none text-dark  ps-3 font-13"
-        ><span> <i class="bi bi-arrow-left pe-2"></i></span>Asset request
-        form</router-link
+        ><span> <i class="bi bi-arrow-left pe-2"></i></span>Back</router-link
       >
     </div>
     <div class="container">
@@ -98,10 +97,10 @@ const route = useRoute(); // Get query params from route
 
 //  Extract query parameters from URL
 const selectedData = ref({
+  routepath: route.query.routepath|| "",
   selectedCategory: route.query.selectedCategory || "", // Retrieve from query
   selectedform: route.query.selectedForm || "", // Retrieve from query
   selectedFormId: route.query.selectedFormId || "", // Retrieve from query
-  routepath: route.query.routepath,
 });
 const business_unit = ref(route.query.business_unit || ""); // Retrieve from query
 const isFormValid = ref(false);
@@ -153,16 +152,16 @@ function RequestUpdate() {
 
   axiosInstance
     .post(apis.Update_raising_request, data_obj)
-    .then(async (resp) => {
+    .then( (resp) => {
       if (resp?.message?.success) {
-        toast.success("Request Raised", {
-          autoClose: 2000,
-          transition: "zoom",
-        });
         blockArr.value = []
-
-        await router.push({ path: "/todo/raisedbyme" });
-      }
+        toast.success("Request Raised", {
+        autoClose: 2000,
+        transition: "zoom",
+        onClose: () => {
+          router.push({ path: "/todo/raisedbyme" });
+        },
+      });      }
     });
 }
 
@@ -184,15 +183,16 @@ function EditRequestUpdate() {
 
   axiosInstance
     .post(apis.edit_form_before_approve, data_obj)
-    .then(async (resp) => {
+    .then( (resp) => {
       if (resp?.message?.success) {
-        toast.success("Request Updated Successfully", {
-          autoClose: 2000,
-          transition: "zoom",
-        });
         blockArr.value = []
-
-        await router.push({ path: "/todo/raisedbyme" });
+        toast.success("Request Raised", {
+        autoClose: 2000,
+        transition: "zoom",
+        onClose: () => {
+          router.push({ path: "/todo/raisedbyme" });
+        },
+      });
       }
     });
 
@@ -317,7 +317,7 @@ function formDefinations() {
 
   const queryParams = {
     fields: JSON.stringify(["*"]),
-    limit_page_length: filterObj.value.limitPageLength,
+    limit_page_length: 'None',
     limit_start: filterObj.value.limit_start,
     filters: JSON.stringify(filters),
     order_by: "`tabEzy Form Definitions`.`creation` desc",
@@ -592,15 +592,19 @@ function request_raising_fn(item) {
     files: filepaths.value.length > 0 ? filepaths.value : [],
     property: business_unit.value,
   };
-  axiosInstance.post(apis.raising_request, data_obj).then(async (resp) => {
-    if (resp?.message?.success) {
-      toast.success("Request Raised", { autoClose: 2000, transition: "zoom" });
-
-      await router.push({ path: "/todo/raisedbyme" });
-      // window.location.reload();
+  axiosInstance.post(apis.raising_request, data_obj).then( (resp) => {
+    if (resp?.message?.success === true) {
+      toast.success("Request Raised", {
+        autoClose: 2000,
+        transition: "zoom",
+        onClose: () => {
+          router.push({ path: "/todo/raisedbyme" });
+        },
+      });
     }
   });
 }
+// window.location.reload();
 </script>
 
 <style scoped>

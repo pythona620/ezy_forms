@@ -54,6 +54,7 @@ export const apis = {
   dashboard: domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.dashboard`,
   Update_raising_request: domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.rejected_form_updating`,
   edit_form_before_approve: domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.edit_the_form_before_approve`,
+  uploadbulkEmployeefile: domain + `/method/ezy_forms.ezy_forms.doctype.ezy_employee.bulk_import_data.import_bulk_data`,
 
 };
 

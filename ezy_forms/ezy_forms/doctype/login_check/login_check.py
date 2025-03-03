@@ -16,7 +16,7 @@ def after_insert_user(self, method=None):
         
         if not existing_user:
             new_doc = frappe.new_doc("Login Check")
-            new_doc.user = self.emp_mail_id
+            new_doc.user_id = self.emp_mail_id
             new_doc.insert(ignore_permissions=True)
             frappe.db.commit()
             
@@ -43,9 +43,15 @@ def update_is_first_value(user_id_name,company=None):
 @frappe.whitelist(allow_guest=True)
 def check_is_first_time_or_not(user_id,company=None):
     try:
-        is_first_login = frappe.get_doc("Login Check",{"user_id":user_id},['*'])
- 
-        return is_first_login
+        login_doc = frappe.get_doc("Login Check", {"user_id": user_id}, ['*'])
+        login_dict = login_doc.as_dict()
+        
+        enable_two_factor_auth = frappe.db.get_value("System Settings", "System Settings", "enable_two_factor_auth")
+        
+        login_dict["enable_two_factor_auth"] = enable_two_factor_auth
+        
+        
+        return login_dict
     
     except Exception as e:
         frappe.log_error(f"Error In User Not exit for:", {str(e)})
