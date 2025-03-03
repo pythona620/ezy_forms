@@ -187,7 +187,7 @@
                   <span>...</span>
                 </p>
                 <ul class="dropdown-menu actionsdropdown">
-                  <li class="py-1" @click="selectedAction(row, action, 'edit')" v-for="(action, index) in actions"
+                  <li class="py-1" @click="selectedAction(row, action)" v-for="(action, index) in actions"
                     :key="index">
                     <a class="dropdown-item py-2 d-flex align-items-center gap-2">
                       <i :class="action.icon"></i>
@@ -290,6 +290,7 @@ const emits = defineEmits(["actionClicked", "updateFilters", "toggle-click"]);
 
 function selectedAction(row, action) {
   emits("actionClicked", row, action);
+  console.log(row ,action);
 }
 
 
