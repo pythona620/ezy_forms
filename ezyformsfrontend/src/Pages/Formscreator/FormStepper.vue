@@ -1103,7 +1103,7 @@
                                               <input
                                                 @change="gettingTablename"
                                                 placeholder="Table Name"
-                                                :value="tableName"
+                                                v-model="tableName"
                                                 :class="[
                                                   'border-less-input',
                                                   'font-14',
@@ -1609,7 +1609,7 @@ const formattedData = computed(() => ({
 
 const isEmptyFieldType = computed(() => {
   return (
-    !tableName.value ||
+    !tableName.value.length ||
     columns.some((field) => !field.fieldtype || !field.label)
   );
 });
@@ -1742,6 +1742,14 @@ const childfield = [
   {
     label: "Attach",
     type: "Attach",
+  },
+  {
+    label: "Date",
+    type: "Date",
+  },
+  {
+    label: "Datetime",
+    type: "Datetime",
   },
 ];
 const fieldTypes = [
