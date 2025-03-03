@@ -191,7 +191,7 @@ const businessUnit = computed(() => {
 });
 const newBusinessUnit = ref({ business_unit: "" });
 
-const filterObj = ref({ limitPageLength: "None", limit_start: 0 });
+const filterObj = ref({ limitPageLength: 20, limit_start: 0 });
 const totalRecords = ref(0);
 const selectedRequest = ref({});
 const showRequest = ref(null);
