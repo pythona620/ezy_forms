@@ -2277,7 +2277,7 @@ function formData(status) {
   
   if (childtableHeaders.value && childtableHeaders.value.length) {
     // Append child table headers instead of replacing
-    fields = [...fields, ...childtableHeaders.value];
+    fields = [...fields, ...childtableHeaders.value, ...tableFieldsCache.value];
   }
   const dataObj = {
     ...filterObj.value,
