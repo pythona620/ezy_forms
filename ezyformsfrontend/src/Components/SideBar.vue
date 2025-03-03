@@ -220,7 +220,7 @@ function deptData() {
         limitstart: filterObj.value.limitstart,
         filters: JSON.stringify(filters),
 
-        order_by: "`tabEzy Departments`.`creation` desc",
+        order_by: "`tabEzy Departments`.`department_name` asc",
 
     };
 

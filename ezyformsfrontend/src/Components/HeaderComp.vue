@@ -373,6 +373,8 @@ function deptData(value = null) {
     const queryParams = {
         fields: JSON.stringify(["*"]),
         filters: JSON.stringify(filters),
+        order_by: "`tabEzy Departments`.`department_name` asc",
+
     };
 
     axiosInstance.get(apis.resource + doctypes.departments, { params: queryParams })

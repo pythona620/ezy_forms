@@ -633,26 +633,6 @@
 
                               <div class="childtableShow">
                                 <div>
-                                  <button
-                                    v-if="blockIndex === 0 && !childName"
-                                    class="btn btn-light addRow"
-                                    @click="addMoreFieldsToTable('new')"
-                                  >
-                                    Add Table
-                                  </button>
-                                  <!-- <button v-if="
-                                    blockIndex === 0
-                                  " class="btn btn-light addRow" @click="
-                                            childName
-                                              ? addMoreFieldsToTable('more')
-                                              : addMoreFieldsToTable('new')
-                                            ">
-                                    {{
-                                      childName
-                                        ? "Add more Fields to Table"
-                                        : "Add Table"
-                                    }}
-                                  </button> -->
                                   <div v-if="childName">
                                     <div v-if="blockIndex === 0" class="mt-2">
                                       <div>
@@ -682,155 +662,76 @@
                                       </table>
                                     </div>
                                   </div>
-                                  <div v-if="updateBtnDiv && blockIndex === 0">
-                                    <div v-for="(field, fieldIndex) in columns" :key="'field-' + fieldIndex"
-                                      class="dynamicField">
-                                      <div class="px-1 field-border">
-                                        <div class="d-flex justify-content-between">
-                                          <div class="flex-column d-flex">
-                                            <input v-model="field.label" placeholder="Name the field" :class="[
-                                              'border-less-input',
-                                              'font-14',
-                                              'p-0',
-                                              'inputHeight',
-                                              {
-                                                'italic-style': !field.label,
-                                              },
-                                              { 'fw-medium': field.label },
-                                            ]" />
-                                          </div>
-                                          <div>
-                                            <button class="btn btn-light btn-sm bg-transparent trash-btn py-0"
-                                              @click="removeField(fieldIndex)">
-                                              <i class="bi bi-x-lg"></i>
-                                            </button>
-                                          </div>
-                                        </div>
-
-                                        <select v-model="field.fieldtype"
-                                          class="form-select mb-2 mt-1 font-13 searchSelect">
-                                          <!-- @change="validateField(field)" -->
-                                          <option value="">Select Type</option>
-                                          <option v-for="section in childfield" :key="section" :value="section.type">
-                                            {{ section.label }}
-                                          </option>
-                                        </select>
-                                        <!-- <small v-if="field.errorMsg" class="text-danger font-10">{{ field.errorMsg
-                                          }}</small>  -->
-
-                                        <!-- <div class="d-flex gap-2 align-items-center">
-                                                      <input class="font-12" v-model="field.reqd" type="checkbox" />
-                                                      <label for="mandatory" class="font-12 m-0 fw-light">Mandatory</label>
-                                                    </div>
-                                                    <small v-if="field.error" class="text-danger font-10">{{ field.error }}</small> -->
-                                      </div>
-                                    </div>
-
-                                    <div class="d-flex justify-content-center align-items-center my-2">
-                                      <button class="btn btn-light btn-sm d-flex align-items-center addField m-2"
-                                        @click="addUpdatetablefield">
-                                        <i class="bi bi-plus fs-5"></i>
-                                        <span>Add Field</span>
-                                      </button>
-                                      <div class="">
-                                        <!-- <button type="button" class="btn btn-secondary btn-sm font-12">
-                                          Close
-                                        </button> -->
-                                        <button type="button" class="btn btn-dark btn-sm font-12"
-                                          @click="addmorechildfeildsFn">
-                                          Update Table
-                                        </button>
-                                      </div>
-                                    </div>
-                                  </div>
+                                 
                                   <div>
-                                    <div v-if="childtableShow && blockIndex === 0">
-                                      <div v-if="!childName">
-                                        <div class="mb-3">
-                                          <div>
-                                            <div>
-                                              <input @change="gettingTablename" placeholder="Table Name"
-                                                v-model="tableName" :class="[
-                                                  'border-less-input',
-                                                  'font-14',
-                                                  'p-0',
-                                                  'inputHeight',
-                                                  {
-                                                    'italic-style': !tableName,
-                                                  },
-                                                  { 'fw-medium': tableName },
-                                                ]" />
-                                            </div>
-                                          </div>
-                                        </div>
+                                    <div v-if=" blockIndex === 0">
+                                      <div>
+    <button class="btn btn-light addRow mb-3" @click="addChildTable">
+      Add New Table
+    </button>
 
-                                        <div>
-                                          <div v-for="(field, fieldIndex) in columns" :key="'field-' + fieldIndex"
-                                            class="dynamicField">
-                                            <div class="px-1 field-border">
-                                              <div class="d-flex justify-content-between">
-                                                <div class="flex-column d-flex">
-                                                  <input v-model="field.label" placeholder="Name the field" :class="[
-                                                    'border-less-input',
-                                                    'font-14',
-                                                    'p-0',
-                                                    'inputHeight',
-                                                    {
-                                                      'italic-style': !field.label,
-                                                    },
-                                                    {
-                                                      'fw-medium': field.label,
-                                                    },
-                                                  ]" />
-                                                </div>
-                                                <div>
-                                                  <button class="btn btn-light btn-sm bg-transparent trash-btn py-0"
-                                                    @click="
-                                                      removechildField(fieldIndex)
-                                                      ">
-                                                    <i class="bi bi-x-lg"></i>
-                                                  </button>
-                                                </div>
-                                              </div>
+    <div v-for="(table, tableIndex) in childTables" :key="tableIndex" class="child-table">
+      <div class="d-flex justify-content-between align-items-center">
+        <input
+          @change="(e) => formatTableName(tableIndex, e)"
+          v-model="table.tableName"
+          placeholder="Table Name"
+          :class="[
+            'border-less-input',
+            'font-14',
+            'p-0',
+            'inputHeight',
+            { 'italic-style': !table.tableName },
+            { 'fw-medium': table.tableName },
+          ]"
+        />
+        <button class="btn btn-light bg-transparent border-0 font-13 deleteSection" @click="removeChildTable(tableIndex)">
+       <i class=" bi bi-trash"></i> Remove Table
+      </button>
+      </div>
 
-                                              <select v-model="field.fieldtype"
-                                                class="form-select mb-2 mt-1 font-13 searchSelect">
-                                                <!-- @change="validateField(field)" -->
-                                                <option value="">Select Type</option>
-                                                <option v-for="section in childfield" :key="section"
-                                                  :value="section.type">
-                                                  {{ section.label }}
-                                                </option>
-                                              </select>
-                                              <!-- <small v-if="field.errorMsg" class="text-danger font-10">{{ field.errorMsg
-                                              }}</small> -->
+      <div v-for="(field, fieldIndex) in table.columns" :key="fieldIndex" class="dynamicField">
+        <div class="px-1 field-border">
+          <div class="d-flex justify-content-between">
+            <input
+              v-model="field.label"
+              placeholder="Name the field"
+              :class="[
+                'border-less-input',
+                'font-14',
+                'p-0',
+                'inputHeight',
+                { 'italic-style': !field.label },
+                { 'fw-medium': field.label },
+              ]"
+            />
+            <button class="btn btn-sm trash-btn py-0" @click="removeFieldFromTable(tableIndex, fieldIndex)">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
 
-                                              <!-- <div class="d-flex gap-2 align-items-center">
-                                                      <input class="font-12" v-model="field.reqd" type="checkbox" />
-                                                      <label for="mandatory" class="font-12 m-0 fw-light">Mandatory</label>
-                                                    </div>
-                                                    <small v-if="field.error" class="text-danger font-10">{{ field.error }}</small> -->
-                                            </div>
-                                          </div>
+          <select v-model="field.fieldtype" class="form-select font-13">
+            <option value="">Select Type</option>
+            <option v-for="section in childfield" :key="section.type" :value="section.type">
+              {{ section.label }}
+            </option>
+          </select>
+        </div>
+      </div>
 
-                                          <div class="d-flex justify-content-center align-items-center my-2">
-                                            <button class="btn btn-light btn-sm d-flex align-items-center addField m-2"
-                                              @click="tableField">
-                                              <i class="bi bi-plus fs-5"></i>
-                                              <span>Add Field</span>
-                                            </button>
-                                            <div class="">
-                                              <!-- <button type="button" class="btn btn-secondary btn-sm font-12">
-                                          Close
-                                        </button> -->
-                                              <button type="button" class="btn btn-dark btn-sm font-12"
-                                                @click="processFields">
-                                                Create Table
-                                              </button>
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
+      <button class="btn btn-light btn-sm addField" @click="addFieldToTable(tableIndex)">
+        <i class="bi bi-plus"></i> Add Field
+      </button>
+
+      <button class="btn btn-dark btn-sm" @click="processFields(tableIndex)">
+        Create Table
+      </button>
+
+     
+
+      <hr />
+    </div>
+  </div>
                                     </div>
                                   </div>
                                 </div>
@@ -1085,97 +986,90 @@ onMounted(() => {
   let Bu_Unit = localStorage.getItem("Bu");
   filterObj.value.business_unit = Bu_Unit;
 });
+// Store multiple child tables
+const childTables = ref([]);
 
-const tableField = () => {
-  const newField = {
+// Function to add a new child table
+const addChildTable = () => {
+  childTables.value.push({
+    tableName: "",
+    formattedTableName: "",
+    columns: reactive([]), // Store fields for this table
+  });
+};
+
+// Function to remove a specific child table
+const removeChildTable = (tableIndex) => {
+  childTables.value.splice(tableIndex, 1);
+};
+
+// Function to add a field to a specific table
+const addFieldToTable = (tableIndex) => {
+  childTables.value[tableIndex].columns.push({
     label: "",
-    fieldname: `field_${columns.length}`,
+    fieldname: `field_${childTables.value[tableIndex].columns.length}`,
     fieldtype: "",
-    idx: columns.length,
+    idx: childTables.value[tableIndex].columns.length,
     reqd: false,
-  };
-  columns.push(newField);
+  });
+  console.log(childtableHeaders.value,"mmmm");
 };
 
-const removechildField = (index) => {
-  columns.splice(index, 1);
+// Function to remove a field from a specific table
+const removeFieldFromTable = (tableIndex, fieldIndex) => {
+  childTables.value[tableIndex].columns.splice(fieldIndex, 1);
 };
-const addUpdatetablefield = () => {
-  const newField = {
-    label: "",
-    fieldname: `field_${"sadcerdysasbdqjk"}`,
-    fieldtype: "",
-    idx: columns.length,
-    reqd: false,
-  };
-  columns.push(newField);
-};
-//   const addUpdatetablefield = () => {
-//   const randomNum = Math.floor(1000 + Math.random() * 9000); // Generates a 4-digit random number
 
-//   const newField = {
-//     label: "",
-//     fieldname: "", // Placeholder, will be updated dynamically
-//     fieldtype: "",
-//     idx: columns.length,
-//     reqd: false,
-//   };
-
-//   columns.push(newField);
-
-//   // Watch for label changes and update fieldname with a random number
-//   watch(() => newField.label, (newVal) => {
-//     const sanitizedLabel = newVal.replace(/\s+/g, '_').toLowerCase();
-//     newField.fieldname = `field_${sanitizedLabel}_${randomNum}`;
-//   });
-// };
-
-// errorMsg: "",
-
-// const validateField = (field) => {
-//   if (!field.fieldtype) {
-//     field.errorMsg = "Field type is required";
-//   } else {
-//     field.errorMsg = "";
-//   }
-// };
-const formattedTableName = ref("");
-const gettingTablename = (e) => {
-  if (e?.target?.value) {
-    formattedTableName.value = e.target.value
-      .trim() // Remove leading/trailing spaces
-      .toLowerCase() // Convert to lowercase
-      .replace(/\s+/g, "_") // Replace spaces with underscores
-      .replace(/[^a-z0-9_]/g, ""); // Remove non-alphanumeric characters except underscores
+// Format table name dynamically
+const formatTableName = (tableIndex, event) => {
+  if (event?.target?.value) {
+    childTables.value[tableIndex].formattedTableName = event.target.value
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, "_")
+      .replace(/[^a-z0-9_]/g, "");
   }
 };
-const formattedData = computed(() => ({
-  form_short_name: formattedTableName.value,
-  fields: columns,
-}));
 
-const isEmptyFieldType = computed(() => {
+// Validate if table fields are complete
+const isEmptyFieldType = (tableIndex) => {
   return (
-    !tableName.value.length || columns.some((field) => !field.fieldtype || !field.label)
+    !childTables.value[tableIndex].tableName.length ||
+    childTables.value[tableIndex].columns.some(
+      (field) => !field.fieldtype || !field.label
+    )
   );
-});
+};
 
-// const updatedTableFields = computed(() => {
+// Process fields for a specific table
+const processFields = (tableIndex) => {
+  if (isEmptyFieldType(tableIndex)) {
+    toast.error("Please fill in all required fields before proceeding.", {
+      transition: "zoom",
+    });
+    return;
+  }
 
-//   // console.log(columns,"=====", childtableHeaders.value);
-//   // const field = {
-//   //   ...columns,
+  const data = {
+    form_short_name: childTables.value[tableIndex].formattedTableName,
+    fields: childTables.value[tableIndex].columns,
+  };
 
-//   // };
+  axiosInstance
+    .post(apis.childtable, data)
+    .then((res) => {
+      if (res) {
+        const firstTableField = res.message[0][0].child_doc;
+        if (firstTableField) {
+          tableFieldsCache.value.push(firstTableField);
+        }
+      }
+    })
+    .catch((error) => {
+      console.error("Error saving form data:", error);
+    });
+};
 
-//   return {
-//   //   form_short_name: tableName.value[0].options,
-//   //   // business_unit: filterObj.business_unit,
-//   //   fields: field,
-//   form_short_name: tableName.value[0].options,
-//   fields: field,
-//   };
-// });
 
 const updatedTableFields = computed(() => ({
   form_short_name: tableName.value[0].options,
@@ -1198,39 +1092,6 @@ const addmorechildfeildsFn = () => {
         // Extract the first "Table" field from the response
 
         getFormData();
-      }
-    })
-    .catch((error) => {
-      console.error("Error saving form data:", error); // Log any errors
-    });
-};
-
-const processFields = () => {
-  if (isEmptyFieldType.value) {
-    toast.error("Please fill in all required fields before proceeding.", {
-      transition: "zoom",
-    });
-    return;
-  }
-
-  const data = {
-    ...formattedData.value,
-  };
-  // console.log(data);
-
-  // Call the API to process the fields
-  axiosInstance
-    .post(apis.childtable, data)
-    .then((res) => {
-      if (res) {
-
-        // Extract the first "Table" field from the response
-        const firstTableField = res.message[0][0].child_doc;
-
-        
-        if (firstTableField) {
-          tableFieldsCache.value.push(firstTableField); // Store in ref instead of localStorage
-        }
       }
     })
     .catch((error) => {
@@ -1609,16 +1470,7 @@ function getFormData() {
     });
 }
 
-const openFile = (filePath) => {
-  if (!filePath) return;
-  const fileUrl = `${filePath}`;
-  window.open(fileUrl, "_blank");
-};
 
-const isFilePath = (value) => {
-  if (!value) return false;
-  return /\.(png|jpg|jpeg|gif|pdf|docx|xlsx|txt)$/i.test(value);
-};
 function deptData() {
   const queryParams = {
     fields: JSON.stringify(["*"]),
@@ -1682,7 +1534,7 @@ function formData(status) {
 
   if (childtableHeaders.value && childtableHeaders.value.length) {
     // Append child table headers instead of replacing
-    fields = [...fields, ...childtableHeaders.value, ...tableFieldsCache.value];
+    fields = [...fields, ...childtableHeaders.value];
   }
   const dataObj = {
     ...filterObj.value,
