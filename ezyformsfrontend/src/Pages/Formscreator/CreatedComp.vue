@@ -52,7 +52,7 @@
             </div>
         </div>
 
-        <FormPreview :blockArr="selectedForm" :formDescriptions="formDescriptions" />
+        <FormPreview :blockArr="selectedForm" :formDescriptions="formDescriptions"  :childHeaders="childtableHeaders" :child-name="childName" />
 
 
     </div>
@@ -143,13 +143,23 @@ const actions = ref([
     // { name: 'Share this form', icon: 'fa-solid fa-share-alt' },
     // { name: 'Download Print format', icon: 'fa-solid fa-download' },
 ]);
-
+const childtableHeaders = ref([]);
+const childName = ref("");
 function actionCreated(rowData, actionEvent) {
+    console.log(rowData, actionEvent,"ppp");
     if (actionEvent.name === 'View form') {``
         if (rowData?.form_json) {
             formDescriptions.value = { ...rowData };
             // console.log(formDescriptions.value, "lllllllllll");
             selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json).fields);
+            const parsedFormJson = JSON.parse(rowData?.form_json);
+            const tableName = parsedFormJson.fields.filter(
+          (field) => field.fieldtype === "Table"
+        );
+        childtableHeaders.value = JSON.parse(
+          rowData.form_json
+        ).child_table_fields;
+        childName.value = tableName[0]?.options.replace(/_/g, " ");
             // console.log(selectedForm.value, "ooooo");
             const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});
             modal.show();
