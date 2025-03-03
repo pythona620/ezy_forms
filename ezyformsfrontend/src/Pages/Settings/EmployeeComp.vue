@@ -729,15 +729,25 @@ const downloadExcel = () => {
 //       console.error("Download error:", error);
 //     });
 // };
+// const downloadTemplate = () => {
+//   const link = document.createElement("a");
+//   link.href = "/Employee_import.xlsx"; // Reference from the public folder
+//   link.setAttribute("download", "Employee_import.xlsx"); // Force download
+//   document.body.appendChild(link);
+//   link.click();
+//   document.body.removeChild(link);
+// };
+
+
 const downloadTemplate = () => {
+  const fileUrl = `${window.location.origin}/Employee_import.xlsx`; // Correct absolute path
   const link = document.createElement("a");
-  link.href = "/Employee_import.xlsx"; // Reference from the public folder
+  link.href = fileUrl;
   link.setAttribute("download", "Employee_import.xlsx"); // Force download
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
 };
-
 
 const emailError = ref("");
 
