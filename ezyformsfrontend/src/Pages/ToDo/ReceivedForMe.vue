@@ -42,10 +42,10 @@
                       }}) has
                     <strong class="strong-content">{{
                       formatAction(item.action)
-                    }}</strong>
+                      }}</strong>
                     the request<span v-if="index !== 0 && item.reason">with the comments:</span>
                     <strong v-if="index !== 0 && item.reason" class="strong-content">{{ item.reason || "N/A"
-                      }}</strong>.
+                    }}</strong>.
                   </p>
                 </div>
               </div>
@@ -72,7 +72,8 @@
                 <button type="submit" class="btn btn-success approvebtn"
                   @click.prevent="ApproverFormSubmission(emittedFormData, 'Approve')">
                   <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                  <span v-if="!loading" ><i class="bi bi-check-lg font-15 me-2"></i><span class="font-12">Approve</span></span>
+                  <span v-if="!loading"><i class="bi bi-check-lg font-15 me-2"></i><span
+                      class="font-12">Approve</span></span>
                 </button>
 
 
@@ -115,7 +116,7 @@ const businessUnit = computed(() => {
 });
 const newBusinessUnit = ref({ business_unit: "" });
 
-const filterObj = ref({ limitPageLength: "None", limit_start: 0 });
+const filterObj = ref({ limitPageLength: 20, limit_start: 0, filters:[] });
 const totalRecords = ref(0);
 const idDta = ref([]);
 const docTypeName = ref([]);
@@ -126,19 +127,27 @@ const activityData = ref([]);
 
 const tableheaders = ref([
   // { th: "Request ID", td_key: "name" },
-  { th: "Form name", td_key: "doctype_name" },
+  { th: "Form name", td_key: "name" },
   // { th: "Form category", td_key: "doctype_name" },
   // { th: "Owner of form", td_key: "owner" },
   { th: "Requested By", td_key: "requested_by" },
   { th: "Requested department", td_key: "role" },
-  { th: "Property", td_key: "property" },
+  // { th: "Property", td_key: "property" },
   { th: "Approval Status", td_key: "status" },
+  { th: "Workflow Status", td_key: "assigned_to_users" },
+
 ]);
 const fieldMapping = ref({
   // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
   // credit_irn_generated: { type: "select", options: ["Pending", "Completed", "Error"] },
   // role: { type: "input" },
-  doctype_name: { type: "input" },
+  name: { type: "input" },
+  requested_by: { type: "input" },
+  role: { type: "input" },
+
+
+  status: { type: "select", options: ["Completed","Request Raised", "In Progress", "Request Cancelled"] },
+
   // requested_on: { type: "date" },
 });
 const actions = ref([
@@ -342,13 +351,13 @@ function ApproverFormSubmission(dataObj, type) {
     .then((response) => {
       if (response?.data) {
         approvalStatusFn(dataObj, type);
-        
+
       }
     })
     .catch((error) => {
       console.error("Error submitting form:", error);
     })
-    
+
 }
 
 
@@ -379,7 +388,7 @@ function approvalStatusFn(dataObj, type) {
         modal.hide();
         ApproverReason.value = ""; // Clear reason after success
 
-       
+
         receivedForMe();
       } else {
         toast.error(`Failed to ${type} request`, { autoClose: 1000, transition: "zoom" });
@@ -478,18 +487,27 @@ function closeModal() {
 const PaginationUpdateValue = (itemsPerPage) => {
   filterObj.value.limitPageLength = itemsPerPage;
   filterObj.value.limit_start = 0;
-  receivedForMe();
+  if (filterObj.value.filters.length) {
+    receivedForMe(filterObj.value.filters);
+  } else {
+    receivedForMe();
+  }
 };
 // Handle updating the limit start
 const PaginationLimitStart = ([itemsPerPage, start]) => {
   filterObj.value.limitPageLength = itemsPerPage;
   filterObj.value.limit_start = start;
-  receivedForMe();
+  if (filterObj.value.filters.length) {
+    receivedForMe(filterObj.value.filters);
+  } else {
+    receivedForMe();
+  }
 };
 
+const filters = ref([]);
 function inLineFiltersData(searchedData) {
   //   // Initialize filters array
-  const filters = [];
+  filterObj.value.filters = [];
 
   //   // Loop through the tableheaders and build dynamic filters based on the `searchedData`
   tableheaders.value.forEach((header) => {
@@ -497,8 +515,9 @@ function inLineFiltersData(searchedData) {
 
     //     // If there is a match for the key in searchedData, create a 'like' filter
     if (searchedData[key]) {
-      filters.push(key, "like", `%${searchedData[key]}%`);
+      filterObj.value.filters.push(key, "like", `%${searchedData[key]}%`);
     }
+    console.log(searchedData,"pppp");
     //     // Add filter for selected option
     //     if (key === "selectedOption" && searchedData.selectedOption) {
     //       filters.push([key, "=", searchedData.selectedOption]);
@@ -517,15 +536,12 @@ function inLineFiltersData(searchedData) {
   //   // Log filters to verify
 
   //   // Once the filters are built, pass them to fetchData function
-  if (filters.length) {
-    receivedForMe(filters);
-  } else {
-    receivedForMe();
-  }
+  receivedForMe(filterObj.value.filters.length ? filterObj.value.filters : []);
 }
 
 function receivedForMe(data) {
   // Initialize filters array for building dynamic query parameters
+
   const EmpRequestdesignation = JSON.parse(localStorage.getItem("employeeData"));
 
   const filters = [
@@ -565,12 +581,19 @@ function receivedForMe(data) {
   axiosInstance
     .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, { params: queryParams })
     .then((res) => {
-      tableData.value = res.data;
-      idDta.value = [...new Set(res.data.map((id) => id.name))];
-      docTypeName.value = [
-        ...new Set(res.data.map((docTypeName) => docTypeName.doctype_name)),
-      ];
-      statusOptions.value = [...new Set(res.data.map((status) => status.status))];
+      if(filterObj.value.limit_start === 0){
+
+        tableData.value = res.data;
+        idDta.value = [...new Set(res.data.map((id) => id.name))];
+        docTypeName.value = [
+          ...new Set(res.data.map((docTypeName) => docTypeName.doctype_name)),
+        ];
+        statusOptions.value = [...new Set(res.data.map((status) => status.status))];
+      }
+      else {
+                tableData.value = tableData.value.concat(res.data);
+            }
+
     })
     .catch((error) => {
       console.error("Error fetching records:", error);

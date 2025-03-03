@@ -29,8 +29,8 @@ const props = defineProps({
 
 });
 
-const itemsPerPage = ref(100);
-const newpages = ref([100, 200, 500]);
+const itemsPerPage = ref(20);
+const newpages = ref([20,50,100,200,500]);
 const emit = defineEmits(["updateValue", "limitStart"]);
 const start = ref(0);
 
@@ -116,14 +116,16 @@ ul.pagination li:first-child {
 
 ul.pagination li a {
   /* border-radius: 5px; */
-  color: #ccc;
+  color: grey;
   text-decoration: none;
   /* background-color: #F4F5F6; */
   /* border: 1px solid black; */
 }
 
 ul.pagination li:has(a.active) {
-  background-color: #ccc;
+  /* background-color: #ccc; */
+  background: grey !important;
+
 }
 
 ul.pagination li:has(a.active):hover {
@@ -144,7 +146,9 @@ button[disabled] {
 }
 
 .more {
-  color: var(--secondary);
+  color: grey;
+
+
 }
 
 .totalcount {

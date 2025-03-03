@@ -16,7 +16,7 @@
                 </div>
                 <div class="mx-3 my-2">
                   <div v-for="(field, fieldIndex) in column.fields" :key="'field-preview-' + fieldIndex"
-                    :class="props.readonlyFor === true ? 'd-flex align-items-end' : ''">
+                    :class="props.readonlyFor === true || blockIndex === 0 ? 'd-flex align-items-end' : ''">
                     <div v-if="field.label">
                       <label :for="'field-' +
                         sectionIndex +
@@ -31,7 +31,7 @@
                         }}
 
                         </span>
-                        <span v-if="props.readonlyFor === true">:</span>
+                        <span v-if="props.readonlyFor === true || blockIndex === 0">:</span>
                       </label>
                     </div>
                     <!-- field.fieldtype === 'Select' || -->
@@ -55,7 +55,7 @@
                     <!-- Field Type Check or Radio -->
                     <template v-else-if="
                       field.fieldtype === 'Check' ||
-                      field.fieldtype === 'Select' ||
+                      
                       field.fieldtype === 'radio'
                     ">
                       <div class="container-fluid">
@@ -66,7 +66,7 @@
                             <div>
                               <input v-if="
                                 field.fieldtype === 'Check' ||
-                                field.fieldtype === 'Select' && index !== 0
+                                index !== 0
                               " class="form-check-input" type="checkbox" :disabled="blockIndex === 0 || props.readonlyFor === true
                                 " :checked="field.value === option" :value="option"
                                 :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
@@ -176,7 +176,7 @@
 
                     <template v-else-if="field.fieldtype == 'Datetime'">
                       <input type="datetime-local" v-model="field.value"
-                        :class="props.readonlyFor === true ? 'border-0 image-border-bottom w-50 pb-0 ' : ' '" :readOnly="blockIndex === 0 || props.readonlyFor === true
+                        :class="props.readonlyFor === true || blockIndex === 0 ? 'border-0 image-border-bottom w-50 pb-0 ' : ' '" :readOnly="blockIndex === 0 || props.readonlyFor === true
                           " :placeholder="'Enter ' + field.label" :name="'field-' +
                           sectionIndex +
                           '-' +
@@ -197,8 +197,17 @@
                           '-' +
                           fieldIndex
                           " class="form-control previewInputHeight" />
-                      <component v-if="field.fieldtype !== 'Int'" :is="getFieldComponent(field.fieldtype)"
-                        :class="props.readonlyFor === true ? 'border-0 image-border-bottom w-50' : ' '"
+                        <textarea v-if="field.fieldtype == 'Text'" :class="props.readonlyFor === true || blockIndex === 0 ? 'border-0 image-border-bottom ' : ' '" :readOnly="blockIndex === 0 || props.readonlyFor === true
+                        " v-model="field.value" :placeholder="'Enter ' + field.label"
+                        :value="field.value" :name="'field-' +
+                          sectionIndex +
+                          '-' +
+                          columnIndex +
+                          '-' +
+                          fieldIndex
+                          " class="form-control previewInputHeight"></textarea>
+                      <component v-if="field.fieldtype !== 'Int' && field.fieldtype !== 'Text' "  :is="getFieldComponent(field.fieldtype)"
+                        :class="props.readonlyFor === true || blockIndex === 0 ? 'border-0 image-border-bottom w-50' : ' '"
                         :value="field.value" :type="field.fieldtype" :readOnly="blockIndex === 0 || props.readonlyFor === true
                           " :name="'field-' +
                             sectionIndex +
@@ -493,7 +502,7 @@ const getFieldComponent = (type) => {
     case "Check":
       return "input";
     case "Select":
-      return "select";
+      return "input";
     case "Date":
       return "input";
     case "Datetime":

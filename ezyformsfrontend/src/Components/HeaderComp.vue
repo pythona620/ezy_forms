@@ -384,7 +384,7 @@ function deptData(value = null) {
                 // departmentList.value = res.data.map((dept) => (dept.name));
                 // Update the route for the "Forms" tab with the first department's route
                 const newFormsRoute = deptartmentData.value.length > 0
-                    ? `/forms/department/${deptartmentData.value[0].name.replace(/\s+/g, '-').toLowerCase()}`
+                    ? `/forms/department/${deptartmentData.value[0].name.replace(/\s+/g, '-')}`
                     : '/forms';
 
                 tabsData.value = tabsData.value.map(tab => {
@@ -894,7 +894,10 @@ const handleBuChange = (tab) => {
 
 .stickyheader {
     z-index: 10;
-    box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
+    // box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 3px 3px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
+
+    // box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .raise-label {

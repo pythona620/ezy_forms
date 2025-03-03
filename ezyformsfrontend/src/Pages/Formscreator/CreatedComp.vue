@@ -90,7 +90,7 @@ onMounted(() => {
 
 const filterObj = ref({
     limit_start: 0,
-    limitPageLength: 100,
+    limitPageLength: 20,
     form_name: "",
     form_short_name: "",
     accessible_departments: "[]",
