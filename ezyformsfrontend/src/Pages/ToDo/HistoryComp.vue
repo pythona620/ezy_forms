@@ -199,11 +199,11 @@ const tableheaders = ref([
   { th: "Approval Status", td_key: "status" },
 ]);
 const fieldMapping = ref({
-  // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
-  status: {
-    type: "select",
-    options: ["Request Raised", "In Progress", "Completed", "Request Cancelled"],
-  },
+  requested_on: { type: "input"},
+  // status: {
+  //   type: "select",
+  //   options: ["Request Raised", "In Progress", "Completed", "Request Cancelled"],
+  // },
   name: { type: "input" },
   doctype_name: { type: "input" },
 });

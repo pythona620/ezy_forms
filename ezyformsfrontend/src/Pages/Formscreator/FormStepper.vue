@@ -394,7 +394,7 @@
                                   <div class="d-flex justify-content-between align-items-center">
                                     <label class="rownames">{{
                                       getRowSuffix(rowIndex)
-                                    }}</label>
+                                      }}</label>
                                     <div>
                                       <button v-if="row.columns.length < 3"
                                         class="btn btn-light bg-transparent border-0 font-12" @click="
@@ -588,7 +588,7 @@
                                               </div>
                                             </div>
                                             <small v-if="field.error" class="text-danger font-10">{{ field.error
-                                            }}</small>
+                                              }}</small>
                                           </div>
                                         </div>
 
@@ -638,7 +638,7 @@
                                       <div>
                                         <span class="font-13 fw-bold">{{
                                           childName
-                                        }}</span>
+                                          }}</span>
                                       </div>
                                       <table class="table table-bordered table-striped">
                                         <thead>
@@ -662,76 +662,79 @@
                                       </table>
                                     </div>
                                   </div>
-                                 
+
                                   <div>
-                                    <div v-if=" blockIndex === 0">
+                                    <div v-if="blockIndex === 0">
                                       <div>
-    <button class="btn btn-light addRow mb-3" @click="addChildTable">
-      Add New Table
-    </button>
+                                        <button class="btn btn-light addRow mb-3" @click="addChildTable">
+                                          Add New Table
+                                        </button>
 
-    <div v-for="(table, tableIndex) in childTables" :key="tableIndex" class="child-table">
-      <div class="d-flex justify-content-between align-items-center">
-        <input
-          @change="(e) => formatTableName(tableIndex, e)"
-          v-model="table.tableName"
-          placeholder="Table Name"
-          :class="[
-            'border-less-input',
-            'font-14',
-            'p-0',
-            'inputHeight',
-            { 'italic-style': !table.tableName },
-            { 'fw-medium': table.tableName },
-          ]"
-        />
-        <button class="btn btn-light bg-transparent border-0 font-13 deleteSection" @click="removeChildTable(tableIndex)">
-       <i class=" bi bi-trash"></i> Remove Table
-      </button>
-      </div>
+                                        <div v-for="(table, tableIndex) in childTables" :key="tableIndex"
+                                          class="child-table">
+                                          <div class="d-flex justify-content-between align-items-center">
+                                            <div>
 
-      <div v-for="(field, fieldIndex) in table.columns" :key="fieldIndex" class="dynamicField">
-        <div class="px-1 field-border">
-          <div class="d-flex justify-content-between">
-            <input
-              v-model="field.label"
-              placeholder="Name the field"
-              :class="[
-                'border-less-input',
-                'font-14',
-                'p-0',
-                'inputHeight',
-                { 'italic-style': !field.label },
-                { 'fw-medium': field.label },
-              ]"
-            />
-            <button class="btn btn-sm trash-btn py-0" @click="removeFieldFromTable(tableIndex, fieldIndex)">
-              <i class="bi bi-x-lg"></i>
-            </button>
-          </div>
+                                              <span :class="table.tableName ? 'd-none' : 'text-danger'">*</span>
+                                              <input @change="(e) => formatTableName(tableIndex, e)"
+                                                v-model="table.tableName" placeholder="Table Name" :class="[
+                                                  'border-less-input',
+                                                  'font-14',
+                                                  'p-0',
+                                                  'inputHeight',
+                                                  { 'italic-style': !table.tableName },
+                                                  { 'fw-medium': table.tableName },
+                                                ]" />
+                                            </div>
+                                            <button class="btn btn-light bg-transparent border-0 font-13 deleteSection"
+                                              @click="removeChildTable(tableIndex)">
+                                              <i class=" bi bi-trash"></i> Remove Table
+                                            </button>
+                                          </div>
 
-          <select v-model="field.fieldtype" class="form-select font-13">
-            <option value="">Select Type</option>
-            <option v-for="section in childfield" :key="section.type" :value="section.type">
-              {{ section.label }}
-            </option>
-          </select>
-        </div>
-      </div>
+                                          <div v-for="(field, fieldIndex) in table.columns" :key="fieldIndex"
+                                            class="dynamicField">
+                                            <div class="px-1 field-border">
+                                              <div class="d-flex justify-content-between">
+                                                <input v-model="field.label" placeholder="Name the field" :class="[
+                                                  'border-less-input',
+                                                  'font-14',
+                                                  'p-0',
+                                                  'inputHeight',
+                                                  { 'italic-style': !field.label },
+                                                  { 'fw-medium': field.label },
+                                                ]" />
+                                                <button class="btn btn-sm trash-btn py-0"
+                                                  @click="removeFieldFromTable(tableIndex, fieldIndex)">
+                                                  <i class="bi bi-x-lg"></i>
+                                                </button>
+                                              </div>
 
-      <button class="btn btn-light btn-sm addField" @click="addFieldToTable(tableIndex)">
-        <i class="bi bi-plus"></i> Add Field
-      </button>
+                                              <select v-model="field.fieldtype" class="form-select font-13">
+                                                <option value="">Select Type</option>
+                                                <option v-for="section in childfield" :key="section.type"
+                                                  :value="section.type">
+                                                  {{ section.label }}
+                                                </option>
+                                              </select>
+                                            </div>
+                                          </div>
 
-      <button class="btn btn-dark btn-sm" @click="processFields(tableIndex)">
-        Create Table
-      </button>
+                                          <button class="btn btn-light btn-sm addField mx-1"
+                                            @click="addFieldToTable(tableIndex)">
+                                            <i class="bi bi-plus"></i> Add Field
+                                          </button>
 
-     
+                                          <button class="btn btn-dark btn-sm font-12 mx-1"
+                                            @click="processFields(tableIndex)">
+                                            Create Table
+                                          </button>
 
-      <hr />
-    </div>
-  </div>
+
+
+                                          <hr />
+                                        </div>
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
@@ -1012,7 +1015,7 @@ const addFieldToTable = (tableIndex) => {
     idx: childTables.value[tableIndex].columns.length,
     reqd: false,
   });
-  console.log(childtableHeaders.value,"mmmm");
+  console.log(childtableHeaders.value, "mmmm");
 };
 
 // Function to remove a field from a specific table
@@ -1445,6 +1448,7 @@ function getFormData() {
         tableName.value = parsedFormJson.fields.filter(
           (field) => field.fieldtype === "Table"
         );
+        console.log(tableName.value, "table");
         childName.value = tableName.value[0]?.options.replace(/_/g, " ");
         // console.log(childName.value, typeof childName.value, "5555");
 
@@ -1532,9 +1536,9 @@ function formData(status) {
     fields = [...fields, ...tableFieldsCache.value];
   }
 
-  if (childtableHeaders.value && childtableHeaders.value.length) {
+  if (tableName.value && tableName.value.length) {
     // Append child table headers instead of replacing
-    fields = [...fields, ...childtableHeaders.value];
+    fields = [...fields, ...tableName.value];
   }
   const dataObj = {
     ...filterObj.value,

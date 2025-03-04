@@ -24,7 +24,7 @@
                                     <!-- v-if="shouldShowButton" -->
                                     <ButtonComp
                                         class="btn btn-outline-danger raiseReqBtn d-flex justify-content-center align-items-center  m-0 text-nowrap font-10"
-                                        name="Raise request" data-bs-toggle="modal"
+                                        name="Raise request" data-bs-toggle="modal" @click="raiseRequest"
                                         data-bs-target="#riaseRequestModal" />
                                     <!-- @click="raiseRequest" -->
                                 </div>
@@ -356,10 +356,9 @@ const ezyForms = () => {
 watch(business_unit, (newBu, oldBu) => {
     EzyBusinessUnit.value = newBu;
     localStorage.setItem("Bu", EzyBusinessUnit.value)
-
-    if (oldBu) {
+    if (route.path.includes('forms') && newBu !== oldBu) {
         deptData(true);
-    } else {
+    } else if (route.path.includes('forms') && newBu === oldBu) {
 
         deptData();
     }
@@ -400,6 +399,8 @@ function deptData(value = null) {
                 formSideBarData.value = deptartmentData.value.map(department => ({
                     route: department.name.replace(/\s+/g, '-').toLowerCase(),
                 }));
+                
+
 
                 if (value && activeTab.value.includes("/forms")) {
                     handleBuChange({ route: newFormsRoute })
@@ -411,76 +412,9 @@ function deptData(value = null) {
             console.error("Error fetching department data:", error);
         });
 }
-const employeeData = ref({});
-
-// function raiseRequest() {
-
-// const storedData = localStorage.getItem("employeeData");
-// if (storedData) {
-//     employeeData.value = JSON.parse(storedData);
-// employeeData?.value.department
-// categoriesdata();
-// } else {
-//     console.error("No employee data found in local storage.");
-// }
-// }
-// watch(
-//     () => selectedData.value.selectedCategory,
-//     (newVal, oldVal) => {
-//         if (newVal !== oldVal) {
-//             changingCategory(newVal, oldVal);
-//         }
-//     }
-// );
-
-// function changingCategory(value) {
 
 
 
-//     const filters = [];
-//     if (selectedData.value.SelectedDepartment) {
-//         filters.push(["owner_of_the_form", "like", `${selectedData.value.SelectedDepartment}`]);
-//     }
-//     // if (value) {
-//     //     filters.push(["form_category", "like", `%${value}%`]);
-//     // }
-
-
-
-//     const queryParams = {
-//         fields: JSON.stringify(["*"]),
-//         limit_page_length: filterObj.value.limitPageLength,
-//         limit_start: filterObj.value.limit_start,
-//         filters: JSON.stringify(filters),
-//         order_by: "`tabEzy Form Definitions`.`creation` desc"
-//     };
-
-//     axiosInstance.get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParams })
-//         .then(res => {
-
-//             formList.value = res.data; // Store the form list
-//         })
-//         .catch(error => {
-//             console.error("Error fetching ezyForms data:", error);
-//         });
-//     // blockArr.value = [];
-//     // selectedData.value.selectedform = '';
-//     // if (value) {
-//     //     const dataObj = {
-//     //         "role": employeeData.value.designation,
-//     //         "business_unit": EzyBusinessUnit.value
-//     //     };
-
-//     //     axiosInstance.post(apis.raiseFormdata, dataObj)
-//     //         .then((response) => {
-//     //             formList.value = response.message.list_of_roadmaps
-
-//     //         })
-//     //         .catch((error) => {
-//     //             console.error("Error fetching data:", error);
-//     //         });
-//     // }
-// }
 function SelectedFromchange(value) {
     blockArr.value = [];
     selectedData.value.selectedform = value;
@@ -559,92 +493,6 @@ function SelectedFromchange(value) {
 
 
 
-// function formDefinations(value) {
-//     const filters = [
-//         ["business_unit", "like", `%${business_unit.value}%`]
-//     ];
-//     if (selectedData.value.selectedCategory) {
-//         filters.push(["form_category", "like", `${selectedData.value.selectedCategory}`]);
-//     }
-//     if (value) {
-//         filters.push(["form_short_name", "like", `%${value}%`]);
-//     }
-
-//     const queryParams = {
-//         fields: JSON.stringify(["*"]),
-//         limit_page_length: filterObj.value.limitPageLength,
-//         limit_start: filterObj.value.limit_start,
-//         filters: JSON.stringify(filters),
-//         order_by: "`tabEzy Form Definitions`.`creation` desc"
-//     };
-//     // const queryParamsCount = {
-//     //     fields: JSON.stringify(["count( `tabEzy Form Definitions`.`name`) AS total_count"]),
-//     //     limitPageLength: "None",
-//     //     filters: JSON.stringify(filters),
-//     // }
-//     // axiosInstance.get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParamsCount })
-//     //     .then((res) => {
-//     //        
-//     //         totalRecords.value = res.data[0].total_count
-
-//     //     })
-//     //     .catch((error) => {
-//     //         console.error("Error fetching ezyForms data:", error);
-//     //     });
-
-
-//     axiosInstance.get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParams })
-//         .then(res => {
-//           
-//             if (res.data.length) {
-//                 toRaiseRequest()
-//             } else {
-//                 toast.error("No Forms Found", { autoClose: 2000 });
-//             }
-
-//         })
-//         .catch(error => {
-//             console.error("Error fetching ezyForms data:", error);
-//         });
-// }
-
-
-
-// function SelectedDepartment(departmentName) {
-//     // const selectedDept = deptartmentData.value.find(dept => dept.name === departmentName);
-//     console.log(departmentName);
-    
-//         const filters = [];
-//     if (departmentName) {
-//         filters.push(["owner_of_the_form", "like", `${departmentName}`]);
-//     }
-//     // if (value) {
-//     //     filters.push(["form_category", "like", `%${value}%`]);
-//     // }
-
-
-
-//     const queryParams = {
-//         fields: JSON.stringify(["*"]),
-//         limit_page_length: filterObj.value.limitPageLength,
-//         limit_start: filterObj.value.limit_start,
-//         filters: JSON.stringify(filters),
-//         order_by: "`tabEzy Form Definitions`.`creation` desc"
-//     };
-
-//     axiosInstance.get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParams })
-//         .then(res => {
-
-//             formList.value = res.data; // Store the form list
-//         })
-//         .catch(error => {
-//             console.error("Error fetching ezyForms data:", error);
-//         });
-
-//         // categoriesdata(selectedDept.name); // Sending department 'name' instead of 'department_name'
-    
-// }
-
 // Function to fetch and filter forms based on role
 function SelectedDepartment(departmentName) {
 //   console.log("Selected Department:", departmentName);
@@ -659,7 +507,9 @@ function SelectedDepartment(departmentName) {
     return;
   }
 
-  const filters = [];
+  const filters = [
+    ["enable", "=", 1]
+  ];
   if (departmentName) {
     filters.push(["owner_of_the_form", "like", departmentName]);
   }
@@ -721,88 +571,13 @@ function SelectedDepartment(departmentName) {
 
 
 
-// function categoriesdata(departmentId) {
-//     axiosInstance.get(`${apis.resource}${doctypes.departments}/${departmentId}`)
-//         .then((res) => {
-//             if (res.data && res.data.ezy_departments_items) {
-//                 categoryOptions.value = res.data.ezy_departments_items.map(item => item.category);
-//             }
-//         })
-//         .catch((error) => {
-//             console.error("Error fetching categories data:", error);
-//         });
-// }
 const emittedFormData = ref([]);
 const filepaths = ref('')
-const handleFieldUpdate = (field) => {
-
-    const fieldExists = emittedFormData.value.some(item => item.fieldname === field.fieldname);
-
-
-    if (!fieldExists) {
-        if (field.fieldtype === 'Attach') {
-            if (!Array.isArray(field.value)) {
-                filepaths.value = field.value;
-
-            }
-            emittedFormData.value.push(field);
-        } else {
-            emittedFormData.value = emittedFormData.value.concat(field);
-        }
-
-    } else {
-        console.log(`Field with name "${field.fieldname}" already exists in emittedFormData.`);
-    }
-};
-
-function raiseRequestSubmission() {
-    let form = {};
-    form['doctype'] = selectedData.value.selectedform;
-    form['company_field'] = business_unit.value;
-    // form['supporting_files'] = [];
-    if (emittedFormData.value.length) {
-        emittedFormData.value.map((each) => {
-            form[each.fieldname] = each.value
-        })
-    }
-
-
-    // form['form_json']
-    const formData = new FormData();
-    formData.append('doc', JSON.stringify(form));
-    formData.append('action', 'Save');
-    axiosInstance.post(apis.savedocs, formData)
-        .then((response) => {
-
-            request_raising_fn(response.docs[0])
-
-        })
-        .catch((error) => {
-            console.error("Error fetching data:", error);
-        });
+function raiseRequest(){
+    deptData()
 }
 
-function request_raising_fn(item) {
-    const filesArray = filepaths.value ? filepaths.value.split(',').map(filePath => filePath.trim()) : [];
-    let data_obj = {
-        module_name: 'Ezy Forms',
-        doctype_name: selectedData.value.selectedform,
-        ids: [item.name],
-        reason: '',
-        url_for_request_id: '',
-        files: filesArray,
-        property: business_unit.value,
-    }; axiosInstance.post(apis.raising_request, data_obj).then(async (resp) => {
 
-        if (resp?.message?.success) {
-            toast.success("Request Raised", { autoClose: 1000 });
-            const modal = await bootstrap.Modal.getInstance(document.getElementById('riaseRequestModal'));
-            modal.hide();
-            await router.push({ path: '/todo/raisedbyme' });
-            window.location.reload();
-        }
-    });
-}
 function toRaiseRequest() {
     const modal = bootstrap.Modal.getInstance(document.getElementById('riaseRequestModal'));
     modal.hide();
