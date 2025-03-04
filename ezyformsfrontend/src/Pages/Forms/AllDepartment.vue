@@ -86,7 +86,7 @@ const actions = ref(
 const fieldMapping = ref({
   // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
   form_short_name: { type: "input" },
-  form_category: { type: "select", options: ["Software", "Hardware"] },
+  form_category: { type: "select", options: formCategory.value },
   form_status: { type: "select", options: ["Created", "Draft"] },
 
   form_status: { type: "select", options: ["Created", "Draft"] },
@@ -294,7 +294,7 @@ function fetchDepartmentDetails(id, data) {
     .then((response) => {
       tableData.value = response.data;
 
-      formCategory.value = [...new Set(response.data.map((formCategory) => formCategory.form_category))];
+      formCategory.value = [...new Set(newData.map((formCategory) => formCategory.form_category))];
 
 
     })

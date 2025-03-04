@@ -63,14 +63,14 @@
 
                                 <!-- <i :class="`bi-icon ps-1 bg-transparent ${department.icon} me-3`"></i> -->
                                 <i :class="[
-                'bi-icon',
-                'fs-6',
-                'bg-transparent',
+                                    'bi-icon',
+                                    'fs-6',
+                                    'bg-transparent',
 
-                iconClasses[index % iconClasses.length],
-                'me-3',
+                                    iconClasses[index % iconClasses.length],
+                                    'me-3',
 
-            ]"></i>
+                                ]"></i>
 
                                 {{ department.name }}
                             </li>
@@ -230,13 +230,13 @@ function deptData() {
                 deptartmentData.value = res.data;
 
 
-                formSideBarData.value = deptartmentData.value.map(department => ({
-                    name: department.department_name,
-                    // icon: iconClasses,
-                    route: department.name,
+                formSideBarData.value = deptartmentData.value
+                    .sort((a, b) => a.department_name.localeCompare(b.department_name))
+                    .map(department => ({
+                        name: department.department_name,
+                        route: department.name,
+                    }));
 
-                    //   id: department.id 
-                }));
 
             }
         })
@@ -313,7 +313,7 @@ li {
     line-height: 26px;
     text-align: left;
     border-radius: 6px;
-    
+
 
 
 
