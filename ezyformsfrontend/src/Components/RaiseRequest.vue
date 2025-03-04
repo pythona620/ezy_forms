@@ -18,36 +18,42 @@
           />
             <!-- @formValidation="isFormValid = $event" -->
 
-          <div v-if="tableName.length" class="mt-3">
-            <div>
-              <span class="font-13 fw-bold">{{ childTableName }}</span>
-            </div>
-            <table class="table table-striped" border="1" width="100%">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th v-for="field in tableHeaders" :key="field.fieldname">
-                    {{ field.label }}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(row, index) in tableRows" :key="index">
-                  <td>{{ index + 1 }}</td>
-                  <td v-for="field in tableHeaders" :key="field.fieldname">
-                    <template v-if="field.fieldtype === 'Data'">
-                      <input type="text" class="form-control" v-model="row[field.fieldname]" />
-                    </template>
-                    <template v-else-if="field.fieldtype === 'Attach'">
-                      <input type="file" class="form-control"
-                        @change="handleFileUpload($event, row, field.fieldname)" />
-                    </template>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <button class="btn btn-light" @click="addRow">Add Row</button>
-          </div>
+      <!-- <span class="font-13 fw-bold">{{ table.childTableName.replace(/_/g, " ") }}</span> -->
+      <div class="mt-3">
+  <div v-for="(table, tableIndex) in tableHeaders" :key="tableIndex" class="mt-3">
+    <div>
+      <span class="font-13 fw-bold">Table {{ tableIndex + 1 }}</span>
+    </div>
+    
+    <table class="table table-striped" border="1" width="100%">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th v-for="field in table" :key="field.fieldname">
+            {{ field.label }}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(row, rowIndex) in tableRows[tableIndex]" :key="rowIndex">
+          <td>{{ rowIndex + 1 }}</td>
+          <td v-for="field in table" :key="field.fieldname">
+            <template v-if="field.fieldtype === 'Data'">
+              <input type="text" class="form-control" v-model="row[field.fieldname]" />
+            </template>
+            <template v-else-if="field.fieldtype === 'Attach'">
+              <input type="file" class="form-control" @change="handleFileUpload($event, row, field.fieldname)" />
+            </template>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <button class="btn btn-light" @click="addRow(tableIndex)">Add Row</button>
+  </div>
+</div>
+
+
         </div>
         <!-- @formValidation="isFormValid = $event" -->
         <div class="raiserequestBtnDiv">
@@ -200,13 +206,27 @@ function EditRequestUpdate() {
 
 
 
+// const tableRows = ref([]);
 
-const addRow = () => {
+// Initialize tableRows for each table
+onMounted(() => {
+  tableRows.value = tableHeaders.value.map(() => []);
+});
+
+const addRow = (tableIndex) => {
+  if (!tableRows.value[tableIndex]) {
+    tableRows.value[tableIndex] = []; // Initialize it if undefined
+  }
+
   const newRow = Object.fromEntries(
-    tableHeaders.value.map((field) => [field.fieldname, ""])
+    tableHeaders.value[tableIndex].map((field) => [field.fieldname, ""])
   );
-  tableRows.value.push(newRow);
+
+  tableRows.value[tableIndex].push(newRow);
 };
+
+
+
 
 watch(business_unit, (newBu, oldBu) => {
   EzyBusinessUnit.value = newBu;
@@ -348,6 +368,7 @@ function formDefinations() {
       // console.log(childTableName.value, "child====");
 
       tableHeaders.value = parsedFormJson.child_table_fields;
+      console.log(tableHeaders.value);
       initializeTableRows();
       // console.log(tableHeaders.value, "table fields");
     })
@@ -464,18 +485,20 @@ const handleFieldUpdate = (field) => {
   }
 };
 const ChildTableData = () => {
-  const childName = tableName.value[0]?.options;
   let form = {};
   form["doctype"] = selectedData.value.selectedform;
   form["company_field"] = business_unit.value;
-  form[childName] = tableRows.value;
 
-  // form['form_json']
+  // Loop through all child tables
+  tableName.value.forEach((table, index) => {
+    const childName = table.options;
+    form[childName] = tableRows.value[index] || []; // Assign corresponding table data
+  });
+
   const formData = new FormData();
   formData.append("doc", JSON.stringify(form));
   formData.append("action", "Save");
 
-  // console.log(form);
   axiosInstance
     .post(apis.savedocs, formData)
     .then((response) => {
@@ -486,44 +509,44 @@ const ChildTableData = () => {
     });
 };
 
+
 function raiseRequestSubmission() {
-  // console.log(isFormValid.value);
   if (!isFormValid.value) {
     toast.error("Please Fill Mandatory Fields");
     return; // Stop execution if the form is invalid
-  } 
-    if (tableName.value[0]?.options) {
-      ChildTableData();
-    }
-    const childName = tableName.value[0]?.options;
-    let form = {};
-    form["doctype"] = selectedData.value.selectedform;
-    form["company_field"] = business_unit.value;
-    if (tableName.value.length) {
-      form[childName] = tableRows.value;
-    }
-    // form['supporting_files'] = [];
-    if (emittedFormData.value.length) {
-      emittedFormData.value.map((each) => {
-        form[each.fieldname] = each.value;
-      });
-    }
+  }
 
-    // form['form_json']
-    const formData = new FormData();
-    formData.append("doc", JSON.stringify(form));
-    formData.append("action", "Save");
-    // console.log(formData);
-    axiosInstance
-      .post(apis.savedocs, formData)
-      .then((response) => {
-        request_raising_fn(response.docs[0]);
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-      });
-  
+  let form = {};
+  form["doctype"] = selectedData.value.selectedform;
+  form["company_field"] = business_unit.value;
+
+  // ✅ Loop through all child tables dynamically
+  tableName.value.forEach((table, index) => {
+    const childName = table.options;
+    form[childName] = tableRows.value[index] || []; // Ensure each child table's data is assigned
+  });
+
+  // ✅ Add emitted form data if available
+  if (emittedFormData.value.length) {
+    emittedFormData.value.forEach((each) => {
+      form[each.fieldname] = each.value;
+    });
+  }
+
+  const formData = new FormData();
+  formData.append("doc", JSON.stringify(form));
+  formData.append("action", "Save");
+
+  axiosInstance
+    .post(apis.savedocs, formData)
+    .then((response) => {
+      request_raising_fn(response.docs[0]); // Process the response
+    })
+    .catch((error) => {
+      console.error("Error fetching data:", error);
+    });
 }
+
 function WfRequestUpdate() {
   const filters = [
     [

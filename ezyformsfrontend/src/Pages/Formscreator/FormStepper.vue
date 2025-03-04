@@ -634,34 +634,31 @@
                               <div class="childtableShow">
                                 <div>
                                   <div v-if="childName">
-                                    <div v-if="blockIndex === 0" class="mt-2">
-                                      <div>
-                                        <span class="font-13 fw-bold">{{
-                                          childName
-                                          }}</span>
-                                      </div>
-                                      <table class="table table-bordered table-striped">
-                                        <thead>
-                                          <tr>
-                                            <th>#</th>
-                                            <th v-for="field in childtableHeaders" :key="field.fieldname">
-                                              {{ field.label }}
-                                            </th>
-                                          </tr>
-                                        </thead>
-                                        <tbody>
-                                          <tr v-for="(row, index) in childtableRows" :key="index">
-                                            <td>{{ index + 1 }}</td>
-                                            <td v-for="field in childtableHeaders" :key="field.fieldname">
-                                              <span>
-                                                {{ row[field.fieldname] || "-" }}
-                                              </span>
-                                            </td>
-                                          </tr>
-                                        </tbody>
-                                      </table>
-                                    </div>
-                                  </div>
+  <div v-if="blockIndex === 0" class="mt-2">
+    
+    <!-- Loop through each table inside childTableFields -->
+    <div v-for="(fields, tableName) in childtableHeaders" :key="tableName">
+      
+      <!-- Table Name (Dynamically Displayed) -->
+      <div>
+        <span class="font-13 fw-bold">{{ childName }} </span>
+      </div>
+
+      <table class="table table-bordered table-striped">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th v-for="field in fields" :key="field.fieldname">
+              {{ field.label }}
+            </th>
+          </tr>
+        </thead>
+      </table>
+      
+    </div>
+  </div>
+</div>
+
 
                                   <div>
                                     <div v-if="blockIndex === 0">
@@ -1015,7 +1012,7 @@ const addFieldToTable = (tableIndex) => {
     idx: childTables.value[tableIndex].columns.length,
     reqd: false,
   });
-  console.log(childtableHeaders.value, "mmmm");
+
 };
 
 // Function to remove a field from a specific table
