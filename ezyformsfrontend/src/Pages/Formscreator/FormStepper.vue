@@ -1559,7 +1559,7 @@ const prevStep = () => {
     activeStep.value -= 1;
   }
 };
-
+const returTables = ref([])
 // Get form by ID
 function getFormData() {
   axiosInstance
@@ -1582,6 +1582,9 @@ function getFormData() {
         wrkAfterGetData.value = parsedFormJson.workflow;
         // console.log(parsedFormJson.workflow, "parsedFormJson");
         tableName.value = parsedFormJson.fields.filter(
+          (field) => field.fieldtype === "Table"
+        );
+        returTables.value = parsedFormJson.fields.filter(
           (field) => field.fieldtype === "Table"
         );
         console.log(tableName.value,"table");
@@ -1681,9 +1684,9 @@ function formData(status) {
     fields = [...fields, ...tableFieldsCache.value];
   }
 
-  if (tableName.value && tableName.value.length) {
+  if (returTables.value && returTables.value.length) {
     // Append child table headers instead of replacing
-    fields = [...fields, ...tableName.value];
+    fields = [...fields, ...returTables.value];
   }
   const dataObj = {
     ...filterObj.value,
