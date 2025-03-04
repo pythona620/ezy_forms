@@ -8,8 +8,8 @@
  "field_order": [
   "bu_name",
   "bu_code",
-  "send_form_as_a_attach_through_mail",
-  "bu_logo"
+  "bu_logo",
+  "send_form_as_a_attach_through_mail"
  ],
  "fields": [
   {
@@ -27,11 +27,17 @@
    "fieldname": "bu_logo",
    "fieldtype": "Attach",
    "label": "BU Logo"
+  },
+  {
+   "default": "0",
+   "fieldname": "send_form_as_a_attach_through_mail",
+   "fieldtype": "Check",
+   "label": "Send form as a attach through mail"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-02-28 10:46:17.796362",
+ "modified": "2025-02-28 17:23:14.519499",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
  "name": "Ezy Business Unit",
