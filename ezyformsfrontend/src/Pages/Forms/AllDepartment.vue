@@ -294,8 +294,7 @@ function fetchDepartmentDetails(id, data) {
     .then((response) => {
       tableData.value = response.data;
 
-      formCategory.value = [...new Set(newData.map((formCategory) => formCategory.form_category))];
-
+      formCategory.value = [...new Set(tableData.value.map((formCategory) => formCategory.form_category))];
 
     })
     .catch((error) => {
