@@ -17,7 +17,7 @@
         <!-- v-if="tableForm" -->
         <div class="mt-2">
 
-            <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" actionType="dropdown"
+            <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" actionType="dropdown" enableDisable="true"
                 @actionClicked="actionCreated" @toggle-click="toggleFunction" isFiltersoption="true"
                 :field-mapping="fieldMapping" :actions="actions" @updateFilters="inLineFiltersData" isCheckbox="true" />
             <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
@@ -155,7 +155,7 @@ const hideModal = () => {
 const actions = ref(
     [
         { name: 'View form', icon: 'fa-solid fa-eye' },
-        { name: 'Active this form', icon: 'far fa-file-alt' }
+        // { name: 'Active this form', icon: 'far fa-file-alt' }
         // { name: 'Edit Form', icon: 'fa-solid fa-edit' },
         // { name: 'Edit accessibility to dept.', icon: 'fa-solid fa-users' },
         // { name: 'Share this form', icon: 'fa-solid fa-share-alt' },

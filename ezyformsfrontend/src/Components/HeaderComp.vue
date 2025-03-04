@@ -571,7 +571,9 @@ function SelectedDepartment(departmentName) {
 
 const emittedFormData = ref([]);
 const filepaths = ref('')
-
+function raiseRequest(){
+    deptData()
+}
 
 
 function toRaiseRequest() {
