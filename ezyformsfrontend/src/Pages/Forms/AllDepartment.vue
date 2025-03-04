@@ -13,8 +13,8 @@
 
       </div>
       <div class="mt-3">
-        <GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true"
-          actionType="Toogle&dropdown" @actionClicked="actionCreated" @toggle-click="toggleFunction" :actions="actions"
+        <GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true" enableDisable="true"
+          actionType="dropdown" @actionClicked="actionCreated" @toggle-click="toggleFunction" :actions="actions"
           @updateFilters="inLineFiltersData" :field-mapping="fieldMapping" isFiltersoption="true" />
         <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
           @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
@@ -186,7 +186,8 @@ watch(
   [() => businessUnit.value, () => props.id],
   ([newBusinessUnitVal, newId]) => {
     newBusinessUnit.value.business_unit = newBusinessUnitVal;
-    if (newBusinessUnitVal.length && newId) {
+    if (newBusinessUnitVal.length && newId && props.id !== ':id') {
+      console.log(newId,props.id,"----");
       fetchDepartmentDetails(newId || props.id, null);
     }
   },

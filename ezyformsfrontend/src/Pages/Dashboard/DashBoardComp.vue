@@ -2,10 +2,10 @@
     <div class="container-fluid">
         <div class="row mt-3">
             <!-- Total Checks Status -->
-            <div class="col-4">
+            <div class="col-6">
                 <div class="chart-wrapper">
                     <div>
-                        <h6 class="fw13 font-13 text-nowrap">Received to me (4 requests)</h6>
+                        <h6 class="fw13 font-13 text-nowrap">Requests received for me (4 requests)</h6>
                         <div class="chart-container" ref="totalChecksChartRef"></div>
                     </div>
                     <div class="chart-info">
@@ -92,21 +92,21 @@ function updateChart() {
             },
             series: [{
                 type: 'pie',
-                radius: ['50%', '70%'], // Donut chart
+                radius: ['40%', '80%'], // Adjust for a bigger donut chart
                 center: ['50%', '50%'],
                 label: {
                     show: true,
                     position: 'inside',
                     color: '#fff',
-                    fontSize: 12,
+                    fontSize: 16, // Increase font size
                     formatter: '{c}', // Show values inside sections
                 },
                 labelLine: { show: false },
                 data: [
                     { value: Approved.value, name: 'Approved', itemStyle: { color: '#00FF00' } },
                     { value: Pending.value, name: 'Pending', itemStyle: { color: '#594DFA' } },
-                    { value: request_raised.value, name: 'request_raised', itemStyle: { color:'#ECE51F'  } },
-                    { value: Request_cancelled.value, name: 'Request_cancelled', itemStyle: { color:'#FF0000'  } },
+                    { value: request_raised.value, name: 'request_raised', itemStyle: { color: '#ECE51F' } },
+                    { value: Request_cancelled.value, name: 'Request_cancelled', itemStyle: { color: '#FF0000' } },
                 ]
             }],
             graphic: {
@@ -116,14 +116,19 @@ function updateChart() {
                 style: {
                     text: `${totalChecks.value}\nTotal forms`,
                     textAlign: 'center',
-                    fontSize: 12,
+                    fontSize: 16, // Increase text size
                     fontWeight: 'bold',
                     fill: '#000',
                 }
             }
         });
+
+        window.addEventListener('resize', () => {
+            chart.resize(); // Ensure chart resizes when window size changes
+        });
     }
 }
+
 
 // Watch for changes in data & update chart
 watch([Approved, Request_cancelled, request_raised, Pending], updateChart);
@@ -140,7 +145,7 @@ onMounted(fetchData);
 .chart-wrapper {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: space-evenly                                                                                                                                                                                                                                                                       ;
     padding: 20px;
     border: 1px solid #EEEEEE;
     border-radius: 4px;
@@ -149,8 +154,8 @@ onMounted(fetchData);
 }
 
 .chart-container {
-    width: 180px;
-    height: 180px;
+    width: 280px;
+    height: 280px;
 }
 
 .chart-info {

@@ -243,41 +243,36 @@
                   </div>
                 </div>
               </div>
-              <div v-if="blockIndex === 0 && props.childName" class="mt-2 pb-3 mx-2">
-                <div>
-                  <span class="font-13 fw-bold ps-1 tablename text-secondary">{{
-                    props.childName
-                  }}</span>
-                </div>
-                <div class="tableborder-child">
-                  <table class="table mt-2 table-striped">
-                    <thead>
-                      <tr>
-                        <th>#</th>
-                        <th
-                          v-for="field in props.childHeaders"
-                          :key="field.fieldname"
-                        >
-                          {{ field.label }}
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr >
-                        <td>{{ '-' }}</td>
-                        <td
-                          v-for="(field, index)  in props.childHeaders"
-                          :key="index"
-                        >
-                          
-                          <span >
-                            {{  "-" }}
-                          </span>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+              <div v-if="blockIndex === 0 " class="mt-2 pb-3 mx-2">
+                <div v-for="(table, tableIndex) in props.tables" :key="tableIndex">
+    <div v-if="tableIndex === 0 && table.childName" class="mt-2 pb-3 mx-2">
+      <div>
+        <span class="font-13 fw-bold ps-1 tablename text-secondary">
+          {{ table.childName }}
+        </span>
+      </div>
+    </div>
+    <div class="tableborder-child">
+      <table class="table mt-2 table-striped">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th v-for="field in table.childHeaders" :key="field.fieldname">
+              {{ field.label }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{{ '-' }}</td>
+            <td v-for="(field, index) in table.childHeaders" :key="index">
+              <span>-</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
               </div>
             </div>
           </div>

@@ -7,9 +7,10 @@
 						<input type="checkbox" class="checkbox form-check-input" @change="SelectedAll()" />
 					</th> -->
           <th>#</th>
-          <th v-for="(column, index) in tHeaders" :key="index" :class="{ 'text-center': column.th === 'Users' }">
+          <th v-for="(column, index) in tHeaders" :key="index" :class="{ 'text-center': column.th === 'Users' || column.th === 'Status' }">
             {{ column.th }}
           </th>
+          <th class="text-center fixed-column" v-if="enableDisable == 'true'">Enable/Disable</th>
           <th class="text-center fixed-column" v-if="isAction == 'true'">Action</th>
         </tr>
       </thead>
@@ -57,7 +58,7 @@
 								@change="selectedCheckList(row, rowIndex)" />
 						</td> -->
             <td class="">{{ rowIndex + 1 }}</td>
-            <td :title="row[column.td_key] ? row[column.td_key].toString() : '-'" v-for="(column, colIndex) in tHeaders"
+            <td :title="row[column.td_key] ? row[column.td_key].toString() : '-'" v-for="(column, colIndex) in tHeaders" :class="column.td_key === 'form_status' ? 'text-center' : ''"
               :key="colIndex">
 
               <!-- <span :class="{'accessible-departments': column.td_key === 'accessible_departments'}" v-if="column.td_key === 'accessible_departments'">
@@ -122,8 +123,8 @@
                             return 'Completed';
                           }
                           if (row.status === 'Request Cancelled') {
-              return 'Request Cancelled';
-            }
+                            return 'Request Cancelled';
+                          }
 
                           // If value is an empty array, return "-"
                           if (Array.isArray(value) && value.length === 0) {
@@ -164,6 +165,17 @@
 					<td :selectedOption="selectoption"></td>
 					column.td_key, -->
 
+            <td class="text-center fixed-column" v-if="enableDisable === 'true'">
+              <div class="d-flex justify-content-center align-items-center gap-2">
+                <span :class="row.enable == 0 ? 'text-secondary font-11' : ''">
+                  {{ row.enable == '1' ? '' : 'Disabled' }}
+                </span>
+                <div class="form-check d-flex justify-content-center form-switch text-end">
+                  <input class="form-check-input shadow-none" type="checkbox" role="switch" :checked="row.enable == '0'"
+                    @click.prevent="handleToggle(row, index, $event)" />
+                </div>
+              </div>
+            </td>
             <td v-if="actionType === 'dropdown'" class="text-center fixed-column position-relative">
               <div class="dropdown">
                 <p class="p-0 actions" data-bs-toggle="dropdown" aria-expanded="false">
@@ -180,15 +192,16 @@
               </div>
             </td>
 
-            <td v-if="actionType === 'Toogle&dropdown'"
+
+
+            <!-- <td v-if="actionType === 'Toogle&dropdown'"
               class="text-end d-flex justify-content-end align-items-center fixed-column position-relative">
               <div class="dropdown">
                 <p class="p-0 actions" data-bs-toggle="dropdown" aria-expanded="false">
                   <span>...</span>
                 </p>
                 <ul class="dropdown-menu actionsdropdown">
-                  <li class="py-1" @click="selectedAction(row, action)" v-for="(action, index) in actions"
-                    :key="index">
+                  <li class="py-1" @click="selectedAction(row, action)" v-for="(action, index) in actions" :key="index">
                     <a class="dropdown-item py-2 d-flex align-items-center gap-2">
                       <i :class="action.icon"></i>
                       <h1 class="font-10 mb-0">{{ action.name }}</h1>
@@ -197,11 +210,8 @@
                 </ul>
               </div>
 
-              <div class="form-check d-flex justify-content-end form-switch text-end w-50">
-                <input class="form-check-input shadow-none" type="checkbox" role="switch" :checked="row.enable == '1'"
-                  @click.prevent="handleToggle(row, index, $event)" />
-              </div>
-            </td>
+
+            </td> -->
 
 
 
@@ -284,13 +294,17 @@ const props = defineProps({
     type: Object,
     required: false,
   },
+  enableDisable: {
+    type: String,
+
+  }
 });
 
 const emits = defineEmits(["actionClicked", "updateFilters", "toggle-click"]);
 
 function selectedAction(row, action) {
   emits("actionClicked", row, action);
-  console.log(row ,action);
+  console.log(row, action);
 }
 
 
