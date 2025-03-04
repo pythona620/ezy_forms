@@ -1584,6 +1584,7 @@ function getFormData() {
         tableName.value = parsedFormJson.fields.filter(
           (field) => field.fieldtype === "Table"
         );
+        console.log(tableName.value,"table");
         childName.value = tableName.value[0]?.options.replace(/_/g, " ");
         // console.log(childName.value, typeof childName.value, "5555");
 
@@ -1680,9 +1681,9 @@ function formData(status) {
     fields = [...fields, ...tableFieldsCache.value];
   }
 
-  if (childtableHeaders.value && childtableHeaders.value.length) {
+  if (tableName.value && tableName.value.length) {
     // Append child table headers instead of replacing
-    fields = [...fields, ...childtableHeaders.value, ...tableFieldsCache.value];
+    fields = [...fields, ...tableName.value];
   }
   const dataObj = {
     ...filterObj.value,

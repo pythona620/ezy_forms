@@ -2,7 +2,7 @@
     <div>
         <div class="d-flex justify-content-between align-items-center formsticky py-2">
             <div>
-                <h1 class="m-0 font-13">Forms Master</h1>
+                <h1 class="m-0 font-13">All Forms </h1>
                 <p class="m-0 font-11 pt-1">{{ totalRecords }} forms available</p>
             </div>
             <div class="d-flex gap-2 align-items-center">
@@ -14,7 +14,7 @@
         <!-- v-if="tableForm" -->
         <div class="mt-2">
 
-            <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" actionType="Toogle&dropdown"
+            <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" actionType="dropdown" enableDisable="true"
                 @actionClicked="actionCreated" @toggle-click="toggleFunction" isFiltersoption="true"
                 :field-mapping="fieldMapping" :actions="actions" @updateFilters="inLineFiltersData" isCheckbox="true" />
             <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
@@ -82,9 +82,11 @@ const businessUnit = computed(() => {
     return EzyBusinessUnit.value;
 });
 const sections = reactive([]);
+
+
 onMounted(() => {
     // fetchTable()
-    fetchCategory()
+    // fetchCategory()
 
 })
 
@@ -124,14 +126,7 @@ const tableheaders = ref([
 ]);
 
 const router = useRouter();
-const fieldMapping = ref({
-    // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
-    // invoice_date: { type: "date" },
-    form_name: { type: "input" },
-    form_category: { type: "select", options: [] },
-    owner_of_the_form: { type: "input" }
 
-});
 const selectedForm = ref(null);
 const actions = ref([
     { name: 'View form', icon: 'fa-solid fa-eye' },
@@ -387,48 +382,48 @@ const PaginationLimitStart = ([itemsPerPage, start]) => {
 
 };
 
-async function fetchCategory() {
-    try {
-        // Fetch all department names
-        const queryParams = { fields: JSON.stringify(["name"]) };
-        const response = await axiosInstance.get(`${apis.resource}${doctypes.departments}`, { params: queryParams });
+// async function fetchCategory() {
+//     try {
+//         // Fetch all department names
+//         const queryParams = { fields: JSON.stringify(["name"]) };
+//         const response = await axiosInstance.get(`${apis.resource}${doctypes.departments}`, { params: queryParams });
 
-        if (response.data) {
-            const departments = response.data;
+//         if (response.data) {
+//             const departments = response.data;
 
-            // Fetch full details of each department (including child table)
-            const departmentDetailsPromises = departments.map(department =>
-                axiosInstance.get(`${apis.resource}${doctypes.departments}/${department.name}`)
-            );
+//             // Fetch full details of each department (including child table)
+//             const departmentDetailsPromises = departments.map(department =>
+//                 axiosInstance.get(`${apis.resource}${doctypes.departments}/${department.name}`)
+//             );
 
-            // Resolve all department requests
-            const detailedResponses = await Promise.all(departmentDetailsPromises);
-            const detailedDepartments = detailedResponses.map(res => res.data);
+//             // Resolve all department requests
+//             const detailedResponses = await Promise.all(departmentDetailsPromises);
+//             const detailedDepartments = detailedResponses.map(res => res.data);
 
-            // Extract all category names from child tables
-            const allCategories = [];
-            detailedDepartments.forEach(department => {
+//             // Extract all category names from child tables
+//             const allCategories = [];
+//             detailedDepartments.forEach(department => {
 
-                if (department.ezy_departments_items) {
-                    department.ezy_departments_items.forEach(child => {
-                        if (child.category) {
-                            allCategories.push(child.category);
-                        }
-                    });
-                } else {
-                    console.log("No child table found for:", department.name);
-                }
-            });
+//                 if (department.ezy_departments_items) {
+//                     department.ezy_departments_items.forEach(child => {
+//                         if (child.category) {
+//                             allCategories.push(child.category);
+//                         }
+//                     });
+//                 } else {
+//                     console.log("No child table found for:", department.name);
+//                 }
+//             });
 
 
-            // Remove duplicates and store in options
-            fieldMapping.value.form_category.options = [...new Set(allCategories)];
-            // console.log(fieldMapping.value.form_category.options, "======== Categories");
-        }
-    } catch (error) {
-        console.error("Error fetching categories:", error);
-    }
-}
+//             // Remove duplicates and store in options
+//             fieldMapping.value.form_category.options = [...new Set(allCategories)];
+//             // console.log(fieldMapping.value.form_category.options, "======== Categories");
+//         }
+//     } catch (error) {
+//         console.error("Error fetching categories:", error);
+//     }
+// }
 
 
 
@@ -484,6 +479,12 @@ function fetchTable(data) {
             console.error("Error fetching ezyForms data:", error);
         });
 }
+
+const fieldMapping = computed(() => ({
+    form_name: { type: "input" },
+    form_category: { type: "select", options: formCategory.value },
+    owner_of_the_form: { type: "input" }
+}));
 
 </script>
 

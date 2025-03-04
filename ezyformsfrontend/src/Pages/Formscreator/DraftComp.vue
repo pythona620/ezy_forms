@@ -2,7 +2,7 @@
     <div>
         <div class="d-flex justify-content-between align-items-center formsticky py-2">
             <div>
-                <h1 class="m-0 font-13">Forms Master</h1>
+                <h1 class="m-0 font-13">Forms in Draft</h1>
                 <p class="m-0 font-11 pt-1">{{ totalRecords }} forms available</p>
             </div>
             <div class="d-flex gap-2 align-items-center">
@@ -17,7 +17,7 @@
         <!-- v-if="tableForm" -->
         <div class="mt-2">
 
-            <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" actionType="dropdown"
+            <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" actionType="dropdown" 
                 @actionClicked="actionCreated" isFiltersoption="true" :field-mapping="fieldMapping" :actions="actions"
                 @updateFilters="inLineFiltersData" isCheckbox="true" />
             <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
@@ -45,7 +45,6 @@ import FormPreview from '../../Components/FormPreview.vue'
 const totalRecords = ref(0);
 const formDescriptions = ref({})
 const tableData = ref([]);
-const formCategory = ref([]);
 const accessibleDepartments = ref([]);
 const ownerForms = ref([])
 const router = useRouter();
@@ -129,14 +128,7 @@ const tableheaders = ref([
     { th: "Accessible departments", td_key: "accessible_departments" },
     { th: "Status", td_key: "form_status" },
 ]);
-const fieldMapping = ref({
-    // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
-    // invoice_date: { type: "date" },
-    form_category: { type: "select", options: ["Software", "Hardware"] },
-    name: { type: "input" },
-    owner_of_the_form: { type: "input" }
 
-});
 
 function formCreation(item = null) {
     if (item == null) {
@@ -209,6 +201,7 @@ function inLineFiltersData(searchedData) {
     //   fetchTotalRecords(filters);
 }
 
+const formCategory = ref([]);
 
 
 
@@ -250,6 +243,7 @@ function fetchTable(data) {
             if (filterObj.value.limit_start === 0) {
                 tableData.value = newData;
                 formCategory.value = [...new Set(newData.map((formCategory) => formCategory.form_category))];
+                
 
                 ownerForms.value = [...new Set(newData.map((ownerForms) => ownerForms.owner_of_the_form))]
             } else {
@@ -260,6 +254,16 @@ function fetchTable(data) {
             console.error("Error fetching ezyForms data:", error);
         });
 }
+
+const fieldMapping  = computed(() => ({
+    // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
+    // invoice_date: { type: "date" },
+    form_category: { type: "select", options: formCategory.value },
+    form_name: { type: "input" },
+    owner_of_the_form: { type: "input" }
+
+}));
+
 
 </script>
 

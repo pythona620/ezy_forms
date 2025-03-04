@@ -137,19 +137,7 @@ const tableheaders = ref([
   { th: "Workflow Status", td_key: "assigned_to_users" },
 
 ]);
-const fieldMapping = ref({
-  // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
-  // credit_irn_generated: { type: "select", options: ["Pending", "Completed", "Error"] },
-  // role: { type: "input" },
-  name: { type: "input" },
-  requested_by: { type: "input" },
-  role: { type: "input" },
 
-
-  status: { type: "select", options: ["Completed","Request Raised", "In Progress", "Request Cancelled"] },
-
-  // requested_on: { type: "date" },
-});
 const actions = ref([
   { name: "View Request", icon: "fa-solid fa-eye" },
 
@@ -604,6 +592,19 @@ function receivedForMe(data) {
       console.error("Error fetching records:", error);
     });
 }
+const fieldMapping = computed(() =>({
+  // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
+  // credit_irn_generated: { type: "select", options: ["Pending", "Completed", "Error"] },
+  // role: { type: "input" },
+  name: { type: "input" },
+  requested_by: { type: "input" },
+  role: { type: "input" },
+
+
+  status: { type: "select", options: statusOptions.value },
+
+}));
+
 
 watch(
   businessUnit,
