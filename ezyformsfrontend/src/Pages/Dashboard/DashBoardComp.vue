@@ -92,7 +92,7 @@ function updateChart() {
             },
             series: [{
                 type: 'pie',
-                radius: ['40%', '80%'], // Adjust for a bigger donut chart
+                radius: ['40%', '70%'], // Adjust for a bigger donut chart
                 center: ['50%', '50%'],
                 label: {
                     show: true,

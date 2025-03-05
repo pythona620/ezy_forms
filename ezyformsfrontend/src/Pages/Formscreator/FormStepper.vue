@@ -637,6 +637,7 @@
   <div v-if="blockIndex === 0" class="mt-2">
     
     <!-- Loop through each table inside childTableFields -->
+   
     <div v-for="(fields, tableName) in childtableHeaders" :key="tableName">
       
       <!-- Table Name (Dynamically Displayed) -->
@@ -1454,6 +1455,8 @@ function getFormData() {
           JSON.parse(res_data?.form_json).fields
         );
         childtableHeaders.value = JSON.parse(res.data.form_json).child_table_fields;
+        childTables.value = []
+        tableFieldsCache.value = []
 
         // workflowSetup.push(JSON.parse(res_data?.form_json).workflow)
 
@@ -1546,7 +1549,7 @@ function formData(status) {
   };
 
   dataObj.accessible_departments = dataObj.accessible_departments.toString();
-  console.log(dataObj, "---data obj");
+  // console.log(dataObj, "---data obj");
   axiosInstance
     .post(apis.savedata, dataObj)
     .then((res) => {
@@ -1898,6 +1901,7 @@ function handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex, fiel
     "file_list",
     "flags",
     "docstatus",
+    
   ].map((label) => label.toLowerCase().trim()); // Normalize restricted labels
 
   // Extract labels and filter out excluded ones
@@ -1919,6 +1923,9 @@ function handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex, fiel
     const normalizedLabel = fieldLabel?.trim().toLowerCase();
     return restrictedLabels.includes(normalizedLabel);
   }
+  function hasInvalidCharacter(fieldLabel) {
+    return fieldLabel.includes('"'); // Check if label contains double quotes
+  }
 
   if (
     fieldIndex !== undefined &&
@@ -1935,6 +1942,10 @@ function handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex, fiel
       blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
         columnIndex
       ].fields[fieldIndex].errorMsg = "Entered label is restricted";
+    }else if (hasInvalidCharacter(fieldLabel)) {
+      blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
+        columnIndex
+      ].fields[fieldIndex].errorMsg = 'Label should not contain double quotes (")';
     } else {
       blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
         columnIndex
@@ -1958,6 +1969,10 @@ function handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex, fiel
       blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
         columnIndex
       ].errorMsg = "Entered label is restricted";
+    }else if (hasInvalidCharacter(columnLabel)) {
+      blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
+        columnIndex
+      ].errorMsg = 'Label should not contain double quotes (")';
     } else {
       blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
         columnIndex
@@ -1975,6 +1990,8 @@ function handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex, fiel
     if (isRestricted(sectionLabel)) {
       blockArr[blockIndex].sections[sectionIndex].errorMsg =
         "Entered label is restricted";
+    }else if (hasInvalidCharacter(sectionLabel)) {
+      blockArr[blockIndex].sections[sectionIndex].errorMsg = 'Label should not contain double quotes (")';
     } else {
       blockArr[blockIndex].sections[sectionIndex].errorMsg = shouldSetError(sectionLabel)
         ? "Duplicate Label Name in Section"

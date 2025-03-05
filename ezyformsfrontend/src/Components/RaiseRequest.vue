@@ -36,7 +36,7 @@
       </thead>
       <tbody>
         <tr v-for="(row, rowIndex) in tableRows[tableIndex]" :key="rowIndex">
-          <td>{{ rowIndex + 1 }}</td>
+          <td style="text-align: center;">{{ rowIndex + 1 }}</td>
           <td v-for="field in table" :key="field.fieldname">
             <template v-if="field.fieldtype === 'Data'">
               <input type="text" class="form-control" v-model="row[field.fieldname]" />
@@ -49,7 +49,7 @@
       </tbody>
     </table>
 
-    <button class="btn btn-light" @click="addRow(tableIndex)">Add Row</button>
+    <button class="btn btn-light font-12" @click="addRow(tableIndex)">Add Row</button>
   </div>
 </div>
 
@@ -209,9 +209,9 @@ function EditRequestUpdate() {
 // const tableRows = ref([]);
 
 // Initialize tableRows for each table
-onMounted(() => {
-  tableRows.value = tableHeaders.value.map(() => []);
-});
+// onMounted(() => {
+//   tableRows.value = tableHeaders.value.map(() => []);
+// });
 
 const addRow = (tableIndex) => {
   if (!tableRows.value[tableIndex]) {
@@ -368,7 +368,6 @@ function formDefinations() {
       // console.log(childTableName.value, "child====");
 
       tableHeaders.value = parsedFormJson.child_table_fields;
-      console.log(tableHeaders.value);
       initializeTableRows();
       // console.log(tableHeaders.value, "table fields");
     })
@@ -457,7 +456,7 @@ const uploadFile = (row, fieldname, file) => {
 //     });
 // }
 const handleFieldUpdate = (field) => {
-  console.log(field,"field");
+  // console.log(field,"field");
   const fieldExists = emittedFormData.value.some(
     (item) => item.fieldname === field.fieldname
   );
@@ -472,8 +471,8 @@ const handleFieldUpdate = (field) => {
       } else {
         filepaths.value = [];
       }
-      console.log(filepaths.value,"oooo");
-      console.log(emittedFormData.value,"emitteddata");
+      // console.log(filepaths.value,"oooo");
+      // console.log(emittedFormData.value,"emitteddata");
       emittedFormData.value.push(field);
     } else {
       emittedFormData.value = emittedFormData.value.concat(field);
@@ -484,49 +483,72 @@ const handleFieldUpdate = (field) => {
     );
   }
 };
-const ChildTableData = () => {
-  let form = {};
-  form["doctype"] = selectedData.value.selectedform;
-  form["company_field"] = business_unit.value;
 
-  // Loop through all child tables
-  tableName.value.forEach((table, index) => {
+const ChildTableData = async () => {
+  if (!tableName.value.length) return;
+
+
+
+  // **Loop through each child table and send separate API requests**
+  const formPromises = tableName.value.map((table) => {
     const childName = table.options;
-    form[childName] = tableRows.value[index] || []; // Assign corresponding table data
-  });
+    const childData = tableRows.value[childName];
 
-  const formData = new FormData();
-  formData.append("doc", JSON.stringify(form));
-  formData.append("action", "Save");
+    if (!childData || !childData.length) {
+      console.warn(`⚠ Skipping empty child table: ${childName}`);
+      return null; // Skip empty tables
+    }
 
-  axiosInstance
-    .post(apis.savedocs, formData)
-    .then((response) => {
-      console.log(response);
-    })
-    .catch((error) => {
-      console.error("Error fetching data:", error);
-    });
+    const form = {
+      doctype: selectedData.value.selectedform,
+      company_field: business_unit.value,
+      [childName]: childData, // Only this child table's data
+    };
+
+    const formData = new FormData();
+    formData.append("doc", JSON.stringify(form));
+    formData.append("action", "Save");
+
+
+
+    // **Return API call promise**
+    return axiosInstance.post(apis.savedocs, formData);
+  }).filter(Boolean); // Remove null entries
+
+  try {
+    const responses = await Promise.all(formPromises);
+
+  } catch (error) {
+    console.error("Error submitting child tables:", error);
+  }
 };
 
-
-function raiseRequestSubmission() {
+async function raiseRequestSubmission() {
   if (!isFormValid.value) {
     toast.error("Please Fill Mandatory Fields");
-    return; // Stop execution if the form is invalid
+    return;
   }
 
-  let form = {};
-  form["doctype"] = selectedData.value.selectedform;
-  form["company_field"] = business_unit.value;
+  //  First, submit child tables separately
+  await ChildTableData();
 
-  // ✅ Loop through all child tables dynamically
-  tableName.value.forEach((table, index) => {
+  //  Collect all child tables for the main submission
+  let childTables = {};
+  tableName.value.forEach((table) => {
     const childName = table.options;
-    form[childName] = tableRows.value[index] || []; // Ensure each child table's data is assigned
+    const childData = tableRows.value[childName];
+
+    if (childData && childData.length) {
+      childTables[childName] = childData;
+    }
   });
 
-  // ✅ Add emitted form data if available
+  //  Merge child tables with main form
+  let form = {
+    doctype: selectedData.value.selectedform,
+    company_field: business_unit.value,
+    ...childTables, // Add all child tables
+  };
   if (emittedFormData.value.length) {
     emittedFormData.value.forEach((each) => {
       form[each.fieldname] = each.value;
@@ -537,15 +559,98 @@ function raiseRequestSubmission() {
   formData.append("doc", JSON.stringify(form));
   formData.append("action", "Save");
 
+
   axiosInstance
     .post(apis.savedocs, formData)
     .then((response) => {
-      request_raising_fn(response.docs[0]); // Process the response
+      request_raising_fn(response.docs[0]);
     })
     .catch((error) => {
-      console.error("Error fetching data:", error);
+      console.error("Error submitting main form:", error);
     });
 }
+
+
+
+// const ChildTableData = async () => {
+//   if (!tableName.value.length) return;
+
+//   console.log("✅ Sending Child Tables Data...");
+
+//   // **Loop through each child table and send separate API requests**
+//   const formPromises = tableName.value.map((table, index) => {
+//     const childName = table.options;
+
+//     // if (!tableRows.value[childName] || !tableRows.value[childName].length) {
+//     //   console.warn(`⚠ Skipping empty child table: ${childName}`);
+//     //   return null; // Skip if no data
+//     // }
+
+//     const form = {
+//       doctype: selectedData.value.selectedform,
+//       company_field: business_unit.value,
+//       [childName]: tableRows.value[childName], // Ensure we use the correct childName key
+//     };
+
+//     console.log(`🚀 Submitting Child Table: ${childName}`, form);
+
+//     const formData = new FormData();
+//     formData.append("doc", JSON.stringify(form));
+//     formData.append("action", "Save");
+
+//     // **Return API call promise**
+//     return axiosInstance.post(apis.savedocs, formData);
+//   }).filter(Boolean); // Remove `null` values (empty tables)
+
+//   try {
+//     // **Await all API requests**
+//     const responses = await Promise.all(formPromises);
+//     console.log("✅ Child Tables Submitted:", responses);
+//   } catch (error) {
+//     console.error("❌ Error submitting child table data:", error);
+//   }
+// };
+
+// async function raiseRequestSubmission() {
+//   if (!isFormValid.value) {
+//     toast.error("Please Fill Mandatory Fields");
+//     return;
+//   }
+
+//   // **Submit each child table separately**
+//   const childTables = ChildTableData();  // Wait for all child tables to be submitted
+
+//   // **Now, submit the main form WITHOUT child tables**
+//   let form = {
+//     doctype: selectedData.value.selectedform,
+//     company_field: business_unit.value,
+//     ...childTables,
+//   };
+
+//   // ✅ Include additional form data if available
+//   if (emittedFormData.value.length) {
+//     emittedFormData.value.forEach((each) => {
+//       form[each.fieldname] = each.value;
+//     });
+//   }
+
+//   const formData = new FormData();
+//   formData.append("doc", JSON.stringify(form));
+//   formData.append("action", "Save");
+
+//   console.log("🚀 Submitting Main Form", form);
+
+//   axiosInstance
+//     .post(apis.savedocs, formData)
+//     .then((response) => {
+//       request_raising_fn(response.docs[0]); // Process response
+//     })
+//     .catch((error) => {
+//       console.error("❌ Error submitting main form:", error);
+//     });
+// }
+
+
 
 function WfRequestUpdate() {
   const filters = [

@@ -7,7 +7,7 @@
                     <div class="row">
                         <div class="col-2">
                             <div class="d-flex gap-2 align-items-center">
-                                <div><img class="imgmix img-fluid" src="../assets/Final-logo-ezyforms-removebg-preview.png"  /></div>
+                                <div><img @click="logoClick" class="imgmix img-fluid" src="../assets/Final-logo-ezyforms-removebg-preview.png"  /></div>
                                 <!-- <div class="m-0">
                                     <p class="font-13 m-0">EZY | Forms</p>
                                 </div> -->
@@ -364,6 +364,12 @@ watch(business_unit, (newBu, oldBu) => {
     }
 });
 
+function logoClick(){
+    router.push({
+        path:'/dashboard/maindash'
+    })
+}
+
 
 function deptData(value = null) {
     const filters = [
@@ -425,7 +431,7 @@ function SelectedFromchange(value) {
     let userRole = localStorage.getItem("USERROLE")?.trim().toLowerCase();
     // Remove any extra quotes (if present) around the userRole
     userRole = userRole?.replace(/^"|"$/g, ''); // Remove surrounding quotes
-    console.log("UserRole from localStorage:", `"${userRole}"`);
+    // console.log("UserRole from localStorage:", `"${userRole}"`);
 
     if (!userRole) {
         toast.error("User role is missing. Please log in again.", { autoClose: 2000 });
@@ -434,7 +440,7 @@ function SelectedFromchange(value) {
 
     // Find the selected form in formList
     const selectedForm = formList.value.find(form => form.form_short_name === value);
-    console.log("Selected Form from formList:", selectedForm);
+    // console.log("Selected Form from formList:", selectedForm);
 
     if (!selectedForm) {
         toast.error("Selected form does not exist in the fetched list.", { autoClose: 2000 });
@@ -535,7 +541,7 @@ function SelectedDepartment(departmentName) {
           const requestor = formJson?.workflow?.find((item) => item.type === "requestor");
 
           if (!requestor || !Array.isArray(requestor.roles)) {
-            console.log(`Form ${form.form_short_name} has no valid requestor roles.`);
+            // console.log(`Form ${form.form_short_name} has no valid requestor roles.`);
             return false;
           }
 
@@ -638,6 +644,10 @@ const handleBuChange = (tab) => {
     color: #2124FE;
     text-align: left;
 
+}
+
+.imgmix{
+    cursor: pointer;
 }
 
 .logout {

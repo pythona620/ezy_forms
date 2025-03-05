@@ -263,7 +263,6 @@ function setView(view) {
   displayedBlocks.value = filterBlocksByFieldname(view, props.blockArr);
   updateWorkFlowRoles();
 }
-
 function updateWorkFlowRoles() {
   let approverIndex = 0; // Keep track of approvers
 
@@ -289,6 +288,7 @@ function updateWorkFlowRoles() {
     return { roles };
   });
 }
+
 
 //  Filter blocks based on the view
 function filterBlocksByFieldname(view, blocks) {
