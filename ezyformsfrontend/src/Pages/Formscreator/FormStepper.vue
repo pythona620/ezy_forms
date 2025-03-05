@@ -621,7 +621,7 @@
                             </div>
                             <div v-if="
                               blockIndex === 0
-                            " class=" my-2">
+                            " class="m-2">
                               <!-- <button
                                   class="btn btn-light addRow m-2"
                                   @click="
@@ -640,7 +640,7 @@
                                           childName
                                           }}</span>
                                       </div>
-                                      <table class="table table-bordered table-striped">
+                                      <table class="table table-bordered table-striped mt-2">
                                         <thead>
                                           <tr>
                                             <th>#</th>
@@ -666,13 +666,13 @@
                                   <div>
                                     <div v-if="blockIndex === 0">
                                       <div>
-                                        <button class="btn btn-light addRow mb-3" @click="addChildTable">
+                                        <button class="btn btn-light addRow mb-3 mt-4" @click="addChildTable">
                                           Add New Table
                                         </button>
 
                                         <div v-for="(table, tableIndex) in childTables" :key="tableIndex"
                                           class="child-table">
-                                          <div class="d-flex justify-content-between align-items-center">
+                                          <div class="d-flex justify-content-between align-items-center mt-1 mb-2">
                                             <div>
 
                                               <span :class="table.tableName ? 'd-none' : 'text-danger'">*</span>
@@ -710,7 +710,7 @@
                                                 </button>
                                               </div>
 
-                                              <select v-model="field.fieldtype" class="form-select font-13">
+                                              <select v-model="field.fieldtype" class="form-select font-13 mb-3">
                                                 <option value="">Select Type</option>
                                                 <option v-for="section in childfield" :key="section.type"
                                                   :value="section.type">
@@ -2287,7 +2287,7 @@ input {
 .field-border {
   /* border: 1px solid rgb(221, 221, 221); */
   border-radius: 10px;
-  margin: 0px 10px 5px 10px;
+  // margin: 0px 10px 5px 10px;
   background-color: #fafafa;
   position: relative;
 }
