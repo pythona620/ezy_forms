@@ -150,12 +150,12 @@ option, index
                   </div>
                 </div>
               </div>
-              <div v-if="blockIndex === 0" class="mt-2 pb-3 mx-2">
+              <div v-if="blockIndex === 0" class="mt-2 pb-1 mx-2">
                 <div v-for="(table, tableIndex) in props.childHeaders" :key="tableIndex">
-                  <div class="mt-2 pb-3 mx-2">
+                  <div class="mt-2 pb-1 mx-1">
                     <div>
-                      <span class="font-13 fw-bold ps-1 tablename text-secondary">
-                        {{ (tableIndex + 1).replace("_", " ") }}
+                      <span class="font-13 fw-bold  tablename text-secondary">
+                        {{ tableIndex.replace(/_/g, " ") }}
                       </span>
                     </div>
                   </div>
@@ -207,9 +207,7 @@ const props = defineProps({
   childHeaders: {
     type: Object,
   },
-  childName: {
-    type: String,
-  },
+
 });
 
 const selectedView = ref("All"); // Default to Requestor

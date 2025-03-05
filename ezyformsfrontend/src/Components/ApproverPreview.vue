@@ -10,6 +10,7 @@
           <div class="container-fluid">
             <div class="row" v-for="(row, rowIndex) in section.rows" :key="rowIndex">
               <div v-for="(column, columnIndex) in row.columns" :key="'column-preview-' + columnIndex"
+                :class="props.readonlyFor === true || blockIndex === 0 ? 'border-0 bg-transparent' : 'border-0 bg-transparent'"
                 class="col dynamicColumn">
                 <div v-if="column.label" class="p-3 border-bottom">
                   <h6 class="m-0 font-12">{{ column.label }}</h6>
@@ -111,7 +112,7 @@
                     <template v-else-if="field.fieldtype == 'Attach'">
                       <div v-if="field.value" class="position-relative d-inline-block"
                         :class="props.readonlyFor === true ? 'image-border-bottom' : ''">
-                        <img v-if="isImageFile(field.value)" :src="field.value" alt="Attachment Preview"
+                        <img v-if="isImageFile(field.value)" :src="field.value"
                           class="img-thumbnail mt-2 cursor-pointer border-0" style="max-width: 100px; max-height: 100px"
                           @mouseover="showPreview = true" @mouseleave="showPreview = false" />
 
@@ -202,12 +203,12 @@
                         :class="props.readonlyFor === true || blockIndex === 0 ? 'border-0 image-border-bottom ' : ' '"
                         :readOnly="blockIndex === 0 || props.readonlyFor === true
                           " v-model="field.value" :placeholder="'Enter ' + field.label" :value="field.value" :name="'field-' +
-                          sectionIndex +
-                          '-' +
-                          columnIndex +
-                          '-' +
-                          fieldIndex
-                          " class="form-control previewInputHeight"></textarea>
+                            sectionIndex +
+                            '-' +
+                            columnIndex +
+                            '-' +
+                            fieldIndex
+                            " class="form-control previewInputHeight"></textarea>
                       <component v-if="field.fieldtype !== 'Int' && field.fieldtype !== 'Text'"
                         :is="getFieldComponent(field.fieldtype)"
                         :class="props.readonlyFor === true || blockIndex === 0 ? 'border-0 image-border-bottom w-50' : ' '"
@@ -237,7 +238,6 @@
           </div>
         </div>
         <div v-if="blockIndex === 0" class="mt-2 mx-2">
-
           <div v-if="props.childHeaders && Object.keys(props.childHeaders).length" class="mt-2 mx-2">
             <div v-for="(headers, tableName) in props.childHeaders" :key="tableName">
               <div>
@@ -403,7 +403,7 @@ const filteredBlocks = computed(() => {
               hour12: false,
             }).replace(/,/, "").replace(/\//g, "-");
 
-          
+
             field.value = localTime;
             emit("updateField", field);
 
@@ -550,7 +550,7 @@ const logFieldValue = (
       if (eve.target.checked) {
         // If checked, set the value as a string
         field["value"] = eve.target.value;
-        
+
       } else {
         // If unchecked, set the value as an empty string (or use any default value)
         field.value = "";
@@ -743,7 +743,7 @@ td {
 
 .tableborder-child {
   border: 1px solid #ccc !important;
-  border-radius: 10px !important;
+  border-radius: 5px !important;
   padding: 0;
   margin: 1px;
 }
