@@ -678,7 +678,6 @@ const triggerFileInput = () => {
 const handleFileChange = (event) => {
   const file = event.target.files[0];
   if (file) {
-    console.log(file, "ppp");
     uploadbulkFile(file);
   }
 };
@@ -701,7 +700,6 @@ const uploadbulkFile = (file) => {
   uploading.value = true;
   progress.value = 0;
 
-  console.log(file, "====", "--", fileName);
 
   axiosInstance
     .post(apis.uploadfile, formData, {
@@ -746,7 +744,6 @@ const buluploding = () => {
   axiosInstance
     .post(apis.uploadbulkEmployeefile, data)
     .then((res) => {
-      console.log(res?.message, "]data");
       if (res?.message) {
         bulkdata.value = res.message;
 
@@ -758,7 +755,6 @@ const buluploding = () => {
           }));
         }
 
-        console.log("Upload Response:", bulkdata.value);
 
         if (bulkdata.value.template_status === "success") {
           if (bulkdata.value.success) {
@@ -940,7 +936,6 @@ const addDesignation = (newTag) => {
       .post(apis.resource + doctypes.roles, { role_name: newTag }) // Adjust payload as needed
       .then((response) => {
         if (response.data) {
-          console.log("Role:", response.data);
 
           // Update local designations list
           // designations.value.push(newTag);
@@ -951,7 +946,6 @@ const addDesignation = (newTag) => {
             }) // Adjust payload as needed
             .then((response) => {
               if (response.data) {
-                console.log("Wf role:", response.data);
 
                 // Update local designations list
                 designations.value.push(response.data.role);
@@ -1042,7 +1036,6 @@ function createEmplBtn() {
   designationData();
 }
 function actionCreated(rowData, actionEvent) {
-  console.log(rowData,actionEvent,"---");
   if (actionEvent?.name === 'Edit Employee') {
     if (rowData) {
       deptData();
@@ -1210,7 +1203,7 @@ const uploadFile = (file, field) => {
         if (field === "signature") {
           createEmployee.value.signature = res.message.file_url;
         }
-        console.log("Uploaded file URL:", res.message.file_url);
+        // console.log("Uploaded file URL:", res.message.file_url);
       } else {
         console.error("file_url not found in the response.");
       }

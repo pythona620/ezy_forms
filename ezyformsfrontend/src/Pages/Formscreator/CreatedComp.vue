@@ -141,7 +141,7 @@ const actions = ref([
 const childtableHeaders = ref([]);
 const childName = ref("");
 function actionCreated(rowData, actionEvent) {
-    console.log(rowData, actionEvent,"ppp");
+    // console.log(rowData, actionEvent,"ppp");
     if (actionEvent.name === 'View form') {``
         if (rowData?.form_json) {
             formDescriptions.value = { ...rowData };
@@ -193,10 +193,10 @@ function actionCreated(rowData, actionEvent) {
 
     if (storedData) {
         const designation = JSON.parse(storedData).designation;
-        console.log(designation);
+        // console.log(designation);
 
         const roles = parsedData.workflow[0].roles;
-        console.log(roles);
+        // console.log(roles);
 
         let hasAccess = false;
 

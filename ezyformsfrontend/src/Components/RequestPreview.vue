@@ -2,6 +2,8 @@
     <section>
         <div v-if="blockArr" class="card">
             <div v-for="(block, blockIndex) in blockArr" :key="blockIndex" class="block-container">
+                
+                
                 <div v-for="(section, sectionIndex) in block.sections" :key="'preview-' + sectionIndex"
                     class="preview-section m-2">
                     <div class="section-label">
@@ -290,6 +292,8 @@ onMounted(() => {
                         column.fields.forEach((field) => {
                             if (field.fieldtype === "Datetime" && !field.value) {
                                 field.value = getCurrentDateTime();
+                                emit("updateField", field);
+
                             }
                             if (field.label.includes("Requested by")) {
                                 field.value = parsedData.emp_name;
@@ -378,7 +382,6 @@ const logFieldValue = (
         props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
             columnIndex
         ].fields[fieldIndex];
-    console.log(field, "0oip");
 
     if (eve.target?.files && eve.target.files.length > 0) {
         let files = Array.from(eve.target.files); // Convert FileList to an array
@@ -423,7 +426,6 @@ const logFieldValue = (
         }
 
         field["value"] = inputValue;
-        console.log(inputValue, "---input value");
     }
     validateField(
         field,

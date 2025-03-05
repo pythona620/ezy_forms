@@ -120,12 +120,47 @@ async function fetchData() {
     }
 }
 
-// Function to initialize and update each chart dynamically
-function updateCharts() {
-    chartsData.value.forEach((chartData, index) => {
-        const el = chartRefs[index];
-        if (el) {
-            const chartInstance = echarts.init(el);
+// Function to render ECharts
+function updateChart() {
+    if (totalChecksChartRef.value) {
+        const chart = echarts.init(totalChecksChartRef.value);
+        chart.setOption({
+            tooltip: {
+                trigger: 'item',
+                formatter: '{c}', // Show only value
+            },
+            series: [{
+                type: 'pie',
+                radius: ['40%', '70%'], // Adjust for a bigger donut chart
+                center: ['50%', '50%'],
+                label: {
+                    show: true,
+                    position: 'inside',
+                    color: '#fff',
+                    fontSize: 16, // Increase font size
+                    formatter: '{c}', // Show values inside sections
+                },
+                labelLine: { show: false },
+                data: [
+                    { value: Approved.value, name: 'Approved', itemStyle: { color: '#00FF00' } },
+                    { value: Pending.value, name: 'Pending', itemStyle: { color: '#594DFA' } },
+                    { value: request_raised.value, name: 'request_raised', itemStyle: { color: '#ECE51F' } },
+                    { value: Request_cancelled.value, name: 'Request_cancelled', itemStyle: { color: '#FF0000' } },
+                ]
+            }],
+            graphic: {
+                type: 'text',
+                left: 'center',
+                top: 'center',
+                style: {
+                    text: `${totalChecks.value}\nTotal forms`,
+                    textAlign: 'center',
+                    fontSize: 16, // Increase text size
+                    fontWeight: 'bold',
+                    fill: '#000',
+                }
+            }
+        });
 
             // Build series data dynamically based on the keys
             const seriesData = keys.map(key => ({

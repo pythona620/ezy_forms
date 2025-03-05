@@ -19,13 +19,13 @@
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title font-13" id="viewRequestLabel">
-              Request Id: {{ selectedRequest.name }}
+              Request Id: {{ selectedRequest.name?.replace(/_/g, " ") }}
             </h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" @click="closeModal"
               aria-label="Close"></button>
           </div>
           <div class="modal-body approvermodalbody">
-            <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel" :employeeData="employeeData"
+            <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel"  :childData="responseData" :childHeaders="tableHeaders" :employeeData="employeeData"
               @updateField="updateFormData" />
           </div>
           <div class="p-2">
@@ -124,6 +124,7 @@ const statusOptions = ref([]);
 const emittedFormData = ref([]);
 const selectedcurrentLevel = ref("");
 const activityData = ref([]);
+const responseData = ref([]);
 
 const tableheaders = ref([
   // { th: "Request ID", td_key: "name" },
@@ -151,6 +152,8 @@ const showRequest = ref(null);
 const doctypeForm = ref([]);
 const ApproverReason = ref("");
 const employeeData = ref([]);
+const tableHeaders = ref([]);
+
 const loading = ref(false)
 onMounted(() => {
   const storedData = localStorage.getItem("employeeData");
@@ -182,6 +185,11 @@ function actionCreated(rowData, actionEvent) {
         JSON.parse(selectedRequest.value?.json_columns)?.fields
       );
 
+      tableHeaders.value = JSON.parse(
+        selectedRequest.value?.json_columns
+      ).child_table_fields;
+      console.log(tableHeaders.value, "lll");
+
       // Prepare the filters for fetching data
       const filters = [
         ["wf_generated_request_id", "like", `%${selectedRequest.value.name}%`],
@@ -205,12 +213,37 @@ function actionCreated(rowData, actionEvent) {
 
             // Map values from doctypeForm to showRequest fields
             mapFormFieldsToRequest(doctypeForm.value, showRequest.value);
+
+            axiosInstance
+              .get(
+                `${apis.resource}${selectedRequest.value.doctype_name}/${res.data[0].name}`
+              )
+              .then((res) => {
+                console.log(`Data for :`, res.data);
+                // Identify the child table key dynamically
+                const childTables = Object.keys(res.data).filter((key) =>
+                  Array.isArray(res.data[key])
+                );
+                if (childTables.length) {
+                  responseData.value = {};
+
+                  childTables.forEach((tableKey) => {
+                    responseData.value[tableKey] = res.data[tableKey] || [];
+                  });
+                  console.log("Response Data:", responseData.value);
+                }
+
+              })
+              .catch((error) => {
+                console.error(`Error fetching data for :`, error);
+              });
+
           }
         })
         .catch((error) => {
           console.error("Error fetching categories data:", error);
         });
-
+      
       axiosInstance
         .get(`${apis.resource}${doctypes.WFActivityLog}/${selectedRequest.value.name}`)
         .then((res) => {
@@ -352,7 +385,7 @@ function ApproverFormSubmission(dataObj, type) {
 function approvalStatusFn(dataObj, type) {
 
 
-  console.log(dataObj);
+  // console.log(dataObj);
   let data = {
     property: selectedRequest.value.property,
     doctype: selectedRequest.value.doctype_name,
@@ -505,7 +538,7 @@ function inLineFiltersData(searchedData) {
     if (searchedData[key]) {
       filterObj.value.filters.push(key, "like", `%${searchedData[key]}%`);
     }
-    console.log(searchedData,"pppp");
+    // console.log(searchedData,"pppp");
     //     // Add filter for selected option
     //     if (key === "selectedOption" && searchedData.selectedOption) {
     //       filters.push([key, "=", searchedData.selectedOption]);

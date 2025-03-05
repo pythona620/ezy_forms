@@ -27,9 +27,9 @@
           <div class="modal-header py-2 d-block">
             <div class="d-flex justify-content-between align-items-center">
               <div>
-                <h5 class="m-0 font-13" id="viewRequest">Request Id: {{ selectedRequest.name }}
+                <h5 class="m-0 font-13" id="viewRequest">Request Id: {{ selectedRequest.name?.replace(/_/g, " ") }}
                 </h5>
-                
+
               </div>
               <div class="">
                 <button button="button" class="btn btn-white text-dark font-13" @click="downloadPdf">
@@ -43,11 +43,8 @@
             </div>
           </div>
           <div class="modal-body approvermodalbody">
-            <ApproverPreview
-              :blockArr="showRequest" :childHeaders="tableHeaders" :childData="responseData" :readonly-for="true"
-              :current-level="totalLevels"
-              @updateField="updateFormData"
-            />
+            <ApproverPreview :blockArr="showRequest" :childHeaders="tableHeaders" :childData="responseData"
+              :readonly-for="true" :current-level="totalLevels" @updateField="updateFormData" />
             <!-- <div v-if="tableName" class="mt-2">
               <div>
                 <span class="font-13 fw-bold">{{ tableName }}</span>
@@ -93,22 +90,22 @@
                   On
                   <strong class="strong-content">{{
                     formatDate(item.creation)
-                  }}</strong>,
+                    }}</strong>,
                   <strong class="strong-content">
                     <span v-if="index == 0">you</span>
                     <span v-else>
 
-                    {{ item.user_name }}
+                      {{ item.user_name }}
                     </span>
                   </strong>
                   ({{ item.role }})
                   <strong class="strong-content">{{
                     formatAction(item.action)
-                  }}</strong>
+                    }}</strong>
                   the request with the comments:
                   <strong class="strong-content">{{
                     item.reason || "N/A"
-                  }}</strong>.
+                    }}</strong>.
                 </p>
               </div>
             </div>
@@ -118,16 +115,17 @@
               <!-- <button type="button" class="btn btn-white text-dark  font-13" @click="closemodal"
                 data-bs-dismiss="modal">Close
                 <i class="bi bi-x"></i></button> -->
-              <div v-if="selectedRequestStatus == 'Request Raised'">
-                  <button :disabled="loading" type="submit" class="btn edit-btn"
+              <!-- <div v-if="selectedRequestStatus == 'Request Raised'">
+                <button :disabled="loading" type="submit" class="btn edit-btn"
                   @click="approvalCancelFn('Request Cancelled')">
                   <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                  <span v-if="!loading" ><i class="bi bi-check-lg font-11 me-2"></i><span class="font-10">Cancel Request</span></span>
+                  <span v-if="!loading"><i class="bi bi-check-lg font-11 me-2"></i><span class="font-10">Cancel
+                      Request</span></span>
                 </button>
 
-              </div>
+              </div> -->
             </div>
-            <div v-if="requestcancelled || selectedRequestStatus == 'Request Raised'">
+            <div v-if=" selectedRequestStatus == 'Request Raised'">
               <ButtonComp type="button" class="border-1 edit-btn text-nowrap font-10" @click="handleEditClick"
                 name="Edit Form" />
             </div>
@@ -271,6 +269,7 @@ function actionCreated(rowData, actionEvent) {
       tableHeaders.value = JSON.parse(
         selectedRequest.value?.json_columns
       ).child_table_fields;
+      console.log(tableHeaders.value, "lll");
 
       // console.log(tableHeaders.value, "req");
 
@@ -316,19 +315,20 @@ function actionCreated(rowData, actionEvent) {
                 `${apis.resource}${selectedRequest.value.doctype_name}/${res.data[0].name}`
               )
               .then((res) => {
-                // console.log(`Data for :`, res.data);
+                console.log(`Data for :`, res.data);
                 // Identify the child table key dynamically
-                const childTableKey = Object.keys(res?.data).find((key) =>
+                const childTables = Object.keys(res.data).filter((key) =>
                   Array.isArray(res.data[key])
                 );
-                tableName.value = childTableKey?.replace(/_/g, " ");
-                // console.log(tableName.value);
+                if (childTables.length) {
+                  responseData.value = {};
 
-                if (childTableKey) {
-                  responseData.value = res.data[childTableKey];
-                  tableRows.value = responseData.value; // Assign table rows
-                  // console.log(responseData.value, "Dynamic Child Table Data");
+                  childTables.forEach((tableKey) => {
+                    responseData.value[tableKey] = res.data[tableKey] || [];
+                  });
+                  console.log("Response Data:", responseData.value);
                 }
+
               })
               .catch((error) => {
                 console.error(`Error fetching data for :`, error);
@@ -386,7 +386,7 @@ function actionCreated(rowData, actionEvent) {
           const dataObj = {
             form_short_name: rowData.doctype_name,
             name: doctypeForm.value[0].name,
-            business_unit:businessUnit.value
+            business_unit: businessUnit.value
           };
 
           axiosInstance
@@ -464,7 +464,7 @@ function downloadPdf() {
   const dataObj = {
     form_short_name: selectedRequest.value.doctype_name,
     name: doctypeForm.value[0]?.name,
-    business_unit:businessUnit.value
+    business_unit: businessUnit.value
 
   };
 
@@ -520,7 +520,7 @@ function ApproverFormSubmission(dataObj, type) {
     });
 }
 
-function approvalCancelFn( type) {
+function approvalCancelFn(type) {
   let data = {
     action: type,
     property: selectedRequest.value.property,
@@ -720,7 +720,7 @@ function receivedForMe(data) {
     });
 }
 
-const fieldMapping =  computed(() =>({
+const fieldMapping = computed(() => ({
 
   // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
   status: {
@@ -731,7 +731,7 @@ const fieldMapping =  computed(() =>({
   doctype_name: { type: "input" },
   // requested_on: { type: "date" },
   role: { type: "input" },
-  
+
 }))
 
 
@@ -856,6 +856,7 @@ onMounted(() => {
 table {
   border-collapse: collapse;
 }
+
 th {
   background-color: #f2f2f2 !important;
   text-align: left;
