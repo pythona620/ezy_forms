@@ -621,7 +621,7 @@
                             </div>
                             <div v-if="
                               blockIndex === 0
-                            " class=" my-2">
+                            " class="m-2">
                               <!-- <button
                                   class="btn btn-light addRow m-2"
                                   @click="
@@ -664,13 +664,13 @@
                                   <div>
                                     <div v-if="blockIndex === 0">
                                       <div>
-                                        <button class="btn btn-light addRow mb-3" @click="addChildTable">
+                                        <button class="btn btn-light addRow mb-3 mt-4" @click="addChildTable">
                                           Add New Table
                                         </button>
 
                                         <div v-for="(table, tableIndex) in childTables" :key="tableIndex"
                                           class="child-table">
-                                          <div class="d-flex justify-content-between align-items-center">
+                                          <div class="d-flex justify-content-between align-items-center mt-1 mb-2">
                                             <div>
 
                                               <span :class="table.tableName ? 'd-none' : 'text-danger'">*</span>
@@ -708,7 +708,7 @@
                                                 </button>
                                               </div>
 
-                                              <select v-model="field.fieldtype" class="form-select font-13">
+                                              <select v-model="field.fieldtype" class="form-select font-13 mb-3">
                                                 <option value="">Select Type</option>
                                                 <option v-for="section in childfield" :key="section.type"
                                                   :value="section.type">
@@ -1421,7 +1421,7 @@ const prevStep = () => {
     activeStep.value -= 1;
   }
 };
-
+const returTables = ref([])
 // Get form by ID
 function getFormData() {
   axiosInstance
@@ -1446,7 +1446,10 @@ function getFormData() {
         tableName.value = parsedFormJson.fields.filter(
           (field) => field.fieldtype === "Table"
         );
-        console.log(tableName.value, "table");
+        returTables.value = parsedFormJson.fields.filter(
+          (field) => field.fieldtype === "Table"
+        );
+        console.log(tableName.value,"table");
         childName.value = tableName.value[0]?.options.replace(/_/g, " ");
         // console.log(childName.value, typeof childName.value, "5555");
 
@@ -1536,9 +1539,9 @@ function formData(status) {
     fields = [...fields, ...tableFieldsCache.value];
   }
 
-  if (tableName.value && tableName.value.length) {
+  if (returTables.value && returTables.value.length) {
     // Append child table headers instead of replacing
-    fields = [...fields, ...tableName.value];
+    fields = [...fields, ...returTables.value];
   }
   const dataObj = {
     ...filterObj.value,
@@ -2298,7 +2301,7 @@ input {
 .field-border {
   /* border: 1px solid rgb(221, 221, 221); */
   border-radius: 10px;
-  margin: 0px 10px 5px 10px;
+  // margin: 0px 10px 5px 10px;
   background-color: #fafafa;
   position: relative;
 }

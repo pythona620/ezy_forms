@@ -216,7 +216,7 @@ const tabsData = ref([
     { name: 'Forms', icon: 'bi bi-file-earmark-text', route: '/forms' },
     { name: 'To do', icon: 'fa-solid fa-list-check', route: '/todo' },
     { name: 'Settings', icon: 'bi bi-gear', route: '/settings' },
-    { name: 'Archive', icon: 'bi bi-archive', route: '/archived' },
+    // { name: 'Archive', icon: 'bi bi-archive', route: '/archived' },
     { name: 'Form Creation', icon: 'bi bi-file-earmark-text', route: '/create-form' }
 ]);
 

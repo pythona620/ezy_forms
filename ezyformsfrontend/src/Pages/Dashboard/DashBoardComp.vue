@@ -1,80 +1,119 @@
 <template>
     <div class="container-fluid">
         <div class="row mt-3">
-            <!-- Total Checks Status -->
-            <div class="col-6">
+            <!-- Loop over the dynamic chartsData array -->
+            <div v-for="(chart, index) in chartsData" :key="index" class="col-6">
                 <div class="chart-wrapper">
                     <div>
-                        <h6 class="fw13 font-13 text-nowrap">Requests received for me (4 requests)</h6>
-                        <div class="chart-container" ref="totalChecksChartRef"></div>
+                        <h6 class="fw13 font-14 text-nowrap">
+                            {{ chart.title }} (<b>{{ chart.data.total }}</b> requests)
+                        </h6>
+                        <!-- Each chart container gets its own ref and a fixed height -->
+                        <div class="chart-container" :ref="el => chartRefs[index] = el" style="height: 300px"></div>
                     </div>
                     <div class="chart-info">
                         <div class="total-count">
-                            <strong>{{ totalChecks }}</strong>
-                            <span>Total forms</span>
+                            <strong>{{ chart.data.total }}</strong>
+                            <span class="font-14">Total forms</span>
                         </div>
-                        <div class="d-flex gap-4">
-                            <div class="legend">
+                        <div>
+                            <!-- Loop over the keys to create dynamic legends -->
+                            <div v-for="(key, i) in keys" :key="i" class="legend">
                                 <div class="legend-item">
-                                    <span class="color-box scanned"></span>
-                                    <span class="label"><b>{{ Approved || 0 }}</b> Approved</span>
+                                    <span class="color-box" :style="{ backgroundColor: colorMapping[key] }"></span>
+                                    <span class="label">
+                                        <b>{{ chart.data[key] || 0 }}</b> {{ displayMapping[key] }}
+                                    </span>
                                 </div>
-                                <!-- </div>
-                            <div class="legend"> -->
-                                <div class="legend-item">
-                                    <span class="color-box InProgress"></span>
-                                    <span class="label"><b>{{ Pending || 0 }}</b> Pending</span>
-                                </div>
-                                <div class="legend-item">
-                                    <span class="color-box Pending"></span>
-                                    <span class="label"><b>{{ request_raised || 0 }}</b> Request Raised</span>
-                                </div>
-                                <div class="legend-item">
-                                    <span class="color-box request_raised"></span>
-                                    <span class="label"><b>{{ Request_cancelled || 0 }}</b> Request Cancelled</span>
-                                </div>
-
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-
-
         </div>
     </div>
-
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, nextTick } from 'vue';
 import * as echarts from 'echarts';
 import { apis } from "../../shared/apiurls";
 import axiosInstance from "../../shared/services/interceptor";
 
-// Reactive state for API data
-const Approved = ref(0);
-const Request_cancelled = ref(0);
-const request_raised = ref(0);
-const Pending = ref(0);
-const totalChecks = ref(0);
-const totalChecksChartRef = ref(null);
+// Define keys used for legends and chart series
+const keys = ['Approved', 'Pending', 'request_raised', 'Request_cancelled'];
 
+// Color mapping for each key
+const colorMapping = {
+    Approved: '#00FF00',
+    Pending: '#594DFA',
+    request_raised: '#ECE51F',
+    Request_cancelled: '#FF0000'
+};
+
+// Display mapping to show proper labels in legends
+const displayMapping = {
+    Approved: 'Approved',
+    Pending: 'Pending',
+    request_raised: 'Request Raised',
+    Request_cancelled: 'Request Cancelled'
+};
+
+// Array to hold chart data for each dataset
+const chartsData = ref([]);
+
+// Array to store refs for each dynamically rendered chart container
+const chartRefs = [];
+
+// API call that fetches the data and processes it
 async function fetchData() {
     try {
         const response = await axiosInstance.get(`${apis.dashboard}`);
         if (response.message) {
-            const newData = response.message;
-            Approved.value = newData.Approved || 0;
-            Request_cancelled.value = newData["Request_cancelled"] || 0;
-            Pending.value = newData.Pending || 0;
-            request_raised.value = newData.request_raised || 0;
+            // Extract the two datasets from the API response
+            const receivedByUser = response.message.data.received_by_user;
+            const requestedByUser = response.message.data.requested_by_user;
 
-            // Update total count
-            totalChecks.value = Approved.value + Request_cancelled.value + request_raised.value + Pending.value;
+            // Calculate totals for each dataset
+            const receivedTotal =
+                (receivedByUser.Approved || 0) +
+                (receivedByUser.Pending || 0) +
+                (receivedByUser.request_raised || 0) +
+                (receivedByUser.Request_cancelled || 0);
 
-            // Update the chart
-            updateChart();
+            const requestedTotal =
+                (requestedByUser.Approved || 0) +
+                (requestedByUser.Pending || 0) +
+                (requestedByUser.request_raised || 0) +
+                (requestedByUser.Request_cancelled || 0);
+
+            // Build an array for the charts.
+            // Only add the "received" chart if receivedTotal > 0.
+            const tempCharts = [];
+            if (receivedTotal > 0) {
+                tempCharts.push({
+                    title: "Requests received for me",
+                    data: {
+                        ...receivedByUser,
+                        total: receivedTotal
+                    }
+                });
+            }
+
+            // Always add the "requested" chart regardless of requestedTotal value.
+            tempCharts.push({
+                title: "Requests made by me",
+                data: {
+                    ...requestedByUser,
+                    total: requestedTotal
+                }
+            });
+
+            chartsData.value = tempCharts;
+
+            // Wait for the DOM to update so refs are populated, then initialize charts
+            await nextTick();
+            updateCharts();
         }
     } catch (error) {
         console.error("Error fetching data:", error);
@@ -123,17 +162,53 @@ function updateChart() {
             }
         });
 
-        window.addEventListener('resize', () => {
-            chart.resize(); // Ensure chart resizes when window size changes
-        });
-    }
+            // Build series data dynamically based on the keys
+            const seriesData = keys.map(key => ({
+                value: chartData.data[key] || 0,
+                name: displayMapping[key],
+                itemStyle: { color: colorMapping[key] }
+            }));
+
+            chartInstance.setOption({
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{c}'
+                },
+                series: [{
+                    type: 'pie',
+                    radius: ['40%', '80%'],
+                    center: ['50%', '50%'],
+                    label: {
+                        show: true,
+                        position: 'inside',
+                        color: '#fff',
+                        fontSize: 16,
+                        formatter: params => params.value === 0 ? '' : params.value
+                    },
+                    labelLine: { show: false },
+                    data: seriesData
+                }],
+                graphic: {
+                    type: 'text',
+                    left: 'center',
+                    top: 'center',
+                    style: {
+                        text: `${chartData.data.total}\nTotal forms`,
+                        textAlign: 'center',
+                        fontSize: 16,
+                        fontWeight: 'bold',
+                        fill: '#000'
+                    }
+                }
+            });
+
+            // Ensure the chart resizes when the window size changes
+            window.addEventListener('resize', () => chartInstance.resize());
+        }
+    });
 }
 
-
-// Watch for changes in data & update chart
-watch([Approved, Request_cancelled, request_raised, Pending], updateChart);
-
-// Fetch data when component mounts
+// Fetch data and initialize charts when the component mounts
 onMounted(fetchData);
 </script>
 
@@ -145,12 +220,12 @@ onMounted(fetchData);
 .chart-wrapper {
     display: flex;
     align-items: center;
-    justify-content: space-evenly                                                                                                                                                                                                                                                                       ;
+    justify-content: space-evenly;
     padding: 20px;
     border: 1px solid #EEEEEE;
     border-radius: 4px;
     box-shadow: 0px 2px 2px 0px #0000000D;
-    background-color: #fff;
+    background-color: #f7f7f7;
 }
 
 .chart-container {
@@ -175,7 +250,7 @@ h3 {
 }
 
 .total-count strong {
-    font-size: 12px;
+    font-size: 13px;
     display: block;
     font-weight: 700;
 }
@@ -230,6 +305,5 @@ h3 {
 .label {
     font-size: 13px;
     color: #333;
-    white-space: nowrap;
 }
 </style>
