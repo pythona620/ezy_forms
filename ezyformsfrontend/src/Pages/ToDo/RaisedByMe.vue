@@ -2,7 +2,7 @@
   <div>
     <div class="d-flex justify-content-between align-items-center py-2">
       <div>
-        <h1 class="m-0 font-13">Requests raised for me</h1>
+        <h1 class="m-0 font-13">Requests raised by me</h1>
         <p class="m-0 font-11 pt-1">{{ totalRecords }} request</p>
       </div>
     </div>
@@ -239,23 +239,6 @@ const tableheaders = ref([
   { th: "Approval Status", td_key: "status" },
   { th: "Workflow Status", td_key: "assigned_to_users" },
 ]);
-const fieldMapping = ref({
-  // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
-  status: {
-    type: "select",
-    options: [
-      "Request Raised",
-      "In Progress",
-      "Completed",
-      "Request Cancelled",
-    ],
-  },
-  // name: { type: "input" },
-  doctype_name: { type: "input" },
-  // requested_on: { type: "date" },
-  role: { type: "input" },
-
-});
 
 const actions = ref([
   { name: "View Request", icon: "fa-solid fa-eye" },
@@ -756,6 +739,22 @@ function receivedForMe(data) {
       console.error("Error fetching records:", error);
     });
 }
+
+const fieldMapping =  computed(() =>({
+
+  // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
+  status: {
+    type: "select",
+    options: statusOptions.value
+  },
+  // name: { type: "input" },
+  doctype_name: { type: "input" },
+  // requested_on: { type: "date" },
+  role: { type: "input" },
+  
+}))
+
+
 
 watch(
   businessUnit,

@@ -2,10 +2,9 @@
   <div>
     <div class="container-fluid">
       <div class="backtofromPage px-2 py-2">
-        <router-link :to="backTo" class="text-decoration-none text-dark font-13"
-          ><span> <i class="bi bi-arrow-left"></i></span>Asset request
-          form</router-link
-        >
+        <router-link :to="backTo" class="text-decoration-none text-dark font-13"><span> <i
+              class="bi bi-arrow-left"></i></span>Asset request
+          form</router-link>
       </div>
     </div>
     <div class="container-fluid">
@@ -22,92 +21,67 @@
             </div>
             <div class="position-relative h-100">
               <div class="requestPreviewDiv">
-                <ApproverPreview
-                  :blockArr="showRequest"
-                  :current-level="selectedcurrentLevel" :employee-data="employeeData"
-                  @updateField="updateFormData"
-                />
-                
+                <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel"
+                  :employee-data="employeeData" @updateField="updateFormData" />
+
               </div>
-              <div v-if="selectedData.type === ''" class="approveBtns">
-                <div class="d-flex justify-content-end align-item-center">
-                  <!-- v-if="!requestcancelled" -->
-                  <div class="form-floating p-1">
-                    <textarea
-                      class="form-control font-12"
-                      placeholder="Leave a comment here"
-                      id="floatingTextarea"
-                      @input="resetCommentsValidation"
-                      :class="{ 'is-invalid': !isCommentsValid }"
-                      v-model="ApproverReason"
-                    ></textarea>
-                    <label class="font-11" for="floatingTextarea"
-                      >Comments..</label
-                    >
+
+              <div v-if="selectedData.type === ''" class="">
+                <!-- v-if="!requestcancelled" -->
+                <div class="form-floating mb-5 p-1">
+                  <textarea class="form-control font-12" placeholder="Leave a comment here" id="floatingTextarea"
+                    @input="resetCommentsValidation" :class="{ 'is-invalid': !isCommentsValid }"
+                    v-model="ApproverReason"></textarea>
+                  <label class="font-11" for="floatingTextarea">Comments..</label>
+                </div>
+                <div class="approveBtns mt-3">
+                  <div>
+                    <button type="submit" class="btn btn-success approvebtn"
+                      @click.prevent="ApproverFormSubmission(emittedFormData, 'Approve')">
+                      <span v-if="loading" class="spinner-border spinner-border-sm" role="status"
+                        aria-hidden="true"></span>
+                      <span v-if="!loading"><i class="bi bi-check-lg font-15 me-2"></i><span
+                          class="font-12">Approve</span></span>
+                    </button>
+
                   </div>
                   <div>
-                    <div
-                      class="d-flex justify-content-between align-items-center mt-3 gap-2"
-                    >
-                      <div>
-                        <button
-                          class="btn btn-outline-danger font-10 py-0 rejectbtn"
-                          type="button"
-                          data-bs-dismiss="modal"
-                          @click="
-                            approvalCancelFn(formData, 'Request Cancelled')
-                          "
-                        >
-                          <span><i class="bi bi-x-lg me-2"></i></span>Reject
-                        </button>
-                      </div>
-                      <div>
-                        <button type="submit" class="btn btn-success approvebtn"
-                  @click.prevent="ApproverFormSubmission(emittedFormData, 'Approve')">
-                  <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                  <span v-if="!loading" ><i class="bi bi-check-lg font-15 me-2"></i><span class="font-12">Approve</span></span>
-                </button>
-
-                      </div>
-                    </div>
+                    <button class="btn btn-outline-danger font-10 py-0 rejectbtn" type="button" data-bs-dismiss="modal"
+                      @click="
+                        approvalCancelFn(formData, 'Request Cancelled')
+                        ">
+                      <span><i class="bi bi-x-lg me-2"></i></span>Reject
+                    </button>
                   </div>
+
                 </div>
               </div>
             </div>
           </div>
         </div>
         <div class="col-3">
-          <div class="activity-log-container">
+          <div class="activity-log-container ">
             <div class="asset_request w-100 py-2 px-3 mb-2">
               <h5 class="font-13 fw-bold">Asset request form approval</h5>
               <span class="text-warning font-12 fw-bold">
                 Pending ({{ tableData.current_level }} /
-                {{ tableData.total_levels }})</span
-              >
+                {{ tableData.total_levels }})</span>
             </div>
             <div>
               <h6 class="font-14 ps-3 mb-3">Activity log</h6>
             </div>
-            <div
-              v-for="(item, index) in activityData"
-              :key="index"
-              class="activity-log-item"
-              :class="{ 'last-item': index === activityData.length - 1 }"
-            >
+            <div v-for="(item, index) in activityData" :key="index" class="activity-log-item"
+              :class="{ 'last-item': index === activityData.length - 1 }">
               <div class="activity-log-dot"></div>
               <div class="activity-log-content">
                 <p class="font-12 mb-1">
                   <strong>{{ formatAction(item.action) }} on </strong>
-                  <strong class="strong-content">{{ item.creation }} </strong
-                  ><br />
-                  <strong class="strong-content"> {{ item.user_name }}</strong
-                  ><br />
-                  <span>{{ item.role }}</span
-                  ><br />
+                  <strong class="strong-content">{{ item.creation }} </strong><br />
+                  <strong class="strong-content"> {{ item.user_name }}</strong><br />
+                  <span>{{ item.role }}</span><br />
                   <span class="font-12 text-secondary">{{
                     item.reason || "N/A"
-                  }}</span
-                  >.
+                  }}</span>.
                 </p>
               </div>
             </div>
@@ -264,7 +238,7 @@ function approvalStatusFn(dataObj, type) {
     .post(apis.requestApproval, { request_details: [data] })
     .then((response) => {
       console.log("API Response:", response);
-      
+
       if (response?.message?.success === true) {
         toast.success(`Request ${type}ed`, { autoClose: 1000, transition: "zoom" });
         ApproverReason.value = ""; // Clear reason after success
@@ -550,15 +524,28 @@ watch(
   border-radius: 4px;
   opacity: 0px;
 }
-.approveBtns {
-  position: fixed;
+.approvediv{
+  position: fixed !important;
   bottom: 0;
+  z-index: 10;
+  background-color: #fff;
+}
+
+.approveBtns {
+  position: fixed !important;
+  bottom: 0;
+  z-index: 10;
   background-color: #fff;
   padding: 5px 10px;
+  display: flex;
+  justify-content: space-between;
+  width: 48%;
 }
+
 .asset_request {
-  box-shadow: 0px 2px 4px 0px #0000000d;
+  box-shadow: 0px 2px 4px 0px #0000000D;
 }
+
 .is-invalid {
   border: 1px solid red;
 }
@@ -631,6 +618,7 @@ watch(
 table {
   border-collapse: collapse;
 }
+
 th {
   background-color: #f2f2f2 !important;
   text-align: left;

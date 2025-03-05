@@ -13,8 +13,8 @@
 
       </div>
       <div class="mt-3">
-        <GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true"
-          actionType="Toogle&dropdown" @actionClicked="actionCreated" @toggle-click="toggleFunction" :actions="actions"
+        <GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true" enableDisable="true"
+          actionType="dropdown" @actionClicked="actionCreated" @toggle-click="toggleFunction" :actions="actions"
           @updateFilters="inLineFiltersData" :field-mapping="fieldMapping" isFiltersoption="true" />
         <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
           @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
@@ -86,7 +86,7 @@ const actions = ref(
 const fieldMapping = ref({
   // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
   form_short_name: { type: "input" },
-  form_category: { type: "select", options: ["Software", "Hardware"] },
+  form_category: { type: "select", options: formCategory.value },
   form_status: { type: "select", options: ["Created", "Draft"] },
 
   form_status: { type: "select", options: ["Created", "Draft"] },
@@ -186,7 +186,8 @@ watch(
   [() => businessUnit.value, () => props.id],
   ([newBusinessUnitVal, newId]) => {
     newBusinessUnit.value.business_unit = newBusinessUnitVal;
-    if (newBusinessUnitVal.length && newId) {
+    if (newBusinessUnitVal.length && newId && props.id !== ':id') {
+      console.log(newId,props.id,"----");
       fetchDepartmentDetails(newId || props.id, null);
     }
   },
@@ -293,8 +294,7 @@ function fetchDepartmentDetails(id, data) {
     .then((response) => {
       tableData.value = response.data;
 
-      formCategory.value = [...new Set(response.data.map((formCategory) => formCategory.form_category))];
-
+      formCategory.value = [...new Set(tableData.value.map((formCategory) => formCategory.form_category))];
 
     })
     .catch((error) => {
