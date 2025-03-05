@@ -240,7 +240,7 @@ const businessUnit = computed(() => {
 });
 const newBusinessUnit = ref({ business_unit: "" });
 
-const filterObj = ref({ limitPageLength: "None", limit_start: 0 });
+const filterObj = ref({ limitPageLength: "20", limit_start: 0 });
 const totalRecords = ref(0);
 const selectedRequest = ref({});
 const showRequest = ref(null);
@@ -355,7 +355,7 @@ function actionCreated(rowData, actionEvent) {
         .then((res) => {
           if (res.data) {
             doctypeForm.value = res.data;
-            console.log(typeof doctypeForm.value, "doctype", typeof showRequest.value);
+            // console.log(typeof doctypeForm.value, "doctype", typeof showRequest.value);
             // Map values from doctypeForm to showRequest fields
             mapFormFieldsToRequest(doctypeForm.value[0], showRequest.value);
             axiosInstance
@@ -371,18 +371,18 @@ function actionCreated(rowData, actionEvent) {
                 `${apis.resource}${selectedRequest.value.doctype_name}/${res.data[0].name}`
               )
               .then((res) => {
-                console.log(`Data for :`, res.data);
+                // console.log(`Data for :`, res.data);
                 // Identify the child table key dynamically
                 const childTableKey = Object.keys(res.data).find((key) =>
                   Array.isArray(res.data[key])
                 );
                 tableName.value = childTableKey.replace(/_/g, " ");
-                console.log(tableName.value);
+                // console.log(tableName.value);
 
                 if (childTableKey) {
                   responseData.value = res.data[childTableKey];
                   tableRows.value = responseData.value; // Assign table rows
-                  console.log(responseData.value, "Dynamic Child Table Data");
+                  // console.log(responseData.value, "Dynamic Child Table Data");
                 }
               })
               .catch((error) => {

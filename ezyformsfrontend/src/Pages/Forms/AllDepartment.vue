@@ -113,10 +113,10 @@ function actionCreated(rowData, actionEvent) {
 
     if (storedData) {
         const designation = JSON.parse(storedData).designation;
-        console.log(designation);
+        // console.log(designation);
 
         const roles = parsedData.workflow[0].roles;
-        console.log(roles);
+        // console.log(roles);
 
         let hasAccess = false;
 
@@ -126,7 +126,7 @@ function actionCreated(rowData, actionEvent) {
                 break;
             }
         }
-        console.log(route.path,"sadasda");
+        // console.log(route.path,"sadasda");
 
         if (hasAccess) {
             router.push({
@@ -187,7 +187,7 @@ watch(
   ([newBusinessUnitVal, newId]) => {
     newBusinessUnit.value.business_unit = newBusinessUnitVal;
     if (newBusinessUnitVal.length && newId && props.id !== ':id') {
-      console.log(newId,props.id,"----");
+    
       fetchDepartmentDetails(newId || props.id, null);
     }
   },

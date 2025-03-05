@@ -16,7 +16,7 @@
                 </div>
                 <div class="mx-3 my-2">
                   <div v-for="(field, fieldIndex) in column.fields" :key="'field-preview-' + fieldIndex"
-                    :class="props.readonlyFor === true || blockIndex === 0 ? 'd-flex align-items-end' : ''">
+                    :class="props.readonlyFor === true || blockIndex === 0 ? 'd-flex align-items-end mb-2' : ''">
                     <div v-if="field.label">
                       <label :for="'field-' +
                         sectionIndex +
@@ -28,10 +28,10 @@
                         <span class="font-12">{{ field.label }}</span>
                         <span class="ms-1 text-danger">{{
                           field.reqd === 1 ? "*" : ""
-                        }}
+                          }}
 
                         </span>
-                        <span v-if="props.readonlyFor === true || blockIndex === 0">:</span>
+                        <span class="pe-2" v-if="props.readonlyFor === true || blockIndex === 0">:</span>
                       </label>
                     </div>
                     <!-- field.fieldtype === 'Select' || -->
@@ -55,7 +55,7 @@
                     <!-- Field Type Check or Radio -->
                     <template v-else-if="
                       field.fieldtype === 'Check' ||
-                      
+
                       field.fieldtype === 'radio'
                     ">
                       <div class="container-fluid">
@@ -176,14 +176,15 @@
 
                     <template v-else-if="field.fieldtype == 'Datetime'">
                       <input type="datetime-local" v-model="field.value"
-                        :class="props.readonlyFor === true || blockIndex === 0 ? 'border-0 image-border-bottom w-50 pb-0 ' : ' '" :readOnly="blockIndex === 0 || props.readonlyFor === true
+                        :class="props.readonlyFor === true || blockIndex === 0 ? 'border-0 image-border-bottom w-50 pb-0 ' : ' '"
+                        :readOnly="blockIndex === 0 || props.readonlyFor === true
                           " :placeholder="'Enter ' + field.label" :name="'field-' +
-                          sectionIndex +
-                          '-' +
-                          columnIndex +
-                          '-' +
-                          fieldIndex
-                          " class="form-control previewInputHeight" />
+                            sectionIndex +
+                            '-' +
+                            columnIndex +
+                            '-' +
+                            fieldIndex
+                            " class="form-control previewInputHeight" />
                     </template>
 
                     <!-- Field Type Default -->
@@ -197,16 +198,18 @@
                           '-' +
                           fieldIndex
                           " class="form-control previewInputHeight" />
-                        <textarea v-if="field.fieldtype == 'Text'" :class="props.readonlyFor === true || blockIndex === 0 ? 'border-0 image-border-bottom ' : ' '" :readOnly="blockIndex === 0 || props.readonlyFor === true
-                        " v-model="field.value" :placeholder="'Enter ' + field.label"
-                        :value="field.value" :name="'field-' +
+                      <textarea v-if="field.fieldtype == 'Text'"
+                        :class="props.readonlyFor === true || blockIndex === 0 ? 'border-0 image-border-bottom ' : ' '"
+                        :readOnly="blockIndex === 0 || props.readonlyFor === true
+                          " v-model="field.value" :placeholder="'Enter ' + field.label" :value="field.value" :name="'field-' +
                           sectionIndex +
                           '-' +
                           columnIndex +
                           '-' +
                           fieldIndex
                           " class="form-control previewInputHeight"></textarea>
-                      <component v-if="field.fieldtype !== 'Int' && field.fieldtype !== 'Text' "  :is="getFieldComponent(field.fieldtype)"
+                      <component v-if="field.fieldtype !== 'Int' && field.fieldtype !== 'Text'"
+                        :is="getFieldComponent(field.fieldtype)"
                         :class="props.readonlyFor === true || blockIndex === 0 ? 'border-0 image-border-bottom w-50' : ' '"
                         :value="field.value" :type="field.fieldtype" :readOnly="blockIndex === 0 || props.readonlyFor === true
                           " :name="'field-' +
@@ -216,16 +219,16 @@
                             '-' +
                             fieldIndex
                             " @blur="
-                            (event) =>
-                              logFieldValue(
-                                event,
-                                blockIndex,
-                                sectionIndex,
-                                rowIndex,
-                                columnIndex,
-                                fieldIndex
-                              )
-                          " class="form-control previewInputHeight"></component>
+                              (event) =>
+                                logFieldValue(
+                                  event,
+                                  blockIndex,
+                                  sectionIndex,
+                                  rowIndex,
+                                  columnIndex,
+                                  fieldIndex
+                                )
+                            " class="form-control previewInputHeight"></component>
                     </template>
                   </div>
                 </div>
@@ -233,37 +236,42 @@
             </div>
           </div>
         </div>
-        <div v-if="blockIndex === 0 && tableName" class="mt-2 mx-2">
-          <div>
-            <span class="font-13 fw-bold tablename">{{ tableName }}</span>
+        <div v-if="blockIndex === 0" class="mt-2 mx-2">
+
+          <div v-if="props.childHeaders && Object.keys(props.childHeaders).length" class="mt-2 mx-2">
+            <div v-for="(headers, tableName) in props.childHeaders" :key="tableName">
+              <div>
+                <span class="font-13 fw-bold tablename">{{ tableName.replace(/_/g, " ") }}</span>
+              </div>
+              <div class="tableborder-child">
+                <table class="table mt-2 table-striped">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th v-for="field in headers" :key="field.fieldname">
+                        {{ field.label }}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(row, index) in props.childData[tableName]" :key="index">
+                      <td>{{ index + 1 }}</td>
+                      <td v-for="field in headers" :key="field.fieldname">
+                        <span v-if="isFilePath(row[field.fieldname])" class="cursor-pointer"
+                          @click="openFile(row[field.fieldname])">
+                          <span>View Attachment <i class="bi bi-eye-fill ps-1"></i></span>
+                        </span>
+                        <span v-else>
+                          {{ row[field.fieldname] || "-" }}
+                        </span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
-          <div class="tableborder-child">
-            <table class="table mt-2 table-striped">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th v-for="field in props.childHeaders" :key="field.fieldname">
-                    {{ field.label }}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(row, index) in props.childData" :key="index">
-                  <td>{{ index + 1 }}</td>
-                  <td v-for="field in props.childHeaders" :key="field.fieldname">
-                    <span v-if="isFilePath(row[field.fieldname])" class="cursor-pointer"
-                      @click="openFile(row[field.fieldname])">
-                      <!-- {{ row[field.fieldname] }} -->
-                      <span>View Attachment <i class="bi bi-eye-fill ps-1"></i></span>
-                    </span>
-                    <span v-else>
-                      {{ row[field.fieldname] || "-" }}
-                    </span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+
         </div>
       </div>
     </div>
@@ -285,10 +293,10 @@ const props = defineProps({
     // required: true,
   },
   childHeaders: {
-    type: Array,
+    type: Object,
   },
   childData: {
-    type: Array,
+    type: Object,
   },
   readonlyFor: {
     type: Boolean,
@@ -395,7 +403,7 @@ const filteredBlocks = computed(() => {
               hour12: false,
             }).replace(/,/, "").replace(/\//g, "-");
 
-            console.log(localTime, "----");
+          
             field.value = localTime;
             emit("updateField", field);
 
@@ -542,7 +550,7 @@ const logFieldValue = (
       if (eve.target.checked) {
         // If checked, set the value as a string
         field["value"] = eve.target.value;
-        console.log(field.value);
+        
       } else {
         // If unchecked, set the value as an empty string (or use any default value)
         field.value = "";
