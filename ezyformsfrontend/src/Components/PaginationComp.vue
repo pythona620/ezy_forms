@@ -50,10 +50,12 @@ const itemsIncrease = () => {
   start.value += itemsPerPage.value;
   emit("limitStart", [itemsPerPage.value, start.value]);
 };
-
+const count = ref([])
 // watch currentRecords
 watch(() => props.currentRecords, (newVal, oldVal) => {
-  console.log(`Current records changed from ${oldVal} to ${newVal}`);
+  count.value = oldVal;
+  count.value = newVal;
+  // console.log(`Current records changed from ${oldVal} to ${newVal}`);
 });
 // watch(() => props.tab_name, (newVal, oldVal) => {
 //   if (newVal !== oldVal) {

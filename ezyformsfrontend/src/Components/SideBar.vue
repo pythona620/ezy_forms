@@ -56,6 +56,9 @@
                 </template>
                 <template v-if="isMasterRoute">
                     <ul class="list-unstyled">
+                        <router-link to="/forms/department/AllForms" class="text-decoration-none text-black" active-class="active-link">
+                            <li><i class="bi-icon fs-6 bi bi-file-earmark-richtext me-3"></i>All Forms</li>
+                        </router-link>
                         <router-link v-for="(department, index) in formSideBarData" :key="department.route"
                             :to="`/forms/department/${department.route}`" class="text-decoration-none text-black"
                             active-class="active-link">
@@ -63,14 +66,14 @@
 
                                 <!-- <i :class="`bi-icon ps-1 bg-transparent ${department.icon} me-3`"></i> -->
                                 <i :class="[
-                'bi-icon',
-                'fs-6',
-                'bg-transparent',
+                                    'bi-icon',
+                                    'fs-6',
+                                    'bg-transparent',
 
-                iconClasses[index % iconClasses.length],
-                'me-3',
+                                    iconClasses[index % iconClasses.length],
+                                    'me-3',
 
-            ]"></i>
+                                ]"></i>
 
                                 {{ department.name }}
                             </li>
@@ -230,13 +233,13 @@ function deptData() {
                 deptartmentData.value = res.data;
 
 
-                formSideBarData.value = deptartmentData.value.map(department => ({
-                    name: department.department_name,
-                    // icon: iconClasses,
-                    route: department.name,
+                formSideBarData.value = deptartmentData.value
+                    .sort((a, b) => a.department_name.localeCompare(b.department_name))
+                    .map(department => ({
+                        name: department.department_name,
+                        route: department.name,
+                    }));
 
-                    //   id: department.id 
-                }));
 
             }
         })
@@ -313,7 +316,7 @@ li {
     line-height: 26px;
     text-align: left;
     border-radius: 6px;
-    
+
 
 
 

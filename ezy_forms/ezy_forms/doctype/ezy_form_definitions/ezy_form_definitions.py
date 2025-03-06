@@ -131,13 +131,15 @@ def enqueued_add_customized_fields_for_dynamic_doc(fields:list[dict],doctype:str
         table_fieldnames = [item["fieldname"] for item in fields if item.get("fieldtype") == "Table"]
         child_table_fields = {"child_table_fields": []}
         if table_fieldnames:
-            table_name = table_fieldnames[0]  # Get the first table fieldname
-            fields_in_child_doctype = frappe.db.sql(
+            table_fieldnames = [item["fieldname"] for item in fields if item.get("fieldtype") == "Table"]
+            child_table_fields = {"child_table_fields": {}}
+            for table_name in table_fieldnames:
+                fields_in_child_doctype = frappe.db.sql(
                 f"select fieldname,fieldtype,idx,label from `tabDocField` where parent ='{table_name}';",
                 as_dict=True
-            )
-            [each_child.update({'value':''}) for each_child in fields_in_child_doctype]
-            child_table_fields = {"child_table_fields":fields_in_child_doctype }
+                )
+                [each_child.update({'value':''}) for each_child in fields_in_child_doctype]
+                child_table_fields["child_table_fields"][table_name] = fields_in_child_doctype
             
         for dicts_of_docs_entries in fields:
             if dicts_of_docs_entries["fieldname"] in fields_in_mentioned_doctype:

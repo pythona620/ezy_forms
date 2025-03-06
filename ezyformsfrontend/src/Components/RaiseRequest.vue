@@ -18,40 +18,46 @@
           />
             <!-- @formValidation="isFormValid = $event" -->
 
-          <div v-if="tableName.length" class="mt-3">
-            <div>
-              <span class="font-13 fw-bold">{{ childTableName }}</span>
-            </div>
-            <table class="table table-striped" border="1" width="100%">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th v-for="field in tableHeaders" :key="field.fieldname">
-                    {{ field.label }}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(row, index) in tableRows" :key="index">
-                  <td>{{ index + 1 }}</td>
-                  <td v-for="field in tableHeaders" :key="field.fieldname">
-                    <template v-if="field.fieldtype === 'Data'">
-                      <input type="text" class="form-control" v-model="row[field.fieldname]" />
-                    </template>
-                    <template v-else-if="field.fieldtype === 'Attach'">
-                      <input type="file" class="form-control"
-                        @change="handleFileUpload($event, row, field.fieldname)" />
-                    </template>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <button class="btn btn-light" @click="addRow">Add Row</button>
-          </div>
+      <!-- <span class="font-13 fw-bold">{{ table.childTableName.replace(/_/g, " ") }}</span> -->
+      <div class="mt-3">
+  <div v-for="(table, tableIndex) in tableHeaders" :key="tableIndex" class="mt-3">
+    <div>
+      <span class="font-13 fw-bold">Table {{ tableIndex.replace(/_/g," ") }}</span>
+    </div>
+    
+    <table class="table table-striped" border="1" width="100%">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th v-for="field in table" :key="field.fieldname">
+            {{ field.label }}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(row, rowIndex) in tableRows[tableIndex]" :key="rowIndex">
+          <td style="text-align: center;">{{ rowIndex + 1 }}</td>
+          <td v-for="field in table" :key="field.fieldname">
+            <template v-if="field.fieldtype === 'Data'">
+              <input type="text" class="form-control" v-model="row[field.fieldname]" />
+            </template>
+            <template v-else-if="field.fieldtype === 'Attach'">
+              <input type="file" class="form-control" @change="handleFileUpload($event, row, field.fieldname)" />
+            </template>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <button class="btn btn-light font-12" @click="addRow(tableIndex)">Add Row</button>
+  </div>
+</div>
+
+
         </div>
         <!-- @formValidation="isFormValid = $event" -->
         <div class="raiserequestBtnDiv">
-          <div class="d-flex justify-content-end align-items-center p-3">
+          <div class="d-flex justify-content-end align-items-center gap-2 p-3">
             <button class="btn btn-white font-13" @click="clearFrom">
               <span> <i class="bi bi-x"></i></span>Clear form
             </button>
@@ -154,7 +160,7 @@ function RequestUpdate() {
     .post(apis.Update_raising_request, data_obj)
     .then( (resp) => {
       if (resp?.message?.success) {
-        blockArr.value = []
+        
         toast.success("Request Raised", {
         autoClose: 2000,
         transition: "zoom",
@@ -185,7 +191,7 @@ function EditRequestUpdate() {
     .post(apis.edit_form_before_approve, data_obj)
     .then( (resp) => {
       if (resp?.message?.success) {
-        blockArr.value = []
+        
         toast.success("Request Raised", {
         autoClose: 2000,
         transition: "zoom",
@@ -200,13 +206,27 @@ function EditRequestUpdate() {
 
 
 
+// const tableRows = ref([]);
 
-const addRow = () => {
+// Initialize tableRows for each table
+// onMounted(() => {
+//   tableRows.value = tableHeaders.value.map(() => []);
+// });
+
+const addRow = (tableIndex) => {
+  if (!tableRows.value[tableIndex]) {
+    tableRows.value[tableIndex] = []; // Initialize it if undefined
+  }
+
   const newRow = Object.fromEntries(
-    tableHeaders.value.map((field) => [field.fieldname, ""])
+    tableHeaders.value[tableIndex].map((field) => [field.fieldname, ""])
   );
-  tableRows.value.push(newRow);
+
+  tableRows.value[tableIndex].push(newRow);
 };
+
+
+
 
 watch(business_unit, (newBu, oldBu) => {
   EzyBusinessUnit.value = newBu;
@@ -218,7 +238,13 @@ watch(business_unit, (newBu, oldBu) => {
     deptData();
   }
 });
-function clearFrom() { }
+function clearFrom() {
+
+  emittedFormData.value = []
+  window.location.reload()
+  tableRows.value = []
+
+ }
 function deptData(value = null) {
   const filters = [["business_unit", "like", `%${business_unit.value}%`]];
   const queryParams = {
@@ -436,7 +462,7 @@ const uploadFile = (row, fieldname, file) => {
 //     });
 // }
 const handleFieldUpdate = (field) => {
-  console.log(field,"field");
+  // console.log(field,"field");
   const fieldExists = emittedFormData.value.some(
     (item) => item.fieldname === field.fieldname
   );
@@ -451,8 +477,8 @@ const handleFieldUpdate = (field) => {
       } else {
         filepaths.value = [];
       }
-      console.log(filepaths.value,"oooo");
-      console.log(emittedFormData.value,"emitteddata");
+      // console.log(filepaths.value,"oooo");
+      // console.log(emittedFormData.value,"emitteddata");
       emittedFormData.value.push(field);
     } else {
       emittedFormData.value = emittedFormData.value.concat(field);
@@ -463,67 +489,175 @@ const handleFieldUpdate = (field) => {
     );
   }
 };
-const ChildTableData = () => {
-  const childName = tableName.value[0]?.options;
-  let form = {};
-  form["doctype"] = selectedData.value.selectedform;
-  form["company_field"] = business_unit.value;
-  form[childName] = tableRows.value;
 
-  // form['form_json']
+const ChildTableData = async () => {
+  if (!tableName.value.length) return;
+
+
+
+  // **Loop through each child table and send separate API requests**
+  const formPromises = tableName.value.map((table) => {
+    const childName = table.options;
+    const childData = tableRows.value[childName];
+
+    if (!childData || !childData.length) {
+      console.warn(`⚠ Skipping empty child table: ${childName}`);
+      return null; // Skip empty tables
+    }
+
+    const form = {
+      doctype: selectedData.value.selectedform,
+      company_field: business_unit.value,
+      [childName]: childData, // Only this child table's data
+    };
+
+    const formData = new FormData();
+    formData.append("doc", JSON.stringify(form));
+    formData.append("action", "Save");
+
+
+
+    // **Return API call promise**
+    return axiosInstance.post(apis.savedocs, formData);
+  }).filter(Boolean); // Remove null entries
+
+  try {
+    const responses = await Promise.all(formPromises);
+
+  } catch (error) {
+    console.error("Error submitting child tables:", error);
+  }
+};
+
+async function raiseRequestSubmission() {
+  if (!isFormValid.value) {
+    toast.error("Please Fill Mandatory Fields");
+    return;
+  }
+
+  //  First, submit child tables separately
+  await ChildTableData();
+
+  //  Collect all child tables for the main submission
+  let childTables = {};
+  tableName.value.forEach((table) => {
+    const childName = table.options;
+    const childData = tableRows.value[childName];
+
+    if (childData && childData.length) {
+      childTables[childName] = childData;
+    }
+  });
+
+  //  Merge child tables with main form
+  let form = {
+    doctype: selectedData.value.selectedform,
+    company_field: business_unit.value,
+    ...childTables, // Add all child tables
+  };
+  if (emittedFormData.value.length) {
+    emittedFormData.value.forEach((each) => {
+      form[each.fieldname] = each.value;
+    });
+  }
+
   const formData = new FormData();
   formData.append("doc", JSON.stringify(form));
   formData.append("action", "Save");
 
-  // console.log(form);
+
   axiosInstance
     .post(apis.savedocs, formData)
     .then((response) => {
-      console.log(response);
+      request_raising_fn(response.docs[0]);
     })
     .catch((error) => {
-      console.error("Error fetching data:", error);
+      console.error("Error submitting main form:", error);
     });
-};
-
-function raiseRequestSubmission() {
-  // console.log(isFormValid.value);
-  if (!isFormValid.value) {
-    toast.error("Please Fill Mandatory Fields");
-    return; // Stop execution if the form is invalid
-  } 
-    if (tableName.value[0]?.options) {
-      ChildTableData();
-    }
-    const childName = tableName.value[0]?.options;
-    let form = {};
-    form["doctype"] = selectedData.value.selectedform;
-    form["company_field"] = business_unit.value;
-    if (tableName.value.length) {
-      form[childName] = tableRows.value;
-    }
-    // form['supporting_files'] = [];
-    if (emittedFormData.value.length) {
-      emittedFormData.value.map((each) => {
-        form[each.fieldname] = each.value;
-      });
-    }
-
-    // form['form_json']
-    const formData = new FormData();
-    formData.append("doc", JSON.stringify(form));
-    formData.append("action", "Save");
-    // console.log(formData);
-    axiosInstance
-      .post(apis.savedocs, formData)
-      .then((response) => {
-        request_raising_fn(response.docs[0]);
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-      });
-  
 }
+
+
+
+// const ChildTableData = async () => {
+//   if (!tableName.value.length) return;
+
+//   console.log("✅ Sending Child Tables Data...");
+
+//   // **Loop through each child table and send separate API requests**
+//   const formPromises = tableName.value.map((table, index) => {
+//     const childName = table.options;
+
+//     // if (!tableRows.value[childName] || !tableRows.value[childName].length) {
+//     //   console.warn(`⚠ Skipping empty child table: ${childName}`);
+//     //   return null; // Skip if no data
+//     // }
+
+//     const form = {
+//       doctype: selectedData.value.selectedform,
+//       company_field: business_unit.value,
+//       [childName]: tableRows.value[childName], // Ensure we use the correct childName key
+//     };
+
+//     console.log(`🚀 Submitting Child Table: ${childName}`, form);
+
+//     const formData = new FormData();
+//     formData.append("doc", JSON.stringify(form));
+//     formData.append("action", "Save");
+
+//     // **Return API call promise**
+//     return axiosInstance.post(apis.savedocs, formData);
+//   }).filter(Boolean); // Remove `null` values (empty tables)
+
+//   try {
+//     // **Await all API requests**
+//     const responses = await Promise.all(formPromises);
+//     console.log("✅ Child Tables Submitted:", responses);
+//   } catch (error) {
+//     console.error("❌ Error submitting child table data:", error);
+//   }
+// };
+
+// async function raiseRequestSubmission() {
+//   if (!isFormValid.value) {
+//     toast.error("Please Fill Mandatory Fields");
+//     return;
+//   }
+
+//   // **Submit each child table separately**
+//   const childTables = ChildTableData();  // Wait for all child tables to be submitted
+
+//   // **Now, submit the main form WITHOUT child tables**
+//   let form = {
+//     doctype: selectedData.value.selectedform,
+//     company_field: business_unit.value,
+//     ...childTables,
+//   };
+
+//   // ✅ Include additional form data if available
+//   if (emittedFormData.value.length) {
+//     emittedFormData.value.forEach((each) => {
+//       form[each.fieldname] = each.value;
+//     });
+//   }
+
+//   const formData = new FormData();
+//   formData.append("doc", JSON.stringify(form));
+//   formData.append("action", "Save");
+
+//   console.log("🚀 Submitting Main Form", form);
+
+//   axiosInstance
+//     .post(apis.savedocs, formData)
+//     .then((response) => {
+//       request_raising_fn(response.docs[0]); // Process response
+//     })
+//     .catch((error) => {
+//       console.error("❌ Error submitting main form:", error);
+//     });
+// }
+
+
+
 function WfRequestUpdate() {
   const filters = [
     [

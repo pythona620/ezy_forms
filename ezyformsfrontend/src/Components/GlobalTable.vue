@@ -146,9 +146,13 @@
                 {{ row[column.td_key] }}
               </span> -->
               <!-- v-tooltip.top="row[column.td_key]" -->
+              <!-- <span v-else>
+                {{ row[column.td_key].replace(/_/g, " ") || "-" }}
+              </span> -->
               <span v-else>
-                {{ row[column.td_key] || "-" }}
-              </span>
+  {{ row[column.td_key]?.replace(/_/g, " ").replace(/@[\w.-]+/, "") || "-" }}
+</span>
+
             </td>
 
             <td v-if="actionType === 'viewPdf'" class="text-center">
@@ -304,7 +308,7 @@ const emits = defineEmits(["actionClicked", "updateFilters", "toggle-click"]);
 
 function selectedAction(row, action) {
   emits("actionClicked", row, action);
-  console.log(row, action);
+  // console.log(row, action);
 }
 
 
@@ -691,4 +695,5 @@ th:first-child {
   border: 1px solid #dee2e6;
   border-radius: 0.375rem;
 }
+
 </style>

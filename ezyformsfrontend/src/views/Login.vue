@@ -381,7 +381,7 @@ export default {
                 this.ShowLoginPage = false;
                 this.showOtpPage = true;
               }
-              if (this.twoFactorAuth === "0") {
+              else {
                 this.showOtpPage = false;
                 this.ShowLoginPage = false;
                 this.otp = ["", "", "", "", "", ""];

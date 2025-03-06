@@ -86,7 +86,7 @@ const actions = ref(
 const fieldMapping = ref({
   // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
   form_short_name: { type: "input" },
-  form_category: { type: "select", options: ["Software", "Hardware"] },
+  form_category: { type: "select", options: formCategory.value },
   form_status: { type: "select", options: ["Created", "Draft"] },
 
   form_status: { type: "select", options: ["Created", "Draft"] },
@@ -113,10 +113,10 @@ function actionCreated(rowData, actionEvent) {
 
     if (storedData) {
         const designation = JSON.parse(storedData).designation;
-        console.log(designation);
+        // console.log(designation);
 
         const roles = parsedData.workflow[0].roles;
-        console.log(roles);
+        // console.log(roles);
 
         let hasAccess = false;
 
@@ -126,7 +126,7 @@ function actionCreated(rowData, actionEvent) {
                 break;
             }
         }
-        console.log(route.path,"sadasda");
+        // console.log(route.path,"sadasda");
 
         if (hasAccess) {
             router.push({
@@ -187,7 +187,7 @@ watch(
   ([newBusinessUnitVal, newId]) => {
     newBusinessUnit.value.business_unit = newBusinessUnitVal;
     if (newBusinessUnitVal.length && newId && props.id !== ':id') {
-      console.log(newId,props.id,"----");
+    
       fetchDepartmentDetails(newId || props.id, null);
     }
   },
@@ -260,7 +260,7 @@ function fetchDepartmentDetails(id, data) {
     ["business_unit", "like", `%${newBusinessUnit.value.business_unit}%`],
     ["enable", "=", 1]
   ];
-  if (props.id) {
+  if (props.id && props.id !== "AllForms") {
     filters.push(["owner_of_the_form", "=", props.id]);
   }
   if (data) {
@@ -294,8 +294,7 @@ function fetchDepartmentDetails(id, data) {
     .then((response) => {
       tableData.value = response.data;
 
-      formCategory.value = [...new Set(response.data.map((formCategory) => formCategory.form_category))];
-
+      formCategory.value = [...new Set(tableData.value.map((formCategory) => formCategory.form_category))];
 
     })
     .catch((error) => {
