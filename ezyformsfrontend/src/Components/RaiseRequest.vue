@@ -57,7 +57,7 @@
         </div>
         <!-- @formValidation="isFormValid = $event" -->
         <div class="raiserequestBtnDiv">
-          <div class="d-flex justify-content-end align-items-center p-3">
+          <div class="d-flex justify-content-end align-items-center gap-2 p-3">
             <button class="btn btn-white font-13" @click="clearFrom">
               <span> <i class="bi bi-x"></i></span>Clear form
             </button>
@@ -160,7 +160,7 @@ function RequestUpdate() {
     .post(apis.Update_raising_request, data_obj)
     .then( (resp) => {
       if (resp?.message?.success) {
-        blockArr.value = []
+        
         toast.success("Request Raised", {
         autoClose: 2000,
         transition: "zoom",
@@ -191,7 +191,7 @@ function EditRequestUpdate() {
     .post(apis.edit_form_before_approve, data_obj)
     .then( (resp) => {
       if (resp?.message?.success) {
-        blockArr.value = []
+        
         toast.success("Request Raised", {
         autoClose: 2000,
         transition: "zoom",
@@ -238,7 +238,13 @@ watch(business_unit, (newBu, oldBu) => {
     deptData();
   }
 });
-function clearFrom() { }
+function clearFrom() {
+
+  emittedFormData.value = []
+  window.location.reload()
+  tableRows.value = []
+
+ }
 function deptData(value = null) {
   const filters = [["business_unit", "like", `%${business_unit.value}%`]];
   const queryParams = {

@@ -247,7 +247,17 @@ const props = defineProps({
 
 
 const getCurrentDateTime = () => {
-    return new Date().toISOString().slice(0, 16); // Adjust format as needed
+    const localTime = new Date().toLocaleString("en-CA", {
+              timeZone: "Asia/Kolkata", // Change this to your target timezone
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: false,
+            }).replace(/,/, "").replace(/\//g, "-");
+            return localTime;
+ // Adjust format as needed
 };
 
 // Function to update Datetime fields

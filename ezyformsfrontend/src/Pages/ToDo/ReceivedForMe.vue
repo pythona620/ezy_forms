@@ -452,6 +452,8 @@ function ApproverCancelSubmission(dataObj, type) {
     )
     .then((response) => {
       if (response?.data) {
+        const modal = bootstrap.Modal.getInstance(document.getElementById("viewRequest"));
+        modal.hide();
         approvalCancelFn(dataObj, type);
       }
     });
@@ -475,7 +477,7 @@ function approvalCancelFn(dataObj, type) {
   axiosInstance.post(apis.wf_cancelling_request, data).then((response) => {
     if (response?.message) {
       if (type == "Reject") {
-        toast.error(`Request ${type}ed`, { autoClose: 1000, transition: "zoom" });
+        toast.success(`Request ${type}ed`, { autoClose: 1000, transition: "zoom" });
       }
       const modal = bootstrap.Modal.getInstance(document.getElementById("viewRequest"));
       modal.hide();
