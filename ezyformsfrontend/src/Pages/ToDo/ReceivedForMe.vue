@@ -65,7 +65,7 @@
                   @click="ApproverCancelSubmission(formData, 'Request Cancelled')">
                   <span><i class="bi bi-x-lg me-2"></i></span>Reject
                 </button> -->
-                <button type="submit" class="btn btn-outline-danger font-12 py-0 rejectbtn"
+                <button type="submit" class="btn btn-outline-danger font-12 py-0 rejectbtn" :disabled="Rejectloading"
                   @click.prevent="ApproverCancelSubmission(formData, 'Request Cancelled')">
                   <span v-if="Rejectloading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                   <span v-if="!Rejectloading"><i class="bi bi-x-lg me-2"></i><span
@@ -75,7 +75,7 @@
               <div>
                 <!-- <ButtonComp type="button" icon="check2" class="approvebtn border-1 text-nowrap font-10"
                   @click="ApproverFormSubmission('formData','Approve')" name="Approve" /> -->
-                <button type="submit" class="btn btn-success approvebtn"
+                <button type="submit" class="btn btn-success approvebtn" :disabled="loading"
                   @click.prevent="ApproverFormSubmission(emittedFormData, 'Approve')">
                   <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                   <span v-if="!loading"><i class="bi bi-check-lg font-15 me-2"></i><span

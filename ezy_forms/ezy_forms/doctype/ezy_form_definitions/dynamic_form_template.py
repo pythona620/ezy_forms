@@ -148,7 +148,12 @@ template_str = """
  
         .column {
             flex: 1;
-            margin-right: 20px;
+            margin-right: 5px;
+            margin-left: 5px;
+            padding-left:5px;
+            padding-right:5px;
+            
+            
         }
  
         .section h3, .section h4 {
@@ -157,9 +162,10 @@ template_str = """
         
         .section {
             margin: 10px;
-            border: 1px solid #000;
+            border: 0px solid #ccc;
                # border-bottom: 1px solid #000;
-            padding: 15px;
+            # padding: 15px;
+            border-radius:3px;
         }
         .section h3 {
             margin-bottom: 10px;
@@ -187,6 +193,7 @@ template_str = """
             background: transparent;
             flex: 1;
             border-bottom: 1px solid #cccccc;
+            
         }
         .field select, .field textarea {
             border: none;
@@ -201,9 +208,9 @@ template_str = """
             padding: 0px 5px;
             background: transparent;
             flex: 1;
-            border-bottom: 1px solid #cccccc;
-            min-height: 70px; /* Adjust as needed */
-            resize: vertical; /* Allows users to resize the textarea */
+            #border-bottom: 1px solid #cccccc;
+            resize: none; /* Disable manual resizing */
+            overflow-y: hidden; /* Hide scrollbar */ /* Allows users to resize the textarea */
 }
         .field input[type="checkbox"], .field input[type="radio"] {
             flex: 0;
@@ -252,6 +259,11 @@ template_str = """
               padding-bottom: 5px;
               border-bottom: 1px solid #cccccc;
               
+          }
+          .childtablename{
+              font-size:16px;
+              font-weight:bold;
+              margin: 8px 0px 3px 12px;
           }
  
         .logo-div{
@@ -380,33 +392,36 @@ template_str = """
             </div>
         {% endfor %}
     </div>
-{% endfor %}
- {% if child_table_data %}
-    {% for table_name, rows in child_table_data.items() %}
-        <h3>{{ table_name.replace("_", " ").title() }}</h3>  
-        <table style="width:98%; margin-left:10px; border-collapse: collapse; border: 1px solid black;">
-            <thead>
-                <tr>
-                    <th style="border: 1px solid black; padding: 8px; background-color: #f2f2f2;">S.no</th>
-                    {% for key in rows[0].keys() %}
-                        <th style="border: 1px solid black; padding: 8px; background-color: #f2f2f2;">{{ key }}</th>
-                    {% endfor %}
-                </tr>
-            </thead>
-            <tbody>
-                {% for row in rows %}
-                    <tr>
-                        <td style="border: 1px solid black; padding: 8px;">{{ loop.index }}</td>  
-                        {% for value in row.values() %}
-                            <td style="border: 1px solid black; padding: 8px;">{{ value or "-"}}</td>
-                        {% endfor %}
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% endfor %}
-{% endif %}
 
+    {# Show the table after the first block only #}
+    {% if loop.first and child_table_data %}
+        {% for table_name, rows in child_table_data.items() %}
+            <h3 class="childtablename">{{ table_name.replace("_", " ").title() }}</h3>  
+            <div style="margin-left:10px;margin-right:10px;margin-bottom:10px; overflow: hidden; border-radius:5px; border: 1px solid #ccc;">
+                <table style=" width:100%; border-collapse: collapse;">
+                    <thead>
+                        <tr>
+                            <th style="border: 1px solid #ccc; padding: 8px; background-color: #f2f2f2;">S.no</th>
+                            {% for key in rows[0].keys() %}
+                                <th style="border: 1px solid #ccc; padding: 8px; background-color: #f2f2f2;">{{ key }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in rows %}
+                            <tr>
+                                <td style="border: 1px solid #ccc; padding: 8px;">{{ loop.index }}</td>  
+                                {% for value in row.values() %}
+                                    <td style="border: 1px solid #ccc; padding: 8px;">{{ value or "-"}}</td>
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endfor %}
 
  
  
@@ -449,6 +464,14 @@ template_str = """
                 }
             });
         });
+         document.querySelectorAll(".field textarea").forEach(textarea => {
+            textarea.style.height = textarea.scrollHeight + "px"; // Set initial height
+            textarea.addEventListener("input", function () {
+                this.style.height = "auto"; // Reset height
+                this.style.height = this.scrollHeight + "px"; // Adjust height based on content
+            });
+        });
+
     });
 </script>
  
