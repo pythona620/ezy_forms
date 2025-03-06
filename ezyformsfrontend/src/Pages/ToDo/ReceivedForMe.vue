@@ -61,15 +61,21 @@
           <div class="modal-footer">
             <div v-if="!requestcancelled" class="d-flex justify-content-between align-items-center mt-3 gap-2">
               <div>
-                <button class="btn btn-outline-danger font-12 py-0 rejectbtn" type="button"
+                <!-- <button class="btn btn-outline-danger font-12 py-0 rejectbtn" type="button"
                   @click="ApproverCancelSubmission(formData, 'Request Cancelled')">
                   <span><i class="bi bi-x-lg me-2"></i></span>Reject
+                </button> -->
+                <button type="submit" class="btn btn-outline-danger font-12 py-0 rejectbtn" :disabled="Rejectloading"
+                  @click.prevent="ApproverCancelSubmission(formData, 'Request Cancelled')">
+                  <span v-if="Rejectloading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                  <span v-if="!Rejectloading"><i class="bi bi-x-lg me-2"></i><span
+                      class="font-12">Reject</span></span>
                 </button>
               </div>
               <div>
                 <!-- <ButtonComp type="button" icon="check2" class="approvebtn border-1 text-nowrap font-10"
                   @click="ApproverFormSubmission('formData','Approve')" name="Approve" /> -->
-                <button type="submit" class="btn btn-success approvebtn"
+                <button type="submit" class="btn btn-success approvebtn" :disabled="loading"
                   @click.prevent="ApproverFormSubmission(emittedFormData, 'Approve')">
                   <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                   <span v-if="!loading"><i class="bi bi-check-lg font-15 me-2"></i><span
@@ -155,6 +161,8 @@ const employeeData = ref([]);
 const tableHeaders = ref([]);
 
 const loading = ref(false)
+const Rejectloading = ref(false)
+
 onMounted(() => {
   const storedData = localStorage.getItem("employeeData");
   try {
@@ -385,7 +393,7 @@ function ApproverFormSubmission(dataObj, type) {
 function approvalStatusFn(dataObj, type) {
 
 
-  // console.log(dataObj);
+  console.log(dataObj);
   let data = {
     property: selectedRequest.value.property,
     doctype: selectedRequest.value.doctype_name,
@@ -432,10 +440,11 @@ function ApproverCancelSubmission(dataObj, type) {
     isCommentsValid.value = false;
 
     return; // Stop function execution
-  } else {
+  } 
     // Proceed if comments are valid
     isCommentsValid.value = true;
-  }
+  
+    Rejectloading.value = true; // Start loader
 
 
 
@@ -458,12 +467,10 @@ function ApproverCancelSubmission(dataObj, type) {
       }
     });
 }
-
-
 function approvalCancelFn(dataObj, type) {
-  // let files = this.selectedFileAttachments.map((res: any) => res.url);
 
-  console.log(dataObj, "data");
+
+  console.log(dataObj, "data",type);
   let data = {
     property: selectedRequest.value.property,
     doctype: selectedRequest.value.doctype_name,
@@ -474,17 +481,55 @@ function approvalCancelFn(dataObj, type) {
     url_for_cancelling_id: "",
     current_level: selectedRequest.value.current_level,
   };
-  axiosInstance.post(apis.wf_cancelling_request, data).then((response) => {
-    if (response?.message) {
-      if (type == "Reject") {
-        toast.success(`Request ${type}ed`, { autoClose: 1000, transition: "zoom" });
+
+  axiosInstance
+    .post(apis.wf_cancelling_request, data)
+    .then((response) => {
+      if (response?.message) {
+        ApproverReason.value = "";
+        if (type == "Request Cancelled") {
+          toast.success(`${type}`, { autoClose: 1000, transition: "zoom" });
+        }
+        const modal = bootstrap.Modal.getInstance(document.getElementById("viewRequest"));
+        modal.hide();
+        receivedForMe();
       }
-      const modal = bootstrap.Modal.getInstance(document.getElementById("viewRequest"));
-      modal.hide();
-      receivedForMe();
-    }
-  });
+    })
+    .catch((error) => {
+      console.error("Error processing cancellation:", error);
+      toast.error("An error occurred while processing your request.", { autoClose: 1000, transition: "zoom" });
+    })
+    .finally(() => {
+      Rejectloading.value = false; // Ensure loader stops
+    });
 }
+
+
+// function approvalCancelFn(dataObj, type) {
+//   // let files = this.selectedFileAttachments.map((res: any) => res.url);
+
+//   console.log(dataObj, "data");
+//   let data = {
+//     property: selectedRequest.value.property,
+//     doctype: selectedRequest.value.doctype_name,
+//     request_id: selectedRequest.value.name,
+//     reason: ApproverReason.value,
+//     action: type,
+//     files: [],
+//     url_for_cancelling_id: "",
+//     current_level: selectedRequest.value.current_level,
+//   };
+//   axiosInstance.post(apis.wf_cancelling_request, data).then((response) => {
+//     if (response?.message) {
+//       if (type == "Reject") {
+//         toast.success(`Request ${type}ed`, { autoClose: 1000, transition: "zoom" });
+//       }
+//       const modal = bootstrap.Modal.getInstance(document.getElementById("viewRequest"));
+//       modal.hide();
+//       receivedForMe();
+//     }
+//   });
+// }
 
 function mapFormFieldsToRequest(doctypeData, showRequestData) {
   showRequestData.forEach((block) => {

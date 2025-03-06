@@ -1388,7 +1388,7 @@ function cancelForm() {
 }
 const handleStepClick = (stepId) => {
   if (isNextDisabled.value) {
-    toast.error("Please complete all required fields before proceeding.", {
+    toast.error("Please check all required fields before proceeding.", {
       autoClose: 2000,
       transition: "zoom",
     });
@@ -1404,7 +1404,7 @@ const handleStepClick = (stepId) => {
 
 const nextStep = () => {
   if (isNextDisabled.value) {
-    toast.error("Please complete all required fields before proceeding.", {
+    toast.error("Please check all required fields before proceeding.", {
       autoClose: 2000,
       transition: "zoom",
     });
@@ -2059,6 +2059,22 @@ function handleInputChange(event, fieldType) {
     return;
   } else {
     formShortNameError.value = ""; // Clear error if input is valid
+  }
+
+  // Check for special characters (allow only letters and numbers)
+  if (/[^a-zA-Z0-9]/.test(inputValue)) {
+    if (fieldType === "form_name") {
+      formNameError.value = "Special characters are not allowed";
+    } else if (fieldType === "form_short_name") {
+      formShortNameError.value = "Special characters are not allowed";
+    }
+    return;
+  } else {
+    if (fieldType === "form_name") {
+      formNameError.value = "";
+    } else if (fieldType === "form_short_name") {
+      formShortNameError.value = "";
+    }
   }
 
   // Set filter based on fieldType
