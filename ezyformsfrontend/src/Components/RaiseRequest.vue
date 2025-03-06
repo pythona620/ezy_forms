@@ -22,7 +22,7 @@
       <div class="mt-3">
   <div v-for="(table, tableIndex) in tableHeaders" :key="tableIndex" class="mt-3">
     <div>
-      <span class="font-13 fw-bold">Table {{ tableIndex + 1 }}</span>
+      <span class="font-13 fw-bold">Table {{ tableIndex.replace(/_/g," ") }}</span>
     </div>
     
     <table class="table table-striped" border="1" width="100%">

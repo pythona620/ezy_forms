@@ -260,7 +260,7 @@ function fetchDepartmentDetails(id, data) {
     ["business_unit", "like", `%${newBusinessUnit.value.business_unit}%`],
     ["enable", "=", 1]
   ];
-  if (props.id) {
+  if (props.id && props.id !== "AllForms") {
     filters.push(["owner_of_the_form", "=", props.id]);
   }
   if (data) {
