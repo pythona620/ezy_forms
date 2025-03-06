@@ -38,7 +38,7 @@
         </div>
       </div>
     </div>
-    <FormPreview :blockArr="selectedForm" :formDescriptions="formDescriptions" />
+    <FormPreview :blockArr="selectedForm" :formDescriptions="formDescriptions" :childHeaders="childtableHeaders"  />
 
   </div>
 </template>
@@ -71,6 +71,7 @@ const tableData = ref([]);
 const formCategory = ref([]);
 const route = useRoute();
 
+const childtableHeaders = ref([]);
 
 
 // Business unit and filter object
@@ -99,6 +100,9 @@ function actionCreated(rowData, actionEvent) {
     if (rowData?.form_json) {
       formDescriptions.value = { ...rowData }
       selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json).fields)
+      childtableHeaders.value = JSON.parse(
+          rowData.form_json
+        ).child_table_fields;
       const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});// raise a modal
       modal.show();
       

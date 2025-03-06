@@ -152,7 +152,7 @@ function actionCreated(rowData, actionEvent) {
         childtableHeaders.value = JSON.parse(
           rowData.form_json
         ).child_table_fields;
-        console.log(typeof childtableHeaders.value ,childtableHeaders.value,"----");
+        
         
             // console.log(selectedForm.value, "ooooo");
             const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});
