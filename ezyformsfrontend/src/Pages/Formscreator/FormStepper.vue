@@ -276,7 +276,7 @@
                         </div>
                       </div>
                       <FormPreview :blockArr="selectedform" :formDescriptions="formDescriptions"
-                        :childHeaders="childtableHeaders" :child-name="childName" />
+                        :childHeaders="childtableHeaders"  />
                       <div class="main-block" ref="mainBlockRef">
                         <!-- Here is block level starts -->
                         <div class="block-level" v-for="(block, blockIndex) in blockArr" :key="blockIndex">
@@ -633,7 +633,7 @@
 
                               <div class="childtableShow">
                                 <div>
-                                  <div v-if="childName">
+                                  <div >
   <div v-if="blockIndex === 0" class="mt-2">
     
     <!-- Loop through each table inside childTableFields -->
@@ -642,7 +642,7 @@
       
       <!-- Table Name (Dynamically Displayed) -->
       <div>
-        <span class="font-13 fw-bold">{{ childName }} </span>
+        <span class="font-13 fw-bold">{{ tableName.replace(/_/g," ") }} </span>
       </div>
 
       <table class="table table-bordered table-striped">
@@ -859,7 +859,7 @@ const searchDesignation = ref("");
 const wrkAfterGetData = ref([]);
 // const hasWorkflowToastShown = ref(false);
 const tableFieldsCache = ref([]);
-const childName = ref("");
+
 const childtableRows = ref([]);
 const childtableHeaders = ref([]);
 // const childtableName = ref("");
@@ -1449,9 +1449,7 @@ function getFormData() {
         returTables.value = parsedFormJson.fields.filter(
           (field) => field.fieldtype === "Table"
         );
-        console.log(tableName.value,"table");
-        childName.value = tableName.value[0]?.options.replace(/_/g, " ");
-        // console.log(childName.value, typeof childName.value, "5555");
+        
 
         // let structuredArr = rebuildToStructuredArray((JSON.parse(res_data?.form_json?.fields).fields)?.replace(/\\\"/g, '"'))
         let structuredArr = rebuildToStructuredArray(
