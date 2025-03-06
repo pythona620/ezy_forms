@@ -101,49 +101,49 @@ function actionCreated(rowData, actionEvent) {
       selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json).fields)
       const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});// raise a modal
       modal.show();
-      
+
     } else {
       toast.warn(" There is no form fields ")
     }
   }
-  
+
   if (actionEvent.name === 'Raise Request') {
     const parsedData = JSON.parse(rowData.form_json);
     const storedData = localStorage.getItem("employeeData");
 
     if (storedData) {
-        const designation = JSON.parse(storedData).designation;
-        console.log(designation);
+      const designation = JSON.parse(storedData).designation;
+      console.log(designation);
 
-        const roles = parsedData.workflow[0].roles;
-        console.log(roles);
+      const roles = parsedData.workflow[0].roles;
+      console.log(roles);
 
-        let hasAccess = false;
+      let hasAccess = false;
 
-        for (let i = 0; i < roles.length; i++) {
-            if (roles[i] === designation) {
-                hasAccess = true;
-                break;
-            }
+      for (let i = 0; i < roles.length; i++) {
+        if (roles[i] === designation) {
+          hasAccess = true;
+          break;
         }
-        console.log(route.path,"sadasda");
+      }
+      console.log(route.path, "sadasda");
 
-        if (hasAccess) {
-            router.push({
-                name: "RaiseRequest",
-                query: {
-                    routepath: route.path,
-                    selectedForm: rowData.form_short_name,
-                    business_unit: rowData.business_unit,
+      if (hasAccess) {
+        router.push({
+          name: "RaiseRequest",
+          query: {
+            routepath: route.path,
+            selectedForm: rowData.form_short_name,
+            business_unit: rowData.business_unit,
 
-                    
-                },
-            });
-        } else {
-          toast.info("You do not have permission to access this Form.");
-        }
+
+          },
+        });
+      } else {
+        toast.info("You do not have permission to access this Form.");
+      }
     } else {
-        console.log("No employee data found in localStorage.");
+      console.log("No employee data found in localStorage.");
     }
   }
 }
@@ -187,7 +187,7 @@ watch(
   ([newBusinessUnitVal, newId]) => {
     newBusinessUnit.value.business_unit = newBusinessUnitVal;
     if (newBusinessUnitVal.length && newId && props.id !== ':id') {
-      console.log(newId,props.id,"----");
+      console.log(newId, props.id, "----");
       fetchDepartmentDetails(newId || props.id, null);
     }
   },
@@ -252,7 +252,6 @@ function inLineFiltersData(searchedData) {
   }
 
 }
-
 // Fetch department details function
 function fetchDepartmentDetails(id, data) {
 
@@ -260,7 +259,7 @@ function fetchDepartmentDetails(id, data) {
     ["business_unit", "like", `%${newBusinessUnit.value.business_unit}%`],
     ["enable", "=", 1]
   ];
-  if (props.id) {
+  if (props.id && props.id !== "AllForms") {
     filters.push(["owner_of_the_form", "=", props.id]);
   }
   if (data) {
