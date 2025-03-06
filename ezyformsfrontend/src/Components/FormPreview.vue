@@ -83,7 +83,7 @@
                                 <span class="font-12">{{ field.label }}</span>
                                 <span class="ms-1 text-danger">{{
                                   field.reqd === 1 ? "*" : ""
-                                }}</span>
+                                  }}</span>
                               </label>
                               <!-- field.fieldtype == 'Select' || -->
                               <template v-if="field.fieldtype == 'Table MultiSelect'">
@@ -151,37 +151,40 @@ option, index
                 </div>
               </div>
               <div v-if="blockIndex === 0" class="mt-2 pb-2 mx-2">
-                
-                <div v-for="(table, tableName) in props.childHeaders" :key="tableName">
-  <div class="mt-2 pb-1 mx-1">
-    <div>
-      <span class="font-13 fw-bold ps-1 tablename text-secondary">
-        {{ tableName.toString().replace(/_/g, " ") }}
-      </span>
-    </div>
-  </div>
 
-  <div class="tableborder-child">
-    <table class="table mt-2 table-striped">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th v-for="field in table" :key="field.fieldname">
-            {{ field.label }}
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>-</td>
-          <td v-for="(field, index) in table" :key="index">
-            <span>-</span>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</div>
+
+                <div v-for="(table, tableName) in props.childHeaders" :key="tableName">
+                  <!-- Table Title -->
+                  <div class="mt-2 pb-1 mx-1">
+                    <span class="font-13 fw-bold ps-1 tablename text-secondary">
+                      {{ tableName.toString().replace(/_/g, " ") }}
+                    </span>
+                  </div>
+
+                  <!-- Table -->
+                  <div class="tableborder-child">
+                    <table class="table mt-2 table-striped">
+                      <thead>
+                        <tr>
+                          <th>#</th>
+                          <th v-for="field in table" :key="field.fieldname">
+                            {{ field.label }}
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="(row, rowIndex) in table" :key="rowIndex">
+                          <td>{{ rowIndex + 1 }}</td>
+                          <td v-for="(field, index) in table" :key="index">
+                            <span>{{ row[field.fieldname] || '-' }}</span>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+
 
 
               </div>
@@ -214,6 +217,9 @@ const props = defineProps({
     type: String,
   },
 });
+
+
+console.log(props.blockArr, props.childHeaders, props.childName, props.formDescriptions);
 
 const selectedView = ref("All"); // Default to Requestor
 const displayedBlocks = ref([]);
