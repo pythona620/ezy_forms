@@ -276,7 +276,7 @@
                         </div>
                       </div>
                       <FormPreview :blockArr="selectedform" :formDescriptions="formDescriptions"
-                        :childHeaders="childtableHeaders" :child-name="childName" />
+                        :childHeaders="childtableHeaders" />
                       <div class="main-block" ref="mainBlockRef">
                         <!-- Here is block level starts -->
                         <div class="block-level" v-for="(block, blockIndex) in blockArr" :key="blockIndex">
@@ -633,35 +633,32 @@
 
                               <div class="childtableShow">
                                 <div>
-                                  <div v-if="childName">
+                                  <div>
                                     <div v-if="blockIndex === 0" class="mt-2">
-                                      <div>
-                                        <span class="font-13 fw-bold">{{
-                                          childName
-                                          }}</span>
+
+                                      <!-- Loop through each table inside childTableFields -->
+
+                                      <div v-for="(fields, tableName) in childtableHeaders" :key="tableName">
+
+                                        <div>
+                                          <span class="font-13 fw-bold">{{ tableName.replace(/_/g, " ") }} </span>
+                                        </div>
+
+                                        <table class="table table-bordered table-striped">
+                                          <thead>
+                                            <tr>
+                                              <th>#</th>
+                                              <th v-for="field in fields" :key="field.fieldname">
+                                                {{ field.label }}
+                                              </th>
+                                            </tr>
+                                          </thead>
+                                        </table>
+
                                       </div>
-                                      <table class="table table-bordered table-striped mt-2">
-                                        <thead>
-                                          <tr>
-                                            <th>#</th>
-                                            <th v-for="field in childtableHeaders" :key="field.fieldname">
-                                              {{ field.label }}
-                                            </th>
-                                          </tr>
-                                        </thead>
-                                        <tbody>
-                                          <tr v-for="(row, index) in childtableRows" :key="index">
-                                            <td>{{ index + 1 }}</td>
-                                            <td v-for="field in childtableHeaders" :key="field.fieldname">
-                                              <span>
-                                                {{ row[field.fieldname] || "-" }}
-                                              </span>
-                                            </td>
-                                          </tr>
-                                        </tbody>
-                                      </table>
                                     </div>
                                   </div>
+
 
                                   <div>
                                     <div v-if="blockIndex === 0">
@@ -861,8 +858,6 @@ const searchDesignation = ref("");
 const wrkAfterGetData = ref([]);
 // const hasWorkflowToastShown = ref(false);
 const tableFieldsCache = ref([]);
-const childName = ref("");
-const childtableRows = ref([]);
 const childtableHeaders = ref([]);
 // const childtableName = ref("");
 // const childTableresponseData = ref([]);
@@ -1015,7 +1010,7 @@ const addFieldToTable = (tableIndex) => {
     idx: childTables.value[tableIndex].columns.length,
     reqd: false,
   });
-  console.log(childtableHeaders.value, "mmmm");
+
 };
 
 // Function to remove a field from a specific table
@@ -1451,15 +1446,13 @@ function getFormData() {
         returTables.value = parsedFormJson.fields.filter(
           (field) => field.fieldtype === "Table"
         );
-        console.log(tableName.value,"table");
-        childName.value = tableName.value[0]?.options.replace(/_/g, " ");
-        // console.log(childName.value, typeof childName.value, "5555");
-
         // let structuredArr = rebuildToStructuredArray((JSON.parse(res_data?.form_json?.fields).fields)?.replace(/\\\"/g, '"'))
         let structuredArr = rebuildToStructuredArray(
           JSON.parse(res_data?.form_json).fields
         );
         childtableHeaders.value = JSON.parse(res.data.form_json).child_table_fields;
+        childTables.value = []
+        tableFieldsCache.value = []
 
         // workflowSetup.push(JSON.parse(res_data?.form_json).workflow)
 
@@ -1552,7 +1545,7 @@ function formData(status) {
   };
 
   dataObj.accessible_departments = dataObj.accessible_departments.toString();
-  console.log(dataObj, "---data obj");
+  // console.log(dataObj, "---data obj");
   axiosInstance
     .post(apis.savedata, dataObj)
     .then((res) => {
@@ -1904,6 +1897,7 @@ function handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex, fiel
     "file_list",
     "flags",
     "docstatus",
+
   ].map((label) => label.toLowerCase().trim()); // Normalize restricted labels
 
   // Extract labels and filter out excluded ones
@@ -1925,6 +1919,9 @@ function handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex, fiel
     const normalizedLabel = fieldLabel?.trim().toLowerCase();
     return restrictedLabels.includes(normalizedLabel);
   }
+  function hasInvalidCharacter(fieldLabel) {
+    return fieldLabel.includes('"'); // Check if label contains double quotes
+  }
 
   if (
     fieldIndex !== undefined &&
@@ -1941,6 +1938,10 @@ function handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex, fiel
       blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
         columnIndex
       ].fields[fieldIndex].errorMsg = "Entered label is restricted";
+    } else if (hasInvalidCharacter(fieldLabel)) {
+      blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
+        columnIndex
+      ].fields[fieldIndex].errorMsg = 'Label should not contain double quotes (")';
     } else {
       blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
         columnIndex
@@ -1964,6 +1965,10 @@ function handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex, fiel
       blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
         columnIndex
       ].errorMsg = "Entered label is restricted";
+    } else if (hasInvalidCharacter(columnLabel)) {
+      blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
+        columnIndex
+      ].errorMsg = 'Label should not contain double quotes (")';
     } else {
       blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
         columnIndex
@@ -1981,6 +1986,8 @@ function handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex, fiel
     if (isRestricted(sectionLabel)) {
       blockArr[blockIndex].sections[sectionIndex].errorMsg =
         "Entered label is restricted";
+    } else if (hasInvalidCharacter(sectionLabel)) {
+      blockArr[blockIndex].sections[sectionIndex].errorMsg = 'Label should not contain double quotes (")';
     } else {
       blockArr[blockIndex].sections[sectionIndex].errorMsg = shouldSetError(sectionLabel)
         ? "Duplicate Label Name in Section"

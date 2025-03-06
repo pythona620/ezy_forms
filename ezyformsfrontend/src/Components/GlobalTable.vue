@@ -155,9 +155,13 @@
                 {{ row[column.td_key] }}
               </span> -->
               <!-- v-tooltip.top="row[column.td_key]" -->
+              <!-- <span v-else>
+                {{ row[column.td_key].replace(/_/g, " ") || "-" }}
+              </span> -->
               <span v-else>
-                {{ row[column.td_key] || "-" }}
-              </span>
+  {{ row[column.td_key]?.replace(/_/g, " ").replace(/@[\w.-]+/, "") || "-" }}
+</span>
+
             </td>
             <!-- <td
               class="text-center d-flex justify-content-center position-relative"
@@ -361,7 +365,7 @@ const emits = defineEmits(["actionClicked", "updateFilters", "cell-click","toggl
 
 function selectedAction(row, action) {
   emits("actionClicked", row, action);
-  console.log(row, action);
+  // console.log(row, action);
 }
 
 

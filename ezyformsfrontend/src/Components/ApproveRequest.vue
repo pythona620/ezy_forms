@@ -3,8 +3,7 @@
     <div class="container-fluid">
       <div class="backtofromPage px-2 py-2">
         <router-link :to="backTo" class="text-decoration-none text-dark font-13"><span> <i
-              class="bi bi-arrow-left"></i></span>Asset request
-          form</router-link>
+              class="bi bi-arrow-left px-2"></i></span>Back</router-link>
       </div>
     </div>
     <div class="container-fluid">
@@ -21,37 +20,40 @@
             </div>
             <div class="position-relative h-100">
               <div class="requestPreviewDiv">
-                <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel"
-                  :employee-data="employeeData" @updateField="updateFormData" />
+                <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel" :childData="responseData"
+                  :childHeaders="tableHeaders" :employee-data="employeeData" @updateField="updateFormData" />
 
               </div>
 
               <div v-if="selectedData.type === ''" class="">
                 <!-- v-if="!requestcancelled" -->
-                <div class="form-floating mb-5 p-1">
-                  <textarea class="form-control font-12" placeholder="Leave a comment here" id="floatingTextarea"
-                    @input="resetCommentsValidation" :class="{ 'is-invalid': !isCommentsValid }"
-                    v-model="ApproverReason"></textarea>
-                  <label class="font-11" for="floatingTextarea">Comments..</label>
-                </div>
-                <div class="approveBtns mt-3">
-                  <div>
-                    <button type="submit" class="btn btn-success approvebtn"
-                      @click.prevent="ApproverFormSubmission(emittedFormData, 'Approve')">
-                      <span v-if="loading" class="spinner-border spinner-border-sm" role="status"
-                        aria-hidden="true"></span>
-                      <span v-if="!loading"><i class="bi bi-check-lg font-15 me-2"></i><span
-                          class="font-12">Approve</span></span>
-                    </button>
-
+                <div class="approveBtns mb-5 mt-3 flex-column">
+                  <div class="form-floating mb-2 p-1">
+                    <textarea class="form-control font-12" placeholder="Leave a comment here" id="floatingTextarea"
+                      @input="resetCommentsValidation" :class="{ 'is-invalid': !isCommentsValid }"
+                      v-model="ApproverReason"></textarea>
+                    <label class="font-11" for="floatingTextarea">Comments..</label>
                   </div>
-                  <div>
-                    <button class="btn btn-outline-danger font-10 py-0 rejectbtn" type="button" data-bs-dismiss="modal"
-                      @click="
-                        approvalCancelFn(formData, 'Request Cancelled')
-                        ">
-                      <span><i class="bi bi-x-lg me-2"></i></span>Reject
-                    </button>
+                  <div class=" d-flex justify-content-between ">
+
+                    <div>
+                      <button class="btn btn-outline-danger font-10 py-0 rejectbtn" type="button"
+                        data-bs-dismiss="modal" @click="
+                          approvalCancelFn(formData, 'Request Cancelled')
+                          ">
+                        <span><i class="bi bi-x-lg me-2"></i></span>Reject
+                      </button>
+                    </div>
+                    <div>
+                      <button type="submit" class="btn btn-success approvebtn"
+                        @click.prevent="ApproverFormSubmission(emittedFormData, 'Approve')">
+                        <span v-if="loading" class="spinner-border spinner-border-sm" role="status"
+                          aria-hidden="true"></span>
+                        <span v-if="!loading"><i class="bi bi-check-lg font-15 me-2"></i><span
+                            class="font-12">Approve</span></span>
+                      </button>
+
+                    </div>
                   </div>
 
                 </div>
@@ -61,17 +63,22 @@
         </div>
         <div class="col-3">
           <div class="activity-log-container ">
-            <div class="asset_request w-100 py-2 px-3 mb-2">
-              <h5 class="font-13 fw-bold">Asset request form approval</h5>
-              <span class="text-warning font-12 fw-bold">
-                Pending ({{ tableData.current_level }} /
-                {{ tableData.total_levels }})</span>
+            <div class=" w-100  mb-2">
+              <div class="asset_request py-2 px-3">
+
+                <h5 class="font-13 fw-bold">Asset request form approval</h5>
+              </div>
+              <div class="py-2 px-3">
+                <span class="text-warning font-12  fw-bold">
+                  Pending ({{ tableData.current_level }} /
+                  {{ tableData.total_levels }})</span>
+              </div>
             </div>
             <div>
               <h6 class="font-14 ps-3 mb-3">Activity log</h6>
             </div>
             <div v-for="(item, index) in activityData" :key="index" class="activity-log-item"
-              :class="{ 'last-item': index === activityData.length - 1 }">
+              :class="{ 'last-item': index === activityData.length - 0 }">
               <div class="activity-log-dot"></div>
               <div class="activity-log-content">
                 <p class="font-12 mb-1">
@@ -81,7 +88,18 @@
                   <span>{{ item.role }}</span><br />
                   <span class="font-12 text-secondary">{{
                     item.reason || "N/A"
-                  }}</span>.
+                    }}</span>.
+
+                </p>
+              </div>
+            </div>
+            <div class="activity-log-item">
+              <div class="pending"></div>
+              <div class="activity-log-content">
+                <p class="font-12 mb-1">
+                  <span class="font-12 text-secondary">
+                    Pending
+                  </span>
                 </p>
               </div>
             </div>
@@ -230,6 +248,8 @@ function approvalStatusFn(dataObj, type) {
     request_ids: [tableData.value.name],
     reason: ApproverReason.value,
     action: type,
+    files: null,
+    cluster_name: null,
     url_for_approval_id: "",
     current_level: tableData.value.current_level,
   };
@@ -387,16 +407,16 @@ function getdata(formname) {
           .then((res) => {
             console.log(`Data for :`, res.data);
             // Identify the child table key dynamically
-            const childTableKey = Object.keys(res.data).find((key) =>
+            const childTables = Object.keys(res.data).filter((key) =>
               Array.isArray(res.data[key])
             );
-            tableName.value = childTableKey?.replace(/_/g, " ");
-            console.log(tableName.value);
+            if (childTables.length) {
+              responseData.value = {};
 
-            if (childTableKey) {
-              responseData.value = res.data[childTableKey];
-              tableRows.value = responseData.value; // Assign table rows
-              console.log(responseData.value, "Dynamic Child Table Data");
+              childTables.forEach((tableKey) => {
+                responseData.value[tableKey] = res.data[tableKey] || [];
+              });
+              console.log("Response Data:", responseData.value);
             }
           })
           .catch((error) => {
@@ -492,7 +512,7 @@ watch(
 <style lang="scss" scoped>
 .approvebtn {
   width: 146px;
-  height: 30px;
+  //height: 30px;
   background: #099819;
   color: white;
   padding: 5px 15px 5px 15px;
@@ -504,7 +524,7 @@ watch(
 
 .rejectbtn {
   width: 146px;
-  height: 30px;
+  //height: 30px;
   background: #fe212e;
   color: white;
   padding: 5px 15px 5px 15px;
@@ -524,7 +544,8 @@ watch(
   border-radius: 4px;
   opacity: 0px;
 }
-.approvediv{
+
+.approvediv {
   position: fixed !important;
   bottom: 0;
   z-index: 10;
@@ -539,11 +560,12 @@ watch(
   padding: 5px 10px;
   display: flex;
   justify-content: space-between;
-  width: 48%;
+  width: 50%;
 }
 
 .asset_request {
-  box-shadow: 0px 2px 4px 0px #0000000D;
+  //box-shadow: 0px 2px 4px 0px #0000000D;
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
 }
 
 .is-invalid {
@@ -569,6 +591,18 @@ watch(
   /* Space between dot and text */
   margin-bottom: 20px;
   /* Space between logs */
+}
+
+.pending {
+  position: relative;
+  width: 12px;
+  height: 12px;
+  background-color: #676767;
+  border-radius: 50%;
+  border: 2px solid white;
+  z-index: 1;
+  margin-top: 3px;
+  /* Ensure dot is above */
 }
 
 /* Dot styling */

@@ -7,47 +7,26 @@
       </div>
     </div>
     <div class="mt-2">
-      <GlobalTable
-        :tHeaders="tableheaders"
-        :tData="tableData"
-        isAction="true"
-        viewType="viewPdf"
-        isCheckbox="true"
-        @updateFilters="inLineFiltersData"
-        :field-mapping="fieldMapping"
-        @cell-click="viewPreview"
-        isFiltersoption="true"
-        :actions="actions"
-        @actionClicked="actionCreated"
-      />
-      <PaginationComp
-        :currentRecords="tableData.length"
-        :totalRecords="totalRecords"
-        @updateValue="PaginationUpdateValue"
-        @limitStart="PaginationLimitStart"
-      />
+      <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" viewType="viewPdf" isCheckbox="true"
+        @updateFilters="inLineFiltersData" :field-mapping="fieldMapping" @cell-click="viewPreview"
+        isFiltersoption="true" :actions="actions" @actionClicked="actionCreated" />
+      <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
+        @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
     </div>
-    <div
-      class="modal fade"
-      id="viewRequest"
-      data-bs-backdrop="static"
-      data-bs-keyboard="false"
-      tabindex="-1"
-      aria-labelledby="viewRequestLabel"
-      aria-hidden="true"
-    >
+    <div class="modal fade" id="viewRequest" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+      aria-labelledby="viewRequestLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title font-13" id="viewRequestLabel">
-              Request Id: {{ selectedRequest.name }}
+              Request Id: {{ selectedRequest.name?.replace(/_/g, " ") }}
             </h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" @click="closeModal"
               aria-label="Close"></button>
           </div>
           <div class="modal-body approvermodalbody">
-            <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel" :employeeData="employeeData"
-              @updateField="updateFormData" />
+            <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel" :childData="responseData"
+              :childHeaders="tableHeaders" :employeeData="employeeData" @updateField="updateFormData" />
           </div>
           <div class="p-2">
             <div class="activity-log-container">
@@ -57,16 +36,15 @@
                 <div class="activity-log-content">
                   <p class="font-12 mb-1">
                     On
-                    <strong class="strong-content">{{ formatDate(item.creation) }}</strong
-                    >,
+                    <strong class="strong-content">{{ formatDate(item.creation) }}</strong>,
                     <strong class="strong-content">{{ item.user_name }}</strong>
                     ({{ item.role }}) has
                     <strong class="strong-content">{{
                       formatAction(item.action)
-                      }}</strong>
+                    }}</strong>
                     the request<span v-if="index !== 0 && item.reason">with the comments:</span>
                     <strong v-if="index !== 0 && item.reason" class="strong-content">{{ item.reason || "N/A"
-                    }}</strong>
+                      }}</strong>
                   </p>
                 </div>
               </div>
@@ -140,7 +118,7 @@ const businessUnit = computed(() => {
 });
 const newBusinessUnit = ref({ business_unit: "" });
 
-const filterObj = ref({ limitPageLength: 20, limit_start: 0, filters:[] });
+const filterObj = ref({ limitPageLength: 20, limit_start: 0, filters: [] });
 const totalRecords = ref(0);
 const idDta = ref([]);
 const docTypeName = ref([]);
@@ -148,6 +126,7 @@ const statusOptions = ref([]);
 const emittedFormData = ref([]);
 const selectedcurrentLevel = ref("");
 const activityData = ref([]);
+const responseData = ref([]);
 
 const tableheaders = ref([
   // { th: "Request ID", td_key: "name" },
@@ -175,6 +154,8 @@ const showRequest = ref(null);
 const doctypeForm = ref([]);
 const ApproverReason = ref("");
 const employeeData = ref([]);
+const tableHeaders = ref([]);
+
 const loading = ref(false)
 onMounted(() => {
   const storedData = localStorage.getItem("employeeData");
@@ -206,6 +187,11 @@ function actionCreated(rowData, actionEvent) {
         JSON.parse(selectedRequest.value?.json_columns)?.fields
       );
 
+      tableHeaders.value = JSON.parse(
+        selectedRequest.value?.json_columns
+      ).child_table_fields;
+      console.log(tableHeaders.value, "lll");
+
       // Prepare the filters for fetching data
       const filters = [
         ["wf_generated_request_id", "like", `%${selectedRequest.value.name}%`],
@@ -228,7 +214,32 @@ function actionCreated(rowData, actionEvent) {
             doctypeForm.value = res.data[0];
 
             // Map values from doctypeForm to showRequest fields
-            // mapFormFieldsToRequest(doctypeForm.value, showRequest.value);
+            mapFormFieldsToRequest(doctypeForm.value, showRequest.value);
+
+            axiosInstance
+              .get(
+                `${apis.resource}${selectedRequest.value.doctype_name}/${res.data[0].name}`
+              )
+              .then((res) => {
+                console.log(`Data for :`, res.data);
+                // Identify the child table key dynamically
+                const childTables = Object.keys(res.data).filter((key) =>
+                  Array.isArray(res.data[key])
+                );
+                if (childTables.length) {
+                  responseData.value = {};
+
+                  childTables.forEach((tableKey) => {
+                    responseData.value[tableKey] = res.data[tableKey] || [];
+                  });
+                  console.log("Response Data:", responseData.value);
+                }
+
+              })
+              .catch((error) => {
+                console.error(`Error fetching data for :`, error);
+              });
+
           }
         })
         .catch((error) => {
@@ -377,7 +388,7 @@ function ApproverFormSubmission(dataObj, type) {
 function approvalStatusFn(dataObj, type) {
 
 
-  console.log(dataObj);
+  // console.log(dataObj);
   let data = {
     property: selectedRequest.value.property,
     doctype: selectedRequest.value.doctype_name,
@@ -530,7 +541,7 @@ function inLineFiltersData(searchedData) {
     if (searchedData[key]) {
       filterObj.value.filters.push(key, "like", `%${searchedData[key]}%`);
     }
-    console.log(searchedData,"pppp");
+    // console.log(searchedData,"pppp");
     //     // Add filter for selected option
     //     if (key === "selectedOption" && searchedData.selectedOption) {
     //       filters.push([key, "=", searchedData.selectedOption]);
@@ -549,10 +560,10 @@ function inLineFiltersData(searchedData) {
   //   // Log filters to verify
 
   //   // Once the filters are built, pass them to fetchData function
-  if(filterObj.value.filters.length){
+  if (filterObj.value.filters.length) {
 
     receivedForMe(filterObj.value.filters);
-  }else{
+  } else {
     receivedForMe();
   }
 }
@@ -603,7 +614,7 @@ function receivedForMe(data) {
       params: queryParams,
     })
     .then((res) => {
-      if(filterObj.value.limit_start === 0){
+      if (filterObj.value.limit_start === 0) {
 
         tableData.value = res.data;
         idDta.value = [...new Set(res.data.map((id) => id.name))];
@@ -613,15 +624,15 @@ function receivedForMe(data) {
         statusOptions.value = [...new Set(res.data.map((status) => status.status))];
       }
       else {
-                tableData.value = tableData.value.concat(res.data);
-            }
+        tableData.value = tableData.value.concat(res.data);
+      }
 
     })
     .catch((error) => {
       console.error("Error fetching records:", error);
     });
 }
-const fieldMapping = computed(() =>({
+const fieldMapping = computed(() => ({
   // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
   // credit_irn_generated: { type: "select", options: ["Pending", "Completed", "Error"] },
   // role: { type: "input" },

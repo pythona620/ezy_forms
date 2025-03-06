@@ -89,27 +89,45 @@ async function fetchData() {
 
             // Build an array for the charts.
             // Only add the "received" chart if receivedTotal > 0.
-            const tempCharts = [];
-            if (receivedTotal > 0) {
-                tempCharts.push({
+            // const tempCharts = [];
+            // if (receivedTotal > 0) {
+            //     tempCharts.push({
+            //         title: "Requests received for me",
+            //         data: {
+            //             ...receivedByUser,
+            //             total: receivedTotal
+            //         }
+            //     });
+            // }
+
+            // // Always add the "requested" chart regardless of requestedTotal value.
+            // tempCharts.push({
+            //     title: "Requests made by me",
+            //     data: {
+            //         ...requestedByUser,
+            //         total: requestedTotal
+            //     }
+            // });
+
+            // chartsData.value = tempCharts;
+
+            chartsData.value = [
+                {
                     title: "Requests received for me",
                     data: {
                         ...receivedByUser,
                         total: receivedTotal
                     }
-                });
-            }
-
-            // Always add the "requested" chart regardless of requestedTotal value.
-            tempCharts.push({
-                title: "Requests made by me",
-                data: {
-                    ...requestedByUser,
-                    total: requestedTotal
+                },
+                {
+                    title: "Requests made by me",
+                    data: {
+                        ...requestedByUser,
+                        total: requestedTotal
+                    }
                 }
-            });
+            ];
 
-            chartsData.value = tempCharts;
 
             // Wait for the DOM to update so refs are populated, then initialize charts
             await nextTick();
