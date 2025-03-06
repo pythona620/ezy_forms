@@ -156,7 +156,7 @@ option, index
   <div class="mt-2 pb-1 mx-1">
     <div>
       <span class="font-13 fw-bold ps-1 tablename text-secondary">
-        {{ tableName.replace(/_/g, " ") }}
+        {{ tableName.toString().replace(/_/g, " ") }}
       </span>
     </div>
   </div>
@@ -173,7 +173,7 @@ option, index
       </thead>
       <tbody>
         <tr>
-          <td>{{ '-' }}</td>
+          <td>-</td>
           <td v-for="(field, index) in table" :key="index">
             <span>-</span>
           </td>
@@ -182,6 +182,7 @@ option, index
     </table>
   </div>
 </div>
+
 
               </div>
             </div>
