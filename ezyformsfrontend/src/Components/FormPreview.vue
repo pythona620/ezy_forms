@@ -172,11 +172,11 @@ option, index
                           </th>
                         </tr>
                       </thead>
-                      <tbody>
-                        <tr v-for="(row, rowIndex) in table" :key="rowIndex">
-                          <td>{{ rowIndex + 1 }}</td>
+                       <tbody>
+                        <tr>
+                          <td>{{ '-' }}</td>
                           <td v-for="(field, index) in table" :key="index">
-                            <span>{{ row[field.fieldname] || '-' }}</span>
+                            <span>-</span>
                           </td>
                         </tr>
                       </tbody>
@@ -219,7 +219,6 @@ const props = defineProps({
 });
 
 
-console.log(props.blockArr, props.childHeaders, props.childName, props.formDescriptions);
 
 const selectedView = ref("All"); // Default to Requestor
 const displayedBlocks = ref([]);
