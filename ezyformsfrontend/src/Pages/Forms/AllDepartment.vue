@@ -105,12 +105,12 @@ function actionCreated(rowData, actionEvent) {
         ).child_table_fields;
       const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});// raise a modal
       modal.show();
-      
+
     } else {
       toast.warn(" There is no form fields ")
     }
   }
-  
+
   if (actionEvent.name === 'Raise Request') {
     const parsedData = JSON.parse(rowData.form_json);
     const storedData = localStorage.getItem("employeeData");
@@ -122,32 +122,32 @@ function actionCreated(rowData, actionEvent) {
         const roles = parsedData.workflow[0].roles;
         // console.log(roles);
 
-        let hasAccess = false;
+      let hasAccess = false;
 
-        for (let i = 0; i < roles.length; i++) {
-            if (roles[i] === designation) {
-                hasAccess = true;
-                break;
-            }
+      for (let i = 0; i < roles.length; i++) {
+        if (roles[i] === designation) {
+          hasAccess = true;
+          break;
         }
-        // console.log(route.path,"sadasda");
+      }
+      // console.log(route.path, "sadasda");
 
-        if (hasAccess) {
-            router.push({
-                name: "RaiseRequest",
-                query: {
-                    routepath: route.path,
-                    selectedForm: rowData.form_short_name,
-                    business_unit: rowData.business_unit,
+      if (hasAccess) {
+        router.push({
+          name: "RaiseRequest",
+          query: {
+            routepath: route.path,
+            selectedForm: rowData.form_short_name,
+            business_unit: rowData.business_unit,
 
-                    
-                },
-            });
-        } else {
-          toast.info("You do not have permission to access this Form.");
-        }
+
+          },
+        });
+      } else {
+        toast.info("You do not have permission to access this Form.");
+      }
     } else {
-        console.log("No employee data found in localStorage.");
+      console.log("No employee data found in localStorage.");
     }
   }
 }
@@ -256,7 +256,6 @@ function inLineFiltersData(searchedData) {
   }
 
 }
-
 // Fetch department details function
 function fetchDepartmentDetails(id, data) {
 
