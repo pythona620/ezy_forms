@@ -1,7 +1,7 @@
 <template>
-  <div>
-    <div class="container-fluid">
-      <div class="backtofromPage px-2 py-2">
+  <div class="position-relative">
+    <div class="container-fluid  p-0">
+      <div class="backtofromPage asset_request px-2 py-2">
         <router-link :to="backTo" class="text-decoration-none text-dark font-13"><span> <i
               class="bi bi-arrow-left px-2"></i></span>Back</router-link>
       </div>
@@ -10,37 +10,37 @@
       <div class="row">
         <div class="col-3"></div>
         <div class="col-6">
-          <div class="mt-2">
+          <div class="mt-1">
             <div class="text-center">
-              <!-- <div class="card border-0 shadow-none">
-              <div class="card-body">
-                <h5 class="card-title">{{ selectedData.doctype_name }}</h5>
+              <div class="card border-0 shadow-none">
+                <div class="card-body pb-2">
+                  <h5 class="card-title">{{ selectedData.doctype_name }}</h5>
+                </div>
               </div>
-            </div> -->
             </div>
-            <div class="position-relative h-100">
-              <div class="requestPreviewDiv">
+            <div class="position-relative ">
+              <div class="requestPreviewDiv pb-5">
                 <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel" :childData="responseData"
-                  :childHeaders="tableHeaders" :employee-data="employeeData" @updateField="updateFormData" />
+                  :readonly-for="selectedData.readOnly" :childHeaders="tableHeaders" :employee-data="employeeData"
+                  @updateField="updateFormData" />
 
               </div>
 
-              <div v-if="selectedData.type === ''" class="">
+              <div v-if="selectedData.type !== 'myforms'" class="">
                 <!-- v-if="!requestcancelled" -->
-                <div class="approveBtns mb-5 mt-3 flex-column">
+                <div class="approveBtns pb-2 mb-2 mt-3 flex-column px-0 pe-4">
                   <div class="form-floating mb-2 p-1">
                     <textarea class="form-control font-12" placeholder="Leave a comment here" id="floatingTextarea"
                       @input="resetCommentsValidation" :class="{ 'is-invalid': !isCommentsValid }"
                       v-model="ApproverReason"></textarea>
                     <label class="font-11" for="floatingTextarea">Comments..</label>
+                    <span v-if="!isCommentsValid" class="font-11 text-danger ps-1">Please enter comments**</span>
                   </div>
                   <div class=" d-flex justify-content-between ">
-
                     <div>
-                      <button class="btn btn-outline-danger font-10 py-0 rejectbtn" type="button"
-                        data-bs-dismiss="modal" @click="
-                          approvalCancelFn(formData, 'Request Cancelled')
-                          ">
+                      <button class="btn btn-outline-danger font-10 py-0 rejectbtn" type="button" @click="
+                        ApproverCancelSubmission(formData, 'Request Cancelled')
+                        ">
                         <span><i class="bi bi-x-lg me-2"></i></span>Reject
                       </button>
                     </div>
@@ -63,37 +63,39 @@
         </div>
         <div class="col-3">
           <div class="activity-log-container ">
-            <div class=" w-100  mb-2">
-              <div class="asset_request py-2 px-3">
+            <!-- <div class=" w-100  mb-2">
+              <div class=" py-2 px-3">
 
-                <h5 class="font-13 fw-bold">Asset request form approval</h5>
+                <h5 class="font-13 fw-bold">{{ selectedData.doctype_name }} form approval</h5>
               </div>
               <div class="py-2 px-3">
                 <span class="text-warning font-12  fw-bold">
                   Pending ({{ tableData.current_level }} /
                   {{ tableData.total_levels }})</span>
               </div>
-            </div>
-            <div>
-              <h6 class="font-14 ps-3 mb-3">Activity log</h6>
+            </div> -->
+            <div class="mt-5 pt-2">
+              <h6 class="font-14 ps-3 mb-3">Activity log <span class="text-warning font-12  fw-bold">
+                  Pending ({{ tableData.current_level }} /
+                  {{ tableData.total_levels }})</span></h6>
             </div>
             <div v-for="(item, index) in activityData" :key="index" class="activity-log-item"
-              :class="{ 'last-item': index === activityData.length - 0 }">
+              :class="{ 'last-item': index === activityData.length - 1 }">
               <div class="activity-log-dot"></div>
               <div class="activity-log-content">
                 <p class="font-12 mb-1">
-                  <strong>{{ formatAction(item.action) }} on </strong>
-                  <strong class="strong-content">{{ item.creation }} </strong><br />
-                  <strong class="strong-content"> {{ item.user_name }}</strong><br />
+                  <span class="strong-content">{{ formatAction(item.action) }} on </span>
+                  <span class="strong-content">{{ item.creation }} </span><br />
+                  <span class="strong-content"> {{ item.user_name }}</span><br />
                   <span>{{ item.role }}</span><br />
                   <span class="font-12 text-secondary">{{
                     item.reason || "N/A"
-                    }}</span>.
+                  }}</span>.
 
                 </p>
               </div>
             </div>
-            <div class="activity-log-item">
+            <!-- <div class="activity-log-item">
               <div class="pending"></div>
               <div class="activity-log-content">
                 <p class="font-12 mb-1">
@@ -102,7 +104,7 @@
                   </span>
                 </p>
               </div>
-            </div>
+            </div> -->
           </div>
         </div>
       </div>
@@ -128,6 +130,7 @@ const selectedData = ref({
   formname: route.query.name || "", // Retrieve from query
   doctype_name: route.query.doctype_name || "", // Retrieve from query
   type: route.query.type || "", // Retrieve from query
+  readOnly: route.query.readOnly || false, // Retrieve from query
 });
 const backTo = ref(selectedData.value.routepath);
 // onMounted(() => {
@@ -206,10 +209,11 @@ const updateFormData = (fieldValues) => {
 
 // Function to handle form submission
 function ApproverFormSubmission(dataObj, type) {
-  if (!ApproverReason.value.trim()) {
+  if (ApproverReason.value.trim() === "") {
     isCommentsValid.value = false; // Show validation error
     return; // Stop execution
   }
+
 
   isCommentsValid.value = true;
   loading.value = true; // Start loader
@@ -260,8 +264,14 @@ function approvalStatusFn(dataObj, type) {
       console.log("API Response:", response);
 
       if (response?.message?.success === true) {
-        toast.success(`Request ${type}ed`, { autoClose: 1000, transition: "zoom" });
         ApproverReason.value = ""; // Clear reason after success
+        toast.success(`Request ${type}ed`, {
+          autoClose: 1000,
+          transition: "zoom",
+          onClose: () => {
+            router.push({ name: "ReceivedForMe" }); // Navigate after toast closes
+          }
+        });
       } else {
         toast.error(`Failed to ${type} request`, { autoClose: 1000, transition: "zoom" });
       }
@@ -272,13 +282,49 @@ function approvalStatusFn(dataObj, type) {
     })
     .finally(() => {
       loading.value = false; // Ensure loader stops
-      router.push({ name: "ReceivedForMe" });
     });
 }
 
 
+
+function ApproverCancelSubmission(dataObj, type) {
+
+  if (ApproverReason.value.trim() === "") {
+    // Set the validation flag to false if the comment is empty
+    isCommentsValid.value = false;
+
+    return; // Stop function execution
+  } else {
+    // Proceed if comments are valid
+    isCommentsValid.value = true;
+  }
+
+
+
+  let form = {};
+  if (emittedFormData.value.length) {
+    emittedFormData.value.map((each) => {
+      form[each.fieldname] = each.value;
+    });
+  }
+  axiosInstance
+    .put(
+      `${apis.resource}${selectedRequest.value.doctype_name}/${doctypeForm.value.name}`,
+      form
+    )
+    .then((response) => {
+      if (response?.data) {
+        approvalCancelFn(dataObj, type);
+      }
+    });
+}
+
+
+
 function approvalCancelFn(dataObj, type) {
   // let files = this.selectedFileAttachments.map((res: any) => res.url);
+
+  console.log(dataObj, "data");
 
   let data = {
     property: selectedRequest.value.property,
@@ -430,16 +476,16 @@ function getdata(formname) {
       console.error("Error fetching categories data:", error);
     });
 }
-const openFile = (filePath) => {
-  if (!filePath) return;
-  const fileUrl = `${filePath}`;
-  window.open(fileUrl, "_blank");
-};
+// const openFile = (filePath) => {
+//   if (!filePath) return;
+//   const fileUrl = `${filePath}`;
+//   window.open(fileUrl, "_blank");
+// };
 
-const isFilePath = (value) => {
-  if (!value) return false;
-  return /\.(png|jpg|jpeg|gif|pdf|docx|xlsx|txt)$/i.test(value);
-};
+// const isFilePath = (value) => {
+//   if (!value) return false;
+//   return /\.(png|jpg|jpeg|gif|pdf|docx|xlsx|txt)$/i.test(value);
+// };
 
 // function childFunction() {
 //   axiosInstance
@@ -510,6 +556,14 @@ watch(
 </script>
 
 <style lang="scss" scoped>
+.backtofromPage {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 1000 !important;
+
+}
+
+
 .approvebtn {
   width: 146px;
   //height: 30px;
@@ -520,6 +574,14 @@ watch(
   border-radius: 4px;
   opacity: 0px;
   font-weight: bold;
+}
+
+.requestPreviewDiv {
+  height: 75vh;
+  overflow-y: auto;
+  //padding-bottom: 100px;
+  margin-bottom: 100px;
+
 }
 
 .rejectbtn {
@@ -589,7 +651,7 @@ watch(
   gap: 10px;
   padding-left: 15px;
   /* Space between dot and text */
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   /* Space between logs */
 }
 
@@ -605,32 +667,55 @@ watch(
   /* Ensure dot is above */
 }
 
-/* Dot styling */
+/* Activity log dot with inner padding and dotted border */
 .activity-log-dot {
   position: relative;
-  width: 12px;
-  height: 12px;
-  background-color: #676767;
+  width: 16px;
+  /* Increase size to accommodate padding */
+  height: 16px;
+  background-color: white;
+  /* Inner padding effect */
   border-radius: 50%;
-  border: 2px solid white;
+  border: 2px dotted #ccc;
+  /* Dotted border */
+  display: flex;
+  align-items: center;
+  justify-content: center;
   z-index: 1;
   margin-top: 3px;
-  /* Ensure dot is above */
+}
+
+/* Inner dot */
+.activity-log-dot::before {
+  content: "";
+  width: 8px;
+  /* Inner dot size */
+  height: 8px;
+  background-color: #2BED12;
+  /* Inner dot color */
+  border-radius: 50%;
+  display: block;
 }
 
 /* Add vertical line using ::after */
 .activity-log-dot::after {
   content: "";
   position: absolute;
-  top: 13px;
-  /* Start line from bottom of dot */
+  top: 18px;
+  /* Position below the dot */
   left: 50%;
-  width: 2px;
-  height: 50px;
-  /* Adjust line height */
-  background-color: #ddd;
+  width: 1px;
+  height: calc(100% + 50px);
+
+  /* Adjust line length */
+  background: repeating-linear-gradient(to bottom,
+      rgb(133, 133, 133),
+      rgb(133, 133, 133) 4px,
+      transparent 4px,
+      transparent 8px);
   transform: translateX(-50%);
 }
+
 
 /* Remove line for the last item */
 .activity-log-item.last-item .activity-log-dot::after {
@@ -662,5 +747,9 @@ th {
 
 td {
   font-size: 12px;
+}
+
+.strong-content {
+  font-weight: 500;
 }
 </style>

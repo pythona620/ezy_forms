@@ -10,14 +10,14 @@
           <div class="container-fluid">
             <div class="row" v-for="(row, rowIndex) in section.rows" :key="rowIndex">
               <div v-for="(column, columnIndex) in row.columns" :key="'column-preview-' + columnIndex"
-                :class="props.readonlyFor === true || blockIndex === 0 ? 'border-0 bg-transparent' : 'border-0 bg-transparent'"
+                :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 bg-transparent' : 'border-0 bg-transparent'"
                 class="col dynamicColumn">
                 <div v-if="column.label" class="p-3 border-bottom">
                   <h6 class="m-0 font-12">{{ column.label }}</h6>
                 </div>
                 <div class="mx-3 my-2">
                   <div v-for="(field, fieldIndex) in column.fields" :key="'field-preview-' + fieldIndex"
-                    :class="props.readonlyFor === true || blockIndex === 0 ? 'd-flex align-items-end mb-2' : ''">
+                    :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'd-flex align-items-end mb-2' : ''">
                     <div v-if="field.label">
                       <label :for="'field-' +
                         sectionIndex +
@@ -32,7 +32,7 @@
                           }}
 
                         </span>
-                        <span class="pe-2" v-if="props.readonlyFor === true || blockIndex === 0">:</span>
+                        <span class="pe-2" v-if="props.readonlyFor === 'true' || blockIndex < currentLevel">:</span>
                       </label>
                     </div>
                     <!-- field.fieldtype === 'Select' || -->
@@ -68,7 +68,7 @@
                               <input v-if="
                                 field.fieldtype === 'Check' ||
                                 index !== 0
-                              " class="form-check-input" type="checkbox" :disabled="blockIndex === 0 || props.readonlyFor === true
+                              " class="form-check-input" type="checkbox" :disabled="blockIndex === 0 || props.readonlyFor === 'true'
                                 " :checked="field.value === option" :value="option"
                                 :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
                                 :id="`${option}-${index}`" @blur="
@@ -83,7 +83,7 @@
                                     )
                                 " />
 
-                              <input v-else-if="field.fieldtype === 'radio'" :disabled="blockIndex === 0 || props.readonlyFor === true
+                              <input v-else-if="field.fieldtype === 'radio'" :disabled="blockIndex === 0 || props.readonlyFor === 'true'
                                 " class="form-check-input" type="radio"
                                 :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
                                 :id="`${option}-${index}`" :value="option" :checked="field.value === option" @blur="
@@ -111,14 +111,14 @@
                     <!-- @click="openInNewWindow(field.value)" -->
                     <template v-else-if="field.fieldtype == 'Attach'">
                       <div v-if="field.value" class="position-relative d-inline-block"
-                        :class="props.readonlyFor === true ? 'image-border-bottom' : ''">
+                        :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'image-border-bottom' : ''">
                         <img v-if="isImageFile(field.value)" :src="field.value"
                           class="img-thumbnail mt-2 cursor-pointer border-0" style="max-width: 100px; max-height: 100px"
                           @mouseover="showPreview = true" @mouseleave="showPreview = false" />
 
                         <!-- Close Icon to Remove Image -->
                         <i class="bi bi-x-lg position-absolute  text-danger cursor-pointer"
-                          :class="props.readonlyFor === true ? 'd-none' : ''" style="
+                          :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'd-none' : ''" style="
                             top: -10px;
                             right: -5px;
                             font-size: 13px;
@@ -155,9 +155,9 @@
                         </div>
                       </div>
 
-                      <input :disabled="blockIndex === 0 || props.readonlyFor === true
+                      <input :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'
                         " v-else type="file" accept="image/jpeg,image/png,application/pdf"
-                        :class="props.readonlyFor === true ? 'd-none' : ' '" :id="'field-' +
+                        :class="props.readonlyFor === 'true' ? 'd-none' : ' '" :id="'field-' +
                           sectionIndex +
                           '-' +
                           columnIndex +
@@ -177,8 +177,8 @@
 
                     <template v-else-if="field.fieldtype == 'Datetime'">
                       <input type="datetime-local" v-model="field.value"
-                        :class="props.readonlyFor === true || blockIndex === 0 ? 'border-0 image-border-bottom w-50 pb-0 ' : ' '"
-                        :readOnly="blockIndex === 0 || props.readonlyFor === true
+                        :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 image-border-bottom w-50 pb-0 bg-transparent ' : ' '"
+                        :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'" :readOnly="blockIndex < currentLevel || props.readonlyFor === 'true'
                           " :placeholder="'Enter ' + field.label" :name="'field-' +
                             sectionIndex +
                             '-' +
@@ -190,18 +190,20 @@
 
                     <!-- Field Type Default -->
                     <template v-else>
-                      <input v-if="field.fieldtype == 'Int'" :readOnly="blockIndex === 0 || props.readonlyFor === true
-                        " type="number" v-model="field.value" :placeholder="'Enter ' + field.label"
-                        :value="field.value" :name="'field-' +
+                      <input v-if="field.fieldtype == 'Int'"
+                        :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'" :readOnly="blockIndex < currentLevel || props.readonlyFor === 'true'
+                          " type="number" v-model="field.value"
+                        :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 image-border-bottom w-50' : ' '"
+                        :placeholder="'Enter ' + field.label" :value="field.value" :name="'field-' +
                           sectionIndex +
                           '-' +
                           columnIndex +
                           '-' +
                           fieldIndex
                           " class="form-control previewInputHeight" />
-                      <textarea v-if="field.fieldtype == 'Text'"
-                        :class="props.readonlyFor === true || blockIndex === 0 ? 'border-0 image-border-bottom ' : ' '"
-                        :readOnly="blockIndex === 0 || props.readonlyFor === true
+                      <textarea v-if="field.fieldtype == 'Text'" :disabled="blockIndex < currentLevel"
+                        :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 image-border-bottom bg-transparent ' : ' '"
+                        :readOnly="blockIndex === 0 || props.readonlyFor === 'true'
                           " v-model="field.value" :placeholder="'Enter ' + field.label" :value="field.value" :name="'field-' +
                             sectionIndex +
                             '-' +
@@ -210,9 +212,10 @@
                             fieldIndex
                             " class="form-control previewInputHeight"></textarea>
                       <component v-if="field.fieldtype !== 'Int' && field.fieldtype !== 'Text'"
+                        :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'"
                         :is="getFieldComponent(field.fieldtype)"
-                        :class="props.readonlyFor === true || blockIndex === 0 ? 'border-0 image-border-bottom w-50' : ' '"
-                        :value="field.value" :type="field.fieldtype" :readOnly="blockIndex === 0 || props.readonlyFor === true
+                        :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 image-border-bottom w-50 bg-transparent ' : ' '"
+                        :value="field.value" :type="field.fieldtype" :readOnly="blockIndex < currentLevel || props.readonlyFor === 'true'
                           " :name="'field-' +
                             sectionIndex +
                             '-' +
@@ -244,7 +247,7 @@
                 <span class="font-13 fw-bold tablename">{{ tableName.replace(/_/g, " ") }}</span>
               </div>
               <div class="tableborder-child">
-                <table class="table mt-2 table-striped">
+                <table class="table mb-0">
                   <thead>
                     <tr>
                       <th>#</th>
@@ -299,12 +302,13 @@ const props = defineProps({
     type: Object,
   },
   readonlyFor: {
-    type: Boolean,
+    type: String,
   },
   employeeData: {
     type: Array,
   },
 });
+
 
 const emit = defineEmits();
 const filePaths = ref([]);
@@ -318,19 +322,7 @@ const isImageFile = (value) => {
   return /\.(png|jpg|jpeg|gif)$/i.test(value);
 };
 
-const clearImage = (
-  blockIndex,
-  sectionIndex,
-  rowIndex,
-  columnIndex,
-  fieldIndex
-) => {
-  const field =
-    props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
-      columnIndex
-    ].fields[fieldIndex];
-  field.value = ""; // Reset the field value
-};
+
 
 // const openInNewWindow = (url) => {
 //   window.open(url, '_blank');
@@ -379,7 +371,7 @@ const filteredBlocks = computed(() => {
     section.rows?.forEach((row) => {
       row.columns?.forEach((column) => {
         column.fields?.forEach((field) => {
-          if (!props.employeeData) return;
+          if (!props.employeeData || props.readonlyFor === 'true') return;
           if (field.label === "Approver") {
             field.value = employee.emp_name;
             emit("updateField", field);
@@ -647,6 +639,19 @@ const uploadFile = (file, field) => {
       console.error("Upload error:", error);
     });
 };
+const clearImage = (
+  blockIndex,
+  sectionIndex,
+  rowIndex,
+  columnIndex,
+  fieldIndex
+) => {
+  const field =
+    props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
+      columnIndex
+    ].fields[fieldIndex];
+  field.value = ""; // Reset the field value
+};
 
 // const logFieldValue = (
 //   event,
@@ -709,7 +714,7 @@ const uploadFile = (file, field) => {
 }
 
 .block-container {
-  background-color: #f5f5f5;
+  background-color: #fff;
 }
 
 input::-webkit-input-placeholder {

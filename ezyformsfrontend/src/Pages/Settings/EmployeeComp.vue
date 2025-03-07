@@ -48,8 +48,8 @@
                         <div class="input-container">
                           <FormFields tag="input" type="text" name="emp_phone" id="emp_phone" maxlength="10"
                             class="w-100" placeholder="Enter Phone Number" v-model="createEmployee.emp_phone"
-                            @input="maskPhoneNumber" @change="validatephone" />
-                          <i :class="eyeIcon" class="eye-icon" @click="toggleMask"></i>
+                            @change="validatephone" />
+                          <!-- <i :class="eyeIcon" class="eye-icon" @click="toggleMask"></i> -->
                         </div>
                         <p v-if="phoneError" class="text-danger font-11 ps-1">
                           {{ phoneError }}
@@ -795,10 +795,11 @@ const originalPhone = ref("");
 const eyeIcon = computed(() => (isMasked.value ? "bi bi-eye-slash-fill" : "bi bi-eye-fill"));
 
 const maskPhoneNumber = () => {
-  if (!isMasked.value || createEmployee.value.emp_phone.length < 10) return;
+  const phone = createEmployee.value?.emp_phone || ""; // Ensure it's a string
+  if (!isMasked.value || phone.length < 10) return;
 
-  originalPhone.value = createEmployee.value.emp_phone;
-  createEmployee.value.emp_phone = "******" + originalPhone.value.slice(-4);
+  originalPhone.value = phone;
+  createEmployee.value.emp_phone = "******" + phone.slice(-4);
 };
 
 const toggleMask = () => {
@@ -806,11 +807,9 @@ const toggleMask = () => {
 
   isMasked.value = !isMasked.value;
   createEmployee.value.emp_phone = isMasked.value
-    ? "******" + originalPhone.value.slice(-4)
+    ? "******" + (originalPhone.value?.slice(-4) || "")
     : originalPhone.value;
-}
-
-
+};
 
 function bulkEmp() {
   showEmployeebulk.value = false

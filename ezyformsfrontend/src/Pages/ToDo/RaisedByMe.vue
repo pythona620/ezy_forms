@@ -8,25 +8,11 @@
     </div>
     <div class="mt-2">
       <!-- actionType="dropdown" -->
-      <GlobalTable
-        :tHeaders="tableheaders"
-        :tData="tableData"
-        isAction="true"
-        viewType="viewPdf"
-        isCheckbox="true"
-        @cell-click="viewPreview"
-        :actions="actions"
-        @actionClicked="actionCreated"
-        isFiltersoption="true"
-        :field-mapping="fieldMapping"
-        @updateFilters="inLineFiltersData"
-      />
-      <PaginationComp
-        :currentRecords="tableData.length"
-        :totalRecords="totalRecords"
-        @updateValue="PaginationUpdateValue"
-        @limitStart="PaginationLimitStart"
-      />
+      <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" viewType="viewPdf" isCheckbox="true"
+        @cell-click="viewPreview" :actions="actions" @actionClicked="actionCreated" isFiltersoption="true"
+        :field-mapping="fieldMapping" @updateFilters="inLineFiltersData" />
+      <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
+        @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
     </div>
     <div class="modal fade" id="viewRequest" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
       aria-labelledby="viewRequestLabel" aria-hidden="true">
@@ -105,7 +91,7 @@
                   On
                   <strong class="strong-content">{{
                     formatDate(item.creation)
-                    }}</strong>,
+                  }}</strong>,
                   <strong class="strong-content">
                     <span v-if="index == 0">you</span>
                     <span v-else>
@@ -116,11 +102,11 @@
                   ({{ item.role }})
                   <strong class="strong-content">{{
                     formatAction(item.action)
-                    }}</strong>
+                  }}</strong>
                   the request with the comments:
                   <strong class="strong-content">{{
                     item.reason || "N/A"
-                    }}</strong>.
+                  }}</strong>.
                 </p>
               </div>
             </div>
@@ -140,7 +126,7 @@
 
               </div> -->
             </div>
-            <div v-if=" selectedRequestStatus == 'Request Raised'">
+            <div v-if="selectedRequestStatus == 'Request Raised'">
               <ButtonComp type="button" class="border-1 edit-btn text-nowrap font-10" @click="handleEditClick"
                 name="Edit Form" />
             </div>
@@ -254,6 +240,7 @@ function viewPreview(data) {
       name: data.name,
       doctype_name: data.doctype_name,
       type: "myforms",
+      readOnly: 'true'
     },
   });
 }

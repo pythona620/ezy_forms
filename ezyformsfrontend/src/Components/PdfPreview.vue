@@ -1,7 +1,11 @@
 <template>
-  <div>dasd</div>
+  <section>
+    <div v-html="pdfPreview"></div>
+  </section>
 </template>
 
-<script setup></script>
+<script setup>
+const pdfPreview = ref("");
+</script>
 
 <style lang="sass" scoped></style>

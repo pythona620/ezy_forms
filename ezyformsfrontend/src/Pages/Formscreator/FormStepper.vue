@@ -638,7 +638,7 @@
 
                                       <!-- Loop through each table inside childTableFields -->
 
-                                      <div v-for="(fields, tableName) in childtableHeaders" :key="tableName">
+                                      <div v-for="(fields, tableName, index,) in childtableHeaders" :key="index">
 
                                         <div>
                                           <span class="font-13 fw-bold">{{ tableName.replace(/_/g, " ") }} </span>
