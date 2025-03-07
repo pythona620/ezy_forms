@@ -83,7 +83,7 @@
                                 <span class="font-12">{{ field.label }}</span>
                                 <span class="ms-1 text-danger">{{
                                   field.reqd === 1 ? "*" : ""
-                                }}</span>
+                                  }}</span>
                               </label>
                               <!-- field.fieldtype == 'Select' || -->
                               <template v-if="field.fieldtype == 'Table MultiSelect'">
@@ -150,16 +150,18 @@ option, index
                   </div>
                 </div>
               </div>
-              <div v-if="blockIndex === 0" class="mt-2 pb-1 mx-2">
-                <div v-for="(table, tableIndex) in props.childHeaders" :key="tableIndex">
+              <div v-if="blockIndex === 0" class="mt-2 pb-2 mx-2">
+
+
+                <div v-for="(table, tableName) in props.childHeaders" :key="tableName">
+                  <!-- Table Title -->
                   <div class="mt-2 pb-1 mx-1">
-                    <div>
-                      <span class="font-13 fw-bold  tablename text-secondary">
-                        {{ tableIndex.replace(/_/g, " ") }}
-                      </span>
-                    </div>
+                    <span class="font-13 fw-bold ps-1 tablename text-secondary">
+                      {{ tableName.toString().replace(/_/g, " ") }}
+                    </span>
                   </div>
 
+                  <!-- Table -->
                   <div class="tableborder-child">
                     <table class="table mt-2 table-striped">
                       <thead>
@@ -170,7 +172,7 @@ option, index
                           </th>
                         </tr>
                       </thead>
-                      <tbody>
+                       <tbody>
                         <tr>
                           <td>{{ '-' }}</td>
                           <td v-for="(field, index) in table" :key="index">
@@ -181,6 +183,10 @@ option, index
                     </table>
                   </div>
                 </div>
+
+
+
+
               </div>
             </div>
           </div>
@@ -209,6 +215,8 @@ const props = defineProps({
   },
 
 });
+
+
 
 const selectedView = ref("All"); // Default to Requestor
 const displayedBlocks = ref([]);

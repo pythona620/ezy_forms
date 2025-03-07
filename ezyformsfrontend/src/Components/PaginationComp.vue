@@ -50,7 +50,6 @@ const itemsIncrease = () => {
   start.value += itemsPerPage.value;
   emit("limitStart", [itemsPerPage.value, start.value]);
 };
-
 const count = ref([])
 // watch currentRecords
 watch(() => props.currentRecords, (newVal, oldVal) => {

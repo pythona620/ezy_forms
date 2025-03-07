@@ -52,7 +52,7 @@
             </div>
         </div>
 
-        <FormPreview :blockArr="selectedForm" :formDescriptions="formDescriptions"  :childHeaders="childtableHeaders" :child-name="childName" />
+        <FormPreview :blockArr="selectedForm" :formDescriptions="formDescriptions"  :childHeaders="childtableHeaders" />
 
 
     </div>
@@ -139,7 +139,7 @@ const actions = ref([
     // { name: 'Download Print format', icon: 'fa-solid fa-download' },
 ]);
 const childtableHeaders = ref([]);
-const childName = ref("");
+
 function actionCreated(rowData, actionEvent) {
     // console.log(rowData, actionEvent,"ppp");
     if (actionEvent.name === 'View form') {``
@@ -147,14 +147,13 @@ function actionCreated(rowData, actionEvent) {
             formDescriptions.value = { ...rowData };
             // console.log(formDescriptions.value, "lllllllllll");
             selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json).fields);
-            const parsedFormJson = JSON.parse(rowData?.form_json);
-            const tableName = parsedFormJson.fields.filter(
-          (field) => field.fieldtype === "Table"
-        );
+            
+            
         childtableHeaders.value = JSON.parse(
           rowData.form_json
         ).child_table_fields;
-        childName.value = tableName[0]?.options.replace(/_/g, " ");
+        
+        
             // console.log(selectedForm.value, "ooooo");
             const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});
             modal.show();

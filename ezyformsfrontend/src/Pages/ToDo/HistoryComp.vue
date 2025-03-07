@@ -716,10 +716,17 @@ function inLineFiltersData(searchedData) {
 function receivedForMe(data) {
   // Initialize filters array for building dynamic query parameters
   const EmpRequestMail = JSON.parse(localStorage.getItem("employeeData"));
+  
+ // Calculate the date one month ago
+ const oneMonthAgo = new Date();
+  oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+  const formattedDate = oneMonthAgo.toISOString().split('T')[0];
+  
   const filters = [
     ["requested_by", "like", EmpRequestMail.emp_mail_id],
     ["property", "like", `%${newBusinessUnit.value.business_unit}%`],
     ["status", "=", "Completed"],
+    ["creation", ">=", formattedDate] // Filter to include records from the last month
   ];
 
   if (data) {

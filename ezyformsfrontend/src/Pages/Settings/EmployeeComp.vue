@@ -305,7 +305,6 @@
 
         </div>
       </div>
-
     </div>
     <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-lg">
@@ -325,6 +324,14 @@
                   <label class="font-13 ps-1" for="emp_code">Emp code<span class="text-danger ps-1">*</span></label>
                   <FormFields class="mb-3" tag="input" type="text" name="emp_code" id="emp_code"
                     placeholder="Enter department code" v-model="createEmployee.emp_code" />
+                  <!-- <div class="mb-3">
+                        <label class="font-13 ps-1" for="emp_phone">Emp Phone</label>
+                        <FormFields tag="input" type="text" name="emp_phone" id="emp_phone" maxlength="10"
+                          @change="validatephone" placeholder="Enter Phone Number" v-model="createEmployee.emp_phone" />
+                        <p v-if="phoneError" class="text-danger font-11 ps-1">
+                          {{ phoneError }}
+                        </p>
+                      </div> -->
                   <div class="mb-3">
                     <label class="font-13 ps-1" for="emp_phone">Emp Phone</label>
                     <div class="input-container">
@@ -337,16 +344,6 @@
                       {{ phoneError }}
                     </p>
                   </div>
-                  <!-- <div class="mb-3">
-                    <label class="font-13 ps-1" for="emp_mail_id">Emp Mail ID<span
-                        class="text-danger ps-1">*</span></label>
-                    <FormFields class="mb-1" tag="input" type="email" name="emp_mail_id" @change="validateEmail"
-                      :required="true" id="emp_mail_id" placeholder="Enter Email"
-                      v-model="createEmployee.emp_mail_id" />
-                    <p v-if="emailError" class="text-danger font-11 ps-1">
-                      {{ emailError }}
-                    </p>
-                  </div> -->
                   <div class="mb-3">
                     <label class="font-13 ps-1" for="emp_mail_id">Emp Mail ID<span
                         class="text-danger ps-1">*</span></label>
@@ -780,7 +777,7 @@ const emailError = ref("");
 // };
 const validateEmail = () => {
   const email = originalEmail.value || createEmployee.value.emp_mail_id;
-  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
   if (!emailPattern.test(email)) {
     emailError.value = "Invalid email address";
@@ -788,6 +785,23 @@ const validateEmail = () => {
     emailError.value = "";
   }
 };
+
+
+function bulkEmp() {
+  showEmployeebulk.value = false
+}
+
+function backtoEmployeeList() {
+  showEmployeebulk.value = true
+}
+// const validatephone = () => {
+//   if (createEmployee.value.emp_phone) {
+//     const phone = createEmployee.value.emp_phone;
+//     const phonePattern = /^\d{10}$/;
+//     phoneError.value = phonePattern.test(phone) ? "" : "Invalid phone number.";
+//   }
+// };
+
 
 const isMasked = ref(true);
 const originalPhone = ref("");
@@ -811,21 +825,6 @@ const toggleMask = () => {
     : originalPhone.value;
 };
 
-function bulkEmp() {
-  showEmployeebulk.value = false
-}
-
-function backtoEmployeeList() {
-  showEmployeebulk.value = true
-}
-// const validatephone = () => {
-//   if (createEmployee.value.emp_phone) {
-//     const phone = createEmployee.value.emp_phone;
-//     const phonePattern = /^\d{10}$/;
-//     phoneError.value = phonePattern.test(phone) ? "" : "Invalid phone number.";
-//   }
-// };
-
 
 const validatephone = () => {
   const phone = originalPhone.value || createEmployee.value.emp_phone;
@@ -835,6 +834,15 @@ const validatephone = () => {
     phoneError.value = "";
   }
 };
+
+
+// const validatephone = () => {
+//   if (createEmployee.value.emp_phone) {
+//     const phone = createEmployee.value.emp_phone;
+//     const phonePattern = /^\d{10}$/;
+//     phoneError.value = phonePattern.test(phone) ? "" : "Invalid phone number.";
+//   }
+// };
 const filterObj = ref({
   limitPageLength: "None",
   limit_start: 0,

@@ -275,7 +275,7 @@
                                                     </button> -->
                         </div>
                       </div>
-                      <FormPreview :blockArr="selectedform" :formDescriptions="formDescriptions"
+                      <FormPreview :blockArr="selectedform" :formDescriptions="formDescriptions" 
                         :childHeaders="childtableHeaders" />
                       <div class="main-block" ref="mainBlockRef">
                         <!-- Here is block level starts -->
@@ -394,7 +394,7 @@
                                   <div class="d-flex justify-content-between align-items-center">
                                     <label class="rownames">{{
                                       getRowSuffix(rowIndex)
-                                      }}</label>
+                                    }}</label>
                                     <div>
                                       <button v-if="row.columns.length < 3"
                                         class="btn btn-light bg-transparent border-0 font-12" @click="
@@ -588,7 +588,7 @@
                                               </div>
                                             </div>
                                             <small v-if="field.error" class="text-danger font-10">{{ field.error
-                                              }}</small>
+                                            }}</small>
                                           </div>
                                         </div>
 
@@ -638,7 +638,7 @@
 
                                       <!-- Loop through each table inside childTableFields -->
 
-                                      <div v-for="(fields, tableName, index,) in childtableHeaders" :key="index">
+                                      <div v-for="(fields, tableName) in childtableHeaders" :key="tableName">
 
                                         <div>
                                           <span class="font-13 fw-bold">{{ tableName.replace(/_/g, " ") }} </span>
@@ -858,6 +858,8 @@ const searchDesignation = ref("");
 const wrkAfterGetData = ref([]);
 // const hasWorkflowToastShown = ref(false);
 const tableFieldsCache = ref([]);
+
+// const childtableRows = ref([]);
 const childtableHeaders = ref([]);
 // const childtableName = ref("");
 // const childTableresponseData = ref([]);
@@ -1385,7 +1387,7 @@ function cancelForm() {
 }
 const handleStepClick = (stepId) => {
   if (isNextDisabled.value) {
-    toast.error("Please complete all required fields before proceeding.", {
+    toast.error("Please check all required fields before proceeding.", {
       autoClose: 2000,
       transition: "zoom",
     });
@@ -1401,7 +1403,7 @@ const handleStepClick = (stepId) => {
 
 const nextStep = () => {
   if (isNextDisabled.value) {
-    toast.error("Please complete all required fields before proceeding.", {
+    toast.error("Please check all required fields before proceeding.", {
       autoClose: 2000,
       transition: "zoom",
     });
@@ -2054,6 +2056,22 @@ function handleInputChange(event, fieldType) {
     return;
   } else {
     formShortNameError.value = ""; // Clear error if input is valid
+  }
+
+  // Check for special characters (allow only letters and numbers)
+  if (/[^a-zA-Z0-9]/.test(inputValue)) {
+    if (fieldType === "form_name") {
+      formNameError.value = "Special characters are not allowed";
+    } else if (fieldType === "form_short_name") {
+      formShortNameError.value = "Special characters are not allowed";
+    }
+    return;
+  } else {
+    if (fieldType === "form_name") {
+      formNameError.value = "";
+    } else if (fieldType === "form_short_name") {
+      formShortNameError.value = "";
+    }
   }
 
   // Set filter based on fieldType
