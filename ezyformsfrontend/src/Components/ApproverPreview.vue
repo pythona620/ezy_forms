@@ -385,8 +385,11 @@ const filteredBlocks = computed(() => {
             emit("updateField", field);
           }
           if (field.label === "Approved By") {
-            field.value = employee.signature;
-            emit("updateField", field);
+            if(employee.signature){
+
+              field.value = employee.signature;
+              emit("updateField", field);
+            }
 
             // if (field.value) {
             //   logFieldValue({ target: { value: field.value } }, lastBlock, sectionIndex, rowIndex, columnIndex, fieldIndex);

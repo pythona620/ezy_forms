@@ -264,7 +264,7 @@ function downloadPdf() {
 
     const dataObj = {
         "form_short_name": formDescriptions.value.form_short_name,
-        "name": "",
+        "name": null,
         business_unit:businessUnit.value
     };
 
