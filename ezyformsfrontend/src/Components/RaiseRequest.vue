@@ -7,7 +7,6 @@
     <div class="container">
       <div v-if="blockArr.length" class="position-relative">
         <div class="requestPreviewDiv">
-<<<<<<< HEAD
           <RequestPreview :blockArr="blockArr" :formName="selectedData.selectedform" @updateField="handleFieldUpdate"
             @formValidation="isFormValid = $event" />
           <!-- @formValidation="isFormValid = $event" -->
@@ -47,49 +46,6 @@
               <button class="btn btn-light font-12" @click="addRow(tableIndex)">Add Row</button>
             </div>
           </div>
-=======
-          <RequestPreview
-            :blockArr="blockArr"
-            :formName="selectedData.selectedform"
-            @updateField="handleFieldUpdate" @formValidation="isFormValid = $event"
-          />
-            <!-- @formValidation="isFormValid = $event" -->
-
-      <!-- <span class="font-13 fw-bold">{{ table.childTableName.replace(/_/g, " ") }}</span> -->
-      <div class="mt-3">
-  <div v-for="(table, tableIndex) in tableHeaders" :key="tableIndex" class="mt-3">
-    <div>
-      <span class="font-13 fw-bold">Table {{ tableIndex.replace(/_/g," ") }}</span>
-    </div>
-    
-    <table class="table table-striped" border="1" width="100%">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th v-for="field in table" :key="field.fieldname">
-            {{ field.label }}
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(row, rowIndex) in tableRows[tableIndex]" :key="rowIndex">
-          <td style="text-align: center;">{{ rowIndex + 1 }}</td>
-          <td v-for="field in table" :key="field.fieldname">
-            <template v-if="field.fieldtype === 'Data'">
-              <input type="text" class="form-control" v-model="row[field.fieldname]" />
-            </template>
-            <template v-else-if="field.fieldtype === 'Attach'">
-              <input type="file" class="form-control" @change="handleFileUpload($event, row, field.fieldname)" />
-            </template>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
-    <button class="btn btn-light font-12" @click="addRow(tableIndex)">Add Row</button>
-  </div>
-</div>
->>>>>>> b3c4b29ef1201d3f034775c6bcb6145372170774
 
 
         </div>
@@ -198,7 +154,7 @@ function RequestUpdate() {
     .post(apis.Update_raising_request, data_obj)
     .then((resp) => {
       if (resp?.message?.success) {
-        
+
         toast.success("Request Raised", {
           autoClose: 2000,
           transition: "zoom",
@@ -230,7 +186,7 @@ function EditRequestUpdate() {
     .post(apis.edit_form_before_approve, data_obj)
     .then((resp) => {
       if (resp?.message?.success) {
-        
+
         toast.success("Request Raised", {
           autoClose: 2000,
           transition: "zoom",
@@ -283,7 +239,7 @@ function clearFrom() {
   window.location.reload()
   tableRows.value = []
 
- }
+}
 function deptData(value = null) {
   const filters = [["business_unit", "like", `%${business_unit.value}%`]];
   const queryParams = {
@@ -768,7 +724,7 @@ function request_raising_fn(item) {
   axiosInstance.post(apis.raising_request, data_obj).then((resp) => {
     if (resp?.message?.success === true) {
       toast.success("Request Raised", {
-        autoClose: 2000,
+        autoClose: 1000,
         transition: "zoom",
         onClose: () => {
           router.push({ path: "/todo/raisedbyme" });

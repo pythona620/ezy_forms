@@ -2,10 +2,10 @@
   <div class="bg-img">
     <div v-if="ShowLoginPage" class="input-div p-5">
       <div class="d-flex gap-2 p-2 justify-content-center align-items-center">
-        <div><img class="imgmix" src="../assets/favicon.jpg" /></div>
-        <div class="m-0">
+        <div><img class="imgmix" src="../assets/Final-logo-ezyforms-removebg-preview.png" /></div>
+        <!-- <div class="m-0">
           <p class="fontimgtext fw-medium m-0">EZY | Forms</p>
-        </div>
+        </div> -->
       </div>
 
       <div>
@@ -415,7 +415,7 @@ export default {
                   JSON.stringify(employeeData.designation)
                 );
                 setTimeout(() => {
-                  this.$router.push({ path: "/todo/receivedform" }); // Navigate dynamically
+                  this.$router.push({ path: "/dashboard/maindash" }); // Navigate dynamically
                 }, 700);
               })
               .catch((error) => {

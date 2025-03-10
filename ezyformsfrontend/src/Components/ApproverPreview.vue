@@ -29,7 +29,7 @@
                         <span class="font-12">{{ field.label }}</span>
                         <span class="ms-1 text-danger">{{
                           field.reqd === 1 ? "*" : ""
-                          }}
+                        }}
 
                         </span>
                         <span class="pe-2" v-if="props.readonlyFor === 'true' || blockIndex < currentLevel">:</span>
@@ -111,7 +111,7 @@
                     <!-- @click="openInNewWindow(field.value)" -->
                     <template v-else-if="field.fieldtype == 'Attach'">
                       <div v-if="field.value" class="position-relative d-inline-block"
-                        :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'image-border-bottom' : ''">
+                        :class="props.readonlyFor === 'true' ? 'image-border-bottom' : ''">
                         <img v-if="isImageFile(field.value)" :src="field.value"
                           class="img-thumbnail mt-2 cursor-pointer border-0" style="max-width: 100px; max-height: 100px"
                           @mouseover="showPreview = true" @mouseleave="showPreview = false" />
@@ -155,9 +155,9 @@
                         </div>
                       </div>
 
-                      <input :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'
+                      <input :disabled="props.readonlyFor === 'true'
                         " v-else type="file" accept="image/jpeg,image/png,application/pdf"
-                        :class="props.readonlyFor === 'true' ? 'd-none' : ' '" :id="'field-' +
+                        :class="props.readonlyFor === 'true' ? 'd-none ' : ' '" :id="'field-' +
                           sectionIndex +
                           '-' +
                           columnIndex +
@@ -377,8 +377,11 @@ const filteredBlocks = computed(() => {
             emit("updateField", field);
           }
           if (field.label === "Approved By") {
-            field.value = employee.signature;
-            emit("updateField", field);
+            if (employee.signature) {
+
+              field.value = employee.signature;
+              emit("updateField", field);
+            }
 
             // if (field.value) {
             //   logFieldValue({ target: { value: field.value } }, lastBlock, sectionIndex, rowIndex, columnIndex, fieldIndex);
@@ -624,6 +627,7 @@ const uploadFile = (file, field) => {
   axiosInstance
     .post(apis.uploadfile, formData)
     .then((res) => {
+      console.log(res, res.message.file_url);
       if (res.message && res.message.file_url) {
         if (field["value"]) {
           field["value"] += `, ${res.message.file_url}`;
@@ -631,6 +635,7 @@ const uploadFile = (file, field) => {
           field["value"] = res.message.file_url;
         }
         emit("updateField", field);
+        console.log(field);
       } else {
         console.error("file_url not found in the response.");
       }

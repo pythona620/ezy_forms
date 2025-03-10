@@ -90,7 +90,7 @@
                   <span>{{ item.role }}</span><br />
                   <span class="font-12 text-secondary">{{
                     item.reason || "N/A"
-                  }}</span>.
+                    }}</span>.
 
                 </p>
               </div>
@@ -204,7 +204,16 @@ const formatAction = (action) => {
 };
 // Function to capture the form data from ApproverPreview
 const updateFormData = (fieldValues) => {
-  emittedFormData.value = emittedFormData.value.concat(fieldValues);
+  // console.log(fieldValues, "pp");
+  // console.log(emittedFormData.value);
+
+  // Ensure emittedFormData.value is an array before updating
+  emittedFormData.value = [
+    ...emittedFormData.value.filter(field => field.fieldname !== fieldValues.fieldname),
+    fieldValues
+  ];
+
+  // console.log(emittedFormData.value, "======");
 };
 
 // Function to handle form submission
@@ -224,6 +233,7 @@ function ApproverFormSubmission(dataObj, type) {
       form[each.fieldname] = each.value;
     });
   }
+  console.log(loading.value, dataObj, type, form);
 
   axiosInstance
     .put(`${apis.resource}${selectedData.value.doctype_name}/${doctypeForm.value.name}`, form)
