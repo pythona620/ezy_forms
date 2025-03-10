@@ -6,6 +6,9 @@
               class="bi bi-arrow-left px-2"></i></span>Back</router-link>
       </div>
     </div>
+
+
+
     <div class="container-fluid">
       <div class="row">
         <div class="col-3"></div>
@@ -26,9 +29,8 @@
 
               </div>
 
-              <div v-if="selectedData.type !== 'myforms'" class="">
-                <!-- v-if="!requestcancelled" -->
-                <div class="approveBtns pb-2 mb-2 mt-3 flex-column px-0 pe-4">
+              <div v-if="selectedData.type !== 'myforms' && selectedData.type !== 'myteam'" class="">
+                <div class="approveBtns pb-4  mt-3 flex-column px-0 pe-4">
                   <div class="form-floating mb-2 p-1">
                     <textarea class="form-control font-12" placeholder="Leave a comment here" id="floatingTextarea"
                       @input="resetCommentsValidation" :class="{ 'is-invalid': !isCommentsValid }"
@@ -38,14 +40,16 @@
                   </div>
                   <div class=" d-flex justify-content-between ">
                     <div>
-                      <button class="btn btn-outline-danger font-10 py-0 rejectbtn" type="button" @click="
-                        ApproverCancelSubmission(formData, 'Request Cancelled')
-                        ">
-                        <span><i class="bi bi-x-lg me-2"></i></span>Reject
+                      <button :disabled="rejectLoad" class="btn btn-outline-danger font-10 py-0 rejectbtn" type="button"
+                        @click="ApproverCancelSubmission(formData, 'Request Cancelled')">
+                        <span v-if="rejectLoad" class="spinner-border spinner-border-sm" role="status"
+                          aria-hidden="true"></span>
+                        <span v-if="!rejectLoad"><i class="bi bi-x-lg fw-bolder font-12 me-2"></i><span
+                            class="font-12">Reject</span></span>
                       </button>
                     </div>
                     <div>
-                      <button type="submit" class="btn btn-success approvebtn"
+                      <button :disabled="loading" type="submit" class="btn btn-success approvebtn"
                         @click.prevent="ApproverFormSubmission(emittedFormData, 'Approve')">
                         <span v-if="loading" class="spinner-border spinner-border-sm" role="status"
                           aria-hidden="true"></span>
@@ -74,10 +78,23 @@
                   {{ tableData.total_levels }})</span>
               </div>
             </div> -->
-            <div class="mt-5 pt-2">
-              <h6 class="font-14 ps-3 mb-3">Activity log <span class="text-warning font-12  fw-bold">
+            <div class="mt-5 mb-3 pt-2 d-flex justify-content-between align-items-center">
+              <h6 class="font-14 ps-3  mb-0">Activity log <span
+                  v-if="tableData?.status !== 'Completed' && tableData.status !== 'Request Cancelled'"
+                  class="text-warning font-12  fw-bold">
                   Pending ({{ tableData.current_level }} /
-                  {{ tableData.total_levels }})</span></h6>
+                  {{ tableData?.total_levels }})</span>
+                <span class=" font-11 status_completed" v-if="tableData?.status === 'Completed'">
+                  Completed
+                </span>
+                <span class=" font-11 requestRejected" v-if="tableData?.status === 'Request Cancelled'">
+                  Request Rejected
+                </span>
+              </h6>
+              <button v-if="tableData.status === 'Completed'"
+                class="btn btn-light font-12 fw-bold text-decoration-underline" type="button" @click="downloadPdf"><i
+                  class="bi bi-arrow-down-circle fw-bold px-1"></i>Download
+                PDF</button>
             </div>
             <div v-for="(item, index) in activityData" :key="index" class="activity-log-item"
               :class="{ 'last-item': index === activityData.length - 1 }">
@@ -90,7 +107,7 @@
                   <span>{{ item.role }}</span><br />
                   <span class="font-12 text-secondary">{{
                     item.reason || "N/A"
-                    }}</span>.
+                  }}</span>.
 
                 </p>
               </div>
@@ -106,9 +123,23 @@
               </div>
             </div> -->
           </div>
+
+
+          <!-- <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+
+            <div class="offcanvas-header">
+              <h5 class="offcanvas-title" id="offcanvasRightLabel">Offcanvas right</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body">
+              <div v-html="pdfPreview"></div>
+            </div>
+          </div> -->
         </div>
       </div>
     </div>
+
+
   </div>
 </template>
 
@@ -117,7 +148,7 @@ import { onMounted, ref, watch, computed } from "vue";
 import ApproverPreview from "./ApproverPreview.vue";
 import { useRoute, useRouter } from "vue-router";
 import axiosInstance from "../shared/services/interceptor";
-import { apis, doctypes } from "../shared/apiurls";
+import { apis, doctypes, domain } from "../shared/apiurls";
 import { EzyBusinessUnit } from "../shared/services/business_unit";
 import { rebuildToStructuredArray } from "../shared/services/field_format";
 import ButtonComp from "./ButtonComp.vue";
@@ -141,10 +172,8 @@ const backTo = ref(selectedData.value.routepath);
 
 const router = useRouter();
 
-const businessUnit = computed(() => {
-  return EzyBusinessUnit.value;
-});
-const newBusinessUnit = ref({ business_unit: "" });
+const businessUnit = computed(() => EzyBusinessUnit.value);
+const business_unit = ref('');
 const filterObj = ref({ limitPageLength: "None", limit_start: 0 });
 const totalRecords = ref(0);
 const tableData = ref([]);
@@ -155,8 +184,9 @@ const activityData = ref([]);
 const ApproverReason = ref("");
 const selectedcurrentLevel = ref("");
 const doctypeForm = ref([]);
-const loading = ref(false)
-
+const loading = ref(false);
+const rejectLoad = ref(false)
+const pdfPreview = ref("");
 const tableRows = ref([]);
 const tableHeaders = ref([]);
 const tableName = ref("");
@@ -168,6 +198,8 @@ const resetCommentsValidation = () => {
     isCommentsValid.value = true;
   }
 };
+
+const ApprovePDF = ref(true)
 // Format the date for display
 // const formatDate = (dateString) => {
 //   if (!dateString) return "N/A";
@@ -189,10 +221,22 @@ onMounted(() => {
     console.error("Error parsing employeeData from localStorage:", error);
     employeeData.value = []; // Fallback to empty array if there's an error
   }
+
 });
 
-
-
+watch(
+  businessUnit,
+  (newVal) => {
+    const local = localStorage.getItem("Bu")
+    business_unit.value = newVal;
+    business_unit.value = local
+    if (newVal) {
+      console.log(business_unit.value, newVal, "ll");
+      receivedForMe();
+    }
+  },
+  { immediate: true }
+);
 
 const formatAction = (action) => {
   if (!action) return "performed an action on";
@@ -300,14 +344,13 @@ function approvalStatusFn(dataObj, type) {
 function ApproverCancelSubmission(dataObj, type) {
 
   if (ApproverReason.value.trim() === "") {
-    // Set the validation flag to false if the comment is empty
     isCommentsValid.value = false;
-
-    return; // Stop function execution
-  } else {
-    // Proceed if comments are valid
-    isCommentsValid.value = true;
+    return;
   }
+
+  isCommentsValid.value = true;
+  rejectLoad.value = true; // Start loader
+
 
 
 
@@ -318,62 +361,108 @@ function ApproverCancelSubmission(dataObj, type) {
     });
   }
   axiosInstance
-    .put(
-      `${apis.resource}${selectedRequest.value.doctype_name}/${doctypeForm.value.name}`,
-      form
-    )
+    .put(`${apis.resource}${selectedData.value.doctype_name}/${doctypeForm.value.name}`, form)
     .then((response) => {
       if (response?.data) {
         approvalCancelFn(dataObj, type);
+      } else {
+        rejectLoad.value = false; // Stop loader on failure
+        toast.error("Failed to cancel request", { autoClose: 1000, transition: "zoom" });
       }
+    })
+    .catch((error) => {
+      console.error("Error cancelling request:", error);
+      rejectLoad.value = false; // Stop loader on error
+      toast.error("An error occurred while cancelling the request.", { autoClose: 1000, transition: "zoom" });
     });
 }
 
 
 
-function approvalCancelFn(dataObj, type) {
-  // let files = this.selectedFileAttachments.map((res: any) => res.url);
+// function approvalCancelFn(dataObj, type) {
+//   // let files = this.selectedFileAttachments.map((res: any) => res.url);
 
-  console.log(dataObj, "data");
+//   console.log(dataObj, "data");
+
+//   let data = {
+//     property: selectedRequest.value.property,
+//     doctype: selectedRequest.value.doctype_name,
+//     request_id: selectedRequest.value.name,
+//     reason: type == "Request Cancelled" ? "Cancelled" : "",
+//     action: type,
+//     files: [],
+//     url_for_cancelling_id: "",
+//     current_level: selectedRequest.value.current_level,
+//   };
+//   axiosInstance.post(apis.wf_cancelling_request, data).then((response) => {
+//     if (response?.message?.success) {
+//       router.push({
+//         name: "ReceivedForMe",
+//       });
+//     }
+//   });
+// }
+
+function approvalCancelFn(dataObj, type) {
+  console.log("approvalCancelFn Data:", dataObj);
 
   let data = {
-    property: selectedRequest.value.property,
-    doctype: selectedRequest.value.doctype_name,
-    request_id: selectedRequest.value.name,
-    reason: type == "Request Cancelled" ? "Cancelled" : "",
+    property: tableData.value.property,
+    doctype: tableData.value.doctype_name,
+    request_id: tableData.value.name,
+    reason: ApproverReason.value,
     action: type,
     files: [],
     url_for_cancelling_id: "",
-    current_level: selectedRequest.value.current_level,
+    current_level: tableData.value.current_level,
   };
-  axiosInstance.post(apis.wf_cancelling_request, data).then((response) => {
-    if (response?.message?.success) {
-      router.push({
-        name: "ReceivedForMe",
-      });
-    }
-  });
+
+  axiosInstance
+    .post(apis.wf_cancelling_request, data)
+    .then((response) => {
+      if (response?.message) {
+        toast.success(`${type}`, {
+          autoClose: 1000,
+          transition: "zoom",
+          onClose: () => {
+            router.push({ name: "ReceivedForMe" }); // Navigate after toast
+          },
+        });
+      } else {
+        toast.error(`Failed to ${type} request`, { autoClose: 1000, transition: "zoom" });
+      }
+    })
+    .catch((error) => {
+      console.error("Error processing cancellation:", error);
+      toast.error("An error occurred while cancelling the request.", { autoClose: 1000, transition: "zoom" });
+    })
+    .finally(() => {
+      rejectLoad.value = false; // Ensure loader stops
+    });
 }
+
 function receivedForMe(data) {
   // Initialize filters array for building dynamic query parameters
   const EmpRequestdesignation = JSON.parse(
     localStorage.getItem("employeeData")
   );
   const filters = [
-    ["property", "like", `%${newBusinessUnit.value.business_unit}%`],
+    ["property", "like", `%${business_unit.value}%`],
     ["name", "like", `%${selectedData.value.formname}%`],
   ];
   if (data) {
     filters.push(data);
   }
-  if (selectedData.value.type == "myforms") {
-    filters.push(["requested_by", "like", EmpRequestdesignation.emp_mail_id]);
-  } else {
-    filters.push([
-      "assigned_to_users",
-      "like",
-      `%${EmpRequestdesignation?.designation}%`,
-    ]);
+  if (selectedData.value.type !== 'myteam') {
+    if (selectedData.value.type == "myforms") {
+      filters.push(["requested_by", "like", EmpRequestdesignation.emp_mail_id]);
+    } else {
+      filters.push([
+        "assigned_to_users",
+        "like",
+        `%${EmpRequestdesignation?.designation}%`,
+      ]);
+    }
   }
 
   const queryParams = {
@@ -409,6 +498,7 @@ function receivedForMe(data) {
     })
     .then((res) => {
       tableData.value = res.data[0];
+
       showRequest.value = rebuildToStructuredArray(
         JSON.parse(tableData.value?.json_columns).fields
       );
@@ -486,6 +576,72 @@ function getdata(formname) {
       console.error("Error fetching categories data:", error);
     });
 }
+// function viewasPdfView() {
+//   console.log(doctypeForm.value, tableData.value);
+//   ApprovePDF.value = !ApprovePDF.value;
+//   const dataObj = {
+//     form_short_name: tableData.value.doctype_name,
+//     name: doctypeForm.value.name,
+//     business_unit: businessUnit.value
+
+//   };
+
+//   axiosInstance
+//     .post(apis.preview_dynamic_form, dataObj)
+//     .then((response) => {
+//       pdfPreview.value = response.message;
+//       if (response.message) {
+
+//       }
+
+
+
+//     })
+//     .catch((error) => {
+//       console.error("Error fetching data:", error);
+//     });
+// }
+
+
+function downloadPdf() {
+  const dataObj = {
+    form_short_name: tableData.value.doctype_name,
+    name: doctypeForm.value.name,
+    business_unit: business_unit.value
+  };
+
+  axiosInstance
+    .post(apis.download_pdf_form, dataObj)
+    .then((response) => {
+      if (!response || !response.message) {
+        console.error("Invalid response:", response);
+        return;
+      }
+
+      let pdfUrl = domain + response.message;
+
+      // Remove '/api' from the URL if present
+      pdfUrl = pdfUrl.replace("/api", "");
+
+      // Extract filename safely
+      const fileName = response.message.includes("/")
+        ? response.message.split("/").pop()
+        : "download.pdf";
+
+      // Create and trigger download
+      const link = document.createElement("a");
+      link.href = pdfUrl;
+      link.download = fileName;
+      link.target = "_blank"; // Helps with some browser restrictions
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    })
+    .catch((error) => {
+      console.error("Error downloading PDF:", error);
+    });
+}
+
 // const openFile = (filePath) => {
 //   if (!filePath) return;
 //   const fileUrl = `${filePath}`;
@@ -552,17 +708,7 @@ watch(activityData, (newVal) => {
   console.log("Request Cancelled?", requestcancelled.value);
 });
 
-watch(
-  businessUnit,
-  (newVal) => {
-    if (newVal) {
-      console.log(newVal, businessUnit.value);
-      newBusinessUnit.value.business_unit = newVal;
-      receivedForMe();
-    }
-  },
-  { immediate: true }
-);
+
 </script>
 
 <style lang="scss" scoped>
@@ -761,5 +907,21 @@ td {
 
 .strong-content {
   font-weight: 500;
+}
+
+.status_completed {
+  color: #2BED12;
+  border: 1px solid #2BED12;
+  border-radius: 10px;
+  padding: 2px 5px;
+  margin: 0px 5px;
+}
+
+.requestRejected {
+  color: #fe212e;
+  border: 1px solid #fe212e;
+  border-radius: 10px;
+  padding: 2px 5px;
+  margin: 0px 5px;
 }
 </style>

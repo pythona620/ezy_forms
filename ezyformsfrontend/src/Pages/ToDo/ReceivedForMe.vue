@@ -41,10 +41,10 @@
                     ({{ item.role }}) has
                     <strong class="strong-content">{{
                       formatAction(item.action)
-                    }}</strong>
+                      }}</strong>
                     the request<span v-if="index !== 0 && item.reason">with the comments:</span>
                     <strong v-if="index !== 0 && item.reason" class="strong-content">{{ item.reason || "N/A"
-                      }}</strong>
+                    }}</strong>
                   </p>
                 </div>
               </div>
@@ -66,9 +66,9 @@
                 </button> -->
                 <button type="submit" class="btn btn-outline-danger font-12 py-0 rejectbtn" :disabled="Rejectloading"
                   @click.prevent="ApproverCancelSubmission(formData, 'Request Cancelled')">
-                  <span v-if="Rejectloading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                  <span v-if="!Rejectloading"><i class="bi bi-x-lg me-2"></i><span
-                      class="font-12">Reject</span></span>
+                  <span v-if="Rejectloading" class="spinner-border spinner-border-sm" role="status"
+                    aria-hidden="true"></span>
+                  <span v-if="!Rejectloading"><i class="bi bi-x-lg me-2"></i><span class="font-12">Reject</span></span>
                 </button>
               </div>
               <div>
@@ -444,11 +444,11 @@ function ApproverCancelSubmission(dataObj, type) {
     isCommentsValid.value = false;
 
     return; // Stop function execution
-  } 
-    // Proceed if comments are valid
-    isCommentsValid.value = true;
-  
-    Rejectloading.value = true; // Start loader
+  }
+  // Proceed if comments are valid
+  isCommentsValid.value = true;
+
+  Rejectloading.value = true; // Start loader
 
 
 
@@ -474,7 +474,7 @@ function ApproverCancelSubmission(dataObj, type) {
 function approvalCancelFn(dataObj, type) {
 
 
-  console.log(dataObj, "data",type);
+  console.log(dataObj, "data", type);
   let data = {
     property: selectedRequest.value.property,
     doctype: selectedRequest.value.doctype_name,
@@ -625,6 +625,7 @@ function receivedForMe(data) {
     // assigned_to_users
     ["assigned_to_users", "like", `%${EmpRequestdesignation?.designation}%`],
     ["property", "like", `%${newBusinessUnit.value.business_unit}%`],
+    ["status", "!=", "Request Cancelled"],
   ];
   if (data) {
     filters.push(data);

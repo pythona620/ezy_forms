@@ -42,8 +42,7 @@
             </div>
           </div>
           <div class="modal-body approvermodalbody">
-            <ApproverPreview :blockArr="showRequest" :readonly-for="true" :current-level="totalLevels"
-              @updateField="updateFormData" />
+            <ApproverPreview :blockArr="showRequest" :current-level="totalLevels" @updateField="updateFormData" />
           </div>
           <div class="activity-log-container">
             <div v-for="(item, index) in activityData" :key="index" class="activity-log-item"
@@ -283,6 +282,7 @@ function viewPreview(data, index, type) {
           name: data.name,
           doctype_name: data.doctype_name,
           type: "myforms",
+          readOnly: 'true'
         },
       });
     }
@@ -664,12 +664,12 @@ function inLineFiltersData(searchedData) {
 function receivedForMe(data) {
   // Initialize filters array for building dynamic query parameters
   const EmpRequestMail = JSON.parse(localStorage.getItem("employeeData"));
-  
+
   // Calculate the date one month ago
   const oneMonthAgo = new Date();
   oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
   const formattedDate = oneMonthAgo.toISOString().split('T')[0];
-  
+
   const filters = [
     ["requested_by", "like", EmpRequestMail.emp_mail_id],
     ["property", "like", `%${newBusinessUnit.value.business_unit}%`],
@@ -829,4 +829,6 @@ onMounted(() => {
 .activity-log-content strong {
   color: #333;
 }
+
+
 </style>

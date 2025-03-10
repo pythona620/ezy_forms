@@ -112,7 +112,7 @@
                     <template v-else-if="field.fieldtype == 'Attach'">
                       <div v-if="field.value" class="position-relative d-inline-block"
                         :class="props.readonlyFor === 'true' ? 'image-border-bottom' : ''">
-                        <img v-if="isImageFile(field.value)" :src="field.value"
+                        <img v-if="isImageFile(field.value) || field.value" :src="field.value"
                           class="img-thumbnail mt-2 cursor-pointer border-0" style="max-width: 100px; max-height: 100px"
                           @mouseover="showPreview = true" @mouseleave="showPreview = false" />
 
