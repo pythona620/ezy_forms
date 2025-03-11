@@ -113,8 +113,8 @@
                         :class="props.readonlyFor === true ? 'image-border-bottom' : ''">
                         <img v-if="isImageFile(field.value)" :src="field.value" alt="Attachment Preview"
                           class="img-thumbnail mt-2 cursor-pointer border-0" style="max-width: 100px; max-height: 100px"
-                          @mouseover="showPreview = true" @mouseleave="showPreview = false" />
-
+                           />
+                           <!-- @mouseover="showPreview = true" @mouseleave="showPreview = false" -->
                         <!-- Close Icon to Remove Image -->
                         <i class="bi bi-x-lg position-absolute  text-danger cursor-pointer"
                           :class="props.readonlyFor === true ? 'd-none' : ''" style="

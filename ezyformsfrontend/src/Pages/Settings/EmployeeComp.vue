@@ -46,7 +46,8 @@
                       <div class="mb-3">
                         <label class="font-13 ps-1" for="emp_phone">Emp Phone</label>
                         <FormFields tag="input" type="text" name="emp_phone" id="emp_phone" maxlength="10"
-                          @change="validatephone" placeholder="Enter Phone Numver" v-model="createEmployee.emp_phone" />
+                          @change="validatephonenew" placeholder="Enter Phone Numver"
+                          v-model="createEmployee.emp_phone" />
                         <p v-if="phoneError" class="text-danger font-11 ps-1">
                           {{ phoneError }}
                         </p>
@@ -789,24 +790,36 @@ const isMasked = ref(true);
 const originalPhone = ref("");
 
 const eyeIcon = computed(() => (isMasked.value ? "bi bi-eye-slash-fill" : "bi bi-eye-fill"));
-
 const maskPhoneNumber = () => {
-  const phone = createEmployee.value?.emp_phone || ""; // Ensure it's a string
-  if (!isMasked.value || phone.length < 10) return;
+  const phone = createEmployee.value.emp_phone || ""; // Ensure it's a string
+  //if (phone.length < 10) return; // Only mask valid phone numbers
 
-  originalPhone.value = phone;
-  createEmployee.value.emp_phone = "******" + phone.slice(-4);
+  if (isMasked.value) {
+    originalPhone.value = phone;
+    createEmployee.value.emp_phone = "******" + phone.slice(-4);
+  }
 };
-
 const toggleMask = () => {
   if (!originalPhone.value) return;
 
+  if (isMasked.value) {
+    const confirmView = window.confirm("Are you sure you want to see the phone number?");
+    if (!confirmView) return; // If user cancels, do nothing
+  }
+
   isMasked.value = !isMasked.value;
   createEmployee.value.emp_phone = isMasked.value
-    ? "******" + (originalPhone.value?.slice(-4) || "")
+    ? "******" + originalPhone.value.slice(-4)
     : originalPhone.value;
 };
+// const toggleMask = () => {
+//   if (!originalPhone.value) return;
 
+//   isMasked.value = !isMasked.value;
+//   createEmployee.value.emp_phone = isMasked.value
+//     ? "******" + originalPhone.value.slice(-4)
+//     : originalPhone.value;
+// };
 
 const validatephone = () => {
   const phone = originalPhone.value || createEmployee.value.emp_phone;
@@ -816,6 +829,16 @@ const validatephone = () => {
     phoneError.value = "";
   }
 };
+
+// Watch for phone input and update the original value
+watch(
+  () => createEmployee.value.emp_phone,
+  (newVal) => {
+    if (!isMasked.value) {
+      originalPhone.value = newVal;
+    }
+  }
+);
 
 const isEmailMasked = ref(true);
 const originalEmail = ref("");
@@ -833,8 +856,14 @@ const maskEmail = () => {
   }
 };
 
+
 const toggleEmailMask = () => {
   if (!originalEmail.value) return;
+
+  if (isEmailMasked.value) {
+    const confirmView = window.confirm("Are you sure you want to see the email address?");
+    if (!confirmView) return; // If user cancels, do nothing
+  }
 
   isEmailMasked.value = !isEmailMasked.value;
   createEmployee.value.emp_mail_id = isEmailMasked.value
@@ -842,17 +871,26 @@ const toggleEmailMask = () => {
     : originalEmail.value;
 };
 
+// const toggleEmailMask = () => {
+//   if (!originalEmail.value) return;
+
+//   isEmailMasked.value = !isEmailMasked.value;
+//   createEmployee.value.emp_mail_id = isEmailMasked.value
+//     ? maskEmailFormat(originalEmail.value)
+//     : originalEmail.value;
+// };
+
 const maskEmailFormat = (email) => {
   const [localPart, domain] = email.split("@");
   return localPart.length > 3 ? localPart.slice(0, 3) + "***@" + domain : email;
 };
-// const validatephone = () => {
-//   if (createEmployee.value.emp_phone) {
-//     const phone = createEmployee.value.emp_phone;
-//     const phonePattern = /^\d{10}$/;
-//     phoneError.value = phonePattern.test(phone) ? "" : "Invalid phone number.";
-//   }
-// };
+const validatephonenew = () => {
+  if (createEmployee.value.emp_phone) {
+    const phone = createEmployee.value.emp_phone;
+    const phonePattern = /^\d{10}$/;
+    phoneError.value = phonePattern.test(phone) ? "" : "Invalid phone number.";
+  }
+};
 const filterObj = ref({
   limitPageLength: "None",
   limit_start: 0,
@@ -972,9 +1010,12 @@ function createEmplBtn() {
 function actionCreated(rowData, actionEvent) {
   if (actionEvent?.name === 'Edit Employee') {
     if (rowData) {
+      phoneError.value= ""
       deptData();
       designationData();
       createEmployee.value = { ...rowData }
+      isMasked.value = true
+      isEmailMasked.value = true
       maskPhoneNumber()
       maskEmail()
       const modal = new bootstrap.Modal(document.getElementById('exampleModal'), {});

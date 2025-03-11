@@ -39,10 +39,10 @@
           <td style="text-align: center;">{{ rowIndex + 1 }}</td>
           <td v-for="field in table" :key="field.fieldname">
             <template v-if="field.fieldtype === 'Data'">
-              <input type="text" class="form-control" v-model="row[field.fieldname]" />
+              <input type="text" class="form-control font-12" v-model="row[field.fieldname]" />
             </template>
             <template v-else-if="field.fieldtype === 'Attach'">
-              <input type="file" class="form-control" @change="handleFileUpload($event, row, field.fieldname)" />
+              <input type="file" class="form-control font-12" @change="handleFileUpload($event, row, field.fieldname)" />
             </template>
           </td>
         </tr>
