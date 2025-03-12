@@ -385,8 +385,8 @@ export default {
                 this.showOtpPage = false;
                 this.ShowLoginPage = false;
                 this.otp = ["", "", "", "", "", ""];
-                localStorage.setItem("UserName", JSON.stringify(this.tempId));
-                sessionStorage.setItem("UserName", JSON.stringify(this.tempId));
+                // localStorage.setItem("UserName", JSON.stringify(this.tempId));
+                // sessionStorage.setItem("UserName", JSON.stringify(this.tempId));
                 this.userData(this.formdata.usr);
               }
             }
@@ -410,6 +410,8 @@ export default {
               .get(`${apis.resource}${doctypes.EzyEmployeeList}/${this.email}`)
               .then((responce) => {
                 const employeeData = responce.data;
+                localStorage.setItem("UserName", JSON.stringify(this.tempId));
+                sessionStorage.setItem("UserName", JSON.stringify(this.tempId));
                 localStorage.setItem("employeeData", JSON.stringify(employeeData));
                 localStorage.setItem(
                   "USERROLE",
