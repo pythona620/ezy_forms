@@ -48,7 +48,7 @@
                         <div class="input-container">
                           <FormFields tag="input" type="text" name="emp_phone" id="emp_phone" maxlength="10"
                             class="w-100" placeholder="Enter Phone Number" v-model="createEmployee.emp_phone"
-                            @change="validatephone" />
+                            @input="formatPhoneNumber" @change="validatephone" />
                           <!-- <i :class="eyeIcon" class="eye-icon" @click="toggleMask"></i> -->
                         </div>
                         <p v-if="phoneError" class="text-danger font-11 ps-1">
@@ -812,8 +812,8 @@ const maskPhoneNumber = () => {
   const phone = createEmployee.value?.emp_phone || ""; // Ensure it's a string
   if (!isMasked.value || phone.length < 10) return;
 
-  originalPhone.value = phone;
-  createEmployee.value.emp_phone = "******" + phone.slice(-4);
+  originalPhone.value = phone.startsWith("+91") ? phone : `+91${phone}`;
+  createEmployee.value.emp_phone = "+91 ******" + phone.slice(-4);
 };
 
 const toggleMask = () => {
@@ -821,10 +821,19 @@ const toggleMask = () => {
 
   isMasked.value = !isMasked.value;
   createEmployee.value.emp_phone = isMasked.value
-    ? "******" + (originalPhone.value?.slice(-4) || "")
+    ? "+91 ******" + (originalPhone.value?.slice(-4) || "")
     : originalPhone.value;
 };
 
+
+
+const formatPhoneNumber = () => {
+  if (!createEmployee.value.emp_phone.startsWith("+91")) {
+    createEmployee.value.emp_phone = "+91" + createEmployee.value.emp_phone.replace(/\D/g, '');
+  } else {
+    createEmployee.value.emp_phone = "+91" + createEmployee.value.emp_phone.slice(3).replace(/\D/g, '');
+  }
+};
 
 const validatephone = () => {
   const phone = originalPhone.value || createEmployee.value.emp_phone;

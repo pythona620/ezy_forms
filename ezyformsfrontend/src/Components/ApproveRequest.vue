@@ -26,6 +26,15 @@
 
               </div>
 
+              <div v-if="selectedData.type == 'myforms' && tableData.status == 'Request Raised'"
+                class="d-flex justify-content-end approveBtns">
+                <button type="submit" class="btn Edit_btn" @click.prevent="EditformSubmission()">
+                  <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                  <span v-if="!loading"><i class="bi bi-pencil-fill font-15 me-2"></i><span
+                      class="font-12">Edit</span></span>
+                </button>
+              </div>
+
               <div v-if="selectedData.type !== 'myforms'" class="">
                 <!-- v-if="!requestcancelled" -->
                 <div class="approveBtns pb-2 mb-2 mt-3 flex-column px-0 pe-4">
@@ -190,6 +199,23 @@ onMounted(() => {
     employeeData.value = []; // Fallback to empty array if there's an error
   }
 });
+
+
+function EditformSubmission() {
+  // Navigate to the new route
+  router.push({
+    name: "RaiseRequest",
+    query: {
+      routepath: route.path,
+      business_unit: route.query.property,
+      selectedForm: route.query.doctype_name,
+      selectedFormId: route.query.name,
+      selectedFormStatus: route.query.status,
+    },
+  });
+  console.log("emittedFormData", emittedFormData.value);
+}
+
 
 
 
@@ -561,6 +587,17 @@ watch(
   top: 0 !important;
   z-index: 1000 !important;
 
+}
+
+.Edit_btn {
+  width: 100px;
+  background: rgb(34, 33, 33);
+  color: white;
+  padding: 5px 15px 5px 15px;
+  gap: 7px;
+  border-radius: 4px;
+  opacity: 0px;
+  font-weight: bold;
 }
 
 

@@ -118,7 +118,7 @@
             <div class="mb-2">
               <label class="raise-label" for="confirmpass">Confirm Password</label>
               <FormFields class="" tag="input" type="text" name="confirmpass" id="confirmpass"
-                placeholder="Enter Confirm Password" v-model="confirm_password" />
+                placeholder="Enter Confirm Password" v-model="confirm_password" @keydown.enter="passwordChange" />
               <span v-if="passwordsMismatch" class="text-danger font-11 m-0 ps-2">Passwords do not match.</span>
             </div>
             <!-- <FormFields tag="select" placeholder="Form" class="mb-3" name="roles" id="roles"
@@ -144,6 +144,7 @@ import FormFields from "../Components/FormFields.vue";
 import ButtonComp from '../Components/ButtonComp.vue'
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
+import { nextTick } from "vue";
 export default {
   props: ["id"],
   components: {
@@ -171,7 +172,7 @@ export default {
       ShowLoginPage: true,
       otp: ["", "", "", "", "", ""],
       errorMessage: "",
-      tempId: [],
+      storeData: [],
       isFirstLogin: "",
       twoFactorAuth: ""
       // timeLeft: 60,
@@ -352,6 +353,11 @@ export default {
               this.showPwdField = true;
               this.showOtpPage = false;
 
+              // Ensure the DOM updates before focusing the input
+              nextTick(() => {
+                document.getElementById("password")?.focus();
+              });
+
               // console.log("User is logging in for the first time.");
             } else {
               console.log("User has logged in before.");
@@ -376,16 +382,16 @@ export default {
           .post(apis.login, this.formdata)
           .then((res) => {
             if (res) {
-              this.tempId = res;
+              this.storeData = res;
               if (this.twoFactorAuth === "1") {
                 this.ShowLoginPage = false;
                 this.showOtpPage = true;
               }
               else {
                 this.showOtpPage = false;
-                this.ShowLoginPage = false;
+                this.ShowLoginPage = true;
                 this.otp = ["", "", "", "", "", ""];
-                localStorage.setItem("UserName", JSON.stringify(this.tempId));
+                // localStorage.setItem("UserName", JSON.stringify(this.storeData));
                 this.userData(this.formdata.usr);
               }
             }
@@ -409,6 +415,7 @@ export default {
               .get(`${apis.resource}${doctypes.EzyEmployeeList}/${this.email}`)
               .then((responce) => {
                 const employeeData = responce.data;
+                localStorage.setItem("UserName", JSON.stringify(this.storeData));
                 localStorage.setItem("employeeData", JSON.stringify(employeeData));
                 localStorage.setItem(
                   "USERROLE",
@@ -442,7 +449,7 @@ export default {
         const params = {
           user: String(this.formdata.usr),
           otp: this.otp.join(""),
-          tmp_id: String(this.tempId.tmp_id),
+          tmp_id: String(this.storeData.tmp_id),
           cmd: "login",
         };
 
@@ -452,7 +459,7 @@ export default {
             if (message) {
               console.log("message", message);
               this.storeData = message;
-              localStorage.setItem("UserName", JSON.stringify(this.storeData));
+              // localStorage.setItem("UserName", JSON.stringify(this.storeData));
               if (this.formdata.usr) {
                 this.userData(this.formdata.usr);
               }

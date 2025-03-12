@@ -14,7 +14,7 @@ const settingRoutes = [
   {
     path: "/settings",
     component: SettingsPage,
-    redirect: "/settings/department",
+    redirect: "/settings/profile",
 
     children: [
       {

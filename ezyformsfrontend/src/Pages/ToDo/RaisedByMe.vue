@@ -239,8 +239,11 @@ function viewPreview(data) {
       routepath: route.path,
       name: data.name,
       doctype_name: data.doctype_name,
+      business_unit:data.property,
+      status:data.status,
       type: "myforms",
       readOnly: 'true'
+
     },
   });
 }
