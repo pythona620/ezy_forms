@@ -275,7 +275,7 @@
                                                     </button> -->
                         </div>
                       </div>
-                      <FormPreview :blockArr="selectedform" :formDescriptions="formDescriptions" 
+                      <FormPreview :blockArr="selectedform" :formDescriptions="formDescriptions"
                         :childHeaders="childtableHeaders" />
                       <div class="main-block" ref="mainBlockRef">
                         <!-- Here is block level starts -->
@@ -636,25 +636,57 @@
                                   <div>
                                     <div v-if="blockIndex === 0" class="mt-2">
 
-                                      <!-- Loop through each table inside childTableFields -->
+                                      <div class="childTableContainer">
+                                        <div v-for="(table, tableName,tableindex) in childtableHeaders" :key="tableName"
+                                          class="childTable">
+                                          
+                                          <h5>{{ tableName }}</h5> 
 
-                                      <div v-for="(fields, tableName) in childtableHeaders" :key="tableName">
 
-                                        <div>
-                                          <span class="font-13 fw-bold">{{ tableName.replace(/_/g, " ") }} </span>
+                                          <table class="table table-bordered">
+                                            <thead>
+                                              <tr>
+                                                <th>#</th>
+                                                <th v-for="(field, fIndex) in table" :key="fIndex">{{ field.label }}
+                                                </th>
+                                              </tr>
+                                            </thead>
+                                          </table>
+
+                                          
+                                          <div v-for="(field, fIndex) in table.newFields" :key="fIndex"
+                                            class="newField dynamicField">
+                                            <div class=" d-flex justify-content-between">
+
+                                            <input v-model="field.label" placeholder="Field Label" :class="[
+                                                  'border-less-input',
+                                                  'font-14',
+                                                  'p-0 my-1',
+                                                  'inputHeight',
+                                                  { 'italic-style': !field.label },
+                                                  { 'fw-medium': field.label },
+                                                ]"
+                                               />
+                                              <!-- <button class="btn trash-btn trash-btn py-0  btn-sm"
+                                              @click="removeNewField(index, fIndex)"><i class="bi bi-x-lg"></i></button> -->
+                                            </div>
+                                            <select v-model="field.fieldtype" class="form-select font-13 mb-3">
+                                              <option value="">Select Type</option>
+                                              <option v-for="section in childfield" :key="section.type"
+                                                :value="section.type">
+                                                {{ section.label }}
+                                              </option>
+                                            </select>
+                                           
+                                          </div>
+
+                                         
+                                          <button class="btn btn-light btn-sm font-12 mt-2"
+                                            @click="addNewField(tableName, tableindex)">Add More
+                                            Field</button>
+                                          <button v-if="table.newFields" class="btn btn-dark btn-sm font-12 mt-2 ms-2"
+                                            @click="saveNewFields(tableName,tableindex)">Save</button>
                                         </div>
-
-                                        <table class="table table-bordered table-striped">
-                                          <thead>
-                                            <tr>
-                                              <th>#</th>
-                                              <th v-for="field in fields" :key="field.fieldname">
-                                                {{ field.label }}
-                                              </th>
-                                            </tr>
-                                          </thead>
-                                        </table>
-
                                       </div>
                                     </div>
                                   </div>
@@ -722,7 +754,7 @@
                                             <i class="bi bi-plus"></i> Add Field
                                           </button>
 
-                                          <button class="btn btn-dark btn-sm font-12 mx-1"
+                                          <button v-if="table.columns.length" class="btn btn-dark btn-sm font-12 mx-1"
                                             @click="processFields(tableIndex)">
                                             Create Table
                                           </button>
@@ -739,7 +771,7 @@
                             </div>
                           </div>
                         </div>
-                        <!-- class="d-flex justify-content-center align-items-center add-block-btn-div py-4 pb-4" -->
+                        
                         <div :class="[
                           'd-flex justify-content-center align-items-center add-block-btn-div py-4  ',
                           {
@@ -986,6 +1018,8 @@ onMounted(() => {
   let Bu_Unit = localStorage.getItem("Bu");
   filterObj.value.business_unit = Bu_Unit;
 });
+
+
 // Store multiple child tables
 const childTables = ref([]);
 
@@ -994,7 +1028,16 @@ const addChildTable = () => {
   childTables.value.push({
     tableName: "",
     formattedTableName: "",
-    columns: reactive([]), // Store fields for this table
+    columns: reactive([
+      {
+    label: "",
+    fieldname: `field_${columns.length}`, // This will be updated once the label is entered
+    fieldtype: "",
+    idx: columns.length,
+    reqd: false,
+  }
+    ]), // Use `ref([])` instead of `reactive([])`
+    newFields: ref([]), // Store new fields separately
   });
 };
 
@@ -1005,21 +1048,26 @@ const removeChildTable = (tableIndex) => {
 
 // Function to add a field to a specific table
 const addFieldToTable = (tableIndex) => {
-  childTables.value[tableIndex].columns.push({
+  const columns = childTables.value[tableIndex].columns;
+  
+  columns.push({
     label: "",
-    fieldname: `field_${childTables.value[tableIndex].columns.length}`,
+    fieldname: "", // This will be updated once the label is entered
     fieldtype: "",
-    idx: childTables.value[tableIndex].columns.length,
+    idx: columns.length,
     reqd: false,
   });
 
+  // Watch for label changes and update fieldname dynamically
+  watch(() => columns[columns.length - 1].label, (newLabel) => {
+    columns[columns.length - 1].fieldname = `${newLabel.replace(/\s+/g, "_").toLowerCase()}_${columns.length - 1}`;
+  });
 };
 
 // Function to remove a field from a specific table
 const removeFieldFromTable = (tableIndex, fieldIndex) => {
   childTables.value[tableIndex].columns.splice(fieldIndex, 1);
 };
-
 // Format table name dynamically
 const formatTableName = (tableIndex, event) => {
   if (event?.target?.value) {
@@ -1055,54 +1103,106 @@ const processFields = (tableIndex) => {
     fields: childTables.value[tableIndex].columns,
   };
 
+
   axiosInstance
     .post(apis.childtable, data)
     .then((res) => {
       if (res) {
+        alert("Fields saved successfully!");
         const firstTableField = res.message[0][0].child_doc;
         if (firstTableField) {
           tableFieldsCache.value.push(firstTableField);
         }
-      }
-    })
+      }  
+      })
     .catch((error) => {
       console.error("Error saving form data:", error);
     });
 };
 
 
-const updatedTableFields = computed(() => ({
-  form_short_name: tableName.value[0].options,
-  fields: columns,
-}));
+const addNewField = (tableIndex) => {
+  const table = childtableHeaders.value[tableIndex];
 
-const addmorechildfeildsFn = () => {
-  const data = {
-    ...updatedTableFields.value,
+  // ✅ Ensure `table` exists
+  if (!table) {
+    console.error(`Table at index ${tableIndex} not found.`);
+    return;
+  }
+
+  // ✅ Ensure `fields` is initialized
+  if (!table.fields) {
+    table.fields = [];
+  }
+
+  // ✅ Ensure `newFields` is initialized
+  if (!table.newFields) {
+    table.newFields = [];
+  }
+
+  const newIndex = table.fields.length + table.newFields.length;
+
+  table.newFields.push({
+    fieldname: `field_${newIndex + 1}`,  // Set default fieldname based on index
+    fieldtype: "",
+    idx: newIndex + 1,
+    label: "",
+    value: "",
+  });
+
+  // ✅ Sync fieldname with label dynamically
+  watch(
+    () => table.newFields[newIndex].label,
+    (newLabel) => {
+      table.newFields[newIndex].fieldname = newLabel.trim().replace(/\s+/g, "_").toLowerCase(); // Convert label to a valid fieldname
+    }
+  );
+
+  // console.log("Updated newFields:", table.newFields);
+};
+
+const removeNewField = (tableIndex, fieldIndex) => {
+  const table = childtableHeaders.value[tableIndex]; // ✅ Ensure using childtableHeaders
+
+  if (!table || !table.newFields) {
+    console.error("Table or newFields not found.");
+    return;
+  }
+
+  // ✅ Use splice to remove the specific field correctly
+  table.newFields.splice(fieldIndex, 1);
+};
+
+
+const saveNewFields = (tableIndex,index) => {
+  const table = childtableHeaders.value[tableIndex];
+  // console.log(tableIndex,index);
+
+  // if (table.newFields.some((field) => !field.label || !field.fieldtype)) {
+  //   alert("Please enter a label and select a field type for all new fields.");
+  //   return;
+  // }
+
+  const payload = {
+    form_short_name: tableIndex,
+    fields: [...table, ...table.newFields],
   };
-  // console.log(data, ",,,,,,,,,,");
 
-  // Call the API to process the fields
   axiosInstance
-    .post(`${apis.update_child_doctype}`, data)
+    .post(apis.childtable, payload)
     .then((res) => {
-      if (res) {
-        console.log(res); // Corrected response access
+      console.log("Fields updated successfully:", res.data);
+      // alert("Fields updated successfully!");
 
-        // Extract the first "Table" field from the response
-
-        getFormData();
-      }
+      // Move new fields to fields and reset newFields
+      table.fields.push(...table.newFields);
+      table.newFields = [];
     })
     .catch((error) => {
-      console.error("Error saving form data:", error); // Log any errors
+      console.error("Error updating fields:", error);
     });
 };
 
-// const modal = bootstrap.Modal.getInstance(
-//           document.getElementById("childtable")
-//         );
-//         modal.hide();
 const steps = ref([
   {
     id: 1,
@@ -1448,13 +1548,16 @@ function getFormData() {
         returTables.value = parsedFormJson.fields.filter(
           (field) => field.fieldtype === "Table"
         );
+
+
         // let structuredArr = rebuildToStructuredArray((JSON.parse(res_data?.form_json?.fields).fields)?.replace(/\\\"/g, '"'))
         let structuredArr = rebuildToStructuredArray(
           JSON.parse(res_data?.form_json).fields
         );
         childtableHeaders.value = JSON.parse(res.data.form_json).child_table_fields;
-        childTables.value = []
-        tableFieldsCache.value = []
+        
+        // childTables.value = []
+        // tableFieldsCache.value = []
 
         // workflowSetup.push(JSON.parse(res_data?.form_json).workflow)
 
@@ -1619,7 +1722,6 @@ function formData(status) {
 // }, 2000);
 
 const mainBlockRef = ref("");
-
 const addBlock = () => {
   const blockIndex = blockArr.length; // Get current length before adding new block
 
@@ -1630,49 +1732,81 @@ const addBlock = () => {
       {
         label: "",
         parent: `${businessUnit.value.value}-${filterObj.value.form_short_name}`,
-        rows: [
-          {
-            label: `row_0_0_${blockIndex}`,
-            columns:
-              blockIndex === 0
-                ? [
-                  {
-                    label: "", // No extra empty column for the requestor block
-                    fields: [{ label: "", fieldtype: "", options: "", reqd: false }],
-                  },
-                ]
-                : [
-                  {
-                    label: "", // First column with "Approver" & "Approved By"
-                    fields: [
-                      {
-                        label: "Approver",
-                        fieldtype: "Data",
-                        options: "",
-                        reqd: false,
-                      },
-                      {
-                        label: "Approved By",
-                        fieldtype: "Attach",
-                        options: "",
-                        reqd: false,
-                      },
-                    ],
-                  },
-                  {
-                    label: "", // Second column with "Approved On"
-                    fields: [
-                      {
-                        label: "Approved On",
-                        fieldtype: "Datetime",
-                        options: "",
-                        reqd: false,
-                      },
-                    ],
-                  },
-                ],
-          },
-        ],
+        rows: 
+          blockIndex === 0
+            ? [
+                {
+                  label: `row_0_0_${blockIndex}`,
+                  columns: [
+                    {
+                      label: "", // First column with "Requested by"
+                      fields: [
+                        {
+                          label: "Requested by",
+                          fieldtype: "Data",
+                          options: "",
+                          reqd: false,
+                        },
+                      ],
+                    },
+                    {
+                      label: "", // Second column with "Requested On"
+                      fields: [
+                        {
+                          label: "Requested On",
+                          fieldtype: "Datetime",
+                          options: "",
+                          reqd: false,
+                        },
+                      ],
+                    },
+                  ],
+                },
+                {
+                  label: `row_0_1_${blockIndex}`, // New row with an empty field
+                  columns: [
+                    {
+                      label: "",
+                      fields: [{ label: "", fieldtype: "", options: "", reqd: false }],
+                    },
+                  ],
+                },
+              ]
+            : [
+                {
+                  label: `row_0_0_${blockIndex}`,
+                  columns: [
+                    {
+                      label: "", // First column with "Approver" & "Approved By"
+                      fields: [
+                        {
+                          label: "Approver",
+                          fieldtype: "Data",
+                          options: "",
+                          reqd: false,
+                        },
+                        {
+                          label: "Approved By",
+                          fieldtype: "Attach",
+                          options: "",
+                          reqd: false,
+                        },
+                      ],
+                    },
+                    {
+                      label: "", // Second column with "Approved On"
+                      fields: [
+                        {
+                          label: "Approved On",
+                          fieldtype: "Datetime",
+                          options: "",
+                          reqd: false,
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
       },
     ],
   };
@@ -1687,6 +1821,73 @@ const addBlock = () => {
     }
   });
 };
+// const addBlock = () => {
+//   const blockIndex = blockArr.length; // Get current length before adding new block
+
+//   const newBlock = {
+//     label: blockIndex === 0 ? "requestor" : `approver-${blockIndex}`,
+//     parent: `${businessUnit.value?.value}-${filterObj.value?.form_short_name}`,
+//     sections: [
+//       {
+//         label: "",
+//         parent: `${businessUnit.value.value}-${filterObj.value.form_short_name}`,
+//         rows: [
+//           {
+//             label: `row_0_0_${blockIndex}`,
+//             columns:
+//               blockIndex === 0
+//                 ? [
+//                   {
+//                     label: "", // No extra empty column for the requestor block
+//                     fields: [{ label: "", fieldtype: "", options: "", reqd: false }],
+//                   },
+//                 ]
+//                 : [
+//                   {
+//                     label: "", // First column with "Approver" & "Approved By"
+//                     fields: [
+//                       {
+//                         label: "Approver",
+//                         fieldtype: "Data",
+//                         options: "",
+//                         reqd: false,
+//                       },
+//                       {
+//                         label: "Approved By",
+//                         fieldtype: "Attach",
+//                         options: "",
+//                         reqd: false,
+//                       },
+//                     ],
+//                   },
+//                   {
+//                     label: "", // Second column with "Approved On"
+//                     fields: [
+//                       {
+//                         label: "Approved On",
+//                         fieldtype: "Datetime",
+//                         options: "",
+//                         reqd: false,
+//                       },
+//                     ],
+//                   },
+//                 ],
+//           },
+//         ],
+//       },
+//     ],
+//   };
+
+//   blockArr.push(newBlock);
+//   nextTick(() => {
+//     if (mainBlockRef.value) {
+//       mainBlockRef.value.scrollTo({
+//         top: mainBlockRef.value.scrollHeight,
+//         behavior: "smooth",
+//       });
+//     }
+//   });
+// };
 
 // function to delete block
 const removeBlock = (blockIndex) => {

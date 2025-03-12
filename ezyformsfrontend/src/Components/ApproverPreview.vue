@@ -114,8 +114,8 @@
                         :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'image-border-bottom' : ''">
                         <img v-if="isImageFile(field.value)" :src="field.value"
                           class="img-thumbnail mt-2 cursor-pointer border-0" style="max-width: 100px; max-height: 100px"
-                          @mouseover="showPreview = true" @mouseleave="showPreview = false" />
-
+                           />
+                           <!-- @mouseover="showPreview = true" @mouseleave="showPreview = false" -->
                         <!-- Close Icon to Remove Image -->
                         <i class="bi bi-x-lg position-absolute  text-danger cursor-pointer"
                           :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'd-none' : ''" style="
@@ -377,8 +377,11 @@ const filteredBlocks = computed(() => {
             emit("updateField", field);
           }
           if (field.label === "Approved By") {
-            field.value = employee.signature;
-            emit("updateField", field);
+            if(employee.signature){
+
+              field.value = employee.signature;
+              emit("updateField", field);
+            }
 
             // if (field.value) {
             //   logFieldValue({ target: { value: field.value } }, lastBlock, sectionIndex, rowIndex, columnIndex, fieldIndex);

@@ -27,6 +27,10 @@ export const apis = {
   resource: domain + `/resource/`,
   uploadfile: domain + `/method/upload_file`,
   login: domain + `/method/login`,
+  logout: domain + `/method/logout`,
+  
+
+
   savedata:
     domain +
     `/method/ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions.add_dynamic_doctype`,

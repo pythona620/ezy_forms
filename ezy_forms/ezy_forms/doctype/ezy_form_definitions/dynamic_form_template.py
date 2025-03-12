@@ -127,7 +127,7 @@ template_str = """
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Generated Form</title>
-    <style>
+   <style>
       body {
             font-family: Arial, sans-serif;
             
@@ -143,7 +143,7 @@ template_str = """
          .row {
             display: flex;
             flex-wrap: wrap;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
  
         .column {
@@ -175,7 +175,7 @@ template_str = """
             align-items: baseline;
             # border-bottom: 1px solid #cccccc;
             padding: 0px ;
-            margin: 15px;
+            margin: 10px;
         }
         .field label {
             font-weight: bold;
@@ -193,22 +193,23 @@ template_str = """
             background: transparent;
             flex: 1;
             border-bottom: 1px solid #cccccc;
+            font-weight:600;
             
         }
         .field select, .field textarea {
-            border: none;
+            
             outline: none;
             padding: 0px 5px;
             background: transparent;
             flex: 1;
         }
           .field textarea {
-            border: none;
-                outline: none;
+            
+                
             padding: 0px 5px;
             background: transparent;
             flex: 1;
-            #border-bottom: 1px solid #cccccc;
+            border-bottom: 1px solid #cccccc;
             resize: none; /* Disable manual resizing */
             overflow-y: hidden; /* Hide scrollbar */ /* Allows users to resize the textarea */
 }
@@ -277,16 +278,20 @@ template_str = """
          .header-right{
              min-width: 200px;
          }
+         
         @media print {
             .table, .table th, .table td {
                 border: 1px solid black !important;
+            }
+            .table{
+                width: 100% !important;
             }
         }
         
    
        
     </style>
-</head>
+    </head>
 <body>
 <div class="main-body">
 <div class="header-container">
@@ -360,7 +365,7 @@ template_str = """
                                             </div>
  
                                         {% elif field.fieldtype == 'Data' or field.fieldtype == 'Select' %}
-                                            <input type="text" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
+                                            <input type="text" id="{{ field.fieldname }}" disabled value="{{ field['values'] }}" name="{{ field.fieldname }}">
                                         {% elif field.fieldtype == 'Attach' %}
                                             {% if field['values'] %}
                                                 <img  id="{{ field.fieldname }}" src="{{ site_url + field['values'] or ''  }}" class="signature-Imge" name="{{ field.fieldname }}">
@@ -378,7 +383,7 @@ template_str = """
                                         {% elif field.fieldtype == 'Date' %}
                                             <input type="text" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}" class="date-input" placeholder="__/__/____">
                                         {% elif field.fieldtype == 'Datetime' %}
-                                            <input type="text" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
+                                            <input type="text" id="{{ field.fieldname }}" disabled value="{{ field['values'] }}" name="{{ field.fieldname }}">
                         
                                         {% elif field.fieldtype == 'Signature' %}
                                             <input type="text" id="{{ field.fieldname }}" name="{{ field.fieldname }}" placeholder="Signature input (future implementation)">
@@ -391,37 +396,72 @@ template_str = """
                 {% endfor %}
             </div>
         {% endfor %}
-    </div>
+        
+         {% if loop.first %} {# Ensure tables are shown only in the first block #}
 
-    {# Show the table after the first block only #}
-    {% if loop.first and child_table_data %}
-        {% for table_name, rows in child_table_data.items() %}
-            <h3 class="childtablename">{{ table_name.replace("_", " ").title() }}</h3>  
-            <div style="margin-left:10px;margin-right:10px;margin-bottom:10px; overflow: hidden; border-radius:5px; border: 1px solid #ccc;">
-                <table style=" width:100%; border-collapse: collapse;">
-                    <thead>
-                        <tr>
-                            <th style="border: 1px solid #ccc; padding: 8px; background-color: #f2f2f2;">S.no</th>
-                            {% for key in rows[0].keys() %}
-                                <th style="border: 1px solid #ccc; padding: 8px; background-color: #f2f2f2;">{{ key }}</th>
-                            {% endfor %}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for row in rows %}
+            {% if child_data %}
+                {% for table_name, rows in child_data.items() %}
+                    <h3 class="childtablename">{{ table_name.replace("_", " ").title() }}</h3>
+                    {% if rows %}
+                        <table style="width: 100%; max-width: 100%;margin-bottom:10px; border-collapse: collapse; border-radius:5px;">
+                            <thead>
+                                <tr>
+                                    <th style="border: 1px solid #ccc;width:3%; padding:font-size:13px; 8px; background-color: #f2f2f2;">S.no</th>
+                                    {% for key in rows[0].keys() %}
+                                        <th style="border: 1px solid #ccc; padding: 8px;font-size:13px; background-color: #f2f2f2;">
+                                            {{ key }}
+                                        </th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for child in rows %}
+                                    <tr>
+                                        <td style="border: 1px solid #ccc;width:3%;font-size:13px; padding: 8px;text-align:center;">{{ loop.index }}</td> 
+                                        {% for value in child.values() %}
+                                            <td style="border: 1px solid #ccc; padding: 8px;font-size:13px;text-align:center;"">
+                                                {{ value if value else '—' }}
+                                            </td>
+                                        {% endfor %}
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p>No data available for {{ table_name }}</p>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+            </div>
+
+            {% if child_table_data %}
+                {% for table_name, columns in child_table_data.items() %}
+                    <h3 class="childtablename">{{ table_name.replace("_", " ").title() }}</h3>
+                    <table style="width: 100%;margin-bottom:10px; border-collapse: collapse; border-radius:5px;">
+                        <thead>
                             <tr>
-                                <td style="border: 1px solid #ccc; padding: 8px;">{{ loop.index }}</td>  
-                                {% for value in row.values() %}
-                                    <td style="border: 1px solid #ccc; padding: 8px;">{{ value or "-"}}</td>
+                                <th style="border: 1px solid #ccc;font-size:13px; padding: 8px;width:3%; background-color: #f2f2f2;">S.no</th>
+                                {% for column in columns %}
+                                    <th style="border: 1px solid #ccc;font-size:13px; padding: 8px; background-color: #f2f2f2;">{{ column }}</th>
                                 {% endfor %}
                             </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        {% endfor %}
-    {% endif %}
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="border: 1px solid #ccc;font-size:13px; color:#fff;width:3%; padding: 8px;">- </td>
+                                {% for column in columns %}
+                                    <td style="border: 1px solid #ccc; font-size:13px; color:#fff; padding: 8px;"> - </td>
+                                {% endfor %}
+                            </tr>
+                        </tbody>
+                    </table>
+                {% endfor %}
+            {% endif %}
+
+        {% endif %}
+  
 {% endfor %}
+ 
 
  
  
@@ -464,7 +504,7 @@ template_str = """
                 }
             });
         });
-         document.querySelectorAll(".field textarea").forEach(textarea => {
+          document.querySelectorAll(".field textarea").forEach(textarea => {
             textarea.style.height = textarea.scrollHeight + "px"; // Set initial height
             textarea.addEventListener("input", function () {
                 this.style.height = "auto"; // Reset height
@@ -479,13 +519,13 @@ template_str = """
 </html>
  
 """
- 
+    
 def convert_html_to_pdf(html_content, pdf_path):
     try:
         pdfkit.from_string(html_content, pdf_path)
-        print(f"PDF generated and saved at {pdf_path}")
+    
     except Exception as e:
-        print(f"PDF generation failed: {e}")
+        frappe.log_eror(f"PDF generation failed: {e}")
  
 def json_structure_call_for_html_view(json_obj: list, form_name: str, child_data, child_table_data,business_unit):
     if child_data is None:
@@ -506,136 +546,228 @@ def json_structure_call_for_html_view(json_obj: list, form_name: str, child_data
     html_output = Template(template_str).render(
         data=structered_data, form_name=form_name, child_data=child_data, child_table_data=child_table_data,company_logo=logo_of_company,site_url=site_url
     )
-    print(child_data,"child_datachild_datachild_datachild_data")
-    print(child_table_data,"child_table_datachild_table_datachild_table_datachild_table_data")
+    
     return html_output
  
 
-
 @frappe.whitelist()
 def preview_dynamic_form(form_short_name: str, business_unit=None, name=None):
-    """Previews a dynamic form with data populated, including multiple child tables."""
-    
+    """Previews a dynamic form with data populated"""
     json_object = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_json")
     form_name = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_name")
     json_object = literal_eval(json_object)["fields"]
 
-    # Filter out "Attach" fields unless related to "approved_by"
+    # Exclude "Attach" fields except those with "approved_by" in their fieldname
     json_object = [
         field for field in json_object
         if field.get("fieldtype") != "Attach" or ("approved_by" in field.get("fieldname", "").lower())
     ]
 
-    child_table_data = {}  # Dictionary to store multiple child tables
+    labels = {}  # Dictionary to store multiple child table fields
+    data_list = {}
+    if name is None:
+        user_doc = frappe.get_doc("DocType", form_short_name).as_dict()
+
+        for iteration in json_object:
+            if "value" in iteration:
+                iteration["value"] = user_doc.get(iteration["fieldname"], "")
+
+            # Handling child table fields
+            if iteration.get("fieldtype") == "Table":
+                iteration["value"] = frappe.get_all(iteration["options"], filters={"parent": name}, fields=["*"])
+                child_table_name = str(iteration["fieldname"])  
+
+                # Get the child table Doctype name
+                child_table_doctype = frappe.get_value(
+                    "DocField",
+                    {"parent": form_short_name, "fieldname": child_table_name},
+                    "options"
+                )
+
+                if not child_table_doctype:
+                    return {"error": f"Child table '{child_table_name}' not found"}
+
+                # Get the fields (columns) of the child table
+                child_table_fields = frappe.get_all(
+                    "DocField",
+                    filters={"parent": child_table_doctype},
+                    fields=["label"]
+                )
+
+                # Store labels for each child table
+                labels[child_table_name] = [field["label"] for field in child_table_fields]
+
+        # Call the function to generate HTML view
+        html_view = json_structure_call_for_html_view(
+            json_obj=json_object,
+            form_name=form_name,
+            child_table_data=labels,
+            child_data=None,
+            business_unit=business_unit
+        )
+        return html_view
 
     if name:
         user_doc = frappe.get_doc(form_short_name, name).as_dict()
 
-        for field in json_object:
-            if "value" in field:
-                field["value"] = user_doc.get(field["fieldname"], "")
+        for iteration in json_object:
+            if "value" in iteration:
+                iteration["value"] = user_doc.get(iteration["fieldname"], "")
 
-            # Handling multiple child tables
-            if field.get("fieldtype") == "Table":
-                child_table_name = field["fieldname"]
-                child_table_records = frappe.get_all(field["options"], filters={"parent": name}, fields=["*"])
+            # Handling child table fields
+            if iteration.get("fieldtype") == "Table":
+                child_table_name = str(iteration["fieldname"])
+                child_table_records = frappe.get_all(iteration["options"], filters={"parent": name}, fields=["*"])
                 
-                # Get child table Doctype fields
-                child_table_meta = frappe.get_meta(field["options"])
-                field_labels = {df.fieldname: df.label for df in child_table_meta.fields}
+                # Get field names and labels dynamically
+                field_names = [df.fieldname for df in frappe.get_meta(iteration["options"]).fields]
+                field_labels = {df.fieldname: df.label for df in frappe.get_meta(iteration["options"]).fields}
 
-                # Format child table data
-                formatted_child_table = [
-                    {field_labels.get(field, field): record.get(field) for field in field_labels}
+                # Store child table data properly
+                data_list[child_table_name] = [
+                    {field_labels.get(field, field): record.get(field) for field in field_names}
                     for record in child_table_records
                 ]
-                
-                child_table_data[child_table_name] = formatted_child_table
+
+
 
     html_view = json_structure_call_for_html_view(
         json_obj=json_object,
         form_name=form_name,
-        child_data=None,  # This remains None for now
-        child_table_data=child_table_data,  # Pass multiple child tables
+        child_data=data_list,
+        child_table_data=None,
         business_unit=business_unit
     )
-
+    
     return html_view
-
  
-
-
+ 
 @frappe.whitelist()
-def download_filled_form(form_short_name: str, name: str, business_unit=None):
-    """Generates a PDF for the dynamic form with multiple child tables and uploads it to File Manager."""
-
+def download_filled_form(form_short_name: str, name: str|None,business_unit=None):
+    """Generates a PDF for the dynamic form with filled data"""
     try:
-        json_object = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_json")
-        json_object = literal_eval(json_object)["fields"]
+        
+    
+        if name is None:
+            json_object = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_json")
+            json_object = literal_eval(json_object)["fields"]
+            json_object = [
+                field for field in json_object
+                if field.get("fieldtype") != "Attach" or ("approved_by" in field.get("fieldname", "").lower())
+                    ]
+            user_doc = frappe.get_doc("DocType", form_short_name).as_dict()
+            labels={}
+            for iteration in json_object:
+                if "value" in iteration:
+                    iteration["value"] = user_doc.get(iteration["fieldname"], "")
 
-        # Filter out "Attach" fields unless related to "approved_by"
-        json_object = [
-            field for field in json_object
-            if field.get("fieldtype") != "Attach" or ("approved_by" in field.get("fieldname", "").lower())
-        ]
+                # Handling child table fields
+                if iteration.get("fieldtype") == "Table":
+                    iteration["value"] = frappe.get_all(iteration["options"], filters={"parent": name}, fields=["*"])
+                    child_table_name = str(iteration["fieldname"])  
 
-        user_doc = frappe.get_doc(form_short_name, name).as_dict()
-        child_table_data = {}  # Dictionary to store multiple child tables
+                    # Get the child table Doctype name
+                    child_table_doctype = frappe.get_value(
+                        "DocField",
+                        {"parent": form_short_name, "fieldname": child_table_name},
+                        "options"
+                    )
 
-        for field in json_object:
-            if "value" in field:
-                field["value"] = user_doc.get(field["fieldname"], "")
+                    if not child_table_doctype:
+                        return {"error": f"Child table '{child_table_name}' not found"}
 
-            # Handling multiple child tables
-            if field.get("fieldtype") == "Table":
-                child_table_name = field["fieldname"]
-                child_table_records = frappe.get_all(field["options"], filters={"parent": name}, fields=["*"])
-                
-                # Get child table Doctype fields
-                child_table_meta = frappe.get_meta(field["options"])
-                field_labels = {df.fieldname: df.label for df in child_table_meta.fields}
+                    # Get the fields (columns) of the child table
+                    child_table_fields = frappe.get_all(
+                        "DocField",
+                        filters={"parent": child_table_doctype},
+                        fields=["label"]
+                    )
 
-                # Format child table data
-                formatted_child_table = [
-                    {field_labels.get(field, field): record.get(field) for field in field_labels}
-                    for record in child_table_records
-                ]
-                
-                child_table_data[child_table_name] = formatted_child_table
+                    # Store labels for each child table
+                    labels[child_table_name] = [field["label"] for field in child_table_fields]
+            html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_short_name,child_table_data=labels,child_data=None,business_unit=business_unit)
+            random_number = randint(111, 999)
+ 
+            pdf_filename = f"{form_short_name}_{random_number}.pdf"
+            pdf_path = f"private/files/{pdf_filename}"
+            absolute_pdf_path = os.path.join(get_bench_path(), "sites", cstr(frappe.local.site), pdf_path)
+ 
+            convert_html_to_pdf(html_content=html_view, pdf_path=absolute_pdf_path)
+ 
+            new_file = frappe.get_doc({
+                "doctype": "File",
+                "file_name": pdf_filename,
+                "file_url": f"/{pdf_path}",
+                "is_private": 1,
+ 
+            })
+            new_file.insert(ignore_permissions=True)
+            frappe.db.commit()
+ 
+            file_url = get_url(new_file.file_url)
+ 
+            return file_url
+        if name:
+            json_object = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_json")
+            json_object = literal_eval(json_object)["fields"]
+            json_object = [
+                field for field in json_object
+                if field.get("fieldtype") != "Attach" or ("approved_by" in field.get("fieldname", "").lower())
+                    ]
+            user_doc = frappe.get_doc(form_short_name, name).as_dict()
+            data_list ={}
+            for iteration in json_object:
+                if "value" in iteration:
+                    iteration["value"] = user_doc.get(iteration["fieldname"], "")
 
-        html_view = json_structure_call_for_html_view(
-            json_obj=json_object,
-            form_name=form_short_name,
-            child_data=None,
-            child_table_data=child_table_data,
-            business_unit=business_unit
-        )
+                # Handling child table fields
+                if iteration.get("fieldtype") == "Table":
+                    child_table_name = str(iteration["fieldname"])
+                    child_table_records = frappe.get_all(iteration["options"], filters={"parent": name}, fields=["*"])
+                    
+                    # Get field names and labels dynamically
+                    field_names = [df.fieldname for df in frappe.get_meta(iteration["options"]).fields]
+                    field_labels = {df.fieldname: df.label for df in frappe.get_meta(iteration["options"]).fields}
 
-        # Generate a random number for the filename
-        random_number = randint(111, 999)
-        pdf_filename = f"{form_short_name}_{name}_{random_number}.pdf"
-        pdf_path = f"private/files/{pdf_filename}"
-        absolute_pdf_path = os.path.join(get_bench_path(), "sites", frappe.local.site, pdf_path)
+                    # Store child table data properly
+                    data_list[child_table_name] = [
+                        {field_labels.get(field, field): record.get(field) for field in field_names}
+                        for record in child_table_records
+                    ]
 
-        # Convert HTML to PDF
-        convert_html_to_pdf(html_content=html_view, pdf_path=absolute_pdf_path)
-
-        # Create a File record in ERPNext
-        new_file = frappe.get_doc({
-            "doctype": "File",
-            "file_name": pdf_filename,
-            "file_url": f"/{pdf_path}",
-            "is_private": 1,
-            "attached_to_doctype": form_short_name,
-            "attached_to_name": name
-        })
-        new_file.insert(ignore_permissions=True)
-        frappe.db.commit()
-
-        file_url = get_url(new_file.file_url)
-
-        return file_url
-
+        
+            html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_short_name,child_data=data_list,child_table_data=None,business_unit=business_unit)
+            random_number = randint(111, 999)
+    
+            pdf_filename = f"{form_short_name}_{name}_{random_number}.pdf"
+            pdf_path = f"private/files/{pdf_filename}"
+            absolute_pdf_path = os.path.join(get_bench_path(), "sites", cstr(frappe.local.site), pdf_path)
+    
+            convert_html_to_pdf(html_content=html_view, pdf_path=absolute_pdf_path)
+    
+            new_file = frappe.get_doc({
+                "doctype": "File",
+                "file_name": pdf_filename,
+                "file_url": f"/{pdf_path}",
+                "is_private": 1,
+                "attached_to_doctype": form_short_name,
+                "attached_to_name": name
+            })
+            new_file.insert(ignore_permissions=True)
+            frappe.db.commit()
+    
+            file_url = get_url(new_file.file_url)
+    
+            return file_url
+ 
     except Exception as e:
-        frappe.log_error(frappe.get_traceback(), "Error in Downloading Filled Form")
-        return {"error": str(e)}
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        frappe.log_error("Error Downloading File", f"line No:{exc_tb.tb_lineno}\n{traceback.format_exc()}")
+        frappe.throw(str(e))
+ 
+ 
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        frappe.log_error("Error Downloading File", "line No:{}\n{}".format(exc_tb.tb_lineno, traceback.format_exc()))
+        frappe.throw(str(e))
+        return {"success": False, "message": str(e)}

@@ -2,10 +2,10 @@
   <div class="bg-img">
     <div v-if="ShowLoginPage" class="input-div p-5">
       <div class="d-flex gap-2 p-2 justify-content-center align-items-center">
-        <div><img class="imgmix" src="../assets/favicon.jpg" /></div>
-        <div class="m-0">
+        <div><img class="imgmix" src="../assets/Final-logo-ezyforms-removebg-preview.png" /></div>
+        <!-- <div class="m-0">
           <p class="fontimgtext fw-medium m-0">EZY | Forms</p>
-        </div>
+        </div> -->
       </div>
 
       <div>
@@ -416,14 +416,21 @@ export default {
               .then((responce) => {
                 const employeeData = responce.data;
                 localStorage.setItem("UserName", JSON.stringify(this.storeData));
+                sessionStorage.setItem("UserName", JSON.stringify(this.storeData));
                 localStorage.setItem("employeeData", JSON.stringify(employeeData));
                 localStorage.setItem(
                   "USERROLE",
                   JSON.stringify(employeeData.designation)
                 );
+                sessionStorage.setItem("employeeData", JSON.stringify(employeeData))
+                sessionStorage.setItem(
+                  "USERROLE",
+                  JSON.stringify(employeeData.designation)
+                );
+                toast.success("Login successfull",{autoClose:2000})
                 setTimeout(() => {
-                  this.$router.push({ path: "/todo/receivedform" }); // Navigate dynamically
-                }, 700);
+                  this.$router.push({ path: "/dashboard/maindash" }); // Navigate dynamically
+                }, 500);
               })
               .catch((error) => {
                 console.error("Error fetching user data:", error);

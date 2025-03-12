@@ -13,7 +13,7 @@
 
       </div>
       <div class="mt-3">
-        <GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true" enableDisable="true"
+        <GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true" :enableDisable="isEnable"
           actionType="dropdown" @actionClicked="actionCreated" @toggle-click="toggleFunction" :actions="actions"
           @updateFilters="inLineFiltersData" :field-mapping="fieldMapping" isFiltersoption="true" />
         <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
@@ -75,7 +75,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, reactive,onMounted } from 'vue';
+import { ref, computed, watch, reactive, onMounted } from 'vue';
 import axiosInstance from '../../shared/services/interceptor';
 import { apis, doctypes, domain } from '../../shared/apiurls';
 import GlobalTable from '../../Components/GlobalTable.vue';
@@ -402,10 +402,16 @@ function fetchDepartmentDetails(id, data) {
 }
 
 const userDesigination = ref('');
+const isEnable = ref("");
 
 onMounted(() => {
   const userData = JSON.parse(localStorage.getItem('employeeData'));
   userDesigination.value = userData.designation || '';
+
+  if (userDesigination.value.includes("IT")) {
+    isEnable.value = "true";
+  }
+
 })
 
 </script>
