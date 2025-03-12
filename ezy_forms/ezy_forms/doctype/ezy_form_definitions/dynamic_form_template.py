@@ -197,19 +197,19 @@ template_str = """
             
         }
         .field select, .field textarea {
-            border: none;
+            
             outline: none;
             padding: 0px 5px;
             background: transparent;
             flex: 1;
         }
           .field textarea {
-            border: none;
-                outline: none;
+            
+                
             padding: 0px 5px;
             background: transparent;
             flex: 1;
-            #border-bottom: 1px solid #cccccc;
+            border-bottom: 1px solid #cccccc;
             resize: none; /* Disable manual resizing */
             overflow-y: hidden; /* Hide scrollbar */ /* Allows users to resize the textarea */
 }
@@ -523,9 +523,9 @@ template_str = """
 def convert_html_to_pdf(html_content, pdf_path):
     try:
         pdfkit.from_string(html_content, pdf_path)
-        print(f"PDF generated and saved at {pdf_path}")
+    
     except Exception as e:
-        print(f"PDF generation failed: {e}")
+        frappe.log_eror(f"PDF generation failed: {e}")
  
 def json_structure_call_for_html_view(json_obj: list, form_name: str, child_data, child_table_data,business_unit):
     if child_data is None:
@@ -629,7 +629,7 @@ def preview_dynamic_form(form_short_name: str, business_unit=None, name=None):
                     for record in child_table_records
                 ]
 
-    print(data_list, "-" * 100)  # Debugging print to check multiple tables
+
 
     html_view = json_structure_call_for_html_view(
         json_obj=json_object,
@@ -647,7 +647,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
     """Generates a PDF for the dynamic form with filled data"""
     try:
         
-        print("-------",name,"-"*100)
+    
         if name is None:
             json_object = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_json")
             json_object = literal_eval(json_object)["fields"]
@@ -735,7 +735,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                         for record in child_table_records
                     ]
 
-            print(data_list, "-" * 100)
+        
             html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_short_name,child_data=data_list,child_table_data=None,business_unit=business_unit)
             random_number = randint(111, 999)
     

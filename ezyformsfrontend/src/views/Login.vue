@@ -386,6 +386,7 @@ export default {
                 this.ShowLoginPage = false;
                 this.otp = ["", "", "", "", "", ""];
                 localStorage.setItem("UserName", JSON.stringify(this.tempId));
+                sessionStorage.setItem("UserName", JSON.stringify(this.tempId));
                 this.userData(this.formdata.usr);
               }
             }
@@ -411,6 +412,11 @@ export default {
                 const employeeData = responce.data;
                 localStorage.setItem("employeeData", JSON.stringify(employeeData));
                 localStorage.setItem(
+                  "USERROLE",
+                  JSON.stringify(employeeData.designation)
+                );
+                sessionStorage.setItem("employeeData", JSON.stringify(employeeData))
+                sessionStorage.setItem(
                   "USERROLE",
                   JSON.stringify(employeeData.designation)
                 );
