@@ -1059,7 +1059,7 @@ const addFieldToTable = (tableIndex) => {
   });
 
   // Watch for label changes and update fieldname dynamically
-  watch(() => columns[columns.length - 1].label, (newLabel) => {
+  watch(() => columns[columns.length - 1]?.label, (newLabel) => {
     columns[columns.length - 1].fieldname = `${newLabel.replace(/\s+/g, "_").toLowerCase()}_${columns.length - 1}`;
   });
 };
@@ -1119,10 +1119,8 @@ const processFields = (tableIndex) => {
       console.error("Error saving form data:", error);
     });
 };
-
-
 const addNewField = (tableIndex) => {
-  const table = childtableHeaders.value[tableIndex];
+  const table = childtableHeaders.value[tableIndex]; // Accessing by key
 
   // ✅ Ensure `table` exists
   if (!table) {
@@ -1130,20 +1128,16 @@ const addNewField = (tableIndex) => {
     return;
   }
 
-  // ✅ Ensure `fields` is initialized
-  if (!table.fields) {
-    table.fields = [];
-  }
-
   // ✅ Ensure `newFields` is initialized
-  if (!table.newFields) {
+  if (!Array.isArray(table.newFields)) {
     table.newFields = [];
   }
 
-  const newIndex = table.fields.length + table.newFields.length;
+  const newIndex = table.newFields.length; // Only consider newFields length
 
+  // ✅ Push only to `table.newFields`
   table.newFields.push({
-    fieldname: `field_${newIndex + 1}`,  // Set default fieldname based on index
+    fieldname: `field_${newIndex + 1}`, // Set default fieldname based on index
     fieldtype: "",
     idx: newIndex + 1,
     label: "",
@@ -1152,17 +1146,68 @@ const addNewField = (tableIndex) => {
 
   // ✅ Sync fieldname with label dynamically
   watch(
-    () => table.newFields[newIndex].label,
+    () => table.newFields[newIndex]?.label,
     (newLabel) => {
-      table.newFields[newIndex].fieldname = newLabel.trim().replace(/\s+/g, "_").toLowerCase(); // Convert label to a valid fieldname
+      if (table.newFields[newIndex]) {
+        table.newFields[newIndex].fieldname = newLabel?.trim().replace(/\s+/g, "_").toLowerCase();
+      }
     }
   );
 
-  // console.log("Updated newFields:", table.newFields);
+  console.log(`Updated newFields for table "${tableIndex}":`, table.newFields);
 };
 
+
+// const addNewField = (tableKey) => {
+//   if (!childtableHeaders.value || typeof childtableHeaders.value !== "object") {
+//     console.error("childtableHeaders is not a valid object:", childtableHeaders.value);
+//     return;
+//   }
+
+//   const table = childtableHeaders.value[tableKey]; // Access by key
+
+//   // ✅ Ensure `table` exists
+//   if (!table) {
+//     console.error(`Table with key "${tableKey}" not found.`);
+//     return;
+//   }
+
+//   // ✅ Ensure `table` is an array
+//   if (!Array.isArray(table)) {
+//     console.error(`Table "${tableKey}" is not an array:`, table);
+//     return;
+//   }
+
+//   const newIndex = table.length;
+
+//   const newField = {
+//     fieldname: `field_${newIndex + 1}`,
+//     fieldtype: "",
+//     idx: newIndex + 1,
+//     label: "",
+//     value: "",
+//   };
+
+//   table.push(newField);
+
+//   // ✅ Ensure newIndex is within bounds before watching
+//   if (table.length > newIndex) {
+//     watch(
+//       () => table[newIndex]?.label,
+//       (newLabel) => {
+//         if (table[newIndex]) {
+//           table[newIndex].fieldname = newLabel?.trim().replace(/\s+/g, "_").toLowerCase();
+//         }
+//       }
+//     );
+//   }
+
+//   console.log(`Updated table "${tableKey}":`, table);
+// };
+
+
 const removeNewField = (tableIndex, fieldIndex) => {
-  const table = childtableHeaders.value[tableIndex]; // ✅ Ensure using childtableHeaders
+  const table = childtableHeaders?.value[tableIndex]; // ✅ Ensure using childtableHeaders
 
   if (!table || !table.newFields) {
     console.error("Table or newFields not found.");
@@ -1173,28 +1218,36 @@ const removeNewField = (tableIndex, fieldIndex) => {
   table.newFields.splice(fieldIndex, 1);
 };
 
-
-const saveNewFields = (tableIndex,index) => {
+const saveNewFields = (tableIndex, index) => {
   const table = childtableHeaders.value[tableIndex];
-  // console.log(tableIndex,index);
 
-  // if (table.newFields.some((field) => !field.label || !field.fieldtype)) {
-  //   alert("Please enter a label and select a field type for all new fields.");
-  //   return;
-  // }
+  if (!table) {
+    console.error(`Table "${tableIndex}" not found.`);
+    return;
+  }
+
+  // ✅ Ensure `fields` exists
+  if (!Array.isArray(table.fields)) {
+    table.fields = [];
+  }
+
+  // ✅ Ensure `newFields` exists
+  if (!Array.isArray(table.newFields)) {
+    table.newFields = [];
+  }
 
   const payload = {
     form_short_name: tableIndex,
-    fields: [...table, ...table.newFields],
+    fields: [...table, ...table.newFields], // Ensure correct merging
   };
 
   axiosInstance
     .post(apis.childtable, payload)
     .then((res) => {
-      console.log("Fields updated successfully:", res.data);
-      // alert("Fields updated successfully!");
+      console.log("Fields updated successfully:", res.message);
+      toast.success("Fields updated successfully!");
 
-      // Move new fields to fields and reset newFields
+      // ✅ Move new fields to fields and reset newFields
       table.fields.push(...table.newFields);
       table.newFields = [];
     })
@@ -1202,6 +1255,7 @@ const saveNewFields = (tableIndex,index) => {
       console.error("Error updating fields:", error);
     });
 };
+
 
 const steps = ref([
   {

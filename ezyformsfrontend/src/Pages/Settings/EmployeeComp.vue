@@ -46,7 +46,7 @@
                       <div class="mb-3">
                         <label class="font-13 ps-1" for="emp_phone">Emp Phone</label>
                         <FormFields tag="input" type="text" name="emp_phone" id="emp_phone" maxlength="10"
-                          @change="validatephonenew" placeholder="Enter Phone Numver"
+                          @change="validatephonenew" placeholder="Enter Phone Number"
                           v-model="createEmployee.emp_phone" />
                         <p v-if="phoneError" class="text-danger font-11 ps-1">
                           {{ phoneError }}
