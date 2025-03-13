@@ -8,6 +8,7 @@
  "engine": "InnoDB",
  "field_order": [
   "enable",
+  "profile_image",
   "company_field",
   "emp_code",
   "emp_name",
@@ -81,11 +82,16 @@
    "fieldname": "enable",
    "fieldtype": "Check",
    "label": "enable"
+  },
+  {
+   "fieldname": "profile_image",
+   "fieldtype": "Attach",
+   "label": "Profile Image"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-03-01 14:41:16.188870",
+ "modified": "2025-03-13 11:44:51.428433",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
  "name": "Ezy Employee",
@@ -101,6 +107,18 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "DOF",
    "share": 1,
    "write": 1
   },

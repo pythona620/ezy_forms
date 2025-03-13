@@ -159,7 +159,7 @@ function updateCharts() {
                 },
                 series: [{
                     type: 'pie',
-                    radius: ['40%', '80%'],
+                    radius: ['40%', '75%'],
                     center: ['50%', '50%'],
                     label: {
                         show: true,

@@ -302,7 +302,7 @@ const props = defineProps({
     type: Object,
   },
   readonlyFor: {
-    type: String,
+    type: String || Boolean,
   },
   employeeData: {
     type: Array,
@@ -322,7 +322,7 @@ const isImageFile = (value) => {
   return /\.(png|jpg|jpeg|gif)$/i.test(value);
 };
 
-
+console.log(props.blockArr);
 
 // const openInNewWindow = (url) => {
 //   window.open(url, '_blank');

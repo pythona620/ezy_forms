@@ -12,7 +12,7 @@
           <!-- @formValidation="isFormValid = $event" -->
 
           <!-- <span class="font-13 fw-bold">{{ table.childTableName.replace(/_/g, " ") }}</span> -->
-          <div v-if="tableHeaders.length" class="mt-3">
+          <div  class="mt-3">
             <div v-for="(table, tableIndex) in tableHeaders" :key="tableIndex" class="mt-3">
               <div>
                 <span class="font-13 fw-bold">Table {{ tableIndex.replace(/_/g, " ") }}</span>
