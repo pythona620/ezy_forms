@@ -14,6 +14,9 @@ import isAuthenticated from "../src/shared/services/auth";
 import RaiseRequest from './Components/RaiseRequest.vue';
 import NotFound from './Components/NotFound.vue'
 import ApproveRequest from "./Components/ApproveRequest.vue";
+import FormPreview from "./Components/FormPreview.vue";
+import FormPreviewComp from "./Components/FormPreviewComp.vue";
+import PdfPreview from "./Components/PdfPreview.vue";
 
 
 const routes = [
@@ -37,6 +40,21 @@ const routes = [
     path: '/approverequest',
     component: ApproveRequest,
     name: 'ApproveRequest'
+  },
+  {
+    path: '/formpreview',
+    component: FormPreview,
+    name: 'FormPreview'
+  },
+  {
+    path: '/formpreviewComp',
+    component: FormPreviewComp,
+    name: 'FormPreviewComp'
+  },
+  {
+    path: '/pdfpreview',
+    component: PdfPreview,
+    name: 'PdfPreview'
   },
   { path: "/:pathMatch(.*)*", name: "NotFound", component: NotFound },
 ];

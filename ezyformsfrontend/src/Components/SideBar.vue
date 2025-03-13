@@ -31,9 +31,9 @@
                             </li>
                         </router-link>
                     </ul> -->
-                    <h2 class="font-10 m-0 text-muted ps-2">{{ thirdSettingsTitle }}</h2>
-                    <ul class="list-unstyled">
-                        <router-link v-for="(list, index) in thirdSettingsGroup" :key="index"
+                    <h2  v-if="filteredSettingsGroups.thirdSettingsGroup.length" class="font-10 m-0 text-muted ps-2">{{ thirdSettingsTitle }}</h2>
+                    <ul class="list-unstyled" v-if="filteredSettingsGroups.thirdSettingsGroup.length">
+                        <router-link v-for="(list, index) in filteredSettingsGroups.thirdSettingsGroup" :key="index"
                             :to="`${baseRoute}/${list.route.toLowerCase()}`" class="text-decoration-none text-black"
                             active-class="active-link">
                             <li :title="list.name">
@@ -42,9 +42,9 @@
                             </li>
                         </router-link>
                     </ul>
-                    <h2 class="font-10 m-0 text-muted ps-2">{{ forthSettingsTitle }}</h2>
-                    <ul class="list-unstyled">
-                        <router-link v-for="(list, index) in forthSettingsGroup" :key="index"
+                    <h2  v-if="filteredSettingsGroups.forthSettingsGroup.length" class="font-10 m-0 text-muted ps-2">{{ forthSettingsTitle }}</h2>
+                    <ul class="list-unstyled"  v-if="filteredSettingsGroups.forthSettingsGroup.length">
+                        <router-link v-for="(list, index) in filteredSettingsGroups.forthSettingsGroup" :key="index"
                             :to="`${baseRoute}/${list.route.toLowerCase()}`" class="text-decoration-none text-black"
                             active-class="active-link">
                             <li :title="list.name">
@@ -56,12 +56,14 @@
                 </template>
                 <template v-if="isMasterRoute">
                     <ul class="list-unstyled">
-                        <router-link to="/forms/department/AllForms" class="text-decoration-none text-black" active-class="active-link">
+                        <router-link to="/forms/department/AllForms" class="text-decoration-none text-black"
+                            active-class="active-link">
                             <li><i class="bi-icon fs-6 bi bi-file-earmark-richtext me-3"></i>All Forms</li>
                         </router-link>
                         <router-link v-for="(department, index) in formSideBarData" :key="department.route"
                             :to="`/forms/department/${department.route}`" class="text-decoration-none text-black"
                             active-class="active-link">
+
                             <li>
 
                                 <!-- <i :class="`bi-icon ps-1 bg-transparent ${department.icon} me-3`"></i> -->
@@ -179,8 +181,18 @@ const sidebarData = computed(() => {
 });
 const firstSettingsGroup = computed(() => settingsSideBarData.slice(0, 1)); // First 4 items
 // const secondSettingsGroup = computed(() => settingsSideBarData.slice(2, 6));
-const thirdSettingsGroup = computed(() => settingsSideBarData.slice(1, 3)); // Remaining items
-const forthSettingsGroup = computed(() => settingsSideBarData.slice(3));
+// const thirdSettingsGroup = computed(() => settingsSideBarData.slice(1, 3)); // Remaining items
+// const forthSettingsGroup = computed(() => settingsSideBarData.slice(3));
+
+const filteredSettingsGroups = computed(() => {
+    return userDesigination.value.toLowerCase().includes('it')
+        ? {
+            thirdSettingsGroup: settingsSideBarData.slice(1, 3),
+            forthSettingsGroup: settingsSideBarData.slice(3)
+        }
+        : { thirdSettingsGroup: [], forthSettingsGroup: [] };
+});
+
 // Define the title based on the current route
 const sidebarTitle = computed(() => {
     if (isMasterRoute.value) {
@@ -208,11 +220,36 @@ const baseRoute = computed(() => {
 
 
 const deptartmentData = ref([])
-// onMounted(() => {
-//     if (route.path.startsWith('/forms')) {
-//         deptData();
-//     }
-// })
+const username = ref('');
+const userAdmin = ref('');
+const userDesigination = ref('');
+
+onMounted(() => {
+    // Retrieve data from localStorage
+    const userData = JSON.parse(localStorage.getItem('employeeData'));
+    const userName = JSON.parse(localStorage.getItem('UserName'));
+    // const syetemmanger = JSON.parse(localStorage.getItem('systemManager'))
+    if (userName) {
+        // Set the username based on the UserName data, which is used to check if the user is Admin
+        username.value = userName.full_name;
+
+        if (userName.full_name === 'Administrator') {
+
+            userAdmin.value = userName.full_name;
+            // userInitial.value = userName.full_name.charAt(0).toUpperCase();
+        } else if (userData) {
+            // Non-admin login: Set both employee and user-specific data
+            userAdmin.value = userName.full_name;
+            // userInitial.value = userData.emp_name.charAt(0).toUpperCase() || userData.full_name.charAt(0).toUpperCase();
+            // userEmail.value = userData.name;
+            userDesigination.value = userData.designation || '';
+
+        }
+    } else {
+        console.warn("No user data found in localStorage.");
+    }
+})
+
 function deptData() {
     const filters = [
         ["business_unit", "like", `%${newBusinessUnit.value.business_unit}%`]

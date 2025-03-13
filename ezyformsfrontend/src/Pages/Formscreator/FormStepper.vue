@@ -394,7 +394,7 @@
                                   <div class="d-flex justify-content-between align-items-center">
                                     <label class="rownames">{{
                                       getRowSuffix(rowIndex)
-                                      }}</label>
+                                    }}</label>
                                     <div>
                                       <button v-if="row.columns.length < 3"
                                         class="btn btn-light bg-transparent border-0 font-12" @click="
@@ -588,7 +588,7 @@
                                               </div>
                                             </div>
                                             <small v-if="field.error" class="text-danger font-10">{{ field.error
-                                              }}</small>
+                                            }}</small>
                                           </div>
                                         </div>
 
@@ -891,7 +891,7 @@ const wrkAfterGetData = ref([]);
 // const hasWorkflowToastShown = ref(false);
 const tableFieldsCache = ref([]);
 
-const childtableRows = ref([]);
+// const childtableRows = ref([]);
 const childtableHeaders = ref([]);
 // const childtableName = ref("");
 // const childTableresponseData = ref([]);
@@ -1995,27 +1995,27 @@ const removeSection = (blockIndex, sectionIndex) => {
   // toast.success("Section removed", { autoClose: 500 })
 };
 
-const addRow = (blockIndex, sectionIndex) => {
-  const rowIndex = blockArr[blockIndex].sections[sectionIndex].rows.length; // Get the current row index
-  const rowSuffix = getRowSuffix(rowIndex);
+// const addRow = (blockIndex, sectionIndex) => {
+//   const rowIndex = blockArr[blockIndex].sections[sectionIndex].rows.length; // Get the current row index
+//   const rowSuffix = getRowSuffix(rowIndex);
 
-  blockArr[blockIndex].sections[sectionIndex].rows.push({
-    label: `row_${rowIndex}_${sectionIndex}_${blockIndex}`,
-    columns: [
-      {
-        fields: [
-          {
-            label: "",
-            fieldtype: "",
-            // value: ref(""), // Keeping the value as a ref for reactivity
-            options: "",
-            reqd: false,
-          },
-        ], // Initialize with an empty fields array
-      },
-    ],
-  });
-};
+//   blockArr[blockIndex].sections[sectionIndex].rows.push({
+//     label: `row_${rowIndex}_${sectionIndex}_${blockIndex}`,
+//     columns: [
+//       {
+//         fields: [
+//           {
+//             label: "",
+//             fieldtype: "",
+//             // value: ref(""), // Keeping the value as a ref for reactivity
+//             options: "",
+//             reqd: false,
+//           },
+//         ], // Initialize with an empty fields array
+//       },
+//     ],
+//   });
+// };
 
 // const removeRow = (blockIndex, sectionIndex, rowIndex) => {
 //   let item = blockArr[blockIndex].sections[sectionIndex].rows[rowIndex];
