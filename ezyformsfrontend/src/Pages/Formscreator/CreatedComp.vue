@@ -14,9 +14,10 @@
         <!-- v-if="tableForm" -->
         <div class="mt-2">
 
-            <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" actionType="dropdown" enableDisable="true"
-                @actionClicked="actionCreated" @toggle-click="toggleFunction" isFiltersoption="true"
-                :field-mapping="fieldMapping" :actions="actions" @updateFilters="inLineFiltersData" isCheckbox="true" />
+            <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" actionType="dropdown"
+                enableDisable="true" @actionClicked="actionCreated" @toggle-click="toggleFunction"
+                isFiltersoption="true" :field-mapping="fieldMapping" :actions="actions"
+                @updateFilters="inLineFiltersData" isCheckbox="true" />
             <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
                 @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
         </div>
@@ -52,7 +53,7 @@
             </div>
         </div>
 
-        <FormPreview :blockArr="selectedForm" :formDescriptions="formDescriptions"  :childHeaders="childtableHeaders" />
+        <FormPreview :blockArr="selectedForm" :formDescriptions="formDescriptions" :childHeaders="childtableHeaders" />
 
 
     </div>
@@ -108,7 +109,7 @@ watch(
         filterObj.value.business_unit = newVal;
 
         if (newVal.length) {
-            // console.log(newVal, "new value of business unit");
+            console.log(newVal, "new value of business unit");
             // localStorage.setItem("Bu", filterObj.value.business_unit)
             tableData.value = []
             fetchTable()
@@ -142,18 +143,19 @@ const childtableHeaders = ref([]);
 
 function actionCreated(rowData, actionEvent) {
     // console.log(rowData, actionEvent,"ppp");
-    if (actionEvent.name === 'View form') {``
+    if (actionEvent.name === 'View form') {
+        ``
         if (rowData?.form_json) {
             formDescriptions.value = { ...rowData };
             // console.log(formDescriptions.value, "lllllllllll");
             selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json).fields);
-            
-            
-        childtableHeaders.value = JSON.parse(
-          rowData.form_json
-        ).child_table_fields;
-        
-        
+
+
+            childtableHeaders.value = JSON.parse(
+                rowData.form_json
+            ).child_table_fields;
+
+
             // console.log(selectedForm.value, "ooooo");
             const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});
             modal.show();
@@ -170,7 +172,7 @@ function actionCreated(rowData, actionEvent) {
 
         const dataObj = {
             "form_short_name": rowData.form_short_name,
-             business_unit:businessUnit.value
+            business_unit: businessUnit.value
 
         };
 
@@ -187,43 +189,43 @@ function actionCreated(rowData, actionEvent) {
         modal.show();
     }
     if (actionEvent.name === 'Raise Request') {
-    const parsedData = JSON.parse(rowData.form_json);
-    const storedData = localStorage.getItem("employeeData");
+        const parsedData = JSON.parse(rowData.form_json);
+        const storedData = localStorage.getItem("employeeData");
 
-    if (storedData) {
-        const designation = JSON.parse(storedData).designation;
-        // console.log(designation);
+        if (storedData) {
+            const designation = JSON.parse(storedData).designation;
+            // console.log(designation);
 
-        const roles = parsedData.workflow[0].roles;
-        // console.log(roles);
+            const roles = parsedData.workflow[0].roles;
+            // console.log(roles);
 
-        let hasAccess = false;
+            let hasAccess = false;
 
-        for (let i = 0; i < roles.length; i++) {
-            if (roles[i] === designation) {
-                hasAccess = true;
-                break;
+            for (let i = 0; i < roles.length; i++) {
+                if (roles[i] === designation) {
+                    hasAccess = true;
+                    break;
+                }
             }
-        }
 
-        if (hasAccess) {
-            router.push({
-                name: "RaiseRequest",
-                query: {
-                    routepath: route.path,
-                    selectedForm: rowData.form_short_name,
-                    business_unit: rowData.business_unit,
-                    
-                },
-            });
+            if (hasAccess) {
+                router.push({
+                    name: "RaiseRequest",
+                    query: {
+                        routepath: route.path,
+                        selectedForm: rowData.form_short_name,
+                        business_unit: rowData.business_unit,
+
+                    },
+                });
+            } else {
+                toast.info("You are not assigned to raise a request.");
+
+            }
         } else {
-            toast.info("You are not assigned to raise a request.");
-
+            console.log("No employee data found in localStorage.");
         }
-    } else {
-        console.log("No employee data found in localStorage.");
     }
-  }
     else if (actionEvent.name === 'Edit accessibility to dept.') {
         formCreation(rowData);
     }
@@ -265,7 +267,7 @@ function downloadPdf() {
     const dataObj = {
         "form_short_name": formDescriptions.value.form_short_name,
         "name": null,
-        business_unit:businessUnit.value
+        business_unit: businessUnit.value
     };
 
     axiosInstance.post(apis.download_pdf_form, dataObj)

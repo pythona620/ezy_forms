@@ -7,34 +7,14 @@
       </div>
     </div>
     <div class="mt-2">
-      <GlobalTable
-        :tHeaders="tableheaders"
-        :tData="tableData"
-        isAction="true"
-        actionType="dropdown"
-        isCheckbox="true"
-        :actions="actions"
-        @actionClicked="actionCreated"
-        isFiltersoption="true"
-        :field-mapping="fieldMapping"
-        @updateFilters="inLineFiltersData"
-      />
-      <PaginationComp
-        :currentRecords="tableData.length"
-        :totalRecords="totalRecords"
-        @updateValue="PaginationUpdateValue"
-        @limitStart="PaginationLimitStart"
-      />
+      <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" viewType="viewPdf" isCheckbox="true"
+        :actions="actions" @actionClicked="actionCreated" isFiltersoption="true" :field-mapping="fieldMapping"
+        @cell-click="viewPreview" @updateFilters="inLineFiltersData" />
+      <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
+        @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
     </div>
-    <div
-      class="modal fade"
-      id="viewRequest"
-      data-bs-backdrop="static"
-      data-bs-keyboard="false"
-      tabindex="-1"
-      aria-labelledby="viewRequestLabel"
-      aria-hidden="true"
-    >
+    <div class="modal fade" id="viewRequest" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+      aria-labelledby="viewRequestLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
           <!-- <div class="modal-header">
@@ -51,32 +31,21 @@
                 </h5>
               </div>
               <div class="">
-                <button
-                  button="button"
-                  class="btn btn-white text-dark font-13"
-                  @click="downloadPdf"
-                >
-                  Download Pdf<span class="ms-2"
-                    ><i class="bi bi-download"></i
-                  ></span>
+                <button v-if="selectedRequest.status === 'Completed'" button="button"
+                  class="btn btn-white text-dark font-13" @click="downloadPdf">
+                  Download Pdf<span class="ms-2"><i class="bi bi-download"></i></span>
                 </button>
-                <button
-                  type="button"
-                  class="btn btn-white text-dark font-13"
-                  @click="closemodal"
-                  data-bs-dismiss="modal"
-                >
+                <button type="button" class="btn btn-white text-dark font-13" @click="closemodal"
+                  data-bs-dismiss="modal">
                   Close <i class="bi bi-x"></i>
                 </button>
               </div>
             </div>
           </div>
           <div class="modal-body approvermodalbody">
-            <ApproverPreview
-              :blockArr="showRequest" :childHeaders="tableHeaders" :childData="responseData" :readonly-for="true"
-              :current-level="totalLevels"
-              @updateField="updateFormData"
-            />
+
+            <ApproverPreview :blockArr="showRequest" :childHeaders="tableHeaders" :childData="responseData"
+              :readonly-for="'true'" :current-level="totalLevels" @updateField="updateFormData" />
             <!-- <div v-if="tableName" class="mt-2">
               <div>
                 <span class="font-13 fw-bold">{{ tableName }}</span>
@@ -114,20 +83,15 @@
             </div> -->
           </div>
           <div class="activity-log-container">
-            <div
-              v-for="(item, index) in activityData"
-              :key="index"
-              class="activity-log-item"
-              :class="{ 'last-item': index === activityData.length - 1 }"
-            >
+            <div v-for="(item, index) in activityData" :key="index" class="activity-log-item"
+              :class="{ 'last-item': index === activityData.length - 1 }">
               <div class="activity-log-dot"></div>
               <div class="activity-log-content">
                 <p class="font-12 mb-1">
                   On
                   <strong class="strong-content">{{
                     formatDate(item.creation)
-                  }}</strong
-                  >,
+                  }}</strong>,
                   <strong class="strong-content">
                     <!-- {{ item.user_name }} -->
                     you
@@ -139,8 +103,7 @@
                   the request with the comments:
                   <strong class="strong-content">{{
                     item.reason || "N/A"
-                  }}</strong
-                  >.
+                  }}</strong>.
                 </p>
               </div>
             </div>
@@ -168,13 +131,7 @@
         </div>
       </div>
     </div>
-    <div
-      class="modal fade"
-      id="pdfView"
-      tabindex="-1"
-      aria-labelledby="pdfViewLabel"
-      aria-hidden="true"
-    >
+    <div class="modal fade" id="pdfView" tabindex="-1" aria-labelledby="pdfViewLabel" aria-hidden="true">
       <div class="modal-dialog modal-xl">
         <div class="modal-content">
           <div class="modal-header py-2 d-block bg-dark text-white">
@@ -185,21 +142,12 @@
                 </h5>
               </div>
               <div class="">
-                <button
-                  button="button"
-                  class="btn btn-dark text-white font-13"
-                  @click="downloadPdf"
-                >
-                  Download Pdf<span class="ms-2"
-                    ><i class="bi bi-download"></i
-                  ></span>
+                <button v-if="selectedRequest.status === 'Completed'" button="button"
+                  class="btn btn-dark text-white font-13" @click="downloadPdf">
+                  Download Pdf<span class="ms-2"><i class="bi bi-download"></i></span>
                 </button>
-                <button
-                  type="button"
-                  class="btn btn-dark text-white font-13"
-                  @click="closemodal"
-                  data-bs-dismiss="modal"
-                >
+                <button type="button" class="btn btn-dark text-white font-13" @click="closemodal"
+                  data-bs-dismiss="modal">
                   Close <i class="bi bi-x"></i>
                 </button>
               </div>
@@ -234,11 +182,14 @@ import { rebuildToStructuredArray } from "../../shared/services/field_format";
 import ApproverPreview from "../../Components/ApproverPreview.vue";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
-import router from "../../router";
+// import router from "../../router";
+import { useRoute, useRouter } from "vue-router";
 const businessUnit = computed(() => {
   return EzyBusinessUnit.value;
 });
 const newBusinessUnit = ref({ business_unit: "" });
+const route = useRoute();
+const router = useRouter();
 
 const filterObj = ref({ limitPageLength: "20", limit_start: 0 });
 const totalRecords = ref(0);
@@ -371,18 +322,16 @@ function actionCreated(rowData, actionEvent) {
                 `${apis.resource}${selectedRequest.value.doctype_name}/${res.data[0].name}`
               )
               .then((res) => {
-                // console.log(`Data for :`, res.data);
-                // Identify the child table key dynamically
-                const childTableKey = Object.keys(res.data).find((key) =>
+                const childTables = Object.keys(res.data).filter((key) =>
                   Array.isArray(res.data[key])
                 );
-                tableName.value = childTableKey.replace(/_/g, " ");
-                // console.log(tableName.value);
+                if (childTables.length) {
+                  responseData.value = {};
 
-                if (childTableKey) {
-                  responseData.value = res.data[childTableKey];
-                  tableRows.value = responseData.value; // Assign table rows
-                  // console.log(responseData.value, "Dynamic Child Table Data");
+                  childTables.forEach((tableKey) => {
+                    responseData.value[tableKey] = res.data[tableKey] || [];
+                  });
+                  console.log("Response Data:", responseData.value);
                 }
               })
               .catch((error) => {
@@ -441,7 +390,7 @@ function actionCreated(rowData, actionEvent) {
           const dataObj = {
             form_short_name: rowData.doctype_name,
             name: doctypeForm.value[0].name,
-            business_unit:businessUnit.value
+            business_unit: businessUnit.value
 
           };
 
@@ -463,6 +412,21 @@ function actionCreated(rowData, actionEvent) {
     modal.show();
   }
 }
+
+
+function viewPreview(data) {
+  router.push({
+    name: "ApproveRequest",
+    query: {
+      routepath: route.path,
+      name: data.name,
+      doctype_name: data.doctype_name,
+      type: 'myteam',
+      readOnly: 'true'
+    },
+  });
+}
+
 function closemodal() {
   responseData.value = [];
   tableName.value = "";
@@ -714,7 +678,7 @@ function receivedForMe(data) {
     ["property", "like", `%${newBusinessUnit.value.business_unit}%`],
   ];
   // ["requested_by", "like", EmpRequestMail.emp_mail_id],
-  
+
   if (data) {
     filters.push(data);
   }
@@ -885,6 +849,7 @@ onMounted(() => {
 table {
   border-collapse: collapse;
 }
+
 th {
   background-color: #f2f2f2 !important;
   text-align: left;

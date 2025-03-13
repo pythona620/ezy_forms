@@ -724,7 +724,7 @@ function request_raising_fn(item) {
   axiosInstance.post(apis.raising_request, data_obj).then((resp) => {
     if (resp?.message?.success === true) {
       toast.success("Request Raised", {
-        autoClose: 2000,
+        autoClose: 1000,
         transition: "zoom",
         onClose: () => {
           router.push({ path: "/todo/raisedbyme" });

@@ -213,9 +213,7 @@ const props = defineProps({
   childHeaders: {
     type: Object,
   },
-  childName: {
-    type: String,
-  },
+
 });
 
 

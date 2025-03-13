@@ -771,19 +771,26 @@ const downloadTemplate = () => {
 
 const emailError = ref("");
 
+// const validateEmail = () => {
+//   const email = createEmployee.value.emp_mail_id;
+//   const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+//   if (!emailPattern.test(email)) {
+//     emailError.value = "Invalid email address.";
+//   } else {
+//     emailError.value = "";
+//   }
+// };
 const validateEmail = () => {
   const email = originalEmail.value || createEmployee.value.emp_mail_id;
   const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
   if (!emailPattern.test(email)) {
-    emailError.value = "Invalid email address.";
+    emailError.value = "Invalid email address";
   } else {
     emailError.value = "";
   }
 };
-
-
-
 
 
 function bulkEmp() {
@@ -793,6 +800,13 @@ function bulkEmp() {
 function backtoEmployeeList() {
   showEmployeebulk.value = true
 }
+// const validatephone = () => {
+//   if (createEmployee.value.emp_phone) {
+//     const phone = createEmployee.value.emp_phone;
+//     const phonePattern = /^\d{10}$/;
+//     phoneError.value = phonePattern.test(phone) ? "" : "Invalid phone number.";
+//   }
+// };
 
 
 const isMasked = ref(true);
@@ -872,6 +886,16 @@ const validatePhone = () => {
     phoneError.value = "";
   }
 };
+
+
+// const validatephone = () => {
+//   if (createEmployee.value.emp_phone) {
+//     const phone = createEmployee.value.emp_phone;
+//     const phonePattern = /^\d{10}$/;
+//     phoneError.value = phonePattern.test(phone) ? "" : "Invalid phone number.";
+//   }
+// };
+
 
 const isEmailMasked = ref(true);
 const originalEmail = ref("");
@@ -1086,60 +1110,6 @@ function actionCreated(rowData, actionEvent) {
 }
 
 
-// function actionCreated(rowData, action, actionType) {
-//     if (action && action.name === 'Edit Employee') {
-//         if (rowData) {
-//             deptData();
-//             designationData();
-//             createEmployee.value = { ...rowData }
-//             const modal = new bootstrap.Modal(document.getElementById('viewEmployee'), {});
-//             modal.show();
-//         } else {
-//             console.warn("No form fields provided.");
-//             formCreation(rowData);
-//         }
-//     }
-//   }
-// }
-
-// function toggleFunction(rowData) {
-//   // Decide the action based on the current state:
-//   const isCurrentlyEnabled = rowData.enable == '1' || rowData.enable === 1;
-//   const actionText = isCurrentlyEnabled ? 'Disable' : 'Enable';
-
-//   // Show the confirmation dialog with dynamic messaging:
-//   if (confirm(`Are you sure you want to ${actionText} ${rowData.emp_name} this Employee?`)) {
-//     // Toggle the state:
-//     rowData.enable = isCurrentlyEnabled ? 0 : 1;
-
-//     axiosInstance
-//       .put(`${apis.resource}${doctypes.EzyEmployeeList}/${rowData.name}`, rowData)
-//       .then((response) => {
-//         console.log("Response:", response.data);
-//         // Adjust the toast message accordingly:
-//         toast.success(`Form ${actionText}d successfully`, { autoClose: 700 });
-
-//         axiosInstance
-//           .put(`${apis.resource}${doctypes.users}/${rowData.name}`, rowData)
-//           .then((response) => {
-//             console.log("Response:", response.data);
-//           })
-//           .catch((error) => {
-//             console.error("Error updating toggle:", error);
-//           });
-
-
-//         employeeData();
-//         window.location.reload()
-//       })
-//       .catch((error) => {
-//         console.error("Error updating toggle:", error);
-//       });
-//   } else {
-//     // If canceled, do nothing – the checkbox remains unchanged.
-//     console.log("Action cancelled. Toggle remains unchanged.");
-//   }
-// }
 
 
 function toggleFunction(rowData) {

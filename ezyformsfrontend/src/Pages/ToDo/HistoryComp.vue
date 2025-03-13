@@ -7,34 +7,14 @@
       </div>
     </div>
     <div class="mt-2">
-      <GlobalTable
-        :tHeaders="tableheaders"
-        :tData="tableData"
-        isAction="true"
-        actionType="dropdown"
-        isCheckbox="true"
-        :actions="actions"
-        @actionClicked="actionCreated"
-        isFiltersoption="true"
-        :field-mapping="fieldMapping"
-        @updateFilters="inLineFiltersData"
-      />
-      <PaginationComp
-        :currentRecords="tableData.length"
-        :totalRecords="totalRecords"
-        @updateValue="PaginationUpdateValue"
-        @limitStart="PaginationLimitStart"
-      />
+      <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" viewType="viewPdf" isCheckbox="true"
+        @cell-click="viewPreview" download="true" :actions="actions" @actionClicked="actionCreated"
+        isFiltersoption="true" :field-mapping="fieldMapping" @updateFilters="inLineFiltersData" />
+      <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
+        @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
     </div>
-    <div
-      class="modal fade"
-      id="viewRequest"
-      data-bs-backdrop="static"
-      data-bs-keyboard="false"
-      tabindex="-1"
-      aria-labelledby="viewRequestLabel"
-      aria-hidden="true"
-    >
+    <div class="modal fade" id="viewRequest" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+      aria-labelledby="viewRequestLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
           <!-- <div class="modal-header">
@@ -51,44 +31,27 @@
                 </h5>
               </div>
               <div class="">
-                <button
-                  button="button"
-                  class="btn btn-white text-dark font-13"
-                  @click="downloadPdf"
-                >
+                <button button="button" class="btn btn-white text-dark font-13" @click="downloadPdf">
                   Download Pdf<span class="ms-2"><i class="bi bi-download"></i></span>
                 </button>
-                <button
-                  type="button"
-                  class="btn btn-white text-dark font-13"
-                  @click="closemodal"
-                  data-bs-dismiss="modal"
-                >
+                <button type="button" class="btn btn-white text-dark font-13" @click="closemodal"
+                  data-bs-dismiss="modal">
                   Close <i class="bi bi-x"></i>
                 </button>
               </div>
             </div>
           </div>
           <div class="modal-body approvermodalbody">
-            <ApproverPreview
-              :blockArr="showRequest" :readonly-for="true"
-              :current-level="totalLevels"
-              @updateField="updateFormData"
-            />
+            <ApproverPreview :blockArr="showRequest" :current-level="totalLevels" @updateField="updateFormData" />
           </div>
           <div class="activity-log-container">
-            <div
-              v-for="(item, index) in activityData"
-              :key="index"
-              class="activity-log-item"
-              :class="{ 'last-item': index === activityData.length - 1 }"
-            >
+            <div v-for="(item, index) in activityData" :key="index" class="activity-log-item"
+              :class="{ 'last-item': index === activityData.length - 1 }">
               <div class="activity-log-dot"></div>
               <div class="activity-log-content">
                 <p class="font-12 mb-1">
                   On
-                  <strong class="strong-content">{{ formatDate(item.creation) }}</strong
-                  >,
+                  <strong class="strong-content">{{ formatDate(item.creation) }}</strong>,
                   <strong class="strong-content">
                     {{ item.user_name }}
                   </strong>
@@ -115,13 +78,7 @@
         </div>
       </div>
     </div>
-    <div
-      class="modal fade"
-      id="pdfView"
-      tabindex="-1"
-      aria-labelledby="pdfViewLabel"
-      aria-hidden="true"
-    >
+    <div class="modal fade" id="pdfView" tabindex="-1" aria-labelledby="pdfViewLabel" aria-hidden="true">
       <div class="modal-dialog modal-xl">
         <div class="modal-content">
           <div class="modal-header py-2 d-block bg-dark text-white">
@@ -130,19 +87,11 @@
                 <h5 class="m-0 text-white font-13" id="exampleModalLabel">PDF format</h5>
               </div>
               <div class="">
-                <button
-                  button="button"
-                  class="btn btn-dark text-white font-13"
-                  @click="downloadPdf"
-                >
+                <button button="button" class="btn btn-dark text-white font-13" @click="downloadPdf">
                   Download Pdf<span class="ms-2"><i class="bi bi-download"></i></span>
                 </button>
-                <button
-                  type="button"
-                  class="btn btn-dark text-white font-13"
-                  @click="closemodal"
-                  data-bs-dismiss="modal"
-                >
+                <button type="button" class="btn btn-dark text-white font-13" @click="closemodal"
+                  data-bs-dismiss="modal">
                   Close <i class="bi bi-x"></i>
                 </button>
               </div>
@@ -170,10 +119,13 @@ import { rebuildToStructuredArray } from "../../shared/services/field_format";
 import ApproverPreview from "../../Components/ApproverPreview.vue";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
+import { useRoute, useRouter } from "vue-router";
 const businessUnit = computed(() => {
   return EzyBusinessUnit.value;
 });
 const newBusinessUnit = ref({ business_unit: "" });
+const router = useRouter();
+const route = useRoute();
 
 const filterObj = ref({ limitPageLength: "None", limit_start: 0 });
 const totalRecords = ref(0);
@@ -199,7 +151,7 @@ const tableheaders = ref([
   { th: "Approval Status", td_key: "status" },
 ]);
 const fieldMapping = ref({
-  requested_on: { type: "input"},
+  requested_on: { type: "input" },
   // status: {
   //   type: "select",
   //   options: ["Request Raised", "In Progress", "Completed", "Request Cancelled"],
@@ -296,7 +248,7 @@ function actionCreated(rowData, actionEvent) {
           const dataObj = {
             form_short_name: rowData.doctype_name,
             name: doctypeForm.value[0].name,
-            business_unit:businessUnit.value
+            business_unit: businessUnit.value
 
           };
 
@@ -318,6 +270,168 @@ function actionCreated(rowData, actionEvent) {
     modal.show();
   }
 }
+function viewPreview(data, index, type) {
+  console.log(route.path);
+  if (type === "view") {
+    if (data) {
+      console.log(data, "------------");
+      router.push({
+        name: "ApproveRequest",
+        query: {
+          routepath: route.path,
+          name: data.name,
+          doctype_name: data.doctype_name,
+          type: "myforms",
+          readOnly: 'true'
+        },
+      });
+    }
+  }
+  if (type === "download") {
+    selectedRequest.value = data;
+    // Prepare the filters for fetching data
+    const filters = [
+      ["wf_generated_request_id", "like", `%${selectedRequest.value.name}%`],
+    ];
+    const queryParams = {
+      fields: JSON.stringify(["*"]),
+      limit_page_length: "None",
+      limit_start: 0,
+      filters: JSON.stringify(filters),
+      order_by: `\`tab${selectedRequest.value.doctype_name}\`.\`creation\` desc`,
+    };
+    // Fetch the doctype data
+    axiosInstance
+      .get(`${apis.resource}${selectedRequest.value.doctype_name}`, {
+        params: queryParams,
+      })
+      .then((res) => {
+        if (res.data) {
+          doctypeForm.value = res.data;
+          const dataObj = {
+            form_short_name: data.doctype_name,
+            name: doctypeForm.value[0].name,
+          };
+          axiosInstance
+            .post(apis.preview_dynamic_form, dataObj)
+            .then((response) => {
+              pdfPreview.value = response.message;
+            })
+            .catch((error) => {
+              console.error("Error fetching data:", error);
+            });
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching categories data:", error);
+      });
+    const modal = new bootstrap.Modal(document.getElementById("pdfView"), {});
+    modal.show();
+  }
+}
+
+// function viewPreview(data, index, type) {
+//   console.log(data, index, type);
+
+//   if (type === "view") {
+//     if (data) {
+//       selectedRequest.value = { ...data };
+//       totalLevels.value = selectedRequest.value.total_levels;
+//       // Rebuild the structured array from JSON
+//       showRequest.value = rebuildToStructuredArray(
+//         JSON.parse(selectedRequest.value?.json_columns).fields
+//       );
+
+//       // Prepare the filters for fetching data
+//       const filters = [
+//         ["wf_generated_request_id", "like", `%${selectedRequest.value.name}%`],
+//       ];
+//       const queryParams = {
+//         fields: JSON.stringify(["*"]),
+//         limit_page_length: "None",
+//         limit_start: 0,
+//         filters: JSON.stringify(filters),
+//         order_by: `\`tab${selectedRequest.value.doctype_name}\`.\`creation\` desc`,
+//       };
+
+//       // Fetch the doctype data
+//       axiosInstance
+//         .get(`${apis.resource}${selectedRequest.value.doctype_name}`, {
+//           params: queryParams,
+//         })
+//         .then((res) => {
+//           if (res.data) {
+//             doctypeForm.value = res.data;
+//             // Map values from doctypeForm to showRequest fields
+//             mapFormFieldsToRequest(doctypeForm.value[0], showRequest.value);
+//           }
+//         })
+//         .catch((error) => {
+//           console.error("Error fetching categories data:", error);
+//         });
+//       axiosInstance
+//         .get(`${apis.resource}${doctypes.WFActivityLog}/${selectedRequest.value.name}`)
+//         .then((res) => {
+//           if (res.data) {
+//             // console.log(res.data);
+//             activityData.value = res.data.reason || []; // Ensure it's always an array
+//           }
+//         })
+//         .catch((error) => {
+//           console.error("Error fetching activity data:", error);
+//         });
+//       const modal = new bootstrap.Modal(document.getElementById("viewRequest"), {});
+//       modal.show();
+//     } else {
+//       console.warn(" There is no form fields ");
+//     }
+//   }
+//   if (type === "download") {
+//     selectedRequest.value = data;
+//     // Prepare the filters for fetching data
+//     const filters = [
+//       ["wf_generated_request_id", "like", `%${selectedRequest.value.name}%`],
+//     ];
+//     const queryParams = {
+//       fields: JSON.stringify(["*"]),
+//       limit_page_length: "None",
+//       limit_start: 0,
+//       filters: JSON.stringify(filters),
+//       order_by: `\`tab${selectedRequest.value.doctype_name}\`.\`creation\` desc`,
+//     };
+
+//     // Fetch the doctype data
+//     axiosInstance
+//       .get(`${apis.resource}${selectedRequest.value.doctype_name}`, {
+//         params: queryParams,
+//       })
+//       .then((res) => {
+//         if (res.data) {
+//           doctypeForm.value = res.data;
+
+//           const dataObj = {
+//             form_short_name: data.doctype_name,
+//             name: doctypeForm.value[0].name,
+//           };
+
+//           axiosInstance
+//             .post(apis.preview_dynamic_form, dataObj)
+//             .then((response) => {
+//               pdfPreview.value = response.message;
+//             })
+//             .catch((error) => {
+//               console.error("Error fetching data:", error);
+//             });
+//         }
+//       })
+//       .catch((error) => {
+//         console.error("Error fetching categories data:", error);
+//       });
+
+//     const modal = new bootstrap.Modal(document.getElementById("pdfView"), {});
+//     modal.show();
+//   }
+// }
 // Format the date for display
 const formatDate = (dateString) => {
   if (!dateString) return "N/A";
@@ -360,7 +474,7 @@ function downloadPdf() {
   const dataObj = {
     form_short_name: selectedRequest.value.doctype_name,
     name: doctypeForm.value[0]?.name,
-    business_unit:businessUnit.value
+    business_unit: businessUnit.value
 
   };
 
@@ -550,12 +664,12 @@ function inLineFiltersData(searchedData) {
 function receivedForMe(data) {
   // Initialize filters array for building dynamic query parameters
   const EmpRequestMail = JSON.parse(localStorage.getItem("employeeData"));
-  
- // Calculate the date one month ago
- const oneMonthAgo = new Date();
+
+  // Calculate the date one month ago
+  const oneMonthAgo = new Date();
   oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
   const formattedDate = oneMonthAgo.toISOString().split('T')[0];
-  
+
   const filters = [
     ["requested_by", "like", EmpRequestMail.emp_mail_id],
     ["property", "like", `%${newBusinessUnit.value.business_unit}%`],
@@ -715,4 +829,6 @@ onMounted(() => {
 .activity-log-content strong {
   color: #333;
 }
+
+
 </style>

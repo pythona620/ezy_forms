@@ -21,11 +21,20 @@
           <td class="p-1" v-for="(column, index) in tHeaders" :key="index">
             <template v-if="fieldMapping[column.td_key]">
               <!-- Text input -->
-              <div v-if="fieldMapping[column.td_key].type === 'input'" class="input-group border-none-input">
-                <span class="input-group-text font-12" id="basic-addon1"><i class="bi bi-search"></i></span>
-                <input type="search" aria-describedby="basic-addon1"
-                  class="form-control font-12 py-1 px-2 border-left-class input-search" v-model="filters[column.td_key]"
-                  @input="handleFilterChange" />
+              <div
+                v-if="fieldMapping[column.td_key].type === 'input'"
+                class="input-group border-none-input"
+              >
+                <span class="input-group-text font-12" id="basic-addon1"
+                  ><i class="bi bi-search"></i
+                ></span>
+                <input
+                  type="search"
+                  aria-describedby="basic-addon1"
+                  class="form-control font-12 py-1 px-2 border-left-class input-search"
+                  v-model="filters[column.td_key]"
+                  @input="handleFilterChange"
+                />
               </div>
               <!-- Date input -->
               <input v-else-if="fieldMapping[column.td_key].type === 'date'" type="date"
@@ -154,20 +163,32 @@
 </span>
 
             </td>
+            <!-- <td
+              class="text-center d-flex justify-content-center position-relative"
+              v-if="isAction == 'true' && viewType === 'viewPdf'"
+            > -->
+              <div v-if="isAction == 'true' && viewType === 'viewPdf'" class="text-center">
+                <span class="px-2">
+                  <i
+                    @click="handleCellClick(row, rowIndex, 'view')"
+                    class="ri-eye-line eye-cursor"
+                  ></i>
+                </span>
+                <span v-if="download === 'true'">
+                  <i
+                    class="bi bi-download eye-cursor"
+                    @click="handleCellClick(row, rowIndex, 'download')"
+                  ></i>
+                </span>
+              </div>
+                        <!-- 'Reviewpending': row[column.td_key] == 'Pending Review',
+                'Reviewed': row[column.td_key] == 'Reviewed',
+                'Completed': row[column.td_key] == 'Completed',
+                'text-danger': row[column.td_key] == 'Error' -->
 
-            <td v-if="actionType === 'viewPdf'" class="text-center">
-              <span>
-                <i @click="handleCellClick(row, rowIndex)" class="ri-eye-line eye-cursor"></i>
-              </span>
-            </td>
-            <!-- 'Reviewpending': row[column.td_key] == 'Pending Review',
-			'Reviewed': row[column.td_key] == 'Reviewed',
-			'Completed': row[column.td_key] == 'Completed',
-			'text-danger': row[column.td_key] == 'Error' -->
-
-            <!-- <td :selectedText="text"></td>
-					<td :selectedOption="selectoption"></td>
-					column.td_key, -->
+                        <!-- <td :selectedText="text"></td>
+                    <td :selectedOption="selectoption"></td>
+                    column.td_key, -->
 
             <td class="text-center fixed-column" v-if="enableDisable === 'true'">
               <div class="d-flex justify-content-center align-items-center gap-2">
@@ -200,6 +221,32 @@
 
             <!-- <td v-if="actionType === 'Toogle&dropdown'"
               class="text-end d-flex justify-content-end align-items-center fixed-column position-relative">
+            </td>
+              <td
+                v-if="actionType === 'dropdown'"
+                class="fixed-column position-relative"
+              >
+                <div class="dropdown">
+                  <p class="p-0 actions" data-bs-toggle="dropdown" aria-expanded="false">
+                    <span>...</span>
+                  </p>
+                  <ul class="dropdown-menu actionsdropdown">
+                    <li
+                      class="py-1"
+                      @click="selectedAction(row, action)"
+                      v-for="(action, index) in actions"
+                      :key="index"
+                    >
+                      <a class="dropdown-item py-2 d-flex align-items-center gap-2">
+                        <i :class="action.icon"></i>
+                        <h1 class="font-10 mb-0">{{ action.name }}</h1>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </td>
+            <td v-if="actionType === 'Toogle&dropdown' " 
+              class="text-end d-flex p-0 justify-content-center align-items-center gap-2 fixed-column ">
               <div class="dropdown">
                 <p class="p-0 actions" data-bs-toggle="dropdown" aria-expanded="false">
                   <span>...</span>
@@ -216,6 +263,11 @@
 
 
             </td> -->
+              <!-- <div  class="form-check d-flex justify-content-end form-switch text-end ">
+                <input class="form-check-input shadow-none" type="checkbox" role="switch" :checked="row.enable == '1'"
+                  @click.prevent="handleToggle(row, index, $event)" />
+              </div> -->
+            <!-- </td> -->
 
 
 
@@ -277,10 +329,15 @@ const props = defineProps({
   actions: {
     type: Array,
   },
+  download: {
+    type: String,
+  },
   actionType: {
     type: String,
   },
-
+  viewType: {
+    type: String,
+  },
   // class: {
   //   type: String,
   //   required: true,
@@ -304,7 +361,7 @@ const props = defineProps({
   }
 });
 
-const emits = defineEmits(["actionClicked", "updateFilters", "toggle-click"]);
+const emits = defineEmits(["actionClicked", "updateFilters", "cell-click","toggle-click"]);
 
 function selectedAction(row, action) {
   emits("actionClicked", row, action);
@@ -391,8 +448,8 @@ onMounted(() => {
 //   emits("upload-file", file);
 // console.log(file.name,'jkgbjd')
 // }
-function handleCellClick(check, index) {
-  emits("cell-click", check, index);
+function handleCellClick(check, index, type) {
+  emits("cell-click", check, index, type);
 }
 // function formatDate(dateString) {
 // 	return moment(dateString).format("DD-MM-YYYY");
@@ -695,5 +752,7 @@ th:first-child {
   border: 1px solid #dee2e6;
   border-radius: 0.375rem;
 }
-
+.eye-cursor {
+  cursor: pointer;
+}
 </style>
