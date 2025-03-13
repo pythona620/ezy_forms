@@ -7,7 +7,8 @@
                     <div class="row">
                         <div class="col-2">
                             <div class="d-flex gap-2 align-items-center">
-                                <div><img @click="logoClick" class="imgmix img-fluid" src="../assets/Final-logo-ezyforms-removebg-preview.png"  /></div>
+                                <div><img @click="logoClick" class="imgmix img-fluid"
+                                        src="../assets/Final-logo-ezyforms-removebg-preview.png" /></div>
                                 <!-- <div class="m-0">
                                     <p class="font-13 m-0">EZY | Forms</p>
                                 </div> -->
@@ -58,7 +59,7 @@
                                                         <div v-if="userDesigination" class=" ">
 
                                                             <span class="fw-medium font-11">{{ userDesigination
-                                                                }}</span>
+                                                            }}</span>
                                                         </div>
                                                     </li>
                                                 </div>
@@ -216,7 +217,7 @@ const tabsData = ref([
     { name: 'Forms', icon: 'bi bi-file-earmark-text', route: '/forms' },
     { name: 'To do', icon: 'fa-solid fa-list-check', route: '/todo' },
     { name: 'Settings', icon: 'bi bi-gear', route: '/settings' },
-    // { name: 'Archive', icon: 'bi bi-archive', route: '/archived' },
+    { name: 'Archive', icon: 'bi bi-archive', route: '/archived' },
     { name: 'Form Creation', icon: 'bi bi-file-earmark-text', route: '/create-form' }
 ]);
 
@@ -262,14 +263,18 @@ const filteredTabsData = computed(() => {
         : tabsData.value.filter(tab => tab.name !== 'Form Creation');
 });
 function logout() {
-    localStorage.removeItem('UserName');
-    localStorage.removeItem('employeeData');
-    localStorage.removeItem('                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           ');
-
-
-    router.push({ path: '/' }).then(() => {
-
-    });
+    // localStorage.removeItem('UserName');
+    // localStorage.removeItem('employeeData');
+    axiosInstance.post(apis.logout)
+        .then((response) => {
+            console.log(response.data);
+            localStorage.removeItem('UserName');
+            localStorage.removeItem('employeeData');
+            localStorage.removeItem('Bu');
+            localStorage.removeItem('USERROLE');
+            router.push({ path: '/' }).then(() => {
+            });
+        })
 }
 function raiseRequstClearForm() {
     selectedData.value.selectedCategory = '',
@@ -278,6 +283,7 @@ function raiseRequstClearForm() {
 }
 const props = defineProps(['id']);
 onMounted(() => {
+    
     ezyForms();
     activeTab.value = route.path;
 
@@ -356,6 +362,8 @@ const ezyForms = () => {
 watch(business_unit, (newBu, oldBu) => {
     EzyBusinessUnit.value = newBu;
     localStorage.setItem("Bu", EzyBusinessUnit.value)
+    sessionStorage.setItem("Bu", EzyBusinessUnit.value)
+
     if (route.path.includes('forms') && newBu !== oldBu) {
         deptData(true);
     } else if (route.path.includes('forms') && newBu === oldBu) {
@@ -364,12 +372,11 @@ watch(business_unit, (newBu, oldBu) => {
     }
 });
 
-function logoClick(){
+function logoClick() {
     router.push({
-        path:'/dashboard/maindash'
+        path: '/dashboard/maindash'
     })
 }
-
 
 function deptData(value = null) {
     const filters = [
@@ -405,7 +412,7 @@ function deptData(value = null) {
                 formSideBarData.value = deptartmentData.value.map(department => ({
                     route: department.name.replace(/\s+/g, '-').toLowerCase(),
                 }));
-                
+
 
 
                 if (value && activeTab.value.includes("/forms")) {
@@ -492,7 +499,7 @@ function SelectedFromchange(value) {
             toast.error("You do not have permission to raise this request.", { autoClose: 2000 });
         }
     } catch (error) {
-        
+
         toast.error("Invalid form data. Please contact support.", { autoClose: 2000 });
     }
 }
@@ -501,85 +508,85 @@ function SelectedFromchange(value) {
 
 // Function to fetch and filter forms based on role
 function SelectedDepartment(departmentName) {
-//   console.log("Selected Department:", departmentName);
+    //   console.log("Selected Department:", departmentName);
 
-  // Get USERROLE from localStorage and normalize
-  let userRole = localStorage.getItem("USERROLE")?.trim().toLowerCase();
-  userRole = userRole?.replace(/^"|"$/g, ""); // Remove surrounding quotes
-  console.log("UserRole from localStorage:", `"${userRole}"`);
+    // Get USERROLE from localStorage and normalize
+    let userRole = localStorage.getItem("USERROLE")?.trim().toLowerCase();
+    userRole = userRole?.replace(/^"|"$/g, ""); // Remove surrounding quotes
+    console.log("UserRole from localStorage:", `"${userRole}"`);
 
-  if (!userRole) {
-    toast.error("User role is missing. Please log in again.", { autoClose: 2000 });
-    return;
-  }
+    if (!userRole) {
+        toast.error("User role is missing. Please log in again.", { autoClose: 2000 });
+        return;
+    }
 
-  const filters = [
-    ["enable", "=", 1]
-  ];
-  if (departmentName) {
-    filters.push(["owner_of_the_form", "like", departmentName]);
-  }
+    const filters = [
+        ["enable", "=", 1]
+    ];
+    if (departmentName) {
+        filters.push(["owner_of_the_form", "like", departmentName]);
+    }
 
-  const queryParams = {
-    fields: JSON.stringify(["*"]),
-    limit_page_length: filterObj.value.limitPageLength,
-    limit_start: filterObj.value.limit_start,
-    filters: JSON.stringify(filters),
-    order_by: "`tabEzy Form Definitions`.`creation` desc",
-  };
+    const queryParams = {
+        fields: JSON.stringify(["*"]),
+        limit_page_length: filterObj.value.limitPageLength,
+        limit_start: filterObj.value.limit_start,
+        filters: JSON.stringify(filters),
+        order_by: "`tabEzy Form Definitions`.`creation` desc",
+    };
 
-  axiosInstance
-  .get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParams })
-    .then((res) => {
-      let allForms = res.data; // Store fetched form list
-    //   console.log("Fetched Forms List:", allForms);
+    axiosInstance
+        .get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParams })
+        .then((res) => {
+            let allForms = res.data; // Store fetched form list
+            //   console.log("Fetched Forms List:", allForms);
 
-      // Filter forms based on user role
-      let allowedForms = allForms.filter((form) => {
-        try {
-          const formJson = JSON.parse(form.form_json); // Parse JSON
-          const requestor = formJson?.workflow?.find((item) => item.type === "requestor");
+            // Filter forms based on user role
+            let allowedForms = allForms.filter((form) => {
+                try {
+                    const formJson = JSON.parse(form.form_json); // Parse JSON
+                    const requestor = formJson?.workflow?.find((item) => item.type === "requestor");
 
-          if (!requestor || !Array.isArray(requestor.roles)) {
-            // console.log(`Form ${form.form_short_name} has no valid requestor roles.`);
-            return false;
-          }
+                    if (!requestor || !Array.isArray(requestor.roles)) {
+                        // console.log(`Form ${form.form_short_name} has no valid requestor roles.`);
+                        return false;
+                    }
 
-          // Normalize and clean roles
-          const normalizedRoles = requestor.roles.map((role) => role.trim().toLowerCase());
-          const cleanRole = (str) => str.replace(/[^\x20-\x7E]/g, "").trim().toLowerCase();
-          const cleanedRoles = normalizedRoles.map(cleanRole);
-          const cleanedUserRole = cleanRole(userRole);
+                    // Normalize and clean roles
+                    const normalizedRoles = requestor.roles.map((role) => role.trim().toLowerCase());
+                    const cleanRole = (str) => str.replace(/[^\x20-\x7E]/g, "").trim().toLowerCase();
+                    const cleanedRoles = normalizedRoles.map(cleanRole);
+                    const cleanedUserRole = cleanRole(userRole);
 
-          console.log(`Checking Form: ${form.form_short_name}`);
-        //   console.log("Allowed Roles:", cleanedRoles);
-        //   console.log("User Role:", cleanedUserRole);
+                    console.log(`Checking Form: ${form.form_short_name}`);
+                    //   console.log("Allowed Roles:", cleanedRoles);
+                    //   console.log("User Role:", cleanedUserRole);
 
-          // Check if userRole exists in cleaned roles
-          return cleanedRoles.includes(cleanedUserRole);
-        } catch (error) {
-          console.error("Error parsing form_json for form:", form.form_short_name, error);
-          return false;
-        }
-      });
+                    // Check if userRole exists in cleaned roles
+                    return cleanedRoles.includes(cleanedUserRole);
+                } catch (error) {
+                    console.error("Error parsing form_json for form:", form.form_short_name, error);
+                    return false;
+                }
+            });
 
-    //   console.log("Allowed Forms after Role Filtering:", allowedForms);
-      if (allowedForms.length === 0) {
-        toast.warning("No forms have been created in this department.", { autoClose: 2000,transition: "zoom", });
-      }
-      formList.value = allowedForms; // Only store role-matched forms
-    })
-    .catch((error) => {
-      console.error("Error fetching ezyForms data:", error);
-      toast.error("Error fetching forms. Please try again.", { autoClose: 2000 ,transition: "zoom",});
-    });
+            //   console.log("Allowed Forms after Role Filtering:", allowedForms);
+            if (allowedForms.length === 0) {
+                toast.warning("No forms have been created in this department.", { autoClose: 2000, transition: "zoom", });
+            }
+            formList.value = allowedForms; // Only store role-matched forms
+        })
+        .catch((error) => {
+            console.error("Error fetching ezyForms data:", error);
+            toast.error("Error fetching forms. Please try again.", { autoClose: 2000, transition: "zoom", });
+        });
 }
 
 
 
 const emittedFormData = ref([]);
 const filepaths = ref('')
-function raiseRequest(){
+function raiseRequest() {
     deptData()
 }
 
@@ -646,7 +653,7 @@ const handleBuChange = (tab) => {
 
 }
 
-.imgmix{
+.imgmix {
     cursor: pointer;
 }
 
@@ -661,9 +668,11 @@ const handleBuChange = (tab) => {
     text-align: left;
 
 }
-.raiseReqBtn{
+
+.raiseReqBtn {
     border: 1px solid #FE212E !important;
 }
+
 .raiseReqBtn:hover {
 
     background-color: #FE212E;

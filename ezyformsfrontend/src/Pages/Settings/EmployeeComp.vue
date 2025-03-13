@@ -43,15 +43,24 @@
                       <label class="font-13 ps-1" for="emp_code">Emp code<span class="text-danger ps-1">*</span></label>
                       <FormFields class="mb-3" tag="input" type="text" name="emp_code" id="emp_code"
                         placeholder="Enter Emp code" v-model="createEmployee.emp_code" />
-                      <div class="mb-3">
-                        <label class="font-13 ps-1" for="emp_phone">Emp Phone</label>
-                        <FormFields tag="input" type="text" name="emp_phone" id="emp_phone" maxlength="10"
-                          @change="validatephonenew" placeholder="Enter Phone Numver"
-                          v-model="createEmployee.emp_phone" />
-                        <p v-if="phoneError" class="text-danger font-11 ps-1">
-                          {{ phoneError }}
-                        </p>
-                      </div>
+                        <div class="mb-3">
+  <label class="font-13 ps-1" for="emp_phone">Emp Phone</label>
+  <FormFields 
+    tag="input" 
+    type="text" 
+    name="emp_phone" 
+    id="emp_phone" 
+    maxlength="13"
+    @input="formatPhoneNumber" 
+    @change="validatephonenew" 
+    placeholder="Enter Phone Number"
+    v-model="createEmployee.emp_phone" 
+  />
+  <p v-if="phoneError" class="text-danger font-11 ps-1">
+    {{ phoneError }}
+  </p>
+</div>
+
                       <div class="mb-3">
                         <label class="font-13 ps-1" for="emp_mail_id">Emp Mail ID<span
                             class="text-danger ps-1">*</span></label>
@@ -334,7 +343,7 @@
                     <div class="input-container">
                       <FormFields tag="input" type="text" name="emp_phone" id="emp_phone" maxlength="10" class="w-100"
                         :readonly="true" placeholder="Enter Phone Number" v-model="createEmployee.emp_phone"
-                        @input="maskPhoneNumber" @change="validatephone" />
+                        @input="maskPhoneNumber" @change="validatePhone"  />
                       <i :class="eyeIcon" class="eye-icon" @click="toggleMask"></i>
                     </div>
                     <p v-if="phoneError" class="text-danger font-11 ps-1">
@@ -762,19 +771,26 @@ const downloadTemplate = () => {
 
 const emailError = ref("");
 
+// const validateEmail = () => {
+//   const email = createEmployee.value.emp_mail_id;
+//   const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+//   if (!emailPattern.test(email)) {
+//     emailError.value = "Invalid email address.";
+//   } else {
+//     emailError.value = "";
+//   }
+// };
 const validateEmail = () => {
   const email = originalEmail.value || createEmployee.value.emp_mail_id;
   const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
   if (!emailPattern.test(email)) {
-    emailError.value = "Invalid email address.";
+    emailError.value = "Invalid email address";
   } else {
     emailError.value = "";
   }
 };
-
-
-
 
 
 function bulkEmp() {
@@ -784,66 +800,109 @@ function bulkEmp() {
 function backtoEmployeeList() {
   showEmployeebulk.value = true
 }
+// const validatephone = () => {
+//   if (createEmployee.value.emp_phone) {
+//     const phone = createEmployee.value.emp_phone;
+//     const phonePattern = /^\d{10}$/;
+//     phoneError.value = phonePattern.test(phone) ? "" : "Invalid phone number.";
+//   }
+// };
+
 
 
 const isMasked = ref(true);
 const originalPhone = ref("");
 
-const eyeIcon = computed(() => (isMasked.value ? "bi bi-eye-slash-fill" : "bi bi-eye-fill"));
-const maskPhoneNumber = () => {
-  const phone = createEmployee.value.emp_phone || ""; // Ensure it's a string
-  //if (phone.length < 10) return; // Only mask valid phone numbers
 
-  if (isMasked.value) {
-    originalPhone.value = phone;
-    createEmployee.value.emp_phone = "******" + phone.slice(-4);
+const eyeIcon = computed(() => (isMasked.value ? "bi bi-eye-slash-fill" : "bi bi-eye-fill"));
+
+// Ensure +91 is always prefixed
+const existformatPhoneNumber = (phone) => {
+  phone = phone.replace(/\D/g, ""); // Remove non-numeric characters
+  if (phone.startsWith("91") && phone.length === 12) {
+    phone = "+" + phone;
+  } else if (phone.length === 10) {
+    phone = "+91" + phone;
   }
+  return phone;
 };
+
+// Watch input field for changes
+watch(
+  () => createEmployee.value.emp_phone,
+  (newVal) => {
+    if (!newVal.startsWith("+91")) {
+      createEmployee.value.emp_phone = existformatPhoneNumber(newVal);
+    }
+
+    // Update originalPhone only when unmasked
+    if (!isMasked.value) {
+      originalPhone.value = createEmployee.value.emp_phone;
+    }
+  },
+  { immediate: true } // Run immediately to set +91 on initial load
+);
+
+// Mask phone number
+const maskPhoneNumber = () => {
+  let phone = createEmployee.value.emp_phone || "";
+  phone = existformatPhoneNumber(phone);
+
+  if (!/^\+91\d{10}$/.test(phone)) {
+    phoneError.value = "Phone number must start with +91 and have 10 digits.";
+    return;
+  } else {
+    phoneError.value = "";
+  }
+
+  originalPhone.value = phone;
+
+  // Mask the number when required
+  createEmployee.value.emp_phone = isMasked.value
+    ? "+91 ******" + phone.slice(-4)
+    : phone;
+};
+
+// Toggle between masked and unmasked
 const toggleMask = () => {
   if (!originalPhone.value) return;
 
   if (isMasked.value) {
     const confirmView = window.confirm("Are you sure you want to see the phone number?");
-    if (!confirmView) return; // If user cancels, do nothing
+    if (!confirmView) return;
   }
 
   isMasked.value = !isMasked.value;
   createEmployee.value.emp_phone = isMasked.value
-    ? "******" + originalPhone.value.slice(-4)
+    ? "+91 ******" + originalPhone.value.slice(-4)
     : originalPhone.value;
 };
-// const toggleMask = () => {
-//   if (!originalPhone.value) return;
 
-//   isMasked.value = !isMasked.value;
-//   createEmployee.value.emp_phone = isMasked.value
-//     ? "******" + originalPhone.value.slice(-4)
-//     : originalPhone.value;
-// };
-
-const validatephone = () => {
-  const phone = originalPhone.value || createEmployee.value.emp_phone;
+// Validate phone number
+const validatePhone = () => {
+  let phone = originalPhone.value.replace("+91", ""); // Remove +91 for validation
   if (!/^\d{10}$/.test(phone)) {
-    phoneError.value = "Invalid phone number";
+    phoneError.value = "Phone number must be 10 digits.";
   } else {
     phoneError.value = "";
   }
 };
 
-// Watch for phone input and update the original value
-watch(
-  () => createEmployee.value.emp_phone,
-  (newVal) => {
-    if (!isMasked.value) {
-      originalPhone.value = newVal;
-    }
-  }
-);
+
+// const validatephone = () => {
+//   if (createEmployee.value.emp_phone) {
+//     const phone = createEmployee.value.emp_phone;
+//     const phonePattern = /^\d{10}$/;
+//     phoneError.value = phonePattern.test(phone) ? "" : "Invalid phone number.";
+//   }
+// };
+
 
 const isEmailMasked = ref(true);
 const originalEmail = ref("");
 
 const eyeIconEmail = computed(() => (isEmailMasked.value ? "bi bi-eye-slash-fill" : "bi bi-eye-fill"));
+
 
 const maskEmail = () => {
   if (!isEmailMasked.value || !createEmployee.value.emp_mail_id.includes("@")) return;
@@ -884,13 +943,36 @@ const maskEmailFormat = (email) => {
   const [localPart, domain] = email.split("@");
   return localPart.length > 3 ? localPart.slice(0, 3) + "***@" + domain : email;
 };
+// Ensure +91 is always prefixed
+const formatPhoneNumber = (event) => {
+  let value = event.target.value;
+
+  // Remove non-numeric characters except '+'
+  value = value.replace(/[^0-9+]/g, "");
+
+  // Ensure +91 is always at the start
+  if (!value.startsWith("+91")) {
+    value = "+91" + value.replace(/^91/, ""); // Remove leading '91' if entered without '+'
+  }
+
+  // Limit total length to 13 characters
+  if (value.length > 13) {
+    value = value.slice(0, 13);
+  }
+
+  createEmployee.value.emp_phone = value;
+};
+
+// Validate phone number
 const validatephonenew = () => {
   if (createEmployee.value.emp_phone) {
-    const phone = createEmployee.value.emp_phone;
+    const phone = createEmployee.value.emp_phone.replace("+91", ""); // Remove +91 for validation
     const phonePattern = /^\d{10}$/;
     phoneError.value = phonePattern.test(phone) ? "" : "Invalid phone number.";
   }
 };
+
+
 const filterObj = ref({
   limitPageLength: "None",
   limit_start: 0,
@@ -1031,60 +1113,6 @@ function actionCreated(rowData, actionEvent) {
 }
 
 
-// function actionCreated(rowData, action, actionType) {
-//     if (action && action.name === 'Edit Employee') {
-//         if (rowData) {
-//             deptData();
-//             designationData();
-//             createEmployee.value = { ...rowData }
-//             const modal = new bootstrap.Modal(document.getElementById('viewEmployee'), {});
-//             modal.show();
-//         } else {
-//             console.warn("No form fields provided.");
-//             formCreation(rowData);
-//         }
-//     }
-//   }
-// }
-
-// function toggleFunction(rowData) {
-//   // Decide the action based on the current state:
-//   const isCurrentlyEnabled = rowData.enable == '1' || rowData.enable === 1;
-//   const actionText = isCurrentlyEnabled ? 'Disable' : 'Enable';
-
-//   // Show the confirmation dialog with dynamic messaging:
-//   if (confirm(`Are you sure you want to ${actionText} ${rowData.emp_name} this Employee?`)) {
-//     // Toggle the state:
-//     rowData.enable = isCurrentlyEnabled ? 0 : 1;
-
-//     axiosInstance
-//       .put(`${apis.resource}${doctypes.EzyEmployeeList}/${rowData.name}`, rowData)
-//       .then((response) => {
-//         console.log("Response:", response.data);
-//         // Adjust the toast message accordingly:
-//         toast.success(`Form ${actionText}d successfully`, { autoClose: 700 });
-
-//         axiosInstance
-//           .put(`${apis.resource}${doctypes.users}/${rowData.name}`, rowData)
-//           .then((response) => {
-//             console.log("Response:", response.data);
-//           })
-//           .catch((error) => {
-//             console.error("Error updating toggle:", error);
-//           });
-
-
-//         employeeData();
-//         window.location.reload()
-//       })
-//       .catch((error) => {
-//         console.error("Error updating toggle:", error);
-//       });
-//   } else {
-//     // If canceled, do nothing – the checkbox remains unchanged.
-//     console.log("Action cancelled. Toggle remains unchanged.");
-//   }
-// }
 
 
 function toggleFunction(rowData) {
@@ -1129,6 +1157,7 @@ function toggleFunction(rowData) {
 const fieldMapping = ref({
   emp_code: { type: "input" },
   emp_name: { type: "input" },
+  designation: { type: "input" },
 });
 // const filtersBeforeApplyingCount = computed(() => {
 //     return [filterOnModal.designation, filterOnModal.emp_code, filterOnModal.department, filterOnModal.emp_mail_id, filterOnModal.emp_name, filterOnModal.reporting_designation, filterOnModal.reporting_to].filter(

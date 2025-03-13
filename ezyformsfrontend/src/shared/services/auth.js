@@ -1,3 +1,11 @@
 export default function isAuthenticated() {
-    return !!localStorage.getItem("UserName"); // Assuming you store login info in localStorage
+    const userName = sessionStorage.getItem("UserName"); // Check session storage
+    const userId = document.cookie
+        .split('; ')
+        .find(cookie => cookie.startsWith('user_id='))
+        ?.split('=')[1] || null; // Check cookies
+
+    return !!(userName && userId); // Returns true if either is found
 }
+
+

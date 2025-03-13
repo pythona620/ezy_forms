@@ -2,8 +2,8 @@
     <section>
         <div v-if="blockArr" class="card">
             <div v-for="(block, blockIndex) in blockArr" :key="blockIndex" class="block-container">
-                
-                
+
+
                 <div v-for="(section, sectionIndex) in block.sections" :key="'preview-' + sectionIndex"
                     class="preview-section m-2">
                     <div class="section-label">
@@ -129,7 +129,8 @@
                                                     " />
                                         </template>
                                         <template v-else-if="field.fieldtype == 'Datetime'">
-                                            <input type="datetime-local" :value="field.value"
+                                            <input type="datetime-local" :value="field.value" @click="forceOpenCalendar"
+    ref="datetimeInput"
                                                 :placeholder="'Enter ' + field.label" :name="'field-' +
                                                     sectionIndex +
                                                     '-' +
@@ -150,7 +151,8 @@
                                         </template>
 
                                         <template v-else>
-                                            <input v-if="field.fieldtype === 'Datetime'" type="datetime-local"
+                                            <input v-if="field.fieldtype === 'Datetime'" type="datetime-local" @click="forceOpenCalendar"
+    ref="datetimeInput"
                                                 :value="field.value" class="form-control previewInputHeight font-10" />
                                             <!-- <input v-if="field.fieldtype === 'Date'" type="date" :value="field.value"
                                                 class="form-control previewInputHeight font-10" /> -->
@@ -163,24 +165,23 @@
                                                     fieldIndex
                                                     " class="form-control previewInputHeight" /> -->
                                             <!-- :value="field.value"  -->
-                                            <textarea v-if="field.fieldtype == 'Text'"  @change="
-                                                        (event) =>
-                                                            logFieldValue(
-                                                                event,
-                                                                blockIndex,
-                                                                sectionIndex,
-                                                                rowIndex,
-                                                                columnIndex,
-                                                                fieldIndex
-                                                            )
-                                                    "
-                                                v-model="field.value" :placeholder="'Enter ' + field.label"   :name="'field-' +
-                            sectionIndex +
-                            '-' +
-                            columnIndex +
-                            '-' +
-                            fieldIndex
-                            " class="form-control previewInputHeight"></textarea>
+                                            <textarea v-if="field.fieldtype == 'Text'" @change="
+                                                (event) =>
+                                                    logFieldValue(
+                                                        event,
+                                                        blockIndex,
+                                                        sectionIndex,
+                                                        rowIndex,
+                                                        columnIndex,
+                                                        fieldIndex
+                                                    )
+                                            " v-model="field.value" :placeholder="'Enter ' + field.label" :name="'field-' +
+                                                sectionIndex +
+                                                '-' +
+                                                columnIndex +
+                                                '-' +
+                                                fieldIndex
+                                                " class="form-control previewInputHeight"></textarea>
                                             <component v-if="
                                                 field.fieldtype !== 'Datetime' && field.fieldtype !== 'Text'
                                             " :is="getFieldComponent(field.fieldtype)" :value="field.value"
@@ -195,16 +196,16 @@
                                                             '-' +
                                                             fieldIndex
                                                             " @change="
-            (event) =>
-                logFieldValue(
-                    event,
-                    blockIndex,
-                    sectionIndex,
-                    rowIndex,
-                    columnIndex,
-                    fieldIndex
-                )
-        " class="form-control previewInputHeight font-10">
+                                                                (event) =>
+                                                                    logFieldValue(
+                                                                        event,
+                                                                        blockIndex,
+                                                                        sectionIndex,
+                                                                        rowIndex,
+                                                                        columnIndex,
+                                                                        fieldIndex
+                                                                    )
+                                                            " class="form-control previewInputHeight font-10">
                                             </component>
                                         </template>
                                         <div v-if="
@@ -248,16 +249,16 @@ const props = defineProps({
 
 const getCurrentDateTime = () => {
     const localTime = new Date().toLocaleString("en-CA", {
-              timeZone: "Asia/Kolkata", // Change this to your target timezone
-              year: "numeric",
-              month: "2-digit",
-              day: "2-digit",
-              hour: "2-digit",
-              minute: "2-digit",
-              hour12: false,
-            }).replace(/,/, "").replace(/\//g, "-");
-            return localTime;
- // Adjust format as needed
+        timeZone: "Asia/Kolkata", // Change this to your target timezone
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+    }).replace(/,/, "").replace(/\//g, "-");
+    return localTime;
+    // Adjust format as needed
 };
 
 // Function to update Datetime fields
@@ -272,6 +273,12 @@ const updateDateTimeFields = () => {
                                 field.value = getCurrentDateTime();
                                 emit("updateField", field);
                             }
+                            if (field.fieldtype === "Date" && !field.value) {
+                                field.value = new Date().toISOString().split('T')[0]; // Ensure format is YYYY-MM-DD
+                                // console.log("Setting field.value:", field.value); // Debugging log
+                                emit("updateField", field);
+                            }
+
                         });
                     });
                 });
@@ -310,6 +317,14 @@ onMounted(() => {
                                 emit("updateField", field);
 
                             }
+                            if (field.fieldtype === "Date" && !field.value) {
+                                field.value = new Date().toISOString().split('T')[0]; // Ensure format is YYYY-MM-DD
+                                // console.log("Setting field.value:", field.value); // Debugging log
+                                emit("updateField", field);
+                            }
+
+
+
                         });
                     });
                 });
@@ -317,6 +332,14 @@ onMounted(() => {
         });
     }
 });
+
+const datetimeInput = ref(null);
+const forceOpenCalendar = (event) => {
+  if (event.target.showPicker) {
+    event.target.showPicker(); // Opens the date picker in supported browsers
+  }
+  setTimeout(() => event.target.focus(), 50); // Ensures focus for unsupported browsers
+};
 // Watch blockArr for changes
 watch(
     () => props.blockArr,
@@ -417,7 +440,7 @@ const logFieldValue = (
             eve.target.selectedOptions,
             (option) => option.value
         );
-    }else if (field.fieldtype === "Text") {
+    } else if (field.fieldtype === "Text") {
         field["value"] = eve.target.value; // Capture textarea value
         emit("updateField", field.value); // Emit updated value
     } else {
@@ -519,6 +542,8 @@ const uploadFile = (file, field) => {
 // };
 </script>
 <style setup>
+
+
 .previewInputHeight {
     margin-bottom: 5px;
 }

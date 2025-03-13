@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="">
     <div>
       <div class="d-flex justify-content-between align-items-center py-2">
         <div>
@@ -13,7 +13,7 @@
 
       </div>
       <div class="mt-3">
-        <GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true" enableDisable="true"
+        <GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true" :enableDisable="isEnable"
           actionType="dropdown" @actionClicked="actionCreated" @toggle-click="toggleFunction" :actions="actions"
           @updateFilters="inLineFiltersData" :field-mapping="fieldMapping" isFiltersoption="true" />
         <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
@@ -38,15 +38,46 @@
         </div>
       </div>
     </div>
-    <FormPreview :blockArr="selectedForm" :formDescriptions="formDescriptions" :childHeaders="childtableHeaders"  />
+
+    <div class="modal fade" id="pdfView" tabindex="-1" aria-labelledby="pdfViewLabel" aria-hidden="true">
+      <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+          <div class="modal-header py-2 d-block bg-dark text-white">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h5 class="m-0 text-white font-13" id="exampleModalLabel">
+                  PDF format
+                </h5>
+              </div>
+              <div class="">
+                <button button="button" class=" btn btn-dark text-white font-13" @click="downloadPdf">Download Pdf<span
+                    class=" ms-2"><i class="bi bi-download"></i></span> </button>
+                <button type="button" class="btn btn-dark text-white font-13" @click="closemodal"
+                  data-bs-dismiss="modal">Close
+                  <i class="bi bi-x"></i></button>
+              </div>
+            </div>
+          </div>
+          <div class="modal-body">
+
+            <div v-html="pdfPreview"></div>
+          </div>
+          <div class="modal-footer">
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- <FormPreview :blockArr="selectedForm" :formDescriptions="formDescriptions" :childHeaders="childtableHeaders" /> -->
 
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch, reactive } from 'vue';
+import { ref, computed, watch, reactive, onMounted } from 'vue';
 import axiosInstance from '../../shared/services/interceptor';
-import { apis, doctypes } from '../../shared/apiurls';
+import { apis, doctypes, domain } from '../../shared/apiurls';
 import GlobalTable from '../../Components/GlobalTable.vue';
 import { EzyBusinessUnit } from '../../shared/services/business_unit';
 import { rebuildToStructuredArray } from '../../shared/services/field_format';
@@ -70,6 +101,7 @@ const selectedForm = ref(null);
 const tableData = ref([]);
 const formCategory = ref([]);
 const route = useRoute();
+const pdfPreview = ref('')
 
 const childtableHeaders = ref([]);
 
@@ -82,6 +114,7 @@ const actions = ref(
   [
     { name: 'View form', icon: 'fa-solid fa-eye' },
     { name: 'Raise Request', icon: 'fa fa-file-text' },
+    { name: 'Download Print format', icon: 'fa-solid fa-download' },
   ]
 )
 const fieldMapping = ref({
@@ -97,60 +130,123 @@ const fieldMapping = ref({
 });
 function actionCreated(rowData, actionEvent) {
   if (actionEvent.name === 'View form') {
-    if (rowData?.form_json) {
-      formDescriptions.value = { ...rowData }
-      selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json).fields)
-      childtableHeaders.value = JSON.parse(
-          rowData.form_json
-        ).child_table_fields;
-      const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});// raise a modal
-      modal.show();
-      
+    if (rowData) {
+      // formDescriptions.value = { ...rowData }
+      // selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json).fields)
+      // childtableHeaders.value = JSON.parse(
+      //     rowData.form_json
+      //   ).child_table_fields;
+      // const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});// raise a modal
+      // modal.show();
+
+
+      router.push({
+        name: "FormPreviewComp",
+        query: {
+          routepath: route.path,
+          form_short_name: rowData.form_short_name,
+
+        },
+      });
+
     } else {
       toast.warn(" There is no form fields ")
     }
   }
-  
+
   if (actionEvent.name === 'Raise Request') {
     const parsedData = JSON.parse(rowData.form_json);
     const storedData = localStorage.getItem("employeeData");
 
     if (storedData) {
-        const designation = JSON.parse(storedData).designation;
-        // console.log(designation);
+      const designation = JSON.parse(storedData).designation;
+      // console.log(designation);
 
-        const roles = parsedData.workflow[0].roles;
-        // console.log(roles);
+      const roles = parsedData.workflow[0].roles;
+      // console.log(roles);
 
-        let hasAccess = false;
+      let hasAccess = false;
 
-        for (let i = 0; i < roles.length; i++) {
-            if (roles[i] === designation) {
-                hasAccess = true;
-                break;
-            }
+      for (let i = 0; i < roles.length; i++) {
+        if (roles[i] === designation) {
+          hasAccess = true;
+          break;
         }
-        // console.log(route.path,"sadasda");
+      }
+      // console.log(route.path, "sadasda");
 
-        if (hasAccess) {
-            router.push({
-                name: "RaiseRequest",
-                query: {
-                    routepath: route.path,
-                    selectedForm: rowData.form_short_name,
-                    business_unit: rowData.business_unit,
+      if (hasAccess) {
+        router.push({
+          name: "RaiseRequest",
+          query: {
+            routepath: route.path,
+            selectedForm: rowData.form_short_name,
+            business_unit: rowData.business_unit,
 
-                    
-                },
-            });
-        } else {
-          toast.info("You do not have permission to access this Form.");
-        }
+
+          },
+        });
+      } else {
+        toast.info("You do not have permission to access this Form.");
+      }
     } else {
-        console.log("No employee data found in localStorage.");
+      console.log("No employee data found in localStorage.");
     }
   }
+
+  if (actionEvent.name === 'Download Print format') {
+    // pdfView
+    formDescriptions.value = rowData
+
+    const dataObj = {
+      "form_short_name": rowData.form_short_name,
+      business_unit: businessUnit.value
+
+    };
+
+    axiosInstance.post(apis.preview_dynamic_form, dataObj)
+      .then((response) => {
+
+        pdfPreview.value = response.message
+
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
+    const modal = new bootstrap.Modal(document.getElementById('pdfView'), {});
+    modal.show();
+  }
 }
+
+function downloadPdf() {
+
+  const dataObj = {
+    "form_short_name": formDescriptions.value.form_short_name,
+    "name": null,
+    business_unit: businessUnit.value
+  };
+
+  axiosInstance.post(apis.download_pdf_form, dataObj)
+    .then((response) => {
+
+      let pdfUrl = domain + response.message;
+
+      // Remove 'api' from the URL if present
+      pdfUrl = pdfUrl.replace('/api', '');
+
+      // Create an anchor element to trigger the download
+      const link = document.createElement('a');
+      link.href = pdfUrl;
+      link.download = response.message.split('/').pop(); // Use the file name from the URL
+      link.click();
+    })
+    .catch((error) => {
+      console.error("Error fetching data:", error);
+    });
+}
+
+
+
 // Toggle function triggered when a checkbox is clicked
 function toggleFunction(rowData, rowIndex, event) {
   // console.log("rowData", rowData);
@@ -191,7 +287,7 @@ watch(
   ([newBusinessUnitVal, newId]) => {
     newBusinessUnit.value.business_unit = newBusinessUnitVal;
     if (newBusinessUnitVal.length && newId && props.id !== ':id') {
-    
+
       fetchDepartmentDetails(newId || props.id, null);
     }
   },
@@ -256,7 +352,6 @@ function inLineFiltersData(searchedData) {
   }
 
 }
-
 // Fetch department details function
 function fetchDepartmentDetails(id, data) {
 
@@ -305,6 +400,19 @@ function fetchDepartmentDetails(id, data) {
       console.error("Error fetching department details:", error);
     });
 }
+
+const userDesigination = ref('');
+const isEnable = ref("");
+
+onMounted(() => {
+  const userData = JSON.parse(localStorage.getItem('employeeData'));
+  userDesigination.value = userData.designation || '';
+
+  if (userDesigination.value.includes("IT")) {
+    isEnable.value = "true";
+  }
+
+})
 
 </script>
 

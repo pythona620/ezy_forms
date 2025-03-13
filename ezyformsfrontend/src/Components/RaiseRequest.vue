@@ -1,57 +1,51 @@
 <template>
   <div>
     <div class="backtofromPage py-2">
-      <router-link
-        :to="backTo"
-        @click="backToForm"
-        class="text-decoration-none text-dark  ps-3 font-13"
-        ><span> <i class="bi bi-arrow-left pe-2"></i></span>Back</router-link
-      >
+      <router-link :to="backTo" @click="backToForm" class="text-decoration-none text-dark  ps-3 font-13"><span> <i
+            class="bi bi-arrow-left pe-2"></i></span>Back</router-link>
     </div>
     <div class="container">
       <div v-if="blockArr.length" class="position-relative">
         <div class="requestPreviewDiv">
-          <RequestPreview
-            :blockArr="blockArr"
-            :formName="selectedData.selectedform"
-            @updateField="handleFieldUpdate" @formValidation="isFormValid = $event"
-          />
-            <!-- @formValidation="isFormValid = $event" -->
+          <RequestPreview :blockArr="blockArr" :formName="selectedData.selectedform" @updateField="handleFieldUpdate"
+            @formValidation="isFormValid = $event" />
+          <!-- @formValidation="isFormValid = $event" -->
 
-      <!-- <span class="font-13 fw-bold">{{ table.childTableName.replace(/_/g, " ") }}</span> -->
-      <div class="mt-3">
-  <div v-for="(table, tableIndex) in tableHeaders" :key="tableIndex" class="mt-3">
-    <div>
-      <span class="font-13 fw-bold">Table {{ tableIndex.replace(/_/g," ") }}</span>
-    </div>
-    
-    <table class="table table-striped" border="1" width="100%">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th v-for="field in table" :key="field.fieldname">
-            {{ field.label }}
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(row, rowIndex) in tableRows[tableIndex]" :key="rowIndex">
-          <td style="text-align: center;">{{ rowIndex + 1 }}</td>
-          <td v-for="field in table" :key="field.fieldname">
-            <template v-if="field.fieldtype === 'Data'">
-              <input type="text" class="form-control font-12" v-model="row[field.fieldname]" />
-            </template>
-            <template v-else-if="field.fieldtype === 'Attach'">
-              <input type="file" class="form-control font-12" @change="handleFileUpload($event, row, field.fieldname)" />
-            </template>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+          <!-- <span class="font-13 fw-bold">{{ table.childTableName.replace(/_/g, " ") }}</span> -->
+          <div  class="mt-3">
+            <div v-for="(table, tableIndex) in tableHeaders" :key="tableIndex" class="mt-3">
+              <div>
+                <span class="font-13 fw-bold">Table {{ tableIndex.replace(/_/g, " ") }}</span>
+              </div>
 
-    <button class="btn btn-light font-12" @click="addRow(tableIndex)">Add Row</button>
-  </div>
-</div>
+              <table class="table table-striped" border="1" width="100%">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th v-for="field in table" :key="field.fieldname">
+                      {{ field.label }}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(row, rowIndex) in tableRows[tableIndex]" :key="rowIndex">
+                    <td style="text-align: center;">{{ rowIndex + 1 }}</td>
+                    <td v-for="field in table" :key="field.fieldname">
+                      <template v-if="field.fieldtype === 'Data'">
+                        <input type="text" class="form-control font-12" v-model="row[field.fieldname]" />
+                      </template>
+                      <template v-else-if="field.fieldtype === 'Attach'">
+                        <input type="file" class="form-control font-12"
+                          @change="handleFileUpload($event, row, field.fieldname)" />
+                      </template>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <button class="btn btn-light font-12" @click="addRow(tableIndex)">Add Row</button>
+            </div>
+          </div>
 
 
         </div>
@@ -62,16 +56,16 @@
               <span> <i class="bi bi-x"></i></span>Clear form
             </button>
             <!-- :disabled="!isFormValid" -->
-            <button v-if="!selectedData.selectedFormId "
-               class="btn btn-dark font-12" type="submit" @click="raiseRequestSubmission">
+            <button v-if="!selectedData.selectedFormId" class="btn btn-dark font-12" type="submit"
+              @click="raiseRequestSubmission">
               Raise Request
             </button>
             <button v-if="selectedData.selectedFormId && $route.query.selectedFormStatus == 'Request Cancelled'"
-              @click="RequestUpdate"  class="btn btn-dark font-12" type="submit">
+              @click="RequestUpdate" class="btn btn-dark font-12" type="submit">
               Update Request
             </button>
             <button v-if="$route.query.selectedFormStatus && $route.query.selectedFormStatus == 'Request Raised'"
-              @click="EditRequestUpdate"  class="btn btn-dark font-12" type="submit">
+              @click="EditRequestUpdate" class="btn btn-dark font-12" type="submit">
               Edit Request
             </button>
 
@@ -103,7 +97,7 @@ const route = useRoute(); // Get query params from route
 
 //  Extract query parameters from URL
 const selectedData = ref({
-  routepath: route.query.routepath|| "",
+  routepath: route.query.routepath || "",
   selectedCategory: route.query.selectedCategory || "", // Retrieve from query
   selectedform: route.query.selectedForm || "", // Retrieve from query
   selectedFormId: route.query.selectedFormId || "", // Retrieve from query
@@ -158,16 +152,17 @@ function RequestUpdate() {
 
   axiosInstance
     .post(apis.Update_raising_request, data_obj)
-    .then( (resp) => {
+    .then((resp) => {
       if (resp?.message?.success) {
-        
+
         toast.success("Request Raised", {
-        autoClose: 2000,
-        transition: "zoom",
-        onClose: () => {
-          router.push({ path: "/todo/raisedbyme" });
-        },
-      });      }
+          autoClose: 2000,
+          transition: "zoom",
+          onClose: () => {
+            router.push({ path: "/todo/raisedbyme" });
+          },
+        });
+      }
     });
 }
 
@@ -189,16 +184,16 @@ function EditRequestUpdate() {
 
   axiosInstance
     .post(apis.edit_form_before_approve, data_obj)
-    .then( (resp) => {
+    .then((resp) => {
       if (resp?.message?.success) {
-        
+
         toast.success("Request Raised", {
-        autoClose: 2000,
-        transition: "zoom",
-        onClose: () => {
-          router.push({ path: "/todo/raisedbyme" });
-        },
-      });
+          autoClose: 2000,
+          transition: "zoom",
+          onClose: () => {
+            router.push({ path: "/todo/raisedbyme" });
+          },
+        });
       }
     });
 
@@ -244,7 +239,7 @@ function clearFrom() {
   window.location.reload()
   tableRows.value = []
 
- }
+}
 function deptData(value = null) {
   const filters = [["business_unit", "like", `%${business_unit.value}%`]];
   const queryParams = {
@@ -468,7 +463,7 @@ const handleFieldUpdate = (field) => {
   );
   if (!fieldExists) {
     if (field.fieldtype === "Attach") {
-      
+
       if (field.value && typeof field.value === "string") {
         filepaths.value = field.value
           .split(",")
@@ -713,7 +708,7 @@ function mapFormFieldsToRequest(doctypeData, blockArr) {
   });
 }
 function request_raising_fn(item) {
-  console.log(filepaths.value,"---filepaths");
+  console.log(filepaths.value, "---filepaths");
   // const filesArray = filepaths.value
   //   ? filepaths.value.split(",").map((filePath) => filePath.trim())
   //   : [];
@@ -726,10 +721,10 @@ function request_raising_fn(item) {
     files: filepaths.value.length > 0 ? filepaths.value : [],
     property: business_unit.value,
   };
-  axiosInstance.post(apis.raising_request, data_obj).then( (resp) => {
+  axiosInstance.post(apis.raising_request, data_obj).then((resp) => {
     if (resp?.message?.success === true) {
       toast.success("Request Raised", {
-        autoClose: 2000,
+        autoClose: 1000,
         transition: "zoom",
         onClose: () => {
           router.push({ path: "/todo/raisedbyme" });

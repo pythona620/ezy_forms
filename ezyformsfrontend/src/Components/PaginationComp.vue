@@ -30,7 +30,7 @@ const props = defineProps({
 });
 
 const itemsPerPage = ref(20);
-const newpages = ref([20,50,100,200,500]);
+const newpages = ref([20, 50, 100, 200, 500]);
 const emit = defineEmits(["updateValue", "limitStart"]);
 const start = ref(0);
 

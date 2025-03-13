@@ -7,9 +7,10 @@
       </div>
     </div>
     <div class="mt-2">
-      <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" actionType="dropdown" isCheckbox="true"
-        :actions="actions" @actionClicked="actionCreated" isFiltersoption="true" :field-mapping="fieldMapping"
-        @updateFilters="inLineFiltersData" />
+      <!-- actionType="dropdown" -->
+      <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" viewType="viewPdf" isCheckbox="true"
+        @cell-click="viewPreview" :actions="actions" @actionClicked="actionCreated" isFiltersoption="true"
+        :field-mapping="fieldMapping" @updateFilters="inLineFiltersData" />
       <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
         @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
     </div>
@@ -90,7 +91,7 @@
                   On
                   <strong class="strong-content">{{
                     formatDate(item.creation)
-                    }}</strong>,
+                  }}</strong>,
                   <strong class="strong-content">
                     <span v-if="index == 0">you</span>
                     <span v-else>
@@ -101,11 +102,11 @@
                   ({{ item.role }})
                   <strong class="strong-content">{{
                     formatAction(item.action)
-                    }}</strong>
+                  }}</strong>
                   the request with the comments:
                   <strong class="strong-content">{{
                     item.reason || "N/A"
-                    }}</strong>.
+                  }}</strong>.
                 </p>
               </div>
             </div>
@@ -125,7 +126,7 @@
 
               </div> -->
             </div>
-            <div v-if=" selectedRequestStatus == 'Request Raised'">
+            <div v-if="selectedRequestStatus == 'Request Raised'">
               <ButtonComp type="button" class="border-1 edit-btn text-nowrap font-10" @click="handleEditClick"
                 name="Edit Form" />
             </div>
@@ -187,6 +188,8 @@ import { useRoute, useRouter } from "vue-router";
 const businessUnit = computed(() => {
   return EzyBusinessUnit.value;
 });
+const router = useRouter();
+
 const newBusinessUnit = ref({ business_unit: "" });
 
 const filterObj = ref({ limitPageLength: 20, limit_start: 0 });
@@ -208,7 +211,6 @@ const tableHeaders = ref([]);
 const tableName = ref("");
 const responseData = ref([]);
 const route = useRoute();
-const router = useRouter();
 
 const loading = ref(false);
 
@@ -230,6 +232,21 @@ const actions = ref([
   // { name: 'Edit Form', icon: 'fa-solid fa-edit' },
 ]);
 
+function viewPreview(data) {
+  router.push({
+    name: "ApproveRequest",
+    query: {
+      routepath: route.path,
+      name: data.name,
+      doctype_name: data.doctype_name,
+      business_unit:data.property,
+      status:data.status,
+      type: "myforms",
+      readOnly: 'true'
+
+    },
+  });
+}
 function handleEditClick() {
   const modalElement = document.getElementById("viewRequest");
   if (modalElement) {

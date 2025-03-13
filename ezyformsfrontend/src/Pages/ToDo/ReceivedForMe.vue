@@ -7,9 +7,9 @@
       </div>
     </div>
     <div class="mt-2">
-      <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" actionType="dropdown" isCheckbox="true"
-        @updateFilters="inLineFiltersData" :field-mapping="fieldMapping" isFiltersoption="true" :actions="actions"
-        @actionClicked="actionCreated" />
+      <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" viewType="viewPdf" isCheckbox="true"
+        @updateFilters="inLineFiltersData" :field-mapping="fieldMapping" @cell-click="viewPreview"
+        isFiltersoption="true" :actions="actions" @actionClicked="actionCreated" />
       <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
         @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
     </div>
@@ -25,8 +25,8 @@
               aria-label="Close"></button>
           </div>
           <div class="modal-body approvermodalbody">
-            <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel"  :childData="responseData" :childHeaders="tableHeaders" :employeeData="employeeData"
-              @updateField="updateFormData" />
+            <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel" :childData="responseData"
+              :childHeaders="tableHeaders" :employeeData="employeeData" @updateField="updateFormData" />
           </div>
           <div class="p-2">
             <div class="activity-log-container">
@@ -36,16 +36,15 @@
                 <div class="activity-log-content">
                   <p class="font-12 mb-1">
                     On
-                    <strong class="strong-content">{{ formatDate(item.creation) }}</strong>, <strong
-                      class="strong-content">{{ item.user_name }}</strong> ({{
-                        item.role
-                      }}) has
+                    <strong class="strong-content">{{ formatDate(item.creation) }}</strong>,
+                    <strong class="strong-content">{{ item.user_name }}</strong>
+                    ({{ item.role }}) has
                     <strong class="strong-content">{{
                       formatAction(item.action)
                       }}</strong>
                     the request<span v-if="index !== 0 && item.reason">with the comments:</span>
                     <strong v-if="index !== 0 && item.reason" class="strong-content">{{ item.reason || "N/A"
-                    }}</strong>.
+                    }}</strong>
                   </p>
                 </div>
               </div>
@@ -67,9 +66,9 @@
                 </button> -->
                 <button type="submit" class="btn btn-outline-danger font-12 py-0 rejectbtn" :disabled="Rejectloading"
                   @click.prevent="ApproverCancelSubmission(formData, 'Request Cancelled')">
-                  <span v-if="Rejectloading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                  <span v-if="!Rejectloading"><i class="bi bi-x-lg me-2"></i><span
-                      class="font-12">Reject</span></span>
+                  <span v-if="Rejectloading" class="spinner-border spinner-border-sm" role="status"
+                    aria-hidden="true"></span>
+                  <span v-if="!Rejectloading"><i class="bi bi-x-lg me-2"></i><span class="font-12">Reject</span></span>
                 </button>
               </div>
               <div>
@@ -116,13 +115,16 @@ import { rebuildToStructuredArray } from "../../shared/services/field_format";
 import ApproverPreview from "../../Components/ApproverPreview.vue";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
-import router from "../../router";
+import { useRoute, useRouter } from "vue-router";
+const router = useRouter();
+const route = useRoute();
+
 const businessUnit = computed(() => {
   return EzyBusinessUnit.value;
 });
 const newBusinessUnit = ref({ business_unit: "" });
 
-const filterObj = ref({ limitPageLength: 20, limit_start: 0, filters:[] });
+const filterObj = ref({ limitPageLength: 20, limit_start: 0, filters: [] });
 const totalRecords = ref(0);
 const idDta = ref([]);
 const docTypeName = ref([]);
@@ -251,7 +253,7 @@ function actionCreated(rowData, actionEvent) {
         .catch((error) => {
           console.error("Error fetching categories data:", error);
         });
-      
+
       axiosInstance
         .get(`${apis.resource}${doctypes.WFActivityLog}/${selectedRequest.value.name}`)
         .then((res) => {
@@ -276,8 +278,12 @@ function viewPreview(data) {
   router.push({
     name: "ApproveRequest",
     query: {
+      routepath: route.path,
       name: data.name,
       doctype_name: data.doctype_name,
+      readOnly: 'false',
+      type: "mytasks",
+
     },
   });
 }
@@ -440,11 +446,11 @@ function ApproverCancelSubmission(dataObj, type) {
     isCommentsValid.value = false;
 
     return; // Stop function execution
-  } 
-    // Proceed if comments are valid
-    isCommentsValid.value = true;
-  
-    Rejectloading.value = true; // Start loader
+  }
+  // Proceed if comments are valid
+  isCommentsValid.value = true;
+
+  Rejectloading.value = true; // Start loader
 
 
 
@@ -470,7 +476,7 @@ function ApproverCancelSubmission(dataObj, type) {
 function approvalCancelFn(dataObj, type) {
 
 
-  console.log(dataObj, "data",type);
+  console.log(dataObj, "data", type);
   let data = {
     property: selectedRequest.value.property,
     doctype: selectedRequest.value.doctype_name,
@@ -604,10 +610,10 @@ function inLineFiltersData(searchedData) {
   //   // Log filters to verify
 
   //   // Once the filters are built, pass them to fetchData function
-  if(filterObj.value.filters.length){
+  if (filterObj.value.filters.length) {
 
     receivedForMe(filterObj.value.filters);
-  }else{
+  } else {
     receivedForMe();
   }
 }
@@ -621,6 +627,7 @@ function receivedForMe(data) {
     // assigned_to_users
     ["assigned_to_users", "like", `%${EmpRequestdesignation?.designation}%`],
     ["property", "like", `%${newBusinessUnit.value.business_unit}%`],
+    ["status", "!=", "Request Cancelled"],
   ];
   if (data) {
     filters.push(data);
@@ -642,7 +649,9 @@ function receivedForMe(data) {
 
   // Fetch total count of records matching filters
   axiosInstance
-    .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, { params: queryParamsCount })
+    .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, {
+      params: queryParamsCount,
+    })
     .then((res) => {
       totalRecords.value = res.data[0].total_count;
     })
@@ -652,9 +661,11 @@ function receivedForMe(data) {
 
   // Fetch the records matching filters
   axiosInstance
-    .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, { params: queryParams })
+    .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, {
+      params: queryParams,
+    })
     .then((res) => {
-      if(filterObj.value.limit_start === 0){
+      if (filterObj.value.limit_start === 0) {
 
         tableData.value = res.data;
         idDta.value = [...new Set(res.data.map((id) => id.name))];
@@ -664,15 +675,15 @@ function receivedForMe(data) {
         statusOptions.value = [...new Set(res.data.map((status) => status.status))];
       }
       else {
-                tableData.value = tableData.value.concat(res.data);
-            }
+        tableData.value = tableData.value.concat(res.data);
+      }
 
     })
     .catch((error) => {
       console.error("Error fetching records:", error);
     });
 }
-const fieldMapping = computed(() =>({
+const fieldMapping = computed(() => ({
   // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
   // credit_irn_generated: { type: "select", options: ["Pending", "Completed", "Error"] },
   // role: { type: "input" },
