@@ -19,6 +19,7 @@ export const doctypes = {
   WFWorkflowRequests: 'WF Workflow Requests',
   WFActivityLog: 'WF Activity Log',
   CheckUser: 'Login Check',
+  SystemSettings:"System Settings",
 
 
 };

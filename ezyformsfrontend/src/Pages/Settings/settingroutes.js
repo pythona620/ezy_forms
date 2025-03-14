@@ -10,6 +10,7 @@ const RolesMatrix = () => import("./RolesMatrix.vue");
 const Categories = () => import("./Catagories.vue");
 const ActivityLog = () => import("./DepartmentComp.vue");
 const EsignComp = () => import("./EsignComp.vue");
+const AuthenticationPage=()=>import("./AuthenticationPage.vue");
 const settingRoutes = [
   {
     path: "/settings",
@@ -67,6 +68,11 @@ const settingRoutes = [
         path: "esign",
         component: EsignComp,
         name: "EsignComp",
+      },
+      {
+        path: "authenticationpage",
+        component: AuthenticationPage,
+        name: "authenticationpage",
       },
     ],
   },
