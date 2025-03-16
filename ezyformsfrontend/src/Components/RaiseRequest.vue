@@ -15,7 +15,7 @@
           <div  class="mt-3">
             <div v-for="(table, tableIndex) in tableHeaders" :key="tableIndex" class="mt-3">
               <div>
-                <span class="font-13 fw-bold">Table {{ tableIndex.replace(/_/g, " ") }}</span>
+                <span class="font-13 fw-bold">{{ tableIndex.replace(/_/g, " ") }}</span>
               </div>
 
               <table class="table table-striped" border="1" width="100%">
@@ -33,6 +33,9 @@
                     <td v-for="field in table" :key="field.fieldname">
                       <template v-if="field.fieldtype === 'Data'">
                         <input type="text" class="form-control font-12" v-model="row[field.fieldname]" />
+                      </template>
+                      <template v-if="field.fieldtype === 'Date'">
+                        <input type="date" class="form-control font-12" v-model="row[field.fieldname]" />
                       </template>
                       <template v-else-if="field.fieldtype === 'Attach'">
                         <input type="file" class="form-control font-12"
@@ -166,10 +169,23 @@ function RequestUpdate() {
     });
 }
 
-function EditRequestUpdate() {
+async function EditRequestUpdate() {
   // const filesArray = filepaths.value
   //   ? filepaths.value.split(",").map((filePath) => filePath.trim())
   //   : [];
+
+  await ChildTableData();
+
+//  Collect all child tables for the main submission
+let childTables = {};
+tableName.value.forEach((table) => {
+  const childName = table.options;
+  const childData = tableRows.value[childName];
+
+  if (childData && childData.length) {
+    childTables[childName] = childData;
+  }
+});
   let form = {};
   if (emittedFormData.value.length) {
     emittedFormData.value.map((each) => {
@@ -180,22 +196,24 @@ function EditRequestUpdate() {
   let data_obj = {
     form_id: route.query.selectedFormId,
     updated_fields: form, // Pass the form JSON here
+
   };
+  console.log(data_obj,"lll");
 
-  axiosInstance
-    .post(apis.edit_form_before_approve, data_obj)
-    .then((resp) => {
-      if (resp?.message?.success) {
+  // axiosInstance
+  //   .post(apis.edit_form_before_approve, data_obj)
+  //   .then((resp) => {
+  //     if (resp?.message?.success) {
 
-        toast.success("Request Raised", {
-          autoClose: 2000,
-          transition: "zoom",
-          onClose: () => {
-            router.push({ path: "/todo/raisedbyme" });
-          },
-        });
-      }
-    });
+  //       toast.success("Request Raised", {
+  //         autoClose: 2000,
+  //         transition: "zoom",
+  //         onClose: () => {
+  //           router.push({ path: "/todo/raisedbyme" });
+  //         },
+  //       });
+  //     }
+  //   });
 
 }
 
@@ -509,19 +527,19 @@ const ChildTableData = async () => {
     const formData = new FormData();
     formData.append("doc", JSON.stringify(form));
     formData.append("action", "Save");
-
+console.log(formData,"[[[[]]]]");
 
 
     // **Return API call promise**
-    return axiosInstance.post(apis.savedocs, formData);
+  //   return axiosInstance.post(apis.savedocs, formData);
   }).filter(Boolean); // Remove null entries
 
-  try {
-    const responses = await Promise.all(formPromises);
+  // try {
+  //   const responses = await Promise.all(formPromises);
 
-  } catch (error) {
-    console.error("Error submitting child tables:", error);
-  }
+  // } catch (error) {
+  //   console.error("Error submitting child tables:", error);
+  // }
 };
 
 async function raiseRequestSubmission() {
@@ -559,7 +577,6 @@ async function raiseRequestSubmission() {
   const formData = new FormData();
   formData.append("doc", JSON.stringify(form));
   formData.append("action", "Save");
-
 
   axiosInstance
     .post(apis.savedocs, formData)
@@ -677,11 +694,43 @@ function WfRequestUpdate() {
     .then((res) => {
       if (res.data && res.data.length > 0) {
         const doctypeForm = res.data[0];
-        // console.log(doctypeForm, "doctype",);
+        console.log(doctypeForm, "doctype",);
         // console.log( blockArr.value);
 
         // Map response data to UI fields
         mapFormFieldsToRequest(doctypeForm, blockArr.value);
+
+
+        axiosInstance
+          .get(`${apis.resource}${selectedData.value.selectedform}`)
+          .then((res) => {
+            console.log(`Data for :`, res.data[0]);
+          })
+          .catch((error) => {
+            console.error(`Error fetching data for :`, error);
+          });
+        axiosInstance
+          .get(
+            `${apis.resource}${selectedData.value.selectedform}/${res.data[0].name}`
+          )
+          .then((res) => {
+            console.log(`Data for :`, res.data);
+            // Identify the child table key dynamically
+            const childTables = Object.keys(res.data).filter((key) =>
+              Array.isArray(res.data[key])
+            );
+            if (childTables.length) {
+              tableRows.value = {};
+
+              childTables.forEach((tableKey) => {
+                tableRows.value[tableKey] = res.data[tableKey] || [];
+              });
+              console.log("Response Data:", tableRows.value);
+            }
+          })
+          .catch((error) => {
+            console.error(`Error fetching data for :`, error);
+          });
       }
     })
     .catch((error) => {
