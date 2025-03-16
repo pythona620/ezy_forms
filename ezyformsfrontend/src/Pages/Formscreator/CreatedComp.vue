@@ -446,7 +446,7 @@ function fetchTable(data) {
         filters: JSON.stringify(filters),
         limit_page_length: filterObj.value.limitPageLength,
         limit_start: filterObj.value.limit_start,
-        order_by: "`tabEzy Form Definitions`.`creation` desc"
+        order_by: "`tabEzy Form Definitions`.`enable` DESC, `tabEzy Form Definitions`.`creation` DESC"
     };
     const queryParamsCount = {
         fields: JSON.stringify(["count(name) AS total_count"]),
