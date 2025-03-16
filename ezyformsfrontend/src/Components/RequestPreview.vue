@@ -504,9 +504,9 @@ const generateRandomNumber = () => {
     return Math.floor(Math.random() * 1000000);
 };
 
-const uploadFile = (file, field) => {
+const uploadFile = (file, field, index) => {
     const randomNumber = generateRandomNumber();
-    let fileName = `${props.formName}-${randomNumber}-@${file.name}`;
+    let fileName = `attach-${props.formName}${randomNumber}-@${file.name}`;
 
     const formData = new FormData();
     formData.append("file", file, fileName);
