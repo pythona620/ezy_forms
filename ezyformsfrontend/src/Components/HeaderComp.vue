@@ -59,7 +59,7 @@
                                                         <div v-if="userDesigination" class=" ">
 
                                                             <span class="fw-medium font-11">{{ userDesigination
-                                                            }}</span>
+                                                                }}</span>
                                                         </div>
                                                     </li>
                                                 </div>
@@ -287,7 +287,7 @@ function raiseRequstClearForm() {
 }
 const props = defineProps(['id']);
 onMounted(() => {
-    
+
     ezyForms();
     activeTab.value = route.path;
 
