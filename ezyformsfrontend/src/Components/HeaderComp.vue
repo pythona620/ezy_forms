@@ -272,6 +272,10 @@ function logout() {
             localStorage.removeItem('employeeData');
             localStorage.removeItem('Bu');
             localStorage.removeItem('USERROLE');
+            sessionStorage.removeItem('UserName');
+            sessionStorage.removeItem('employeeData');
+            sessionStorage.removeItem('Bu');
+            sessionStorage.removeItem('USERROLE');
             router.push({ path: '/' }).then(() => {
             });
         })
