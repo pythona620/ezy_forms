@@ -45,7 +45,7 @@
           </div>
           <div class="modal-body approvermodalbody">
             <ApproverPreview :blockArr="showRequest" :childHeaders="tableHeaders" :childData="responseData"
-              :readonly-for="true" :current-level="totalLevels" @updateField="updateFormData" />
+               :current-level="totalLevels" @updateField="updateFormData" />
             <!-- <div v-if="tableName" class="mt-2">
               <div>
                 <span class="font-13 fw-bold">{{ tableName }}</span>
