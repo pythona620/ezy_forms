@@ -322,7 +322,7 @@ const isImageFile = (value) => {
   return /\.(png|jpg|jpeg|gif)$/i.test(value);
 };
 
-console.log(props.blockArr);
+
 
 // const openInNewWindow = (url) => {
 //   window.open(url, '_blank');

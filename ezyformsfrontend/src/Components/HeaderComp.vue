@@ -402,8 +402,8 @@ function deptData(value = null) {
                 // departmentList.value = res.data.map((dept) => (dept.name));
                 // Update the route for the "Forms" tab with the first department's route
                 const newFormsRoute = deptartmentData.value.length > 0
-                    ? `/forms/department/${deptartmentData.value[0].name.replace(/\s+/g, '-')}`
-                    : '/forms';
+                    ? `/forms/department/allforms`
+                    : '/forms/department/allforms';
 
                 tabsData.value = tabsData.value.map(tab => {
                     if (tab.name === 'Forms') {

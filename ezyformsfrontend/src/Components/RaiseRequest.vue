@@ -69,7 +69,7 @@
             </button>
             <button v-if="$route.query.selectedFormStatus && $route.query.selectedFormStatus == 'Request Raised'"
               @click="EditRequestUpdate" class="btn btn-dark font-12" type="submit">
-              Edit Request
+              Update Request
             </button>
 
           </div>
@@ -223,10 +223,12 @@ function EditRequestUpdate() {
     });
   });
 
-  console.log(childTables, "Child Tables Data");
+  console.log(childTables, childTables.length,"Child Tables Data");
 
   // Call function to update child records
-  updateChildRecords(childTables, child_id_name.value);
+  if(childTables.length){
+    updateChildRecords(childTables, child_id_name.value);
+  }
 
 
   let form = {};
