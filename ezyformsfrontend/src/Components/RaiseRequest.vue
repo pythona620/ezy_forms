@@ -92,7 +92,7 @@ import { rebuildToStructuredArray } from "../shared/services/field_format";
 import axiosInstance from "../shared/services/interceptor";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
-import { EzyBusinessUnit } from "../shared/services/business_unit";
+// import { EzyBusinessUnit } from "../shared/services/business_unit";
 import { useRoute, useRouter } from "vue-router";
 
 const router = useRouter();
@@ -105,7 +105,9 @@ const selectedData = ref({
   selectedform: route.query.selectedForm || "", // Retrieve from query
   selectedFormId: route.query.selectedFormId || "", // Retrieve from query
 });
-const business_unit = ref(route.query.business_unit || ""); // Retrieve from query
+
+
+const business_unit = ref(localStorage.getItem('Bu')); // Retrieve from query
 const isFormValid = ref(false);
 // const isFormValid = computed(() => allFieldsFilled.value);
 const blockArr = ref([]);
@@ -136,6 +138,20 @@ function backToForm() {
 onMounted(() => {
   formDefinations();
   raiseRequest();
+});
+
+watch(business_unit.value, (newBu, oldBu) => {
+  
+  business_unit.value = newBu;
+  console.log(newBu);
+  console.log("[[[[]]]]", newBu,oldBu);
+  // localStorage.setItem("Bu", EzyBusinessUnit.value);
+
+  if (oldBu) {
+    deptData(true);
+  } else {
+    deptData();
+  }
 });
 function RequestUpdate() {
   // const filesArray = filepaths.value
@@ -169,23 +185,50 @@ function RequestUpdate() {
     });
 }
 
-async function EditRequestUpdate() {
-  // const filesArray = filepaths.value
-  //   ? filepaths.value.split(",").map((filePath) => filePath.trim())
-  //   : [];
+function updateChildRecords(childTables, child_id_name) {
+  let requestData = {};
 
-  await ChildTableData();
+  // Add each child table and its fields dynamically
+  childTables.forEach(({ child_table, child_fields }) => {
+    requestData[child_table] = child_fields.map(({ name, ...fields }) => fields);
+  });
 
-//  Collect all child tables for the main submission
-let childTables = {};
-tableName.value.forEach((table) => {
-  const childName = table.options;
-  const childData = tableRows.value[childName];
+  axiosInstance
+    .put(`${apis.resource}${selectedData.value.selectedform}/${child_id_name}`, requestData)
+    .then((response) => {
+      console.log(`Updated Record for All Child Tables:`, response.data);
+    })
+    .catch((error) => {
+      console.error(`Error updating records:`, error);
+    });
+}
 
-  if (childData && childData.length) {
-    childTables[childName] = childData;
-  }
-});
+function EditRequestUpdate() {
+  // Filter valid tables that have child data
+  const validTables = tableName.value.filter((table) => {
+    const childData = tableRows.value[table.options];
+    return childData && childData.length;
+  });
+
+  let childTables = [];
+
+  // Iterate through valid tables and collect their fields
+  validTables.forEach((table) => {
+    const childTableName = table.options;
+    const childFields = tableRows.value[childTableName] || [];
+
+    childTables.push({
+      child_table: childTableName,
+      child_fields: childFields,
+    });
+  });
+
+  console.log(childTables, "Child Tables Data");
+
+  // Call function to update child records
+  updateChildRecords(childTables, child_id_name.value);
+
+
   let form = {};
   if (emittedFormData.value.length) {
     emittedFormData.value.map((each) => {
@@ -200,22 +243,71 @@ tableName.value.forEach((table) => {
   };
   console.log(data_obj,"lll");
 
-  // axiosInstance
-  //   .post(apis.edit_form_before_approve, data_obj)
-  //   .then((resp) => {
-  //     if (resp?.message?.success) {
+  axiosInstance
+    .post(apis.edit_form_before_approve, data_obj)
+    .then((resp) => {
+      if (resp?.message?.success) {
 
-  //       toast.success("Request Raised", {
-  //         autoClose: 2000,
-  //         transition: "zoom",
-  //         onClose: () => {
-  //           router.push({ path: "/todo/raisedbyme" });
-  //         },
-  //       });
-  //     }
-  //   });
-
+        toast.success("Request Raised", {
+          autoClose: 2000,
+          transition: "zoom",
+          onClose: () => {
+            router.push({ path: "/todo/raisedbyme" });
+          },
+        });
+      }
+    });
 }
+
+
+
+// async function EditRequestUpdate() {
+//   let form = {};
+//   if (emittedFormData.value.length) {
+//     emittedFormData.value.forEach((each) => {
+//       form[each.fieldname] = each.value;
+//     });
+//   }
+
+//   // Filter valid tables that have child data
+//   const validTables = tableName.value.filter((table) => {
+//     const childData = tableRows.value[table.options];
+//     return childData && childData.length;
+//   });
+
+//   let child_table = "";
+//   let child_fields = [];
+
+//   // Ensure we process only the first valid table
+//   if (validTables.length) {
+//     const table = validTables[0]; // Picking the first valid table
+//     child_table = table.options;
+//     child_fields = tableRows.value[child_table] || [];
+//   }
+
+//   let data_obj = {
+//     form_id: route.query.selectedFormId,
+//     updated_fields: form, // Form updates
+//     child_table, // Single child table name
+//     child_fields // Corresponding child table fields
+//   };
+
+//   console.log(data_obj, "lll");
+
+//   axiosInstance.post(apis.edit_form_before_approve, data_obj).then((resp) => {
+//     if (resp?.message?.success) {
+//       toast.success("Request Raised", {
+//         autoClose: 2000,
+//         transition: "zoom",
+//         onClose: () => {
+//           router.push({ path: "/todo/raisedbyme" });
+//         },
+//       });
+//     }
+//   });
+// }
+
+
 
 
 
@@ -241,16 +333,7 @@ const addRow = (tableIndex) => {
 
 
 
-watch(business_unit, (newBu, oldBu) => {
-  EzyBusinessUnit.value = newBu;
-  localStorage.setItem("Bu", EzyBusinessUnit.value);
 
-  if (oldBu) {
-    deptData(true);
-  } else {
-    deptData();
-  }
-});
 function clearFrom() {
 
   emittedFormData.value = []
@@ -381,6 +464,7 @@ function formDefinations() {
       tableName.value = parsedFormJson.fields.filter(
         (field) => field.fieldtype === "Table"
       );
+      console.log(tableName.value);
       // console.log(tableName.value, "5555");
       childTableName.value = tableName.value[0]?.options.replace(/_/g, " ");
 
@@ -531,15 +615,15 @@ console.log(formData,"[[[[]]]]");
 
 
     // **Return API call promise**
-  //   return axiosInstance.post(apis.savedocs, formData);
+    return axiosInstance.post(apis.savedocs, formData);
   }).filter(Boolean); // Remove null entries
 
-  // try {
-  //   const responses = await Promise.all(formPromises);
+  try {
+    const responses = await Promise.all(formPromises);
 
-  // } catch (error) {
-  //   console.error("Error submitting child tables:", error);
-  // }
+  } catch (error) {
+    console.error("Error submitting child tables:", error);
+  }
 };
 
 async function raiseRequestSubmission() {
@@ -668,7 +752,7 @@ async function raiseRequestSubmission() {
 //     });
 // }
 
-
+const child_id_name = ref((''))
 
 function WfRequestUpdate() {
   const filters = [
@@ -694,7 +778,7 @@ function WfRequestUpdate() {
     .then((res) => {
       if (res.data && res.data.length > 0) {
         const doctypeForm = res.data[0];
-        console.log(doctypeForm, "doctype",);
+        
         // console.log( blockArr.value);
 
         // Map response data to UI fields
@@ -719,13 +803,16 @@ function WfRequestUpdate() {
             const childTables = Object.keys(res.data).filter((key) =>
               Array.isArray(res.data[key])
             );
+            
             if (childTables.length) {
               tableRows.value = {};
 
               childTables.forEach((tableKey) => {
                 tableRows.value[tableKey] = res.data[tableKey] || [];
               });
-              console.log("Response Data:", tableRows.value);
+              child_id_name.value = res.data.name
+              console.log(res.data,"000000");
+              
             }
           })
           .catch((error) => {
@@ -782,6 +869,8 @@ function request_raising_fn(item) {
     }
   });
 }
+
+
 // window.location.reload();
 </script>
 

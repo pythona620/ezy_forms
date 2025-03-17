@@ -111,7 +111,7 @@
                                         </template>
 
                                         <template v-else-if="field.fieldtype == 'Attach'">
-                                            <input type="file" accept="image/jpeg,image/png/,application/pdf" :id="'field-' +
+                                            <input type="file"  accept="image/jpeg,image/png/,application/pdf" :id="'field-' +
                                                 sectionIndex +
                                                 '-' +
                                                 columnIndex +
