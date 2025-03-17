@@ -31,7 +31,8 @@
                             </li>
                         </router-link>
                     </ul> -->
-                    <h2  v-if="filteredSettingsGroups.thirdSettingsGroup.length" class="font-10 m-0 text-muted ps-2">{{ thirdSettingsTitle }}</h2>
+                    <h2 v-if="filteredSettingsGroups.thirdSettingsGroup.length" class="font-10 m-0 text-muted ps-2">{{
+                        thirdSettingsTitle }}</h2>
                     <ul class="list-unstyled" v-if="filteredSettingsGroups.thirdSettingsGroup.length">
                         <router-link v-for="(list, index) in filteredSettingsGroups.thirdSettingsGroup" :key="index"
                             :to="`${baseRoute}/${list.route.toLowerCase()}`" class="text-decoration-none text-black"
@@ -42,8 +43,9 @@
                             </li>
                         </router-link>
                     </ul>
-                    <h2  v-if="filteredSettingsGroups.forthSettingsGroup.length" class="font-10 m-0 text-muted ps-2">{{ forthSettingsTitle }}</h2>
-                    <ul class="list-unstyled"  v-if="filteredSettingsGroups.forthSettingsGroup.length">
+                    <h2 v-if="filteredSettingsGroups.forthSettingsGroup.length" class="font-10 m-0 text-muted ps-2">{{
+                        forthSettingsTitle }}</h2>
+                    <ul class="list-unstyled" v-if="filteredSettingsGroups.forthSettingsGroup.length">
                         <router-link v-for="(list, index) in filteredSettingsGroups.forthSettingsGroup" :key="index"
                             :to="`${baseRoute}/${list.route.toLowerCase()}`" class="text-decoration-none text-black"
                             active-class="active-link">
@@ -53,6 +55,21 @@
                             </li>
                         </router-link>
                     </ul>
+
+                    <h2 v-if="filteredSettingsGroups.fifthSettingsGroup" class="font-10 m-0 text-muted ps-2">{{
+                        fifthSettingsTitle }}</h2>
+                    <ul class="list-unstyled" v-if="filteredSettingsGroups.fifthSettingsGroup">
+                        <router-link v-for="(list, index) in filteredSettingsGroups.fifthSettingsGroup" :key="index"
+                            :to="`${baseRoute}/${list.route.toLowerCase()}`" class="text-decoration-none text-black"
+                            active-class="active-link">
+                            <li :title="list.name">
+                                <i :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
+                                {{ list.name }}
+                            </li>
+                        </router-link>
+                    </ul>
+
+
                 </template>
                 <template v-if="isMasterRoute">
                     <ul class="list-unstyled">
@@ -87,7 +104,8 @@
                 <template v-else>
                     <ul class="list-unstyled">
                         <router-link v-for="(list, index) in sidebarData" :key="index"
-                            :to="`${baseRoute}/${list.route.toLowerCase()}`" class="text-decoration-none text-black"
+                            :to="`${baseRoute}/${list.route ? list.route.toLowerCase() : ''}`"
+                            class="text-decoration-none text-black"
                             active-class="active-link">
                             <li :title="list.name">
                                 <i :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
@@ -133,13 +151,18 @@ const settingsSideBarData = [
     { name: 'Designation', icon: 'bi bi-people', route: 'designations' },
     // { name: 'Categories', icon: 'bi bi-tags', route: 'categories' },
     { name: 'Employees', icon: 'bi bi-people', route: 'employee' },
+    { name: 'System Settings', icon: 'bi bi-people', route: 'authenticationpage' },
+
+
 
 ];
 // Define the title for the first and second settings sections
 const firstSettingsTitle = 'My Details';
 // const secondSettingsTitle = 'Workflow';
 const thirdSettingsTitle = 'Master';
-const forthSettingsTitle = 'Form';
+const forthSettingsTitle = 'Employee';
+const fifthSettingsTitle = 'System Settings';
+
 
 
 
@@ -156,6 +179,16 @@ const userFormSideBarData = [
     { name: 'Trash', icon: 'bi bi-trash3', route: 'trash' },
 ];
 
+const filteredSideBarData = computed(() => {
+    return todoSideBarData.filter(item => {  
+        if (item.name === "My Team") {
+            return userDesigination.value.includes("IT") || userDesigination.value.includes("HOD");
+        }
+        return true;
+    });
+});
+
+
 
 const route = useRoute();
 const router = useRouter();
@@ -168,17 +201,18 @@ const isSettingsRoute = computed(() => route.path.startsWith('/settings'));
 const isToDoRoute = computed(() => route.path.startsWith('/todo'));
 const isUserFormsRoute = computed(() => route.path.startsWith('/create-form'));
 // Compute sidebar data based on the current route
+
 const sidebarData = computed(() => {
     if (isMasterRoute.value) {
         return formSideBarData.value;
-
     } else if (isToDoRoute.value) {
-        return todoSideBarData;
+        return filteredSideBarData.value;
     } else if (isUserFormsRoute.value) {
-        return userFormSideBarData;
+        return userFormSideBarData ;
     }
     return [];
 });
+
 const firstSettingsGroup = computed(() => settingsSideBarData.slice(0, 1)); // First 4 items
 // const secondSettingsGroup = computed(() => settingsSideBarData.slice(2, 6));
 // const thirdSettingsGroup = computed(() => settingsSideBarData.slice(1, 3)); // Remaining items
@@ -188,7 +222,9 @@ const filteredSettingsGroups = computed(() => {
     return userDesigination.value.toLowerCase().includes('it')
         ? {
             thirdSettingsGroup: settingsSideBarData.slice(1, 3),
-            forthSettingsGroup: settingsSideBarData.slice(3)
+            forthSettingsGroup: settingsSideBarData.slice(3, 4),
+            fifthSettingsGroup: settingsSideBarData.slice(4)
+
         }
         : { thirdSettingsGroup: [], forthSettingsGroup: [] };
 });

@@ -59,7 +59,7 @@
                                                         <div v-if="userDesigination" class=" ">
 
                                                             <span class="fw-medium font-11">{{ userDesigination
-                                                            }}</span>
+                                                                }}</span>
                                                         </div>
                                                     </li>
                                                 </div>
@@ -272,6 +272,10 @@ function logout() {
             localStorage.removeItem('employeeData');
             localStorage.removeItem('Bu');
             localStorage.removeItem('USERROLE');
+            sessionStorage.removeItem('UserName');
+            sessionStorage.removeItem('employeeData');
+            sessionStorage.removeItem('Bu');
+            sessionStorage.removeItem('USERROLE');
             router.push({ path: '/' }).then(() => {
             });
         })
@@ -283,7 +287,7 @@ function raiseRequstClearForm() {
 }
 const props = defineProps(['id']);
 onMounted(() => {
-    
+
     ezyForms();
     activeTab.value = route.path;
 
