@@ -45,13 +45,17 @@
                                 <FormFields type="search" tag="input" placeholder="search Department" class="mb-3"
                                     name="dept" v-model="filterObj.role" id="dept" :Required="false" />
                             </div>
-                            <div class="col-6">
+                            <!-- <div class=" col-6">
                                 <label class="font-13 ps-1" for="Requested">Requested Period:</label>
-                                <!-- <FormFields class="mb-3" tag="input" type="date" name="Requested" id="Requested"
-                                    placeholder="Jan-2024-Dec-2024" v-model="filterObj.date" /> -->
+
+                                <FormFields class="mb-3" tag="input" type="date" name="Requested" id="Requested"
+                                     v-model="filterObj.date" />
+                            </div> -->
+                            <!-- <div class="col-6">
+                                <label class="font-13 ps-1" for="Requested">Requested Period:</label>
                                 <DatePicker class="datePicker" :enable-time-picker="false" :format="'yyyy-MM-dd'" v-model="filterObj.dateRange" range
                                     placeholder="Select From - To Date" />
-                            </div>
+                            </div>  -->
                             <div class="col-12">
                                 <FormFields tag="radio" :options="radioOptions" name="exampleRadio" id="exampleRadio"
                                     v-model="filterObj.selectedRadio" labeltext="Approval Status" />
@@ -95,8 +99,8 @@ import GlobalTable from '../../Components/GlobalTable.vue';
 import axiosInstance from "../../shared/services/interceptor";
 import { apis, doctypes } from "../../shared/apiurls";
 import { ref, computed } from 'vue';
-import DatePicker from "@vuepic/vue-datepicker";
-import "@vuepic/vue-datepicker/dist/main.css";
+// import DatePicker from "@vuepic/vue-datepicker";
+// import "@vuepic/vue-datepicker/dist/main.css";
 // const dateRange = ref();
 
 const showFilters = ref(true);
