@@ -6,13 +6,13 @@
     </div>
     <div class="container">
       <div v-if="blockArr.length" class="position-relative">
-        <div class="requestPreviewDiv">
+        <div class="requestPreviewDiv" ref="mainBlockRef">
           <RequestPreview :blockArr="blockArr" :formName="selectedData.selectedform" @updateField="handleFieldUpdate"
             @formValidation="isFormValid = $event" />
           <!-- @formValidation="isFormValid = $event" -->
 
           <!-- <span class="font-13 fw-bold">{{ table.childTableName.replace(/_/g, " ") }}</span> -->
-          <div  class="mt-3">
+          <div class="mt-3">
             <div v-for="(table, tableIndex) in tableHeaders" :key="tableIndex" class="mt-3">
               <div>
                 <span class="font-13 fw-bold">Table {{ tableIndex.replace(/_/g, " ") }}</span>
@@ -25,6 +25,7 @@
                     <th v-for="field in table" :key="field.fieldname">
                       {{ field.label }}
                     </th>
+                    <th></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -38,6 +39,9 @@
                         <input type="file" class="form-control font-12"
                           @change="handleFileUpload($event, row, field.fieldname)" />
                       </template>
+                    </td>
+                    <td>
+                      <span @click="removeRow(tableIndex, rowIndex)"><i class="bi bi-x-lg"></i></span>
                     </td>
                   </tr>
                 </tbody>
@@ -80,7 +84,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch,nextTick } from "vue";
 import { apis, doctypes, domain } from "../shared/apiurls";
 import RequestPreview from "./RequestPreview.vue";
 import Multiselect from "@vueform/multiselect";
@@ -119,6 +123,7 @@ const tableName = ref("");
 // const tableKey = ref('');
 // const responseData = ref([]);
 // const childIDs = ref("");
+const mainBlockRef = ref("");
 
 const filterObj = ref({
   limit_start: 0,
@@ -206,7 +211,7 @@ function EditRequestUpdate() {
 // Initialize tableRows for each table
 // onMounted(() => {
 //   tableRows.value = tableHeaders.value.map(() => []);
-// });
+// }); 
 
 const addRow = (tableIndex) => {
   if (!tableRows.value[tableIndex]) {
@@ -218,6 +223,20 @@ const addRow = (tableIndex) => {
   );
 
   tableRows.value[tableIndex].push(newRow);
+
+  nextTick(() => {
+    if (mainBlockRef.value) {
+      mainBlockRef.value.scrollTo({
+        top: mainBlockRef.value.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  });
+
+};
+
+const removeRow = (tableIndex, rowIndex) => {
+  tableRows.value[tableIndex].splice(rowIndex, 1);
 };
 
 
@@ -808,5 +827,9 @@ button {
   margin-top: 10px;
   padding: 5px 10px;
   cursor: pointer;
+}
+.bi-x-lg::before {
+    content: "\f659";
+    margin-top: 8px;
 }
 </style>

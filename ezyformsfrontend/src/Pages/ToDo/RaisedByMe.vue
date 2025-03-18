@@ -742,7 +742,12 @@ const fieldMapping = computed(() => ({
   // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
   status: {
     type: "select",
-    options: statusOptions.value
+    options: [
+      "Request Raised",
+      "In Progress",
+      "Completed",
+      "Request Cancelled",
+    ],
   },
   // name: { type: "input" },
   doctype_name: { type: "input" },
