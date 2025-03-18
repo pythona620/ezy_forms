@@ -765,4 +765,11 @@ td {
 .img-thumbnail {
   cursor: pointer;
 }
+.tableborder-child table td {
+  word-break: break-word;
+  max-width: 150px; /* Adjust as needed */
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
 </style>

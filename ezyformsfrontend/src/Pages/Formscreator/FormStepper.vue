@@ -47,9 +47,10 @@
                   <div v-if="activeStep === 1">
                     <div class="">
                       <div class="stepperbackground ps-2 pe-2 m-0 d-flex justify-content-between align-items-center">
-                        <h1 class="font-14 m-0" @click="cancelForm()">
+                        <div></div>
+                        <!-- <h1 class="font-14 m-0" @click="cancelForm()">
                           <i class="bi bi-chevron-left"></i><span class="ms-2">Cancel Form</span>
-                        </h1>
+                        </h1> -->
                         <h1 class="font-14 fw-bold m-0">About Form</h1>
                         <ButtonComp class="btn btn-dark bg-dark text-white fw-bold font-13" name="Next"
                           v-if="activeStep < 3" @click="nextStep" />

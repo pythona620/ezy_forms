@@ -419,9 +419,11 @@ template_str = """
                                     <tr>
                                         <td style="border: 1px solid #ccc;width:3%;font-size:13px; padding: 8px;text-align:center;">{{ loop.index }}</td> 
                                         {% for value in child.values() %}
-                                            <td style="border: 1px solid #ccc; padding: 8px;font-size:13px;text-align:center;"">
-                                                {{ value if value else '—' }}
-                                            </td>
+                                           <td style="border: 1px solid #ccc; padding: 8px; font-size: 13px; text-align: center; 
+                                                word-break: break-word; max-width: 150px; overflow-wrap: break-word; white-space: normal;">
+                                            {{ value if value else '—' }}
+                                        </td>
+
                                         {% endfor %}
                                     </tr>
                                 {% endfor %}

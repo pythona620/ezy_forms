@@ -111,7 +111,7 @@
                                         </template>
 
                                         <template v-else-if="field.fieldtype == 'Attach'">
-                                            <input type="file" accept="image/jpeg,image/png/,application/pdf" :id="'field-' +
+                                            <input type="file"  accept="image/jpeg,image/png/,application/pdf" :id="'field-' +
                                                 sectionIndex +
                                                 '-' +
                                                 columnIndex +
@@ -504,9 +504,9 @@ const generateRandomNumber = () => {
     return Math.floor(Math.random() * 1000000);
 };
 
-const uploadFile = (file, field) => {
+const uploadFile = (file, field, index) => {
     const randomNumber = generateRandomNumber();
-    let fileName = `${props.formName}-${randomNumber}-@${file.name}`;
+    let fileName = `attach-${props.formName}${randomNumber}-@${file.name}`;
 
     const formData = new FormData();
     formData.append("file", file, fileName);
