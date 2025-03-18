@@ -18,7 +18,7 @@
                         </div>
                         <div>
                             <!-- Loop over the keys to create dynamic legends -->
-                            <div v-for="(key, i) in keys" :key="i" class="legend">
+                            <div v-for="(key, i) in filteredKeys(chart.title)" :key="i" class="legend">
                                 <div class="legend-item">
                                     <span class="color-box" :style="{ backgroundColor: colorMapping[key] }"></span>
                                     <span class="label">
@@ -57,6 +57,12 @@ const displayMapping = {
     Pending: 'Pending',
     request_raised: 'Request Raised',
     Request_cancelled: 'Request Cancelled'
+};
+
+const filteredKeys = (title) => {
+    return title === "Requests received for me"
+        ? ["Pending", "request_raised"]  // Show only these for this chart
+        : keys; // Show all keys for other charts
 };
 
 // Array to hold chart data for each dataset
@@ -115,8 +121,9 @@ async function fetchData() {
                 {
                     title: "Requests received for me",
                     data: {
-                        ...receivedByUser,
-                        total: receivedTotal
+                        request_raised: receivedByUser.request_raised || 0,
+                        Pending: receivedByUser.Pending || 0,
+                        total: (receivedByUser.request_raised || 0) + (receivedByUser.Pending || 0)
                     }
                 },
                 {
@@ -127,6 +134,7 @@ async function fetchData() {
                     }
                 }
             ];
+
 
 
             // Wait for the DOM to update so refs are populated, then initialize charts

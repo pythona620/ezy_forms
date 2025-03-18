@@ -750,6 +750,9 @@ th {
 td {
   font-size: 12px;
 }
+td:first-child{
+  width: 5%;
+}
 
 .tableborder-child {
   border: 1px solid #ccc !important;

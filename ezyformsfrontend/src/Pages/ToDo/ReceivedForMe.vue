@@ -692,7 +692,7 @@ const fieldMapping = computed(() => ({
   role: { type: "input" },
 
 
-  status: { type: "select", options: statusOptions.value },
+  status: { type: "select", options:["Completed","Request Raised","In Progress"] },
 
 }));
 

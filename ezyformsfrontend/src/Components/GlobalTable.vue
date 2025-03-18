@@ -22,20 +22,27 @@
             <template v-if="fieldMapping[column.td_key]">
               <!-- Text input -->
               <div
-                v-if="fieldMapping[column.td_key].type === 'input'"
-                class="input-group border-none-input"
-              >
-                <span class="input-group-text font-12" id="basic-addon1"
-                  ><i class="bi bi-search"></i
-                ></span>
-                <input
-                  type="search"
-                  aria-describedby="basic-addon1"
-                  class="form-control font-12 py-1 px-2 border-left-class input-search"
-                  v-model="filters[column.td_key]"
-                  @input="handleFilterChange"
-                />
-              </div>
+  v-if="fieldMapping[column.td_key].type === 'input'"
+  class="input-group border-none-input"
+>
+  <span
+    v-show="!focusedFields[column.td_key]"
+    class="input-group-text font-12"
+    id="basic-addon1"
+  >
+    <i class="bi bi-search"></i>
+  </span>
+  <input
+    type="search"
+    aria-describedby="basic-addon1"
+    class="form-control font-12 py-1 px-2  border-0  input-search"
+    v-model="filters[column.td_key]"
+    @input="handleFilterChange" :class="{ 'border-left-class ': focusedFields[column.td_key] }"
+    @focus="focusedFields[column.td_key] = true"
+    @blur="focusedFields[column.td_key] = false"
+  />
+</div>
+
               <!-- Date input -->
               <input v-else-if="fieldMapping[column.td_key].type === 'date'" type="date"
                 class="form-control font-12 input-search py-1 px-2" v-model="filters[column.td_key]"
@@ -43,7 +50,7 @@
 
               <!-- Select dropdown -->
               <select v-else-if="fieldMapping[column.td_key].type === 'select'"
-                class="form-control form-select input-search font-12 py-1 px-2 w-100" v-model="filters[column.td_key]"
+                class="form-control form-select input-search font-12 select-filetrs py-1 px-2 w-100" v-model="filters[column.td_key]"
                 @change="handleFilterChange">
                 <option class="font-12" value="">All</option>
                 <option class="font-12" v-for="(option, optionIndex) in fieldMapping[column.td_key].options"
@@ -306,7 +313,7 @@
 
 <script setup>
 // import ButtonComp from "./ButtonComp.vue";
-import { defineProps, defineEmits, ref, onMounted, watch } from "vue";
+import { defineProps, defineEmits, ref, onMounted, watch, reactive } from "vue";
 // import moment from "moment";
 // import FormFields from "./FormFields.vue";
 const props = defineProps({
@@ -374,7 +381,7 @@ function handleToggle(row, index, event) {
   emits("toggle-click", row, index, event);
   console.log("event", event);
 }
-
+const focusedFields = reactive({});
 
 
 const allCheck = ref(false);
@@ -711,48 +718,61 @@ th:first-child {
 .textcancel {
   color: #17a2b8;
 }
-
-.border-left-class:focus {
-  outline: none;
-  box-shadow: none;
-  border: none;
+/* Default border style */
+.border-none-input {
+  border: 1px solid #dee2e6;
+  border-radius: 0.375rem;
+  transition: border 0.3s ease-in-out, border-radius 0.3s ease-in-out;
 }
 
-.border-left-class {
-  border: none;
-}
-
+/* When input is focused inside input-group */
 .input-group:focus-within {
   border: 1px solid #0000005e;
   border-radius: 5px;
+  transition: border 0.3s ease-in-out, border-radius 0.3s ease-in-out;
 }
 
+/* Search icon wrapper */
 .input-group-text {
   border-right: 0px !important;
   height: 26px !important;
   display: flex;
   align-items: center;
   border: none;
+  transition: opacity 0.3s ease-in-out;
 }
 
+/* When not focused, remove border-left */
 .border-left-class {
   border-left: 0px !important;
+  transition: border-left 0.3s ease-in-out;
 }
 
-.input-group {
-  height: 28px !important;
-}
-
-.input-group .border-left-class {
+/* Input inside input-group */
+.input-group input {
   height: 26px !important;
   line-height: 30px;
+  border: none; /* Default no border */
+  outline: none;
+  box-shadow: none;
+  transition: border-left 0.3s ease-in-out, border-radius 0.3s ease-in-out;
 }
 
-.border-none-input {
-  border: 1px solid #dee2e6;
-  border-radius: 0.375rem;
+/* Apply border-left and border-radius when focused */
+.input-group input:focus {
+  border-left: 1px solid #0000005e !important;
+  border-radius: 5px !important;
+  outline: none;
+  box-shadow: none;
 }
+
 .eye-cursor {
   cursor: pointer;
+}
+.select-filetrs:focus{
+box-shadow: none;
+outline: none;
+border: 1px solid #dee2e6;
+
 }
 </style>
