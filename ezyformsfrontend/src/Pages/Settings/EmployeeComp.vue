@@ -737,19 +737,21 @@ const formattedData = computed(() => {
   });
 });
 
-
-// **Helper Function to Extract Email**
+// **Fixed Email Extraction Function**
 const extractEmail = (message) => {
   if (typeof message === "string") {
-    return message.includes("Successfully imported")
-      ? message.split("Successfully imported ")[1]
-      : "N/A";
+    message = message.toLowerCase(); // Ensure case insensitivity
+    if (message.includes("successfully imported ")) {
+      return message.split("successfully imported ")[1] || "N/A";
+    }
   }
   if (Array.isArray(message)) {
     return message[0]?.message?.match(/<strong>(.*?)<\/strong>/)?.[1] || "N/A";
   }
   return "N/A";
 };
+
+// **Extract Invalid Email**
 const extractInvalidEmail = (messages) => {
   if (Array.isArray(messages)) {
     for (const msg of messages) {
