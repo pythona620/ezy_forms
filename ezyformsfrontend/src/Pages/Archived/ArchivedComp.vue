@@ -1,39 +1,6 @@
 <template>
-    <div>
-
-        <div class="ps-2">
-            <div class="d-flex justify-content-between align-items-center py-2 ">
-                <div>
-                    <!-- <h1 class="m-0 font-13">
-                    Archived forms
-                </h1>
-                <p class="m-0 font-11 pt-1">
-                    1239 Requests
-                </p> -->
-                </div>
-                <div class="d-flex p-1 gap-3 align-items-center">
-                    <div class="d-flex  gap-2">
-                        <!-- <div class=" d-flex align-items-center">
-                            <FormFields labeltext="" class="" tag="input" type="search" placeholder="Search File Name"
-                                name="Value" id="Value" v-model="filterObj.search" isCheckbox='true' />
-                        </div> -->
-                        <!-- <div>
-                        <FormFields tag="select" placeholder="Filter By" class="p-1" name="roles"
-                            v-model="filterObj.selectoption" id="roles" :Required="false"
-                            :options="['JW Marriott Golfshire Banglore', 'JW Marriott Golfshire Banglore']" />
-                    </div> -->
-                    </div>
-                    <!-- <div v-if="tableShow" class="d-flex align-items-center mb-1">
-                    <ButtonComp class="buttoncomp font-10" data-bs-toggle="modal" data-bs-target="#exampleModal"
-                        name="Apply filters"></ButtonComp>
-                </div>
-                <div class="d-flex align-items-center mb-1">
-                    <ButtonComp class="buttoncomp font-10" name="Create form"></ButtonComp>
-                </div> -->
-                </div>
-            </div>
-        </div>
-        <!-- <div v-if="formarchived" class="form_archived">
+    <div class="mt-2">
+        <div v-if="showFilters" class="form_archived">
             <div>
                 <img class="m-auto d-flex" src="../../assets/box with files.svg" />
                 <h1 class="font-14 fw-bold m-0 text-center">
@@ -53,199 +20,205 @@
 
             </div>
 
-        </div> -->
+        </div>
         <!-- Modal -->
-        <!-- <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-xl">
                 <div class="modal-content">
 
                     <div class="modal-body">
-                        <div class="row">
-                            <div class="col-3">
+                        <div class="row mt-3">
+                            <div class="col-6">
+                                <!-- doctype_name -->
+                                <label class="font-13 ps-1" for="Requested">Form name:</label>
+                                <FormFields class="mb-3" tag="input" type="search" name="Requested" id="Requested"
+                                    placeholder="Search Form name" v-model="filterObj.doctype_name" />
+                            </div>
+                            <div class="col-6">
+                                <!-- doctype_name -->
                                 <label class="font-13 ps-1" for="Requested">Requested By:</label>
                                 <FormFields class="mb-3" tag="input" type="search" name="Requested" id="Requested"
-                                    placeholder="Search" v-model="filterObj.search" />
+                                    placeholder="Search" v-model="filterObj.requested_by" />
                             </div>
-                            <div class="col-3">
+                            <div class="col-6">
                                 <label class="font-13 ps-1 fw-medium" for="dept">Requested Dept:</label>
-                                <FormFields tag="select" placeholder="Select Department" class="mb-3" name="dept"
-                                    v-model="filterObj.selectoption" id="dept" :Required="false"
-                                    :options="['JW Marriott Golfshire Banglore', 'JW Marriott Golfshire Banglore']" />
+                                <FormFields type="search" tag="input" placeholder="search Department" class="mb-3"
+                                    name="dept" v-model="filterObj.role" id="dept" :Required="false" />
                             </div>
-                            <div class="col-3">
-                                <label class="font-13 ps-1" for="dept">Owner OF Form:</label>
-                                <FormFields tag="select" placeholder="Select Department" class="mb-3" name="dept"
-                                    v-model="filterObj.selectoption" id="dept" :Required="false"
-                                    :options="['JW Marriott Golfshire Banglore', 'JW Marriott Golfshire Banglore']" />
-                            </div>
-                            <div class="col-3">
-                                <label class="font-13 ps-1" for="dept">Form Category:</label>
-                                <FormFields tag="select" placeholder="Select Department" class="mb-3" name="dept"
-                                    v-model="filterObj.selectoption" id="dept" :Required="false"
-                                    :options="['JW Marriott Golfshire Banglore', 'JW Marriott Golfshire Banglore']" />
-                            </div>
-                            <div class="col-3">
-                                <label class="font-13 ps-1" for="Requested">Form Name:</label>
-                                <FormFields class="mb-3" tag="input" type="search" name="Requested" id="Requested"
-                                    placeholder="Search" v-model="filterObj.search" />
-                            </div>
-                            <div class="col-3">
+                            <div class="col-6">
                                 <label class="font-13 ps-1" for="Requested">Requested Period:</label>
-                                <FormFields class="mb-3" tag="input" type="date" name="Requested" id="Requested"
-                                    placeholder="Jan-2024-Dec-2024" v-model="filterObj.search" />
+                                <!-- <FormFields class="mb-3" tag="input" type="date" name="Requested" id="Requested"
+                                    placeholder="Jan-2024-Dec-2024" v-model="filterObj.date" /> -->
+                                <DatePicker class="datePicker" :enable-time-picker="false" :format="'yyyy-MM-dd'" v-model="filterObj.dateRange" range
+                                    placeholder="Select From - To Date" />
                             </div>
-                            <div class="col-3">
+                            <div class="col-12">
                                 <FormFields tag="radio" :options="radioOptions" name="exampleRadio" id="exampleRadio"
                                     v-model="filterObj.selectedRadio" labeltext="Approval Status" />
-                            </div>
-                            <div class="col-3">
-                                <label class="font-13 ps-1" for="Requested">Requested Id:</label>
-                                <FormFields class="mb-3" tag="input" type="search" name="Requested" id="Requested"
-                                    placeholder="Search" v-model="filterObj.search" />
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="cancelfilter border-0 text-nowrap font-10 "
+                        <button type="button" @click="clearFilter" class="cancelfilter border-0 text-nowrap font-10 "
                             data-bs-dismiss="modal"><span class="font-14 me-1">x</span>Cancel Filter</button>
 
-                        <button type="button"
+                        <button type="button" :disabled="isFilterEmpty"
                             class="applyfilter text-nowrap border-0 btn btn-dark text-white font-10 d-flex justify-content-center align-items-center"
-                            data-bs-dismiss="modal" @click="applyFilter()"><span class="font-16 me-1"><i
+                            data-bs-dismiss="modal" @click="applyFilter"><span class="font-16 me-1"><i
                                     class="bi bi-check2 "></i></span>
                             Apply
                             Filter</button>
                     </div>
                 </div>
             </div>
-        </div> -->
-        <div>
+        </div>
+        <div v-if="tableShow">
             <div class="mt-2">
-                <GlobalTable :tHeaders="tableheaders" :tData="tableData"  />
+                <div class="d-flex justify-content-end me-3">
+                    <button data-bs-toggle="modal" data-bs-target="#exampleModal" class="filter-btn">
+                        <i class="bi bi-funnel me-2"></i> Filters
+                        <span v-if="appliedFilterCount" class="badge bg-primary ms-2">
+                            {{ appliedFilterCount }}
+                        </span>
+                    </button>
+                </div>
+                <GlobalTable class="mt-2" :tHeaders="tableheaders" :tData="tableData" />
             </div>
         </div>
     </div>
 
 </template>
+
 <script setup>
-// import FormFields from '../../Components/FormFields.vue';
-import ButtonComp from '../../Components/ButtonComp.vue';
+import FormFields from '../../Components/FormFields.vue';
 import GlobalTable from '../../Components/GlobalTable.vue';
 import axiosInstance from "../../shared/services/interceptor";
 import { apis, doctypes } from "../../shared/apiurls";
-import { EzyBusinessUnit } from "../../shared/services/business_unit";
-import { ref, onMounted,computed } from 'vue';
+import { ref, computed } from 'vue';
+import DatePicker from "@vuepic/vue-datepicker";
+import "@vuepic/vue-datepicker/dist/main.css";
+// const dateRange = ref();
 
-const businessUnit = computed(() => {
-  return EzyBusinessUnit.value;
-});
-const newBusinessUnit = ref({ business_unit: "" });
+const showFilters = ref(true);
+const tableShow = ref(false);
+const tableData = ref([]);
 
 const filterObj = ref({
-    requested_by: '',
-    doctype_name: '', 
-    status: '',
-    name: '',
-})
-const tableShow = ref(false);
-const formarchived = ref(true);
-const tableData = ref([]);
-const totalRecords = ref(0);
-const idDta = ref([]);
-const docTypeName = ref([]);
-const statusOptions = ref([]);
-
+    doctype_name: "",
+    requested_by: "",
+    role: "",
+    date: "",
+    selectedRadio: "",
+    dateRange: ""
+});
 
 const tableheaders = ref([
-  { th: "Request ID", td_key: "name" },
-  { th: "Form name", td_key: "doctype_name" },
-  { th: "Owner of form", td_key: "role" },
-  { th: "Requested on", td_key: "requested_on" },
-  { th: "Requested department", td_key: "role" },
-  { th: "Approval Status", td_key: "status" },
+    { th: "Request ID", td_key: "name" },
+    { th: "Form name", td_key: "doctype_name" },
+    { th: "Owner of form", td_key: "role" },
+    { th: "Requested on", td_key: "requested_on" },
+    { th: "Requested By", td_key: "requested_by" },
+    { th: "Approval Status", td_key: "status" },
 ]);
 
-// function applyFilter() {
-//     tableShow.value = true;
-//     formarchived.value = false;
-// }
+const radioOptions = ref(['All', 'Completed', 'Request Raised', 'In Progress', 'Request Cancelled']);
 
-onMounted(()=>{
-    receivedForMe()
-})
+const isFilterEmpty = computed(() => {
+    return !Object.values(filterObj.value).some(val => val);
+});
 
+const appliedFilterCount = ref(0);
 
-function receivedForMe(data) {
-    // Initialize filters array for building dynamic query parameters
-    const EmpRequestMail = JSON.parse(localStorage.getItem("employeeData"));
+const activeFilterCount = computed(() => {
+    let count = 0;
+    if (filterObj.value.doctype_name?.trim()) count++;
+    if (filterObj.value.requested_by?.trim()) count++;
+    if (filterObj.value.role?.trim()) count++;
+    if (filterObj.value.dateRange?.length === 2 && filterObj.value.dateRange[0] && filterObj.value.dateRange[1]) count++;
+    if (filterObj.value.selectedRadio) count++;
 
-    // Calculate the date one month ago
-    const oneMonthAgo = new Date();
-    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-    const formattedDate = oneMonthAgo.toISOString().split('T')[0];
+    return count;
+});
 
-    const filters = [
-        ["requested_by", "like", EmpRequestMail.emp_mail_id],
-        ["property", "like", `%${newBusinessUnit.value.business_unit}%`],
-        ["status", "=", "Completed"],
-        ["creation", "<", formattedDate] // Filter to include records before the last month
-    ];
+const clearFilter = () => {
+    filterObj.value = {
+        doctype_name: "",
+        requested_by: "",
+        role: "",
+        date: null,
+        selectedRadio: "",
+        dateRange: ""
 
-    if (data) {
-        filters.push(data);
+    };
+    showFilters.value = true;
+    tableShow.value = false;
+
+};
+
+const applyFilter = () => {
+    tableShow.value = true;
+    showFilters.value = false;
+    appliedFilterCount.value = activeFilterCount.value;
+
+    const filters = [];
+    if (filterObj.value.requested_by) {
+        filters.push(["requested_by", "like", `%${filterObj.value.requested_by}%`]);
+    }
+    if (filterObj.value.doctype_name) {
+        filters.push(["doctype_name", "like", `%${filterObj.value.doctype_name}%`
+        ]);
+    }
+    if (filterObj.value.role) {
+        filters.push(["role", "like", `%${filterObj.value.role}%`
+        ]);
+    }
+    if (filterObj.value.date) {
+        filters.push(["requested_on", ">=", filterObj.value.date]);
+    }
+    if (filterObj.value.selectedRadio && filterObj.value.selectedRadio !== 'All') {
+        filters.push(["status", "=", filterObj.value.selectedRadio]);
+    }
+    if (filterObj.value.dateRange && filterObj.value.dateRange.length === 2) {
+        const [startDate, endDate] = filterObj.value.dateRange;
+        filters.push(["requested_on", ">=", startDate]);
+        filters.push(["requested_on", "<=", endDate]);
     }
 
-    // Define query parameters for data and count retrieval
-    const queryParams = {
-        fields: JSON.stringify(["*"]),
-        limit_page_length: filterObj.value?.limitPageLength,
-        limit_start: filterObj.value?.limit_start,
-        filters: JSON.stringify(filters),
-        order_by: "`tabWF Workflow Requests`.`creation` desc",
-    };
 
-    const queryParamsCount = {
-        fields: JSON.stringify(["count(name) AS total_count"]),
-        limitPageLength: "None",
-        filters: JSON.stringify(filters),
-    };
+    axiosInstance.get(`${apis.resource}${doctypes.WFWorkflowRequests}`, {
+        params: {
+            fields: JSON.stringify(["*"]),
+            filters: JSON.stringify(filters)
+        }
+    }).then((res) => {
+        tableData.value = res.data;
+    }).catch((error) => {
+        console.error("Error fetching records:", error);
+    });
+};
 
-    // Fetch total count of records matching filters
-    axiosInstance
-        .get(`${apis?.resource}${doctypes?.WFWorkflowRequests}`, { params: queryParamsCount })
-        .then((res) => {
-            totalRecords.value = res.data[0].total_count;
-        })
-        .catch((error) => {
-            console.error("Error fetching total count:", error);
-        });
-
-    // Fetch the records matching filters
-    axiosInstance
-        .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, { params: queryParams })
-        .then((res) => {
-            tableData.value = res.data;
-            idDta.value = [...new Set(res.data.map((id) => id.name))];
-            docTypeName.value = [
-                ...new Set(res.data.map((docTypeName) => docTypeName.doctype_name)),
-            ];
-            statusOptions.value = [...new Set(res.data.map((status) => status.status))];
-        })
-        .catch((error) => {
-            console.error("Error fetching records:", error);
-        });
-}
-
-
-const radioOptions = ref(['All',
-    'Approved', 'Rejected']);
+// onMounted(() => {
+//     tableShow.value = false; // Initially hide the table
+// });
 </script>
+
 <style scoped>
 .form_archived {
     display: flex;
     align-items: center;
     justify-content: center;
     height: 100vh;
+}
+
+.filter-btn {
+    background-color: var(--sidebar-color);
+    border: 1px solid #D8D6FF;
+    font-size: var(--fourteen);
+    padding: 5px 23px;
+    border-radius: 4px;
+    color: #3021FE;
+    display: flex;
+    align-items: center;
 }
 
 .filterbtn {
@@ -275,5 +248,10 @@ const radioOptions = ref(['All',
     /* background-color: #f1f1f1; */
     /* color: #111111; */
     padding: 8px 20px;
+}
+
+.datePicker {
+    cursor: pointer;
+    height: 32px !important;
 }
 </style>
