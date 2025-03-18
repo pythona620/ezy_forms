@@ -38,7 +38,7 @@
             </div>
         </div> -->
 
-        <div class="card border-0 mt-4 container">
+        <div class="card border-0 mt-4 form-containe-div container">
             <div v-for="(blockItem, blockIndex) in displayedBlocks" :key="blockIndex">
                 <div class="d-flex justify-content-end align-items-center me-2">
                     <span class="font-12 px-2 py-1" v-if="workFlowRoles[blockIndex]?.roles.length > 0">
@@ -613,5 +613,9 @@ td {
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+.form-containe-div{
+    height: 80vh;
+    overflow-y: scroll;
 }
 </style>
