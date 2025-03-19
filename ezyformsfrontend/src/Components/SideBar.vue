@@ -73,7 +73,7 @@
                 </template>
                 <template v-if="isMasterRoute">
                     <ul class="list-unstyled">
-                        <router-link to="/forms/department/AllForms" class="text-decoration-none text-black"
+                        <router-link to="/forms/department/allforms" class="text-decoration-none text-black"
                             active-class="active-link">
                             <li><i class="bi-icon fs-6 bi bi-file-earmark-richtext me-3"></i>All Forms</li>
                         </router-link>

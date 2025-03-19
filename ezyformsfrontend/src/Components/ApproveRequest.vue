@@ -1,9 +1,12 @@
 <template>
   <div class="position-relative">
-    <div class="container-fluid  p-0">
-      <div class="backtofromPage asset_request px-2 py-2">
-        <router-link :to="backTo" class="text-decoration-none text-dark font-13"><span> <i
-              class="bi bi-arrow-left px-2"></i></span>Back</router-link>
+    <div class=" back-to-same">
+
+      <div class="container-fluid  p-0">
+        <div class="backtofromPage asset_request px-2 py-2">
+          <router-link :to="backTo" class="text-decoration-none text-dark font-13"><span> <i
+                class="bi bi-arrow-left px-2"></i></span>Back</router-link>
+        </div>
       </div>
     </div>
 
@@ -38,8 +41,8 @@
                 </button>
               </div>
 
-              <div v-if="selectedData.type === 'mytasks' " class="">
-                
+              <div v-if="selectedData.type === 'mytasks'" class="">
+
                 <!-- v-if="!requestcancelled" -->
                 <div class="approveBtns pb-2 mb-2 mt-3 flex-column px-0 pe-4">
                   <div class="form-floating mb-2 p-1">
@@ -89,7 +92,7 @@
                   {{ tableData.total_levels }})</span>
               </div>
             </div> -->
-            <div class="mt-5 mb-3 pt-2 d-flex justify-content-between align-items-center">
+            <!-- <div class="mt-5 mb-3 pt-2 d-flex justify-content-between align-items-center">
               <h6 class="font-14 ps-3  mb-0">Activity log <span
                   v-if="tableData?.status !== 'Completed' && tableData.status !== 'Request Cancelled'"
                   class="text-warning font-12  fw-bold">
@@ -106,7 +109,38 @@
                 class="btn btn-light font-12 fw-bold text-decoration-underline" type="button" @click="downloadPdf"><i
                   class="bi bi-arrow-down-circle fw-bold px-1"></i>Download
                 PDF</button>
+            </div> -->
+            <div class="row mb-3">
+              <div class="col-xl-6 col-lg-12 col-md-12">
+                <div class="d-flex  align-items-baseline  mt-2">
+                  <div>
+                    <span class="font-14 ps-3 fw-bold mb-0">Activity log
+                    </span>
+                  </div>
+                  <div class="d-flex align-items-baseline gap-2 ps-1 ">
+                    <span v-if="tableData?.status !== 'Completed' && tableData.status !== 'Request Cancelled'"
+                      class="text-warning font-11  fw-bold">
+                      Pending ({{ tableData.current_level }} /
+                      {{ tableData?.total_levels }})</span>
+                    <span class=" font-11 status_completed" v-if="tableData?.status === 'Completed'">
+                      Completed
+                    </span>
+                    <span class=" font-11 requestRejected" v-if="tableData?.status === 'Request Cancelled'">
+                      Request Rejected
+                    </span>
+                  </div>
+                </div>
+
+
+              </div>
+              <div class="col-xl-6 col-lg-12 col-md-12">
+                <button v-if="tableData.status === 'Completed'"
+                  class="btn btn-light font-12 fw-bold h-0 text-decoration-underline" type="button" @click="downloadPdf"><i
+                    class="bi bi-arrow-down-circle fw-bold px-1"></i>Download
+                  PDF</button>
+              </div>
             </div>
+            <div class="activity_height">
             <div v-for="(item, index) in activityData" :key="index" class="activity-log-item"
               :class="{ 'last-item': index === activityData.length - 1 }">
               <div class="activity-log-dot"></div>
@@ -118,11 +152,12 @@
                   <span>{{ item.role }}</span><br />
                   <span class="font-12 text-secondary">{{
                     item.reason || "N/A"
-                  }}</span>.
+                    }}</span>.
 
                 </p>
               </div>
             </div>
+          </div>
             <!-- <div class="activity-log-item">
               <div class="pending"></div>
               <div class="activity-log-content">
@@ -172,9 +207,9 @@ const selectedData = ref({
   formname: route.query.name || "", // Retrieve from query
   doctype_name: route.query.doctype_name || "", // Retrieve from query
   type: route.query.type || "", // Retrieve from query
-  readOnly: route.query.readOnly , // Retrieve from query
+  readOnly: route.query.readOnly, // Retrieve from query
 });
-console.log(selectedData.value,"////");
+console.log(selectedData.value, "////");
 const backTo = ref(selectedData.value.routepath);
 // onMounted(() => {
 //   receivedForMe();
@@ -745,12 +780,12 @@ watch(activityData, (newVal) => {
 </script>
 
 <style lang="scss" scoped>
-.backtofromPage {
-  position: sticky !important;
-  top: 0 !important;
-  z-index: 1000 !important;
+// .backtofromPage {
+//   position: sticky !important;
+//   top: 0 !important;
+//   z-index: 1000 !important;
 
-}
+// }
 
 .Edit_btn {
   width: 100px;
@@ -853,6 +888,10 @@ watch(activityData, (newVal) => {
   /* Space between dot and text */
   margin-bottom: 10px;
   /* Space between logs */
+}
+.activity_height{
+  height: 80vh;
+  overflow-y: scroll;
 }
 
 .pending {
@@ -967,5 +1006,12 @@ td {
   border-radius: 10px;
   padding: 2px 5px;
   margin: 0px 5px;
+}
+
+.back-to-same {
+  position: sticky;
+  top: 0;
+  background-color: #fff;
+  z-index: 10;
 }
 </style>

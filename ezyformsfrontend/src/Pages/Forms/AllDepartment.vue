@@ -109,7 +109,7 @@ const childtableHeaders = ref([]);
 // Business unit and filter object
 const businessUnit = computed(() => EzyBusinessUnit.value);
 const newBusinessUnit = ref({ business_unit: '' });
-const filterObj = ref({ limitPageLength: 'None', limit_start: 0 });
+const filterObj = ref({ limitPageLength: 20, limit_start: 0 });
 const actions = ref(
   [
     { name: 'View form', icon: 'fa-solid fa-eye' },
@@ -120,7 +120,7 @@ const actions = ref(
 const fieldMapping = ref({
   // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
   form_short_name: { type: "input" },
-  form_category: { type: "select", options: formCategory.value },
+  form_category: { type: "input" },
   form_status: { type: "select", options: ["Created", "Draft"] },
 
   form_status: { type: "select", options: ["Created", "Draft"] },
@@ -298,14 +298,14 @@ watch(
 const PaginationUpdateValue = (itemsPerPage) => {
   filterObj.value.limitPageLength = itemsPerPage;
   filterObj.value.limit_start = 0;
-  fetchTable();
+  fetchDepartmentDetails();
 
 };
 // Handle updating the limit start
 const PaginationLimitStart = ([itemsPerPage, start]) => {
   filterObj.value.limitPageLength = itemsPerPage;
   filterObj.value.limit_start = start;
-  fetchTable();
+  fetchDepartmentDetails();
 
 };
 
@@ -359,7 +359,7 @@ function fetchDepartmentDetails(id, data) {
     ["business_unit", "like", `%${newBusinessUnit.value.business_unit}%`],
     ["enable", "=", 1]
   ];
-  if (props.id && props.id !== "AllForms") {
+  if (props.id && props.id !== "allforms") {
     filters.push(["owner_of_the_form", "=", props.id]);
   }
   if (data) {
@@ -391,10 +391,14 @@ function fetchDepartmentDetails(id, data) {
   axiosInstance
     .get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParams })
     .then((response) => {
-      tableData.value = response.data;
+      
+      if(filterObj.value.limit_start === 0){
+        tableData.value = response.data;
+        formCategory.value = [...new Set(tableData.value.map((formCategory) => formCategory.form_category))];
 
-      formCategory.value = [...new Set(tableData.value.map((formCategory) => formCategory.form_category))];
-
+      }else {
+        tableData.value = tableData.value.concat(response.data);
+      }
     })
     .catch((error) => {
       console.error("Error fetching department details:", error);
@@ -410,6 +414,9 @@ onMounted(() => {
 
   if (userDesigination.value.includes("IT")) {
     isEnable.value = "true";
+  }
+  if (route.path === "/forms/department/allforms") {
+    router.replace("/forms/department/allforms");
   }
 
 })

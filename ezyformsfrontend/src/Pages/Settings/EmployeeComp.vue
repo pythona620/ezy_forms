@@ -296,7 +296,7 @@
                     <tr v-for="(record, index) in formattedData" :key="index">
                       <td>{{ index + 1 }}</td>
                       <td>{{ record.email }}</td>
-                      <td :class="record.status === 'Success' ? 'status-success' : 'status-failed'">
+                      <td :class="record.status === 'success' ? 'status-success' : 'status-failed'">
                         {{ record.status }}
                       </td>
                       <td>{{ record.displayMessage }}</td>
@@ -560,6 +560,9 @@ const handleFileChange = (event) => {
   const file = event.target.files[0];
   if (file) {
     uploadbulkFile(file);
+    if (fileInput.value) {
+      fileInput.value.value = "";
+    }
   }
 };
 
@@ -595,7 +598,7 @@ const uploadbulkFile = (file) => {
       if (res.message && res.message.file_url) {
         bulkfileUrl.value = res.message.file_url;
 
-        toast.success("File uploaded successfully! Processing import...");
+        // toast.success("File uploaded successfully! Processing import...");
 
         if (res.message.file_url && bulkfileUrl.value) {
           buluploding();
@@ -615,7 +618,6 @@ const uploadbulkFile = (file) => {
       }, 2000);
     });
 };
-
 const buluploding = () => {
   const data = {
     file: bulkfileUrl.value,
@@ -625,33 +627,65 @@ const buluploding = () => {
   axiosInstance
     .post(apis.uploadbulkEmployeefile, data)
     .then((res) => {
-      if (res?.message) {
-        bulkdata.value = res.message;
+      if (!res?.data) {
+        toast.error("Import response not found.");
+        return;
+      }
 
-        // Ensure records exist and avoid unnecessary JSON parsing
-        if (bulkdata.value.records) {
-          bulkdata.value.records = bulkdata.value.records.map(record => ({
-            ...record,
-            message: record.message // Keep the message as a string
-          }));
-        }
+      bulkdata.value = res.data;
 
+      // Handle API failure immediately
+      if (res.data.success === false) {
+        let errorMessage = res._error_message || res.data.message || "Import failed.";
 
-        if (bulkdata.value.template_status === "success") {
-          if (bulkdata.value.success) {
-            toast.success("Bulk data imported successfully!");
-          } else {
-            toast.error(`Import Error: ${bulkdata.value.status}`);
+        // Remove anything inside parentheses (including the parentheses)
+        errorMessage = errorMessage.replace(/\s*\(.*?\)\s*/g, "").trim();
+
+        toast.error(errorMessage);
+
+        // Parse and display _server_messages if available
+        if (res.data._server_messages) {
+          try {
+            const serverMessages = JSON.parse(res.data._server_messages);
+            if (Array.isArray(serverMessages)) {
+              serverMessages.forEach((msg) => {
+                const parsedMessage = JSON.parse(msg);
+                let parsedErrorMessage = parsedMessage.message || "Permission error.";
+
+                // Remove anything inside parentheses
+                parsedErrorMessage = parsedErrorMessage.replace(/\s*\(.*?\)\s*/g, "").trim();
+
+                toast.error(parsedErrorMessage);
+              });
+            }
+          } catch (err) {
+            console.error("Error parsing _server_messages:", err);
           }
         }
-        else if (bulkdata.value.template_status === "failed") {
-          toast.error(`Import Failed: ${bulkdata.value.message}`);
-        }
-        else if (bulkdata.value.status === "Partial Success") {
-          toast.warning("Partial Success: Some records failed.");
-        }
-      } else {
-        toast.error("Import response not found.");
+        return; // Stop further execution
+      }
+
+      // Show warnings if present
+      if (bulkdata.value.template_warnings?.length) {
+        bulkdata.value.template_warnings.forEach((warning) => {
+          toast.warning(`Warning: ${warning}`);
+        });
+      }
+
+      // Ensure records exist
+      if (bulkdata.value.records) {
+        bulkdata.value.records = bulkdata.value.records.map(record => ({
+          ...record,
+          message: record.message, // Keep as a string
+        }));
+      }
+      // Handle different statuses
+      if (bulkdata.value.template_status === "success") {
+        toast.success("Bulk data imported successfully!");
+      } else if (bulkdata.value.template_status === "failed") {
+        toast.error(`Import Failed: ${bulkdata.value.message}`);
+      } else if (bulkdata.value.status === "Partial Success") {
+        toast.warning("Partial Success: Some records failed.");
       }
     })
     .catch((error) => {
@@ -660,22 +694,35 @@ const buluploding = () => {
     });
 };
 
+
+
 const formattedData = computed(() => {
   const data = bulkdata.value?.records || [];
+  
   return data.map((record, index) => {
     let email = "N/A";
     let messageText = "N/A";
 
     try {
-      if (record.status === "Success") {
-        // Extract email from the success message
+      if (record.status.toLowerCase() === "success") {
         email = extractEmail(record.message);
         messageText = "Successfully imported";
-      } else {
-        // Parse failed messages and extract email & title
-        const parsedMessage = JSON.parse(record.message);
-        messageText = parsedMessage[0]?.title || "Unknown Issue";
-        email = extractEmail(parsedMessage);
+      } else if (record.status.toLowerCase() === "failed") {
+        // Parse JSON from the message field
+        const parsedMessages = JSON.parse(record.message);
+
+        if (Array.isArray(parsedMessages) && parsedMessages.length > 0) {
+          messageText = parsedMessages[0].title || "Unknown Issue";
+
+          // Check for invalid email error
+          const invalidEmail = extractInvalidEmail(parsedMessages);
+          if (invalidEmail) {
+            email = invalidEmail;
+            messageText = "Invalid Email Address";
+          } else {
+            email = extractEmail(parsedMessages);
+          }
+        }
       }
     } catch (error) {
       messageText = "Parsing Error"; // Fallback if JSON parsing fails
@@ -690,12 +737,13 @@ const formattedData = computed(() => {
   });
 });
 
-// Helper function to extract email
+// **Fixed Email Extraction Function**
 const extractEmail = (message) => {
   if (typeof message === "string") {
-    return message.includes("Successfully imported")
-      ? message.split("Successfully imported ")[1]
-      : "N/A";
+    message = message.toLowerCase(); // Ensure case insensitivity
+    if (message.includes("successfully imported ")) {
+      return message.split("successfully imported ")[1] || "N/A";
+    }
   }
   if (Array.isArray(message)) {
     return message[0]?.message?.match(/<strong>(.*?)<\/strong>/)?.[1] || "N/A";
@@ -703,11 +751,22 @@ const extractEmail = (message) => {
   return "N/A";
 };
 
+// **Extract Invalid Email**
+const extractInvalidEmail = (messages) => {
+  if (Array.isArray(messages)) {
+    for (const msg of messages) {
+      if (msg.message.includes("is not a valid Email Address")) {
+        return msg.message.split(" is not a valid Email Address")[0];
+      }
+    }
+  }
+  return null;
+};
 
+// **Template Warnings Computed Property**
 const templateWarnings = computed(() => {
   return bulkdata.value?.template_warnings || [];
 });
-
 // Function to Download Excel
 const downloadExcel = () => {
   const XLSX = window.XLSX; // Access XLSX from the global window object

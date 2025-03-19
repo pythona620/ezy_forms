@@ -47,12 +47,17 @@
                   <div v-if="activeStep === 1">
                     <div class="">
                       <div class="stepperbackground ps-2 pe-2 m-0 d-flex justify-content-between align-items-center">
-                        <h1 class="font-14 m-0" @click="cancelForm()">
+                        <div></div>
+                        <!-- <h1 class="font-14 m-0" @click="cancelForm()">
                           <i class="bi bi-chevron-left"></i><span class="ms-2">Cancel Form</span>
-                        </h1>
+                        </h1> -->
                         <h1 class="font-14 fw-bold m-0">About Form</h1>
+                        <div>
+                          <button class=" btn btn-light font-12 mx-2" type="button" @click="clearForm">Clear Form</button>
+
                         <ButtonComp class="btn btn-dark bg-dark text-white fw-bold font-13" name="Next"
                           v-if="activeStep < 3" @click="nextStep" />
+                        </div>
                         <!-- :class="{ 'disabled-btn': isNextDisabled }" -->
                         <!-- :disabled="isNextDisabled" -->
                       </div>
@@ -1538,6 +1543,18 @@ function cancelForm() {
   router.push({
     name: "Created",
   });
+}
+
+function clearForm(){
+  filterObj.value.form_name= ''
+  filterObj.value.form_short_name= ''
+  filterObj.value.owner_of_the_form= ''
+  filterObj.value.business_unit= '' 
+  filterObj.value.form_category = ''  
+  filterObj.value.accessible_departments = []
+
+  
+
 }
 const handleStepClick = (stepId) => {
   if (isNextDisabled.value) {

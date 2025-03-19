@@ -45,7 +45,7 @@
           </div>
           <div class="modal-body approvermodalbody">
             <ApproverPreview :blockArr="showRequest" :childHeaders="tableHeaders" :childData="responseData"
-              :readonly-for="true" :current-level="totalLevels" @updateField="updateFormData" />
+               :current-level="totalLevels" @updateField="updateFormData" />
             <!-- <div v-if="tableName" class="mt-2">
               <div>
                 <span class="font-13 fw-bold">{{ tableName }}</span>
@@ -742,7 +742,12 @@ const fieldMapping = computed(() => ({
   // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
   status: {
     type: "select",
-    options: statusOptions.value
+    options: [
+      "Request Raised",
+      "In Progress",
+      "Completed",
+      "Request Cancelled",
+    ],
   },
   // name: { type: "input" },
   doctype_name: { type: "input" },

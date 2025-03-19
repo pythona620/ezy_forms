@@ -1,6 +1,6 @@
 <template>
     <div class="p-1 mt-3">
-        <h1 class="m-0 font-13 mb-3">Two Factor Authentication</h1>
+        <h1 class="m-0 font-13 mb-3">Settings</h1>
         <table class="table">
             <thead>
                 <tr>
@@ -15,8 +15,18 @@
                     <td>{{ item.title }}</td>
                     <td>
                         <!-- <input type="checkbox" v-model="item.checked" @change="handleToggle(index)" /> -->
-                        <input class="form-check-input shadow-none" type="checkbox" role="switch" v-model="item.checked"
-                            @change="handleToggle(index)" />
+                        <div class="form-check form-switch">
+                <input 
+                    class="form-check-input shadow-none" 
+                    type="checkbox" 
+                    role="switch" 
+                    v-model="item.checked"
+                    @change="handleToggle(index)" 
+                />
+                <label class="form-check-label mt-1">
+                    {{ item.checked ? "Enabled" : "Disabled" }}
+                </label>
+            </div>
                     </td>
                 </tr>
             </tbody>
@@ -28,11 +38,11 @@ import { ref, onMounted } from "vue";
 import axiosInstance from "../../shared/services/interceptor";
 import { apis, doctypes } from "../../shared/apiurls";
 import { toast } from "vue3-toastify";
-import "vue3-toastify/dist/index.css";
+import "vue3-toastify/dist/index.css";                      
 
 const tableData = ref([
     { title: "Two Factor Authentication", checked: false },
-    { title: "send Form As a Attach Through Mail", checked: false },
+    { title: "Send Form As a Attach Through Mail", checked: false },
 
 ]);
 
@@ -78,12 +88,31 @@ const employeeData = () => {
 
 const handleToggle = (index) => {
     const docName = index === 0 ? "System Settings" : localStorage.getItem("Bu") || "";
-
     if (!docName) return; // Prevent API call if docName is empty
 
+    const isChecked = tableData.value[index].checked; // Store current state before toggle
+
+    let confirmMessage = "";
     if (index === 0) {
-        // Handle Two Factor Authentication
-        const newStatus = tableData.value[index].checked ? 1 : 0;
+        confirmMessage = isChecked
+            ? "Are you sure you want to enable Two Factor Authentication?"
+            : "Are you sure you want to disable Two Factor Authentication?";
+    } else if (index === 1) {
+        confirmMessage = isChecked
+            ? "Are you sure you want to enable Send Form As an Attachment Through Mail?"
+            : "Are you sure you want to disable Send Form As an Attachment Through Mail?";
+    }
+
+    if (!window.confirm(confirmMessage)) {
+        // Revert the checkbox state if canceled
+        tableData.value[index].checked = !isChecked;
+        return;
+    }
+
+    // Proceed with API request only if the user confirms
+    const newStatus = isChecked ? 1 : 0;
+    
+    if (index === 0) {
         axiosInstance
             .put(`${apis.resource}${doctypes.SystemSettings}/${encodeURIComponent(docName)}`, {
                 enable_two_factor_auth: newStatus,
@@ -95,14 +124,10 @@ const handleToggle = (index) => {
                 toast.error("Failed to update Two Factor Authentication!");
             });
     } else if (index === 1) {
-        // Handle Send Form As a Attach Through Mail
-        const newStatus = tableData.value[index].checked ? 1 : 0; // Toggle value
-        const queryParams = {
-            send_form_as_a_attach_through_mail: newStatus,
-        };
-
         axiosInstance
-            .put(`${apis.resource}${doctypes.wfSettingEzyForms}/${encodeURIComponent(docName)}`, queryParams)
+            .put(`${apis.resource}${doctypes.wfSettingEzyForms}/${encodeURIComponent(docName)}`, {
+                send_form_as_a_attach_through_mail: newStatus,
+            })
             .then(() => {
                 toast.success(`Send Form As a Attach Through Mail ${newStatus ? "Disabled" : "Enabled"} Successfully!`, { autoClose: 700 });
             })
@@ -111,7 +136,6 @@ const handleToggle = (index) => {
             });
     }
 };
-
 
 const BussinesUnit = () => {
     const buData = localStorage.getItem('Bu') || ''; // Ensure buData is parsed correctly

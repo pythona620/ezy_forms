@@ -59,7 +59,7 @@
                                                         <div v-if="userDesigination" class=" ">
 
                                                             <span class="fw-medium font-11">{{ userDesigination
-                                                            }}</span>
+                                                                }}</span>
                                                         </div>
                                                     </li>
                                                 </div>
@@ -272,6 +272,10 @@ function logout() {
             localStorage.removeItem('employeeData');
             localStorage.removeItem('Bu');
             localStorage.removeItem('USERROLE');
+            sessionStorage.removeItem('UserName');
+            sessionStorage.removeItem('employeeData');
+            sessionStorage.removeItem('Bu');
+            sessionStorage.removeItem('USERROLE');
             router.push({ path: '/' }).then(() => {
             });
         })
@@ -283,7 +287,7 @@ function raiseRequstClearForm() {
 }
 const props = defineProps(['id']);
 onMounted(() => {
-    
+
     ezyForms();
     activeTab.value = route.path;
 
@@ -398,8 +402,8 @@ function deptData(value = null) {
                 // departmentList.value = res.data.map((dept) => (dept.name));
                 // Update the route for the "Forms" tab with the first department's route
                 const newFormsRoute = deptartmentData.value.length > 0
-                    ? `/forms/department/${deptartmentData.value[0].name.replace(/\s+/g, '-')}`
-                    : '/forms';
+                    ? `/forms/department/allforms`
+                    : '/forms/department/allforms';
 
                 tabsData.value = tabsData.value.map(tab => {
                     if (tab.name === 'Forms') {

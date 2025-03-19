@@ -144,21 +144,29 @@ const childtableHeaders = ref([]);
 function actionCreated(rowData, actionEvent) {
     // console.log(rowData, actionEvent,"ppp");
     if (actionEvent.name === 'View form') {
-        ``
+        
         if (rowData?.form_json) {
-            formDescriptions.value = { ...rowData };
-            // console.log(formDescriptions.value, "lllllllllll");
-            selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json).fields);
+            router.push({
+        name: "FormPreviewComp",
+        query: {
+          routepath: route.path,
+          form_short_name: rowData.form_short_name,
+
+        },
+      });
+            // formDescriptions.value = { ...rowData };
+            // // console.log(formDescriptions.value, "lllllllllll");
+            // selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json).fields);
 
 
-            childtableHeaders.value = JSON.parse(
-                rowData.form_json
-            ).child_table_fields;
+            // childtableHeaders.value = JSON.parse(
+            //     rowData.form_json
+            // ).child_table_fields;
 
 
-            // console.log(selectedForm.value, "ooooo");
-            const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});
-            modal.show();
+            // // console.log(selectedForm.value, "ooooo");
+            // const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});
+            // modal.show();
         } else {
             console.warn("There are no form fields");
             formCreation(rowData);

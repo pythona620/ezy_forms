@@ -322,7 +322,7 @@ const isImageFile = (value) => {
   return /\.(png|jpg|jpeg|gif)$/i.test(value);
 };
 
-console.log(props.blockArr);
+
 
 // const openInNewWindow = (url) => {
 //   window.open(url, '_blank');
@@ -750,6 +750,9 @@ th {
 td {
   font-size: 12px;
 }
+td:first-child{
+  width: 5%;
+}
 
 .tableborder-child {
   border: 1px solid #ccc !important;
@@ -765,4 +768,11 @@ td {
 .img-thumbnail {
   cursor: pointer;
 }
+.tableborder-child table td {
+  word-break: break-word;
+  max-width: 150px; /* Adjust as needed */
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
 </style>
