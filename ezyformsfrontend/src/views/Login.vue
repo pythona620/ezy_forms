@@ -27,7 +27,7 @@
             :class="{ 'is-invalid': errors.pwd }" />
 
           <!-- Toggle icon for show/hide sas  password -->
-          <span v-if="!errors.pwd" class="toggle-icon" @click="togglePasswordVisibility">
+          <span v-if="!errors.pwd && formdata.pwd" class="toggle-icon" @click="togglePasswordVisibility">
             <i :class="showPassword ? 'bi bi-eye' : 'bi bi-eye-slash'"></i>
           </span>
           <div class="invalid-feedback font-10" v-if="errors.pwd">
