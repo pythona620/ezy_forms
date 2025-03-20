@@ -114,7 +114,7 @@ const actions = ref(
   [
     { name: 'View form', icon: 'fa-solid fa-eye' },
     { name: 'Raise Request', icon: 'fa fa-file-text' },
-    { name: 'Download Print format', icon: 'fa-solid fa-download' },
+    // { name: 'Download Print format', icon: 'fa-solid fa-download' },
   ]
 )
 const fieldMapping = ref({
@@ -310,47 +310,30 @@ const PaginationLimitStart = ([itemsPerPage, start]) => {
 };
 
 
+const timeout = ref(null);
+
 function inLineFiltersData(searchedData) {
+    clearTimeout(timeout.value); // Clear previous timeout
 
+    timeout.value = setTimeout(() => {
+        const filters = [];
 
-  //   // Initialize filters array
-  const filters = [];
+        // Loop through the table headers and build dynamic filters
+        tableheaders.value.forEach((header) => {
+            const key = header.td_key;
 
-  //   // Loop through the tableheaders and build dynamic filters based on the `searchedData`
-  tableheaders.value.forEach((header) => {
-    const key = header.td_key;
+            if (searchedData[key]) {
+                filters.push(key, "like", `%${searchedData[key]}%`);
+            }
+        });
 
-    //     // If there is a match for the key in searchedData, create a 'like' filter
-    if (searchedData[key]) {
-      filters.push(key, "like", `%${searchedData[key]}%`);
-    }
-    //     // Add filter for selected option
-    //     if (key === "selectedOption" && searchedData.selectedOption) {
-    //       filters.push([key, "=", searchedData.selectedOption]);
-    //     }
-    //     // Special handling for 'invoice_date' to create a 'Between' filter (if it's a date)
-    //     if (key === "invoice_date" && searchedData[key]) {
-    //       filters.push([key, "Between", [searchedData[key], searchedData[key]]]);
-    //     }
-
-    //     // Special handling for 'invoice_type' or 'irn_generated' to create an '=' filter
-    //     if ((key === "invoice_type" || key === "credit_irn_generated") && searchedData[key]) {
-    //       filters.push([key, "=", searchedData[key]]);
-    //     }
-  });
-
-
-  //   // Log filters to verify
-
-
-  //   // Once the filters are built, pass them to fetchData function
-  if (filters.length) {
-    fetchDepartmentDetails(null, filters);
-  }
-  else {
-    fetchDepartmentDetails();
-  }
-
+        // Call fetchDepartmentDetails with or without filters
+        if (filters.length) {
+            fetchDepartmentDetails(null, filters);
+        } else {
+            fetchDepartmentDetails();
+        }
+    }, 500); // Adjust debounce delay as needed
 }
 // Fetch department details function
 function fetchDepartmentDetails(id, data) {
@@ -371,7 +354,7 @@ function fetchDepartmentDetails(id, data) {
     limit_page_length: filterObj.value.limitPageLength,
     limit_start: filterObj.value.limit_start,
     filters: JSON.stringify(filters),
-    order_by: "`tabEzy Form Definitions`.`creation` desc",
+    order_by: "`tabEzy Form Definitions`.`enable` DESC, `tabEzy Form Definitions`.`creation` DESC"
   };
   const queryParamsCount = {
     fields: JSON.stringify(["count(name) AS total_count"]),

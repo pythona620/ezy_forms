@@ -139,7 +139,7 @@
                 <button v-if="tableData.status === 'Completed'"
                   class="btn btn-light font-11 fw-bold h-0 text-decoration-underline" type="button" @click="downloadPdf"><i
                     class="bi bi-arrow-down-circle fw-bold px-1"></i>Download
-                  PDF</button>
+                  </button>
               </div>
             </div>
             <div class="activity_height">

@@ -108,8 +108,10 @@ import GlobalTable from '../../Components/GlobalTable.vue';
 import axiosInstance from "../../shared/services/interceptor";
 import { apis, doctypes } from "../../shared/apiurls";
 import { ref, computed } from 'vue';
-// import DatePicker from "@vuepic/vue-datepicker";
+// import DatePicker from "@vuepic/vue-datepicker"; 
 // import "@vuepic/vue-datepicker/dist/main.css";
+
+import { format } from "date-fns";
 // const dateRange = ref();
 
 const showFilters = ref(true);
@@ -168,6 +170,8 @@ const clearFilter = () => {
 
 };
 
+const formatDate = (date) => format(new Date(date), "yyyy/M/d");
+
 const applyFilter = () => {
     tableShow.value = true;
     showFilters.value = false;
@@ -178,36 +182,36 @@ const applyFilter = () => {
         filters.push(["requested_by", "like", `%${filterObj.value.requested_by}%`]);
     }
     if (filterObj.value.doctype_name) {
-        filters.push(["doctype_name", "like", `%${filterObj.value.doctype_name}%`
-        ]);
+        filters.push(["doctype_name", "like", `%${filterObj.value.doctype_name}%`]);
     }
     if (filterObj.value.role) {
-        filters.push(["role", "like", `%${filterObj.value.role}%`
-        ]);
+        filters.push(["role", "like", `%${filterObj.value.role}%`]);
     }
     if (filterObj.value.date) {
-        filters.push(["requested_on", ">=", filterObj.value.date]);
+        filters.push(["requested_on", ">=", formatDate(filterObj.value.date)]);
     }
-    if (filterObj.value.selectedRadio && filterObj.value.selectedRadio !== 'All') {
+    if (filterObj.value.selectedRadio && filterObj.value.selectedRadio !== "All") {
         filters.push(["status", "=", filterObj.value.selectedRadio]);
     }
     if (filterObj.value.dateRange && filterObj.value.dateRange.length === 2) {
-        const [startDate, endDate] = filterObj.value.dateRange;
+        const [startDate, endDate] = filterObj.value.dateRange.map(formatDate);
         filters.push(["requested_on", ">=", startDate]);
         filters.push(["requested_on", "<=", endDate]);
     }
 
-
-    axiosInstance.get(`${apis.resource}${doctypes.WFWorkflowRequests}`, {
-        params: {
-            fields: JSON.stringify(["*"]),
-            filters: JSON.stringify(filters)
-        }
-    }).then((res) => {
-        tableData.value = res.data;
-    }).catch((error) => {
-        console.error("Error fetching records:", error);
-    });
+    axiosInstance
+        .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, {
+            params: {
+                fields: JSON.stringify(["*"]),
+                filters: JSON.stringify(filters),
+            },
+        })
+        .then((res) => {
+            tableData.value = res.data;
+        })
+        .catch((error) => {
+            console.error("Error fetching records:", error);
+        });
 };
 
 // onMounted(() => {

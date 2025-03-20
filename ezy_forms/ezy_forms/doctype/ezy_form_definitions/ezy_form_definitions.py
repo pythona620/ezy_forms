@@ -380,4 +380,40 @@ def add_child_doctype(form_short_name: str, fields: list[dict]):
         frappe.log_error(frappe.get_traceback(), "Error in add_child_doctype")
         return {"error": str(e)}
  
- 
+
+@frappe.whitelist()
+def update_field_properties(doctype_name, field_updates):
+    """
+    Update the label and/or field type of multiple fields in a given Doctype.
+
+    :param doctype_name: Name of the Doctype
+    :param field_updates: JSON object containing a list of field update objects
+    """
+    try:
+        doc = frappe.get_doc("DocType", doctype_name)
+        fields_updated = False
+
+        for update in field_updates:
+            fieldname = update.get("fieldname")
+            new_label = update.get("label")
+            new_fieldtype = update.get("fieldtype")
+
+            for field in doc.fields:
+                if field.fieldname == fieldname:
+                    if new_label:
+                        field.label = new_label  # Update label
+                    if new_fieldtype:
+                        field.fieldtype = new_fieldtype  # Update field type
+                    fields_updated = True
+                    break
+
+        if fields_updated:
+            doc.save()
+            frappe.db.commit()
+            return f"Fields updated successfully in Doctype '{doctype_name}'."
+        else:
+            return f"No matching fields found in Doctype '{doctype_name}'."
+
+    except Exception as e:
+        frappe.log_error(f"Error updating fields in Doctype {doctype_name}: {str(e)}")
+        return f"Error updating fields: {str(e)}"
