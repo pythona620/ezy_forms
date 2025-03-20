@@ -663,12 +663,17 @@ function receivedForMe(data) {
   axiosInstance
     .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, { params: queryParams })
     .then((res) => {
-      tableData.value = res.data;
-      idDta.value = [...new Set(res.data.map((id) => id.name))];
-      docTypeName.value = [
-        ...new Set(res.data.map((docTypeName) => docTypeName.doctype_name)),
-      ];
-      statusOptions.value = [...new Set(res.data.map((status) => status.status))];
+      const newData = res.data;
+      if (filterObj.value.limit_start === 0) {
+        tableData.value = newData;
+        idDta.value = [...new Set(res.data.map((id) => id.name))];
+        docTypeName.value = [
+          ...new Set(res.data.map((docTypeName) => docTypeName.doctype_name)),
+        ];
+        statusOptions.value = [...new Set(res.data.map((status) => status.status))];
+      }else{
+        tableData.value = tableData.value.concat(newData);
+      }
     })
     .catch((error) => {
       console.error("Error fetching records:", error);
