@@ -111,7 +111,7 @@ import { ref, computed } from 'vue';
 // import DatePicker from "@vuepic/vue-datepicker"; 
 // import "@vuepic/vue-datepicker/dist/main.css";
 
-import { format } from "date-fns";
+// import { format } from "date-fns";
 // const dateRange = ref();
 
 const showFilters = ref(true);
@@ -170,7 +170,7 @@ const clearFilter = () => {
 
 };
 
-const formatDate = (date) => format(new Date(date), "yyyy/M/d");
+// const formatDate = (date) => format(new Date(date), "yyyy/M/d");
 
 const applyFilter = () => {
     tableShow.value = true;
@@ -193,11 +193,11 @@ const applyFilter = () => {
     if (filterObj.value.selectedRadio && filterObj.value.selectedRadio !== "All") {
         filters.push(["status", "=", filterObj.value.selectedRadio]);
     }
-    if (filterObj.value.dateRange && filterObj.value.dateRange.length === 2) {
-        const [startDate, endDate] = filterObj.value.dateRange.map(formatDate);
-        filters.push(["requested_on", ">=", startDate]);
-        filters.push(["requested_on", "<=", endDate]);
-    }
+    // if (filterObj.value.dateRange && filterObj.value.dateRange.length === 2) {
+    //     const [startDate, endDate] = filterObj.value.dateRange.map(formatDate);
+    //     filters.push(["requested_on", ">=", startDate]);
+    //     filters.push(["requested_on", "<=", endDate]);
+    // }
 
     axiosInstance
         .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, {
