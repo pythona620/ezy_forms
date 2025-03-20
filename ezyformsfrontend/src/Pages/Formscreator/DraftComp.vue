@@ -157,50 +157,34 @@ const PaginationLimitStart = ([itemsPerPage, start]) => {
 };
 
 
+const timeout = ref(null); // Store the timeout reference
 
 function inLineFiltersData(searchedData) {
+    // Clear the previous timeout to prevent multiple API calls
+    clearTimeout(timeout.value);
 
+    // Set a new timeout to delay the API call
+    timeout.value = setTimeout(() => {
+        // Initialize filters array
+        const filters = [];
 
-    //   // Initialize filters array
-    const filters = [];
+        // Loop through the table headers and build dynamic filters
+        tableheaders.value.forEach((header) => {
+            const key = header.td_key;
 
-    //   // Loop through the tableheaders and build dynamic filters based on the `searchedData`
-    tableheaders.value.forEach((header) => {
-        const key = header.td_key;
+            // If there is a match for the key in searchedData, create a 'like' filter
+            if (searchedData[key]) {
+                filters.push(key, "like", `%${searchedData[key]}%`);
+            }
+        });
 
-        //     // If there is a match for the key in searchedData, create a 'like' filter
-        if (searchedData[key]) {
-            filters.push(key, "like", `%${searchedData[key]}%`);
-        }
-        //     // Add filter for selected option
-        //     if (key === "selectedOption" && searchedData.selectedOption) {
-        //       filters.push([key, "=", searchedData.selectedOption]);
-        //     }
-        //     // Special handling for 'invoice_date' to create a 'Between' filter (if it's a date)
-        //     if (key === "invoice_date" && searchedData[key]) {
-        //       filters.push([key, "Between", [searchedData[key], searchedData[key]]]);
-        //     }
+        // Fetch data with filters
+        fetchTable(filters.length ? filters : undefined);
 
-        //     // Special handling for 'invoice_type' or 'irn_generated' to create an '=' filter
-        //     if ((key === "invoice_type" || key === "credit_irn_generated") && searchedData[key]) {
-        //       filters.push([key, "=", searchedData[key]]);
-        //     }
-    });
-
-
-    //   // Log filters to verify
-
-
-    //   // Once the filters are built, pass them to fetchData function
-    if (filters.length) {
-        fetchTable(filters);
-    }
-    else {
-        fetchTable();
-    }
-    //   fetchTotalRecords(filters);
+        // Optional: Fetch total records if needed
+        // fetchTotalRecords(filters);
+    }, 500); // Adjust debounce delay as needed (e.g., 500ms)
 }
-
 const formCategory = ref([]);
 
 

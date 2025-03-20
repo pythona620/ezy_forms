@@ -537,45 +537,6 @@ function ApproverFormSubmission(dataObj, type) {
     });
 }
 
-function approvalCancelFn(type) {
-  let data = {
-    action: type,
-    property: selectedRequest.value.property,
-    doctype: selectedRequest.value.doctype_name,
-    current_level: selectedRequest.value.current_level,
-    request_id: selectedRequest.value.name,
-    reason: "Request Cancelled",
-    files: [],
-    url_for_cancelling_id: "",
-    // "action": type,
-    // "cluster_name": null,
-    // https://ezyrecon.ezyinvoicing.com/home/wf-requests
-  };
-  loading.value = true;
-
-  // need to check this api not working
-  axiosInstance
-    .post(apis.wf_cancelling_request, data)
-    .then((response) => {
-      if (response?.message?.success) {
-        toast.success(`${type}`, { autoClose: 1000 });
-        const modal = bootstrap.Modal.getInstance(
-          document.getElementById("viewRequest")
-        );
-        loading.value = false;
-        modal.hide();
-        receivedForMe();
-      }
-    })
-    .catch((error) => {
-      console.error("Error fetching data:", error);
-      toast.error(`Cancell failed${type}`, { autoClose: 1000 });
-
-    })
-    .finally(() => {
-      loading.value = false; // Ensure loading is false regardless of success or failure
-    });
-}
 
 // // Function to handle form submission
 // const ApproverFormSubmission = () => {
@@ -640,42 +601,34 @@ const PaginationLimitStart = ([itemsPerPage, start]) => {
   filterObj.value.limit_start = start;
   receivedForMe();
 };
+const timeout = ref(null);
+
 function inLineFiltersData(searchedData) {
-  //   // Initialize filters array
-  const filters = [];
+    clearTimeout(timeout.value); // Clear previous timeout
 
-  //   // Loop through the tableheaders and build dynamic filters based on the `searchedData`
-  tableheaders.value.forEach((header) => {
-    const key = header.td_key;
+    timeout.value = setTimeout(() => {
+        // Initialize filters array
+        const filters = [];
 
-    //     // If there is a match for the key in searchedData, create a 'like' filter
-    if (searchedData[key]) {
-      filters.push(key, "like", `%${searchedData[key]}%`);
-    }
-    //     // Add filter for selected option
-    //     if (key === "selectedOption" && searchedData.selectedOption) {
-    //       filters.push([key, "=", searchedData.selectedOption]);
-    //     }
-    //     // Special handling for 'invoice_date' to create a 'Between' filter (if it's a date)
-    //     if (key === "invoice_date" && searchedData[key]) {
-    //       filters.push([key, "Between", [searchedData[key], searchedData[key]]]);
-    //     }
+        // Loop through the table headers and build dynamic filters
+        tableheaders.value.forEach((header) => {
+            const key = header.td_key;
 
-    //     // Special handling for 'invoice_type' or 'irn_generated' to create an '=' filter
-    //     if ((key === "invoice_type" || key === "credit_irn_generated") && searchedData[key]) {
-    //       filters.push([key, "=", searchedData[key]]);
-    //     }
-  });
+            if (searchedData[key]) {
+                filters.push(key, "like", `%${searchedData[key]}%`);
+            }
+        });
 
-  //   // Log filters to verify
+        // Call receivedForMe with or without filters
+        if (filters.length) {
+            receivedForMe(filters);
+        } else {
+            receivedForMe();
+        }
 
-  //   // Once the filters are built, pass them to fetchData function
-  if (filters.length) {
-    receivedForMe(filters);
-  } else {
-    receivedForMe();
-  }
-  //   fetchTotalRecords(filters);
+        // Optionally call fetchTotalRecords
+        // fetchTotalRecords(filters);
+    }, 500); // Adjust debounce delay as needed
 }
 
 function receivedForMe(data) {
@@ -723,14 +676,23 @@ function receivedForMe(data) {
       params: queryParams,
     })
     .then((res) => {
-      tableData.value = res.data;
-      idDta.value = [...new Set(res.data.map((id) => id.name))];
-      docTypeName.value = [
-        ...new Set(res.data.map((docTypeName) => docTypeName.doctype_name)),
-      ];
-      statusOptions.value = [
-        ...new Set(res.data.map((status) => status.status)),
-      ];
+      const newData = res.data;
+      if (filterObj.value.limit_start === 0) {
+        tableData.value = newData;
+
+        idDta.value = [...new Set(newData.map((id) => id.name))];
+        docTypeName.value = [
+          ...new Set(newData.map((docTypeName) => docTypeName.doctype_name)),
+        ];
+        statusOptions.value = [
+          ...new Set(newData.map((status) => status.status)),
+        ];
+      }
+      else{
+        tableData.value = tableData.value.concat(newData)
+      }
+
+
     })
     .catch((error) => {
       console.error("Error fetching records:", error);

@@ -560,40 +560,7 @@ function approvalCancelFn(dataObj, type) {
     });
 }
 
-// // Function to handle form submission
-// const ApproverFormSubmission = () => {
 
-//   // if (emittedFormData.value.length) {
-//   //       emittedFormData.value.map((each) => {
-//   //           form[each.fieldname] = each.value
-//   //       })
-//   //   }
-
-//   let data = {
-//     "property": selectedRequest.value.property,
-//     "doctype": selectedRequest.value.doctype_name,
-//     "request_ids": selectedRequest.value.name,
-//     "reason": "",
-//     "action": selectedRequest.value.action,
-//     "files": "[]",
-//     "cluster_name": null,
-//     "url_for_approval_id": '',
-//     // https://ezyrecon.ezyinvoicing.com/home/wf-requests
-//     "current_level": selectedRequest.value.current_level
-//   }
-
-//   // axiosInstance.post(apis.requestApproval, { request_details: [data] })
-//   //   .then((response) => {
-
-//   toast.success("Rquest Approved", { autoClose: 1000 })
-//   const modal = bootstrap.Modal.getInstance(document.getElementById('viewRequest'));
-//   modal.hide();
-//   // })
-//   // .catch((error) => {
-//   //   console.error("Error fetching data:", error);
-//   // });
-
-// };
 
 function mapFormFieldsToRequest(doctypeData, showRequestData) {
   showRequestData.forEach((block) => {
@@ -623,44 +590,30 @@ const PaginationLimitStart = ([itemsPerPage, start]) => {
   filterObj.value.limit_start = start;
   receivedForMe();
 };
+const timeout = ref(null); // Store the timeout reference
+
 function inLineFiltersData(searchedData) {
-  //   // Initialize filters array
-  const filters = [];
+    // Clear the previous timeout to prevent multiple API calls
+    clearTimeout(timeout.value);
 
-  //   // Loop through the tableheaders and build dynamic filters based on the `searchedData`
-  tableheaders.value.forEach((header) => {
-    const key = header.td_key;
+    // Set a new timeout to delay the API call
+    timeout.value = setTimeout(() => {
+        // Initialize filters array
+        const filters = [];
 
-    //     // If there is a match for the key in searchedData, create a 'like' filter
-    if (searchedData[key]) {
-      filters.push(key, "like", `%${searchedData[key]}%`);
-    }
-    //     // Add filter for selected option
-    //     if (key === "selectedOption" && searchedData.selectedOption) {
-    //       filters.push([key, "=", searchedData.selectedOption]);
-    //     }
-    //     // Special handling for 'invoice_date' to create a 'Between' filter (if it's a date)
-    //     if (key === "invoice_date" && searchedData[key]) {
-    //       filters.push([key, "Between", [searchedData[key], searchedData[key]]]);
-    //     }
+        // Loop through the table headers and build dynamic filters
+        tableheaders.value.forEach((header) => {
+            const key = header.td_key;
 
-    //     // Special handling for 'invoice_type' or 'irn_generated' to create an '=' filter
-    //     if ((key === "invoice_type" || key === "credit_irn_generated") && searchedData[key]) {
-    //       filters.push([key, "=", searchedData[key]]);
-    //     }
-  });
+            if (searchedData[key]) {
+                filters.push(key, "like", `%${searchedData[key]}%`);
+            }
+        });
 
-  //   // Log filters to verify
-
-  //   // Once the filters are built, pass them to fetchData function
-  if (filters.length) {
-    receivedForMe(filters);
-  } else {
-    receivedForMe();
-  }
-  //   fetchTotalRecords(filters);
+        // Call receivedForMe with or without filters
+        receivedForMe(filters.length ? filters : undefined);
+    }, 500); // Adjust debounce delay as needed (e.g., 500ms)
 }
-
 function receivedForMe(data) {
   // Initialize filters array for building dynamic query parameters
   const EmpRequestMail = JSON.parse(localStorage.getItem("employeeData"));
@@ -710,12 +663,17 @@ function receivedForMe(data) {
   axiosInstance
     .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, { params: queryParams })
     .then((res) => {
-      tableData.value = res.data;
-      idDta.value = [...new Set(res.data.map((id) => id.name))];
-      docTypeName.value = [
-        ...new Set(res.data.map((docTypeName) => docTypeName.doctype_name)),
-      ];
-      statusOptions.value = [...new Set(res.data.map((status) => status.status))];
+      const newData = res.data;
+      if (filterObj.value.limit_start === 0) {
+        tableData.value = newData;
+        idDta.value = [...new Set(res.data.map((id) => id.name))];
+        docTypeName.value = [
+          ...new Set(res.data.map((docTypeName) => docTypeName.doctype_name)),
+        ];
+        statusOptions.value = [...new Set(res.data.map((status) => status.status))];
+      }else{
+        tableData.value = tableData.value.concat(newData);
+      }
     })
     .catch((error) => {
       console.error("Error fetching records:", error);

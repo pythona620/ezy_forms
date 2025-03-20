@@ -1,6 +1,6 @@
 <template>
     <div>
-        <div class="d-flex justify-content-between align-items-center py-2 ">
+        <div class="d-flex align-items-center justify-content-between py-2">
             <div>
                 <h1 class="m-0 font-13">
                     Designations
@@ -9,7 +9,7 @@
                 374 users
             </p> -->
             </div>
-            <div class="d-flex gap-2 align-items-center">
+            <div class="d-flex align-items-center gap-2">
 
                 <div>
                     <FormFields labeltext="" class="my-1" tag="input" type="search" placeholder="Search Name"
@@ -51,7 +51,7 @@ const createDesignation = ref({
     ezy_business_unit: "",
 });
 const filterObj = ref({
-    limitPageLength: 'None',
+    limitPageLength: 20,
     limit_start: 0,
     search: ""
 });
@@ -59,14 +59,14 @@ const filterObj = ref({
 const PaginationUpdateValue = (itemsPerPage) => {
     filterObj.value.limitPageLength = itemsPerPage;
     filterObj.value.limit_start = 0;
-    fetchTable();
+    designationData();
 
 };
 // Handle updating the limit start
 const PaginationLimitStart = ([itemsPerPage, start]) => {
     filterObj.value.limitPageLength = itemsPerPage;
     filterObj.value.limit_start = start;
-    fetchTable();
+    designationData();
 
 };
 watch(
@@ -115,8 +115,14 @@ function designationData() {
     axiosInstance.get(apis.resource + doctypes.designations, { params: queryParams })
         .then((res) => {
             if (res.data) {
+                const newData = res.data
+                if (filterObj.value.limit_start === 0) {
+                    tableData.value = newData;
 
-                tableData.value = res.data;
+                }else {
+                    tableData.value = tableData.value.concat(newData)
+                }
+
             }
         })
         .catch((error) => {

@@ -511,31 +511,7 @@ function approvalCancelFn(dataObj, type) {
 }
 
 
-// function approvalCancelFn(dataObj, type) {
-//   // let files = this.selectedFileAttachments.map((res: any) => res.url);
 
-//   console.log(dataObj, "data");
-//   let data = {
-//     property: selectedRequest.value.property,
-//     doctype: selectedRequest.value.doctype_name,
-//     request_id: selectedRequest.value.name,
-//     reason: ApproverReason.value,
-//     action: type,
-//     files: [],
-//     url_for_cancelling_id: "",
-//     current_level: selectedRequest.value.current_level,
-//   };
-//   axiosInstance.post(apis.wf_cancelling_request, data).then((response) => {
-//     if (response?.message) {
-//       if (type == "Reject") {
-//         toast.success(`Request ${type}ed`, { autoClose: 1000, transition: "zoom" });
-//       }
-//       const modal = bootstrap.Modal.getInstance(document.getElementById("viewRequest"));
-//       modal.hide();
-//       receivedForMe();
-//     }
-//   });
-// }
 
 function mapFormFieldsToRequest(doctypeData, showRequestData) {
   showRequestData.forEach((block) => {
@@ -579,45 +555,32 @@ const PaginationLimitStart = ([itemsPerPage, start]) => {
 };
 
 const filters = ref([]);
+const timeout = ref(null);
+
 function inLineFiltersData(searchedData) {
-  //   // Initialize filters array
-  filterObj.value.filters = [];
+    clearTimeout(timeout.value); // Clear previous timeout
 
-  //   // Loop through the tableheaders and build dynamic filters based on the `searchedData`
-  tableheaders.value.forEach((header) => {
-    const key = header.td_key;
+    timeout.value = setTimeout(() => {
+        // Initialize filters array
+        filterObj.value.filters = [];
 
-    //     // If there is a match for the key in searchedData, create a 'like' filter
-    if (searchedData[key]) {
-      filterObj.value.filters.push(key, "like", `%${searchedData[key]}%`);
-    }
-    // console.log(searchedData,"pppp");
-    //     // Add filter for selected option
-    //     if (key === "selectedOption" && searchedData.selectedOption) {
-    //       filters.push([key, "=", searchedData.selectedOption]);
-    //     }
-    //     // Special handling for 'invoice_date' to create a 'Between' filter (if it's a date)
-    //     if (key === "invoice_date" && searchedData[key]) {
-    //       filters.push([key, "Between", [searchedData[key], searchedData[key]]]);
-    //     }
+        // Loop through the table headers and build dynamic filters
+        tableheaders.value.forEach((header) => {
+            const key = header.td_key;
 
-    //     // Special handling for 'invoice_type' or 'irn_generated' to create an '=' filter
-    //     if ((key === "invoice_type" || key === "credit_irn_generated") && searchedData[key]) {
-    //       filters.push([key, "=", searchedData[key]]);
-    //     }
-  });
+            if (searchedData[key]) {
+                filterObj.value.filters.push(key, "like", `%${searchedData[key]}%`);
+            }
+        });
 
-  //   // Log filters to verify
-
-  //   // Once the filters are built, pass them to fetchData function
-  if (filterObj.value.filters.length) {
-
-    receivedForMe(filterObj.value.filters);
-  } else {
-    receivedForMe();
-  }
+        // Call receivedForMe with or without filters
+        if (filterObj.value.filters.length) {
+            receivedForMe(filterObj.value.filters);
+        } else {
+            receivedForMe();
+        }
+    }, 500); // Adjust debounce delay as needed
 }
-
 function receivedForMe(data) {
   // Initialize filters array for building dynamic query parameters
 

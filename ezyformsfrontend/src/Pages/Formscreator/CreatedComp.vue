@@ -132,7 +132,7 @@ const selectedForm = ref(null);
 const actions = ref([
     { name: 'View form', icon: 'fa-solid fa-eye' },
     { name: 'Edit Form', icon: 'fa-solid fa-edit' },
-    { name: 'Download Print format', icon: 'fa-solid fa-download' },
+    // { name: 'Download Print format', icon: 'fa-solid fa-download' },
     { name: 'Raise Request', icon: 'fa-solid fa-check-circle' },
     // { name: 'In-active this form', icon: 'fa-solid fa-ban' },
     // { name: 'Edit accessibility to dept.', icon: 'fa-solid fa-users' },
@@ -318,50 +318,23 @@ const hideModal = () => {
     const modal = bootstrap.Modal.getInstance(document.getElementById('formViewModal'));
     modal.hide();
 };
-
+const timeout = ref(null);
 function inLineFiltersData(searchedData) {
+    clearTimeout(timeout.value); // Clear previous timeout
 
+    timeout.value = setTimeout(() => {
+        const filters = [];
 
-    //   // Initialize filters array
-    const filters = [];
+        tableheaders.value.forEach((header) => {
+            const key = header.td_key;
+            if (searchedData[key]) {
+                filters.push(key, "like", `%${searchedData[key]}%`);
+            }
+        });
 
-    //   // Loop through the tableheaders and build dynamic filters based on the `searchedData`
-    tableheaders.value.forEach((header) => {
-        const key = header.td_key;
-
-        //     // If there is a match for the key in searchedData, create a 'like' filter
-        if (searchedData[key]) {
-            filters.push(key, "like", `%${searchedData[key]}%`);
-        }
-        //     // Add filter for selected option
-        //     if (key === "selectedOption" && searchedData.selectedOption) {
-        //       filters.push([key, "=", searchedData.selectedOption]);
-        //     }
-        //     // Special handling for 'invoice_date' to create a 'Between' filter (if it's a date)
-        //     if (key === "invoice_date" && searchedData[key]) {
-        //       filters.push([key, "Between", [searchedData[key], searchedData[key]]]);
-        //     }
-
-        //     // Special handling for 'invoice_type' or 'irn_generated' to create an '=' filter
-        //     if ((key === "invoice_type" || key === "credit_irn_generated") && searchedData[key]) {
-        //       filters.push([key, "=", searchedData[key]]);
-        //     }
-    });
-
-
-    //   // Log filters to verify
-
-
-    //   // Once the filters are built, pass them to fetchData function
-    if (filters.length) {
-        fetchTable(filters);
-    }
-    else {
-        fetchTable();
-    }
-    //   fetchTotalRecords(filters);
+        fetchTable(filters.length ? filters : undefined);
+    }, 500); // Delay API call by 500ms
 }
-
 
 
 
@@ -491,7 +464,7 @@ function fetchTable(data) {
 
 const fieldMapping = computed(() => ({
     form_name: { type: "input" },
-    form_category: { type: "select", options: formCategory.value },
+    form_category: { type: "input" },
     owner_of_the_form: { type: "input" }
 }));
 
