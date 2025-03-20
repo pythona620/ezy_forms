@@ -118,8 +118,8 @@ watch(
     { immediate: true }
 );
 const tableheaders = ref([
-    { th: "Name", td_key: "name" },
     { th: "Form name", td_key: "form_name" },
+    { th: "Short Name", td_key: "form_short_name" },
     { th: "Form category", td_key: "form_category" },
     { th: "Owner of form", td_key: "owner_of_the_form" },
     { th: "Accessible departments", td_key: "accessible_departments" },
@@ -464,6 +464,7 @@ function fetchTable(data) {
 
 const fieldMapping = computed(() => ({
     form_name: { type: "input" },
+    form_short_name:{ type: "input" },
     form_category: { type: "input" },
     owner_of_the_form: { type: "input" }
 }));
