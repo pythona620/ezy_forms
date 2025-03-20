@@ -1033,7 +1033,7 @@ const validatephonenew = () => {
 
 
 const filterObj = ref({
-  limitPageLength: "None",
+  limitPageLength: 20,
   limit_start: 0,
 });
 // const addDepartment = (newTag) => {
@@ -1300,13 +1300,13 @@ function deptData() {
 const PaginationUpdateValue = (itemsPerPage) => {
   filterObj.value.limitPageLength = itemsPerPage;
   filterObj.value.limit_start = 0;
-  fetchTable();
+  employeeData();
 };
 // Handle updating the limit start
 const PaginationLimitStart = ([itemsPerPage, start]) => {
   filterObj.value.limitPageLength = itemsPerPage;
   filterObj.value.limit_start = start;
-  fetchTable();
+  employeeData();
 };
 
 function inLineFiltersData(searchedData) {
@@ -1380,20 +1380,27 @@ function employeeData(data) {
     .get(apis.resource + doctypes.EzyEmployeeList, { params: queryParams })
     .then((res) => {
       if (res.data) {
-        tableData.value = res.data;
-        // designations.value = [...new Set(res.data.map((designation) => designation.designation))];
-        reportingTo.value = [
-          ...new Set(res.data.map((reporting) => reporting.reporting_to)),
-        ];
-        reportingDesigination.value = [
-          ...new Set(
-            res.data.map(
-              (reportingDesigination) =>
+        const newData = res.data
+        if(filterObj.value.limit_start === 0){
+
+          tableData.value = newData;
+          // designations.value = [...new Set(res.data.map((designation) => designation.designation))];
+          reportingTo.value = [
+            ...new Set(res.data.map((reporting) => reporting.reporting_to)),
+          ];
+          reportingDesigination.value = [
+            ...new Set(
+              res.data.map(
+                (reportingDesigination) =>
                 reportingDesigination.reporting_designation
-            )
-          ),
-        ];
-        createEmployee.value.company_field = businessUnit.value;
+              )
+            ),
+          ];
+          createEmployee.value.company_field = businessUnit.value;
+        }
+        else{
+          tableData.value = tableData.value.concat(newData);
+        }
       }
     })
     .catch((error) => {

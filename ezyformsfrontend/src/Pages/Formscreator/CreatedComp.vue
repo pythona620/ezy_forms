@@ -144,16 +144,16 @@ const childtableHeaders = ref([]);
 function actionCreated(rowData, actionEvent) {
     // console.log(rowData, actionEvent,"ppp");
     if (actionEvent.name === 'View form') {
-        
+
         if (rowData?.form_json) {
             router.push({
-        name: "FormPreviewComp",
-        query: {
-          routepath: route.path,
-          form_short_name: rowData.form_short_name,
+                name: "FormPreviewComp",
+                query: {
+                    routepath: route.path,
+                    form_short_name: rowData.form_short_name,
 
-        },
-      });
+                },
+            });
             // formDescriptions.value = { ...rowData };
             // // console.log(formDescriptions.value, "lllllllllll");
             // selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json).fields);
@@ -340,14 +340,18 @@ function inLineFiltersData(searchedData) {
 
 function formCreation(item = null) {
     if (item == null) {
-        router.push({ name: "FormStepper", query:{
-            routepath: route.path
-        }, });
+        router.push({
+            name: "FormStepper", query: {
+                routepath: route.path
+            },
+        });
     } else {
         router.push({
             name: "FormStepper",
             params: { paramid: item.name },
-            routepath: route.path,
+            query: {
+                routepath: route.path
+            }
 
         });
     }
@@ -467,7 +471,7 @@ function fetchTable(data) {
 
 const fieldMapping = computed(() => ({
     form_name: { type: "input" },
-    form_short_name:{ type: "input" },
+    form_short_name: { type: "input" },
     form_category: { type: "input" },
     owner_of_the_form: { type: "input" }
 }));

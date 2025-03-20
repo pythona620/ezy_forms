@@ -38,7 +38,7 @@ import PaginationComp from '../../Components/PaginationComp.vue'
 import axiosInstance from '../../shared/services/interceptor';
 import { apis, doctypes } from "../../shared/apiurls";
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { rebuildToStructuredArray } from "../../shared/services/field_format";
 import FormPreview from '../../Components/FormPreview.vue'
 import { toast } from "vue3-toastify";
@@ -56,6 +56,8 @@ const selectedForm = ref(null);
 const businessUnit = computed(() => {
     return EzyBusinessUnit.value;
 });
+
+const route = useRoute();
 const sections = reactive([]);
 onMounted(() => {
     // fetchTable()
@@ -67,10 +69,18 @@ onMounted(() => {
 function actionCreated(rowData, actionEvent) {
     if (actionEvent.name === 'View form') {
         if (rowData?.form_json) {
-            formDescriptions.value = { ...rowData }
-            selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json).fields)
-            const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});// raise a modal
-            modal.show();
+            router.push({
+                name: "FormPreviewComp",
+                query: {
+                    routepath: route.path,
+                    form_short_name: rowData.form_short_name,
+
+                },
+            });
+            // formDescriptions.value = { ...rowData }
+            // selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json).fields)
+            // const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});// raise a modal
+            // modal.show();
 
         } else {
             console.warn(" There is no form fields ")
@@ -136,12 +146,17 @@ const tableheaders = ref([
 
 function formCreation(item = null) {
     if (item == null) {
-        router.push({ name: "FormStepper" });
+        router.push({ query:{
+            routepath: route.path
+        },name: "FormStepper", });
     } else {
         router.push({
+            query:{
+            routepath: route.path
+        },
             name: "FormStepper",
             params: { paramid: item.name },
-
+           
         });
     }
 }

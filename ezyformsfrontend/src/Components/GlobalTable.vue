@@ -174,20 +174,7 @@
               class="text-center d-flex justify-content-center position-relative"
               v-if="isAction == 'true' && viewType === 'viewPdf'"
             > -->
-              <div v-if="isAction == 'true' && viewType === 'viewPdf'" class="text-center">
-                <span class="px-2">
-                  <i
-                    @click="handleCellClick(row, rowIndex, 'view')"
-                    class="ri-eye-line eye-cursor"
-                  ></i>
-                </span>
-                <span v-if="download === 'true'">
-                  <i
-                    class="bi bi-download eye-cursor"
-                    @click="handleCellClick(row, rowIndex, 'download')"
-                  ></i>
-                </span>
-              </div>
+             
                         <!-- 'Reviewpending': row[column.td_key] == 'Pending Review',
                 'Reviewed': row[column.td_key] == 'Reviewed',
                 'Completed': row[column.td_key] == 'Completed',
@@ -208,6 +195,26 @@
                 </div>
               </div>
             </td>
+            <div v-if="isAction == 'true' && viewType === 'viewPdf'" class="text-center">
+                <span class="px-2">
+                  <i
+                    @click="handleCellClick(row, rowIndex, 'view')"
+                    class="ri-eye-line eye-cursor"
+                  ></i>
+                </span>
+                <span v-if="download === 'true'">
+                  <i
+                    class="bi bi-download eye-cursor"
+                    @click="handleCellClick(row, rowIndex, 'download')"
+                  ></i>
+                </span>
+                <span v-if="raiseRequest === 'true'">
+                  <i
+                    class="bi bi-send eye-cursor mx-1"
+                    @click="handleCellClick(row, rowIndex, 'raiseRequest')"
+                  ></i>
+                </span>
+              </div>
             <td v-if="actionType === 'dropdown'" class="text-center fixed-column position-relative">
               <div class="dropdown">
                 <p class="p-0 actions" data-bs-toggle="dropdown" aria-expanded="false">
@@ -338,6 +345,9 @@ const props = defineProps({
   },
   download: {
     type: String,
+  },
+  raiseRequest:{
+    type:String
   },
   actionType: {
     type: String,

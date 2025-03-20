@@ -1,9 +1,9 @@
 <template>
     <div class="container xjdvsdvs">
         <div class="backBtn">
-            <h5 class="p-3 m-0 px-4 font-13">
-                <router-link :to="backTo" @click="backToForm" class="text-decoration-none text-dark"><i
-                        class="bi bi-arrow-left pe-2 font-14"></i></router-link>
+            <h5 class="m-0 p-3 font-13 px-4">
+                <router-link :to="backTo" @click="backToForm" class="text-dark text-decoration-none"><i
+                        class="bi bi-arrow-left font-14 pe-2"></i></router-link>
                 {{ formDescriptions.form_name || "Untitled" }} ({{
                     formDescriptions.form_category
                 }})
@@ -15,11 +15,11 @@
 
         <!-- <div class="d-flex gap-2">
             <div class="dropdown">
-                <button class="btn btn-dark text-white dropdown-toggle font-13" type="button" id="dropdownMenuButton"
+                <button class="btn btn-dark dropdown-toggle text-white font-13" type="button" id="dropdownMenuButton"
                     data-bs-toggle="dropdown" aria-expanded="false">
                     View as {{ selectedView }}
                 </button>
-                <ul class="dropdown-menu " aria-labelledby="dropdownMenuButton">
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                       <li><a class="dropdown-item" @click="setView('Requestor')"> Requestor</a></li>
                                       <li><a class="dropdown-item" @click="setView('Approver 1')">Approver 1</a>
                                       </li>
@@ -38,9 +38,9 @@
             </div>
         </div> -->
 
-        <div class="card border-0 mt-4 form-containe-div container">
+        <div class="container card form-containe-div border-0 mt-4">
             <div v-for="(blockItem, blockIndex) in displayedBlocks" :key="blockIndex">
-                <div class="d-flex justify-content-end align-items-center me-2">
+                <div class="d-flex align-items-center justify-content-end me-2">
                     <span class="font-12 px-2 py-1" v-if="workFlowRoles[blockIndex]?.roles.length > 0">
                         {{
                             blockIndex === 0
@@ -52,7 +52,7 @@
                 </div>
                 <div v-for="(section, sectionIndex) in blockItem.sections" :key="'preview-' + sectionIndex"
                     class="preview-section">
-                    <div v-if="section.label" class="section-label d-flex justify-content-between">
+                    <div v-if="section.label" class="d-flex justify-content-between section-label">
                         <h5 class="m-0 font-13">{{ section.label }}</h5>
                     </div>
                     <div class="px-2">
@@ -60,7 +60,7 @@
                             <div class="row" v-for="(row, rowIndex) in section.rows" :key="rowIndex">
                                 <div v-for="(column, columnIndex) in row.columns" :key="'column-preview-' + columnIndex"
                                     class="col dynamicColumn">
-                                    <div v-if="column.label" class="p-3 border-bottom">
+                                    <div v-if="column.label" class="border-bottom p-3">
                                         <h6 class="m-0 font-12">{{ column.label || "-" }}</h6>
                                     </div>
                                     <div class="mx-3 my-2">
@@ -75,14 +75,14 @@
                                                     fieldIndex
                                                     ">
                                                     <span class="font-12">{{ field.label }}</span>
-                                                    <span class="ms-1 text-danger">{{
+                                                    <span class="text-danger ms-1">{{
                                                         field.reqd === 1 ? "*" : ""
                                                     }}</span>
                                                 </label>
                                                 <!-- field.fieldtype == 'Select' || -->
                                                 <template v-if="field.fieldtype == 'Table MultiSelect'">
                                                     <select :multiple="field.fieldtype == 'Table MultiSelect'
-                                                        " v-model="field.value" class="form-select mb-2 font-13">
+                                                        " v-model="field.value" class="form-select font-13 mb-2">
                                                         <option v-for="(
 option, index
                                       ) in field.options?.split('\n')" :key="index" :value="option">
@@ -97,10 +97,10 @@ option, index
                                                 ">
                                                     <div class="container">
                                                         <div class="row">
-                                                            <div class="form-check col-4 mb-4" v-for="(
+                                                            <div class="col-4 form-check mb-4" v-for="(
 option, index
                                         ) in field?.options?.split('\n')" :key="index">
-                                                                <div class="d-flex gap-2 align-items-center">
+                                                                <div class="d-flex align-items-center gap-2">
                                                                     <div>
                                                                         <input v-if="
                                                                             field.fieldtype === 'Check' || field.fieldtype === 'Select' &&
@@ -132,16 +132,16 @@ option, index
                                                 <template v-else>
                                                     <input v-if="field.fieldtype === 'Int'" type="number"
                                                         v-model="field.value" readonly
-                                                        class="form-control previewInputHeight font-10" />
+                                                        class="form-control font-10 previewInputHeight" />
                                                     <input v-if="field.fieldtype === 'Datetime'" type="datetime-local"
                                                         v-model="field.value"
-                                                        class="form-control previewInputHeight font-10" />
+                                                        class="form-control font-10 previewInputHeight" />
                                                     <component v-if="
                                                         field.fieldtype !== 'Datetime' &&
                                                         field.fieldtype !== 'Int'
                                                     " readonly :is="getFieldComponent(field.fieldtype)"
                                                         v-model="field.value" :type="field.fieldtype"
-                                                        class="form-control previewInputHeight font-10" />
+                                                        class="form-control font-10 previewInputHeight" />
                                                 </template>
                                             </div>
                                         </div>
@@ -151,20 +151,20 @@ option, index
                         </div>
                     </div>
                 </div>
-                <div v-if="blockIndex === 0" class="mt-2 pb-2 mx-2">
+                <div v-if="blockIndex === 0" class="mt-2 mx-2 pb-2">
 
 
                     <div v-for="(table, tableName) in childtableHeaders" :key="tableName">
                         <!-- Table Title -->
-                        <div class="mt-2 pb-1 mx-1">
-                            <span class="font-13 fw-bold ps-1 tablename text-secondary">
+                        <div class="mt-2 mx-1 pb-1">
+                            <span class="tablename text-secondary font-13 fw-bold ps-1">
                                 {{ tableName.toString().replace(/_/g, " ") }}
                             </span>
                         </div>
 
                         <!-- Table -->
                         <div class="tableborder-child">
-                            <table class="table mt-2 table-striped">
+                            <table class="table table-striped mt-2">
                                 <thead>
                                     <tr>
                                         <th>#</th>

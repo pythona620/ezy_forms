@@ -1,15 +1,15 @@
 <template>
     <div>
-        <div class="d-flex justify-content-between align-items-center formsticky py-2">
+        <div class="d-flex formsticky align-items-center justify-content-between py-2">
             <div>
                 <h1 class="m-0 font-13">Forms in Trash</h1>
                 <p class="m-0 font-11 pt-1">{{ totalRecords }} forms available</p>
             </div>
-            <div class="d-flex gap-2 align-items-center">
+            <div class="d-flex align-items-center gap-2">
 
 
 
-                <!-- <div class="d-flex align-items-center ">
+                <!-- <div class="d-flex align-items-center">
                     <ButtonComp class="buttoncomp" @click="formCreation()" name="Create form"></ButtonComp>
                 </div> -->
             </div>
@@ -38,7 +38,7 @@ import PaginationComp from '../../Components/PaginationComp.vue'
 import axiosInstance from '../../shared/services/interceptor';
 import { apis, doctypes } from "../../shared/apiurls";
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { rebuildToStructuredArray } from "../../shared/services/field_format";
 import FormPreview from '../../Components/FormPreview.vue'
 import { toast } from "vue3-toastify";
@@ -56,6 +56,10 @@ const businessUnit = computed(() => {
     return EzyBusinessUnit.value;
 });
 const sections = reactive([]);
+
+
+const route = useRoute();
+
 onMounted(() => {
     // fetchTable()
 
@@ -97,10 +101,19 @@ function toggleFunction(rowData, rowIndex, event) {
 function actionCreated(rowData, actionEvent) {
     if (actionEvent.name === 'View form') {
         if (rowData?.form_json) {
-            formDescriptions.value = { ...rowData }
-            selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json).fields)
-            const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});// raise a modal
-            modal.show();
+
+            router.push({
+                name: "FormPreviewComp",
+                query: {
+                    routepath: route.path,
+                    form_short_name: rowData.form_short_name,
+
+                },
+            });
+            // formDescriptions.value = { ...rowData }
+            // selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json).fields)
+            // const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});// raise a modal
+            // modal.show();
 
         } else {
             console.warn(" There is no form fields ")
@@ -199,11 +212,16 @@ const tableheaders = ref([
 
 function formCreation(item = null) {
     if (item == null) {
-        router.push({ name: "FormStepper" });
+        router.push({ name: "FormStepper",query:{
+            routepath: route.path
+        } });
     } else {
         router.push({
             name: "FormStepper",
             params: { paramid: item.name },
+            query:{
+            routepath: route.path
+        }
 
         });
     }
