@@ -1,15 +1,15 @@
 <template>
     <div>
-        <div class="d-flex justify-content-between align-items-center formsticky py-2">
+        <div class="d-flex formsticky align-items-center justify-content-between py-2">
             <div>
                 <h1 class="m-0 font-13">Forms in Draft</h1>
                 <p class="m-0 font-11 pt-1">{{ totalRecords }} forms available</p>
             </div>
-            <div class="d-flex gap-2 align-items-center">
+            <div class="d-flex align-items-center gap-2">
 
 
 
-                <!-- <div class="d-flex align-items-center ">
+                <!-- <div class="d-flex align-items-center">
                     <ButtonComp class="buttoncomp" @click="formCreation()" name="Create form"></ButtonComp>
                 </div> -->
             </div>
@@ -17,8 +17,8 @@
         <!-- v-if="tableForm" -->
         <div class="mt-2">
 
-            <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" actionType="dropdown" 
-                @actionClicked="actionCreated" isFiltersoption="true" :field-mapping="fieldMapping" :actions="actions"
+            <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" actionType="dropdown"  enableDisable="true"
+                @actionClicked="actionCreated" isFiltersoption="true" :field-mapping="fieldMapping" :actions="actions" @toggle-click="toggleFunction"
                 @updateFilters="inLineFiltersData" isCheckbox="true" />
             <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
                 @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
@@ -41,6 +41,10 @@ import { EzyBusinessUnit } from "../../shared/services/business_unit";
 import { useRouter } from "vue-router";
 import { rebuildToStructuredArray } from "../../shared/services/field_format";
 import FormPreview from '../../Components/FormPreview.vue'
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
+
+
 
 const totalRecords = ref(0);
 const formDescriptions = ref({})
@@ -156,6 +160,29 @@ const PaginationLimitStart = ([itemsPerPage, start]) => {
 
 };
 
+function toggleFunction(rowData, rowIndex, event) {
+    const isCurrentlyEnabled = rowData.enable == '1' || rowData.enable === 1;
+    const actionText = isCurrentlyEnabled ? 'Disable' : 'Enable';
+
+    if (confirm(`Are you sure you want to ${actionText} this Form?`)) {
+        rowData.enable = isCurrentlyEnabled ? 0 : 1;
+
+        axiosInstance
+            .put(`${apis.resource}${doctypes.EzyFormDefinitions}/${rowData.name}`, rowData)
+            .then((response) => {
+                toast.success(`Form ${actionText}d successfully`, { autoClose: 700 });
+                // setTimeout(() => {
+                //     fetchTable();
+                // }, 1000);
+                window.location.reload()
+            })
+            .catch((error) => {
+                console.error("Error updating toggle:", error);
+            });
+    } else {
+        console.log("Action cancelled. Toggle remains unchanged.");
+    }
+}
 
 const timeout = ref(null); // Store the timeout reference
 
@@ -192,7 +219,8 @@ const formCategory = ref([]);
 function fetchTable(data) {
     const filters = [
         ["business_unit", "like", `%${filterObj.value.business_unit}%`],
-        ["form_status", "=", "Draft"]
+        ["form_status", "=", "Draft"],
+        ["enable", "=", 1]
     ];
     if (data) {
         filters.push(data)

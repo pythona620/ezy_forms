@@ -1,12 +1,12 @@
 <template>
     <div>
-        <div class="d-flex justify-content-between align-items-center formsticky py-2">
+        <div class="d-flex formsticky align-items-center justify-content-between py-2">
             <div>
                 <h1 class="m-0 font-13">All Forms </h1>
                 <p class="m-0 font-11 pt-1">{{ totalRecords }} forms available</p>
             </div>
-            <div class="d-flex gap-2 align-items-center">
-                <div class="d-flex align-items-center ">
+            <div class="d-flex align-items-center gap-2">
+                <div class="d-flex align-items-center">
                     <ButtonComp class="buttoncomp" @click="formCreation()" name="Create form"></ButtonComp>
                 </div>
             </div>
@@ -25,16 +25,16 @@
         <div class="modal fade" id="pdfView" tabindex="-1" aria-labelledby="pdfViewLabel" aria-hidden="true">
             <div class="modal-dialog modal-xl">
                 <div class="modal-content">
-                    <div class="modal-header py-2 d-block bg-dark text-white">
-                        <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-block modal-header bg-dark text-white py-2">
+                        <div class="d-flex align-items-center justify-content-between">
                             <div>
                                 <h5 class="m-0 text-white font-13" id="exampleModalLabel">
                                     PDF format
                                 </h5>
                             </div>
                             <div class="">
-                                <button button="button" class=" btn btn-dark text-white font-13"
-                                    @click="downloadPdf">Download Pdf<span class=" ms-2"><i
+                                <button button="button" class="btn btn-dark text-white font-13"
+                                    @click="downloadPdf">Download Pdf<span class="ms-2"><i
                                             class="bi bi-download"></i></span> </button>
                                 <button type="button" class="btn btn-dark text-white font-13" @click="closemodal"
                                     data-bs-dismiss="modal">Close
@@ -414,8 +414,8 @@ const accessibleDepartments = ref([]);
 const ownerForms = ref([])
 function fetchTable(data) {
     const filters = [
-        ["business_unit", "like", `%${filterObj.value.business_unit}%`]
-        // ["form_status", "=", "Draft"]
+        ["business_unit", "like", `%${filterObj.value.business_unit}%`],
+        ["form_status", "=", "Created"]
     ];
     if (data) {
         filters.push(data)
