@@ -2155,10 +2155,126 @@ const onFieldTypeChange = (
   // const xyz = extractFieldsWithBreaks(sections)
 };
 
+// function handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) {
+//   const excludedLabels = ["Approver", "Approved on", "Approved By"].map((label) =>
+//     label.toLowerCase().trim()
+//   );
+//   const restrictedLabels = [
+//     "name",
+//     "parent",
+//     "creation",
+//     "owner",
+//     "modified",
+//     "modified_by",
+//     "parentfield",
+//     "parenttype",
+//     "file_list",
+//     "flags",
+//     "docstatus",
+
+//   ].map((label) => label.toLowerCase().trim()); // Normalize restricted labels
+
+//   // Extract labels and filter out excluded ones
+//   const flatArr = blockArr
+//     .flatMap(extractfieldlabels)
+//     .map((label) => label.trim().toLowerCase()) // Normalize labels
+//     .filter((label) => label !== "" && !excludedLabels.includes(label)); // Remove empty and excluded labels
+
+//   const isDuplicate = hasDuplicates(flatArr); // Check duplicates
+//   const checkFieldType = addErrorMessagesToStructuredArray(blockArr);
+//   blockArr.splice(0, blockArr.length, ...checkFieldType);
+
+//   function shouldSetError(fieldLabel) {
+//     const normalizedLabel = fieldLabel?.trim().toLowerCase();
+//     return isDuplicate && normalizedLabel && !excludedLabels.includes(normalizedLabel);
+//   }
+
+//   function isRestricted(fieldLabel) {
+//     const normalizedLabel = fieldLabel?.trim().toLowerCase();
+//     return restrictedLabels.includes(normalizedLabel);
+//   }
+//   function hasInvalidCharacter(fieldLabel) {
+//     return fieldLabel.includes('"'); // Check if label contains double quotes
+//   }
+
+//   if (
+//     fieldIndex !== undefined &&
+//     fieldIndex >= 0 &&
+//     columnIndex !== undefined &&
+//     columnIndex >= 0 &&
+//     sectionIndex !== undefined
+//   ) {
+//     const fieldLabel =
+//       blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex]
+//         .fields[fieldIndex].label;
+
+//     if (isRestricted(fieldLabel)) {
+//       blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
+//         columnIndex
+//       ].fields[fieldIndex].errorMsg = "Entered label is restricted";
+//     } else if (hasInvalidCharacter(fieldLabel)) {
+//       blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
+//         columnIndex
+//       ].fields[fieldIndex].errorMsg = 'Label should not contain double quotes (")';
+//     } else {
+//       blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
+//         columnIndex
+//       ].fields[fieldIndex].errorMsg = shouldSetError(fieldLabel)
+//           ? "Duplicate Label Name"
+//           : "";
+//     }
+//   }
+
+//   if (
+//     fieldIndex === undefined &&
+//     columnIndex !== undefined &&
+//     columnIndex >= 0 &&
+//     sectionIndex !== undefined
+//   ) {
+//     const columnLabel =
+//       blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex]
+//         .label;
+
+//     if (isRestricted(columnLabel)) {
+//       blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
+//         columnIndex
+//       ].errorMsg = "Entered label is restricted";
+//     } else if (hasInvalidCharacter(columnLabel)) {
+//       blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
+//         columnIndex
+//       ].errorMsg = 'Label should not contain double quotes (")';
+//     } else {
+//       blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
+//         columnIndex
+//       ].errorMsg = shouldSetError(columnLabel) ? "Duplicate Label Name in Column" : "";
+//     }
+//   }
+
+//   if (
+//     columnIndex === undefined &&
+//     fieldIndex === undefined &&
+//     sectionIndex !== undefined
+//   ) {
+//     const sectionLabel = blockArr[blockIndex].sections[sectionIndex].label;
+
+//     if (isRestricted(sectionLabel)) {
+//       blockArr[blockIndex].sections[sectionIndex].errorMsg =
+//         "Entered label is restricted";
+//     } else if (hasInvalidCharacter(sectionLabel)) {
+//       blockArr[blockIndex].sections[sectionIndex].errorMsg = 'Label should not contain double quotes (")';
+//     } else {
+//       blockArr[blockIndex].sections[sectionIndex].errorMsg = shouldSetError(sectionLabel)
+//         ? "Duplicate Label Name in Section"
+//         : "";
+//     }
+//   }
+// }
+
 function handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) {
   const excludedLabels = ["Approver", "Approved on", "Approved By"].map((label) =>
     label.toLowerCase().trim()
   );
+
   const restrictedLabels = [
     "name",
     "parent",
@@ -2171,28 +2287,33 @@ function handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex, fiel
     "file_list",
     "flags",
     "docstatus",
+  ].map((label) => label.toLowerCase().trim());
 
-  ].map((label) => label.toLowerCase().trim()); // Normalize restricted labels
+  // Function to check for duplicates
+  const hasDuplicates = (array) => new Set(array).size !== array.length;
 
-  // Extract labels and filter out excluded ones
+  // Extract all labels except excluded ones
   const flatArr = blockArr
     .flatMap(extractfieldlabels)
-    .map((label) => label.trim().toLowerCase()) // Normalize labels
-    .filter((label) => label !== "" && !excludedLabels.includes(label)); // Remove empty and excluded labels
+    .map((label) => label.trim().toLowerCase())
+    .filter((label) => label !== "" && !excludedLabels.includes(label));
 
-  const isDuplicate = hasDuplicates(flatArr); // Check duplicates
-  const checkFieldType = addErrorMessagesToStructuredArray(blockArr);
-  blockArr.splice(0, blockArr.length, ...checkFieldType);
+  console.log("Extracted Labels:", flatArr); // Debugging
 
   function shouldSetError(fieldLabel) {
     const normalizedLabel = fieldLabel?.trim().toLowerCase();
-    return isDuplicate && normalizedLabel && !excludedLabels.includes(normalizedLabel);
+    if (!normalizedLabel || excludedLabels.includes(normalizedLabel)) return false;
+
+    // Count occurrences of the label in `flatArr`
+    const occurrences = flatArr.filter((label) => label === normalizedLabel).length;
+
+    return occurrences > 1; // True if duplicate exists
   }
 
   function isRestricted(fieldLabel) {
-    const normalizedLabel = fieldLabel?.trim().toLowerCase();
-    return restrictedLabels.includes(normalizedLabel);
+    return restrictedLabels.includes(fieldLabel?.trim().toLowerCase());
   }
+
   function hasInvalidCharacter(fieldLabel) {
     return fieldLabel.includes('"'); // Check if label contains double quotes
   }
@@ -2209,19 +2330,17 @@ function handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex, fiel
         .fields[fieldIndex].label;
 
     if (isRestricted(fieldLabel)) {
-      blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
-        columnIndex
-      ].fields[fieldIndex].errorMsg = "Entered label is restricted";
+      blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[
+        fieldIndex
+      ].errorMsg = "Entered label is restricted";
     } else if (hasInvalidCharacter(fieldLabel)) {
-      blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
-        columnIndex
-      ].fields[fieldIndex].errorMsg = 'Label should not contain double quotes (")';
+      blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[
+        fieldIndex
+      ].errorMsg = 'Label should not contain double quotes (")';
     } else {
-      blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
-        columnIndex
-      ].fields[fieldIndex].errorMsg = shouldSetError(fieldLabel)
-          ? "Duplicate Label Name"
-          : "";
+      blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[
+        fieldIndex
+      ].errorMsg = shouldSetError(fieldLabel) ? "Duplicate Label Name" : "";
     }
   }
 
@@ -2232,43 +2351,35 @@ function handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex, fiel
     sectionIndex !== undefined
   ) {
     const columnLabel =
-      blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex]
-        .label;
+      blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].label;
 
     if (isRestricted(columnLabel)) {
-      blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
-        columnIndex
-      ].errorMsg = "Entered label is restricted";
+      blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].errorMsg =
+        "Entered label is restricted";
     } else if (hasInvalidCharacter(columnLabel)) {
-      blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
-        columnIndex
-      ].errorMsg = 'Label should not contain double quotes (")';
+      blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].errorMsg =
+        'Label should not contain double quotes (")';
     } else {
-      blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
-        columnIndex
-      ].errorMsg = shouldSetError(columnLabel) ? "Duplicate Label Name in Column" : "";
+      blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].errorMsg =
+        shouldSetError(columnLabel) ? "Duplicate Label Name in Column" : "";
     }
   }
 
-  if (
-    columnIndex === undefined &&
-    fieldIndex === undefined &&
-    sectionIndex !== undefined
-  ) {
+  if (columnIndex === undefined && fieldIndex === undefined && sectionIndex !== undefined) {
     const sectionLabel = blockArr[blockIndex].sections[sectionIndex].label;
 
     if (isRestricted(sectionLabel)) {
-      blockArr[blockIndex].sections[sectionIndex].errorMsg =
-        "Entered label is restricted";
+      blockArr[blockIndex].sections[sectionIndex].errorMsg = "Entered label is restricted";
     } else if (hasInvalidCharacter(sectionLabel)) {
-      blockArr[blockIndex].sections[sectionIndex].errorMsg = 'Label should not contain double quotes (")';
+      blockArr[blockIndex].sections[sectionIndex].errorMsg =
+        'Label should not contain double quotes (")';
     } else {
-      blockArr[blockIndex].sections[sectionIndex].errorMsg = shouldSetError(sectionLabel)
-        ? "Duplicate Label Name in Section"
-        : "";
+      blockArr[blockIndex].sections[sectionIndex].errorMsg =
+        shouldSetError(sectionLabel) ? "Duplicate Label Name in Section" : "";
     }
   }
 }
+
 
 const hasErrors = computed(() => {
   function checkFieldErrors(obj) {
@@ -2443,7 +2554,7 @@ async function saveFormData(type) {
   }
 }
 
-const hasDuplicates = (array) => new Set(array).size !== array.length;
+// const hasDuplicates = (array) => new Set(array).size !== array.length;
 </script>
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 
