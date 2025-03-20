@@ -12,7 +12,7 @@
         <div class="mt-3">
           <label for="name" class="font-13">User name</label><br />
           <input type="text" class="form-control m-0 bg-white" id="name" v-model="formdata.usr" @input="validatename"
-            @change="checkUserMail()" :class="{ 'is-invalid': errors.usr }" />
+            @change="checkUserMail" :class="{ 'is-invalid': errors.usr }" />
 
           <div class="invalid-feedback font-11 mt-1" v-if="errors.usr">
             {{ errors.usr }}
@@ -48,10 +48,11 @@
 
     <div v-if="showOtpPage">
       <div class="d-flex gap-2 p-2 justify-content-center align-items-center">
-        <div><img class="imgmix" src="../assets/favicon.jpg" /></div>
+        <div><img class="imgmix" src="../assets/Final-logo-ezyforms-removebg-preview.png" /></div>
+        <!-- <div><img class="imgmix" src="../assets/favicon.jpg" /></div>
         <div class="m-0">
           <p class="fontimgtext fw-medium m-0">EZY | Forms</p>
-        </div>
+        </div> -->
       </div>
       <div>
       </div>
@@ -427,7 +428,7 @@ export default {
                   "USERROLE",
                   JSON.stringify(employeeData.designation)
                 );
-                toast.success("Login successfull",{autoClose:2000})
+                toast.success("Login successfull", { autoClose: 2000 })
                 setTimeout(() => {
                   this.$router.push({ path: "/dashboard/maindash" }); // Navigate dynamically
                 }, 500);
@@ -495,7 +496,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .loginpageheight {
   height: 100vh;
 }
