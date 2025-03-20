@@ -19,8 +19,10 @@
           <div class="mt-1">
             <div class="text-center">
               <div class="card border-0 shadow-none">
-                <div class="card-body pb-2">
+                <div class="card-body pb-2 d-flex gap-3 align-items-center justify-content-center">
                   <h5 class="card-title">{{ selectedData.doctype_name }}</h5>
+                  <span v-if="tableData?.status === 'Completed'"><i class="bi approved-icon bi-check2-circle "></i></span>
+                  <span v-if="tableData?.status === 'Request Cancelled'"><i class="bi rejected-icon bi-x-circle"></i></span>
                 </div>
               </div>
             </div>
@@ -114,18 +116,18 @@
               <div class="col-xl-6 col-lg-12 col-md-12">
                 <div class="d-flex  align-items-baseline  mt-2">
                   <div>
-                    <span class="font-14 ps-3 fw-bold mb-0">Activity log
+                    <span class="font-12 text-nowrap fw-bold mb-0">Activity log
                     </span>
                   </div>
                   <div class="d-flex align-items-baseline gap-2 ps-1 ">
                     <span v-if="tableData?.status !== 'Completed' && tableData.status !== 'Request Cancelled'"
-                      class="text-warning font-11  fw-bold">
+                      class="text-warning font-11 text-nowrap fw-bold">
                       Pending ({{ tableData.current_level }} /
                       {{ tableData?.total_levels }})</span>
-                    <span class=" font-11 status_completed" v-if="tableData?.status === 'Completed'">
-                      Completed
+                    <span class=" font-11 status_completed text-nowrap" v-if="tableData?.status === 'Completed'">
+                      Approved
                     </span>
-                    <span class=" font-11 requestRejected" v-if="tableData?.status === 'Request Cancelled'">
+                    <span class=" font-11 requestRejected text-nowrap" v-if="tableData?.status === 'Request Cancelled'">
                       Request Rejected
                     </span>
                   </div>
@@ -135,8 +137,9 @@
               </div>
               <div class="col-xl-6 col-lg-12 col-md-12">
                 <button v-if="tableData.status === 'Completed'"
-                  class="btn btn-light font-12 fw-bold h-0 text-decoration-underline" type="button" @click="downloadPdf"><i
-                    class="bi bi-arrow-down-circle fw-bold px-1"></i>Download</button>
+                  class="btn btn-light font-11 fw-bold h-0 text-decoration-underline" type="button" @click="downloadPdf"><i
+                    class="bi bi-arrow-down-circle fw-bold px-1"></i>Download
+                  </button>
               </div>
             </div>
             <div class="activity_height">
@@ -785,6 +788,14 @@ watch(activityData, (newVal) => {
 //   z-index: 1000 !important;
 
 // }
+.approved-icon{
+  color: #2BED12;
+  font-size: 24px;
+}
+.rejected-icon{
+  color: #d75159;
+  font-size: 24px;
+}
 
 .Edit_btn {
   width: 100px;

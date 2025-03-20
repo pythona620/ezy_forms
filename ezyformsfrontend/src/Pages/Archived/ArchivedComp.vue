@@ -51,14 +51,23 @@
                                 <FormFields class="mb-3" tag="input" type="date" name="Requested" id="Requested"
                                      v-model="filterObj.date" />
                             </div> -->
-                            <div class="col-6">
+                            <!-- <div class="col-6">
                                 <label class="font-13 ps-1" for="Requested">Requested Period:</label>
                                 <DatePicker class="datePicker" :enable-time-picker="false" :format="'yyyy-MM-dd'" v-model="filterObj.dateRange" range
                                     placeholder="Select From - To Date" />
-                            </div> 
-                            <div class="col-12">
-                                <FormFields tag="radio" :options="radioOptions" name="exampleRadio" id="exampleRadio"
-                                    v-model="filterObj.selectedRadio" labeltext="Approval Status" />
+                            </div>  -->
+                            <div class="col-6">
+                                <label class="font-13 ps-1 fw-medium" for="dept">Approval Status:</label><br>
+                                <!-- <FormFields tag="select" type="select" :options="radioOptions" name="exampleRadio" id="exampleRadio"
+                                    v-model="filterObj.selectedRadio" /> -->
+
+                                <select class="status-select" v-model="filterObj.selectedRadio" name="exampleRadio"
+                                    id="exampleRadio">
+                                    <option value="" disabled selected>Select an option</option>
+                                    <option v-for="option in radioOptions" :key="option" :value="option">
+                                        {{ option }}
+                                    </option>
+                                </select>
                             </div>
                         </div>
                     </div>
@@ -99,8 +108,8 @@ import GlobalTable from '../../Components/GlobalTable.vue';
 import axiosInstance from "../../shared/services/interceptor";
 import { apis, doctypes } from "../../shared/apiurls";
 import { ref, computed } from 'vue';
-import DatePicker from "@vuepic/vue-datepicker"; 
-import "@vuepic/vue-datepicker/dist/main.css";
+// import DatePicker from "@vuepic/vue-datepicker"; 
+// import "@vuepic/vue-datepicker/dist/main.css";
 
 import { format } from "date-fns";
 // const dateRange = ref();
@@ -216,6 +225,24 @@ const applyFilter = () => {
     align-items: center;
     justify-content: center;
     height: 100vh;
+}
+
+.status-select {
+    height: 32px !important;
+    width: 100%;
+    line-height: 30px;
+    outline: none;
+    box-shadow: none;
+    border: 1px solid #dee2e6;
+    background: transparent;
+    border-radius: 4px;
+    font-size: 13px;
+    padding:0px 10px;
+    transition: border 0.3s ease-in-out, border-radius 0.3s ease-in-out;
+}
+
+.status-select option {
+    font-size: 13px;
 }
 
 .filter-btn {
