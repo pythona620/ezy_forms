@@ -1539,10 +1539,15 @@ function add_Wf_roles_setup() {
     });
 }
 
+const selectedData = ref({
+  routepath: route.query.routepath,
+
+});
 function cancelForm() {
   router.push({
-    name: "Created",
+    path:selectedData.value.routepath,
   });
+
 }
 
 function clearForm(){

@@ -1,7 +1,7 @@
 <template>
   <div class="">
     <div>
-      <div class="d-flex justify-content-between align-items-center py-2">
+      <div class="d-flex align-items-center justify-content-between py-2">
         <div>
           <h1 class="m-0 font-13">
             Forms in {{ id }}
@@ -10,6 +10,11 @@
             {{ totalRecords }} forms available
           </p>
         </div>
+        <div v-if="userDesigination.includes('IT')" class="d-flex align-items-center gap-2">
+                <div class="d-flex align-items-center">
+                    <ButtonComp class="buttoncomp" @click="formCreation()" name="Create form"></ButtonComp>
+                </div>
+            </div>
 
       </div>
       <div class="mt-3">
@@ -27,10 +32,10 @@
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
       </div>
       <div class="offcanvas-body">
-        <div class="d-flex gap-3 align-items-baseline position-relative">
+        <div class="d-flex align-items-baseline position-relative gap-3">
           <div class="d-flex flex-column">
             <span>
-              <i class="ri-checkbox-blank-circle-fill dashedcircle"></i>
+              <i class="dashedcircle ri-checkbox-blank-circle-fill"></i>
             </span>
             <div class="dashed_line mt-4"></div>
           </div>
@@ -42,16 +47,16 @@
     <div class="modal fade" id="pdfView" tabindex="-1" aria-labelledby="pdfViewLabel" aria-hidden="true">
       <div class="modal-dialog modal-xl">
         <div class="modal-content">
-          <div class="modal-header py-2 d-block bg-dark text-white">
-            <div class="d-flex justify-content-between align-items-center">
+          <div class="d-block modal-header bg-dark text-white py-2">
+            <div class="d-flex align-items-center justify-content-between">
               <div>
                 <h5 class="m-0 text-white font-13" id="exampleModalLabel">
                   PDF format
                 </h5>
               </div>
               <div class="">
-                <button button="button" class=" btn btn-dark text-white font-13" @click="downloadPdf">Download Pdf<span
-                    class=" ms-2"><i class="bi bi-download"></i></span> </button>
+                <button button="button" class="btn btn-dark text-white font-13" @click="downloadPdf">Download Pdf<span
+                    class="ms-2"><i class="bi bi-download"></i></span> </button>
                 <button type="button" class="btn btn-dark text-white font-13" @click="closemodal"
                   data-bs-dismiss="modal">Close
                   <i class="bi bi-x"></i></button>
@@ -87,6 +92,7 @@ import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import router from '../../router';
 import { useRoute } from 'vue-router';
+import ButtonComp from '../../Components/ButtonComp.vue';
 const totalRecords = ref(0);
 const tableheaders = ref([
   { th: "Form name", td_key: "form_name" },
@@ -117,6 +123,8 @@ const actions = ref(
     // { name: 'Download Print format', icon: 'fa-solid fa-download' },
   ]
 )
+
+
 const fieldMapping = ref({
   // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
   form_short_name: { type: "input" },
@@ -128,6 +136,13 @@ const fieldMapping = ref({
 
   // requested_on: { type: "date" },
 });
+function formCreation() {
+   
+        router.push({ name: "FormStepper" ,query:{
+            routepath: route.path
+        }, });
+        console.log(route.path,"pppp");
+    }
 function actionCreated(rowData, actionEvent) {
   if (actionEvent.name === 'View form') {
     if (rowData) {
@@ -394,6 +409,7 @@ const isEnable = ref("");
 onMounted(() => {
   const userData = JSON.parse(localStorage.getItem('employeeData'));
   userDesigination.value = userData.designation || '';
+  console.log(userDesigination.value,"///");
 
   if (userDesigination.value.includes("IT")) {
     isEnable.value = "true";

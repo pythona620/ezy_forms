@@ -340,11 +340,14 @@ function inLineFiltersData(searchedData) {
 
 function formCreation(item = null) {
     if (item == null) {
-        router.push({ name: "FormStepper" });
+        router.push({ name: "FormStepper", query:{
+            routepath: route.path
+        }, });
     } else {
         router.push({
             name: "FormStepper",
             params: { paramid: item.name },
+            routepath: route.path,
 
         });
     }
