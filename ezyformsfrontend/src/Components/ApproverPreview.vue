@@ -751,7 +751,7 @@ td {
   font-size: 12px;
 }
 td:first-child{
-  width: 5%;
+  width: 8%;
 }
 
 .tableborder-child {
