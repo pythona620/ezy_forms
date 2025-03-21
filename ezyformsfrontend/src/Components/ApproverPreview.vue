@@ -750,8 +750,9 @@ th {
 td {
   font-size: 12px;
 }
-td:first-child{
-  width: 6% !important;
+td:first-child {
+  min-width: 50px; /* Adjust as needed */
+  width: auto !important;
 }
 
 .tableborder-child {

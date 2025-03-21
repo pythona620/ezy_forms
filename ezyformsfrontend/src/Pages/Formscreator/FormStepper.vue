@@ -400,7 +400,7 @@
                                   <div class="d-flex justify-content-between align-items-center">
                                     <label class="rownames">{{
                                       getRowSuffix(rowIndex)
-                                      }}</label>
+                                    }}</label>
                                     <div>
                                       <button v-if="row.columns.length < 3"
                                         class="btn btn-light bg-transparent border-0 font-12" @click="
@@ -510,7 +510,7 @@
                                                     fieldIndex
                                                   )
                                                   " />
-                                                <small v-if="field.errorMsg" class="text-danger font-12">
+                                                <small v-if="field.errorMsg" class="text-danger font-10">
                                                   {{ field.errorMsg }}
                                                 </small>
                                               </div>
@@ -594,7 +594,7 @@
                                               </div>
                                             </div>
                                             <small v-if="field.error" class="text-danger font-10">{{ field.error
-                                              }}</small>
+                                            }}</small>
                                           </div>
                                         </div>
 
@@ -643,10 +643,10 @@
                                     <div v-if="blockIndex === 0" class="mt-2">
 
                                       <div class="childTableContainer">
-                                        
+
                                         <div v-for="(table, tableName) in childtableHeaders" :key="tableName"
                                           class="childTable">
-                                          <h5>{{ tableName }}</h5>
+                                          <h5>{{ tableName.replace(/_/g, ' ') }}</h5>
                                           <table class="table table-bordered">
                                             <thead>
                                               <tr>
@@ -1096,12 +1096,6 @@ const addChildTable = () => {
   // New index starts from the total existing fields
   const newIndex = existingFieldsCount + childTables.value.length;
 
-  console.log(
-    "Headers:", childtableHeaders.value, 
-    "Total Existing Fields Count:", existingFieldsCount,
-    "Child Tables Length:", childTables.value.length,
-    "New Index:", newIndex
-  );
   childTables.value.push({
     idx: newIndex,
     tableName: "",
@@ -1115,7 +1109,7 @@ const addChildTable = () => {
         reqd: false,
       }
     ]), // Use `ref([])` instead of `reactive([])`
-     // Store new fields separately
+    // Store new fields separately
   });
 };
 
@@ -1181,14 +1175,16 @@ const processFields = (tableIndex) => {
     fields: childTables.value[tableIndex].columns,
     idx: childTables.value[tableIndex].idx
   };
-  console.log(data);
+
 
 
   axiosInstance
     .post(apis.childtable, data)
     .then((res) => {
       if (res) {
-        alert("Fields saved successfully!");
+        toast.success("Table created successfully!", { autoClose: 500 }, {
+          transition: "zoom",
+        });
         const firstTableField = res.message[0][0].child_doc;
         if (firstTableField) {
           tableFieldsCache.value.push(firstTableField);
@@ -1197,7 +1193,7 @@ const processFields = (tableIndex) => {
     })
     .catch((error) => {
       console.error("Error saving form data:", error);
-    }); 
+    });
 };
 
 const editMode = reactive({});
@@ -1271,7 +1267,7 @@ const invalidFields = ref({});
 
 const toggleEdit = (tableName) => {
   if (editMode[tableName]) {
-    console.log("Saving table:", tableName);
+
 
     // ✅ Reset validation errors
     invalidFields.value[tableName] = [];
@@ -1287,11 +1283,11 @@ const toggleEdit = (tableName) => {
     });
 
     if (!isValid) {
-      console.log("❌ Validation failed. Please fill in required fields.");
+
       return; // Stop execution if validation fails
     }
 
-    console.log("✅ Validation Passed, Proceeding to Save...");
+
 
     // Process all fields (both old and new)
     let allFields = childtableHeaders.value[tableName].map(({ isNew, ...rest }, index) => ({
@@ -1306,11 +1302,14 @@ const toggleEdit = (tableName) => {
       fields: allFields,
     };
 
-    console.log("✅ Sending all fields in one request:", formData);
+
 
     axiosInstance
       .post(apis.childtable, formData) // Use a single API endpoint
       .then((response) => {
+        toast.success("Fields updated successfully!", { autoClose: 500 }, {
+          transition: "zoom",
+        });
         console.log("✅ All fields saved successfully:", response.data);
       })
       .catch((error) => {
@@ -1682,7 +1681,7 @@ const selectedData = ref({
 });
 function cancelForm() {
   router.push({
-    path:selectedData.value.routepath,
+    path: selectedData.value.routepath,
   });
 
 }
@@ -1769,7 +1768,7 @@ function getFormData() {
         );
         childtableHeaders.value = JSON.parse(res.data.form_json).child_table_fields;
 
-        childTables.value = [] 
+        childTables.value = []
         tableFieldsCache.value = []
 
         // workflowSetup.push(JSON.parse(res_data?.form_json).workflow)
@@ -1842,7 +1841,7 @@ function formData(status) {
   // console.log(blockArr, "blockarray");
 
   let fields = extractFieldsWithBreaks(blockArr);
-  console.log(tableFieldsCache.value, " Fields");
+
   if (tableFieldsCache.value.length) {
     // Merge stored table fields
     fields = [...fields, ...tableFieldsCache.value];
@@ -2324,7 +2323,6 @@ function handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex, fiel
     .map((label) => label.trim().toLowerCase())
     .filter((label) => label !== "" && !excludedLabels.includes(label));
 
-  console.log("Extracted Labels:", flatArr); // Debugging
 
   function shouldSetError(fieldLabel) {
     const normalizedLabel = fieldLabel?.trim().toLowerCase();
