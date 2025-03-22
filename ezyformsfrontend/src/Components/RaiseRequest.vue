@@ -38,6 +38,9 @@
                       <template v-if="field.fieldtype === 'Date'">
                         <input type="date" class="form-control font-12" v-model="row[field.fieldname]" />
                       </template>
+                      <template v-if="field.fieldtype === 'Datetime'">
+                        <input type="datetime-local" class="form-control font-12" v-model="row[field.fieldname]" />
+                      </template>
                       <template v-else-if="field.fieldtype === 'Attach'">
                         <input type="file" class="form-control font-12"
                           @change="handleFileUpload($event, row, field.fieldname)" />
