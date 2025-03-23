@@ -118,8 +118,8 @@ watch(
     { immediate: true }
 );
 const tableheaders = ref([
-    { th: "Name", td_key: "name" },
     { th: "Form name", td_key: "form_name" },
+    { th: "Short Name", td_key: "form_short_name" },
     { th: "Form category", td_key: "form_category" },
     { th: "Owner of form", td_key: "owner_of_the_form" },
     { th: "Accessible departments", td_key: "accessible_departments" },
@@ -144,16 +144,16 @@ const childtableHeaders = ref([]);
 function actionCreated(rowData, actionEvent) {
     // console.log(rowData, actionEvent,"ppp");
     if (actionEvent.name === 'View form') {
-        
+
         if (rowData?.form_json) {
             router.push({
-        name: "FormPreviewComp",
-        query: {
-          routepath: route.path,
-          form_short_name: rowData.form_short_name,
+                name: "FormPreviewComp",
+                query: {
+                    routepath: route.path,
+                    form_short_name: rowData.form_short_name,
 
-        },
-      });
+                },
+            });
             // formDescriptions.value = { ...rowData };
             // // console.log(formDescriptions.value, "lllllllllll");
             // selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json).fields);
@@ -340,11 +340,18 @@ function inLineFiltersData(searchedData) {
 
 function formCreation(item = null) {
     if (item == null) {
-        router.push({ name: "FormStepper" });
+        router.push({
+            name: "FormStepper", query: {
+                routepath: route.path
+            },
+        });
     } else {
         router.push({
             name: "FormStepper",
             params: { paramid: item.name },
+            query: {
+                routepath: route.path
+            }
 
         });
     }
@@ -464,6 +471,7 @@ function fetchTable(data) {
 
 const fieldMapping = computed(() => ({
     form_name: { type: "input" },
+    form_short_name: { type: "input" },
     form_category: { type: "input" },
     owner_of_the_form: { type: "input" }
 }));

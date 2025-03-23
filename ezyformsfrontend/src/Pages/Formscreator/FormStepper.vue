@@ -53,10 +53,11 @@
                         </h1> -->
                         <h1 class="font-14 fw-bold m-0">About Form</h1>
                         <div>
-                          <button class=" btn btn-light font-12 mx-2" type="button" @click="clearForm">Clear Form</button>
+                          <button class=" btn btn-light font-12 mx-2" type="button" @click="clearForm">Clear
+                            Form</button>
 
-                        <ButtonComp class="btn btn-dark bg-dark text-white fw-bold font-13" name="Next"
-                          v-if="activeStep < 3" @click="nextStep" />
+                          <ButtonComp class="btn btn-dark bg-dark text-white fw-bold font-13" name="Next"
+                            v-if="activeStep < 3" @click="nextStep" />
                         </div>
                         <!-- :class="{ 'disabled-btn': isNextDisabled }" -->
                         <!-- :disabled="isNextDisabled" -->
@@ -509,7 +510,7 @@
                                                     fieldIndex
                                                   )
                                                   " />
-                                                <small v-if="field.errorMsg" class="text-danger font-12">
+                                                <small v-if="field.errorMsg" class="text-danger font-10">
                                                   {{ field.errorMsg }}
                                                 </small>
                                               </div>
@@ -585,7 +586,8 @@
 
                                             <div class="d-flex gap-2 align-items-center">
                                               <div class="d-flex align-items-center">
-                                                <input class="font-12" v-model="field.reqd" placeholder="Field Name"
+                                                
+                                                <input class="font-12" v-model="field.reqd" :true-value="1" :false-value="0" placeholder="Field Name"
                                                   type="checkbox" />
                                               </div>
                                               <div>
@@ -642,38 +644,95 @@
                                     <div v-if="blockIndex === 0" class="mt-2">
 
                                       <div class="childTableContainer">
-                                        <div v-for="(table, tableName,tableindex) in childtableHeaders" :key="tableName"
+
+                                        <div v-for="(table, tableName) in childtableHeaders" :key="tableName"
                                           class="childTable">
-                                          
-                                          <h5>{{ tableName }}</h5> 
-
-
+                                          <h5>{{ tableName.replace(/_/g, ' ') }}</h5>
                                           <table class="table table-bordered">
                                             <thead>
                                               <tr>
                                                 <th>#</th>
-                                                <th v-for="(field, fIndex) in table" :key="fIndex">{{ field.label }}
-                                                </th>
+                                                <th>Label</th>
+                                                <th>Field Type</th>
+                                                <!-- <th>Action</th> -->
                                               </tr>
                                             </thead>
+                                            <tbody>
+                                              <tr v-for="(field, index) in table" :key="index">
+                                                <td>{{ index + 1 }}</td>
+
+                                                <!-- Label Input -->
+                                                <td v-if="editMode[tableName]">
+                                                  <input v-model="field.label" placeholder="Field Label"
+                                                    class="form-control "
+                                                    :class="{ 'border-1 border-danger ': invalidFields[tableName]?.includes(index) }" />
+                                                  <span v-if="invalidFields[tableName]?.includes(index)"
+                                                    class="font-11 text-danger">Label
+                                                    required**</span>
+                                                </td>
+                                                <td v-else>{{ field.label }}</td>
+
+                                                <!-- Field Type Select -->
+                                                <td v-if="editMode[tableName]">
+                                                  <div class="d-flex gap-1">
+
+                                                    <select v-model="field.fieldtype" class="form-select form-select-sm"
+                                                      :class="{ 'border-1 border-danger ': invalidFields[tableName]?.includes(index) }">
+                                                      <option value="">Select Type</option>
+                                                      <option v-for="option in childfield" :key="option.type"
+                                                        :value="option.type">
+                                                        {{ option.label }}
+                                                      </option>
+                                                    </select>
+                                                    <span v-if="editMode[tableName]">
+                                                      <button class="btn btn-light btn-sm"
+                                                        @click="deleteRow(tableName, index)">
+                                                        <i class="bi bi-x-lg"></i>
+                                                      </button>
+                                                    </span>
+                                                  </div>
+
+
+                                                  <span v-if="invalidFields[tableName]?.includes(index)"
+                                                    class="font-11 text-danger">Type
+                                                    required**</span>
+
+                                                </td>
+                                                <td v-else>{{ field.fieldtype }}</td>
+
+                                              </tr>
+                                            </tbody>
                                           </table>
 
-                                          
-                                          <div v-for="(field, fIndex) in table.newFields" :key="fIndex"
+                                          <!-- Show error message below the table if any fields are invalid -->
+                                          <!-- <div v-if="invalidFields[tableName]?.length" class="text-danger font-12 mt-2">
+     Please fill in the required fields in the highlighted rows.
+  </div> -->
+                                          <div class="mb-2"> <button class="btn btn-light btn-sm mx-2 "
+                                              @click="toggleEdit(tableName)">
+                                              {{ editMode[tableName] ? 'Save' : 'Edit' }}
+                                            </button>
+                                            <button class="btn btn-light btn-sm " v-if="editMode[tableName]"
+                                              @click="addNewFieldedit(tableName)">
+                                              Add More Field
+                                            </button>
+                                          </div>
+
+                                        </div>
+
+                                        <!-- <div v-for="(field, fIndex) in table.newFields" :key="fIndex"
                                             class="newField dynamicField">
                                             <div class=" d-flex justify-content-between">
 
-                                            <input v-model="field.label" placeholder="Field Label" :class="[
-                                                  'border-less-input',
-                                                  'font-14',
-                                                  'p-0 my-1',
-                                                  'inputHeight',
-                                                  { 'italic-style': !field.label },
-                                                  { 'fw-medium': field.label },
-                                                ]"
-                                               />
-                                              <!-- <button class="btn trash-btn trash-btn py-0  btn-sm"
-                                              @click="removeNewField(index, fIndex)"><i class="bi bi-x-lg"></i></button> -->
+                                              <input v-model="field.label" placeholder="Field Label" :class="[
+                                                'border-less-input',
+                                                'font-14',
+                                                'p-0 my-1',
+                                                'inputHeight',
+                                                { 'italic-style': !field.label },
+                                                { 'fw-medium': field.label },
+                                              ]" />
+                                              
                                             </div>
                                             <select v-model="field.fieldtype" class="form-select font-13 mb-3">
                                               <option value="">Select Type</option>
@@ -682,16 +741,17 @@
                                                 {{ section.label }}
                                               </option>
                                             </select>
-                                           
+
                                           </div>
 
-                                         
-                                          <button class="btn btn-light btn-sm font-12 mt-2"
-                                            @click="addNewField(tableName, tableindex)">Add More
-                                            Field</button>
-                                          <button v-if="table.newFields" class="btn btn-dark btn-sm font-12 mt-2 ms-2"
-                                            @click="saveNewFields(tableName,tableindex)">Save</button>
-                                        </div>
+                                          <button class="btn btn-light btn-sm font-12 my-2" @click="toggleEdit(tableName)">
+                                              {{ editMode[tableName] ? "Save" : "Edit" }}
+                                            </button>
+                                          <button class="btn btn-light btn-sm font-12 my-2"
+                                            @click="addNewField(tableName, tableIndex)">Add Fields</button>
+
+                                          <button v-if="table.newFields" class="btn btn-dark btn-sm font-12 my-2 ms-2"
+                                            @click="saveNewFields(tableName, tableIndex)">Save</button> -->
                                       </div>
                                     </div>
                                   </div>
@@ -776,7 +836,7 @@
                             </div>
                           </div>
                         </div>
-                        
+
                         <div :class="[
                           'd-flex justify-content-center align-items-center add-block-btn-div py-4  ',
                           {
@@ -1030,19 +1090,27 @@ const childTables = ref([]);
 
 // Function to add a new child table
 const addChildTable = () => {
+  const existingFieldsCount = Object.values(childtableHeaders.value).reduce((acc, table) => {
+    return acc + (Array.isArray(table) ? table.length : 0);
+  }, 0);
+
+  // New index starts from the total existing fields
+  const newIndex = existingFieldsCount + childTables.value.length;
+
   childTables.value.push({
+    idx: newIndex,
     tableName: "",
     formattedTableName: "",
     columns: reactive([
       {
-    label: "",
-    fieldname: `field_${columns.length}`, // This will be updated once the label is entered
-    fieldtype: "",
-    idx: columns.length,
-    reqd: false,
-  }
+        label: "",
+        fieldname: `field_${columns.length}`, // This will be updated once the label is entered
+        fieldtype: "",
+        idx: columns.length,
+        reqd: false,
+      }
     ]), // Use `ref([])` instead of `reactive([])`
-    newFields: ref([]), // Store new fields separately
+    // Store new fields separately
   });
 };
 
@@ -1054,7 +1122,7 @@ const removeChildTable = (tableIndex) => {
 // Function to add a field to a specific table
 const addFieldToTable = (tableIndex) => {
   const columns = childTables.value[tableIndex].columns;
-  
+
   columns.push({
     label: "",
     fieldname: "", // This will be updated once the label is entered
@@ -1106,61 +1174,178 @@ const processFields = (tableIndex) => {
   const data = {
     form_short_name: childTables.value[tableIndex].formattedTableName,
     fields: childTables.value[tableIndex].columns,
+    idx: childTables.value[tableIndex].idx
   };
+
 
 
   axiosInstance
     .post(apis.childtable, data)
     .then((res) => {
       if (res) {
-        alert("Fields saved successfully!");
+        toast.success("Table created successfully!", { autoClose: 500 }, {
+          transition: "zoom",
+        });
         const firstTableField = res.message[0][0].child_doc;
         if (firstTableField) {
           tableFieldsCache.value.push(firstTableField);
         }
-      }  
-      })
+      }
+    })
     .catch((error) => {
       console.error("Error saving form data:", error);
     });
 };
-const addNewField = (tableIndex) => {
-  const table = childtableHeaders.value[tableIndex]; // Accessing by key
 
-  // ✅ Ensure `table` exists
-  if (!table) {
-    console.error(`Table at index ${tableIndex} not found.`);
-    return;
+const editMode = reactive({});
+// const toggleEdit = (tableName) => {
+//   if (editMode[tableName]) {
+//     console.log("Saving table:", tableName);
+
+//     // Remove the 'value' key from each object in the child table
+//     const filteredData = childtableHeaders.value[tableName].map(({ value, ...rest }) => rest);
+
+//     console.log("Filtered Table Data:", JSON.parse(JSON.stringify(filteredData)));
+
+//     // Construct form data
+//     const form = {
+//       "name": tableName,
+//       "doctype": "DocType",
+//       "fields": filteredData, // Child table data without 'value' key
+//     };
+
+//     const formData = new FormData();
+//     formData.append("doc", JSON.stringify(form));
+//     formData.append("action", "Save");
+
+//     console.log("FormData to be sent:", formData);
+
+//     // Send the data to the API
+//     axiosInstance
+//       .post(apis.savedocs, formData)
+//       .then((response) => {
+//         console.log("Save successful:", response.data);
+//       })
+//       .catch((error) => {
+//         console.error("Save failed:", error);
+//       });
+//   }
+
+//   // Toggle edit mode
+//   editMode[tableName] = !editMode[tableName];
+// };
+
+
+
+
+
+
+const addNewFieldedit = (tableName) => {
+  if (!childtableHeaders.value[tableName]) {
+    childtableHeaders.value[tableName] = [];
   }
 
-  // ✅ Ensure `newFields` is initialized
-  if (!Array.isArray(table.newFields)) {
-    table.newFields = [];
-  }
+  // Assign idx based on existing field count
+  const newIndex = childtableHeaders.value[tableName].length + 1;
 
-  const newIndex = table.newFields.length; // Only consider newFields length
-
-  // ✅ Push only to `table.newFields`
-  table.newFields.push({
-    fieldname: `field_${newIndex + 1}`, // Set default fieldname based on index
+  childtableHeaders.value[tableName].push({
+    fieldname: `field_${newIndex - 1}`, // Ensuring unique fieldname
     fieldtype: "",
-    idx: newIndex + 1,
+    idx: newIndex, // Assign idx dynamically
     label: "",
-    value: "",
+    value: "", // Keep value
+    isNew: true,
   });
-
-  // ✅ Sync fieldname with label dynamically
-  watch(
-    () => table.newFields[newIndex]?.label,
-    (newLabel) => {
-      if (table.newFields[newIndex]) {
-        table.newFields[newIndex].fieldname = newLabel?.trim().replace(/\s+/g, "_").toLowerCase();
-      }
-    }
-  );
-
-  console.log(`Updated newFields for table "${tableIndex}":`, table.newFields);
 };
+const deleteRow = (tableName, index) => {
+  if (childtableHeaders.value[tableName]) {
+    childtableHeaders.value[tableName].splice(index, 1);
+  }
+};
+
+
+const invalidFields = ref({});
+
+const toggleEdit = (tableName) => {
+  if (editMode[tableName]) {
+
+
+    // ✅ Reset validation errors
+    invalidFields.value[tableName] = [];
+
+    let isValid = true;
+
+    // Validate all fields in the table
+    childtableHeaders.value[tableName].forEach((field, index) => {
+      if (!field.label || !field.fieldtype) {
+        invalidFields.value[tableName].push(index); // Store index of invalid rows
+        isValid = false;
+      }
+    });
+
+    if (!isValid) {
+
+      return; // Stop execution if validation fails
+    }
+
+
+
+    // Process all fields (both old and new)
+    let allFields = childtableHeaders.value[tableName].map(({ isNew, ...rest }, index) => ({
+      ...rest,
+      idx: index + 1, // Ensure `idx` is correctly set in sequential order
+    }));
+
+    // ✅ Single API request to save both old and new fields
+    const formData = {
+      form_short_name: tableName,
+
+      fields: allFields,
+    };
+
+
+
+    axiosInstance
+      .post(apis.childtable, formData) // Use a single API endpoint
+      .then((response) => {
+        toast.success("Fields updated successfully!", { autoClose: 500 }, {
+          transition: "zoom",
+        });
+        console.log("✅ All fields saved successfully:", response.data);
+      })
+      .catch((error) => {
+        console.error("❌ Saving fields failed:", error);
+      });
+  }
+
+  // Toggle edit mode for the table
+  editMode[tableName] = !editMode[tableName];
+};
+
+
+watch(childtableHeaders, (newTables) => {
+  Object.keys(newTables).forEach((tableName) => {
+    newTables[tableName].forEach((field, index) => {
+      if (field.label && field.fieldtype) {
+        // ✅ Remove error dynamically when user enters a valid value
+        invalidFields.value[tableName] = invalidFields.value[tableName]?.filter(i => i !== index);
+      }
+    });
+  });
+}, { deep: true });
+
+
+
+
+
+
+
+
+// const getFieldLabel = (fieldtype) => {
+//   if (!childfield.value || !Array.isArray(childfield.value)) return fieldtype;
+//   const field = childfield.value.find((f) => f.type === fieldtype);
+//   return field ? field.label : fieldtype;
+// };
 
 
 // const addNewField = (tableKey) => {
@@ -1211,55 +1396,7 @@ const addNewField = (tableIndex) => {
 // };
 
 
-const removeNewField = (tableIndex, fieldIndex) => {
-  const table = childtableHeaders?.value[tableIndex]; // ✅ Ensure using childtableHeaders
 
-  if (!table || !table.newFields) {
-    console.error("Table or newFields not found.");
-    return;
-  }
-
-  // ✅ Use splice to remove the specific field correctly
-  table.newFields.splice(fieldIndex, 1);
-};
-
-const saveNewFields = (tableIndex, index) => {
-  const table = childtableHeaders.value[tableIndex];
-
-  if (!table) {
-    console.error(`Table "${tableIndex}" not found.`);
-    return;
-  }
-
-  // ✅ Ensure `fields` exists
-  if (!Array.isArray(table.fields)) {
-    table.fields = [];
-  }
-
-  // ✅ Ensure `newFields` exists
-  if (!Array.isArray(table.newFields)) {
-    table.newFields = [];
-  }
-
-  const payload = {
-    form_short_name: tableIndex,
-    fields: [...table, ...table.newFields], // Ensure correct merging
-  };
-
-  axiosInstance
-    .post(apis.childtable, payload)
-    .then((res) => {
-      console.log("Fields updated successfully:", res.message);
-      toast.success("Fields updated successfully!");
-
-      // ✅ Move new fields to fields and reset newFields
-      table.fields.push(...table.newFields);
-      table.newFields = [];
-    })
-    .catch((error) => {
-      console.error("Error updating fields:", error);
-    });
-};
 
 
 const steps = ref([
@@ -1539,21 +1676,26 @@ function add_Wf_roles_setup() {
     });
 }
 
+const selectedData = ref({
+  routepath: route.query.routepath,
+
+});
 function cancelForm() {
   router.push({
-    name: "Created",
+    path: selectedData.value.routepath,
   });
+
 }
 
-function clearForm(){
-  filterObj.value.form_name= ''
-  filterObj.value.form_short_name= ''
-  filterObj.value.owner_of_the_form= ''
-  filterObj.value.business_unit= '' 
-  filterObj.value.form_category = ''  
+function clearForm() {
+  filterObj.value.form_name = ''
+  filterObj.value.form_short_name = ''
+  filterObj.value.owner_of_the_form = ''
+  filterObj.value.business_unit = ''
+  filterObj.value.form_category = ''
   filterObj.value.accessible_departments = []
 
-  
+
 
 }
 const handleStepClick = (stepId) => {
@@ -1626,9 +1768,9 @@ function getFormData() {
           JSON.parse(res_data?.form_json).fields
         );
         childtableHeaders.value = JSON.parse(res.data.form_json).child_table_fields;
-        
-        // childTables.value = []
-        // tableFieldsCache.value = []
+
+        childTables.value = []
+        tableFieldsCache.value = []
 
         // workflowSetup.push(JSON.parse(res_data?.form_json).workflow)
 
@@ -1680,8 +1822,6 @@ function OwnerOftheForm(newVal) {
   if (newVal && typeof newVal === "string" && newVal.trim() !== "") {
     // console.log("Owner Of The Form Changed:", newVal);
     categoriesData(newVal);
-  } else {
-    console.log("Owner Of The Form is empty or undefined.");
   }
 }
 
@@ -1702,7 +1842,7 @@ function formData(status) {
   // console.log(blockArr, "blockarray");
 
   let fields = extractFieldsWithBreaks(blockArr);
-  console.log(tableFieldsCache.value, " Fields");
+
   if (tableFieldsCache.value.length) {
     // Merge stored table fields
     fields = [...fields, ...tableFieldsCache.value];
@@ -1803,81 +1943,81 @@ const addBlock = () => {
       {
         label: "",
         parent: `${businessUnit.value.value}-${filterObj.value.form_short_name}`,
-        rows: 
+        rows:
           blockIndex === 0
             ? [
-                {
-                  label: `row_0_0_${blockIndex}`,
-                  columns: [
-                    {
-                      label: "", // First column with "Requested by"
-                      fields: [
-                        {
-                          label: "Requested by",
-                          fieldtype: "Data",
-                          options: "",
-                          reqd: false,
-                        },
-                      ],
-                    },
-                    {
-                      label: "", // Second column with "Requested On"
-                      fields: [
-                        {
-                          label: "Requested On",
-                          fieldtype: "Datetime",
-                          options: "",
-                          reqd: false,
-                        },
-                      ],
-                    },
-                  ],
-                },
-                {
-                  label: `row_0_1_${blockIndex}`, // New row with an empty field
-                  columns: [
-                    {
-                      label: "",
-                      fields: [{ label: "", fieldtype: "", options: "", reqd: false }],
-                    },
-                  ],
-                },
-              ]
+              {
+                label: `row_0_0_${blockIndex}`,
+                columns: [
+                  {
+                    label: "", // First column with "Requested by"
+                    fields: [
+                      {
+                        label: "Requested by",
+                        fieldtype: "Data",
+                        options: "",
+                        reqd: false,
+                      },
+                    ],
+                  },
+                  {
+                    label: "", // Second column with "Requested On"
+                    fields: [
+                      {
+                        label: "Requested On",
+                        fieldtype: "Datetime",
+                        options: "",
+                        reqd: false,
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                label: `row_0_1_${blockIndex}`, // New row with an empty field
+                columns: [
+                  {
+                    label: "",
+                    fields: [{ label: "", fieldtype: "", options: "", reqd: false }],
+                  },
+                ],
+              },
+            ]
             : [
-                {
-                  label: `row_0_0_${blockIndex}`,
-                  columns: [
-                    {
-                      label: "", // First column with "Approver" & "Approved By"
-                      fields: [
-                        {
-                          label: "Approver",
-                          fieldtype: "Data",
-                          options: "",
-                          reqd: false,
-                        },
-                        {
-                          label: "Approved By",
-                          fieldtype: "Attach",
-                          options: "",
-                          reqd: false,
-                        },
-                      ],
-                    },
-                    {
-                      label: "", // Second column with "Approved On"
-                      fields: [
-                        {
-                          label: "Approved On",
-                          fieldtype: "Datetime",
-                          options: "",
-                          reqd: false,
-                        },
-                      ],
-                    },
-                  ],
-                },
-              ],
+              {
+                label: `row_0_0_${blockIndex}`,
+                columns: [
+                  {
+                    label: "", // First column with "Approver" & "Approved By"
+                    fields: [
+                      {
+                        label: "Approver",
+                        fieldtype: "Data",
+                        options: "",
+                        reqd: false,
+                      },
+                      {
+                        label: "Approved By",
+                        fieldtype: "Attach",
+                        options: "",
+                        reqd: false,
+                      },
+                    ],
+                  },
+                  {
+                    label: "", // Second column with "Approved On"
+                    fields: [
+                      {
+                        label: "Approved On",
+                        fieldtype: "Datetime",
+                        options: "",
+                        reqd: false,
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
       },
     ],
   };
@@ -2155,10 +2295,86 @@ const onFieldTypeChange = (
   // const xyz = extractFieldsWithBreaks(sections)
 };
 
+
+// const hasDuplicates = (array) => new Set(array).size !== array.length;
+
+
+const restrictedLabels = [
+  "name", "parent", "creation", "owner", "modified", "modified_by",
+  "parentfield", "parenttype", "file_list", "flags", "docstatus"
+].map(label => label.toLowerCase().trim());
+
+const excludedLabels = ["Approver", "Approved on", "Approved By"].map(label => label.toLowerCase().trim());
+
+function isRestricted(label) {
+  return restrictedLabels.includes(label?.trim().toLowerCase());
+}
+
+function hasInvalidCharacter(label) {
+  return label.includes('"');
+}
+
+function getAllLabels(blockArr) {
+  return blockArr.flatMap(block => [
+    block.label?.trim().toLowerCase(),
+    ...block.sections.flatMap(section => [
+      section.label?.trim().toLowerCase(),
+      ...section.rows.flatMap(row =>
+        row.columns.flatMap(column => [
+          column.label?.trim().toLowerCase(),
+          ...column.fields.map(field => field.label?.trim().toLowerCase())
+        ])
+      )
+    ])
+  ]).filter(label => label !== "" && !excludedLabels.includes(label));
+}
+
+function handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) {
+  const allLabels = getAllLabels(blockArr);
+  const duplicateLabels = allLabels.filter((label, index, arr) => arr.indexOf(label) !== index);
+  
+  const checkFieldType = addErrorMessagesToStructuredArray(blockArr);
+  blockArr.splice(0, blockArr.length, ...checkFieldType);
+
+  function validateLabel(label, errorPath) {
+    if (isRestricted(label)) {
+      errorPath.errorMsg = "Entered label is restricted";
+    } else if (hasInvalidCharacter(label)) {
+      errorPath.errorMsg = 'Label should not contain double quotes (")';
+    } else {
+      errorPath.errorMsg = duplicateLabels.includes(label.trim().toLowerCase()) ? "Duplicate Label Name" : "";
+    }
+  }
+
+  // Validate Field
+  if (fieldIndex !== undefined) {
+    validateLabel(
+      blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex].label,
+      blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex]
+    );
+  }
+
+  // Validate Column
+  if (fieldIndex === undefined && columnIndex !== undefined) {
+    validateLabel(
+      blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].label,
+      blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex]
+    );
+  }
+
+  // Validate Section
+  if (columnIndex === undefined && fieldIndex === undefined) {
+    validateLabel(
+      blockArr[blockIndex].sections[sectionIndex].label,
+      blockArr[blockIndex].sections[sectionIndex]
+    );
+  }
+}
 // function handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) {
 //   const excludedLabels = ["Approver", "Approved on", "Approved By"].map((label) =>
 //     label.toLowerCase().trim()
 //   );
+
 //   const restrictedLabels = [
 //     "name",
 //     "parent",
@@ -2171,28 +2387,32 @@ const onFieldTypeChange = (
 //     "file_list",
 //     "flags",
 //     "docstatus",
+//   ].map((label) => label.toLowerCase().trim());
 
-//   ].map((label) => label.toLowerCase().trim()); // Normalize restricted labels
+//   // Function to check for duplicates
+//   const hasDuplicates = (array) => new Set(array).size !== array.length;
 
-//   // Extract labels and filter out excluded ones
+//   // Extract all labels except excluded ones
 //   const flatArr = blockArr
 //     .flatMap(extractfieldlabels)
-//     .map((label) => label.trim().toLowerCase()) // Normalize labels
-//     .filter((label) => label !== "" && !excludedLabels.includes(label)); // Remove empty and excluded labels
+//     .map((label) => label.trim().toLowerCase())
+//     .filter((label) => label !== "" && !excludedLabels.includes(label));
 
-//   const isDuplicate = hasDuplicates(flatArr); // Check duplicates
-//   const checkFieldType = addErrorMessagesToStructuredArray(blockArr);
-//   blockArr.splice(0, blockArr.length, ...checkFieldType);
 
 //   function shouldSetError(fieldLabel) {
 //     const normalizedLabel = fieldLabel?.trim().toLowerCase();
-//     return isDuplicate && normalizedLabel && !excludedLabels.includes(normalizedLabel);
+//     if (!normalizedLabel || excludedLabels.includes(normalizedLabel)) return false;
+
+//     // Count occurrences of the label in `flatArr`
+//     const occurrences = flatArr.filter((label) => label === normalizedLabel).length;
+
+//     return occurrences > 1; // True if duplicate exists
 //   }
 
 //   function isRestricted(fieldLabel) {
-//     const normalizedLabel = fieldLabel?.trim().toLowerCase();
-//     return restrictedLabels.includes(normalizedLabel);
+//     return restrictedLabels.includes(fieldLabel?.trim().toLowerCase());
 //   }
+
 //   function hasInvalidCharacter(fieldLabel) {
 //     return fieldLabel.includes('"'); // Check if label contains double quotes
 //   }
@@ -2209,19 +2429,17 @@ const onFieldTypeChange = (
 //         .fields[fieldIndex].label;
 
 //     if (isRestricted(fieldLabel)) {
-//       blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
-//         columnIndex
-//       ].fields[fieldIndex].errorMsg = "Entered label is restricted";
+//       blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[
+//         fieldIndex
+//       ].errorMsg = "Entered label is restricted";
 //     } else if (hasInvalidCharacter(fieldLabel)) {
-//       blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
-//         columnIndex
-//       ].fields[fieldIndex].errorMsg = 'Label should not contain double quotes (")';
+//       blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[
+//         fieldIndex
+//       ].errorMsg = 'Label should not contain double quotes (")';
 //     } else {
-//       blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
-//         columnIndex
-//       ].fields[fieldIndex].errorMsg = shouldSetError(fieldLabel)
-//           ? "Duplicate Label Name"
-//           : "";
+//       blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[
+//         fieldIndex
+//       ].errorMsg = shouldSetError(fieldLabel) ? "Duplicate Label Name" : "";
 //     }
 //   }
 
@@ -2232,153 +2450,34 @@ const onFieldTypeChange = (
 //     sectionIndex !== undefined
 //   ) {
 //     const columnLabel =
-//       blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex]
-//         .label;
+//       blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].label;
 
 //     if (isRestricted(columnLabel)) {
-//       blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
-//         columnIndex
-//       ].errorMsg = "Entered label is restricted";
+//       blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].errorMsg =
+//         "Entered label is restricted";
 //     } else if (hasInvalidCharacter(columnLabel)) {
-//       blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
-//         columnIndex
-//       ].errorMsg = 'Label should not contain double quotes (")';
+//       blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].errorMsg =
+//         'Label should not contain double quotes (")';
 //     } else {
-//       blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
-//         columnIndex
-//       ].errorMsg = shouldSetError(columnLabel) ? "Duplicate Label Name in Column" : "";
+//       blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].errorMsg =
+//         shouldSetError(columnLabel) ? "Duplicate Label Name in Column" : "";
 //     }
 //   }
 
-//   if (
-//     columnIndex === undefined &&
-//     fieldIndex === undefined &&
-//     sectionIndex !== undefined
-//   ) {
+//   if (columnIndex === undefined && fieldIndex === undefined && sectionIndex !== undefined) {
 //     const sectionLabel = blockArr[blockIndex].sections[sectionIndex].label;
 
 //     if (isRestricted(sectionLabel)) {
-//       blockArr[blockIndex].sections[sectionIndex].errorMsg =
-//         "Entered label is restricted";
+//       blockArr[blockIndex].sections[sectionIndex].errorMsg = "Entered label is restricted";
 //     } else if (hasInvalidCharacter(sectionLabel)) {
-//       blockArr[blockIndex].sections[sectionIndex].errorMsg = 'Label should not contain double quotes (")';
+//       blockArr[blockIndex].sections[sectionIndex].errorMsg =
+//         'Label should not contain double quotes (")';
 //     } else {
-//       blockArr[blockIndex].sections[sectionIndex].errorMsg = shouldSetError(sectionLabel)
-//         ? "Duplicate Label Name in Section"
-//         : "";
+//       blockArr[blockIndex].sections[sectionIndex].errorMsg =
+//         shouldSetError(sectionLabel) ? "Duplicate Label Name in Section" : "";
 //     }
 //   }
 // }
-
-function handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) {
-  const excludedLabels = ["Approver", "Approved on", "Approved By"].map((label) =>
-    label.toLowerCase().trim()
-  );
-
-  const restrictedLabels = [
-    "name",
-    "parent",
-    "creation",
-    "owner",
-    "modified",
-    "modified_by",
-    "parentfield",
-    "parenttype",
-    "file_list",
-    "flags",
-    "docstatus",
-  ].map((label) => label.toLowerCase().trim());
-
-  // Function to check for duplicates
-  const hasDuplicates = (array) => new Set(array).size !== array.length;
-
-  // Extract all labels except excluded ones
-  const flatArr = blockArr
-    .flatMap(extractfieldlabels)
-    .map((label) => label.trim().toLowerCase())
-    .filter((label) => label !== "" && !excludedLabels.includes(label));
-
-  console.log("Extracted Labels:", flatArr); // Debugging
-
-  function shouldSetError(fieldLabel) {
-    const normalizedLabel = fieldLabel?.trim().toLowerCase();
-    if (!normalizedLabel || excludedLabels.includes(normalizedLabel)) return false;
-
-    // Count occurrences of the label in `flatArr`
-    const occurrences = flatArr.filter((label) => label === normalizedLabel).length;
-
-    return occurrences > 1; // True if duplicate exists
-  }
-
-  function isRestricted(fieldLabel) {
-    return restrictedLabels.includes(fieldLabel?.trim().toLowerCase());
-  }
-
-  function hasInvalidCharacter(fieldLabel) {
-    return fieldLabel.includes('"'); // Check if label contains double quotes
-  }
-
-  if (
-    fieldIndex !== undefined &&
-    fieldIndex >= 0 &&
-    columnIndex !== undefined &&
-    columnIndex >= 0 &&
-    sectionIndex !== undefined
-  ) {
-    const fieldLabel =
-      blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex]
-        .fields[fieldIndex].label;
-
-    if (isRestricted(fieldLabel)) {
-      blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[
-        fieldIndex
-      ].errorMsg = "Entered label is restricted";
-    } else if (hasInvalidCharacter(fieldLabel)) {
-      blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[
-        fieldIndex
-      ].errorMsg = 'Label should not contain double quotes (")';
-    } else {
-      blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[
-        fieldIndex
-      ].errorMsg = shouldSetError(fieldLabel) ? "Duplicate Label Name" : "";
-    }
-  }
-
-  if (
-    fieldIndex === undefined &&
-    columnIndex !== undefined &&
-    columnIndex >= 0 &&
-    sectionIndex !== undefined
-  ) {
-    const columnLabel =
-      blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].label;
-
-    if (isRestricted(columnLabel)) {
-      blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].errorMsg =
-        "Entered label is restricted";
-    } else if (hasInvalidCharacter(columnLabel)) {
-      blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].errorMsg =
-        'Label should not contain double quotes (")';
-    } else {
-      blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].errorMsg =
-        shouldSetError(columnLabel) ? "Duplicate Label Name in Column" : "";
-    }
-  }
-
-  if (columnIndex === undefined && fieldIndex === undefined && sectionIndex !== undefined) {
-    const sectionLabel = blockArr[blockIndex].sections[sectionIndex].label;
-
-    if (isRestricted(sectionLabel)) {
-      blockArr[blockIndex].sections[sectionIndex].errorMsg = "Entered label is restricted";
-    } else if (hasInvalidCharacter(sectionLabel)) {
-      blockArr[blockIndex].sections[sectionIndex].errorMsg =
-        'Label should not contain double quotes (")';
-    } else {
-      blockArr[blockIndex].sections[sectionIndex].errorMsg =
-        shouldSetError(sectionLabel) ? "Duplicate Label Name in Section" : "";
-    }
-  }
-}
 
 
 const hasErrors = computed(() => {
@@ -2554,7 +2653,7 @@ async function saveFormData(type) {
   }
 }
 
-// const hasDuplicates = (array) => new Set(array).size !== array.length;
+const hasDuplicates = (array) => new Set(array).size !== array.length;
 </script>
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 

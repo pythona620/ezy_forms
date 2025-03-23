@@ -11,7 +11,7 @@
     </div>
 
 
-
+<div class="approve_height">
     <div class="container-fluid">
       <div class="row">
         <div class="col-3"></div>
@@ -186,6 +186,7 @@
         </div>
       </div>
     </div>
+  </div>
 
 
   </div>
@@ -788,6 +789,11 @@ watch(activityData, (newVal) => {
 //   z-index: 1000 !important;
 
 // }
+
+.approve_height{
+  overflow: hidden;
+  height: 85vh;
+}
 .approved-icon{
   color: #2BED12;
   font-size: 24px;
