@@ -4,7 +4,7 @@
       <div v-for="(block, blockIndex) in filteredBlocks" :key="blockIndex" class="block-container rounded-2">
         <div v-for="(section, sectionIndex) in block.sections" :key="'preview-' + sectionIndex"
           class="preview-section m-2">
-          <div class="section-label">
+          <div v-if="section.label" class="section-label">
             <h5 class="m-0 font-13">{{ section.label }}</h5>
           </div>
           <div class="container-fluid">
@@ -373,13 +373,13 @@ const filteredBlocks = computed(() => {
         column.fields?.forEach((field) => {
           if (!props.employeeData || props.readonlyFor === 'true') return;
           if (field.label === "Approver") {
-            field.value = employee.emp_name;
+            field.value = employee?.emp_name;
             emit("updateField", field);
           }
           if (field.label === "Approved By") {
-            if(employee.signature){
+            if(employee?.signature){
 
-              field.value = employee.signature;
+              field.value = employee?.signature;
               emit("updateField", field);
             }
 

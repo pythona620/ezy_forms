@@ -17,6 +17,7 @@ import ApproveRequest from "./Components/ApproveRequest.vue";
 import FormPreview from "./Components/FormPreview.vue";
 import FormPreviewComp from "./Components/FormPreviewComp.vue";
 import PdfPreview from "./Components/PdfPreview.vue";
+import EmailApprove from "./Components/EmailApprove.vue";
 
 
 const routes = [
@@ -42,6 +43,12 @@ const routes = [
     name: 'ApproveRequest'
   },
   {
+    path: '/emailapprove',
+    component: EmailApprove,
+    name: 'EmailApprove',
+  },
+
+  {
     path: '/formpreview',
     component: FormPreview,
     name: 'FormPreview'
@@ -65,10 +72,14 @@ const router = createRouter({
 });
 router.beforeEach((to, from, next) => {
   const isLoggedIn = isAuthenticated();  // Check if the user is authenticated
-  const requiresAuth = to.matched.some((record) => record.meta.LoginRequire);
+  const requiresAuth = to.matched.some((record) => record.meta?.LoginRequire);
 
+  // Allow access to /approverequest without login
+  if (to.name === 'EmailApprove') {
+    next(); // Skip authentication for this route
+  }
   // If the route requires authentication and the user is not logged in, redirect to LoginPage
-  if (requiresAuth && !isLoggedIn) {
+  else if (requiresAuth && !isLoggedIn) {
     next({ name: 'LoginPage' });
   }
   // If the user is logged in and tries to access LoginPage, redirect to DashBoard
@@ -84,6 +95,7 @@ router.beforeEach((to, from, next) => {
     next();
   }
 });
+
 // router.beforeEach((to, from, next) => {
 //   to.matched.forEach(record => {
 //     if (typeof record.meta.breadcrumb === 'function') {

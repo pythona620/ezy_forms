@@ -281,7 +281,6 @@ function viewPreview(data) {
       routepath: route.path,
       name: data.name,
       doctype_name: data.doctype_name,
-      readOnly: 'false',
       type: "mytasks",
 
     },
