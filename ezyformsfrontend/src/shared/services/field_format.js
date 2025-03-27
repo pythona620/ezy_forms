@@ -25,7 +25,7 @@ export function extractFieldsWithBreaks(data) {
               label: field.label,
               reqd: field.reqd ? 1 : 0,
               value: field.value ? field.value : "",
-              ...(["Select", "Table MultiSelect", "Check"].includes(field.fieldtype) && field.options
+              ...(["Select", "Table MultiSelect", "Check","Small Text"].includes(field.fieldtype) && field.options
                 ? { options: field.options.startsWith("\n") ? field.options : `\n${field.options}` }
                 : {}),
             });

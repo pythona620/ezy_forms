@@ -59,16 +59,16 @@
 
                                         <template v-else-if="
                                             field.fieldtype === 'Check' ||
-                                            field.fieldtype === 'radio'
+                                            field.fieldtype === 'radio' || field.fieldtype === 'Small Text'
                                         ">
                                             <div class="container-fluid">
                                                 <div class="row">
-                                                    <div class="form-check col-4 mb-4" v-for="(option, index) in field?.options?.split(
+                                                    <div class="form-check col-4 mb-4"  v-for="(option, index) in field?.options?.split(
                                                         '\n'
-                                                    )" :key="index">
+                                                    )" :key="index" :class="{ 'd-none': index === 0 }">
                                                         <div>
                                                             <input v-if="
-                                                                field.fieldtype === 'Check' && index !== 0
+                                                                field.fieldtype === 'Check' || field.fieldtype === 'Small Text' && index !== 0
                                                             " class="form-check-input" type="checkbox" :value="option"
                                                                 :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
                                                                 :id="`${option}-${index}`"
@@ -111,7 +111,7 @@
                                         </template>
 
                                         <template v-else-if="field.fieldtype == 'Attach'">
-                                            <input type="file"  accept="image/jpeg,image/png/,application/pdf" :id="'field-' +
+                                            <input type="file" accept="image/jpeg,image/png/,application/pdf" :id="'field-' +
                                                 sectionIndex +
                                                 '-' +
                                                 columnIndex +
@@ -130,8 +130,7 @@
                                         </template>
                                         <template v-else-if="field.fieldtype == 'Datetime'">
                                             <input type="datetime-local" :value="field.value" @click="forceOpenCalendar"
-    ref="datetimeInput"
-                                                :placeholder="'Enter ' + field.label" :name="'field-' +
+                                                ref="datetimeInput" :placeholder="'Enter ' + field.label" :name="'field-' +
                                                     sectionIndex +
                                                     '-' +
                                                     columnIndex +
@@ -151,9 +150,9 @@
                                         </template>
 
                                         <template v-else>
-                                            <input v-if="field.fieldtype === 'Datetime'" type="datetime-local" @click="forceOpenCalendar"
-    ref="datetimeInput"
-                                                :value="field.value" class="form-control previewInputHeight font-10" />
+                                            <input v-if="field.fieldtype === 'Datetime'" type="datetime-local"
+                                                @click="forceOpenCalendar" ref="datetimeInput" :value="field.value"
+                                                class="form-control previewInputHeight font-10" />
                                             <!-- <input v-if="field.fieldtype === 'Date'" type="date" :value="field.value"
                                                 class="form-control previewInputHeight font-10" /> -->
                                             <!-- <input v-if="field.fieldtype == 'Int'" type="number"
@@ -335,10 +334,10 @@ onMounted(() => {
 
 const datetimeInput = ref(null);
 const forceOpenCalendar = (event) => {
-  if (event.target.showPicker) {
-    event.target.showPicker(); // Opens the date picker in supported browsers
-  }
-  setTimeout(() => event.target.focus(), 50); // Ensures focus for unsupported browsers
+    if (event.target.showPicker) {
+        event.target.showPicker(); // Opens the date picker in supported browsers
+    }
+    setTimeout(() => event.target.focus(), 50); // Ensures focus for unsupported browsers
 };
 // Watch blockArr for changes
 watch(
@@ -415,6 +414,7 @@ const logFieldValue = (
         props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
             columnIndex
         ].fields[fieldIndex];
+    console.log(field.fieldtype);
 
     if (eve.target?.files && eve.target.files.length > 0) {
         let files = Array.from(eve.target.files); // Convert FileList to an array
@@ -430,6 +430,22 @@ const logFieldValue = (
     } else if (eve.target?.type === "checkbox") {
         if (field.fieldtype === "Check") {
             field.value = eve.target.checked ? eve.target.value : "";
+        } else if (field.fieldtype === "Small Text") {
+            let selectedValues = field.value ? JSON.parse(field.value) : []; // Parse existing values or create an empty array
+
+            if (eve.target.checked) {
+                if (!selectedValues.includes(eve.target.value)) {
+                    selectedValues.push(eve.target.value); // Add new selection
+                }
+            } else {
+                selectedValues = selectedValues.filter(val => val !== eve.target.value); // Remove unchecked value
+            }
+
+            field.value = JSON.stringify(selectedValues); // Store as stringified array
+            console.log(field.value, "selectedValues", selectedValues);
+
+
+
         } else {
             field.value = eve.target.checked;
         }
@@ -440,7 +456,8 @@ const logFieldValue = (
             eve.target.selectedOptions,
             (option) => option.value
         );
-    } else if (field.fieldtype === "Text") {
+    }
+    else if (field.fieldtype === "Text") {
         field["value"] = eve.target.value; // Capture textarea value
         emit("updateField", field.value); // Emit updated value
     } else {
@@ -542,8 +559,6 @@ const uploadFile = (file, field, index) => {
 // };
 </script>
 <style setup>
-
-
 .previewInputHeight {
     margin-bottom: 5px;
 }
