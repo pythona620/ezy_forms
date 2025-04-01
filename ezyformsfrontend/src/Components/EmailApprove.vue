@@ -46,7 +46,7 @@
                   </button>
                 </div>
 
-                <div v-if="selectedData.type === 'mytasks' && tableData?.status !== 'Completed'" class="">
+                <div v-if="selectedData.type === 'mytasks' && tableData?.status !== 'Completed' && tableData?.status !== 'Request Cancelled'" class="">
 
                   <!-- v-if="!requestcancelled" -->
                   <div class="approveBtns pb-2 mb-2 mt-3 flex-column px-0 pe-4">
@@ -272,6 +272,7 @@ const ApprovePDF = ref(true)
 // Format action text (cancelled or raised)
 
 onMounted(() => {
+  // userData()
   const storedData = localStorage.getItem("employeeData");
   try {
     const parsedData = JSON.parse(storedData);
@@ -286,6 +287,31 @@ onMounted(() => {
 
 });
 
+// function userData() {
+//   console.log(selectedData.value.token,".......");
+//   // Get token from selectedData or localStorage
+//   const token = selectedData.value.token || localStorage.getItem("authToken");
+
+//   // Define headers
+//   const headers = {
+//     "Content-Type": "application/json",
+//   };
+
+//   // Add Authorization header if token exists
+//   if (token) {
+//     headers["Authorization"] = `Bearer ${token}`;
+//   }
+
+//   axiosInstance
+//     .get(`${apis.resource}${doctypes.EzyEmployeeList}`, { headers })
+//     .then((response) => {
+//       const employeeData = response.data;
+//       console.log(employeeData, "pppp");
+//     })
+//     .catch((error) => {
+//       console.error("Error fetching user data:", error);
+//     });
+// }
 
 function EditformSubmission() {
   // Navigate to the new route
@@ -341,14 +367,12 @@ const updateFormData = (fieldValues) => {
 
   // console.log(emittedFormData.value, "======");
 };
-
 // Function to handle form submission
 function ApproverFormSubmission(dataObj, type) {
   if (ApproverReason.value.trim() === "") {
     isCommentsValid.value = false; // Show validation error
     return; // Stop execution
   }
-
 
   isCommentsValid.value = true;
   loading.value = true; // Start loader
@@ -361,8 +385,23 @@ function ApproverFormSubmission(dataObj, type) {
   }
   console.log(loading.value, dataObj, type, form);
 
+  // Get token from selectedData or localStorage
+  const token = selectedData.value.token || localStorage.getItem("authToken");
+
+  // Define headers
+  const headers = {
+    "Content-Type": "application/json",
+  };
+
+  // Add Authorization header if token exists
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
   axiosInstance
-    .put(`${apis.resource}${selectedData.value.doctype_name}/${doctypeForm.value.name}`, form)
+    .put(`${apis.resource}${selectedData.value.doctype_name}/${doctypeForm.value.name}`, form, {
+      headers,
+    })
     .then((response) => {
       if (response?.data) {
         approvalStatusFn(dataObj, type);
@@ -394,8 +433,21 @@ function approvalStatusFn(dataObj, type) {
     current_level: tableData.value.current_level,
   };
 
+  // Get token from selectedData or localStorage
+  const token = selectedData.value.token || localStorage.getItem("authToken");
+
+  // Define headers
+  const headers = {
+    "Content-Type": "application/json",
+  };
+
+  // Add Authorization header if token exists
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
   axiosInstance
-    .post(apis.requestApproval, { request_details: [data] })
+    .post(apis.requestApproval, { request_details: [data] }, { headers })
     .then((response) => {
       console.log("API Response:", response);
 
@@ -404,9 +456,6 @@ function approvalStatusFn(dataObj, type) {
         toast.success(`Request ${type}ed`, {
           autoClose: 500,
           transition: "zoom",
-          // onClose: () => {
-          //   router.push({ name: "ReceivedForMe" }); // Navigate after toast closes
-          // }
         });
         approvedform.value = false; // Show thank you message
       } else {
@@ -422,10 +471,7 @@ function approvalStatusFn(dataObj, type) {
     });
 }
 
-
-
 function ApproverCancelSubmission(dataObj, type) {
-
   if (ApproverReason.value.trim() === "") {
     isCommentsValid.value = false;
     return;
@@ -434,17 +480,28 @@ function ApproverCancelSubmission(dataObj, type) {
   isCommentsValid.value = true;
   rejectLoad.value = true; // Start loader
 
-
-
-
   let form = {};
   if (emittedFormData.value.length) {
-    emittedFormData.value.map((each) => {
+    emittedFormData.value.forEach((each) => {
       form[each.fieldname] = each.value;
     });
   }
+
+  // Get token from selectedData or localStorage
+  const token = selectedData.value.token || localStorage.getItem("authToken");
+
+  // Define headers
+  const headers = {
+    "Content-Type": "application/json",
+  };
+
+  // Add Authorization header if token exists
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
   axiosInstance
-    .put(`${apis.resource}${selectedData.value.doctype_name}/${doctypeForm.value.name}`, form)
+    .put(`${apis.resource}${selectedData.value.doctype_name}/${doctypeForm.value.name}`, form, { headers })
     .then((response) => {
       if (response?.data) {
         approvalCancelFn(dataObj, type);
@@ -459,7 +516,6 @@ function ApproverCancelSubmission(dataObj, type) {
       toast.error("An error occurred while cancelling the request.", { autoClose: 1000, transition: "zoom" });
     });
 }
-
 
 
 // function approvalCancelFn(dataObj, type) {
@@ -485,7 +541,6 @@ function ApproverCancelSubmission(dataObj, type) {
 //     }
 //   });
 // }
-
 function approvalCancelFn(dataObj, type) {
   console.log("approvalCancelFn Data:", dataObj);
 
@@ -500,8 +555,21 @@ function approvalCancelFn(dataObj, type) {
     current_level: tableData.value.current_level,
   };
 
+  // Get token from selectedData or localStorage
+  const token = selectedData.value.token || localStorage.getItem("authToken");
+
+  // Define headers
+  const headers = {
+    "Content-Type": "application/json",
+  };
+
+  // Add Authorization header if token exists
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
   axiosInstance
-    .post(apis.wf_cancelling_request, data)
+    .post(apis.wf_cancelling_request, data, { headers })
     .then((response) => {
       if (response?.message) {
         toast.success(`${type}`, {
@@ -523,6 +591,7 @@ function approvalCancelFn(dataObj, type) {
       rejectLoad.value = false; // Ensure loader stops
     });
 }
+
 
 function receivedForMe(data) {
   // Initialize filters array for building dynamic query parameters
@@ -712,7 +781,6 @@ function getdata(formname) {
 //     });
 // }
 
-
 function downloadPdf() {
   const dataObj = {
     form_short_name: tableData.value.doctype_name,
@@ -720,8 +788,21 @@ function downloadPdf() {
     business_unit: business_unit.value
   };
 
+  // Get token from selectedData or localStorage
+  const token = selectedData.value.token || localStorage.getItem("authToken");
+
+  // Define headers
+  const headers = {
+    "Content-Type": "application/json",
+  };
+
+  // Add Authorization header if token exists
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
   axiosInstance
-    .post(apis.download_pdf_form, dataObj)
+    .post(apis.download_pdf_form, dataObj, { headers })
     .then((response) => {
       if (!response || !response.message) {
         console.error("Invalid response:", response);
@@ -777,19 +858,35 @@ function downloadPdf() {
 //     });
 // }
 
-function Wfactivitylog(formname) {
-  axiosInstance
-    .get(`${apis.resource}${doctypes.WFActivityLog}/${formname}`)
-    .then((res) => {
-      if (res.data) {
-        console.log("Activity Data:", res.data);
-        activityData.value = res.data.reason || []; // Ensure it's always an array
-      }
-    })
-    .catch((error) => {
-      console.error("Error fetching activity data:", error);
-    });
-}
+// function Wfactivitylog(formname) {
+//   // Get token from selectedData or localStorage
+//   const token = selectedData.value.token || localStorage.getItem("authToken");
+
+//   // Define headers with Content-Type
+//   const headers = {
+//     "Content-Type": "application/json",
+//   };
+
+//   // Add Authorization header only if token exists
+//   if (token) {
+//     headers["Authorization"] = `Bearer ${token}`;
+//   }
+
+//   axiosInstance
+//     .get(`${apis.resource}${doctypes.WFActivityLog}/${formname}`, {
+//       headers,
+//     })
+//     .then((res) => {
+//       if (res.data) {
+//         console.log("Activity Data:", res.data);
+//         activityData.value = res.data.reason || []; // Ensure it's always an array
+//       }
+//     })
+//     .catch((error) => {
+//       console.error("Error fetching activity data:", error);
+//     });
+// }
+
 
 function mapFormFieldsToRequest(doctypeData, showRequestData) {
   showRequestData.forEach((block) => {

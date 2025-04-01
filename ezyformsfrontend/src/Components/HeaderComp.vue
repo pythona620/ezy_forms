@@ -31,7 +31,7 @@
                                 </div>
                                 <div class="">
 
-                                    <FormFields tag="select" placeholder="" class="" name="roles" id="roles"
+                                    <FormFields tag="select" placeholder="" class="" name="roles" id="roles" 
                                         :Required="false" v-model="business_unit" :options="EzyFormsCompanys" />
                                 </div>
                                 <div class="logooutbtn m-0">
@@ -230,7 +230,7 @@ const isFormValid = ref(false);
 const route = useRoute(); // Initialize route to access route parameters
 const categoryOptions = ref([])
 const formList = ref([])
-const business_unit = ref('');
+const business_unit = ref(EzyBusinessUnit.value);
 const userInitial = ref('');
 const new_password = ref("")
 const username = ref('');
@@ -297,7 +297,7 @@ onMounted(() => {
     // const syetemmanger = JSON.parse(localStorage.getItem('systemManager'))
     if (userName) {
         // Set the username based on the UserName data, which is used to check if the user is Admin
-        username.value = userName.full_name;
+        username.value = userName.full_name;        
 
         if (userName.full_name === 'Administrator') {
 
@@ -348,14 +348,14 @@ function passwordChange() {
 const ezyForms = () => {
     const queryParams = {
         fields: JSON.stringify(["*"]),
-    };
+    }; 
 
     axiosInstance.get(apis.resource + doctypes.wfSettingEzyForms, {
         params: queryParams,
     }).then((res) => {
         if (res?.data?.length) {
             EzyFormsCompanys.value = res.data.map((company) => company.bu_code);
-            if (EzyFormsCompanys.value.length) {
+            if (EzyFormsCompanys.value.length && !business_unit.value.length) {
                 business_unit.value = EzyFormsCompanys.value[0];
             }
         }
@@ -364,7 +364,7 @@ const ezyForms = () => {
     });
 };
 watch(business_unit, (newBu, oldBu) => {
-    EzyBusinessUnit.value = newBu;
+    EzyBusinessUnit.value = newBu;   
     localStorage.setItem("Bu", EzyBusinessUnit.value)
     sessionStorage.setItem("Bu", EzyBusinessUnit.value)
 
