@@ -569,7 +569,7 @@
                                               [
                                                 'Select',
                                                 'Table MultiSelect',
-                                                'Check',
+                                                'Check','Small Text'
                                               ].includes(field.fieldtype)
                                             ">
                                               <label class="font-12 fw-light" for="options">Enter Options:</label>
@@ -1491,10 +1491,10 @@ const fieldTypes = [
     label: "Select",
     type: "Select",
   },
-  // {
-  //     label: "MultiSelect",
-  //     type: "Table MultiSelect",
-  // },
+  {
+      label: "MultiSelect",
+      type: "Small Text",
+  },
   // {
   //     label: "Signature",
   //     type: "Signature",

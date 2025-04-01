@@ -52,6 +52,34 @@
                         </option>
                       </select>
                     </template>
+                    <template v-if="field.fieldtype === 'Small Text'">
+                      <div class="container-fluid">
+                        <div class="row">
+                          <div class="form-check col-4 mb-1" v-for="(option, index) in field?.options?.split('\n')"
+                            :key="index"
+                            :class="{ 'd-none': !(JSON.parse(field.value || '[]') || []).includes(option)  }">
+
+                            <div>
+                              <input class="form-check-input" type="checkbox"
+                                :disabled="blockIndex === 0 || props.readonlyFor === 'true'"
+                                :checked="(JSON.parse(field.value || '[]') || []).includes(option)" :value="option"
+                                :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
+                                :id="`${option}-${index}`"
+                                @change="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
+                            </div>
+
+                            <div>
+                              <label class="form-check-label m-0" :for="`${option}-${index}`">
+                                {{ option }}
+                              </label>
+                            </div>
+
+                          </div>
+                        </div>
+                      </div>
+                    </template>
+
+
 
                     <!-- Field Type Check or Radio -->
                     <template v-else-if="
@@ -113,9 +141,9 @@
                       <div v-if="field.value" class="position-relative d-inline-block"
                         :class="props.readonlyFor === 'true' ? 'image-border-bottom' : ''">
                         <img v-if="isImageFile(field.value) || field.value" :src="field.value"
-                          class="img-thumbnail mt-2 cursor-pointer border-0" style="max-width: 100px; max-height: 100px"
-                           />
-                           <!-- @mouseover="showPreview = true" @mouseleave="showPreview = false" -->
+                          class="img-thumbnail mt-2 cursor-pointer border-0"
+                          style="max-width: 100px; max-height: 100px" />
+                        <!-- @mouseover="showPreview = true" @mouseleave="showPreview = false" -->
                         <!-- Close Icon to Remove Image -->
                         <i class="bi bi-x-lg position-absolute  text-danger cursor-pointer"
                           :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'd-none' : ''" style="
@@ -377,7 +405,7 @@ const filteredBlocks = computed(() => {
             emit("updateField", field);
           }
           if (field.label === "Approved By") {
-            if(employee.signature){
+            if (employee.signature) {
 
               field.value = employee.signature;
               emit("updateField", field);
@@ -658,6 +686,7 @@ const clearImage = (
   field.value = ""; // Reset the field value
 };
 
+
 // const logFieldValue = (
 //   event,
 //   blockIndex,
@@ -750,8 +779,10 @@ th {
 td {
   font-size: 12px;
 }
+
 td:first-child {
-  min-width: 50px; /* Adjust as needed */
+  min-width: 50px;
+  /* Adjust as needed */
   width: auto !important;
 }
 
@@ -769,11 +800,12 @@ td:first-child {
 .img-thumbnail {
   cursor: pointer;
 }
+
 .tableborder-child table td {
   word-break: break-word;
-  max-width: 150px; /* Adjust as needed */
+  max-width: 150px;
+  /* Adjust as needed */
   overflow-wrap: break-word;
   white-space: normal;
 }
-
 </style>
