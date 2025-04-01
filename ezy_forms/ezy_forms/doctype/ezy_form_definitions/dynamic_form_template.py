@@ -145,7 +145,7 @@ template_str = """
             flex-wrap: wrap;
             margin-bottom: 10px;
         }
- 
+
         .column {
             flex: 1;
             margin-right: 5px;
@@ -231,6 +231,64 @@ template_str = """
                # background-color: #f0f0f0;
                margin: 0px 10px;
           }
+/* Style for the custom checkboxes */
+.custom-checkbox {
+    position: relative;
+    width: 20px;
+    height: 20px;
+    appearance: none;
+    border: 2px solid #007bff;  /* Blue border */
+    border-radius: 4px;
+    background-color: #007bff; /* Blue background */
+    outline: none;
+    cursor: pointer;
+    padding-bottom: 2px;
+    transition: background-color 0.2s ease;
+}
+
+.custom-checkbox:checked {
+    background-color: #000; /* Blue background when checked */
+}
+
+.custom-checkbox:checked::before {
+    content: '✔'; /* White checkmark */
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    color: #000; /* White color for the checkmark */
+    text-align: center;
+    line-height: 20px;  /* Adjust for centering the tick mark */
+    background-color: #fff;
+    border-radius: 4px;
+    border: 2px solid #000;
+}
+
+.custom-checkbox:disabled {
+    opacity: 0.6; /* Slightly dimmed when disabled */
+    cursor: not-allowed; /* Prevent clicking when disabled */
+}
+
+.checkbox-gap {
+    margin-bottom: 10px;
+    margin-right: 10px;  /* Adding space between checkboxes */
+}
+
+/* Container to hold checkboxes, display 3 per row */
+.checkbox-container {
+    display: flex;
+    flex-wrap: wrap;   /* Allow items to wrap into new lines */
+    gap: 10px;         /* Space between checkboxes */
+    width: 100%;       /* Ensure the container uses full available width */
+}
+
+/* Each checkbox takes up 30% of the container width, allowing 3 per row */
+.checkbox-container > .checkbox-gap {
+    flex: 1 0 30%;      /* Takes 30% of the width */
+    box-sizing: border-box;  /* Prevents overflow due to padding/margin */
+}
+
         .footer-container{
              display: flex;
              justify-content: center;
@@ -243,6 +301,7 @@ template_str = """
                width: 100%;
                right: 0px;
         }
+        
           .footer-container span{
               margin: 0px;
               padding: 0px;
@@ -286,6 +345,7 @@ template_str = """
             .table{
                 width: 100% !important;
             }
+            
         }
         
    
@@ -324,7 +384,7 @@ template_str = """
                                 {% for field in column.fields %}
                                     <div class="field">
                                         <label for="{{ field.fieldname }}">{{ field.label }}:</label>
- 
+
                                         {% if field.fieldtype in ['Check', 'radio'] %}
                                             <div class="container-fluid">
                                                 <div class="row">
@@ -366,6 +426,36 @@ template_str = """
  
                                         {% elif field.fieldtype == 'Data' or field.fieldtype == 'Select' %}
                                             <input type="text" id="{{ field.fieldname }}" disabled value="{{ field['values'] }}" name="{{ field.fieldname }}">
+                                        {% elif field.fieldtype == 'Small Text' %}
+                                                {% set parsed_values = field['values'] | replace('["', '') | replace('"]', '') | replace('","', ',') %}
+                                                {% set parsed_values_list = parsed_values.split(',') %}
+
+                                                {% set field_values = field.values() if field.values is callable else field.values %}
+                                                {% set field_values_list = field_values | list %}  <!-- Convert dict_values to a list -->
+
+                                                <div class="checkbox-container">
+                                                    {% for option in parsed_values_list %}
+                                                        <div class="checkbox-gap">
+                                                            <input
+                                                                type="checkbox"
+                                                                class="form-check-input custom-checkbox"
+                                                                id="{{ field.fieldname }}-{{ loop.index0 }}"
+                                                                name="{{ field.fieldname }}"
+                                                                value="{{ option }}"
+                                                                checked
+                                                                disabled
+                                                            >
+                                                            {{ option }}
+                                                        </div>
+                                                    {% endfor %}
+                                                </div>
+
+                                                                                            
+
+
+
+
+
                                         {% elif field.fieldtype == 'Attach' %}
                                             {% if field['values'] %}
                                                 <img  id="{{ field.fieldname }}" src="{{ site_url + field['values'] or ''  }}" class="signature-Imge" name="{{ field.fieldname }}">
@@ -690,7 +780,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
             html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_short_name,child_table_data=labels,child_data=None,business_unit=business_unit)
             random_number = randint(111, 999)
  
-            pdf_filename = f"{form_short_name}_{random_number}.pdf"
+            pdf_filename = f"mailfiles{form_short_name}_{random_number}.pdf"
             pdf_path = f"private/files/{pdf_filename}"
             absolute_pdf_path = os.path.join(get_bench_path(), "sites", cstr(frappe.local.site), pdf_path)
  
@@ -741,7 +831,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
             html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_short_name,child_data=data_list,child_table_data=None,business_unit=business_unit)
             random_number = randint(111, 999)
     
-            pdf_filename = f"{form_short_name}_{name}_{random_number}.pdf"
+            pdf_filename = f"mailfiles{form_short_name}_{name}_{random_number}.pdf"
             pdf_path = f"private/files/{pdf_filename}"
             absolute_pdf_path = os.path.join(get_bench_path(), "sites", cstr(frappe.local.site), pdf_path)
     

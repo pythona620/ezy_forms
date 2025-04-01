@@ -523,7 +523,7 @@ const generateRandomNumber = () => {
 
 const uploadFile = (file, field, index) => {
     const randomNumber = generateRandomNumber();
-    let fileName = `attach-${props.formName}${randomNumber}-@${file.name}`;
+    let fileName = `mailfiles-${props.formName}${randomNumber}-@${file.name}`;
 
     const formData = new FormData();
     formData.append("file", file, fileName);
