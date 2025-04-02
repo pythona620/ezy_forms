@@ -99,17 +99,17 @@ option, index
                               <template v-else-if="
                                 field.fieldtype == 'Check' ||
                                 field.fieldtype == 'radio' ||
-                                field.fieldtype == 'Select'
+                                field.fieldtype == 'Select' ||  field.fieldtype == 'Small Text'
                               ">
                                 <div class="container-fluid">
                                   <div class="row">
                                     <div class="form-check col-4 mb-4" v-for="(
 option, index
-                                      ) in field?.options?.split('\n')" :key="index">
+                                      ) in field?.options?.split('\n')" :key="index" :class="{ 'd-none': index === 0 }">
                                       <div class="d-flex gap-2 align-items-center">
                                         <div>
                                           <input v-if="
-                                            field.fieldtype === 'Check' || field.fieldtype === 'Select' &&
+                                            field.fieldtype === 'Check' || field.fieldtype === 'Select' ||  field.fieldtype == 'Small Text' &&
                                             index !== 0
                                           " class="form-check-input" :type="field.fieldtype" :name="option"
                                             :id="option" readonly />
