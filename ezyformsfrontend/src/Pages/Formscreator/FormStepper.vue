@@ -1492,7 +1492,7 @@ const fieldTypes = [
     type: "Select",
   },
   {
-      label: "MultiSelect",
+      label: "Multi Select",
       type: "Small Text",
   },
   // {
