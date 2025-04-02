@@ -231,51 +231,7 @@ template_str = """
                # background-color: #f0f0f0;
                margin: 0px 10px;
           }
-/* Style for the custom checkboxes */
-.custom-checkbox {
-    position: relative;
-    width: 20px;
-    height: 20px;
-    appearance: none;
-    border: 2px solid #007bff;  /* Blue border */
-    border-radius: 4px;
-    background-color: #007bff; /* Blue background */
-    outline: none;
-    cursor: pointer;
-    padding-bottom: 2px;
-    transition: background-color 0.2s ease;
-}
-
-.custom-checkbox:checked {
-    background-color: #000; /* Blue background when checked */
-}
-
-.custom-checkbox:checked::before {
-    content: '✔'; /* White checkmark */
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    color: #000; /* White color for the checkmark */
-    text-align: center;
-    line-height: 20px;  /* Adjust for centering the tick mark */
-    background-color: #fff;
-    border-radius: 4px;
-    border: 2px solid #000;
-}
-
-.custom-checkbox:disabled {
-    opacity: 0.6; /* Slightly dimmed when disabled */
-    cursor: not-allowed; /* Prevent clicking when disabled */
-}
-
-.checkbox-gap {
-    margin-bottom: 10px;
-    margin-right: 10px;  /* Adding space between checkboxes */
-}
-
-/* Container to hold checkboxes, display 3 per row */
+/* Flex container to arrange checkboxes */
 .checkbox-container {
     display: flex;
     flex-wrap: wrap;   /* Allow items to wrap into new lines */
@@ -283,11 +239,48 @@ template_str = """
     width: 100%;       /* Ensure the container uses full available width */
 }
 
-/* Each checkbox takes up 30% of the container width, allowing 3 per row */
+
 .checkbox-container > .checkbox-gap {
-    flex: 1 0 30%;      /* Takes 30% of the width */
-    box-sizing: border-box;  /* Prevents overflow due to padding/margin */
+    flex: 1 0 calc(33.33% - 20px);  /* 3 per row, considering gap */
+    box-sizing: border-box; 
+    display: flex;
+    align-items: start;
+    gap: 15px; /* Space between checkbox and text */
+    margin-top: 10px;  /* Space above */
+    margin-bottom: 10px; /* Space below */
+    min-width: 150px;  /* Prevent shrinking */
 }
+/* Checkbox design */
+.custom-checkbox {
+    display: inline-block;
+    width: 20px !important;
+    height: 20px !important;
+    border: 2px solid #007bff;  /* Blue border */
+    border-radius: 4px;
+    background-color: #007bff; /* Blue background */
+    position: relative;
+    margin:3px;
+    flex-shrink: 0; 
+}
+
+/* White checkmark */
+.custom-checkbox::before {
+    content: '✔'; 
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 16px;
+    color: white;  /* White checkmark */
+    font-weight: bold;
+}
+
+/* Disabled effect */
+.custom-checkbox.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 
         .footer-container{
              display: flex;
@@ -434,21 +427,14 @@ template_str = """
                                                 {% set field_values_list = field_values | list %}  <!-- Convert dict_values to a list -->
 
                                                 <div class="checkbox-container">
-                                                    {% for option in parsed_values_list %}
-                                                        <div class="checkbox-gap">
-                                                            <input
-                                                                type="checkbox"
-                                                                class="form-check-input custom-checkbox"
-                                                                id="{{ field.fieldname }}-{{ loop.index0 }}"
-                                                                name="{{ field.fieldname }}"
-                                                                value="{{ option }}"
-                                                                checked
-                                                                disabled
-                                                            >
-                                                            {{ option }}
-                                                        </div>
-                                                    {% endfor %}
-                                                </div>
+    {% for option in parsed_values_list %}
+        <div class="checkbox-gap">
+            <span class="custom-checkbox"></span>
+            {{ option }}
+        </div>
+    {% endfor %}
+</div>
+
 
                                                                                             
 
