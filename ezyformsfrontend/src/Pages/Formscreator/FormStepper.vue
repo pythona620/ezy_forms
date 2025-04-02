@@ -400,7 +400,7 @@
                                   <div class="d-flex justify-content-between align-items-center">
                                     <label class="rownames">{{
                                       getRowSuffix(rowIndex)
-                                    }}</label>
+                                      }}</label>
                                     <div>
                                       <button v-if="row.columns.length < 3"
                                         class="btn btn-light bg-transparent border-0 font-12" @click="
@@ -569,7 +569,7 @@
                                               [
                                                 'Select',
                                                 'Table MultiSelect',
-                                                'Check','Small Text'
+                                                'Check', 'Small Text'
                                               ].includes(field.fieldtype)
                                             ">
                                               <label class="font-12 fw-light" for="options">Enter Options:</label>
@@ -584,18 +584,33 @@
                                               </small>
                                             </div>
 
-                                            <div class="d-flex gap-2 align-items-center">
-                                              <div class="d-flex align-items-center">
-                                                
-                                                <input class="font-12" v-model="field.reqd" :true-value="1" :false-value="0" placeholder="Field Name"
-                                                  type="checkbox" />
+                                            <div class="d-flex  align-items-center justify-content-between">
+                                              <div class=" d-flex align-items-center gap-2">
+                                                <div class="d-flex align-items-center">
+
+                                                  <input class="font-12" v-model="field.reqd" :true-value="1"
+                                                    :false-value="0" placeholder="Field Name" type="checkbox" />
+                                                </div>
+                                                <div>
+                                                  <label for="mandatory" class="font-12 m-0 fw-light">Mandatory</label>
+                                                </div>
                                               </div>
                                               <div>
-                                                <label for="mandatory" class="font-12 m-0 fw-light">Mandatory</label>
+
+                                                <button class="btn btn-sm  font-12"
+                                                @click="field.showDescription = !field.showDescription">
+                                                {{ field.showDescription ? 'Hide Description' : (field.description ? 'Edit Description' : 'Add Description') }}
+                                                </button>
                                               </div>
                                             </div>
+
+                                            <!-- Description Textarea -->
+                                            <textarea v-if="field.showDescription" v-model="field.description"
+                                              class="form-control font-12 mt-2"
+                                              placeholder="Enter field description"></textarea>
+
                                             <small v-if="field.error" class="text-danger font-10">{{ field.error
-                                            }}</small>
+                                              }}</small>
                                           </div>
                                         </div>
 
@@ -1492,8 +1507,8 @@ const fieldTypes = [
     type: "Select",
   },
   {
-      label: "MultiSelect",
-      type: "Small Text",
+    label: "MultiSelect",
+    type: "Small Text",
   },
   // {
   //     label: "Signature",
@@ -1978,7 +1993,7 @@ const addBlock = () => {
                 columns: [
                   {
                     label: "",
-                    fields: [{ label: "", fieldtype: "", options: "", reqd: false }],
+                    fields: [{ label: "", fieldtype: "", options: "", reqd: false, description: "" }],
                   },
                 ],
               },
@@ -2332,7 +2347,7 @@ function getAllLabels(blockArr) {
 function handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) {
   const allLabels = getAllLabels(blockArr);
   const duplicateLabels = allLabels.filter((label, index, arr) => arr.indexOf(label) !== index);
-  
+
   const checkFieldType = addErrorMessagesToStructuredArray(blockArr);
   blockArr.splice(0, blockArr.length, ...checkFieldType);
 
