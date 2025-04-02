@@ -569,7 +569,7 @@
                                               [
                                                 'Select',
                                                 'Table MultiSelect',
-                                                'Check',
+                                                'Check','Small Text'
                                               ].includes(field.fieldtype)
                                             ">
                                               <label class="font-12 fw-light" for="options">Enter Options:</label>
@@ -1491,10 +1491,10 @@ const fieldTypes = [
     label: "Select",
     type: "Select",
   },
-  // {
-  //     label: "MultiSelect",
-  //     type: "Table MultiSelect",
-  // },
+  {
+      label: "MultiSelect",
+      type: "Small Text",
+  },
   // {
   //     label: "Signature",
   //     type: "Signature",
@@ -2310,8 +2310,8 @@ function isRestricted(label) {
   return restrictedLabels.includes(label?.trim().toLowerCase());
 }
 
-function hasInvalidCharacter(label) {
-  return label.includes('"');
+function hasInvalidCharacters(label) {
+  return /[^a-zA-Z0-9 _]/.test(label) || label.includes('"') || label.includes("'");
 }
 
 function getAllLabels(blockArr) {
@@ -2339,8 +2339,8 @@ function handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex, fiel
   function validateLabel(label, errorPath) {
     if (isRestricted(label)) {
       errorPath.errorMsg = "Entered label is restricted";
-    } else if (hasInvalidCharacter(label)) {
-      errorPath.errorMsg = 'Label should not contain double quotes (")';
+    } else if (hasInvalidCharacters(label)) {
+      errorPath.errorMsg = "Label should not contain special characters, double quotes (\") or single quotes (')";
     } else {
       errorPath.errorMsg = duplicateLabels.includes(label.trim().toLowerCase()) ? "Duplicate Label Name" : "";
     }
@@ -2541,7 +2541,7 @@ function handleInputChange(event, fieldType) {
   }
 
   // Check for special characters (allow only letters and numbers)
-  if (/[^a-zA-Z0-9]/.test(inputValue)) {
+  if (/[^a-zA-Z0-9&]/.test(inputValue)) {
     if (fieldType === "form_name") {
       formNameError.value = "Special characters are not allowed";
     } else if (fieldType === "form_short_name") {
