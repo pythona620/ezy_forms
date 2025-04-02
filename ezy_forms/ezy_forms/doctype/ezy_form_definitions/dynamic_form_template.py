@@ -145,7 +145,7 @@ template_str = """
             flex-wrap: wrap;
             margin-bottom: 10px;
         }
- 
+
         .column {
             flex: 1;
             margin-right: 5px;
@@ -231,6 +231,57 @@ template_str = """
                # background-color: #f0f0f0;
                margin: 0px 10px;
           }
+/* Flex container to arrange checkboxes */
+.checkbox-container {
+    display: flex;
+    flex-wrap: wrap;   /* Allow items to wrap into new lines */
+    gap: 10px;         /* Space between checkboxes */
+    width: 100%;       /* Ensure the container uses full available width */
+}
+
+
+.checkbox-container > .checkbox-gap {
+    flex: 1 0 calc(33.33% - 20px);  /* 3 per row, considering gap */
+    box-sizing: border-box; 
+    display: flex;
+    align-items: start;
+    gap: 15px; /* Space between checkbox and text */
+    margin-top: 10px;  /* Space above */
+    margin-bottom: 10px; /* Space below */
+    min-width: 150px;  /* Prevent shrinking */
+}
+/* Checkbox design */
+.custom-checkbox {
+    display: inline-block;
+    width: 20px !important;
+    height: 20px !important;
+    border: 2px solid #007bff;  /* Blue border */
+    border-radius: 4px;
+    background-color: #007bff; /* Blue background */
+    position: relative;
+    margin:3px;
+    flex-shrink: 0; 
+}
+
+/* White checkmark */
+.custom-checkbox::before {
+    content: '✔'; 
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 16px;
+    color: white;  /* White checkmark */
+    font-weight: bold;
+}
+
+/* Disabled effect */
+.custom-checkbox.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+
         .footer-container{
              display: flex;
              justify-content: center;
@@ -243,6 +294,7 @@ template_str = """
                width: 100%;
                right: 0px;
         }
+        
           .footer-container span{
               margin: 0px;
               padding: 0px;
@@ -286,6 +338,7 @@ template_str = """
             .table{
                 width: 100% !important;
             }
+            
         }
         
    
@@ -324,7 +377,7 @@ template_str = """
                                 {% for field in column.fields %}
                                     <div class="field">
                                         <label for="{{ field.fieldname }}">{{ field.label }}:</label>
- 
+
                                         {% if field.fieldtype in ['Check', 'radio'] %}
                                             <div class="container-fluid">
                                                 <div class="row">
@@ -366,6 +419,29 @@ template_str = """
  
                                         {% elif field.fieldtype == 'Data' or field.fieldtype == 'Select' %}
                                             <input type="text" id="{{ field.fieldname }}" disabled value="{{ field['values'] }}" name="{{ field.fieldname }}">
+                                        {% elif field.fieldtype == 'Small Text' %}
+                                                {% set parsed_values = field['values'] | replace('["', '') | replace('"]', '') | replace('","', ',') %}
+                                                {% set parsed_values_list = parsed_values.split(',') %}
+
+                                                {% set field_values = field.values() if field.values is callable else field.values %}
+                                                {% set field_values_list = field_values | list %}  <!-- Convert dict_values to a list -->
+
+                                                <div class="checkbox-container">
+    {% for option in parsed_values_list %}
+        <div class="checkbox-gap">
+            <span class="custom-checkbox"></span>
+            {{ option }}
+        </div>
+    {% endfor %}
+</div>
+
+
+                                                                                            
+
+
+
+
+
                                         {% elif field.fieldtype == 'Attach' %}
                                             {% if field['values'] %}
                                                 <img  id="{{ field.fieldname }}" src="{{ site_url + field['values'] or ''  }}" class="signature-Imge" name="{{ field.fieldname }}">
@@ -690,7 +766,8 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
             html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_short_name,child_table_data=labels,child_data=None,business_unit=business_unit)
             random_number = randint(111, 999)
  
-            pdf_filename = f"{form_short_name}_{random_number}.pdf"
+            pdf_filename = f"mailfiles{form_short_name}_{random_number}.pdf"
+            
             pdf_path = f"private/files/{pdf_filename}"
             absolute_pdf_path = os.path.join(get_bench_path(), "sites", cstr(frappe.local.site), pdf_path)
  
@@ -741,7 +818,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
             html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_short_name,child_data=data_list,child_table_data=None,business_unit=business_unit)
             random_number = randint(111, 999)
     
-            pdf_filename = f"{form_short_name}_{name}_{random_number}.pdf"
+            pdf_filename = f"mailfiles{form_short_name}_{name}_{random_number}.pdf"
             pdf_path = f"private/files/{pdf_filename}"
             absolute_pdf_path = os.path.join(get_bench_path(), "sites", cstr(frappe.local.site), pdf_path)
     
