@@ -16,25 +16,17 @@
                   <h6 class="m-0 font-12">{{ column.label }}</h6>
                 </div>
                 <div class="mx-3 my-2">
-                  <div v-for="(field, fieldIndex) in column.fields" :key="'field-preview-' + fieldIndex"
-                    :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'd-flex align-items-end mb-2' : ''">
-                    <div v-if="field.label">
-                      <label :for="'field-' +
-                        sectionIndex +
-                        '-' +
-                        columnIndex +
-                        '-' +
-                        fieldIndex
-                        ">
-                        <span class="font-12">{{ field.label }}</span>
-                        <span class="ms-1 text-danger">{{
-                          field.reqd === 1 ? "*" : ""
-                        }}
-
-                        </span>
-                        <span class="pe-2" v-if="props.readonlyFor === 'true' || blockIndex < currentLevel">:</span>
-                      </label>
-                    </div>
+                  <div v-for="(field, fieldIndex) in column.fields" 
+     :key="'field-preview-' + fieldIndex"
+     :class="(props.readonlyFor === 'true' || blockIndex < currentLevel) && field.fieldtype !== 'Small Text' ? 'd-flex align-items-end mb-2' : ''">
+  
+  <div v-if="field.label">
+    <label :for="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex">
+      <span class="font-12">{{ field.label }}</span>
+      <span class="ms-1 text-danger">{{ field.reqd === 1 ? "*" : "" }}</span>
+      <span class="pe-2" v-if="props.readonlyFor === 'true' || blockIndex < currentLevel">:</span>
+    </label>
+  </div>
                     <!-- field.fieldtype === 'Select' || -->
                     <!-- Field Type Select or Multiselect -->
                     <template v-if="field.fieldtype === 'multiselect'">
