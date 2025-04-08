@@ -53,7 +53,7 @@ def add_roles_to_wf_requestors(business_unit:str,doctype:str,workflow_setup:list
 		requestors_section = requestors_df.filter(pl.col('type').str.contains("requestor")).select("roles","fields").rename({"roles":"requestor","fields":"columns_allowed"}).to_dicts()
 		approvers_section = requestors_df.filter(pl.col('type').str.contains("approver")).with_columns(pl.lit(1).alias('cancel_request')).with_columns(pl.lit(1).alias('mandatory')).with_columns(pl.lit("Approve/Reject").alias('action'))
 		if approvers_section.shape[0]>0:
-			approvers_section = approvers_section.select("roles","fields","idx","cancel_request","mandatory","action").rename({"roles":"role","fields":"columns_allowed","idx":"level"}).to_dicts()
+			approvers_section = approvers_section.select("roles","fields","idx","cancel_request","mandatory","action",'view_only_reportee').rename({"roles":"role","fields":"columns_allowed","idx":"level"}).to_dicts()
 		else:approvers_section=[]
 		frappe.db.sql(f"""delete from `tabWF Requestors` where parent = '{doc_rec}' and parentfield = 'wf_requestors' and parenttype = 'WF Roadmap';""")
 		frappe.db.commit()

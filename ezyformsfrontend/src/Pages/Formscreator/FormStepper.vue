@@ -400,7 +400,7 @@
                                   <div class="d-flex justify-content-between align-items-center">
                                     <label class="rownames">{{
                                       getRowSuffix(rowIndex)
-                                      }}</label>
+                                    }}</label>
                                     <div>
                                       <button v-if="row.columns.length < 3"
                                         class="btn btn-light bg-transparent border-0 font-12" @click="
@@ -598,8 +598,10 @@
                                               <div>
 
                                                 <button class="btn btn-sm  font-12"
-                                                @click="field.showDescription = !field.showDescription">
-                                                {{ field.showDescription ? 'Hide Description' : (field.description ? 'Edit Description' : 'Add Description') }}
+                                                  @click="field.showDescription = !field.showDescription">
+                                                  {{ field.showDescription ? 'Hide Description' : (field.description ?
+                                                  'Edit Description'
+                                                  : 'Add Description') }}
                                                 </button>
                                               </div>
                                             </div>
@@ -610,7 +612,7 @@
                                               placeholder="Enter field description"></textarea>
 
                                             <small v-if="field.error" class="text-danger font-10">{{ field.error
-                                              }}</small>
+                                            }}</small>
                                           </div>
                                         </div>
 
@@ -881,7 +883,7 @@
 
     <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
       <div class="offcanvas-header add_designationHeader">
-        <span id="offcanvasRightLabel font-14">
+        <span id="offcanvasRightLabel" class="font-14">
           Add designation for
           {{ selectedBlockIndex == 0 ? "Requestor" : "Approver" }}
         </span>
@@ -891,19 +893,32 @@
       </div>
       <div class="offcanvas-body">
         <div class="">
+          <div class="form-check ps-1" v-if="selectedBlockIndex !== 0">
+            <div>
+
+              <input type="checkbox" id="ViewOnlyReportee" v-model="ViewOnlyReportee"
+                class="me-2 mt-1  form-check-input"  />
+              <label for="ViewOnlyReportee " class="SelectallDesignation fw-bold mt-1 form-check-label">View Only
+                Reportee</label>
+            </div>
+          </div>
           <input v-model="searchDesignation" class="px-2 py-1 rounded-2 form-control shadow-none my-3" type="text"
             placeholder="Search Designation" />
 
-          <div class="form-check ps-1" v-if="DesignationList.length">
-            <input type="checkbox" id="selectAll" v-model="isAllSelected" class="me-2 mt-1 form-check-input" />
-            <label for="selectAll fw-bold m-0" class="SelectallDesignation form-check-label">Select all</label>
+          <div class="form-check ps-1" v-if="DesignationList.length && selectedBlockIndex == 0">
+            <div>
+              <!-- :disabled="ViewOnlyReportee"  -->
+              <input type="checkbox" id="selectAll" v-model="isAllSelected" class="me-2 mt-1 form-check-input" />
+              <label for="selectAll fw-bold m-0" class="SelectallDesignation form-check-label">Select all</label>
+            </div>
+
           </div>
         </div>
         <ul v-if="DesignationList.length" class="list-unstyled">
           <li v-for="(item, index) in filteredDesignationList" :key="index" class="designationList">
-            <input type="checkbox" v-model="designationValue" :value="item" class="designationCheckBox"
+            <input type="checkbox" v-model="designationValue" :value="item" class="designationCheckBox" 
               @change="handleSingleSelect" />
-            <span class="ps-2">{{ item }}</span>
+            <span class="ps-2" :class="{ 'opacity-50': ViewOnlyReportee }">{{ item }}</span>
           </li>
         </ul>
         <div v-else>
@@ -966,7 +981,7 @@ const formShortNameError = ref("");
 const selectedBlockIndex = ref("");
 let workflowSetup = reactive([]);
 const searchDesignation = ref("");
-
+const ViewOnlyReportee = ref(0);
 const wrkAfterGetData = ref([]);
 // const hasWorkflowToastShown = ref(false);
 const tableFieldsCache = ref([]);
@@ -1022,6 +1037,16 @@ watch(
   },
   { immediate: true }
 );
+// const ViewOnlyReporteeFn = () => {
+//   if (ViewOnlyReportee.value) {
+//     designationValue = [];
+//     isAllSelected = false;
+//     employeeData()
+//   }
+// };
+
+
+
 
 const filteredDesignationList = computed(() => {
   return DesignationList.value
@@ -1609,6 +1634,10 @@ function addDesignationBtn() {
   };
 
   // workflowSetup.push(xyz)
+  if (selectedBlockIndex.value !== 0) {
+    xyz.view_only_reportee = ViewOnlyReportee.value === true ? 1 : 0;
+  }
+  console.log(xyz);
 
   const existingIndex = workflowSetup.findIndex((item) => item.idx === xyz.idx);
   if (existingIndex !== -1) {

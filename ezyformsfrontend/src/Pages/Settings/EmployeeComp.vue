@@ -43,23 +43,15 @@
                       <label class="font-13 ps-1" for="emp_code">Emp code<span class="text-danger ps-1">*</span></label>
                       <FormFields class="mb-3" tag="input" type="text" name="emp_code" id="emp_code"
                         placeholder="Enter Emp code" v-model="createEmployee.emp_code" />
-                        <div class="mb-3">
-  <label class="font-13 ps-1" for="emp_phone">Emp Phone</label>
-  <FormFields 
-    tag="input" 
-    type="text" 
-    name="emp_phone" 
-    id="emp_phone" 
-    maxlength="13"
-    @input="formatPhoneNumber" 
-    @change="validatephonenew" 
-    placeholder="Enter Phone Number"
-    v-model="createEmployee.emp_phone" 
-  />
-  <p v-if="phoneError" class="text-danger font-11 ps-1">
-    {{ phoneError }}
-  </p>
-</div>
+                      <div class="mb-3">
+                        <label class="font-13 ps-1" for="emp_phone">Emp Phone</label>
+                        <FormFields tag="input" type="text" name="emp_phone" id="emp_phone" maxlength="13"
+                          @input="formatPhoneNumber" @change="validatephonenew" placeholder="Enter Phone Number"
+                          v-model="createEmployee.emp_phone" />
+                        <p v-if="phoneError" class="text-danger font-11 ps-1">
+                          {{ phoneError }}
+                        </p>
+                      </div>
 
                       <div class="mb-3">
                         <label class="font-13 ps-1" for="emp_mail_id">Emp Mail ID<span
@@ -139,7 +131,8 @@
                                             id="reporting_to" placeholder="Enter Reporting To"
                                             v-model="createEmployee.reporting_to" /> -->
                       <VueMultiselect v-model="createEmployee.reporting_to"
-                        :options="tableData.map((dept) => dept.emp_name)" :multiple="false" :close-on-select="true"
+                        :options="tableData.map((dept) => dept.emp_mail_id)" :multiple="false" :close-on-select="true"  label="emp_name"
+  track-by="emp_mail_id"
                         :clear-on-select="false" :preserve-search="true" placeholder="Select Reporting To"
                         class="font-11 mb-3">
                         <!-- taggable
@@ -343,7 +336,7 @@
                     <div class="input-container">
                       <FormFields tag="input" type="text" name="emp_phone" id="emp_phone" maxlength="10" class="w-100"
                         :readonly="true" placeholder="Enter Phone Number" v-model="createEmployee.emp_phone"
-                        @input="maskPhoneNumber" @change="validatePhone"  />
+                        @input="maskPhoneNumber" @change="validatePhone" />
                       <i :class="eyeIcon" class="eye-icon" @click="toggleMask"></i>
                     </div>
                     <p v-if="phoneError" class="text-danger font-11 ps-1">
@@ -412,7 +405,7 @@
                   </VueMultiselect>
                   <label class="font-13 ps-1" for="reporting_to">Reporting To</label>
                   <VueMultiselect v-model="createEmployee.reporting_to"
-                    :options="tableData.map((dept) => dept.emp_name)" :multiple="false" :close-on-select="true"
+                    :options="tableData.map((dept) => dept.emp_mail_id)" :multiple="false" :close-on-select="true"
                     :clear-on-select="false" :preserve-search="true" placeholder="Select Reporting To"
                     class="font-11 mb-3">
 
@@ -698,7 +691,7 @@ const buluploding = () => {
 
 const formattedData = computed(() => {
   const data = bulkdata.value?.records || [];
-  
+
   return data.map((record, index) => {
     let email = "N/A";
     let messageText = "N/A";
@@ -1104,7 +1097,7 @@ watch(
   (newValue) => {
     if (newValue) {
       const selectedEmployee = tableData.value.find(
-        (emp) => emp.emp_name === newValue
+        (emp) => emp.emp_mail_id === newValue
       );
       if (selectedEmployee) {
         createEmployee.value.reporting_designation =
@@ -1151,7 +1144,7 @@ function createEmplBtn() {
 function actionCreated(rowData, actionEvent) {
   if (actionEvent?.name === 'Edit Employee') {
     if (rowData) {
-      phoneError.value= ""
+      phoneError.value = ""
       deptData();
       designationData();
       createEmployee.value = { ...rowData }
@@ -1381,7 +1374,7 @@ function employeeData(data) {
     .then((res) => {
       if (res.data) {
         const newData = res.data
-        if(filterObj.value.limit_start === 0){
+        if (filterObj.value.limit_start === 0) {
 
           tableData.value = newData;
           // designations.value = [...new Set(res.data.map((designation) => designation.designation))];
@@ -1392,13 +1385,13 @@ function employeeData(data) {
             ...new Set(
               res.data.map(
                 (reportingDesigination) =>
-                reportingDesigination.reporting_designation
+                  reportingDesigination.reporting_designation
               )
             ),
           ];
           createEmployee.value.company_field = businessUnit.value;
         }
-        else{
+        else {
           tableData.value = tableData.value.concat(newData);
         }
       }
