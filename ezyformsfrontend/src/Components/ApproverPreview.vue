@@ -134,7 +134,7 @@
                           class="position-relative d-inline-block"
                           :class="props.readonlyFor === 'true' ? 'image-border-bottom' : ''">
                           <!-- Image preview (if image) -->
-                          <img v-if="isImageFile(file)" :src="file" class="img-thumbnail mt-2 cursor-pointer border-0"
+                          <img v-if="isImageFile(file)" :src="file" class="img-thumbnail mt-2 cursor-pointer border-0" @click="openFile(file)"
                             style="max-width: 100px; max-height: 100px" @mouseover="showPreview = i"
                             @mouseleave="showPreview = null" />
 
@@ -469,9 +469,28 @@ const getAllFieldsData = () => {
 // };
 
 const openFile = (filePath) => {
-  const fileUrl = `${filePath}`;
-  window.open(fileUrl, "_blank");
+  const fileUrl = filePath.trim();
+
+  if (/\.(pdf)$/i.test(fileUrl)) {
+    // For PDFs: open in new tab
+    window.open(fileUrl, '_blank');
+  } else if (/\.(jpg|jpeg|png|gif)$/i.test(fileUrl)) {
+    // For images: create a new tab and write <img> inside it
+    const win = window.open();
+    win.document.write(`
+      <html>
+        <head><title>Image Preview</title></head>
+        <body style="margin:0;display:flex;justify-content:center;align-items:center;height:100vh;background:#000">
+          <img src="${fileUrl}" style="max-width:100%;max-height:100%;" />
+        </body>
+      </html>
+    `);
+    win.document.close();
+  } else {
+    alert('Unsupported file type');
+  }
 };
+
 const isFilePath = (value) => {
   if (!value) return false;
   return /\.(png|jpg|jpeg|gif|pdf|docx|xlsx|txt)$/i.test(value);
