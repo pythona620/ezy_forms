@@ -218,6 +218,8 @@
                                                 ]
                                             }}
                                         </div>
+                            <span v-if="field.description !== 'Field'" class="font-11"><span class="fw-semibold">Description: </span>{{ field.description }}</span>
+
                                     </div>
                                 </div>
                             </div>

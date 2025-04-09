@@ -5,6 +5,12 @@
         <h1 class="m-0 font-13">Requests received for me</h1>
         <p class="m-0 font-11 pt-1">{{ totalRecords }} request</p>
       </div>
+      <!-- <div>
+        <input type="checkbox" id="ViewOnlyReportee" v-model="ViewOnlyReportee" class="me-2 mt-1 form-check-input" @change="ViewOnlyRe" />
+              <label for="ViewOnlyReportee " class="SelectallDesignation  font-12 m-0 form-check-label">View Only Reportee</label>
+        
+        
+      </div> -->
     </div>
     <div class="mt-2">
       <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" viewType="viewPdf" isCheckbox="true"
@@ -32,7 +38,7 @@
             <div class="activity-log-container">
               <div v-for="(item, index) in activityData" :key="index" class="activity-log-item"
                 :class="{ 'last-item': index === activityData.length - 1 }">
-                <div class="activity-log-dot"></div>
+                <div class="activity-log-dot"></div>def add_roles_to_wf_requestors
                 <div class="activity-log-content">
                   <p class="font-12 mb-1">
                     On
@@ -133,7 +139,7 @@ const emittedFormData = ref([]);
 const selectedcurrentLevel = ref("");
 const activityData = ref([]);
 const responseData = ref([]);
-
+const ViewOnlyReportee =  ref(false);
 const tableheaders = ref([
   // { th: "Request ID", td_key: "name" },
   { th: "Form name", td_key: "name" },
@@ -177,17 +183,34 @@ onMounted(() => {
     console.error("Error parsing employeeData from localStorage:", error);
     employeeData.value = []; // Fallback to empty array if there's an error
   }
+
 });
 
+const viewlist = ref([])
+function ViewOnlyReport(){
+
+  // console.log(ViewOnlyReportee.value); 
+  axiosInstance
+    .post(apis.view_only_reportee,)
+    .then((response) => {
+      console.log(response.message,"list");
+      viewlist.value = response.message;
+
+      // const filters = [ "name","in", viewlist.value];
+      receivedForMe()
+
+    })
+    .catch((error) => {
+      console.log(error);
+      });
+   
+
+}
 function actionCreated(rowData, actionEvent) {
   if (actionEvent.name === "View Request") {
     if (rowData) {
       selectedRequest.value = { ...rowData };
       selectedcurrentLevel.value = selectedRequest.value.current_level;
-
-
-      // console.log("doctype_name",selectedRequest.value.doctype_name);
-      // console.log("Property name",selectedRequest.value.property);
 
 
       // Rebuild the structured array from JSON
@@ -351,187 +374,17 @@ const isCommentsValid = ref(true); // Flag to validate comment field
 //   }
 // };
 
-const resetCommentsValidation = () => {
-  if (ApproverReason.value.trim() !== "") {
-    // If comment is not empty, set isCommentsValid to true
-    isCommentsValid.value = true;
-  }
-};
-// Function to handle form submission
-function ApproverFormSubmission(dataObj, type) {
-
-  if (ApproverReason.value.trim() === "") {
-    isCommentsValid.value = false; // Show validation error
-    return; // Stop execution
-  }
-
-  isCommentsValid.value = true;
-  loading.value = true; // Start loader
 
 
 
 
-  let form = {};
-  if (emittedFormData.value.length) {
-    emittedFormData.value.map((each) => {
-      form[each.fieldname] = each.value;
-    });
-  }
-  axiosInstance
-    .put(
-      `${apis.resource}${selectedRequest.value.doctype_name}/${doctypeForm.value.name}`,
-      form
-    )
-    .then((response) => {
-      if (response?.data) {
-        approvalStatusFn(dataObj, type);
-
-      }
-    })
-    .catch((error) => {
-      console.error("Error submitting form:", error);
-    })
-
-}
-
-
-function approvalStatusFn(dataObj, type) {
-
-
-  console.log(dataObj);
-  let data = {
-    property: selectedRequest.value.property,
-    doctype: selectedRequest.value.doctype_name,
-    request_ids: [selectedRequest.value.name],
-    reason: ApproverReason.value,
-    action: type,
-    files: null,
-    cluster_name: null,
-    url_for_approval_id: "",
-    // https://ezyrecon.ezyinvoicing.com/home/wf-requests
-    current_level: selectedRequest.value.current_level,
-  };
-
-  // need to check this api not working
-  axiosInstance
-    .post(apis.requestApproval, { request_details: [data] })
-    .then((response) => {
-      if (response?.message?.success === true) {
-        toast.success(`Request ${type}ed`, { autoClose: 1000, transition: "zoom" });
-        const modal = bootstrap.Modal.getInstance(document.getElementById("viewRequest"));
-        modal.hide();
-        ApproverReason.value = ""; // Clear reason after success
-
-
-        receivedForMe();
-      } else {
-        toast.error(`Failed to ${type} request`, { autoClose: 1000, transition: "zoom" });
-      }
-    })
-    .catch((error) => {
-      console.error("Error processing request:", error);
-      // toast.error("An error occurred while processing your request.", { autoClose: 1000, transition: "zoom" });
-    })
-    .finally(() => {
-      loading.value = false; // Ensure loader stops
-    });
-}
-
-
-function ApproverCancelSubmission(dataObj, type) {
-
-  if (ApproverReason.value.trim() === "") {
-    // Set the validation flag to false if the comment is empty
-    isCommentsValid.value = false;
-
-    return; // Stop function execution
-  }
-  // Proceed if comments are valid
-  isCommentsValid.value = true;
-
-  Rejectloading.value = true; // Start loader
-
-
-
-  let form = {};
-  if (emittedFormData.value.length) {
-    emittedFormData.value.map((each) => {
-      form[each.fieldname] = each.value;
-    });
-  }
-  axiosInstance
-    .put(
-      `${apis.resource}${selectedRequest.value.doctype_name}/${doctypeForm.value.name}`,
-      form
-    )
-    .then((response) => {
-      if (response?.data) {
-        const modal = bootstrap.Modal.getInstance(document.getElementById("viewRequest"));
-        modal.hide();
-        approvalCancelFn(dataObj, type);
-      }
-    });
-}
-function approvalCancelFn(dataObj, type) {
-
-
-  console.log(dataObj, "data", type);
-  let data = {
-    property: selectedRequest.value.property,
-    doctype: selectedRequest.value.doctype_name,
-    request_id: selectedRequest.value.name,
-    reason: ApproverReason.value,
-    action: type,
-    files: [],
-    url_for_cancelling_id: "",
-    current_level: selectedRequest.value.current_level,
-  };
-
-  axiosInstance
-    .post(apis.wf_cancelling_request, data)
-    .then((response) => {
-      if (response?.message) {
-        ApproverReason.value = "";
-        if (type == "Request Cancelled") {
-          toast.success(`${type}`, { autoClose: 1000, transition: "zoom" });
-        }
-        const modal = bootstrap.Modal.getInstance(document.getElementById("viewRequest"));
-        modal.hide();
-        receivedForMe();
-      }
-    })
-    .catch((error) => {
-      console.error("Error processing cancellation:", error);
-      toast.error("An error occurred while processing your request.", { autoClose: 1000, transition: "zoom" });
-    })
-    .finally(() => {
-      Rejectloading.value = false; // Ensure loader stops
-    });
-}
 
 
 
 
-function mapFormFieldsToRequest(doctypeData, showRequestData) {
-  showRequestData.forEach((block) => {
-    block.sections.forEach((section) => {
-      section.rows.forEach((row) => {
-        row.columns.forEach((column) => {
-          column.fields.forEach((field) => {
-            // Check if the fieldname exists in the doctypeForm and assign the value
-            if (doctypeData?.hasOwnProperty(field?.fieldname)) {
-              field.value = doctypeData[field?.fieldname]; // Assign the value from doctypeForm to the field
-            }
-          });
-        });
-      });
-    });
-  });
-}
 
-function closeModal() {
-  isCommentsValid.value = true;
-}
+
+
 
 const PaginationUpdateValue = (itemsPerPage) => {
   filterObj.value.limitPageLength = itemsPerPage;
@@ -590,6 +443,7 @@ function receivedForMe(data) {
     ["assigned_to_users", "like", `%${EmpRequestdesignation?.designation}%`],
     ["property", "like", `%${newBusinessUnit.value.business_unit}%`],
     ["status", "!=", "Request Cancelled"],
+    ["name","in", viewlist.value]
   ];
   if (data) {
     filters.push(data);
@@ -654,7 +508,7 @@ const fieldMapping = computed(() => ({
   role: { type: "input" },
 
 
-  status: { type: "select", options:["Completed","Request Raised","In Progress"] },
+  status: { type: "select", options:["Request Raised","In Progress"] },
 
 }));
 
@@ -665,7 +519,7 @@ watch(
     newBusinessUnit.value.business_unit = newVal;
 
     if (newVal.length) {
-      receivedForMe();
+      ViewOnlyReport();
     }
   },
   { immediate: true }

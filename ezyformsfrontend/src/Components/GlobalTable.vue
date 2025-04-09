@@ -166,7 +166,7 @@
                 {{ row[column.td_key].replace(/_/g, " ") || "-" }}
               </span> -->
               <span v-else>
-  {{ row[column.td_key]?.replace(/_/g, " ").replace(/@[\w.-]+/, "") || "-" }}
+  {{ row[column.td_key]?.replace(/@[\w.-]+/, "") || "-" }}
 </span>
 
             </td>

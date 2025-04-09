@@ -83,15 +83,14 @@
                                 <span class="font-12">{{ field.label }}</span>
                                 <span class="ms-1 text-danger">{{
                                   field.reqd === 1 ? "*" : ""
-                                  }}</span>
+                                }}</span>
                               </label>
                               <!-- field.fieldtype == 'Select' || -->
                               <template v-if="field.fieldtype == 'Table MultiSelect'">
                                 <select :multiple="field.fieldtype == 'Table MultiSelect'
                                   " v-model="field.value" class="form-select mb-2 font-13">
-                                  <option v-for="(
-option, index
-                                    ) in field.options?.split('\n')" :key="index" :value="option">
+                                  <option v-for="(option, index
+                                  ) in field.options?.split('\n')" :key="index" :value="option">
                                     {{ option }}
                                   </option>
                                 </select>
@@ -103,9 +102,8 @@ option, index
                               ">
                                 <div class="container-fluid">
                                   <div class="row">
-                                    <div class="form-check col-4 mb-4" v-for="(
-option, index
-                                      ) in field?.options?.split('\n')" :key="index">
+                                    <div class="form-check col-4 mb-4" v-for="(option, index
+                                    ) in field?.options?.split('\n')" :key="index">
                                       <div class="d-flex gap-2 align-items-center">
                                         <div>
                                           <input v-if="
@@ -143,6 +141,7 @@ option, index
                                   :type="field.fieldtype" class="form-control previewInputHeight font-10" />
                               </template>
                             </div>
+                            <span v-if="field.description !== 'Field'" class="font-11"><span class="fw-semibold">Description: </span>{{ field.description }}</span>
                           </div>
                         </div>
                       </div>
@@ -172,7 +171,7 @@ option, index
                           </th>
                         </tr>
                       </thead>
-                       <tbody>
+                      <tbody>
                         <tr>
                           <td>{{ '-' }}</td>
                           <td v-for="(field, index) in table" :key="index">

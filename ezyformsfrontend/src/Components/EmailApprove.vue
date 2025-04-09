@@ -69,7 +69,7 @@
                       </div>
                       <div>
                         <button :disabled="loading" type="submit" class="btn btn-success approvebtn"
-                          @click.prevent="ApproverFormSubmission(emittedFormData, 'Approve')">
+                          @click.prevent="ApproverFormSubmissionNew('Approve')">
                           <span v-if="loading" class="spinner-border spinner-border-sm" role="status"
                             aria-hidden="true"></span>
                           <span v-if="!loading"><i class="bi bi-check-lg font-15 me-2"></i><span
@@ -239,6 +239,7 @@ const business_unit = ref('');
 const filterObj = ref({ limitPageLength: "None", limit_start: 0 });
 const totalRecords = ref(0);
 const tableData = ref([]);
+const tableWFData = ref([]);
 const emittedFormData = ref([]);
 const showRequest = ref(null);
 const isCommentsValid = ref(true);
@@ -367,6 +368,26 @@ const updateFormData = (fieldValues) => {
 
   // console.log(emittedFormData.value, "======");
 };
+ function ApproverFormSubmissionNew(action){
+  const data = {
+    token : selectedData.value.token,
+    action: action,
+    reason: ApproverReason.value
+    }
+
+
+  axiosInstance
+    .get(apis.toMailApproval,{ params: data })
+    .then((res) => {
+      console.log(res);
+     
+    })
+    .catch((error) => {
+      console.error("Error fetching records:", error);
+    });
+ }
+
+
 // Function to handle form submission
 function ApproverFormSubmission(dataObj, type) {
   if (ApproverReason.value.trim() === "") {
@@ -593,99 +614,34 @@ function approvalCancelFn(dataObj, type) {
 }
 
 
-function receivedForMe(data) {
-  // Initialize filters array for building dynamic query parameters
-  const EmpRequestdesignation = JSON.parse(localStorage.getItem("employeeData"));
-  const filters = [
+function receivedForMe() {
 
-  ];
-  if (business_unit.value) {
-    filters.push(["property", "like", `%${business_unit.value}%`]);
-  }
-  if (selectedData.value.formname) {
-    filters.push(["name", "like", `%${selectedData.value.formname}%`]);
-  }
-
-  if (data) {
-    filters.push(data);
-  }
-
-  if (selectedData.value.type !== "myteam" && EmpRequestdesignation?.designation) {
-    if (selectedData.value.type == "myforms") {
-      filters.push(["requested_by", "like", EmpRequestdesignation?.emp_mail_id]);
-    } else {
-      filters.push([
-        "assigned_to_users",
-        "like",
-        `%${EmpRequestdesignation?.designation}%`,
-      ]);
+  const data = {
+    token : selectedData.value.token
     }
-  }
 
-  const queryParams = {
-    fields: JSON.stringify(["*"]),
-    limit_page_length: filterObj.value.limitPageLength,
-    limit_start: filterObj.value.limit_start,
-    filters: JSON.stringify(filters),
-    order_by: "`tabWF Workflow Requests`.`creation` desc",
-  };
 
-  const queryParamsCount = {
-    fields: JSON.stringify(["count(name) AS total_count"]),
-    limitPageLength: "None",
-    filters: JSON.stringify(filters),
-  };
-
-  // Get token from selectedData or localStorage
-  const token = selectedData.value.token || localStorage.getItem("authToken");
-
-  // Define headers with Content-Type
-  const headers = {
-    "Content-Type": "application/json",
-  };
-
-  // Add Authorization header only if token exists
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
-
-  // Fetch total count of records matching filters
   axiosInstance
-    .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, {
-      params: queryParamsCount,
-      headers,
-    })
+    .get(apis.toMailApproval,{ params: data })
     .then((res) => {
-      totalRecords.value = res.data[0].total_count;
-    })
-    .catch((error) => {
-      console.error("Error fetching total count:", error);
-    });
-
-  // Fetch the records matching filters
-  axiosInstance
-    .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, {
-      params: queryParams,
-      headers,
-    })
-    .then((res) => {
-      tableData.value = res.data[0];
+      tableData.value = res.message.message.doc_data;
+      tableWFData.value = res.message.message.wf_data
 
       showRequest.value = rebuildToStructuredArray(
-        JSON.parse(tableData.value?.json_columns).fields
+        JSON.parse(tableWFData.value?.json_columns).fields
       );
 
-      console.log(tableData.value);
-      tableHeaders.value = JSON.parse(tableData.value?.json_columns).child_table_fields;
-
+      console.log(showRequest.value,"pppa--------------");
+      mapFormFieldsToRequest(tableData.value, showRequest.value);
+      tableHeaders.value = JSON.parse(tableWFData.value?.json_columns).child_table_fields;
       console.log(tableHeaders.value, "req");
 
-      if (res.data.length) {
-        Wfactivitylog(tableData.value.name);
-        getdata(tableData.value.name);
-      }
+      // if (res.data.length) {
+      //   Wfactivitylog(tableData.value.name);
+      //   getdata(tableData.value.name);
+      // }
 
-      selectedcurrentLevel.value = tableData.value.current_level;
+      selectedcurrentLevel.value = tableWFData.value.current_level;
     })
     .catch((error) => {
       console.error("Error fetching records:", error);
@@ -712,7 +668,7 @@ function getdata(formname) {
     .then((res) => {
       if (res.data) {
         doctypeForm.value = res.data[0];
-        mapFormFieldsToRequest(doctypeForm.value, showRequest.value);
+        // mapFormFieldsToRequest(doctypeForm.value, showRequest.value);
         let configHeaders = {};
         if (selectedData.value.token) {
           configHeaders.headers = { Authorization: `Bearer ${selectedData.value.token}`, };

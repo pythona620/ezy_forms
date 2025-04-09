@@ -569,7 +569,7 @@
                                               [
                                                 'Select',
                                                 'Table MultiSelect',
-                                                'Check','Small Text'
+                                                'Check', 'Small Text'
                                               ].includes(field.fieldtype)
                                             ">
                                               <label class="font-12 fw-light" for="options">Enter Options:</label>
@@ -584,16 +584,33 @@
                                               </small>
                                             </div>
 
-                                            <div class="d-flex gap-2 align-items-center">
-                                              <div class="d-flex align-items-center">
-                                                
-                                                <input class="font-12" v-model="field.reqd" :true-value="1" :false-value="0" placeholder="Field Name"
-                                                  type="checkbox" />
+                                            <div class="d-flex  align-items-center justify-content-between">
+                                              <div class=" d-flex align-items-center gap-2">
+                                                <div class="d-flex align-items-center">
+
+                                                  <input class="font-12" v-model="field.reqd" :true-value="1"
+                                                    :false-value="0" placeholder="Field Name" type="checkbox" />
+                                                </div>
+                                                <div>
+                                                  <label for="mandatory" class="font-12 m-0 fw-light">Mandatory</label>
+                                                </div>
                                               </div>
                                               <div>
-                                                <label for="mandatory" class="font-12 m-0 fw-light">Mandatory</label>
+
+                                                <button class="btn btn-sm  font-12"
+                                                  @click="field.showDescription = !field.showDescription">
+                                                  {{ field.showDescription ? 'Hide Description' : (field.description ?
+                                                  'Edit Description'
+                                                  : 'Add Description') }}
+                                                </button>
                                               </div>
                                             </div>
+
+                                            <!-- Description Textarea -->
+                                            <textarea v-if="field.showDescription" v-model="field.description"
+                                              class="form-control font-12 mt-2"
+                                              placeholder="Enter field description"></textarea>
+
                                             <small v-if="field.error" class="text-danger font-10">{{ field.error
                                             }}</small>
                                           </div>
@@ -866,7 +883,7 @@
 
     <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
       <div class="offcanvas-header add_designationHeader">
-        <span id="offcanvasRightLabel font-14">
+        <span id="offcanvasRightLabel" class="font-14">
           Add designation for
           {{ selectedBlockIndex == 0 ? "Requestor" : "Approver" }}
         </span>
@@ -876,19 +893,32 @@
       </div>
       <div class="offcanvas-body">
         <div class="">
+          <div class="form-check ps-1" v-if="selectedBlockIndex !== 0">
+            <div>
+
+              <input type="checkbox" id="ViewOnlyReportee" v-model="ViewOnlyReportee"
+                class="me-2 mt-1  form-check-input"  />
+              <label for="ViewOnlyReportee " class="SelectallDesignation fw-bold mt-1 form-check-label">View Only
+                Reportee</label>
+            </div>
+          </div>
           <input v-model="searchDesignation" class="px-2 py-1 rounded-2 form-control shadow-none my-3" type="text"
             placeholder="Search Designation" />
 
-          <div class="form-check ps-1" v-if="DesignationList.length">
-            <input type="checkbox" id="selectAll" v-model="isAllSelected" class="me-2 mt-1 form-check-input" />
-            <label for="selectAll fw-bold m-0" class="SelectallDesignation form-check-label">Select all</label>
+          <div class="form-check ps-1" v-if="DesignationList.length && selectedBlockIndex == 0">
+            <div>
+              <!-- :disabled="ViewOnlyReportee"  -->
+              <input type="checkbox" id="selectAll" v-model="isAllSelected" class="me-2 mt-1 form-check-input" />
+              <label for="selectAll fw-bold m-0" class="SelectallDesignation form-check-label">Select all</label>
+            </div>
+
           </div>
         </div>
         <ul v-if="DesignationList.length" class="list-unstyled">
           <li v-for="(item, index) in filteredDesignationList" :key="index" class="designationList">
-            <input type="checkbox" v-model="designationValue" :value="item" class="designationCheckBox"
+            <input type="checkbox" v-model="designationValue" :value="item" class="designationCheckBox" 
               @change="handleSingleSelect" />
-            <span class="ps-2">{{ item }}</span>
+            <span class="ps-2" :class="{ 'opacity-50': ViewOnlyReportee }">{{ item }}</span>
           </li>
         </ul>
         <div v-else>
@@ -951,7 +981,7 @@ const formShortNameError = ref("");
 const selectedBlockIndex = ref("");
 let workflowSetup = reactive([]);
 const searchDesignation = ref("");
-
+const ViewOnlyReportee = ref(false);
 const wrkAfterGetData = ref([]);
 // const hasWorkflowToastShown = ref(false);
 const tableFieldsCache = ref([]);
@@ -1007,6 +1037,16 @@ watch(
   },
   { immediate: true }
 );
+// const ViewOnlyReporteeFn = () => {
+//   if (ViewOnlyReportee.value) {
+//     designationValue = [];
+//     isAllSelected = false;
+//     employeeData()
+//   }
+// };
+
+
+
 
 const filteredDesignationList = computed(() => {
   return DesignationList.value
@@ -1492,8 +1532,8 @@ const fieldTypes = [
     type: "Select",
   },
   {
-      label: "MultiSelect",
-      type: "Small Text",
+    label: "MultiSelect",
+    type: "Small Text",
   },
   // {
   //     label: "Signature",
@@ -1594,6 +1634,10 @@ function addDesignationBtn() {
   };
 
   // workflowSetup.push(xyz)
+  if (selectedBlockIndex.value !== 0) {
+    xyz.view_only_reportee = ViewOnlyReportee.value === true ? 1 : 0;
+  }
+  console.log(xyz);
 
   const existingIndex = workflowSetup.findIndex((item) => item.idx === xyz.idx);
   if (existingIndex !== -1) {
@@ -1611,16 +1655,27 @@ function addDesignationBtn() {
 // };
 
 function getWorkflowSetup(blockIndex) {
+
   return workflowSetup.find((setup) => setup.idx === blockIndex) || { roles: [] };
 }
 
-// Initialize `designationValue` based on the roles for the given block index
 function initializeDesignationValue(blockIndex) {
-  const rolesForBlock = getWorkflowSetup(blockIndex).roles || [];
-  designationValue.value = [...rolesForBlock]; // Reset designationValue to match only roles for the current block
+  const currentSetup = getWorkflowSetup(blockIndex);
+  const rolesForBlock = currentSetup.roles || [];
+  designationValue.value = [...rolesForBlock];
+
+  // Check for view_only_reportee flag
+  ViewOnlyReportee.value = currentSetup.view_only_reportee === 1;
 }
 
+// Initialize `designationValue` based on the roles for the given block index
+// function initializeDesignationValue(blockIndex) {
+//   const rolesForBlock = getWorkflowSetup(blockIndex).roles || [];
+//   designationValue.value = [...rolesForBlock]; // Reset designationValue to match only roles for the current block
+// }
+
 const AddDesignCanvas = (idx) => {
+  ViewOnlyReportee.value = false;
   // console.log(idx, "---clicked idex", selectedBlockIndex.value);
   if (filterObj.value.accessible_departments.length) {
     designationData(filterObj.value.accessible_departments);
@@ -1978,7 +2033,7 @@ const addBlock = () => {
                 columns: [
                   {
                     label: "",
-                    fields: [{ label: "", fieldtype: "", options: "", reqd: false }],
+                    fields: [{ label: "", fieldtype: "", options: "", reqd: false, description: "" }],
                   },
                 ],
               },
@@ -2332,7 +2387,7 @@ function getAllLabels(blockArr) {
 function handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) {
   const allLabels = getAllLabels(blockArr);
   const duplicateLabels = allLabels.filter((label, index, arr) => arr.indexOf(label) !== index);
-  
+
   const checkFieldType = addErrorMessagesToStructuredArray(blockArr);
   blockArr.splice(0, blockArr.length, ...checkFieldType);
 
