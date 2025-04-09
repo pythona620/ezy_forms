@@ -165,6 +165,7 @@
               <!-- <span v-else>
                 {{ row[column.td_key].replace(/_/g, " ") || "-" }}
               </span> -->
+              <!-- src/Components/GlobalTable.vue -->
               <span v-else>
   {{ row[column.td_key] || "-" }}
 </span>
