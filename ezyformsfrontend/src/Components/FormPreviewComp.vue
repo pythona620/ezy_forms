@@ -110,7 +110,7 @@ option, index
                                                                             :id="option" readonly />
                                                                     </div>
                                                                     <div>
-                                                                        <label class="form-check-label m-0"
+                                                                        <label class="form-check-label font-12 m-0"
                                                                             :for="option">{{ option
                                                                             }}</label>
                                                                     </div>

@@ -16,17 +16,16 @@
                   <h6 class="m-0 font-12">{{ column.label }}</h6>
                 </div>
                 <div class="mx-3 my-2">
-                  <div v-for="(field, fieldIndex) in column.fields" 
-     :key="'field-preview-' + fieldIndex"
-     :class="(props.readonlyFor === 'true' || blockIndex < currentLevel) && field.fieldtype !== 'Small Text' ? 'd-flex align-items-end mb-2' : ''">
-  
-  <div v-if="field.label">
-    <label :for="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex">
-      <span class="font-12">{{ field.label }}</span>
-      <span class="ms-1 text-danger">{{ field.reqd === 1 ? "*" : "" }}</span>
-      <span class="pe-2" v-if="props.readonlyFor === 'true' || blockIndex < currentLevel">:</span>
-    </label>
-  </div>
+                  <div v-for="(field, fieldIndex) in column.fields" :key="'field-preview-' + fieldIndex"
+                    :class="(props.readonlyFor === 'true' || blockIndex < currentLevel) && field.fieldtype !== 'Small Text' ? 'd-flex align-items-end mb-2' : ''">
+
+                    <div v-if="field.label">
+                      <label :for="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex">
+                        <span class="font-12">{{ field.label }}</span>
+                        <span class="ms-1 text-danger">{{ field.reqd === 1 ? "*" : "" }}</span>
+                        <span class="pe-2" v-if="props.readonlyFor === 'true' || blockIndex < currentLevel">:</span>
+                      </label>
+                    </div>
                     <!-- field.fieldtype === 'Select' || -->
                     <!-- Field Type Select or Multiselect -->
                     <template v-if="field.fieldtype === 'multiselect'">
@@ -49,7 +48,7 @@
                         <div class="row">
                           <div class="form-check col-4 mb-1" v-for="(option, index) in field?.options?.split('\n')"
                             :key="index"
-                            :class="{ 'd-none': !(JSON.parse(field.value || '[]') || []).includes(option)  }">
+                            :class="{ 'd-none': !(JSON.parse(field.value || '[]') || []).includes(option) }">
 
                             <div>
                               <input class="form-check-input" type="checkbox"
@@ -61,7 +60,7 @@
                             </div>
 
                             <div>
-                              <label class="form-check-label m-0" :for="`${option}-${index}`">
+                              <label class="form-check-label font-12 m-0" :for="`${option}-${index}`">
                                 {{ option }}
                               </label>
                             </div>
@@ -130,70 +129,45 @@
 
                     <!-- @click="openInNewWindow(field.value)" -->
                     <template v-else-if="field.fieldtype == 'Attach'">
-                      <div v-if="field.value" class="position-relative d-inline-block"
-                        :class="props.readonlyFor === 'true' ? 'image-border-bottom' : ''">
-                        <img v-if="isImageFile(field.value) || field.value" :src="field.value"
-                          class="img-thumbnail mt-2 cursor-pointer border-0"
-                          style="max-width: 100px; max-height: 100px" />
-                        <!-- @mouseover="showPreview = true" @mouseleave="showPreview = false" -->
-                        <!-- Close Icon to Remove Image -->
-                        <i class="bi bi-x-lg position-absolute  text-danger cursor-pointer"
-                          :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'd-none' : ''" style="
-                            top: -10px;
-                            right: -5px;
-                            font-size: 13px;
-                            background: white;
-                            border-radius: 50%;
-                            padding: 3px;
-                          " @click="
-                            clearImage(
-                              blockIndex,
-                              sectionIndex,
-                              rowIndex,
-                              columnIndex,
-                              fieldIndex
-                            )
-                            "></i>
+                      <div v-if="field.value" class="d-flex gap-2 flex-wrap">
+                        <div v-for="(file, i) in getFileArray(field.value)" :key="i"
+                          class="position-relative d-inline-block"
+                          :class="props.readonlyFor === 'true' ? 'image-border-bottom' : ''">
+                          <!-- Image preview (if image) -->
+                          <img v-if="isImageFile(file)" :src="file" class="img-thumbnail mt-2 cursor-pointer border-0"
+                            style="max-width: 100px; max-height: 100px" @mouseover="showPreview = i"
+                            @mouseleave="showPreview = null" />
 
-                        <!-- Pop-up Enlarged Image -->
-                        <div v-if="showPreview" class="image-popup position-absolute" style="
-                            top: 0;
-                            left: 110%;
-                            width: 200px;
-                            height: auto;
-                            z-index: 10;
-                            background: white;
-                            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
-                            border-radius: 5px;
-                            padding: 5px;
-                          ">
-                          <img :src="field.value" alt="Enlarged Preview" style="
-                              width: 100%;
-                              height: auto;
-                              border-radius: 5px;
-                            " />
+                          <!-- PDF Preview icon -->
+                          <a v-else :href="file" target="_blank"
+                            class="d-flex align-items-center justify-content-center mt-2 border rounded bg-light"
+                            style="width: 100px; height: 100px; text-decoration: none;">
+                            <i class="bi bi-file-earmark-pdf-fill fs-2 text-danger"></i>
+                          </a>
+
+                          <!-- Close Icon to Remove Image -->
+                          <i class="bi bi-x-lg position-absolute text-danger cursor-pointer"
+                            :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'd-none' : ''"
+                            style="top: -10px; right: -5px; font-size: 13px; background: white; border-radius: 50%; padding: 3px"
+                            @click="removeFileAtIndex(i)"></i>
+
+                          <!-- Pop-up Enlarged Image -->
+                          <div v-if="showPreview === i && isImageFile(file)" class="image-popup position-absolute"
+                            style="top: 0; left: 110%; width: 200px; background: white; z-index: 10; box-shadow: 0px 0px 10px rgba(0,0,0,0.2); border-radius: 5px; padding: 5px;">
+                            <img :src="file" alt="Enlarged Preview" style="width: 100%; border-radius: 5px;" />
+                          </div>
                         </div>
                       </div>
 
-                      <input :disabled="props.readonlyFor === 'true'
-                        " v-else type="file" accept="image/jpeg,image/png,application/pdf"
-                        :class="props.readonlyFor === 'true' ? 'd-none ' : ' '" :id="'field-' +
-                          sectionIndex +
-                          '-' +
-                          columnIndex +
-                          '-' +
-                          fieldIndex
-                          " class="form-control previewInputHeight font-10" multiple @change="
-                            logFieldValue(
-                              $event,
-                              blockIndex,
-                              sectionIndex,
-                              rowIndex,
-                              columnIndex,
-                              fieldIndex
-                            )
-                            " />
+                      <!-- File input when no files uploaded -->
+                      <input :disabled="props.readonlyFor === 'true'" v-else type="file"
+                        accept="image/jpeg,image/png,application/pdf"
+                        :class="props.readonlyFor === 'true' ? 'd-none' : ''"
+                        :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                        class="form-control previewInputHeight font-10" multiple
+                        @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
                     </template>
+
 
                     <template v-else-if="field.fieldtype == 'Datetime'">
                       <input type="datetime-local" v-model="field.value"
@@ -341,6 +315,11 @@ const isImageFile = (value) => {
   if (!value) return false;
   return /\.(png|jpg|jpeg|gif)$/i.test(value);
 };
+
+
+function getFileArray(value) {
+  return value.split(',').map(f => f.trim())
+}
 
 
 
