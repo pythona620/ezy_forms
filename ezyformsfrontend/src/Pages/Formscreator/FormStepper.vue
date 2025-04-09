@@ -981,7 +981,7 @@ const formShortNameError = ref("");
 const selectedBlockIndex = ref("");
 let workflowSetup = reactive([]);
 const searchDesignation = ref("");
-const ViewOnlyReportee = ref(0);
+const ViewOnlyReportee = ref(false);
 const wrkAfterGetData = ref([]);
 // const hasWorkflowToastShown = ref(false);
 const tableFieldsCache = ref([]);
@@ -1655,16 +1655,27 @@ function addDesignationBtn() {
 // };
 
 function getWorkflowSetup(blockIndex) {
+
   return workflowSetup.find((setup) => setup.idx === blockIndex) || { roles: [] };
 }
 
-// Initialize `designationValue` based on the roles for the given block index
 function initializeDesignationValue(blockIndex) {
-  const rolesForBlock = getWorkflowSetup(blockIndex).roles || [];
-  designationValue.value = [...rolesForBlock]; // Reset designationValue to match only roles for the current block
+  const currentSetup = getWorkflowSetup(blockIndex);
+  const rolesForBlock = currentSetup.roles || [];
+  designationValue.value = [...rolesForBlock];
+
+  // Check for view_only_reportee flag
+  ViewOnlyReportee.value = currentSetup.view_only_reportee === 1;
 }
 
+// Initialize `designationValue` based on the roles for the given block index
+// function initializeDesignationValue(blockIndex) {
+//   const rolesForBlock = getWorkflowSetup(blockIndex).roles || [];
+//   designationValue.value = [...rolesForBlock]; // Reset designationValue to match only roles for the current block
+// }
+
 const AddDesignCanvas = (idx) => {
+  ViewOnlyReportee.value = false;
   // console.log(idx, "---clicked idex", selectedBlockIndex.value);
   if (filterObj.value.accessible_departments.length) {
     designationData(filterObj.value.accessible_departments);

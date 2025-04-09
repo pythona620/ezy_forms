@@ -196,8 +196,8 @@ function ViewOnlyReport(){
       console.log(response.message,"list");
       viewlist.value = response.message;
 
-      const filters = [ "name","in", viewlist.value];
-      receivedForMe(filters)
+      // const filters = [ "name","in", viewlist.value];
+      receivedForMe()
 
     })
     .catch((error) => {
@@ -444,6 +444,7 @@ function receivedForMe(data) {
     ["assigned_to_users", "like", `%${EmpRequestdesignation?.designation}%`],
     ["property", "like", `%${newBusinessUnit.value.business_unit}%`],
     ["status", "!=", "Request Cancelled"],
+    ["name","in", viewlist.value]
   ];
   if (data) {
     filters.push(data);
