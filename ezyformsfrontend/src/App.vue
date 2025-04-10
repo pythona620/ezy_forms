@@ -59,7 +59,7 @@ function getUserIdFromCookies() {
 function removeUserIdCookie() {
     document.cookie = "user_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
     user_id.value = ""; // Clear the reactive variable
-    console.log("user_id cookie removed");
+    // console.log("user_id cookie removed");
 }
 
 // Function to remove user-related localStorage data
@@ -68,7 +68,7 @@ function clearLocalStorage() {
     localStorage.removeItem("employeeData");
     localStorage.removeItem("Bu");
     localStorage.removeItem("USERROLE");
-    console.log("Local storage cleared");
+    // console.log("Local storage cleared");
 }
 
 // Set the initial value on component mount

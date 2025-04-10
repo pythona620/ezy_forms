@@ -280,7 +280,7 @@ function actionCreated(rowData, actionEvent) {
         selectedRequest.value?.json_columns
       ).child_table_fields;
 
-      console.log(tableHeaders.value, "req");
+      // console.log(tableHeaders.value, "req");
 
       // console.log(selectedRequest.value,"0000");
       // Rebuild the structured array from JSON
@@ -333,7 +333,7 @@ function actionCreated(rowData, actionEvent) {
                   childTables.forEach((tableKey) => {
                     responseData.value[tableKey] = res.data[tableKey] || [];
                   });
-                  console.log("Response Data:", responseData.value);
+                  // console.log("Response Data:", responseData.value);
                 }
               })
               .catch((error) => {

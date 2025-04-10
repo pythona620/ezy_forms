@@ -212,7 +212,7 @@ const selectedData = ref({
   type: route.query.type || "", // Retrieve from query
   readOnly: route.query.readOnly, // Retrieve from query
 });
-console.log(selectedData.value, "////");
+// console.log(selectedData.value, "////");
 const backTo = ref(selectedData.value.routepath);
 // onMounted(() => {
 //   receivedForMe();
@@ -287,7 +287,7 @@ function EditformSubmission() {
       selectedFormStatus: route.query.status,
     },
   });
-  console.log("emittedFormData", emittedFormData.value);
+  // console.log("emittedFormData", emittedFormData.value);
 }
 watch(
   businessUnit,
@@ -296,7 +296,7 @@ watch(
     business_unit.value = newVal;
     business_unit.value = local
     if (newVal) {
-      console.log(business_unit.value, newVal, "ll");
+      // console.log(business_unit.value, newVal, "ll");
       receivedForMe();
     }
   },
@@ -347,7 +347,7 @@ function ApproverFormSubmission(dataObj, type) {
       form[each.fieldname] = each.value;
     });
   }
-  console.log(loading.value, dataObj, type, form);
+  // console.log(loading.value, dataObj, type, form);
 
   axiosInstance
     .put(`${apis.resource}${selectedData.value.doctype_name}/${doctypeForm.value.name}`, form)
@@ -365,10 +365,11 @@ function ApproverFormSubmission(dataObj, type) {
       toast.error("An error occurred while submitting the form.", { autoClose: 1000, transition: "zoom" });
     });
 }
-
+const dataObje = ref([])
 // Function to handle approval status
 function approvalStatusFn(dataObj, type) {
-  console.log("Approval Data:", dataObj);
+  dataObje.value = dataObj;
+  // console.log("Approval Data:", dataObj);
 
   let data = {
     property: tableData.value.property,
@@ -385,7 +386,7 @@ function approvalStatusFn(dataObj, type) {
   axiosInstance
     .post(apis.requestApproval, { request_details: [data] })
     .then((response) => {
-      console.log("API Response:", response);
+      // console.log("API Response:", response);
 
       if (response?.message?.success === true) {
         ApproverReason.value = ""; // Clear reason after success
@@ -474,7 +475,8 @@ function ApproverCancelSubmission(dataObj, type) {
 // }
 
 function approvalCancelFn(dataObj, type) {
-  console.log("approvalCancelFn Data:", dataObj);
+  // console.log("approvalCancelFn Data:", dataObj);
+  dataObje.value = dataObj;
 
   let data = {
     property: tableData.value.property,
@@ -572,12 +574,12 @@ function receivedForMe(data) {
       showRequest.value = rebuildToStructuredArray(
         JSON.parse(tableData.value?.json_columns).fields
       );
-      console.log(tableData.value);
+      // console.log(tableData.value);
       tableHeaders.value = JSON.parse(
         tableData.value?.json_columns
       ).child_table_fields;
 
-      console.log(tableHeaders.value, "req");
+      // console.log(tableHeaders.value, "req");
       if (res.data.length) {
         Wfactivitylog(tableData.value.name);
         getdata(tableData.value.name);
@@ -622,7 +624,7 @@ function getdata(formname) {
             `${apis.resource}${selectedData.value.doctype_name}/${res.data[0].name}`
           )
           .then((res) => {
-            console.log(`Data for :`, res.data);
+            // console.log(`Data for :`, res.data);
             // Identify the child table key dynamically
             const childTables = Object.keys(res.data).filter((key) =>
               Array.isArray(res.data[key])
@@ -633,7 +635,7 @@ function getdata(formname) {
               childTables.forEach((tableKey) => {
                 responseData.value[tableKey] = res.data[tableKey] || [];
               });
-              console.log("Response Data:", responseData.value);
+              // console.log("Response Data:", responseData.value);
             }
           })
           .catch((error) => {
@@ -743,7 +745,7 @@ function Wfactivitylog(formname) {
     .get(`${apis.resource}${doctypes.WFActivityLog}/${formname}`)
     .then((res) => {
       if (res.data) {
-        console.log("Activity Data:", res.data);
+        // console.log("Activity Data:", res.data);
         activityData.value = res.data.reason || []; // Ensure it's always an array
       }
     })
@@ -774,6 +776,7 @@ const requestcancelled = computed(() => {
   const lastAction = activityData.value[activityData.value.length - 1];
   return lastAction.action === "Request Cancelled";
 });
+
 watch(activityData, (newVal) => {
   console.log("Updated Activity Data:", newVal);
   console.log("Request Cancelled?", requestcancelled.value);

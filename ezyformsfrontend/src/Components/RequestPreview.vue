@@ -470,7 +470,7 @@ const logFieldValue = (
         props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
             columnIndex
         ].fields[fieldIndex];
-    console.log(field.fieldtype);
+    // console.log(field.fieldtype);
 
     if (eve.target?.files && eve.target.files.length > 0) {
         let files = Array.from(eve.target.files); // Convert FileList to an array
@@ -498,7 +498,7 @@ const logFieldValue = (
             }
 
             field.value = JSON.stringify(selectedValues); // Store as stringified array
-            console.log(field.value, "selectedValues", selectedValues);
+            // console.log(field.value, "selectedValues", selectedValues);
 
 
 
