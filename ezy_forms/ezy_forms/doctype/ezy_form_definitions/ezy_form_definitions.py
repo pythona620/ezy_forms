@@ -11,6 +11,7 @@ from ast import literal_eval
 from frappe.utils.background_jobs import enqueue
 from ezy_forms.ezy_forms.doctype.ezy_form_definitions.linking_flow_and_forms import enqueing_creation_of_roadmap
 from itertools import chain
+from frappe.utils import cstr
  
 class EzyFormDefinitions(Document):
     pass
@@ -131,13 +132,15 @@ def enqueued_add_customized_fields_for_dynamic_doc(fields:list[dict],doctype:str
         table_fieldnames = [item["fieldname"] for item in fields if item.get("fieldtype") == "Table"]
         child_table_fields = {"child_table_fields": []}
         if table_fieldnames:
-            table_name = table_fieldnames[0]  # Get the first table fieldname
-            fields_in_child_doctype = frappe.db.sql(
+            table_fieldnames = [item["fieldname"] for item in fields if item.get("fieldtype") == "Table"]
+            child_table_fields = {"child_table_fields": {}}
+            for table_name in table_fieldnames:
+                fields_in_child_doctype = frappe.db.sql(
                 f"select fieldname,fieldtype,idx,label from `tabDocField` where parent ='{table_name}';",
                 as_dict=True
-            )
-            [each_child.update({'value':''}) for each_child in fields_in_child_doctype]
-            child_table_fields = {"child_table_fields":fields_in_child_doctype }
+                )
+                [each_child.update({'value':''}) for each_child in fields_in_child_doctype]
+                child_table_fields["child_table_fields"][table_name] = fields_in_child_doctype
             
         for dicts_of_docs_entries in fields:
             if dicts_of_docs_entries["fieldname"] in fields_in_mentioned_doctype:
@@ -212,13 +215,18 @@ def enqueued_deleting_customized_field_from_custom_dynamic_doc(doctype:str,delet
         frappe.db.rollback()
         frappe.throw(str(e))
         return {"success": False, "message": str(e)}
- 
+
+@frappe.whitelist()    
 def bench_migrating_from_code():
-    os.chdir(frappe.utils.get_bench_path()+"/sites")
-    subprocess.run(["bench","migrate"])
+    try:
+        site_name = cstr(frappe.local.site)
+        os.chdir(frappe.utils.get_bench_path() + "/sites")
+        subprocess.run(["bench","--site", site_name,"migrate"])
+    except Exception as e:
+        frappe.log_error(str(e))
  
 def activating_perms(doctype,role):
-    if not frappe.db.exists("DocPerm",{"parent" : doctype,"parentfield":"permissions","parenttype":"DocType","role":role}):
+    if not frappe.db.exists("DocPerm",{"parent":doctype,"parentfield":"permissions","parenttype":"DocType","role":role}):
         perm_doc = frappe.new_doc("DocPerm")
         perm_doc.parent = doctype
         perm_doc.parentfield="permissions"
