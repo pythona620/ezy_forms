@@ -11,6 +11,7 @@ from ast import literal_eval
 from frappe.utils.background_jobs import enqueue
 from ezy_forms.ezy_forms.doctype.ezy_form_definitions.linking_flow_and_forms import enqueing_creation_of_roadmap
 from itertools import chain
+from frappe.utils import cstr
  
 class EzyFormDefinitions(Document):
     pass
@@ -226,8 +227,12 @@ def enqueued_deleting_customized_field_from_custom_dynamic_doc(doctype:str,delet
         return {"success": False, "message": str(e)}
  
 def bench_migrating_from_code():
-    os.chdir(frappe.utils.get_bench_path()+"/sites")
-    subprocess.run(["bench","migrate"])
+    try:
+        site_name = cstr(frappe.local.site)
+        os.chdir(frappe.utils.get_bench_path() + "/sites")
+        subprocess.run(["bench","--site", site_name,"migrate"])
+    except Exception as e:
+        frappe.log_error(str(e))
  
 def activating_perms(doctype,role):
     if not frappe.db.exists("DocPerm",{"parent" : doctype,"parentfield":"permissions","parenttype":"DocType","role":role}):
