@@ -271,10 +271,10 @@ function actionCreated(rowData, actionEvent) {
   }
 }
 function viewPreview(data, index, type) {
-  console.log(route.path);
+  // console.log(route.path);
   if (type === "view") {
     if (data) {
-      console.log(data, "------------");
+      // console.log(data, "------------");
       router.push({
         name: "ApproveRequest",
         query: {

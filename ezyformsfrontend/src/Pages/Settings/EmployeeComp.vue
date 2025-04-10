@@ -817,16 +817,54 @@ const downloadExcel = () => {
 //   document.body.removeChild(link);
 // };
 
-const downloadTemplate = () => {
-  const fileUrl = `${import.meta.env.BASE_URL}Employee_import.xlsx`; // Vue 3 Base URL
+// const downloadTemplate = () => {
+//   const fileUrl = `${import.meta.env.BASE_URL}Employee_import.xlsx`; // Vue 3 Base URL
+//   const link = document.createElement("a");
+//   link.href = fileUrl;
+//   link.setAttribute("download", "Employee_import.xlsx");
+//   document.body.appendChild(link);
+//   link.click();
+//   document.body.removeChild(link);
+// };
+
+const downloadTemplate = async () => {
+  const company = businessUnit.value;
+
+  // Load the template
+  const response = await fetch(`${import.meta.env.BASE_URL}Employee_import.xlsx`);
+  const arrayBuffer = await response.arrayBuffer();
+  const workbook = XLSX.read(arrayBuffer, { type: "array" });
+
+  // Access first sheet
+  const sheetName = workbook.SheetNames[0];
+  const worksheet = workbook.Sheets[sheetName];
+
+  // Insert company name in A2 (assuming A1 has "Company")
+  worksheet["A2"] = { t: "s", v: company };
+
+  // Update sheet range if needed
+  const range = XLSX.utils.decode_range(worksheet["!ref"]);
+  if (range.e.r < 1) range.e.r = 1; // ensure at least 2 rows
+  worksheet["!ref"] = XLSX.utils.encode_range(range);
+
+  // Export modified workbook
+  const updatedWorkbook = XLSX.write(workbook, {
+    bookType: "xlsx",
+    type: "array"
+  });
+
+  const blob = new Blob([updatedWorkbook], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  });
+
+  // Trigger download
   const link = document.createElement("a");
-  link.href = fileUrl;
+  link.href = URL.createObjectURL(blob);
   link.setAttribute("download", "Employee_import.xlsx");
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
 };
-
 
 const emailError = ref("");
 

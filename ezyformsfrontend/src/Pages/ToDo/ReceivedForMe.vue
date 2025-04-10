@@ -198,7 +198,7 @@ function actionCreated(rowData, actionEvent) {
       tableHeaders.value = JSON.parse(
         selectedRequest.value?.json_columns
       ).child_table_fields;
-      console.log(tableHeaders.value, "lll");
+      // console.log(tableHeaders.value, "lll");
 
       // Prepare the filters for fetching data
       const filters = [
@@ -229,7 +229,7 @@ function actionCreated(rowData, actionEvent) {
                 `${apis.resource}${selectedRequest.value.doctype_name}/${res.data[0].name}`
               )
               .then((res) => {
-                console.log(`Data for :`, res.data);
+                // console.log(`Data for :`, res.data);
                 // Identify the child table key dynamically
                 const childTables = Object.keys(res.data).filter((key) =>
                   Array.isArray(res.data[key])
@@ -240,7 +240,7 @@ function actionCreated(rowData, actionEvent) {
                   childTables.forEach((tableKey) => {
                     responseData.value[tableKey] = res.data[tableKey] || [];
                   });
-                  console.log("Response Data:", responseData.value);
+                  // console.log("Response Data:", responseData.value);
                 }
 
               })
@@ -399,7 +399,7 @@ function ApproverFormSubmission(dataObj, type) {
 function approvalStatusFn(dataObj, type) {
 
 
-  console.log(dataObj);
+  // console.log(dataObj);
   let data = {
     property: selectedRequest.value.property,
     doctype: selectedRequest.value.doctype_name,
@@ -476,7 +476,7 @@ function ApproverCancelSubmission(dataObj, type) {
 function approvalCancelFn(dataObj, type) {
 
 
-  console.log(dataObj, "data", type);
+  // console.log(dataObj, "data", type);
   let data = {
     property: selectedRequest.value.property,
     doctype: selectedRequest.value.doctype_name,

@@ -194,9 +194,10 @@ function toggleFunction(rowData, rowIndex, event) {
             .catch((error) => {
                 console.error("Error updating toggle:", error);
             });
-    } else {
-        console.log("Action cancelled. Toggle remains unchanged.");
     }
+    //  else {
+    //     console.log("Action cancelled. Toggle remains unchanged.");
+    // }
 }
 
 const timeout = ref(null); // Store the timeout reference

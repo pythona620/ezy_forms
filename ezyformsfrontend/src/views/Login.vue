@@ -294,7 +294,7 @@ export default {
       axiosInstance
         .put(`${apis.loginCheckuseermethod}`, payload)
         .then((res) => {
-          console.log("Password updated successfully:", res.data);
+          // console.log("Password updated successfully:", res.data);
           if (res.message.is_first_login === 1) {
             this.showPwdField = true;
           }
@@ -364,7 +364,7 @@ export default {
               console.log("User has logged in before.");
             }
           } else {
-            console.log("No user data found.");
+            // console.log("No user data found.");
             this.showPwdField = true; // Show password field when no user data is found
           }
         })
@@ -476,7 +476,7 @@ export default {
           .post(apis.login, params)
           .then((message) => {
             if (message) {
-              console.log("message", message);
+              // console.log("message", message);
               this.storeData = message;
               // localStorage.setItem("UserName", JSON.stringify(this.storeData));
               if (this.formdata.usr) {

@@ -102,14 +102,15 @@ const filterObj = ref({
     owner_of_the_form: "",
     search: "",
 });
-
+const newChngedValue =  ref('')
 watch(
     businessUnit,
     (newVal) => {
         filterObj.value.business_unit = newVal;
 
         if (newVal.length) {
-            console.log(newVal, "new value of business unit");
+            newChngedValue.value = newVal
+            // console.log(newVal, "new value of business unit");
             // localStorage.setItem("Bu", filterObj.value.business_unit)
             tableData.value = []
             fetchTable()
@@ -230,9 +231,10 @@ function actionCreated(rowData, actionEvent) {
                 toast.info("You are not assigned to raise a request.");
 
             }
-        } else {
-            console.log("No employee data found in localStorage.");
-        }
+        } 
+        // else {
+        //     console.log("No employee data found in localStorage.");
+        // }
     }
     else if (actionEvent.name === 'Edit accessibility to dept.') {
         formCreation(rowData);
@@ -265,9 +267,10 @@ function toggleFunction(rowData, rowIndex, event) {
             .catch((error) => {
                 console.error("Error updating toggle:", error);
             });
-    } else {
-        console.log("Action cancelled. Toggle remains unchanged.");
-    }
+    } 
+    // else {
+    //     console.log("Action cancelled. Toggle remains unchanged.");
+    // }
 }
 
 function downloadPdf() {

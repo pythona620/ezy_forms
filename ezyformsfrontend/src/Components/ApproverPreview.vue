@@ -347,7 +347,7 @@ const emp_data = ref({}); // Use an object to hold both name and signature
 
 function getEmploye() {
   const storedData = JSON.parse(localStorage.getItem("employeeData"));
-  console.log(storedData, "=============================");
+  // console.log(storedData, "=============================");
   const queryParams = {
     filters: JSON.stringify([["Ezy Employee", "emp_mail_id", "=", storedData.emp_mail_id]]),
     fields: JSON.stringify(["emp_name", "signature"]),
@@ -364,7 +364,7 @@ function getEmploye() {
         emp_name: response.data[0].emp_name,
         signature: response.data[0].signature,
       };
-      console.log(emp_data.value, "response");
+      // console.log(emp_data.value, "response");
     })
     .catch((error) => {
       console.error("Error fetching user data:", error);
@@ -693,7 +693,7 @@ const uploadFile = (file, field) => {
   axiosInstance
     .post(apis.uploadfile, formData)
     .then((res) => {
-      console.log(res, res.message.file_url);
+      // console.log(res, res.message.file_url);
       if (res.message && res.message.file_url) {
         if (field["value"]) {
           field["value"] += `, ${res.message.file_url}`;
@@ -701,7 +701,7 @@ const uploadFile = (file, field) => {
           field["value"] = res.message.file_url;
         }
         emit("updateField", field);
-        console.log(field);
+        // console.log(field);
       } else {
         console.error("file_url not found in the response.");
       }

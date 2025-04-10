@@ -389,7 +389,7 @@ function selectedAction(row, action) {
 function handleToggle(row, index, event) {
   // Emit the custom event. The parent component will handle showing the confirmation.
   emits("toggle-click", row, index, event);
-  console.log("event", event);
+  // console.log("event", event);
 }
 const focusedFields = reactive({});
 
