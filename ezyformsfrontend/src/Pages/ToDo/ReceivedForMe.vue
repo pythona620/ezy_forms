@@ -25,8 +25,8 @@
               aria-label="Close"></button>
           </div>
           <div class="modal-body approvermodalbody">
-            <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel" :childData="responseData"
-              :childHeaders="tableHeaders" :employeeData="employeeData" @updateField="updateFormData" />
+            <!-- <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel" :childData="responseData"
+              :childHeaders="tableHeaders" :employeeData="employeeData" @updateField="updateFormData" /> -->
           </div>
           <div class="p-2">
             <div class="activity-log-container">
@@ -112,7 +112,7 @@ import { onMounted, ref, reactive, computed, watch } from "vue";
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
 import PaginationComp from "../../Components/PaginationComp.vue";
 import { rebuildToStructuredArray } from "../../shared/services/field_format";
-import ApproverPreview from "../../Components/ApproverPreview.vue";
+// import ApproverPreview from "../../Components/ApproverPreview.vue";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import { useRoute, useRouter } from "vue-router";
@@ -135,8 +135,8 @@ const activityData = ref([]);
 const responseData = ref([]);
 
 const tableheaders = ref([
-  // { th: "Request ID", td_key: "name" },
-  { th: "Form name", td_key: "name" },
+  { th: "Request ID", td_key: "name" },
+  // { th: "Form name", td_key: "name" },
   // { th: "Form category", td_key: "doctype_name" },
   // { th: "Owner of form", td_key: "owner" },
   { th: "Requested By", td_key: "requested_by" },
@@ -165,19 +165,19 @@ const tableHeaders = ref([]);
 const loading = ref(false)
 const Rejectloading = ref(false)
 
-onMounted(() => {
-  const storedData = localStorage.getItem("employeeData");
-  try {
-    const parsedData = JSON.parse(storedData);
+// onMounted(() => {
+//   const storedData = localStorage.getItem("employeeData");
+//   try {
+//     const parsedData = JSON.parse(storedData);
 
-    // Ensure parsedData is an array
-    employeeData.value = Array.isArray(parsedData) ? parsedData : [parsedData];
+//     // Ensure parsedData is an array
+//     employeeData.value = Array.isArray(parsedData) ? parsedData : [parsedData];
 
-  } catch (error) {
-    console.error("Error parsing employeeData from localStorage:", error);
-    employeeData.value = []; // Fallback to empty array if there's an error
-  }
-});
+//   } catch (error) {
+//     console.error("Error parsing employeeData from localStorage:", error);
+//     employeeData.value = []; // Fallback to empty array if there's an error
+//   }
+// });
 
 function actionCreated(rowData, actionEvent) {
   if (actionEvent.name === "View Request") {

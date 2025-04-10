@@ -416,25 +416,35 @@ export default {
               .get(`${apis.resource}${doctypes.EzyEmployeeList}/${this.email}`)
               .then((responce) => {
                 const employeeData = responce.data;
+
+                // Extract only the required fields
+                const filteredEmployeeData = {
+                  name: employeeData.name,
+                  company_field: employeeData.company_field,
+                  emp_name: employeeData.emp_name,
+                  emp_mail_id: employeeData.emp_mail_id,
+                  designation: employeeData.designation,
+                  // department: employeeData.department,
+                };
+
+                // Store required data only
                 localStorage.setItem("UserName", JSON.stringify(this.storeData));
                 sessionStorage.setItem("UserName", JSON.stringify(this.storeData));
-                localStorage.setItem("employeeData", JSON.stringify(employeeData));
-                localStorage.setItem(
-                  "USERROLE",
-                  JSON.stringify(employeeData.designation)
-                );
-                sessionStorage.setItem("employeeData", JSON.stringify(employeeData))
-                sessionStorage.setItem(
-                  "USERROLE",
-                  JSON.stringify(employeeData.designation)
-                );
-                toast.success("Login successfull", { autoClose: 2000 })
+
+                localStorage.setItem("employeeData", JSON.stringify(filteredEmployeeData));
+                sessionStorage.setItem("employeeData", JSON.stringify(filteredEmployeeData));
+
+                localStorage.setItem("USERROLE", JSON.stringify(filteredEmployeeData.designation));
+                sessionStorage.setItem("USERROLE", JSON.stringify(filteredEmployeeData.designation));
+
+                toast.success("Login successfull", { autoClose: 2000 });
+
                 setTimeout(() => {
-                  this.$router.push({ path: "/dashboard/maindash" }); // Navigate dynamically
+                  this.$router.push({ path: "/dashboard/maindash" });
                 }, 500);
               })
               .catch((error) => {
-                console.error("Error fetching user data:", error);
+                console.error("Error fetching employee data:", error);
               });
           } else {
             localStorage.setItem("employeeData", JSON.stringify(this.employeeData));
@@ -443,7 +453,8 @@ export default {
         .catch((error) => {
           console.error("Error fetching user data:", error);
         });
-    },
+    }
+    ,
 
 
     validateOtp() {
