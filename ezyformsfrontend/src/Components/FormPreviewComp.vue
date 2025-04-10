@@ -102,11 +102,11 @@ option, index
                                         ) in field?.options?.split('\n')" :key="index" :class="{ 'd-none': index === 0 }">
                                                                 <div class="d-flex align-items-center gap-2">
                                                                     <div>
-                                                                        <input v-if="
+                                                                        <input  v-if="
                                                                             field.fieldtype === 'Check' || field.fieldtype === 'Select' || field.fieldtype == 'Small Text' &&
                                                                             index !== 0
                                                                         " class="form-check-input"
-                                                                            :type="field.fieldtype" :name="option"
+                                                                            :type="field.fieldtype == 'Small Text' ? 'Checkbox':field.fieldtype " :name="option"
                                                                             :id="option" readonly />
                                                                     </div>
                                                                     <div>

@@ -286,7 +286,7 @@ function actionCreated(rowData, actionEvent) {
       tableHeaders.value = JSON.parse(
         selectedRequest.value?.json_columns
       ).child_table_fields;
-      console.log(tableHeaders.value, "lll");
+      // console.log(tableHeaders.value, "lll");
 
       // console.log(tableHeaders.value, "req");
 
@@ -332,7 +332,7 @@ function actionCreated(rowData, actionEvent) {
                 `${apis.resource}${selectedRequest.value.doctype_name}/${res.data[0].name}`
               )
               .then((res) => {
-                console.log(`Data for :`, res.data);
+                // console.log(`Data for :`, res.data);
                 // Identify the child table key dynamically
                 const childTables = Object.keys(res.data).filter((key) =>
                   Array.isArray(res.data[key])
@@ -343,7 +343,7 @@ function actionCreated(rowData, actionEvent) {
                   childTables.forEach((tableKey) => {
                     responseData.value[tableKey] = res.data[tableKey] || [];
                   });
-                  console.log("Response Data:", responseData.value);
+                  // console.log("Response Data:", responseData.value);
                 }
 
               })
