@@ -29,7 +29,7 @@ class EzyEmployee(Document):
 				adding_role_doc.role = self.designation
 				adding_role_doc.insert(ignore_permissions=True)
 				frappe.db.commit()
-			for doc_name in ["Ezy Employee","WF Workflow Requests","WF Roadmap","Ezy Business Unit","WF Roles","Ezy Form Definitions","Ezy Departments",""]:
+			for doc_name in ["Ezy Employee","WF Workflow Requests","WF Roadmap","Ezy Business Unit","WF Roles","Ezy Form Definitions","Ezy Departments"]:
 				if not frappe.db.exists("DocPerm",{"parent":doc_name,"parenttype":"DocType","role":self.designation,"parentfield":"permissions"}):
 					activating_perms(doc_name,self.designation)
 			bench_migrating_from_code()
