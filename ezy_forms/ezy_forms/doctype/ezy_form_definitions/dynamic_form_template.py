@@ -374,6 +374,9 @@ template_str = """
                     <div class="row">
                         {% for column in row.columns %}
                             <div class="column">
+                              {% if column.label %}
+                                <h3>{{ column.label }}</h3>
+                                {% endif %}
                                 {% for field in column.fields %}
                                     <div class="field">
                                         <label for="{{ field.fieldname }}">{{ field.label }}:</label>

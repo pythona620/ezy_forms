@@ -126,6 +126,10 @@
                         </div>
                       </div>
                     </template>
+                    <!-- <i class="bi bi-x-lg position-absolute text-danger cursor-pointer"
+                            :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'd-none' : ''"
+                            style="top: -10px; right: -5px; font-size: 13px; background: white; border-radius: 50%; padding: 3px"
+                            @click="removeFileAtIndex(i)"></i> -->
 
                     <!-- @click="openInNewWindow(field.value)" -->
                     <template v-else-if="field.fieldtype == 'Attach'">
@@ -133,33 +137,31 @@
                         <div v-for="(file, i) in getFileArray(field.value)" :key="i"
                           class="position-relative d-inline-block"
                           :class="props.readonlyFor === 'true' ? 'image-border-bottom' : ''">
-                          <!-- Image preview (if image) -->
-                          <img v-if="isImageFile(file)" :src="file" class="img-thumbnail mt-2 cursor-pointer border-0" @click="openFile(file)"
-                            style="max-width: 100px; max-height: 100px" @mouseover="showPreview = i"
-                            @mouseleave="showPreview = null" />
+                          <!-- Unique key per block -->
+                          <template v-if="isImageFile(file)">
+                            <img :src="file" class="img-thumbnail mt-2 cursor-pointer border-0" @click="openFile(file)"
+                              style="max-width: 100px; max-height: 100px"
+                              @mouseover="handleMouseOver(blockIndex + '-' + fieldIndex, i)"
+                              @mouseleave="handleMouseLeave(blockIndex + '-' + fieldIndex)" />
 
-                          <!-- PDF Preview icon -->
+                            <!-- Enlarged Preview -->
+                            <div v-if="hoverStates[blockIndex + '-' + fieldIndex] === i"
+                              class="image-popup position-absolute"
+                              style="top: 0; left: 110%; width: 200px; background: white; z-index: 10; box-shadow: 0px 0px 10px rgba(0,0,0,0.2); border-radius: 5px; padding: 5px;">
+                              <img :src="file" alt="Enlarged Preview" style="width: 100%; border-radius: 5px;" />
+                            </div>
+                          </template>
+
+                          <!-- PDF File Icon -->
                           <a v-else :href="file" target="_blank"
                             class="d-flex align-items-center justify-content-center mt-2 border rounded bg-light"
                             style="width: 100px; height: 100px; text-decoration: none;">
                             <i class="bi bi-file-earmark-pdf-fill fs-2 text-danger"></i>
                           </a>
-
-                          <!-- Close Icon to Remove Image -->
-                          <i class="bi bi-x-lg position-absolute text-danger cursor-pointer"
-                            :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'd-none' : ''"
-                            style="top: -10px; right: -5px; font-size: 13px; background: white; border-radius: 50%; padding: 3px"
-                            @click="removeFileAtIndex(i)"></i>
-
-                          <!-- Pop-up Enlarged Image -->
-                          <div v-if="showPreview === i && isImageFile(file)" class="image-popup position-absolute"
-                            style="top: 0; left: 110%; width: 200px; background: white; z-index: 10; box-shadow: 0px 0px 10px rgba(0,0,0,0.2); border-radius: 5px; padding: 5px;">
-                            <img :src="file" alt="Enlarged Preview" style="width: 100%; border-radius: 5px;" />
-                          </div>
                         </div>
                       </div>
 
-                      <!-- File input when no files uploaded -->
+                      <!-- File input -->
                       <input :disabled="props.readonlyFor === 'true'" v-else type="file"
                         accept="image/jpeg,image/png,application/pdf"
                         :class="props.readonlyFor === 'true' ? 'd-none' : ''"
@@ -167,6 +169,7 @@
                         class="form-control previewInputHeight font-10" multiple
                         @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
                     </template>
+
 
 
                     <template v-else-if="field.fieldtype == 'Datetime'">
@@ -277,8 +280,9 @@
 
 <script setup>
 import { computed, defineProps, onMounted, ref, watch } from "vue";
-import { apis, domain } from "../shared/apiurls";
+import { apis, doctypes, domain } from "../shared/apiurls";
 import axiosInstance from "../shared/services/interceptor";
+import { useRoute } from "vue-router";
 
 const props = defineProps({
   blockArr: {
@@ -302,14 +306,26 @@ const props = defineProps({
     type: Array,
   },
 });
+const route = useRoute();
 
+const selectedData = ref({
+  type: route.query.type || "", // Retrieve from query
+});
 
 const emit = defineEmits();
 const filePaths = ref([]);
 const tableName = ref("");
 const errorMessages = ref({});
 
-const showPreview = ref(false);
+const hoverStates = ref({});
+
+const handleMouseOver = (key, index) => {
+  hoverStates.value[key] = index;
+};
+
+const handleMouseLeave = (key) => {
+  hoverStates.value[key] = null;
+};
 
 const isImageFile = (value) => {
   if (!value) return false;
@@ -320,8 +336,40 @@ const isImageFile = (value) => {
 function getFileArray(value) {
   return value.split(',').map(f => f.trim())
 }
+onMounted(() => {
+  emit("updateField", getAllFieldsData());
+  if(selectedData.value.type === 'mytasks'){
+    getEmploye()
+  }
+});
+
+const emp_data = ref({}); // Use an object to hold both name and signature
+
+function getEmploye() {
+  const storedData = JSON.parse(localStorage.getItem("employeeData"));
+  console.log(storedData, "=============================");
+  const queryParams = {
+    filters: JSON.stringify([["Ezy Employee", "emp_mail_id", "=", storedData.emp_mail_id]]),
+    fields: JSON.stringify(["emp_name", "signature"]),
+
+  };
 
 
+  axiosInstance
+    .get(`${apis.resource}${doctypes.EzyEmployeeList}`, {
+          params: queryParams,
+        })
+    .then((response) => {
+      emp_data.value = {
+        emp_name: response.data[0].emp_name,
+        signature: response.data[0].signature,
+      };
+      console.log(emp_data.value, "response");
+    })
+    .catch((error) => {
+      console.error("Error fetching user data:", error);
+    });
+}
 
 // const openInNewWindow = (url) => {
 //   window.open(url, '_blank');
@@ -353,12 +401,12 @@ const filteredBlocks = computed(() => {
   }
 
   // Ensure employeeData is valid
-  if (!props.employeeData || props.employeeData.length === 0) {
-    console.warn("No employeeData available.");
-    return filtered;
-  }
+  // if (!props.employeeData || props.employeeData.length === 0) {
+  //   console.warn("No employeeData available.");
+  //   return filtered;
+  // }
 
-  const employee = props.employeeData[0]; // Access first item
+  // const employee = props.employeeData[0]; // Access first item
 
   // Create a deep copy before modifying the data
   const updatedBlocks = JSON.parse(JSON.stringify(filtered));
@@ -370,15 +418,18 @@ const filteredBlocks = computed(() => {
     section.rows?.forEach((row) => {
       row.columns?.forEach((column) => {
         column.fields?.forEach((field) => {
-          if (!props.employeeData || props.readonlyFor === 'true') return;
+          if (props.readonlyFor === 'true') return;
           if (field.label === "Approver") {
-            field.value = employee.emp_name;
-            emit("updateField", field);
+            if(emp_data.value.emp_name){
+
+              field.value = emp_data.value.emp_name;
+              emit("updateField", field);
+            }
           }
           if (field.label === "Approved By") {
-            if (employee.signature) {
+            if (emp_data.value.signature) {
 
-              field.value = employee.signature;
+              field.value = emp_data.value.signature;
               emit("updateField", field);
             }
 
@@ -496,9 +547,6 @@ const isFilePath = (value) => {
   return /\.(png|jpg|jpeg|gif|pdf|docx|xlsx|txt)$/i.test(value);
 };
 
-onMounted(() => {
-  emit("updateField", getAllFieldsData());
-});
 
 watch(
   () => props.blockArr,

@@ -44,8 +44,8 @@
             </div>
           </div>
           <div class="modal-body approvermodalbody">
-            <ApproverPreview :blockArr="showRequest" :childHeaders="tableHeaders" :childData="responseData"
-               :current-level="totalLevels" @updateField="updateFormData" />
+            <!-- <ApproverPreview :blockArr="showRequest" :childHeaders="tableHeaders" :childData="responseData"
+               :current-level="totalLevels" @updateField="updateFormData" /> -->
             <!-- <div v-if="tableName" class="mt-2">
               <div>
                 <span class="font-13 fw-bold">{{ tableName }}</span>
@@ -181,7 +181,7 @@ import {
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
 import PaginationComp from "../../Components/PaginationComp.vue";
 import { rebuildToStructuredArray } from "../../shared/services/field_format";
-import ApproverPreview from "../../Components/ApproverPreview.vue";
+// import ApproverPreview from "../../Components/ApproverPreview.vue";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import { useRoute, useRouter } from "vue-router";
@@ -215,7 +215,7 @@ const route = useRoute();
 const loading = ref(false);
 
 const tableheaders = ref([
-  // { th: "Request ID", td_key: "name" },
+  { th: "Request ID", td_key: "name" }, 
   { th: "Form name", td_key: "doctype_name" },
   // { th: "Form category", td_key: "doctype_name" },
   { th: "Owner of form", td_key: "role" },
@@ -711,7 +711,7 @@ const fieldMapping = computed(() => ({
       "Request Cancelled",
     ],
   },
-  // name: { type: "input" },
+  name: { type: "input" },
   doctype_name: { type: "input" },
   // requested_on: { type: "date" },
   role: { type: "input" },

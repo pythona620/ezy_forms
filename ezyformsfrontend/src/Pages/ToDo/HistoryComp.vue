@@ -8,7 +8,7 @@
     </div>
     <div class="mt-2">
       <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" viewType="viewPdf" isCheckbox="true"
-        @cell-click="viewPreview" download="true" :actions="actions" @actionClicked="actionCreated"
+        @cell-click="viewPreview"  :actions="actions" @actionClicked="actionCreated"
         isFiltersoption="true" :field-mapping="fieldMapping" @updateFilters="inLineFiltersData" />
       <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
         @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
@@ -42,7 +42,7 @@
             </div>
           </div>
           <div class="modal-body approvermodalbody">
-            <ApproverPreview :blockArr="showRequest" :current-level="totalLevels" @updateField="updateFormData" />
+            <!-- <ApproverPreview :blockArr="showRequest" :current-level="totalLevels" @updateField="updateFormData" /> -->
           </div>
           <div class="activity-log-container">
             <div v-for="(item, index) in activityData" :key="index" class="activity-log-item"
@@ -116,7 +116,7 @@ import { callWithErrorHandling, onMounted, ref, reactive, computed, watch } from
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
 import PaginationComp from "../../Components/PaginationComp.vue";
 import { rebuildToStructuredArray } from "../../shared/services/field_format";
-import ApproverPreview from "../../Components/ApproverPreview.vue";
+// import ApproverPreview from "../../Components/ApproverPreview.vue";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import { useRoute, useRouter } from "vue-router";
