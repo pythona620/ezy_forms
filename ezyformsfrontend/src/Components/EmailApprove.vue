@@ -380,6 +380,7 @@ const updateFormData = (fieldValues) => {
     .get(apis.toMailApproval,{ params: data })
     .then((res) => {
       console.log(res);
+      approvedform.value = false;
      
     })
     .catch((error) => {
