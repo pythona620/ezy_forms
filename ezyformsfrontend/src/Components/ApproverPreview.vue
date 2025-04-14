@@ -17,11 +17,11 @@
                 </div>
                 <div class="mx-3 my-2">
                   <div v-for="(field, fieldIndex) in column.fields" :key="'field-preview-' + fieldIndex"
-                    :class="(props.readonlyFor === 'true' || blockIndex < currentLevel) && field.fieldtype !== 'Small Text' ? 'd-flex align-items-end mb-2' : ''">
+                    :class="(props.readonlyFor === 'true' || blockIndex < currentLevel) && field.fieldtype !== 'Small Text' && field.fieldtype !== 'Text' ? 'd-flex align-items-start mb-2' : ''">
 
                     <div v-if="field.label">
                       <label :for="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex">
-                        <span class="font-12">{{ field.label }}</span>
+                        <span class="font-12 fw-medium">{{ field.label }}</span>
                         <span class="ms-1 text-danger">{{ field.reqd === 1 ? "*" : "" }}</span>
                         <span class="pe-2" v-if="props.readonlyFor === 'true' || blockIndex < currentLevel">:</span>
                       </label>
@@ -198,16 +198,19 @@
                           '-' +
                           fieldIndex
                           " class="form-control previewInputHeight" />
-                      <textarea v-if="field.fieldtype == 'Text'" :disabled="blockIndex < currentLevel"
-                        :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 image-border-bottom bg-transparent ' : ' '"
-                        :readOnly="blockIndex === 0 || props.readonlyFor === 'true'
-                          " v-model="field.value" :placeholder="'Enter ' + field.label" :value="field.value" :name="'field-' +
-                            sectionIndex +
-                            '-' +
-                            columnIndex +
-                            '-' +
-                            fieldIndex
-                            " class="form-control previewInputHeight"></textarea>
+                          <textarea
+  v-if="field.fieldtype === 'Text'"
+  :disabled="blockIndex < currentLevel"
+  :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0  bg-transparent' : ''"
+  :readOnly="blockIndex === 0 || props.readonlyFor === 'true'"
+  v-model="field.value"
+  :placeholder="'Enter ' + field.label"
+  :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+  class="form-control previewInputHeight"
+  :ref="el => setRef(el, sectionIndex, columnIndex, fieldIndex)"
+  @input="adjustHeight(sectionIndex, columnIndex, fieldIndex)"
+/>
+
                       <component v-if="field.fieldtype !== 'Int' && field.fieldtype !== 'Text'"
                         :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'"
                         :is="getFieldComponent(field.fieldtype)"
@@ -279,7 +282,7 @@
 </template>
 
 <script setup>
-import { computed, defineProps, onMounted, ref, watch } from "vue";
+import { computed, defineProps, onMounted, ref, watch, nextTick, reactive } from "vue";
 import { apis, doctypes, domain } from "../shared/apiurls";
 import axiosInstance from "../shared/services/interceptor";
 import { useRoute } from "vue-router";
@@ -318,14 +321,23 @@ const tableName = ref("");
 const errorMessages = ref({});
 
 const hoverStates = ref({});
+const textAreaRefs = reactive({});
 
-const handleMouseOver = (key, index) => {
-  hoverStates.value[key] = index;
-};
+function setRef(el, sectionIndex, columnIndex, fieldIndex) {
+  if (!el) return;
+  const key = `${sectionIndex}-${columnIndex}-${fieldIndex}`;
+  textAreaRefs[key] = el;
+  nextTick(() => adjustHeight(sectionIndex, columnIndex, fieldIndex));
+}
 
-const handleMouseLeave = (key) => {
-  hoverStates.value[key] = null;
-};
+function adjustHeight(sectionIndex, columnIndex, fieldIndex) {
+  const key = `${sectionIndex}-${columnIndex}-${fieldIndex}`;
+  const el = textAreaRefs[key];
+  if (el) {
+    el.style.height = 'auto';
+    el.style.height = el.scrollHeight + 'px';
+  }
+}
 
 const isImageFile = (value) => {
   if (!value) return false;
@@ -338,9 +350,14 @@ function getFileArray(value) {
 }
 onMounted(() => {
   emit("updateField", getAllFieldsData());
-  if(selectedData.value.type === 'mytasks'){
+  if (selectedData.value.type === 'mytasks') {
     getEmploye()
   }
+  Object.values(textAreaRefs).forEach(el => {
+    el.style.height = 'auto';
+    el.style.height = el.scrollHeight + 'px';
+  });
+
 });
 
 const emp_data = ref({}); // Use an object to hold both name and signature
@@ -357,8 +374,8 @@ function getEmploye() {
 
   axiosInstance
     .get(`${apis.resource}${doctypes.EzyEmployeeList}`, {
-          params: queryParams,
-        })
+      params: queryParams,
+    })
     .then((response) => {
       emp_data.value = {
         emp_name: response.data[0].emp_name,
@@ -420,7 +437,7 @@ const filteredBlocks = computed(() => {
         column.fields?.forEach((field) => {
           if (props.readonlyFor === 'true') return;
           if (field.label === "Approver") {
-            if(emp_data.value.emp_name){
+            if (emp_data.value.emp_name) {
 
               field.value = emp_data.value.emp_name;
               emit("updateField", field);

@@ -20,9 +20,21 @@
             <div class="text-center">
               <div class="card border-0 shadow-none">
                 <div class="card-body pb-2 d-flex gap-3 align-items-center justify-content-center">
-                  <h5 class="card-title">{{ selectedData.doctype_name }}</h5>
-                  <span v-if="tableData?.status === 'Completed'"><i class="bi approved-icon bi-check2-circle "></i></span>
-                  <span v-if="tableData?.status === 'Request Cancelled'"><i class="bi rejected-icon bi-x-circle"></i></span>
+                  <h5 class="card-title mb-0">{{ selectedData.doctype_name }}</h5>
+                  <div class="d-flex align-items-baseline gap-2 ps-1 ">
+                    <span v-if="tableData?.status !== 'Completed' && tableData.status !== 'Request Cancelled'"
+                      class="text-warning font-11 text-nowrap fw-bold">
+                      Pending ({{ tableData.current_level }} /
+                      {{ tableData?.total_levels }})</span>
+                    <span class=" font-11 status_completed fw-bold text-nowrap" v-if="tableData?.status === 'Completed'">
+                      Approved
+                    </span>
+                    <span class=" font-11 requestRejected text-nowrap" v-if="tableData?.status === 'Request Cancelled'">
+                      Request Rejected
+                    </span>
+                  </div>
+                  <!-- <span v-if="tableData?.status === 'Completed'"><i class="bi approved-icon bi-check2-circle "></i></span>
+                  <span v-if="tableData?.status === 'Request Cancelled'"><i class="bi rejected-icon bi-x-circle"></i></span> -->
                 </div>
               </div>
             </div>
@@ -119,7 +131,7 @@
                     <span class="font-12 text-nowrap fw-bold mb-0">Activity log
                     </span>
                   </div>
-                  <div class="d-flex align-items-baseline gap-2 ps-1 ">
+                  <!-- <div class="d-flex align-items-baseline gap-2 ps-1 ">
                     <span v-if="tableData?.status !== 'Completed' && tableData.status !== 'Request Cancelled'"
                       class="text-warning font-11 text-nowrap fw-bold">
                       Pending ({{ tableData.current_level }} /
@@ -130,7 +142,7 @@
                     <span class=" font-11 requestRejected text-nowrap" v-if="tableData?.status === 'Request Cancelled'">
                       Request Rejected
                     </span>
-                  </div>
+                  </div> -->
                 </div>
 
 
@@ -1013,7 +1025,7 @@ td {
 
 .status_completed {
   color: #2BED12;
-  border: 1px solid #2BED12;
+  border: 2px solid #2BED12;
   border-radius: 10px;
   padding: 2px 5px;
   margin: 0px 5px;
