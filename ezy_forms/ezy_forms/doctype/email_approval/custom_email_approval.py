@@ -68,7 +68,7 @@ def email_approval(token, action=None, reason=None):
         
         frappe.db.set_value(
             "Email Approval",
-            {"action_token": token, "token_status": "Active"},
+            {"current_level":  email_doc.current_level, "token_status": "Active","wf_request_id":email_doc.wf_request_id,"document_id":email_doc.document_id},
             {"token_status": "Inactive"},
         )
         frappe.db.commit()
@@ -77,3 +77,5 @@ def email_approval(token, action=None, reason=None):
 
     except Exception as e:
         frappe.log_error(f"Email Approval Action Error: {str(e)}")
+        
+

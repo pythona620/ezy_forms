@@ -30,7 +30,7 @@
                 </div>
                 <div class="position-relative ">
                   <div class="requestPreviewDiv pb-5">
-                    <ApproverPreview :blockArr="showRequest" :childData="responseData"
+                    <ApproverPreview :blockArr="showRequest" :childData="responseData" :current-level="selectedcurrentLevel"
                       :readonly-for="selectedData.readOnly" :childHeaders="tableHeaders" :employee-data="employeeData"
                       @updateField="updateFormData" />
 
@@ -195,9 +195,9 @@
       </div>
       <div v-if="!approvedform" class="thank_div">
         <div>
-          <div class="thank-you-message">
-            <span>Thank You <i class="bi approved-icon bi-check2-circle"></i></span>
-          </div>
+          <div class="thank-you-card">
+  <span>Thank You <i class="bi approved-icon bi-check2-circle"></i></span>
+</div>
         </div>
       </div>
     </div>
@@ -384,59 +384,71 @@ const updateFormData = (fieldValues) => {
 
   // console.log(emittedFormData.value, "======");
 };
+
+
 function ApproverFormSubmissionNew(action) {
-  if (ApproverReason.value.trim() === "") {
+  // Trim and validate the reason input
+  const reason = ApproverReason.value.trim();
+  if (!reason) {
     isCommentsValid.value = false; // Show validation error
-    return; // Stop execution
+    return;
   }
+
+  isCommentsValid.value = true;
+  loading.value = true;
+
   const data = {
     token: selectedData.value.token,
     action: action,
-    reason: ApproverReason.value
-  }
-
+    reason: reason
+  };
 
   axiosInstance
     .get(apis.toMailApproval, { params: data })
     .then((res) => {
-      // console.log(res);
-      loading.value = false;
+      responseData.value = res.data; // Assuming you need the actual data
       approvedform.value = false;
-
     })
     .catch((error) => {
-      loading.value = false;
       console.error("Error fetching records:", error);
+    })
+    .finally(() => {
+      loading.value = false; // Always reset loading state
     });
 }
+
 
 function ApproverCancelSubmissionNew(action) {
-  if (ApproverReason.value.trim() === "") {
+  const reason = ApproverReason.value.trim();
+
+  if (!reason) {
     isCommentsValid.value = false; // Show validation error
-    return; // Stop execution
+    return;
   }
+
   isCommentsValid.value = true;
-  loading.value = true; 
+  rejectLoad.value = true;
+
   const data = {
     token: selectedData.value.token,
     action: action,
-    reason: ApproverReason.value
-  }
-
+    reason: reason
+  };
 
   axiosInstance
     .get(apis.toMailApproval, { params: data })
     .then((res) => {
-      // console.log(res);
-      loading.value = false;
+      responseData.value = res.data; // Store only the response data
       approvedform.value = false;
-
     })
     .catch((error) => {
-      loading.value = false;
-      console.error("Error fetching records:", error);
+      console.error("Error sending cancel request:", error);
+    })
+    .finally(() => {
+      rejectLoad.value = false; // Always stop the loader
     });
 }
+
 
 
 
@@ -988,21 +1000,57 @@ watch(activityData, (newVal) => {
 
 }
 
-.thank-you-message {
-  padding: 10px 20px;
-  background-color: #e6f7ed;
-  border: 1px solid #b7eb8f;
-  border-radius: 8px;
-  color: #389e0d;
-  display: inline-block;
-  font-weight: 500;
-  font-size: 16px;
+@keyframes slideFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
-.thank-you-message i {
-  margin-left: 8px;
+@keyframes bounceIcon {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(56, 158, 13, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(56, 158, 13, 0.6);
+  }
+}
+
+.thank-you-card {
+  padding: 15px 25px;
+  background-color: #e6f7ed;
+  border: 1px solid #b7eb8f;
+  border-radius: 12px;
+  color: #389e0d;
+  display: inline-block;
+  font-weight: 600;
   font-size: 18px;
+  animation: slideFadeIn 0.8s ease-out, glowPulse 2s ease-in-out infinite;
+  transition: transform 0.3s ease;
+}
+
+.thank-you-card:hover {
+  transform: scale(1.03);
+}
+
+.thank-you-card i {
+  margin-left: 10px;
+  font-size: 20px;
   vertical-align: middle;
+  animation: bounceIcon 1s infinite;
 }
 
 .approve_height {

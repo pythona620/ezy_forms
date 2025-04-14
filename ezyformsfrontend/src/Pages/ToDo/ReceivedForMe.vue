@@ -337,54 +337,6 @@ const updateFormData = (fieldValues) => {
 };
 const isCommentsValid = ref(true); // Flag to validate comment field
 
-// function handleEditClick() {
-//   console.log("item", selectedRequest.value);
-
-//   // Hide the modal properly
-//   const modalElement = document.getElementById('viewRequest');
-//   if (modalElement) {
-//     const modalInstance = bootstrap.Modal.getInstance(modalElement); // Get existing modal instance
-//     if (modalInstance) {
-//       modalInstance.hide();
-//     }
-//   }
-
-//   // Navigate to the new route
-//   router.push({
-//     name: "RaiseRequest",
-//     query: {
-//       business_unit: selectedRequest.value.property,
-//       selectedForm: selectedRequest.value.doctype_name,
-//     }
-//   });
-// }
-
-
-
-
-// Function to handle approve button click
-// const handleApproveClick = () => {
-//   if (ApproverReason.value.trim() === "") {
-//     // Set the validation flag to false if comment is empty
-//     isCommentsValid.value = false;
-//   } else {
-//     // Proceed with the Approve action if comments are valid
-//     isCommentsValid.value = true;
-//     ApproverFormSubmission(emittedFormData.value, "Approve"); // Use emittedFormData instead of formData
-//   }
-// };
-
-
-
-
-
-
-
-
-
-
-
-
 
 const PaginationUpdateValue = (itemsPerPage) => {
   filterObj.value.limitPageLength = itemsPerPage;

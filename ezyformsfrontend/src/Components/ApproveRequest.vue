@@ -594,7 +594,7 @@ function receivedForMe(data) {
     })
     .then((res) => {
       tableData.value = res.data[0];
-      console.log(tableData.value?.name);
+      console.log(tableData.value?.name,"ppppppppppppp");
       selectedcurrentLevel.value = tableData.value?.current_level;
       console.log(selectedcurrentLevel.value, " current_level");
 
@@ -696,14 +696,13 @@ function ViewOnlyRe() {
       console.log(response.message, "list");
       viewlist.value = response.message;
 
-      canApprove.value = viewlist.value.includes(tableData.value.name);
+      canApprove.value = viewlist.value.includes(selectedData.value.formname);
       receivedForMe()
 
     })
     .catch((error) => {
       console.log(error);
     });
-
 
 }
 // function viewasPdfView() {
