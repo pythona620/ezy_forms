@@ -16,13 +16,12 @@
                   <h6 class="m-0 font-12">{{ column.label }}</h6>
                 </div>
                 <div class="mx-3 my-2">
-                  <div v-for="(field, fieldIndex) in column.fields" 
-                      :key="'field-preview-' + fieldIndex"
-                      :class="(props.readonlyFor === 'true' || blockIndex < currentLevel) && field.fieldtype !== 'Small Text' ? 'd-flex align-items-end mb-2' : ''">
-                    
-                    <div v-if="field.label">
+                  <div v-for="(field, fieldIndex) in column.fields" :key="'field-preview-' + fieldIndex"
+                    :class="(props.readonlyFor === 'true' || blockIndex < currentLevel) && field.fieldtype !== 'Small Text' && field.fieldtype !== 'Text' ? 'd-flex align-items-start mb-2' : 'd-flex align-items-end'">
+
+                    <div v-if="field.label" >
                       <label :for="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex">
-                        <span class="font-12">{{ field.label }}</span>
+                        <span class="font-12 fw-medium">{{ field.label }}</span>
                         <span class="ms-1 text-danger">{{ field.reqd === 1 ? "*" : "" }}</span>
                         <span class="pe-2" v-if="props.readonlyFor === 'true' || blockIndex < currentLevel">:</span>
                       </label>
@@ -49,7 +48,7 @@
                         <div class="row">
                           <div class="form-check col-4 mb-1" v-for="(option, index) in field?.options?.split('\n')"
                             :key="index"
-                            :class="{ 'd-none': !(JSON.parse(field.value || '[]') || []).includes(option)  }">
+                            :class="{ 'd-none': !(JSON.parse(field.value || '[]') || []).includes(option) }">
 
                             <div>
                               <input class="form-check-input" type="checkbox"
@@ -61,7 +60,7 @@
                             </div>
 
                             <div>
-                              <label class="form-check-label m-0" :for="`${option}-${index}`">
+                              <label class="form-check-label font-12 m-0" :for="`${option}-${index}`">
                                 {{ option }}
                               </label>
                             </div>
@@ -127,73 +126,51 @@
                         </div>
                       </div>
                     </template>
+                    <!-- <i class="bi bi-x-lg position-absolute text-danger cursor-pointer"
+                            :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'd-none' : ''"
+                            style="top: -10px; right: -5px; font-size: 13px; background: white; border-radius: 50%; padding: 3px"
+                            @click="removeFileAtIndex(i)"></i> -->
 
                     <!-- @click="openInNewWindow(field.value)" -->
                     <template v-else-if="field.fieldtype == 'Attach'">
-                      <div v-if="field.value" class="position-relative d-inline-block"
-                        :class="props.readonlyFor === 'true' ? 'image-border-bottom' : ''">
-                        <img v-if="isImageFile(field.value) || field.value" :src="field.value"
-                          class="img-thumbnail mt-2 cursor-pointer border-0"
-                          style="max-width: 100px; max-height: 100px" />
-                        <!-- @mouseover="showPreview = true" @mouseleave="showPreview = false" -->
-                        <!-- Close Icon to Remove Image -->
-                        <i class="bi bi-x-lg position-absolute  text-danger cursor-pointer"
-                          :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'd-none' : ''" style="
-                            top: -10px;
-                            right: -5px;
-                            font-size: 13px;
-                            background: white;
-                            border-radius: 50%;
-                            padding: 3px;
-                          " @click="
-                            clearImage(
-                              blockIndex,
-                              sectionIndex,
-                              rowIndex,
-                              columnIndex,
-                              fieldIndex
-                            )
-                            "></i>
+                      <div v-if="field.value" class="d-flex gap-2 flex-wrap">
+                        <div v-for="(file, i) in getFileArray(field.value)" :key="i"
+                          class="position-relative d-inline-block"
+                          :class="props.readonlyFor === 'true' ? ' border-bottom-0' : ''">
+                          <!-- Unique key per block -->
+                          <template v-if="isImageFile(file)">
+                            <img :src="file" class="img-thumbnail mt-2 cursor-pointer border-0 border-bottom-0" @click="openFile(file)"
+                              style="max-width: 100px; max-height: 100px"
+                              @mouseover="handleMouseOver(blockIndex + '-' + fieldIndex, i)"
+                              @mouseleave="handleMouseLeave(blockIndex + '-' + fieldIndex)" />
 
-                        <!-- Pop-up Enlarged Image -->
-                        <div v-if="showPreview" class="image-popup position-absolute" style="
-                            top: 0;
-                            left: 110%;
-                            width: 200px;
-                            height: auto;
-                            z-index: 10;
-                            background: white;
-                            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
-                            border-radius: 5px;
-                            padding: 5px;
-                          ">
-                          <img :src="field.value" alt="Enlarged Preview" style="
-                              width: 100%;
-                              height: auto;
-                              border-radius: 5px;
-                            " />
+                            <!-- Enlarged Preview -->
+                            <div v-if="hoverStates[blockIndex + '-' + fieldIndex] === i"
+                              class="image-popup position-absolute"
+                              style="top: 0; left: 110%; width: 200px; background: white; z-index: 10; box-shadow: 0px 0px 10px rgba(0,0,0,0.2); border-radius: 5px; padding: 5px;">
+                              <img :src="file" alt="Enlarged Preview" style="width: 100%; border-radius: 5px;" />
+                            </div>
+                          </template>
+
+                          <!-- PDF File Icon -->
+                          <a v-else :href="file" target="_blank"
+                            class="d-flex align-items-center justify-content-center mt-2 border rounded bg-light"
+                            style="width: 100px; height: 100px; text-decoration: none;">
+                            <i class="bi bi-file-earmark-pdf-fill fs-2 text-danger"></i>
+                          </a>
                         </div>
                       </div>
 
-                      <input :disabled="props.readonlyFor === 'true'
-                        " v-else type="file" accept="image/jpeg,image/png,application/pdf"
-                        :class="props.readonlyFor === 'true' ? 'd-none ' : ' '" :id="'field-' +
-                          sectionIndex +
-                          '-' +
-                          columnIndex +
-                          '-' +
-                          fieldIndex
-                          " class="form-control previewInputHeight font-10" multiple @change="
-                            logFieldValue(
-                              $event,
-                              blockIndex,
-                              sectionIndex,
-                              rowIndex,
-                              columnIndex,
-                              fieldIndex
-                            )
-                            " />
+                      <!-- File input -->
+                      <input :disabled="props.readonlyFor === 'true'" v-else type="file"
+                        accept="image/jpeg,image/png,application/pdf"
+                        :class="props.readonlyFor === 'true' ? 'd-none' : ''"
+                        :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                        class="form-control previewInputHeight font-10" multiple
+                        @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
                     </template>
+
+
 
                     <template v-else-if="field.fieldtype == 'Datetime'">
                       <input type="datetime-local" v-model="field.value"
@@ -221,16 +198,15 @@
                           '-' +
                           fieldIndex
                           " class="form-control previewInputHeight" />
-                      <textarea v-if="field.fieldtype == 'Text'" :disabled="blockIndex < currentLevel"
-                        :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 image-border-bottom bg-transparent ' : ' '"
-                        :readOnly="blockIndex === 0 || props.readonlyFor === 'true'
-                          " v-model="field.value" :placeholder="'Enter ' + field.label" :value="field.value" :name="'field-' +
-                            sectionIndex +
-                            '-' +
-                            columnIndex +
-                            '-' +
-                            fieldIndex
-                            " class="form-control previewInputHeight"></textarea>
+                      <textarea v-if="field.fieldtype === 'Text'" :disabled="blockIndex < currentLevel"
+                        :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0  bg-transparent' : ''"
+                        :readOnly="blockIndex === 0 || props.readonlyFor === 'true'" v-model="field.value"
+                        :placeholder="'Enter ' + field.label"
+                        :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                        class="form-control previewInputHeight"
+                        :ref="el => setRef(el, sectionIndex, columnIndex, fieldIndex)"
+                        @input="adjustHeight(sectionIndex, columnIndex, fieldIndex)" />
+
                       <component v-if="field.fieldtype !== 'Int' && field.fieldtype !== 'Text'"
                         :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'"
                         :is="getFieldComponent(field.fieldtype)"
@@ -302,9 +278,10 @@
 </template>
 
 <script setup>
-import { computed, defineProps, onMounted, ref, watch } from "vue";
-import { apis, domain } from "../shared/apiurls";
+import { computed, defineProps, onMounted, ref, watch, nextTick, reactive } from "vue";
+import { apis, doctypes, domain } from "../shared/apiurls";
 import axiosInstance from "../shared/services/interceptor";
+import { useRoute } from "vue-router";
 
 const props = defineProps({
   blockArr: {
@@ -328,14 +305,35 @@ const props = defineProps({
     type: Array,
   },
 });
+const route = useRoute();
 
+const selectedData = ref({
+  type: route.query.type || "", // Retrieve from query
+});
 
 const emit = defineEmits();
 const filePaths = ref([]);
 const tableName = ref("");
 const errorMessages = ref({});
 
-const showPreview = ref(false);
+const hoverStates = ref({});
+const textAreaRefs = reactive({});
+
+function setRef(el, sectionIndex, columnIndex, fieldIndex) {
+  if (!el) return;
+  const key = `${sectionIndex}-${columnIndex}-${fieldIndex}`;
+  textAreaRefs[key] = el;
+  nextTick(() => adjustHeight(sectionIndex, columnIndex, fieldIndex));
+}
+
+function adjustHeight(sectionIndex, columnIndex, fieldIndex) {
+  const key = `${sectionIndex}-${columnIndex}-${fieldIndex}`;
+  const el = textAreaRefs[key];
+  if (el) {
+    el.style.height = 'auto';
+    el.style.height = el.scrollHeight + 'px';
+  }
+}
 
 const isImageFile = (value) => {
   if (!value) return false;
@@ -343,6 +341,48 @@ const isImageFile = (value) => {
 };
 
 
+function getFileArray(value) {
+  return value.split(',').map(f => f.trim())
+}
+onMounted(() => {
+  emit("updateField", getAllFieldsData());
+  if (selectedData.value.type === 'mytasks') {
+    getEmploye()
+  }
+  Object.values(textAreaRefs).forEach(el => {
+    el.style.height = 'auto';
+    el.style.height = el.scrollHeight + 'px';
+  });
+
+});
+
+const emp_data = ref({}); // Use an object to hold both name and signature
+
+function getEmploye() {
+  const storedData = JSON.parse(localStorage.getItem("employeeData"));
+  // console.log(storedData, "=============================");
+  const queryParams = {
+    filters: JSON.stringify([["Ezy Employee", "emp_mail_id", "=", storedData.emp_mail_id]]),
+    fields: JSON.stringify(["emp_name", "signature"]),
+
+  };
+
+
+  axiosInstance
+    .get(`${apis.resource}${doctypes.EzyEmployeeList}`, {
+      params: queryParams,
+    })
+    .then((response) => {
+      emp_data.value = {
+        emp_name: response.data[0].emp_name,
+        signature: response.data[0].signature,
+      };
+      // console.log(emp_data.value, "response");
+    })
+    .catch((error) => {
+      console.error("Error fetching user data:", error);
+    });
+}
 
 // const openInNewWindow = (url) => {
 //   window.open(url, '_blank');
@@ -374,12 +414,12 @@ const filteredBlocks = computed(() => {
   }
 
   // Ensure employeeData is valid
-  if (!props.employeeData || props.employeeData.length === 0) {
-    console.warn("No employeeData available.");
-    return filtered;
-  }
+  // if (!props.employeeData || props.employeeData.length === 0) {
+  //   console.warn("No employeeData available.");
+  //   return filtered;
+  // }
 
-  const employee = props.employeeData[0]; // Access first item
+  // const employee = props.employeeData[0]; // Access first item
 
   // Create a deep copy before modifying the data
   const updatedBlocks = JSON.parse(JSON.stringify(filtered));
@@ -391,15 +431,18 @@ const filteredBlocks = computed(() => {
     section.rows?.forEach((row) => {
       row.columns?.forEach((column) => {
         column.fields?.forEach((field) => {
-          if (!props.employeeData || props.readonlyFor === 'true') return;
+          if (props.readonlyFor === 'true') return;
           if (field.label === "Approver") {
-            field.value = employee?.emp_name;
-            emit("updateField", field);
+            if (emp_data.value?.emp_name) {
+
+              field.value = emp_data.value?.emp_name;
+              emit("updateField", field);
+            }
           }
           if (field.label === "Approved By") {
-            if(employee?.signature){
+            if (emp_data.value.signature) {
 
-              field.value = employee?.signature;
+              field.value = emp_data.value.signature;
               emit("updateField", field);
             }
 
@@ -490,17 +533,33 @@ const getAllFieldsData = () => {
 // };
 
 const openFile = (filePath) => {
-  const fileUrl = `${filePath}`;
-  window.open(fileUrl, "_blank");
+  const fileUrl = filePath.trim();
+
+  if (/\.(pdf)$/i.test(fileUrl)) {
+    // For PDFs: open in new tab
+    window.open(fileUrl, '_blank');
+  } else if (/\.(jpg|jpeg|png|gif)$/i.test(fileUrl)) {
+    // For images: create a new tab and write <img> inside it
+    const win = window.open();
+    win.document.write(`
+      <html>
+        <head><title>Image Preview</title></head>
+        <body style="margin:0;display:flex;justify-content:center;align-items:center;height:100vh;background:#000">
+          <img src="${fileUrl}" style="max-width:100%;max-height:100%;" />
+        </body>
+      </html>
+    `);
+    win.document.close();
+  } else {
+    alert('Unsupported file type');
+  }
 };
+
 const isFilePath = (value) => {
   if (!value) return false;
   return /\.(png|jpg|jpeg|gif|pdf|docx|xlsx|txt)$/i.test(value);
 };
 
-onMounted(() => {
-  emit("updateField", getAllFieldsData());
-});
 
 watch(
   () => props.blockArr,
@@ -647,7 +706,7 @@ const uploadFile = (file, field) => {
   axiosInstance
     .post(apis.uploadfile, formData)
     .then((res) => {
-      console.log(res, res.message.file_url);
+      // console.log(res, res.message.file_url);
       if (res.message && res.message.file_url) {
         if (field["value"]) {
           field["value"] += `, ${res.message.file_url}`;
@@ -655,7 +714,7 @@ const uploadFile = (file, field) => {
           field["value"] = res.message.file_url;
         }
         emit("updateField", field);
-        console.log(field);
+        // console.log(field);
       } else {
         console.error("file_url not found in the response.");
       }

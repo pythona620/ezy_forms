@@ -141,14 +141,14 @@ function formCreation() {
         router.push({ name: "FormStepper" ,query:{
             routepath: route.path
         }, });
-        console.log(route.path,"pppp");
+        // console.log(route.path,"pppp");
     }
 
 function viewPreview(data, index, type) {
-  console.log(route.path);
+  // console.log(route.path);
   if (type === "view") {
     if (data) {
-      console.log(data, "------------");
+      // console.log(data, "------------");
       router.push({
         name: "FormPreviewComp",
         query: {
@@ -162,7 +162,7 @@ function viewPreview(data, index, type) {
   if(type === 'raiseRequest'){
     const parsedData = JSON.parse(data.form_json);
     const storedData = localStorage.getItem("employeeData");
-    console.log(parsedData);
+    // console.log(parsedData);
 
     if (storedData) {
       const designation = JSON.parse(storedData).designation;
@@ -198,9 +198,10 @@ function viewPreview(data, index, type) {
       } else {
         toast.info("You do not have permission to access this Form.");
       }
-    } else {
-      console.log("No employee data found in localStorage.");
     }
+    //  else {
+    //   console.log("No employee data found in localStorage.");
+    // }
   }
 
 
@@ -268,9 +269,10 @@ function actionCreated(rowData, actionEvent) {
       } else {
         toast.info("You do not have permission to access this Form.");
       }
-    } else {
-      console.log("No employee data found in localStorage.");
     }
+    //  else {
+    //   console.log("No employee data found in localStorage.");
+    // }
   }
 
   if (actionEvent.name === 'Download Print format') {
@@ -324,7 +326,7 @@ function downloadPdf() {
     });
 }
 
-
+const responcedata = ref([]);
 
 // Toggle function triggered when a checkbox is clicked
 function toggleFunction(rowData, rowIndex, event) {
@@ -342,7 +344,8 @@ function toggleFunction(rowData, rowIndex, event) {
     axiosInstance
       .put(`${apis.resource}${doctypes.EzyFormDefinitions}/${rowData.name}`, rowData)
       .then((response) => {
-        console.log("Response:", response.data);
+         responcedata.value = response.data;
+        // console.log("Response:", response.data);
         // Adjust the toast message accordingly:
         toast.success(`Form ${actionText}d successfully`, { autoClose: 700 });
         // Refresh the table data after a short delay
@@ -353,10 +356,11 @@ function toggleFunction(rowData, rowIndex, event) {
       .catch((error) => {
         console.error("Error updating toggle:", error);
       });
-  } else {
-    // If canceled, do nothing – the checkbox remains unchanged.
-    console.log("Action cancelled. Toggle remains unchanged.");
-  }
+  } 
+  // else {
+  //   // If canceled, do nothing – the checkbox remains unchanged.
+  //   console.log("Action cancelled. Toggle remains unchanged.");
+  // }
 }
 
 
@@ -473,7 +477,7 @@ const isEnable = ref("");
 onMounted(() => {
   const userData = JSON.parse(localStorage.getItem('employeeData'));
   userDesigination.value = userData.designation || '';
-  console.log(userDesigination.value,"///");
+  // console.log(userDesigination.value,"///");
 
   if (userDesigination.value.includes("IT")) {
     isEnable.value = "true";

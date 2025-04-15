@@ -330,6 +330,18 @@ template_str = """
          .header-right{
              min-width: 200px;
          }
+        .watermark {
+            position: fixed;
+            top: 50%;
+            left: 30%;
+            font-size: 80px;
+            color: rgba(0, 0, 0, 0.1); /* Light gray with transparency */
+            transform: rotate(-30deg);
+            z-index: 0;
+            pointer-events: none;
+            user-select: none;
+            white-space: nowrap;
+        }
          
         @media print {
             .table, .table th, .table td {
@@ -338,7 +350,15 @@ template_str = """
             .table{
                 width: 100% !important;
             }
-            
+            textarea {
+                border: none;
+                resize: none;
+                overflow: visible !important;
+                white-space: pre-wrap;
+            }
+            .watermark {
+             display: block;
+            }
         }
         
    
@@ -347,10 +367,14 @@ template_str = """
     </head>
 <body>
 <div class="main-body">
+<div class="watermark">{{business_unit}}</div>
+
 <div class="header-container">
     <div class="logo-div"> 
     
     <img src="{{ company_logo }}" alt="logo" style="height: 70px; width: 200px; margin-bottom:0px">
+    
+    
      </div>
   <div class="header-left">
   
@@ -374,6 +398,9 @@ template_str = """
                     <div class="row">
                         {% for column in row.columns %}
                             <div class="column">
+                              {% if column.label %}
+                                <h3>{{ column.label }}</h3>
+                                {% endif %}
                                 {% for field in column.fields %}
                                     <div class="field">
                                         <label for="{{ field.fieldname }}">{{ field.label }}:</label>
@@ -427,13 +454,13 @@ template_str = """
                                                 {% set field_values_list = field_values | list %}  <!-- Convert dict_values to a list -->
 
                                                 <div class="checkbox-container">
-    {% for option in parsed_values_list %}
-        <div class="checkbox-gap">
-            <span class="custom-checkbox"></span>
-            {{ option }}
-        </div>
-    {% endfor %}
-</div>
+                                                    {% for option in parsed_values_list %}
+                                                        <div class="checkbox-gap">
+                                                            <span class="custom-checkbox"></span>
+                                                            {{ option }}
+                                                        </div>
+                                                    {% endfor %}
+                                                </div>
 
 
                                                                                             
@@ -455,7 +482,14 @@ template_str = """
                                         {% elif field.fieldtype == 'Color' %}
                                             <input type="color" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
                                         {% elif field.fieldtype == 'Text' %}
-                                            <textarea id="{{ field.fieldname }}" name="{{ field.fieldname }}">{{ field['values'] }}</textarea>
+                                            {% set char_count = field['values']|length %}
+                                            {% set lines = (char_count // 60) + 1 %}
+                                            {% set height = lines * 24 %}
+                                            <textarea
+                                            id="{{ field.fieldname }}"
+                                            name="{{ field.fieldname }}"
+                                            style="height: {{ height }}px; border:none;"
+                                            >{{ field['values'] }}</textarea>
                                         {% elif field.fieldtype == 'Date' %}
                                             <input type="text" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}" class="date-input" placeholder="__/__/____">
                                         {% elif field.fieldtype == 'Datetime' %}
@@ -580,15 +614,26 @@ template_str = """
                 if (!input.value.replace(/\D/g, "")) {
                     input.value = "__/__/____";
                 }
+                });
             });
-        });
-          document.querySelectorAll(".field textarea").forEach(textarea => {
-            textarea.style.height = textarea.scrollHeight + "px"; // Set initial height
-            textarea.addEventListener("input", function () {
-                this.style.height = "auto"; // Reset height
-                this.style.height = this.scrollHeight + "px"; // Adjust height based on content
+            document.addEventListener("DOMContentLoaded", function () {
+                const textareas = document.querySelectorAll("textarea");
+
+                textareas.forEach(textarea => {
+                    // Remove any hardcoded height
+                    textarea.style.height = "auto";
+                    textarea.style.overflow = "hidden";
+
+                    // Function to auto-resize based on content
+                    const resizeTextarea = () => {
+                        textarea.style.height = "auto"; // Reset
+                        textarea.style.height = textarea.scrollHeight + "px"; // Set based on content
+                    };
+
+                    resizeTextarea(); // Initial resize on load
+                    textarea.addEventListener("input", resizeTextarea); // Resize on user input
+                });
             });
-        });
 
     });
 </script>
@@ -622,7 +667,7 @@ def json_structure_call_for_html_view(json_obj: list, form_name: str, child_data
         logo_of_company = site_url + company_logo
     
     html_output = Template(template_str).render(
-        data=structered_data, form_name=form_name, child_data=child_data, child_table_data=child_table_data,company_logo=logo_of_company,site_url=site_url
+        data=structered_data, form_name=form_name, child_data=child_data, child_table_data=child_table_data,company_logo=logo_of_company,site_url=site_url,business_unit=business_unit
     )
     
     return html_output

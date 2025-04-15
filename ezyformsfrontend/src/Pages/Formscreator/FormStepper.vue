@@ -1532,8 +1532,8 @@ const fieldTypes = [
     type: "Select",
   },
   {
-    label: "MultiSelect",
-    type: "Small Text",
+      label: "Multi Select",
+      type: "Small Text",
   },
   // {
   //     label: "Signature",

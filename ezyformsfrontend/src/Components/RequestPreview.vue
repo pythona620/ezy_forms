@@ -100,7 +100,7 @@
                                                                 " />
                                                         </div>
                                                         <div>
-                                                            <label class="form-check-label m-0"
+                                                            <label class="form-check-label font-12 m-0"
                                                                 :for="`${option}-${index}`">
                                                                 {{ option }}
                                                             </label>
@@ -111,23 +111,65 @@
                                         </template>
 
                                         <template v-else-if="field.fieldtype == 'Attach'">
-                                            <input type="file" accept="image/jpeg,image/png/,application/pdf" :id="'field-' +
-                                                sectionIndex +
-                                                '-' +
-                                                columnIndex +
-                                                '-' +
-                                                fieldIndex
-                                                " class="form-control previewInputHeight font-10" multiple @change="
-                                                    logFieldValue(
-                                                        $event,
-                                                        blockIndex,
-                                                        sectionIndex,
-                                                        rowIndex,
-                                                        columnIndex,
-                                                        fieldIndex
-                                                    )
-                                                    " />
-                                        </template>
+                                            <input
+    :disabled="props.readonlyFor === 'true'"
+    type="file"
+    accept="image/jpeg,image/png,application/pdf"
+    :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+    class="form-control previewInputHeight font-10 mt-2"
+    multiple
+    @change="
+      logFieldValue(
+        $event,
+        blockIndex,
+        sectionIndex,
+        rowIndex,
+        columnIndex,
+        fieldIndex
+      )
+    "
+  />
+  <div v-if="field.value" class="d-flex flex-wrap gap-2">
+    <div
+      v-for="(fileUrl, index) in field.value.split(',').map(f => f.trim())"
+      :key="index"
+      class="position-relative d-inline-block"
+      @mouseover="hovered = index"
+      @mouseleave="hovered = null"
+    >
+      <!-- Show image thumbnail -->
+      <img
+        v-if="isImageFile(fileUrl)"
+        :src="fileUrl"
+        class="img-thumbnail mt-2 cursor-pointer border-0"
+        style="max-width: 100px; max-height: 100px"
+      />
+
+      <!-- Show PDF icon if not image -->
+      <div
+        v-else
+        class="d-flex align-items-center justify-content-center border mt-2"
+        style="width: 100px; height: 100px; background: #f9f9f9"
+      >
+        <i class="bi bi-file-earmark-pdf fs-1 text-danger"></i>
+      </div>
+
+      <!-- Remove icon -->
+      <button
+        v-if="hovered === index"
+        @click="removeFile(index, field)"
+        class="btn btn-sm btn-light position-absolute"
+        style="top: 2px; right: 5px; border-radius: 50%; padding: 0 5px"
+      >
+        <i class="bi bi-x fs-6"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- File input for uploading -->
+
+</template>
+
                                         <template v-else-if="field.fieldtype == 'Datetime'">
                                             <input type="datetime-local" :value="field.value" @click="forceOpenCalendar"
                                                 ref="datetimeInput" :placeholder="'Enter ' + field.label" :name="'field-' +
@@ -335,6 +377,20 @@ onMounted(() => {
 });
 
 const datetimeInput = ref(null);
+
+
+const hovered = ref(null)
+
+const isImageFile = (url) => {
+  return /\.(jpg|jpeg|png|gif|png)$/i.test(url)
+}
+
+const removeFile = (index, field) => {
+  const files = field.value.split(',').map(f => f.trim())
+  files.splice(index, 1)
+  field.value = files.join(', ')
+  emit('updateField', field)
+}
 const forceOpenCalendar = (event) => {
     if (event.target.showPicker) {
         event.target.showPicker(); // Opens the date picker in supported browsers
@@ -416,7 +472,7 @@ const logFieldValue = (
         props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
             columnIndex
         ].fields[fieldIndex];
-    console.log(field.fieldtype);
+    // console.log(field.fieldtype);
 
     if (eve.target?.files && eve.target.files.length > 0) {
         let files = Array.from(eve.target.files); // Convert FileList to an array
@@ -444,7 +500,7 @@ const logFieldValue = (
             }
 
             field.value = JSON.stringify(selectedValues); // Store as stringified array
-            console.log(field.value, "selectedValues", selectedValues);
+            // console.log(field.value, "selectedValues", selectedValues);
 
 
 
