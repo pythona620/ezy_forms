@@ -481,15 +481,17 @@ template_str = """
                                             <input type="time" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
                                         {% elif field.fieldtype == 'Color' %}
                                             <input type="color" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
-                                        {% elif field.fieldtype == 'Text' %}
-                                            {% set char_count = field['values']|length %}
-                                            {% set lines = (char_count // 60) + 1 %}
-                                            {% set height = lines * 24 %}
+                                       {% elif field.fieldtype == 'Text' %}
+                                            {% set value = field['values'] %}
+                                            {% set char_count = value | length %}
+                                            {% set newline_count = value.count('\n') %}
+                                            {% set estimated_lines = (char_count // 60) + 1 + newline_count %}
+                                            {% set height = estimated_lines * 24 %}
                                             <textarea
-                                            id="{{ field.fieldname }}"
-                                            name="{{ field.fieldname }}"
-                                            style="height: {{ height }}px; border:none;"
-                                            >{{ field['values'] }}</textarea>
+                                                id="{{ field.fieldname }}"
+                                                name="{{ field.fieldname }}"
+                                                style="height: {{ height }}px; border:none;"
+                                            >{{ value }}</textarea>
                                         {% elif field.fieldtype == 'Date' %}
                                             <input type="text" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}" class="date-input" placeholder="__/__/____">
                                         {% elif field.fieldtype == 'Datetime' %}
