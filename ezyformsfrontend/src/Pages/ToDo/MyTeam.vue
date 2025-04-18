@@ -44,8 +44,8 @@
           </div>
           <div class="modal-body approvermodalbody">
 
-            <ApproverPreview :blockArr="showRequest" :childHeaders="tableHeaders" :childData="responseData"
-              :readonly-for="'true'" :current-level="totalLevels" @updateField="updateFormData" />
+            <!-- <ApproverPreview :blockArr="showRequest" :childHeaders="tableHeaders" :childData="responseData"
+              :readonly-for="'true'" :current-level="totalLevels" @updateField="updateFormData" /> -->
             <!-- <div v-if="tableName" class="mt-2">
               <div>
                 <span class="font-13 fw-bold">{{ tableName }}</span>
@@ -210,16 +210,18 @@ const tableName = ref("");
 const responseData = ref([]);
 
 const tableheaders = ref([
-  // { th: "Request ID", td_key: "name" },
+  { th: "Request ID", td_key: "name" },
   { th: "Form name", td_key: "doctype_name" },
   // { th: "Form category", td_key: "doctype_name" },
   { th: "Owner of form", td_key: "role" },
   { th: "Requested on", td_key: "requested_on" },
   // { th: "Total Levels", td_key: "total_levels" },
   { th: "Approval Status", td_key: "status" },
+  { th: "Workflow Status", td_key: "assigned_to_users" },
+
 ]);
 const fieldMapping = ref({
-  // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
+  name: { type: "input" },
   status: {
     type: "select",
     options: [
@@ -278,7 +280,7 @@ function actionCreated(rowData, actionEvent) {
         selectedRequest.value?.json_columns
       ).child_table_fields;
 
-      console.log(tableHeaders.value, "req");
+      // console.log(tableHeaders.value, "req");
 
       // console.log(selectedRequest.value,"0000");
       // Rebuild the structured array from JSON
@@ -331,7 +333,7 @@ function actionCreated(rowData, actionEvent) {
                   childTables.forEach((tableKey) => {
                     responseData.value[tableKey] = res.data[tableKey] || [];
                   });
-                  console.log("Response Data:", responseData.value);
+                  // console.log("Response Data:", responseData.value);
                 }
               })
               .catch((error) => {

@@ -1,5 +1,5 @@
 <template>
-  <div  class="position-relative">
+  <div class="position-relative">
     <!-- <div class=" back-to-same">
   
         <div class="container-fluid  p-0">
@@ -10,83 +10,85 @@
         </div>
       </div> -->
 
-
-    <div v-if="approvedform" class="approve_height">
-      <div class="container-fluid">
-        <div class="row">
-          <div class="col-3"></div>
-          <div class="col-6">
-            <div class="mt-1">
-              <div class="text-center">
-                <div class="card border-0 shadow-none">
-                  <div class="card-body pb-2 d-flex gap-3 align-items-center justify-content-center">
-                    <h5 class="card-title">{{ selectedData.doctype_name }}</h5>
-                    <span v-if="tableData?.status === 'Completed'"><i
-                        class="bi approved-icon bi-check2-circle "></i></span>
-                    <span v-if="tableData?.status === 'Request Cancelled'"><i
-                        class="bi rejected-icon bi-x-circle"></i></span>
+    <div v-if="expiryToken">
+      <div v-if="approvedform" class="approve_height">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-3"></div>
+            <div class="col-6">
+              <div class="mt-1">
+                <div class="text-center">
+                  <div class="card border-0 shadow-none">
+                    <div class="card-body pb-2 d-flex gap-3 align-items-center justify-content-center">
+                      <h5 class="card-title">{{ selectedData.doctype_name }}</h5>
+                      <span v-if="tableData?.status === 'Completed'"><i
+                          class="bi approved-icon bi-check2-circle "></i></span>
+                      <span v-if="tableData?.status === 'Request Cancelled'"><i
+                          class="bi rejected-icon bi-x-circle"></i></span>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div class="position-relative ">
-                <div class="requestPreviewDiv pb-5">
-                  <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel"
-                    :childData="responseData" :readonly-for="selectedData.readOnly" :childHeaders="tableHeaders"
-                    :employee-data="employeeData" @updateField="updateFormData" />
+                <div class="position-relative ">
+                  <div class="requestPreviewDiv pb-5">
+                    <ApproverPreview :blockArr="showRequest" :childData="responseData"
+                      :current-level="selectedcurrentLevel" :readonly-for="selectedData.readOnly"
+                      :childHeaders="tableHeaders" :employee-data="employeeData" @updateField="updateFormData" />
 
-                </div>
+                  </div>
 
-                <div v-if="selectedData.type == 'myforms' && tableData.status == 'Request Raised'"
-                  class="d-flex justify-content-end approveBtns">
-                  <button type="submit" class="btn Edit_btn" @click.prevent="EditformSubmission()">
-                    <span v-if="loading" class="spinner-border spinner-border-sm" role="status"
-                      aria-hidden="true"></span>
-                    <span v-if="!loading"><i class="bi bi-pencil-fill font-15 me-2"></i><span
-                        class="font-12">Edit</span></span>
-                  </button>
-                </div>
+                  <div v-if="selectedData.type == 'myforms' && tableData.status == 'Request Raised'"
+                    class="d-flex justify-content-end approveBtns">
+                    <button type="submit" class="btn Edit_btn" @click.prevent="EditformSubmission()">
+                      <span v-if="loading" class="spinner-border spinner-border-sm" role="status"
+                        aria-hidden="true"></span>
+                      <span v-if="!loading"><i class="bi bi-pencil-fill font-15 me-2"></i><span
+                          class="font-12">Edit</span></span>
+                    </button>
+                  </div>
 
-                <div v-if="selectedData.type === 'mytasks' && tableData?.status !== 'Completed' && tableData?.status !== 'Request Cancelled'" class="">
+                  <div
+                    v-if="selectedData.type === 'mytasks' || tableWFData?.status !== 'Completed' || tableWFData?.status !== 'Request Cancelled'"
+                    class="">
 
-                  <!-- v-if="!requestcancelled" -->
-                  <div class="approveBtns pb-2 mb-2 mt-3 flex-column px-0 pe-4">
-                    <div class="form-floating mb-2 p-1">
-                      <textarea class="form-control font-12" placeholder="Leave a comment here" id="floatingTextarea"
-                        @input="resetCommentsValidation" :class="{ 'is-invalid': !isCommentsValid }"
-                        v-model="ApproverReason"></textarea>
-                      <label class="font-11" for="floatingTextarea">Comments..</label>
-                      <span v-if="!isCommentsValid" class="font-11 text-danger ps-1">Please enter comments**</span>
-                    </div>
-                    <div class=" d-flex justify-content-between ">
-                      <div>
-                        <button :disabled="rejectLoad" class="btn btn-outline-danger font-10 py-0 rejectbtn"
-                          type="button" @click="ApproverCancelSubmission(formData, 'Request Cancelled')">
-                          <span v-if="rejectLoad" class="spinner-border spinner-border-sm" role="status"
-                            aria-hidden="true"></span>
-                          <span v-if="!rejectLoad"><i class="bi bi-x-lg fw-bolder font-12 me-2"></i><span
-                              class="font-12">Reject</span></span>
-                        </button>
+                    <!-- v-if="!requestcancelled" -->
+                    <div class="approveBtns pb-2 mb-2 mt-3 flex-column px-0 pe-4">
+                      <div class="form-floating mb-2 p-1">
+                        <textarea class="form-control font-12" placeholder="Leave a comment here" id="floatingTextarea"
+                          @input="resetCommentsValidation" :class="{ 'is-invalid': !isCommentsValid }"
+                          v-model="ApproverReason"></textarea>
+                        <label class="font-11" for="floatingTextarea">Comments..</label>
+                        <span v-if="!isCommentsValid" class="font-11 text-danger ps-1">Please enter comments**</span>
                       </div>
-                      <div>
-                        <button :disabled="loading" type="submit" class="btn btn-success approvebtn"
-                          @click.prevent="ApproverFormSubmissionNew('Approve')">
-                          <span v-if="loading" class="spinner-border spinner-border-sm" role="status"
-                            aria-hidden="true"></span>
-                          <span v-if="!loading"><i class="bi bi-check-lg font-15 me-2"></i><span
-                              class="font-12">Approve</span></span>
-                        </button>
+                      <div class=" d-flex justify-content-between ">
+                        <div>
+                          <button :disabled="rejectLoad" class="btn btn-outline-danger font-10 py-0 rejectbtn"
+                            type="button" @click="ApproverCancelSubmissionNew('Request Cancelled')">
+                            <span v-if="rejectLoad" class="spinner-border spinner-border-sm" role="status"
+                              aria-hidden="true"></span>
+                            <span v-if="!rejectLoad"><i class="bi bi-x-lg fw-bolder font-12 me-2"></i><span
+                                class="font-12">Reject</span></span>
+                          </button>
+                        </div>
+                        <div>
+                          <button :disabled="loading" type="submit" class="btn btn-success approvebtn"
+                            @click.prevent="ApproverFormSubmissionNew('Approve')">
+                            <span v-if="loading" class="spinner-border spinner-border-sm" role="status"
+                              aria-hidden="true"></span>
+                            <span v-if="!loading"><i class="bi bi-check-lg font-15 me-2"></i><span
+                                class="font-12">Approve</span></span>
+                          </button>
 
+                        </div>
                       </div>
-                    </div>
 
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div class="col-3">
-            <div class="activity-log-container ">
-              <!-- <div class=" w-100  mb-2">
+            <div class="col-3">
+              <div class="activity-log-container ">
+                <!-- <div class=" w-100  mb-2">
                 <div class=" py-2 px-3">
   
                   <h5 class="font-13 fw-bold">{{ selectedData.doctype_name }} form approval</h5>
@@ -97,7 +99,7 @@
                     {{ tableData.total_levels }})</span>
                 </div>
               </div> -->
-              <!-- <div class="mt-5 mb-3 pt-2 d-flex justify-content-between align-items-center">
+                <!-- <div class="mt-5 mb-3 pt-2 d-flex justify-content-between align-items-center">
                 <h6 class="font-14 ps-3  mb-0">Activity log <span
                     v-if="tableData?.status !== 'Completed' && tableData.status !== 'Request Cancelled'"
                     class="text-warning font-12  fw-bold">
@@ -115,7 +117,7 @@
                     class="bi bi-arrow-down-circle fw-bold px-1"></i>Download
                   PDF</button>
               </div> -->
-              <!-- <div class="row mb-3">
+                <!-- <div class="row mb-3">
                 <div class="col-xl-6 col-lg-12 col-md-12">
                   <div class="d-flex  align-items-baseline  mt-2">
                     <div>
@@ -146,7 +148,7 @@
                   </button>
                 </div>
               </div> -->
-              <!-- <div class="activity_height">
+                <!-- <div class="activity_height">
                 <div v-for="(item, index) in activityData" :key="index" class="activity-log-item"
                   :class="{ 'last-item': index === activityData.length - 1 }">
                   <div class="activity-log-dot"></div>
@@ -164,7 +166,7 @@
                   </div>
                 </div>
               </div> -->
-              <!-- <div class="activity-log-item">
+                <!-- <div class="activity-log-item">
                 <div class="pending"></div>
                 <div class="activity-log-content">
                   <p class="font-12 mb-1">
@@ -174,10 +176,10 @@
                   </p>
                 </div>
               </div> -->
-            </div>
+              </div>
 
 
-            <!-- <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+              <!-- <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
   
               <div class="offcanvas-header">
                 <h5 class="offcanvas-title" id="offcanvasRightLabel">Offcanvas right</h5>
@@ -187,16 +189,35 @@
                 <div v-html="pdfPreview"></div>
               </div>
             </div> -->
+            </div>
+          </div>
+        </div>
+      </div>
+      <div v-if="!approvedform" class="thank_div">
+        <div>
+          <div :class="actionStatus == 'Approve' ? 'thank-you-card-approve': 'thank-you-card-reject'">
+          
+            <span>Form {{ actionStatus }} Successfully <span v-if="actionStatus == 'Approve'"><i class="bi approved-icon bi-check2-circle"></i></span>
+            <span v-if="actionStatus == 'Request Cancelled'">
+              <i class="bi bi-x-lg"></i>
+            </span>
+            </span>
           </div>
         </div>
       </div>
     </div>
-    <div v-if="!approvedform" class="thank_div">
-      <span>Thank You <i
-        class="bi approved-icon bi-check2-circle "></i></span>
+    <div v-else>
+
+      <div class="expiry-token-container">
+        <div class="expiry-token-card">
+          <!-- <h2>⚠️</h2> -->
+          <p>Form Already Submitted.</p>
+        </div>
+      </div>
+
+
 
     </div>
-
 
 
   </div>
@@ -224,7 +245,7 @@ const selectedData = ref({
   readOnly: route.query.readOnly, // Retrieve from query
   token: route.query.key, // Retrieve from query
 });
-console.log(selectedData.value, "////");
+// console.log(selectedData.value, "////");
 const backTo = ref(selectedData.value.routepath);
 // onMounted(() => {
 //   receivedForMe();
@@ -261,7 +282,9 @@ const resetCommentsValidation = () => {
     isCommentsValid.value = true;
   }
 };
-
+const actionStatus = ref("");
+const EmptyData = ref([])
+const expiryToken = ref(true);
 const ApprovePDF = ref(true)
 // Format the date for display
 // const formatDate = (dateString) => {
@@ -272,8 +295,69 @@ const ApprovePDF = ref(true)
 
 // Format action text (cancelled or raised)
 
+
+// function clearAllCookies() {
+//   const cookies = document.cookie.split(";");
+
+//   const expiredDate = new Date(0).toUTCString(); // Thu, 01 Jan 1970
+
+//   for (let cookie of cookies) {
+//     const eqPos = cookie.indexOf("=");
+//     const name = eqPos > -1 ? cookie.slice(0, eqPos).trim() : cookie.trim();
+//     document.cookie = `${name}=;expires=${expiredDate};path=/`;
+//   }
+// }
+// function deleteCookie(name) {
+//   document.cookie = `${name}=;expires=${new Date(0).toUTCString()};path=/`;
+// }
+// function deleteCookie(name) {
+//   const expired = new Date(0).toUTCString();
+
+//   // Try different paths to ensure it's removed
+//   document.cookie = `${name}=; expires=${expired}; path=/;`;
+//   document.cookie = `${name}=; expires=${expired}; path=/; domain=${location.hostname}`;
+//   document.cookie = `${name}=; expires=${expired}; path=/`;
+// }
+// function clearSidCookie() {
+//   // Forcing removal of sid cookie by setting an expired date
+//   document.cookie = "sid=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+// }
+const userRole = ref('Guest');
 onMounted(() => {
+  // clearSidCookie()
+  //   const cookies = document.cookie;
+
+  // const hasAuthCookies = ['full_name', 'sid', 'system_user', 'user_id'].some(name =>
+  //   cookies.includes(`${name}=`)
+  // );
+
+  // if (hasAuthCookies) {
+  //   console.log('User is logged in');
+  //   userRole.value = 'User';
+  // } else {
+  //   console.log('Treating as Guest');
+  //   userRole.value = 'Guest';
+  // }
+
+  // // 👉 Optionally override anyway
+  // userRole.value = 'Guest'; 
   // userData()
+  // clearAllCookies();
+
+  //   const cookiesToRemove = ['full_name', 'sid', 'system_user', 'user_id'];
+
+  // cookiesToRemove.forEach(cookie => {
+  //   deleteCookie(cookie);
+  // });
+
+  // const cookiesToRemove = ['full_name', 'sid', 'system_user', 'user_id'];
+
+  // cookiesToRemove.forEach(cookie => {
+  //   deleteCookie(cookie);
+  // });
+
+  // // Debug: Check what cookies are still left
+  // console.log('Cookies after clearing:', document.cookie);
   const storedData = localStorage.getItem("employeeData");
   try {
     const parsedData = JSON.parse(storedData);
@@ -288,31 +372,7 @@ onMounted(() => {
 
 });
 
-// function userData() {
-//   console.log(selectedData.value.token,".......");
-//   // Get token from selectedData or localStorage
-//   const token = selectedData.value.token || localStorage.getItem("authToken");
 
-//   // Define headers
-//   const headers = {
-//     "Content-Type": "application/json",
-//   };
-
-//   // Add Authorization header if token exists
-//   if (token) {
-//     headers["Authorization"] = `Bearer ${token}`;
-//   }
-
-//   axiosInstance
-//     .get(`${apis.resource}${doctypes.EzyEmployeeList}`, { headers })
-//     .then((response) => {
-//       const employeeData = response.data;
-//       console.log(employeeData, "pppp");
-//     })
-//     .catch((error) => {
-//       console.error("Error fetching user data:", error);
-//     });
-// }
 
 function EditformSubmission() {
   // Navigate to the new route
@@ -326,7 +386,7 @@ function EditformSubmission() {
       selectedFormStatus: route.query.status,
     },
   });
-  console.log("emittedFormData", emittedFormData.value);
+  // console.log("emittedFormData", emittedFormData.value);
 }
 watch(
   businessUnit,
@@ -335,7 +395,7 @@ watch(
     business_unit.value = newVal;
     business_unit.value = local
     if (newVal) {
-      console.log(business_unit.value, newVal, "ll");
+      // console.log(business_unit.value, newVal, "ll");
       receivedForMe();
     }
   },
@@ -368,289 +428,357 @@ const updateFormData = (fieldValues) => {
 
   // console.log(emittedFormData.value, "======");
 };
- function ApproverFormSubmissionNew(action){
-  const data = {
-    token : selectedData.value.token,
-    action: action,
-    reason: ApproverReason.value
-    }
 
 
-  axiosInstance
-    .get(apis.toMailApproval,{ params: data })
-    .then((res) => {
-      console.log(res);
-      approvedform.value = false;
-     
-    })
-    .catch((error) => {
-      console.error("Error fetching records:", error);
-    });
- }
-
-
-// Function to handle form submission
-function ApproverFormSubmission(dataObj, type) {
-  if (ApproverReason.value.trim() === "") {
+function ApproverFormSubmissionNew(action) {
+  // clearSidCookie()
+  // Trim and validate the reason input
+  const reason = ApproverReason.value.trim();
+  if (!reason) {
     isCommentsValid.value = false; // Show validation error
-    return; // Stop execution
-  }
-
-  isCommentsValid.value = true;
-  loading.value = true; // Start loader
-
-  let form = {};
-  if (Array.isArray(emittedFormData.value) && emittedFormData.value.length) {
-    emittedFormData.value.forEach((each) => {
-      form[each.fieldname] = each.value;
-    });
-  }
-  console.log(loading.value, dataObj, type, form);
-
-  // Get token from selectedData or localStorage
-  const token = selectedData.value.token || localStorage.getItem("authToken");
-
-  // Define headers
-  const headers = {
-    "Content-Type": "application/json",
-  };
-
-  // Add Authorization header if token exists
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
-
-  axiosInstance
-    .put(`${apis.resource}${selectedData.value.doctype_name}/${doctypeForm.value.name}`, form, {
-      headers,
-    })
-    .then((response) => {
-      if (response?.data) {
-        approvalStatusFn(dataObj, type);
-      } else {
-        loading.value = false; // Stop loader on failure
-        toast.error("Failed to submit form", { autoClose: 1000, transition: "zoom" });
-      }
-    })
-    .catch((error) => {
-      console.error("Error submitting form:", error);
-      loading.value = false; // Stop loader on error
-      toast.error("An error occurred while submitting the form.", { autoClose: 1000, transition: "zoom" });
-    });
-}
-
-// Function to handle approval status
-function approvalStatusFn(dataObj, type) {
-  console.log("Approval Data:", dataObj);
-
-  let data = {
-    property: tableData.value.property,
-    doctype: tableData.value.doctype_name,
-    request_ids: [tableData.value.name],
-    reason: ApproverReason.value,
-    action: type,
-    files: null,
-    cluster_name: null,
-    url_for_approval_id: "",
-    current_level: tableData.value.current_level,
-  };
-
-  // Get token from selectedData or localStorage
-  const token = selectedData.value.token || localStorage.getItem("authToken");
-
-  // Define headers
-  const headers = {
-    "Content-Type": "application/json",
-  };
-
-  // Add Authorization header if token exists
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
-
-  axiosInstance
-    .post(apis.requestApproval, { request_details: [data] }, { headers })
-    .then((response) => {
-      console.log("API Response:", response);
-
-      if (response?.message?.success === true) {
-        ApproverReason.value = ""; // Clear reason after success
-        toast.success(`Request ${type}ed`, {
-          autoClose: 500,
-          transition: "zoom",
-        });
-        approvedform.value = false; // Show thank you message
-      } else {
-        toast.error(`Failed to ${type} request`, { autoClose: 1000, transition: "zoom" });
-      }
-    })
-    .catch((error) => {
-      console.error("Error processing request:", error);
-      toast.error("An error occurred while processing your request.", { autoClose: 1000, transition: "zoom" });
-    })
-    .finally(() => {
-      loading.value = false; // Ensure loader stops
-    });
-}
-
-function ApproverCancelSubmission(dataObj, type) {
-  if (ApproverReason.value.trim() === "") {
-    isCommentsValid.value = false;
     return;
   }
 
   isCommentsValid.value = true;
-  rejectLoad.value = true; // Start loader
+  loading.value = true;
 
-  let form = {};
-  if (emittedFormData.value.length) {
-    emittedFormData.value.forEach((each) => {
-      form[each.fieldname] = each.value;
-    });
-  }
-
-  // Get token from selectedData or localStorage
-  const token = selectedData.value.token || localStorage.getItem("authToken");
-
-  // Define headers
-  const headers = {
-    "Content-Type": "application/json",
+  const data = {
+    token: selectedData.value.token,
+    action: action,
+    reason: reason
   };
 
-  // Add Authorization header if token exists
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
-
   axiosInstance
-    .put(`${apis.resource}${selectedData.value.doctype_name}/${doctypeForm.value.name}`, form, { headers })
-    .then((response) => {
-      if (response?.data) {
-        approvalCancelFn(dataObj, type);
-      } else {
-        rejectLoad.value = false; // Stop loader on failure
-        toast.error("Failed to cancel request", { autoClose: 1000, transition: "zoom" });
-      }
+    .get(apis.toMailApproval, { params: data })
+    .then((res) => {
+      actionStatus.value = action
+      EmptyData.value = res.data; // Assuming you need the actual data
+      approvedform.value = false;
     })
     .catch((error) => {
-      console.error("Error cancelling request:", error);
-      rejectLoad.value = false; // Stop loader on error
-      toast.error("An error occurred while cancelling the request.", { autoClose: 1000, transition: "zoom" });
+      console.error("Error fetching records:", error);
+    })
+    .finally(() => {
+      loading.value = false; // Always reset loading state
     });
 }
 
 
-// function approvalCancelFn(dataObj, type) {
-//   // let files = this.selectedFileAttachments.map((res: any) => res.url);
+function ApproverCancelSubmissionNew(action) {
+  const reason = ApproverReason.value.trim();
 
-//   console.log(dataObj, "data");
+  if (!reason) {
+    isCommentsValid.value = false; // Show validation error
+    return;
+  }
+
+  isCommentsValid.value = true;
+  rejectLoad.value = true;
+
+  const data = {
+    token: selectedData.value.token,
+    action: action,
+    reason: reason
+  };
+
+  axiosInstance
+    .get(apis.toMailApproval, { params: data })
+    .then((res) => {
+      actionStatus.value = action
+      EmptyData.value = res.data; // Store only the response data
+      approvedform.value = false;
+    })
+    .catch((error) => {
+      console.error("Error sending cancel request:", error);
+    })
+    .finally(() => {
+      rejectLoad.value = false; // Always stop the loader
+    });
+}
+
+
+
+
+// // Function to handle form submission
+// function ApproverFormSubmission(dataObj, type) {
+//   if (ApproverReason.value.trim() === "") {
+//     isCommentsValid.value = false; // Show validation error
+//     return; // Stop execution
+//   }
+
+//   isCommentsValid.value = true;
+//   loading.value = true; // Start loader
+
+//   let form = {};
+//   if (Array.isArray(emittedFormData.value) && emittedFormData.value.length) {
+//     emittedFormData.value.forEach((each) => {
+//       form[each.fieldname] = each.value;
+//     });
+//   }
+//   // console.log(loading.value, dataObj, type, form);
+
+//   // Get token from selectedData or localStorage
+//   const token = selectedData.value.token || localStorage.getItem("authToken");
+
+//   // Define headers
+//   const headers = {
+//     "Content-Type": "application/json",
+//   };
+
+//   // Add Authorization header if token exists
+//   if (token) {
+//     headers["Authorization"] = `Bearer ${token}`;
+//   }
+
+//   axiosInstance
+//     .put(`${apis.resource}${selectedData.value.doctype_name}/${doctypeForm.value.name}`, form, {
+//       headers,
+//     })
+//     .then((response) => {
+//       if (response?.data) {
+//         approvalStatusFn(dataObj, type);
+//       } else {
+//         loading.value = false; // Stop loader on failure
+//         toast.error("Failed to submit form", { autoClose: 1000, transition: "zoom" });
+//       }
+//     })
+//     .catch((error) => {
+//       console.error("Error submitting form:", error);
+//       loading.value = false; // Stop loader on error
+//       toast.error("An error occurred while submitting the form.", { autoClose: 1000, transition: "zoom" });
+//     });
+// }
+
+// // Function to handle approval status
+// function approvalStatusFn(dataObj, type) {
+//   // console.log("Approval Data:", dataObj);
 
 //   let data = {
-//     property: selectedRequest.value.property,
-//     doctype: selectedRequest.value.doctype_name,
-//     request_id: selectedRequest.value.name,
-//     reason: type == "Request Cancelled" ? "Cancelled" : "",
+//     property: tableData.value.property,
+//     doctype: tableData.value.doctype_name,
+//     request_ids: [tableData.value.name],
+//     reason: ApproverReason.value,
+//     action: type,
+//     files: null,
+//     cluster_name: null,
+//     url_for_approval_id: "",
+//     current_level: tableData.value.current_level,
+//   };
+
+//   // Get token from selectedData or localStorage
+//   const token = selectedData.value.token || localStorage.getItem("authToken");
+
+//   // Define headers
+//   const headers = {
+//     "Content-Type": "application/json",
+//   };
+
+//   // Add Authorization header if token exists
+//   if (token) {
+//     headers["Authorization"] = `Bearer ${token}`;
+//   }
+
+//   axiosInstance
+//     .post(apis.requestApproval, { request_details: [data] }, { headers })
+//     .then((response) => {
+//       // console.log("API Response:", response);
+
+//       if (response?.message?.success === true) {
+//         ApproverReason.value = ""; // Clear reason after success
+//         toast.success(`Request ${type}ed`, {
+//           autoClose: 500,
+//           transition: "zoom",
+//         });
+//         approvedform.value = false; // Show thank you message
+//       } else {
+//         toast.error(`Failed to ${type} request`, { autoClose: 1000, transition: "zoom" });
+//       }
+//     })
+//     .catch((error) => {
+//       console.error("Error processing request:", error);
+//       toast.error("An error occurred while processing your request.", { autoClose: 1000, transition: "zoom" });
+//     })
+//     .finally(() => {
+//       loading.value = false; // Ensure loader stops
+//     });
+// } 
+
+// function ApproverCancelSubmission(dataObj, type) {
+//   if (ApproverReason.value.trim() === "") {
+//     isCommentsValid.value = false;
+//     return;
+//   }
+
+//   isCommentsValid.value = true;
+//   rejectLoad.value = true; // Start loader
+
+//   let form = {};
+//   if (emittedFormData.value.length) {
+//     emittedFormData.value.forEach((each) => {
+//       form[each.fieldname] = each.value;
+//     });
+//   }
+
+//   // Get token from selectedData or localStorage
+//   const token = selectedData.value.token || localStorage.getItem("authToken");
+
+//   // Define headers
+//   const headers = {
+//     "Content-Type": "application/json",
+//   };
+
+//   // Add Authorization header if token exists
+//   if (token) {
+//     headers["Authorization"] = `Bearer ${token}`;
+//   }
+
+//   axiosInstance
+//     .put(`${apis.resource}${selectedData.value.doctype_name}/${doctypeForm.value.name}`, form, { headers })
+//     .then((response) => {
+//       if (response?.data) {
+//         approvalCancelFn(dataObj, type);
+//       } else {
+//         rejectLoad.value = false; // Stop loader on failure
+//         toast.error("Failed to cancel request", { autoClose: 1000, transition: "zoom" });
+//       }
+//     })
+//     .catch((error) => {
+//       console.error("Error cancelling request:", error);
+//       rejectLoad.value = false; // Stop loader on error
+//       toast.error("An error occurred while cancelling the request.", { autoClose: 1000, transition: "zoom" });
+//     });
+// }
+
+
+// // function approvalCancelFn(dataObj, type) {
+// //   // let files = this.selectedFileAttachments.map((res: any) => res.url);
+
+// //   console.log(dataObj, "data");
+
+// //   let data = {
+// //     property: selectedRequest.value.property,
+// //     doctype: selectedRequest.value.doctype_name,
+// //     request_id: selectedRequest.value.name,
+// //     reason: type == "Request Cancelled" ? "Cancelled" : "",
+// //     action: type,
+// //     files: [],
+// //     url_for_cancelling_id: "",
+// //     current_level: selectedRequest.value.current_level,
+// //   };
+// //   axiosInstance.post(apis.wf_cancelling_request, data).then((response) => {
+// //     if (response?.message?.success) {
+// //       router.push({
+// //         name: "ReceivedForMe",
+// //       });
+// //     }
+// //   });
+// // }
+// function approvalCancelFn(dataObj, type) {
+//   // console.log("approvalCancelFn Data:", dataObj);
+
+//   let data = {
+//     property: tableData.value.property,
+//     doctype: tableData.value.doctype_name,
+//     request_id: tableData.value.name,
+//     reason: ApproverReason.value,
 //     action: type,
 //     files: [],
 //     url_for_cancelling_id: "",
-//     current_level: selectedRequest.value.current_level,
+//     current_level: tableData.value.current_level,
 //   };
-//   axiosInstance.post(apis.wf_cancelling_request, data).then((response) => {
-//     if (response?.message?.success) {
-//       router.push({
-//         name: "ReceivedForMe",
-//       });
-//     }
-//   });
+
+//   // Get token from selectedData or localStorage
+//   const token = selectedData.value.token || localStorage.getItem("authToken");
+
+//   // Define headers
+//   const headers = {
+//     "Content-Type": "application/json",
+//   };
+
+//   // Add Authorization header if token exists
+//   if (token) {
+//     headers["Authorization"] = `Bearer ${token}`;
+//   }
+
+//   axiosInstance
+//     .post(apis.wf_cancelling_request, data, { headers })
+//     .then((response) => {
+//       if (response?.message) {
+//         toast.success(`${type}`, {
+//           autoClose: 500,
+//           transition: "zoom",
+//           onClose: () => {
+//             router.push({ name: "ReceivedForMe" }); // Navigate after toast
+//           },
+//         });
+//       } else {
+//         toast.error(`Failed to ${type} request`, { autoClose: 1000, transition: "zoom" });
+//       }
+//     })
+//     .catch((error) => {
+//       console.error("Error processing cancellation:", error);
+//       toast.error("An error occurred while cancelling the request.", { autoClose: 1000, transition: "zoom" });
+//     })
+//     .finally(() => {
+//       rejectLoad.value = false; // Ensure loader stops
+//     });
 // }
-function approvalCancelFn(dataObj, type) {
-  console.log("approvalCancelFn Data:", dataObj);
-
-  let data = {
-    property: tableData.value.property,
-    doctype: tableData.value.doctype_name,
-    request_id: tableData.value.name,
-    reason: ApproverReason.value,
-    action: type,
-    files: [],
-    url_for_cancelling_id: "",
-    current_level: tableData.value.current_level,
-  };
-
-  // Get token from selectedData or localStorage
-  const token = selectedData.value.token || localStorage.getItem("authToken");
-
-  // Define headers
-  const headers = {
-    "Content-Type": "application/json",
-  };
-
-  // Add Authorization header if token exists
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
-
-  axiosInstance
-    .post(apis.wf_cancelling_request, data, { headers })
-    .then((response) => {
-      if (response?.message) {
-        toast.success(`${type}`, {
-          autoClose: 500,
-          transition: "zoom",
-          onClose: () => {
-            router.push({ name: "ReceivedForMe" }); // Navigate after toast
-          },
-        });
-      } else {
-        toast.error(`Failed to ${type} request`, { autoClose: 1000, transition: "zoom" });
-      }
-    })
-    .catch((error) => {
-      console.error("Error processing cancellation:", error);
-      toast.error("An error occurred while cancelling the request.", { autoClose: 1000, transition: "zoom" });
-    })
-    .finally(() => {
-      rejectLoad.value = false; // Ensure loader stops
-    });
-}
 
 
 function receivedForMe() {
 
   const data = {
-    token : selectedData.value.token
-    }
+    token: selectedData.value.token
+  }
 
 
   axiosInstance
-    .get(apis.toMailApproval,{ params: data })
+    .get(apis.toMailApproval, { params: data })
     .then((res) => {
-      tableData.value = res.message.message.doc_data;
-      tableWFData.value = res.message.message.wf_data
+      if (res.message.message === 'Invalid or expired token') {
+        expiryToken.value = false
+      } else {
+        tableData.value = res.message.message.doc_data;
+        tableWFData.value = res.message.message.wf_data
 
-      showRequest.value = rebuildToStructuredArray(
-        JSON.parse(tableWFData.value?.json_columns).fields
-      );
+        showRequest.value = rebuildToStructuredArray(
+          JSON.parse(tableWFData.value?.json_columns).fields
+        );
 
-      console.log(showRequest.value,"pppa--------------");
-      mapFormFieldsToRequest(tableData.value, showRequest.value);
-      tableHeaders.value = JSON.parse(tableWFData.value?.json_columns).child_table_fields;
-      console.log(tableHeaders.value, "req");
+        // console.log(showRequest.value, "pppa--------------");
+        mapFormFieldsToRequest(tableData.value, showRequest.value);
+        tableHeaders.value = JSON.parse(tableWFData.value?.json_columns).child_table_fields;
 
-      // if (res.data.length) {
-      //   Wfactivitylog(tableData.value.name);
-      //   getdata(tableData.value.name);
-      // }
 
-      selectedcurrentLevel.value = tableWFData.value.current_level;
+        const childTables = Object.keys(tableData.value).filter((key) =>
+          Array.isArray(tableData.value[key])
+        );
+        if (childTables.length) {
+          responseData.value = {};
+
+          childTables.forEach((tableKey) => {
+            responseData.value[tableKey] = tableData.value[tableKey] || [];
+          });
+          // console.log("Response Data:", responseData.value);
+        }
+        // console.log(tableHeaders.value, "req");
+
+        // if (res.data.length) {
+        //   Wfactivitylog(tableData.value.name);
+        //   getdata(tableData.value.name);
+        // }
+
+        selectedcurrentLevel.value = tableWFData.value.current_level - 1 ;
+      }
     })
     .catch((error) => {
       console.error("Error fetching records:", error);
     });
+
 }
 
 function getdata(formname) {
-  console.log(selectedData.value.token, "jjjjj");
+  // console.log(selectedData.value.token, "jjjjj");
   const filters = [["wf_generated_request_id", "like", `%${formname}%`]];
   const queryParams = {
     fields: JSON.stringify(["*"]),
@@ -677,7 +805,7 @@ function getdata(formname) {
         axiosInstance
           .get(`${apis.resource}${selectedData.value.doctype_name}`, configHeaders)
           .then((res) => {
-            console.log(`Data for :`, res.data[0]);
+            // console.log(`Data for :`, res.data[0]);
           })
           .catch((error) => {
             console.error(`Error fetching data for :`, error);
@@ -687,7 +815,7 @@ function getdata(formname) {
             `${apis.resource}${selectedData.value.doctype_name}/${res.data[0].name}`, configHeaders
           )
           .then((res) => {
-            console.log(`Data for :`, res.data);
+            // console.log(`Data for :`, res.data);
             // Identify the child table key dynamically
             const childTables = Object.keys(res.data).filter((key) =>
               Array.isArray(res.data[key])
@@ -698,7 +826,7 @@ function getdata(formname) {
               childTables.forEach((tableKey) => {
                 responseData.value[tableKey] = res.data[tableKey] || [];
               });
-              console.log("Response Data:", responseData.value);
+              // console.log("Response Data:", responseData.value);
             }
           })
           .catch((error) => {
@@ -883,17 +1011,128 @@ watch(activityData, (newVal) => {
 //   z-index: 1000 !important;
 
 // }
-.thank_div{
+.expiry-token-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #ece9e6, #ffffff);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.expiry-token-card {
+  background-color: #fff;
+  padding: 40px 60px;
+  border-radius: 20px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  animation: fadeIn 0.8s ease-in-out;
+}
+
+.expiry-token-card h2 {
+  font-size: 32px;
+  margin-bottom: 15px;
+  color: #d9534f;
+}
+
+.expiry-token-card p {
+  font-size: 18px;
+  color: #555;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.thank_div {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
   background-color: #f0f0f0;
-  font-size: 24px;
-  color: #333;
-  font-weight: bold;
 
 }
+
+@keyframes slideFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes bounceIcon {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes glowPulse {
+
+  0%,
+  100% {
+    box-shadow: 0 0 5px rgba(56, 158, 13, 0.3);
+  }
+
+  50% {
+    box-shadow: 0 0 15px rgba(56, 158, 13, 0.6);
+  }
+}
+
+.thank-you-card-approve {
+  padding: 15px 25px;
+  background-color: #e6f7ed;
+  border: 1px solid #b7eb8f;
+  border-radius: 12px;
+  color: #389e0d;
+  display: inline-block;
+  font-weight: 600;
+  font-size: 18px;
+  animation: slideFadeIn 0.8s ease-out, glowPulse 2s ease-in-out infinite;
+  transition: transform 0.3s ease;
+}
+.thank-you-card-reject {
+  padding: 15px 25px;
+  background-color: #e6f7ed;
+  border: 1px solid #eb8f8f;
+  border-radius: 12px;
+  color: #d75159;
+  display: inline-block;
+  font-weight: 600;
+  font-size: 18px;
+  animation: slideFadeIn 0.8s ease-out, glowPulse 2s ease-in-out infinite;
+  transition: transform 0.3s ease;
+}
+
+.thank-you-card:hover {
+  transform: scale(1.03);
+}
+
+.thank-you-card i {
+  margin-left: 10px;
+  font-size: 20px;
+  vertical-align: middle;
+  animation: bounceIcon 1s infinite;
+}
+
 .approve_height {
   overflow: hidden;
   height: 85vh;

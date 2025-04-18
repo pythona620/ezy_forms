@@ -20,6 +20,7 @@ export const doctypes = {
   WFActivityLog: 'WF Activity Log',
   CheckUser: 'Login Check',
   SystemSettings:"System Settings",
+  Email_Account: 'Email Account',
 
 
 };

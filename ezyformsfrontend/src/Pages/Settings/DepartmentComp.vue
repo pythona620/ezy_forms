@@ -16,7 +16,7 @@
 
                     <button type="button" class="btn btn-dark buttoncomp CreateDepartments d-flex align-items-center "
                         data-bs-toggle="modal" data-bs-target="#createDepartments">
-                        Create Departments
+                        Create Department
                     </button>
                 </div>
                 <div class="modal fade" id="createDepartments" tabindex="-1" aria-labelledby="createDepartmentsLabel"
@@ -62,8 +62,8 @@
                                 </VueMultiselect>
                                 <div class="d-flex align-items-center gap-2">
                                     <div class="w-100">
-                                        <label class="font-13 ps-1" for="ezy_departments_items">Ezy Departments
-                                            Items</label>
+                                        <label class="font-13 ps-1" for="ezy_departments_items">ADD Department Categories
+                                            </label>
                                         <FormFields class="mb-3" tag="input" type="text" name="ezy_departments_items"
                                             id="ezy_departments_items" placeholder="Enter category"
                                             v-model="newCategory" />

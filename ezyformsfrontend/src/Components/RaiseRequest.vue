@@ -151,8 +151,8 @@ onMounted(() => {
 watch(business_unit.value, (newBu, oldBu) => {
   
   business_unit.value = newBu;
-  console.log(newBu);
-  console.log("[[[[]]]]", newBu,oldBu);
+  // console.log(newBu);
+  // console.log("[[[[]]]]", newBu,oldBu);
   // localStorage.setItem("Bu", EzyBusinessUnit.value);
 
   if (oldBu) {
@@ -231,7 +231,7 @@ function EditRequestUpdate() {
     });
   });
 
-  console.log(childTables, childTables.length,"Child Tables Data");
+  // console.log(childTables, childTables.length,"Child Tables Data");
 
   // Call function to update child records
   if(childTables.length){
@@ -251,7 +251,7 @@ function EditRequestUpdate() {
     updated_fields: form, // Pass the form JSON here
 
   };
-  console.log(data_obj,"lll");
+  // console.log(data_obj,"lll");
 
   axiosInstance
     .post(apis.edit_form_before_approve, data_obj)
@@ -488,7 +488,7 @@ function formDefinations() {
       tableName.value = parsedFormJson.fields.filter(
         (field) => field.fieldtype === "Table"
       );
-      console.log(tableName.value);
+      // console.log(tableName.value);
       // console.log(tableName.value, "5555");
       childTableName.value = tableName.value[0]?.options.replace(/_/g, " ");
 
@@ -635,7 +635,7 @@ const ChildTableData = async () => {
     const formData = new FormData();
     formData.append("doc", JSON.stringify(form));
     formData.append("action", "Save");
-console.log(formData,"[[[[]]]]");
+// console.log(formData,"[[[[]]]]");
 
 
     // **Return API call promise**
@@ -822,7 +822,7 @@ function WfRequestUpdate() {
             `${apis.resource}${selectedData.value.selectedform}/${res.data[0].name}`
           )
           .then((res) => {
-            console.log(`Data for :`, res.data);
+            // console.log(`Data for :`, res.data);
             // Identify the child table key dynamically
             const childTables = Object.keys(res.data).filter((key) =>
               Array.isArray(res.data[key])
@@ -835,7 +835,7 @@ function WfRequestUpdate() {
                 tableRows.value[tableKey] = res.data[tableKey] || [];
               });
               child_id_name.value = res.data.name
-              console.log(res.data,"000000");
+              // console.log(res.data,"000000");
               
             }
           })
@@ -868,7 +868,7 @@ function mapFormFieldsToRequest(doctypeData, blockArr) {
   });
 }
 function request_raising_fn(item) {
-  console.log(filepaths.value, "---filepaths");
+  // console.log(filepaths.value, "---filepaths");
   // const filesArray = filepaths.value
   //   ? filepaths.value.split(",").map((filePath) => filePath.trim())
   //   : [];

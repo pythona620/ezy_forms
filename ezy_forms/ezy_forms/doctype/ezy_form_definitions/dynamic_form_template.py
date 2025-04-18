@@ -232,54 +232,66 @@ template_str = """
                margin: 0px 10px;
           }
 /* Flex container to arrange checkboxes */
-.checkbox-container {
-    display: flex;
-    flex-wrap: wrap;   /* Allow items to wrap into new lines */
-    gap: 10px;         /* Space between checkboxes */
-    width: 100%;       /* Ensure the container uses full available width */
-}
+            .checkbox-container {
+                display: flex;
+                flex-wrap: wrap;   /* Allow items to wrap into new lines */
+                gap: 10px;         /* Space between checkboxes */
+                width: 100%;       /* Ensure the container uses full available width */
+            }
 
 
-.checkbox-container > .checkbox-gap {
-    flex: 1 0 calc(33.33% - 20px);  /* 3 per row, considering gap */
-    box-sizing: border-box; 
-    display: flex;
-    align-items: start;
-    gap: 15px; /* Space between checkbox and text */
-    margin-top: 10px;  /* Space above */
-    margin-bottom: 10px; /* Space below */
-    min-width: 150px;  /* Prevent shrinking */
-}
-/* Checkbox design */
-.custom-checkbox {
-    display: inline-block;
-    width: 20px !important;
-    height: 20px !important;
-    border: 2px solid #007bff;  /* Blue border */
-    border-radius: 4px;
-    background-color: #007bff; /* Blue background */
-    position: relative;
-    margin:3px;
-    flex-shrink: 0; 
-}
+            .checkbox-container > .checkbox-gap {
+                flex: 1 0 calc(33.33% - 20px);  /* 3 per row, considering gap */
+                box-sizing: border-box; 
+                display: flex;
+                align-items: end;
+                gap: 15px; /* Space between checkbox and text */
+                margin-top: 10px;  /* Space above */
+                margin-bottom: 10px; /* Space below */
+                min-width: 150px;  /* Prevent shrinking */
+                
+            }
+            /* Checkbox design */
+            .custom-checkbox {
+                display: inline-block;
+                width: 20px !important;
+                height: 20px !important;
+                border: 2px solid #007bff;  /* Blue border */
+                border-radius: 4px;
+                background-color: #007bff; /* Blue background */
+                position: relative;
+                margin:3px;
+                margin-bottom:0px;
+                
+                flex-shrink: 0; 
+            }
 
-/* White checkmark */
-.custom-checkbox::before {
-    content: '✔'; 
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 16px;
-    color: white;  /* White checkmark */
-    font-weight: bold;
-}
+            /* White checkmark */
+            .custom-checkbox::before {
+                content: '✔'; 
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                font-size: 16px;
+                color: white;  /* White checkmark */
+                font-weight: bold;
+            }
 
-/* Disabled effect */
-.custom-checkbox.disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
+            /* Disabled effect */
+            .custom-checkbox.disabled {
+                opacity: 0.6;
+                cursor: not-allowed;
+            }
+            .custom-checkbox.checked {
+                background-color: #007bff; /* Blue for checked */
+                border-color: #007bff;
+            }
+
+            .custom-checkbox.unchecked {
+                background-color: #fff; /* Gray for unchecked */
+                border-color: #ccc;
+            }
 
 
         .footer-container{
@@ -330,6 +342,18 @@ template_str = """
          .header-right{
              min-width: 200px;
          }
+        .watermark {
+            position: fixed;
+            top: 50%;
+            left: 30%;
+            font-size: 80px;
+            color: rgba(0, 0, 0, 0.1); /* Light gray with transparency */
+            transform: rotate(-30deg);
+            z-index: 0;
+            pointer-events: none;
+            user-select: none;
+            white-space: nowrap;
+        }
          
         @media print {
             .table, .table th, .table td {
@@ -338,7 +362,15 @@ template_str = """
             .table{
                 width: 100% !important;
             }
-            
+            textarea {
+                border: none;
+                resize: none;
+                overflow: visible !important;
+                white-space: pre-wrap;
+            }
+            .watermark {
+             display: block;
+            }
         }
         
    
@@ -347,10 +379,14 @@ template_str = """
     </head>
 <body>
 <div class="main-body">
+<div class="watermark">{{business_unit}}</div>
+
 <div class="header-container">
     <div class="logo-div"> 
     
     <img src="{{ company_logo }}" alt="logo" style="height: 70px; width: 200px; margin-bottom:0px">
+    
+    
      </div>
   <div class="header-left">
   
@@ -374,6 +410,9 @@ template_str = """
                     <div class="row">
                         {% for column in row.columns %}
                             <div class="column">
+                              {% if column.label %}
+                                <h3>{{ column.label }}</h3>
+                                {% endif %}
                                 {% for field in column.fields %}
                                     <div class="field">
                                         <label for="{{ field.fieldname }}">{{ field.label }}:</label>
@@ -419,21 +458,30 @@ template_str = """
  
                                         {% elif field.fieldtype == 'Data' or field.fieldtype == 'Select' %}
                                             <input type="text" id="{{ field.fieldname }}" disabled value="{{ field['values'] }}" name="{{ field.fieldname }}">
-                                        {% elif field.fieldtype == 'Small Text' %}
-                                                {% set parsed_values = field['values'] | replace('["', '') | replace('"]', '') | replace('","', ',') %}
-                                                {% set parsed_values_list = parsed_values.split(',') %}
-
-                                                {% set field_values = field.values() if field.values is callable else field.values %}
-                                                {% set field_values_list = field_values | list %}  <!-- Convert dict_values to a list -->
-
+                                       {% elif field.fieldtype == 'Small Text' %}
+                                            {% set options = field.options.strip().split('\n') %}
+                                            
+                                            {% if field['values'] %}
+                                                {% set selected_values = field['values'] | replace('["', '') | replace('"]', '') | replace('","', ',') %}
+                                                {% set selected_values_list = selected_values.split(',') %}
                                                 <div class="checkbox-container">
-    {% for option in parsed_values_list %}
-        <div class="checkbox-gap">
-            <span class="custom-checkbox"></span>
-            {{ option }}
-        </div>
-    {% endfor %}
-</div>
+                                                    {% for value in selected_values_list if value %}
+                                                        <div class="checkbox-gap">
+                                                            <span class="custom-checkbox checked"></span>
+                                                            <span style="margin-top:6px; margin-left:4px;">{{ value }}</span>
+                                                        </div>
+                                                    {% endfor %}
+                                                </div>
+                                            {% else %}
+                                                <div class="checkbox-container">
+                                                    {% for option in options if option %}
+                                                        <div class="checkbox-gap">
+                                                            <span class="custom-checkbox unchecked"></span>
+                                                           <span style="margin-top:6px; margin-left:4px;"> {{ option }}</span>
+                                                        </div>
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
 
 
                                                                                             
@@ -455,7 +503,16 @@ template_str = """
                                         {% elif field.fieldtype == 'Color' %}
                                             <input type="color" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
                                         {% elif field.fieldtype == 'Text' %}
-                                            <textarea id="{{ field.fieldname }}" name="{{ field.fieldname }}">{{ field['values'] }}</textarea>
+                                            {% set value = field['values'] %}
+                                            {% set char_count = value | length %}
+                                            {% set newline_count = value.count('\n') %}
+                                            {% set estimated_lines = (char_count // 60) + 1 + newline_count %}
+                                            {% set height = estimated_lines * 24 %}
+                                            <textarea
+                                                id="{{ field.fieldname }}"
+                                                name="{{ field.fieldname }}"
+                                                style="height: {{ height }}px; border:none;"
+                                            >{{ value }}</textarea>
                                         {% elif field.fieldtype == 'Date' %}
                                             <input type="text" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}" class="date-input" placeholder="__/__/____">
                                         {% elif field.fieldtype == 'Datetime' %}
@@ -580,15 +637,26 @@ template_str = """
                 if (!input.value.replace(/\D/g, "")) {
                     input.value = "__/__/____";
                 }
+                });
             });
-        });
-          document.querySelectorAll(".field textarea").forEach(textarea => {
-            textarea.style.height = textarea.scrollHeight + "px"; // Set initial height
-            textarea.addEventListener("input", function () {
-                this.style.height = "auto"; // Reset height
-                this.style.height = this.scrollHeight + "px"; // Adjust height based on content
+            document.addEventListener("DOMContentLoaded", function () {
+                const textareas = document.querySelectorAll("textarea");
+
+                textareas.forEach(textarea => {
+                    // Remove any hardcoded height
+                    textarea.style.height = "auto";
+                    textarea.style.overflow = "hidden";
+
+                    // Function to auto-resize based on content
+                    const resizeTextarea = () => {
+                        textarea.style.height = "auto"; // Reset
+                        textarea.style.height = textarea.scrollHeight + "px"; // Set based on content
+                    };
+
+                    resizeTextarea(); // Initial resize on load
+                    textarea.addEventListener("input", resizeTextarea); // Resize on user input
+                });
             });
-        });
 
     });
 </script>
@@ -622,7 +690,7 @@ def json_structure_call_for_html_view(json_obj: list, form_name: str, child_data
         logo_of_company = site_url + company_logo
     
     html_output = Template(template_str).render(
-        data=structered_data, form_name=form_name, child_data=child_data, child_table_data=child_table_data,company_logo=logo_of_company,site_url=site_url
+        data=structered_data, form_name=form_name, child_data=child_data, child_table_data=child_table_data,company_logo=logo_of_company,site_url=site_url,business_unit=business_unit
     )
     
     return html_output
@@ -766,7 +834,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
             html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_short_name,child_table_data=labels,child_data=None,business_unit=business_unit)
             random_number = randint(111, 999)
  
-            pdf_filename = f"{form_short_name}_{random_number}mailfiles.pdf"
+            pdf_filename = f"{form_short_name}_{random_number}  .pdf"
             pdf_path = f"private/files/{pdf_filename}"
             absolute_pdf_path = os.path.join(get_bench_path(), "sites", cstr(frappe.local.site), pdf_path)
  

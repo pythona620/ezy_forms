@@ -19,12 +19,25 @@
             <div class="mt-1">
               <div class="text-center">
                 <div class="card border-0 shadow-none">
-                  <div class="card-body pb-2 d-flex gap-3 align-items-center justify-content-center">
+                  <div class="card-body pb-2 d-flex gap-2 align-items-center justify-content-center">
                     <h5 class="card-title">{{ selectedData.doctype_name }}</h5>
-                    <span v-if="tableData?.status === 'Completed'"><i
+                    <div class="d-flex align-items-baseline gap-2 ps-1 ">
+                      <span v-if="tableData?.status !== 'Completed' && tableData.status !== 'Request Cancelled'"
+                        class="text-warning font-11 text-nowrap fw-bold">
+                        Pending ({{ tableData.current_level }} /
+                        {{ tableData?.total_levels }})</span>
+                      <span class=" font-11 status_completed text-nowrap" v-if="tableData?.status === 'Completed'">
+                        Approved
+                      </span>
+                      <span class=" font-11 requestRejected text-nowrap"
+                        v-if="tableData?.status === 'Request Cancelled'">
+                        Request Rejected
+                      </span>
+                    </div>
+                    <!-- <span v-if="tableData?.status === 'Completed'"><i
                         class="bi approved-icon bi-check2-circle "></i></span>
                     <span v-if="tableData?.status === 'Request Cancelled'"><i
-                        class="bi rejected-icon bi-x-circle"></i></span>
+                        class="bi rejected-icon bi-x-circle"></i></span> -->
                   </div>
                 </div>
               </div>
@@ -133,7 +146,7 @@
                       <span class="font-12 text-nowrap fw-bold mb-0">Activity log
                       </span>
                     </div>
-                    <div class="d-flex align-items-baseline gap-2 ps-1 ">
+                    <!-- <div class="d-flex align-items-baseline gap-2 ps-1 ">
                       <span v-if="tableData?.status !== 'Completed' && tableData.status !== 'Request Cancelled'"
                         class="text-warning font-11 text-nowrap fw-bold">
                         Pending ({{ tableData.current_level }} /
@@ -145,7 +158,7 @@
                         v-if="tableData?.status === 'Request Cancelled'">
                         Request Rejected
                       </span>
-                    </div>
+                    </div> -->
                   </div>
 
 
@@ -228,7 +241,6 @@ const selectedData = ref({
   readOnly: route.query.readOnly, // Retrieve from query
   business_unit: route.query.business_unit || "", // Retrieve from query
 });
-
 const backTo = ref(selectedData.value.routepath);
 // onMounted(() => {
 //   receivedForMe();
@@ -281,20 +293,20 @@ const ApprovePDF = ref(true)
 
 // Format action text (cancelled or raised)
 
-onMounted(() => {
-  const storedData = localStorage.getItem("employeeData");
-  try {
-    const parsedData = JSON.parse(storedData);
+// onMounted(() => {
+//   const storedData = localStorage.getItem("employeeData");
+//   try {
+//     const parsedData = JSON.parse(storedData);
 
-    // Ensure parsedData is an array
-    employeeData.value = Array.isArray(parsedData) ? parsedData : [parsedData];
+//     // Ensure parsedData is an array
+//     employeeData.value = Array.isArray(parsedData) ? parsedData : [parsedData];
 
-  } catch (error) {
-    console.error("Error parsing employeeData from localStorage:", error);
-    employeeData.value = []; // Fallback to empty array if there's an error
-  }
+//   } catch (error) {
+//     console.error("Error parsing employeeData from localStorage:", error);
+//     employeeData.value = []; // Fallback to empty array if there's an error
+//   }
 
-});
+// });
 
 
 function EditformSubmission() {
@@ -391,10 +403,11 @@ function ApproverFormSubmission(dataObj, type) {
       toast.error("An error occurred while submitting the form.", { autoClose: 1000, transition: "zoom" });
     });
 }
-
+const dataObje = ref([])
 // Function to handle approval status
 function approvalStatusFn(dataObj, type) {
-  console.log("Approval Data:", dataObj);
+  dataObje.value = dataObj;
+  // console.log("Approval Data:", dataObj);
 
   let data = {
     property: tableData.value.property,
@@ -500,7 +513,8 @@ function ApproverCancelSubmission(dataObj, type) {
 // }
 
 function approvalCancelFn(dataObj, type) {
-  console.log("approvalCancelFn Data:", dataObj);
+  // console.log("approvalCancelFn Data:", dataObj);
+  dataObje.value = dataObj;
 
   let data = {
     property: tableData.value.property,
@@ -594,7 +608,7 @@ function receivedForMe(data) {
     })
     .then((res) => {
       tableData.value = res.data[0];
-      console.log(tableData.value?.name);
+      console.log(tableData.value?.name,"ppppppppppppp");
       selectedcurrentLevel.value = tableData.value?.current_level;
       console.log(selectedcurrentLevel.value, " current_level");
 
@@ -696,14 +710,13 @@ function ViewOnlyRe() {
       console.log(response.message, "list");
       viewlist.value = response.message;
 
-      canApprove.value = viewlist.value.includes(tableData.value.name);
+      canApprove.value = viewlist.value.includes(selectedData.value.formname);
       receivedForMe()
 
     })
     .catch((error) => {
       console.log(error);
     });
-
 
 }
 // function viewasPdfView() {
@@ -833,6 +846,7 @@ const requestcancelled = computed(() => {
   const lastAction = activityData.value[activityData.value.length - 1];
   return lastAction.action === "Request Cancelled";
 });
+
 watch(activityData, (newVal) => {
   console.log("Updated Activity Data:", newVal);
   console.log("Request Cancelled?", requestcancelled.value);
@@ -1072,7 +1086,7 @@ td {
 
 .status_completed {
   color: #2BED12;
-  border: 1px solid #2BED12;
+  border: 2px solid #2BED12;
   border-radius: 10px;
   padding: 2px 5px;
   margin: 0px 5px;

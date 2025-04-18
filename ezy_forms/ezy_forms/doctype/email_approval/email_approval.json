@@ -1,0 +1,125 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-04-09 11:11:17.155854",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "property",
+  "doctype_name",
+  "wf_request_id",
+  "current_level",
+  "column_break_lnzr",
+  "document_id",
+  "status",
+  "user_details_section",
+  "user_id",
+  "role",
+  "column_break_hbgg",
+  "department",
+  "token_details_section",
+  "token_status",
+  "action_token"
+ ],
+ "fields": [
+  {
+   "fieldname": "property",
+   "fieldtype": "Data",
+   "label": "Property"
+  },
+  {
+   "fieldname": "doctype_name",
+   "fieldtype": "Data",
+   "label": "Doctype Name"
+  },
+  {
+   "fieldname": "wf_request_id",
+   "fieldtype": "Data",
+   "label": "WF Request Id"
+  },
+  {
+   "fieldname": "current_level",
+   "fieldtype": "Data",
+   "label": "Current Level"
+  },
+  {
+   "fieldname": "column_break_lnzr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "document_id",
+   "fieldtype": "Data",
+   "label": "Document Id"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Data",
+   "label": "Status"
+  },
+  {
+   "fieldname": "user_details_section",
+   "fieldtype": "Section Break",
+   "label": "User Details"
+  },
+  {
+   "fieldname": "user_id",
+   "fieldtype": "Data",
+   "label": "User Id"
+  },
+  {
+   "fieldname": "column_break_hbgg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "department",
+   "fieldtype": "Data",
+   "label": "Department"
+  },
+  {
+   "fieldname": "token_details_section",
+   "fieldtype": "Section Break",
+   "label": "Token Details"
+  },
+  {
+   "default": "Active",
+   "fieldname": "token_status",
+   "fieldtype": "Select",
+   "label": "Token Status",
+   "options": "\nActive\nInactive"
+  },
+  {
+   "fieldname": "action_token",
+   "fieldtype": "Small Text",
+   "label": "Action Token"
+  },
+  {
+   "fieldname": "role",
+   "fieldtype": "Data",
+   "label": "Role"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-04-09 14:37:01.198949",
+ "modified_by": "Administrator",
+ "module": "Ezy Forms",
+ "name": "Email Approval",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

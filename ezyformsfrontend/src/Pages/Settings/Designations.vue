@@ -74,10 +74,10 @@ watch(
     (newVal) => {
         createDesignation.value.ezy_business_unit = newVal;
 
-        if (newVal) {
-            console.log(newVal, "new value of business unit");
+        // if (newVal) {
+        //     console.log(newVal, "new value of business unit");
 
-        }
+        // }
     },
     { immediate: true }
 );

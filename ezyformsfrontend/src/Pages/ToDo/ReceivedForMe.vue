@@ -31,8 +31,8 @@
               aria-label="Close"></button>
           </div>
           <div class="modal-body approvermodalbody">
-            <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel" :childData="responseData"
-              :childHeaders="tableHeaders" :employeeData="employeeData" @updateField="updateFormData" />
+            <!-- <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel" :childData="responseData"
+              :childHeaders="tableHeaders" :employeeData="employeeData" @updateField="updateFormData" /> -->
           </div>
           <div class="p-2">
             <div class="activity-log-container">
@@ -118,7 +118,7 @@ import { onMounted, ref, reactive, computed, watch } from "vue";
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
 import PaginationComp from "../../Components/PaginationComp.vue";
 import { rebuildToStructuredArray } from "../../shared/services/field_format";
-import ApproverPreview from "../../Components/ApproverPreview.vue";
+// import ApproverPreview from "../../Components/ApproverPreview.vue";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import { useRoute, useRouter } from "vue-router";
@@ -141,8 +141,8 @@ const activityData = ref([]);
 const responseData = ref([]);
 const ViewOnlyReportee =  ref(false);
 const tableheaders = ref([
-  // { th: "Request ID", td_key: "name" },
-  { th: "Form name", td_key: "name" },
+  { th: "Request ID", td_key: "name" },
+  // { th: "Form name", td_key: "name" },
   // { th: "Form category", td_key: "doctype_name" },
   // { th: "Owner of form", td_key: "owner" },
   { th: "Requested By", td_key: "requested_by" },
@@ -171,20 +171,19 @@ const tableHeaders = ref([]);
 const loading = ref(false)
 const Rejectloading = ref(false)
 
-onMounted(() => {
-  const storedData = localStorage.getItem("employeeData");
-  try {
-    const parsedData = JSON.parse(storedData);
+// onMounted(() => {
+//   const storedData = localStorage.getItem("employeeData");
+//   try {
+//     const parsedData = JSON.parse(storedData);
 
-    // Ensure parsedData is an array
-    employeeData.value = Array.isArray(parsedData) ? parsedData : [parsedData];
+//     // Ensure parsedData is an array
+//     employeeData.value = Array.isArray(parsedData) ? parsedData : [parsedData];
 
-  } catch (error) {
-    console.error("Error parsing employeeData from localStorage:", error);
-    employeeData.value = []; // Fallback to empty array if there's an error
-  }
-
-});
+//   } catch (error) {
+//     console.error("Error parsing employeeData from localStorage:", error);
+//     employeeData.value = []; // Fallback to empty array if there's an error
+//   }
+// });
 
 const viewlist = ref([])
 function ViewOnlyReport(){
@@ -193,7 +192,7 @@ function ViewOnlyReport(){
   axiosInstance
     .post(apis.view_only_reportee,)
     .then((response) => {
-      console.log(response.message,"list");
+      // console.log(response.message,"list");
       viewlist.value = response.message;
 
       // const filters = [ "name","in", viewlist.value];
@@ -221,7 +220,7 @@ function actionCreated(rowData, actionEvent) {
       tableHeaders.value = JSON.parse(
         selectedRequest.value?.json_columns
       ).child_table_fields;
-      console.log(tableHeaders.value, "lll");
+      // console.log(tableHeaders.value, "lll");
 
       // Prepare the filters for fetching data
       const filters = [
@@ -252,7 +251,7 @@ function actionCreated(rowData, actionEvent) {
                 `${apis.resource}${selectedRequest.value.doctype_name}/${res.data[0].name}`
               )
               .then((res) => {
-                console.log(`Data for :`, res.data);
+                // console.log(`Data for :`, res.data);
                 // Identify the child table key dynamically
                 const childTables = Object.keys(res.data).filter((key) =>
                   Array.isArray(res.data[key])
@@ -263,7 +262,7 @@ function actionCreated(rowData, actionEvent) {
                   childTables.forEach((tableKey) => {
                     responseData.value[tableKey] = res.data[tableKey] || [];
                   });
-                  console.log("Response Data:", responseData.value);
+                  // console.log("Response Data:", responseData.value);
                 }
 
               })
@@ -374,17 +373,187 @@ const isCommentsValid = ref(true); // Flag to validate comment field
 //   }
 // };
 
+const resetCommentsValidation = () => {
+  if (ApproverReason.value.trim() !== "") {
+    // If comment is not empty, set isCommentsValid to true
+    isCommentsValid.value = true;
+  }
+};
+// Function to handle form submission
+function ApproverFormSubmission(dataObj, type) {
+
+  if (ApproverReason.value.trim() === "") {
+    isCommentsValid.value = false; // Show validation error
+    return; // Stop execution
+  }
+
+  isCommentsValid.value = true;
+  loading.value = true; // Start loader
 
 
 
 
+  let form = {};
+  if (emittedFormData.value.length) {
+    emittedFormData.value.map((each) => {
+      form[each.fieldname] = each.value;
+    });
+  }
+  axiosInstance
+    .put(
+      `${apis.resource}${selectedRequest.value.doctype_name}/${doctypeForm.value.name}`,
+      form
+    )
+    .then((response) => {
+      if (response?.data) {
+        approvalStatusFn(dataObj, type);
+
+      }
+    })
+    .catch((error) => {
+      console.error("Error submitting form:", error);
+    })
+
+}
+
+
+function approvalStatusFn(dataObj, type) {
+
+
+  // console.log(dataObj);
+  let data = {
+    property: selectedRequest.value.property,
+    doctype: selectedRequest.value.doctype_name,
+    request_ids: [selectedRequest.value.name],
+    reason: ApproverReason.value,
+    action: type,
+    files: null,
+    cluster_name: null,
+    url_for_approval_id: "",
+    // https://ezyrecon.ezyinvoicing.com/home/wf-requests
+    current_level: selectedRequest.value.current_level,
+  };
+
+  // need to check this api not working
+  axiosInstance
+    .post(apis.requestApproval, { request_details: [data] })
+    .then((response) => {
+      if (response?.message?.success === true) {
+        toast.success(`Request ${type}ed`, { autoClose: 1000, transition: "zoom" });
+        const modal = bootstrap.Modal.getInstance(document.getElementById("viewRequest"));
+        modal.hide();
+        ApproverReason.value = ""; // Clear reason after success
+
+
+        receivedForMe();
+      } else {
+        toast.error(`Failed to ${type} request`, { autoClose: 1000, transition: "zoom" });
+      }
+    })
+    .catch((error) => {
+      console.error("Error processing request:", error);
+      // toast.error("An error occurred while processing your request.", { autoClose: 1000, transition: "zoom" });
+    })
+    .finally(() => {
+      loading.value = false; // Ensure loader stops
+    });
+}
+
+
+function ApproverCancelSubmission(dataObj, type) {
+
+  if (ApproverReason.value.trim() === "") {
+    // Set the validation flag to false if the comment is empty
+    isCommentsValid.value = false;
+
+    return; // Stop function execution
+  }
+  // Proceed if comments are valid
+  isCommentsValid.value = true;
+
+  Rejectloading.value = true; // Start loader
+
+
+
+  let form = {};
+  if (emittedFormData.value.length) {
+    emittedFormData.value.map((each) => {
+      form[each.fieldname] = each.value;
+    });
+  }
+  axiosInstance
+    .put(
+      `${apis.resource}${selectedRequest.value.doctype_name}/${doctypeForm.value.name}`,
+      form
+    )
+    .then((response) => {
+      if (response?.data) {
+        const modal = bootstrap.Modal.getInstance(document.getElementById("viewRequest"));
+        modal.hide();
+        approvalCancelFn(dataObj, type);
+      }
+    });
+}
+function approvalCancelFn(dataObj, type) {
+
+
+  // console.log(dataObj, "data", type);
+  let data = {
+    property: selectedRequest.value.property,
+    doctype: selectedRequest.value.doctype_name,
+    request_id: selectedRequest.value.name,
+    reason: ApproverReason.value,
+    action: type,
+    files: [],
+    url_for_cancelling_id: "",
+    current_level: selectedRequest.value.current_level,
+  };
+
+  axiosInstance
+    .post(apis.wf_cancelling_request, data)
+    .then((response) => {
+      if (response?.message) {
+        ApproverReason.value = "";
+        if (type == "Request Cancelled") {
+          toast.success(`${type}`, { autoClose: 1000, transition: "zoom" });
+        }
+        const modal = bootstrap.Modal.getInstance(document.getElementById("viewRequest"));
+        modal.hide();
+        receivedForMe();
+      }
+    })
+    .catch((error) => {
+      console.error("Error processing cancellation:", error);
+      toast.error("An error occurred while processing your request.", { autoClose: 1000, transition: "zoom" });
+    })
+    .finally(() => {
+      Rejectloading.value = false; // Ensure loader stops
+    });
+}
 
 
 
 
+function mapFormFieldsToRequest(doctypeData, showRequestData) {
+  showRequestData.forEach((block) => {
+    block.sections.forEach((section) => {
+      section.rows.forEach((row) => {
+        row.columns.forEach((column) => {
+          column.fields.forEach((field) => {
+            // Check if the fieldname exists in the doctypeForm and assign the value
+            if (doctypeData?.hasOwnProperty(field?.fieldname)) {
+              field.value = doctypeData[field?.fieldname]; // Assign the value from doctypeForm to the field
+            }
+          });
+        });
+      });
+    });
+  });
+}
 
-
-
+function closeModal() {
+  isCommentsValid.value = true;
+}
 
 const PaginationUpdateValue = (itemsPerPage) => {
   filterObj.value.limitPageLength = itemsPerPage;

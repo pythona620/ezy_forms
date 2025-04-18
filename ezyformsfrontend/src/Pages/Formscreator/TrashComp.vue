@@ -91,10 +91,11 @@ function toggleFunction(rowData, rowIndex, event) {
             .catch((error) => {
                 console.error("Error updating toggle:", error);
             });
-    } else {
-        // If canceled, do nothing – the checkbox remains unchanged.
-        console.log("Action cancelled. Toggle remains unchanged.");
     }
+    //  else {
+    //     // If canceled, do nothing – the checkbox remains unchanged.
+    //     console.log("Action cancelled. Toggle remains unchanged.");
+    // }
 }
 
 
@@ -147,10 +148,11 @@ function actionCreated(rowData, actionEvent) {
                     .catch((error) => {
                         console.error("Error updating toggle:", error);
                     });
-            } else {
-                // If canceled, do nothing – the checkbox remains unchanged.
-                console.log("Action cancelled. Toggle remains unchanged.");
-            }
+            } 
+            // else {
+            //     // If canceled, do nothing – the checkbox remains unchanged.
+            //     console.log("Action cancelled. Toggle remains unchanged.");
+            // }
 
         }
     }

@@ -32,6 +32,7 @@
             </tbody>
         </table>
     </div>
+    
 </template>
 <script setup>
 import { ref, onMounted } from "vue";
@@ -43,47 +44,11 @@ import "vue3-toastify/dist/index.css";
 const tableData = ref([
     { title: "Two Factor Authentication", checked: false },
     { title: "Send Form As a Attach Through Mail", checked: false },
+    { title: "Welcome Mail Configuration", checked: false },
+
 
 ]);
-
-const employeeData = () => {
-    const docName = "System Settings"; // Document name
-    const queryParams = {
-        fields: JSON.stringify(["*"]),
-    };
-
-    axiosInstance
-        .get(`${apis.resource}${doctypes.SystemSettings}/${encodeURIComponent(docName)}`, { params: queryParams })
-        .then((res) => {
-            if (res.data) {
-                // console.log("res.data", res.data.enable_two_factor_auth);
-
-                // Set the checkbox state based on API response
-                tableData.value[0].checked = res.data.enable_two_factor_auth == 1;
-            }
-        })
-        .catch((error) => {
-            console.error("Error fetching system settings:", error);
-        });
-};
-
-// const handleToggle = (index) => {
-//     if (index !== 0) return; // Only update for Two Factor Authentication
-
-//     const docName = "System Settings";
-//     const newStatus = tableData.value[index].checked ? 1 : 0;
-
-//     axiosInstance
-//         .put(`${apis.resource}${doctypes.SystemSettings}/${encodeURIComponent(docName)}`, {
-//             enable_two_factor_auth: newStatus,
-//         })
-//         .then(() => {
-//             toast.success(`Two Factor Authentication ${newStatus ? "Enabled" : "Disabled"} Successfully!`, { autoClose: 700 });
-//         })
-//         .catch(() => {
-//             toast.error("Failed to update Two Factor Authentication!");
-//         });
-// };
+const default_mail = ref(false)
 
 
 const handleToggle = (index) => {
@@ -101,6 +66,10 @@ const handleToggle = (index) => {
         confirmMessage = isChecked
             ? "Are you sure you want to enable Send Form As an Attachment Through Mail?"
             : "Are you sure you want to disable Send Form As an Attachment Through Mail?";
+    } else if (index === 2) {
+        confirmMessage = isChecked
+            ? "Are you sure you want to enable Welcome Mail Configuration?"
+            : "Are you sure you want to disable Welcome Mail Configuration?";
     }
 
     if (!window.confirm(confirmMessage)) {
@@ -118,7 +87,7 @@ const handleToggle = (index) => {
                 enable_two_factor_auth: newStatus,
             })
             .then(() => {
-                toast.success(`Two Factor Authentication ${newStatus ? "Enabled" : "Disabled"} Successfully!`, { autoClose: 700 });
+                toast.success(`Two Factor Authentication ${newStatus === 0 ? "Disabled " : "Enabled"} Successfully!`, { autoClose: 700 });
             })
             .catch(() => {
                 toast.error("Failed to update Two Factor Authentication!");
@@ -129,11 +98,31 @@ const handleToggle = (index) => {
                 send_form_as_a_attach_through_mail: newStatus,
             })
             .then(() => {
-                toast.success(`Send Form As a Attach Through Mail ${newStatus ? "Disabled" : "Enabled"} Successfully!`, { autoClose: 700 });
+                toast.success(`Send Form As a Attach Through Mail ${newStatus === 0 ? "Disabled" : "Enabled"} Successfully!`, { autoClose: 700 });
             })
             .catch(() => {
                 toast.error("Failed to update Send Form As a Attach Through Mail!");
             });
+    }
+    else if (index === 2) {
+
+        console.log(default_mail.value,typeof default_mail.value);
+        if(default_mail.value === true) {
+            axiosInstance
+            .put(`${apis.resource}${doctypes.wfSettingEzyForms}/${encodeURIComponent(docName)}`, {
+                welcome_mail_to_employee: newStatus,
+            })
+            .then(() => {
+                toast.success(`Welcome Mail Configuration ${newStatus === 0 ? "Disabled" : "Enabled"} Successfully!`, { autoClose: 700 });
+            })
+            .catch(() => {
+                toast.error("Failed to update Welcome Mail Configuration!");
+            });
+        }else{
+            toast.info("Please Configure Default Mail First!");
+            tableData.value[index].checked = 0;
+
+        }
     }
 };
 
@@ -151,6 +140,8 @@ const BussinesUnit = () => {
             if (res.data.length > 0) {
                 const status = res.data[0].send_form_as_a_attach_through_mail;
                 tableData.value[1].checked = status == 1; // Check if 0, uncheck if 1
+                const welcome_mail = res.data[0].welcome_mail_to_employee;
+                tableData.value[2].checked = welcome_mail == 1; // Check if 0
             }
         })
         .catch((error) => {
@@ -158,9 +149,60 @@ const BussinesUnit = () => {
         });
 };
 
+const enable_two_factor = () => {
+    const docName = "System Settings"; // Document name
+    const queryParams = {
+        fields: JSON.stringify(["*"]),
+    };
+
+    axiosInstance
+        .get(`${apis.resource}${doctypes.SystemSettings}/${encodeURIComponent(docName)}`, { params: queryParams })
+        .then((res) => {
+            if (res.data) {
+
+                tableData.value[0].checked = res.data.enable_two_factor_auth == 1;
+            }
+        })
+        .catch((error) => {
+            console.error("Error fetching system settings:", error);
+        });
+};
+const email_account = () => {
+    const queryParams = {
+        fields: JSON.stringify(["default_outgoing","enable_outgoing"]),
+        filters: JSON.stringify([
+            ["default_outgoing", "=", 1],
+            ["enable_outgoing", "=", 1],
+        ]),
+    };
+
+    axiosInstance
+        .get(`${apis.resource}${doctypes.Email_Account}`, { params: queryParams })
+        .then((res) => {
+            if (res.data && res.data.length > 0) {
+                const emailData = res.data[0];
+                console.log(emailData, "response");
+
+                if (emailData.default_outgoing === 1 && emailData.enable_outgoing === 1) {
+                    default_mail.value = true;
+                } else {
+                    default_mail.value = false;
+                }
+
+                console.log(typeof default_mail.value, default_mail.value);
+            } else {
+                default_mail.value = false;
+            }
+        })
+        .catch((error) => {
+            console.error("Error fetching system settings:", error);
+        });
+};
+
 onMounted(() => {
-    employeeData();
+    enable_two_factor();
     BussinesUnit();
+    email_account()
 
 });
 </script>
