@@ -362,9 +362,9 @@
                           <!-- draggable="true" @dragstart="handleDragStart($event, sectionIndex, 'section', blockIndex)"
                                                             @dragover="handleDragOver($event)"
                                                             @drop="handleDrop($event, sectionIndex, 'section', blockIndex)" -->
-                          <div class="mt-2 section_block">
+                          <div class=" pt-0 section_block">
                             <div v-for="(section, sectionIndex) in block.sections" :key="'section-' + sectionIndex"
-                              class="dynamicSection section">
+                              class="dynamicSection mt-0 section">
                               <section class="d-flex justify-content-between align-items-center">
                                 <div class="d-flex flex-column">
                                   <input v-model="section.label" type="text" :class="[
@@ -486,7 +486,7 @@
                                               columnIndex,
                                               fieldIndex
                                             )
-                                            " @mouseleave="resetHoveredField" class="dynamicField">
+                                            " @mouseleave="resetHoveredField" class="dynamicField m-1">
                                           <div class="px-1 dynamic_fied field-border">
                                             <div class="d-flex justify-content-between">
                                               <div class="flex-column d-flex">
@@ -893,7 +893,7 @@
       </div>
       <div class="offcanvas-body">
         <div class="">
-          <div class="form-check ps-1" v-if="selectedBlockIndex !== 0">
+          <div class="form-check ps-1" v-if="selectedBlockIndex == 1">
             <div>
 
               <input type="checkbox" id="ViewOnlyReportee" v-model="ViewOnlyReportee"
@@ -918,7 +918,8 @@
           <li v-for="(item, index) in filteredDesignationList" :key="index" class="designationList">
             <input type="checkbox" v-model="designationValue" :value="item" class="designationCheckBox" 
               @change="handleSingleSelect" />
-            <span class="ps-2" :class="{ 'opacity-50': ViewOnlyReportee }">{{ item }}</span>
+              <!-- :class="{ 'opacity-50': ViewOnlyReportee }" -->
+            <span class="ps-2" >{{ item }}</span>
           </li>
         </ul>
         <div v-else>
@@ -1037,14 +1038,6 @@ watch(
   },
   { immediate: true }
 );
-// const ViewOnlyReporteeFn = () => {
-//   if (ViewOnlyReportee.value) {
-//     designationValue = [];
-//     isAllSelected = false;
-//     employeeData()
-//   }
-// };
-
 
 
 
@@ -1238,47 +1231,6 @@ const processFields = (tableIndex) => {
 };
 
 const editMode = reactive({});
-// const toggleEdit = (tableName) => {
-//   if (editMode[tableName]) {
-//     console.log("Saving table:", tableName);
-
-//     // Remove the 'value' key from each object in the child table
-//     const filteredData = childtableHeaders.value[tableName].map(({ value, ...rest }) => rest);
-
-//     console.log("Filtered Table Data:", JSON.parse(JSON.stringify(filteredData)));
-
-//     // Construct form data
-//     const form = {
-//       "name": tableName,
-//       "doctype": "DocType",
-//       "fields": filteredData, // Child table data without 'value' key
-//     };
-
-//     const formData = new FormData();
-//     formData.append("doc", JSON.stringify(form));
-//     formData.append("action", "Save");
-
-//     console.log("FormData to be sent:", formData);
-
-//     // Send the data to the API
-//     axiosInstance
-//       .post(apis.savedocs, formData)
-//       .then((response) => {
-//         console.log("Save successful:", response.data);
-//       })
-//       .catch((error) => {
-//         console.error("Save failed:", error);
-//       });
-//   }
-
-//   // Toggle edit mode
-//   editMode[tableName] = !editMode[tableName];
-// };
-
-
-
-
-
 
 const addNewFieldedit = (tableName) => {
   if (!childtableHeaders.value[tableName]) {
@@ -1373,70 +1325,6 @@ watch(childtableHeaders, (newTables) => {
     });
   });
 }, { deep: true });
-
-
-
-
-
-
-
-
-// const getFieldLabel = (fieldtype) => {
-//   if (!childfield.value || !Array.isArray(childfield.value)) return fieldtype;
-//   const field = childfield.value.find((f) => f.type === fieldtype);
-//   return field ? field.label : fieldtype;
-// };
-
-
-// const addNewField = (tableKey) => {
-//   if (!childtableHeaders.value || typeof childtableHeaders.value !== "object") {
-//     console.error("childtableHeaders is not a valid object:", childtableHeaders.value);
-//     return;
-//   }
-
-//   const table = childtableHeaders.value[tableKey]; // Access by key
-
-//   // ✅ Ensure `table` exists
-//   if (!table) {
-//     console.error(`Table with key "${tableKey}" not found.`);
-//     return;
-//   }
-
-//   // ✅ Ensure `table` is an array
-//   if (!Array.isArray(table)) {
-//     console.error(`Table "${tableKey}" is not an array:`, table);
-//     return;
-//   }
-
-//   const newIndex = table.length;
-
-//   const newField = {
-//     fieldname: `field_${newIndex + 1}`,
-//     fieldtype: "",
-//     idx: newIndex + 1,
-//     label: "",
-//     value: "",
-//   };
-
-//   table.push(newField);
-
-//   // ✅ Ensure newIndex is within bounds before watching
-//   if (table.length > newIndex) {
-//     watch(
-//       () => table[newIndex]?.label,
-//       (newLabel) => {
-//         if (table[newIndex]) {
-//           table[newIndex].fieldname = newLabel?.trim().replace(/\s+/g, "_").toLowerCase();
-//         }
-//       }
-//     );
-//   }
-
-//   console.log(`Updated table "${tableKey}":`, table);
-// };
-
-
-
 
 
 const steps = ref([
@@ -1960,32 +1848,7 @@ function formData(status) {
       console.error("Error saving form data:", error);
     });
 }
-// setTimeout(() => {
-//   console.log(blockArr.length, workflowSetup.length, "length");
 
-//   if (workflowSetup.length < blockArr.length) {
-//     // ✅ If workflows are missing, show error toast
-//     const missingWorkflows = blockArr.length - workflowSetup.length;
-//     toast.error(`${missingWorkflows} more workflow(s) left to add.`, {
-//       autoClose: 2000,
-//       transition: "zoom",
-//     });
-//   } else {
-//     // ✅ If all workflows are added, show success toast
-//     toast.success("Form Created Successfully!", {
-//       autoClose: 2000,
-//       transition: "zoom",
-//       onClose: () => {
-//         // ✅ Route only after success toast disappears
-//         if (status === "save") {
-//           router.push({ name: "Created" });
-//         } else if (status === "draft") {
-//           router.push({ name: "Draft" });
-//         }
-//       },
-//     });
-//   }
-// }, 2000);
 
 const mainBlockRef = ref("");
 const addBlock = () => {
@@ -2087,73 +1950,6 @@ const addBlock = () => {
     }
   });
 };
-// const addBlock = () => {
-//   const blockIndex = blockArr.length; // Get current length before adding new block
-
-//   const newBlock = {
-//     label: blockIndex === 0 ? "requestor" : `approver-${blockIndex}`,
-//     parent: `${businessUnit.value?.value}-${filterObj.value?.form_short_name}`,
-//     sections: [
-//       {
-//         label: "",
-//         parent: `${businessUnit.value.value}-${filterObj.value.form_short_name}`,
-//         rows: [
-//           {
-//             label: `row_0_0_${blockIndex}`,
-//             columns:
-//               blockIndex === 0
-//                 ? [
-//                   {
-//                     label: "", // No extra empty column for the requestor block
-//                     fields: [{ label: "", fieldtype: "", options: "", reqd: false }],
-//                   },
-//                 ]
-//                 : [
-//                   {
-//                     label: "", // First column with "Approver" & "Approved By"
-//                     fields: [
-//                       {
-//                         label: "Approver",
-//                         fieldtype: "Data",
-//                         options: "",
-//                         reqd: false,
-//                       },
-//                       {
-//                         label: "Approved By",
-//                         fieldtype: "Attach",
-//                         options: "",
-//                         reqd: false,
-//                       },
-//                     ],
-//                   },
-//                   {
-//                     label: "", // Second column with "Approved On"
-//                     fields: [
-//                       {
-//                         label: "Approved On",
-//                         fieldtype: "Datetime",
-//                         options: "",
-//                         reqd: false,
-//                       },
-//                     ],
-//                   },
-//                 ],
-//           },
-//         ],
-//       },
-//     ],
-//   };
-
-//   blockArr.push(newBlock);
-//   nextTick(() => {
-//     if (mainBlockRef.value) {
-//       mainBlockRef.value.scrollTo({
-//         top: mainBlockRef.value.scrollHeight,
-//         behavior: "smooth",
-//       });
-//     }
-//   });
-// };
 
 // function to delete block
 const removeBlock = (blockIndex) => {
@@ -2190,14 +1986,7 @@ const addSection = (blockIndex) => {
       },
     ],
   });
-  // nextTick(() => {
-  //   if (mainBlockRef.value) {
-  //     mainBlockRef.value.scrollTo({
-  //       top: mainBlockRef.value.scrollHeight,
-  //       behavior: "smooth",
-  //     });
-  //   }
-  // });
+
 };
 // Function to remove a section
 const removeSection = (blockIndex, sectionIndex) => {
@@ -2207,34 +1996,6 @@ const removeSection = (blockIndex, sectionIndex) => {
   // toast.success("Section removed", { autoClose: 500 })
 };
 
-// const addRow = (blockIndex, sectionIndex) => {
-//   const rowIndex = blockArr[blockIndex].sections[sectionIndex].rows.length; // Get the current row index
-//   const rowSuffix = getRowSuffix(rowIndex);
-
-//   blockArr[blockIndex].sections[sectionIndex].rows.push({
-//     label: `row_${rowIndex}_${sectionIndex}_${blockIndex}`,
-//     columns: [
-//       {
-//         fields: [
-//           {
-//             label: "",
-//             fieldtype: "",
-//             // value: ref(""), // Keeping the value as a ref for reactivity
-//             options: "",
-//             reqd: false,
-//           },
-//         ], // Initialize with an empty fields array
-//       },
-//     ],
-//   });
-// };
-
-// const removeRow = (blockIndex, sectionIndex, rowIndex) => {
-//   let item = blockArr[blockIndex].sections[sectionIndex].rows[rowIndex];
-//   if (item.parent) deleted_items.push(item);
-//   blockArr[blockIndex].sections[sectionIndex].rows.splice(rowIndex, 1);
-//   // toast.success("Row removed", { autoClose: 500 })
-// };
 
 // Function to add a new column inside a section
 const addColumn = (blockIndex, sectionIndex, rowIndex) => {
@@ -2425,114 +2186,6 @@ function handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex, fiel
     );
   }
 }
-// function handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) {
-//   const excludedLabels = ["Approver", "Approved on", "Approved By"].map((label) =>
-//     label.toLowerCase().trim()
-//   );
-
-//   const restrictedLabels = [
-//     "name",
-//     "parent",
-//     "creation",
-//     "owner",
-//     "modified",
-//     "modified_by",
-//     "parentfield",
-//     "parenttype",
-//     "file_list",
-//     "flags",
-//     "docstatus",
-//   ].map((label) => label.toLowerCase().trim());
-
-//   // Function to check for duplicates
-//   const hasDuplicates = (array) => new Set(array).size !== array.length;
-
-//   // Extract all labels except excluded ones
-//   const flatArr = blockArr
-//     .flatMap(extractfieldlabels)
-//     .map((label) => label.trim().toLowerCase())
-//     .filter((label) => label !== "" && !excludedLabels.includes(label));
-
-
-//   function shouldSetError(fieldLabel) {
-//     const normalizedLabel = fieldLabel?.trim().toLowerCase();
-//     if (!normalizedLabel || excludedLabels.includes(normalizedLabel)) return false;
-
-//     // Count occurrences of the label in `flatArr`
-//     const occurrences = flatArr.filter((label) => label === normalizedLabel).length;
-
-//     return occurrences > 1; // True if duplicate exists
-//   }
-
-//   function isRestricted(fieldLabel) {
-//     return restrictedLabels.includes(fieldLabel?.trim().toLowerCase());
-//   }
-
-//   function hasInvalidCharacter(fieldLabel) {
-//     return fieldLabel.includes('"'); // Check if label contains double quotes
-//   }
-
-//   if (
-//     fieldIndex !== undefined &&
-//     fieldIndex >= 0 &&
-//     columnIndex !== undefined &&
-//     columnIndex >= 0 &&
-//     sectionIndex !== undefined
-//   ) {
-//     const fieldLabel =
-//       blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex]
-//         .fields[fieldIndex].label;
-
-//     if (isRestricted(fieldLabel)) {
-//       blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[
-//         fieldIndex
-//       ].errorMsg = "Entered label is restricted";
-//     } else if (hasInvalidCharacter(fieldLabel)) {
-//       blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[
-//         fieldIndex
-//       ].errorMsg = 'Label should not contain double quotes (")';
-//     } else {
-//       blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[
-//         fieldIndex
-//       ].errorMsg = shouldSetError(fieldLabel) ? "Duplicate Label Name" : "";
-//     }
-//   }
-
-//   if (
-//     fieldIndex === undefined &&
-//     columnIndex !== undefined &&
-//     columnIndex >= 0 &&
-//     sectionIndex !== undefined
-//   ) {
-//     const columnLabel =
-//       blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].label;
-
-//     if (isRestricted(columnLabel)) {
-//       blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].errorMsg =
-//         "Entered label is restricted";
-//     } else if (hasInvalidCharacter(columnLabel)) {
-//       blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].errorMsg =
-//         'Label should not contain double quotes (")';
-//     } else {
-//       blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].errorMsg =
-//         shouldSetError(columnLabel) ? "Duplicate Label Name in Column" : "";
-//     }
-//   }
-
-//   if (columnIndex === undefined && fieldIndex === undefined && sectionIndex !== undefined) {
-//     const sectionLabel = blockArr[blockIndex].sections[sectionIndex].label;
-
-//     if (isRestricted(sectionLabel)) {
-//       blockArr[blockIndex].sections[sectionIndex].errorMsg = "Entered label is restricted";
-//     } else if (hasInvalidCharacter(sectionLabel)) {
-//       blockArr[blockIndex].sections[sectionIndex].errorMsg =
-//         'Label should not contain double quotes (")';
-//     } else {
-//       blockArr[blockIndex].sections[sectionIndex].errorMsg =
-//         shouldSetError(sectionLabel) ? "Duplicate Label Name in Section" : "";
-//     }
-//   }
-// }
 
 
 const hasErrors = computed(() => {
@@ -3212,7 +2865,7 @@ select {
 
 .requestandAppHeader {
   padding: 10px 6px;
-  box-shadow: 0px 4px 4px 0px #0000000d;
+  // box-shadow: 0px 4px 4px 0px #0000000d; 
 }
 
 .section_block {

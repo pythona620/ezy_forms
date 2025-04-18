@@ -16,11 +16,13 @@
                   <h6 class="m-0 font-12">{{ column.label }}</h6>
                 </div>
                 <div class="mx-3 my-2">
-                  <div v-for="(field, fieldIndex) in column.fields" :key="'field-preview-' + fieldIndex"
-                    :class="(props.readonlyFor === 'true' || blockIndex < currentLevel) && field.fieldtype !== 'Small Text' && field.fieldtype !== 'Text' ? 'd-flex align-items-start mb-2' : 'd-flex align-items-end'">
+                  <div v-for="(field, fieldIndex) in column.fields" :key="'field-preview-' + fieldIndex" :class="(props.readonlyFor === 'true' || blockIndex < currentLevel) && field.fieldtype !== 'Small Text' && field.fieldtype !== 'Text'
+                    ? 'd-flex ' + (field.label === 'Approved By' ? 'align-items-end' : 'align-items-start') + ' mb-2'
+                    : ''">
 
-                    <div v-if="field.label" >
-                      <label :for="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex">
+                    <div v-if="field.label">
+                      <label :for="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                        class=" label-text whitespace-nowrap">
                         <span class="font-12 fw-medium">{{ field.label }}</span>
                         <span class="ms-1 text-danger">{{ field.reqd === 1 ? "*" : "" }}</span>
                         <span class="pe-2" v-if="props.readonlyFor === 'true' || blockIndex < currentLevel">:</span>
@@ -139,8 +141,8 @@
                           :class="props.readonlyFor === 'true' ? ' border-bottom-0' : ''">
                           <!-- Unique key per block -->
                           <template v-if="isImageFile(file)">
-                            <img :src="file" class="img-thumbnail mt-2 cursor-pointer border-0 border-bottom-0" @click="openFile(file)"
-                              style="max-width: 100px; max-height: 100px"
+                            <img :src="file" class="img-thumbnail mt-2 cursor-pointer border-0 border-bottom-0"
+                              @click="openFile(file)" style="max-width: 100px; max-height: 100px"
                               @mouseover="handleMouseOver(blockIndex + '-' + fieldIndex, i)"
                               @mouseleave="handleMouseLeave(blockIndex + '-' + fieldIndex)" />
 
@@ -228,7 +230,7 @@
                                   columnIndex,
                                   fieldIndex
                                 )
-                            " class="form-control previewInputHeight"></component>
+                            " class="form-control previewInputHeight w-100"></component>
                     </template>
                   </div>
                 </div>
@@ -362,7 +364,7 @@ function getEmploye() {
   const storedData = JSON.parse(localStorage.getItem("employeeData"));
   // console.log(storedData, "=============================");
   const queryParams = {
-    filters: JSON.stringify([["Ezy Employee", "emp_mail_id", "=", storedData.emp_mail_id]]),
+    filters: JSON.stringify([["Ezy Employee", "emp_mail_id", "=", storedData?.emp_mail_id]]),
     fields: JSON.stringify(["emp_name", "signature"]),
 
   };
@@ -374,8 +376,8 @@ function getEmploye() {
     })
     .then((response) => {
       emp_data.value = {
-        emp_name: response.data[0].emp_name,
-        signature: response.data[0].signature,
+        emp_name: response.data[0]?.emp_name,
+        signature: response.data[0]?.signature,
       };
       // console.log(emp_data.value, "response");
     })
@@ -738,25 +740,14 @@ const clearImage = (
 };
 
 
-// const logFieldValue = (
-//   event,
-//   blockIndex,
-//   sectionIndex,
-//   rowIndex,
-//   columnIndex,
-//   fieldIndex
-// ) => {
-//   const field =
-//     props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
-//       columnIndex
-//     ].fields[fieldIndex];
-//   field.value = event.target.value;
-//   emit("updateField", getAllFieldsData());
-//   // console.log('Field Value Updated:', field);
-// };
+
 </script>
 
-<style lang="scss" setup scoped>
+<style lang="scss" scoped>
+.label-text {
+  white-space: nowrap;
+}
+
 .image-border-bottom {
   border: none;
   padding-bottom: 0;

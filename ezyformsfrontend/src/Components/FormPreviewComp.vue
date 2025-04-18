@@ -218,6 +218,10 @@ const businessUnit = computed(() => EzyBusinessUnit.value);
 const newBusinessUnit = ref({ business_unit: '' });
 
 
+const selectedData = ref({
+  business_unit: route.query.business_unit || "", // Retrieve from query
+});
+
 
 const props = defineProps({
     blockArr: {
@@ -272,7 +276,7 @@ function downloadPdf() {
     const dataObj = {
         "form_short_name": formDescriptions.value.form_short_name,
         "name": null,
-        business_unit: businessUnit.value
+        business_unit: selectedData.value.business_unit
     };
 
     axiosInstance.post(apis.download_pdf_form, dataObj)

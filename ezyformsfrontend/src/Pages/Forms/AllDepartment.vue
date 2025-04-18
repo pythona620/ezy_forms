@@ -369,7 +369,7 @@ watch(
   [() => businessUnit.value, () => props.id],
   ([newBusinessUnitVal, newId]) => {
     newBusinessUnit.value.business_unit = newBusinessUnitVal;
-    if (newBusinessUnitVal.length && newId && props.id !== ':id') {
+    if (newBusinessUnitVal.length && newId && props.id !== ':id' ) {
 
       fetchDepartmentDetails(newId || props.id, null);
     }
@@ -425,7 +425,7 @@ function fetchDepartmentDetails(id, data) {
     ["business_unit", "like", `%${newBusinessUnit.value.business_unit}%`],
     ["enable", "=", 1]
   ];
-  if (props.id && props.id !== "allforms") {
+  if (props.id && props.id !== "Allforms" && props.id !== "allforms") {
     filters.push(["owner_of_the_form", "=", props.id]);
   }
   if (data) {
@@ -482,7 +482,7 @@ onMounted(() => {
   if (userDesigination.value.includes("IT")) {
     isEnable.value = "true";
   }
-  if (route.path === "/forms/department/allforms") {
+  if (route.path === "/forms/department/allforms" || route.path === "/forms/department/Allforms") {
     router.replace("/forms/department/allforms");
   }
 

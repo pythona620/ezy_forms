@@ -8,11 +8,13 @@ from ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions impor
 
 class EzyEmployee(Document):
 	def after_insert(self):
+		is_email_account_set = frappe.db.get_all("Email Account",{"enable_outgoing":["=",1],"default_outgoing":["=",1]})
 		###### Employee updating in User doc
 		user_doc = frappe.new_doc("User")
 		user_doc.email = self.emp_mail_id
 		user_doc.username = self.emp_name
 		user_doc.first_name = self.emp_name.split(" ")[0]
+		user_doc.send_welcome_email = 1 if len(is_email_account_set) > 0 else 0
 		user_doc.insert(ignore_permissions=True)
 		frappe.db.commit()
 		user_doc.reload()
