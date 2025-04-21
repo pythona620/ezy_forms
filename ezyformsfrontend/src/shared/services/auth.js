@@ -5,7 +5,7 @@ export default function isAuthenticated() {
         .find(cookie => cookie.startsWith('user_id='))
         ?.split('=')[1] || null; // Check cookies
 
-    return !!(userName && userId); // Returns true if either is found
+        return !!(userName && userId && userId !== "Guest"); // Returns true if either is found
 }
 
 

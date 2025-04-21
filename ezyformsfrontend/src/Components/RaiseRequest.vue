@@ -111,6 +111,7 @@ const selectedData = ref({
   selectedCategory: route.query.selectedCategory || "", // Retrieve from query
   selectedform: route.query.selectedForm || "", // Retrieve from query
   selectedFormId: route.query.selectedFormId || "", // Retrieve from query
+  selectedBusiness_unit : route.query.business_unit || "", // Retrieve from query
 });
 
 
@@ -445,7 +446,7 @@ function categoriesdata(departmentId) {
 //     });
 
 function formDefinations() {
-  const filters = [["business_unit", "like", `%${business_unit.value}%`]];
+  const filters = [["business_unit", "like", `%${selectedData.value.selectedBusiness_unit}%`]];
   if (selectedData.value.selectedCategory) {
     filters.push([
       "form_category",

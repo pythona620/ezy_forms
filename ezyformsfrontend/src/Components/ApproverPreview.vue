@@ -17,204 +17,208 @@
                 </div>
                 <div class="mx-3 my-2">
                   <div v-for="(field, fieldIndex) in column.fields" :key="'field-preview-' + fieldIndex" :class="(props.readonlyFor === 'true' || blockIndex < currentLevel) && field.fieldtype !== 'Small Text' && field.fieldtype !== 'Text'
-                    ? 'd-flex ' + (field.label === 'Approved By' ? 'align-items-end' : 'align-items-start') + ' mb-2'
+                    ? (field.label === 'Approved By' ? 'align-items-end' : 'align-items-start') + ' mb-2'
                     : ''">
+                    <div :class="(props.readonlyFor === 'true' || blockIndex < currentLevel) && field.fieldtype !== 'Small Text' && field.fieldtype !== 'Text'
+                      ? 'd-flex ' + (field.label === 'Approved By' ? 'align-items-end' : 'align-items-start') + ' mb-2'
+                      : ''">
 
-                    <div v-if="field.label">
-                      <label :for="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
-                        class=" label-text whitespace-nowrap">
-                        <span class="font-12 fw-medium">{{ field.label }}</span>
-                        <span class="ms-1 text-danger">{{ field.reqd === 1 ? "*" : "" }}</span>
-                        <span class="pe-2" v-if="props.readonlyFor === 'true' || blockIndex < currentLevel">:</span>
-                      </label>
-                    </div>
-                    <!-- field.fieldtype === 'Select' || -->
-                    <!-- Field Type Select or Multiselect -->
-                    <template v-if="field.fieldtype === 'multiselect'">
-                      <select :multiple="field.fieldtype === 'multiselect'" :value="field.value" @input="
-                        logFieldValue(
-                          blockIndex,
-                          sectionIndex,
-                          rowIndex,
-                          columnIndex,
-                          fieldIndex
-                        )
-                        " class="form-select mb-2 font-13">
-                        <option v-for="(option, index) in field.options?.split('\n')" :key="index" :value="option">
-                          {{ option }}
-                        </option>
-                      </select>
-                    </template>
-                    <template v-if="field.fieldtype === 'Small Text'">
-                      <div class="container-fluid">
-                        <div class="row">
-                          <div class="form-check col-4 mb-1" v-for="(option, index) in field?.options?.split('\n')"
-                            :key="index"
-                            :class="{ 'd-none': !(JSON.parse(field.value || '[]') || []).includes(option) }">
 
-                            <div>
-                              <input class="form-check-input" type="checkbox"
-                                :disabled="blockIndex === 0 || props.readonlyFor === 'true'"
-                                :checked="(JSON.parse(field.value || '[]') || []).includes(option)" :value="option"
-                                :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
-                                :id="`${option}-${index}`"
-                                @change="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
+                      <div v-if="field.label">
+                        <label :for="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                          class=" label-text whitespace-nowrap">
+                          <span class="font-12 fw-medium">{{ field.label }}</span>
+                          <span class="ms-1 text-danger">{{ field.reqd === 1 ? "*" : "" }}</span>
+                          <span class="pe-2" v-if="props.readonlyFor === 'true' || blockIndex < currentLevel">:</span>
+                        </label>
+                      </div>
+                      <!-- field.fieldtype === 'Select' || -->
+                      <!-- Field Type Select or Multiselect -->
+                      <template v-if="field.fieldtype === 'multiselect'">
+                        <select :multiple="field.fieldtype === 'multiselect'" :value="field.value" @input="
+                          logFieldValue(
+                            blockIndex,
+                            sectionIndex,
+                            rowIndex,
+                            columnIndex,
+                            fieldIndex
+                          )
+                          " class="form-select mb-2 font-13">
+                          <option v-for="(option, index) in field.options?.split('\n')" :key="index" :value="option">
+                            {{ option }}
+                          </option>
+                        </select>
+                      </template>
+                      <template v-if="field.fieldtype === 'Small Text'">
+                        <div class="container-fluid">
+                          <div class="row">
+                            <div class="form-check col-4 mb-1" v-for="(option, index) in field?.options?.split('\n')"
+                              :key="index"
+                              :class="{ 'd-none': !(JSON.parse(field.value || '[]') || []).includes(option) }">
+
+                              <div>
+                                <input class="form-check-input" type="checkbox"
+                                  :disabled="blockIndex === 0 || props.readonlyFor === 'true'"
+                                  :checked="(JSON.parse(field.value || '[]') || []).includes(option)" :value="option"
+                                  :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
+                                  :id="`${option}-${index}`"
+                                  @change="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
+                              </div>
+
+                              <div>
+                                <label class="form-check-label font-12 m-0" :for="`${option}-${index}`">
+                                  {{ option }}
+                                </label>
+                              </div>
+
                             </div>
-
-                            <div>
-                              <label class="form-check-label font-12 m-0" :for="`${option}-${index}`">
-                                {{ option }}
-                              </label>
-                            </div>
-
                           </div>
                         </div>
-                      </div>
-                    </template>
+                      </template>
 
 
 
-                    <!-- Field Type Check or Radio -->
-                    <template v-else-if="
-                      field.fieldtype === 'Check' ||
+                      <!-- Field Type Check or Radio -->
+                      <template v-else-if="
+                        field.fieldtype === 'Check' ||
 
-                      field.fieldtype === 'radio'
-                    ">
-                      <div class="container-fluid">
-                        <div class="row">
-                          <div class="form-check col-4 mb-1" v-for="(option, index) in field?.options?.split(
-                            '\n'
-                          )" :key="index">
-                            <div>
-                              <input v-if="
-                                field.fieldtype === 'Check' ||
-                                index !== 0
-                              " class="form-check-input" type="checkbox" :disabled="blockIndex === 0 || props.readonlyFor === 'true'
+                        field.fieldtype === 'radio'
+                      ">
+                        <div class="container-fluid">
+                          <div class="row">
+                            <div class="form-check col-4 mb-1" v-for="(option, index) in field?.options?.split(
+                              '\n'
+                            )" :key="index">
+                              <div>
+                                <input v-if="
+                                  field.fieldtype === 'Check' ||
+                                  index !== 0
+                                " class="form-check-input" type="checkbox" :disabled="blockIndex === 0 || props.readonlyFor === 'true'
                                 " :checked="field.value === option" :value="option"
-                                :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
-                                :id="`${option}-${index}`" @blur="
-                                  (event) =>
-                                    logFieldValue(
-                                      event,
-                                      blockIndex,
-                                      sectionIndex,
-                                      rowIndex,
-                                      columnIndex,
-                                      fieldIndex
-                                    )
-                                " />
+                                  :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
+                                  :id="`${option}-${index}`" @blur="
+                                    (event) =>
+                                      logFieldValue(
+                                        event,
+                                        blockIndex,
+                                        sectionIndex,
+                                        rowIndex,
+                                        columnIndex,
+                                        fieldIndex
+                                      )
+                                  " />
 
-                              <input v-else-if="field.fieldtype === 'radio'" :disabled="blockIndex === 0 || props.readonlyFor === 'true'
-                                " class="form-check-input" type="radio"
-                                :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
-                                :id="`${option}-${index}`" :value="option" :checked="field.value === option" @blur="
-                                  (event) =>
-                                    logFieldValue(
-                                      event,
-                                      blockIndex,
-                                      sectionIndex,
-                                      rowIndex,
-                                      columnIndex,
-                                      fieldIndex
-                                    )
-                                " />
-                            </div>
-                            <div>
-                              <label class="form-check-label m-0" :for="`${option}-${index}`">
-                                {{ option }}
-                              </label>
+                                <input v-else-if="field.fieldtype === 'radio'" :disabled="blockIndex === 0 || props.readonlyFor === 'true'
+                                  " class="form-check-input" type="radio"
+                                  :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
+                                  :id="`${option}-${index}`" :value="option" :checked="field.value === option" @blur="
+                                    (event) =>
+                                      logFieldValue(
+                                        event,
+                                        blockIndex,
+                                        sectionIndex,
+                                        rowIndex,
+                                        columnIndex,
+                                        fieldIndex
+                                      )
+                                  " />
+                              </div>
+                              <div>
+                                <label class="form-check-label m-0" :for="`${option}-${index}`">
+                                  {{ option }}
+                                </label>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    </template>
-                    <!-- <i class="bi bi-x-lg position-absolute text-danger cursor-pointer"
+                      </template>
+                      <!-- <i class="bi bi-x-lg position-absolute text-danger cursor-pointer"
                             :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'd-none' : ''"
                             style="top: -10px; right: -5px; font-size: 13px; background: white; border-radius: 50%; padding: 3px"
                             @click="removeFileAtIndex(i)"></i> -->
 
-                    <!-- @click="openInNewWindow(field.value)" -->
-                    <template v-else-if="field.fieldtype == 'Attach'">
-                      <div v-if="field.value" class="d-flex gap-2 flex-wrap">
-                        <div v-for="(file, i) in getFileArray(field.value)" :key="i"
-                          class="position-relative d-inline-block"
-                          :class="props.readonlyFor === 'true' ? ' border-bottom-0' : ''">
-                          <!-- Unique key per block -->
-                          <template v-if="isImageFile(file)">
-                            <img :src="file" class="img-thumbnail mt-2 cursor-pointer border-0 border-bottom-0"
-                              @click="openFile(file)" style="max-width: 100px; max-height: 100px"
-                              @mouseover="handleMouseOver(blockIndex + '-' + fieldIndex, i)"
-                              @mouseleave="handleMouseLeave(blockIndex + '-' + fieldIndex)" />
+                      <!-- @click="openInNewWindow(field.value)" -->
+                      <template v-else-if="field.fieldtype == 'Attach'">
+                        <div v-if="field.value" class="d-flex gap-2 flex-wrap">
+                          <div v-for="(file, i) in getFileArray(field.value)" :key="i"
+                            class="position-relative d-inline-block"
+                            :class="props.readonlyFor === 'true' ? ' border-bottom-0' : ''">
+                            <!-- Unique key per block -->
+                            <template v-if="isImageFile(file)">
+                              <img :src="file" class="img-thumbnail mt-2 cursor-pointer border-0 border-bottom-0"
+                                @click="openFile(file)" style="max-width: 100px; max-height: 100px"
+                                @mouseover="handleMouseOver(blockIndex + '-' + fieldIndex, i)"
+                                @mouseleave="handleMouseLeave(blockIndex + '-' + fieldIndex)" />
 
-                            <!-- Enlarged Preview -->
-                            <div v-if="hoverStates[blockIndex + '-' + fieldIndex] === i"
-                              class="image-popup position-absolute"
-                              style="top: 0; left: 110%; width: 200px; background: white; z-index: 10; box-shadow: 0px 0px 10px rgba(0,0,0,0.2); border-radius: 5px; padding: 5px;">
-                              <img :src="file" alt="Enlarged Preview" style="width: 100%; border-radius: 5px;" />
-                            </div>
-                          </template>
+                              <!-- Enlarged Preview -->
+                              <div v-if="hoverStates[blockIndex + '-' + fieldIndex] === i"
+                                class="image-popup position-absolute"
+                                style="top: 0; left: 110%; width: 200px; background: white; z-index: 10; box-shadow: 0px 0px 10px rgba(0,0,0,0.2); border-radius: 5px; padding: 5px;">
+                                <img :src="file" alt="Enlarged Preview" style="width: 100%; border-radius: 5px;" />
+                              </div>
+                            </template>
 
-                          <!-- PDF File Icon -->
-                          <a v-else :href="file" target="_blank"
-                            class="d-flex align-items-center justify-content-center mt-2 border rounded bg-light"
-                            style="width: 100px; height: 100px; text-decoration: none;">
-                            <i class="bi bi-file-earmark-pdf-fill fs-2 text-danger"></i>
-                          </a>
+                            <!-- PDF File Icon -->
+                            <a v-else :href="file" target="_blank"
+                              class="d-flex align-items-center justify-content-center mt-2 border rounded bg-light"
+                              style="width: 100px; height: 100px; text-decoration: none;">
+                              <i class="bi bi-file-earmark-pdf-fill fs-2 text-danger"></i>
+                            </a>
+                          </div>
                         </div>
-                      </div>
 
-                      <!-- File input -->
-                      <input :disabled="props.readonlyFor === 'true'" v-else type="file"
-                        accept="image/jpeg,image/png,application/pdf"
-                        :class="props.readonlyFor === 'true' ? 'd-none' : ''"
-                        :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
-                        class="form-control previewInputHeight font-10" multiple
-                        @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
-                    </template>
-
+                        <!-- File input -->
+                        <input :disabled="props.readonlyFor === 'true'" v-else type="file"
+                          accept="image/jpeg,image/png,application/pdf"
+                          :class="props.readonlyFor === 'true' ? 'd-none' : ''"
+                          :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                          class="form-control previewInputHeight font-10" multiple
+                          @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
+                      </template>
 
 
-                    <template v-else-if="field.fieldtype == 'Datetime'">
-                      <input type="datetime-local" v-model="field.value"
-                        :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 image-border-bottom w-50 pb-0 bg-transparent ' : ' '"
-                        :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'" :readOnly="blockIndex < currentLevel || props.readonlyFor === 'true'
-                          " :placeholder="'Enter ' + field.label" :name="'field-' +
+
+                      <template v-else-if="field.fieldtype == 'Datetime'">
+                        <input type="datetime-local" v-model="field.value"
+                          :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 image-border-bottom w-50 pb-0 bg-transparent ' : ' '"
+                          :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'" :readOnly="blockIndex < currentLevel || props.readonlyFor === 'true'
+                            " :placeholder="'Enter ' + field.label" :name="'field-' +
                             sectionIndex +
                             '-' +
                             columnIndex +
                             '-' +
                             fieldIndex
                             " class="form-control previewInputHeight" />
-                    </template>
+                      </template>
 
-                    <!-- Field Type Default -->
-                    <template v-else>
-                      <input v-if="field.fieldtype == 'Int'"
-                        :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'" :readOnly="blockIndex < currentLevel || props.readonlyFor === 'true'
-                          " type="number" v-model="field.value"
-                        :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 image-border-bottom w-50' : ' '"
-                        :placeholder="'Enter ' + field.label" :value="field.value" :name="'field-' +
-                          sectionIndex +
-                          '-' +
-                          columnIndex +
-                          '-' +
-                          fieldIndex
-                          " class="form-control previewInputHeight" />
-                      <textarea v-if="field.fieldtype === 'Text'" :disabled="blockIndex < currentLevel"
-                        :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0  bg-transparent' : ''"
-                        :readOnly="blockIndex === 0 || props.readonlyFor === 'true'" v-model="field.value"
-                        :placeholder="'Enter ' + field.label"
-                        :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
-                        class="form-control previewInputHeight"
-                        :ref="el => setRef(el, sectionIndex, columnIndex, fieldIndex)"
-                        @input="adjustHeight(sectionIndex, columnIndex, fieldIndex)" />
+                      <!-- Field Type Default -->
+                      <template v-else>
+                        <input v-if="field.fieldtype == 'Int'"
+                          :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'" :readOnly="blockIndex < currentLevel || props.readonlyFor === 'true'
+                            " type="number" v-model="field.value"
+                          :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 image-border-bottom w-50' : ' '"
+                          :placeholder="'Enter ' + field.label" :value="field.value" :name="'field-' +
+                            sectionIndex +
+                            '-' +
+                            columnIndex +
+                            '-' +
+                            fieldIndex
+                            " class="form-control previewInputHeight" />
+                        <textarea v-if="field.fieldtype === 'Text'" :disabled="blockIndex < currentLevel"
+                          :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0  bg-transparent' : ''"
+                          :readOnly="blockIndex === 0 || props.readonlyFor === 'true'" v-model="field.value"
+                          :placeholder="'Enter ' + field.label"
+                          :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                          class="form-control previewInputHeight"
+                          :ref="el => setRef(el, sectionIndex, columnIndex, fieldIndex)"
+                          @input="adjustHeight(sectionIndex, columnIndex, fieldIndex)" />
 
-                      <component v-if="field.fieldtype !== 'Int' && field.fieldtype !== 'Text'"
-                        :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'"
-                        :is="getFieldComponent(field.fieldtype)"
-                        :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 image-border-bottom w-50 bg-transparent ' : ' '"
-                        :value="field.value" :type="field.fieldtype" :readOnly="blockIndex < currentLevel || props.readonlyFor === 'true'
-                          " :name="'field-' +
+                        <component v-if="field.fieldtype !== 'Int' && field.fieldtype !== 'Text'"
+                          :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'"
+                          :is="getFieldComponent(field.fieldtype)"
+                          :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 image-border-bottom w-50 bg-transparent ' : ' '"
+                          :value="field.value" :type="field.fieldtype" :readOnly="blockIndex < currentLevel || props.readonlyFor === 'true'
+                            " :name="'field-' +
                             sectionIndex +
                             '-' +
                             columnIndex +
@@ -231,7 +235,12 @@
                                   fieldIndex
                                 )
                             " class="form-control previewInputHeight w-100"></component>
-                    </template>
+                      </template>
+                    </div>
+                      <div v-if="field.description !== 'Field'" class="w-100 font-11 description-block mt-1">
+                        <span class="fw-semibold">Description :</span><br>
+                        <span v-html="field.description.replace(/\n/g, '<br>')"></span>
+                      </div>
                   </div>
                 </div>
               </div>
