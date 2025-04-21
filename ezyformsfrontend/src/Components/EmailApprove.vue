@@ -197,7 +197,7 @@
         <div>
           <div :class="actionStatus == 'Approve' ? 'thank-you-card-approve': 'thank-you-card-reject'">
           
-            <span>Form {{ actionStatus }} Successfully <span v-if="actionStatus == 'Approve'"><i class="bi approved-icon bi-check2-circle"></i></span>
+            <span>Form {{ actionStatus ==  'Request Cancelled' ? 'Request Rejected' : actionStatus }} Successfully <span v-if="actionStatus == 'Approve'"><i class="bi approved-icon bi-check2-circle"></i></span>
             <span v-if="actionStatus == 'Request Cancelled'">
               <i class="bi bi-x-lg"></i>
             </span>
@@ -225,7 +225,7 @@
 
 <script setup>
 
-import { onMounted, ref, watch, computed } from "vue";
+import { onMounted, ref, watch, computed, watchEffect } from "vue";
 import ApproverPreview from "./ApproverPreview.vue";
 import { useRoute, useRouter } from "vue-router";
 import axiosInstance from "../shared/services/interceptor";
@@ -351,6 +351,7 @@ onMounted(() => {
   // // Debug: Check what cookies are still left
   // console.log('Cookies after clearing:', document.cookie);
     logout()
+    user_id.value = getUserIdFromCookies();
   const cookiesToRemove = ['full_name', 'sid', 'system_user', 'user_id'];
 
   cookiesToRemove.forEach(cookie => {
@@ -375,19 +376,59 @@ function logout() {
     // localStorage.removeItem('employeeData');
     axiosInstance.post(apis.logout)
         .then((response) => {
-            console.log(response.data);
-            localStorage.removeItem('UserName');
-            localStorage.removeItem('employeeData');
-            localStorage.removeItem('Bu');
-            localStorage.removeItem('USERROLE');
-            sessionStorage.removeItem('UserName');
-            sessionStorage.removeItem('employeeData');
-            sessionStorage.removeItem('Bu');
-            sessionStorage.removeItem('USERROLE');
-           
+            console.log(response);
+            if(response){
+
+              localStorage.removeItem('UserName');
+              localStorage.removeItem('employeeData');
+              localStorage.removeItem('Bu');
+              localStorage.removeItem('USERROLE');
+              sessionStorage.removeItem('UserName');
+              sessionStorage.removeItem('employeeData');
+              sessionStorage.removeItem('Bu');
+              sessionStorage.removeItem('USERROLE');
+              receivedForMe();
+            }
         })
 }
+const user_id = ref("");
 
+// Function to get user_id from cookies
+function getUserIdFromCookies() {
+    return document.cookie
+        .split("; ")
+        .find((cookie) => cookie.startsWith("user_id="))
+        ?.split("=")[1] || null;
+}
+
+
+function removeUserIdCookie() {
+    document.cookie = "user_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+    document.cookie = "full_name=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+    user_id.value = ""; // Clear the reactive variable
+    // console.log("user_id cookie removed");
+}
+
+// Function to remove user-related localStorage data
+function clearLocalStorage() {
+    localStorage.removeItem("UserName");
+    localStorage.removeItem("employeeData");
+    localStorage.removeItem("Bu");
+    localStorage.removeItem("USERROLE");
+    // console.log("Local storage cleared");
+}
+
+;
+
+// Watch for changes in `sessionStorage` UserName
+watchEffect(() => {
+    const userName = sessionStorage.getItem("UserName");
+
+    if (!userName) {
+        clearLocalStorage();
+        removeUserIdCookie();
+    }
+});
 function EditformSubmission() {
   // Navigate to the new route
   router.push({
@@ -402,19 +443,19 @@ function EditformSubmission() {
   });
   // console.log("emittedFormData", emittedFormData.value);
 }
-watch(
-  businessUnit,
-  (newVal) => {
-    const local = localStorage.getItem("Bu")
-    business_unit.value = newVal;
-    business_unit.value = local
-    if (newVal) {
-      // console.log(business_unit.value, newVal, "ll");
-      receivedForMe();
-    }
-  },
-  { immediate: true }
-);
+// watch(
+//   businessUnit,
+//   (newVal) => {
+//     const local = localStorage.getItem("Bu")
+//     business_unit.value = newVal;
+//     business_unit.value = local
+//     if (newVal) {
+//       // console.log(business_unit.value, newVal, "ll");
+//       receivedForMe();
+//     }
+//   },
+//   { immediate: true }
+// );
 
 
 
