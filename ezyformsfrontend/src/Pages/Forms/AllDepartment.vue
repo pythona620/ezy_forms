@@ -115,7 +115,7 @@ const childtableHeaders = ref([]);
 // Business unit and filter object
 const businessUnit = computed(() => EzyBusinessUnit.value);
 const newBusinessUnit = ref({ business_unit: '' });
-const filterObj = ref({ limitPageLength: 20, limit_start: 0 });
+const filterObj = ref({ limitPageLength: 20, limit_start: 0,filters:[] });
 const actions = ref(
   [
     { name: 'View form', icon: 'fa-solid fa-eye' },
@@ -370,7 +370,8 @@ watch(
   ([newBusinessUnitVal, newId]) => {
     newBusinessUnit.value.business_unit = newBusinessUnitVal;
     if (newBusinessUnitVal.length && newId && props.id !== ':id' ) {
-
+      filterObj.value.limit_start = 0;
+      filterObj.value.filters = [];
       fetchDepartmentDetails(newId || props.id, null);
     }
   },
@@ -399,20 +400,20 @@ function inLineFiltersData(searchedData) {
     clearTimeout(timeout.value); // Clear previous timeout
 
     timeout.value = setTimeout(() => {
-        const filters = [];
+      filterObj.value.filters = [];
 
         // Loop through the table headers and build dynamic filters
         tableheaders.value.forEach((header) => {
             const key = header.td_key;
 
             if (searchedData[key]) {
-                filters.push(key, "like", `%${searchedData[key]}%`);
+              filterObj.value.filters.push(key, "like", `%${searchedData[key]}%`);
             }
         });
 
         // Call fetchDepartmentDetails with or without filters
-        if (filters.length) {
-            fetchDepartmentDetails(null, filters);
+        if (filterObj.value.filters.length) {
+            fetchDepartmentDetails(null,filterObj.value.filters);
         } else {
             fetchDepartmentDetails();
         }

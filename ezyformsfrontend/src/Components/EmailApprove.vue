@@ -201,7 +201,7 @@
             <span v-if="actionStatus == 'Request Cancelled'">
               <i class="bi bi-x-lg"></i>
             </span>
-            </span>
+            </span> 
           </div>
         </div>
       </div>
@@ -211,7 +211,7 @@
       <div class="expiry-token-container">
         <div class="expiry-token-card">
           <!-- <h2>⚠️</h2> -->
-          <p>Form Already Submitted.</p>
+          <p class="fw-bold">Form Already Submitted.</p>
         </div>
       </div>
 
@@ -322,7 +322,7 @@ const ApprovePDF = ref(true)
 //   // Forcing removal of sid cookie by setting an expired date
 //   document.cookie = "sid=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
 // }
-const userRole = ref('Guest');
+// const userRole = ref('Guest');
 onMounted(() => {
   // clearSidCookie()
   //   const cookies = document.cookie;
@@ -346,18 +346,16 @@ onMounted(() => {
 
   //   const cookiesToRemove = ['full_name', 'sid', 'system_user', 'user_id'];
 
-  // cookiesToRemove.forEach(cookie => {
-  //   deleteCookie(cookie);
-  // });
 
-  // const cookiesToRemove = ['full_name', 'sid', 'system_user', 'user_id'];
-
-  // cookiesToRemove.forEach(cookie => {
-  //   deleteCookie(cookie);
-  // });
-
+  // logout()
   // // Debug: Check what cookies are still left
   // console.log('Cookies after clearing:', document.cookie);
+    logout()
+  const cookiesToRemove = ['full_name', 'sid', 'system_user', 'user_id'];
+
+  cookiesToRemove.forEach(cookie => {
+    deleteCookie(cookie);
+  });
   const storedData = localStorage.getItem("employeeData");
   try {
     const parsedData = JSON.parse(storedData);
@@ -372,7 +370,23 @@ onMounted(() => {
 
 });
 
-
+function logout() {
+    // localStorage.removeItem('UserName');
+    // localStorage.removeItem('employeeData');
+    axiosInstance.post(apis.logout)
+        .then((response) => {
+            console.log(response.data);
+            localStorage.removeItem('UserName');
+            localStorage.removeItem('employeeData');
+            localStorage.removeItem('Bu');
+            localStorage.removeItem('USERROLE');
+            sessionStorage.removeItem('UserName');
+            sessionStorage.removeItem('employeeData');
+            sessionStorage.removeItem('Bu');
+            sessionStorage.removeItem('USERROLE');
+           
+        })
+}
 
 function EditformSubmission() {
   // Navigate to the new route
@@ -428,11 +442,27 @@ const updateFormData = (fieldValues) => {
 
   // console.log(emittedFormData.value, "======");
 };
+// function deleteCookie(name) {
+//   document.cookie = `${name}=;expires=${new Date(0).toUTCString()};path=/`;
+// }
+function deleteCookie(name) {
+  const expired = new Date(0).toUTCString();
 
+  // Try different paths to ensure it's removed
+  document.cookie = `${name}=; expires=${expired}; path=/;`;
+  document.cookie = `${name}=; expires=${expired}; path=/; domain=${location.hostname}`;
+  document.cookie = `${name}=; expires=${expired}; path=/`;
+}
 
 function ApproverFormSubmissionNew(action) {
   // clearSidCookie()
   // Trim and validate the reason input
+  // logout()
+  const cookiesToRemove = ['full_name', 'sid', 'system_user', 'user_id'];
+
+  cookiesToRemove.forEach(cookie => {
+    deleteCookie(cookie);
+  });
   const reason = ApproverReason.value.trim();
   if (!reason) {
     isCommentsValid.value = false; // Show validation error
@@ -1026,7 +1056,7 @@ watch(activityData, (newVal) => {
   border-radius: 20px;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
   text-align: center;
-  animation: fadeIn 0.8s ease-in-out;
+  animation: slideFadeIn 0.8s ease-in-out;
 }
 
 .expiry-token-card h2 {

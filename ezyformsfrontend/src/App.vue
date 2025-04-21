@@ -58,6 +58,7 @@ function getUserIdFromCookies() {
 
 function removeUserIdCookie() {
     document.cookie = "user_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+    document.cookie = "full_name=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
     user_id.value = ""; // Clear the reactive variable
     // console.log("user_id cookie removed");
 }

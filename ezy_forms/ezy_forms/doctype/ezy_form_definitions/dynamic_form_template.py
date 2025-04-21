@@ -100,6 +100,7 @@ def rebuild_to_structured_array(flat_array):
                     "fieldtype": item.get("fieldtype"),
                     "parent": item.get("parent"),
                     "label": item.get("label"),
+                    "description": item.get("description"),
                     "reqd": item.get("reqd"),
                     "options": item.get("options"),
                     "values": item.get("value") if item.get("value") else ""
@@ -342,6 +343,9 @@ template_str = """
          .header-right{
              min-width: 200px;
          }
+         .description-block{
+             font-size:12px;
+         }
         .watermark {
             position: fixed;
             top: 50%;
@@ -521,7 +525,14 @@ template_str = """
                                         {% elif field.fieldtype == 'Signature' %}
                                             <input type="text" id="{{ field.fieldname }}" name="{{ field.fieldname }}" placeholder="Signature input (future implementation)">
                                         {% endif %}
+                                        
                                     </div>
+                                         {% if field.description != 'Field' %}
+                                            <div class="w-100 description-block mt-1">
+                                                <span class="fw-semibold">Description :</span><br>
+                                                <span>{{ field.description | replace('\n', '<br>') | safe }}</span>
+                                            </div>
+                                        {% endif %}
                                 {% endfor %}
                             </div>
                         {% endfor %}
