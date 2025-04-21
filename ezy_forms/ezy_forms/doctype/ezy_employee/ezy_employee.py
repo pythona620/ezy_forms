@@ -13,6 +13,7 @@ class EzyEmployee(Document):
 		user_doc = frappe.new_doc("User")
 		user_doc.email = self.emp_mail_id
 		user_doc.username = self.emp_name
+		user_doc.send_welcome_email = 0
 		user_doc.first_name = self.emp_name.split(" ")[0]
 		user_doc.send_welcome_email = 1 if len(is_email_account_set) > 0 else 0
 		user_doc.insert(ignore_permissions=True)
@@ -30,7 +31,7 @@ class EzyEmployee(Document):
 				adding_role_doc.role = self.designation
 				adding_role_doc.insert(ignore_permissions=True)
 				frappe.db.commit()
-			for doc_name in ["Ezy Employee","WF Workflow Requests","WF Roadmap","Ezy Business Unit","WF Roles","Ezy Form Definitions"]:
+			for doc_name in ["Ezy Employee","WF Workflow Requests","WF Roadmap","Ezy Business Unit","WF Roles","Ezy Form Definitions","Ezy Departments"]:
 				if not frappe.db.exists("DocPerm",{"parent":doc_name,"parenttype":"DocType","role":self.designation,"parentfield":"permissions"}):
 					activating_perms(doc_name,self.designation)
 			bench_migrating_from_code()
