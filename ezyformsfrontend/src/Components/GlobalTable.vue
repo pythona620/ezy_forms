@@ -7,9 +7,10 @@
 						<input type="checkbox" class="checkbox form-check-input" @change="SelectedAll()" />
 					</th> -->
           <th>#</th>
-          <th v-for="(column, index) in tHeaders" :key="index" :class="{ 'text-center': column.th === 'Users' }">
+          <th v-for="(column, index) in tHeaders" :key="index" :class="{ 'text-center': column.th === 'Users' || column.th === 'Status' }">
             {{ column.th }}
           </th>
+          <th class="text-center fixed-column" v-if="enableDisable == 'true'">Enable/Disable</th>
           <th class="text-center fixed-column" v-if="isAction == 'true'">Action</th>
         </tr>
       </thead>
@@ -20,12 +21,28 @@
           <td class="p-1" v-for="(column, index) in tHeaders" :key="index">
             <template v-if="fieldMapping[column.td_key]">
               <!-- Text input -->
-              <div v-if="fieldMapping[column.td_key].type === 'input'" class="input-group border-none-input">
-                <span class="input-group-text font-12" id="basic-addon1"><i class="bi bi-search"></i></span>
-                <input type="search" aria-describedby="basic-addon1"
-                  class="form-control font-12 py-1 px-2 border-left-class input-search" v-model="filters[column.td_key]"
-                  @input="handleFilterChange" />
-              </div>
+              <div
+  v-if="fieldMapping[column.td_key].type === 'input'"
+  class="input-group border-none-input"
+>
+  <span
+    v-show="!focusedFields[column.td_key]"
+    class="input-group-text font-12"
+    id="basic-addon1"
+  >
+    <i class="bi bi-search"></i>
+  </span>
+  <input
+    type="search"
+    aria-describedby="basic-addon1"
+    class="form-control font-12 py-1 px-2  border-0  input-search"
+    v-model="filters[column.td_key]"
+    @input="handleFilterChange" :class="{ 'border-left-class ': focusedFields[column.td_key] }"
+    @focus="focusedFields[column.td_key] = true"
+    @blur="focusedFields[column.td_key] = false"
+  />
+</div>
+
               <!-- Date input -->
               <input v-else-if="fieldMapping[column.td_key].type === 'date'" type="date"
                 class="form-control font-12 input-search py-1 px-2" v-model="filters[column.td_key]"
@@ -33,7 +50,7 @@
 
               <!-- Select dropdown -->
               <select v-else-if="fieldMapping[column.td_key].type === 'select'"
-                class="form-control form-select input-search font-12 py-1 px-2 w-100" v-model="filters[column.td_key]"
+                class="form-control form-select input-search font-12 select-filetrs py-1 px-2 w-100" v-model="filters[column.td_key]"
                 @change="handleFilterChange">
                 <option class="font-12" value="">All</option>
                 <option class="font-12" v-for="(option, optionIndex) in fieldMapping[column.td_key].options"
@@ -57,7 +74,7 @@
 								@change="selectedCheckList(row, rowIndex)" />
 						</td> -->
             <td class="">{{ rowIndex + 1 }}</td>
-            <td :title="row[column.td_key] ? row[column.td_key].toString() : '-'" v-for="(column, colIndex) in tHeaders"
+            <td :title="row[column.td_key] ? row[column.td_key].toString() : '-'" v-for="(column, colIndex) in tHeaders" :class="column.td_key === 'form_status' ? 'text-center' : ''"
               :key="colIndex">
 
               <!-- <span :class="{'accessible-departments': column.td_key === 'accessible_departments'}" v-if="column.td_key === 'accessible_departments'">
@@ -122,8 +139,8 @@
                             return 'Completed';
                           }
                           if (row.status === 'Request Cancelled') {
-              return 'Request Cancelled';
-            }
+                            return 'Request Cancelled';
+                          }
 
                           // If value is an empty array, return "-"
                           if (Array.isArray(value) && value.length === 0) {
@@ -145,25 +162,59 @@
                 {{ row[column.td_key] }}
               </span> -->
               <!-- v-tooltip.top="row[column.td_key]" -->
+              <!-- <span v-else>
+                {{ row[column.td_key].replace(/_/g, " ") || "-" }}
+              </span> -->
               <span v-else>
-                {{ row[column.td_key] || "-" }}
-              </span>
+  {{ row[column.td_key]?.replace(/@[\w.-]+/, "") || "-" }}
+</span>
+
             </td>
+            <!-- <td
+              class="text-center d-flex justify-content-center position-relative"
+              v-if="isAction == 'true' && viewType === 'viewPdf'"
+            > -->
+             
+                        <!-- 'Reviewpending': row[column.td_key] == 'Pending Review',
+                'Reviewed': row[column.td_key] == 'Reviewed',
+                'Completed': row[column.td_key] == 'Completed',
+                'text-danger': row[column.td_key] == 'Error' -->
 
-            <td v-if="actionType === 'viewPdf'" class="text-center">
-              <span>
-                <i @click="handleCellClick(row, rowIndex)" class="ri-eye-line eye-cursor"></i>
-              </span>
+                        <!-- <td :selectedText="text"></td>
+                    <td :selectedOption="selectoption"></td>
+                    column.td_key, -->
+
+            <td class="text-center fixed-column" v-if="enableDisable === 'true'">
+              <div class="d-flex justify-content-center align-items-center gap-2">
+                <span :class="row.enable == 0 ? 'text-secondary font-11' : ''">
+                  {{ row.enable == '1' ? '' : 'Disabled' }}
+                </span>
+                <div class="form-check d-flex justify-content-center form-switch text-end">
+                  <input class="form-check-input shadow-none" type="checkbox" role="switch" :checked="row.enable == '0'"
+                    @click.prevent="handleToggle(row, index, $event)" />
+                </div>
+              </div>
             </td>
-            <!-- 'Reviewpending': row[column.td_key] == 'Pending Review',
-			'Reviewed': row[column.td_key] == 'Reviewed',
-			'Completed': row[column.td_key] == 'Completed',
-			'text-danger': row[column.td_key] == 'Error' -->
-
-            <!-- <td :selectedText="text"></td>
-					<td :selectedOption="selectoption"></td>
-					column.td_key, -->
-
+            <div v-if="isAction == 'true' && viewType === 'viewPdf'" class="text-center">
+                <span class="px-2">
+                  <i
+                    @click="handleCellClick(row, rowIndex, 'view')"
+                    class="ri-eye-line eye-cursor"
+                  ></i>
+                </span>
+                <span v-if="download === 'true'">
+                  <i
+                    class="bi bi-download eye-cursor"
+                    @click="handleCellClick(row, rowIndex, 'download')"
+                  ></i>
+                </span>
+                <span v-if="raiseRequest === 'true'">
+                  <i
+                    class="bi bi-send eye-cursor mx-1"
+                    @click="handleCellClick(row, rowIndex, 'raiseRequest')"
+                  ></i>
+                </span>
+              </div>
             <td v-if="actionType === 'dropdown'" class="text-center fixed-column position-relative">
               <div class="dropdown">
                 <p class="p-0 actions" data-bs-toggle="dropdown" aria-expanded="false">
@@ -180,15 +231,42 @@
               </div>
             </td>
 
-            <td v-if="actionType === 'Toogle&dropdown'"
+
+
+            <!-- <td v-if="actionType === 'Toogle&dropdown'"
               class="text-end d-flex justify-content-end align-items-center fixed-column position-relative">
+            </td>
+              <td
+                v-if="actionType === 'dropdown'"
+                class="fixed-column position-relative"
+              >
+                <div class="dropdown">
+                  <p class="p-0 actions" data-bs-toggle="dropdown" aria-expanded="false">
+                    <span>...</span>
+                  </p>
+                  <ul class="dropdown-menu actionsdropdown">
+                    <li
+                      class="py-1"
+                      @click="selectedAction(row, action)"
+                      v-for="(action, index) in actions"
+                      :key="index"
+                    >
+                      <a class="dropdown-item py-2 d-flex align-items-center gap-2">
+                        <i :class="action.icon"></i>
+                        <h1 class="font-10 mb-0">{{ action.name }}</h1>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </td>
+            <td v-if="actionType === 'Toogle&dropdown' " 
+              class="text-end d-flex p-0 justify-content-center align-items-center gap-2 fixed-column ">
               <div class="dropdown">
                 <p class="p-0 actions" data-bs-toggle="dropdown" aria-expanded="false">
                   <span>...</span>
                 </p>
                 <ul class="dropdown-menu actionsdropdown">
-                  <li class="py-1" @click="selectedAction(row, action)" v-for="(action, index) in actions"
-                    :key="index">
+                  <li class="py-1" @click="selectedAction(row, action)" v-for="(action, index) in actions" :key="index">
                     <a class="dropdown-item py-2 d-flex align-items-center gap-2">
                       <i :class="action.icon"></i>
                       <h1 class="font-10 mb-0">{{ action.name }}</h1>
@@ -197,11 +275,13 @@
                 </ul>
               </div>
 
-              <div class="form-check d-flex justify-content-end form-switch text-end w-50">
+
+            </td> -->
+              <!-- <div  class="form-check d-flex justify-content-end form-switch text-end ">
                 <input class="form-check-input shadow-none" type="checkbox" role="switch" :checked="row.enable == '1'"
                   @click.prevent="handleToggle(row, index, $event)" />
-              </div>
-            </td>
+              </div> -->
+            <!-- </td> -->
 
 
 
@@ -240,7 +320,7 @@
 
 <script setup>
 // import ButtonComp from "./ButtonComp.vue";
-import { defineProps, defineEmits, ref, onMounted, watch } from "vue";
+import { defineProps, defineEmits, ref, onMounted, watch, reactive } from "vue";
 // import moment from "moment";
 // import FormFields from "./FormFields.vue";
 const props = defineProps({
@@ -263,10 +343,18 @@ const props = defineProps({
   actions: {
     type: Array,
   },
+  download: {
+    type: String,
+  },
+  raiseRequest:{
+    type:String
+  },
   actionType: {
     type: String,
   },
-
+  viewType: {
+    type: String,
+  },
   // class: {
   //   type: String,
   //   required: true,
@@ -284,22 +372,26 @@ const props = defineProps({
     type: Object,
     required: false,
   },
+  enableDisable: {
+    type: String,
+
+  }
 });
 
-const emits = defineEmits(["actionClicked", "updateFilters", "toggle-click"]);
+const emits = defineEmits(["actionClicked", "updateFilters", "cell-click","toggle-click"]);
 
 function selectedAction(row, action) {
   emits("actionClicked", row, action);
-  console.log(row ,action);
+  // console.log(row, action);
 }
 
 
 function handleToggle(row, index, event) {
   // Emit the custom event. The parent component will handle showing the confirmation.
   emits("toggle-click", row, index, event);
-  console.log("event", event);
+  // console.log("event", event);
 }
-
+const focusedFields = reactive({});
 
 
 const allCheck = ref(false);
@@ -373,8 +465,8 @@ onMounted(() => {
 //   emits("upload-file", file);
 // console.log(file.name,'jkgbjd')
 // }
-function handleCellClick(check, index) {
-  emits("cell-click", check, index);
+function handleCellClick(check, index, type) {
+  emits("cell-click", check, index, type);
 }
 // function formatDate(dateString) {
 // 	return moment(dateString).format("DD-MM-YYYY");
@@ -636,45 +728,61 @@ th:first-child {
 .textcancel {
   color: #17a2b8;
 }
-
-.border-left-class:focus {
-  outline: none;
-  box-shadow: none;
-  border: none;
+/* Default border style */
+.border-none-input {
+  border: 1px solid #dee2e6;
+  border-radius: 0.375rem;
+  transition: border 0.3s ease-in-out, border-radius 0.3s ease-in-out;
 }
 
-.border-left-class {
-  border: none;
-}
-
+/* When input is focused inside input-group */
 .input-group:focus-within {
   border: 1px solid #0000005e;
   border-radius: 5px;
+  transition: border 0.3s ease-in-out, border-radius 0.3s ease-in-out;
 }
 
+/* Search icon wrapper */
 .input-group-text {
   border-right: 0px !important;
   height: 26px !important;
   display: flex;
   align-items: center;
   border: none;
+  transition: opacity 0.3s ease-in-out;
 }
 
+/* When not focused, remove border-left */
 .border-left-class {
   border-left: 0px !important;
+  transition: border-left 0.3s ease-in-out;
 }
 
-.input-group {
-  height: 28px !important;
-}
-
-.input-group .border-left-class {
+/* Input inside input-group */
+.input-group input {
   height: 26px !important;
   line-height: 30px;
+  border: none; /* Default no border */
+  outline: none;
+  box-shadow: none;
+  transition: border-left 0.3s ease-in-out, border-radius 0.3s ease-in-out;
 }
 
-.border-none-input {
-  border: 1px solid #dee2e6;
-  border-radius: 0.375rem;
+/* Apply border-left and border-radius when focused */
+.input-group input:focus {
+  border-left: 1px solid #0000005e !important;
+  border-radius: 5px !important;
+  outline: none;
+  box-shadow: none;
+}
+
+.eye-cursor {
+  cursor: pointer;
+}
+.select-filetrs:focus{
+box-shadow: none;
+outline: none;
+border: 1px solid #dee2e6;
+
 }
 </style>

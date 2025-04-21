@@ -18,16 +18,17 @@ export function extractFieldsWithBreaks(data) {
             generatedFieldname = getUniqueFieldname(generatedFieldname, fieldnameTracker);
 
             result.push({
-              description: "Field",
+              description: field.description ? field.description : "Field",
               fieldname: generatedFieldname,
               fieldtype: field.fieldtype,
               idx: index++, // Assign index
               label: field.label,
               reqd: field.reqd ? 1 : 0,
               value: field.value ? field.value : "",
-              ...(["Select", "Table MultiSelect", "Check"].includes(field.fieldtype) && field.options
+              ...(["Select", "Table MultiSelect", "Check","Small Text"].includes(field.fieldtype) && field.options
                 ? { options: field.options.startsWith("\n") ? field.options : `\n${field.options}` }
                 : {}),
+               
             });
 
             previousFieldname = generatedFieldname;
@@ -317,7 +318,8 @@ export function rebuildToStructuredArray(flatArray) {
             parent: item.parent,
             label: item.label,
             reqd: item.reqd,
-            options: item.options
+            options: item.options,
+            description: item.description
           });
         }
         break;

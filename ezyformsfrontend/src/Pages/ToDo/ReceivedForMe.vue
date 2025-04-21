@@ -5,11 +5,17 @@
         <h1 class="m-0 font-13">Requests received for me</h1>
         <p class="m-0 font-11 pt-1">{{ totalRecords }} request</p>
       </div>
+      <!-- <div>
+        <input type="checkbox" id="ViewOnlyReportee" v-model="ViewOnlyReportee" class="me-2 mt-1 form-check-input" @change="ViewOnlyRe" />
+              <label for="ViewOnlyReportee " class="SelectallDesignation  font-12 m-0 form-check-label">View Only Reportee</label>
+        
+        
+      </div> -->
     </div>
     <div class="mt-2">
-      <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" actionType="dropdown" isCheckbox="true"
-        @updateFilters="inLineFiltersData" :field-mapping="fieldMapping" isFiltersoption="true" :actions="actions"
-        @actionClicked="actionCreated" />
+      <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" viewType="viewPdf" isCheckbox="true"
+        @updateFilters="inLineFiltersData" :field-mapping="fieldMapping" @cell-click="viewPreview"
+        isFiltersoption="true" :actions="actions" @actionClicked="actionCreated" />
       <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
         @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
     </div>
@@ -19,33 +25,32 @@
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title font-13" id="viewRequestLabel">
-              Request Id: {{ selectedRequest.name }}
+              Request Id: {{ selectedRequest.name?.replace(/_/g, " ") }}
             </h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" @click="closeModal"
               aria-label="Close"></button>
           </div>
           <div class="modal-body approvermodalbody">
-            <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel" :employeeData="employeeData"
-              @updateField="updateFormData" />
+            <!-- <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel" :childData="responseData"
+              :childHeaders="tableHeaders" :employeeData="employeeData" @updateField="updateFormData" /> -->
           </div>
           <div class="p-2">
             <div class="activity-log-container">
               <div v-for="(item, index) in activityData" :key="index" class="activity-log-item"
                 :class="{ 'last-item': index === activityData.length - 1 }">
-                <div class="activity-log-dot"></div>
+                <div class="activity-log-dot"></div>def add_roles_to_wf_requestors
                 <div class="activity-log-content">
                   <p class="font-12 mb-1">
                     On
-                    <strong class="strong-content">{{ formatDate(item.creation) }}</strong>, <strong
-                      class="strong-content">{{ item.user_name }}</strong> ({{
-                        item.role
-                      }}) has
+                    <strong class="strong-content">{{ formatDate(item.creation) }}</strong>,
+                    <strong class="strong-content">{{ item.user_name }}</strong>
+                    ({{ item.role }}) has
                     <strong class="strong-content">{{
                       formatAction(item.action)
                       }}</strong>
                     the request<span v-if="index !== 0 && item.reason">with the comments:</span>
                     <strong v-if="index !== 0 && item.reason" class="strong-content">{{ item.reason || "N/A"
-                    }}</strong>.
+                    }}</strong>
                   </p>
                 </div>
               </div>
@@ -61,15 +66,21 @@
           <div class="modal-footer">
             <div v-if="!requestcancelled" class="d-flex justify-content-between align-items-center mt-3 gap-2">
               <div>
-                <button class="btn btn-outline-danger font-12 py-0 rejectbtn" type="button"
+                <!-- <button class="btn btn-outline-danger font-12 py-0 rejectbtn" type="button"
                   @click="ApproverCancelSubmission(formData, 'Request Cancelled')">
                   <span><i class="bi bi-x-lg me-2"></i></span>Reject
+                </button> -->
+                <button type="submit" class="btn btn-outline-danger font-12 py-0 rejectbtn" :disabled="Rejectloading"
+                  @click.prevent="ApproverCancelSubmission(formData, 'Request Cancelled')">
+                  <span v-if="Rejectloading" class="spinner-border spinner-border-sm" role="status"
+                    aria-hidden="true"></span>
+                  <span v-if="!Rejectloading"><i class="bi bi-x-lg me-2"></i><span class="font-12">Reject</span></span>
                 </button>
               </div>
               <div>
                 <!-- <ButtonComp type="button" icon="check2" class="approvebtn border-1 text-nowrap font-10"
                   @click="ApproverFormSubmission('formData','Approve')" name="Approve" /> -->
-                <button type="submit" class="btn btn-success approvebtn"
+                <button type="submit" class="btn btn-success approvebtn" :disabled="loading"
                   @click.prevent="ApproverFormSubmission(emittedFormData, 'Approve')">
                   <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                   <span v-if="!loading"><i class="bi bi-check-lg font-15 me-2"></i><span
@@ -107,16 +118,19 @@ import { onMounted, ref, reactive, computed, watch } from "vue";
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
 import PaginationComp from "../../Components/PaginationComp.vue";
 import { rebuildToStructuredArray } from "../../shared/services/field_format";
-import ApproverPreview from "../../Components/ApproverPreview.vue";
+// import ApproverPreview from "../../Components/ApproverPreview.vue";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
-import router from "../../router";
+import { useRoute, useRouter } from "vue-router";
+const router = useRouter();
+const route = useRoute();
+
 const businessUnit = computed(() => {
   return EzyBusinessUnit.value;
 });
 const newBusinessUnit = ref({ business_unit: "" });
 
-const filterObj = ref({ limitPageLength: 20, limit_start: 0, filters:[] });
+const filterObj = ref({ limitPageLength: 20, limit_start: 0, filters: [] });
 const totalRecords = ref(0);
 const idDta = ref([]);
 const docTypeName = ref([]);
@@ -124,10 +138,11 @@ const statusOptions = ref([]);
 const emittedFormData = ref([]);
 const selectedcurrentLevel = ref("");
 const activityData = ref([]);
-
+const responseData = ref([]);
+const ViewOnlyReportee =  ref(false);
 const tableheaders = ref([
-  // { th: "Request ID", td_key: "name" },
-  { th: "Form name", td_key: "name" },
+  { th: "Request ID", td_key: "name" },
+  // { th: "Form name", td_key: "name" },
   // { th: "Form category", td_key: "doctype_name" },
   // { th: "Owner of form", td_key: "owner" },
   { th: "Requested By", td_key: "requested_by" },
@@ -137,19 +152,7 @@ const tableheaders = ref([
   { th: "Workflow Status", td_key: "assigned_to_users" },
 
 ]);
-const fieldMapping = ref({
-  // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
-  // credit_irn_generated: { type: "select", options: ["Pending", "Completed", "Error"] },
-  // role: { type: "input" },
-  name: { type: "input" },
-  requested_by: { type: "input" },
-  role: { type: "input" },
 
-
-  status: { type: "select", options: ["Completed","Request Raised", "In Progress", "Request Cancelled"] },
-
-  // requested_on: { type: "date" },
-});
 const actions = ref([
   { name: "View Request", icon: "fa-solid fa-eye" },
 
@@ -163,21 +166,45 @@ const showRequest = ref(null);
 const doctypeForm = ref([]);
 const ApproverReason = ref("");
 const employeeData = ref([]);
+const tableHeaders = ref([]);
+
 const loading = ref(false)
-onMounted(() => {
-  const storedData = localStorage.getItem("employeeData");
-  try {
-    const parsedData = JSON.parse(storedData);
+const Rejectloading = ref(false)
 
-    // Ensure parsedData is an array
-    employeeData.value = Array.isArray(parsedData) ? parsedData : [parsedData];
+// onMounted(() => {
+//   const storedData = localStorage.getItem("employeeData");
+//   try {
+//     const parsedData = JSON.parse(storedData);
 
-  } catch (error) {
-    console.error("Error parsing employeeData from localStorage:", error);
-    employeeData.value = []; // Fallback to empty array if there's an error
-  }
-});
+//     // Ensure parsedData is an array
+//     employeeData.value = Array.isArray(parsedData) ? parsedData : [parsedData];
 
+//   } catch (error) {
+//     console.error("Error parsing employeeData from localStorage:", error);
+//     employeeData.value = []; // Fallback to empty array if there's an error
+//   }
+// });
+
+const viewlist = ref([])
+function ViewOnlyReport(){
+
+  // console.log(ViewOnlyReportee.value); 
+  axiosInstance
+    .post(apis.view_only_reportee,)
+    .then((response) => {
+      // console.log(response.message,"list");
+      viewlist.value = response.message;
+
+      // const filters = [ "name","in", viewlist.value];
+      receivedForMe()
+
+    })
+    .catch((error) => {
+      console.log(error);
+      });
+   
+
+}
 function actionCreated(rowData, actionEvent) {
   if (actionEvent.name === "View Request") {
     if (rowData) {
@@ -185,14 +212,15 @@ function actionCreated(rowData, actionEvent) {
       selectedcurrentLevel.value = selectedRequest.value.current_level;
 
 
-      // console.log("doctype_name",selectedRequest.value.doctype_name);
-      // console.log("Property name",selectedRequest.value.property);
-
-
       // Rebuild the structured array from JSON
       showRequest.value = rebuildToStructuredArray(
         JSON.parse(selectedRequest.value?.json_columns)?.fields
       );
+
+      tableHeaders.value = JSON.parse(
+        selectedRequest.value?.json_columns
+      ).child_table_fields;
+      // console.log(tableHeaders.value, "lll");
 
       // Prepare the filters for fetching data
       const filters = [
@@ -217,6 +245,31 @@ function actionCreated(rowData, actionEvent) {
 
             // Map values from doctypeForm to showRequest fields
             mapFormFieldsToRequest(doctypeForm.value, showRequest.value);
+
+            axiosInstance
+              .get(
+                `${apis.resource}${selectedRequest.value.doctype_name}/${res.data[0].name}`
+              )
+              .then((res) => {
+                // console.log(`Data for :`, res.data);
+                // Identify the child table key dynamically
+                const childTables = Object.keys(res.data).filter((key) =>
+                  Array.isArray(res.data[key])
+                );
+                if (childTables.length) {
+                  responseData.value = {};
+
+                  childTables.forEach((tableKey) => {
+                    responseData.value[tableKey] = res.data[tableKey] || [];
+                  });
+                  // console.log("Response Data:", responseData.value);
+                }
+
+              })
+              .catch((error) => {
+                console.error(`Error fetching data for :`, error);
+              });
+
           }
         })
         .catch((error) => {
@@ -247,8 +300,11 @@ function viewPreview(data) {
   router.push({
     name: "ApproveRequest",
     query: {
+      routepath: route.path,
       name: data.name,
       doctype_name: data.doctype_name,
+      type: "mytasks",
+
     },
   });
 }
@@ -364,7 +420,7 @@ function ApproverFormSubmission(dataObj, type) {
 function approvalStatusFn(dataObj, type) {
 
 
-  console.log(dataObj);
+  // console.log(dataObj);
   let data = {
     property: selectedRequest.value.property,
     doctype: selectedRequest.value.doctype_name,
@@ -411,10 +467,11 @@ function ApproverCancelSubmission(dataObj, type) {
     isCommentsValid.value = false;
 
     return; // Stop function execution
-  } else {
-    // Proceed if comments are valid
-    isCommentsValid.value = true;
   }
+  // Proceed if comments are valid
+  isCommentsValid.value = true;
+
+  Rejectloading.value = true; // Start loader
 
 
 
@@ -431,16 +488,16 @@ function ApproverCancelSubmission(dataObj, type) {
     )
     .then((response) => {
       if (response?.data) {
+        const modal = bootstrap.Modal.getInstance(document.getElementById("viewRequest"));
+        modal.hide();
         approvalCancelFn(dataObj, type);
       }
     });
 }
-
-
 function approvalCancelFn(dataObj, type) {
-  // let files = this.selectedFileAttachments.map((res: any) => res.url);
 
-  console.log(dataObj, "data");
+
+  // console.log(dataObj, "data", type);
   let data = {
     property: selectedRequest.value.property,
     doctype: selectedRequest.value.doctype_name,
@@ -451,17 +508,31 @@ function approvalCancelFn(dataObj, type) {
     url_for_cancelling_id: "",
     current_level: selectedRequest.value.current_level,
   };
-  axiosInstance.post(apis.wf_cancelling_request, data).then((response) => {
-    if (response?.message) {
-      if (type == "Reject") {
-        toast.error(`Request ${type}ed`, { autoClose: 1000, transition: "zoom" });
+
+  axiosInstance
+    .post(apis.wf_cancelling_request, data)
+    .then((response) => {
+      if (response?.message) {
+        ApproverReason.value = "";
+        if (type == "Request Cancelled") {
+          toast.success(`${type}`, { autoClose: 1000, transition: "zoom" });
+        }
+        const modal = bootstrap.Modal.getInstance(document.getElementById("viewRequest"));
+        modal.hide();
+        receivedForMe();
       }
-      const modal = bootstrap.Modal.getInstance(document.getElementById("viewRequest"));
-      modal.hide();
-      receivedForMe();
-    }
-  });
+    })
+    .catch((error) => {
+      console.error("Error processing cancellation:", error);
+      toast.error("An error occurred while processing your request.", { autoClose: 1000, transition: "zoom" });
+    })
+    .finally(() => {
+      Rejectloading.value = false; // Ensure loader stops
+    });
 }
+
+
+
 
 function mapFormFieldsToRequest(doctypeData, showRequestData) {
   showRequestData.forEach((block) => {
@@ -505,45 +576,32 @@ const PaginationLimitStart = ([itemsPerPage, start]) => {
 };
 
 const filters = ref([]);
+const timeout = ref(null);
+
 function inLineFiltersData(searchedData) {
-  //   // Initialize filters array
-  filterObj.value.filters = [];
+    clearTimeout(timeout.value); // Clear previous timeout
 
-  //   // Loop through the tableheaders and build dynamic filters based on the `searchedData`
-  tableheaders.value.forEach((header) => {
-    const key = header.td_key;
+    timeout.value = setTimeout(() => {
+        // Initialize filters array
+        filterObj.value.filters = [];
 
-    //     // If there is a match for the key in searchedData, create a 'like' filter
-    if (searchedData[key]) {
-      filterObj.value.filters.push(key, "like", `%${searchedData[key]}%`);
-    }
-    console.log(searchedData,"pppp");
-    //     // Add filter for selected option
-    //     if (key === "selectedOption" && searchedData.selectedOption) {
-    //       filters.push([key, "=", searchedData.selectedOption]);
-    //     }
-    //     // Special handling for 'invoice_date' to create a 'Between' filter (if it's a date)
-    //     if (key === "invoice_date" && searchedData[key]) {
-    //       filters.push([key, "Between", [searchedData[key], searchedData[key]]]);
-    //     }
+        // Loop through the table headers and build dynamic filters
+        tableheaders.value.forEach((header) => {
+            const key = header.td_key;
 
-    //     // Special handling for 'invoice_type' or 'irn_generated' to create an '=' filter
-    //     if ((key === "invoice_type" || key === "credit_irn_generated") && searchedData[key]) {
-    //       filters.push([key, "=", searchedData[key]]);
-    //     }
-  });
+            if (searchedData[key]) {
+                filterObj.value.filters.push(key, "like", `%${searchedData[key]}%`);
+            }
+        });
 
-  //   // Log filters to verify
-
-  //   // Once the filters are built, pass them to fetchData function
-  if(filterObj.value.filters.length){
-
-    receivedForMe(filterObj.value.filters);
-  }else{
-    receivedForMe();
-  }
+        // Call receivedForMe with or without filters
+        if (filterObj.value.filters.length) {
+            receivedForMe(filterObj.value.filters);
+        } else {
+            receivedForMe();
+        }
+    }, 500); // Adjust debounce delay as needed
 }
-
 function receivedForMe(data) {
   // Initialize filters array for building dynamic query parameters
 
@@ -553,6 +611,8 @@ function receivedForMe(data) {
     // assigned_to_users
     ["assigned_to_users", "like", `%${EmpRequestdesignation?.designation}%`],
     ["property", "like", `%${newBusinessUnit.value.business_unit}%`],
+    ["status", "!=", "Request Cancelled"],
+    ["name","in", viewlist.value]
   ];
   if (data) {
     filters.push(data);
@@ -574,7 +634,9 @@ function receivedForMe(data) {
 
   // Fetch total count of records matching filters
   axiosInstance
-    .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, { params: queryParamsCount })
+    .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, {
+      params: queryParamsCount,
+    })
     .then((res) => {
       totalRecords.value = res.data[0].total_count;
     })
@@ -584,9 +646,11 @@ function receivedForMe(data) {
 
   // Fetch the records matching filters
   axiosInstance
-    .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, { params: queryParams })
+    .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, {
+      params: queryParams,
+    })
     .then((res) => {
-      if(filterObj.value.limit_start === 0){
+      if (filterObj.value.limit_start === 0) {
 
         tableData.value = res.data;
         idDta.value = [...new Set(res.data.map((id) => id.name))];
@@ -596,14 +660,27 @@ function receivedForMe(data) {
         statusOptions.value = [...new Set(res.data.map((status) => status.status))];
       }
       else {
-                tableData.value = tableData.value.concat(res.data);
-            }
+        tableData.value = tableData.value.concat(res.data);
+      }
 
     })
     .catch((error) => {
       console.error("Error fetching records:", error);
     });
 }
+const fieldMapping = computed(() => ({
+  // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
+  // credit_irn_generated: { type: "select", options: ["Pending", "Completed", "Error"] },
+  // role: { type: "input" },
+  name: { type: "input" },
+  requested_by: { type: "input" },
+  role: { type: "input" },
+
+
+  status: { type: "select", options:["Request Raised","In Progress"] },
+
+}));
+
 
 watch(
   businessUnit,
@@ -611,7 +688,7 @@ watch(
     newBusinessUnit.value.business_unit = newVal;
 
     if (newVal.length) {
-      receivedForMe();
+      ViewOnlyReport();
     }
   },
   { immediate: true }

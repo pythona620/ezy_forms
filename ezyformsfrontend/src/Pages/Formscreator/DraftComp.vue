@@ -1,15 +1,15 @@
 <template>
     <div>
-        <div class="d-flex justify-content-between align-items-center formsticky py-2">
+        <div class="d-flex formsticky align-items-center justify-content-between py-2">
             <div>
-                <h1 class="m-0 font-13">Forms Master</h1>
+                <h1 class="m-0 font-13">Forms in Draft</h1>
                 <p class="m-0 font-11 pt-1">{{ totalRecords }} forms available</p>
             </div>
-            <div class="d-flex gap-2 align-items-center">
+            <div class="d-flex align-items-center gap-2">
 
 
 
-                <!-- <div class="d-flex align-items-center ">
+                <!-- <div class="d-flex align-items-center">
                     <ButtonComp class="buttoncomp" @click="formCreation()" name="Create form"></ButtonComp>
                 </div> -->
             </div>
@@ -17,8 +17,8 @@
         <!-- v-if="tableForm" -->
         <div class="mt-2">
 
-            <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" actionType="dropdown"
-                @actionClicked="actionCreated" isFiltersoption="true" :field-mapping="fieldMapping" :actions="actions"
+            <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" actionType="dropdown"  enableDisable="true"
+                @actionClicked="actionCreated" isFiltersoption="true" :field-mapping="fieldMapping" :actions="actions" @toggle-click="toggleFunction"
                 @updateFilters="inLineFiltersData" isCheckbox="true" />
             <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
                 @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
@@ -38,14 +38,17 @@ import PaginationComp from '../../Components/PaginationComp.vue'
 import axiosInstance from '../../shared/services/interceptor';
 import { apis, doctypes } from "../../shared/apiurls";
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { rebuildToStructuredArray } from "../../shared/services/field_format";
 import FormPreview from '../../Components/FormPreview.vue'
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
+
+
 
 const totalRecords = ref(0);
 const formDescriptions = ref({})
 const tableData = ref([]);
-const formCategory = ref([]);
 const accessibleDepartments = ref([]);
 const ownerForms = ref([])
 const router = useRouter();
@@ -53,6 +56,8 @@ const selectedForm = ref(null);
 const businessUnit = computed(() => {
     return EzyBusinessUnit.value;
 });
+
+const route = useRoute();
 const sections = reactive([]);
 onMounted(() => {
     // fetchTable()
@@ -64,10 +69,18 @@ onMounted(() => {
 function actionCreated(rowData, actionEvent) {
     if (actionEvent.name === 'View form') {
         if (rowData?.form_json) {
-            formDescriptions.value = { ...rowData }
-            selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json).fields)
-            const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});// raise a modal
-            modal.show();
+            router.push({
+                name: "FormPreviewComp",
+                query: {
+                    routepath: route.path,
+                    form_short_name: rowData.form_short_name,
+
+                },
+            });
+            // formDescriptions.value = { ...rowData }
+            // selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json).fields)
+            // const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});// raise a modal
+            // modal.show();
 
         } else {
             console.warn(" There is no form fields ")
@@ -129,23 +142,21 @@ const tableheaders = ref([
     { th: "Accessible departments", td_key: "accessible_departments" },
     { th: "Status", td_key: "form_status" },
 ]);
-const fieldMapping = ref({
-    // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
-    // invoice_date: { type: "date" },
-    form_category: { type: "select", options: ["Software", "Hardware"] },
-    name: { type: "input" },
-    owner_of_the_form: { type: "input" }
 
-});
 
 function formCreation(item = null) {
     if (item == null) {
-        router.push({ name: "FormStepper" });
+        router.push({ query:{
+            routepath: route.path
+        },name: "FormStepper", });
     } else {
         router.push({
+            query:{
+            routepath: route.path
+        },
             name: "FormStepper",
             params: { paramid: item.name },
-
+           
         });
     }
 }
@@ -164,58 +175,68 @@ const PaginationLimitStart = ([itemsPerPage, start]) => {
 
 };
 
+function toggleFunction(rowData, rowIndex, event) {
+    const isCurrentlyEnabled = rowData.enable == '1' || rowData.enable === 1;
+    const actionText = isCurrentlyEnabled ? 'Disable' : 'Enable';
 
+    if (confirm(`Are you sure you want to ${actionText} this Form?`)) {
+        rowData.enable = isCurrentlyEnabled ? 0 : 1;
 
-function inLineFiltersData(searchedData) {
-
-
-    //   // Initialize filters array
-    const filters = [];
-
-    //   // Loop through the tableheaders and build dynamic filters based on the `searchedData`
-    tableheaders.value.forEach((header) => {
-        const key = header.td_key;
-
-        //     // If there is a match for the key in searchedData, create a 'like' filter
-        if (searchedData[key]) {
-            filters.push(key, "like", `%${searchedData[key]}%`);
-        }
-        //     // Add filter for selected option
-        //     if (key === "selectedOption" && searchedData.selectedOption) {
-        //       filters.push([key, "=", searchedData.selectedOption]);
-        //     }
-        //     // Special handling for 'invoice_date' to create a 'Between' filter (if it's a date)
-        //     if (key === "invoice_date" && searchedData[key]) {
-        //       filters.push([key, "Between", [searchedData[key], searchedData[key]]]);
-        //     }
-
-        //     // Special handling for 'invoice_type' or 'irn_generated' to create an '=' filter
-        //     if ((key === "invoice_type" || key === "credit_irn_generated") && searchedData[key]) {
-        //       filters.push([key, "=", searchedData[key]]);
-        //     }
-    });
-
-
-    //   // Log filters to verify
-
-
-    //   // Once the filters are built, pass them to fetchData function
-    if (filters.length) {
-        fetchTable(filters);
+        axiosInstance
+            .put(`${apis.resource}${doctypes.EzyFormDefinitions}/${rowData.name}`, rowData)
+            .then((response) => {
+                toast.success(`Form ${actionText}d successfully`, { autoClose: 700 });
+                // setTimeout(() => {
+                //     fetchTable();
+                // }, 1000);
+                window.location.reload()
+            })
+            .catch((error) => {
+                console.error("Error updating toggle:", error);
+            });
     }
-    else {
-        fetchTable();
-    }
-    //   fetchTotalRecords(filters);
+    //  else {
+    //     console.log("Action cancelled. Toggle remains unchanged.");
+    // }
 }
 
+const timeout = ref(null); // Store the timeout reference
+
+function inLineFiltersData(searchedData) {
+    // Clear the previous timeout to prevent multiple API calls
+    clearTimeout(timeout.value);
+
+    // Set a new timeout to delay the API call
+    timeout.value = setTimeout(() => {
+        // Initialize filters array
+        const filters = [];
+
+        // Loop through the table headers and build dynamic filters
+        tableheaders.value.forEach((header) => {
+            const key = header.td_key;
+
+            // If there is a match for the key in searchedData, create a 'like' filter
+            if (searchedData[key]) {
+                filters.push(key, "like", `%${searchedData[key]}%`);
+            }
+        });
+
+        // Fetch data with filters
+        fetchTable(filters.length ? filters : undefined);
+
+        // Optional: Fetch total records if needed
+        // fetchTotalRecords(filters);
+    }, 500); // Adjust debounce delay as needed (e.g., 500ms)
+}
+const formCategory = ref([]);
 
 
 
 function fetchTable(data) {
     const filters = [
         ["business_unit", "like", `%${filterObj.value.business_unit}%`],
-        ["form_status", "=", "Draft"]
+        ["form_status", "=", "Draft"],
+        ["enable", "=", 1]
     ];
     if (data) {
         filters.push(data)
@@ -250,6 +271,7 @@ function fetchTable(data) {
             if (filterObj.value.limit_start === 0) {
                 tableData.value = newData;
                 formCategory.value = [...new Set(newData.map((formCategory) => formCategory.form_category))];
+                
 
                 ownerForms.value = [...new Set(newData.map((ownerForms) => ownerForms.owner_of_the_form))]
             } else {
@@ -260,6 +282,16 @@ function fetchTable(data) {
             console.error("Error fetching ezyForms data:", error);
         });
 }
+
+const fieldMapping  = computed(() => ({
+    // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
+    // invoice_date: { type: "date" },
+    form_category: { type: "select", options: formCategory.value },
+    form_name: { type: "input" },
+    owner_of_the_form: { type: "input" }
+
+}));
+
 
 </script>
 

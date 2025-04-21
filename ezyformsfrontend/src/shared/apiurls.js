@@ -19,6 +19,8 @@ export const doctypes = {
   WFWorkflowRequests: 'WF Workflow Requests',
   WFActivityLog: 'WF Activity Log',
   CheckUser: 'Login Check',
+  SystemSettings:"System Settings",
+  Email_Account: 'Email Account',
 
 
 };
@@ -27,6 +29,10 @@ export const apis = {
   resource: domain + `/resource/`,
   uploadfile: domain + `/method/upload_file`,
   login: domain + `/method/login`,
+  logout: domain + `/method/logout`,
+  
+
+
   savedata:
     domain +
     `/method/ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions.add_dynamic_doctype`,
@@ -51,11 +57,13 @@ export const apis = {
   loginCheckmethod: domain + `/method/ezy_forms.ezy_forms.doctype.login_check.login_check.check_is_first_time_or_not`,
   loginUpdatePassword: domain + `/method/ezy_forms.ezy_forms.doctype.login_check.login_check.update_password`,
   loginCheckuseermethod: domain + `/method/ezy_forms.ezy_forms.doctype.login_check.login_check.update_is_first_value`,
-  dashboard: domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.dashboard`,
+  dashboard: domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.dashboard_counts`,
   Update_raising_request: domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.rejected_form_updating`,
   edit_form_before_approve: domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.edit_the_form_before_approve`,
   uploadbulkEmployeefile: domain + `/method/ezy_forms.ezy_forms.doctype.ezy_employee.bulk_import_data.import_bulk_data`,
-
+  childFieldsUpdation: domain + `/method/ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions.update_field_properties`,
+ view_only_reportee : domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.pick_view_only_reportee`,
+ toMailApproval: domain + `/method/ezy_forms.ezy_forms.doctype.email_approval.custom_email_approval.email_approval`
 };
 
 // export const tokens = {

@@ -16,7 +16,7 @@
 
                     <button type="button" class="btn btn-dark buttoncomp CreateDepartments d-flex align-items-center "
                         data-bs-toggle="modal" data-bs-target="#createDepartments">
-                        Create Departments
+                        Create Department
                     </button>
                 </div>
                 <div class="modal fade" id="createDepartments" tabindex="-1" aria-labelledby="createDepartmentsLabel"
@@ -62,8 +62,8 @@
                                 </VueMultiselect>
                                 <div class="d-flex align-items-center gap-2">
                                     <div class="w-100">
-                                        <label class="font-13 ps-1" for="ezy_departments_items">Ezy Departments
-                                            Items</label>
+                                        <label class="font-13 ps-1" for="ezy_departments_items">ADD Department Categories
+                                            </label>
                                         <FormFields class="mb-3" tag="input" type="text" name="ezy_departments_items"
                                             id="ezy_departments_items" placeholder="Enter category"
                                             v-model="newCategory" />
@@ -112,7 +112,7 @@
                                 <button type="button"
                                     class="applyfilter btn btn-dark text-nowrap font-10 d-flex justify-content-center align-items-center"
                                     data-bs-dismiss="modal"
-                                    :disabled="!CreateDepartments.department_code || !CreateDepartments.department_name || !CreateDepartments.business_unit || !CreateDepartments.ezy_departments_items.length"
+                                    :disabled="!CreateDepartments.department_code || !CreateDepartments.department_name || !CreateDepartments.business_unit"
                                     @click="createDepart"><span class="font-16 me-1"><i
                                             class="bi bi-check2 "></i></span>
                                     Create Department</button>
@@ -134,7 +134,7 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="viewCategoryLabel">Ezy Departments Items</h5>
+                        <h5 class="modal-title" id="viewCategoryLabel">Departments Items</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
@@ -197,9 +197,9 @@ import VueMultiselect from "vue-multiselect";
 const businessUnit = computed(() => {
     return EzyBusinessUnit.value;
 });
-onMounted(() => {
-    ezyForms();
-})
+// onMounted(() => {
+//     ezyForms();
+// })
 const totalRecords = ref(0);
 
 const tableData = ref([]);
@@ -482,6 +482,7 @@ const ezyForms = () => {
         console.error("Error fetching ezyForms data:", error);
     });
 };
+
 function cancelCreate() {
     CreateDepartments.value = {
         department_code: "",
@@ -489,6 +490,8 @@ function cancelCreate() {
         ezy_departments_items: [
         ]
     }
+    CreateDepartments.value.business_unit = businessUnit.value
+    
 }
 
 function createDepart() {

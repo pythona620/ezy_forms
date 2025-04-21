@@ -2,17 +2,17 @@
   <div class="bg-img">
     <div v-if="ShowLoginPage" class="input-div p-5">
       <div class="d-flex gap-2 p-2 justify-content-center align-items-center">
-        <div><img class="imgmix" src="../assets/favicon.jpg" /></div>
-        <div class="m-0">
+        <div><img class="imgmix" src="../assets/Final-logo-ezyforms-removebg-preview.png" /></div>
+        <!-- <div class="m-0">
           <p class="fontimgtext fw-medium m-0">EZY | Forms</p>
-        </div>
+        </div> -->
       </div>
 
       <div>
         <div class="mt-3">
           <label for="name" class="font-13">User name</label><br />
           <input type="text" class="form-control m-0 bg-white" id="name" v-model="formdata.usr" @input="validatename"
-            @change="checkUserMail()" :class="{ 'is-invalid': errors.usr }" />
+            @change="checkUserMail" :class="{ 'is-invalid': errors.usr }" />
 
           <div class="invalid-feedback font-11 mt-1" v-if="errors.usr">
             {{ errors.usr }}
@@ -27,7 +27,7 @@
             :class="{ 'is-invalid': errors.pwd }" />
 
           <!-- Toggle icon for show/hide sas  password -->
-          <span v-if="!errors.pwd" class="toggle-icon" @click="togglePasswordVisibility">
+          <span v-if="!errors.pwd && formdata.pwd" class="toggle-icon" @click="togglePasswordVisibility">
             <i :class="showPassword ? 'bi bi-eye' : 'bi bi-eye-slash'"></i>
           </span>
           <div class="invalid-feedback font-10" v-if="errors.pwd">
@@ -48,10 +48,11 @@
 
     <div v-if="showOtpPage">
       <div class="d-flex gap-2 p-2 justify-content-center align-items-center">
-        <div><img class="imgmix" src="../assets/favicon.jpg" /></div>
+        <div><img class="imgmix" src="../assets/Final-logo-ezyforms-removebg-preview.png" /></div>
+        <!-- <div><img class="imgmix" src="../assets/favicon.jpg" /></div>
         <div class="m-0">
           <p class="fontimgtext fw-medium m-0">EZY | Forms</p>
-        </div>
+        </div> -->
       </div>
       <div>
       </div>
@@ -118,7 +119,7 @@
             <div class="mb-2">
               <label class="raise-label" for="confirmpass">Confirm Password</label>
               <FormFields class="" tag="input" type="text" name="confirmpass" id="confirmpass"
-                placeholder="Enter Confirm Password" v-model="confirm_password" />
+                placeholder="Enter Confirm Password" v-model="confirm_password" @keydown.enter="passwordChange" />
               <span v-if="passwordsMismatch" class="text-danger font-11 m-0 ps-2">Passwords do not match.</span>
             </div>
             <!-- <FormFields tag="select" placeholder="Form" class="mb-3" name="roles" id="roles"
@@ -144,6 +145,7 @@ import FormFields from "../Components/FormFields.vue";
 import ButtonComp from '../Components/ButtonComp.vue'
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
+import { nextTick } from "vue";
 export default {
   props: ["id"],
   components: {
@@ -171,7 +173,7 @@ export default {
       ShowLoginPage: true,
       otp: ["", "", "", "", "", ""],
       errorMessage: "",
-      tempId: [],
+      storeData: [],
       isFirstLogin: "",
       twoFactorAuth: ""
       // timeLeft: 60,
@@ -292,7 +294,7 @@ export default {
       axiosInstance
         .put(`${apis.loginCheckuseermethod}`, payload)
         .then((res) => {
-          console.log("Password updated successfully:", res.data);
+          // console.log("Password updated successfully:", res.data);
           if (res.message.is_first_login === 1) {
             this.showPwdField = true;
           }
@@ -352,12 +354,17 @@ export default {
               this.showPwdField = true;
               this.showOtpPage = false;
 
+              // Ensure the DOM updates before focusing the input
+              nextTick(() => {
+                document.getElementById("password")?.focus();
+              });
+
               // console.log("User is logging in for the first time.");
             } else {
               console.log("User has logged in before.");
             }
           } else {
-            console.log("No user data found.");
+            // console.log("No user data found.");
             this.showPwdField = true; // Show password field when no user data is found
           }
         })
@@ -376,16 +383,16 @@ export default {
           .post(apis.login, this.formdata)
           .then((res) => {
             if (res) {
-              this.tempId = res;
+              this.storeData = res;
               if (this.twoFactorAuth === "1") {
                 this.ShowLoginPage = false;
                 this.showOtpPage = true;
               }
-              if (this.twoFactorAuth === "0") {
+              else {
                 this.showOtpPage = false;
-                this.ShowLoginPage = false;
+                this.ShowLoginPage = true;
                 this.otp = ["", "", "", "", "", ""];
-                localStorage.setItem("UserName", JSON.stringify(this.tempId));
+                // localStorage.setItem("UserName", JSON.stringify(this.storeData));
                 this.userData(this.formdata.usr);
               }
             }
@@ -409,17 +416,35 @@ export default {
               .get(`${apis.resource}${doctypes.EzyEmployeeList}/${this.email}`)
               .then((responce) => {
                 const employeeData = responce.data;
-                localStorage.setItem("employeeData", JSON.stringify(employeeData));
-                localStorage.setItem(
-                  "USERROLE",
-                  JSON.stringify(employeeData.designation)
-                );
+
+                // Extract only the required fields
+                const filteredEmployeeData = {
+                  name: employeeData.name,
+                  company_field: employeeData.company_field,
+                  emp_name: employeeData.emp_name,
+                  emp_mail_id: employeeData.emp_mail_id,
+                  designation: employeeData.designation,
+                  // department: employeeData.department,
+                };
+
+                // Store required data only
+                localStorage.setItem("UserName", JSON.stringify(this.storeData));
+                sessionStorage.setItem("UserName", JSON.stringify(this.storeData));
+
+                localStorage.setItem("employeeData", JSON.stringify(filteredEmployeeData));
+                sessionStorage.setItem("employeeData", JSON.stringify(filteredEmployeeData));
+
+                localStorage.setItem("USERROLE", JSON.stringify(filteredEmployeeData.designation));
+                sessionStorage.setItem("USERROLE", JSON.stringify(filteredEmployeeData.designation));
+
+                toast.success("Login successfull", { autoClose: 2000 });
+
                 setTimeout(() => {
-                  this.$router.push({ path: "/todo/receivedform" }); // Navigate dynamically
-                }, 700);
+                  this.$router.push({ path: "/dashboard/maindash" });
+                }, 500);
               })
               .catch((error) => {
-                console.error("Error fetching user data:", error);
+                console.error("Error fetching employee data:", error);
               });
           } else {
             localStorage.setItem("employeeData", JSON.stringify(this.employeeData));
@@ -428,7 +453,8 @@ export default {
         .catch((error) => {
           console.error("Error fetching user data:", error);
         });
-    },
+    }
+    ,
 
 
     validateOtp() {
@@ -442,7 +468,7 @@ export default {
         const params = {
           user: String(this.formdata.usr),
           otp: this.otp.join(""),
-          tmp_id: String(this.tempId.tmp_id),
+          tmp_id: String(this.storeData.tmp_id),
           cmd: "login",
         };
 
@@ -450,9 +476,9 @@ export default {
           .post(apis.login, params)
           .then((message) => {
             if (message) {
-              console.log("message", message);
+              // console.log("message", message);
               this.storeData = message;
-              localStorage.setItem("UserName", JSON.stringify(this.storeData));
+              // localStorage.setItem("UserName", JSON.stringify(this.storeData));
               if (this.formdata.usr) {
                 this.userData(this.formdata.usr);
               }
@@ -481,7 +507,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .loginpageheight {
   height: 100vh;
 }

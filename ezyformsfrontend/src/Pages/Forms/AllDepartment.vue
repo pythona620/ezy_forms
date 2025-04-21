@@ -1,7 +1,7 @@
 <template>
-  <div>
+  <div class="">
     <div>
-      <div class="d-flex justify-content-between align-items-center py-2">
+      <div class="d-flex align-items-center justify-content-between py-2">
         <div>
           <h1 class="m-0 font-13">
             Forms in {{ id }}
@@ -10,11 +10,16 @@
             {{ totalRecords }} forms available
           </p>
         </div>
+        <div v-if="userDesigination.includes('IT')" class="d-flex align-items-center gap-2">
+                <div class="d-flex align-items-center">
+                    <ButtonComp class="buttoncomp" @click="formCreation()" name="Create form"></ButtonComp>
+                </div>
+            </div>
 
       </div>
       <div class="mt-3">
-        <GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true"
-          actionType="Toogle&dropdown" @actionClicked="actionCreated" @toggle-click="toggleFunction" :actions="actions"
+        <GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true" actionType="dropdown"  raiseRequest="true" :enableDisable="isEnable" @cell-click="viewPreview"
+           @actionClicked="actionCreated" @toggle-click="toggleFunction" :actions="actions"
           @updateFilters="inLineFiltersData" :field-mapping="fieldMapping" isFiltersoption="true" />
         <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
           @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
@@ -27,10 +32,10 @@
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
       </div>
       <div class="offcanvas-body">
-        <div class="d-flex gap-3 align-items-baseline position-relative">
+        <div class="d-flex align-items-baseline position-relative gap-3">
           <div class="d-flex flex-column">
             <span>
-              <i class="ri-checkbox-blank-circle-fill dashedcircle"></i>
+              <i class="dashedcircle ri-checkbox-blank-circle-fill"></i>
             </span>
             <div class="dashed_line mt-4"></div>
           </div>
@@ -38,15 +43,46 @@
         </div>
       </div>
     </div>
-    <FormPreview :blockArr="selectedForm" :formDescriptions="formDescriptions" />
+
+    <div class="modal fade" id="pdfView" tabindex="-1" aria-labelledby="pdfViewLabel" aria-hidden="true">
+      <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+          <div class="d-block modal-header bg-dark text-white py-2">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <h5 class="m-0 text-white font-13" id="exampleModalLabel">
+                  PDF format
+                </h5>
+              </div>
+              <div class="">
+                <button button="button" class="btn btn-dark text-white font-13" @click="downloadPdf">Download Pdf<span
+                    class="ms-2"><i class="bi bi-download"></i></span> </button>
+                <button type="button" class="btn btn-dark text-white font-13" @click="closemodal"
+                  data-bs-dismiss="modal">Close
+                  <i class="bi bi-x"></i></button>
+              </div>
+            </div>
+          </div>
+          <div class="modal-body">
+
+            <div v-html="pdfPreview"></div>
+          </div>
+          <div class="modal-footer">
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- <FormPreview :blockArr="selectedForm" :formDescriptions="formDescriptions" :childHeaders="childtableHeaders" /> -->
 
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch, reactive } from 'vue';
+import { ref, computed, watch, reactive, onMounted } from 'vue';
 import axiosInstance from '../../shared/services/interceptor';
-import { apis, doctypes } from '../../shared/apiurls';
+import { apis, doctypes, domain } from '../../shared/apiurls';
 import GlobalTable from '../../Components/GlobalTable.vue';
 import { EzyBusinessUnit } from '../../shared/services/business_unit';
 import { rebuildToStructuredArray } from '../../shared/services/field_format';
@@ -56,6 +92,7 @@ import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import router from '../../router';
 import { useRoute } from 'vue-router';
+import ButtonComp from '../../Components/ButtonComp.vue';
 const totalRecords = ref(0);
 const tableheaders = ref([
   { th: "Form name", td_key: "form_name" },
@@ -70,23 +107,28 @@ const selectedForm = ref(null);
 const tableData = ref([]);
 const formCategory = ref([]);
 const route = useRoute();
+const pdfPreview = ref('')
 
+const childtableHeaders = ref([]);
 
 
 // Business unit and filter object
 const businessUnit = computed(() => EzyBusinessUnit.value);
 const newBusinessUnit = ref({ business_unit: '' });
-const filterObj = ref({ limitPageLength: 'None', limit_start: 0 });
+const filterObj = ref({ limitPageLength: 20, limit_start: 0,filters:[] });
 const actions = ref(
   [
     { name: 'View form', icon: 'fa-solid fa-eye' },
     { name: 'Raise Request', icon: 'fa fa-file-text' },
+    // { name: 'Download Print format', icon: 'fa-solid fa-download' },
   ]
 )
+
+
 const fieldMapping = ref({
   // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
   form_short_name: { type: "input" },
-  form_category: { type: "select", options: ["Software", "Hardware"] },
+  form_category: { type: "input" },
   form_status: { type: "select", options: ["Created", "Draft"] },
 
   form_status: { type: "select", options: ["Created", "Draft"] },
@@ -94,59 +136,198 @@ const fieldMapping = ref({
 
   // requested_on: { type: "date" },
 });
+function formCreation() {
+   
+        router.push({ name: "FormStepper" ,query:{
+            routepath: route.path
+        }, });
+        // console.log(route.path,"pppp");
+    }
+
+function viewPreview(data, index, type) {
+  // console.log(route.path);
+  if (type === "view") {
+    if (data) {
+      // console.log(data, "------------");
+      router.push({
+        name: "FormPreviewComp",
+        query: {
+          routepath: route.path,
+          form_short_name: data.form_short_name,
+
+        },
+      });
+    }
+  }
+  if(type === 'raiseRequest'){
+    const parsedData = JSON.parse(data.form_json);
+    const storedData = localStorage.getItem("employeeData");
+    // console.log(parsedData);
+
+    if (storedData) {
+      const designation = JSON.parse(storedData).designation;
+      // console.log(designation);
+
+      if(!parsedData.workflow.length){
+        toast.info("No Roles Added",{autoClose:500})
+      }
+      const roles = parsedData.workflow[0].roles;
+      // console.log(roles);
+
+      let hasAccess = false;
+
+      for (let i = 0; i < roles.length; i++) {
+        if (roles[i] === designation) {
+          hasAccess = true;
+          break;
+        }
+      }
+      // console.log(route.path, "sadasda");
+
+      if (hasAccess) {
+        router.push({
+          name: "RaiseRequest",
+          query: {
+            routepath: route.path,
+            selectedForm: data.form_short_name,
+            business_unit: data.business_unit,
+
+
+          },
+        });
+      } else {
+        toast.info("You do not have permission to access this Form.");
+      }
+    }
+    //  else {
+    //   console.log("No employee data found in localStorage.");
+    // }
+  }
+
+
+}
 function actionCreated(rowData, actionEvent) {
   if (actionEvent.name === 'View form') {
-    if (rowData?.form_json) {
-      formDescriptions.value = { ...rowData }
-      selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json).fields)
-      const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});// raise a modal
-      modal.show();
-      
+    if (rowData) {
+      // formDescriptions.value = { ...rowData }
+      // selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json).fields)
+      // childtableHeaders.value = JSON.parse(
+      //     rowData.form_json
+      //   ).child_table_fields;
+      // const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});// raise a modal
+      // modal.show();
+
+
+      router.push({
+        name: "FormPreviewComp",
+        query: {
+          routepath: route.path,
+          form_short_name: rowData.form_short_name,
+
+        },
+      });
+
     } else {
       toast.warn(" There is no form fields ")
     }
   }
-  
+
   if (actionEvent.name === 'Raise Request') {
     const parsedData = JSON.parse(rowData.form_json);
     const storedData = localStorage.getItem("employeeData");
 
     if (storedData) {
-        const designation = JSON.parse(storedData).designation;
-        console.log(designation);
+      const designation = JSON.parse(storedData).designation;
+      // console.log(designation);
+      if (!parsedData.workflow?.length) {
+    toast.info("No Roles Added", { autoClose: 500 });
+}
+      const roles = parsedData.workflow[0].roles;
+      // console.log(roles);
 
-        const roles = parsedData.workflow[0].roles;
-        console.log(roles);
+      let hasAccess = false;
 
-        let hasAccess = false;
-
-        for (let i = 0; i < roles.length; i++) {
-            if (roles[i] === designation) {
-                hasAccess = true;
-                break;
-            }
+      for (let i = 0; i < roles.length; i++) {
+        if (roles[i] === designation) {
+          hasAccess = true;
+          break;
         }
-        console.log(route.path,"sadasda");
+      }
+      // console.log(route.path, "sadasda");
 
-        if (hasAccess) {
-            router.push({
-                name: "RaiseRequest",
-                query: {
-                    routepath: route.path,
-                    selectedForm: rowData.form_short_name,
-                    business_unit: rowData.business_unit,
+      if (hasAccess) {
+        router.push({
+          name: "RaiseRequest",
+          query: {
+            routepath: route.path,
+            selectedForm: rowData.form_short_name,
+            business_unit: rowData.business_unit,
 
-                    
-                },
-            });
-        } else {
-          toast.info("You do not have permission to access this Form.");
-        }
-    } else {
-        console.log("No employee data found in localStorage.");
+
+          },
+        });
+      } else {
+        toast.info("You do not have permission to access this Form.");
+      }
     }
+    //  else {
+    //   console.log("No employee data found in localStorage.");
+    // }
+  }
+
+  if (actionEvent.name === 'Download Print format') {
+    // pdfView
+    formDescriptions.value = rowData
+
+    const dataObj = {
+      "form_short_name": rowData.form_short_name,
+      business_unit: businessUnit.value
+
+    };
+
+    axiosInstance.post(apis.preview_dynamic_form, dataObj)
+      .then((response) => {
+
+        pdfPreview.value = response.message
+
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
+    const modal = new bootstrap.Modal(document.getElementById('pdfView'), {});
+    modal.show();
   }
 }
+
+function downloadPdf() {
+
+  const dataObj = {
+    "form_short_name": formDescriptions.value.form_short_name,
+    "name": null,
+    business_unit: businessUnit.value
+  };
+
+  axiosInstance.post(apis.download_pdf_form, dataObj)
+    .then((response) => {
+
+      let pdfUrl = domain + response.message;
+
+      // Remove 'api' from the URL if present
+      pdfUrl = pdfUrl.replace('/api', '');
+
+      // Create an anchor element to trigger the download
+      const link = document.createElement('a');
+      link.href = pdfUrl;
+      link.download = response.message.split('/').pop(); // Use the file name from the URL
+      link.click();
+    })
+    .catch((error) => {
+      console.error("Error fetching data:", error);
+    });
+}
+
+const responcedata = ref([]);
+
 // Toggle function triggered when a checkbox is clicked
 function toggleFunction(rowData, rowIndex, event) {
   // console.log("rowData", rowData);
@@ -163,7 +344,8 @@ function toggleFunction(rowData, rowIndex, event) {
     axiosInstance
       .put(`${apis.resource}${doctypes.EzyFormDefinitions}/${rowData.name}`, rowData)
       .then((response) => {
-        console.log("Response:", response.data);
+         responcedata.value = response.data;
+        // console.log("Response:", response.data);
         // Adjust the toast message accordingly:
         toast.success(`Form ${actionText}d successfully`, { autoClose: 700 });
         // Refresh the table data after a short delay
@@ -174,10 +356,11 @@ function toggleFunction(rowData, rowIndex, event) {
       .catch((error) => {
         console.error("Error updating toggle:", error);
       });
-  } else {
-    // If canceled, do nothing – the checkbox remains unchanged.
-    console.log("Action cancelled. Toggle remains unchanged.");
-  }
+  } 
+  // else {
+  //   // If canceled, do nothing – the checkbox remains unchanged.
+  //   console.log("Action cancelled. Toggle remains unchanged.");
+  // }
 }
 
 
@@ -186,7 +369,9 @@ watch(
   [() => businessUnit.value, () => props.id],
   ([newBusinessUnitVal, newId]) => {
     newBusinessUnit.value.business_unit = newBusinessUnitVal;
-    if (newBusinessUnitVal.length && newId) {
+    if (newBusinessUnitVal.length && newId && props.id !== ':id' ) {
+      filterObj.value.limit_start = 0;
+      filterObj.value.filters = [];
       fetchDepartmentDetails(newId || props.id, null);
     }
   },
@@ -197,61 +382,43 @@ watch(
 const PaginationUpdateValue = (itemsPerPage) => {
   filterObj.value.limitPageLength = itemsPerPage;
   filterObj.value.limit_start = 0;
-  fetchTable();
+  fetchDepartmentDetails();
 
 };
 // Handle updating the limit start
 const PaginationLimitStart = ([itemsPerPage, start]) => {
   filterObj.value.limitPageLength = itemsPerPage;
   filterObj.value.limit_start = start;
-  fetchTable();
+  fetchDepartmentDetails();
 
 };
 
 
+const timeout = ref(null);
+
 function inLineFiltersData(searchedData) {
+    clearTimeout(timeout.value); // Clear previous timeout
 
+    timeout.value = setTimeout(() => {
+      filterObj.value.filters = [];
 
-  //   // Initialize filters array
-  const filters = [];
+        // Loop through the table headers and build dynamic filters
+        tableheaders.value.forEach((header) => {
+            const key = header.td_key;
 
-  //   // Loop through the tableheaders and build dynamic filters based on the `searchedData`
-  tableheaders.value.forEach((header) => {
-    const key = header.td_key;
+            if (searchedData[key]) {
+              filterObj.value.filters.push(key, "like", `%${searchedData[key]}%`);
+            }
+        });
 
-    //     // If there is a match for the key in searchedData, create a 'like' filter
-    if (searchedData[key]) {
-      filters.push(key, "like", `%${searchedData[key]}%`);
-    }
-    //     // Add filter for selected option
-    //     if (key === "selectedOption" && searchedData.selectedOption) {
-    //       filters.push([key, "=", searchedData.selectedOption]);
-    //     }
-    //     // Special handling for 'invoice_date' to create a 'Between' filter (if it's a date)
-    //     if (key === "invoice_date" && searchedData[key]) {
-    //       filters.push([key, "Between", [searchedData[key], searchedData[key]]]);
-    //     }
-
-    //     // Special handling for 'invoice_type' or 'irn_generated' to create an '=' filter
-    //     if ((key === "invoice_type" || key === "credit_irn_generated") && searchedData[key]) {
-    //       filters.push([key, "=", searchedData[key]]);
-    //     }
-  });
-
-
-  //   // Log filters to verify
-
-
-  //   // Once the filters are built, pass them to fetchData function
-  if (filters.length) {
-    fetchDepartmentDetails(null, filters);
-  }
-  else {
-    fetchDepartmentDetails();
-  }
-
+        // Call fetchDepartmentDetails with or without filters
+        if (filterObj.value.filters.length) {
+            fetchDepartmentDetails(null,filterObj.value.filters);
+        } else {
+            fetchDepartmentDetails();
+        }
+    }, 500); // Adjust debounce delay as needed
 }
-
 // Fetch department details function
 function fetchDepartmentDetails(id, data) {
 
@@ -259,7 +426,7 @@ function fetchDepartmentDetails(id, data) {
     ["business_unit", "like", `%${newBusinessUnit.value.business_unit}%`],
     ["enable", "=", 1]
   ];
-  if (props.id) {
+  if (props.id && props.id !== "Allforms" && props.id !== "allforms") {
     filters.push(["owner_of_the_form", "=", props.id]);
   }
   if (data) {
@@ -271,7 +438,7 @@ function fetchDepartmentDetails(id, data) {
     limit_page_length: filterObj.value.limitPageLength,
     limit_start: filterObj.value.limit_start,
     filters: JSON.stringify(filters),
-    order_by: "`tabEzy Form Definitions`.`creation` desc",
+    order_by: "`tabEzy Form Definitions`.`enable` DESC, `tabEzy Form Definitions`.`creation` DESC"
   };
   const queryParamsCount = {
     fields: JSON.stringify(["count(name) AS total_count"]),
@@ -291,16 +458,36 @@ function fetchDepartmentDetails(id, data) {
   axiosInstance
     .get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParams })
     .then((response) => {
-      tableData.value = response.data;
+      
+      if(filterObj.value.limit_start === 0){
+        tableData.value = response.data;
+        formCategory.value = [...new Set(tableData.value.map((formCategory) => formCategory.form_category))];
 
-      formCategory.value = [...new Set(response.data.map((formCategory) => formCategory.form_category))];
-
-
+      }else {
+        tableData.value = tableData.value.concat(response.data);
+      }
     })
     .catch((error) => {
       console.error("Error fetching department details:", error);
     });
 }
+
+const userDesigination = ref('');
+const isEnable = ref("");
+
+onMounted(() => {
+  const userData = JSON.parse(localStorage.getItem('employeeData'));
+  userDesigination.value = userData.designation || '';
+  // console.log(userDesigination.value,"///");
+
+  if (userDesigination.value.includes("IT")) {
+    isEnable.value = "true";
+  }
+  if (route.path === "/forms/department/allforms" || route.path === "/forms/department/Allforms") {
+    router.replace("/forms/department/allforms");
+  }
+
+})
 
 </script>
 

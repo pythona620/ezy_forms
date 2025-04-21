@@ -47,12 +47,18 @@
                   <div v-if="activeStep === 1">
                     <div class="">
                       <div class="stepperbackground ps-2 pe-2 m-0 d-flex justify-content-between align-items-center">
-                        <h1 class="font-14 m-0" @click="cancelForm()">
+                        <div></div>
+                        <!-- <h1 class="font-14 m-0" @click="cancelForm()">
                           <i class="bi bi-chevron-left"></i><span class="ms-2">Cancel Form</span>
-                        </h1>
+                        </h1> -->
                         <h1 class="font-14 fw-bold m-0">About Form</h1>
-                        <ButtonComp class="btn btn-dark bg-dark text-white fw-bold font-13" name="Next"
-                          v-if="activeStep < 3" @click="nextStep" />
+                        <div>
+                          <button class=" btn btn-light font-12 mx-2" type="button" @click="clearForm">Clear
+                            Form</button>
+
+                          <ButtonComp class="btn btn-dark bg-dark text-white fw-bold font-13" name="Next"
+                            v-if="activeStep < 3" @click="nextStep" />
+                        </div>
                         <!-- :class="{ 'disabled-btn': isNextDisabled }" -->
                         <!-- :disabled="isNextDisabled" -->
                       </div>
@@ -276,7 +282,7 @@
                         </div>
                       </div>
                       <FormPreview :blockArr="selectedform" :formDescriptions="formDescriptions"
-                        :childHeaders="childtableHeaders" :child-name="childName" />
+                        :childHeaders="childtableHeaders" />
                       <div class="main-block" ref="mainBlockRef">
                         <!-- Here is block level starts -->
                         <div class="block-level" v-for="(block, blockIndex) in blockArr" :key="blockIndex">
@@ -356,9 +362,9 @@
                           <!-- draggable="true" @dragstart="handleDragStart($event, sectionIndex, 'section', blockIndex)"
                                                             @dragover="handleDragOver($event)"
                                                             @drop="handleDrop($event, sectionIndex, 'section', blockIndex)" -->
-                          <div class="mt-2 section_block">
+                          <div class=" pt-0 section_block">
                             <div v-for="(section, sectionIndex) in block.sections" :key="'section-' + sectionIndex"
-                              class="dynamicSection section">
+                              class="dynamicSection mt-0 section">
                               <section class="d-flex justify-content-between align-items-center">
                                 <div class="d-flex flex-column">
                                   <input v-model="section.label" type="text" :class="[
@@ -480,7 +486,7 @@
                                               columnIndex,
                                               fieldIndex
                                             )
-                                            " @mouseleave="resetHoveredField" class="dynamicField">
+                                            " @mouseleave="resetHoveredField" class="dynamicField m-1">
                                           <div class="px-1 dynamic_fied field-border">
                                             <div class="d-flex justify-content-between">
                                               <div class="flex-column d-flex">
@@ -504,7 +510,7 @@
                                                     fieldIndex
                                                   )
                                                   " />
-                                                <small v-if="field.errorMsg" class="text-danger font-12">
+                                                <small v-if="field.errorMsg" class="text-danger font-10">
                                                   {{ field.errorMsg }}
                                                 </small>
                                               </div>
@@ -563,7 +569,7 @@
                                               [
                                                 'Select',
                                                 'Table MultiSelect',
-                                                'Check',
+                                                'Check', 'Small Text'
                                               ].includes(field.fieldtype)
                                             ">
                                               <label class="font-12 fw-light" for="options">Enter Options:</label>
@@ -578,15 +584,33 @@
                                               </small>
                                             </div>
 
-                                            <div class="d-flex gap-2 align-items-center">
-                                              <div class="d-flex align-items-center">
-                                                <input class="font-12" v-model="field.reqd" placeholder="Field Name"
-                                                  type="checkbox" />
+                                            <div class="d-flex  align-items-center justify-content-between">
+                                              <div class=" d-flex align-items-center gap-2">
+                                                <div class="d-flex align-items-center">
+
+                                                  <input class="font-12" v-model="field.reqd" :true-value="1"
+                                                    :false-value="0" placeholder="Field Name" type="checkbox" />
+                                                </div>
+                                                <div>
+                                                  <label for="mandatory" class="font-12 m-0 fw-light">Mandatory</label>
+                                                </div>
                                               </div>
                                               <div>
-                                                <label for="mandatory" class="font-12 m-0 fw-light">Mandatory</label>
+
+                                                <button class="btn btn-sm  font-12"
+                                                  @click="field.showDescription = !field.showDescription">
+                                                  {{ field.showDescription ? 'Hide Description' : (field.description ?
+                                                  'Edit Description'
+                                                  : 'Add Description') }}
+                                                </button>
                                               </div>
                                             </div>
+
+                                            <!-- Description Textarea -->
+                                            <textarea v-if="field.showDescription" v-model="field.description"
+                                              class="form-control font-12 mt-2"
+                                              placeholder="Enter field description"></textarea>
+
                                             <small v-if="field.error" class="text-danger font-10">{{ field.error
                                             }}</small>
                                           </div>
@@ -621,7 +645,7 @@
                             </div>
                             <div v-if="
                               blockIndex === 0
-                            " class=" my-2">
+                            " class="m-2">
                               <!-- <button
                                   class="btn btn-light addRow m-2"
                                   @click="
@@ -633,105 +657,195 @@
 
                               <div class="childtableShow">
                                 <div>
-                                  <div v-if="childName">
+                                  <div>
                                     <div v-if="blockIndex === 0" class="mt-2">
-                                      <div>
-                                        <span class="font-13 fw-bold">{{
-                                          childName
-                                        }}</span>
+
+                                      <div class="childTableContainer">
+
+                                        <div v-for="(table, tableName) in childtableHeaders" :key="tableName"
+                                          class="childTable">
+                                          <h5>{{ tableName.replace(/_/g, ' ') }}</h5>
+                                          <table class="table table-bordered">
+                                            <thead>
+                                              <tr>
+                                                <th>#</th>
+                                                <th>Label</th>
+                                                <th>Field Type</th>
+                                                <!-- <th>Action</th> -->
+                                              </tr>
+                                            </thead>
+                                            <tbody>
+                                              <tr v-for="(field, index) in table" :key="index">
+                                                <td>{{ index + 1 }}</td>
+
+                                                <!-- Label Input -->
+                                                <td v-if="editMode[tableName]">
+                                                  <input v-model="field.label" placeholder="Field Label"
+                                                    class="form-control "
+                                                    :class="{ 'border-1 border-danger ': invalidFields[tableName]?.includes(index) }" />
+                                                  <span v-if="invalidFields[tableName]?.includes(index)"
+                                                    class="font-11 text-danger">Label
+                                                    required**</span>
+                                                </td>
+                                                <td v-else>{{ field.label }}</td>
+
+                                                <!-- Field Type Select -->
+                                                <td v-if="editMode[tableName]">
+                                                  <div class="d-flex gap-1">
+
+                                                    <select v-model="field.fieldtype" class="form-select form-select-sm"
+                                                      :class="{ 'border-1 border-danger ': invalidFields[tableName]?.includes(index) }">
+                                                      <option value="">Select Type</option>
+                                                      <option v-for="option in childfield" :key="option.type"
+                                                        :value="option.type">
+                                                        {{ option.label }}
+                                                      </option>
+                                                    </select>
+                                                    <span v-if="editMode[tableName]">
+                                                      <button class="btn btn-light btn-sm"
+                                                        @click="deleteRow(tableName, index)">
+                                                        <i class="bi bi-x-lg"></i>
+                                                      </button>
+                                                    </span>
+                                                  </div>
+
+
+                                                  <span v-if="invalidFields[tableName]?.includes(index)"
+                                                    class="font-11 text-danger">Type
+                                                    required**</span>
+
+                                                </td>
+                                                <td v-else>{{ field.fieldtype }}</td>
+
+                                              </tr>
+                                            </tbody>
+                                          </table>
+
+                                          <!-- Show error message below the table if any fields are invalid -->
+                                          <!-- <div v-if="invalidFields[tableName]?.length" class="text-danger font-12 mt-2">
+     Please fill in the required fields in the highlighted rows.
+  </div> -->
+                                          <div class="mb-2"> <button class="btn btn-light btn-sm mx-2 "
+                                              @click="toggleEdit(tableName)">
+                                              {{ editMode[tableName] ? 'Save' : 'Edit' }}
+                                            </button>
+                                            <button class="btn btn-light btn-sm " v-if="editMode[tableName]"
+                                              @click="addNewFieldedit(tableName)">
+                                              Add More Field
+                                            </button>
+                                          </div>
+
+                                        </div>
+
+                                        <!-- <div v-for="(field, fIndex) in table.newFields" :key="fIndex"
+                                            class="newField dynamicField">
+                                            <div class=" d-flex justify-content-between">
+
+                                              <input v-model="field.label" placeholder="Field Label" :class="[
+                                                'border-less-input',
+                                                'font-14',
+                                                'p-0 my-1',
+                                                'inputHeight',
+                                                { 'italic-style': !field.label },
+                                                { 'fw-medium': field.label },
+                                              ]" />
+                                              
+                                            </div>
+                                            <select v-model="field.fieldtype" class="form-select font-13 mb-3">
+                                              <option value="">Select Type</option>
+                                              <option v-for="section in childfield" :key="section.type"
+                                                :value="section.type">
+                                                {{ section.label }}
+                                              </option>
+                                            </select>
+
+                                          </div>
+
+                                          <button class="btn btn-light btn-sm font-12 my-2" @click="toggleEdit(tableName)">
+                                              {{ editMode[tableName] ? "Save" : "Edit" }}
+                                            </button>
+                                          <button class="btn btn-light btn-sm font-12 my-2"
+                                            @click="addNewField(tableName, tableIndex)">Add Fields</button>
+
+                                          <button v-if="table.newFields" class="btn btn-dark btn-sm font-12 my-2 ms-2"
+                                            @click="saveNewFields(tableName, tableIndex)">Save</button> -->
                                       </div>
-                                      <table class="table table-bordered table-striped">
-                                        <thead>
-                                          <tr>
-                                            <th>#</th>
-                                            <th v-for="field in childtableHeaders" :key="field.fieldname">
-                                              {{ field.label }}
-                                            </th>
-                                          </tr>
-                                        </thead>
-                                        <tbody>
-                                          <tr v-for="(row, index) in childtableRows" :key="index">
-                                            <td>{{ index + 1 }}</td>
-                                            <td v-for="field in childtableHeaders" :key="field.fieldname">
-                                              <span>
-                                                {{ row[field.fieldname] || "-" }}
-                                              </span>
-                                            </td>
-                                          </tr>
-                                        </tbody>
-                                      </table>
                                     </div>
                                   </div>
-                                 
+
+
                                   <div>
-                                    <div v-if=" blockIndex === 0">
+                                    <div v-if="blockIndex === 0">
                                       <div>
-    <button class="btn btn-light addRow mb-3" @click="addChildTable">
-      Add New Table
-    </button>
+                                        <button class="btn btn-light addRow mb-3 mt-4" @click="addChildTable">
+                                          Add New Table
+                                        </button>
 
-    <div v-for="(table, tableIndex) in childTables" :key="tableIndex" class="child-table">
-      <div class="d-flex justify-content-between align-items-center">
-        <input
-          @change="(e) => formatTableName(tableIndex, e)"
-          v-model="table.tableName"
-          placeholder="Table Name"
-          :class="[
-            'border-less-input',
-            'font-14',
-            'p-0',
-            'inputHeight',
-            { 'italic-style': !table.tableName },
-            { 'fw-medium': table.tableName },
-          ]"
-        />
-        <button class="btn btn-light bg-transparent border-0 font-13 deleteSection" @click="removeChildTable(tableIndex)">
-       <i class=" bi bi-trash"></i> Remove Table
-      </button>
-      </div>
+                                        <div v-for="(table, tableIndex) in childTables" :key="tableIndex"
+                                          class="child-table">
+                                          <div class="d-flex justify-content-between align-items-center mt-1 mb-2">
+                                            <div>
 
-      <div v-for="(field, fieldIndex) in table.columns" :key="fieldIndex" class="dynamicField">
-        <div class="px-1 field-border">
-          <div class="d-flex justify-content-between">
-            <input
-              v-model="field.label"
-              placeholder="Name the field"
-              :class="[
-                'border-less-input',
-                'font-14',
-                'p-0',
-                'inputHeight',
-                { 'italic-style': !field.label },
-                { 'fw-medium': field.label },
-              ]"
-            />
-            <button class="btn btn-sm trash-btn py-0" @click="removeFieldFromTable(tableIndex, fieldIndex)">
-              <i class="bi bi-x-lg"></i>
-            </button>
-          </div>
+                                              <span :class="table.tableName ? 'd-none' : 'text-danger'">*</span>
+                                              <input @change="(e) => formatTableName(tableIndex, e)"
+                                                v-model="table.tableName" placeholder="Table Name" :class="[
+                                                  'border-less-input',
+                                                  'font-14',
+                                                  'p-0',
+                                                  'inputHeight',
+                                                  { 'italic-style': !table.tableName },
+                                                  { 'fw-medium': table.tableName },
+                                                ]" />
+                                            </div>
+                                            <button class="btn btn-light bg-transparent border-0 font-13 deleteSection"
+                                              @click="removeChildTable(tableIndex)">
+                                              <i class=" bi bi-trash"></i> Remove Table
+                                            </button>
+                                          </div>
 
-          <select v-model="field.fieldtype" class="form-select font-13">
-            <option value="">Select Type</option>
-            <option v-for="section in childfield" :key="section.type" :value="section.type">
-              {{ section.label }}
-            </option>
-          </select>
-        </div>
-      </div>
+                                          <div v-for="(field, fieldIndex) in table.columns" :key="fieldIndex"
+                                            class="dynamicField">
+                                            <div class="px-1 field-border">
+                                              <div class="d-flex justify-content-between">
+                                                <input v-model="field.label" placeholder="Name the field" :class="[
+                                                  'border-less-input',
+                                                  'font-14',
+                                                  'p-0',
+                                                  'inputHeight',
+                                                  { 'italic-style': !field.label },
+                                                  { 'fw-medium': field.label },
+                                                ]" />
+                                                <button class="btn btn-sm trash-btn py-0"
+                                                  @click="removeFieldFromTable(tableIndex, fieldIndex)">
+                                                  <i class="bi bi-x-lg"></i>
+                                                </button>
+                                              </div>
 
-      <button class="btn btn-light btn-sm addField" @click="addFieldToTable(tableIndex)">
-        <i class="bi bi-plus"></i> Add Field
-      </button>
+                                              <select v-model="field.fieldtype" class="form-select font-13 mb-3">
+                                                <option value="">Select Type</option>
+                                                <option v-for="section in childfield" :key="section.type"
+                                                  :value="section.type">
+                                                  {{ section.label }}
+                                                </option>
+                                              </select>
+                                            </div>
+                                          </div>
 
-      <button class="btn btn-dark btn-sm" @click="processFields(tableIndex)">
-        Create Table
-      </button>
+                                          <button class="btn btn-light btn-sm addField mx-1"
+                                            @click="addFieldToTable(tableIndex)">
+                                            <i class="bi bi-plus"></i> Add Field
+                                          </button>
 
-     
+                                          <button v-if="table.columns.length" class="btn btn-dark btn-sm font-12 mx-1"
+                                            @click="processFields(tableIndex)">
+                                            Create Table
+                                          </button>
 
-      <hr />
-    </div>
-  </div>
+
+
+                                          <hr />
+                                        </div>
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
@@ -739,7 +853,7 @@
                             </div>
                           </div>
                         </div>
-                        <!-- class="d-flex justify-content-center align-items-center add-block-btn-div py-4 pb-4" -->
+
                         <div :class="[
                           'd-flex justify-content-center align-items-center add-block-btn-div py-4  ',
                           {
@@ -769,7 +883,7 @@
 
     <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
       <div class="offcanvas-header add_designationHeader">
-        <span id="offcanvasRightLabel font-14">
+        <span id="offcanvasRightLabel" class="font-14">
           Add designation for
           {{ selectedBlockIndex == 0 ? "Requestor" : "Approver" }}
         </span>
@@ -779,19 +893,33 @@
       </div>
       <div class="offcanvas-body">
         <div class="">
+          <div class="form-check ps-1" v-if="selectedBlockIndex == 1">
+            <div>
+
+              <input type="checkbox" id="ViewOnlyReportee" v-model="ViewOnlyReportee"
+                class="me-2 mt-1  form-check-input"  />
+              <label for="ViewOnlyReportee " class="SelectallDesignation fw-bold mt-1 form-check-label">View Only
+                Reportee</label>
+            </div>
+          </div>
           <input v-model="searchDesignation" class="px-2 py-1 rounded-2 form-control shadow-none my-3" type="text"
             placeholder="Search Designation" />
 
-          <div class="form-check ps-1" v-if="DesignationList.length">
-            <input type="checkbox" id="selectAll" v-model="isAllSelected" class="me-2 mt-1 form-check-input" />
-            <label for="selectAll fw-bold m-0" class="SelectallDesignation form-check-label">Select all</label>
+          <div class="form-check ps-1" v-if="DesignationList.length && selectedBlockIndex == 0">
+            <div>
+              <!-- :disabled="ViewOnlyReportee"  -->
+              <input type="checkbox" id="selectAll" v-model="isAllSelected" class="me-2 mt-1 form-check-input" />
+              <label for="selectAll fw-bold m-0" class="SelectallDesignation form-check-label">Select all</label>
+            </div>
+
           </div>
         </div>
         <ul v-if="DesignationList.length" class="list-unstyled">
           <li v-for="(item, index) in filteredDesignationList" :key="index" class="designationList">
-            <input type="checkbox" v-model="designationValue" :value="item" class="designationCheckBox"
+            <input type="checkbox" v-model="designationValue" :value="item" class="designationCheckBox" 
               @change="handleSingleSelect" />
-            <span class="ps-2">{{ item }}</span>
+              <!-- :class="{ 'opacity-50': ViewOnlyReportee }" -->
+            <span class="ps-2" >{{ item }}</span>
           </li>
         </ul>
         <div v-else>
@@ -854,12 +982,12 @@ const formShortNameError = ref("");
 const selectedBlockIndex = ref("");
 let workflowSetup = reactive([]);
 const searchDesignation = ref("");
-
+const ViewOnlyReportee = ref(false);
 const wrkAfterGetData = ref([]);
 // const hasWorkflowToastShown = ref(false);
 const tableFieldsCache = ref([]);
-const childName = ref("");
-const childtableRows = ref([]);
+
+// const childtableRows = ref([]);
 const childtableHeaders = ref([]);
 // const childtableName = ref("");
 // const childTableresponseData = ref([]);
@@ -910,6 +1038,8 @@ watch(
   },
   { immediate: true }
 );
+
+
 
 const filteredDesignationList = computed(() => {
   return DesignationList.value
@@ -986,15 +1116,34 @@ onMounted(() => {
   let Bu_Unit = localStorage.getItem("Bu");
   filterObj.value.business_unit = Bu_Unit;
 });
+
+
 // Store multiple child tables
 const childTables = ref([]);
 
 // Function to add a new child table
 const addChildTable = () => {
+  const existingFieldsCount = Object.values(childtableHeaders.value).reduce((acc, table) => {
+    return acc + (Array.isArray(table) ? table.length : 0);
+  }, 0);
+
+  // New index starts from the total existing fields
+  const newIndex = existingFieldsCount + childTables.value.length;
+
   childTables.value.push({
+    idx: newIndex,
     tableName: "",
     formattedTableName: "",
-    columns: reactive([]), // Store fields for this table
+    columns: reactive([
+      {
+        label: "",
+        fieldname: `field_${columns.length}`, // This will be updated once the label is entered
+        fieldtype: "",
+        idx: columns.length,
+        reqd: false,
+      }
+    ]), // Use `ref([])` instead of `reactive([])`
+    // Store new fields separately
   });
 };
 
@@ -1005,21 +1154,26 @@ const removeChildTable = (tableIndex) => {
 
 // Function to add a field to a specific table
 const addFieldToTable = (tableIndex) => {
-  childTables.value[tableIndex].columns.push({
+  const columns = childTables.value[tableIndex].columns;
+
+  columns.push({
     label: "",
-    fieldname: `field_${childTables.value[tableIndex].columns.length}`,
+    fieldname: "", // This will be updated once the label is entered
     fieldtype: "",
-    idx: childTables.value[tableIndex].columns.length,
+    idx: columns.length,
     reqd: false,
   });
-  console.log(childtableHeaders.value,"mmmm");
+
+  // Watch for label changes and update fieldname dynamically
+  watch(() => columns[columns.length - 1]?.label, (newLabel) => {
+    columns[columns.length - 1].fieldname = `${newLabel.replace(/\s+/g, "_").toLowerCase()}_${columns.length - 1}`;
+  });
 };
 
 // Function to remove a field from a specific table
 const removeFieldFromTable = (tableIndex, fieldIndex) => {
   childTables.value[tableIndex].columns.splice(fieldIndex, 1);
 };
-
 // Format table name dynamically
 const formatTableName = (tableIndex, event) => {
   if (event?.target?.value) {
@@ -1053,12 +1207,18 @@ const processFields = (tableIndex) => {
   const data = {
     form_short_name: childTables.value[tableIndex].formattedTableName,
     fields: childTables.value[tableIndex].columns,
+    idx: childTables.value[tableIndex].idx
   };
+
+
 
   axiosInstance
     .post(apis.childtable, data)
     .then((res) => {
       if (res) {
+        toast.success("Table created successfully!", { autoClose: 500 }, {
+          transition: "zoom",
+        });
         const firstTableField = res.message[0][0].child_doc;
         if (firstTableField) {
           tableFieldsCache.value.push(firstTableField);
@@ -1070,39 +1230,103 @@ const processFields = (tableIndex) => {
     });
 };
 
+const editMode = reactive({});
 
-const updatedTableFields = computed(() => ({
-  form_short_name: tableName.value[0].options,
-  fields: columns,
-}));
+const addNewFieldedit = (tableName) => {
+  if (!childtableHeaders.value[tableName]) {
+    childtableHeaders.value[tableName] = [];
+  }
 
-const addmorechildfeildsFn = () => {
-  const data = {
-    ...updatedTableFields.value,
-  };
-  // console.log(data, ",,,,,,,,,,");
+  // Assign idx based on existing field count
+  const newIndex = childtableHeaders.value[tableName].length + 1;
 
-  // Call the API to process the fields
-  axiosInstance
-    .post(`${apis.update_child_doctype}`, data)
-    .then((res) => {
-      if (res) {
-        console.log(res); // Corrected response access
-
-        // Extract the first "Table" field from the response
-
-        getFormData();
-      }
-    })
-    .catch((error) => {
-      console.error("Error saving form data:", error); // Log any errors
-    });
+  childtableHeaders.value[tableName].push({
+    fieldname: `field_${newIndex - 1}`, // Ensuring unique fieldname
+    fieldtype: "",
+    idx: newIndex, // Assign idx dynamically
+    label: "",
+    value: "", // Keep value
+    isNew: true,
+  });
+};
+const deleteRow = (tableName, index) => {
+  if (childtableHeaders.value[tableName]) {
+    childtableHeaders.value[tableName].splice(index, 1);
+  }
 };
 
-// const modal = bootstrap.Modal.getInstance(
-//           document.getElementById("childtable")
-//         );
-//         modal.hide();
+
+const invalidFields = ref({});
+
+const toggleEdit = (tableName) => {
+  if (editMode[tableName]) {
+
+
+    // ✅ Reset validation errors
+    invalidFields.value[tableName] = [];
+
+    let isValid = true;
+
+    // Validate all fields in the table
+    childtableHeaders.value[tableName].forEach((field, index) => {
+      if (!field.label || !field.fieldtype) {
+        invalidFields.value[tableName].push(index); // Store index of invalid rows
+        isValid = false;
+      }
+    });
+
+    if (!isValid) {
+
+      return; // Stop execution if validation fails
+    }
+
+
+
+    // Process all fields (both old and new)
+    let allFields = childtableHeaders.value[tableName].map(({ isNew, ...rest }, index) => ({
+      ...rest,
+      idx: index + 1, // Ensure `idx` is correctly set in sequential order
+    }));
+
+    // ✅ Single API request to save both old and new fields
+    const formData = {
+      form_short_name: tableName,
+
+      fields: allFields,
+    };
+
+
+
+    axiosInstance
+      .post(apis.childtable, formData) // Use a single API endpoint
+      .then((response) => {
+        toast.success("Fields updated successfully!", { autoClose: 500 }, {
+          transition: "zoom",
+        });
+        console.log("✅ All fields saved successfully:", response.data);
+      })
+      .catch((error) => {
+        console.error("❌ Saving fields failed:", error);
+      });
+  }
+
+  // Toggle edit mode for the table
+  editMode[tableName] = !editMode[tableName];
+};
+
+
+watch(childtableHeaders, (newTables) => {
+  Object.keys(newTables).forEach((tableName) => {
+    newTables[tableName].forEach((field, index) => {
+      if (field.label && field.fieldtype) {
+        // ✅ Remove error dynamically when user enters a valid value
+        invalidFields.value[tableName] = invalidFields.value[tableName]?.filter(i => i !== index);
+      }
+    });
+  });
+}, { deep: true });
+
+
 const steps = ref([
   {
     id: 1,
@@ -1195,10 +1419,10 @@ const fieldTypes = [
     label: "Select",
     type: "Select",
   },
-  // {
-  //     label: "MultiSelect",
-  //     type: "Table MultiSelect",
-  // },
+  {
+      label: "Multi Select",
+      type: "Small Text",
+  },
   // {
   //     label: "Signature",
   //     type: "Signature",
@@ -1298,6 +1522,10 @@ function addDesignationBtn() {
   };
 
   // workflowSetup.push(xyz)
+  if (selectedBlockIndex.value !== 0) {
+    xyz.view_only_reportee = ViewOnlyReportee.value === true ? 1 : 0;
+  }
+  console.log(xyz);
 
   const existingIndex = workflowSetup.findIndex((item) => item.idx === xyz.idx);
   if (existingIndex !== -1) {
@@ -1315,16 +1543,27 @@ function addDesignationBtn() {
 // };
 
 function getWorkflowSetup(blockIndex) {
+
   return workflowSetup.find((setup) => setup.idx === blockIndex) || { roles: [] };
 }
 
-// Initialize `designationValue` based on the roles for the given block index
 function initializeDesignationValue(blockIndex) {
-  const rolesForBlock = getWorkflowSetup(blockIndex).roles || [];
-  designationValue.value = [...rolesForBlock]; // Reset designationValue to match only roles for the current block
+  const currentSetup = getWorkflowSetup(blockIndex);
+  const rolesForBlock = currentSetup.roles || [];
+  designationValue.value = [...rolesForBlock];
+
+  // Check for view_only_reportee flag
+  ViewOnlyReportee.value = currentSetup.view_only_reportee === 1;
 }
 
+// Initialize `designationValue` based on the roles for the given block index
+// function initializeDesignationValue(blockIndex) {
+//   const rolesForBlock = getWorkflowSetup(blockIndex).roles || [];
+//   designationValue.value = [...rolesForBlock]; // Reset designationValue to match only roles for the current block
+// }
+
 const AddDesignCanvas = (idx) => {
+  ViewOnlyReportee.value = false;
   // console.log(idx, "---clicked idex", selectedBlockIndex.value);
   if (filterObj.value.accessible_departments.length) {
     designationData(filterObj.value.accessible_departments);
@@ -1380,14 +1619,31 @@ function add_Wf_roles_setup() {
     });
 }
 
+const selectedData = ref({
+  routepath: route.query.routepath,
+
+});
 function cancelForm() {
   router.push({
-    name: "Created",
+    path: selectedData.value.routepath,
   });
+
+}
+
+function clearForm() {
+  filterObj.value.form_name = ''
+  filterObj.value.form_short_name = ''
+  filterObj.value.owner_of_the_form = ''
+  filterObj.value.business_unit = ''
+  filterObj.value.form_category = ''
+  filterObj.value.accessible_departments = []
+
+
+
 }
 const handleStepClick = (stepId) => {
   if (isNextDisabled.value) {
-    toast.error("Please complete all required fields before proceeding.", {
+    toast.error("Please check all required fields before proceeding.", {
       autoClose: 2000,
       transition: "zoom",
     });
@@ -1403,7 +1659,7 @@ const handleStepClick = (stepId) => {
 
 const nextStep = () => {
   if (isNextDisabled.value) {
-    toast.error("Please complete all required fields before proceeding.", {
+    toast.error("Please check all required fields before proceeding.", {
       autoClose: 2000,
       transition: "zoom",
     });
@@ -1420,7 +1676,7 @@ const prevStep = () => {
     activeStep.value -= 1;
   }
 };
-
+const returTables = ref([])
 // Get form by ID
 function getFormData() {
   axiosInstance
@@ -1445,14 +1701,19 @@ function getFormData() {
         tableName.value = parsedFormJson.fields.filter(
           (field) => field.fieldtype === "Table"
         );
-        childName.value = tableName.value[0]?.options.replace(/_/g, " ");
-        // console.log(childName.value, typeof childName.value, "5555");
+        returTables.value = parsedFormJson.fields.filter(
+          (field) => field.fieldtype === "Table"
+        );
+
 
         // let structuredArr = rebuildToStructuredArray((JSON.parse(res_data?.form_json?.fields).fields)?.replace(/\\\"/g, '"'))
         let structuredArr = rebuildToStructuredArray(
           JSON.parse(res_data?.form_json).fields
         );
         childtableHeaders.value = JSON.parse(res.data.form_json).child_table_fields;
+
+        childTables.value = []
+        tableFieldsCache.value = []
 
         // workflowSetup.push(JSON.parse(res_data?.form_json).workflow)
 
@@ -1504,8 +1765,6 @@ function OwnerOftheForm(newVal) {
   if (newVal && typeof newVal === "string" && newVal.trim() !== "") {
     // console.log("Owner Of The Form Changed:", newVal);
     categoriesData(newVal);
-  } else {
-    console.log("Owner Of The Form is empty or undefined.");
   }
 }
 
@@ -1526,15 +1785,15 @@ function formData(status) {
   // console.log(blockArr, "blockarray");
 
   let fields = extractFieldsWithBreaks(blockArr);
-  console.log(tableFieldsCache.value, " Fields");
+
   if (tableFieldsCache.value.length) {
     // Merge stored table fields
     fields = [...fields, ...tableFieldsCache.value];
   }
 
-  if (childtableHeaders.value && childtableHeaders.value.length) {
+  if (returTables.value && returTables.value.length) {
     // Append child table headers instead of replacing
-    fields = [...fields, ...childtableHeaders.value];
+    fields = [...fields, ...returTables.value];
   }
   const dataObj = {
     ...filterObj.value,
@@ -1545,7 +1804,7 @@ function formData(status) {
   };
 
   dataObj.accessible_departments = dataObj.accessible_departments.toString();
-  console.log(dataObj, "---data obj");
+  // console.log(dataObj, "---data obj");
   axiosInstance
     .post(apis.savedata, dataObj)
     .then((res) => {
@@ -1589,35 +1848,9 @@ function formData(status) {
       console.error("Error saving form data:", error);
     });
 }
-// setTimeout(() => {
-//   console.log(blockArr.length, workflowSetup.length, "length");
 
-//   if (workflowSetup.length < blockArr.length) {
-//     // ✅ If workflows are missing, show error toast
-//     const missingWorkflows = blockArr.length - workflowSetup.length;
-//     toast.error(`${missingWorkflows} more workflow(s) left to add.`, {
-//       autoClose: 2000,
-//       transition: "zoom",
-//     });
-//   } else {
-//     // ✅ If all workflows are added, show success toast
-//     toast.success("Form Created Successfully!", {
-//       autoClose: 2000,
-//       transition: "zoom",
-//       onClose: () => {
-//         // ✅ Route only after success toast disappears
-//         if (status === "save") {
-//           router.push({ name: "Created" });
-//         } else if (status === "draft") {
-//           router.push({ name: "Draft" });
-//         }
-//       },
-//     });
-//   }
-// }, 2000);
 
 const mainBlockRef = ref("");
-
 const addBlock = () => {
   const blockIndex = blockArr.length; // Get current length before adding new block
 
@@ -1628,18 +1861,50 @@ const addBlock = () => {
       {
         label: "",
         parent: `${businessUnit.value.value}-${filterObj.value.form_short_name}`,
-        rows: [
-          {
-            label: `row_0_0_${blockIndex}`,
-            columns:
-              blockIndex === 0
-                ? [
+        rows:
+          blockIndex === 0
+            ? [
+              {
+                label: `row_0_0_${blockIndex}`,
+                columns: [
                   {
-                    label: "", // No extra empty column for the requestor block
-                    fields: [{ label: "", fieldtype: "", options: "", reqd: false }],
+                    label: "", // First column with "Requested by"
+                    fields: [
+                      {
+                        label: "Requested by",
+                        fieldtype: "Data",
+                        options: "",
+                        reqd: false,
+                      },
+                    ],
                   },
-                ]
-                : [
+                  {
+                    label: "", // Second column with "Requested On"
+                    fields: [
+                      {
+                        label: "Requested On",
+                        fieldtype: "Datetime",
+                        options: "",
+                        reqd: false,
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                label: `row_0_1_${blockIndex}`, // New row with an empty field
+                columns: [
+                  {
+                    label: "",
+                    fields: [{ label: "", fieldtype: "", options: "", reqd: false, description: "" }],
+                  },
+                ],
+              },
+            ]
+            : [
+              {
+                label: `row_0_0_${blockIndex}`,
+                columns: [
                   {
                     label: "", // First column with "Approver" & "Approved By"
                     fields: [
@@ -1669,8 +1934,8 @@ const addBlock = () => {
                     ],
                   },
                 ],
-          },
-        ],
+              },
+            ],
       },
     ],
   };
@@ -1721,14 +1986,7 @@ const addSection = (blockIndex) => {
       },
     ],
   });
-  // nextTick(() => {
-  //   if (mainBlockRef.value) {
-  //     mainBlockRef.value.scrollTo({
-  //       top: mainBlockRef.value.scrollHeight,
-  //       behavior: "smooth",
-  //     });
-  //   }
-  // });
+
 };
 // Function to remove a section
 const removeSection = (blockIndex, sectionIndex) => {
@@ -1738,34 +1996,6 @@ const removeSection = (blockIndex, sectionIndex) => {
   // toast.success("Section removed", { autoClose: 500 })
 };
 
-const addRow = (blockIndex, sectionIndex) => {
-  const rowIndex = blockArr[blockIndex].sections[sectionIndex].rows.length; // Get the current row index
-  const rowSuffix = getRowSuffix(rowIndex);
-
-  blockArr[blockIndex].sections[sectionIndex].rows.push({
-    label: `row_${rowIndex}_${sectionIndex}_${blockIndex}`,
-    columns: [
-      {
-        fields: [
-          {
-            label: "",
-            fieldtype: "",
-            // value: ref(""), // Keeping the value as a ref for reactivity
-            options: "",
-            reqd: false,
-          },
-        ], // Initialize with an empty fields array
-      },
-    ],
-  });
-};
-
-// const removeRow = (blockIndex, sectionIndex, rowIndex) => {
-//   let item = blockArr[blockIndex].sections[sectionIndex].rows[rowIndex];
-//   if (item.parent) deleted_items.push(item);
-//   blockArr[blockIndex].sections[sectionIndex].rows.splice(rowIndex, 1);
-//   // toast.success("Row removed", { autoClose: 500 })
-// };
 
 // Function to add a new column inside a section
 const addColumn = (blockIndex, sectionIndex, rowIndex) => {
@@ -1881,106 +2111,82 @@ const onFieldTypeChange = (
   // const xyz = extractFieldsWithBreaks(sections)
 };
 
+
+// const hasDuplicates = (array) => new Set(array).size !== array.length;
+
+
+const restrictedLabels = [
+  "name", "parent", "creation", "owner", "modified", "modified_by",
+  "parentfield", "parenttype", "file_list", "flags", "docstatus"
+].map(label => label.toLowerCase().trim());
+
+const excludedLabels = ["Approver", "Approved on", "Approved By"].map(label => label.toLowerCase().trim());
+
+function isRestricted(label) {
+  return restrictedLabels.includes(label?.trim().toLowerCase());
+}
+
+function hasInvalidCharacters(label) {
+  return /[^a-zA-Z0-9 _]/.test(label) || label.includes('"') || label.includes("'");
+}
+
+function getAllLabels(blockArr) {
+  return blockArr.flatMap(block => [
+    block.label?.trim().toLowerCase(),
+    ...block.sections.flatMap(section => [
+      section.label?.trim().toLowerCase(),
+      ...section.rows.flatMap(row =>
+        row.columns.flatMap(column => [
+          column.label?.trim().toLowerCase(),
+          ...column.fields.map(field => field.label?.trim().toLowerCase())
+        ])
+      )
+    ])
+  ]).filter(label => label !== "" && !excludedLabels.includes(label));
+}
+
 function handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) {
-  const excludedLabels = ["Approver", "Approved on", "Approved By"].map((label) =>
-    label.toLowerCase().trim()
-  );
-  const restrictedLabels = [
-    "name",
-    "parent",
-    "creation",
-    "owner",
-    "modified",
-    "modified_by",
-    "parentfield",
-    "parenttype",
-    "file_list",
-    "flags",
-    "docstatus",
-  ].map((label) => label.toLowerCase().trim()); // Normalize restricted labels
+  const allLabels = getAllLabels(blockArr);
+  const duplicateLabels = allLabels.filter((label, index, arr) => arr.indexOf(label) !== index);
 
-  // Extract labels and filter out excluded ones
-  const flatArr = blockArr
-    .flatMap(extractfieldlabels)
-    .map((label) => label.trim().toLowerCase()) // Normalize labels
-    .filter((label) => label !== "" && !excludedLabels.includes(label)); // Remove empty and excluded labels
-
-  const isDuplicate = hasDuplicates(flatArr); // Check duplicates
   const checkFieldType = addErrorMessagesToStructuredArray(blockArr);
   blockArr.splice(0, blockArr.length, ...checkFieldType);
 
-  function shouldSetError(fieldLabel) {
-    const normalizedLabel = fieldLabel?.trim().toLowerCase();
-    return isDuplicate && normalizedLabel && !excludedLabels.includes(normalizedLabel);
+  function validateLabel(label, errorPath) {
+    if (isRestricted(label)) {
+      errorPath.errorMsg = "Entered label is restricted";
+    } else if (hasInvalidCharacters(label)) {
+      errorPath.errorMsg = "Label should not contain special characters, double quotes (\") or single quotes (')";
+    } else {
+      errorPath.errorMsg = duplicateLabels.includes(label.trim().toLowerCase()) ? "Duplicate Label Name" : "";
+    }
   }
 
-  function isRestricted(fieldLabel) {
-    const normalizedLabel = fieldLabel?.trim().toLowerCase();
-    return restrictedLabels.includes(normalizedLabel);
+  // Validate Field
+  if (fieldIndex !== undefined) {
+    validateLabel(
+      blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex].label,
+      blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex]
+    );
   }
 
-  if (
-    fieldIndex !== undefined &&
-    fieldIndex >= 0 &&
-    columnIndex !== undefined &&
-    columnIndex >= 0 &&
-    sectionIndex !== undefined
-  ) {
-    const fieldLabel =
+  // Validate Column
+  if (fieldIndex === undefined && columnIndex !== undefined) {
+    validateLabel(
+      blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].label,
       blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex]
-        .fields[fieldIndex].label;
-
-    if (isRestricted(fieldLabel)) {
-      blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
-        columnIndex
-      ].fields[fieldIndex].errorMsg = "Entered label is restricted";
-    } else {
-      blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
-        columnIndex
-      ].fields[fieldIndex].errorMsg = shouldSetError(fieldLabel)
-          ? "Duplicate Label Name"
-          : "";
-    }
+    );
   }
 
-  if (
-    fieldIndex === undefined &&
-    columnIndex !== undefined &&
-    columnIndex >= 0 &&
-    sectionIndex !== undefined
-  ) {
-    const columnLabel =
-      blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex]
-        .label;
-
-    if (isRestricted(columnLabel)) {
-      blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
-        columnIndex
-      ].errorMsg = "Entered label is restricted";
-    } else {
-      blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
-        columnIndex
-      ].errorMsg = shouldSetError(columnLabel) ? "Duplicate Label Name in Column" : "";
-    }
-  }
-
-  if (
-    columnIndex === undefined &&
-    fieldIndex === undefined &&
-    sectionIndex !== undefined
-  ) {
-    const sectionLabel = blockArr[blockIndex].sections[sectionIndex].label;
-
-    if (isRestricted(sectionLabel)) {
-      blockArr[blockIndex].sections[sectionIndex].errorMsg =
-        "Entered label is restricted";
-    } else {
-      blockArr[blockIndex].sections[sectionIndex].errorMsg = shouldSetError(sectionLabel)
-        ? "Duplicate Label Name in Section"
-        : "";
-    }
+  // Validate Section
+  if (columnIndex === undefined && fieldIndex === undefined) {
+    validateLabel(
+      blockArr[blockIndex].sections[sectionIndex].label,
+      blockArr[blockIndex].sections[sectionIndex]
+    );
   }
 }
+
 
 const hasErrors = computed(() => {
   function checkFieldErrors(obj) {
@@ -2040,6 +2246,22 @@ function handleInputChange(event, fieldType) {
     return;
   } else {
     formShortNameError.value = ""; // Clear error if input is valid
+  }
+
+  // Check for special characters (allow only letters and numbers)
+  if (/[^a-zA-Z0-9&]/.test(inputValue)) {
+    if (fieldType === "form_name") {
+      formNameError.value = "Special characters are not allowed";
+    } else if (fieldType === "form_short_name") {
+      formShortNameError.value = "Special characters are not allowed";
+    }
+    return;
+  } else {
+    if (fieldType === "form_name") {
+      formNameError.value = "";
+    } else if (fieldType === "form_short_name") {
+      formShortNameError.value = "";
+    }
   }
 
   // Set filter based on fieldType
@@ -2280,7 +2502,7 @@ input {
 .field-border {
   /* border: 1px solid rgb(221, 221, 221); */
   border-radius: 10px;
-  margin: 0px 10px 5px 10px;
+  // margin: 0px 10px 5px 10px;
   background-color: #fafafa;
   position: relative;
 }
@@ -2643,7 +2865,7 @@ select {
 
 .requestandAppHeader {
   padding: 10px 6px;
-  box-shadow: 0px 4px 4px 0px #0000000d;
+  // box-shadow: 0px 4px 4px 0px #0000000d; 
 }
 
 .section_block {

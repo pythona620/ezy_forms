@@ -1,15 +1,15 @@
 <template>
     <div>
-        <div class="d-flex justify-content-between align-items-center formsticky py-2">
+        <div class="d-flex formsticky align-items-center justify-content-between py-2">
             <div>
-                <h1 class="m-0 font-13">Forms Master</h1>
+                <h1 class="m-0 font-13">Forms in Trash</h1>
                 <p class="m-0 font-11 pt-1">{{ totalRecords }} forms available</p>
             </div>
-            <div class="d-flex gap-2 align-items-center">
+            <div class="d-flex align-items-center gap-2">
 
 
 
-                <!-- <div class="d-flex align-items-center ">
+                <!-- <div class="d-flex align-items-center">
                     <ButtonComp class="buttoncomp" @click="formCreation()" name="Create form"></ButtonComp>
                 </div> -->
             </div>
@@ -17,7 +17,7 @@
         <!-- v-if="tableForm" -->
         <div class="mt-2">
 
-            <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" actionType="dropdown"
+            <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" actionType="dropdown" enableDisable="true"
                 @actionClicked="actionCreated" @toggle-click="toggleFunction" isFiltersoption="true"
                 :field-mapping="fieldMapping" :actions="actions" @updateFilters="inLineFiltersData" isCheckbox="true" />
             <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
@@ -38,7 +38,7 @@ import PaginationComp from '../../Components/PaginationComp.vue'
 import axiosInstance from '../../shared/services/interceptor';
 import { apis, doctypes } from "../../shared/apiurls";
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { rebuildToStructuredArray } from "../../shared/services/field_format";
 import FormPreview from '../../Components/FormPreview.vue'
 import { toast } from "vue3-toastify";
@@ -56,6 +56,10 @@ const businessUnit = computed(() => {
     return EzyBusinessUnit.value;
 });
 const sections = reactive([]);
+
+
+const route = useRoute();
+
 onMounted(() => {
     // fetchTable()
 
@@ -87,20 +91,30 @@ function toggleFunction(rowData, rowIndex, event) {
             .catch((error) => {
                 console.error("Error updating toggle:", error);
             });
-    } else {
-        // If canceled, do nothing – the checkbox remains unchanged.
-        console.log("Action cancelled. Toggle remains unchanged.");
     }
+    //  else {
+    //     // If canceled, do nothing – the checkbox remains unchanged.
+    //     console.log("Action cancelled. Toggle remains unchanged.");
+    // }
 }
 
 
 function actionCreated(rowData, actionEvent) {
     if (actionEvent.name === 'View form') {
         if (rowData?.form_json) {
-            formDescriptions.value = { ...rowData }
-            selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json).fields)
-            const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});// raise a modal
-            modal.show();
+
+            router.push({
+                name: "FormPreviewComp",
+                query: {
+                    routepath: route.path,
+                    form_short_name: rowData.form_short_name,
+
+                },
+            });
+            // formDescriptions.value = { ...rowData }
+            // selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json).fields)
+            // const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});// raise a modal
+            // modal.show();
 
         } else {
             console.warn(" There is no form fields ")
@@ -110,7 +124,7 @@ function actionCreated(rowData, actionEvent) {
     if (actionEvent.name === 'Edit Form') {
         formCreation(rowData)
     }
-    if (actionEvent.name === 'Acive this form') {
+    if (actionEvent.name === 'Active this form') {
         if (rowData) {
             const isCurrentlyEnabled = rowData.enable == '1' || rowData.enable === 1;
             const actionText = isCurrentlyEnabled ? 'delete' : 'Active';
@@ -134,10 +148,11 @@ function actionCreated(rowData, actionEvent) {
                     .catch((error) => {
                         console.error("Error updating toggle:", error);
                     });
-            } else {
-                // If canceled, do nothing – the checkbox remains unchanged.
-                console.log("Action cancelled. Toggle remains unchanged.");
-            }
+            } 
+            // else {
+            //     // If canceled, do nothing – the checkbox remains unchanged.
+            //     console.log("Action cancelled. Toggle remains unchanged.");
+            // }
 
         }
     }
@@ -155,7 +170,7 @@ const hideModal = () => {
 const actions = ref(
     [
         { name: 'View form', icon: 'fa-solid fa-eye' },
-        { name: 'Acive this form', icon: 'far fa-file-alt' }
+        // { name: 'Active this form', icon: 'far fa-file-alt' }
         // { name: 'Edit Form', icon: 'fa-solid fa-edit' },
         // { name: 'Edit accessibility to dept.', icon: 'fa-solid fa-users' },
         // { name: 'Share this form', icon: 'fa-solid fa-share-alt' },
@@ -190,27 +205,25 @@ watch(
     { immediate: true }
 );
 const tableheaders = ref([
+    { th: "Name", td_key: "name" },
     { th: "Form name", td_key: "form_name" },
     { th: "Form category", td_key: "form_category" },
     { th: "Accessible departments", td_key: "accessible_departments" },
     { th: "Status", td_key: "form_status" },
 ]);
-const fieldMapping = ref({
-    // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
-    // invoice_date: { type: "date" },
-    form_category: { type: "select", options: ["Software", "Hardware"] },
-    name: { type: "input" },
-    owner_of_the_form: { type: "input" }
-
-});
 
 function formCreation(item = null) {
     if (item == null) {
-        router.push({ name: "FormStepper" });
+        router.push({ name: "FormStepper",query:{
+            routepath: route.path
+        } });
     } else {
         router.push({
             name: "FormStepper",
             params: { paramid: item.name },
+            query:{
+            routepath: route.path
+        }
 
         });
     }
@@ -281,6 +294,7 @@ function inLineFiltersData(searchedData) {
 function fetchTable(data) {
     const filters = [
         ["business_unit", "like", `%${filterObj.value.business_unit}%`],
+        ["enable", "=", 0]
     ];
     if (data) {
         filters.push(data)
@@ -292,7 +306,7 @@ function fetchTable(data) {
         limit_page_length: filterObj.value.limitPageLength,
         limit_start: filterObj.value.limit_start,
         order_by: "`tabEzy Form Definitions`.`creation` desc",
-        filters: JSON.stringify({ enable: 0 }),
+        
     };
     const queryParamsCount = {
         fields: JSON.stringify(["count(name) AS total_count"]),
@@ -326,6 +340,16 @@ function fetchTable(data) {
             console.error("Error fetching ezyForms data:", error);
         });
 }
+
+const fieldMapping = computed(() => ({
+    // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
+    // invoice_date: { type: "date" },
+    form_category: { type: "select", options: formCategory.value },
+    name: { type: "input" },
+    owner_of_the_form: { type: "input" }
+
+}));
+
 
 </script>
 

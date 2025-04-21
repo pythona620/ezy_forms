@@ -1,12 +1,12 @@
 <template>
     <div>
-        <div class="d-flex justify-content-between align-items-center formsticky py-2">
+        <div class="d-flex formsticky align-items-center justify-content-between py-2">
             <div>
-                <h1 class="m-0 font-13">Forms Master</h1>
+                <h1 class="m-0 font-13">All Forms </h1>
                 <p class="m-0 font-11 pt-1">{{ totalRecords }} forms available</p>
             </div>
-            <div class="d-flex gap-2 align-items-center">
-                <div class="d-flex align-items-center ">
+            <div class="d-flex align-items-center gap-2">
+                <div class="d-flex align-items-center">
                     <ButtonComp class="buttoncomp" @click="formCreation()" name="Create form"></ButtonComp>
                 </div>
             </div>
@@ -14,9 +14,10 @@
         <!-- v-if="tableForm" -->
         <div class="mt-2">
 
-            <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" actionType="Toogle&dropdown"
-                @actionClicked="actionCreated" @toggle-click="toggleFunction" isFiltersoption="true"
-                :field-mapping="fieldMapping" :actions="actions" @updateFilters="inLineFiltersData" isCheckbox="true" />
+            <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" actionType="dropdown"
+                enableDisable="true" @actionClicked="actionCreated" @toggle-click="toggleFunction"
+                isFiltersoption="true" :field-mapping="fieldMapping" :actions="actions"
+                @updateFilters="inLineFiltersData" isCheckbox="true" />
             <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
                 @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
         </div>
@@ -24,16 +25,16 @@
         <div class="modal fade" id="pdfView" tabindex="-1" aria-labelledby="pdfViewLabel" aria-hidden="true">
             <div class="modal-dialog modal-xl">
                 <div class="modal-content">
-                    <div class="modal-header py-2 d-block bg-dark text-white">
-                        <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-block modal-header bg-dark text-white py-2">
+                        <div class="d-flex align-items-center justify-content-between">
                             <div>
                                 <h5 class="m-0 text-white font-13" id="exampleModalLabel">
                                     PDF format
                                 </h5>
                             </div>
                             <div class="">
-                                <button button="button" class=" btn btn-dark text-white font-13"
-                                    @click="downloadPdf">Download Pdf<span class=" ms-2"><i
+                                <button button="button" class="btn btn-dark text-white font-13"
+                                    @click="downloadPdf">Download Pdf<span class="ms-2"><i
                                             class="bi bi-download"></i></span> </button>
                                 <button type="button" class="btn btn-dark text-white font-13" @click="closemodal"
                                     data-bs-dismiss="modal">Close
@@ -52,7 +53,7 @@
             </div>
         </div>
 
-        <FormPreview :blockArr="selectedForm" :formDescriptions="formDescriptions"  :childHeaders="childtableHeaders" :child-name="childName" />
+        <FormPreview :blockArr="selectedForm" :formDescriptions="formDescriptions" :childHeaders="childtableHeaders" />
 
 
     </div>
@@ -82,9 +83,11 @@ const businessUnit = computed(() => {
     return EzyBusinessUnit.value;
 });
 const sections = reactive([]);
+
+
 onMounted(() => {
     // fetchTable()
-    fetchCategory()
+    // fetchCategory()
 
 })
 
@@ -99,13 +102,14 @@ const filterObj = ref({
     owner_of_the_form: "",
     search: "",
 });
-
+const newChngedValue =  ref('')
 watch(
     businessUnit,
     (newVal) => {
         filterObj.value.business_unit = newVal;
 
         if (newVal.length) {
+            newChngedValue.value = newVal
             // console.log(newVal, "new value of business unit");
             // localStorage.setItem("Bu", filterObj.value.business_unit)
             tableData.value = []
@@ -115,8 +119,8 @@ watch(
     { immediate: true }
 );
 const tableheaders = ref([
-    { th: "Name", td_key: "name" },
     { th: "Form name", td_key: "form_name" },
+    { th: "Short Name", td_key: "form_short_name" },
     { th: "Form category", td_key: "form_category" },
     { th: "Owner of form", td_key: "owner_of_the_form" },
     { th: "Accessible departments", td_key: "accessible_departments" },
@@ -124,19 +128,12 @@ const tableheaders = ref([
 ]);
 
 const router = useRouter();
-const fieldMapping = ref({
-    // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
-    // invoice_date: { type: "date" },
-    form_name: { type: "input" },
-    form_category: { type: "select", options: [] },
-    owner_of_the_form: { type: "input" }
 
-});
 const selectedForm = ref(null);
 const actions = ref([
     { name: 'View form', icon: 'fa-solid fa-eye' },
     { name: 'Edit Form', icon: 'fa-solid fa-edit' },
-    { name: 'Download Print format', icon: 'fa-solid fa-download' },
+    // { name: 'Download Print format', icon: 'fa-solid fa-download' },
     { name: 'Raise Request', icon: 'fa-solid fa-check-circle' },
     // { name: 'In-active this form', icon: 'fa-solid fa-ban' },
     // { name: 'Edit accessibility to dept.', icon: 'fa-solid fa-users' },
@@ -144,25 +141,34 @@ const actions = ref([
     // { name: 'Download Print format', icon: 'fa-solid fa-download' },
 ]);
 const childtableHeaders = ref([]);
-const childName = ref("");
+
 function actionCreated(rowData, actionEvent) {
-    console.log(rowData, actionEvent,"ppp");
-    if (actionEvent.name === 'View form') {``
+    // console.log(rowData, actionEvent,"ppp");
+    if (actionEvent.name === 'View form') {
+
         if (rowData?.form_json) {
-            formDescriptions.value = { ...rowData };
-            // console.log(formDescriptions.value, "lllllllllll");
-            selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json).fields);
-            const parsedFormJson = JSON.parse(rowData?.form_json);
-            const tableName = parsedFormJson.fields.filter(
-          (field) => field.fieldtype === "Table"
-        );
-        childtableHeaders.value = JSON.parse(
-          rowData.form_json
-        ).child_table_fields;
-        childName.value = tableName[0]?.options.replace(/_/g, " ");
-            // console.log(selectedForm.value, "ooooo");
-            const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});
-            modal.show();
+            router.push({
+                name: "FormPreviewComp",
+                query: {
+                    routepath: route.path,
+                    form_short_name: rowData.form_short_name,
+                    business_unit: businessUnit.value
+
+                },
+            });
+            // formDescriptions.value = { ...rowData };
+            // // console.log(formDescriptions.value, "lllllllllll");
+            // selectedForm.value = rebuildToStructuredArray(JSON.parse(rowData?.form_json).fields);
+
+
+            // childtableHeaders.value = JSON.parse(
+            //     rowData.form_json
+            // ).child_table_fields;
+
+
+            // // console.log(selectedForm.value, "ooooo");
+            // const modal = new bootstrap.Modal(document.getElementById('formViewModal'), {});
+            // modal.show();
         } else {
             console.warn("There are no form fields");
             formCreation(rowData);
@@ -176,7 +182,7 @@ function actionCreated(rowData, actionEvent) {
 
         const dataObj = {
             "form_short_name": rowData.form_short_name,
-             business_unit:businessUnit.value
+            business_unit: businessUnit.value
 
         };
 
@@ -193,43 +199,44 @@ function actionCreated(rowData, actionEvent) {
         modal.show();
     }
     if (actionEvent.name === 'Raise Request') {
-    const parsedData = JSON.parse(rowData.form_json);
-    const storedData = localStorage.getItem("employeeData");
+        const parsedData = JSON.parse(rowData.form_json);
+        const storedData = localStorage.getItem("employeeData");
 
-    if (storedData) {
-        const designation = JSON.parse(storedData).designation;
-        console.log(designation);
+        if (storedData) {
+            const designation = JSON.parse(storedData).designation;
+            // console.log(designation);
 
-        const roles = parsedData.workflow[0].roles;
-        console.log(roles);
+            const roles = parsedData.workflow[0].roles;
+            // console.log(roles);
 
-        let hasAccess = false;
+            let hasAccess = false;
 
-        for (let i = 0; i < roles.length; i++) {
-            if (roles[i] === designation) {
-                hasAccess = true;
-                break;
+            for (let i = 0; i < roles.length; i++) {
+                if (roles[i] === designation) {
+                    hasAccess = true;
+                    break;
+                }
             }
-        }
 
-        if (hasAccess) {
-            router.push({
-                name: "RaiseRequest",
-                query: {
-                    routepath: route.path,
-                    selectedForm: rowData.form_short_name,
-                    business_unit: rowData.business_unit,
-                    
-                },
-            });
-        } else {
-            toast.info("You are not assigned to raise a request.");
+            if (hasAccess) {
+                router.push({
+                    name: "RaiseRequest",
+                    query: {
+                        routepath: route.path,
+                        selectedForm: rowData.form_short_name,
+                        business_unit: rowData.business_unit,
 
-        }
-    } else {
-        console.log("No employee data found in localStorage.");
+                    },
+                });
+            } else {
+                toast.info("You are not assigned to raise a request.");
+
+            }
+        } 
+        // else {
+        //     console.log("No employee data found in localStorage.");
+        // }
     }
-  }
     else if (actionEvent.name === 'Edit accessibility to dept.') {
         formCreation(rowData);
     }
@@ -261,17 +268,18 @@ function toggleFunction(rowData, rowIndex, event) {
             .catch((error) => {
                 console.error("Error updating toggle:", error);
             });
-    } else {
-        console.log("Action cancelled. Toggle remains unchanged.");
-    }
+    } 
+    // else {
+    //     console.log("Action cancelled. Toggle remains unchanged.");
+    // }
 }
 
 function downloadPdf() {
 
     const dataObj = {
         "form_short_name": formDescriptions.value.form_short_name,
-        "name": "",
-        business_unit:businessUnit.value
+        "name": null,
+        business_unit: businessUnit.value
     };
 
     axiosInstance.post(apis.download_pdf_form, dataObj)
@@ -314,60 +322,40 @@ const hideModal = () => {
     const modal = bootstrap.Modal.getInstance(document.getElementById('formViewModal'));
     modal.hide();
 };
-
+const timeout = ref(null);
 function inLineFiltersData(searchedData) {
+    clearTimeout(timeout.value); // Clear previous timeout
 
+    timeout.value = setTimeout(() => {
+        const filters = [];
 
-    //   // Initialize filters array
-    const filters = [];
+        tableheaders.value.forEach((header) => {
+            const key = header.td_key;
+            if (searchedData[key]) {
+                filters.push(key, "like", `%${searchedData[key]}%`);
+            }
+        });
 
-    //   // Loop through the tableheaders and build dynamic filters based on the `searchedData`
-    tableheaders.value.forEach((header) => {
-        const key = header.td_key;
-
-        //     // If there is a match for the key in searchedData, create a 'like' filter
-        if (searchedData[key]) {
-            filters.push(key, "like", `%${searchedData[key]}%`);
-        }
-        //     // Add filter for selected option
-        //     if (key === "selectedOption" && searchedData.selectedOption) {
-        //       filters.push([key, "=", searchedData.selectedOption]);
-        //     }
-        //     // Special handling for 'invoice_date' to create a 'Between' filter (if it's a date)
-        //     if (key === "invoice_date" && searchedData[key]) {
-        //       filters.push([key, "Between", [searchedData[key], searchedData[key]]]);
-        //     }
-
-        //     // Special handling for 'invoice_type' or 'irn_generated' to create an '=' filter
-        //     if ((key === "invoice_type" || key === "credit_irn_generated") && searchedData[key]) {
-        //       filters.push([key, "=", searchedData[key]]);
-        //     }
-    });
-
-
-    //   // Log filters to verify
-
-
-    //   // Once the filters are built, pass them to fetchData function
-    if (filters.length) {
-        fetchTable(filters);
-    }
-    else {
-        fetchTable();
-    }
-    //   fetchTotalRecords(filters);
+        fetchTable(filters.length ? filters : undefined);
+    }, 500); // Delay API call by 500ms
 }
-
 
 
 
 function formCreation(item = null) {
     if (item == null) {
-        router.push({ name: "FormStepper" });
+        router.push({
+            name: "FormStepper", query: {
+                routepath: route.path
+            },
+        });
     } else {
         router.push({
             name: "FormStepper",
             params: { paramid: item.name },
+            query: {
+                routepath: route.path
+            }
 
         });
     }
@@ -387,48 +375,48 @@ const PaginationLimitStart = ([itemsPerPage, start]) => {
 
 };
 
-async function fetchCategory() {
-    try {
-        // Fetch all department names
-        const queryParams = { fields: JSON.stringify(["name"]) };
-        const response = await axiosInstance.get(`${apis.resource}${doctypes.departments}`, { params: queryParams });
+// async function fetchCategory() {
+//     try {
+//         // Fetch all department names
+//         const queryParams = { fields: JSON.stringify(["name"]) };
+//         const response = await axiosInstance.get(`${apis.resource}${doctypes.departments}`, { params: queryParams });
 
-        if (response.data) {
-            const departments = response.data;
+//         if (response.data) {
+//             const departments = response.data;
 
-            // Fetch full details of each department (including child table)
-            const departmentDetailsPromises = departments.map(department =>
-                axiosInstance.get(`${apis.resource}${doctypes.departments}/${department.name}`)
-            );
+//             // Fetch full details of each department (including child table)
+//             const departmentDetailsPromises = departments.map(department =>
+//                 axiosInstance.get(`${apis.resource}${doctypes.departments}/${department.name}`)
+//             );
 
-            // Resolve all department requests
-            const detailedResponses = await Promise.all(departmentDetailsPromises);
-            const detailedDepartments = detailedResponses.map(res => res.data);
+//             // Resolve all department requests
+//             const detailedResponses = await Promise.all(departmentDetailsPromises);
+//             const detailedDepartments = detailedResponses.map(res => res.data);
 
-            // Extract all category names from child tables
-            const allCategories = [];
-            detailedDepartments.forEach(department => {
+//             // Extract all category names from child tables
+//             const allCategories = [];
+//             detailedDepartments.forEach(department => {
 
-                if (department.ezy_departments_items) {
-                    department.ezy_departments_items.forEach(child => {
-                        if (child.category) {
-                            allCategories.push(child.category);
-                        }
-                    });
-                } else {
-                    console.log("No child table found for:", department.name);
-                }
-            });
+//                 if (department.ezy_departments_items) {
+//                     department.ezy_departments_items.forEach(child => {
+//                         if (child.category) {
+//                             allCategories.push(child.category);
+//                         }
+//                     });
+//                 } else {
+//                     console.log("No child table found for:", department.name);
+//                 }
+//             });
 
 
-            // Remove duplicates and store in options
-            fieldMapping.value.form_category.options = [...new Set(allCategories)];
-            // console.log(fieldMapping.value.form_category.options, "======== Categories");
-        }
-    } catch (error) {
-        console.error("Error fetching categories:", error);
-    }
-}
+//             // Remove duplicates and store in options
+//             fieldMapping.value.form_category.options = [...new Set(allCategories)];
+//             // console.log(fieldMapping.value.form_category.options, "======== Categories");
+//         }
+//     } catch (error) {
+//         console.error("Error fetching categories:", error);
+//     }
+// }
 
 
 
@@ -437,8 +425,8 @@ const accessibleDepartments = ref([]);
 const ownerForms = ref([])
 function fetchTable(data) {
     const filters = [
-        ["business_unit", "like", `%${filterObj.value.business_unit}%`]
-        // ["form_status", "=", "Draft"]
+        ["business_unit", "like", `%${filterObj.value.business_unit}%`],
+        ["form_status", "=", "Created"]
     ];
     if (data) {
         filters.push(data)
@@ -450,7 +438,7 @@ function fetchTable(data) {
         filters: JSON.stringify(filters),
         limit_page_length: filterObj.value.limitPageLength,
         limit_start: filterObj.value.limit_start,
-        order_by: "`tabEzy Form Definitions`.`creation` desc"
+        order_by: "`tabEzy Form Definitions`.`enable` DESC, `tabEzy Form Definitions`.`creation` DESC"
     };
     const queryParamsCount = {
         fields: JSON.stringify(["count(name) AS total_count"]),
@@ -484,6 +472,13 @@ function fetchTable(data) {
             console.error("Error fetching ezyForms data:", error);
         });
 }
+
+const fieldMapping = computed(() => ({
+    form_name: { type: "input" },
+    form_short_name: { type: "input" },
+    form_category: { type: "input" },
+    owner_of_the_form: { type: "input" }
+}));
 
 </script>
 

@@ -1,11 +1,5 @@
 <template>
-  <div
-    class="modal fade"
-    id="formViewModal"
-    tabindex="-1"
-    aria-labelledby="exampleModalLabel"
-    aria-hidden="true"
-  >
+  <div class="modal fade" id="formViewModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
       <div class="modal-content">
         <div class="modal-header py-2 d-block bg-dark text-white">
@@ -21,13 +15,8 @@
             <div class="d-flex gap-2">
               <!-- Dropdown for selecting approver -->
               <div class="dropdown">
-                <button
-                  class="btn btn-dark text-white dropdown-toggle font-13"
-                  type="button"
-                  id="dropdownMenuButton"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                >
+                <button class="btn btn-dark text-white dropdown-toggle font-13" type="button" id="dropdownMenuButton"
+                  data-bs-toggle="dropdown" aria-expanded="false">
                   View as {{ selectedView }}
                 </button>
                 <!-- <ul class="dropdown-menu " aria-labelledby="dropdownMenuButton">
@@ -48,12 +37,7 @@
                   </li>
                 </ul>
               </div>
-              <button
-                type="button"
-                class="btn btn-dark text-white font-13"
-                @click="closemodal"
-                data-bs-dismiss="modal"
-              >
+              <button type="button" class="btn btn-dark text-white font-13" @click="closemodal" data-bs-dismiss="modal">
                 Close <i class="bi bi-x"></i>
               </button>
             </div>
@@ -62,131 +46,75 @@
 
         <div class="modal-body">
           <div class="card border-0">
-            <div
-              v-for="(blockItem, blockIndex) in displayedBlocks"
-              :key="blockIndex"
-              class="block-container"
-            >
+            <div v-for="(blockItem, blockIndex) in displayedBlocks" :key="blockIndex" class="block-container">
               <div class="d-flex justify-content-end align-items-center">
-                <span
-                  class="font-12 px-2 py-1"
-                  v-if="workFlowRoles[blockIndex]?.roles.length > 0"
-                >
+                <span class="font-12 px-2 py-1" v-if="workFlowRoles[blockIndex]?.roles.length > 0">
                   {{
                     blockIndex === 0
                       ? "Requestor"
                       : `Approver ${blockIndex}
-                                                                    `
+                  `
                   }}: <b>{{ workFlowRoles[blockIndex].roles.join(", ") }}</b>
                 </span>
               </div>
-              <div
-                v-for="(section, sectionIndex) in blockItem.sections"
-                :key="'preview-' + sectionIndex"
-                class="preview-section"
-              >
-                <div
-                  v-if="section.label"
-                  class="section-label d-flex justify-content-between"
-                >
+              <div v-for="(section, sectionIndex) in blockItem.sections" :key="'preview-' + sectionIndex"
+                class="preview-section">
+                <div v-if="section.label" class="section-label d-flex justify-content-between">
                   <h5 class="m-0 font-13">{{ section.label }}</h5>
                 </div>
                 <div class="px-2">
                   <div class="container-fluid">
-                    <div
-                      class="row"
-                      v-for="(row, rowIndex) in section.rows"
-                      :key="rowIndex"
-                    >
-                      <div
-                        v-for="(column, columnIndex) in row.columns"
-                        :key="'column-preview-' + columnIndex"
-                        class="col dynamicColumn"
-                      >
+                    <div class="row" v-for="(row, rowIndex) in section.rows" :key="rowIndex">
+                      <div v-for="(column, columnIndex) in row.columns" :key="'column-preview-' + columnIndex"
+                        class="col dynamicColumn">
                         <div v-if="column.label" class="p-3 border-bottom">
                           <h6 class="m-0 font-12">{{ column.label || "-" }}</h6>
                         </div>
                         <div class="mx-3 my-2">
-                          <div
-                            v-for="(field, fieldIndex) in column.fields"
-                            :key="'field-preview-' + fieldIndex"
-                          >
+                          <div v-for="(field, fieldIndex) in column.fields" :key="'field-preview-' + fieldIndex">
                             <div v-if="field.label">
-                              <label
-                                :for="
-                                  'field-' +
-                                  sectionIndex +
-                                  '-' +
-                                  columnIndex +
-                                  '-' +
-                                  fieldIndex
-                                "
-                              >
+                              <label :for="'field-' +
+                                sectionIndex +
+                                '-' +
+                                columnIndex +
+                                '-' +
+                                fieldIndex
+                                ">
                                 <span class="font-12">{{ field.label }}</span>
                                 <span class="ms-1 text-danger">{{
                                   field.reqd === 1 ? "*" : ""
                                 }}</span>
                               </label>
                               <!-- field.fieldtype == 'Select' || -->
-                              <template
-                                v-if="field.fieldtype == 'Table MultiSelect'"
-                              >
-                                <select
-                                  :multiple="
-                                    field.fieldtype == 'Table MultiSelect'
-                                  "
-                                  v-model="field.value"
-                                  class="form-select mb-2 font-13"
-                                >
-                                  <option
-                                    v-for="(
-                                      option, index
-                                    ) in field.options?.split('\n')"
-                                    :key="index"
-                                    :value="option"
-                                  >
+                              <template v-if="field.fieldtype == 'Table MultiSelect'">
+                                <select :multiple="field.fieldtype == 'Table MultiSelect'
+                                  " v-model="field.value" class="form-select mb-2 font-13">
+                                  <option v-for="(option, index
+                                  ) in field.options?.split('\n')" :key="index" :value="option">
                                     {{ option }}
                                   </option>
                                 </select>
                               </template>
-                              <template
-                                v-else-if="
-                                  field.fieldtype == 'Check' ||
-                                  field.fieldtype == 'radio' ||
-                                  field.fieldtype == 'Select'  
-                                "
-                              >
+                              <template v-else-if="
+                                field.fieldtype == 'Check' ||
+                                field.fieldtype == 'radio' ||
+                                field.fieldtype == 'Select' ||  field.fieldtype == 'Small Text'
+                              ">
                                 <div class="container-fluid">
                                   <div class="row">
-                                    <div
-                                      class="form-check col-4 mb-4"
-                                      v-for="(
-                                        option, index
-                                      ) in field?.options?.split('\n')"
-                                      :key="index"
-                                    >
-                                      <div
-                                        class="d-flex gap-2 align-items-center"
-                                      >
+                                    <div class="form-check col-4 mb-4" v-for="(
+option, index
+                                      ) in field?.options?.split('\n')" :key="index" :class="{ 'd-none': index === 0 }">
+                                      <div class="d-flex gap-2 align-items-center">
                                         <div>
-                                          <input
-                                            v-if="
-                                              field.fieldtype === 'Check' || field.fieldtype === 'Select' &&
-                                              index !== 0
-                                            "
-                                            class="form-check-input"
-                                            :type="field.fieldtype"
-                                            :name="option"
-                                            :id="option"
-                                            readonly
-                                          />
+                                          <input v-if="
+                                            field.fieldtype === 'Check' || field.fieldtype === 'Select' ||  field.fieldtype == 'Small Text' &&
+                                            index !== 0
+                                          " class="form-check-input" :type="field.fieldtype == 'Small Text' ? 'Checkbox':field.fieldtype " :name="option"
+                                            :id="option" readonly />
                                         </div>
                                         <div>
-                                          <label
-                                            class="form-check-label m-0"
-                                            :for="option"
-                                            >{{ option }}</label
-                                          >
+                                          <label class="form-check-label font-12 m-0" :for="option">{{ option }}</label>
                                         </div>
                                       </div>
                                     </div>
@@ -194,48 +122,27 @@
                                 </div>
                               </template>
                               <template v-else-if="field.fieldtype == 'Attach'">
-                                <input
-                                  type="file"
-                                  :id="
-                                    'field-' +
-                                    sectionIndex +
-                                    '-' +
-                                    columnIndex +
-                                    '-' +
-                                    fieldIndex
-                                  "
-                                  class="form-control font-10"
-                                  @change="handleFileChange($event, field)"
-                                  disabled
-                                />
+                                <input type="file" :id="'field-' +
+                                  sectionIndex +
+                                  '-' +
+                                  columnIndex +
+                                  '-' +
+                                  fieldIndex
+                                  " class="form-control font-10" @change="handleFileChange($event, field)" disabled />
                               </template>
                               <template v-else>
-                                <input
-                                  v-if="field.fieldtype === 'Int'"
-                                  type="number"
-                                  v-model="field.value"
-                                  readonly
-                                  class="form-control previewInputHeight font-10"
-                                />
-                                <input
-                                  v-if="field.fieldtype === 'Datetime'"
-                                  type="datetime-local"
-                                  v-model="field.value"
-                                  class="form-control previewInputHeight font-10"
-                                />
-                                <component
-                                  v-if="
-                                    field.fieldtype !== 'Datetime' &&
-                                    field.fieldtype !== 'Int'
-                                  "
-                                  readonly
-                                  :is="getFieldComponent(field.fieldtype)"
-                                  v-model="field.value"
-                                  :type="field.fieldtype"
-                                  class="form-control previewInputHeight font-10"
-                                />
+                                <input v-if="field.fieldtype === 'Int'" type="number" v-model="field.value" readonly
+                                  class="form-control previewInputHeight font-10" />
+                                <input v-if="field.fieldtype === 'Datetime'" type="datetime-local" v-model="field.value"
+                                  class="form-control previewInputHeight font-10" />
+                                <component v-if="
+                                  field.fieldtype !== 'Datetime' &&
+                                  field.fieldtype !== 'Int'
+                                " readonly :is="getFieldComponent(field.fieldtype)" v-model="field.value"
+                                  :type="field.fieldtype" class="form-control previewInputHeight font-10" />
                               </template>
                             </div>
+                            <span v-if="field.description !== 'Field'" class="font-11"><span class="fw-semibold">Description: </span>{{ field.description }}</span>
                           </div>
                         </div>
                       </div>
@@ -243,36 +150,43 @@
                   </div>
                 </div>
               </div>
-              <div v-if="blockIndex === 0 " class="mt-2 pb-3 mx-2">
-                <div v-for="(table, tableIndex) in props.tables" :key="tableIndex">
-    <div v-if="tableIndex === 0 && table.childName" class="mt-2 pb-3 mx-2">
-      <div>
-        <span class="font-13 fw-bold ps-1 tablename text-secondary">
-          {{ table.childName }}
-        </span>
-      </div>
-    </div>
-    <div class="tableborder-child">
-      <table class="table mt-2 table-striped">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th v-for="field in table.childHeaders" :key="field.fieldname">
-              {{ field.label }}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>{{ '-' }}</td>
-            <td v-for="(field, index) in table.childHeaders" :key="index">
-              <span>-</span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
+              <div v-if="blockIndex === 0" class="mt-2 pb-2 mx-2">
+
+
+                <div v-for="(table, tableName) in props.childHeaders" :key="tableName">
+                  <!-- Table Title -->
+                  <div class="mt-2 pb-1 mx-1">
+                    <span class="font-13 fw-bold ps-1 tablename text-secondary">
+                      {{ tableName.toString().replace(/_/g, " ") }}
+                    </span>
+                  </div>
+
+                  <!-- Table -->
+                  <div class="tableborder-child">
+                    <table class="table mt-2 table-striped">
+                      <thead>
+                        <tr>
+                          <th>#</th>
+                          <th v-for="field in table" :key="field.fieldname">
+                            {{ field.label }}
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>{{ '-' }}</td>
+                          <td v-for="(field, index) in table" :key="index">
+                            <span>-</span>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+
+
+
               </div>
             </div>
           </div>
@@ -299,10 +213,10 @@ const props = defineProps({
   childHeaders: {
     type: Object,
   },
-  childName: {
-    type: String,
-  },
+
 });
+
+
 
 const selectedView = ref("All"); // Default to Requestor
 const displayedBlocks = ref([]);
@@ -355,7 +269,6 @@ function setView(view) {
   displayedBlocks.value = filterBlocksByFieldname(view, props.blockArr);
   updateWorkFlowRoles();
 }
-
 function updateWorkFlowRoles() {
   let approverIndex = 0; // Keep track of approvers
 
@@ -382,12 +295,13 @@ function updateWorkFlowRoles() {
   });
 }
 
+
 //  Filter blocks based on the view
 function filterBlocksByFieldname(view, blocks) {
   if (!blocks || !Array.isArray(blocks)) return []; // Ensure `blocks` is valid
   if (view === 'All') {
-        return blocks; // Show all blocks
-    }
+    return blocks; // Show all blocks
+  }
 
   const blockOrder = {
     requestor: ["requestor"],
@@ -605,6 +519,7 @@ table {
   border-collapse: collapse;
   background-color: #000;
 }
+
 th {
   background-color: #f2f2f2 !important;
   text-align: left;
@@ -615,6 +530,7 @@ th {
 td {
   font-size: 12px;
 }
+
 .tableborder-child {
   border: 1px solid #ccc !important;
   border-radius: 10px !important;

@@ -2,14 +2,15 @@
   <div>
     <div class="d-flex justify-content-between align-items-center py-2">
       <div>
-        <h1 class="m-0 font-13">Requests raised for me</h1>
+        <h1 class="m-0 font-13">Requests raised by me</h1>
         <p class="m-0 font-11 pt-1">{{ totalRecords }} request</p>
       </div>
     </div>
     <div class="mt-2">
-      <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" actionType="dropdown" isCheckbox="true"
-        :actions="actions" @actionClicked="actionCreated" isFiltersoption="true" :field-mapping="fieldMapping"
-        @updateFilters="inLineFiltersData" />
+      <!-- actionType="dropdown" -->
+      <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" viewType="viewPdf" isCheckbox="true"
+        @cell-click="viewPreview" :actions="actions" @actionClicked="actionCreated" isFiltersoption="true"
+        :field-mapping="fieldMapping" @updateFilters="inLineFiltersData" />
       <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
         @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
     </div>
@@ -27,9 +28,9 @@
           <div class="modal-header py-2 d-block">
             <div class="d-flex justify-content-between align-items-center">
               <div>
-                <h5 class="m-0 font-13" id="viewRequest">Request Id: {{ selectedRequest.name }}
+                <h5 class="m-0 font-13" id="viewRequest">Request Id: {{ selectedRequest.name?.replace(/_/g, " ") }}
                 </h5>
-                
+
               </div>
               <div class="">
                 <button button="button" class="btn btn-white text-dark font-13" @click="downloadPdf">
@@ -43,11 +44,8 @@
             </div>
           </div>
           <div class="modal-body approvermodalbody">
-            <ApproverPreview
-              :blockArr="showRequest" :childHeaders="tableHeaders" :childData="responseData" :readonly-for="true"
-              :current-level="totalLevels"
-              @updateField="updateFormData"
-            />
+            <!-- <ApproverPreview :blockArr="showRequest" :childHeaders="tableHeaders" :childData="responseData"
+               :current-level="totalLevels" @updateField="updateFormData" /> -->
             <!-- <div v-if="tableName" class="mt-2">
               <div>
                 <span class="font-13 fw-bold">{{ tableName }}</span>
@@ -98,7 +96,7 @@
                     <span v-if="index == 0">you</span>
                     <span v-else>
 
-                    {{ item.user_name }}
+                      {{ item.user_name }}
                     </span>
                   </strong>
                   ({{ item.role }})
@@ -118,16 +116,17 @@
               <!-- <button type="button" class="btn btn-white text-dark  font-13" @click="closemodal"
                 data-bs-dismiss="modal">Close
                 <i class="bi bi-x"></i></button> -->
-              <div v-if="selectedRequestStatus == 'Request Raised'">
-                  <button :disabled="loading" type="submit" class="btn edit-btn"
+              <!-- <div v-if="selectedRequestStatus == 'Request Raised'">
+                <button :disabled="loading" type="submit" class="btn edit-btn"
                   @click="approvalCancelFn('Request Cancelled')">
                   <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                  <span v-if="!loading" ><i class="bi bi-check-lg font-11 me-2"></i><span class="font-10">Cancel Request</span></span>
+                  <span v-if="!loading"><i class="bi bi-check-lg font-11 me-2"></i><span class="font-10">Cancel
+                      Request</span></span>
                 </button>
 
-              </div>
+              </div> -->
             </div>
-            <div v-if="requestcancelled || selectedRequestStatus == 'Request Raised'">
+            <div v-if="selectedRequestStatus == 'Request Raised'">
               <ButtonComp type="button" class="border-1 edit-btn text-nowrap font-10" @click="handleEditClick"
                 name="Edit Form" />
             </div>
@@ -182,13 +181,15 @@ import {
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
 import PaginationComp from "../../Components/PaginationComp.vue";
 import { rebuildToStructuredArray } from "../../shared/services/field_format";
-import ApproverPreview from "../../Components/ApproverPreview.vue";
+// import ApproverPreview from "../../Components/ApproverPreview.vue";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import { useRoute, useRouter } from "vue-router";
 const businessUnit = computed(() => {
   return EzyBusinessUnit.value;
 });
+const router = useRouter();
+
 const newBusinessUnit = ref({ business_unit: "" });
 
 const filterObj = ref({ limitPageLength: 20, limit_start: 0 });
@@ -210,12 +211,11 @@ const tableHeaders = ref([]);
 const tableName = ref("");
 const responseData = ref([]);
 const route = useRoute();
-const router = useRouter();
 
 const loading = ref(false);
 
 const tableheaders = ref([
-  // { th: "Request ID", td_key: "name" },
+  { th: "Request ID", td_key: "name" }, 
   { th: "Form name", td_key: "doctype_name" },
   // { th: "Form category", td_key: "doctype_name" },
   { th: "Owner of form", td_key: "role" },
@@ -223,23 +223,6 @@ const tableheaders = ref([
   { th: "Approval Status", td_key: "status" },
   { th: "Workflow Status", td_key: "assigned_to_users" },
 ]);
-const fieldMapping = ref({
-  // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
-  status: {
-    type: "select",
-    options: [
-      "Request Raised",
-      "In Progress",
-      "Completed",
-      "Request Cancelled",
-    ],
-  },
-  // name: { type: "input" },
-  doctype_name: { type: "input" },
-  // requested_on: { type: "date" },
-  role: { type: "input" },
-
-});
 
 const actions = ref([
   { name: "View Request", icon: "fa-solid fa-eye" },
@@ -249,6 +232,21 @@ const actions = ref([
   // { name: 'Edit Form', icon: 'fa-solid fa-edit' },
 ]);
 
+function viewPreview(data) {
+  router.push({
+    name: "ApproveRequest",
+    query: {
+      routepath: route.path,
+      name: data.name,
+      doctype_name: data.doctype_name,
+      business_unit:data.property,
+      status:data.status,
+      type: "myforms",
+      readOnly: 'true'
+
+    },
+  });
+}
 function handleEditClick() {
   const modalElement = document.getElementById("viewRequest");
   if (modalElement) {
@@ -288,6 +286,7 @@ function actionCreated(rowData, actionEvent) {
       tableHeaders.value = JSON.parse(
         selectedRequest.value?.json_columns
       ).child_table_fields;
+      // console.log(tableHeaders.value, "lll");
 
       // console.log(tableHeaders.value, "req");
 
@@ -335,17 +334,18 @@ function actionCreated(rowData, actionEvent) {
               .then((res) => {
                 // console.log(`Data for :`, res.data);
                 // Identify the child table key dynamically
-                const childTableKey = Object.keys(res?.data).find((key) =>
+                const childTables = Object.keys(res.data).filter((key) =>
                   Array.isArray(res.data[key])
                 );
-                tableName.value = childTableKey?.replace(/_/g, " ");
-                // console.log(tableName.value);
+                if (childTables.length) {
+                  responseData.value = {};
 
-                if (childTableKey) {
-                  responseData.value = res.data[childTableKey];
-                  tableRows.value = responseData.value; // Assign table rows
-                  // console.log(responseData.value, "Dynamic Child Table Data");
+                  childTables.forEach((tableKey) => {
+                    responseData.value[tableKey] = res.data[tableKey] || [];
+                  });
+                  // console.log("Response Data:", responseData.value);
                 }
+
               })
               .catch((error) => {
                 console.error(`Error fetching data for :`, error);
@@ -403,7 +403,7 @@ function actionCreated(rowData, actionEvent) {
           const dataObj = {
             form_short_name: rowData.doctype_name,
             name: doctypeForm.value[0].name,
-            business_unit:businessUnit.value
+            business_unit: businessUnit.value
           };
 
           axiosInstance
@@ -481,7 +481,7 @@ function downloadPdf() {
   const dataObj = {
     form_short_name: selectedRequest.value.doctype_name,
     name: doctypeForm.value[0]?.name,
-    business_unit:businessUnit.value
+    business_unit: businessUnit.value
 
   };
 
@@ -537,45 +537,6 @@ function ApproverFormSubmission(dataObj, type) {
     });
 }
 
-function approvalCancelFn( type) {
-  let data = {
-    action: type,
-    property: selectedRequest.value.property,
-    doctype: selectedRequest.value.doctype_name,
-    current_level: selectedRequest.value.current_level,
-    request_id: selectedRequest.value.name,
-    reason: "Request Cancelled",
-    files: [],
-    url_for_cancelling_id: "",
-    // "action": type,
-    // "cluster_name": null,
-    // https://ezyrecon.ezyinvoicing.com/home/wf-requests
-  };
-  loading.value = true;
-
-  // need to check this api not working
-  axiosInstance
-    .post(apis.wf_cancelling_request, data)
-    .then((response) => {
-      if (response?.message?.success) {
-        toast.success(`${type}`, { autoClose: 1000 });
-        const modal = bootstrap.Modal.getInstance(
-          document.getElementById("viewRequest")
-        );
-        loading.value = false;
-        modal.hide();
-        receivedForMe();
-      }
-    })
-    .catch((error) => {
-      console.error("Error fetching data:", error);
-      toast.error(`Cancell failed${type}`, { autoClose: 1000 });
-
-    })
-    .finally(() => {
-      loading.value = false; // Ensure loading is false regardless of success or failure
-    });
-}
 
 // // Function to handle form submission
 // const ApproverFormSubmission = () => {
@@ -640,42 +601,34 @@ const PaginationLimitStart = ([itemsPerPage, start]) => {
   filterObj.value.limit_start = start;
   receivedForMe();
 };
+const timeout = ref(null);
+
 function inLineFiltersData(searchedData) {
-  //   // Initialize filters array
-  const filters = [];
+    clearTimeout(timeout.value); // Clear previous timeout
 
-  //   // Loop through the tableheaders and build dynamic filters based on the `searchedData`
-  tableheaders.value.forEach((header) => {
-    const key = header.td_key;
+    timeout.value = setTimeout(() => {
+        // Initialize filters array
+        const filters = [];
 
-    //     // If there is a match for the key in searchedData, create a 'like' filter
-    if (searchedData[key]) {
-      filters.push(key, "like", `%${searchedData[key]}%`);
-    }
-    //     // Add filter for selected option
-    //     if (key === "selectedOption" && searchedData.selectedOption) {
-    //       filters.push([key, "=", searchedData.selectedOption]);
-    //     }
-    //     // Special handling for 'invoice_date' to create a 'Between' filter (if it's a date)
-    //     if (key === "invoice_date" && searchedData[key]) {
-    //       filters.push([key, "Between", [searchedData[key], searchedData[key]]]);
-    //     }
+        // Loop through the table headers and build dynamic filters
+        tableheaders.value.forEach((header) => {
+            const key = header.td_key;
 
-    //     // Special handling for 'invoice_type' or 'irn_generated' to create an '=' filter
-    //     if ((key === "invoice_type" || key === "credit_irn_generated") && searchedData[key]) {
-    //       filters.push([key, "=", searchedData[key]]);
-    //     }
-  });
+            if (searchedData[key]) {
+                filters.push(key, "like", `%${searchedData[key]}%`);
+            }
+        });
 
-  //   // Log filters to verify
+        // Call receivedForMe with or without filters
+        if (filters.length) {
+            receivedForMe(filters);
+        } else {
+            receivedForMe();
+        }
 
-  //   // Once the filters are built, pass them to fetchData function
-  if (filters.length) {
-    receivedForMe(filters);
-  } else {
-    receivedForMe();
-  }
-  //   fetchTotalRecords(filters);
+        // Optionally call fetchTotalRecords
+        // fetchTotalRecords(filters);
+    }, 500); // Adjust debounce delay as needed
 }
 
 function receivedForMe(data) {
@@ -723,19 +676,49 @@ function receivedForMe(data) {
       params: queryParams,
     })
     .then((res) => {
-      tableData.value = res.data;
-      idDta.value = [...new Set(res.data.map((id) => id.name))];
-      docTypeName.value = [
-        ...new Set(res.data.map((docTypeName) => docTypeName.doctype_name)),
-      ];
-      statusOptions.value = [
-        ...new Set(res.data.map((status) => status.status)),
-      ];
+      const newData = res.data;
+      if (filterObj.value.limit_start === 0) {
+        tableData.value = newData;
+
+        idDta.value = [...new Set(newData.map((id) => id.name))];
+        docTypeName.value = [
+          ...new Set(newData.map((docTypeName) => docTypeName.doctype_name)),
+        ];
+        statusOptions.value = [
+          ...new Set(newData.map((status) => status.status)),
+        ];
+      }
+      else{
+        tableData.value = tableData.value.concat(newData)
+      }
+
+
     })
     .catch((error) => {
       console.error("Error fetching records:", error);
     });
 }
+
+const fieldMapping = computed(() => ({
+
+  // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
+  status: {
+    type: "select",
+    options: [
+      "Request Raised",
+      "In Progress",
+      "Completed",
+      "Request Cancelled",
+    ],
+  },
+  name: { type: "input" },
+  doctype_name: { type: "input" },
+  // requested_on: { type: "date" },
+  role: { type: "input" },
+
+}))
+
+
 
 watch(
   businessUnit,
@@ -857,6 +840,7 @@ onMounted(() => {
 table {
   border-collapse: collapse;
 }
+
 th {
   background-color: #f2f2f2 !important;
   text-align: left;

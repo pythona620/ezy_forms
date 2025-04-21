@@ -7,34 +7,14 @@
       </div>
     </div>
     <div class="mt-2">
-      <GlobalTable
-        :tHeaders="tableheaders"
-        :tData="tableData"
-        isAction="true"
-        actionType="dropdown"
-        isCheckbox="true"
-        :actions="actions"
-        @actionClicked="actionCreated"
-        isFiltersoption="true"
-        :field-mapping="fieldMapping"
-        @updateFilters="inLineFiltersData"
-      />
-      <PaginationComp
-        :currentRecords="tableData.length"
-        :totalRecords="totalRecords"
-        @updateValue="PaginationUpdateValue"
-        @limitStart="PaginationLimitStart"
-      />
+      <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" viewType="viewPdf" isCheckbox="true"
+        :actions="actions" @actionClicked="actionCreated" isFiltersoption="true" :field-mapping="fieldMapping"
+        @cell-click="viewPreview" @updateFilters="inLineFiltersData" />
+      <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
+        @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
     </div>
-    <div
-      class="modal fade"
-      id="viewRequest"
-      data-bs-backdrop="static"
-      data-bs-keyboard="false"
-      tabindex="-1"
-      aria-labelledby="viewRequestLabel"
-      aria-hidden="true"
-    >
+    <div class="modal fade" id="viewRequest" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+      aria-labelledby="viewRequestLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
           <!-- <div class="modal-header">
@@ -51,32 +31,21 @@
                 </h5>
               </div>
               <div class="">
-                <button
-                  button="button"
-                  class="btn btn-white text-dark font-13"
-                  @click="downloadPdf"
-                >
-                  Download Pdf<span class="ms-2"
-                    ><i class="bi bi-download"></i
-                  ></span>
+                <button v-if="selectedRequest.status === 'Completed'" button="button"
+                  class="btn btn-white text-dark font-13" @click="downloadPdf">
+                  Download Pdf<span class="ms-2"><i class="bi bi-download"></i></span>
                 </button>
-                <button
-                  type="button"
-                  class="btn btn-white text-dark font-13"
-                  @click="closemodal"
-                  data-bs-dismiss="modal"
-                >
+                <button type="button" class="btn btn-white text-dark font-13" @click="closemodal"
+                  data-bs-dismiss="modal">
                   Close <i class="bi bi-x"></i>
                 </button>
               </div>
             </div>
           </div>
           <div class="modal-body approvermodalbody">
-            <ApproverPreview
-              :blockArr="showRequest" :childHeaders="tableHeaders" :childData="responseData" :readonly-for="true"
-              :current-level="totalLevels"
-              @updateField="updateFormData"
-            />
+
+            <!-- <ApproverPreview :blockArr="showRequest" :childHeaders="tableHeaders" :childData="responseData"
+              :readonly-for="'true'" :current-level="totalLevels" @updateField="updateFormData" /> -->
             <!-- <div v-if="tableName" class="mt-2">
               <div>
                 <span class="font-13 fw-bold">{{ tableName }}</span>
@@ -114,20 +83,15 @@
             </div> -->
           </div>
           <div class="activity-log-container">
-            <div
-              v-for="(item, index) in activityData"
-              :key="index"
-              class="activity-log-item"
-              :class="{ 'last-item': index === activityData.length - 1 }"
-            >
+            <div v-for="(item, index) in activityData" :key="index" class="activity-log-item"
+              :class="{ 'last-item': index === activityData.length - 1 }">
               <div class="activity-log-dot"></div>
               <div class="activity-log-content">
                 <p class="font-12 mb-1">
                   On
                   <strong class="strong-content">{{
                     formatDate(item.creation)
-                  }}</strong
-                  >,
+                  }}</strong>,
                   <strong class="strong-content">
                     <!-- {{ item.user_name }} -->
                     you
@@ -139,8 +103,7 @@
                   the request with the comments:
                   <strong class="strong-content">{{
                     item.reason || "N/A"
-                  }}</strong
-                  >.
+                  }}</strong>.
                 </p>
               </div>
             </div>
@@ -168,13 +131,7 @@
         </div>
       </div>
     </div>
-    <div
-      class="modal fade"
-      id="pdfView"
-      tabindex="-1"
-      aria-labelledby="pdfViewLabel"
-      aria-hidden="true"
-    >
+    <div class="modal fade" id="pdfView" tabindex="-1" aria-labelledby="pdfViewLabel" aria-hidden="true">
       <div class="modal-dialog modal-xl">
         <div class="modal-content">
           <div class="modal-header py-2 d-block bg-dark text-white">
@@ -185,21 +142,12 @@
                 </h5>
               </div>
               <div class="">
-                <button
-                  button="button"
-                  class="btn btn-dark text-white font-13"
-                  @click="downloadPdf"
-                >
-                  Download Pdf<span class="ms-2"
-                    ><i class="bi bi-download"></i
-                  ></span>
+                <button v-if="selectedRequest.status === 'Completed'" button="button"
+                  class="btn btn-dark text-white font-13" @click="downloadPdf">
+                  Download Pdf<span class="ms-2"><i class="bi bi-download"></i></span>
                 </button>
-                <button
-                  type="button"
-                  class="btn btn-dark text-white font-13"
-                  @click="closemodal"
-                  data-bs-dismiss="modal"
-                >
+                <button type="button" class="btn btn-dark text-white font-13" @click="closemodal"
+                  data-bs-dismiss="modal">
                   Close <i class="bi bi-x"></i>
                 </button>
               </div>
@@ -234,13 +182,16 @@ import { rebuildToStructuredArray } from "../../shared/services/field_format";
 import ApproverPreview from "../../Components/ApproverPreview.vue";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
-import router from "../../router";
+// import router from "../../router";
+import { useRoute, useRouter } from "vue-router";
 const businessUnit = computed(() => {
   return EzyBusinessUnit.value;
 });
 const newBusinessUnit = ref({ business_unit: "" });
+const route = useRoute();
+const router = useRouter();
 
-const filterObj = ref({ limitPageLength: "None", limit_start: 0 });
+const filterObj = ref({ limitPageLength: 20, limit_start: 0 });
 const totalRecords = ref(0);
 const selectedRequest = ref({});
 const showRequest = ref(null);
@@ -259,16 +210,18 @@ const tableName = ref("");
 const responseData = ref([]);
 
 const tableheaders = ref([
-  // { th: "Request ID", td_key: "name" },
+  { th: "Request ID", td_key: "name" },
   { th: "Form name", td_key: "doctype_name" },
   // { th: "Form category", td_key: "doctype_name" },
   { th: "Owner of form", td_key: "role" },
   { th: "Requested on", td_key: "requested_on" },
   // { th: "Total Levels", td_key: "total_levels" },
   { th: "Approval Status", td_key: "status" },
+  { th: "Workflow Status", td_key: "assigned_to_users" },
+
 ]);
 const fieldMapping = ref({
-  // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
+  name: { type: "input" },
   status: {
     type: "select",
     options: [
@@ -327,7 +280,7 @@ function actionCreated(rowData, actionEvent) {
         selectedRequest.value?.json_columns
       ).child_table_fields;
 
-      console.log(tableHeaders.value, "req");
+      // console.log(tableHeaders.value, "req");
 
       // console.log(selectedRequest.value,"0000");
       // Rebuild the structured array from JSON
@@ -355,7 +308,7 @@ function actionCreated(rowData, actionEvent) {
         .then((res) => {
           if (res.data) {
             doctypeForm.value = res.data;
-            console.log(typeof doctypeForm.value, "doctype", typeof showRequest.value);
+            // console.log(typeof doctypeForm.value, "doctype", typeof showRequest.value);
             // Map values from doctypeForm to showRequest fields
             mapFormFieldsToRequest(doctypeForm.value[0], showRequest.value);
             axiosInstance
@@ -371,18 +324,16 @@ function actionCreated(rowData, actionEvent) {
                 `${apis.resource}${selectedRequest.value.doctype_name}/${res.data[0].name}`
               )
               .then((res) => {
-                console.log(`Data for :`, res.data);
-                // Identify the child table key dynamically
-                const childTableKey = Object.keys(res.data).find((key) =>
+                const childTables = Object.keys(res.data).filter((key) =>
                   Array.isArray(res.data[key])
                 );
-                tableName.value = childTableKey.replace(/_/g, " ");
-                console.log(tableName.value);
+                if (childTables.length) {
+                  responseData.value = {};
 
-                if (childTableKey) {
-                  responseData.value = res.data[childTableKey];
-                  tableRows.value = responseData.value; // Assign table rows
-                  console.log(responseData.value, "Dynamic Child Table Data");
+                  childTables.forEach((tableKey) => {
+                    responseData.value[tableKey] = res.data[tableKey] || [];
+                  });
+                  // console.log("Response Data:", responseData.value);
                 }
               })
               .catch((error) => {
@@ -441,7 +392,7 @@ function actionCreated(rowData, actionEvent) {
           const dataObj = {
             form_short_name: rowData.doctype_name,
             name: doctypeForm.value[0].name,
-            business_unit:businessUnit.value
+            business_unit: businessUnit.value
 
           };
 
@@ -463,6 +414,21 @@ function actionCreated(rowData, actionEvent) {
     modal.show();
   }
 }
+
+
+function viewPreview(data) {
+  router.push({
+    name: "ApproveRequest",
+    query: {
+      routepath: route.path,
+      name: data.name,
+      doctype_name: data.doctype_name,
+      type: 'myteam',
+      readOnly: 'true'
+    },
+  });
+}
+
 function closemodal() {
   responseData.value = [];
   tableName.value = "";
@@ -494,28 +460,7 @@ const formatAction = (action) => {
   };
   return actionMap[action] || action.toLowerCase();
 };
-// function downloadPdf() {
 
-//   const dataObj = {
-//     "form_short_name": selectedRequest.value.doctype_name,
-//     "name": doctypeForm.value[0].name
-//   };
-
-//   axiosInstance.post(apis.download_pdf_form, dataObj)
-//     .then((response) => {
-
-//       // Assuming 'domain' contains the base URL like 'https://example.com/api/'
-//       let pdfUrl = domain + response.message;
-
-//       // Remove 'api' from the URL if present
-//       pdfUrl = pdfUrl.replace('/api', '');
-
-//       window.open(pdfUrl);
-//     })
-//     .catch((error) => {
-//       console.error("Error fetching data:", error);
-//     });
-// }
 function downloadPdf() {
   const dataObj = {
     form_short_name: selectedRequest.value.doctype_name,
@@ -547,99 +492,8 @@ const updateFormData = (fieldValues) => {
   formData.value = formData.value.concat(fieldValues);
 };
 
-function ApproverFormSubmission(dataObj, type) {
-  let form = {};
-  form["doctype"] = selectedRequest.value.doctype_name;
-  form["company_field"] = selectedRequest.value.property;
-  form["name"] = doctypeForm.value.name;
-  if (emittedFormData.value.length) {
-    emittedFormData.value.map((each) => {
-      form[each.fieldname] = each.value;
-    });
-  }
 
-  // form['form_json']
-  const formData = new FormData();
-  formData.append("doc", JSON.stringify(form));
-  formData.append("action", "Save");
-  axiosInstance
-    .post(apis.savedocs, formData)
-    .then((response) => {
-      if (response?.docs) {
-        approvalCancelFn(dataObj, type);
-      }
-    })
-    .catch((error) => {
-      console.error("Error fetching data:", error);
-    });
-}
 
-function approvalCancelFn(dataObj, type) {
-  let data = {
-    property: selectedRequest.value.property,
-    doctype: selectedRequest.value.doctype_name,
-    current_level: selectedRequest.value.current_level,
-    request_id: selectedRequest.value.name,
-    reason: ApproverReason.value,
-    files: [],
-    url_for_cancelling_id: "",
-    // "action": type,
-    // "cluster_name": null,
-    // https://ezyrecon.ezyinvoicing.com/home/wf-requests
-  };
-
-  // need to check this api not working
-  axiosInstance
-    .post(apis.wf_cancelling_request, data)
-    .then((response) => {
-      if (response?.message?.success) {
-        toast.success(`${type}`, { autoClose: 1000 });
-        const modal = bootstrap.Modal.getInstance(
-          document.getElementById("viewRequest")
-        );
-        modal.hide();
-        receivedForMe();
-      }
-    })
-    .catch((error) => {
-      console.error("Error fetching data:", error);
-    });
-}
-
-// // Function to handle form submission
-// const ApproverFormSubmission = () => {
-
-//   // if (emittedFormData.value.length) {
-//   //       emittedFormData.value.map((each) => {
-//   //           form[each.fieldname] = each.value
-//   //       })
-//   //   }
-
-//   let data = {
-//     "property": selectedRequest.value.property,
-//     "doctype": selectedRequest.value.doctype_name,
-//     "request_ids": selectedRequest.value.name,
-//     "reason": "",
-//     "action": selectedRequest.value.action,
-//     "files": "[]",
-//     "cluster_name": null,
-//     "url_for_approval_id": '',
-//     // https://ezyrecon.ezyinvoicing.com/home/wf-requests
-//     "current_level": selectedRequest.value.current_level
-//   }
-
-//   // axiosInstance.post(apis.requestApproval, { request_details: [data] })
-//   //   .then((response) => {
-
-//   toast.success("Rquest Approved", { autoClose: 1000 })
-//   const modal = bootstrap.Modal.getInstance(document.getElementById('viewRequest'));
-//   modal.hide();
-//   // })
-//   // .catch((error) => {
-//   //   console.error("Error fetching data:", error);
-//   // });
-
-// };
 
 function mapFormFieldsToRequest(doctypeData, showRequestData) {
   showRequestData.forEach((block) => {
@@ -669,42 +523,33 @@ const PaginationLimitStart = ([itemsPerPage, start]) => {
   filterObj.value.limit_start = start;
   receivedForMe();
 };
+const timeout = ref(null);
+
 function inLineFiltersData(searchedData) {
-  //   // Initialize filters array
-  const filters = [];
+    // Clear the previous timeout to prevent multiple API calls while typing
+    clearTimeout(timeout.value);
 
-  //   // Loop through the tableheaders and build dynamic filters based on the `searchedData`
-  tableheaders.value.forEach((header) => {
-    const key = header.td_key;
+    // Set a new timeout to delay the API call
+    timeout.value = setTimeout(() => {
+        // Initialize filters array
+        const filters = [];
 
-    //     // If there is a match for the key in searchedData, create a 'like' filter
-    if (searchedData[key]) {
-      filters.push(key, "like", `%${searchedData[key]}%`);
-    }
-    //     // Add filter for selected option
-    //     if (key === "selectedOption" && searchedData.selectedOption) {
-    //       filters.push([key, "=", searchedData.selectedOption]);
-    //     }
-    //     // Special handling for 'invoice_date' to create a 'Between' filter (if it's a date)
-    //     if (key === "invoice_date" && searchedData[key]) {
-    //       filters.push([key, "Between", [searchedData[key], searchedData[key]]]);
-    //     }
+        // Loop through the table headers and build dynamic filters
+        tableheaders.value.forEach((header) => {
+            const key = header.td_key;
 
-    //     // Special handling for 'invoice_type' or 'irn_generated' to create an '=' filter
-    //     if ((key === "invoice_type" || key === "credit_irn_generated") && searchedData[key]) {
-    //       filters.push([key, "=", searchedData[key]]);
-    //     }
-  });
+            if (searchedData[key]) {
+                filters.push(key, "like", `%${searchedData[key]}%`);
+            }
+        });
 
-  //   // Log filters to verify
-
-  //   // Once the filters are built, pass them to fetchData function
-  if (filters.length) {
-    receivedForMe(filters);
-  } else {
-    receivedForMe();
-  }
-  //   fetchTotalRecords(filters);
+        // Call receivedForMe with or without filters
+        if (filters.length) {
+            receivedForMe(filters);
+        } else {
+            receivedForMe();
+        }
+    }, 500); // Adjust debounce delay as needed (e.g., 500ms)
 }
 
 function receivedForMe(data) {
@@ -714,7 +559,7 @@ function receivedForMe(data) {
     ["property", "like", `%${newBusinessUnit.value.business_unit}%`],
   ];
   // ["requested_by", "like", EmpRequestMail.emp_mail_id],
-  
+
   if (data) {
     filters.push(data);
   }
@@ -752,14 +597,21 @@ function receivedForMe(data) {
       params: queryParams,
     })
     .then((res) => {
-      tableData.value = res.data;
-      idDta.value = [...new Set(res.data.map((id) => id.name))];
-      docTypeName.value = [
-        ...new Set(res.data.map((docTypeName) => docTypeName.doctype_name)),
-      ];
-      statusOptions.value = [
-        ...new Set(res.data.map((status) => status.status)),
-      ];
+      const newData = res.data;
+      if(filterObj.value.limit_start === 0){
+        tableData.value = newData;
+
+        idDta.value = [...new Set(res.data.map((id) => id.name))];
+        docTypeName.value = [
+          ...new Set(res.data.map((docTypeName) => docTypeName.doctype_name)),
+        ];
+        statusOptions.value = [
+          ...new Set(res.data.map((status) => status.status)),
+        ];
+      }
+      else{
+        tableData.value = tableData.value.concat(newData)
+      }
     })
     .catch((error) => {
       console.error("Error fetching records:", error);
@@ -885,6 +737,7 @@ onMounted(() => {
 table {
   border-collapse: collapse;
 }
+
 th {
   background-color: #f2f2f2 !important;
   text-align: left;

@@ -1,0 +1,1450 @@
+<template>
+  <div class="position-relative">
+    <!-- <div class=" back-to-same">
+  
+        <div class="container-fluid  p-0">
+          <div class="backtofromPage asset_request px-2 py-2">
+            <router-link :to="backTo" class="text-decoration-none text-dark font-13"><span> <i
+                  class="bi bi-arrow-left px-2"></i></span>Back</router-link>
+          </div>
+        </div>
+      </div> -->
+
+    <div v-if="expiryToken">
+      <div v-if="approvedform" class="approve_height">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-3"></div>
+            <div class="col-6">
+              <div class="mt-1">
+                <div class="text-center">
+                  <div class="card border-0 shadow-none">
+                    <div class="card-body pb-2 d-flex gap-3 align-items-center justify-content-center">
+                      <h5 class="card-title">{{ selectedData.doctype_name }}</h5>
+                      <span v-if="tableData?.status === 'Completed'"><i
+                          class="bi approved-icon bi-check2-circle "></i></span>
+                      <span v-if="tableData?.status === 'Request Cancelled'"><i
+                          class="bi rejected-icon bi-x-circle"></i></span>
+                    </div>
+                  </div>
+                </div>
+                <div class="position-relative ">
+                  <div class="requestPreviewDiv pb-5">
+                    <ApproverPreview :blockArr="showRequest" :childData="responseData"
+                      :current-level="selectedcurrentLevel" :readonly-for="selectedData.readOnly"
+                      :childHeaders="tableHeaders" :employee-data="employeeData" @updateField="updateFormData" />
+
+                  </div>
+
+                  <div v-if="selectedData.type == 'myforms' && tableData.status == 'Request Raised'"
+                    class="d-flex justify-content-end approveBtns">
+                    <button type="submit" class="btn Edit_btn" @click.prevent="EditformSubmission()">
+                      <span v-if="loading" class="spinner-border spinner-border-sm" role="status"
+                        aria-hidden="true"></span>
+                      <span v-if="!loading"><i class="bi bi-pencil-fill font-15 me-2"></i><span
+                          class="font-12">Edit</span></span>
+                    </button>
+                  </div>
+
+                  <div
+                    v-if="selectedData.type === 'mytasks' || tableWFData?.status !== 'Completed' || tableWFData?.status !== 'Request Cancelled'"
+                    class="">
+
+                    <!-- v-if="!requestcancelled" -->
+                    <div class="approveBtns pb-2 mb-2 mt-3 flex-column px-0 pe-4">
+                      <div class="form-floating mb-2 p-1">
+                        <textarea class="form-control font-12" placeholder="Leave a comment here" id="floatingTextarea"
+                          @input="resetCommentsValidation" :class="{ 'is-invalid': !isCommentsValid }"
+                          v-model="ApproverReason"></textarea>
+                        <label class="font-11" for="floatingTextarea">Comments..</label>
+                        <span v-if="!isCommentsValid" class="font-11 text-danger ps-1">Please enter comments**</span>
+                      </div>
+                      <div class=" d-flex justify-content-between ">
+                        <div>
+                          <button :disabled="rejectLoad" class="btn btn-outline-danger font-10 py-0 rejectbtn"
+                            type="button" @click="ApproverCancelSubmissionNew('Request Cancelled')">
+                            <span v-if="rejectLoad" class="spinner-border spinner-border-sm" role="status"
+                              aria-hidden="true"></span>
+                            <span v-if="!rejectLoad"><i class="bi bi-x-lg fw-bolder font-12 me-2"></i><span
+                                class="font-12">Reject</span></span>
+                          </button>
+                        </div>
+                        <div>
+                          <button :disabled="loading" type="submit" class="btn btn-success approvebtn"
+                            @click.prevent="ApproverFormSubmissionNew('Approve')">
+                            <span v-if="loading" class="spinner-border spinner-border-sm" role="status"
+                              aria-hidden="true"></span>
+                            <span v-if="!loading"><i class="bi bi-check-lg font-15 me-2"></i><span
+                                class="font-12">Approve</span></span>
+                          </button>
+
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-3">
+              <div class="activity-log-container ">
+                <!-- <div class=" w-100  mb-2">
+                <div class=" py-2 px-3">
+  
+                  <h5 class="font-13 fw-bold">{{ selectedData.doctype_name }} form approval</h5>
+                </div>
+                <div class="py-2 px-3">
+                  <span class="text-warning font-12  fw-bold">
+                    Pending ({{ tableData.current_level }} /
+                    {{ tableData.total_levels }})</span>
+                </div>
+              </div> -->
+                <!-- <div class="mt-5 mb-3 pt-2 d-flex justify-content-between align-items-center">
+                <h6 class="font-14 ps-3  mb-0">Activity log <span
+                    v-if="tableData?.status !== 'Completed' && tableData.status !== 'Request Cancelled'"
+                    class="text-warning font-12  fw-bold">
+                    Pending ({{ tableData.current_level }} /
+                    {{ tableData?.total_levels }})</span>
+                  <span class=" font-11 status_completed" v-if="tableData?.status === 'Completed'">
+                    Completed
+                  </span>
+                  <span class=" font-11 requestRejected" v-if="tableData?.status === 'Request Cancelled'">
+                    Request Rejected
+                  </span>
+                </h6>
+                <button v-if="tableData.status === 'Completed'"
+                  class="btn btn-light font-12 fw-bold text-decoration-underline" type="button" @click="downloadPdf"><i
+                    class="bi bi-arrow-down-circle fw-bold px-1"></i>Download
+                  PDF</button>
+              </div> -->
+                <!-- <div class="row mb-3">
+                <div class="col-xl-6 col-lg-12 col-md-12">
+                  <div class="d-flex  align-items-baseline  mt-2">
+                    <div>
+                      <span class="font-12 text-nowrap fw-bold mb-0">Activity log
+                      </span>
+                    </div>
+                    <div class="d-flex align-items-baseline gap-2 ps-1 ">
+                      <span v-if="tableData?.status !== 'Completed' && tableData.status !== 'Request Cancelled'"
+                        class="text-warning font-11 text-nowrap fw-bold">
+                        Pending ({{ tableData.current_level }} /
+                        {{ tableData?.total_levels }})</span>
+                      <span class=" font-11 status_completed text-nowrap" v-if="tableData?.status === 'Completed'">
+                        Approved
+                      </span>
+                      <span class=" font-11 requestRejected text-nowrap"
+                        v-if="tableData?.status === 'Request Cancelled'">
+                        Request Rejected
+                      </span>
+                    </div>
+                  </div>
+
+
+                </div>
+                <div class="col-xl-6 col-lg-12 col-md-12">
+                  <button v-if="tableData.status === 'Completed'"
+                    class="btn btn-light font-11 fw-bold h-0 text-decoration-underline" type="button"
+                    @click="downloadPdf"><i class="bi bi-arrow-down-circle fw-bold px-1"></i>Download
+                  </button>
+                </div>
+              </div> -->
+                <!-- <div class="activity_height">
+                <div v-for="(item, index) in activityData" :key="index" class="activity-log-item"
+                  :class="{ 'last-item': index === activityData.length - 1 }">
+                  <div class="activity-log-dot"></div>
+                  <div class="activity-log-content">
+                    <p class="font-12 mb-1">
+                      <span class="strong-content">{{ formatAction(item.action) }} on </span>
+                      <span class="strong-content">{{ item.creation }} </span><br />
+                      <span class="strong-content"> {{ item.user_name }}</span><br />
+                      <span>{{ item.role }}</span><br />
+                      <span class="font-12 text-secondary">{{
+                        item.reason || "N/A"
+                        }}</span>.
+
+                    </p>
+                  </div>
+                </div>
+              </div> -->
+                <!-- <div class="activity-log-item">
+                <div class="pending"></div>
+                <div class="activity-log-content">
+                  <p class="font-12 mb-1">
+                    <span class="font-12 text-secondary">
+                      Pending
+                    </span>
+                  </p>
+                </div>
+              </div> -->
+              </div>
+
+
+              <!-- <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+  
+              <div class="offcanvas-header">
+                <h5 class="offcanvas-title" id="offcanvasRightLabel">Offcanvas right</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+              </div>
+              <div class="offcanvas-body">
+                <div v-html="pdfPreview"></div>
+              </div>
+            </div> -->
+            </div>
+          </div>
+        </div>
+      </div>
+      <div v-if="!approvedform" class="thank_div">
+        <div>
+          <div :class="actionStatus == 'Approve' ? 'thank-you-card-approve': 'thank-you-card-reject'">
+          
+            <span>Form {{ actionStatus ==  'Request Cancelled' ? 'Request Rejected' : actionStatus }} Successfully <span v-if="actionStatus == 'Approve'"><i class="bi approved-icon bi-check2-circle"></i></span>
+            <span v-if="actionStatus == 'Request Cancelled'">
+              <i class="bi bi-x-lg"></i>
+            </span>
+            </span> 
+          </div>
+        </div>
+      </div>
+    </div>
+    <div v-else>
+
+      <div class="expiry-token-container">
+        <div class="expiry-token-card">
+          <!-- <h2>⚠️</h2> -->
+          <p class="fw-bold">Form Already Submitted.</p>
+        </div>
+      </div>
+
+
+
+    </div>
+
+
+  </div>
+</template>
+
+<script setup>
+
+import { onMounted, ref, watch, computed, watchEffect } from "vue";
+import ApproverPreview from "./ApproverPreview.vue";
+import { useRoute, useRouter } from "vue-router";
+import axiosInstance from "../shared/services/interceptor";
+import { apis, doctypes, domain } from "../shared/apiurls";
+import { EzyBusinessUnit } from "../shared/services/business_unit";
+import { rebuildToStructuredArray } from "../shared/services/field_format";
+import ButtonComp from "./ButtonComp.vue";
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
+const route = useRoute();
+const approvedform = ref(true);
+const selectedData = ref({
+  routepath: route.query.routepath,
+  formname: route.query.name || "", // Retrieve from query
+  doctype_name: route.query.doctype_name || "", // Retrieve from query
+  type: route.query.type || "", // Retrieve from query
+  readOnly: route.query.readOnly, // Retrieve from query
+  token: route.query.key, // Retrieve from query
+});
+// console.log(selectedData.value, "////");
+const backTo = ref(selectedData.value.routepath);
+// onMounted(() => {
+//   receivedForMe();
+//   // Wfactivitylog(selectedData.value.formname);
+//   // getdata(selectedData.value.formname);
+// });
+
+const router = useRouter();
+
+const businessUnit = computed(() => EzyBusinessUnit.value);
+const business_unit = ref('');
+const filterObj = ref({ limitPageLength: "None", limit_start: 0 });
+const totalRecords = ref(0);
+const tableData = ref([]);
+const tableWFData = ref([]);
+const emittedFormData = ref([]);
+const showRequest = ref(null);
+const isCommentsValid = ref(true);
+const activityData = ref([]);
+const ApproverReason = ref("");
+const selectedcurrentLevel = ref("");
+const doctypeForm = ref([]);
+const loading = ref(false);
+const rejectLoad = ref(false)
+const pdfPreview = ref("");
+const tableRows = ref([]);
+const tableHeaders = ref([]);
+const tableName = ref("");
+const responseData = ref([]);
+const employeeData = ref([]);
+const resetCommentsValidation = () => {
+  if (ApproverReason.value.trim() !== "") {
+    // If comment is not empty, set isCommentsValid to true
+    isCommentsValid.value = true;
+  }
+};
+const actionStatus = ref("");
+const EmptyData = ref([])
+const expiryToken = ref(true);
+const ApprovePDF = ref(true)
+// Format the date for display
+// const formatDate = (dateString) => {
+//   if (!dateString) return "N/A";
+//   const date = new Date(dateString);
+//   return date.toLocaleDateString("en-GB");
+// };
+
+// Format action text (cancelled or raised)
+
+
+// function clearAllCookies() {
+//   const cookies = document.cookie.split(";");
+
+//   const expiredDate = new Date(0).toUTCString(); // Thu, 01 Jan 1970
+
+//   for (let cookie of cookies) {
+//     const eqPos = cookie.indexOf("=");
+//     const name = eqPos > -1 ? cookie.slice(0, eqPos).trim() : cookie.trim();
+//     document.cookie = `${name}=;expires=${expiredDate};path=/`;
+//   }
+// }
+// function deleteCookie(name) {
+//   document.cookie = `${name}=;expires=${new Date(0).toUTCString()};path=/`;
+// }
+// function deleteCookie(name) {
+//   const expired = new Date(0).toUTCString();
+
+//   // Try different paths to ensure it's removed
+//   document.cookie = `${name}=; expires=${expired}; path=/;`;
+//   document.cookie = `${name}=; expires=${expired}; path=/; domain=${location.hostname}`;
+//   document.cookie = `${name}=; expires=${expired}; path=/`;
+// }
+// function clearSidCookie() {
+//   // Forcing removal of sid cookie by setting an expired date
+//   document.cookie = "sid=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+// }
+// const userRole = ref('Guest');
+onMounted(() => {
+  // clearSidCookie()
+  //   const cookies = document.cookie;
+
+  // const hasAuthCookies = ['full_name', 'sid', 'system_user', 'user_id'].some(name =>
+  //   cookies.includes(`${name}=`)
+  // );
+
+  // if (hasAuthCookies) {
+  //   console.log('User is logged in');
+  //   userRole.value = 'User';
+  // } else {
+  //   console.log('Treating as Guest');
+  //   userRole.value = 'Guest';
+  // }
+
+  // // 👉 Optionally override anyway
+  // userRole.value = 'Guest'; 
+  // userData()
+  // clearAllCookies();
+
+  //   const cookiesToRemove = ['full_name', 'sid', 'system_user', 'user_id'];
+
+
+  // logout()
+  // // Debug: Check what cookies are still left
+  // console.log('Cookies after clearing:', document.cookie);
+    logout()
+    user_id.value = getUserIdFromCookies();
+  const cookiesToRemove = ['full_name', 'sid', 'system_user', 'user_id'];
+
+  cookiesToRemove.forEach(cookie => {
+    deleteCookie(cookie);
+  });
+  const storedData = localStorage.getItem("employeeData");
+  try {
+    const parsedData = JSON.parse(storedData);
+
+    // Ensure parsedData is an array
+    employeeData.value = Array.isArray(parsedData) ? parsedData : [parsedData];
+
+  } catch (error) {
+    console.error("Error parsing employeeData from localStorage:", error);
+    employeeData.value = []; // Fallback to empty array if there's an error
+  }
+
+});
+
+function logout() {
+    // localStorage.removeItem('UserName');
+    // localStorage.removeItem('employeeData');
+    axiosInstance.post(apis.logout)
+        .then((response) => {
+            console.log(response);
+            if(response){
+
+              localStorage.removeItem('UserName');
+              localStorage.removeItem('employeeData');
+              localStorage.removeItem('Bu');
+              localStorage.removeItem('USERROLE');
+              sessionStorage.removeItem('UserName');
+              sessionStorage.removeItem('employeeData');
+              sessionStorage.removeItem('Bu');
+              sessionStorage.removeItem('USERROLE');
+              receivedForMe();
+            }
+        })
+}
+const user_id = ref("");
+
+// Function to get user_id from cookies
+function getUserIdFromCookies() {
+    return document.cookie
+        .split("; ")
+        .find((cookie) => cookie.startsWith("user_id="))
+        ?.split("=")[1] || null;
+}
+
+
+function removeUserIdCookie() {
+    document.cookie = "user_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+    document.cookie = "full_name=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+    user_id.value = ""; // Clear the reactive variable
+    // console.log("user_id cookie removed");
+}
+
+// Function to remove user-related localStorage data
+function clearLocalStorage() {
+    localStorage.removeItem("UserName");
+    localStorage.removeItem("employeeData");
+    localStorage.removeItem("Bu");
+    localStorage.removeItem("USERROLE");
+    // console.log("Local storage cleared");
+}
+
+;
+
+// Watch for changes in `sessionStorage` UserName
+watchEffect(() => {
+    const userName = sessionStorage.getItem("UserName");
+
+    if (!userName) {
+        clearLocalStorage();
+        removeUserIdCookie();
+    }
+});
+function EditformSubmission() {
+  // Navigate to the new route
+  router.push({
+    name: "RaiseRequest",
+    query: {
+      routepath: '/todo/raisedbyme',
+      business_unit: route.query.property,
+      selectedForm: route.query.doctype_name,
+      selectedFormId: route.query.name,
+      selectedFormStatus: route.query.status,
+    },
+  });
+  // console.log("emittedFormData", emittedFormData.value);
+}
+// watch(
+//   businessUnit,
+//   (newVal) => {
+//     const local = localStorage.getItem("Bu")
+//     business_unit.value = newVal;
+//     business_unit.value = local
+//     if (newVal) {
+//       // console.log(business_unit.value, newVal, "ll");
+//       receivedForMe();
+//     }
+//   },
+//   { immediate: true }
+// );
+
+
+
+
+
+
+const formatAction = (action) => {
+  if (!action) return "performed an action on";
+  const actionMap = {
+    "Request Cancelled": "cancelled",
+    "Request Raised": "Request initiated",
+  };
+  return actionMap[action] || action;
+};
+// Function to capture the form data from ApproverPreview
+const updateFormData = (fieldValues) => {
+  // console.log(fieldValues, "pp");
+  // console.log(emittedFormData.value);
+
+  // Ensure emittedFormData.value is an array before updating
+  emittedFormData.value = [
+    ...emittedFormData.value.filter(field => field.fieldname !== fieldValues.fieldname),
+    fieldValues
+  ];
+
+  // console.log(emittedFormData.value, "======");
+};
+// function deleteCookie(name) {
+//   document.cookie = `${name}=;expires=${new Date(0).toUTCString()};path=/`;
+// }
+function deleteCookie(name) {
+  const expired = new Date(0).toUTCString();
+
+  // Try different paths to ensure it's removed
+  document.cookie = `${name}=; expires=${expired}; path=/;`;
+  document.cookie = `${name}=; expires=${expired}; path=/; domain=${location.hostname}`;
+  document.cookie = `${name}=; expires=${expired}; path=/`;
+}
+
+function ApproverFormSubmissionNew(action) {
+  // clearSidCookie()
+  // Trim and validate the reason input
+  // logout()
+  const cookiesToRemove = ['full_name', 'sid', 'system_user', 'user_id'];
+
+  cookiesToRemove.forEach(cookie => {
+    deleteCookie(cookie);
+  });
+  const reason = ApproverReason.value.trim();
+  if (!reason) {
+    isCommentsValid.value = false; // Show validation error
+    return;
+  }
+
+  isCommentsValid.value = true;
+  loading.value = true;
+
+  const data = {
+    token: selectedData.value.token,
+    action: action,
+    reason: reason
+  };
+
+  axiosInstance
+    .get(apis.toMailApproval, { params: data })
+    .then((res) => {
+      actionStatus.value = action
+      EmptyData.value = res.data; // Assuming you need the actual data
+      approvedform.value = false;
+    })
+    .catch((error) => {
+      console.error("Error fetching records:", error);
+    })
+    .finally(() => {
+      loading.value = false; // Always reset loading state
+    });
+}
+
+
+function ApproverCancelSubmissionNew(action) {
+  const reason = ApproverReason.value.trim();
+
+  if (!reason) {
+    isCommentsValid.value = false; // Show validation error
+    return;
+  }
+
+  isCommentsValid.value = true;
+  rejectLoad.value = true;
+
+  const data = {
+    token: selectedData.value.token,
+    action: action,
+    reason: reason
+  };
+
+  axiosInstance
+    .get(apis.toMailApproval, { params: data })
+    .then((res) => {
+      actionStatus.value = action
+      EmptyData.value = res.data; // Store only the response data
+      approvedform.value = false;
+    })
+    .catch((error) => {
+      console.error("Error sending cancel request:", error);
+    })
+    .finally(() => {
+      rejectLoad.value = false; // Always stop the loader
+    });
+}
+
+
+
+
+// // Function to handle form submission
+// function ApproverFormSubmission(dataObj, type) {
+//   if (ApproverReason.value.trim() === "") {
+//     isCommentsValid.value = false; // Show validation error
+//     return; // Stop execution
+//   }
+
+//   isCommentsValid.value = true;
+//   loading.value = true; // Start loader
+
+//   let form = {};
+//   if (Array.isArray(emittedFormData.value) && emittedFormData.value.length) {
+//     emittedFormData.value.forEach((each) => {
+//       form[each.fieldname] = each.value;
+//     });
+//   }
+//   // console.log(loading.value, dataObj, type, form);
+
+//   // Get token from selectedData or localStorage
+//   const token = selectedData.value.token || localStorage.getItem("authToken");
+
+//   // Define headers
+//   const headers = {
+//     "Content-Type": "application/json",
+//   };
+
+//   // Add Authorization header if token exists
+//   if (token) {
+//     headers["Authorization"] = `Bearer ${token}`;
+//   }
+
+//   axiosInstance
+//     .put(`${apis.resource}${selectedData.value.doctype_name}/${doctypeForm.value.name}`, form, {
+//       headers,
+//     })
+//     .then((response) => {
+//       if (response?.data) {
+//         approvalStatusFn(dataObj, type);
+//       } else {
+//         loading.value = false; // Stop loader on failure
+//         toast.error("Failed to submit form", { autoClose: 1000, transition: "zoom" });
+//       }
+//     })
+//     .catch((error) => {
+//       console.error("Error submitting form:", error);
+//       loading.value = false; // Stop loader on error
+//       toast.error("An error occurred while submitting the form.", { autoClose: 1000, transition: "zoom" });
+//     });
+// }
+
+// // Function to handle approval status
+// function approvalStatusFn(dataObj, type) {
+//   // console.log("Approval Data:", dataObj);
+
+//   let data = {
+//     property: tableData.value.property,
+//     doctype: tableData.value.doctype_name,
+//     request_ids: [tableData.value.name],
+//     reason: ApproverReason.value,
+//     action: type,
+//     files: null,
+//     cluster_name: null,
+//     url_for_approval_id: "",
+//     current_level: tableData.value.current_level,
+//   };
+
+//   // Get token from selectedData or localStorage
+//   const token = selectedData.value.token || localStorage.getItem("authToken");
+
+//   // Define headers
+//   const headers = {
+//     "Content-Type": "application/json",
+//   };
+
+//   // Add Authorization header if token exists
+//   if (token) {
+//     headers["Authorization"] = `Bearer ${token}`;
+//   }
+
+//   axiosInstance
+//     .post(apis.requestApproval, { request_details: [data] }, { headers })
+//     .then((response) => {
+//       // console.log("API Response:", response);
+
+//       if (response?.message?.success === true) {
+//         ApproverReason.value = ""; // Clear reason after success
+//         toast.success(`Request ${type}ed`, {
+//           autoClose: 500,
+//           transition: "zoom",
+//         });
+//         approvedform.value = false; // Show thank you message
+//       } else {
+//         toast.error(`Failed to ${type} request`, { autoClose: 1000, transition: "zoom" });
+//       }
+//     })
+//     .catch((error) => {
+//       console.error("Error processing request:", error);
+//       toast.error("An error occurred while processing your request.", { autoClose: 1000, transition: "zoom" });
+//     })
+//     .finally(() => {
+//       loading.value = false; // Ensure loader stops
+//     });
+// } 
+
+// function ApproverCancelSubmission(dataObj, type) {
+//   if (ApproverReason.value.trim() === "") {
+//     isCommentsValid.value = false;
+//     return;
+//   }
+
+//   isCommentsValid.value = true;
+//   rejectLoad.value = true; // Start loader
+
+//   let form = {};
+//   if (emittedFormData.value.length) {
+//     emittedFormData.value.forEach((each) => {
+//       form[each.fieldname] = each.value;
+//     });
+//   }
+
+//   // Get token from selectedData or localStorage
+//   const token = selectedData.value.token || localStorage.getItem("authToken");
+
+//   // Define headers
+//   const headers = {
+//     "Content-Type": "application/json",
+//   };
+
+//   // Add Authorization header if token exists
+//   if (token) {
+//     headers["Authorization"] = `Bearer ${token}`;
+//   }
+
+//   axiosInstance
+//     .put(`${apis.resource}${selectedData.value.doctype_name}/${doctypeForm.value.name}`, form, { headers })
+//     .then((response) => {
+//       if (response?.data) {
+//         approvalCancelFn(dataObj, type);
+//       } else {
+//         rejectLoad.value = false; // Stop loader on failure
+//         toast.error("Failed to cancel request", { autoClose: 1000, transition: "zoom" });
+//       }
+//     })
+//     .catch((error) => {
+//       console.error("Error cancelling request:", error);
+//       rejectLoad.value = false; // Stop loader on error
+//       toast.error("An error occurred while cancelling the request.", { autoClose: 1000, transition: "zoom" });
+//     });
+// }
+
+
+// // function approvalCancelFn(dataObj, type) {
+// //   // let files = this.selectedFileAttachments.map((res: any) => res.url);
+
+// //   console.log(dataObj, "data");
+
+// //   let data = {
+// //     property: selectedRequest.value.property,
+// //     doctype: selectedRequest.value.doctype_name,
+// //     request_id: selectedRequest.value.name,
+// //     reason: type == "Request Cancelled" ? "Cancelled" : "",
+// //     action: type,
+// //     files: [],
+// //     url_for_cancelling_id: "",
+// //     current_level: selectedRequest.value.current_level,
+// //   };
+// //   axiosInstance.post(apis.wf_cancelling_request, data).then((response) => {
+// //     if (response?.message?.success) {
+// //       router.push({
+// //         name: "ReceivedForMe",
+// //       });
+// //     }
+// //   });
+// // }
+// function approvalCancelFn(dataObj, type) {
+//   // console.log("approvalCancelFn Data:", dataObj);
+
+//   let data = {
+//     property: tableData.value.property,
+//     doctype: tableData.value.doctype_name,
+//     request_id: tableData.value.name,
+//     reason: ApproverReason.value,
+//     action: type,
+//     files: [],
+//     url_for_cancelling_id: "",
+//     current_level: tableData.value.current_level,
+//   };
+
+//   // Get token from selectedData or localStorage
+//   const token = selectedData.value.token || localStorage.getItem("authToken");
+
+//   // Define headers
+//   const headers = {
+//     "Content-Type": "application/json",
+//   };
+
+//   // Add Authorization header if token exists
+//   if (token) {
+//     headers["Authorization"] = `Bearer ${token}`;
+//   }
+
+//   axiosInstance
+//     .post(apis.wf_cancelling_request, data, { headers })
+//     .then((response) => {
+//       if (response?.message) {
+//         toast.success(`${type}`, {
+//           autoClose: 500,
+//           transition: "zoom",
+//           onClose: () => {
+//             router.push({ name: "ReceivedForMe" }); // Navigate after toast
+//           },
+//         });
+//       } else {
+//         toast.error(`Failed to ${type} request`, { autoClose: 1000, transition: "zoom" });
+//       }
+//     })
+//     .catch((error) => {
+//       console.error("Error processing cancellation:", error);
+//       toast.error("An error occurred while cancelling the request.", { autoClose: 1000, transition: "zoom" });
+//     })
+//     .finally(() => {
+//       rejectLoad.value = false; // Ensure loader stops
+//     });
+// }
+
+
+function receivedForMe() {
+
+  const data = {
+    token: selectedData.value.token
+  }
+
+
+  axiosInstance
+    .get(apis.toMailApproval, { params: data })
+    .then((res) => {
+      if (res.message.message === 'Invalid or expired token') {
+        expiryToken.value = false
+      } else {
+        tableData.value = res.message.message.doc_data;
+        tableWFData.value = res.message.message.wf_data
+
+        showRequest.value = rebuildToStructuredArray(
+          JSON.parse(tableWFData.value?.json_columns).fields
+        );
+
+        // console.log(showRequest.value, "pppa--------------");
+        mapFormFieldsToRequest(tableData.value, showRequest.value);
+        tableHeaders.value = JSON.parse(tableWFData.value?.json_columns).child_table_fields;
+
+
+        const childTables = Object.keys(tableData.value).filter((key) =>
+          Array.isArray(tableData.value[key])
+        );
+        if (childTables.length) {
+          responseData.value = {};
+
+          childTables.forEach((tableKey) => {
+            responseData.value[tableKey] = tableData.value[tableKey] || [];
+          });
+          // console.log("Response Data:", responseData.value);
+        }
+        // console.log(tableHeaders.value, "req");
+
+        // if (res.data.length) {
+        //   Wfactivitylog(tableData.value.name);
+        //   getdata(tableData.value.name);
+        // }
+
+        selectedcurrentLevel.value = tableWFData.value.current_level - 1 ;
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching records:", error);
+    });
+
+}
+
+function getdata(formname) {
+  // console.log(selectedData.value.token, "jjjjj");
+  const filters = [["wf_generated_request_id", "like", `%${formname}%`]];
+  const queryParams = {
+    fields: JSON.stringify(["*"]),
+    limit_page_length: "None",
+    limit_start: 0,
+    filters: JSON.stringify(filters),
+    order_by: `\`tab${selectedData.value.doctype_name}\`.\`creation\` desc`,
+  };
+  let config = { params: queryParams };
+  if (selectedData.value.token) {
+    config.headers = { Authorization: `Bearer ${selectedData.value.token}`, withCredentials: true, };
+  }
+  // Fetch the doctype data
+  axiosInstance
+    .get(`${apis.resource}${selectedData.value.doctype_name}`, config)
+    .then((res) => {
+      if (res.data) {
+        doctypeForm.value = res.data[0];
+        // mapFormFieldsToRequest(doctypeForm.value, showRequest.value);
+        let configHeaders = {};
+        if (selectedData.value.token) {
+          configHeaders.headers = { Authorization: `Bearer ${selectedData.value.token}`, };
+        }
+        axiosInstance
+          .get(`${apis.resource}${selectedData.value.doctype_name}`, configHeaders)
+          .then((res) => {
+            // console.log(`Data for :`, res.data[0]);
+          })
+          .catch((error) => {
+            console.error(`Error fetching data for :`, error);
+          });
+        axiosInstance
+          .get(
+            `${apis.resource}${selectedData.value.doctype_name}/${res.data[0].name}`, configHeaders
+          )
+          .then((res) => {
+            // console.log(`Data for :`, res.data);
+            // Identify the child table key dynamically
+            const childTables = Object.keys(res.data).filter((key) =>
+              Array.isArray(res.data[key])
+            );
+            if (childTables.length) {
+              responseData.value = {};
+
+              childTables.forEach((tableKey) => {
+                responseData.value[tableKey] = res.data[tableKey] || [];
+              });
+              // console.log("Response Data:", responseData.value);
+            }
+          })
+          .catch((error) => {
+            console.error(`Error fetching data for :`, error);
+          });
+
+        // Map values from doctypeForm to showRequest fields
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching categories data:", error);
+    });
+}
+// function viewasPdfView() {
+//   console.log(doctypeForm.value, tableData.value);
+//   ApprovePDF.value = !ApprovePDF.value;
+//   const dataObj = {
+//     form_short_name: tableData.value.doctype_name,
+//     name: doctypeForm.value.name,
+//     business_unit: businessUnit.value
+
+//   };
+
+//   axiosInstance
+//     .post(apis.preview_dynamic_form, dataObj)
+//     .then((response) => {
+//       pdfPreview.value = response.message;
+//       if (response.message) {
+
+//       }
+
+
+
+//     })
+//     .catch((error) => {
+//       console.error("Error fetching data:", error);
+//     });
+// }
+
+function downloadPdf() {
+  const dataObj = {
+    form_short_name: tableData.value.doctype_name,
+    name: doctypeForm.value.name,
+    business_unit: business_unit.value
+  };
+
+  // Get token from selectedData or localStorage
+  const token = selectedData.value.token || localStorage.getItem("authToken");
+
+  // Define headers
+  const headers = {
+    "Content-Type": "application/json",
+  };
+
+  // Add Authorization header if token exists
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  axiosInstance
+    .post(apis.download_pdf_form, dataObj, { headers })
+    .then((response) => {
+      if (!response || !response.message) {
+        console.error("Invalid response:", response);
+        return;
+      }
+
+      let pdfUrl = domain + response.message;
+
+      // Remove '/api' from the URL if present
+      pdfUrl = pdfUrl.replace("/api", "");
+
+      // Extract filename safely
+      const fileName = response.message.includes("/")
+        ? response.message.split("/").pop()
+        : "download.pdf";
+
+      // Create and trigger download
+      const link = document.createElement("a");
+      link.href = pdfUrl;
+      link.download = fileName;
+      link.target = "_blank"; // Helps with some browser restrictions
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    })
+    .catch((error) => {
+      console.error("Error downloading PDF:", error);
+    });
+}
+
+// const openFile = (filePath) => {
+//   if (!filePath) return;
+//   const fileUrl = `${filePath}`;
+//   window.open(fileUrl, "_blank");
+// };
+
+// const isFilePath = (value) => {
+//   if (!value) return false;
+//   return /\.(png|jpg|jpeg|gif|pdf|docx|xlsx|txt)$/i.test(value);
+// };
+
+// function childFunction() {
+//   axiosInstance
+//     .get(
+//       `${apis.resource}${selectedData.value?.selectedform}/${childIDs.value}`
+//     )
+//     .then((res) => {
+//       console.log(`Data for :`, res.data);
+//       responseData.value = res.data;
+//     })
+//     .catch((error) => {
+//       console.error(`Error fetching data for :`, error);
+//     });
+// }
+
+// function Wfactivitylog(formname) {
+//   // Get token from selectedData or localStorage
+//   const token = selectedData.value.token || localStorage.getItem("authToken");
+
+//   // Define headers with Content-Type
+//   const headers = {
+//     "Content-Type": "application/json",
+//   };
+
+//   // Add Authorization header only if token exists
+//   if (token) {
+//     headers["Authorization"] = `Bearer ${token}`;
+//   }
+
+//   axiosInstance
+//     .get(`${apis.resource}${doctypes.WFActivityLog}/${formname}`, {
+//       headers,
+//     })
+//     .then((res) => {
+//       if (res.data) {
+//         console.log("Activity Data:", res.data);
+//         activityData.value = res.data.reason || []; // Ensure it's always an array
+//       }
+//     })
+//     .catch((error) => {
+//       console.error("Error fetching activity data:", error);
+//     });
+// }
+
+
+function mapFormFieldsToRequest(doctypeData, showRequestData) {
+  showRequestData.forEach((block) => {
+    block.sections.forEach((section) => {
+      section.rows.forEach((row) => {
+        row.columns.forEach((column) => {
+          column.fields.forEach((field) => {
+            // Check if the fieldname exists in the doctypeForm and assign the value
+            if (doctypeData?.hasOwnProperty(field?.fieldname)) {
+              field.value = doctypeData[field?.fieldname]; // Assign the value from doctypeForm to the field
+            }
+          });
+        });
+      });
+    });
+  });
+}
+
+const requestcancelled = computed(() => {
+  if (activityData.value.length === 0) return false;
+  const lastAction = activityData.value[activityData.value.length - 1];
+  return lastAction.action === "Request Cancelled";
+});
+watch(activityData, (newVal) => {
+  console.log("Updated Activity Data:", newVal);
+  console.log("Request Cancelled?", requestcancelled.value);
+});
+
+
+
+</script>
+
+<style lang="scss" scoped>
+// .backtofromPage {
+//   position: sticky !important;
+//   top: 0 !important;
+//   z-index: 1000 !important;
+
+// }
+.expiry-token-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #ece9e6, #ffffff);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.expiry-token-card {
+  background-color: #fff;
+  padding: 40px 60px;
+  border-radius: 20px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  animation: slideFadeIn 0.8s ease-in-out;
+}
+
+.expiry-token-card h2 {
+  font-size: 32px;
+  margin-bottom: 15px;
+  color: #d9534f;
+}
+
+.expiry-token-card p {
+  font-size: 18px;
+  color: #555;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.thank_div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f0f0f0;
+
+}
+
+@keyframes slideFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes bounceIcon {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes glowPulse {
+
+  0%,
+  100% {
+    box-shadow: 0 0 5px rgba(56, 158, 13, 0.3);
+  }
+
+  50% {
+    box-shadow: 0 0 15px rgba(56, 158, 13, 0.6);
+  }
+}
+
+.thank-you-card-approve {
+  padding: 15px 25px;
+  background-color: #e6f7ed;
+  border: 1px solid #b7eb8f;
+  border-radius: 12px;
+  color: #389e0d;
+  display: inline-block;
+  font-weight: 600;
+  font-size: 18px;
+  animation: slideFadeIn 0.8s ease-out, glowPulse 2s ease-in-out infinite;
+  transition: transform 0.3s ease;
+}
+.thank-you-card-reject {
+  padding: 15px 25px;
+  background-color: #e6f7ed;
+  border: 1px solid #eb8f8f;
+  border-radius: 12px;
+  color: #d75159;
+  display: inline-block;
+  font-weight: 600;
+  font-size: 18px;
+  animation: slideFadeIn 0.8s ease-out, glowPulse 2s ease-in-out infinite;
+  transition: transform 0.3s ease;
+}
+
+.thank-you-card:hover {
+  transform: scale(1.03);
+}
+
+.thank-you-card i {
+  margin-left: 10px;
+  font-size: 20px;
+  vertical-align: middle;
+  animation: bounceIcon 1s infinite;
+}
+
+.approve_height {
+  overflow: hidden;
+  height: 85vh;
+}
+
+.approved-icon {
+  color: #2BED12;
+  font-size: 24px;
+}
+
+.rejected-icon {
+  color: #d75159;
+  font-size: 24px;
+}
+
+.Edit_btn {
+  width: 100px;
+  background: rgb(34, 33, 33);
+  color: white;
+  padding: 5px 15px 5px 15px;
+  gap: 7px;
+  border-radius: 4px;
+  opacity: 0px;
+  font-weight: bold;
+}
+
+
+.approvebtn {
+  width: 146px;
+  //height: 30px;
+  background: #099819;
+  color: white;
+  padding: 5px 15px 5px 15px;
+  gap: 7px;
+  border-radius: 4px;
+  opacity: 0px;
+  font-weight: bold;
+}
+
+.requestPreviewDiv {
+  height: 75vh;
+  overflow-y: auto;
+  //padding-bottom: 100px;
+  margin-bottom: 100px;
+
+}
+
+.rejectbtn {
+  width: 146px;
+  //height: 30px;
+  background: #fe212e;
+  color: white;
+  padding: 5px 15px 5px 15px;
+  gap: 7px;
+  border-radius: 4px;
+  opacity: 0px;
+  font-weight: bold;
+}
+
+.cancelbtn {
+  width: 146px;
+  height: 30px;
+  background: #d1d0d0;
+  color: white;
+  padding: 5px 15px 5px 15px;
+  gap: 7px;
+  border-radius: 4px;
+  opacity: 0px;
+}
+
+.approvediv {
+  position: fixed !important;
+  bottom: 0;
+  z-index: 10;
+  background-color: #fff;
+}
+
+.approveBtns {
+  position: fixed !important;
+  bottom: 0;
+  z-index: 10;
+  background-color: #fff;
+  padding: 5px 10px;
+  display: flex;
+  justify-content: space-between;
+  width: 50%;
+}
+
+.asset_request {
+  //box-shadow: 0px 2px 4px 0px #0000000D;
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+}
+
+.is-invalid {
+  border: 1px solid red;
+}
+
+/* Activity log container */
+.activity-log-container {
+  width: 100%;
+  margin-top: 20px;
+  //padding-left: 30px;
+  position: relative;
+}
+
+/* Activity log item */
+.activity-log-item {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  /* Ensure dot and text align properly */
+  gap: 10px;
+  padding-left: 15px;
+  /* Space between dot and text */
+  margin-bottom: 10px;
+  /* Space between logs */
+}
+
+.activity_height {
+  height: 80vh;
+  overflow-y: scroll;
+}
+
+.pending {
+  position: relative;
+  width: 12px;
+  height: 12px;
+  background-color: #676767;
+  border-radius: 50%;
+  border: 2px solid white;
+  z-index: 1;
+  margin-top: 3px;
+  /* Ensure dot is above */
+}
+
+/* Activity log dot with inner padding and dotted border */
+.activity-log-dot {
+  position: relative;
+  width: 16px;
+  /* Increase size to accommodate padding */
+  height: 16px;
+  background-color: white;
+  /* Inner padding effect */
+  border-radius: 50%;
+  border: 2px dotted #ccc;
+  /* Dotted border */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  margin-top: 3px;
+}
+
+/* Inner dot */
+.activity-log-dot::before {
+  content: "";
+  width: 8px;
+  /* Inner dot size */
+  height: 8px;
+  background-color: #2BED12;
+  /* Inner dot color */
+  border-radius: 50%;
+  display: block;
+}
+
+/* Add vertical line using ::after */
+.activity-log-dot::after {
+  content: "";
+  position: absolute;
+  top: 18px;
+  /* Position below the dot */
+  left: 50%;
+  width: 1px;
+  height: calc(100% + 50px);
+
+  /* Adjust line length */
+  background: repeating-linear-gradient(to bottom,
+      rgb(133, 133, 133),
+      rgb(133, 133, 133) 4px,
+      transparent 4px,
+      transparent 8px);
+  transform: translateX(-50%);
+}
+
+
+/* Remove line for the last item */
+.activity-log-item.last-item .activity-log-dot::after {
+  content: none;
+}
+
+/* Activity log content */
+.activity-log-content {
+  font-size: 16px;
+  color: #333;
+  flex: 1;
+  /* Ensure text takes up remaining space */
+}
+
+.activity-log-content strong {
+  color: #333;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+th {
+  background-color: #f2f2f2 !important;
+  text-align: left;
+  color: #999999;
+  font-size: 12px;
+}
+
+td {
+  font-size: 12px;
+}
+
+.strong-content {
+  font-weight: 500;
+}
+
+.status_completed {
+  color: #2BED12;
+  border: 1px solid #2BED12;
+  border-radius: 10px;
+  padding: 2px 5px;
+  margin: 0px 5px;
+}
+
+.requestRejected {
+  color: #fe212e;
+  border: 1px solid #fe212e;
+  border-radius: 10px;
+  padding: 2px 5px;
+  margin: 0px 5px;
+}
+
+.back-to-same {
+  position: sticky;
+  top: 0;
+  background-color: #fff;
+  z-index: 10;
+}
+</style>
