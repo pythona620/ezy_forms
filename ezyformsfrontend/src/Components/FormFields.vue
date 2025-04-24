@@ -8,7 +8,7 @@
 
     <div class="shadow-none"
       v-if="tag === 'input' && (type === 'text' || type === 'number' || type === 'email' || type === 'search')">
-      <input :type="type" :placeholder="placeholder" :labeltext="labeltext" :name="name" :id="id" :min="min" :max="max"
+      <input :type="type" :placeholder="placeholder" :disabled="disabled" :labeltext="labeltext" :name="name" :id="id" :min="min" :max="max"
         v-model="localModel" :required="Required ? true : false" class="form-control  input-width" :class="{
       'border-end-0 shadow-none': type === ('text' || type === 'number' || type === 'email' || type === 'search') && icon && label,
     }" />
@@ -134,7 +134,12 @@ const props = defineProps({
   },
   validationStar: {
     type: String
+  },
+  disabled:{
+    type: Boolean,
+    default: false
   }
+
 });
 
 const emit = defineEmits(["update:modelValue"]);

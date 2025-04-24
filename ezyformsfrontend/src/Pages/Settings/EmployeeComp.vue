@@ -40,9 +40,9 @@
                       <label class="font-13 ps-1" for="emp_name">Emp Name<span class="text-danger ps-1">*</span></label>
                       <FormFields class="mb-3" tag="input" type="text" name="emp_name" id="emp_name"
                         placeholder="Enter Emp Name" v-model="createEmployee.emp_name" />
-                      <label class="font-13 ps-1" for="emp_code">Emp code<span class="text-danger ps-1">*</span></label>
+                      <label class="font-13 ps-1" for="emp_code">Emp ID<span class="text-danger ps-1">*</span></label>
                       <FormFields class="mb-3" tag="input" type="text" name="emp_code" id="emp_code"
-                        placeholder="Enter Emp code" v-model="createEmployee.emp_code" />
+                        placeholder="Enter Emp ID" v-model="createEmployee.emp_code" />
                       <div class="mb-3">
                         <label class="font-13 ps-1" for="emp_phone">Emp Phone</label>
                         <FormFields tag="input" type="text" name="emp_phone" id="emp_phone" maxlength="13"
@@ -126,13 +126,13 @@
                                         <FormFields v-if="newDesignation" class="mb-3" tag="input" type="text"
                                             name="emp_code" id="emp_code" placeholder="Enter Designation"
                                             v-model="inputDesignation" /> -->
-                      <label class="font-13 ps-1" for="reporting_to">Reporting To</label>
+                      <label class="font-13 ps-1" for="reporting_to">Reports To</label>
                       <!-- <FormFields class="mb-3" tag="input" type="text" name="reporting_to"
-                                            id="reporting_to" placeholder="Enter Reporting To"
+                                            id="reporting_to" placeholder="Enter Reports To"
                                             v-model="createEmployee.reporting_to" /> -->
                                             <VueMultiselect v-model="createEmployee.reporting_to"
                     :options="tableData.map((dept) => dept.emp_mail_id)" :multiple="false" :close-on-select="true"
-                    :clear-on-select="false" :preserve-search="true" placeholder="Select Reporting To"
+                    :clear-on-select="false" :preserve-search="true" placeholder="Select Reports To"
                     class="font-11 mb-3">
 
 
@@ -309,7 +309,7 @@
                   <label class="font-13 ps-1" for="emp_name">Emp Name<span class="text-danger ps-1">*</span></label>
                   <FormFields class="mb-3" tag="input" type="text" name="emp_name" id="emp_name"
                     placeholder="Enter department code" v-model="createEmployee.emp_name" />
-                  <label class="font-13 ps-1" for="emp_code">Emp code<span class="text-danger ps-1">*</span></label>
+                  <label class="font-13 ps-1" for="emp_code">Emp ID<span class="text-danger ps-1">*</span></label>
                   <FormFields class="mb-3" tag="input" type="text" name="emp_code" id="emp_code"
                     placeholder="Enter department code" v-model="createEmployee.emp_code" />
                   <!-- <div class="mb-3">
@@ -392,10 +392,10 @@
                       </span>
                     </template>
                   </VueMultiselect>
-                  <label class="font-13 ps-1" for="reporting_to">Reporting To</label>
+                  <label class="font-13 ps-1" for="reporting_to">Reports To</label>
                   <VueMultiselect v-model="createEmployee.reporting_to"
                     :options="tableData.map((dept) => dept.emp_mail_id)" :multiple="false" :close-on-select="true"
-                    :clear-on-select="false" :preserve-search="true" placeholder="Select Reporting To"
+                    :clear-on-select="false" :preserve-search="true" placeholder="Select Reports To"
                     class="font-11 mb-3">
 
 
@@ -452,6 +452,25 @@
         </div>
       </div>
     </div>
+    <div class="modal fade" id="EmployeeToggleModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirm Employee Status</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to <span id="empActionText"></span> "<span id="empRowName"></span>"?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-dark" @click="confirmEmployeeToggle">Yes, Proceed</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
   </div>
 
 </template>
@@ -500,17 +519,23 @@ const createEmployee = ref({
   signature: "",
 });
 
+const selectedEmpRow = ref(null);
+const empActionText = ref('');
+
+
 const bulkdata = ref([])
 
 const tableheaders = ref([
-  { th: "Emp Code", td_key: "emp_code" },
+  { th: "Emp ID", td_key: "emp_code" },
   { th: "Emp Name", td_key: "emp_name" },
   // { th: "Mail", td_key: "emp_mail_id" },
   { th: "Designation", td_key: "designation" },
   { th: "Department", td_key: "department" },
   { th: "Signature", td_key: "signature" },
 
-  { th: "Reporting To", td_key: "reporting_to" },
+  { th: "Reports To", td_key: "reporting_to" },
+  { th: "Emp Status", td_key: "enable" },
+
   // { th: "Reporting Designation", td_key: "reporting_designation" },
 ]);
 
@@ -1053,7 +1078,7 @@ const validatephonenew = () => {
 
 
 const filterObj = ref({
-  limitPageLength: 20,
+  limitPageLength: "None",
   limit_start: 0,
 });
 // const addDepartment = (newTag) => {
@@ -1194,43 +1219,37 @@ function actionCreated(rowData, actionEvent) {
 
 
 
+
 function toggleFunction(rowData) {
-  const isCurrentlyEnabled = rowData.enable == '1' || rowData.enable === 1;
-  const actionText = isCurrentlyEnabled ? 'Disable' : 'Enable';
+  selectedEmpRow.value = rowData;
+  const isEnabled = rowData.enable === '1' || rowData.enable === 1;
+  empActionText.value = isEnabled ? 'Disable' : 'Enable';
 
-  // if (confirm(`Are you sure you want to ${actionText} ${rowData.emp_name} this Employee?`)) {
-  const message = `Are you sure you want to ${actionText} \n"${rowData.emp_name}"?`;
+  document.getElementById('empActionText').innerText = empActionText.value;
+  document.getElementById('empRowName').innerText = rowData.emp_name;
 
-  if (confirm(message)) {
-    rowData.enable = isCurrentlyEnabled ? 0 : 1;
-
-    axiosInstance
-      .put(`${apis.resource}${doctypes.EzyEmployeeList}/${rowData.name}`, rowData)
-      .then((employeeResponse) => {
-        console.log("Employee Response:", employeeResponse.data);
-
-        const userUpdateData = { enabled: rowData.enable };
-
-        axiosInstance
-          .put(`${apis.resource}${doctypes.users}/${rowData.name}`, userUpdateData)
-          .then((userResponse) => {
-            console.log("User Account Response:", userResponse.data);
-            toast.success(`Form ${actionText}d successfully`, { autoClose: 700 });
-            // employeeData();
-            window.location.reload();
-          })
-          .catch((userError) => {
-            console.error("Error updating user account toggle:", userError);
-          });
-      })
-      .catch((error) => {
-        console.error("Error updating employee toggle:", error);
-      });
-  } else {
-    console.log("Action cancelled. Toggle remains unchanged.");
-  }
+  const modal = new bootstrap.Modal(document.getElementById('EmployeeToggleModal'));
+  modal.show();
 }
 
+function confirmEmployeeToggle() {
+  const isEnabled = selectedEmpRow.value.enable === '1' || selectedEmpRow.value.enable === 1;
+  selectedEmpRow.value.enable = isEnabled ? 0 : 1;
+
+  axiosInstance
+    .put(`${apis.resource}${doctypes.EzyEmployeeList}/${selectedEmpRow.value.name}`, selectedEmpRow.value)
+    .then(() => {
+      const userData = { enabled: selectedEmpRow.value.enable };
+      return axiosInstance.put(`${apis.resource}${doctypes.users}/${selectedEmpRow.value.name}`, userData);
+    })
+    .then(() => {
+      toast.success(`Employee ${empActionText.value}d successfully`);
+      window.location.reload();
+    })
+    .catch((err) => {
+      console.error('Toggle employee error:', err);
+    });
+}
 
 
 const fieldMapping = ref({

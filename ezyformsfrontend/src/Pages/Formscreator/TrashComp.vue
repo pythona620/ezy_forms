@@ -130,7 +130,7 @@ function actionCreated(rowData, actionEvent) {
             const actionText = isCurrentlyEnabled ? 'delete' : 'Active';
 
             // Show the confirmation dialog with dynamic messaging:
-            if (confirm(`Are you sure you want to ${actionText} this Form?`)) {
+            if (confirm(`Are you sure you want to ${actionText}  ${rowData.name} Form?`)) {
                 // Toggle the state:
                 rowData.enable = isCurrentlyEnabled ? 0 : 1;
 
@@ -210,19 +210,25 @@ const tableheaders = ref([
     { th: "Form category", td_key: "form_category" },
     { th: "Accessible departments", td_key: "accessible_departments" },
     { th: "Status", td_key: "form_status" },
+    { th: "Enable/Disable", td_key: "enable" },
+
 ]);
 
 function formCreation(item = null) {
     if (item == null) {
         router.push({ name: "FormStepper",query:{
-            routepath: route.path
+            routepath: route.path,
+            business_unit: businessUnit.value,
+            
         } });
     } else {
         router.push({
             name: "FormStepper",
             params: { paramid: item.name },
             query:{
-            routepath: route.path
+            routepath: route.path,
+            business_unit: businessUnit.value,
+            id: item.name
         }
 
         });

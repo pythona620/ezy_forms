@@ -7,10 +7,11 @@
 						<input type="checkbox" class="checkbox form-check-input" @change="SelectedAll()" />
 					</th> -->
           <th>#</th>
-          <th v-for="(column, index) in tHeaders" :key="index" :class="{ 'text-center': column.th === 'Users' || column.th === 'Status' }">
+          <th v-for="(column, index) in tHeaders" :key="index"
+            :class="{ 'text-center': column.th === 'Users' || column.th === 'Status' || column.th === 'Enable/Disable' }">
             {{ column.th }}
           </th>
-          <th class="text-center fixed-column" v-if="enableDisable == 'true'">Enable/Disable</th>
+          <!-- <th class="text-center fixed-column" v-if="enableDisable == 'true'">Enable/Disable</th> -->
           <th class="text-center fixed-column" v-if="isAction == 'true'">Action</th>
         </tr>
       </thead>
@@ -21,27 +22,15 @@
           <td class="p-1" v-for="(column, index) in tHeaders" :key="index">
             <template v-if="fieldMapping[column.td_key]">
               <!-- Text input -->
-              <div
-  v-if="fieldMapping[column.td_key].type === 'input'"
-  class="input-group border-none-input"
->
-  <span
-    v-show="!focusedFields[column.td_key]"
-    class="input-group-text font-12"
-    id="basic-addon1"
-  >
-    <i class="bi bi-search"></i>
-  </span>
-  <input
-    type="search"
-    aria-describedby="basic-addon1"
-    class="form-control font-12 py-1 px-2  border-0  input-search"
-    v-model="filters[column.td_key]"
-    @input="handleFilterChange" :class="{ 'border-left-class ': focusedFields[column.td_key] }"
-    @focus="focusedFields[column.td_key] = true"
-    @blur="focusedFields[column.td_key] = false"
-  />
-</div>
+              <div v-if="fieldMapping[column.td_key].type === 'input'" class="input-group border-none-input">
+                <span v-show="!focusedFields[column.td_key]" class="input-group-text font-12" id="basic-addon1">
+                  <i class="bi bi-search"></i>
+                </span>
+                <input type="search" aria-describedby="basic-addon1"
+                  class="form-control font-12 py-1 px-2  border-0  input-search" v-model="filters[column.td_key]"
+                  @input="handleFilterChange" :class="{ 'border-left-class ': focusedFields[column.td_key] }"
+                  @focus="focusedFields[column.td_key] = true" @blur="focusedFields[column.td_key] = false" />
+              </div>
 
               <!-- Date input -->
               <input v-else-if="fieldMapping[column.td_key].type === 'date'" type="date"
@@ -50,8 +39,8 @@
 
               <!-- Select dropdown -->
               <select v-else-if="fieldMapping[column.td_key].type === 'select'"
-                class="form-control form-select input-search font-12 select-filetrs py-1 px-2 w-100" v-model="filters[column.td_key]"
-                @change="handleFilterChange">
+                class="form-control form-select input-search font-12 select-filetrs py-1 px-2 w-100"
+                v-model="filters[column.td_key]" @change="handleFilterChange">
                 <option class="font-12" value="">All</option>
                 <option class="font-12" v-for="(option, optionIndex) in fieldMapping[column.td_key].options"
                   :key="optionIndex" :value="option">
@@ -65,6 +54,7 @@
               <span></span>
             </template>
           </td>
+          <!-- <td class="text-center fixed-column" v-if="enableDisable == 'true'"></td> -->
           <td class="text-center fixed-column" v-if="isAction == 'true'"></td>
         </tr>
         <template v-if="tData.length">
@@ -74,8 +64,8 @@
 								@change="selectedCheckList(row, rowIndex)" />
 						</td> -->
             <td class="">{{ rowIndex + 1 }}</td>
-            <td :title="row[column.td_key] ? row[column.td_key].toString() : '-'" v-for="(column, colIndex) in tHeaders" :class="column.td_key === 'form_status' ? 'text-center' : ''"
-              :key="colIndex">
+            <td :title="row[column.td_key] ? row[column.td_key].toString() : '-'" v-for="(column, colIndex) in tHeaders"
+              :class="column.td_key === 'form_status' ? 'text-center' : ''" :key="colIndex">
 
               <!-- <span :class="{'accessible-departments': column.td_key === 'accessible_departments'}" v-if="column.td_key === 'accessible_departments'">
                 
@@ -106,17 +96,23 @@
 
               <span v-else-if="column.td_key === 'form_status'" :class="{
                 activeform: row[column.td_key] == 'Created',
-                'text-warning': row[column.td_key] == 'Draft',
+                draftForm: row[column.td_key] == 'Draft',
               }">
                 <i class="bi bi-circle-fill status-circle font-10 text-center pe-2"></i>
-                {{ row[column.td_key] }}
+                {{ row[column.td_key] === 'Created' ? 'Active' : 'Retired' }}
               </span>
               <!-- Default Column Rendering -->
               <span v-else-if="
-                column.td_key === 'requested_on' || column.td_key === 'invoice_date'
-              ">
+                column.td_key === 'requested_on' || column.td_key === 'invoice_date'">
                 {{ formatDate(row[column.td_key]) }}
               </span>
+
+              <!-- Show unformatted date for 'modified' when status === 'Request Raised' -->
+              <span
+  v-else-if="column.td_key === 'modified' && row.status !== 'Request Raised'"
+>
+  {{ formatDate(row[column.td_key]) }}
+</span>
               <span v-else-if="column.td_key === 'signature'">
                 <div v-if="row[column.td_key]">
                   <i class="bi bi-check2 fw-bolder font-13 text-success"></i>
@@ -156,6 +152,17 @@
                   </span>
                 </div>
               </span>
+              <span class="text-center fixed-column" v-else-if="column.td_key === 'enable'">
+                <div class="d-flex justify-content-center align-items-center gap-2">
+                  <span :class="row.enable == 0 ? 'text-secondary font-11' : ''">
+                    {{ row.enable == '1' ? '' : 'Disabled' }}
+                  </span>
+                  <div class="form-check d-flex justify-content-center form-switch text-end">
+                    <input class="form-check-input shadow-none" type="checkbox" role="switch"
+                      :checked="row.enable == '0'" @click.prevent="handleToggle(row, index, $event)" />
+                  </div>
+                </div>
+              </span>
 
 
               <!-- <span v-else-if="column.td_key === 'total_levels'">
@@ -166,25 +173,24 @@
                 {{ row[column.td_key].replace(/_/g, " ") || "-" }}
               </span> -->
               <span v-else>
-  {{ row[column.td_key]?.replace(/@[\w.-]+/, "") || "-" }}
-</span>
-
+                {{ column.td_key === 'modified' ? '-' :  row[column.td_key]?.replace(/@[\w.-]+/, "") || "-" }}
+              </span>
             </td>
             <!-- <td
               class="text-center d-flex justify-content-center position-relative"
               v-if="isAction == 'true' && viewType === 'viewPdf'"
             > -->
-             
-                        <!-- 'Reviewpending': row[column.td_key] == 'Pending Review',
+
+            <!-- 'Reviewpending': row[column.td_key] == 'Pending Review',
                 'Reviewed': row[column.td_key] == 'Reviewed',
                 'Completed': row[column.td_key] == 'Completed',
                 'text-danger': row[column.td_key] == 'Error' -->
 
-                        <!-- <td :selectedText="text"></td>
+            <!-- <td :selectedText="text"></td>
                     <td :selectedOption="selectoption"></td>
                     column.td_key, -->
 
-            <td class="text-center fixed-column" v-if="enableDisable === 'true'">
+            <!-- <td class="text-center fixed-column" v-if="enableDisable === 'true'">
               <div class="d-flex justify-content-center align-items-center gap-2">
                 <span :class="row.enable == 0 ? 'text-secondary font-11' : ''">
                   {{ row.enable == '1' ? '' : 'Disabled' }}
@@ -194,27 +200,18 @@
                     @click.prevent="handleToggle(row, index, $event)" />
                 </div>
               </div>
-            </td>
+            </td> -->
             <div v-if="isAction == 'true' && viewType === 'viewPdf'" class="text-center">
-                <span class="px-2">
-                  <i
-                    @click="handleCellClick(row, rowIndex, 'view')"
-                    class="ri-eye-line eye-cursor"
-                  ></i>
-                </span>
-                <span v-if="download === 'true'">
-                  <i
-                    class="bi bi-download eye-cursor"
-                    @click="handleCellClick(row, rowIndex, 'download')"
-                  ></i>
-                </span>
-                <span v-if="raiseRequest === 'true'">
-                  <i
-                    class="bi bi-send eye-cursor mx-1"
-                    @click="handleCellClick(row, rowIndex, 'raiseRequest')"
-                  ></i>
-                </span>
-              </div>
+              <span class="px-2">
+                <i @click="handleCellClick(row, rowIndex, 'view')" class="ri-eye-line eye-cursor"></i>
+              </span>
+              <span v-if="download === 'true'">
+                <i class="bi bi-download eye-cursor" @click="handleCellClick(row, rowIndex, 'download')"></i>
+              </span>
+              <span v-if="raiseRequest === 'true'">
+                <i class="bi bi-send eye-cursor mx-1" @click="handleCellClick(row, rowIndex, 'raiseRequest')"></i>
+              </span>
+            </div>
             <td v-if="actionType === 'dropdown'" class="text-center fixed-column position-relative">
               <div class="dropdown">
                 <p class="p-0 actions" data-bs-toggle="dropdown" aria-expanded="false">
@@ -277,7 +274,7 @@
 
 
             </td> -->
-              <!-- <div  class="form-check d-flex justify-content-end form-switch text-end ">
+            <!-- <div  class="form-check d-flex justify-content-end form-switch text-end ">
                 <input class="form-check-input shadow-none" type="checkbox" role="switch" :checked="row.enable == '1'"
                   @click.prevent="handleToggle(row, index, $event)" />
               </div> -->
@@ -346,8 +343,8 @@ const props = defineProps({
   download: {
     type: String,
   },
-  raiseRequest:{
-    type:String
+  raiseRequest: {
+    type: String
   },
   actionType: {
     type: String,
@@ -378,7 +375,7 @@ const props = defineProps({
   }
 });
 
-const emits = defineEmits(["actionClicked", "updateFilters", "cell-click","toggle-click"]);
+const emits = defineEmits(["actionClicked", "updateFilters", "cell-click", "toggle-click"]);
 
 function selectedAction(row, action) {
   emits("actionClicked", row, action);
@@ -395,21 +392,80 @@ const focusedFields = reactive({});
 
 
 const allCheck = ref(false);
+// function formatDate(dateString) {
+//   if (!dateString) return "-"; // Handle empty or null values
+
+//   // Extract date and time parts
+//   const [datePart, timePart] = dateString.split(" ");
+//   const [year, month, day] = datePart.split("/");
+
+//   // Extract hours, minutes, and seconds from timePart
+//   let [hours, minutes, seconds] = timePart.split(":");
+
+//   // Format output as DD.MM.YYYY @ HH:MM:SS
+//   return `${day.padStart(2, "0")}.${month.padStart(
+//     2,
+//     "0"
+//   )}.${year} @ ${hours}:${minutes}:${seconds.slice(0, 2)}`;
+// }
 function formatDate(dateString) {
-  if (!dateString) return "-"; // Handle empty or null values
+  if (!dateString) return "-";
 
-  // Extract date and time parts
-  const [datePart, timePart] = dateString.split(" ");
-  const [year, month, day] = datePart.split("/");
+  try {
+    let date;
 
-  // Extract hours, minutes, and seconds from timePart
-  let [hours, minutes, seconds] = timePart.split(":");
+    // Format: YYYY/MM/DD HH:MM:SS:ms (colon-separated with optional ms)
+    if (dateString.includes("/") && dateString.includes(" ")) {
+      const [datePart, timePart] = dateString.split(" ");
+      const [year, month, day] = datePart.split("/");
 
-  // Format output as DD.MM.YYYY @ HH:MM:SS
-  return `${day.padStart(2, "0")}.${month.padStart(
-    2,
-    "0"
-  )}.${year} @ ${hours}:${minutes}:${seconds.slice(0, 2)}`;
+      let timeSegments = timePart.split(":");
+      let hours = timeSegments[0]?.padStart(2, "0") || "00";
+      let minutes = timeSegments[1]?.padStart(2, "0") || "00";
+      let seconds = timeSegments[2]?.padStart(2, "0") || "00";
+
+      if (timeSegments.length === 4) {
+        const milliseconds = timeSegments[3];
+        date = new Date(
+          `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}T${hours}:${minutes}:${seconds}.${milliseconds}`
+        );
+      } else {
+        date = new Date(
+          `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}T${hours}:${minutes}:${seconds}`
+        );
+      }
+    }
+
+    // Format: YYYY-MM-DD HH:MM:SS.milliseconds
+    else if (dateString.includes("-")) {
+      const [datePart, timePart] = dateString.split(" ");
+      const [year, month, day] = datePart.split("-");
+      const [timeRaw, milliseconds = ""] = timePart.split(".");
+      const [hours = "00", minutes = "00", seconds = "00"] = timeRaw
+        .split(":")
+        .map((t) => t.padStart(2, "0"));
+
+      const timeString = `${hours}:${minutes}:${seconds}`;
+      date = new Date(
+        `${year}-${month}-${day}T${timeString}${milliseconds ? "." + milliseconds : ""}`
+      );
+    } else {
+      return "-";
+    }
+
+    if (isNaN(date.getTime())) return "-";
+
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const seconds = String(date.getSeconds()).padStart(2, "0");
+
+    return `${day}.${month}.${year} @ ${hours}:${minutes}:${seconds}`;
+  } catch (err) {
+    return "-";
+  }
 }
 
 function SelectedAll() {
@@ -523,9 +579,25 @@ function handleCellClick(check, index, type) {
 
 .activeform {
   font-size: 11px;
-  font-weight: 400;
+  font-weight: 500;
   text-align: left;
-  color: green;
+  color: #2EC400;
+  background-color: #effbeb;
+  border: 0.5px dotted #2EC400;
+  opacity: 0.8;
+  padding: 5px 10px;
+  border-radius: 6px;
+}
+.draftForm{
+  font-size: 11px;
+  font-weight: 500;
+  text-align: left;
+  color: #ffbb00;
+  background-color: #f6f4c9;
+  opacity: 0.8;
+  padding: 5px 10px;
+  border:1px dotted #ffbb00; 
+  border-radius: 6px;
 }
 
 .spinner-grow {
@@ -728,6 +800,7 @@ th:first-child {
 .textcancel {
   color: #17a2b8;
 }
+
 /* Default border style */
 .border-none-input {
   border: 1px solid #dee2e6;
@@ -762,7 +835,8 @@ th:first-child {
 .input-group input {
   height: 26px !important;
   line-height: 30px;
-  border: none; /* Default no border */
+  border: none;
+  /* Default no border */
   outline: none;
   box-shadow: none;
   transition: border-left 0.3s ease-in-out, border-radius 0.3s ease-in-out;
@@ -779,10 +853,11 @@ th:first-child {
 .eye-cursor {
   cursor: pointer;
 }
-.select-filetrs:focus{
-box-shadow: none;
-outline: none;
-border: 1px solid #dee2e6;
+
+.select-filetrs:focus {
+  box-shadow: none;
+  outline: none;
+  border: 1px solid #dee2e6;
 
 }
 </style>

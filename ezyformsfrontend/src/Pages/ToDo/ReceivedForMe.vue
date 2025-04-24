@@ -2,7 +2,7 @@
   <div>
     <div class="d-flex justify-content-between align-items-center py-2">
       <div>
-        <h1 class="m-0 font-13">Requests received for me</h1>
+        <h1 class="m-0 font-13">Requests Assigned to me</h1>
         <p class="m-0 font-11 pt-1">{{ totalRecords }} request</p>
       </div>
       <!-- <div>

@@ -389,6 +389,7 @@ li:hover {
     padding-top: 12px;
     border-radius: 10px;
     margin-top: 10px;
+    /* box-shadow: 4px 0 4px -2px #00000040; */
 
 }
 
