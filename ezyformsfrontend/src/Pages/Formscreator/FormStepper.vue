@@ -69,10 +69,8 @@
                         <div class="col-4">
                           <div class="mt-3">
                             <div class="">
-                              <FormFields :disabled="paramId != undefined &&
-                                paramId != null &&
-                                paramId != 'new'
-                                " labeltext="Form Name" class="formHeight" type="text" tag="input" name="Value"
+                              <FormFields :disabled="selectedData.formId && selectedData.formId.length  > 0"
+                                 labeltext="Form Name" class="formHeight" type="text" tag="input" name="Value"
                                 id="formName" validationStar="true" placeholder="Untitled Form"
                                 @change="(event) => handleInputChange(event, 'form_name')"
                                 v-model="filterObj.form_name" />
@@ -82,10 +80,7 @@
                           </div>
                           <div class="mt-3">
                             <div class="">
-                              <FormFields :disabled="paramId != undefined &&
-                                paramId != null &&
-                                paramId != 'new'
-                                " labeltext="Form Short Code" class="formHeight" type="text" tag="input" name="Value"
+                              <FormFields :disabled="selectedData.formId && selectedData.formId.length > 0" labeltext="Form Short Code" class="formHeight" type="text" tag="input" name="Value"
                                 id="formShortCode" validationStar="true" placeholder="Untitled Form" @change="
                                   (event) => handleInputChange(event, 'form_short_name')
                                 " v-model="filterObj.form_short_name" />
@@ -108,7 +103,7 @@
                               <label for="">Owner Of The Form
                                 <span v-if="!filterObj.owner_of_the_form" class="text-danger">*</span></label>
 
-                              <Multiselect :options="OwnerOfTheFormData" @change="OwnerOftheForm"
+                              <Multiselect :disabled="selectedData.formId && selectedData.formId.length > 0"  :options="OwnerOfTheFormData" @change="OwnerOftheForm"
                                 v-model="filterObj.owner_of_the_form" placeholder="Select Department" :multiple="false"
                                 class="font-11 multiselect" :searchable="true" />
                             </div>
@@ -123,7 +118,7 @@
                               <label for="">Form Cateogry
                                 <span v-if="!filterObj.form_category" class="text-danger">*</span></label>
 
-                              <Multiselect :options="departments" v-model="filterObj.form_category"
+                              <Multiselect :disabled="selectedData.formId && selectedData.formId.length > 0"  :options="departments" v-model="filterObj.form_category"
                                 placeholder="Select Cateogry" :multiple="false" :searchable="true"
                                 class="font-11 multiselect" />
                             </div>
@@ -163,7 +158,7 @@
                                   <span v-if="!filterObj.accessible_departments.length"
                                     class="text-danger">*</span></label>
                               </label>
-                              <VueMultiselect v-model="filterObj.accessible_departments" :options="filteredOptions"
+                              <VueMultiselect :disabled="selectedData.formId && selectedData.formId.length > 0"  v-model="filterObj.accessible_departments" :options="filteredOptions"
                                 :multiple="true" :close-on-select="false" :clear-on-select="false"
                                 :preserve-search="true" placeholder="Select Designation" class="font-11">
                                 <template #option="{ option }">
@@ -893,7 +888,7 @@
       </div>
       <div class="offcanvas-body">
         <div class="">
-          <div class="form-check ps-1" v-if="selectedBlockIndex == 1">
+          <div class="form-check ps-1" v-if="selectedBlockIndex !== 0">
             <div>
 
               <input type="checkbox" id="ViewOnlyReportee" v-model="ViewOnlyReportee"
@@ -999,12 +994,22 @@ const businessUnit = computed(() => {
 });
 const childtableShow = ref(false);
 const columns = reactive([]);
+const selectedData = ref({
+  routepath: route.query.routepath,
+  business_unit: route.query.business_unit,
+  formId : route.query.id
 
+});
+
+
+// const computedDisabled = computed(() => {
+//   return paramId.value.length > 0
+// })
 const filterObj = ref({
   form_name: "",
   form_short_name: "",
   accessible_departments: [],
-  business_unit: `${businessUnit.value.value}`,
+  business_unit: `${businessUnit.value.value || selectedData.value.business_unit}`,
   form_category: "",
   owner_of_the_form: "",
 });
@@ -1112,6 +1117,7 @@ onMounted(() => {
   if (paramId.value != undefined && paramId.value != null && paramId.value != "new") {
     getFormData();
     OwnerOftheForm();
+    console.log(paramId.value,"[[[]]]");
   }
   let Bu_Unit = localStorage.getItem("Bu");
   filterObj.value.business_unit = Bu_Unit;
@@ -1326,6 +1332,19 @@ watch(childtableHeaders, (newTables) => {
   });
 }, { deep: true });
 
+// Object.keys(newTables).forEach((tableName) => {
+//   const fields = newTables[tableName];
+//   if (Array.isArray(fields)) {
+//     fields.forEach((field, index) => {
+//       if (field.label && field.fieldtype) {
+//         invalidFields.value[tableName] = invalidFields.value[tableName]?.filter(i => i !== index);
+//       }
+//     });
+//   } else {
+//     console.warn(`Expected array for table "${tableName}", but got`, fields);
+//   }
+// });
+
 
 const steps = ref([
   {
@@ -1499,7 +1518,6 @@ const isAllSelected = computed({
   },
 });
 
-console;
 function handleSingleSelect() {
   if (!isAllSelected.value && designationValue.value.length === 1) {
     // console.log("Selected only one designation:", designationValue.value[0]);
@@ -1619,13 +1637,11 @@ function add_Wf_roles_setup() {
     });
 }
 
-const selectedData = ref({
-  routepath: route.query.routepath,
 
-});
+
 function cancelForm() {
   router.push({
-    path: selectedData.value.routepath,
+    path: selectedData.value.routepath || localStorage.getItem('routepath'),
   });
 
 }
@@ -1833,7 +1849,8 @@ function formData(status) {
             transition: "zoom",
             onClose: () => {
               if (status === "save") {
-                router.push({ name: "Created" });
+                let toPath = localStorage.getItem('routepath')
+                router.push({path: toPath });
               } else if (status === "draft") {
                 router.push({ name: "Draft" });
               }
@@ -2126,8 +2143,11 @@ function isRestricted(label) {
   return restrictedLabels.includes(label?.trim().toLowerCase());
 }
 
+// function hasInvalidCharacters(label) {
+//   return /[^a-zA-Z0-9 _/]/.test(label) || label.includes('"') || label.includes("'");
+// }
 function hasInvalidCharacters(label) {
-  return /[^a-zA-Z0-9 _]/.test(label) || label.includes('"') || label.includes("'");
+  return /[^a-zA-Z0-9 _\/!@#$%^&*()\[\]{}]/.test(label) || label.includes('"') || label.includes("'");
 }
 
 function getAllLabels(blockArr) {

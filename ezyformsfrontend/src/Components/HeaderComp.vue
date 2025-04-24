@@ -24,7 +24,7 @@
                                 <div class="">
                                     <!-- v-if="shouldShowButton" -->
                                     <ButtonComp
-                                        class="btn btn-outline-danger raiseReqBtn d-flex justify-content-center align-items-center  m-0 text-nowrap font-10"
+                                        class="btn btn-danger raiseReqBtn d-flex justify-content-center align-items-center  m-0 text-nowrap font-10"
                                         name="Raise request" data-bs-toggle="modal" @click="raiseRequest"
                                         data-bs-target="#riaseRequestModal" />
                                     <!-- @click="raiseRequest" -->
@@ -218,7 +218,7 @@ const tabsData = ref([
     { name: 'To do', icon: 'fa-solid fa-list-check', route: '/todo' },
     { name: 'Settings', icon: 'bi bi-gear', route: '/settings' },
     { name: 'Archive', icon: 'bi bi-archive', route: '/archived' },
-    { name: 'Form Creation', icon: 'bi bi-file-earmark-text', route: '/create-form' }
+    // { name: 'Form Creation', icon: 'bi bi-file-earmark-text', route: '/create-form' }
 ]);
 
 const selectedData = ref({
@@ -675,6 +675,7 @@ const handleBuChange = (tab) => {
 
 .raiseReqBtn {
     border: 1px solid #FE212E !important;
+    font-size: 12px;
 }
 
 .raiseReqBtn:hover {

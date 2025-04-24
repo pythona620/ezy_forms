@@ -213,10 +213,10 @@
                           :ref="el => setRef(el, sectionIndex, columnIndex, fieldIndex)"
                           @input="adjustHeight(sectionIndex, columnIndex, fieldIndex)" />
 
-                        <component v-if="field.fieldtype !== 'Int' && field.fieldtype !== 'Text'"
+                        <component v-if="field.fieldtype !== 'Int' && field.fieldtype !== 'Text'"   
                           :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'"
                           :is="getFieldComponent(field.fieldtype)"
-                          :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 image-border-bottom w-50 bg-transparent ' : ' '"
+                          :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0  image-border-bottom w-50 bg-transparent ' : ' '"
                           :value="field.value" :type="field.fieldtype" :readOnly="blockIndex < currentLevel || props.readonlyFor === 'true'
                             " :name="'field-' +
                             sectionIndex +

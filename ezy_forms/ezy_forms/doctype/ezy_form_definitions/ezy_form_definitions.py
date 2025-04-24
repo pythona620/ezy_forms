@@ -12,6 +12,7 @@ from frappe.utils.background_jobs import enqueue
 from ezy_forms.ezy_forms.doctype.ezy_form_definitions.linking_flow_and_forms import enqueing_creation_of_roadmap
 from itertools import chain
 from frappe.utils import cstr
+from frappe.utils import now as frappe_now
  
 class EzyFormDefinitions(Document):
     pass
@@ -246,15 +247,17 @@ def activating_perms(doctype,role):
         frappe.db.commit()
  
 def activating_perms_for_all_roles_in_wf_roadmap():
-    # all_requestors = frappe.db.sql("""Select Unique(requestor) from `tabWF Requestors`;""",as_dict=True)
-    # all_approvers = frappe.db.sql("""Select Unique(role) from `tabWF Level Setup`;""",as_dict=True)
-    # all_roles_from_list_ofdicts_to_one_list_of_dict = all_requestors + all_approvers
-    # only_roles_to_list = list(chain.from_iterable(map(dict.values, all_roles_from_list_ofdicts_to_one_list_of_dict)))
-    # unique_roles_from_all_roles = list(set(only_roles_to_list))
+
     unique_roles_from_all_roles = frappe.db.get_list("WF Roles",pluck="name")
+    
+    child_entries = frappe.get_all(
+            "Doctype Permissions",
+            filters={"parent": "Ezy Doctype Permissions", "parenttype": "Ezy Doctype Permissions", "parentfield": "document_type"},
+            fields=["doctype_names"]
+        )
+    document_type_list = [entry["doctype_names"] for entry in child_entries]
  
-    doctypes = ["Ezy Business Unit","Ezy Form Definitions","Ezy Employee","Ezy Departments","WF Role Matrix","WF Workflow Requests","WF Roadmap","WF Activity Log","Ezy Category","Login Check","WF Roles"]
-    for doc in doctypes:
+    for doc in document_type_list:
         for role in unique_roles_from_all_roles:
             if not frappe.db.exists("Custom DocPerm",{"parent":doc,"role":role}):
                 form_perms = frappe.new_doc("Custom DocPerm")
@@ -268,48 +271,9 @@ def activating_perms_for_all_roles_in_wf_roadmap():
                 form_perms.delete = 1
                 form_perms.insert(ignore_permissions=True)
     frappe.db.commit()
-#  Child Table Creation
-# @frappe.whitelist()
-# def add_child_doctype(form_short_name:str,fields:list[dict]):
-#     try:
-#         doc = frappe.new_doc("DocType")
-#         doc.name = form_short_name
-#         doc.description = f"{doc.name}"
-#         doc.creation = frappe_now()
-#         doc.modified = frappe_now()
-#         doc.modified_by = frappe.session.user
-#         doc.module = "User Forms"
-#         doc.app = "ezy_forms"
-#         doc.custom = 1
-#         doc.istable = 1
-#         # doc.description = business_unit
-#         doc.insert(ignore_permissions=True)
-#         frappe.db.commit()
-#         doc.reload()
-        
-#         if len(fields)>0:
-#             # add_customized_fields_for_dynamic_doc(fields=fields,doctype=doctype,accessible_departments=accessible_departments)
-#             add_customized_fields_for_dynamic_doc(fields=fields,doctype=form_short_name)
-#         return [
-#                 {
-#                     "child_doc": {
-#                         "description": f"{doc.name}",
-#                         "fieldname": f"{doc.name}",
-#                         "fieldtype": "Table",   
-#                         "idx": 0,
-#                         "label": f"{doc.name}",
-#                         "reqd": 0,
-#                         "value": "",
-#                         "options":f"{doc.name}"
-#                     }
-#                 }
-#             ],"Table Added Successfully"
-#     except Exception as e:
-        # return e
+    
  
  
-import frappe
-from frappe.utils import now as frappe_now
  
 @frappe.whitelist()
 def add_child_doctype(form_short_name: str, fields: list[dict],idx=None):

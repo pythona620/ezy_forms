@@ -192,9 +192,9 @@
                                         </template>
 
                                         <template v-else>
-                                            <input v-if="field.fieldtype === 'Datetime'" type="datetime-local"
+                                            <!-- <input v-if="field.fieldtype === 'Datetime'" type="datetime-local"
                                                 @click="forceOpenCalendar" ref="datetimeInput" :value="field.value"
-                                                class="form-control previewInputHeight font-10" />
+                                                class="form-control previewInputHeight font-10" /> -->
                                             <!-- <input v-if="field.fieldtype === 'Date'" type="date" :value="field.value"
                                                 class="form-control previewInputHeight font-10" /> -->
                                             <!-- <input v-if="field.fieldtype == 'Int'" type="number"

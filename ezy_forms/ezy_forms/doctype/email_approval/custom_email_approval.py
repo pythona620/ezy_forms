@@ -38,12 +38,12 @@ def email_approval(token, action=None, reason=None):
             }
         ]
         if action == "Approve":
-            get_return = updating_wf_workflow_requests(request_details, email_doc.user_id)
             update_value(email_doc)
+            get_return = updating_wf_workflow_requests(request_details, email_doc.user_id)
             
         if action == "Request Cancelled":
-            get_return = wf_cancelling_request(email_doc.doctype_name,email_doc.wf_request_id,email_doc.current_level,reason,files=[],property=email_doc.property,cluster_name=None,action=action,url_for_cancelling_id=None,user_session=email_doc.user_id)
             update_value(email_doc)
+            get_return = wf_cancelling_request(email_doc.doctype_name,email_doc.wf_request_id,email_doc.current_level,reason,files=[],property=email_doc.property,cluster_name=None,action=action,url_for_cancelling_id=None,user_session=email_doc.user_id)
             
         frappe.db.set_value(
             "Email Approval",

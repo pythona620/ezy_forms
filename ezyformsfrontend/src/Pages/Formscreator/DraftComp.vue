@@ -74,6 +74,7 @@ function actionCreated(rowData, actionEvent) {
                 query: {
                     routepath: route.path,
                     form_short_name: rowData.form_short_name,
+                    
 
                 },
             });
@@ -141,18 +142,26 @@ const tableheaders = ref([
     { th: "Owner of form", td_key: "owner_of_the_form" },
     { th: "Accessible departments", td_key: "accessible_departments" },
     { th: "Status", td_key: "form_status" },
+    { th: "Enable/Disable", td_key: "enable" },
+
 ]);
 
 
 function formCreation(item = null) {
     if (item == null) {
         router.push({ query:{
-            routepath: route.path
+            routepath: route.path,
+            business_unit: businessUnit.value,
+            
+
         },name: "FormStepper", });
     } else {
         router.push({
             query:{
-            routepath: route.path
+            routepath: route.path,
+            business_unit: businessUnit.value,
+            id: item.name
+
         },
             name: "FormStepper",
             params: { paramid: item.name },
@@ -179,7 +188,7 @@ function toggleFunction(rowData, rowIndex, event) {
     const isCurrentlyEnabled = rowData.enable == '1' || rowData.enable === 1;
     const actionText = isCurrentlyEnabled ? 'Disable' : 'Enable';
 
-    if (confirm(`Are you sure you want to ${actionText} this Form?`)) {
+    if (confirm(`Are you sure you want to ${actionText}  ${rowData.name} Form?`)) {
         rowData.enable = isCurrentlyEnabled ? 0 : 1;
 
         axiosInstance
