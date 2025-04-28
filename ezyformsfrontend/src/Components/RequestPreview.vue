@@ -30,7 +30,7 @@
                                                 <span class="font-12">{{ field.label }}</span>
                                                 <span class="ms-1 text-danger">{{
                                                     field.reqd === 1 ? "*" : ""
-                                                }}</span>
+                                                    }}</span>
                                             </label>
                                         </div>
 
@@ -63,7 +63,7 @@
                                         ">
                                             <div class="container-fluid">
                                                 <div class="row">
-                                                    <div class="form-check col-4 mb-4"  v-for="(option, index) in field?.options?.split(
+                                                    <div class="form-check col-4 mb-4" v-for="(option, index) in field?.options?.split(
                                                         '\n'
                                                     )" :key="index" :class="{ 'd-none': index === 0 }">
                                                         <div>
@@ -111,64 +111,47 @@
                                         </template>
 
                                         <template v-else-if="field.fieldtype == 'Attach'">
-                                            <input
-    :disabled="props.readonlyFor === 'true'"
-    type="file"
-    accept="image/jpeg,image/png,application/pdf"
-    :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
-    class="form-control previewInputHeight font-10 mt-2"
-    multiple
-    @change="
-      logFieldValue(
-        $event,
-        blockIndex,
-        sectionIndex,
-        rowIndex,
-        columnIndex,
-        fieldIndex
-      )
-    "
-  />
-  <div v-if="field.value" class="d-flex flex-wrap gap-2">
-    <div
-      v-for="(fileUrl, index) in field.value.split(',').map(f => f.trim())"
-      :key="index"
-      class="position-relative d-inline-block"
-      @mouseover="hovered = index"
-      @mouseleave="hovered = null"
-    >
-      <!-- Show image thumbnail -->
-      <img
-        v-if="isImageFile(fileUrl)"
-        :src="fileUrl"
-        class="img-thumbnail mt-2 cursor-pointer border-0"
-        style="max-width: 100px; max-height: 100px"
-      />
+                                            <input :disabled="props.readonlyFor === 'true'" type="file"
+                                                accept="image/jpeg,image/png,application/pdf"
+                                                :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                                                class="form-control previewInputHeight font-10 mt-2" multiple @change="
+                                                    logFieldValue(
+                                                        $event,
+                                                        blockIndex,
+                                                        sectionIndex,
+                                                        rowIndex,
+                                                        columnIndex,
+                                                        fieldIndex
+                                                    )
+                                                    " />
+                                            <div v-if="field.value" class="d-flex flex-wrap gap-2">
+                                                <div v-for="(fileUrl, index) in field.value.split(',').map(f => f.trim())"
+                                                    :key="index" class="position-relative d-inline-block"
+                                                    @mouseover="hovered = index" @mouseleave="hovered = null">
+                                                    <!-- Show image thumbnail -->
+                                                    <img v-if="isImageFile(fileUrl)" :src="fileUrl"
+                                                        class="img-thumbnail mt-2 cursor-pointer border-0"
+                                                        style="max-width: 100px; max-height: 100px" />
 
-      <!-- Show PDF icon if not image -->
-      <div
-        v-else
-        class="d-flex align-items-center justify-content-center border mt-2"
-        style="width: 100px; height: 100px; background: #f9f9f9"
-      >
-        <i class="bi bi-file-earmark-pdf fs-1 text-danger"></i>
-      </div>
+                                                    <!-- Show PDF icon if not image -->
+                                                    <div v-else
+                                                        class="d-flex align-items-center justify-content-center border mt-2"
+                                                        style="width: 100px; height: 100px; background: #f9f9f9">
+                                                        <i class="bi bi-file-earmark-pdf fs-1 text-danger"></i>
+                                                    </div>
 
-      <!-- Remove icon -->
-      <button
-        v-if="hovered === index"
-        @click="removeFile(index, field)"
-        class="btn btn-sm btn-light position-absolute"
-        style="top: 2px; right: 5px; border-radius: 50%; padding: 0 5px"
-      >
-        <i class="bi bi-x fs-6"></i>
-      </button>
-    </div>
-  </div>
+                                                    <!-- Remove icon -->
+                                                    <button v-if="hovered === index" @click="removeFile(index, field)"
+                                                        class="btn btn-sm btn-light position-absolute"
+                                                        style="top: 2px; right: 5px; border-radius: 50%; padding: 0 5px">
+                                                        <i class="bi bi-x fs-6"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
 
-  <!-- File input for uploading -->
+                                            <!-- File input for uploading -->
 
-</template>
+                                        </template>
 
                                         <template v-else-if="field.fieldtype == 'Datetime'">
                                             <input type="datetime-local" :value="field.value" @click="forceOpenCalendar"
@@ -190,6 +173,28 @@
                                                             )
                                                     " class="form-control previewInputHeight font-10" />
                                         </template>
+                                        <template v-else-if="field.fieldtype == 'Link'">
+                                            <input type="text" :value="field.value"
+                                                @input="(e) => onInputChange(e.target.value, field)" @change="(event) =>
+                                                    logFieldValue(
+                                                        event,
+                                                        blockIndex,
+                                                        sectionIndex,
+                                                        rowIndex,
+                                                        columnIndex,
+                                                        fieldIndex
+                                                    )" class="form-control font-12 mb-1" @focus="() => setActiveField(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex, field)" />
+
+                                            <ul v-if="isActiveField(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) && linkSearchResults.length"
+                                                class="list-group mt-1" style="max-height: 200px; overflow-y: auto;">
+                                                <li v-for="(result, index) in linkSearchResults" :key="index"
+                                                    @click="selectDoctype(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex, result.name)"
+                                                    class="list-group-item list-group-item-action">
+                                                    {{ result.name }}
+                                                </li>
+                                            </ul>
+                                        </template>
+
 
                                         <template v-else>
                                             <!-- <input v-if="field.fieldtype === 'Datetime'" type="datetime-local"
@@ -260,7 +265,9 @@
                                                 ]
                                             }}
                                         </div>
-                            <span v-if="field.description !== 'Field'" class="font-11"><span class="fw-semibold">Description: </span>{{ field.description }}</span>
+                                        <span v-if="field.description !== 'Field'" class="font-11"><span
+                                                class="fw-semibold">Description: </span>{{
+                                                    field.description }}</span>
 
                                     </div>
                                 </div>
@@ -276,7 +283,8 @@
 import { computed, defineProps, onMounted, ref, watch } from "vue";
 // import moment from "moment";
 import axiosInstance from "../shared/services/interceptor";
-import { apis } from "../shared/apiurls";
+import { apis, doctypes } from "../shared/apiurls";
+import { reactive } from "vue";
 
 const props = defineProps({
     blockArr: {
@@ -288,6 +296,73 @@ const props = defineProps({
         required: true,
     },
 });
+// Reactive states
+const linkSearchResults = ref([]);
+const currentFieldOptions = ref('');
+
+const activeSearch = reactive({
+    query: '',
+    key: '',
+});
+
+// Generate unique key for identifying field
+function getFieldKey(b, s, r, c, f) {
+    return `${b}-${s}-${r}-${c}-${f}`;
+}
+
+// Called when the input is focused
+function setActiveField(b, s, r, c, f, field) {
+    activeSearch.key = getFieldKey(b, s, r, c, f);
+    activeSearch.query = '';
+    currentFieldOptions.value = field.options;
+    fetchDoctypeList(''); // Load initial list on focus
+}
+
+// Check if field is the currently active one
+function isActiveField(b, s, r, c, f) {
+    return activeSearch.key === getFieldKey(b, s, r, c, f);
+}
+
+// Fetch from /api/resource/{field.options} with optional searchText
+function fetchDoctypeList(searchText) {
+    const resourceName = currentFieldOptions.value;
+    if (!resourceName || !activeSearch.key) return;
+
+    const filters = [];
+
+    if (searchText.trim()) {
+        filters.push(['name', 'like', `%${searchText}%`]);
+    }
+
+    axiosInstance
+        .get(`/api/resource/${encodeURIComponent(resourceName)}`, {
+            params: {
+                fields: JSON.stringify(['name']),
+                limit_page_length: '10',
+                filters: JSON.stringify(filters),
+            },
+        })
+        .then((res) => {
+            linkSearchResults.value = res.data || [];
+        })
+        .catch((error) => {
+            console.error('Error fetching link options:', error);
+        });
+}
+
+// Handle selection from dropdown
+function selectDoctype(b, s, r, c, f, name) {
+  const field = props.blockArr[b].sections[s].rows[r].columns[c].fields[f];
+  field.value = name;
+
+  // Manually trigger logFieldValue
+  const mockEvent = { target: { value: name } };
+  logFieldValue(mockEvent, b, s, r, c, f);
+
+  linkSearchResults.value = [];
+  activeSearch.query = '';
+  activeSearch.key = '';
+}
 
 
 const getCurrentDateTime = () => {
@@ -382,14 +457,14 @@ const datetimeInput = ref(null);
 const hovered = ref(null)
 
 const isImageFile = (url) => {
-  return /\.(jpg|jpeg|png|gif|png)$/i.test(url)
+    return /\.(jpg|jpeg|png|gif|png)$/i.test(url)
 }
 
 const removeFile = (index, field) => {
-  const files = field.value.split(',').map(f => f.trim())
-  files.splice(index, 1)
-  field.value = files.join(', ')
-  emit('updateField', field)
+    const files = field.value.split(',').map(f => f.trim())
+    files.splice(index, 1)
+    field.value = files.join(', ')
+    emit('updateField', field)
 }
 const forceOpenCalendar = (event) => {
     if (event.target.showPicker) {

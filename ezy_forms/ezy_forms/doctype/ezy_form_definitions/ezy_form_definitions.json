@@ -16,7 +16,8 @@
   "accessible_departments",
   "form_short_name",
   "form_json",
-  "form_status"
+  "form_status",
+  "print_format"
  ],
  "fields": [
   {
@@ -85,11 +86,16 @@
    "fieldname": "enable",
    "fieldtype": "Check",
    "label": "enable"
+  },
+  {
+   "fieldname": "print_format",
+   "fieldtype": "Data",
+   "label": "Print Format"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-02-25 10:32:32.297329",
+ "modified": "2025-04-28 12:39:11.070900",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
  "name": "Ezy Form Definitions",
@@ -104,7 +110,31 @@
    "print": 1,
    "read": 1,
    "report": 1,
+   "role": "Human Resource",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
    "role": "IT assistance",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Production Manager",
    "share": 1,
    "write": 1
   },
@@ -128,7 +158,31 @@
    "print": 1,
    "read": 1,
    "report": 1,
+   "role": "Team Lead",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Junior Developer",
    "share": 1,
    "write": 1
   },
@@ -164,7 +218,31 @@
    "print": 1,
    "read": 1,
    "report": 1,
+   "role": "DOF",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
    "role": "Website Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Tl",
    "share": 1,
    "write": 1
   },

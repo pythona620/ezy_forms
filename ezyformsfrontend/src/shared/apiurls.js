@@ -21,6 +21,7 @@ export const doctypes = {
   CheckUser: 'Login Check',
   SystemSettings:"System Settings",
   Email_Account: 'Email Account',
+  doctypesList: 'DocType'
 
 
 };

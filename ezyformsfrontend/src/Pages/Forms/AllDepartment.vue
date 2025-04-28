@@ -4,7 +4,7 @@
       <div class="d-flex align-items-center justify-content-between py-3">
         <div>
           <h1 class="m-0 font-13">
-            Forms in {{ id }}
+            {{ id === 'allforms' ? 'All Forms' : id }}
           </h1>
           <p class="m-0 font-11 pt-1">
             {{ totalRecords }} forms available
@@ -207,6 +207,7 @@ function viewPreview(data, index, type) {
         query: {
           routepath: route.path,
           form_short_name: data.form_short_name,
+          business_unit: businessUnit.value,
 
         },
       });
@@ -276,6 +277,7 @@ function actionCreated(rowData, actionEvent) {
         query: {
           routepath: route.path,
           form_short_name: rowData.form_short_name,
+          business_unit: businessUnit.value,
 
         },
       });
@@ -486,7 +488,7 @@ function inLineFiltersData(searchedData) {
       if (key === 'form_status' || key === 'enable') return; // Skip since we already handled it above
 
       if (value) {
-        filterObj.value.filters.push([key, "like", `%${value}%`]);
+        filterObj.value.filters.push(key, "like", `%${value}%`);
       }
     });
 
