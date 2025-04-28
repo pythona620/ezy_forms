@@ -169,8 +169,6 @@ def enqueued_add_customized_fields_for_dynamic_doc(fields: list[dict], doctype: 
                             doc_for_existing_custom_field.options = dicts_of_docs_entries["options"]
                         else:
                             doc_for_existing_custom_field.options = "\n".join(dicts_of_docs_entries["options"])
-
-
       
                     if "default" in dicts_of_docs_entries:
                         doc_for_existing_custom_field.default = dicts_of_docs_entries["default"]

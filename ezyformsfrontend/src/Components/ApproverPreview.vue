@@ -462,7 +462,7 @@ function getData(selectedFieldValue, selectedfieldOption) {
       params: queryParams,
     })
     .then((response) => {
-      console.log("API response:", response.data);
+      // console.log("API response:", response.data);
       ModalData.value = response.data
     })
     .catch((error) => {
@@ -501,7 +501,7 @@ function getEmploye() {
         emp_name: response.data[0]?.emp_name,
         signature: response.data[0]?.signature,
       };
-      console.log(response);
+      // console.log(response);
       // console.log(emp_data.value, "response");
     })
     .catch((error) => {

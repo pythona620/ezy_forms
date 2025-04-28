@@ -608,9 +608,9 @@ function receivedForMe(data) {
     })
     .then((res) => {
       tableData.value = res.data[0];
-      console.log(tableData.value?.name,"ppppppppppppp");
+      // console.log(tableData.value?.name,"ppppppppppppp");
       selectedcurrentLevel.value = tableData.value?.current_level;
-      console.log(selectedcurrentLevel.value, " current_level");
+      // console.log(selectedcurrentLevel.value, " current_level");
 
       showRequest.value = rebuildToStructuredArray(
         JSON.parse(tableData.value?.json_columns).fields
@@ -619,7 +619,7 @@ function receivedForMe(data) {
       //   tableData.value?.json_columns
       // ).workflow, "workflow");
       view_only_reportee.value = JSON.parse(tableData.value?.json_columns)?.workflow[selectedcurrentLevel.value]?.view_only_reportee;
-      console.log(" wrk === =>", view_only_reportee.value);
+      // console.log(" wrk === =>", view_only_reportee.value);
       tableHeaders.value = JSON.parse(
         tableData.value?.json_columns
       ).child_table_fields;
@@ -707,7 +707,7 @@ function ViewOnlyRe() {
       params: queryParams,
     })
     .then((response) => {
-      console.log(response.message, "list");
+
       viewlist.value = response.message;
 
       canApprove.value = viewlist.value.includes(selectedData.value.formname);

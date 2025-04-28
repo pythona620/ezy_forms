@@ -54,19 +54,26 @@ def add_roles_to_wf_requestors(business_unit:str,doctype:str,workflow_setup:list
 		if approvers_section.shape[0]>0:
 			approvers_section = approvers_section.select("roles","fields","idx","cancel_request","mandatory","action",'view_only_reportee').rename({"roles":"role","fields":"columns_allowed","idx":"level"}).to_dicts()
 		else:approvers_section=[]
-		frappe.db.sql(f"""delete from `tabWF Requestors` where parent = '{doc_rec}' and parentfield = 'wf_requestors' and parenttype = 'WF Roadmap';""")
-		frappe.db.commit()
-		frappe.db.sql(f"""delete from `tabWF Level Setup` where parent ='{doc_rec}' and parentfield = 'wf_level_setup' and parenttype='WF Roadmap';""")
-		frappe.db.commit()
+  
+		try:
+			frappe.db.sql(f"""delete from `tabWF Requestors` where parent = '{doc_rec}' and parentfield = 'wf_requestors' and parenttype = 'WF Roadmap';""")
+			frappe.db.commit()
+			frappe.db.sql(f"""delete from `tabWF Level Setup` where parent ='{doc_rec}' and parentfield = 'wf_level_setup' and parenttype='WF Roadmap';""")
+			frappe.db.commit()
+		except Exception as e:
+			frappe.log_error("add role to wf requestors",str(e))
+   
 		roadmap_doc = frappe.get_doc("WF Roadmap",doc_rec)
 		if len(approvers_section)>0:
 			roadmap_doc.workflow_levels = max([max_level['level'] for max_level in approvers_section])
 		for single_requestor in requestors_section:
-			activating_perms(doctype=doctype,role=single_requestor["requestor"])
-			roadmap_doc.append("wf_requestors", single_requestor)
+			if single_requestor["requestor"]:
+				activating_perms(doctype=doctype,role=single_requestor["requestor"])
+				roadmap_doc.append("wf_requestors", single_requestor)
 		for single_approver in approvers_section:
-			activating_perms(doctype=doctype,role=single_approver["role"])
-			roadmap_doc.append("wf_level_setup", single_approver)
+			if single_approver["role"]:
+				activating_perms(doctype=doctype,role=single_approver["role"])
+				roadmap_doc.append("wf_level_setup", single_approver)
 		roadmap_doc.save(ignore_permissions=True)
 		frappe.db.commit()
 		workflow_from_defs = frappe.db.get_value("Ezy Form Definitions",doctype,"form_json")

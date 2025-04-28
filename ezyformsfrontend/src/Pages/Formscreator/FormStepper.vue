@@ -1381,7 +1381,7 @@ onMounted(() => {
   if (paramId.value != undefined && paramId.value != null && paramId.value != "new") {
     getFormData();
     OwnerOftheForm();
-    console.log(paramId.value, "[[[]]]");
+    // console.log(paramId.value, "[[[]]]");
   }
   let Bu_Unit = localStorage.getItem("Bu");
   filterObj.value.business_unit = Bu_Unit;
@@ -1850,7 +1850,7 @@ function addDesignationBtn() {
   if (selectedBlockIndex.value !== 0) {
     xyz.view_only_reportee = ViewOnlyReportee.value === true ? 1 : 0;
   }
-  console.log(xyz);
+
 
   const existingIndex = workflowSetup.findIndex((item) => item.idx === xyz.idx);
   if (existingIndex !== -1) {
@@ -1993,7 +1993,7 @@ const nextStep = () => {
     activeStep.value += 1;
     if (activeStep.value === 3) {
       selectedform.value = blockArr;
-      console.log(selectedform.value);
+      // console.log(selectedform.value);
     }
   }
 };
