@@ -310,7 +310,8 @@ def add_child_doctype(form_short_name: str, fields: list[dict],idx=None):
                         "label": new_label,
                         "fieldtype": new_fieldtype,
                         "parentfield": "fields",
-                        "parenttype": "DocType"
+                        "parenttype": "DocType",
+                        # "options":field.get("options")
                     })
                     fields_updated = True
  
@@ -348,7 +349,8 @@ def add_child_doctype(form_short_name: str, fields: list[dict],idx=None):
                     "label": field.get("label"),
                     "fieldtype": field.get("fieldtype"),
                     "parentfield": "fields",
-                    "parenttype": "DocType"
+                    "parenttype": "DocType",
+                    # "options":field.get("options")
                 })
             
             doc.save(ignore_permissions=True)

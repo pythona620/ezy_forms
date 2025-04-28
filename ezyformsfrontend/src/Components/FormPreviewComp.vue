@@ -1,7 +1,7 @@
 <template>
     <div class="container xjdvsdvs">
-        <div class="backBtn">
-            <h5 class="m-0 p-3 font-13 px-4">
+        <div v-if="!route.query.id" class="backBtn">
+            <h5  class="m-0 p-3 font-13 px-4">
                 <router-link :to="backTo" @click="backToForm" class="text-dark text-decoration-none"><i
                         class="bi bi-arrow-left font-14 pe-2"></i></router-link>
                 {{ formDescriptions.form_name || "Untitled" }} ({{
@@ -241,18 +241,26 @@ const props = defineProps({
 
 onMounted(() => {
     fetchDepartmentDetails();
+    // if(!route.query.id){
+
+    // }
+    // else{
+    //     selectedForm.value = props.blockArr
+    //     workFlowRoles.value = props.blockArr
+    // }
+
 })
 
 function fetchDepartmentDetails() {
 
     const queryParams = {
         fields: JSON.stringify(["*"]),
-        form_short_name: route.query.form_short_name,
+        form_short_name: route.query.form_short_name || route.query.id,
 
     };
 
     axiosInstance
-        .get(`${apis.resource}${doctypes.EzyFormDefinitions}/${route.query.form_short_name}`, { params: queryParams })
+        .get(`${apis.resource}${doctypes.EzyFormDefinitions}/${route.query.form_short_name || route.query.id}`, { params: queryParams })
         .then((response) => {
             console.log("response", response);
             formDescriptions.value = response.data
@@ -261,8 +269,7 @@ function fetchDepartmentDetails() {
             childtableHeaders.value = JSON.parse(
                 response.data.form_json
             ).child_table_fields;
-            console.log("selectedForm.value", selectedForm.value);
-            console.log("childtableHeaders.value", childtableHeaders.value);
+           
 
 
         })
@@ -276,7 +283,7 @@ function downloadPdf() {
     const dataObj = {
         "form_short_name": formDescriptions.value.form_short_name,
         "name": null,
-        business_unit: selectedData.value.business_unit
+        business_unit: selectedData.value.business_unit || route.query.business_unit
     };
 
     axiosInstance.post(apis.download_pdf_form, dataObj)
@@ -347,6 +354,7 @@ function setView(view) {
 function updateWorkFlowRoles() {
     let approverIndex = 0; // Keep track of approvers
 
+
     workFlowRoles.value = displayedBlocks.value.map((block) => {
         let roles = [];
 
@@ -368,6 +376,7 @@ function updateWorkFlowRoles() {
 
         return { roles };
     });
+
 }
 
 

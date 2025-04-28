@@ -267,7 +267,7 @@ function logout() {
     // localStorage.removeItem('employeeData');
     axiosInstance.post(apis.logout)
         .then((response) => {
-            console.log(response.data);
+            console.log(response);
             localStorage.removeItem('UserName');
             localStorage.removeItem('employeeData');
             localStorage.removeItem('Bu');
@@ -290,7 +290,7 @@ onMounted(() => {
 
     ezyForms();
     activeTab.value = route.path;
-
+    localStorage.setItem("Bu", EzyBusinessUnit.value)
     // Retrieve data from localStorage
     const userData = JSON.parse(localStorage.getItem('employeeData'));
     const userName = JSON.parse(localStorage.getItem('UserName'));
@@ -364,7 +364,8 @@ const ezyForms = () => {
     });
 };
 watch(business_unit, (newBu, oldBu) => {
-    EzyBusinessUnit.value = newBu;   
+    EzyBusinessUnit.value = newBu;  
+    console.log(EzyBusinessUnit.value,"pppppp"); 
     localStorage.setItem("Bu", EzyBusinessUnit.value)
     sessionStorage.setItem("Bu", EzyBusinessUnit.value)
 

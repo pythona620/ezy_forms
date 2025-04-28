@@ -26,7 +26,7 @@
 
                       <div v-if="field.label">
                         <label :for="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
-                          class=" label-text whitespace-nowrap">
+                          class=" label-text mt-2 whitespace-nowrap">
                           <span class="font-12 fw-medium">{{ field.label }}</span>
                           <span class="ms-1 text-danger">{{ field.reqd === 1 ? "*" : "" }}</span>
                           <span class="pe-2" v-if="props.readonlyFor === 'true' || blockIndex < currentLevel">:</span>
@@ -94,7 +94,7 @@
                                   field.fieldtype === 'Check' ||
                                   index !== 0
                                 " class="form-check-input" type="checkbox" :disabled="blockIndex === 0 || props.readonlyFor === 'true'
-                                " :checked="field.value === option" :value="option"
+                                  " :checked="field.value === option" :value="option"
                                   :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
                                   :id="`${option}-${index}`" @blur="
                                     (event) =>
@@ -175,6 +175,72 @@
                           class="form-control previewInputHeight font-10" multiple
                           @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
                       </template>
+                      <template v-else-if="field.fieldtype == 'Link'">
+                        <div class="d-flex align-items-center gap-2">
+                          <input type="text" :value="field.value"
+                            :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'"
+                            @input="(e) => onInputChange(e.target.value, field)"
+                            :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 image-border-bottom w-50 pb-0 bg-transparent' : ''"
+                            @change="(event) =>
+                              logFieldValue(
+                                event,
+                                blockIndex,
+                                sectionIndex,
+                                rowIndex,
+                                columnIndex,
+                                fieldIndex
+                              )" class="form-control font-12 " />
+                          <button type="button" class="btn btn-outline-secondary pb-0 btn-sm" data-bs-toggle="modal"
+                            :data-bs-target="`#modal-${field.fieldname}`">
+                            <i class="bi bi-link-45deg font-13"></i>
+                          </button>
+                        </div>
+
+                        <!-- Bootstrap Modal -->
+                        <!-- Bootstrap Modal -->
+                        <div class="modal fade" :id="`modal-${field.fieldname}`" tabindex="-1"
+                          :aria-labelledby="`label-${field.fieldname}`" aria-hidden="true"
+                          :ref="el => setModalRef(el, field)">
+                          <div class="modal-dialog modal-dialog-centered modal-lg">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h5 class="modal-title" :id="`label-${field.fieldname}`">
+                                  Select a {{ field.label }}
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                  aria-label="Close"></button>
+                              </div>
+
+                              <div class="modal-body">
+                                <div v-if="ModalData && Object.keys(ModalData).length">
+                                  <div class="row mb-3" v-for="(pair, index) in chunkedModalData" :key="index">
+                                    <div class="col-md-6" v-for="[key, value] in pair" :key="key">
+                                      <label class="form-label fw-semibold text-capitalize">
+                                        {{ key.replace(/_/g, ' ') }}:
+                                      </label>
+                                      <input type="text" class="form-control" :value="value" readonly />
+                                    </div>
+                                  </div>
+                                </div>
+                                <div v-else>
+                                  <p>Loading data...</p>
+                                </div>
+
+                              </div>
+
+                              <!-- <div class="modal-footer">
+                                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                    Close
+                                  </button>
+                                  <button type="button" class="btn btn-primary">
+                                    Save changes
+                                  </button>
+                                </div> -->
+                            </div>
+                          </div>
+                        </div>
+
+                      </template>
 
 
 
@@ -183,12 +249,12 @@
                           :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 image-border-bottom w-50 pb-0 bg-transparent ' : ' '"
                           :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'" :readOnly="blockIndex < currentLevel || props.readonlyFor === 'true'
                             " :placeholder="'Enter ' + field.label" :name="'field-' +
-                            sectionIndex +
-                            '-' +
-                            columnIndex +
-                            '-' +
-                            fieldIndex
-                            " class="form-control previewInputHeight" />
+                              sectionIndex +
+                              '-' +
+                              columnIndex +
+                              '-' +
+                              fieldIndex
+                              " class="form-control previewInputHeight" />
                       </template>
 
                       <!-- Field Type Default -->
@@ -213,34 +279,34 @@
                           :ref="el => setRef(el, sectionIndex, columnIndex, fieldIndex)"
                           @input="adjustHeight(sectionIndex, columnIndex, fieldIndex)" />
 
-                        <component v-if="field.fieldtype !== 'Int' && field.fieldtype !== 'Text'"   
+                        <component v-if="field.fieldtype !== 'Int' && field.fieldtype !== 'Text'"
                           :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'"
                           :is="getFieldComponent(field.fieldtype)"
                           :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0  image-border-bottom w-50 bg-transparent ' : ' '"
                           :value="field.value" :type="field.fieldtype" :readOnly="blockIndex < currentLevel || props.readonlyFor === 'true'
                             " :name="'field-' +
-                            sectionIndex +
-                            '-' +
-                            columnIndex +
-                            '-' +
-                            fieldIndex
-                            " @blur="
-                              (event) =>
-                                logFieldValue(
-                                  event,
-                                  blockIndex,
-                                  sectionIndex,
-                                  rowIndex,
-                                  columnIndex,
-                                  fieldIndex
-                                )
-                            " class="form-control previewInputHeight w-100"></component>
+                              sectionIndex +
+                              '-' +
+                              columnIndex +
+                              '-' +
+                              fieldIndex
+                              " @blur="
+                                (event) =>
+                                  logFieldValue(
+                                    event,
+                                    blockIndex,
+                                    sectionIndex,
+                                    rowIndex,
+                                    columnIndex,
+                                    fieldIndex
+                                  )
+                              " class="form-control previewInputHeight w-100"></component>
                       </template>
                     </div>
-                      <div v-if="field.description !== 'Field'" class="w-100 font-11 description-block mt-1">
-                        <span class="fw-semibold">Description :</span><br>
-                        <span v-html="field.description.replace(/\n/g, '<br>')"></span>
-                      </div>
+                    <div v-if="field.description !== 'Field'" class="w-100 font-11 description-block mt-1">
+                      <span class="fw-semibold">Description :</span><br>
+                      <span v-html="field.description.replace(/\n/g, '<br>')"></span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -293,6 +359,7 @@ import { computed, defineProps, onMounted, ref, watch, nextTick, reactive } from
 import { apis, doctypes, domain } from "../shared/apiurls";
 import axiosInstance from "../shared/services/interceptor";
 import { useRoute } from "vue-router";
+import FormPreview from "./FormPreview.vue";
 
 const props = defineProps({
   blockArr: {
@@ -367,6 +434,52 @@ onMounted(() => {
 
 });
 
+
+
+const modalRefs = ref({});
+
+function setModalRef(el, field) {
+  if (el) {
+    modalRefs.value[field.fieldname] = el;
+    el.addEventListener("shown.bs.modal", () => {
+      if (field.value && field.options) {
+        getData(field.value, field.options);
+      }
+    });
+  }
+}
+
+
+const ModalData = ref([])
+function getData(selectedFieldValue, selectedfieldOption) {
+  const queryParams = {
+    filters: JSON.stringify([[]]),
+    fields: JSON.stringify(["*"]),
+  };
+
+  axiosInstance
+    .get(`${apis.resource}${selectedfieldOption}/${selectedFieldValue}`, {
+      params: queryParams,
+    })
+    .then((response) => {
+      console.log("API response:", response.data);
+      ModalData.value = response.data
+    })
+    .catch((error) => {
+      console.error("Error fetching data:", error);
+    });
+}
+
+
+const chunkedModalData = computed(() => {
+  const entries = Object.entries(ModalData.value || {});
+  const chunks = [];
+  for (let i = 0; i < entries.length; i += 2) {
+    chunks.push(entries.slice(i, i + 2)); // Two fields per row
+  }
+  return chunks;
+});
+
 const emp_data = ref({}); // Use an object to hold both name and signature
 
 function getEmploye() {
@@ -388,6 +501,7 @@ function getEmploye() {
         emp_name: response.data[0]?.emp_name,
         signature: response.data[0]?.signature,
       };
+      console.log(response);
       // console.log(emp_data.value, "response");
     })
     .catch((error) => {

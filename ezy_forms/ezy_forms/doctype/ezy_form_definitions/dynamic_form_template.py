@@ -682,7 +682,7 @@ def convert_html_to_pdf(html_content, pdf_path):
         pdfkit.from_string(html_content, pdf_path)
     
     except Exception as e:
-        frappe.log_eror(f"PDF generation failed: {e}")
+        frappe.log_error(f"PDF generation failed: {e}")
  
 def json_structure_call_for_html_view(json_obj: list, form_name: str, child_data, child_table_data,business_unit):
     if child_data is None:
@@ -806,43 +806,48 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
         
     
         if name is None:
-            json_object = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_json")
-            json_object = literal_eval(json_object)["fields"]
-            json_object = [
-                field for field in json_object
-                if field.get("fieldtype") != "Attach" or ("approved_by" in field.get("fieldname", "").lower())
-                    ]
-            user_doc = frappe.get_doc("DocType", form_short_name).as_dict()
-            labels={}
-            for iteration in json_object:
-                if "value" in iteration:
-                    iteration["value"] = user_doc.get(iteration["fieldname"], "")
+            print_format = frappe.db.get_value("Ezy Form Definitions", form_short_name, "print_format")
+            if print_format:
+                html_view_ = get_html_file_data(form_short_name,None,str(print_format))
+                html_view = html_view_['html']
+            else:
+                json_object = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_json")
+                json_object = literal_eval(json_object)["fields"]
+                json_object = [
+                    field for field in json_object
+                    if field.get("fieldtype") != "Attach" or ("approved_by" in field.get("fieldname", "").lower())
+                        ]
+                user_doc = frappe.get_doc("DocType", form_short_name).as_dict()
+                labels={}
+                for iteration in json_object:
+                    if "value" in iteration:
+                        iteration["value"] = user_doc.get(iteration["fieldname"], "")
 
-                # Handling child table fields
-                if iteration.get("fieldtype") == "Table":
-                    iteration["value"] = frappe.get_all(iteration["options"], filters={"parent": name}, fields=["*"])
-                    child_table_name = str(iteration["fieldname"])  
+                    # Handling child table fields
+                    if iteration.get("fieldtype") == "Table":
+                        iteration["value"] = frappe.get_all(iteration["options"], filters={"parent": name}, fields=["*"])
+                        child_table_name = str(iteration["fieldname"])  
 
-                    # Get the child table Doctype name
-                    child_table_doctype = frappe.get_value(
-                        "DocField",
-                        {"parent": form_short_name, "fieldname": child_table_name},
-                        "options"
-                    )
+                        # Get the child table Doctype name
+                        child_table_doctype = frappe.get_value(
+                            "DocField",
+                            {"parent": form_short_name, "fieldname": child_table_name},
+                            "options"
+                        )
 
-                    if not child_table_doctype:
-                        return {"error": f"Child table '{child_table_name}' not found"}
+                        if not child_table_doctype:
+                            return {"error": f"Child table '{child_table_name}' not found"}
 
-                    # Get the fields (columns) of the child table
-                    child_table_fields = frappe.get_all(
-                        "DocField",
-                        filters={"parent": child_table_doctype},
-                        fields=["label"]
-                    )
+                        # Get the fields (columns) of the child table
+                        child_table_fields = frappe.get_all(
+                            "DocField",
+                            filters={"parent": child_table_doctype},
+                            fields=["label"]
+                        )
 
-                    # Store labels for each child table
-                    labels[child_table_name] = [field["label"] for field in child_table_fields]
-            html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_short_name,child_table_data=labels,child_data=None,business_unit=business_unit)
+                        # Store labels for each child table
+                        labels[child_table_name] = [field["label"] for field in child_table_fields]
+                html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_short_name,child_table_data=labels,child_data=None,business_unit=business_unit)
             random_number = randint(111, 999)
  
             pdf_filename = f"{form_short_name}_{random_number}  .pdf"
@@ -865,35 +870,42 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
  
             return file_url
         if name:
-            json_object = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_json")
-            json_object = literal_eval(json_object)["fields"]
-            json_object = [
-                field for field in json_object
-                if field.get("fieldtype") != "Attach" or ("approved_by" in field.get("fieldname", "").lower())
-                    ]
-            user_doc = frappe.get_doc(form_short_name, name).as_dict()
-            data_list ={}
-            for iteration in json_object:
-                if "value" in iteration:
-                    iteration["value"] = user_doc.get(iteration["fieldname"], "")
+            
+            print_format = frappe.db.get_value("Ezy Form Definitions", form_short_name, "print_format")
+            
+            if print_format:
+                html_view_ = get_html_file_data(form_short_name,name,print_format)
+                html_view = html_view_['html']
+            else:
+                json_object = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_json")
+                json_object = literal_eval(json_object)["fields"]
+                json_object = [
+                    field for field in json_object
+                    if field.get("fieldtype") != "Attach" or ("approved_by" in field.get("fieldname", "").lower())
+                        ]
+                user_doc = frappe.get_doc(form_short_name, name).as_dict()
+                data_list ={}
+                for iteration in json_object:
+                    if "value" in iteration:
+                        iteration["value"] = user_doc.get(iteration["fieldname"], "")
 
-                # Handling child table fields
-                if iteration.get("fieldtype") == "Table":
-                    child_table_name = str(iteration["fieldname"])
-                    child_table_records = frappe.get_all(iteration["options"], filters={"parent": name}, fields=["*"])
-                    
-                    # Get field names and labels dynamically
-                    field_names = [df.fieldname for df in frappe.get_meta(iteration["options"]).fields]
-                    field_labels = {df.fieldname: df.label for df in frappe.get_meta(iteration["options"]).fields}
+                    # Handling child table fields
+                    if iteration.get("fieldtype") == "Table":
+                        child_table_name = str(iteration["fieldname"])
+                        child_table_records = frappe.get_all(iteration["options"], filters={"parent": name}, fields=["*"])
+                        
+                        # Get field names and labels dynamically
+                        field_names = [df.fieldname for df in frappe.get_meta(iteration["options"]).fields]
+                        field_labels = {df.fieldname: df.label for df in frappe.get_meta(iteration["options"]).fields}
 
-                    # Store child table data properly
-                    data_list[child_table_name] = [
-                        {field_labels.get(field, field): record.get(field) for field in field_names}
-                        for record in child_table_records
-                    ]
-
-        
-            html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_short_name,child_data=data_list,child_table_data=None,business_unit=business_unit)
+                        # Store child table data properly
+                        data_list[child_table_name] = [
+                            {field_labels.get(field, field): record.get(field) for field in field_names}
+                            for record in child_table_records
+                        ]
+                        
+                html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_short_name,child_data=data_list,child_table_data=None,business_unit=business_unit)
+                
             random_number = randint(111, 999)
     
             pdf_filename = f"{form_short_name}_{name}_{random_number}mailfiles.pdf"
@@ -928,3 +940,12 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
         frappe.log_error("Error Downloading File", "line No:{}\n{}".format(exc_tb.tb_lineno, traceback.format_exc()))
         frappe.throw(str(e))
         return {"success": False, "message": str(e)}
+    
+    
+from frappe.www.printview import get_html_and_style
+
+def get_html_file_data(doc=None,data=None,print_format=None):
+    
+    html_file = get_html_and_style(doc,name=data,print_format=print_format,no_letterhead=None,letterhead=None,trigger_print=False,style=None,settings=None)
+ 
+    return html_file

@@ -69,8 +69,8 @@
                         <div class="col-4">
                           <div class="mt-3">
                             <div class="">
-                              <FormFields :disabled="selectedData.formId && selectedData.formId.length  > 0"
-                                 labeltext="Form Name" class="formHeight" type="text" tag="input" name="Value"
+                              <FormFields :disabled="selectedData.formId && selectedData.formId.length > 0"
+                                labeltext="Form Name" class="formHeight" type="text" tag="input" name="Value"
                                 id="formName" validationStar="true" placeholder="Untitled Form"
                                 @change="(event) => handleInputChange(event, 'form_name')"
                                 v-model="filterObj.form_name" />
@@ -80,7 +80,8 @@
                           </div>
                           <div class="mt-3">
                             <div class="">
-                              <FormFields :disabled="selectedData.formId && selectedData.formId.length > 0" labeltext="Form Short Code" class="formHeight" type="text" tag="input" name="Value"
+                              <FormFields :disabled="selectedData.formId && selectedData.formId.length > 0"
+                                labeltext="Form Short Code" class="formHeight" type="text" tag="input" name="Value"
                                 id="formShortCode" validationStar="true" placeholder="Untitled Form" @change="
                                   (event) => handleInputChange(event, 'form_short_name')
                                 " v-model="filterObj.form_short_name" />
@@ -103,7 +104,8 @@
                               <label for="">Owner Of The Form
                                 <span v-if="!filterObj.owner_of_the_form" class="text-danger">*</span></label>
 
-                              <Multiselect :disabled="selectedData.formId && selectedData.formId.length > 0"  :options="OwnerOfTheFormData" @change="OwnerOftheForm"
+                              <Multiselect :disabled="selectedData.formId && selectedData.formId.length > 0"
+                                :options="OwnerOfTheFormData" @change="OwnerOftheForm"
                                 v-model="filterObj.owner_of_the_form" placeholder="Select Department" :multiple="false"
                                 class="font-11 multiselect" :searchable="true" />
                             </div>
@@ -118,9 +120,9 @@
                               <label for="">Form Cateogry
                                 <span v-if="!filterObj.form_category" class="text-danger">*</span></label>
 
-                              <Multiselect :disabled="selectedData.formId && selectedData.formId.length > 0"  :options="departments" v-model="filterObj.form_category"
-                                placeholder="Select Cateogry" :multiple="false" :searchable="true"
-                                class="font-11 multiselect" />
+                              <Multiselect :disabled="selectedData.formId && selectedData.formId.length > 0"
+                                :options="departments" v-model="filterObj.form_category" placeholder="Select Cateogry"
+                                :multiple="false" :searchable="true" class="font-11 multiselect" />
                             </div>
                           </div>
                           <div class="mt-3">
@@ -158,9 +160,10 @@
                                   <span v-if="!filterObj.accessible_departments.length"
                                     class="text-danger">*</span></label>
                               </label>
-                              <VueMultiselect :disabled="selectedData.formId && selectedData.formId.length > 0"  v-model="filterObj.accessible_departments" :options="filteredOptions"
-                                :multiple="true" :close-on-select="false" :clear-on-select="false"
-                                :preserve-search="true" placeholder="Select Designation" class="font-11">
+                              <VueMultiselect :disabled="selectedData.formId && selectedData.formId.length > 0"
+                                v-model="filterObj.accessible_departments" :options="filteredOptions" :multiple="true"
+                                :close-on-select="false" :clear-on-select="false" :preserve-search="true"
+                                placeholder="Select Designation" class="font-11">
                                 <template #option="{ option }">
                                   <div class="custom-option">
                                     <input type="checkbox" :checked="isChecked(option)" class="custom-checkbox"
@@ -395,7 +398,7 @@
                                   <div class="d-flex justify-content-between align-items-center">
                                     <label class="rownames">{{
                                       getRowSuffix(rowIndex)
-                                    }}</label>
+                                      }}</label>
                                     <div>
                                       <button v-if="row.columns.length < 3"
                                         class="btn btn-light bg-transparent border-0 font-12" @click="
@@ -578,6 +581,53 @@
                                                 Options are required for this field type.
                                               </small>
                                             </div>
+                                            <!-- <div v-if="field.fieldtype === 'Link'">
+                                              <label class="font-12 fw-light" for="link-search">Search Doctype:</label>
+                                              <input id="link-search" type="text" v-model="linkSearchQuery"
+                                                @input="fetchDoctypeList(linkSearchQuery)"
+                                                @focus="dropdownVisible = true" class="form-control font-12 mb-1"
+                                                placeholder="Type to search..." />
+
+                                              <ul v-if="linkSearchResults.length && dropdownVisible"
+                                                class="list-group mt-1" style="max-height: 200px; overflow-y: auto;">
+                                                <li v-for="(result, index) in linkSearchResults" :key="index"
+                                                  @click="selectDoctype(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex, result.name)"
+                                                  class="list-group-item list-group-item-action">
+                                                  {{ result.name }}
+                                                </li>
+                                              </ul>
+
+                                              
+                                              <input type="text"
+                                                v-model="blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex].options"
+                                                class="form-control font-12 mb-1"
+                                                :placeholder="linkSearchQuery ? 'Select from list' : 'Selected doctype will appear here'"
+                                                readonly />
+                                            </div> -->
+                                            <div v-if="field.fieldtype === 'Link'">
+                                              <span class="font-11 fw-light">Search Doctype:</span>
+
+                                              <input type="text" v-model="activeSearch.query"
+                                                @input="(e) => fetchDoctypeList(e.target.value)"
+                                                :placeholder="field.options || 'Type to search...'"
+                                                class="form-control font-12 mb-1"
+                                                @focus="setActiveField(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
+
+                                              <ul
+                                                v-if="isActiveField(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) && linkSearchResults.length"
+                                                class="list-group mt-1" style="max-height: 200px; overflow-y: auto;">
+                                                <li v-for="(result, index) in linkSearchResults" :key="index"
+                                                  @click="selectDoctype(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex, result.name)"
+                                                  class="list-group-item list-group-item-action">
+                                                  {{ result.name }}
+                                                </li>
+                                              </ul>
+                                            </div>
+
+
+
+
+
 
                                             <div class="d-flex  align-items-center justify-content-between">
                                               <div class=" d-flex align-items-center gap-2">
@@ -595,8 +645,8 @@
                                                 <button class="btn btn-sm  font-12"
                                                   @click="field.showDescription = !field.showDescription">
                                                   {{ field.showDescription ? 'Hide Description' : (field.description ?
-                                                  'Edit Description'
-                                                  : 'Add Description') }}
+                                                    'Edit Description'
+                                                    : 'Add Description') }}
                                                 </button>
                                               </div>
                                             </div>
@@ -607,7 +657,7 @@
                                               placeholder="Enter field description"></textarea>
 
                                             <small v-if="field.error" class="text-danger font-10">{{ field.error
-                                            }}</small>
+                                              }}</small>
                                           </div>
                                         </div>
 
@@ -823,6 +873,24 @@
                                                   {{ section.label }}
                                                 </option>
                                               </select>
+                                              <!-- <div v-if="field.fieldtype === 'Link'">
+                                                <span class="font-11 fw-light">Search Doctype:</span>
+                                                <input type="text" v-model="field.options"
+                                                  @input="handleLinkSearch(field.options)"
+                                                  :placeholder="field.options || 'Type to search...'"
+                                                  class="form-control font-12 mb-1"
+                                                  @focus="activateLinkField(tableIndex, fieldIndex)" />
+
+                                                <ul
+                                                  v-if="isLinkFieldActive(tableIndex, fieldIndex) && linkSearchResults?.length"
+                                                  class="list-group mt-1" style="max-height: 200px; overflow-y: auto;">
+                                                  <li v-for="(result, index) in linkSearchResults" :key="index"
+                                                    @click="assignLinkOption(result.name, field)"
+                                                    class="list-group-item list-group-item-action">
+                                                    {{ result.name }}
+                                                  </li>
+                                                </ul>
+                                              </div> -->
                                             </div>
                                           </div>
 
@@ -867,10 +935,46 @@
                       </div>
                     </div>
                   </div>
-                  <div v-if="activeStep === 3"></div>
+                  <div v-if="activeStep === 3">
+                    <div class="stepperbackground d-flex align-items-center justify-content-end gap-2 ">
+
+                      <div>
+                        <button class="btn btn btn-light previewBtn font-13" data-bs-toggle="modal"
+                        data-bs-target="#customFormatModal">Print Format
+                        </button>
+
+                      </div>
+                      <div>
+                        <!-- <button class="download_btn font-13 " @click="downloadPdf"><i
+                            class="bi bi-download me-2"></i>Download
+                          Pdf</button> -->
+                      </div>
+                    </div>
+                    <FormPreviewComp :blockArr="selectedform" />
+                  </div>
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" id="customFormatModal" tabindex="-1" aria-labelledby="customFormatModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="customFormatModalLabel">Print Format</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <input v-model="printFormatID" :multiple="false" :placeholder="route.query.id"
+                                class="font-11 form-control " :searchable="true" />
+           
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-dark " @click="SetPrintFormatFn">Add Print Format</button>
           </div>
         </div>
       </div>
@@ -892,7 +996,7 @@
             <div>
 
               <input type="checkbox" id="ViewOnlyReportee" v-model="ViewOnlyReportee"
-                class="me-2 mt-1  form-check-input"  />
+                class="me-2 mt-1  form-check-input" />
               <label for="ViewOnlyReportee " class="SelectallDesignation fw-bold mt-1 form-check-label">View Only
                 Reportee</label>
             </div>
@@ -911,10 +1015,10 @@
         </div>
         <ul v-if="DesignationList.length" class="list-unstyled">
           <li v-for="(item, index) in filteredDesignationList" :key="index" class="designationList">
-            <input type="checkbox" v-model="designationValue" :value="item" class="designationCheckBox" 
+            <input type="checkbox" v-model="designationValue" :value="item" class="designationCheckBox"
               @change="handleSingleSelect" />
-              <!-- :class="{ 'opacity-50': ViewOnlyReportee }" -->
-            <span class="ps-2" >{{ item }}</span>
+            <!-- :class="{ 'opacity-50': ViewOnlyReportee }" -->
+            <span class="ps-2">{{ item }}</span>
           </li>
         </ul>
         <div v-else>
@@ -957,6 +1061,7 @@ import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 // import { nextTick } from "vue";
 import { useDragAndDrop } from "../../shared/services/draggable";
+import FormPreviewComp from "../../Components/FormPreviewComp.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -997,9 +1102,10 @@ const columns = reactive([]);
 const selectedData = ref({
   routepath: route.query.routepath,
   business_unit: route.query.business_unit,
-  formId : route.query.id
+  formId: route.query.id
 
 });
+const printFormatID = ref('')
 
 
 // const computedDisabled = computed(() => {
@@ -1009,7 +1115,7 @@ const filterObj = ref({
   form_name: "",
   form_short_name: "",
   accessible_departments: [],
-  business_unit: `${businessUnit.value.value || selectedData.value.business_unit}`,
+  business_unit: `${businessUnit.value.value || selectedData.value.business_unit || route.query.business_unit}`,
   form_category: "",
   owner_of_the_form: "",
 });
@@ -1043,6 +1149,164 @@ watch(
   },
   { immediate: true }
 );
+
+
+// const linkSearchQuery = ref('');
+// const linkSearchResults = ref([]);
+// const dropdownVisible = ref(false); // Controls dropdown visibility
+
+// function fetchDoctypeList(searchText) {
+//   const filters = [
+//     ['module', 'in', ['User Forms', 'Ezy Forms', 'Ezy Flow']],
+//   ];
+
+//   if (searchText?.trim()) {
+//     filters.push(['name', 'like', `%${searchText}%`]);
+//   }
+
+//   const queryParams = {
+//     fields: JSON.stringify(['name']),
+//     filters: JSON.stringify(filters),
+//     limit_page_length: '10',
+//   };
+
+//   axiosInstance
+//     .get(apis.resource + doctypes.doctypesList, { params: queryParams })
+//     .then((res) => {
+//       console.log("Fetched response:", res);  // Check the whole response
+//       console.log("Fetched data:", res.data); // Check if `data` exists directly
+//       linkSearchResults.value = res.data || [];
+//     })
+//     .catch((error) => {
+//       console.error('Error fetching doctype list:', error);
+//     });
+// }
+
+// const selectDoctype = (blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex, doctypeName) => {
+//   // Access the specific field in the nested structure
+//   const field = blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex];
+
+//   // Update the field's value with the selected doctype
+//   field.options = doctypeName;
+
+//   // Hide the dropdown after selecting a doctype
+//   dropdownVisible.value = false;
+
+//   // Optionally reset the search query or show the selected name
+//   linkSearchQuery.value = doctypeName;
+// };
+
+
+const linkSearchResults = ref([]);
+const activeSearch = reactive({
+  query: '',
+  key: '', // A unique key to match the field
+});
+
+// Create a unique key based on all indices
+function getFieldKey(b, s, r, c, f) {
+  return `${b}-${s}-${r}-${c}-${f}`;
+}
+
+function setActiveField(b, s, r, c, f) {
+  activeSearch.key = getFieldKey(b, s, r, c, f);
+}
+
+function isActiveField(b, s, r, c, f) {
+  return activeSearch.key === getFieldKey(b, s, r, c, f);
+}
+
+function fetchDoctypeList(searchText) {
+  const filters = [
+    ['module', 'in', ['User Forms']],
+    ['istable', '=', 0]
+  ];
+
+  if (searchText?.trim()) {
+    filters.push(['name', 'like', `%${searchText}%`]);
+  }
+
+  const queryParams = {
+    fields: JSON.stringify(['name']),
+    filters: JSON.stringify(filters),
+    limit_page_length: '10',
+  };
+
+  axiosInstance
+    .get(apis.resource + doctypes.doctypesList, { params: queryParams })
+    .then((res) => {
+      linkSearchResults.value = res.data || [];
+    })
+    .catch((error) => {
+      console.error('Error fetching doctype list:', error);
+    });
+}
+
+function selectDoctype(b, s, r, c, f, name) {
+  blockArr[b].sections[s].rows[r].columns[c].fields[f].options = name;
+  linkSearchResults.value = [];
+  activeSearch.query = '';
+  activeSearch.key = ''; // deactivate
+}
+
+
+
+//=========================================================
+// const activeLinkField = ref({});
+
+// const activateLinkField = (tableIndex, fieldIndex) => {
+//   activeLinkField.value = { tableIndex, fieldIndex };
+// };
+
+// const isLinkFieldActive = (tableIndex, fieldIndex) => {
+//   return (
+//     activeLinkField.value.tableIndex === tableIndex &&
+//     activeLinkField.value.fieldIndex === fieldIndex
+//   );
+// };
+
+
+// const handleLinkSearch = (searchText) => {
+//   if (!searchText?.trim()) {
+//     linkSearchResults.value = [];
+//     return;
+//   }
+
+//   const filters = [
+//     ['module', 'in', ['User Forms']],
+//     ['istable', '=', 0]
+//   ];
+
+//   if (searchText.trim()) {
+//     filters.push(['name', 'like', `%${searchText}%`]);
+//   }
+
+//   const queryParams = {
+//     fields: JSON.stringify(['name']),
+//     filters: JSON.stringify(filters),
+//     limit_page_length: '10',
+//   };
+
+//   axiosInstance
+//     .get(apis.resource + doctypes.doctypesList, { params: queryParams })
+//     .then((res) => {
+//       linkSearchResults.value = res.data || [];
+//     })
+//     .catch((error) => {
+//       console.error('Error fetching doctype list:', error);
+//       linkSearchResults.value = [];
+//     });
+// };
+
+
+// // Store selected doctype in field.options
+// const assignLinkOption = (selected, field) => {
+//   field.options = selected;
+//   linkSearchResults.value = [];
+// };
+
+
+
 
 
 
@@ -1117,7 +1381,7 @@ onMounted(() => {
   if (paramId.value != undefined && paramId.value != null && paramId.value != "new") {
     getFormData();
     OwnerOftheForm();
-    console.log(paramId.value,"[[[]]]");
+    console.log(paramId.value, "[[[]]]");
   }
   let Bu_Unit = localStorage.getItem("Bu");
   filterObj.value.business_unit = Bu_Unit;
@@ -1128,28 +1392,59 @@ onMounted(() => {
 const childTables = ref([]);
 
 // Function to add a new child table
+// const addChildTable = () => {
+//   const existingFieldsCount = Object.values(childtableHeaders.value).reduce((acc, table) => {
+//     return acc + (Array.isArray(table) ? table.length : 0);
+//   }, 0);
+
+//   // New index starts from the total existing fields
+//   const newIndex = existingFieldsCount + childTables.value.length;
+
+//   childTables.value.push({
+//     idx: newIndex,
+//     tableName: "",
+//     formattedTableName: "",
+//     columns: reactive([
+//       {
+//         label: "",
+//         fieldname: `field_${columns.length}`, // This will be updated once the label is entered
+//         fieldtype: "",
+//         idx: columns.length,
+//         reqd: false,
+//       }
+//     ]),
+//      // Use `ref([])` instead of `reactive([])`
+//     // Store new fields separately
+//   });
+
+// };
+
 const addChildTable = () => {
   const existingFieldsCount = Object.values(childtableHeaders.value).reduce((acc, table) => {
     return acc + (Array.isArray(table) ? table.length : 0);
   }, 0);
 
-  // New index starts from the total existing fields
   const newIndex = existingFieldsCount + childTables.value.length;
+
+  const fieldtype = ""; // Or set default if needed, like 'Data', 'Link', etc.
+
+  const field = {
+    label: "",
+    fieldname: `field_${newIndex}`,
+    fieldtype,
+    idx: newIndex,
+    reqd: false,
+  };
+
+  if (fieldtype === "Link") {
+    field.options = "";
+  }
 
   childTables.value.push({
     idx: newIndex,
     tableName: "",
     formattedTableName: "",
-    columns: reactive([
-      {
-        label: "",
-        fieldname: `field_${columns.length}`, // This will be updated once the label is entered
-        fieldtype: "",
-        idx: columns.length,
-        reqd: false,
-      }
-    ]), // Use `ref([])` instead of `reactive([])`
-    // Store new fields separately
+    columns: reactive([field]),
   });
 };
 
@@ -1168,7 +1463,11 @@ const addFieldToTable = (tableIndex) => {
     fieldtype: "",
     idx: columns.length,
     reqd: false,
+
   });
+  if (newField.fieldtype === 'Link') {
+    newField.options = "";
+  }
 
   // Watch for label changes and update fieldname dynamically
   watch(() => columns[columns.length - 1]?.label, (newLabel) => {
@@ -1359,12 +1658,12 @@ const steps = ref([
     stepno: "Step 2",
     icon: "bi bi-question-circle",
   },
-  // {
-  //     id: 3,
-  //     label: "Preview & Save",
-  //     stepno: "Step 3",
-  //     icon: "ri-checkbox-circle-line",
-  // },
+  {
+    id: 3,
+    label: "Print Format",
+    stepno: "Step 3",
+    icon: "ri-checkbox-circle-line",
+  },
 ]);
 
 const childfield = [
@@ -1388,6 +1687,10 @@ const childfield = [
     label: "Datetime",
     type: "Datetime",
   },
+  // {
+  //   label: "Link",
+  //   type: "Link"
+  // }
 ];
 const fieldTypes = [
   {
@@ -1439,9 +1742,13 @@ const fieldTypes = [
     type: "Select",
   },
   {
-      label: "Multi Select",
-      type: "Small Text",
+    label: "Multi Select",
+    type: "Small Text",
   },
+  // {
+  //   label: "Link",
+  //   type: "Link"
+  // }
   // {
   //     label: "Signature",
   //     type: "Signature",
@@ -1684,6 +1991,10 @@ const nextStep = () => {
 
   if (activeStep.value < 3) {
     activeStep.value += 1;
+    if (activeStep.value === 3) {
+      selectedform.value = blockArr;
+      console.log(selectedform.value);
+    }
   }
 };
 
@@ -1747,6 +2058,26 @@ function getFormData() {
     });
 }
 
+function SetPrintFormatFn() {
+  const data = {
+    print_format : printFormatID.value
+  }
+  axiosInstance
+    .put(apis.resource + doctypes.EzyFormDefinitions + `/${printFormatID.value}`,data)
+    .then((res) => {
+      console.log(res);
+      const modal = bootstrap.Modal.getInstance(document.getElementById('customFormatModal'));
+      modal.hide();
+      toast.success("Print Format Added Successfully", {
+          autoClose: 1000,
+          transition: "zoom",
+        });
+
+    })
+    .catch((error) => {
+      console.error("Error fetching  data:", error);
+    });
+  }
 
 function deptData() {
   const queryParams = {
@@ -1850,7 +2181,7 @@ function formData(status) {
             onClose: () => {
               if (status === "save") {
                 let toPath = localStorage.getItem('routepath')
-                router.push({path: toPath });
+                router.push({ path: toPath });
               } else if (status === "draft") {
                 router.push({ name: "Draft" });
               }
@@ -2386,6 +2717,24 @@ const hasDuplicates = (array) => new Set(array).size !== array.length;
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 
 <style lang="scss" scoped>
+.stepsDiv {
+  margin-top: 0;
+}
+
+.backBtn {
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.download_btn {
+  border: 1px solid rgb(36, 220, 36);
+  color: rgb(36, 220, 36);
+  background: transparent;
+  border-radius: 10px;
+}
+
 .dynamic_fied {
   position: relative;
 }
