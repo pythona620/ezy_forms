@@ -1321,7 +1321,7 @@ const uploadFile = (file, field) => {
 function deptData() {
   const queryParams = {
     fields: JSON.stringify(["*"]),
-    limit_page_length: filterObj.value.limitPageLength,
+    limit_page_length: "None",
     limit_start: filterObj.value.limit_start,
   };
 
@@ -1495,7 +1495,7 @@ function designationData() {
   const queryParams = {
     fields: JSON.stringify(["*"]),
     filters: JSON.stringify(filters),
-    limit_page_length: filterObj.value.limitPageLength,
+    limit_page_length:"None",
     limit_start: filterObj.value.limit_start,
     order_by: "`tabWF Roles`.`creation` desc",
   };
