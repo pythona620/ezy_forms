@@ -394,7 +394,7 @@
                   </VueMultiselect>
                   <label class="font-13 ps-1" for="reporting_to">Reports To</label>
                   <VueMultiselect v-model="createEmployee.reporting_to"
-                    :options="tableData.map((dept) => dept.emp_mail_id)" :multiple="false" :close-on-select="true"
+                    :options="employeeEmails.map((dept) => dept.emp_mail_id)" :multiple="false" :close-on-select="true"
                     :clear-on-select="false" :preserve-search="true" placeholder="Select Reports To"
                     class="font-11 mb-3">
 
@@ -1200,7 +1200,7 @@ function actionCreated(rowData, actionEvent) {
       phoneError.value = ""
       deptData();
       designationData();
-      employeeData()
+      employeeOptions();
       createEmployee.value = { ...rowData }
       isMasked.value = true
       isEmailMasked.value = true

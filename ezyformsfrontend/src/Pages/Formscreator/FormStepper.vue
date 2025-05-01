@@ -97,6 +97,9 @@
                             <div>
                               <FormFields :disabled="selectedData.formId && selectedData.formId.length > 0" labeltext="Form Name series" class="formHeight mt-2" type="text" tag="input" name="Value"
                                 id="formNameSeries" placeholder="Form Name series" v-model="filterObj.series" />
+                                <small class="text-muted" style="font-size:12px">
+                                 Note : Enter <code>ABC</code> to get <code>ABC-001</code> by default.
+                                </small>
                             </div>
                           </div>
                           <div class="mt-3">
@@ -2307,44 +2310,38 @@ const addBlock = () => {
 const removeBlock = (blockIndex) => {
   let item = blockArr[blockIndex];
   if (item.parent) deleted_items.push(item);
+
+  let rolesToDelete = [];
+  if (workflowSetup.length > blockIndex && workflowSetup[blockIndex].roles) {
+    rolesToDelete = [...workflowSetup[blockIndex].roles];
+  }
+
   blockArr.splice(blockIndex, 1);
+  if (workflowSetup.length > blockIndex) {
+    workflowSetup.splice(blockIndex, 1);
+  }
+
+  delete_assigned_roles(rolesToDelete, blockIndex);
+
 };
 
-// const removeBlock = (blockIndex) => {
-//   let item = blockArr[blockIndex];
-//   if (item.parent) deleted_items.push(item);
+function delete_assigned_roles(roles, blockIndex) {
+  const payload = {
+    role: roles,
+    level: blockIndex,
+    document_type: filterObj.value.form_name,
+    short_name: filterObj.value.form_short_name,
+    property: filterObj.value.business_unit
+  };
 
-//   let rolesToDelete = [];
-//   if (workflowSetup.length > blockIndex && workflowSetup[blockIndex].roles) {
-//     rolesToDelete = [...workflowSetup[blockIndex].roles];
-//   }
-
-//   blockArr.splice(blockIndex, 1);
-//   if (workflowSetup.length > blockIndex) {
-//     workflowSetup.splice(blockIndex, 1);
-//   }
-
-//   delete_assigned_roles(rolesToDelete, blockIndex);
-
-// };
-
-// function delete_assigned_roles(roles, blockIndex) {
-//   const payload = {
-//     role: roles,
-//     level: blockIndex,
-//     document_type: filterObj.value.form_name,
-//     short_name: filterObj.value.form_short_name,
-//     property: filterObj.value.business_unit
-//   };
-
-//   axiosInstance
-//     .post(apis.deleteAssigneRoles, payload)
-//     .then((res) => {
-//       if (res) {
-//         console.log(res);
-//       }
-//     });
-// }
+  axiosInstance
+    .post(apis.deleteAssigneRoles, payload)
+    .then((res) => {
+      if (res) {
+        console.log(res);
+      }
+    });
+}
 
 // Function to add a new section with a default column
 const addSection = (blockIndex) => {
