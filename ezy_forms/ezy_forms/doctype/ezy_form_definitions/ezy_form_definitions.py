@@ -18,7 +18,7 @@ class EzyFormDefinitions(Document):
     pass
  
 @frappe.whitelist()
-def add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:str,form_name:str,accessible_departments:str,form_short_name:str,fields:list[dict],form_status:str):
+def add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:str,form_name:str,accessible_departments:str,form_short_name:str,fields:list[dict],form_status:str,series=None):
     return_response_for_doc_add = enqueue(
         enqueued_add_dynamic_doctype,
         owner_of_the_form=owner_of_the_form,
@@ -30,6 +30,7 @@ def add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:st
         fields=fields,
         form_status=form_status,
         now=True,
+        series =series,
         is_async=True,
         queue="short")
     return return_response_for_doc_add
@@ -57,7 +58,7 @@ def deleting_customized_field_from_custom_dynamic_doc(doctype:str,deleted_fields
         queue="short")
     return deleted_fields_qresponse
  
-def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:str,form_name:str,accessible_departments:str,form_short_name:str,fields:list[dict],form_status:str):
+def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:str,form_name:str,accessible_departments:str,form_short_name:str,fields:list[dict],form_status:str,series=None):
     """ Owner_of_the_form should come from Departments Doctype in Select Field."""
     """Adding DocTypes dynamically, giving Perms for the doctype and creating a default section-break field for DocType"""
     try:
@@ -93,6 +94,7 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
             form_defs.form_status = form_status
             form_defs.owner_of_the_form = owner_of_the_form
             form_defs.active = 1
+            form_defs.series = series + "-.####" if series else None
             form_defs.business_unit = business_unit
             form_defs.count = 0
             form_defs.insert(ignore_permissions=True).save()
