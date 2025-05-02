@@ -1,7 +1,7 @@
 <template>
     <div class="container xjdvsdvs">
         <div v-if="!route.query.id" class="backBtn">
-            <h5  class="m-0 p-3 font-13 px-4">
+            <h5 class="m-0 p-3 font-13 px-4">
                 <router-link :to="backTo" @click="backToForm" class="text-dark text-decoration-none"><i
                         class="bi bi-arrow-left font-14 pe-2"></i></router-link>
                 {{ formDescriptions.form_name || "Untitled" }} ({{
@@ -9,7 +9,8 @@
                 }})
             </h5>
             <div>
-                <button class="download_btn font-13 me-5" @click="downloadPdf"><i class="bi bi-download me-2"></i>Download Pdf</button>
+                <button class="download_btn font-13 me-5" @click="downloadPdf"><i
+                        class="bi bi-download me-2"></i>Download Pdf</button>
             </div>
         </div>
 
@@ -66,7 +67,7 @@
                                     <div class="mx-3 my-2">
                                         <div v-for="(field, fieldIndex) in column.fields"
                                             :key="'field-preview-' + fieldIndex">
-                                            <div v-if="field.label">
+                                            <div v-if="field.label && field.fieldtype !== 'Table'">
                                                 <label :for="'field-' +
                                                     sectionIndex +
                                                     '-' +
@@ -77,7 +78,7 @@
                                                     <span class="font-12">{{ field.label }}</span>
                                                     <span class="text-danger ms-1">{{
                                                         field.reqd === 1 ? "*" : ""
-                                                    }}</span>
+                                                        }}</span>
                                                 </label>
                                                 <!-- field.fieldtype == 'Select' || -->
                                                 <template v-if="field.fieldtype == 'Table MultiSelect'">
@@ -99,15 +100,16 @@ option, index
                                                         <div class="row">
                                                             <div class="col-4 form-check mb-4" v-for="(
 option, index
-                                        ) in field?.options?.split('\n')" :key="index" :class="{ 'd-none': index === 0 }">
+                                        ) in field?.options?.split('\n')" :key="index"
+                                                                :class="{ 'd-none': index === 0 }">
                                                                 <div class="d-flex align-items-center gap-2">
                                                                     <div>
-                                                                        <input  v-if="
+                                                                        <input v-if="
                                                                             field.fieldtype === 'Check' || field.fieldtype === 'Select' || field.fieldtype == 'Small Text' &&
                                                                             index !== 0
                                                                         " class="form-check-input"
-                                                                            :type="field.fieldtype == 'Small Text' ? 'Checkbox':field.fieldtype " :name="option"
-                                                                            :id="option" readonly />
+                                                                            :type="field.fieldtype == 'Small Text' ? 'Checkbox' : field.fieldtype"
+                                                                            :name="option" :id="option" readonly />
                                                                     </div>
                                                                     <div>
                                                                         <label class="form-check-label font-12 m-0"
@@ -143,8 +145,46 @@ option, index
                                                         v-model="field.value" :type="field.fieldtype"
                                                         class="form-control font-10 previewInputHeight" />
                                                 </template>
-                            <span v-if="field.description !== 'Field'" class="font-11"><span class="fw-semibold">Description: </span>{{ field.description }}</span>
+                                                <span v-if="field.description !== 'Field'" class="font-11"><span
+                                                        class="fw-semibold">Description: </span>{{
+                                                    field.description }}</span>
 
+                                            </div>
+                                            <div v-if="blockIndex === 0" >
+
+
+                                                <div v-for="(table, tableName) in childtableHeaders" :key="tableName">
+                                                    <div v-if=" tableName === field.options"> 
+                                                    <!-- Table Title -->
+                                                    <div >
+                                                        <span class="tablename text-secondary font-13 fw-bold ps-1">
+                                                            {{ tableName.toString().replace(/_/g, " ") }}
+                                                        </span>
+                                                    </div>
+
+                                                    <!-- Table -->
+                                                    <div class="tableborder-child">
+                                                        <table class="table table-striped mt-2">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>#</th>
+                                                                    <th v-for="field in table" :key="field.fieldname">
+                                                                        {{ field.label }}
+                                                                    </th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td>{{ '-' }}</td>
+                                                                    <td v-for="(field, index) in table" :key="index">
+                                                                        <span>-</span>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -153,40 +193,7 @@ option, index
                         </div>
                     </div>
                 </div>
-                <div v-if="blockIndex === 0" class="mt-2 mx-2 pb-2">
 
-
-                    <div v-for="(table, tableName) in childtableHeaders" :key="tableName">
-                        <!-- Table Title -->
-                        <div class="mt-2 mx-1 pb-1">
-                            <span class="tablename text-secondary font-13 fw-bold ps-1">
-                                {{ tableName.toString().replace(/_/g, " ") }}
-                            </span>
-                        </div>
-
-                        <!-- Table -->
-                        <div class="tableborder-child">
-                            <table class="table table-striped mt-2">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th v-for="field in table" :key="field.fieldname">
-                                            {{ field.label }}
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>{{ '-' }}</td>
-                                        <td v-for="(field, index) in table" :key="index">
-                                            <span>-</span>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -219,7 +226,7 @@ const newBusinessUnit = ref({ business_unit: '' });
 
 
 const selectedData = ref({
-  business_unit: route.query.business_unit || "", // Retrieve from query
+    business_unit: route.query.business_unit || "", // Retrieve from query
 });
 
 
@@ -269,7 +276,7 @@ function fetchDepartmentDetails() {
             childtableHeaders.value = JSON.parse(
                 response.data.form_json
             ).child_table_fields;
-           
+
 
 
         })
@@ -539,7 +546,8 @@ const getFieldComponent = (type) => {
     /* height: 35px; */
     margin-bottom: 5px;
 }
-.download_btn{
+
+.download_btn {
     border: 1px solid rgb(36, 220, 36);
     color: rgb(36, 220, 36);
     background: transparent;
@@ -629,7 +637,8 @@ td {
     justify-content: space-between;
     align-items: center;
 }
-.form-containe-div{
+
+.form-containe-div {
     height: 80vh;
     overflow-y: scroll;
 }

@@ -485,7 +485,8 @@
                                               fieldIndex
                                             )
                                             " @mouseleave="resetHoveredField" class="dynamicField m-1">
-                                          <div class="px-1 dynamic_fied field-border">
+                                          <div v-if="field.fieldtype !== 'Table'"
+                                            class="px-1 dynamic_fied field-border">
                                             <div class="d-flex justify-content-between">
                                               <div class="flex-column d-flex">
                                                 <input v-model="field.label" placeholder="Name the field" :class="[
@@ -659,130 +660,99 @@
                                             <small v-if="field.error" class="text-danger font-10">{{ field.error
                                               }}</small>
                                           </div>
-                                        </div>
-
-                                        <div class="d-flex justify-content-center align-items-center my-2">
-                                          <button class="btn btn-light btn-sm d-flex align-items-center addField m-2"
-                                            @click="
-                                              addField(
-                                                blockIndex,
-                                                sectionIndex,
-                                                rowIndex,
-                                                columnIndex
-                                              )
-                                              ">
-                                            <i class="bi bi-plus fs-5"></i>
-                                            <span>Add Field</span>
-                                          </button>
-                                        </div>
-                                      </div>
-                                    </div>
-
-                                  </div>
-                                </section>
-                              </div>
-                            </div>
-
-                            <div class="d-flex justify-content-center align-items-center py-2 add-section-btn">
-                              <button class="btn btn-light border font-12" @click="addSection(blockIndex)">
-                                <i class="bi bi-plus-circle me-1 fs-6"></i> Add Section
-                              </button>
-                            </div>
-                            <div v-if="
-                              blockIndex === 0
-                            " class="m-2">
-                              <!-- <button
-                                  class="btn btn-light addRow m-2"
-                                  @click="
-                                    addRow(blockIndex, sectionIndex, rowIndex)
-                                  "
-                                >
-                                  <i class="bi bi-plus"></i> Add row in section
-                                </button> -->
-
-                              <div class="childtableShow">
-                                <div>
-                                  <div>
-                                    <div v-if="blockIndex === 0" class="mt-2">
-
-                                      <div class="childTableContainer">
-
-                                        <div v-for="(table, tableName) in childtableHeaders" :key="tableName"
-                                          class="childTable">
-                                          <h5>{{ tableName.replace(/_/g, ' ') }}</h5>
-                                          <table class="table table-bordered">
-                                            <thead>
-                                              <tr>
-                                                <th>#</th>
-                                                <th>Label</th>
-                                                <th>Field Type</th>
-                                                <!-- <th>Action</th> -->
-                                              </tr>
-                                            </thead>
-                                            <tbody>
-                                              <tr v-for="(field, index) in table" :key="index">
-                                                <td>{{ index + 1 }}</td>
-
-                                                <!-- Label Input -->
-                                                <td v-if="editMode[tableName]">
-                                                  <input v-model="field.label" placeholder="Field Label"
-                                                    class="form-control "
-                                                    :class="{ 'border-1 border-danger ': invalidFields[tableName]?.includes(index) }" />
-                                                  <span v-if="invalidFields[tableName]?.includes(index)"
-                                                    class="font-11 text-danger">Label
-                                                    required**</span>
-                                                </td>
-                                                <td v-else>{{ field.label }}</td>
-
-                                                <!-- Field Type Select -->
-                                                <td v-if="editMode[tableName]">
-                                                  <div class="d-flex gap-1">
-
-                                                    <select v-model="field.fieldtype" class="form-select form-select-sm"
-                                                      :class="{ 'border-1 border-danger ': invalidFields[tableName]?.includes(index) }">
-                                                      <option value="">Select Type</option>
-                                                      <option v-for="option in childfield" :key="option.type"
-                                                        :value="option.type">
-                                                        {{ option.label }}
-                                                      </option>
-                                                    </select>
-                                                    <span v-if="editMode[tableName]">
-                                                      <button class="btn btn-light btn-sm"
-                                                        @click="deleteRow(tableName, index)">
-                                                        <i class="bi bi-x-lg"></i>
-                                                      </button>
-                                                    </span>
-                                                  </div>
+                                          <div class="childtableShow">
+                                            <div>
+                                              <div>
+                                                <div v-if="blockIndex === 0" class="mt-2">
 
 
-                                                  <span v-if="invalidFields[tableName]?.includes(index)"
-                                                    class="font-11 text-danger">Type
-                                                    required**</span>
 
-                                                </td>
-                                                <td v-else>{{ field.fieldtype }}</td>
 
-                                              </tr>
-                                            </tbody>
-                                          </table>
+                                                  <div v-if="field.fieldtype === 'Table'" class="childTableContainer">
 
-                                          <!-- Show error message below the table if any fields are invalid -->
-                                          <!-- <div v-if="invalidFields[tableName]?.length" class="text-danger font-12 mt-2">
-     Please fill in the required fields in the highlighted rows.
-  </div> -->
-                                          <div class="mb-2"> <button class="btn btn-light btn-sm mx-2 "
-                                              @click="toggleEdit(tableName)">
-                                              {{ editMode[tableName] ? 'Save' : 'Edit' }}
-                                            </button>
-                                            <button class="btn btn-light btn-sm " v-if="editMode[tableName]"
-                                              @click="addNewFieldedit(tableName)">
-                                              Add More Field
-                                            </button>
-                                          </div>
+                                                    <div v-for="(table, tableName) in childtableHeaders"
+                                                      :key="tableName" class="childTable">
+                                                      <h5 class=" font-13" v-if="tableName === field.fieldname">{{
+                                                        tableName.replace(/_/g,
+                                                          ' ') }}</h5>
+                                                      <table v-if="tableName === field.fieldname"
+                                                        class="table table-bordered rounded-table">
+                                                        <thead>
+                                                          <tr>
+                                                            <th>#</th>
+                                                            <th>Label</th>
+                                                            <th>Field Type</th>
+                                                            <!-- <th>Action</th> -->
+                                                          </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                          <tr v-for="(field, index) in table" :key="index">
+                                                            <td>{{ index + 1 }}</td>
 
-                                        </div>
+                                                            <!-- Label Input -->
+                                                            <td v-if="editMode[tableName]">
+                                                              <input v-model="field.label" placeholder="Field Label"
+                                                                class="form-control "
+                                                                :class="{ 'border-1 border-danger ': invalidFields[tableName]?.includes(index) }" />
+                                                              <span v-if="invalidFields[tableName]?.includes(index)"
+                                                                class="font-11 text-danger">Label
+                                                                required**</span>
+                                                            </td>
+                                                            <td v-else>{{ field.label }}</td>
 
-                                        <!-- <div v-for="(field, fIndex) in table.newFields" :key="fIndex"
+                                                            <!-- Field Type Select -->
+                                                            <td v-if="editMode[tableName]">
+                                                              <div class="d-flex gap-1">
+
+                                                                <select v-model="field.fieldtype"
+                                                                  class="form-select form-select-sm"
+                                                                  :class="{ 'border-1 border-danger ': invalidFields[tableName]?.includes(index) }">
+                                                                  <option value="">Select Type</option>
+                                                                  <option v-for="option in childfield"
+                                                                    :key="option.type" :value="option.type">
+                                                                    {{ option.label }}
+                                                                  </option>
+                                                                </select>
+                                                                <span v-if="editMode[tableName]">
+                                                                  <button class="btn btn-light btn-sm"
+                                                                    @click="deleteRow(tableName, index)">
+                                                                    <i class="bi bi-x-lg"></i>
+                                                                  </button>
+                                                                </span>
+                                                              </div>
+
+
+                                                              <span v-if="invalidFields[tableName]?.includes(index)"
+                                                                class="font-11 text-danger">Type
+                                                                required**</span>
+
+                                                            </td>
+                                                            <td v-else>{{ field.fieldtype }}</td>
+
+                                                          </tr>
+                                                        </tbody>
+                                                      </table>
+
+                                                      <!-- Show error message below the table if any fields are invalid -->
+                                                      <!-- <div v-if="invalidFields[tableName]?.length" class="text-danger font-12 mt-2">
+                                                    Please fill in the required fields in the highlighted rows.
+                                                  </div> -->
+                                                      <div
+                                                        v-if="field.fieldtype === 'Table' && field.label === tableName"
+                                                        class="mb-2">
+                                                        <button class="btn btn-light btn-sm mx-2 "
+                                                          @click="toggleEdit(tableName)">
+                                                          {{ editMode[tableName] ? 'Save' : 'Edit' }}
+                                                        </button>
+                                                        <button class="btn btn-light btn-sm " v-if="editMode[tableName]"
+                                                          @click="addNewFieldedit(tableName)">
+                                                          Add More Field
+                                                        </button>
+                                                      </div>
+
+                                                    </div>
+
+                                                    <!-- <div v-for="(field, fIndex) in table.newFields" :key="fIndex"
                                             class="newField dynamicField">
                                             <div class=" d-flex justify-content-between">
 
@@ -814,105 +784,188 @@
 
                                           <button v-if="table.newFields" class="btn btn-dark btn-sm font-12 my-2 ms-2"
                                             @click="saveNewFields(tableName, tableIndex)">Save</button> -->
-                                      </div>
-                                    </div>
-                                  </div>
+                                                  </div>
 
-
-                                  <div>
-                                    <div v-if="blockIndex === 0">
-                                      <div>
-                                        <button class="btn btn-light addRow mb-3 mt-4" @click="addChildTable">
-                                          Add New Table
-                                        </button>
-
-                                        <div v-for="(table, tableIndex) in childTables" :key="tableIndex"
-                                          class="child-table">
-                                          <div class="d-flex justify-content-between align-items-center mt-1 mb-2">
-                                            <div>
-
-                                              <span :class="table.tableName ? 'd-none' : 'text-danger'">*</span>
-                                              <input @change="(e) => formatTableName(tableIndex, e)"
-                                                v-model="table.tableName" placeholder="Table Name" :class="[
-                                                  'border-less-input',
-                                                  'font-14',
-                                                  'p-0',
-                                                  'inputHeight',
-                                                  { 'italic-style': !table.tableName },
-                                                  { 'fw-medium': table.tableName },
-                                                ]" />
-                                            </div>
-                                            <button class="btn btn-light bg-transparent border-0 font-13 deleteSection"
-                                              @click="removeChildTable(tableIndex)">
-                                              <i class=" bi bi-trash"></i> Remove Table
-                                            </button>
-                                          </div>
-
-                                          <div v-for="(field, fieldIndex) in table.columns" :key="fieldIndex"
-                                            class="dynamicField">
-                                            <div class="px-1 field-border">
-                                              <div class="d-flex justify-content-between">
-                                                <input v-model="field.label" placeholder="Name the field" :class="[
-                                                  'border-less-input',
-                                                  'font-14',
-                                                  'p-0',
-                                                  'inputHeight',
-                                                  { 'italic-style': !field.label },
-                                                  { 'fw-medium': field.label },
-                                                ]" />
-                                                <button class="btn btn-sm trash-btn py-0"
-                                                  @click="removeFieldFromTable(tableIndex, fieldIndex)">
-                                                  <i class="bi bi-x-lg"></i>
-                                                </button>
+                                                </div>
                                               </div>
 
-                                              <select v-model="field.fieldtype" class="form-select font-13 mb-3">
-                                                <option value="">Select Type</option>
-                                                <option v-for="section in childfield" :key="section.type"
-                                                  :value="section.type">
-                                                  {{ section.label }}
-                                                </option>
-                                              </select>
-                                              <!-- <div v-if="field.fieldtype === 'Link'">
-                                                <span class="font-11 fw-light">Search Doctype:</span>
-                                                <input type="text" v-model="field.options"
-                                                  @input="handleLinkSearch(field.options)"
-                                                  :placeholder="field.options || 'Type to search...'"
-                                                  class="form-control font-12 mb-1"
-                                                  @focus="activateLinkField(tableIndex, fieldIndex)" />
 
-                                                <ul
-                                                  v-if="isLinkFieldActive(tableIndex, fieldIndex) && linkSearchResults?.length"
-                                                  class="list-group mt-1" style="max-height: 200px; overflow-y: auto;">
-                                                  <li v-for="(result, index) in linkSearchResults" :key="index"
-                                                    @click="assignLinkOption(result.name, field)"
-                                                    class="list-group-item list-group-item-action">
-                                                    {{ result.name }}
-                                                  </li>
-                                                </ul>
-                                              </div> -->
+
                                             </div>
                                           </div>
+                                        </div>
 
-                                          <button class="btn btn-light btn-sm addField mx-1"
-                                            @click="addFieldToTable(tableIndex)">
-                                            <i class="bi bi-plus"></i> Add Field
+                                        <div class="d-flex justify-content-center align-items-center my-2">
+                                          <button class="btn btn-light btn-sm d-flex align-items-center addField m-2"
+                                            @click="
+                                              addField(
+                                                blockIndex,
+                                                sectionIndex,
+                                                rowIndex,
+                                                columnIndex
+                                              )
+                                              ">
+                                            <i class="bi bi-plus fs-5"></i>
+                                            <span>Add Field</span>
                                           </button>
-
-                                          <button v-if="table.columns.length" class="btn btn-dark btn-sm font-12 mx-1"
-                                            @click="processFields(tableIndex)">
-                                            Create Table
-                                          </button>
-
-
-
-                                          <hr />
                                         </div>
                                       </div>
+                                    </div>
+
+                                  </div>
+
+                                </section>
+                                <div>
+                                  <div v-for="(table, tableIndex) in section.afterCreated" :key="tableIndex"
+                                    class="childTable">
+                                    <h5 class="font-13">{{ table.tableName }}</h5>
+
+
+                                    <table class="table table-bordered rounded-table">
+                                      <thead>
+                                        <tr>
+                                          <th>#</th>
+                                          <th>Label</th>
+                                          <th>Field Type</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody>
+                                        <tr v-for="(field, index) in table.columns" :key="index">
+                                          <td>{{ index + 1 }}</td>
+
+                                          <td v-if="editMode[table.tableName]">
+                                            <input v-model="field.label" placeholder="Field Label" class="form-control"
+                                              :class="{ 'border-1 border-danger': invalidFields[table.tableName]?.includes(index) }" />
+                                            <span v-if="invalidFields[tableIndex]?.includes(index)"
+                                              class="font-11 text-danger">Label
+                                              required**</span>
+                                          </td>
+                                          <td v-else>{{ field.label }}</td>
+
+                                          <td v-if="editMode[table.tableName]">
+                                            <div class="d-flex gap-1">
+                                              <select v-model="field.fieldtype" class="form-select form-select-sm"
+                                                :class="{ 'border-1 border-danger': invalidFields[table.tableName]?.includes(index) }">
+                                                <option value="">Select Type</option>
+                                                <option v-for="option in childfield" :key="option.type"
+                                                  :value="option.type">
+                                                  {{ option.label }}
+                                                </option>
+                                              </select>
+                                              <button class="btn btn-light btn-sm"
+                                                @click="afterImmediateEditdeleteRow(blockIndex, sectionIndex, table.tableName, index)">
+                                                <i class="bi bi-x-lg"></i>
+                                              </button>
+                                            </div>
+                                            <span v-if="invalidFields[table.tableName]?.includes(index)"
+                                              class="font-11 text-danger">Type
+                                              required**</span>
+                                          </td>
+                                          <td v-else>{{ field.fieldtype }}</td>
+                                        </tr>
+                                      </tbody>
+                                    </table>
+
+                                    <!-- Edit/Add buttons -->
+                                    <div class="mb-2">
+                                      <button class="btn btn-light btn-sm mx-2"
+                                        @click="afterImmediateEdit(blockIndex, sectionIndex, table.tableName)">
+                                        {{ editMode[table.tableName] ? 'Save' : 'Edit' }}
+                                      </button>
+                                      <button class="btn btn-light btn-sm" v-if="editMode[table.tableName]"
+                                        @click="afterImmediateEditaddNewFieldedit(blockIndex, sectionIndex, table.tableName)">
+                                        Add More Field
+                                      </button>
                                     </div>
                                   </div>
                                 </div>
                               </div>
+                              <div>
+                                <div v-if="blockIndex === 0">
+
+                                  <button class="btn btn-light addRow mb-3 mt-4"
+                                    @click="addChildTable(blockIndex, sectionIndex)">
+                                    Add New Table
+                                  </button>
+                                  <div v-for="(table, tableIndex) in section.childTables"
+                                    :key="`table-${blockIndex}-${sectionIndex}-${tableIndex}`" class="child-table">
+                                    <div v-if="table.newTable">
+                                      <div class="d-flex justify-content-between align-items-center mt-1 mb-2">
+                                        <div>
+                                          <span :class="table.tableName ? 'd-none' : 'text-danger'">*</span>
+                                          <input v-model="table.tableName" placeholder="Table Name"
+                                            class="border-less-input font-14 p-0 inputHeight" :class="{
+                                              'italic-style': !table.tableName,
+                                              'fw-medium': table.tableName,
+                                            }" />
+                                        </div>
+                                        <button class="btn btn-light bg-transparent border-0 font-13 deleteSection"
+                                          @click="removeChildTable(blockIndex, sectionIndex, tableIndex)">
+                                          <i class="bi bi-trash"></i> Remove Table
+                                        </button>
+                                      </div>
+
+                                      <div v-for="(field, fieldIndex) in table.columns" :key="fieldIndex"
+                                        class="dynamicField">
+                                        <div class="px-1 field-border">
+                                          <div class="d-flex justify-content-between">
+                                            <input v-model="field.label" placeholder="Name the field"
+                                              class="border-less-input font-14 p-0 inputHeight" :class="{
+                                                'italic-style': !field.label,
+                                                'fw-medium': field.label,
+                                              }" />
+                                            <button class="btn btn-sm trash-btn py-0"
+                                              @click="removeFieldFromTable(blockIndex, sectionIndex, tableIndex, fieldIndex)">
+                                              <i class="bi bi-x-lg"></i>
+                                            </button>
+                                          </div>
+
+                                          <select v-model="field.fieldtype" class="form-select font-13 mb-3">
+                                            <option value="">Select Type</option>
+                                            <option v-for="section in childfield" :key="section.type"
+                                              :value="section.type">
+                                              {{ section.label }}
+                                            </option>
+                                          </select>
+                                        </div>
+                                      </div>
+
+                                      <button class="btn btn-light btn-sm addField mx-1"
+                                        @click="addFieldToTable(blockIndex, sectionIndex, tableIndex)">
+                                        <i class="bi bi-plus"></i> Add Field
+                                      </button>
+
+                                      <button class="btn btn-dark btn-sm font-12 mx-1"
+                                        @click="processFields(blockIndex, sectionIndex, tableIndex)">
+                                        Create Table
+                                      </button>
+
+                                      <hr />
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                            </div>
+
+                            <div class="d-flex justify-content-center align-items-center py-2 add-section-btn">
+                              <button class="btn btn-light border font-12" @click="addSection(blockIndex)">
+                                <i class="bi bi-plus-circle me-1 fs-6"></i> Add Section
+                              </button>
+                            </div>
+                            <div v-if="
+                              blockIndex === 0
+                            " class="m-2">
+                              <!-- <button
+                                  class="btn btn-light addRow m-2"
+                                  @click="
+                                    addRow(blockIndex, sectionIndex, rowIndex)
+                                  "
+                                >
+                                  <i class="bi bi-plus"></i> Add row in section
+                                </button> -->
+
+
                             </div>
                           </div>
                         </div>
@@ -940,7 +993,7 @@
 
                       <div>
                         <button class="btn btn btn-light previewBtn font-13" data-bs-toggle="modal"
-                        data-bs-target="#customFormatModal">Print Format
+                          data-bs-target="#customFormatModal">Print Format
                         </button>
 
                       </div>
@@ -968,9 +1021,9 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <input v-model="printFormatID" :multiple="false" :placeholder="route.query.id"
-                                class="font-11 form-control " :searchable="true" />
-           
+            <input v-model="printFormatID" :multiple="false" :placeholder="route.query.id" class="font-11 form-control "
+              :searchable="true" />
+
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
@@ -1391,6 +1444,219 @@ onMounted(() => {
 // Store multiple child tables
 const childTables = ref([]);
 
+const addChildTable = (blockIndex, sectionIndex) => {
+  const section = blockArr[blockIndex].sections[sectionIndex];
+
+  if (!section.childTables) {
+    section.childTables = [];
+  }
+
+  const newIndex = section.childTables.length;
+
+  // Push a new child table with its own columns array
+  section.childTables.push({
+    label: "",
+    fieldname: `field_${newIndex}`,
+    fieldtype: "Table", // optional clarity
+    idx: newIndex,
+    reqd: false,
+    columns: [], // this holds the fields inside the table
+    newTable: true
+  });
+};
+
+const addFieldToTable = (blockIndex, sectionIndex, tableIndex) => {
+  const table = blockArr[blockIndex].sections[sectionIndex].childTables[tableIndex];
+
+  // Ensure the table has a columns array
+  if (!table.columns) {
+    table.columns = [];
+  }
+
+  table.columns.push({
+    label: "",
+    fieldname: `field_${table.columns.length}`,
+    fieldtype: "",
+    idx: table.columns.length,
+    reqd: false,
+
+  });
+};
+
+
+const removeChildTable = (blockIndex, sectionIndex, tableIndex) => {
+  blockArr[blockIndex].sections[sectionIndex].childTables.splice(tableIndex, 1);
+};
+
+const removeFieldFromTable = (blockIndex, sectionIndex, tableIndex, fieldIndex) => {
+  blockArr[blockIndex].sections[sectionIndex].childTables[tableIndex].columns.splice(fieldIndex, 1);
+};
+
+const isEmptyFieldType = (blockIndex, sectionIndex, tableIndex) => {
+  const table = blockArr[blockIndex].sections[sectionIndex].childTables[tableIndex];
+  return (
+    !table.tableName?.length ||
+    table.columns.some(field => !field.fieldtype || !field.label)
+  );
+};
+// const formatTableName = (tableIndex, event) => {
+//   if (event?.target?.value) {
+//     childTables.value[tableIndex].formattedTableName = event.target.value
+//       .trim()
+//       .toLowerCase()
+//       .replace(/\s+/g, "_")
+//       .replace(/[^a-z0-9_]/g, "");
+//   }
+// };
+const ensureArrayPath = (blockIndex, sectionIndex, key) => {
+  const section = blockArr[blockIndex]?.sections?.[sectionIndex];
+  if (section && !Array.isArray(section[key])) {
+    section[key] = [];
+  }
+};
+
+const processFields = (blockIndex, sectionIndex, tableIndex) => {
+  if (isEmptyFieldType(blockIndex, sectionIndex, tableIndex)) {
+    toast.error("Please fill in all required fields before proceeding.", {
+      transition: "zoom",
+    });
+    return;
+  }
+
+  const table = blockArr[blockIndex].sections[sectionIndex].childTables[tableIndex];
+  const section = blockArr[blockIndex].sections[sectionIndex];
+
+  const data = {
+    form_short_name: table.tableName.toLowerCase(),
+    fields: table.columns,
+    idx: table.idx,
+    sectionIndex: sectionIndex,
+  };
+
+  // console.log(section, data);
+  // ensureArrayPath(blockIndex, sectionIndex, 'afterCreated');
+  // table.newTable = false
+
+  // section.afterCreated[tableIndex] = table;
+  
+  // blockArr[blockIndex].sections[sectionIndex].childTables[tableIndex] = []
+  // toast.success("Table created successfully!", {
+  //   autoClose: 500,
+  //   transition: "zoom",
+  // });
+  axiosInstance
+    .post(apis.childtable, data)
+    .then((res) => {
+        if (res) {
+            ensureArrayPath(blockIndex, sectionIndex, 'afterCreated');
+      
+            // // Save original table to afterCreated
+            section.afterCreated[tableIndex] = table;
+      table.newTable = false
+        blockArr[blockIndex].sections[sectionIndex].childTables[tableIndex] = []
+
+        toast.success("Table created successfully!", {
+          autoClose: 500,
+          transition: "zoom",
+        });
+
+        const responseData = res.message?.[0]?.[0]?.child_doc;
+
+       // // Store the response data back to the table
+        blockArr[blockIndex].sections[sectionIndex].childTables[tableIndex] = responseData;
+
+        console.log("Table response saved:", responseData);
+      }
+    })
+    .catch((error) => {
+      console.error("Error creating table:", error);
+    });
+};
+
+const afterImmediateEditdeleteRow = (blockIndex, sectionIndex, tableName, index) => {
+  const section = blockArr[blockIndex].sections[sectionIndex];
+  const table = section.afterCreated.find((t) => t.tableName === tableName);
+  if (!table) return;
+
+  // Remove the specified field
+  table.columns.splice(index, 1);
+
+  // Recalculate idx for remaining fields
+  table.columns.forEach((field, i) => {
+    field.idx = i + 1;
+  });
+
+  // Also remove from invalidFields if needed
+  const invalids = invalidFields.value[tableName];
+  if (invalids) {
+    invalidFields.value[tableName] = invalids
+      .filter(i => i !== index)
+      .map(i => (i > index ? i - 1 : i)); // Adjust index after removal
+  }
+};
+
+
+const afterImmediateEditaddNewFieldedit = (blockIndex, sectionIndex, tableName) => {
+  const section = blockArr[blockIndex].sections[sectionIndex];
+  const table = section.afterCreated.find((t) => t.tableName === tableName);
+  if (!table) return;
+
+  const newIndex = table.columns.length;
+
+  table.columns.push({
+    fieldname: `field_${newIndex}`,
+    fieldtype: "",
+    idx: newIndex + 1,
+    label: "",
+    value: "",
+    isNew: true,
+  });
+};
+
+
+const afterImmediateEdit = (blockIndex, sectionIndex, tableName) => {
+  const section = blockArr[blockIndex].sections[sectionIndex];
+  const table = section.afterCreated.find((t) => t.tableName === tableName);
+  if (!table) return;
+
+  if (editMode[tableName]) {
+    invalidFields.value[tableName] = [];
+    let isValid = true;
+
+    table.columns.forEach((field, index) => {
+      if (!field.label || !field.fieldtype) {
+        invalidFields.value[tableName].push(index);
+        isValid = false;
+      }
+    });
+
+    if (!isValid) return;
+
+    const allFields = table.columns.map(({ isNew, ...rest }, index) => ({
+      ...rest,
+      idx: index + 1,
+    }));
+
+    const formData = {
+      form_short_name: tableName,
+      fields: allFields,
+    };
+
+    axiosInstance
+      .post(apis.childtable, formData)
+      .then((response) => {
+        toast.success("Fields updated successfully!", { autoClose: 500 });
+        console.log("✅ All fields saved successfully:", response.data);
+      })
+      .catch((error) => {
+        console.error("❌ Saving fields failed:", error);
+      });
+  }
+
+  editMode[tableName] = !editMode[tableName];
+};
+
+
 // Function to add a new child table
 // const addChildTable = () => {
 //   const existingFieldsCount = Object.values(childtableHeaders.value).reduce((acc, table) => {
@@ -1419,121 +1685,112 @@ const childTables = ref([]);
 
 // };
 
-const addChildTable = () => {
-  const existingFieldsCount = Object.values(childtableHeaders.value).reduce((acc, table) => {
-    return acc + (Array.isArray(table) ? table.length : 0);
-  }, 0);
+// const addChildTable = () => {
+//   const existingFieldsCount = Object.values(childtableHeaders.value).reduce((acc, table) => {
+//     return acc + (Array.isArray(table) ? table.length : 0);
+//   }, 0);
 
-  const newIndex = existingFieldsCount + childTables.value.length;
+//   const newIndex = existingFieldsCount + childTables.value.length;
 
-  const fieldtype = ""; // Or set default if needed, like 'Data', 'Link', etc.
+//   const fieldtype = ""; // Or set default if needed, like 'Data', 'Link', etc.
 
-  const field = {
-    label: "",
-    fieldname: `field_${newIndex}`,
-    fieldtype,
-    idx: newIndex,
-    reqd: false,
-  };
+//   const field = {
+//     label: "",
+//     fieldname: `field_${newIndex}`,
+//     fieldtype,
+//     idx: newIndex,
+//     reqd: false,
+//   };
 
-  if (fieldtype === "Link") {
-    field.options = "";
-  }
+//   if (fieldtype === "Link") {
+//     field.options = "";
+//   }
 
-  childTables.value.push({
-    idx: newIndex,
-    tableName: "",
-    formattedTableName: "",
-    columns: reactive([field]),
-  });
-};
+//   childTables.value.push({
+//     idx: newIndex,
+//     tableName: "",
+//     formattedTableName: "",
+//     columns: reactive([field]),
+//   });
+// };
 
-// Function to remove a specific child table
-const removeChildTable = (tableIndex) => {
-  childTables.value.splice(tableIndex, 1);
-};
+// // Function to remove a specific child table
+// const removeChildTable = (tableIndex) => {
+//   childTables.value.splice(tableIndex, 1);
+// };
 
-// Function to add a field to a specific table
-const addFieldToTable = (tableIndex) => {
-  const columns = childTables.value[tableIndex].columns;
+// // Function to add a field to a specific table
+// const addFieldToTable = (tableIndex) => {
+//   const columns = childTables.value[tableIndex].columns;
 
-  columns.push({
-    label: "",
-    fieldname: "", // This will be updated once the label is entered
-    fieldtype: "",
-    idx: columns.length,
-    reqd: false,
+//   columns.push({
+//     label: "",
+//     fieldname: "", // This will be updated once the label is entered
+//     fieldtype: "",
+//     idx: columns.length,
+//     reqd: false,
 
-  });
-  if (newField.fieldtype === 'Link') {
-    newField.options = "";
-  }
+//   });
+//   if (newField.fieldtype === 'Link') {
+//     newField.options = "";
+//   }
 
-  // Watch for label changes and update fieldname dynamically
-  watch(() => columns[columns.length - 1]?.label, (newLabel) => {
-    columns[columns.length - 1].fieldname = `${newLabel.replace(/\s+/g, "_").toLowerCase()}_${columns.length - 1}`;
-  });
-};
+//   // Watch for label changes and update fieldname dynamically
+//   watch(() => columns[columns.length - 1]?.label, (newLabel) => {
+//     columns[columns.length - 1].fieldname = `${newLabel.replace(/\s+/g, "_").toLowerCase()}_${columns.length - 1}`;
+//   });
+// };
 
-// Function to remove a field from a specific table
-const removeFieldFromTable = (tableIndex, fieldIndex) => {
-  childTables.value[tableIndex].columns.splice(fieldIndex, 1);
-};
-// Format table name dynamically
-const formatTableName = (tableIndex, event) => {
-  if (event?.target?.value) {
-    childTables.value[tableIndex].formattedTableName = event.target.value
-      .trim()
-      .toLowerCase()
-      .replace(/\s+/g, "_")
-      .replace(/[^a-z0-9_]/g, "");
-  }
-};
+// // Function to remove a field from a specific table
+// const removeFieldFromTable = (tableIndex, fieldIndex) => {
+//   childTables.value[tableIndex].columns.splice(fieldIndex, 1);
+// };
+// // Format table name dynamically
 
-// Validate if table fields are complete
-const isEmptyFieldType = (tableIndex) => {
-  return (
-    !childTables.value[tableIndex].tableName.length ||
-    childTables.value[tableIndex].columns.some(
-      (field) => !field.fieldtype || !field.label
-    )
-  );
-};
+// // Validate if table fields are complete
+// const isEmptyFieldType = (tableIndex) => {
+//   return (
+//     !childTables.value[tableIndex].tableName.length ||
+//     childTables.value[tableIndex].columns.some(
+//       (field) => !field.fieldtype || !field.label
+//     )
+//   );
+// };
 
-// Process fields for a specific table
-const processFields = (tableIndex) => {
-  if (isEmptyFieldType(tableIndex)) {
-    toast.error("Please fill in all required fields before proceeding.", {
-      transition: "zoom",
-    });
-    return;
-  }
+// // Process fields for a specific table
+// const processFields = (tableIndex) => {
+//   if (isEmptyFieldType(tableIndex)) {
+//     toast.error("Please fill in all required fields before proceeding.", {
+//       transition: "zoom",
+//     });
+//     return;
+//   }
 
-  const data = {
-    form_short_name: childTables.value[tableIndex].formattedTableName,
-    fields: childTables.value[tableIndex].columns,
-    idx: childTables.value[tableIndex].idx
-  };
+//   const data = {
+//     form_short_name: childTables.value[tableIndex].formattedTableName,
+//     fields: childTables.value[tableIndex].columns,
+//     idx: childTables.value[tableIndex].idx
+//   };
 
 
 
-  axiosInstance
-    .post(apis.childtable, data)
-    .then((res) => {
-      if (res) {
-        toast.success("Table created successfully!", { autoClose: 500 }, {
-          transition: "zoom",
-        });
-        const firstTableField = res.message[0][0].child_doc;
-        if (firstTableField) {
-          tableFieldsCache.value.push(firstTableField);
-        }
-      }
-    })
-    .catch((error) => {
-      console.error("Error saving form data:", error);
-    });
-};
+//   axiosInstance
+//     .post(apis.childtable, data)
+//     .then((res) => {
+//       if (res) {
+//         toast.success("Table created successfully!", { autoClose: 500 }, {
+//           transition: "zoom",
+//         });
+//         const firstTableField = res.message[0][0].child_doc;
+//         if (firstTableField) {
+//           tableFieldsCache.value.push(firstTableField);
+//         }
+//       }
+//     })
+//     .catch((error) => {
+//       console.error("Error saving form data:", error);
+//     });
+// };
 
 const editMode = reactive({});
 
@@ -2011,6 +2268,11 @@ function getFormData() {
     .then((res) => {
       let res_data = res?.data;
       if (res_data) {
+        router.push({
+          query: {
+            id: res_data.name
+          }
+        })
         if (res_data.accessible_departments) {
           res_data.accessible_departments = res_data.accessible_departments.split(",");
         }
@@ -2060,24 +2322,24 @@ function getFormData() {
 
 function SetPrintFormatFn() {
   const data = {
-    print_format : printFormatID.value
+    print_format: printFormatID.value
   }
   axiosInstance
-    .put(apis.resource + doctypes.EzyFormDefinitions + `/${printFormatID.value}`,data)
+    .put(apis.resource + doctypes.EzyFormDefinitions + `/${printFormatID.value}`, data)
     .then((res) => {
       console.log(res);
       const modal = bootstrap.Modal.getInstance(document.getElementById('customFormatModal'));
       modal.hide();
       toast.success("Print Format Added Successfully", {
-          autoClose: 1000,
-          transition: "zoom",
-        });
+        autoClose: 1000,
+        transition: "zoom",
+      });
 
     })
     .catch((error) => {
       console.error("Error fetching  data:", error);
     });
-  }
+}
 
 function deptData() {
   const queryParams = {
@@ -2130,18 +2392,21 @@ function categoriesData(newVal) {
 
 function formData(status) {
   // console.log(blockArr, "blockarray");
+  console.log(blockArr, 'blockArr');
+  console.log(tableFieldsCache.value, 'tableFieldsCache');
+  console.log(returTables.value, 'returTables');
 
   let fields = extractFieldsWithBreaks(blockArr);
 
-  if (tableFieldsCache.value.length) {
-    // Merge stored table fields
-    fields = [...fields, ...tableFieldsCache.value];
-  }
+  // if (tableFieldsCache.value.length) {
+  //   // Merge stored table fields
+  //   fields = [...fields, ...tableFieldsCache.value];
+  // }
 
-  if (returTables.value && returTables.value.length) {
-    // Append child table headers instead of replacing
-    fields = [...fields, ...returTables.value];
-  }
+  // if (returTables.value && returTables.value.length) {
+  //   // Append child table headers instead of replacing
+  //   fields = [...fields, ...returTables.value];
+  // }
   const dataObj = {
     ...filterObj.value,
     fields,
@@ -2155,10 +2420,14 @@ function formData(status) {
   axiosInstance
     .post(apis.savedata, dataObj)
     .then((res) => {
+      console.log(res, "res");
       if (res && res.message && res.message.message) {
         // tableFieldsCache.value = [];
         router.push({
           params: { paramid: res.message.message },
+          query: {
+            id: res.message.message
+          }
         });
         paramId.value = res.message.message;
         // paramId = res.message.message;
@@ -2209,6 +2478,8 @@ const addBlock = () => {
       {
         label: "",
         parent: `${businessUnit.value.value}-${filterObj.value.form_short_name}`,
+        childTables: [],
+        afterCreated: {},
         rows:
           blockIndex === 0
             ? [
@@ -2247,6 +2518,7 @@ const addBlock = () => {
                     fields: [{ label: "", fieldtype: "", options: "", reqd: false, description: "" }],
                   },
                 ],
+
               },
             ]
             : [
@@ -2361,17 +2633,36 @@ const addColumn = (blockIndex, sectionIndex, rowIndex) => {
   });
 };
 
-// Function to remove a column inside a section
+
 const removeColumn = (blockIndex, sectionIndex, rowIndex, columnIndex) => {
-  let item =
-    blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex];
+  const row = blockArr[blockIndex].sections[sectionIndex].rows[rowIndex];
+  const columns = row.columns;
+
+  const item = columns[columnIndex];
   if (item.parent) deleted_items.push(item);
-  blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns.splice(
-    columnIndex,
-    1
-  );
-  // toast.success("Column removed", { autoClose: 500 })
+
+  if (columns.length === 1) {
+    // Remove entire row
+    blockArr[blockIndex].sections[sectionIndex].rows.splice(rowIndex, 1);
+    // toast.success("Row removed", { autoClose: 500 });
+  } else {
+    // Remove only the column
+    columns.splice(columnIndex, 1);
+    // toast.success("Column removed", { autoClose: 500 });
+  }
 };
+
+// Function to remove a column inside a section
+// const removeColumn = (blockIndex, sectionIndex, rowIndex, columnIndex) => {
+//   let item =
+//     blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex];
+//   if (item.parent) deleted_items.push(item);
+//   blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns.splice(
+//     columnIndex,
+//     1
+//   );
+//   // toast.success("Column removed", { autoClose: 500 })
+// };
 
 // Function to add a new field inside a column
 const addField = (blockIndex, sectionIndex, rowIndex, columnIndex) => {
@@ -2717,6 +3008,13 @@ const hasDuplicates = (array) => new Set(array).size !== array.length;
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 
 <style lang="scss" scoped>
+.rounded-table {
+  border-radius: 10px;
+  background-color: #ccc;
+  overflow: hidden;
+  /* This ensures child elements respect the border radius */
+}
+
 .stepsDiv {
   margin-top: 0;
 }
@@ -2810,8 +3108,8 @@ input {
   background-color: #f5f5f5;
   position: relative;
   transition: all 2s ease-in;
-  margin: 8px;
-  padding: 10px;
+  margin: 8px 2px;
+  padding: 5px;
 }
 
 .dynamicColumn {

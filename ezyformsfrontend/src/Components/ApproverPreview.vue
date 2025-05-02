@@ -1,9 +1,9 @@
 <template>
   <section>
-    <div v-if="filteredBlocks.length" class="card">
+    <div v-if="filteredBlocks.length" class="card p-4">
       <div v-for="(block, blockIndex) in filteredBlocks" :key="blockIndex" class="block-container rounded-2">
         <div v-for="(section, sectionIndex) in block.sections" :key="'preview-' + sectionIndex"
-          class="preview-section m-2">
+          class="preview-section m-1">
           <div v-if="section.label" class="section-label">
             <h5 class="m-0 font-13">{{ section.label }}</h5>
           </div>
@@ -15,16 +15,16 @@
                 <div v-if="column.label" class="p-3 border-bottom">
                   <h6 class="m-0 font-12">{{ column.label }}</h6>
                 </div>
-                <div class="mx-3 my-2">
+                <div class="mx-1 my-1">
                   <div v-for="(field, fieldIndex) in column.fields" :key="'field-preview-' + fieldIndex" :class="(props.readonlyFor === 'true' || blockIndex < currentLevel) && field.fieldtype !== 'Small Text' && field.fieldtype !== 'Text'
-                    ? (field.label === 'Approved By' ? 'align-items-end' : 'align-items-start') + ' mb-2'
+                    ? (field.label === 'Approved By' ? 'align-items-end' : 'align-items-start') 
                     : ''">
                     <div :class="(props.readonlyFor === 'true' || blockIndex < currentLevel) && field.fieldtype !== 'Small Text' && field.fieldtype !== 'Text'
-                      ? 'd-flex ' + (field.label === 'Approved By' ? 'align-items-end' : 'align-items-start') + ' mb-2'
+                      ? 'd-flex ' + (field.label === 'Approved By' ? 'align-items-end' : 'align-items-start') 
                       : ''">
 
 
-                      <div v-if="field.label">
+                      <div v-if="field.label && field.fieldtype !== 'Table'">
                         <label :for="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
                           class=" label-text mt-2 whitespace-nowrap">
                           <span class="font-12 fw-medium">{{ field.label }}</span>
@@ -32,6 +32,7 @@
                           <span class="pe-2" v-if="props.readonlyFor === 'true' || blockIndex < currentLevel">:</span>
                         </label>
                       </div>
+                      <div v-if="field.fieldtype !== 'Table'">
                       <!-- field.fieldtype === 'Select' || -->
                       <!-- Field Type Select or Multiselect -->
                       <template v-if="field.fieldtype === 'multiselect'">
@@ -246,7 +247,7 @@
 
                       <template v-else-if="field.fieldtype == 'Datetime'">
                         <input type="datetime-local" v-model="field.value"
-                          :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 image-border-bottom w-50 pb-0 bg-transparent ' : ' '"
+                          :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 image-border-bottom  pb-0 bg-transparent ' : ' '"
                           :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'" :readOnly="blockIndex < currentLevel || props.readonlyFor === 'true'
                             " :placeholder="'Enter ' + field.label" :name="'field-' +
                               sectionIndex +
@@ -303,19 +304,15 @@
                               " class="form-control previewInputHeight w-100"></component>
                       </template>
                     </div>
-                    <div v-if="field.description !== 'Field'" class="w-100 font-11 description-block mt-1">
+                    </div>
+                    <div v-if="field.description !== 'Field' && field.fieldtype !== 'Table'" class="w-100 font-11 description-block mt-1">
                       <span class="fw-semibold">Description :</span><br>
                       <span v-html="field.description.replace(/\n/g, '<br>')"></span>
                     </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div v-if="blockIndex === 0" class="mt-2 mx-2">
-          <div v-if="props.childHeaders && Object.keys(props.childHeaders).length" class="mt-2 mx-2">
+                    <div v-if="blockIndex === 0 && field.fieldtype === 'Table'" >
+          <div v-if="props.childHeaders && Object.keys(props.childHeaders).length" >
             <div v-for="(headers, tableName) in props.childHeaders" :key="tableName">
+              <div v-if=" field.options === tableName">
               <div>
                 <span class="font-13 fw-bold tablename">{{ tableName.replace(/_/g, " ") }}</span>
               </div>
@@ -346,9 +343,17 @@
                 </table>
               </div>
             </div>
+            </div>
           </div>
 
         </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+       
       </div>
     </div>
   </section>
@@ -887,10 +892,10 @@ const clearImage = (
 .dynamicColumn {
   border: 1px solid #cccccc;
   border-radius: 7px;
-  margin: 3px 3px 10px 3px;
+  margin: 1px 2px 1px 2px;
   background-color: #ffffff;
   padding: 0;
-  padding-bottom: 5px;
+  padding-bottom: 1px;
 }
 
 .section-label {
