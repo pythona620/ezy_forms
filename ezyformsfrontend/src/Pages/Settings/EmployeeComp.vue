@@ -131,7 +131,7 @@
                                             id="reporting_to" placeholder="Enter Reports To"
                                             v-model="createEmployee.reporting_to" /> -->
                                             <VueMultiselect v-model="createEmployee.reporting_to"
-                    :options="tableData.map((dept) => dept.emp_mail_id)" :multiple="false" :close-on-select="true"
+                    :options="employeeEmails.map((dept) => dept.emp_mail_id)" :multiple="false" :close-on-select="true"
                     :clear-on-select="false" :preserve-search="true" placeholder="Select Reports To"
                     class="font-11 mb-3">
 
@@ -394,7 +394,7 @@
                   </VueMultiselect>
                   <label class="font-13 ps-1" for="reporting_to">Reports To</label>
                   <VueMultiselect v-model="createEmployee.reporting_to"
-                    :options="tableData.map((dept) => dept.emp_mail_id)" :multiple="false" :close-on-select="true"
+                    :options="employeeEmails.map((dept) => dept.emp_mail_id)" :multiple="false" :close-on-select="true"
                     :clear-on-select="false" :preserve-search="true" placeholder="Select Reports To"
                     class="font-11 mb-3">
 
@@ -1078,7 +1078,7 @@ const validatephonenew = () => {
 
 
 const filterObj = ref({
-  limitPageLength: "None",
+  limitPageLength: 20,
   limit_start: 0,
 });
 // const addDepartment = (newTag) => {
@@ -1192,6 +1192,7 @@ const isFormFilled = computed(() => {
 function createEmplBtn() {
   deptData();
   designationData();
+  employeeOptions();
 }
 function actionCreated(rowData, actionEvent) {
   if (actionEvent?.name === 'Edit Employee') {
@@ -1199,6 +1200,7 @@ function actionCreated(rowData, actionEvent) {
       phoneError.value = ""
       deptData();
       designationData();
+      employeeOptions();
       createEmployee.value = { ...rowData }
       isMasked.value = true
       isEmailMasked.value = true
@@ -1319,7 +1321,7 @@ const uploadFile = (file, field) => {
 function deptData() {
   const queryParams = {
     fields: JSON.stringify(["*"]),
-    limit_page_length: filterObj.value.limitPageLength,
+    limit_page_length: "None",
     limit_start: filterObj.value.limit_start,
   };
 
@@ -1424,6 +1426,47 @@ function employeeData(data) {
 
           tableData.value = newData;
           // designations.value = [...new Set(res.data.map((designation) => designation.designation))];
+          // reportingTo.value = [
+          //   ...new Set(res.data.map((reporting) => reporting.reporting_to)),
+          // ];
+          // reportingDesigination.value = [
+          //   ...new Set(
+          //     res.data.map(
+          //       (reportingDesigination) =>
+          //         reportingDesigination.reporting_designation
+          //     )
+          //   ),
+          // ];
+          // createEmployee.value.company_field = businessUnit.value;
+        }
+        else {
+          tableData.value = tableData.value.concat(newData);
+        }
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching department data:", error);
+    });
+}
+
+const employeeEmails=ref([]);
+
+function employeeOptions() {
+  const queryParams = {
+    fields: JSON.stringify(["*"]),
+    limit_page_length: "None",
+    filters: JSON.stringify([["company_field", "like", `%${newbusiness.value}%`]]),
+    order_by: "`tabEzy Employee`.`creation` desc",
+  };
+  axiosInstance
+    .get(apis.resource + doctypes.EzyEmployeeList, { params: queryParams })
+    .then((res) => {
+      if (res.data) {
+        const newData = res.data
+        if (filterObj.value.limit_start === 0) {
+
+          employeeEmails.value = newData;
+          // designations.value = [...new Set(res.data.map((designation) => designation.designation))];
           reportingTo.value = [
             ...new Set(res.data.map((reporting) => reporting.reporting_to)),
           ];
@@ -1438,7 +1481,7 @@ function employeeData(data) {
           createEmployee.value.company_field = businessUnit.value;
         }
         else {
-          tableData.value = tableData.value.concat(newData);
+          employeeEmails.value = employeeEmails.value.concat(newData);
         }
       }
     })
@@ -1452,7 +1495,7 @@ function designationData() {
   const queryParams = {
     fields: JSON.stringify(["*"]),
     filters: JSON.stringify(filters),
-    limit_page_length: filterObj.value.limitPageLength,
+    limit_page_length:"None",
     limit_start: filterObj.value.limit_start,
     order_by: "`tabWF Roles`.`creation` desc",
   };

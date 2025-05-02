@@ -36,12 +36,11 @@
                                     v-model="CreateDepartments.department_name" />
                                 <label class="font-13 ps-1" for="business_unit">Business Unit</label>
 
-                                <!-- <FormFields tag="select" placeholder="" class="mb-3" name="business_unit"
-                                    id="business_unit" v-model="CreateDepartments.business_unit"
-                                    :options="EzyFormsCompanys" /> -->
-                                <VueMultiselect v-model="CreateDepartments.business_unit" :options="EzyFormsCompanys"
+                                <FormFields tag="input" type="text" :disabled="CreateDepartments.business_unit" placeholder="" class="mb-3" name="business_unit"
+                                    id="business_unit" v-model="CreateDepartments.business_unit" />
+                                <!-- <VueMultiselect v-model="CreateDepartments.business_unit" :options="EzyFormsCompanys"
                                     :multiple="false" :close-on-select="false" :clear-on-select="false"
-                                    :preserve-search="true" placeholder="Select Business unit" class="font-11 mb-3">
+                                    :preserve-search="true" placeholder="Select Business unit" class="font-11 mb-3"> -->
                                     <!-- taggable @tag="addDepartment"
                                             tag-placeholder="Press enter to add department" -->
                                     <!-- <template #option="{ option }">
@@ -54,12 +53,12 @@
                                                 </div>
                                             </template> -->
 
-                                    <template #selection="{ values, isOpen }">
+                                    <!-- <template #selection="{ values, isOpen }">
                                         <span class="multiselect__single font-10" v-if="values.length" v-show="!isOpen">
                                             {{ values.join(", ") }}
                                         </span>
                                     </template>
-                                </VueMultiselect>
+                                </VueMultiselect> -->
                                 <div class="d-flex align-items-center gap-2">
                                     <div class="w-100">
                                         <label class="font-13 ps-1" for="ezy_departments_items">ADD Department Categories

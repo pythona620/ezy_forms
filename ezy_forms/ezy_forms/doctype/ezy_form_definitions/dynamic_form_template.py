@@ -520,7 +520,7 @@ template_str = """
                                         {% elif field.fieldtype == 'Date' %}
                                             <input type="text" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}" class="date-input" placeholder="__/__/____">
                                         {% elif field.fieldtype == 'Datetime' %}
-                                            <input type="text" id="{{ field.fieldname }}" disabled value="{{ field['values'] }}" name="{{ field.fieldname }}">
+                                            <input type="text" id="{{ field.fieldname }}" disabled value="{{ field['values'].strftime('%d/%m/%Y %H:%M') if field['values'] else '' }}" name="{{ field.fieldname }}">
                         
                                         {% elif field.fieldtype == 'Signature' %}
                                             <input type="text" id="{{ field.fieldname }}" name="{{ field.fieldname }}" placeholder="Signature input (future implementation)">

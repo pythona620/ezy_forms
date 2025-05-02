@@ -10,6 +10,7 @@
   "business_unit",
   "form_name",
   "form_category",
+  "series",
   "owner_of_the_form",
   "active",
   "count",
@@ -91,11 +92,17 @@
    "fieldname": "print_format",
    "fieldtype": "Data",
    "label": "Print Format"
+  },
+  {
+   "fieldname": "series",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Series"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-04-28 12:39:11.070900",
+ "modified": "2025-05-01 12:39:19.562039",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
  "name": "Ezy Form Definitions",

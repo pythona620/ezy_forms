@@ -177,7 +177,7 @@
                   <div class="activity-log-content">
                     <p class="font-12 mb-1">
                       <span class="strong-content">{{ formatAction(item.action) }} on </span>
-                      <span class="strong-content">{{ item.creation }} </span><br />
+                      <span class="strong-content">{{ formatCreation(item.creation) }}</span><br />
                       <span class="strong-content"> {{ item.user_name }}</span><br />
                       <span>{{ item.role }}</span><br />
                       <span class="font-12 text-secondary">{{
@@ -282,6 +282,9 @@ const resetCommentsValidation = () => {
     isCommentsValid.value = true;
   }
 };
+function formatCreation(dateStr) {
+  return dateStr.slice(0, 16);
+}
 
 const ApprovePDF = ref(true)
 // Format the date for display
