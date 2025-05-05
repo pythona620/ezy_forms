@@ -13,6 +13,9 @@ from ezy_forms.ezy_forms.doctype.ezy_form_definitions.linking_flow_and_forms imp
 from itertools import chain
 from frappe.utils import cstr
 from frappe.utils import now as frappe_now
+import re
+
+
  
 class EzyFormDefinitions(Document):
     pass
@@ -94,7 +97,12 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
             form_defs.form_status = form_status
             form_defs.owner_of_the_form = owner_of_the_form
             form_defs.active = 1
-            form_defs.series = series + "-.####" if series else None
+            cleaned_series = re.sub(r'[^a-zA-Z0-9#\-.]', '', series or '')
+
+            # Apply logic
+            form_defs.series = None if not cleaned_series else (
+                cleaned_series + "-.####" if not re.search(r'-\.#+$', cleaned_series) else cleaned_series
+            )
             form_defs.business_unit = business_unit
             form_defs.count = 0
             form_defs.insert(ignore_permissions=True).save()
