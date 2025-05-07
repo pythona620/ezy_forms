@@ -2777,35 +2777,35 @@ const addColumn = (blockIndex, sectionIndex, rowIndex) => {
 };
 
 
-// const removeColumn = (blockIndex, sectionIndex, rowIndex, columnIndex) => {
-//   const row = blockArr[blockIndex].sections[sectionIndex].rows[rowIndex];
-//   const columns = row.columns;
+const removeColumn = (blockIndex, sectionIndex, rowIndex, columnIndex) => {
+  const row = blockArr[blockIndex].sections[sectionIndex].rows[rowIndex];
+  const columns = row.columns;
 
-//   const item = columns[columnIndex];
-//   if (item.parent) deleted_items.push(item);
+  const item = columns[columnIndex];
+  if (item.parent) deleted_items.push(item);
 
-//   if (columns.length === 1) {
-//     // Remove entire row
-//     blockArr[blockIndex].sections[sectionIndex].rows.splice(rowIndex, 1);
-//     // toast.success("Row removed", { autoClose: 500 });
-//   } else {
-//     // Remove only the column
-//     columns.splice(columnIndex, 1);
-//     // toast.success("Column removed", { autoClose: 500 });
-//   }
-// };
+  if (columns.length === 1) {
+    // Remove entire row
+    blockArr[blockIndex].sections[sectionIndex].rows.splice(rowIndex, 1);
+    // toast.success("Row removed", { autoClose: 500 });
+  } else {
+    // Remove only the column
+    columns.splice(columnIndex, 1);
+    // toast.success("Column removed", { autoClose: 500 });
+  }
+};
 
 // Function to remove a column inside a section
-const removeColumn = (blockIndex, sectionIndex, rowIndex, columnIndex) => {
-  let item =
-    blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex];
-  if (item.parent) deleted_items.push(item);
-  blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns.splice(
-    columnIndex,
-    1
-  );
-  // toast.success("Column removed", { autoClose: 500 })
-};
+// const removeColumn = (blockIndex, sectionIndex, rowIndex, columnIndex) => {
+//   let item =
+//     blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex];
+//   if (item.parent) deleted_items.push(item);
+//   blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns.splice(
+//     columnIndex,
+//     1
+//   );
+//   // toast.success("Column removed", { autoClose: 500 })
+// };
 
 // Function to add a new field inside a column
 const addField = (blockIndex, sectionIndex, rowIndex, columnIndex) => {
