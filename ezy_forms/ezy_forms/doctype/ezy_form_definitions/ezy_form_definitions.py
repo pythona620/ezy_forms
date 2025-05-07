@@ -98,7 +98,6 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
             form_defs.owner_of_the_form = owner_of_the_form
             form_defs.active = 1
             cleaned_series = re.sub(r'[^a-zA-Z0-9#\-.]', '', series or '')
-
             # Apply logic
             form_defs.series = None if not cleaned_series else (
                 cleaned_series + "-.####" if not re.search(r'-\.#+$', cleaned_series) else cleaned_series
