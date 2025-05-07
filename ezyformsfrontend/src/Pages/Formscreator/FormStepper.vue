@@ -53,7 +53,7 @@
                         </h1> -->
                         <h1 class="font-14 fw-bold m-0">About Form</h1>
                         <div>
-                          <button class=" btn btn-light font-12 mx-2" type="button" @click="clearForm">Clear
+                          <button v-if="!$route.query.id" class=" btn btn-light font-12 mx-2" type="button" @click="clearForm">Clear
                             Form</button>
 
                           <ButtonComp class="btn btn-dark bg-dark text-white fw-bold font-13" name="Next"
@@ -95,11 +95,13 @@
                                                             :searchable="true" /> -->
                             </div>
                             <div>
-                              <FormFields :disabled="selectedData.formId && selectedData.formId.length > 0" labeltext="Form Name series" class="formHeight mt-2" type="text" tag="input" name="Value"
-                                id="formNameSeries" placeholder="Form Name series" v-model="filterObj.series" />
+                              <FormFields
+                                labeltext="Form Naming series" class="formHeight mt-2" type="text" tag="input"
+                                name="Value" id="formNameSeries" placeholder="Form Name series"
+                                v-model="filterObj.series" />
                                 <small class="text-muted" style="font-size:12px">
-                                 Note : Enter <code>ABC</code> to get <code>ABC-001</code> by default.
-                                </small>
+                                Note : Enter <code>YY-YY</code>, <code>YYYY</code>, or <code>ABC</code>. The system will default to the format <code> 24-25-0001</code>, <code> 2025-0001</code>, or <code> ABC-0001</code> respectively.
+                          </small>
                             </div>
                           </div>
                           <div class="mt-3">
@@ -975,9 +977,9 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <input v-model="printFormatID" :multiple="false" :placeholder="route.query.id"
-                                class="font-11 form-control " :searchable="true" />
-           
+            <input v-model="printFormatID" :multiple="false" :placeholder="route.query.id" class="font-11 form-control "
+              :searchable="true" />
+
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
@@ -2183,18 +2185,20 @@ function formData(status) {
             transition: "zoom",
           });
         } else {
-          toast.success("Form Created Successfully!", {
-            autoClose: 2000,
-            transition: "zoom",
-            onClose: () => {
-              if (status === "save") {
-                let toPath = localStorage.getItem('routepath')
-                router.push({ path: toPath });
-              } else if (status === "draft") {
-                router.push({ name: "Draft" });
-              }
-            },
-          });
+          if (isBlockRemoved.value === true) {
+            toast.success("Form Created Successfully!", {
+              autoClose: 2000,
+              transition: "zoom",
+              onClose: () => {
+                if (status === "save") {
+                  let toPath = localStorage.getItem('routepath');
+                  router.push({ path: toPath });
+                } else if (status === "draft") {
+                  router.push({ name: "Draft" });
+                }
+              },
+            });
+          }
         }
       } else {
         console.error("Invalid response structure:", res);
@@ -2306,6 +2310,7 @@ const addBlock = () => {
     }
   });
 };
+const isBlockRemoved = ref(false);
 
 const removeBlock = (blockIndex) => {
   let item = blockArr[blockIndex];
@@ -2339,6 +2344,7 @@ function delete_assigned_roles(roles, blockIndex) {
     .then((res) => {
       if (res) {
         console.log(res);
+        formData();
       }
     });
 }
@@ -2740,7 +2746,7 @@ async function saveFormData(type) {
     toast.error("Please fix the errors before proceeding.");
     return;
   }
-
+  isBlockRemoved.value = true;
   let data = deleted_items.flatMap(extractFieldnames);
 
   if (paramId != undefined && paramId != null && paramId != "new" && data.length) {
@@ -2757,6 +2763,11 @@ const hasDuplicates = (array) => new Set(array).size !== array.length;
 <style lang="scss" scoped>
 .stepsDiv {
   margin-top: 0;
+}
+.note{
+  display: flex;
+  align-items: center;
+  height: 93%;
 }
 
 .backBtn {
