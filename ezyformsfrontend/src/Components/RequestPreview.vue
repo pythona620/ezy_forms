@@ -239,7 +239,7 @@
                                                 <component v-if="
                                                     field.fieldtype !== 'Datetime' && field.fieldtype !== 'Text'
                                                 " :is="getFieldComponent(field.fieldtype)" :value="field.value"
-                                                    :maxlength="field.fieldtype === 'Phone' ? '10' : null" :Type="field.fieldtype === 'Color'
+                                                    :maxlength="field.fieldtype === 'Phone' ? '10' : '140'" :Type="field.fieldtype === 'Color'
                                                         ? 'color'
                                                         : field.fieldtype === 'Int'
                                                             ? 'number'
@@ -278,80 +278,189 @@
                                                         field.description }}</span>
                                         </div>
                                         <div v-if="blockIndex === 0 && field.fieldtype === 'Table'">
-                                            <div v-for="(table, tableIndex) in props.tableHeaders" :key="tableIndex"
-                                                class="mt-3">
-                                                <div v-if="tableIndex === field.options">
-                                                    <div>
-                                                        <span class="font-13 text-secondary fw-bold">{{ tableIndex.replace(/_/g, " ")
-                                                        }}</span>
+
+                                            <div v-if="field.fieldtype === 'Table' && field.description === 'true'">
+
+                                                <div v-for="(table, tableIndex) in props.tableHeaders" :key="tableIndex"
+                                                    class="mt-3">
+                                                    <div v-if="tableIndex === field.options">
+                                                        <div>
+                                                            <span class="font-13 text-secondary fw-bold">{{
+                                                                tableIndex.replace(/_/g, " ") }}</span>
+                                                        </div>
+
+                                                        <div v-if="!tableRows[tableIndex] || tableRows[tableIndex].length === 0"
+                                                            class="text-center text-muted">
+                                                            <div class="d-flex flex-column align-items-center">
+                                                                <i class="bi bi-card-list fs-3 mb-2"></i>
+                                                                <span>No Data</span>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Block View -->
+                                                        <div v-for="(row, rowIndex) in tableRows[tableIndex]"
+                                                            :key="rowIndex"
+                                                            class="border p-3 mb-3 rounded bg-light-subtle">
+                                                            <div
+                                                                class="d-flex justify-content-between align-items-center mb-2">
+                                                                <strong>Block {{ rowIndex + 1 }}</strong>
+                                                                <span class="text-danger cursor-pointer"
+                                                                    @click="removeRow(tableIndex, rowIndex)">
+                                                                    <i class="bi bi-x-lg"></i>
+                                                                </span>
+                                                            </div>
+
+                                                            <div v-for="i in Math.ceil(table.length / 2)" :key="i"
+                                                                class="row mb-2">
+                                                                <div class="col-6"
+                                                                    v-for="fieldItem in table.slice((i - 1) * 2, i * 2)"
+                                                                    :key="fieldItem.fieldname">
+                                                                    <label class="font-12 fw-semibold">{{
+                                                                        fieldItem.label
+                                                                        }}</label>
+
+                                                                    <input v-if="fieldItem.fieldtype === 'Data'"
+                                                                        :title="row[fieldItem.fieldname]" type="text"
+                                                                        class="form-control font-12 px-2"
+                                                                        :maxlength="fieldItem.fieldtype === 'Phone' ? '10' : '140'"
+                                                                        v-model="row[fieldItem.fieldname]" />
+
+                                                                    <input v-else-if="fieldItem.fieldtype === 'Date'"
+                                                                        :title="row[fieldItem.fieldname]" type="date"
+                                                                        class="form-control font-12"
+                                                                        v-model="row[fieldItem.fieldname]" />
+
+                                                                    <input
+                                                                        v-else-if="fieldItem.fieldtype === 'Datetime'"
+                                                                        :title="row[fieldItem.fieldname]"
+                                                                        type="datetime-local"
+                                                                        class="form-control font-12"
+                                                                        v-model="row[fieldItem.fieldname]" />
+
+                                                                    <input v-else-if="fieldItem.fieldtype === 'Attach'"
+                                                                        type="file" class="form-control font-12"
+                                                                        @change="handleFileUpload($event, row, fieldItem.fieldname)" />
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+
+                                                        <!-- Add Block Button -->
+                                                        <div class="text-center">
+                                                            <button
+                                                                class="btn btn-outline-light text-secondary addRow-btn  btn-sm font-12"
+                                                                @click="addRow(tableIndex)">
+                                                                Add Block
+                                                            </button>
+                                                        </div>
+
+                                                        <!-- <span v-if="field.description !== tableIndex" class="font-11">
+                                                            <span class="fw-semibold">Description: </span>{{ field.description }}
+                                                        </span> -->
                                                     </div>
-                                                    <table class="table table-striped rounded-table" border="1" width="100%">
-                                                        <thead>
-                                                            <tr class=" font-12 text-secondary">
-                                                                <th>#</th>
-                                                                <th v-for="field in table" :key="field.fieldname">
-                                                                    {{ field.label }}
-                                                                </th>
-                                                                <th></th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            <tr
-                                                                v-if="!tableRows[tableIndex] || tableRows[tableIndex].length === 0">
-                                                                <td :colspan="table.length + 2"
-                                                                    class="text-center text-muted">
-                                                                    <div class="d-flex flex-column align-items-center">
-                                                                        <i class="bi bi-card-list fs-3 mb-2"></i>
-                                                                        <span>No Data</span>
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
-                                                            <tr v-for="(row, rowIndex) in tableRows[tableIndex]"
-                                                                :key="rowIndex">
-                                                                <td style="text-align: center;">{{ rowIndex + 1 }}</td>
-                                                                <td v-for="field in table" :key="field.fieldname">
-                                                                    <template v-if="field.fieldtype === 'Data'">
-                                                                        <input type="text" class="form-control font-12"
-                                                                            v-model="row[field.fieldname]" />
-                                                                    </template>
-                                                                    <template v-if="field.fieldtype === 'Date'">
-                                                                        <input type="date" class="form-control font-12"
-                                                                            v-model="row[field.fieldname]" />
-                                                                    </template>
-                                                                    <template v-if="field.fieldtype === 'Datetime'">
-                                                                        <input type="datetime-local"
-                                                                            class="form-control font-12"
-                                                                            v-model="row[field.fieldname]" />
-                                                                    </template>
-                                                                    <template v-else-if="field.fieldtype === 'Attach'">
-                                                                        <input type="file" class="form-control font-12"
-                                                                            @change="handleFileUpload($event, row, field.fieldname)" />
-                                                                    </template>
-                                                                </td>
-                                                                <td class=" d-table-cell ">
-                                                                    <span class="tableRowRemoveBtn" @click="removeRow(tableIndex, rowIndex)"><i
-                                                                            class="bi bi-x-lg"></i></span>
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td :colspan="table.length + 2"
-                                                                    class="text-center text-muted">
-
-                                                                    <button
-                                                                        class="btn btn-outline-light text-secondary btn-sm font-12"
-                                                                        @click="addRow(tableIndex)">Add Row</button>
-                                                                </td>
-
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
-
-                                                <span v-if="field.description !== tableIndex" class="font-11"><span
-                                                    class="fw-semibold">Description: </span>{{
-                                                        field.description }}</span>
                                                 </div>
                                             </div>
+                                            <div v-else>
+                                                <div v-for="(table, tableIndex) in props.tableHeaders" :key="tableIndex"
+                                                    class="mt-3">
+                                                    <div v-if="tableIndex === field.options">
+                                                        <div>
+                                                            <span class="font-13 text-secondary fw-bold">{{
+                                                                tableIndex.replace(/_/g, " ")
+                                                            }}</span>
+                                                        </div>
+                                                        <table class="table  rounded-table" border="1"
+                                                            width="100%">
+                                                            <thead>
+                                                                <tr class=" font-12 text-secondary">
+                                                                    <th class=" text-center">#</th>
+                                                                    <th class=" text-center" v-for="field in table" :key="field.fieldname">
+                                                                        {{ field.label }}
+                                                                    </th>
+                                                                    <th></th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr
+                                                                    v-if="!tableRows[tableIndex] || tableRows[tableIndex].length === 0">
+                                                                    <td :colspan="table.length + 2"
+                                                                        class="text-center text-muted">
+                                                                        <div
+                                                                            class="d-flex bg-white py-3 flex-column align-items-center">
+                                                                            <i class="bi bi-card-list fs-3 mb-2"></i>
+                                                                            <span class=" font-13 text-secondary">No Data</span>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr v-for="(row, rowIndex) in tableRows[tableIndex]"
+                                                                    :key="rowIndex">
+                                                                    <td style="text-align: center;">{{ rowIndex + 1 }}
+                                                                    </td>
+                                                                    <td v-for="field in table" :key="field.fieldname"
+                                                                        :title="row[field.fieldname]" :style="{
+                                                                            width: row[field.fieldname] ? Math.max(row[field.fieldname].length * 10, 100) + 'px' : 'auto'
+                                                                        }">
+
+                                                                        <template v-if="field.fieldtype === 'Data'">
+                                                                            <input type="text"
+                                                                                :maxlength="field.fieldtype === 'Phone' ? '10' : '140'"
+                                                                                class="form-control font-12"
+                                                                                :title="row[field.fieldname]"
+                                                                                v-model="row[field.fieldname]" />
+                                                                        </template>
+
+                                                                        <template v-if="field.fieldtype === 'Date'">
+                                                                            <input type="date"
+                                                                                :title="row[field.fieldname]"
+                                                                                class="form-control font-12"
+                                                                                v-model="row[field.fieldname]" />
+                                                                        </template>
+
+                                                                        <template v-if="field.fieldtype === 'Datetime'">
+                                                                            <input type="datetime-local"
+                                                                                :title="row[field.fieldname]"
+                                                                                class="form-control font-12"
+                                                                                v-model="row[field.fieldname]" />
+                                                                        </template>
+
+                                                                        <template
+                                                                            v-else-if="field.fieldtype === 'Attach'">
+                                                                            <input type="file"
+                                                                                class="form-control font-12"
+                                                                                @change="handleFileUpload($event, row, field.fieldname)" />
+                                                                        </template>
+                                                                    </td>
+                                                                    <td class="d-table-cell text-center align-middle">
+                                                                        <span class="tableRowRemoveBtn "
+                                                                            @click="removeRow(tableIndex, rowIndex)">
+                                                                            <i class="bi bi-x-lg "></i>
+                                                                        </span>
+                                                                    </td>
+                                                                </tr>
+
+                                                                <tr>
+                                                                    <td :colspan="table.length + 2"
+                                                                        class="text-center text-muted">
+
+                                                                        <button
+                                                                            class="btn btn-outline-light text-secondary fw-bold addRow-btn btn-sm font-12"
+                                                                            @click="addRow(tableIndex)">Add Row</button>
+                                                                    </td>
+
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+
+                                                        <span v-if="field.description !== tableIndex && field.description !== 'True' && field.description !== 'false'"
+                                                            class="font-11"><span class="fw-semibold">Description:
+                                                            </span>{{
+                                                                field.description }}</span>
+                                                    </div>
+                                                </div>
+
+                                            </div>
                                         </div>
+
                                     </div>
                                 </div>
                             </div>
@@ -660,6 +769,10 @@ const allFieldsFilled = computed(() => {
             }
         }
     }
+    //     if (Object.keys(errorMessages.value).length > 0) {
+    //     return false;
+    //   }
+
     return true; // If all required fields are filled, return true
 });
 
@@ -730,7 +843,23 @@ const logFieldValue = (
     else if (field.fieldtype === "Text") {
         field["value"] = eve.target.value; // Capture textarea value
         emit("updateField", field.value); // Emit updated value
-    } else {
+    }
+    else if (field.fieldtype === "Data") {
+        const inputValue = eve.target.value;
+        // const fieldKey = `${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`;
+
+        // if (inputValue.length > 139) {
+        //     errorMessages.value[fieldKey] = "Maximum 140 characters allowed.";
+        //     return;
+        // } else {
+        //     delete errorMessages.value[fieldKey];
+        // }
+
+        field["value"] = inputValue;
+        emit("updateField", field.value);
+    }
+
+    else {
         // field['value'] = eve.target.value;
         let inputValue = eve.target.value;
 
@@ -829,6 +958,10 @@ const uploadFile = (file, field, index) => {
 // };
 </script>
 <style setup>
+.addRow-btn {
+    border: 1px dotted #cccccc;
+}
+
 .previewInputHeight {
     margin-bottom: 5px;
 }
@@ -864,15 +997,28 @@ const uploadFile = (file, field, index) => {
 input::-webkit-input-placeholder {
     font-size: 10px;
 }
-table th{
+
+table th {
     color: #6c757d;
 }
-.tableRowRemoveBtn{
-    padding-top: 12px !important;
+.tableRowRemoveBtn {
+
+  border-radius: 50%;
+  padding: 4px;
 }
+.tableRowRemoveBtn:hover {
+  background-color: #cccccc;
+  border-radius: 50%;
+  padding: 4px;
+}
+.tableRowRemoveBtn i {
+    cursor: pointer;
+}
+
 .rounded-table {
-  border-radius: 10px;
-  background-color: #ccc;
-  overflow: hidden; /* This ensures child elements respect the border radius */
+    border-radius: 10px;
+    background-color: #ccc;
+    overflow: hidden;
+    /* This ensures child elements respect the border radius */
 }
 </style>

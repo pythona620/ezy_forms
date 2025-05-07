@@ -42,7 +42,7 @@
                 </div>
               </div>
               <div class="position-relative ">
-                <div class="requestPreviewDiv pb-5">
+                <div class="requestPreviewDiv pb-5">              
                   <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel"
                     :childData="responseData" :readonly-for="selectedData.readOnly" :childHeaders="tableHeaders"
                     :employee-data="employeeData" @updateField="updateFormData" />

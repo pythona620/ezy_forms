@@ -95,11 +95,13 @@
                                                             :searchable="true" /> -->
                             </div>
                             <div>
-                              <FormFields :disabled="selectedData.formId && selectedData.formId.length > 0" labeltext="Form Name series" class="formHeight mt-2" type="text" tag="input" name="Value"
-                                id="formNameSeries" placeholder="Form Name series" v-model="filterObj.series" />
-                                <small class="text-muted" style="font-size:12px">
-                                 Note : Enter <code>ABC</code> to get <code>ABC-001</code> by default.
-                                </small>
+                              <FormFields :disabled="selectedData.formId && selectedData.formId.length > 0"
+                                labeltext="Form Name series" class="formHeight mt-2" type="text" tag="input"
+                                name="Value" id="formNameSeries" placeholder="Form Name series"
+                                v-model="filterObj.series" />
+                              <small class="text-muted" style="font-size:12px">
+                                Note : Enter <code>ABC</code> to get <code>ABC-001</code> by default.
+                              </small>
                             </div>
                           </div>
                           <div class="mt-3">
@@ -170,11 +172,12 @@
                               <VueMultiselect :disabled="selectedData.formId && selectedData.formId.length > 0"
                                 v-model="filterObj.accessible_departments" :options="filteredOptions" :multiple="true"
                                 :close-on-select="false" :clear-on-select="false" :preserve-search="true"
-                                placeholder="Select Designation" class="font-11">
+                                placeholder="Select Designation" class="font-11" @select="handleSelect"
+                                @remove="handleRemove">
                                 <template #option="{ option }">
                                   <div class="custom-option">
                                     <input type="checkbox" :checked="isChecked(option)" class="custom-checkbox"
-                                      @change="toggleOption(option, $event)" />
+                                      @change="toggleOption(option, $event)" @click.stop />
                                     <span>{{ option }}</span>
                                   </div>
                                 </template>
@@ -185,6 +188,8 @@
                                   </span>
                                 </template>
                               </VueMultiselect>
+
+
 
                               <!-- <VueMultiselect
                               v-model="filterObj.accessible_departments"
@@ -405,7 +410,7 @@
                                   <div class="d-flex justify-content-between align-items-center">
                                     <label class="rownames">{{
                                       getRowSuffix(rowIndex)
-                                      }}</label>
+                                    }}</label>
                                     <div>
                                       <button v-if="row.columns.length < 3"
                                         class="btn btn-light bg-transparent border-0 font-12" @click="
@@ -578,7 +583,7 @@
                                                 'Check', 'Small Text'
                                               ].includes(field.fieldtype)
                                             ">
-                                              <label class="font-12 fw-light" for="options">Enter Options:</label>
+                                              <label class="font-12 fw-light"  for="options">Enter Options:</label>
                                               <textarea id="options" placeholder="Enter your Options"
                                                 v-model="field.options"
                                                 class="form-control shadow-none mb-1 font-12"></textarea>
@@ -665,7 +670,7 @@
                                               placeholder="Enter field description"></textarea>
 
                                             <small v-if="field.error" class="text-danger font-10">{{ field.error
-                                              }}</small>
+                                            }}</small>
                                           </div>
                                           <div class="childtableShow">
                                             <div>
@@ -682,6 +687,18 @@
                                                       <h5 class=" font-13" v-if="tableName === field.fieldname">{{
                                                         tableName.replace(/_/g,
                                                           ' ') }}</h5>
+                                                      <div v-if="editMode[tableName]" class=" d-flex align-items-center gap-2">
+                                                        <div class="d-flex align-items-center">
+
+                                                          <input class="font-12" v-model="field.description"
+                                                            true-value="true" false-value="fasle"
+                                                            placeholder="Field Name" type="checkbox" />
+                                                        </div>
+                                                        <div>
+                                                          <label for="mandatory" class="font-12 m-0 fw-light">Show as
+                                                            Blocks</label>
+                                                        </div>
+                                                      </div>
                                                       <table v-if="tableName === field.fieldname"
                                                         class="table table-bordered rounded-table">
                                                         <thead>
@@ -748,7 +765,7 @@
                                                         v-if="field.fieldtype === 'Table' && field.label === tableName"
                                                         class="mb-2">
                                                         <button class="btn btn-light btn-sm mx-2 "
-                                                          @click="toggleEdit(tableName)">
+                                                          @click="toggleEdit(tableName, field.description)">
                                                           {{ editMode[tableName] ? 'Save' : 'Edit' }}
                                                         </button>
                                                         <button class="btn btn-light btn-sm " v-if="editMode[tableName]"
@@ -898,13 +915,27 @@
                                     :key="`table-${blockIndex}-${sectionIndex}-${tableIndex}`" class="child-table">
                                     <div v-if="table.newTable">
                                       <div class="d-flex justify-content-between align-items-center mt-1 mb-2">
-                                        <div>
+                                        <div >
                                           <span :class="table.tableName ? 'd-none' : 'text-danger'">*</span>
                                           <input v-model="table.tableName" placeholder="Table Name"
                                             class="border-less-input font-14 p-0 inputHeight" :class="{
                                               'italic-style': !table.tableName,
                                               'fw-medium': table.tableName,
                                             }" />
+                                          <div
+                                            v-if="fieldErrors[`${blockIndex}-${sectionIndex}-${tableIndex}`]?.tableName"
+                                            class="text-danger font-12">
+                                            {{ fieldErrors[`${blockIndex}-${sectionIndex}-${tableIndex}`].tableName }}
+                                          </div>
+                                          <div class=" d-flex align-items-center gap-2">
+                                            <div class="d-flex align-items-center">
+                                              <input class="font-12" v-model="table.as_a_block" :true-value="1"
+                                                :false-value="0" placeholder="Field Name" type="checkbox" />
+                                            </div>
+                                            <div>
+                                              <label for="mandatory" class="font-12 m-0 fw-light">Show as Blocks</label>
+                                            </div>
+                                          </div>
                                         </div>
                                         <button class="btn btn-light bg-transparent border-0 font-13 deleteSection"
                                           @click="removeChildTable(blockIndex, sectionIndex, tableIndex)">
@@ -916,24 +947,43 @@
                                         class="dynamicField">
                                         <div class="px-1 field-border">
                                           <div class="d-flex justify-content-between">
-                                            <input v-model="field.label" placeholder="Name the field"
-                                              class="border-less-input font-14 p-0 inputHeight" :class="{
-                                                'italic-style': !field.label,
-                                                'fw-medium': field.label,
-                                              }" />
+                                            <div>
+                                              <span :class="field.label ? 'd-none' : 'text-danger'">*</span>
+                                              <input v-model="field.label" placeholder="Name the field"
+                                                class="border-less-input font-14 p-0 inputHeight" :class="{
+                                                  'italic-style': !field.label,
+                                                  'fw-medium': field.label,
+                                                  'is-invalid': fieldErrors[`${blockIndex}-${sectionIndex}-${tableIndex}`]?.columns?.[fieldIndex]?.label
+                                                }" />
+                                              <div
+                                                v-if="fieldErrors[`${blockIndex}-${sectionIndex}-${tableIndex}`]?.columns?.[fieldIndex]?.label"
+                                                class="text-danger font-12">
+                                                {{
+                                                  fieldErrors[`${blockIndex}-${sectionIndex}-${tableIndex}`].columns[fieldIndex].label
+                                                }}
+                                              </div>
+                                            </div>
                                             <button class="btn btn-sm trash-btn py-0"
                                               @click="removeFieldFromTable(blockIndex, sectionIndex, tableIndex, fieldIndex)">
                                               <i class="bi bi-x-lg"></i>
                                             </button>
                                           </div>
 
-                                          <select v-model="field.fieldtype" class="form-select font-13 mb-3">
+                                          <select v-model="field.fieldtype" class="form-select font-13 mb-1"
+                                            :class="{ 'is-invalid': fieldErrors[`${blockIndex}-${sectionIndex}-${tableIndex}`]?.columns?.[fieldIndex]?.fieldtype }">
                                             <option value="">Select Type</option>
                                             <option v-for="section in childfield" :key="section.type"
                                               :value="section.type">
                                               {{ section.label }}
                                             </option>
                                           </select>
+                                          <div
+                                            v-if="fieldErrors[`${blockIndex}-${sectionIndex}-${tableIndex}`]?.columns?.[fieldIndex]?.fieldtype"
+                                            class="text-danger font-12">
+                                            {{
+                                              fieldErrors[`${blockIndex}-${sectionIndex}-${tableIndex}`].columns[fieldIndex].fieldtype
+                                            }}
+                                          </div>
                                         </div>
                                       </div>
 
@@ -1146,7 +1196,7 @@ const ViewOnlyReportee = ref(false);
 const wrkAfterGetData = ref([]);
 // const hasWorkflowToastShown = ref(false);
 const tableFieldsCache = ref([]);
-
+const fieldErrors = reactive({});
 // const childtableRows = ref([]);
 const childtableHeaders = ref([]);
 // const childtableName = ref("");
@@ -1178,7 +1228,7 @@ const filterObj = ref({
   business_unit: `${businessUnit.value.value || selectedData.value.business_unit || route.query.business_unit}`,
   form_category: "",
   owner_of_the_form: "",
-  series:""
+  series: ""
 });
 const formDescriptions = computed(() => filterObj.value);
 const child_id = ref("");
@@ -1450,6 +1500,15 @@ onMounted(() => {
 
 
 // Store multiple child tables
+// const formatTableName = (tableIndex, event) => {
+//   if (event?.target?.value) {
+//     childTables.value[tableIndex].formattedTableName = event.target.value
+//       .trim()
+//       .toLowerCase()
+//       .replace(/\s+/g, "_")
+//       .replace(/[^a-z0-9_]/g, "");
+//   }
+// };
 const childTables = ref([]);
 
 const addChildTable = (blockIndex, sectionIndex) => {
@@ -1468,7 +1527,16 @@ const addChildTable = (blockIndex, sectionIndex) => {
     fieldtype: "Table", // optional clarity
     idx: newIndex,
     reqd: false,
-    columns: [], // this holds the fields inside the table
+    as_a_block: '',
+    columns: [
+      {
+        label: "",
+        fieldname: `field_0`,
+        fieldtype: "",
+        idx: 0,
+        reqd: false,
+      }
+    ], // this holds the fields inside the table
     newTable: true
   });
 };
@@ -1502,20 +1570,37 @@ const removeFieldFromTable = (blockIndex, sectionIndex, tableIndex, fieldIndex) 
 
 const isEmptyFieldType = (blockIndex, sectionIndex, tableIndex) => {
   const table = blockArr[blockIndex].sections[sectionIndex].childTables[tableIndex];
-  return (
-    !table.tableName?.length ||
-    table.columns.some(field => !field.fieldtype || !field.label)
-  );
+  const errors = {
+    tableName: false,
+    columns: [],
+  };
+
+  let hasError = false;
+
+  if (!table.tableName?.trim()) {
+    errors.tableName = "Table name is required.";
+    hasError = true;
+  }
+
+  table.columns.forEach((field, fieldIndex) => {
+    const fieldError = {};
+    if (!field.label?.trim()) {
+      fieldError.label = "Field Label is required";
+      hasError = true;
+    }
+    if (!field.fieldtype?.trim()) {
+      fieldError.fieldtype = "Please select field type";
+      hasError = true;
+    }
+    errors.columns[fieldIndex] = fieldError;
+  });
+
+  // Save to fieldErrors
+  fieldErrors[`${blockIndex}-${sectionIndex}-${tableIndex}`] = errors;
+
+  return hasError;
 };
-// const formatTableName = (tableIndex, event) => {
-//   if (event?.target?.value) {
-//     childTables.value[tableIndex].formattedTableName = event.target.value
-//       .trim()
-//       .toLowerCase()
-//       .replace(/\s+/g, "_")
-//       .replace(/[^a-z0-9_]/g, "");
-//   }
-// };
+
 const ensureArrayPath = (blockIndex, sectionIndex, key) => {
   const section = blockArr[blockIndex]?.sections?.[sectionIndex];
   if (section && !Array.isArray(section[key])) {
@@ -1524,8 +1609,13 @@ const ensureArrayPath = (blockIndex, sectionIndex, key) => {
 };
 
 const processFields = (blockIndex, sectionIndex, tableIndex) => {
-  if (isEmptyFieldType(blockIndex, sectionIndex, tableIndex)) {
-    toast.error("Please fill in all required fields before proceeding.", {
+
+
+
+  const hasErrors = isEmptyFieldType(blockIndex, sectionIndex, tableIndex);
+
+  if (hasErrors) {
+    toast.error("Please fix validation errors before creating the table", {
       transition: "zoom",
     });
     return;
@@ -1538,15 +1628,15 @@ const processFields = (blockIndex, sectionIndex, tableIndex) => {
     form_short_name: table.tableName.toLowerCase(),
     fields: table.columns,
     idx: table.idx,
-    sectionIndex: sectionIndex,
+    as_a_block: table.as_a_block === 1 ? 'true' : 'false',
   };
 
-  // console.log(section, data);
+  console.log(data);
   // ensureArrayPath(blockIndex, sectionIndex, 'afterCreated');
   // table.newTable = false
 
   // section.afterCreated[tableIndex] = table;
-  
+
   // blockArr[blockIndex].sections[sectionIndex].childTables[tableIndex] = []
   // toast.success("Table created successfully!", {
   //   autoClose: 500,
@@ -1555,12 +1645,12 @@ const processFields = (blockIndex, sectionIndex, tableIndex) => {
   axiosInstance
     .post(apis.childtable, data)
     .then((res) => {
-        if (res) {
-            ensureArrayPath(blockIndex, sectionIndex, 'afterCreated');
-      
-            // // Save original table to afterCreated
-            section.afterCreated[tableIndex] = table;
-      table.newTable = false
+      if (res) {
+        ensureArrayPath(blockIndex, sectionIndex, 'afterCreated');
+
+        // // Save original table to afterCreated
+        section.afterCreated[tableIndex] = table;
+        table.newTable = false
         blockArr[blockIndex].sections[sectionIndex].childTables[tableIndex] = []
 
         toast.success("Table created successfully!", {
@@ -1570,7 +1660,7 @@ const processFields = (blockIndex, sectionIndex, tableIndex) => {
 
         const responseData = res.message?.[0]?.[0]?.child_doc;
 
-       // // Store the response data back to the table
+        // // Store the response data back to the table
         blockArr[blockIndex].sections[sectionIndex].childTables[tableIndex] = responseData;
 
         console.log("Table response saved:", responseData);
@@ -1828,7 +1918,7 @@ const deleteRow = (tableName, index) => {
 
 const invalidFields = ref({});
 
-const toggleEdit = (tableName) => {
+const toggleEdit = (tableName, description) => {
   if (editMode[tableName]) {
 
 
@@ -1863,6 +1953,7 @@ const toggleEdit = (tableName) => {
       form_short_name: tableName,
 
       fields: allFields,
+      as_a_block: description
     };
 
 
@@ -2045,10 +2136,13 @@ const isChecked = (option) => {
 
 // Toggle selection for an option
 const toggleOption = (option, event) => {
+  console.log(isChecked);
   if (option === SELECT_ALL) {
     if (event.target.checked) {
       //  Select all options immediately
+
       filterObj.value.accessible_departments = [...formOptions.value];
+      console.log(filterObj.value.accessible_departments);
     } else {
       // Unselect all options
       filterObj.value.accessible_departments = [];
@@ -2071,6 +2165,18 @@ const toggleOption = (option, event) => {
         (item) => item !== SELECT_ALL
       );
     }
+  }
+};
+
+const handleSelect = (option) => {
+  if (option === SELECT_ALL) {
+    filterObj.value.accessible_departments = [...formOptions.value];
+  }
+};
+
+const handleRemove = (option) => {
+  if (option === SELECT_ALL) {
+    filterObj.value.accessible_departments = [];
   }
 };
 
@@ -2806,7 +2912,7 @@ function isRestricted(label) {
 //   return /[^a-zA-Z0-9 _/]/.test(label) || label.includes('"') || label.includes("'");
 // }
 function hasInvalidCharacters(label) {
-  return /[^a-zA-Z0-9 _\/!@#$%^&*()\[\]{}]/.test(label) || label.includes('"') || label.includes("'");
+  return /[^a-zA-Z0-9 _\/!@#$%^&*()?.:;|/\\[\]{}]/.test(label) || label.includes('"') || label.includes("'");
 }
 
 function getAllLabels(blockArr) {

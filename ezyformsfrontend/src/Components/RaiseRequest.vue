@@ -653,7 +653,7 @@ const ChildTableData = async () => {
 };
 async function raiseRequestSubmission() {
   if (!isFormValid.value) {
-    toast.error("Please Fill Mandatory Fields");
+    toast.error("Please Check Fields");
     return;
   }
 

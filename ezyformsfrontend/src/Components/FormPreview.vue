@@ -106,7 +106,7 @@
                                     <div class="form-check col-4 mb-4" v-for="(
                                       option, index
                                       ) in field?.options?.split('\n')" :key="index"
-                                      :class="{ 'd-none': index === 0 }">
+                                      >
                                       <div class="d-flex gap-2 align-items-center">
                                         <div>
                                           <input v-if="
@@ -145,9 +145,9 @@
                                   :type="field.fieldtype" class="form-control previewInputHeight font-10" />
                               </template>
                             </div>
-                            <span v-if="field.description !== 'Field'" class="font-11"><span
-                                class="fw-semibold">Description: </span>{{
-                              field.description }}</span>
+                            <span v-if="field.description !== 'Field'" class="font-11"><span v-if="field.description !== 'Field'"
+                                class="fw-semibold">Description: {{
+                                  field.description }}</span></span>
                             </div>
                             <div v-if="blockIndex === 0">
 

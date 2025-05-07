@@ -276,7 +276,7 @@ def activating_perms_for_all_roles_in_wf_roadmap():
  
  
 @frappe.whitelist()
-def add_child_doctype(form_short_name: str, fields: list[dict],idx=None):
+def add_child_doctype(form_short_name: str, as_a_block:str, fields: list[dict],idx=None) :
 
     try:
         doc = None  # Ensure 'doc' is always defined
@@ -331,7 +331,7 @@ def add_child_doctype(form_short_name: str, fields: list[dict],idx=None):
             # Create new DocType
             doc = frappe.new_doc("DocType")
             doc.name = form_short_name
-            doc.description = f"{doc.name}"
+            doc.description = f"{as_a_block}"
             doc.creation = frappe_now()
             doc.modified = frappe_now()
             doc.modified_by = frappe.session.user
@@ -350,7 +350,7 @@ def add_child_doctype(form_short_name: str, fields: list[dict],idx=None):
                     "fieldtype": field.get("fieldtype"),
                     "parentfield": "fields",
                     "parenttype": "DocType",
-                    # "options":field.get("options")
+                    "options":field.get("options")
                 })
             
             doc.save(ignore_permissions=True)
@@ -363,7 +363,7 @@ def add_child_doctype(form_short_name: str, fields: list[dict],idx=None):
         return [
             {
                 "child_doc": {
-                    "description": child_doc_name,
+                    "description": as_a_block,
                     "fieldname": child_doc_name,
                     "fieldtype": "Table",
                     "idx": idx ,

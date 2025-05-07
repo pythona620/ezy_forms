@@ -16,84 +16,89 @@ def rebuild_to_structured_array(flat_array):
     current_row = None
     current_column = None
     child_table_row = None
- 
     for item in reversed(flat_array):
         description = item.get("description")
-        child_type =  item.get("fieldtype")
+        child_type = item.get("fieldtype")
+        idx = item.get("idx")
+
         if description == "Block Break":
-            # Push current section, row, and block if they exist
             if current_row:
                 current_section["rows"].insert(0, current_row)
                 current_row = None
- 
+
             if current_section:
                 current_block["sections"].insert(0, current_section)
                 current_section = None
- 
+
             if current_block:
                 result.insert(0, current_block)
- 
+
             current_block = {
                 "fieldtype": item.get("fieldtype"),
                 "fieldname": item.get("fieldname"),
                 "label": item.get("label") if item.get("label") else "",
                 "parent": item.get("parent"),
+                "idx": idx,
                 "sections": []
             }
- 
+
         elif description == "Section Break":
-            # Push current row and section if they exist
             if current_row:
                 current_section["rows"].insert(0, current_row)
                 current_row = None
- 
+
             if current_section:
                 current_block["sections"].insert(0, current_section)
- 
+
             current_section = {
                 "fieldtype": item.get("fieldtype"),
                 "fieldname": item.get("fieldname"),
                 "label": item.get("label") if item.get("label") else "",
                 "parent": item.get("parent"),
+                "idx": idx,
                 "rows": []
             }
- 
+
         elif description == "Row Break":
-            # Push current row if it exists
             if current_row:
                 current_section["rows"].insert(0, current_row)
- 
+
             current_row = {
                 "fieldtype": item.get("fieldtype"),
                 "fieldname": item.get("fieldname"),
                 "label": item.get("label") if item.get("label") and not item.get("label").lower().startswith("row_") else "",
                 "parent": item.get("parent"),
+                "idx": idx,
                 "columns": []
             }
- 
+
         elif description == "Column Break":
-            # Add the column to the current row
             current_column = {
                 "fieldtype": item.get("fieldtype"),
                 "fieldname": item.get("fieldname"),
                 "label": item.get("label") if item.get("label") else "",
                 "parent": item.get("parent"),
+                "idx": idx,
                 "fields": []
             }
             current_row["columns"].insert(0, current_column)
+
         elif child_type == 'Table':
-    
             child_table_row = {
-            "fieldtype": item.get("fieldtype"),
-            "fieldname": item.get("fieldname"),
-            "label": item.get("label"),
-            "parent": item.get("parent"),
-            "child_table": []
+                "fieldtype": item.get("fieldtype"),
+                "fieldname": item.get("fieldname"),
+                "label": item.get("label"),
+                "parent": item.get("parent"),
+                "options": item.get("options"),
+                "description": item.get("description"),
+                "idx": idx,
+                "child_table": []
             }
-            
+
+            current_section["rows"].insert(0, child_table_row)
             child_table_row["child_table"].insert(0, item.get("value"))
+
         else:  # Regular field
-            # Add field to the current column
             if current_column:
                 updated_field = {
                     "fieldname": item.get("fieldname"),
@@ -103,22 +108,26 @@ def rebuild_to_structured_array(flat_array):
                     "description": item.get("description"),
                     "reqd": item.get("reqd"),
                     "options": item.get("options"),
-                    "values": item.get("value") if item.get("value") else ""
-                    }
+                    "values": item.get("value") if item.get("value") else "",
+                    "idx": idx
+                }
                 current_column["fields"].insert(0, updated_field)
- 
-    # Push the last row, section, and block (if any exist)
+
+    # Final push for any remaining structures
     if current_row:
         current_section["rows"].insert(0, current_row)
- 
+
     if current_section:
         current_block["sections"].insert(0, current_section)
-    if  child_table_row:
+
+    if child_table_row:
         result.insert(0, child_table_row)
-        child_table_row = None
+
     if current_block:
         result.insert(0, current_block)
+
     return result
+
  
 # Jinja2 template string
 template_str = """
@@ -196,6 +205,16 @@ template_str = """
             border-bottom: 1px solid #cccccc;
             font-weight:600;
             
+        }
+        .block_input{
+              border: none;
+            outline: none;
+            padding: 0px 5px;
+               padding-left: 50px ;
+            background: transparent;
+            flex: 1;
+            border-bottom: 1px solid #cccccc;
+            font-weight:600;
         }
         .field select, .field textarea {
             
@@ -403,21 +422,123 @@ template_str = """
     
 </div>
 {% for block in data %}
+
     <div class="block">
         {% for section in block.sections %}
+        
             <div class="section">
                 {% if section.label %}
                     <h3>{{ section.label }}</h3>
                 {% endif %}
                 
-                {% for row in section.rows %}
+                {% for row in section.rows | sort(attribute='idx') %}
+                
+                                            
+                            {% set table_name = row.options %}
+
+                            {% if row.description == 'true' %}
+                                {% if table_name in child_data %}
+                                    <h3 class="childtablename">{{ table_name.replace("_", " ").title() }}</h3>
+                                    {% if child_data[table_name] %}
+                                        {% for child in child_data[table_name] %}
+                                            <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
+                                                
+                                                <div style="display: flex; flex-wrap: wrap;">
+                                                    {% for key, value in child.items() %}
+                                                        <div style="width: 48%; display:flex;align-items:baseline;gap:2px;  margin-right: 2%; margin-bottom: 10px;">
+                                                            <label style="font-weight: 600;">{{ key }}:</label><br />
+                                                            {% if value and value.endswith(('.pdf', '.jpg', '.png', '.jpeg')) %}
+                                                                <a href="{{ value }}" target="_blank">View Attachment</a>
+                                                            {% else %}
+                                                                <input type="text" value="{{ value }}" class="block_input" readonly style="width: 100%; padding: 5px;" />
+                                                            {% endif %}
+                                                        </div>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <p>No data available for {{ table_name }}</p>
+                                    {% endif %}
+
+                                {% elif table_name in child_table_data %}
+                                    <h3 class="childtablename">{{ table_name.replace("_", " ").title() }}</h3>
+                                    <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
+                                    
+                                        <div style="display: flex; flex-wrap: wrap;">
+                                            {% for column in child_table_data[table_name] %}
+                                                <div style="width: 48%; margin-right: 2%;display:flex;align-items:baseline;gap:2px; margin-bottom: 10px;">
+                                                    <label style="font-weight: 600;">{{ column }}:</label><br />
+                                                    <input type="text"  readonly class="block_input" style="width: 100%; padding: 5px; color: #ccc;" />
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+
+                            {% else %}
+
+                                {% if table_name in child_data %}
+                                    <h3 class="childtablename">{{ table_name.replace("_", " ").title() }}</h3>
+                                    {% if child_data[table_name] %}
+                                        <table style="width: 100%; margin-bottom:10px; border-collapse: collapse;">
+                                            <thead>
+                                                <tr>
+                                                    <th style="border: 1px solid #ccc;width:3%; padding: 8px; background-color: #f2f2f2;">S.no</th>
+                                                    {% for key in child_data[table_name][0].keys() %}
+                                                        <th style="border: 1px solid #ccc; padding: 8px; background-color: #f2f2f2;">{{ key }}</th>
+                                                    {% endfor %}
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for child in child_data[table_name] %}
+                                                    <tr>
+                                                        <td style="border: 1px solid #ccc;padding: 8px;text-align:center;">{{ loop.index }}</td>
+                                                        {% for value in child.values() %}
+                                                            <td style="border: 1px solid #ccc; padding: 8px; word-break: break-word;">{{ value if value else '—' }}</td>
+                                                        {% endfor %}
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    {% else %}
+                                        <p>No data available for {{ table_name }}</p>
+                                    {% endif %}
+
+                                {% elif table_name in child_table_data %}
+                                    <h3 class="childtablename">{{ table_name.replace("_", " ").title() }}</h3>
+                                    <table style="width: 100%; margin-bottom:10px; border-collapse: collapse;">
+                                        <thead>
+                                            <tr>
+                                                <th style="border: 1px solid #ccc;width:3%; padding: 8px; background-color: #f2f2f2;">S.no</th>
+                                                {% for column in child_table_data[table_name] %}
+                                                    <th style="border: 1px solid #ccc; padding: 8px; background-color: #f2f2f2;">{{ column }}</th>
+                                                {% endfor %}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td style="border: 1px solid #ccc; padding: 8px; text-align: center;">-</td>
+                                                {% for column in child_table_data[table_name] %}
+                                                    <td style="border: 1px solid #ccc; padding: 8px; text-align: center; color: #ccc;">-</td>
+                                                {% endfor %}
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                {% endif %}
+                            {% endif %}
+
+                    
+
                     <div class="row">
                         {% for column in row.columns %}
+                       
                             <div class="column">
                               {% if column.label %}
                                 <h3>{{ column.label }}</h3>
                                 {% endif %}
                                 {% for field in column.fields %}
+                               
                                     <div class="field">
                                         <label for="{{ field.fieldname }}">{{ field.label }}:</label>
 
@@ -541,70 +662,7 @@ template_str = """
             </div>
         {% endfor %}
         
-         {% if loop.first %} {# Ensure tables are shown only in the first block #}
-
-            {% if child_data %}
-                {% for table_name, rows in child_data.items() %}
-                    <h3 class="childtablename">{{ table_name.replace("_", " ").title() }}</h3>
-                    {% if rows %}
-                        <table style="width: 100%; max-width: 100%;margin-bottom:10px; border-collapse: collapse; border-radius:5px;">
-                            <thead>
-                                <tr>
-                                    <th style="border: 1px solid #ccc;width:3%; padding:font-size:13px; 8px; background-color: #f2f2f2;">S.no</th>
-                                    {% for key in rows[0].keys() %}
-                                        <th style="border: 1px solid #ccc; padding: 8px;font-size:13px; background-color: #f2f2f2;">
-                                            {{ key }}
-                                        </th>
-                                    {% endfor %}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for child in rows %}
-                                    <tr>
-                                        <td style="border: 1px solid #ccc;width:3%;font-size:13px; padding: 8px;text-align:center;">{{ loop.index }}</td> 
-                                        {% for value in child.values() %}
-                                           <td style="border: 1px solid #ccc; padding: 8px; font-size: 13px; text-align: center; 
-                                                word-break: break-word; max-width: 150px; overflow-wrap: break-word; white-space: normal;">
-                                            {{ value if value else '—' }}
-                                        </td>
-
-                                        {% endfor %}
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    {% else %}
-                        <p>No data available for {{ table_name }}</p>
-                    {% endif %}
-                {% endfor %}
-            {% endif %}
-            </div>
-
-            {% if child_table_data %}
-                {% for table_name, columns in child_table_data.items() %}
-                    <h3 class="childtablename">{{ table_name.replace("_", " ").title() }}</h3>
-                    <table style="width: 100%;margin-bottom:10px; border-collapse: collapse; border-radius:5px;">
-                        <thead>
-                            <tr>
-                                <th style="border: 1px solid #ccc;font-size:13px; padding: 8px;width:3%; background-color: #f2f2f2;">S.no</th>
-                                {% for column in columns %}
-                                    <th style="border: 1px solid #ccc;font-size:13px; padding: 8px; background-color: #f2f2f2;">{{ column }}</th>
-                                {% endfor %}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td style="border: 1px solid #ccc;font-size:13px; color:#fff;width:3%; padding: 8px;">- </td>
-                                {% for column in columns %}
-                                    <td style="border: 1px solid #ccc; font-size:13px; color:#fff; padding: 8px;"> - </td>
-                                {% endfor %}
-                            </tr>
-                        </tbody>
-                    </table>
-                {% endfor %}
-            {% endif %}
-
-        {% endif %}
+        
   
 {% endfor %}
  
@@ -699,7 +757,7 @@ def json_structure_call_for_html_view(json_obj: list, form_name: str, child_data
     company_logo = frappe.db.get_value("Ezy Business Unit",business_unit,"bu_logo")
     if company_logo:
         logo_of_company = site_url + company_logo
-    
+  
     html_output = Template(template_str).render(
         data=structered_data, form_name=form_name, child_data=child_data, child_table_data=child_table_data,company_logo=logo_of_company,site_url=site_url,business_unit=business_unit
     )
