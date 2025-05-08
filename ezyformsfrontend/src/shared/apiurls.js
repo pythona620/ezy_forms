@@ -65,7 +65,7 @@ export const apis = {
   childFieldsUpdation: domain + `/method/ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions.update_field_properties`,
  view_only_reportee : domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.pick_view_only_reportee`,
  toMailApproval: domain + `/method/ezy_forms.ezy_forms.doctype.email_approval.custom_email_approval.email_approval`,
- deleteAssigneRoles:domain+`/method/ezy_flow.ezy_flow.doctype.wf_roadmap.wf_roadmap.delete_roles_for_approver_roles`,
+ deleteAssigneRoles:domain+`/method/ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions.delete_roles_for_approver_roles`,
 };
 
 // export const tokens = {
