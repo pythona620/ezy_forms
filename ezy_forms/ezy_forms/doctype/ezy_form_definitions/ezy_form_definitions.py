@@ -13,6 +13,9 @@ from ezy_forms.ezy_forms.doctype.ezy_form_definitions.linking_flow_and_forms imp
 from itertools import chain
 from frappe.utils import cstr
 from frappe.utils import now as frappe_now
+import re
+
+
  
 class EzyFormDefinitions(Document):
     pass
@@ -94,7 +97,11 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
             form_defs.form_status = form_status
             form_defs.owner_of_the_form = owner_of_the_form
             form_defs.active = 1
-            form_defs.series = series + "-.####" if series else None
+            cleaned_series = re.sub(r'[^a-zA-Z0-9#\-.]', '', series or '')
+            # Apply logic
+            form_defs.series = None if not cleaned_series else (
+                cleaned_series.upper() + "-.####" if not re.search(r'-\.#+$', cleaned_series.upper()) else cleaned_series.upper()
+            )
             form_defs.business_unit = business_unit
             form_defs.count = 0
             form_defs.insert(ignore_permissions=True).save()
@@ -276,7 +283,7 @@ def activating_perms_for_all_roles_in_wf_roadmap():
  
  
 @frappe.whitelist()
-def add_child_doctype(form_short_name: str, fields: list[dict],idx=None):
+def add_child_doctype(form_short_name: str, as_a_block:str, fields: list[dict],idx=None) :
 
     try:
         doc = None  # Ensure 'doc' is always defined
@@ -331,7 +338,7 @@ def add_child_doctype(form_short_name: str, fields: list[dict],idx=None):
             # Create new DocType
             doc = frappe.new_doc("DocType")
             doc.name = form_short_name
-            doc.description = f"{doc.name}"
+            doc.description = f"{as_a_block}"
             doc.creation = frappe_now()
             doc.modified = frappe_now()
             doc.modified_by = frappe.session.user
@@ -350,7 +357,7 @@ def add_child_doctype(form_short_name: str, fields: list[dict],idx=None):
                     "fieldtype": field.get("fieldtype"),
                     "parentfield": "fields",
                     "parenttype": "DocType",
-                    # "options":field.get("options")
+                    "options":field.get("options")
                 })
             
             doc.save(ignore_permissions=True)
@@ -363,7 +370,7 @@ def add_child_doctype(form_short_name: str, fields: list[dict],idx=None):
         return [
             {
                 "child_doc": {
-                    "description": child_doc_name,
+                    "description": as_a_block,
                     "fieldname": child_doc_name,
                     "fieldtype": "Table",
                     "idx": idx ,
