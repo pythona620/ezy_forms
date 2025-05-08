@@ -53,7 +53,8 @@
                         </h1> -->
                         <h1 class="font-14 fw-bold m-0">About Form</h1>
                         <div>
-                          <button v-if="!$route.query.id" class=" btn btn-light font-12 mx-2" type="button" @click="clearForm">Clear
+                          <button v-if="!$route.query.id" class=" btn btn-light font-12 mx-2" type="button"
+                            @click="clearForm">Clear
                             Form</button>
 
                           <ButtonComp class="btn btn-dark bg-dark text-white fw-bold font-13" name="Next"
@@ -99,9 +100,11 @@
                                 labeltext="Form Naming series" class="formHeight mt-2" type="text" tag="input"
                                 name="Value" id="formNameSeries" placeholder="Form Naming series"
                                 v-model="filterObj.series" />
-                                <small class="text-muted" style="font-size:12px">
-                                Note : Enter <code>YY-YY</code>, <code>YYYY</code>, or <code>ABC</code>. The system will default to the format <code> 24-25-0001</code>, <code> 2025-0001</code>, or <code> ABC-0001</code> respectively.
-                          </small>
+                              <small class="text-muted" style="font-size:12px">
+                                Note : Enter <code>YY-YY</code>, <code>YYYY</code>, or <code>ABC</code>. The system will
+                                default to the format <code> 24-25-0001</code>, <code> 2025-0001</code>, or
+                                <code> ABC-0001</code> respectively.
+                              </small>
                             </div>
                           </div>
                           <div class="mt-3">
@@ -410,7 +413,7 @@
                                   <div class="d-flex justify-content-between align-items-center">
                                     <label class="rownames">{{
                                       getRowSuffix(rowIndex)
-                                    }}</label>
+                                      }}</label>
                                     <div>
                                       <button v-if="row.columns.length < 3"
                                         class="btn btn-light bg-transparent border-0 font-12" @click="
@@ -583,7 +586,7 @@
                                                 'Check', 'Small Text'
                                               ].includes(field.fieldtype)
                                             ">
-                                              <label class="font-12 fw-light"  for="options">Enter Options:</label>
+                                              <label class="font-12 fw-light" for="options">Enter Options:</label>
                                               <textarea id="options" placeholder="Enter your Options"
                                                 v-model="field.options"
                                                 class="form-control shadow-none mb-1 font-12"></textarea>
@@ -670,7 +673,7 @@
                                               placeholder="Enter field description"></textarea>
 
                                             <small v-if="field.error" class="text-danger font-10">{{ field.error
-                                            }}</small>
+                                              }}</small>
                                           </div>
                                           <div class="childtableShow">
                                             <div>
@@ -687,7 +690,9 @@
                                                       <h5 class=" font-13" v-if="tableName === field.fieldname">{{
                                                         tableName.replace(/_/g,
                                                           ' ') }}</h5>
-                                                      <div v-if="editMode[tableName]" class=" d-flex align-items-center gap-2">
+                                                      <div
+                                                        v-if="editMode[tableName] && tableName === currentEditingTable"
+                                                        class=" d-flex align-items-center gap-2">
                                                         <div class="d-flex align-items-center">
 
                                                           <input class="font-12" v-model="field.description"
@@ -915,7 +920,7 @@
                                     :key="`table-${blockIndex}-${sectionIndex}-${tableIndex}`" class="child-table">
                                     <div v-if="table.newTable">
                                       <div class="d-flex justify-content-between align-items-center mt-1 mb-2">
-                                        <div >
+                                        <div>
                                           <span :class="table.tableName ? 'd-none' : 'text-danger'">*</span>
                                           <input v-model="table.tableName" placeholder="Table Name"
                                             class="border-less-input font-14 p-0 inputHeight" :class="{
@@ -1080,6 +1085,16 @@
           <div class="modal-body">
             <input v-model="printFormatID" :multiple="false" :placeholder="route.query.id" class="font-11 form-control "
               :searchable="true" />
+            <div class=" d-flex align-items-center gap-2">
+              <div class="d-flex align-items-center py-2">
+
+                <input class="font-12" v-model="is_landscape" :true-value="1" :false-value="0" placeholder="Field Name"
+                  type="checkbox" />
+              </div>
+              <div>
+                <label for="mandatory" class="font-12 fw-bold m-0 fw-light">Print Landscape Mode</label>
+              </div>
+            </div>
 
 
           </div>
@@ -1217,6 +1232,7 @@ const selectedData = ref({
 
 });
 const printFormatID = ref('')
+const is_landscape = ref(false)
 
 
 // const computedDisabled = computed(() => {
@@ -1609,10 +1625,14 @@ const ensureArrayPath = (blockIndex, sectionIndex, key) => {
   }
 };
 
+
+const formatTableName = (tableName) => {
+  return tableName
+    ? tableName.trim().toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "")
+    : "";
+};
+
 const processFields = (blockIndex, sectionIndex, tableIndex) => {
-
-
-
   const hasErrors = isEmptyFieldType(blockIndex, sectionIndex, tableIndex);
 
   if (hasErrors) {
@@ -1626,7 +1646,7 @@ const processFields = (blockIndex, sectionIndex, tableIndex) => {
   const section = blockArr[blockIndex].sections[sectionIndex];
 
   const data = {
-    form_short_name: table.tableName.toLowerCase(),
+    form_short_name: formatTableName(table.tableName),
     fields: table.columns,
     idx: table.idx,
     as_a_block: table.as_a_block === 1 ? 'true' : 'false',
@@ -1746,7 +1766,7 @@ const afterImmediateEdit = (blockIndex, sectionIndex, tableName) => {
       .then((response) => {
         afterdata.value = response.data;
         toast.success("Fields updated successfully!", { autoClose: 500 });
-       
+
       })
       .catch((error) => {
         console.error("❌ Saving fields failed:", error);
@@ -1919,7 +1939,7 @@ const deleteRow = (tableName, index) => {
 
 
 const invalidFields = ref({});
-
+const currentEditingTable = ref(null);
 const toggleEdit = (tableName, description) => {
   if (editMode[tableName]) {
 
@@ -1976,6 +1996,7 @@ const toggleEdit = (tableName, description) => {
 
   // Toggle edit mode for the table
   editMode[tableName] = !editMode[tableName];
+  currentEditingTable.value = editMode[tableName] ? tableName : null;
 };
 
 
@@ -2438,11 +2459,21 @@ function getFormData() {
 }
 
 function SetPrintFormatFn() {
-  const data = {
-    print_format: printFormatID.value
-  }
+  console.log(is_landscape.value);
+  const data = {};
+
+// Add print_format if it has a value
+if (printFormatID.value) {
+  data.print_format = printFormatID.value;
+}
+
+// Add is_landscape if it has a value (you can also check === true if needed)
+if (is_landscape.value !== undefined && is_landscape.value !== null) {
+  data.is_landscape = is_landscape.value;
+}
+
   axiosInstance
-    .put(apis.resource + doctypes.EzyFormDefinitions + `/${printFormatID.value}`, data)
+    .put(apis.resource + doctypes.EzyFormDefinitions + `/${route.query.id}`, data)
     .then((res) => {
       console.log(res);
       const modal = bootstrap.Modal.getInstance(document.getElementById('customFormatModal'));
@@ -3169,7 +3200,8 @@ const hasDuplicates = (array) => new Set(array).size !== array.length;
 .stepsDiv {
   margin-top: 0;
 }
-.note{
+
+.note {
   display: flex;
   align-items: center;
   height: 93%;

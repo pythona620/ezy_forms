@@ -18,7 +18,8 @@
   "form_short_name",
   "form_json",
   "form_status",
-  "print_format"
+  "print_format",
+  "is_landscape"
  ],
  "fields": [
   {
@@ -98,11 +99,17 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Series"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_landscape",
+   "fieldtype": "Check",
+   "label": "Is Landscape"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-05-01 12:39:19.562039",
+ "modified": "2025-05-08 16:32:10.520014",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
  "name": "Ezy Form Definitions",

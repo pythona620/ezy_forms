@@ -70,6 +70,8 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
         doctype = form_short_name
         if isinstance(fields,str):
             fields = literal_eval(fields)
+        if frappe.db.exists("Ezy Form Definitions",{"name":form_short_name}):
+            frappe.set_value("Ezy Form Definitions",form_short_name,"form_status",form_status)
         if not frappe.db.exists("DocType",doctype):
             frappe.db.sql(f"DROP TABLE IF EXISTS `tab{doctype}`;")
             frappe.db.commit()
@@ -154,6 +156,7 @@ def enqueued_add_customized_fields_for_dynamic_doc(fields: list[dict], doctype: 
                 f"SELECT fieldname, fieldtype, idx, label FROM `tabDocField` WHERE parent ='{table_name}';",
                 as_dict=True
             )
+            print(table_name,"-------"*100)
             for each_child in fields_in_child_doctype:
                 each_child['value'] = ''
             # Sort the fields by 'idx' within each child table

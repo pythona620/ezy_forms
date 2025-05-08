@@ -748,9 +748,9 @@ template_str = """
  
 """
     
-def convert_html_to_pdf(html_content, pdf_path):
+def convert_html_to_pdf(html_content, pdf_path,options=None):
     try:
-        pdfkit.from_string(html_content, pdf_path)
+        pdfkit.from_string(html_content, pdf_path,options=options)
     
     except Exception as e:
         frappe.log_error(f"PDF generation failed: {e}")
@@ -877,6 +877,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
     try:
         
     
+        is_landscape = frappe.db.get_value("Ezy Form Definitions", form_short_name, "is_landscape")
         if name is None:
             print_format = frappe.db.get_value("Ezy Form Definitions", form_short_name, "print_format")
             if print_format:
@@ -884,6 +885,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                 html_view = html_view_['html']
             else:
                 json_object = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_json")
+              
                 json_object = literal_eval(json_object)["fields"]
                 json_object = [
                     field for field in json_object
@@ -913,8 +915,10 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                         # Get the fields (columns) of the child table
                         child_table_fields = frappe.get_all(
                             "DocField",
+                            
                             filters={"parent": child_table_doctype},
-                            fields=["label"]
+                            fields=["label"],
+                            order_by="idx asc"
                         )
 
                         # Store labels for each child table
@@ -925,8 +929,8 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
             pdf_filename = f"{form_short_name}_{random_number}  .pdf"
             pdf_path = f"private/files/{pdf_filename}"
             absolute_pdf_path = os.path.join(get_bench_path(), "sites", cstr(frappe.local.site), pdf_path)
- 
-            convert_html_to_pdf(html_content=html_view, pdf_path=absolute_pdf_path)
+            opts={"orientation":"Landscape"if is_landscape else"Portrait"}
+            convert_html_to_pdf(html_content=html_view,pdf_path=absolute_pdf_path,options=opts)
  
             new_file = frappe.get_doc({
                 "doctype": "File",
@@ -950,6 +954,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                 html_view = html_view_['html']
             else:
                 json_object = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_json")
+
                 json_object = literal_eval(json_object)["fields"]
                 json_object = [
                     field for field in json_object
@@ -983,8 +988,10 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
             pdf_filename = f"{form_short_name}_{name}_{random_number}mailfiles.pdf"
             pdf_path = f"private/files/{pdf_filename}"
             absolute_pdf_path = os.path.join(get_bench_path(), "sites", cstr(frappe.local.site), pdf_path)
-    
-            convert_html_to_pdf(html_content=html_view, pdf_path=absolute_pdf_path)
+            opts={"orientation":"Landscape"if is_landscape else"Portrait"}
+            convert_html_to_pdf(html_content=html_view,pdf_path=absolute_pdf_path,options=opts)
+
+            
     
             new_file = frappe.get_doc({
                 "doctype": "File",
