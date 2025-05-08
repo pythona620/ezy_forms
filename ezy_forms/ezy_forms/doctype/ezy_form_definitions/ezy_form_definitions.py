@@ -14,6 +14,7 @@ from itertools import chain
 from frappe.utils import cstr
 from frappe.utils import now as frappe_now
 import re
+import json
 
 
  
@@ -358,7 +359,7 @@ def add_child_doctype(form_short_name: str, as_a_block:str, fields: list[dict],i
                     "fieldtype": field.get("fieldtype"),
                     "parentfield": "fields",
                     "parenttype": "DocType",
-                    "optio drtyns":field.get("options")
+                    "options":field.get("options")
                 })
             
             doc.save(ignore_permissions=True)
@@ -387,3 +388,63 @@ def add_child_doctype(form_short_name: str, as_a_block:str, fields: list[dict],i
         frappe.log_error(frappe.get_traceback(), "Error in manage_child_doctype")
         return {"error": str(e)}
  
+
+
+
+
+
+
+@frappe.whitelist()
+def delete_roles_for_approver_roles(role:list|None,level:int|None,short_name:str|None, document_type:str|None, property:str|None):
+	level = int(level)
+	form_json, doc_name = frappe.get_value("Ezy Form Definitions", {'form_name': document_type, 'business_unit': property}, ["form_json", "name"])
+	form_def_json_str =form_json
+	form_json = json.loads(form_def_json_str)
+	# Remove the targeted approver step
+	workflow = form_json.get("workflow", [])
+	filtered_workflow = []
+	for step in workflow:
+		if (
+			step.get("type") == "approver"
+			and step.get("idx") == level
+			and any(r in role for r in step.get("roles", []))
+		):
+			continue  # Remove this step
+		filtered_workflow.append(step)
+	# Reindex the workflow steps
+	for i, step in enumerate(filtered_workflow):
+		step["idx"] = i
+	form_json["workflow"] = filtered_workflow
+	# Save it back
+	frappe.db.set_value("Ezy Form Definitions", doc_name, "form_json", json.dumps(form_json))
+	frappe.db.commit()
+ 
+	updated_roadmaps = []
+	doc = frappe.get_doc("WF Roadmap",{"document_type": short_name, "property": property},['wf_level_setup'])
+	original_level_count = len(doc.wf_level_setup)
+	# Prepare new child table list excluding the entry to delete
+	new_level_setup = []
+	for entry in doc.wf_level_setup:
+		if entry.role in role and entry.level == int(level):
+			continue  # Skip this entry (deleting it)
+		elif entry.level > int(level):
+			entry.level -= 1  # Shift down levels above the deleted one
+		new_level_setup.append(entry)
+	# Sort by level to maintain logical order
+	new_level_setup.sort(key=lambda x: x.level or 0)
+	# Update idx (serial number) in order
+	for idx, entry in enumerate(new_level_setup, start=1):
+		entry.idx = idx
+	doc.wf_level_setup = new_level_setup
+	level_changed = len(doc.wf_level_setup) != original_level_count
+	if level_changed:
+		doc.workflow_levels = len(doc.wf_level_setup)
+		doc.save(ignore_permissions=True)
+		frappe.db.commit()
+		updated_roadmaps.append(doc.name)	
+	frappe.db.commit()
+	return {
+		"status": "success",
+		"updated_workflow": filtered_workflow,
+		"updated_roadmaps": updated_roadmaps
+	}
