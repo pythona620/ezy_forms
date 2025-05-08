@@ -105,13 +105,12 @@
                                   <div class="row">
                                     <div class="form-check col-4 mb-4" v-for="(
                                       option, index
-                                      ) in field?.options?.split('\n')" :key="index"
+                                      ) in field?.options?.split('\n')" :key="index" :class="{ 'd-none': index === 0 && !field.option }"
                                       >
                                       <div class="d-flex gap-2 align-items-center">
                                         <div>
-                                          <input v-if="
-                                            field.fieldtype === 'Check' || field.fieldtype === 'Select' || field.fieldtype == 'Small Text' &&
-                                            index !== 0
+                                          <input v-if=" (field?.options ||
+                                            field.fieldtype === 'Check' || field.fieldtype === 'Select' || field.fieldtype == 'Small Text') && index !== 0
                                           " class="form-check-input"
                                             :type="field.fieldtype == 'Small Text' ? 'Checkbox' : field.fieldtype"
                                             :name="option" :id="option" readonly />

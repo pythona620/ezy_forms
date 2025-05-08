@@ -100,12 +100,12 @@ option, index
                                                         <div class="row">
                                                             <div class="col-4 form-check mb-4" v-for="(
 option, index
-                                        ) in field?.options?.split('\n')" :key="index"
-                                                                :class="{ 'd-none': index === 0 }">
+                                        ) in field?.options?.split('\n')" :key="index" :class="{ 'd-none': index === 0 && !field.option }"
+                                                                >
                                                                 <div class="d-flex align-items-center gap-2">
                                                                     <div>
-                                                                        <input v-if="
-                                                                            field.fieldtype === 'Check' || field.fieldtype === 'Select' || field.fieldtype == 'Small Text' &&
+                                                                        <input v-if="( field?.option ||
+                                                                            field.fieldtype === 'Check' || field.fieldtype === 'Select' || field.fieldtype == 'Small Text' )&&
                                                                             index !== 0
                                                                         " class="form-check-input"
                                                                             :type="field.fieldtype == 'Small Text' ? 'Checkbox' : field.fieldtype"

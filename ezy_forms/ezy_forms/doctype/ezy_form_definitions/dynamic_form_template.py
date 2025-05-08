@@ -919,7 +919,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
 
                         # Store labels for each child table
                         labels[child_table_name] = [field["label"] for field in child_table_fields]
-                html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_short_name,child_table_data=labels,child_data=None,business_unit=business_unit,wf_generated_request_id=wf_generated_request_id)
+                html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_short_name,child_table_data=labels,child_data=None,business_unit=business_unit,wf_generated_request_id='')
             random_number = randint(111, 999)
  
             pdf_filename = f"{form_short_name}_{random_number}  .pdf"
