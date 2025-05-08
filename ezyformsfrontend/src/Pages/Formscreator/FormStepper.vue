@@ -1081,8 +1081,6 @@
             <input v-model="printFormatID" :multiple="false" :placeholder="route.query.id" class="font-11 form-control "
               :searchable="true" />
 
-            <input v-model="printFormatID" :multiple="false" :placeholder="route.query.id" class="font-11 form-control "
-              :searchable="true" />
 
           </div>
           <div class="modal-footer">
