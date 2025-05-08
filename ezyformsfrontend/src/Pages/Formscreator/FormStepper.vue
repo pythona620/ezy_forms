@@ -1631,7 +1631,7 @@ const processFields = (blockIndex, sectionIndex, tableIndex) => {
     as_a_block: table.as_a_block === 1 ? 'true' : 'false',
   };
 
-  console.log(data);
+  // console.log(data);
   // ensureArrayPath(blockIndex, sectionIndex, 'afterCreated');
   // table.newTable = false
 
@@ -1663,7 +1663,7 @@ const processFields = (blockIndex, sectionIndex, tableIndex) => {
         // // Store the response data back to the table
         blockArr[blockIndex].sections[sectionIndex].childTables[tableIndex] = responseData;
 
-        console.log("Table response saved:", responseData);
+        // console.log("Table response saved:", responseData);
       }
     })
     .catch((error) => {
@@ -1711,7 +1711,7 @@ const afterImmediateEditaddNewFieldedit = (blockIndex, sectionIndex, tableName) 
   });
 };
 
-
+const afterdata = ref([])
 const afterImmediateEdit = (blockIndex, sectionIndex, tableName) => {
   const section = blockArr[blockIndex].sections[sectionIndex];
   const table = section.afterCreated.find((t) => t.tableName === tableName);
@@ -1743,8 +1743,9 @@ const afterImmediateEdit = (blockIndex, sectionIndex, tableName) => {
     axiosInstance
       .post(apis.childtable, formData)
       .then((response) => {
+        afterdata.value = response.data;
         toast.success("Fields updated successfully!", { autoClose: 500 });
-        console.log("✅ All fields saved successfully:", response.data);
+       
       })
       .catch((error) => {
         console.error("❌ Saving fields failed:", error);
@@ -1964,7 +1965,8 @@ const toggleEdit = (tableName, description) => {
         toast.success("Fields updated successfully!", { autoClose: 500 }, {
           transition: "zoom",
         });
-        console.log("✅ All fields saved successfully:", response.data);
+        afterdata.value = response.data;
+        // console.log("✅ All fields saved successfully:", response.data);
       })
       .catch((error) => {
         console.error("❌ Saving fields failed:", error);
@@ -2136,13 +2138,13 @@ const isChecked = (option) => {
 
 // Toggle selection for an option
 const toggleOption = (option, event) => {
-  console.log(isChecked);
+  // console.log(isChecked);
   if (option === SELECT_ALL) {
     if (event.target.checked) {
       //  Select all options immediately
 
       filterObj.value.accessible_departments = [...formOptions.value];
-      console.log(filterObj.value.accessible_departments);
+      // console.log(filterObj.value.accessible_departments); 
     } else {
       // Unselect all options
       filterObj.value.accessible_departments = [];
@@ -2506,9 +2508,9 @@ function categoriesData(newVal) {
 
 function formData(status) {
   // console.log(blockArr, "blockarray");
-  console.log(blockArr, 'blockArr');
-  console.log(tableFieldsCache.value, 'tableFieldsCache');
-  console.log(returTables.value, 'returTables');
+  // console.log(blockArr, 'blockArr');
+  // console.log(tableFieldsCache.value, 'tableFieldsCache');
+  // console.log(returTables.value, 'returTables');
 
   let fields = extractFieldsWithBreaks(blockArr);
 
@@ -2534,7 +2536,7 @@ function formData(status) {
   axiosInstance
     .post(apis.savedata, dataObj)
     .then((res) => {
-      console.log(res, "res");
+      // console.log(res, "res");
       if (res && res.message && res.message.message) {
         // tableFieldsCache.value = [];
         router.push({
@@ -3125,7 +3127,7 @@ function delete_form_items_fields() {
     .then((res) => {
       if (res?.message?.success) {
         // return res;
-        console.log(object);
+        // console.log(object);
         formData();
       }
     });

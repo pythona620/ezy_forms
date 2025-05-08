@@ -251,9 +251,10 @@ template_str = """
                # background-color: #f0f0f0;
                margin: 0px 10px;
           }
-/* Flex container to arrange checkboxes */
+            /* Flex container to arrange checkboxes */
             .checkbox-container {
                 display: flex;
+                justify-content: flex-start;
                 flex-wrap: wrap;   /* Allow items to wrap into new lines */
                 gap: 10px;         /* Space between checkboxes */
                 width: 100%;       /* Ensure the container uses full available width */
@@ -377,7 +378,19 @@ template_str = """
             user-select: none;
             white-space: nowrap;
         }
-         
+        .requestId{
+             display: flex;
+              justify-content: start;
+              align-items: center;
+              padding-top:5px;
+              padding-bottom:5px;
+              padding-left:10px;
+              
+              
+        }
+         .requestId strong {
+    margin-right: 8px;  /* adds space between the label and the ID */
+}
         @media print {
             .table, .table th, .table td {
                 border: 1px solid black !important;
@@ -421,8 +434,8 @@ template_str = """
      </div>
     
 </div>
+<div class="requestId"><strong>Request ID:</strong><span>{{wf_generated_request_id}}</span></div>
 {% for block in data %}
-
     <div class="block">
         {% for section in block.sections %}
         
@@ -742,9 +755,10 @@ def convert_html_to_pdf(html_content, pdf_path):
     except Exception as e:
         frappe.log_error(f"PDF generation failed: {e}")
  
-def json_structure_call_for_html_view(json_obj: list, form_name: str, child_data, child_table_data,business_unit):
+def json_structure_call_for_html_view(json_obj: list, form_name: str, child_data, child_table_data,business_unit,wf_generated_request_id=None):
     if child_data is None:
         child_data = []
+        wf_generated_request_id=wf_generated_request_id
     site_url = frappe.utils.get_url()
     logo_of_company = site_url + "/files/Final-logo-ezyforms-removebg-preview.png"
     if child_table_data is None:
@@ -759,7 +773,7 @@ def json_structure_call_for_html_view(json_obj: list, form_name: str, child_data
         logo_of_company = site_url + company_logo
   
     html_output = Template(template_str).render(
-        data=structered_data, form_name=form_name, child_data=child_data, child_table_data=child_table_data,company_logo=logo_of_company,site_url=site_url,business_unit=business_unit
+        data=structered_data, form_name=form_name, child_data=child_data, child_table_data=child_table_data,company_logo=logo_of_company,site_url=site_url,business_unit=business_unit,wf_generated_request_id=wf_generated_request_id
     )
     
     return html_output
@@ -905,7 +919,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
 
                         # Store labels for each child table
                         labels[child_table_name] = [field["label"] for field in child_table_fields]
-                html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_short_name,child_table_data=labels,child_data=None,business_unit=business_unit)
+                html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_short_name,child_table_data=labels,child_data=None,business_unit=business_unit,wf_generated_request_id=wf_generated_request_id)
             random_number = randint(111, 999)
  
             pdf_filename = f"{form_short_name}_{random_number}  .pdf"
@@ -942,6 +956,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                     if field.get("fieldtype") != "Attach" or ("approved_by" in field.get("fieldname", "").lower())
                         ]
                 user_doc = frappe.get_doc(form_short_name, name).as_dict()
+                wf_generated_request_id = frappe.get_value(form_short_name,name,"wf_generated_request_id")
                 data_list ={}
                 for iteration in json_object:
                     if "value" in iteration:
@@ -961,8 +976,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                             {field_labels.get(field, field): record.get(field) for field in field_names}
                             for record in child_table_records
                         ]
-                        
-                html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_short_name,child_data=data_list,child_table_data=None,business_unit=business_unit)
+                html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_short_name,child_data=data_list,child_table_data=None,business_unit=business_unit,wf_generated_request_id=wf_generated_request_id)
                 
             random_number = randint(111, 999)
     
