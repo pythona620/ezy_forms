@@ -911,11 +911,11 @@
                                     <!-- Edit/Add buttons -->
                                     <div class="mb-2">
                                       <button class="btn btn-light btn-sm mx-2"
-                                        @click="afterImmediateEdit(blockIndex, sectionIndex, table.tableName, table.description)">
+                                        @click="afterImmediateEdit(blockIndex, sectionIndex, table.tableName)">
                                         {{ editMode[table.tableName] ? 'Save' : 'Edit' }}
                                       </button>
                                       <button class="btn btn-light btn-sm" v-if="editMode[table.tableName]"
-                                        @click="afterImmediateEditaddNewFieldedit(blockIndex, sectionIndex, table.tableName,table.description)">
+                                        @click="afterImmediateEditaddNewFieldedit(blockIndex, sectionIndex, table.tableName)">
                                         Add More Field
                                       </button>
                                     </div>
@@ -1558,6 +1558,7 @@ const addChildTable = (blockIndex, sectionIndex) => {
     idx: newIndex,
     reqd: false,
     as_a_block: '',
+    description:'false',
     columns: [
       {
         label: "",
@@ -1641,7 +1642,7 @@ const ensureArrayPath = (blockIndex, sectionIndex, key) => {
 
 const formatTableName = (tableName) => {
   return tableName
-    ? tableName.trim().toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, "")
+    ? tableName.trim().replace(/\s+/g, "_").replace(/[^a-zA-Z0-9_]/g, "")
     : "";
 };
 
@@ -1665,7 +1666,7 @@ const processFields = (blockIndex, sectionIndex, tableIndex) => {
     as_a_block: table.as_a_block === 1 ? 'true' : 'false',
   };
 
-  // console.log(data);
+  console.log(data);
   // ensureArrayPath(blockIndex, sectionIndex, 'afterCreated');
   // table.newTable = false
 
@@ -1728,7 +1729,7 @@ const afterImmediateEditdeleteRow = (blockIndex, sectionIndex, tableName, index)
 };
 
 
-const afterImmediateEditaddNewFieldedit = (blockIndex, sectionIndex, tableName,description) => {
+const afterImmediateEditaddNewFieldedit = (blockIndex, sectionIndex, tableName) => {
   const section = blockArr[blockIndex].sections[sectionIndex];
   const table = section.afterCreated.find((t) => t.tableName === tableName);
   if (!table) return;
@@ -1742,14 +1743,16 @@ const afterImmediateEditaddNewFieldedit = (blockIndex, sectionIndex, tableName,d
     label: "",
     value: "",
     isNew: true,
-    description:description
+
   });
 };
 
 const afterdata = ref([])
-const afterImmediateEdit = (blockIndex, sectionIndex, tableName, description) => {
+const afterImmediateEdit = (blockIndex, sectionIndex, tableName) => {
+
   const section = blockArr[blockIndex].sections[sectionIndex];
   const table = section.afterCreated.find((t) => t.tableName === tableName);
+  console.log('table',table)
   if (!table) return;
 
   if (editMode[tableName]) {
@@ -1773,7 +1776,7 @@ const afterImmediateEdit = (blockIndex, sectionIndex, tableName, description) =>
     const formData = {
       form_short_name: tableName,
       fields: allFields,
-      as_a_block: description
+      as_a_block: table.description
     };
 
     axiosInstance

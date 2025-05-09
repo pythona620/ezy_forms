@@ -86,7 +86,7 @@ export function extractFieldsWithBreaks(data) {
           // });
 
           // Actual table field
-          const tableFieldname = getUniqueFieldname(convertLabelToFieldName(table.label), fieldnameTracker);
+          const tableFieldname = getUniqueFieldname(table.label, fieldnameTracker);
           result.push({
             description: table.description || "Table",
             fieldname: tableFieldname,
