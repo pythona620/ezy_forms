@@ -415,7 +415,12 @@
                                                                                 class="form-control font-12"
                                                                                 v-model="row[field.fieldname]" />
                                                                         </template>
-
+                                                                        <template v-if="field.fieldtype === 'Int'">
+                                                                            <input type="Number"
+                                                                                class="form-control font-12"
+                                                                                :title="row[field.fieldname]"
+                                                                                v-model="row[field.fieldname]" />
+                                                                        </template>
                                                                         <template v-if="field.fieldtype === 'Datetime'">
                                                                             <input type="datetime-local"
                                                                                 :title="row[field.fieldname]"

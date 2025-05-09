@@ -224,8 +224,6 @@ template_str = """
             flex: 1;
         }
           .field textarea {
-            
-                
             padding: 0px 5px;
             background: transparent;
             flex: 1;
@@ -644,12 +642,15 @@ template_str = """
                                             {% set value = field['values'] %}
                                             {% set char_count = value | length %}
                                             {% set newline_count = value.count('\n') %}
-                                            {% set estimated_lines = (char_count // 60) + 1 + newline_count %}
-                                            {% set height = estimated_lines * 24 %}
+                                            {% set est_line_length = 60 %}
+                                            {% set wrapped_lines = (char_count // est_line_length) %}
+                                            {% set estimated_lines = wrapped_lines + newline_count + 1 %}
+                                            {% set line_height = 18 %}
+                                            {% set height = estimated_lines * line_height %}
                                             <textarea
                                                 id="{{ field.fieldname }}"
                                                 name="{{ field.fieldname }}"
-                                                style="height: {{ height }}px; border:none;"
+                                                style="height: {{ height }}px; border: none; width: 100%;"
                                             >{{ value }}</textarea>
                                         {% elif field.fieldtype == 'Date' %}
                                             <input type="text" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}" class="date-input" placeholder="__/__/____">

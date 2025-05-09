@@ -844,11 +844,24 @@
                                   </div>
 
                                 </section>
-                                <div>
+                                <div >
                                   <div v-for="(table, tableIndex) in section.afterCreated" :key="tableIndex"
-                                    class="childTable">
+                                    class="childTable dynamicColumn m-0 p-2 ">
                                     <h5 class="font-13">{{ table.tableName }}</h5>
+                                    <div
+                                                        v-if="editMode[table.tableName]"
+                                                        class=" d-flex align-items-center gap-2">
+                                                        <div class="d-flex align-items-center">
 
+                                                          <input class="font-12" v-model="table.description"
+                                                            true-value="true" false-value="fasle"
+                                                            placeholder="Field Name" type="checkbox" />
+                                                        </div>
+                                                        <div>
+                                                          <label for="mandatory" class="font-12 m-0 fw-light">Show as
+                                                            Blocks</label>
+                                                        </div>
+                                                      </div>
 
                                     <table class="table table-bordered rounded-table">
                                       <thead>
@@ -898,11 +911,11 @@
                                     <!-- Edit/Add buttons -->
                                     <div class="mb-2">
                                       <button class="btn btn-light btn-sm mx-2"
-                                        @click="afterImmediateEdit(blockIndex, sectionIndex, table.tableName)">
+                                        @click="afterImmediateEdit(blockIndex, sectionIndex, table.tableName, table.description)">
                                         {{ editMode[table.tableName] ? 'Save' : 'Edit' }}
                                       </button>
                                       <button class="btn btn-light btn-sm" v-if="editMode[table.tableName]"
-                                        @click="afterImmediateEditaddNewFieldedit(blockIndex, sectionIndex, table.tableName)">
+                                        @click="afterImmediateEditaddNewFieldedit(blockIndex, sectionIndex, table.tableName,table.description)">
                                         Add More Field
                                       </button>
                                     </div>
@@ -1634,7 +1647,6 @@ const formatTableName = (tableName) => {
 
 const processFields = (blockIndex, sectionIndex, tableIndex) => {
   const hasErrors = isEmptyFieldType(blockIndex, sectionIndex, tableIndex);
-
   if (hasErrors) {
     toast.error("Please fix validation errors before creating the table", {
       transition: "zoom",
@@ -1644,7 +1656,8 @@ const processFields = (blockIndex, sectionIndex, tableIndex) => {
 
   const table = blockArr[blockIndex].sections[sectionIndex].childTables[tableIndex];
   const section = blockArr[blockIndex].sections[sectionIndex];
-
+  
+  table.newTable = false
   const data = {
     form_short_name: formatTableName(table.tableName),
     fields: table.columns,
@@ -1671,7 +1684,7 @@ const processFields = (blockIndex, sectionIndex, tableIndex) => {
 
         // // Save original table to afterCreated
         section.afterCreated[tableIndex] = table;
-        table.newTable = false
+        
         blockArr[blockIndex].sections[sectionIndex].childTables[tableIndex] = []
 
         toast.success("Table created successfully!", {
@@ -1715,7 +1728,7 @@ const afterImmediateEditdeleteRow = (blockIndex, sectionIndex, tableName, index)
 };
 
 
-const afterImmediateEditaddNewFieldedit = (blockIndex, sectionIndex, tableName) => {
+const afterImmediateEditaddNewFieldedit = (blockIndex, sectionIndex, tableName,description) => {
   const section = blockArr[blockIndex].sections[sectionIndex];
   const table = section.afterCreated.find((t) => t.tableName === tableName);
   if (!table) return;
@@ -1729,11 +1742,12 @@ const afterImmediateEditaddNewFieldedit = (blockIndex, sectionIndex, tableName) 
     label: "",
     value: "",
     isNew: true,
+    description:description
   });
 };
 
 const afterdata = ref([])
-const afterImmediateEdit = (blockIndex, sectionIndex, tableName) => {
+const afterImmediateEdit = (blockIndex, sectionIndex, tableName, description) => {
   const section = blockArr[blockIndex].sections[sectionIndex];
   const table = section.afterCreated.find((t) => t.tableName === tableName);
   if (!table) return;
@@ -1759,6 +1773,7 @@ const afterImmediateEdit = (blockIndex, sectionIndex, tableName) => {
     const formData = {
       form_short_name: tableName,
       fields: allFields,
+      as_a_block: description
     };
 
     axiosInstance
@@ -3059,7 +3074,7 @@ const isPreviewVisible = computed(() => {
 });
 //spaces removed version
 function handleInputChange(event, fieldType) {
-  let inputValue = event.target.value.trim().replace(/\s+/g, "");
+  let inputValue = event.target.value.trim();  // ✅ only trims start and end
 
   // Check if the first character is a number
   if (/^\d/.test(inputValue)) {
@@ -3072,7 +3087,7 @@ function handleInputChange(event, fieldType) {
   }
 
   // Check for special characters (allow only letters and numbers)
-  if (/[^a-zA-Z0-9&]/.test(inputValue)) {
+  if (/[^a-zA-Z0-9& ]/.test(inputValue)) {  // ✅ allow spaces inside
     if (fieldType === "form_name") {
       formNameError.value = "Special characters are not allowed";
     } else if (fieldType === "form_short_name") {
@@ -3088,7 +3103,10 @@ function handleInputChange(event, fieldType) {
   }
 
   // Set filter based on fieldType
-  const filters = [[fieldType, "like", `%${inputValue}%`]];
+  const filters = [
+    [fieldType, "like", `%${inputValue}%`],
+    ["business_unit", "like", `%${filterObj.value.business_unit}%`],
+  ];
   const queryParams = {
     fields: JSON.stringify(["*"]),
     filters: JSON.stringify(filters),
@@ -3101,27 +3119,27 @@ function handleInputChange(event, fieldType) {
     .then((res) => {
       ezyFormsData.value = res.data;
 
-      // Check for duplicates
+      // Check for duplicates (ignore spaces when comparing)
       if (fieldType === "form_name") {
         formNameError.value =
           inputValue &&
-            ezyFormsData.value.some(
-              (item) =>
-                item.form_name &&
-                item.form_name.replace(/\s+/g, "").toLowerCase() ===
-                inputValue.toLowerCase()
-            )
+          ezyFormsData.value.some(
+            (item) =>
+              item.form_name &&
+              item.form_name.replace(/\s+/g, "").toLowerCase() ===
+                inputValue.replace(/\s+/g, "").toLowerCase()
+          )
             ? "Name already exists"
             : "";
       } else if (fieldType === "form_short_name") {
         formShortNameError.value =
           inputValue &&
-            ezyFormsData.value.some(
-              (item) =>
-                item.form_short_name &&
-                item.form_short_name.replace(/\s+/g, "").toLowerCase() ===
-                inputValue.toLowerCase()
-            )
+          ezyFormsData.value.some(
+            (item) =>
+              item.form_short_name &&
+              item.form_short_name.replace(/\s+/g, "").toLowerCase() ===
+                inputValue.replace(/\s+/g, "").toLowerCase()
+          )
             ? "Short name already exists"
             : "";
       }
@@ -3132,6 +3150,7 @@ function handleInputChange(event, fieldType) {
       else if (fieldType === "form_short_name") formShortNameError.value = "";
     });
 }
+
 
 const getRowSuffix = (index) => {
   if (index === 0) {
