@@ -488,7 +488,7 @@ function inLineFiltersData(searchedData) {
       if (key === 'form_status' || key === 'enable') return; // Skip since we already handled it above
 
       if (value) {
-        filterObj.value.filters.push(key, "like", `%${value}%`);
+        filterObj.value.filters.push([key, "like", `%${value}%`]);
       }
     });
 
@@ -511,7 +511,7 @@ function fetchDepartmentDetails(id, data) {
     filters.push(["owner_of_the_form", "=", props.id]);
   }
   if (data) {
-    filters.push(data)
+    filters.push(...data)
   }
 
   const queryParams = {

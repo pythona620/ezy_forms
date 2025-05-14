@@ -590,7 +590,8 @@ function inLineFiltersData(searchedData) {
             const key = header.td_key;
 
             if (searchedData[key]) {
-                filterObj.value.filters.push(key, "like", `%${searchedData[key]}%`);
+                // Push as an array of 3 items
+                filterObj.value.filters.push([key, "like", `%${searchedData[key]}%`]);
             }
         });
 
@@ -615,7 +616,8 @@ function receivedForMe(data) {
     ["name","in", viewlist.value]
   ];
   if (data) {
-    filters.push(data);
+    filters.push(...data);
+    console.log(data);
   }
 
   const queryParams = {
