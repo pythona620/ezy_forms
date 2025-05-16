@@ -206,6 +206,7 @@ template_str = """
             font-weight:600;
             
         }
+        
         .block_input{
               border: none;
             outline: none;
@@ -238,6 +239,9 @@ template_str = """
             margin-left: 5px;
             border: 1px solid #000;
         }
+        .field-textarea {
+                display: block;
+            }
           .header-container{
               display: flex;
                justify-content: space-between;
@@ -550,7 +554,7 @@ template_str = """
                                 {% endif %}
                                 {% for field in column.fields %}
                                
-                                    <div class="field">
+                                    <div class="field field-textarea">
                                         <label for="{{ field.fieldname }}">{{ field.label }}:</label>
 
                                         {% if field.fieldtype in ['Check', 'radio'] %}
@@ -639,19 +643,19 @@ template_str = """
                                         {% elif field.fieldtype == 'Color' %}
                                             <input type="color" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
                                         {% elif field.fieldtype == 'Text' %}
-                                            {% set value = field['values'] %}
+                                            {% set value = field['values'].strip() %}
                                             {% set char_count = value | length %}
-                                            {% set newline_count = value.count('\n') %}
+                                            {% set newline_count = value.count('\n') + 1 %}
                                             {% set est_line_length = 60 %}
-                                            {% set wrapped_lines = (char_count // est_line_length) %}
-                                            {% set estimated_lines = wrapped_lines + newline_count + 1 %}
-                                            {% set line_height = 18 %}
-                                            {% set height = estimated_lines * line_height %}
-                                            <textarea
-                                                id="{{ field.fieldname }}"
-                                                name="{{ field.fieldname }}"
-                                                style="height: {{ height }}px; border: none; width: 100%;"
-                                            >{{ value }}</textarea>
+                                            {% set wrapped_lines = (char_count // est_line_length) + 1 %}
+                                            {% set total_lines = [wrapped_lines, newline_count] | max %}
+                                            {% set line_height = 20 %}
+                                            {% set height = total_lines * line_height %}
+                                                <textarea
+                                                    id="{{ field.fieldname }}"
+                                                    name="{{ field.fieldname }}"
+                                                    style="height: {{ height }}px; border: none; padding: 0; margin: 0; line-height: 1.2; width: 100%;"
+                                                >{{ value }}</textarea>
                                         {% elif field.fieldtype == 'Date' %}
                                             <input type="text" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}" class="date-input" placeholder="__/__/____">
                                         {% elif field.fieldtype == 'Datetime' %}

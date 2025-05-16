@@ -146,7 +146,7 @@
                               class="position-relative d-inline-block"
                               :class="props.readonlyFor === 'true' ? ' border-bottom-0' : ''">
                               <!-- Unique key per block -->
-                              <template v-if="isImageFile(file)">
+                              <template v-if="isImageFile(file) && field.value ">
                                 <img :src="file" class="img-thumbnail mt-2 cursor-pointer border-0 border-bottom-0"
                                   @click="openFile(file)" style="max-width: 100px; max-height: 100px"
                                   @mouseover="handleMouseOver(blockIndex + '-' + fieldIndex, i)"

@@ -31,7 +31,7 @@
                                                     <span class="font-12">{{ field.label }}</span>
                                                     <span class="ms-1 text-danger">{{
                                                         field.reqd === 1 ? "*" : ""
-                                                    }}</span>
+                                                        }}</span>
                                                 </label>
                                             </div>
 
@@ -39,7 +39,7 @@
                                                 field.fieldtype === 'Select' ||
                                                 field.fieldtype === 'Table MultiSelect'
                                             ">
-                                                <select :multiple="field.fieldtype === 'Table MultiSelect'"
+                                                <!-- <select :multiple="field.fieldtype === 'Table MultiSelect'"
                                                     :value="field.value" @change="
                                                         (event) =>
                                                             logFieldValue(
@@ -55,7 +55,15 @@
                                                         :key="index" :value="option">
                                                         {{ option }}
                                                     </option>
-                                                </select>
+                                                </select> -->
+                                                <Multiselect :multiple="field.fieldtype === 'Table MultiSelect'"
+                                                    :maxlength="getMaxLength(field)"
+                                                    :options="field.options?.split('\n') || []"
+                                                    :modelValue="field.value" placeholder="Select"
+                                                    @update:modelValue="(val) => handleSelectChange(val, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+                                                    class="font-11 multiselect" />
+
+
                                             </template>
 
                                             <template v-else-if="
@@ -159,7 +167,7 @@
                                             </template>
 
                                             <template v-else-if="field.fieldtype == 'Datetime'">
-                                                <input type="datetime-local" :value="field.value"
+                                                <input type="datetime-local" :value="field.value" :max="today"
                                                     @click="forceOpenCalendar" ref="datetimeInput"
                                                     :placeholder="'Enter ' + field.label" :name="'field-' +
                                                         sectionIndex +
@@ -239,27 +247,25 @@
                                                 <component v-if="
                                                     field.fieldtype !== 'Datetime' && field.fieldtype !== 'Text'
                                                 " :is="getFieldComponent(field.fieldtype)" :value="field.value"
-                                                    :maxlength="field.fieldtype === 'Phone' ? '10' : '140'" :Type="field.fieldtype === 'Color'
-                                                        ? 'color'
-                                                        : field.fieldtype === 'Int'
-                                                            ? 'number'
-                                                            : field.fieldtype" :name="'field-' +
-                                                                sectionIndex +
-                                                                '-' +
-                                                                columnIndex +
-                                                                '-' +
-                                                                fieldIndex
-                                                                " @change="
-                                                                    (event) =>
-                                                                        logFieldValue(
-                                                                            event,
-                                                                            blockIndex,
-                                                                            sectionIndex,
-                                                                            rowIndex,
-                                                                            columnIndex,
-                                                                            fieldIndex
-                                                                        )
-                                                                " class="form-control previewInputHeight font-10">
+                                                    :max="currentdate" @click="forceOpenCalendar"
+                                                    :maxlength="getMaxLength(field)"
+                                                    :type="getInputType(field.fieldtype)" :name="'field-' +
+                                                        sectionIndex +
+                                                        '-' +
+                                                        columnIndex +
+                                                        '-' +
+                                                        fieldIndex
+                                                        " @change="
+                                                            (event) =>
+                                                                logFieldValue(
+                                                                    event,
+                                                                    blockIndex,
+                                                                    sectionIndex,
+                                                                    rowIndex,
+                                                                    columnIndex,
+                                                                    fieldIndex
+                                                                )
+                                                        " class="form-control previewInputHeight font-10">
                                                 </component>
                                             </template>
                                             <div v-if="
@@ -285,7 +291,7 @@
                                                     class="mt-3">
                                                     <div v-if="tableIndex === field.options">
                                                         <div>
-                                                            <span class="font-13 text-secondary fw-bold">{{
+                                                            <span class="font-13 text-secondary fw-medium">{{
                                                                 tableIndex.replace(/_/g, " ") }}</span>
                                                         </div>
 
@@ -303,7 +309,7 @@
                                                             class="border p-3 mb-3 rounded bg-light-subtle">
                                                             <div
                                                                 class="d-flex justify-content-between align-items-center mb-2">
-                                                                <strong>Block {{ rowIndex + 1 }}</strong>
+                                                                <span>Block {{ rowIndex + 1 }}</span>
                                                                 <span class="text-danger cursor-pointer"
                                                                     @click="removeRow(tableIndex, rowIndex)">
                                                                     <i class="bi bi-x-lg"></i>
@@ -315,9 +321,9 @@
                                                                 <div class="col-6"
                                                                     v-for="fieldItem in table.slice((i - 1) * 2, i * 2)"
                                                                     :key="fieldItem.fieldname">
-                                                                    <label class="font-12 fw-semibold">{{
+                                                                    <label class="font-12 fw-medium">{{
                                                                         fieldItem.label
-                                                                        }}</label>
+                                                                    }}</label>
 
                                                                     <input v-if="fieldItem.fieldtype === 'Data'"
                                                                         :title="row[fieldItem.fieldname]" type="text"
@@ -326,8 +332,8 @@
                                                                         v-model="row[fieldItem.fieldname]" />
 
                                                                     <input v-else-if="fieldItem.fieldtype === 'Date'"
-                                                                        :title="row[fieldItem.fieldname]" type="date"
-                                                                        class="form-control font-12"
+                                                                        :max="today" :title="row[fieldItem.fieldname]"
+                                                                        type="date" class="form-control font-12"
                                                                         v-model="row[fieldItem.fieldname]" />
 
                                                                     <input
@@ -336,6 +342,14 @@
                                                                         type="datetime-local"
                                                                         class="form-control font-12"
                                                                         v-model="row[fieldItem.fieldname]" />
+                                                                    <!-- <template v-else-if="fieldItem.fieldtype === 'Data' && row[fieldItem.fieldname] === 'Type of Manpower'">
+                                                                            <Multiselect :multiple="field.fieldtype === 'Table MultiSelect'"
+                                                    :maxlength="getMaxLength(field)"
+                                                    :options="field.options?.split('\n') || []"
+                                                    :modelValue="field.value" placeholder="Select"
+                                                    @update:modelValue="(val) => handleSelectChange(val, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+                                                    class="font-11 multiselect" />
+                                                                        </template> -->
 
                                                                     <input v-else-if="fieldItem.fieldtype === 'Attach'"
                                                                         type="file" class="form-control font-12"
@@ -348,7 +362,7 @@
                                                         <!-- Add Block Button -->
                                                         <div class="text-center">
                                                             <button
-                                                                class="btn btn-outline-light text-secondary addRow-btn  btn-sm font-12"
+                                                                class="btn btn-outline-light text-secondary addRow-btn fw-medium btn-sm font-12"
                                                                 @click="addRow(tableIndex)">
                                                                 Add Block
                                                             </button>
@@ -365,16 +379,16 @@
                                                     class="mt-3">
                                                     <div v-if="tableIndex === field.options">
                                                         <div>
-                                                            <span class="font-13 text-secondary fw-bold">{{
+                                                            <span class="font-13 text-secondary ">{{
                                                                 tableIndex.replace(/_/g, " ")
-                                                            }}</span>
+                                                                }}</span>
                                                         </div>
-                                                        <table class="table  rounded-table" border="1"
-                                                            width="100%">
+                                                        <table class="table  rounded-table" border="1" width="100%">
                                                             <thead>
-                                                                <tr class=" font-12 text-secondary">
-                                                                    <th class=" text-center">#</th>
-                                                                    <th class=" text-center" v-for="field in table" :key="field.fieldname">
+                                                                <tr class=" font-12 text-secondary fw-lighter">
+                                                                    <th class="fw-medium text-center">#</th>
+                                                                    <th class=" fw-medium text-center" v-for="field in table"
+                                                                        :key="field.fieldname">
                                                                         {{ field.label }}
                                                                     </th>
                                                                     <th></th>
@@ -388,20 +402,23 @@
                                                                         <div
                                                                             class="d-flex bg-white py-3 flex-column align-items-center">
                                                                             <i class="bi bi-card-list fs-3 mb-2"></i>
-                                                                            <span class=" font-13 text-secondary">No Data</span>
+                                                                            <span class=" font-13 text-secondary">No
+                                                                                Data</span>
                                                                         </div>
                                                                     </td>
                                                                 </tr>
-                                                                <tr v-for="(row, rowIndex) in tableRows[tableIndex]"
+                                                                <tr class=" position-relative"
+                                                                    v-for="(row, rowIndex) in tableRows[tableIndex]"
                                                                     :key="rowIndex">
                                                                     <td style="text-align: center;">{{ rowIndex + 1 }}
                                                                     </td>
                                                                     <td v-for="field in table" :key="field.fieldname"
-                                                                        :title="row[field.fieldname]" :style="{
-                                                                            width: row[field.fieldname] ? Math.max(row[field.fieldname].length * 10, 100) + 'px' : 'auto'
-                                                                        }">
+                                                                        :title="row[field.fieldname]"
+                                                                        :style="field.label !== 'Type of Manpower' ? { width: row[field.fieldname] ? Math.max(row[field.fieldname].length * 10, 100) + 'px' : 'auto' } : {}">
 
-                                                                        <template v-if="field.fieldtype === 'Data'">
+
+                                                                        <template
+                                                                            v-if="field.fieldtype === 'Data' && field.label !== 'Type of Manpower'">
                                                                             <input type="text"
                                                                                 :maxlength="field.fieldtype === 'Phone' ? '10' : '140'"
                                                                                 class="form-control font-12"
@@ -409,8 +426,19 @@
                                                                                 v-model="row[field.fieldname]" />
                                                                         </template>
 
+                                                                        <template v-if="field.fieldtype === 'Select'">
+                                                                            <div>
+                                                                                <Multiselect
+                                                                                    :multiple="field.fieldtype === 'Table MultiSelect'"
+                                                                                    :options="field.options?.split('\n') || []"
+                                                                                    :model-value="row[field.fieldname]"
+                                                                                    placeholder="Select"
+                                                                                    @update:model-value="val => row[field.fieldname] = val"
+                                                                                    class="font-11 multiselect" />
+                                                                            </div>
+                                                                        </template>
                                                                         <template v-if="field.fieldtype === 'Date'">
-                                                                            <input type="date"
+                                                                            <input type="date" :max="today"
                                                                                 :title="row[field.fieldname]"
                                                                                 class="form-control font-12"
                                                                                 v-model="row[field.fieldname]" />
@@ -448,7 +476,7 @@
                                                                         class="text-center text-muted">
 
                                                                         <button
-                                                                            class="btn btn-outline-light text-secondary fw-bold addRow-btn btn-sm font-12"
+                                                                            class="btn btn-outline-light text-secondary fw-medium addRow-btn btn-sm font-12"
                                                                             @click="addRow(tableIndex)">Add Row</button>
                                                                     </td>
 
@@ -456,8 +484,9 @@
                                                             </tbody>
                                                         </table>
 
-                                                        <span v-if="field.description !== tableIndex && field.description !== 'True' && field.description !== 'false'"
-                                                            class="font-11"><span class="fw-semibold">Description:
+                                                        <span
+                                                            v-if="field.description !== tableIndex && field.description !== 'True' && field.description !== 'false'"
+                                                            class="font-11"><span class="fw-semibold">
                                                             </span>{{
                                                                 field.description }}</span>
                                                     </div>
@@ -482,6 +511,8 @@ import { computed, defineProps, onMounted, ref, watch } from "vue";
 import axiosInstance from "../shared/services/interceptor";
 import { apis, doctypes } from "../shared/apiurls";
 import { reactive } from "vue";
+import Multiselect from "vue-multiselect";
+import "@vueform/multiselect/themes/default.css";
 
 const props = defineProps({
     blockArr: {
@@ -506,7 +537,30 @@ const currentFieldOptions = ref('');
 const tableRows = reactive({});
 
 
+// const today = new Date().toISOString().split('T')[0]; 
+const now = new Date();
+const pad = (n) => n.toString().padStart(2, '0');
 
+// Format: YYYY-MM-DDTHH:MM (suitable for datetime-local input)
+const today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+const currentdate = new Date().toISOString().split('T')[0];
+
+const getMaxLength = (field) => {
+    const label = field.label?.toLowerCase() || '';
+
+    if (label.includes('expense code')) return 6;
+    if (label.includes('cost center')) return 4;
+    if (field.fieldtype?.toLowerCase() === 'phone') return 10;
+
+    return 140;
+};
+const getInputType = (type) => {
+    const t = type?.toLowerCase();
+    if (t === 'color') return 'color';
+    if (t === 'int') return 'number';
+    return t;
+};
+// Format as 'YYYY-MM-DDTHH:MM'
 watch(
     () => tableRows,
     () => {
@@ -544,7 +598,26 @@ const removeRow = (tableIndex, rowIndex) => {
     tableRows[tableIndex].splice(rowIndex, 1);
 };
 
+const handleSelectChange = (
+    value,
+    blockIndex,
+    sectionIndex,
+    rowIndex,
+    columnIndex,
+    fieldIndex
+) => {
+    const field =
+        props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
+            columnIndex
+        ].fields[fieldIndex];
 
+    field.value = value;
+
+    const mockEvent = { target: { value: field.value } };
+    console.log(mockEvent, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex);
+
+    logFieldValue(mockEvent, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex);
+};
 
 
 const activeSearch = reactive({
@@ -802,7 +875,13 @@ const logFieldValue = (
         props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
             columnIndex
         ].fields[fieldIndex];
-    // console.log(field.fieldtype);
+    console.log(eve,
+        blockIndex,
+        sectionIndex,
+        rowIndex,
+        columnIndex,
+        fieldIndex);
+
 
     if (eve.target?.files && eve.target.files.length > 0) {
         let files = Array.from(eve.target.files); // Convert FileList to an array
@@ -839,6 +918,7 @@ const logFieldValue = (
         }
     } else if (eve.target?.type === "Select") {
         field.value = eve.target.value;
+        console.log(field.value);
     } else if (eve.target?.type === "Table MultiSelect") {
         field.value = Array.from(
             eve.target.selectedOptions,
@@ -880,6 +960,7 @@ const logFieldValue = (
         }
 
         field["value"] = inputValue;
+        console.log(inputValue);
     }
     validateField(
         field,
@@ -962,7 +1043,181 @@ const uploadFile = (file, field, index) => {
 //     }
 // };
 </script>
-<style setup>
+<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
+
+<style lang="scss" scoped>
+.multiselect {
+    height: 30px !important;
+    font-size: 12px !important;
+    width: 100% !important;
+}
+
+.multiselect {
+    margin: initial;
+    font-size: 11px !important;
+    border: 1px solid #e2e2e2 !important;
+    height: 30px !important;
+    border-radius: 8px !important;
+
+    .multiselect-wrapper {
+        height: 30px !important;
+    }
+
+    .multiselect-dropdown {
+        .multiselect-options {
+            font-size: 11px;
+
+            li.multiselect-option span {
+                font-size: 11px !important;
+            }
+
+            li.multiselect-option .is-selected {
+                background-color: grey !important;
+                font-size: 11px;
+            }
+        }
+    }
+}
+
+.multiselect__option span {
+    font-size: 11px;
+    /* Change this value to whatever size you need */
+}
+
+.multiselect .multiselect-option {
+    font-size: 11px;
+}
+
+.multiselect .multiselect-wrapper {
+    min-height: 30px !important;
+}
+
+.multiselect .multiselect--above {
+    min-height: 30px !important;
+}
+
+.multiselect__tags {
+    min-height: 30px !important;
+    padding: 0px;
+}
+
+.multiselect .multiselect__tags {
+    min-height: 30px !important;
+    font-size: 11px !important;
+}
+
+.multiselect .multiselect__placeholder {
+    font-size: 11px;
+}
+
+.multiselect .multiselect__single {
+    font-size: 11px;
+}
+
+.multiselect .multiselect__tags .multiselect__placeholder {
+    font-size: 11px;
+}
+
+::v-deep(.multiselect__placeholder) {
+    color: #adadad;
+    display: inline-block;
+    margin-bottom: 10px;
+    padding-top: 2px;
+    font-size: 12px !important;
+}
+
+
+::v-deep(.multiselect__select) {
+    position: absolute;
+    width: 40px;
+    height: 32px;
+    right: 1px;
+    /* top: 1px; */
+    padding: 4px 8px;
+    text-align: center;
+    transition: transform 0.2s ease;
+}
+
+::v-deep(.multiselect) {
+    height: 32px !important;
+    min-height: 32px !important;
+}
+
+::v-deep(.multiselect__single) {
+    font-size: 12px;
+    color: #212529 !important;
+}
+
+::v-deep(.multiselect__tags) {
+    height: 32px !important;
+    min-height: 32px !important;
+    display: flex;
+    align-items: center;
+    border: none;
+}
+
+::v-deep(.multiselect-wrapper),
+::v-deep(.multiselect-search) {
+    height: 32px !important;
+    min-height: 32px !important;
+    line-height: 32px !important;
+    display: flex;
+    align-items: center;
+}
+
+::v-deep(.multiselect-search) {
+    height: 32px !important;
+    min-height: 32px !important;
+    display: flex;
+    align-items: center;
+}
+
+::v-deep(.multiselect-wrapper) {
+    height: 32px !important;
+    min-height: 32px !important;
+    line-height: 32px !important;
+}
+
+::v-deep(.multiselect-search) {
+    position: absolute;
+    width: 40px !important;
+    height: 32px !important;
+    right: 1px;
+
+    padding: 4px 8px;
+    text-align: center;
+    transition: transform 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+::v-deep(.multiselect__element:hover) {
+    background-color: #eeeeee !important;
+}
+
+::v-deep(.multiselect__element:hover .multiselect__option) {
+    background-color: #eeeeee !important;
+    color: #000 !important;
+}
+
+::v-deep(.multiselect__tags) {
+    color: #000 !important;
+    font-size: 12px !important;
+}
+
+
+::v-deep(.multiselect__element:hover .multiselect__option--highlight) {
+    background-color: #eeeeee !important;
+    color: #000 !important;
+}
+
+/* Additional specific rule for `.multiselect__option` when hovered */
+::v-deep(.multiselect__option:hover) {
+    background-color: #eeeeee !important;
+    color: #000 !important;
+}
+
 .addRow-btn {
     border: 1px dotted #cccccc;
 }
@@ -1006,16 +1261,19 @@ input::-webkit-input-placeholder {
 table th {
     color: #6c757d;
 }
+
 .tableRowRemoveBtn {
 
-  border-radius: 50%;
-  padding: 4px;
+    border-radius: 50%;
+    padding: 4px;
 }
+
 .tableRowRemoveBtn:hover {
-  background-color: #cccccc;
-  border-radius: 50%;
-  padding: 4px;
+    background-color: #cccccc;
+    border-radius: 50%;
+    padding: 4px;
 }
+
 .tableRowRemoveBtn i {
     cursor: pointer;
 }
@@ -1023,7 +1281,7 @@ table th {
 .rounded-table {
     border-radius: 10px;
     background-color: #ccc;
-    overflow: hidden;
+    // overflow: hidden;
     /* This ensures child elements respect the border radius */
 }
 </style>
