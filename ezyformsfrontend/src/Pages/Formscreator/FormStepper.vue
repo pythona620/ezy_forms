@@ -781,7 +781,7 @@
                                                   </div> -->
                                                       <div
                                                         v-if="field.fieldtype === 'Table' && (field.label === tableName || field.fieldname === tableName)"
-                                                        class="mb-2">
+                                                        class="mb-2 mt-3">
                                                         <button class="btn btn-light btn-sm mx-2 "
                                                           @click="toggleEdit(tableName, field.description)">
                                                           {{ editMode[tableName] ? 'Save' : 'Edit' }}
