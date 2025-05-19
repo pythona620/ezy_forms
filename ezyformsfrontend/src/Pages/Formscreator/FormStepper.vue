@@ -12,7 +12,7 @@
             <!-- <ButtonComp class="font-13 rounded-2" name="Save as Draft"></ButtonComp> -->
             <button v-if="activeStep === 2 && blockArr.length" :disabled="hasErrors || isNextDisabled"
               :style="{ cursor: hasErrors ? 'not-allowed' : 'pointer' }" type="butoon" class="btn font-13 btn-light"
-              @click="saveFormData('draft')">
+              @click="saveFormData('Draft')">
               <i class="bi bi-bookmark-check-fill"></i> Save As Draft
             </button>
           </div>
@@ -343,6 +343,7 @@
                                 </div>
 
                                 <button v-if="
+                                canShowDesignationButton(blockIndex) &&
                                   paramId != undefined &&
                                   paramId != null &&
                                   paramId != 'new' &&
@@ -1188,7 +1189,7 @@
             <div>
               <!-- :disabled="ViewOnlyReportee"  -->
               <input type="checkbox" id="selectAll" v-model="isAllSelected" class="me-2 mt-1 form-check-input" />
-              <label for="selectAll fw-bold m-0" class="SelectallDesignation form-check-label">Select all</label>
+              <label for="selectAll" class="SelectallDesignation fw-bold m-0 form-check-label">Select all</label>
             </div>
 
           </div>
@@ -2375,6 +2376,27 @@ function initializeDesignationValue(blockIndex) {
 //   designationValue.value = [...rolesForBlock]; // Reset designationValue to match only roles for the current block
 // }
 
+function canShowDesignationButton(blockIndex) {
+  if (paramId === undefined || paramId === null || paramId === 'new') return false;
+ 
+  const roles = getWorkflowSetup(blockIndex).roles;
+ 
+  // First approver (blockIndex = 0)
+  if (blockIndex === 0) {
+    return roles.length === 0;
+  }
+ 
+  // For subsequent approvers: check if previous approver has a role
+  const prevRoles = getWorkflowSetup(blockIndex - 1).roles;
+  return (
+    prevRoles.length > 0 &&
+    prevRoles[0] !== null &&
+    prevRoles[0] !== '' &&
+    roles.length === 0
+  );
+}
+ 
+
 const AddDesignCanvas = (idx) => {
   ViewOnlyReportee.value = false;
   // console.log(idx, "---clicked idex", selectedBlockIndex.value);
@@ -2690,11 +2712,13 @@ function formData(status) {
               autoClose: 2000,
               transition: "zoom",
               onClose: () => {
+                let toPath = localStorage.getItem('routepath');
                 if (status === "save") {
-                  let toPath = localStorage.getItem('routepath');
                   router.push({ path: toPath });
-                } else if (status === "draft") {
-                  router.push({ name: "Draft" });
+                } 
+                else if (status === "Draft") {
+                  router.push({ path: toPath });
+
                 }
               },
             });
@@ -3156,7 +3180,14 @@ const isPreviewVisible = computed(() => {
 //spaces removed version
 function handleInputChange(event, fieldType) {
   let inputValue = event.target.value.trim();  // ✅ only trims start and end
-
+ if (!inputValue) {
+    if (fieldType === "form_name") {
+      formNameError.value = "Input cannot be empty or only spaces";
+    } else if (fieldType === "form_short_name") {
+      formShortNameError.value = "Input cannot be empty or only spaces";
+    }
+    return;
+  }
   // Check if the first character is a number
   if (/^\d/.test(inputValue)) {
     if (fieldType === "form_short_name") {
