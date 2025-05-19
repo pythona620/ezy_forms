@@ -292,7 +292,7 @@
                                                     class="mt-3">
                                                     <div v-if="tableIndex === field.options">
                                                         <div>
-                                                            <span class="font-13 text-secondary fw-medium">{{
+                                                            <span class="font-13  fw-medium">{{
                                                                 tableIndex.replace(/_/g, " ") }}</span>
                                                         </div>
 
@@ -386,7 +386,7 @@
                                                         </div>
                                                         <table class="table  rounded-table" border="1" width="100%">
                                                             <thead>
-                                                                <tr class=" font-12 text-secondary fw-lighter">
+                                                                <tr class=" font-12 fw-lighter">
                                                                     <th class="fw-medium text-center">#</th>
                                                                     <th class=" fw-medium text-center" v-for="field in table"
                                                                         :key="field.fieldname">

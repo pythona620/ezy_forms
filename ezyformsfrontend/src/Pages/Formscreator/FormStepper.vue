@@ -10,7 +10,7 @@
           </div>
           <div>
             <!-- <ButtonComp class="font-13 rounded-2" name="Save as Draft"></ButtonComp> -->
-            <button v-if="activeStep === 2 && blockArr.length" :disabled="hasErrors || isNextDisabled"
+            <button v-if="activeStep === 2 && blockArr.length && !$route.query.id" :disabled="hasErrors || isNextDisabled "
               :style="{ cursor: hasErrors ? 'not-allowed' : 'pointer' }" type="butoon" class="btn font-13 btn-light"
               @click="saveFormData('Draft')">
               <i class="bi bi-bookmark-check-fill"></i> Save As Draft
@@ -1063,13 +1063,13 @@
                                 </div>
                               </div>
 
-                            </div>
-
                             <div class="d-flex justify-content-center align-items-center py-2 add-section-btn">
-                              <button class="btn btn-light border font-12" @click="addSection(blockIndex)">
+                              <button class="btn btn-light border font-12" @click="addSection(blockIndex, sectionIndex)">
                                 <i class="bi bi-plus-circle me-1 fs-6"></i> Add Section
                               </button>
                             </div>
+                            </div>
+
                             <div v-if="
                               blockIndex === 0
                             " class="m-2">
@@ -2398,6 +2398,7 @@ function canShowDesignationButton(blockIndex) {
  
 
 const AddDesignCanvas = (idx) => {
+  searchDesignation.value = ''
   ViewOnlyReportee.value = false;
   // console.log(idx, "---clicked idex", selectedBlockIndex.value);
   if (filterObj.value.accessible_departments.length) {
@@ -2880,11 +2881,38 @@ function delete_assigned_roles(roles, blockIndex) {
 }
 
 // Function to add a new section with a default column
-const addSection = (blockIndex) => {
-  let sectionIndex = blockArr[blockIndex].sections.length;
-  // let rowIndex = blockArr[blockIndex].sections;
+// const addSection = (blockIndex) => {
+//   let sectionIndex = blockArr[blockIndex].sections.length;
+//   // let rowIndex = blockArr[blockIndex].sections;
 
-  blockArr[blockIndex].sections.push({
+//   blockArr[blockIndex].sections.push({
+//     label: "",
+//     parent: `${businessUnit.value.value}-${filterObj.value.form_short_name}`,
+//     rows: [
+//       {
+//         label: `row_0_${sectionIndex}_${blockIndex}`,
+//         columns: [
+//           {
+//             label: "",
+//             fields: [
+//               {
+//                 label: "",
+//                 fieldtype: "",
+//                 // value: ref(""), // Keeping the value as a ref for reactivity
+//                 options: "",
+//                 reqd: false,
+//               },
+//             ], // Initialize with an empty fields array
+//           },
+//         ],
+//       },
+//     ],
+//   });
+
+// };
+
+const addSection = (blockIndex, sectionIndex) => {
+  const newSection = {
     label: "",
     parent: `${businessUnit.value.value}-${filterObj.value.form_short_name}`,
     rows: [
@@ -2897,17 +2925,17 @@ const addSection = (blockIndex) => {
               {
                 label: "",
                 fieldtype: "",
-                // value: ref(""), // Keeping the value as a ref for reactivity
                 options: "",
                 reqd: false,
               },
-            ], // Initialize with an empty fields array
+            ],
           },
         ],
       },
     ],
-  });
-
+  };
+ 
+  blockArr[blockIndex].sections.splice(sectionIndex + 1, 0, newSection);
 };
 // Function to remove a section
 const removeSection = (blockIndex, sectionIndex) => {
@@ -3807,12 +3835,12 @@ select {
   font-size: 12px !important;
 }
 
-.add-section-btn {
-  position: sticky;
-  bottom: 80px;
-  z-index: 1;
-  background-color: #ffffff;
-}
+// .add-section-btn {
+//   position: sticky;
+//   bottom: 80px;
+//   z-index: 1;
+//   // background-color: #ffffff; 
+// }
 
 .add-block-btn-div {
   position: sticky;

@@ -169,9 +169,9 @@
                     @click="downloadPdf"><i class="bi bi-arrow-down-circle fw-bold px-1"></i>Download
                   </button>
                    <!-- <button type="button" class="btn btn-outline-light  CreateDepartments " data-bs-toggle="modal"
-            data-bs-target="#pdfView" @click="viewasPdfView">
-            preview
-          </button> -->
+                    data-bs-target="#pdfView" @click="viewasPdfView">
+                    Preview
+                  </button> -->
                   
                 </div>
               </div>
@@ -755,7 +755,7 @@ function ViewOnlyRe() {
 
 }
 function viewasPdfView() {
-  console.log(doctypeForm.value, tableData.value);
+
   ApprovePDF.value = !ApprovePDF.value;
   const dataObj = {
     form_short_name: tableData.value.doctype_name,
