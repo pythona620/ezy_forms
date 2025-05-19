@@ -377,7 +377,7 @@
                                             <div v-else>
                                                 <div v-for="(table, tableIndex) in props.tableHeaders" :key="tableIndex"
                                                     class="mt-3">
-                                                    <div v-if="tableIndex === field.options">
+                                                    <div v-if="tableIndex === field.options || tableIndex === field.fieldname">
                                                         <div>
                                                             <span class="font-13 text-secondary ">{{
                                                                 tableIndex.replace(/_/g, " ")
@@ -438,7 +438,7 @@
                                                                             </div>
                                                                         </template>
                                                                         <template v-if="field.fieldtype === 'Date'">
-                                                                            <input type="date" :max="today"
+                                                                            <input type="date"  :min="past"
                                                                                 :title="row[field.fieldname]"
                                                                                 class="form-control font-12"
                                                                                 v-model="row[field.fieldname]" />
@@ -536,7 +536,7 @@ const linkSearchResults = ref([]);
 const currentFieldOptions = ref('');
 const tableRows = reactive({});
 
-
+const past = new Date().toISOString().split('T')[0]
 // const today = new Date().toISOString().split('T')[0]; 
 const now = new Date();
 const pad = (n) => n.toString().padStart(2, '0');

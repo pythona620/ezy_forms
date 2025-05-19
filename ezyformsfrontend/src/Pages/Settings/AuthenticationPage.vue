@@ -80,12 +80,12 @@ const handleToggle = (index) => {
             : "Are you sure you want to disable Two Factor Authentication?";
     } else if (index === 1) {
         confirmMessage.value = isChecked
-            ? "Are you sure you want to enable Send Form As an Attachment Through Mail?"
-            : "Are you sure you want to disable Send Form As an Attachment Through Mail?";
+            ? "Are you sure you want to enable Send Form As an Attachment Through E-Mail?"
+            : "Are you sure you want to disable Send Form As an Attachment Through E-Mail?";
     } else if (index === 2) {
         confirmMessage.value = isChecked
-            ? "Are you sure you want to enable Welcome Mail Configuration?"
-            : "Are you sure you want to disable Welcome Mail Configuration?";
+            ? "Are you sure you want to enable E-Mail Configuration?"
+            : "Are you sure you want to disable E-Mail Configuration?";
     }
 
     // Show the modal

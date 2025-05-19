@@ -316,7 +316,7 @@
                     <div v-if="blockIndex === 0 && field.fieldtype === 'Table'">
                       <div v-if="props.childHeaders && Object.keys(props.childHeaders).length">
                         <div v-for="(headers, tableName) in props.childHeaders" :key="tableName">
-                          <div v-if="field.options === tableName">
+                          <div v-if="field.options === tableName || field.fieldname === tableName">
                             <div>
                               <span class="font-13 fw-bold tablename">{{ tableName.replace(/_/g, " ") }}</span>
                             </div>

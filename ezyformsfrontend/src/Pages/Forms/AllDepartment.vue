@@ -7,12 +7,12 @@
             {{ id === 'allforms' ? 'All Forms' : id }}
           </h1>
           <p class="m-0 font-11 pt-1">
-            {{ totalRecords }} forms available
+            {{ totalRecords }} Forms Available
           </p>
         </div>
         <div v-if="userDesigination.includes('IT')" class="d-flex align-items-center gap-2">
           <div class="d-flex align-items-center">
-            <ButtonComp class="buttoncomp" @click="formCreation()" name="Create form"></ButtonComp>
+            <ButtonComp class="buttoncomp" @click="formCreation()" name="Create Form"></ButtonComp>
           </div>
         </div>
 
@@ -122,10 +122,10 @@ import { useRoute } from 'vue-router';
 import ButtonComp from '../../Components/ButtonComp.vue';
 const totalRecords = ref(0);
 const tableheaders = ref([
-  { th: "Form name", td_key: "form_name" },
+  { th: "Form Name", td_key: "form_name" },
   { th: "Form Short Code", td_key: "form_short_name" },
-  { th: "Form category", td_key: "form_category" },
-  { th: "Accessible departments", td_key: "accessible_departments" },
+  { th: "Form Category", td_key: "form_category" },
+  { th: "Accessible Departments", td_key: "accessible_departments" },
   { th: "Status", td_key: "form_status" },
   { th: "Form Status", td_key: "enable" },
 

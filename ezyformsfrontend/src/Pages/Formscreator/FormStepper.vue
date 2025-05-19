@@ -413,7 +413,7 @@
                                   <div class="d-flex justify-content-between align-items-center">
                                     <label class="rownames">{{
                                       getRowSuffix(rowIndex)
-                                      }}</label>
+                                    }}</label>
                                     <div>
                                       <button v-if="row.columns.length < 3"
                                         class="btn btn-light bg-transparent border-0 font-12" @click="
@@ -673,7 +673,7 @@
                                               placeholder="Enter field description"></textarea>
 
                                             <small v-if="field.error" class="text-danger font-10">{{ field.error
-                                              }}</small>
+                                            }}</small>
                                           </div>
                                           <div class="childtableShow">
                                             <div>
@@ -715,74 +715,63 @@
                                                           </tr>
                                                         </thead>
                                                         <!-- :draggable="editMode[tableName]" -->
-                                                        <tbody
-          @dragover.prevent="onDragOver"
-          @drop="onDrop($event, table)"
-        >
-          <tr
-            v-for="(field, index) in table"
-            :key="index"
-            
-            
-            @dragstart="onDragStart(index)"
-            @dragend="onDragEnd"
-            :class="{ dragging: draggingIndex === index }"
-          >
-            <td>{{ index + 1 }}</td>
+                                                        <tbody @dragover.prevent="onDragOver"
+                                                          @drop="onDrop($event, table)">
+                                                          <tr v-for="(field, index) in table" :key="index"
+                                                            @dragstart="onDragStart(index)" @dragend="onDragEnd"
+                                                            :class="{ dragging: draggingIndex === index }">
+                                                            <td>{{ index + 1 }}</td>
 
-            <!-- Label Input -->
-            <td v-if="editMode[tableName]">
-              <input
-                v-model="field.label"
-                placeholder="Field Label"
-                class="form-control"
-                :class="{ 'border-1 border-danger': invalidFields[tableName]?.includes(index) }"
-              />
-              <span v-if="invalidFields[tableName]?.includes(index)" class="font-11 text-danger">Label required**</span>
-            </td>
-            <td v-else>{{ field.label }}</td>
+                                                            <!-- Label Input -->
+                                                            <td v-if="editMode[tableName]">
+                                                              <input v-model="field.label" placeholder="Field Label"
+                                                                class="form-control"
+                                                                :class="{ 'border-1 border-danger': invalidFields[tableName]?.includes(index) }" />
+                                                              <span v-if="invalidFields[tableName]?.includes(index)"
+                                                                class="font-11 text-danger">Label required**</span>
+                                                            </td>
+                                                            <td v-else>{{ field.label }}</td>
 
-            <!-- Field Type Select -->
-            <td v-if="editMode[tableName]">
-              <div class="d-flex gap-1">
-                <select
-                  v-model="field.fieldtype"
-                  class="form-select form-select-sm"
-                  :class="{ 'border-1 border-danger': invalidFields[tableName]?.includes(index) }"
-                >
-                  <option value="">Select Type</option>
-                  <option v-for="option in childfield" :key="option.type" :value="option.type">
-                    {{ option.label }}
-                  </option>
-                </select>
-                <button
-                  class="btn btn-light btn-sm"
-                  @click="deleteRow(tableName, index)"
-                >
-                  <i class="bi bi-x-lg"></i>
-                </button>
-              </div>
-                <div v-if="
-                                              [
-                                                'Select'
-                                              ].includes(field.fieldtype)
-                                            ">
-                                              <label class="font-12 fw-light" for="options">Enter Options:</label>
-                                              <textarea id="options" placeholder="Enter your Options"
-                                                v-model="field.options"
-                                                class="form-control shadow-none mb-1 font-12"></textarea>
-                                              <small v-if="
-                                                !field.options ||
-                                                field.options.trim() === ''
-                                              " class="text-danger font-10">
-                                                Options are required for this field type.
-                                              </small>
-                                            </div>
-              <span v-if="invalidFields[tableName]?.includes(index)" class="font-11 text-danger">Type required**</span>
-            </td>
-            <td v-else>{{ field.fieldtype }}</td>
-          </tr>
-        </tbody>
+                                                            <!-- Field Type Select -->
+                                                            <td v-if="editMode[tableName]">
+                                                              <div class="d-flex gap-1">
+                                                                <select v-model="field.fieldtype"
+                                                                  class="form-select form-select-sm"
+                                                                  :class="{ 'border-1 border-danger': invalidFields[tableName]?.includes(index) }">
+                                                                  <option value="">Select Type</option>
+                                                                  <option v-for="option in childfield"
+                                                                    :key="option.type" :value="option.type">
+                                                                    {{ option.label }}
+                                                                  </option>
+                                                                </select>
+                                                                <button class="btn btn-light btn-sm"
+                                                                  @click="deleteRow(tableName, index)">
+                                                                  <i class="bi bi-x-lg"></i>
+                                                                </button>
+                                                              </div>
+                                                              <div v-if="
+                                                                [
+                                                                  'Select'
+                                                                ].includes(field.fieldtype)
+                                                              ">
+                                                                <label class="font-12 fw-light" for="options">Enter
+                                                                  Options:</label>
+                                                                <textarea id="options" placeholder="Enter your Options"
+                                                                  v-model="field.options"
+                                                                  class="form-control shadow-none mb-1 font-12"></textarea>
+                                                                <small v-if="
+                                                                  !field.options ||
+                                                                  field.options.trim() === ''
+                                                                " class="text-danger font-10">
+                                                                  Options are required for this field type.
+                                                                </small>
+                                                              </div>
+                                                              <span v-if="invalidFields[tableName]?.includes(index)"
+                                                                class="font-11 text-danger">Type required**</span>
+                                                            </td>
+                                                            <td v-else>{{ field.fieldtype }}</td>
+                                                          </tr>
+                                                        </tbody>
                                                       </table>
 
                                                       <!-- Show error message below the table if any fields are invalid -->
@@ -790,7 +779,7 @@
                                                     Please fill in the required fields in the highlighted rows.
                                                   </div> -->
                                                       <div
-                                                        v-if="field.fieldtype === 'Table' && field.label === tableName"
+                                                        v-if="field.fieldtype === 'Table' && (field.label === tableName || field.fieldname === tableName)"
                                                         class="mb-2">
                                                         <button class="btn btn-light btn-sm mx-2 "
                                                           @click="toggleEdit(tableName, field.description)">
@@ -867,24 +856,21 @@
                                   </div>
 
                                 </section>
-                                <div >
+                                <div>
                                   <div v-for="(table, tableIndex) in section.afterCreated" :key="tableIndex"
                                     class="childTable dynamicColumn m-0 p-2 ">
                                     <h5 class="font-13">{{ table.tableName }}</h5>
-                                    <div
-                                                        v-if="editMode[table.tableName]"
-                                                        class=" d-flex align-items-center gap-2">
-                                                        <div class="d-flex align-items-center">
+                                    <div v-if="editMode[table.tableName]" class=" d-flex align-items-center gap-2">
+                                      <div class="d-flex align-items-center">
 
-                                                          <input class="font-12" v-model="table.description"
-                                                            true-value="true" false-value="fasle"
-                                                            placeholder="Field Name" type="checkbox" />
-                                                        </div>
-                                                        <div>
-                                                          <label for="mandatory" class="font-12 m-0 fw-light">Show as
-                                                            Blocks</label>
-                                                        </div>
-                                                      </div>
+                                        <input class="font-12" v-model="table.description" true-value="true"
+                                          false-value="fasle" placeholder="Field Name" type="checkbox" />
+                                      </div>
+                                      <div>
+                                        <label for="mandatory" class="font-12 m-0 fw-light">Show as
+                                          Blocks</label>
+                                      </div>
+                                    </div>
 
                                     <table class="table table-bordered rounded-table">
                                       <thead>
@@ -922,7 +908,7 @@
                                                 <i class="bi bi-x-lg"></i>
                                               </button>
                                             </div>
-                                             <div v-if="
+                                            <div v-if="
                                               [
                                                 'Select'
                                               ].includes(field.fieldtype)
@@ -1035,21 +1021,21 @@
                                             </option>
                                           </select>
                                           <div v-if="
-                                              [
-                                                'Select'
-                                              ].includes(field.fieldtype)
-                                            ">
-                                              <label class="font-12 fw-light" for="options">Enter Options:</label>
-                                              <textarea id="options" placeholder="Enter your Options"
-                                                v-model="field.options"
-                                                class="form-control shadow-none mb-1 font-12"></textarea>
-                                              <small v-if="
-                                                !field.options ||
-                                                field.options.trim() === ''
-                                              " class="text-danger font-10">
-                                                Options are required for this field type.
-                                              </small>
-                                            </div>
+                                            [
+                                              'Select'
+                                            ].includes(field.fieldtype)
+                                          ">
+                                            <label class="font-12 fw-light" for="options">Enter Options:</label>
+                                            <textarea id="options" placeholder="Enter your Options"
+                                              v-model="field.options"
+                                              class="form-control shadow-none mb-1 font-12"></textarea>
+                                            <small v-if="
+                                              !field.options ||
+                                              field.options.trim() === ''
+                                            " class="text-danger font-10">
+                                              Options are required for this field type.
+                                            </small>
+                                          </div>
                                           <div
                                             v-if="fieldErrors[`${blockIndex}-${sectionIndex}-${tableIndex}`]?.columns?.[fieldIndex]?.fieldtype"
                                             class="text-danger font-12">
@@ -1613,7 +1599,7 @@ const addChildTable = (blockIndex, sectionIndex) => {
     idx: newIndex,
     reqd: false,
     as_a_block: '',
-    description:'false',
+    description: 'false',
     columns: [
       {
         label: "",
@@ -1622,13 +1608,13 @@ const addChildTable = (blockIndex, sectionIndex) => {
         idx: 0,
         reqd: false,
         ...(columns.fieldtype === "Select" && columns.options
-      ? { options: columns.options ? `\n${columns.options}`  : `\n${''}` }
-      : {})
+          ? { options: columns.options ? `\n${columns.options}` : `\n${''}` }
+          : {})
       }
     ], // this holds the fields inside the table
     newTable: true
   });
-  
+
 };
 
 const addFieldToTable = (blockIndex, sectionIndex, tableIndex) => {
@@ -1645,7 +1631,7 @@ const addFieldToTable = (blockIndex, sectionIndex, tableIndex) => {
     fieldtype: "",
     idx: table.columns.length,
     reqd: false,
-       ...(table.columns.fieldtype === "Select" && table.columns.options
+    ...(table.columns.fieldtype === "Select" && table.columns.options
       ? { options: table.columns.options ? `\n${table.columns.options}` : `\n${''}` }
       : {}
     )
@@ -1720,7 +1706,7 @@ const processFields = (blockIndex, sectionIndex, tableIndex) => {
 
   const table = blockArr[blockIndex].sections[sectionIndex].childTables[tableIndex];
   const section = blockArr[blockIndex].sections[sectionIndex];
-  
+
   table.newTable = false
   const data = {
     form_short_name: formatTableName(table.tableName),
@@ -1748,7 +1734,7 @@ const processFields = (blockIndex, sectionIndex, tableIndex) => {
 
         // // Save original table to afterCreated
         section.afterCreated[tableIndex] = table;
-        
+
         blockArr[blockIndex].sections[sectionIndex].childTables[tableIndex] = []
 
         toast.success("Table created successfully!", {
@@ -1815,7 +1801,7 @@ const afterImmediateEdit = (blockIndex, sectionIndex, tableName) => {
 
   const section = blockArr[blockIndex].sections[sectionIndex];
   const table = section.afterCreated.find((t) => t.tableName === tableName);
-  console.log('table',table)
+  console.log('table', table)
   if (!table) return;
 
   if (editMode[tableName]) {
@@ -2073,7 +2059,7 @@ const toggleEdit = (tableName, description) => {
 
 
     // Process all fields (both old and new)
-    let allFields = childtableHeaders.value[tableName].map(({ isNew, ...rest}, index) => ({
+    let allFields = childtableHeaders.value[tableName].map(({ isNew, ...rest }, index) => ({
       ...rest,
       idx: index + 1, // Ensure `idx` is correctly set in sequential order
     }));
@@ -2161,7 +2147,7 @@ const childfield = [
   {
     label: "Select",
     type: "Select",
-  }, 
+  },
   {
     label: "Attach",
     type: "Attach",
@@ -2569,15 +2555,15 @@ function SetPrintFormatFn() {
   console.log(is_landscape.value);
   const data = {};
 
-// Add print_format if it has a value
-if (printFormatID.value) {
-  data.print_format = printFormatID.value;
-}
+  // Add print_format if it has a value
+  if (printFormatID.value) {
+    data.print_format = printFormatID.value;
+  }
 
-// Add is_landscape if it has a value (you can also check === true if needed)
-if (is_landscape.value !== undefined && is_landscape.value !== null) {
-  data.is_landscape = is_landscape.value;
-}
+  // Add is_landscape if it has a value (you can also check === true if needed)
+  if (is_landscape.value !== undefined && is_landscape.value !== null) {
+    data.is_landscape = is_landscape.value;
+  }
 
   axiosInstance
     .put(apis.resource + doctypes.EzyFormDefinitions + `/${route.query.id}`, data)
@@ -2844,7 +2830,7 @@ const removeBlock = (blockIndex) => {
   }
   // if(rolesToDelete.length){
 
-    
+
   //   delete_assigned_roles(rolesToDelete, blockIndex);
   // }
 
@@ -3218,23 +3204,23 @@ function handleInputChange(event, fieldType) {
       if (fieldType === "form_name") {
         formNameError.value =
           inputValue &&
-          ezyFormsData.value.some(
-            (item) =>
-              item.form_name &&
-              item.form_name.replace(/\s+/g, "").toLowerCase() ===
+            ezyFormsData.value.some(
+              (item) =>
+                item.form_name &&
+                item.form_name.replace(/\s+/g, "").toLowerCase() ===
                 inputValue.replace(/\s+/g, "").toLowerCase()
-          )
+            )
             ? "Name already exists"
             : "";
       } else if (fieldType === "form_short_name") {
         formShortNameError.value =
           inputValue &&
-          ezyFormsData.value.some(
-            (item) =>
-              item.form_short_name &&
-              item.form_short_name.replace(/\s+/g, "").toLowerCase() ===
+            ezyFormsData.value.some(
+              (item) =>
+                item.form_short_name &&
+                item.form_short_name.replace(/\s+/g, "").toLowerCase() ===
                 inputValue.replace(/\s+/g, "").toLowerCase()
-          )
+            )
             ? "Short name already exists"
             : "";
       }
