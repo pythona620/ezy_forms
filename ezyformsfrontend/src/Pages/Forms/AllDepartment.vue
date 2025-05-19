@@ -467,16 +467,16 @@ function inLineFiltersData(searchedData) {
 
     // Loop through the table headers and build dynamic filters
     if (searchedData.form_status === 'Active') {
-      filterObj.value.filters.push("form_status", "like", "Created");
+      filterObj.value.filters.push(["form_status", "like", "Created"]);
     }
     if (searchedData.form_status === 'Retired') {
-      filterObj.value.filters.push("form_status", "like", "Draft");
+      filterObj.value.filters.push(["form_status", "like", "Draft"]);
     }
     console.log(searchedData.enable);
     if (searchedData.enable === 'Enabled') {
-      filterObj.value.filters.push("enable", "=", 1);
+      filterObj.value.filters.push(["enable", "=", 1]);
     } else if (searchedData.enable === 'Disabled') {
-      filterObj.value.filters.push("enable", "=", 0);
+      filterObj.value.filters.push(["enable", "=", 0]);
     }
 
 
