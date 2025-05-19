@@ -168,6 +168,11 @@
                     class="btn btn-light font-11 fw-bold h-0 text-decoration-underline" type="button"
                     @click="downloadPdf"><i class="bi bi-arrow-down-circle fw-bold px-1"></i>Download
                   </button>
+                   <!-- <button type="button" class="btn btn-outline-light  CreateDepartments " data-bs-toggle="modal"
+            data-bs-target="#pdfView" @click="viewasPdfView">
+            preview
+          </button> -->
+                  
                 </div>
               </div>
               <div class="activity_height">
@@ -199,7 +204,34 @@
               </div>
             </div> -->
             </div>
-
+<div class="modal fade" id="pdfView" tabindex="-1" aria-labelledby="pdfViewLabel" aria-hidden="true">
+      <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+          <div class="modal-header py-2 d-block bg-dark text-white">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h5 class="m-0 text-white font-13" id="exampleModalLabel">
+                  PDF format
+                </h5>
+              </div>
+              <div class="">
+                <button button="button" class="btn btn-dark text-white font-13" @click="downloadPdf">
+                  Download Pdf<span class="ms-2"><i class="bi bi-download"></i></span>
+                </button>
+                <button type="button" class="btn btn-dark text-white font-13" @click="closemodal"
+                  data-bs-dismiss="modal">
+                  Close <i class="bi bi-x"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="modal-body pdf-body">
+            <div v-html="pdfPreview"></div>
+          </div>
+          <div class="modal-footer"></div>
+        </div>
+      </div>
+    </div>
 
             <!-- <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
 
@@ -722,31 +754,31 @@ function ViewOnlyRe() {
     });
 
 }
-// function viewasPdfView() {
-//   console.log(doctypeForm.value, tableData.value);
-//   ApprovePDF.value = !ApprovePDF.value;
-//   const dataObj = {
-//     form_short_name: tableData.value.doctype_name,
-//     name: doctypeForm.value.name,
-//     business_unit: businessUnit.value
+function viewasPdfView() {
+  console.log(doctypeForm.value, tableData.value);
+  ApprovePDF.value = !ApprovePDF.value;
+  const dataObj = {
+    form_short_name: tableData.value.doctype_name,
+    name: doctypeForm.value.name,
+    business_unit: business_unit.value
 
-//   };
+  };
 
-//   axiosInstance
-//     .post(apis.preview_dynamic_form, dataObj)
-//     .then((response) => {
-//       pdfPreview.value = response.message;
-//       if (response.message) {
+  axiosInstance
+    .post(apis.preview_dynamic_form, dataObj)
+    .then((response) => {
+      pdfPreview.value = response.message;
+      if (response.message) {
 
-//       }
+      }
 
 
 
-//     })
-//     .catch((error) => {
-//       console.error("Error fetching data:", error);
-//     });
-// }
+    })
+    .catch((error) => {
+      console.error("Error fetching data:", error);
+    });
+}
 
 
 function downloadPdf() {

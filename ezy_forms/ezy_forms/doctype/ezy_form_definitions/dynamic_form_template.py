@@ -142,7 +142,7 @@ template_str = """
             font-family: Arial, sans-serif;
             
    
-              # height: 100vh;
+              /* height: 100vh;*/
         }
           .main-body{
               margin: 15px;
@@ -173,8 +173,8 @@ template_str = """
         .section {
             margin: 10px;
             border: 0px solid #ccc;
-               # border-bottom: 1px solid #000;
-            # padding: 15px;
+            /*border-bottom: 1px solid #000;*/
+            /*padding: 15px;*/
             border-radius:3px;
         }
         .section h3 {
@@ -199,11 +199,12 @@ template_str = """
             border: none;
             outline: none;
             padding: 0px 5px;
-               padding-left: 50px ;
+            padding-left: 50px ;
             background: transparent;
             flex: 1;
             border-bottom: 1px solid #cccccc;
             font-weight:600;
+            color:#000;
             
         }
         
@@ -241,17 +242,15 @@ template_str = """
         }
         .field-textarea {
                 display: block;
+               
             }
           .header-container{
-              display: flex;
-               justify-content: space-between;
-              
-              align-items: center;
-               padding: 10px;
-            padding-bottom: 0px;
-              border-bottom: 1px solid #000;
-               # background-color: #f0f0f0;
-               margin: 0px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #000;
+           
+            
           }
             /* Flex container to arrange checkboxes */
             .checkbox-container {
@@ -321,10 +320,9 @@ template_str = """
              display: flex;
              justify-content: center;
              padding: 10px;
-             # background-color: #f0f0f0;
             margin: 0px 10px;
             positon: fixed;
-               bottom: 0px;
+            bottom: 0px;
                left: 0px;
                width: 100%;
                right: 0px;
@@ -359,11 +357,12 @@ template_str = """
               min-width: 200px;
         }
          .header-left{
-             display: flex;
-              justify-content: center;
+            display: flex;
+            justify-content: center;
+            min-width: 400px;
          }
          .header-right{
-             min-width: 200px;
+             min-width: 280px;
          }
          .description-block{
              font-size:12px;
@@ -391,8 +390,8 @@ template_str = """
               
         }
          .requestId strong {
-    margin-right: 8px;  /* adds space between the label and the ID */
-}
+            margin-right: 8px;  /* adds space between the label and the ID */
+        }
         @media print {
             .table, .table th, .table td {
                 border: 1px solid black !important;
@@ -403,7 +402,7 @@ template_str = """
             textarea {
                 border: none;
                 resize: none;
-                overflow: visible !important;
+                
                 white-space: pre-wrap;
             }
             .watermark {
@@ -417,22 +416,35 @@ template_str = """
     </head>
 <body>
 <div class="main-body">
-<div class="watermark">{{business_unit}}</div>
+
+<div class="watermark">{{bu_name}}</div>
 
 <div class="header-container">
+  <div class="header-right">
+    {% set value = letter_head %}
+    {% set char_count = value | length %}
+    {% set newline_count = value.count('\n') %}
+    {% set est_line_length = 100 %}
+    {% set wrapped_lines = (char_count // est_line_length) %}
+    {% set estimated_lines = wrapped_lines + newline_count + 1 %}
+    {% set line_height = 16 %}
+    {% set height = estimated_lines * line_height %}
+
+    {% set lines = value.split('\n') %}
+    <div style="height: {{ height }}px; border: none; width: 100%; margin-bottom: 0px; padding-bottom: 0px; line-height: {{ line_height }}px;">
+        <div style="font-weight: bold;font-size: 15px;">{{ lines[0] }}</div>
+        {% for line in lines[1:] %}
+            <div style="font-size: 13px;">{{ line }}</div>
+        {% endfor %}
+    </div>
+</div>
+
+    <div class="header-left">
+        <h4 style="font-size:20px;">{{ form_name }}</h4>
+    </div>
+    
     <div class="logo-div"> 
-    
-    <img src="{{ company_logo }}" alt="logo" style="height: 70px; width: 200px; margin-bottom:0px">
-    
-    
-     </div>
-  <div class="header-left">
-  
- 
-    <h4>{{ form_name }}</h4>
-  </div>
-     <div class="header-right">
-    
+        <img src="{{ company_logo }}" alt="logo" style="height: 70px; width: 200px; margin-bottom:0px">
      </div>
     
 </div>
@@ -545,7 +557,7 @@ template_str = """
 
                     
 
-                    <div class="row">
+                    <div class="row" style="display: flex; flex-wrap: wrap;">
                         {% for column in row.columns %}
                        
                             <div class="column">
@@ -622,14 +634,6 @@ template_str = """
                                                     {% endfor %}
                                                 </div>
                                             {% endif %}
-
-
-                                                                                            
-
-
-
-
-
                                         {% elif field.fieldtype == 'Attach' %}
                                             {% if field['values'] %}
                                                 <img  id="{{ field.fieldname }}" src="{{ site_url + field['values'] or ''  }}" class="signature-Imge" name="{{ field.fieldname }}">
@@ -642,20 +646,20 @@ template_str = """
                                             <input type="time" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
                                         {% elif field.fieldtype == 'Color' %}
                                             <input type="color" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
-                                        {% elif field.fieldtype == 'Text' %}
-                                            {% set value = field['values'].strip() %}
+                                          {% elif field.fieldtype == 'Text' %}
+                                            {% set value = field['values'] %}
                                             {% set char_count = value | length %}
-                                            {% set newline_count = value.count('\n') + 1 %}
+                                            {% set newline_count = value.count('\n') %}
                                             {% set est_line_length = 60 %}
-                                            {% set wrapped_lines = (char_count // est_line_length) + 1 %}
-                                            {% set total_lines = [wrapped_lines, newline_count] | max %}
-                                            {% set line_height = 20 %}
-                                            {% set height = total_lines * line_height %}
-                                                <textarea
-                                                    id="{{ field.fieldname }}"
-                                                    name="{{ field.fieldname }}"
-                                                    style="height: {{ height }}px; border: none; padding: 0; margin: 0; line-height: 1.2; width: 100%;"
-                                                >{{ value }}</textarea>
+                                            {% set wrapped_lines = (char_count // est_line_length) %}
+                                            {% set estimated_lines = wrapped_lines + newline_count + 1 %}
+                                            {% set line_height = 18 %}
+                                            {% set height = estimated_lines * line_height %}
+                                            <textarea
+                                                id="{{ field.fieldname }}"
+                                                name="{{ field.fieldname }}"
+                                                style="height: {{ height }}px; border: none; width: 100%; font-size:13px;"
+                                            >{{ value }}</textarea>
                                         {% elif field.fieldtype == 'Date' %}
                                             <input type="text" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}" class="date-input" placeholder="__/__/____">
                                         {% elif field.fieldtype == 'Datetime' %}
@@ -668,7 +672,7 @@ template_str = """
                                     </div>
                                          {% if field.description != 'Field' %}
                                             <div class="w-100 description-block mt-1">
-                                                <span class="fw-semibold">Description :</span><br>
+                                               
                                                 <span>{{ field.description | replace('\n', '<br>') | safe }}</span>
                                             </div>
                                         {% endif %}
@@ -754,9 +758,9 @@ template_str = """
 """
     
 def convert_html_to_pdf(html_content, pdf_path,options=None):
+
     try:
         pdfkit.from_string(html_content, pdf_path,options=options)
-    
     except Exception as e:
         frappe.log_error(f"PDF generation failed: {e}")
  
@@ -765,7 +769,7 @@ def json_structure_call_for_html_view(json_obj: list, form_name: str, child_data
         child_data = []
         wf_generated_request_id=wf_generated_request_id
     site_url = frappe.utils.get_url()
-    logo_of_company = site_url + "/files/Final-logo-ezyforms-removebg-preview.png"
+    logo_of_company = site_url + "/files/company.png"
     if child_table_data is None:
         child_table_data = []
     
@@ -773,12 +777,28 @@ def json_structure_call_for_html_view(json_obj: list, form_name: str, child_data
     if structered_data is None:
         structered_data = []  # Ensure it's iterable
  
-    company_logo = frappe.db.get_value("Ezy Business Unit",business_unit,"bu_logo")
+    business_unit = frappe.get_doc("Ezy Business Unit",business_unit)
+    
+    company_logo = business_unit.bu_logo
+    letter_head = ''
+    bu_name =''
+
+    
+    if business_unit.letter_head:
+        letter_head = business_unit.letter_head
+        
     if company_logo:
+        
         logo_of_company = site_url + company_logo
-  
+        
+    if business_unit.water_mark:
+       
+        if business_unit.bu_name:
+            bu_name = business_unit.bu_name
+
+
     html_output = Template(template_str).render(
-        data=structered_data, form_name=form_name, child_data=child_data, child_table_data=child_table_data,company_logo=logo_of_company,site_url=site_url,business_unit=business_unit,wf_generated_request_id=wf_generated_request_id
+        data=structered_data, form_name=form_name, child_data=child_data,letter_head=letter_head, child_table_data=child_table_data,company_logo=logo_of_company,site_url=site_url,bu_name=bu_name,wf_generated_request_id=wf_generated_request_id
     )
     
     return html_output
@@ -928,7 +948,8 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
 
                         # Store labels for each child table
                         labels[child_table_name] = [field["label"] for field in child_table_fields]
-                html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_short_name,child_table_data=labels,child_data=None,business_unit=business_unit,wf_generated_request_id='')
+                form_name = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_name")
+                html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_name,child_table_data=labels,child_data=None,business_unit=business_unit,wf_generated_request_id='')
             random_number = randint(111, 999)
  
             pdf_filename = f"{form_short_name}_{random_number}  .pdf"
@@ -986,7 +1007,8 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                             {field_labels.get(field, field): record.get(field) for field in field_names}
                             for record in child_table_records
                         ]
-                html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_short_name,child_data=data_list,child_table_data=None,business_unit=business_unit,wf_generated_request_id=wf_generated_request_id)
+                form_name = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_name")
+                html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_name,child_data=data_list,child_table_data=None,business_unit=business_unit,wf_generated_request_id=wf_generated_request_id)
                 
             random_number = randint(111, 999)
     

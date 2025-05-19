@@ -167,7 +167,7 @@
                                             </template>
 
                                             <template v-else-if="field.fieldtype == 'Datetime'">
-                                                <input type="datetime-local" :value="field.value" :max="today"
+                                                <input type="datetime-local" :value="field.value"  :min="new Date().toISOString().slice(0, 16)"
                                                     @click="forceOpenCalendar" ref="datetimeInput"
                                                     :placeholder="'Enter ' + field.label" :name="'field-' +
                                                         sectionIndex +
@@ -244,10 +244,11 @@
                                                     '-' +
                                                     fieldIndex
                                                     " class="form-control previewInputHeight"></textarea>
+                                                    <!-- :max="currentdate" -->
                                                 <component v-if="
-                                                    field.fieldtype !== 'Datetime' && field.fieldtype !== 'Text'
-                                                " :is="getFieldComponent(field.fieldtype)" :value="field.value"
-                                                    :max="currentdate" @click="forceOpenCalendar"
+                                                    field.fieldtype !== 'Datetime' && field.fieldtype !== 'Text' 
+                                                " :is="getFieldComponent(field.fieldtype)" :value="field.value" :min="past"
+                                                     @click="forceOpenCalendar"
                                                     :maxlength="getMaxLength(field)"
                                                     :type="getInputType(field.fieldtype)" :name="'field-' +
                                                         sectionIndex +
@@ -331,7 +332,7 @@
                                                                         :maxlength="fieldItem.fieldtype === 'Phone' ? '10' : '140'"
                                                                         v-model="row[fieldItem.fieldname]" />
 
-                                                                    <input v-else-if="fieldItem.fieldtype === 'Date'"
+                                                                    <input v-else-if="fieldItem.fieldtype === 'Date'" :min="past"
                                                                         :max="today" :title="row[fieldItem.fieldname]"
                                                                         type="date" class="form-control font-12"
                                                                         v-model="row[fieldItem.fieldname]" />
