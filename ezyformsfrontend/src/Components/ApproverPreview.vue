@@ -300,7 +300,7 @@
                             :ref="el => setRef(el, sectionIndex, columnIndex, fieldIndex)"
                             @input="adjustHeight(sectionIndex, columnIndex, fieldIndex)" />
 
-                          <template v-if="blockIndex === 0">
+                          <template v-if="blockIndex === 0 && field.fieldtype !== 'Int' && field.fieldtype !== 'Text'">
                             <span style="font-size: 12px;" :class="props.readonlyFor === 'true' || blockIndex < currentLevel
                                 ? 'border-0 image-border-bottom w-50 bg-transparent'
                                 : ''" :value="field.value" :type="field.fieldtype">
@@ -308,7 +308,7 @@
                             </span>
                           </template>
                           <template v-else>
-                            <component v-if="field.fieldtype !== 'Int' && field.fieldtype !== 'Text'" :style="{
+                            <component v-if="blockIndex !== 0 && field.fieldtype !== 'Int' && field.fieldtype !== 'Text'" :style="{
                               width: Math.min(100 + (field.value?.length * 2), 600) + 'px'
                             }" :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'" :is="getFieldComponent(field.fieldtype)"
                               :class="props.readonlyFor === 'true' || blockIndex < currentLevel
@@ -332,7 +332,7 @@
                     </div>
                     <div v-if="field.description !== 'Field' && field.fieldtype !== 'Table'"
                       class="w-100 font-11 description-block mt-1">
-                      <span class="fw-semibold">Description :</span><br>
+                      <!-- <span class="fw-semibold"></span><br> -->
                       <span v-html="field.description.replace(/\n/g, '<br>')"></span>
                     </div>
                     <div v-if="blockIndex === 0 && field.fieldtype === 'Table'">

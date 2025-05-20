@@ -145,9 +145,9 @@ template_str = """
               /* height: 100vh;*/
         }
           .main-body{
-              margin: 15px;
+              margin: 5px;
                border: 1px solid #000;
-               padding: 10px;
+               padding: 15px;
                border-radius: 5px;
           }
          .row {
@@ -158,7 +158,8 @@ template_str = """
 
         .column {
             flex: 1;
-           padding: 0px 3px;
+            padding:0px 2px;
+          
             
         }
        
@@ -172,7 +173,7 @@ template_str = """
             font-size:13px;
         }
         .section {
-            margin: 5px;
+            /*margin: 5px;*/
             border: 0px solid #ccc;
             /*border-bottom: 1px solid #000;*/
             /*padding: 15px;*/
@@ -186,7 +187,7 @@ template_str = """
          .column .columnlabel {
             margin: 5px 0;
             font-size:14px;
-            padding: 0px 10px;
+            padding: 0px 4px;
              font-weight:600;
         }
         .field {
@@ -194,7 +195,7 @@ template_str = """
             align-items: baseline;
             # border-bottom: 1px solid #cccccc;
             padding: 0px ;
-            margin: 5px 10px;
+            margin: 5px 5px;
         }
         .field label {
             font-weight: bold;
@@ -408,11 +409,14 @@ template_str = """
             }
             .table{
                 width: 100% !important;
+                margin:0px 3px;
+            }
+            .column{
+                padding:0px;
             }
             textarea {
                 border: none;
                 resize: none;
-                
                 white-space: pre-wrap;
             }
             .watermark {
@@ -465,7 +469,7 @@ template_str = """
         
             <div class="section">
                 {% if section.label %}
-                    <h3>{{ section.label }}</h3>
+                    <h3 style="padding-left:3px;">{{ section.label }}</h3>
                 {% endif %}
                 
                 {% for row in section.rows | sort(attribute='idx') %}
@@ -475,7 +479,7 @@ template_str = """
 
                             {% if row.description == 'true' %}
                                 {% if table_name in child_data %}
-                                {{ table_name }}
+                                
                                     <h3 class="childtablename">{{ table_name.replace("_", " ").title() }}</h3>
                                     {% if child_data[table_name] %}
                                         {% for child in child_data[table_name] %}
@@ -517,9 +521,9 @@ template_str = """
                             {% else %}
 
                                 {% if table_name in child_data %}
-                                    <h3 class="childtablename">{{ table_name.replace("_", " ").title() }}</h3>
+                                    <h3 class="childtablename" style=margin-left:3px;margin-right:3px;>{{ table_name.replace("_", " ").title() }}</h3>
                                     {% if child_data[table_name] %}
-                                        <table style="width: 100%; margin-bottom:10px; border-collapse: collapse;">
+                                        <table style="width: 100%; margin-bottom:5px; border-collapse: collapse; margin-left:3px;margin-right:3px;">
                                             <thead>
                                                 <tr>
                                                     <th style="border: 1px solid #ccc;width:3%; padding: 8px; background-color: #f2f2f2;">S.no</th>
@@ -544,6 +548,7 @@ template_str = """
                                     {% endif %}
 
                                 {% elif table_name in child_table_data %}
+                                
                                     <h3 class="childtablename">{{ table_name.replace("_", " ").title() }}</h3>
                                     <table style="width: 100%; margin-bottom:10px; border-collapse: collapse;">
                                         <thead>
@@ -563,6 +568,7 @@ template_str = """
                                             </tr>
                                         </tbody>
                                     </table>
+                                   
                                 {% endif %}
                             {% endif %}
 
@@ -644,7 +650,7 @@ template_str = """
                                                     {% for option in options if option %}
                                                         <div class="checkbox-gap">
                                                             <span class="custom-checkbox unchecked"></span>
-                                                           <span style="margin-top:6px; margin-left:4px;"> {{ option }}</span>
+                                                           <span style="margin-top:4px; margin-left:4px;"> {{ option }}</span>
                                                         </div>
                                                     {% endfor %}
                                                 </div>
