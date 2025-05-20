@@ -491,6 +491,13 @@
                                                                                     @dragstart="handleDragStart($event, fieldIndex, 'field', blockIndex, sectionIndex, rowIndex, columnIndex)"
                                                                                     @dragover="handleDragOver"
                                                                                     @drop="handleDrop($event, fieldIndex, 'field', blockIndex, sectionIndex, rowIndex, columnIndex)" -->
+                                                                                    <div
+  v-if="column.fields.length === 0"
+  class="empty-drop-zone"
+  @dragover.prevent
+  @drop="handleFieldDropAtIndex(blockIndex, sectionIndex, rowIndex, columnIndex, 0)"
+>
+</div>
                                         <div v-for="(field, fieldIndex) in column.fields" :key="'field-' + fieldIndex"
                                           @mouseenter="
                                             setHoveredField(
@@ -500,9 +507,20 @@
                                               columnIndex,
                                               fieldIndex
                                             )
-                                            " @mouseleave="resetHoveredField" class="dynamicField m-1">
+                                            " @mouseleave="resetHoveredField" class="dynamicField m-1 draggable-item"
+                                            draggable="true"
+                                            @dragstart="handleDragStart($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+                                        >
+
+                                        <div
+  class="drop-zone"
+  @dragover.prevent
+  @drop="handleFieldDropAtIndex(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+></div>
+
                                           <div v-if="field.fieldtype !== 'Table'"
-                                            class="px-1 dynamic_fied field-border">
+                                            class="px-1 dynamic_fied field-border" @dragover.prevent
+                                            @drop="handleFieldDropAtIndex(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
                                             <div class="d-flex justify-content-between">
                                               <div class="flex-column d-flex">
                                                 <input v-model="field.label" placeholder="Name the field" :class="[
@@ -676,13 +694,15 @@
                                             <small v-if="field.error" class="text-danger font-10">{{ field.error
                                             }}</small>
                                           </div>
+                                          <div
+  class="drop-zone"
+  @dragover.prevent
+  @drop="handleFieldDropAtIndex(blockIndex, sectionIndex, rowIndex, columnIndex, column.fields.length)"
+></div>
                                           <div class="childtableShow">
                                             <div>
                                               <div>
                                                 <div v-if="blockIndex === 0" class="mt-2">
-
-
-
 
                                                   <div v-if="field.fieldtype === 'Table'" class="childTableContainer">
 
@@ -1061,15 +1081,14 @@
                                     </div>
                                   </div>
                                 </div>
-                              </div>
+                            </div>
 
                             <div class="d-flex justify-content-center align-items-center py-2 add-section-btn">
-                              <button class="btn btn-light border font-12" @click="addSection(blockIndex, sectionIndex)">
+                              <button class="btn btn-light border font-12" @click="addSection(blockIndex,sectionIndex)">
                                 <i class="bi bi-plus-circle me-1 fs-6"></i> Add Section
                               </button>
                             </div>
                             </div>
-
                             <div v-if="
                               blockIndex === 0
                             " class="m-2">
@@ -1332,6 +1351,87 @@ watch(
   },
   { immediate: true }
 );
+
+function canShowDesignationButton(blockIndex) {
+  if (paramId === undefined || paramId === null || paramId === 'new') return false;
+
+  const roles = getWorkflowSetup(blockIndex).roles;
+
+  // First approver (blockIndex = 0)
+  if (blockIndex === 0) {
+    return roles.length === 0;
+  }
+
+  // For subsequent approvers: check if previous approver has a role
+  const prevRoles = getWorkflowSetup(blockIndex - 1).roles;
+  return (
+    prevRoles.length > 0 &&
+    prevRoles[0] !== null &&
+    prevRoles[0] !== '' &&
+    roles.length === 0
+  );
+}
+
+
+const draggedField = ref(null);
+
+const handleDragStart = (event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) => {
+  draggedField.value = {
+    blockIndex,
+    sectionIndex,
+    rowIndex,
+    columnIndex,
+    fieldIndex,
+  };
+};
+
+const handleFieldDropAtIndex = (
+  targetBlock,
+  targetSection,
+  targetRow,
+  targetColumn,
+  insertIndex
+) => {
+  if (!draggedField.value) return;
+
+  const {
+    blockIndex: fromBlock,
+    sectionIndex: fromSection,
+    rowIndex: fromRow,
+    columnIndex: fromColumn,
+    fieldIndex: fromFieldIndex,
+  } = draggedField.value;
+
+  // Avoid inserting into same place
+  const isSameLocation =
+    fromBlock === targetBlock &&
+    fromSection === targetSection &&
+    fromRow === targetRow &&
+    fromColumn === targetColumn;
+
+  const fromFields =
+    blockArr[fromBlock].sections[fromSection].rows[fromRow].columns[fromColumn].fields;
+
+  const targetFields =
+    blockArr[targetBlock].sections[targetSection].rows[targetRow].columns[targetColumn].fields;
+
+  // Remove from original position
+  const movedField = fromFields.splice(fromFieldIndex, 1)[0];
+
+  // Adjust insert index if from same array and before insert point
+  if (
+    isSameLocation &&
+    fromColumn === targetColumn &&
+    fromFieldIndex < insertIndex
+  ) {
+    insertIndex -= 1;
+  }
+
+  // Insert at desired index
+  targetFields.splice(insertIndex, 0, movedField);
+
+  draggedField.value = null;
+};
 
 
 // const linkSearchQuery = ref('');
@@ -2376,25 +2476,25 @@ function initializeDesignationValue(blockIndex) {
 //   designationValue.value = [...rolesForBlock]; // Reset designationValue to match only roles for the current block
 // }
 
-function canShowDesignationButton(blockIndex) {
-  if (paramId === undefined || paramId === null || paramId === 'new') return false;
+// function canShowDesignationButton(blockIndex) {
+//   if (paramId === undefined || paramId === null || paramId === 'new') return false;
  
-  const roles = getWorkflowSetup(blockIndex).roles;
+//   const roles = getWorkflowSetup(blockIndex).roles;
  
-  // First approver (blockIndex = 0)
-  if (blockIndex === 0) {
-    return roles.length === 0;
-  }
+//   // First approver (blockIndex = 0)
+//   if (blockIndex === 0) {
+//     return roles.length === 0;
+//   }
  
-  // For subsequent approvers: check if previous approver has a role
-  const prevRoles = getWorkflowSetup(blockIndex - 1).roles;
-  return (
-    prevRoles.length > 0 &&
-    prevRoles[0] !== null &&
-    prevRoles[0] !== '' &&
-    roles.length === 0
-  );
-}
+//   // For subsequent approvers: check if previous approver has a role
+//   const prevRoles = getWorkflowSetup(blockIndex - 1).roles;
+//   return (
+//     prevRoles.length > 0 &&
+//     prevRoles[0] !== null &&
+//     prevRoles[0] !== '' &&
+//     roles.length === 0
+//   );
+// }
  
 
 const AddDesignCanvas = (idx) => {
@@ -2934,7 +3034,6 @@ const addSection = (blockIndex, sectionIndex) => {
       },
     ],
   };
- 
   blockArr[blockIndex].sections.splice(sectionIndex + 1, 0, newSection);
 };
 // Function to remove a section
@@ -3354,6 +3453,16 @@ const hasDuplicates = (array) => new Set(array).size !== array.length;
   background-color: #ccc;
   overflow: hidden;
   /* This ensures child elements respect the border radius */
+}
+.draggable-item {
+  border: 1px dashed #ccc;
+  padding: 10px;
+  margin-bottom: 8px;
+  cursor: grab;
+  background: #f9f9f9;
+}
+.draggable-item:active {
+  cursor: grabbing;
 }
 
 .stepsDiv {
@@ -4047,5 +4156,13 @@ th {
 
 td {
   font-size: 12px;
+}
+
+.empty-drop-zone {
+  border: 2px dashed #bbb;
+  padding: 20px;
+  text-align: center;
+  color: #999;
+  background-color: #f9f9f9;
 }
 </style>
