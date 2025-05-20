@@ -18,8 +18,8 @@
                                 </div>
                                 <div class="mx-3 my-2">
                                     <div v-for="(field, fieldIndex) in column.fields"
-                                        :key="'field-preview-' + fieldIndex">
-                                        <div v-if="field.fieldtype !== 'Table'">
+                                        :key="'field-preview-' + fieldIndex" >
+                                        <div v-if="field.fieldtype !== 'Table'" :class="field.fieldtype === 'Check' ? ' d-flex mt-4 flex-row-reverse justify-content-start gap-3':''">
                                             <div v-if="field.label">
                                                 <label :for="'field-' +
                                                     sectionIndex +
@@ -34,7 +34,7 @@
                                                         }}</span>
                                                 </label>
                                             </div>
-
+ 
                                             <template v-if="
                                                 field.fieldtype === 'Select' ||
                                                 field.fieldtype === 'Table MultiSelect'
@@ -67,7 +67,7 @@
                                             </template>
 
                                             <template v-else-if="
-                                                field.fieldtype === 'Check' ||
+                                                
                                                 field.fieldtype === 'radio' || field.fieldtype === 'Small Text'
                                             ">
                                                 <div class="container-fluid">
@@ -77,7 +77,7 @@
                                                         )" :key="index" :class="{ 'd-none': index === 0 }">
                                                             <div>
                                                                 <input v-if="
-                                                                    field.fieldtype === 'Check' || field.fieldtype === 'Small Text' && index !== 0
+                                                                    field.fieldtype === 'Small Text' && index !== 0
                                                                 " class="form-check-input" type="checkbox"
                                                                     :value="option"
                                                                     :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
@@ -165,7 +165,27 @@
                                                 <!-- File input for uploading -->
 
                                             </template>
-
+                                            <template v-else-if="field.fieldtype == 'Check'">
+                                                <input type="checkbox" :value="field.value" 
+                                                    
+                                                    :placeholder="'Enter ' + field.label" :name="'field-' +
+                                                        sectionIndex +
+                                                        '-' +
+                                                        columnIndex +
+                                                        '-' +
+                                                        fieldIndex
+                                                        " @change="
+                                                            (event) =>
+                                                                logFieldValue(
+                                                                    event,
+                                                                    blockIndex,
+                                                                    sectionIndex,
+                                                                    rowIndex,
+                                                                    columnIndex,
+                                                                    fieldIndex
+                                                                )
+                                                        " class="form-control form-check-input previewInputHeight font-10" />
+                                            </template>
                                             <template v-else-if="field.fieldtype == 'Datetime'">
                                                 <input type="datetime-local" :value="field.value"  :min="new Date().toISOString().slice(0, 16)"
                                                     @click="forceOpenCalendar" ref="datetimeInput"
@@ -897,7 +917,7 @@ const logFieldValue = (
         files.forEach((file) => uploadFile(file, field));
     } else if (eve.target?.type === "checkbox") {
         if (field.fieldtype === "Check") {
-            field.value = eve.target.checked ? eve.target.value : "";
+            field.value = eve.target.checked ? 1 : 0;
         } else if (field.fieldtype === "Small Text") {
             let selectedValues = field.value ? JSON.parse(field.value) : []; // Parse existing values or create an empty array
 

@@ -21,8 +21,8 @@
                   <div v-for="(field, fieldIndex) in column.fields" :key="'field-preview-' + fieldIndex" :class="(props.readonlyFor === 'true' || blockIndex < currentLevel) && field.fieldtype !== 'Small Text' && field.fieldtype !== 'Text'
                     ? (field.label === 'Approved By' ? 'align-items-end' : 'align-items-start')
                     : ''">
-                    <div :class="(props.readonlyFor === 'true' || blockIndex < currentLevel) && field.fieldtype !== 'Small Text' && field.fieldtype !== 'Text'
-                      ? 'd-flex ' + (field.label === 'Approved By' ? 'align-items-end' : 'align-items-start')
+                    <div :class="(props.readonlyFor === 'true' || blockIndex < currentLevel) && field.fieldtype !== 'Small Text' && field.fieldtype !== 'Text' || field.fieldtype === 'Check'
+                      ? 'd-flex ' +(field.fieldtype === 'Check' ? 'mt-4 flex-row-reverse justify-content-end gap-2 w-0 align-items-start ' : '') + (field.label === 'Approved By' ? 'align-items-end' : 'align-items-start')
                       : ''">
 
 
@@ -31,10 +31,10 @@
                           class=" label-text  whitespace-nowrap">
                           <span class="font-12 fw-medium">{{ field.label }}</span>
                           <span class="ms-1 text-danger">{{ field.reqd === 1 ? "*" : "" }}</span>
-                          <span class="pe-2" v-if="props.readonlyFor === 'true' || blockIndex < currentLevel">:</span>
+                          <span class="pe-2" v-if="field.fieldtype !== 'Check' && (props.readonlyFor === 'true' || blockIndex < currentLevel)">:</span>
                         </label>
                       </div>
-                      <div v-if="field.fieldtype !== 'Table'" class=" w-100">
+                      <div v-if="field.fieldtype !== 'Table'" :class="field.fieldtype === 'Check' ? 'w-0':'w-100'">
                         <!-- field.fieldtype === 'Select' || -->
                         <!-- Field Type Select or Multiselect -->
                         <template v-if="field.fieldtype === 'multiselect'">
@@ -79,11 +79,31 @@
                           </div>
                         </template>
 
-
+                    <template v-else-if="field.fieldtype == 'Check'">
+                                                <input type="checkbox" :checked="field.value" :disabled="blockIndex === 0 || props.readonlyFor === 'true'"
+                                                    
+                                                    :placeholder="'Enter ' + field.label" :name="'field-' +
+                                                        sectionIndex +
+                                                        '-' +
+                                                        columnIndex +
+                                                        '-' +
+                                                        fieldIndex
+                                                        " @change="
+                                                            (event) =>
+                                                                logFieldValue(
+                                                                    event,
+                                                                    blockIndex,
+                                                                    sectionIndex,
+                                                                    rowIndex,
+                                                                    columnIndex,
+                                                                    fieldIndex
+                                                                )
+                                                        " class="form-control fs-6 border-dark form-check-input previewInputHeight font-10" />
+                                            </template>
 
                         <!-- Field Type Check or Radio -->
                         <template v-else-if="
-                          field.fieldtype === 'Check' ||
+                          
 
                           field.fieldtype === 'radio'
                         ">
@@ -94,7 +114,7 @@
                               )" :key="index">
                                 <div>
                                   <input v-if="
-                                    field.fieldtype === 'Check' ||
+                                    
                                     index !== 0
                                   " class="form-check-input" type="checkbox" :disabled="blockIndex === 0 || props.readonlyFor === 'true'
                                     " :checked="field.value === option" :value="option"
@@ -812,7 +832,7 @@ const logFieldValue = (
       // Ensure value is a string, not an array
       if (eve.target.checked) {
         // If checked, set the value as a string
-        field["value"] = eve.target.value;
+        field["value"] = eve.target.checked ? 1 : 0;
 
       } else {
         // If unchecked, set the value as an empty string (or use any default value)

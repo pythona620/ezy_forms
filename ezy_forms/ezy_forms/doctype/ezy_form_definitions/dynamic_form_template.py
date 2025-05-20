@@ -670,11 +670,11 @@ template_str = """
                                                 <input type="text" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
                                             {% endif %}
                                         {% elif field.fieldtype == 'Phone' %}
-                                             <span id="{{ field.fieldname }}" name="{{ field.fieldname }}" class="date-span">
+                                             <span id="{{ field.fieldname }}" style="font-size:13px; font-weight:500;border-bottom: 1px solid #cccccc;" name="{{ field.fieldname }}" class="date-span">
                                                 {{ field['values'] }}
                                             </span>
                                         {% elif field.fieldtype == 'Time' %}
-                                             <span id="{{ field.fieldname }}" name="{{ field.fieldname }}" class="date-span">
+                                             <span id="{{ field.fieldname }}" style="font-size:13px; font-weight:500;border-bottom: 1px solid #cccccc;" name="{{ field.fieldname }}" class="date-span">
                                                 {{ field['values'] }}
                                             </span>
                                         {% elif field.fieldtype == 'Color' %}
@@ -694,7 +694,7 @@ template_str = """
                                                 style="height: {{ height }}px; border: none; width: 100%; font-size:13px;"
                                             >{{ value }}</textarea>
                                         {% elif field.fieldtype == 'Date' %}
-                                            <span id="{{ field.fieldname }}" name="{{ field.fieldname }}" class="date-span">
+                                            <span id="{{ field.fieldname }}" style="font-size:13px; font-weight:500;border-bottom: 1px solid #cccccc;" name="{{ field.fieldname }}" class="date-span">
                                                 {{ field['values'] }}
                                             </span>
 

@@ -48,12 +48,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, watch, computed } from "vue";
 import axiosInstance from "../../shared/services/interceptor";
 import { apis, doctypes } from "../../shared/apiurls";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
-
+import { EzyBusinessUnit } from "../../shared/services/business_unit";
 const tableData = ref([
     { title: "Two Factor Authentication", checked: false },
     { title: "Send Form as an Attachment Via an E-Mail ", checked: false },
@@ -65,6 +65,32 @@ const selectedRowData = ref(null);  // stores index
 const selectedCheckedState = ref(false); // stores checkbox state before toggle
 const confirmMessage = ref('');  // dynamic message
 const originalCheckedState = ref(false); // stores initial checkbox state
+const Bussines_unit = ref('')
+const businessUnit = computed(() => {
+  return EzyBusinessUnit.value;
+});
+
+// onMounted(() => {
+
+// //      const storedBu = localStorage.getItem('Bu');
+// //   if (storedBu) {
+// //     Bussines_unit.value = storedBu;
+// //   }
+// });
+watch(
+  businessUnit,
+  (newVal) => {
+    if (newVal && newVal.length) {
+      Bussines_unit.value= newVal;
+     
+    enable_two_factor();
+    BussinesUnit();
+    email_account()
+    }
+  },
+  { immediate: true }
+);
+
 
 const handleToggle = (index) => {
     selectedRowData.value = index;
@@ -162,12 +188,12 @@ const confirmAction = () => {
 
 
 
-const BussinesUnit = () => {
-    const buData = localStorage.getItem('Bu') || ''; // Ensure buData is parsed correctly
+function BussinesUnit() {
+    // const buData = localStorage.getItem('Bu') || ''; // Ensure buData is parsed correctly
 
     const queryParams = {
         fields: JSON.stringify(["*"]),
-        filters: JSON.stringify([["bu_name", "=", buData]]) // Apply filter based on buData
+        filters: JSON.stringify([["bu_name", "=", Bussines_unit.value]]) // Apply filter based on buData
     };
 
     axiosInstance
@@ -235,12 +261,7 @@ const email_account = () => {
         });
 };
 
-onMounted(() => {
-    enable_two_factor();
-    BussinesUnit();
-    email_account()
 
-});
 </script>
 
 <style scoped>

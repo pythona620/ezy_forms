@@ -602,7 +602,7 @@
                                               [
                                                 'Select',
                                                 'Table MultiSelect',
-                                                'Check', 'Small Text'
+                                                 'Small Text'
                                               ].includes(field.fieldtype)
                                             ">
                                               <label class="font-12 fw-light" for="options">Enter Options:</label>
@@ -2313,10 +2313,10 @@ const fieldTypes = [
     label: "Datetime",
     type: "Datetime",
   },
-  // {
-  //     label: "Check",
-  //     type: "Check",
-  // },
+  {
+      label: "Check",
+      type: "Check",
+  },
   // {
   //     label: "Radio",
   //     type: "radio",
@@ -3169,7 +3169,7 @@ const onFieldTypeChange = (
     blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex]
       .fields[fieldIndex].fieldtype;
   if (
-    fieldType !== "Check" ||
+    
     fieldType !== "Select" ||
     fieldType !== "radio" ||
     fieldType !== "multiselect"
@@ -3277,7 +3277,7 @@ const hasErrors = computed(() => {
       ("fieldtype" in obj && obj.fieldtype === "") ||
       ("error" in obj && obj.error) ||
       ("errorMsg" in obj && obj.errorMsg) ||
-      (["Select", "Table MultiSelect", "Check"].includes(obj.fieldtype) &&
+      (["Select", "Table MultiSelect"].includes(obj.fieldtype) &&
         (!obj.options || obj.options.trim() === ""))
     ) {
       return true;
