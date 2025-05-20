@@ -1362,7 +1362,6 @@ function canShowDesignationButton(blockIndex) {
     return roles.length === 0;
   }
 
-  // For subsequent approvers: check if previous approver has a role
   const prevRoles = getWorkflowSetup(blockIndex - 1).roles;
   return (
     prevRoles.length > 0 &&
@@ -1371,6 +1370,7 @@ function canShowDesignationButton(blockIndex) {
     roles.length === 0
   );
 }
+
 
 
 const draggedField = ref(null);
