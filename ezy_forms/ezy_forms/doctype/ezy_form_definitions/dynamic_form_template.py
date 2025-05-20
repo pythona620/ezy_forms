@@ -214,6 +214,8 @@ template_str = """
             border-bottom: 1px solid #cccccc;
             font-weight:600;
             color:#000;
+            font-size: 13px;
+            
             
         }
         
@@ -275,7 +277,6 @@ template_str = """
                 flex: 1 0 calc(33.33% - 20px);  /* 3 per row, considering gap */
                 box-sizing: border-box; 
                 display: flex;
-                align-items: end;
                 gap: 15px; /* Space between checkbox and text */
                 margin-top: 10px;  /* Space above */
                 margin-bottom: 10px; /* Space below */
@@ -619,7 +620,11 @@ template_str = """
                                             </div>
  
                                         {% elif field.fieldtype == 'Data' or field.fieldtype == 'Select' %}
-                                            <input type="text" id="{{ field.fieldname }}" disabled value="{{ field['values'] }}" name="{{ field.fieldname }}">
+                                            <span id="{{ field.fieldname }}"
+                                                style="font-size:13px; font-weight:500;border-bottom: 1px solid #cccccc;">
+                                                {{ field['values'] }}
+                                            </span>
+
                                        {% elif field.fieldtype == 'Small Text' %}
                                             {% set options = field.options.strip().split('\n') %}
                                             
@@ -630,7 +635,7 @@ template_str = """
                                                     {% for value in selected_values_list if value %}
                                                         <div class="checkbox-gap">
                                                             <span class="custom-checkbox checked"></span>
-                                                            <span style="margin-top:6px; margin-left:4px;">{{ value }}</span>
+                                                            <span >{{ value }}</span>
                                                         </div>
                                                     {% endfor %}
                                                 </div>
@@ -653,7 +658,7 @@ template_str = """
                                         {% elif field.fieldtype == 'Phone' %}
                                             <input type="tel" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
                                         {% elif field.fieldtype == 'Time' %}
-                                            <input type="time" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
+                                            <input type="time" id="{{ field.fieldname }}"  value="{{ field['values'] }}" name="{{ field.fieldname }}">
                                         {% elif field.fieldtype == 'Color' %}
                                             <input type="color" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
                                           {% elif field.fieldtype == 'Text' %}
@@ -673,7 +678,10 @@ template_str = """
                                         {% elif field.fieldtype == 'Date' %}
                                             <input type="text" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}" class="date-input" placeholder="__/__/____">
                                         {% elif field.fieldtype == 'Datetime' %}
-                                            <input type="text" id="{{ field.fieldname }}" disabled value="{{ field['values'].strftime('%d/%m/%Y %H:%M') if field['values'] else '' }}" name="{{ field.fieldname }}">
+                                            <span id="{{ field.fieldname }}"
+                                                style="font-size:13px; font-weight:500;border-bottom: 1px solid #cccccc;">
+                                                {{ field['values'] }}
+                                            </span>
                         
                                         {% elif field.fieldtype == 'Signature' %}
                                             <input type="text" id="{{ field.fieldname }}" name="{{ field.fieldname }}" placeholder="Signature input (future implementation)">

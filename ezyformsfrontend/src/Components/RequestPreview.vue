@@ -13,7 +13,7 @@
                         <div class="row" v-for="(row, rowIndex) in section.rows" :key="rowIndex">
                             <div v-for="(column, columnIndex) in row.columns" :key="'column-preview-' + columnIndex"
                                 class="col dynamicColumn">
-                                <div v-if="column.label" class="p-3 border-bottom">
+                                <div v-if="column.label" class="p-2 border-bottom">
                                     <h6 class="m-0 font-12">{{ column.label }}</h6>
                                 </div>
                                 <div class="mx-3 my-2">
@@ -28,7 +28,7 @@
                                                     '-' +
                                                     fieldIndex
                                                     ">
-                                                    <span class="font-12">{{ field.label }}</span>
+                                                    <span class="font-12" :class="field.fieldtype === 'Small Text' ? 'fw-bold': ''">{{ field.label }}</span>
                                                     <span class="ms-1 text-danger">{{
                                                         field.reqd === 1 ? "*" : ""
                                                         }}</span>
@@ -72,7 +72,7 @@
                                             ">
                                                 <div class="container-fluid">
                                                     <div class="row">
-                                                        <div class="form-check col-4 mb-4" v-for="(option, index) in field?.options?.split(
+                                                        <div class="form-check col-4 mb-1" v-for="(option, index) in field?.options?.split(
                                                             '\n'
                                                         )" :key="index" :class="{ 'd-none': index === 0 }">
                                                             <div>

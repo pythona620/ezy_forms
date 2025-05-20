@@ -2,7 +2,8 @@
   <section>
     <div v-if="filteredBlocks.length" class="card p-3">
       <div v-for="(block, blockIndex) in filteredBlocks" :key="blockIndex" class="block-container rounded-2">
-        <div v-if="blockIndex === 0"><label class=" fw-bold ps-2">Request ID: </label> <span> {{selectedData.formname}}</span> </div>
+        <div v-if="blockIndex === 0"><label class=" fw-bold ps-2">Request ID: </label> <span>
+            {{ selectedData.formname }}</span> </div>
         <div v-for="(section, sectionIndex) in block.sections" :key="'preview-' + sectionIndex"
           class="preview-section m-1">
           <div v-if="section.label" class="section-label">
@@ -27,7 +28,7 @@
 
                       <div v-if="field.label && field.fieldtype !== 'Table'">
                         <label :for="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
-                          class=" label-text mt-2 whitespace-nowrap">
+                          class=" label-text  whitespace-nowrap">
                           <span class="font-12 fw-medium">{{ field.label }}</span>
                           <span class="ms-1 text-danger">{{ field.reqd === 1 ? "*" : "" }}</span>
                           <span class="pe-2" v-if="props.readonlyFor === 'true' || blockIndex < currentLevel">:</span>
@@ -141,46 +142,33 @@
 
                         <!-- @click="openInNewWindow(field.value)" -->
                         <template v-else-if="field.fieldtype == 'Attach'">
-  <div v-if="field.value" class="d-flex gap-2 flex-wrap">
-    <div
-      v-for="(file, i) in getFileArray(field.value)"
-      :key="i"
-      class="position-relative d-inline-block"
-      :class="props.readonlyFor === 'true' ? ' border-bottom-0' : ''"
-    >
-      <!-- Show file input if flagged for replacement -->
-      <div v-if="replaceInputIndexes.includes(i)">
-        <input
-          type="file"
-          accept="image/jpeg,image/png,application/pdf"
-          class="form-control previewInputHeight font-10"
-          @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
-        />
-      </div>
+                          <div v-if="field.value" class="d-flex gap-2 flex-wrap">
+                            <div v-for="(file, i) in getFileArray(field.value)" :key="i"
+                              class="position-relative d-inline-block"
+                              :class="props.readonlyFor === 'true' ? ' border-bottom-0' : ''">
+                              <!-- Show file input if flagged for replacement -->
+                              <div v-if="replaceInputIndexes.includes(i)">
+                                <input type="file" accept="image/jpeg,image/png,application/pdf"
+                                  class="form-control previewInputHeight font-10"
+                                  @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
+                              </div>
 
-      <!-- Image block -->
-      <template v-else-if="isImageFile(file)">
-        <img
-          :src="file"
-          class="img-thumbnail cursor-pointer border-0 border-bottom-0"
-          @click="openFile(file)"
-          style="max-width: 100px; max-height: 100px"
-          
-        />
-        <!-- @mouseover="handleMouseOver(blockIndex + '-' + fieldIndex, i)"
+                              <!-- Image block -->
+                              <template v-else-if="isImageFile(file)">
+                                <img :src="file" class="img-thumbnail cursor-pointer border-0 border-bottom-0"
+                                  @click="openFile(file)" style="max-width: 100px; max-height: 100px" />
+                                <!-- @mouseover="handleMouseOver(blockIndex + '-' + fieldIndex, i)"
           @mouseleave="handleMouseLeave(blockIndex + '-' + fieldIndex)" -->
 
-        <!-- Hover preview -->
-        <div
-          v-if="hoverStates[blockIndex + '-' + fieldIndex] === i"
-          class="image-popup position-absolute"
-          style="top: 0; left: 110%; width: 200px; background: white; z-index: 10; box-shadow: 0px 0px 10px rgba(0,0,0,0.2); border-radius: 5px; padding: 5px;"
-        >
-          <img :src="file" alt="Enlarged Preview" style="width: 100%; border-radius: 5px;" />
-        </div>
+                                <!-- Hover preview -->
+                                <div v-if="hoverStates[blockIndex + '-' + fieldIndex] === i"
+                                  class="image-popup position-absolute"
+                                  style="top: 0; left: 110%; width: 200px; background: white; z-index: 10; box-shadow: 0px 0px 10px rgba(0,0,0,0.2); border-radius: 5px; padding: 5px;">
+                                  <img :src="file" alt="Enlarged Preview" style="width: 100%; border-radius: 5px;" />
+                                </div>
 
-        <!-- Remove icon -->
-        <!-- <button
+                                <!-- Remove icon -->
+                                <!-- <button
           v-if="blockIndex !== 0 && props.readonlyFor !== 'true'"
           @click="replaceInput(i)"
           class="btn btn-sm btn-outline-secondary position-absolute top-0 end-0"
@@ -188,34 +176,25 @@
         >
           ×
         </button> -->
-      </template>
+                              </template>
 
-      <!-- PDF block -->
-      <a
-        v-else
-        :href="file"
-        target="_blank"
-        class="d-flex align-items-center justify-content-center mt-2 border rounded bg-light"
-        style="width: 100px; height: 100px; text-decoration: none;"
-      >
-        <i class="bi bi-file-earmark-pdf-fill fs-2 text-danger"></i>
-      </a>
-    </div>
-  </div>
+                              <!-- PDF block -->
+                              <a v-else :href="file" target="_blank"
+                                class="d-flex align-items-center justify-content-center mt-2 border rounded bg-light"
+                                style="width: 100px; height: 100px; text-decoration: none;">
+                                <i class="bi bi-file-earmark-pdf-fill fs-2 text-danger"></i>
+                              </a>
+                            </div>
+                          </div>
 
-  <!-- Fallback input when there's no file yet -->
-  <input
-    v-else
-    :disabled="props.readonlyFor === 'true'"
-    type="file"
-    accept="image/jpeg,image/png,application/pdf"
-    :class="props.readonlyFor === 'true' ? 'd-none' : ''"
-    :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
-    class="form-control previewInputHeight font-10"
-    multiple
-    @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
-  />
-</template>
+                          <!-- Fallback input when there's no file yet -->
+                          <input v-else :disabled="props.readonlyFor === 'true'" type="file"
+                            accept="image/jpeg,image/png,application/pdf"
+                            :class="props.readonlyFor === 'true' ? 'd-none' : ''"
+                            :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                            class="form-control previewInputHeight font-10" multiple
+                            @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
+                        </template>
 
                         <template v-else-if="field.fieldtype == 'Link'">
                           <div class="d-flex align-items-center gap-2">
@@ -288,7 +267,7 @@
 
                         <template v-else-if="field.fieldtype == 'Datetime'">
                           <input type="datetime-local" v-model="field.value"
-                            :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 image-border-bottom  pb-0 bg-transparent ' : ' '"
+                            :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 image-border-bottom   pb-0 bg-transparent ' : ' '"
                             :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'" :readOnly="blockIndex < currentLevel || props.readonlyFor === 'true'
                               " :placeholder="'Enter ' + field.label" :name="'field-' +
                                 sectionIndex +
@@ -296,7 +275,7 @@
                                 columnIndex +
                                 '-' +
                                 fieldIndex
-                                " class="form-control previewInputHeight" />
+                                " class="form-control p-1 previewInputHeight" />
                         </template>
 
                         <!-- Field Type Default -->
@@ -313,7 +292,7 @@
                               fieldIndex
                               " class="form-control previewInputHeight" />
                           <textarea v-if="field.fieldtype === 'Text'" :disabled="blockIndex < currentLevel"
-                            :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0  bg-transparent' : ''"
+                            :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0   bg-transparent' : ''"
                             :readOnly="blockIndex === 0 || props.readonlyFor === 'true'" v-model="field.value"
                             :placeholder="'Enter ' + field.label"
                             :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
@@ -321,20 +300,22 @@
                             :ref="el => setRef(el, sectionIndex, columnIndex, fieldIndex)"
                             @input="adjustHeight(sectionIndex, columnIndex, fieldIndex)" />
 
-                          <component v-if="field.fieldtype !== 'Int' && field.fieldtype !== 'Text'" :style="{
-
-                            width: Math.min(100 + (field.value?.length * 2), 600) + 'px' // cap at 600px
-                          }" :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'"
-                            :is="getFieldComponent(field.fieldtype)"
-                            :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0  image-border-bottom w-50 bg-transparent ' : ' '"
-                            :value="field.value" :type="field.fieldtype" :readOnly="blockIndex < currentLevel || props.readonlyFor === 'true'
-                              " :name="'field-' +
-                                sectionIndex +
-                                '-' +
-                                columnIndex +
-                                '-' +
-                                fieldIndex
-                                " @blur="
+                          <template v-if="blockIndex === 0">
+                            <span style="font-size: 12px;" :class="props.readonlyFor === 'true' || blockIndex < currentLevel
+                                ? 'border-0 image-border-bottom w-50 bg-transparent'
+                                : ''" :value="field.value" :type="field.fieldtype">
+                              {{ field.value }}
+                            </span>
+                          </template>
+                          <template v-else>
+                            <component v-if="field.fieldtype !== 'Int' && field.fieldtype !== 'Text'" :style="{
+                              width: Math.min(100 + (field.value?.length * 2), 600) + 'px'
+                            }" :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'" :is="getFieldComponent(field.fieldtype)"
+                              :class="props.readonlyFor === 'true' || blockIndex < currentLevel
+                                ? 'border-0 image-border-bottom w-50 bg-transparent'
+                                : ''" :value="field.value" :type="field.fieldtype"
+                              :readOnly="blockIndex < currentLevel || props.readonlyFor === 'true'"
+                              :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex" @blur="
                                 (event) =>
                                   logFieldValue(
                                     event,
@@ -344,7 +325,8 @@
                                     columnIndex,
                                     fieldIndex
                                   )
-                              " class="form-control previewInputHeight w-100"></component>
+                              " class="form-control previewInputHeight w-100 p-1" />
+                          </template>
                         </template>
                       </div>
                     </div>
@@ -962,7 +944,7 @@ const clearImage = (
 
 .previewInputHeight {
   /* height: 35px; */
-  margin-top: 5px;
+  // margin-top: 5px;
   // margin-bottom: 5px;
   font-size: 12px;
   padding: 2px 2px;
