@@ -158,20 +158,21 @@ template_str = """
 
         .column {
             flex: 1;
-            margin-right: 5px;
-            margin-left: 5px;
-            padding-left:5px;
-            padding-right:5px;
-            
+           padding: 0px 3px;
             
         }
+       
  
-        .section h3, .section h4 {
-            margin: 10px 0;
+        .section h3 {
+            margin: 5px 0;
+            font-size:13px;
         }
-        
+        .section h4 {
+            margin: 5px 0;
+            font-size:13px;
+        }
         .section {
-            margin: 10px;
+            margin: 5px;
             border: 0px solid #ccc;
             /*border-bottom: 1px solid #000;*/
             /*padding: 15px;*/
@@ -179,18 +180,26 @@ template_str = """
         }
         .section h3 {
             margin-bottom: 10px;
+            font-size: 15px;
+            font-weight:700;
+        }
+         .column .columnlabel {
+            margin: 5px 0;
+            font-size:14px;
+            padding: 0px 10px;
+             font-weight:600;
         }
         .field {
             display: flex;
             align-items: baseline;
             # border-bottom: 1px solid #cccccc;
             padding: 0px ;
-            margin: 10px;
+            margin: 5px 10px;
         }
         .field label {
             font-weight: bold;
             white-space: nowrap;
-            margin-right: 10px;
+            margin-right: 2px;
             font-size: 13px;
             margin-bottom: 0px;
             padding-bottom: 0px;
@@ -199,7 +208,7 @@ template_str = """
             border: none;
             outline: none;
             padding: 0px 5px;
-            padding-left: 50px ;
+            padding-left: 4px ;
             background: transparent;
             flex: 1;
             border-bottom: 1px solid #cccccc;
@@ -348,13 +357,13 @@ template_str = """
           }
           .childtablename{
               font-size:16px;
-              font-weight:bold;
-              margin: 8px 0px 3px 12px;
+              font-weight:600 !important;
+              margin-bottom: 3px !important;
           }
  
         .logo-div{
             max-width: 300px;
-              min-width: 200px;
+              min-width: 250px !important;
         }
          .header-left{
             display: flex;
@@ -385,7 +394,7 @@ template_str = """
               align-items: center;
               padding-top:5px;
               padding-bottom:5px;
-              padding-left:10px;
+              padding-left:4px;
               
               
         }
@@ -444,7 +453,7 @@ template_str = """
     </div>
     
     <div class="logo-div"> 
-        <img src="{{ company_logo }}" alt="logo" style="height: 70px; width: 200px; margin-bottom:0px">
+        <img src="{{ company_logo }}" alt="logo" style="height: 55px; width: 245px; margin-bottom:0px">
      </div>
     
 </div>
@@ -461,10 +470,11 @@ template_str = """
                 {% for row in section.rows | sort(attribute='idx') %}
                 
                                             
-                            {% set table_name = row.options %}
+                            {% set table_name = row.fieldname %}
 
                             {% if row.description == 'true' %}
                                 {% if table_name in child_data %}
+                                {{ table_name }}
                                     <h3 class="childtablename">{{ table_name.replace("_", " ").title() }}</h3>
                                     {% if child_data[table_name] %}
                                         {% for child in child_data[table_name] %}
@@ -490,7 +500,7 @@ template_str = """
 
                                 {% elif table_name in child_table_data %}
                                     <h3 class="childtablename">{{ table_name.replace("_", " ").title() }}</h3>
-                                    <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
+                                    <div style="border:1px solid #ccc; padding:10px; margin-bottom:5px;">
                                     
                                         <div style="display: flex; flex-wrap: wrap;">
                                             {% for column in child_table_data[table_name] %}
@@ -562,12 +572,12 @@ template_str = """
                        
                             <div class="column">
                               {% if column.label %}
-                                <h3>{{ column.label }}</h3>
+                                <h3 class="columnlabel">{{ column.label }}</h3>
                                 {% endif %}
                                 {% for field in column.fields %}
                                
                                     <div class="field field-textarea">
-                                        <label for="{{ field.fieldname }}">{{ field.label }}:</label>
+                                        <label for="{{ field.fieldname }}">{{ field.label }} <span style="padding-left:2px;">:</span></label>
 
                                         {% if field.fieldtype in ['Check', 'radio'] %}
                                             <div class="container-fluid">

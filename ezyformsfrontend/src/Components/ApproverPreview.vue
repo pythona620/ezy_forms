@@ -1,6 +1,6 @@
 <template>
   <section>
-    <div v-if="filteredBlocks.length" class="card p-4">
+    <div v-if="filteredBlocks.length" class="card p-3">
       <div v-for="(block, blockIndex) in filteredBlocks" :key="blockIndex" class="block-container rounded-2">
         <div v-if="blockIndex === 0"><label class=" fw-bold ps-2">Request ID: </label> <span> {{selectedData.formname}}</span> </div>
         <div v-for="(section, sectionIndex) in block.sections" :key="'preview-' + sectionIndex"
@@ -13,7 +13,7 @@
               <div v-for="(column, columnIndex) in row.columns" :key="'column-preview-' + columnIndex"
                 :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 bg-transparent' : 'border-0 bg-transparent'"
                 class="col dynamicColumn">
-                <div v-if="column.label" class="p-3 border-bottom">
+                <div v-if="column.label" class="p-1 border-bottom">
                   <h6 class="m-0 font-12">{{ column.label }}</h6>
                 </div>
                 <div class="mx-1 my-1">
@@ -141,42 +141,82 @@
 
                         <!-- @click="openInNewWindow(field.value)" -->
                         <template v-else-if="field.fieldtype == 'Attach'">
-                          <div v-if="field.value" class="d-flex gap-2 flex-wrap">
-                            <div v-for="(file, i) in getFileArray(field.value)" :key="i"
-                              class="position-relative d-inline-block"
-                              :class="props.readonlyFor === 'true' ? ' border-bottom-0' : ''">
-                              <!-- Unique key per block -->
-                              <template v-if="isImageFile(file) && field.value ">
-                                <img :src="file" class="img-thumbnail mt-2 cursor-pointer border-0 border-bottom-0"
-                                  @click="openFile(file)" style="max-width: 100px; max-height: 100px"
-                                  @mouseover="handleMouseOver(blockIndex + '-' + fieldIndex, i)"
-                                  @mouseleave="handleMouseLeave(blockIndex + '-' + fieldIndex)" />
+  <div v-if="field.value" class="d-flex gap-2 flex-wrap">
+    <div
+      v-for="(file, i) in getFileArray(field.value)"
+      :key="i"
+      class="position-relative d-inline-block"
+      :class="props.readonlyFor === 'true' ? ' border-bottom-0' : ''"
+    >
+      <!-- Show file input if flagged for replacement -->
+      <div v-if="replaceInputIndexes.includes(i)">
+        <input
+          type="file"
+          accept="image/jpeg,image/png,application/pdf"
+          class="form-control previewInputHeight font-10"
+          @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+        />
+      </div>
 
-                                <!-- Enlarged Preview -->
-                                <div v-if="hoverStates[blockIndex + '-' + fieldIndex] === i"
-                                  class="image-popup position-absolute"
-                                  style="top: 0; left: 110%; width: 200px; background: white; z-index: 10; box-shadow: 0px 0px 10px rgba(0,0,0,0.2); border-radius: 5px; padding: 5px;">
-                                  <img :src="file" alt="Enlarged Preview" style="width: 100%; border-radius: 5px;" />
-                                </div>
-                              </template>
+      <!-- Image block -->
+      <template v-else-if="isImageFile(file)">
+        <img
+          :src="file"
+          class="img-thumbnail cursor-pointer border-0 border-bottom-0"
+          @click="openFile(file)"
+          style="max-width: 100px; max-height: 100px"
+          
+        />
+        <!-- @mouseover="handleMouseOver(blockIndex + '-' + fieldIndex, i)"
+          @mouseleave="handleMouseLeave(blockIndex + '-' + fieldIndex)" -->
 
-                              <!-- PDF File Icon -->
-                              <a v-else :href="file" target="_blank"
-                                class="d-flex align-items-center justify-content-center mt-2 border rounded bg-light"
-                                style="width: 100px; height: 100px; text-decoration: none;">
-                                <i class="bi bi-file-earmark-pdf-fill fs-2 text-danger"></i>
-                              </a>
-                            </div>
-                          </div>
+        <!-- Hover preview -->
+        <div
+          v-if="hoverStates[blockIndex + '-' + fieldIndex] === i"
+          class="image-popup position-absolute"
+          style="top: 0; left: 110%; width: 200px; background: white; z-index: 10; box-shadow: 0px 0px 10px rgba(0,0,0,0.2); border-radius: 5px; padding: 5px;"
+        >
+          <img :src="file" alt="Enlarged Preview" style="width: 100%; border-radius: 5px;" />
+        </div>
 
-                          <!-- File input -->
-                          <input :disabled="props.readonlyFor === 'true'" v-else type="file"
-                            accept="image/jpeg,image/png,application/pdf"
-                            :class="props.readonlyFor === 'true' ? 'd-none' : ''"
-                            :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
-                            class="form-control previewInputHeight font-10" multiple
-                            @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
-                        </template>
+        <!-- Remove icon -->
+        <!-- <button
+          v-if="blockIndex !== 0 && props.readonlyFor !== 'true'"
+          @click="replaceInput(i)"
+          class="btn btn-sm btn-outline-secondary position-absolute top-0 end-0"
+          style="z-index: 20; padding: 2px 6px; font-size: 12px;"
+        >
+          ×
+        </button> -->
+      </template>
+
+      <!-- PDF block -->
+      <a
+        v-else
+        :href="file"
+        target="_blank"
+        class="d-flex align-items-center justify-content-center mt-2 border rounded bg-light"
+        style="width: 100px; height: 100px; text-decoration: none;"
+      >
+        <i class="bi bi-file-earmark-pdf-fill fs-2 text-danger"></i>
+      </a>
+    </div>
+  </div>
+
+  <!-- Fallback input when there's no file yet -->
+  <input
+    v-else
+    :disabled="props.readonlyFor === 'true'"
+    type="file"
+    accept="image/jpeg,image/png,application/pdf"
+    :class="props.readonlyFor === 'true' ? 'd-none' : ''"
+    :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+    class="form-control previewInputHeight font-10"
+    multiple
+    @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+  />
+</template>
+
                         <template v-else-if="field.fieldtype == 'Link'">
                           <div class="d-flex align-items-center gap-2">
                             <input type="text" :value="field.value"
@@ -277,7 +317,7 @@
                             :readOnly="blockIndex === 0 || props.readonlyFor === 'true'" v-model="field.value"
                             :placeholder="'Enter ' + field.label"
                             :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
-                            class="form-control previewInputHeight"
+                            class="form-control previewInputHeight mt-0 outline-none"
                             :ref="el => setRef(el, sectionIndex, columnIndex, fieldIndex)"
                             @input="adjustHeight(sectionIndex, columnIndex, fieldIndex)" />
 
@@ -432,7 +472,13 @@ const errorMessages = ref({});
 
 const hoverStates = ref({});
 const textAreaRefs = reactive({});
+const replaceInputIndexes = ref([]);
 
+const replaceInput = (index) => {
+  if (!replaceInputIndexes.value.includes(index)) {
+    replaceInputIndexes.value.push(index);
+  }
+};
 function setRef(el, sectionIndex, columnIndex, fieldIndex) {
   if (!el) return;
   const key = `${sectionIndex}-${columnIndex}-${fieldIndex}`;
@@ -916,8 +962,10 @@ const clearImage = (
 
 .previewInputHeight {
   /* height: 35px; */
-  margin-bottom: 5px;
+  margin-top: 5px;
+  // margin-bottom: 5px;
   font-size: 12px;
+  padding: 2px 2px;
 }
 
 .dynamicColumn {
@@ -930,7 +978,7 @@ const clearImage = (
 }
 
 .section-label {
-  padding: 10px 1px;
+  padding: 10px 4px;
   font-weight: bold;
 }
 

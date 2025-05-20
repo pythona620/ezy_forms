@@ -168,10 +168,10 @@
                     class="btn btn-light font-11 fw-bold h-0 text-decoration-underline" type="button"
                     @click="downloadPdf"><i class="bi bi-arrow-down-circle fw-bold px-1"></i>Download
                   </button>
-                   <!-- <button type="button" class="btn btn-outline-light  CreateDepartments " data-bs-toggle="modal"
+                   <button type="button" class="btn btn-outline-light  CreateDepartments " data-bs-toggle="modal"
                     data-bs-target="#pdfView" @click="viewasPdfView">
                     Preview
-                  </button> -->
+                  </button>
                   
                 </div>
               </div>
@@ -671,6 +671,7 @@ function receivedForMe(data) {
       console.error("Error fetching records:", error);
     });
 }
+const datanew = ref([]);
 function getdata(formname) {
   const filters = [["wf_generated_request_id", "like", `%${formname}%`]];
   const queryParams = {
@@ -694,7 +695,8 @@ function getdata(formname) {
         axiosInstance
           .get(`${apis.resource}${selectedData.value.doctype_name}`)
           .then((res) => {
-            console.log(`Data for :`, res.data[0]);
+            datanew.value =res.data[0]
+            // console.log(`Data for :`, res.data[0]);
           })
           .catch((error) => {
             console.error(`Error fetching data for :`, error);
@@ -881,10 +883,12 @@ const requestcancelled = computed(() => {
   const lastAction = activityData.value[activityData.value.length - 1];
   return lastAction.action === "Request Cancelled";
 });
-
+const activityDatalog = ref([]);
 watch(activityData, (newVal) => {
-  console.log("Updated Activity Data:", newVal);
-  console.log("Request Cancelled?", requestcancelled.value);
+  // console.log("Updated Activity Data:", newVal);
+  activityDatalog.value = newVal;
+  // console.log("Request Cancelled?", requestcancelled.value);
+activityDatalog.value = requestcancelled.value
 });
 
 

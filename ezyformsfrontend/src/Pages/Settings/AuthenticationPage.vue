@@ -217,7 +217,7 @@ const email_account = () => {
         .then((res) => {
             if (res.data && res.data.length > 0) {
                 const emailData = res.data[0];
-                console.log(emailData, "response");
+                // console.log(emailData, "response");
 
                 if (emailData.default_outgoing === 1 && emailData.enable_outgoing === 1) {
                     default_mail.value = true;
@@ -225,7 +225,7 @@ const email_account = () => {
                     default_mail.value = false;
                 }
 
-                console.log(typeof default_mail.value, default_mail.value);
+                // console.log(typeof default_mail.value, default_mail.value);
             } else {
                 default_mail.value = false;
             }
