@@ -432,7 +432,7 @@ function inLineFiltersData(searchedData) {
 
         //     // If there is a match for the key in searchedData, create a 'like' filter
         if (searchedData[key]) {
-            filters.push(key, "like", `%${searchedData[key]}%`);
+            filters.push([key, "like", `%${searchedData[key]}%`]);
         }
         //     // Add filter for selected option
         //     if (key === "selectedOption" && searchedData.selectedOption) {
@@ -496,7 +496,7 @@ function deptData(data) {
         ["business_unit", "like", `%${CreateDepartments.value.business_unit}%`]
     ];
     if (data) {
-        filters.push(data)
+        filters.push(...data)
     }
 
 

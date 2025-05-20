@@ -10,7 +10,9 @@
   "bu_code",
   "bu_logo",
   "send_form_as_a_attach_through_mail",
-  "welcome_mail_to_employee"
+  "welcome_mail_to_employee",
+  "water_mark",
+  "letter_head"
  ],
  "fields": [
   {
@@ -40,17 +42,40 @@
    "fieldname": "welcome_mail_to_employee",
    "fieldtype": "Check",
    "label": "Welcome mail to employee"
+  },
+  {
+   "fieldname": "letter_head",
+   "fieldtype": "Text",
+   "label": "Letter Head"
+  },
+  {
+   "default": "0",
+   "fieldname": "water_mark",
+   "fieldtype": "Check",
+   "label": "Water Mark"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-04-16 11:28:11.949931",
+ "modified": "2025-05-19 12:21:01.195421",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
  "name": "Ezy Business Unit",
  "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Website Manager",
+   "share": 1,
+   "write": 1
+  },
   {
    "create": 1,
    "delete": 1,
@@ -71,7 +96,31 @@
    "print": 1,
    "read": 1,
    "report": 1,
+   "role": "IT assistance",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
    "role": "CS",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "junior Consultant",
    "share": 1,
    "write": 1
   },

@@ -146,7 +146,7 @@
                               class="position-relative d-inline-block"
                               :class="props.readonlyFor === 'true' ? ' border-bottom-0' : ''">
                               <!-- Unique key per block -->
-                              <template v-if="isImageFile(file)">
+                              <template v-if="isImageFile(file) && field.value ">
                                 <img :src="file" class="img-thumbnail mt-2 cursor-pointer border-0 border-bottom-0"
                                   @click="openFile(file)" style="max-width: 100px; max-height: 100px"
                                   @mouseover="handleMouseOver(blockIndex + '-' + fieldIndex, i)"
@@ -316,7 +316,7 @@
                     <div v-if="blockIndex === 0 && field.fieldtype === 'Table'">
                       <div v-if="props.childHeaders && Object.keys(props.childHeaders).length">
                         <div v-for="(headers, tableName) in props.childHeaders" :key="tableName">
-                          <div v-if="field.options === tableName">
+                          <div v-if="field.options === tableName || field.fieldname === tableName">
                             <div>
                               <span class="font-13 fw-bold tablename">{{ tableName.replace(/_/g, " ") }}</span>
                             </div>

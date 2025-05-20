@@ -606,7 +606,7 @@ function inLineFiltersData(searchedData) {
             const key = header.td_key;
 
             if (searchedData[key]) {
-                filters.push(key, "like", `%${searchedData[key]}%`);
+                filters.push([key, "like", `%${searchedData[key]}%`]);
             }
         });
 
@@ -631,7 +631,7 @@ function receivedForMe(data) {
   ];
 
   if (data) {
-    filters.push(data);
+    filters.push(...data);
   }
 
   // Define query parameters for data and count retrieval

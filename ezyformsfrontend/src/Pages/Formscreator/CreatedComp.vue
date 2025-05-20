@@ -334,7 +334,7 @@ function inLineFiltersData(searchedData) {
         tableheaders.value.forEach((header) => {
             const key = header.td_key;
             if (searchedData[key]) {
-                filters.push(key, "like", `%${searchedData[key]}%`);
+                filters.push([key, "like", `%${searchedData[key]}%`]);
             }
         });
 
@@ -436,7 +436,7 @@ function fetchTable(data) {
         ["form_status", "=", "Created"]
     ];
     if (data) {
-        filters.push(data)
+        filters.push(...data)
     }
 
 

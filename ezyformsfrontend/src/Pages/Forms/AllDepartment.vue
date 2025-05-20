@@ -7,12 +7,12 @@
             {{ id === 'allforms' ? 'All Forms' : id }}
           </h1>
           <p class="m-0 font-11 pt-1">
-            {{ totalRecords }} forms available
+            {{ totalRecords }} Forms Available
           </p>
         </div>
         <div v-if="userDesigination.includes('IT')" class="d-flex align-items-center gap-2">
           <div class="d-flex align-items-center">
-            <ButtonComp class="buttoncomp" @click="formCreation()" name="Create form"></ButtonComp>
+            <ButtonComp class="buttoncomp" @click="formCreation()" name="Create Form"></ButtonComp>
           </div>
         </div>
 
@@ -122,10 +122,10 @@ import { useRoute } from 'vue-router';
 import ButtonComp from '../../Components/ButtonComp.vue';
 const totalRecords = ref(0);
 const tableheaders = ref([
-  { th: "Form name", td_key: "form_name" },
+  { th: "Form Name", td_key: "form_name" },
   { th: "Form Short Code", td_key: "form_short_name" },
-  { th: "Form category", td_key: "form_category" },
-  { th: "Accessible departments", td_key: "accessible_departments" },
+  { th: "Form Category", td_key: "form_category" },
+  { th: "Accessible Departments", td_key: "accessible_departments" },
   { th: "Status", td_key: "form_status" },
   { th: "Form Status", td_key: "enable" },
 
@@ -467,16 +467,16 @@ function inLineFiltersData(searchedData) {
 
     // Loop through the table headers and build dynamic filters
     if (searchedData.form_status === 'Active') {
-      filterObj.value.filters.push("form_status", "like", "Created");
+      filterObj.value.filters.push(["form_status", "like", "Created"]);
     }
     if (searchedData.form_status === 'Retired') {
-      filterObj.value.filters.push("form_status", "like", "Draft");
+      filterObj.value.filters.push(["form_status", "like", "Draft"]);
     }
     console.log(searchedData.enable);
     if (searchedData.enable === 'Enabled') {
-      filterObj.value.filters.push("enable", "=", 1);
+      filterObj.value.filters.push(["enable", "=", 1]);
     } else if (searchedData.enable === 'Disabled') {
-      filterObj.value.filters.push("enable", "=", 0);
+      filterObj.value.filters.push(["enable", "=", 0]);
     }
 
 
@@ -488,7 +488,7 @@ function inLineFiltersData(searchedData) {
       if (key === 'form_status' || key === 'enable') return; // Skip since we already handled it above
 
       if (value) {
-        filterObj.value.filters.push(key, "like", `%${value}%`);
+        filterObj.value.filters.push([key, "like", `%${value}%`]);
       }
     });
 
@@ -511,7 +511,7 @@ function fetchDepartmentDetails(id, data) {
     filters.push(["owner_of_the_form", "=", props.id]);
   }
   if (data) {
-    filters.push(data)
+    filters.push(...data)
   }
 
   const queryParams = {

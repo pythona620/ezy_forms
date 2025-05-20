@@ -153,7 +153,7 @@
 
                               <div v-for="(table, tableName) in props.childHeaders" :key="tableName">
                                 <!-- Table Title -->
-                                <div v-if="tableName === field.options"> 
+                                <div v-if="tableName === field.options || tableName === field.fieldname"> 
                                 <div >
                                   <span class="font-13 fw-bold ps-1 tablename text-secondary">
                                     {{ tableName.toString().replace(/_/g, " ") }}

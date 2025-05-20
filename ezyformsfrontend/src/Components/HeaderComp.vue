@@ -25,7 +25,7 @@
                                     <!-- v-if="shouldShowButton" -->
                                     <ButtonComp
                                         class="btn btn-danger raiseReqBtn d-flex justify-content-center align-items-center  m-0 text-nowrap font-10"
-                                        name="Raise request" data-bs-toggle="modal" @click="raiseRequest"
+                                        name="Raise Request" data-bs-toggle="modal" @click="raiseRequest"
                                         data-bs-target="#riaseRequestModal" />
                                     <!-- @click="raiseRequest" -->
                                 </div>
