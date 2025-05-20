@@ -193,8 +193,7 @@ template_str = """
         .field {
             display: flex;
             align-items: baseline;
-            # border-bottom: 1px solid #cccccc;
-            padding: 0px ;
+            padding: 4px 0px;
             margin: 5px 5px;
         }
         .field label {
@@ -213,7 +212,7 @@ template_str = """
             background: transparent;
             flex: 1;
             border-bottom: 1px solid #cccccc;
-            font-weight:600;
+            font-weight:500;
             color:#000;
             font-size: 13px;
             
@@ -358,7 +357,7 @@ template_str = """
               
           }
           .childtablename{
-              font-size:16px;
+              font-size:13px;
               font-weight:600 !important;
               margin-bottom: 3px !important;
           }
@@ -403,9 +402,18 @@ template_str = """
          .requestId strong {
             margin-right: 8px;  /* adds space between the label and the ID */
         }
+        .rounded-table {
+        width: 100%;
+        margin-bottom: 10px;
+        border-collapse: separate;
+        border-spacing: 0;
+        border-radius: 3px;
+        overflow: hidden;
+    }
         @media print {
             .table, .table th, .table td {
                 border: 1px solid black !important;
+                font-size: 13px;
             }
             .table{
                 width: 100% !important;
@@ -480,7 +488,7 @@ template_str = """
                             {% if row.description == 'true' %}
                                 {% if table_name in child_data %}
                                 
-                                    <h3 class="childtablename">{{ table_name.replace("_", " ").title() }}</h3>
+                                    <h3 class="childtablename" style="font-size: 14px;">{{ table_name.replace("_", " ").title() }}</h3>
                                     {% if child_data[table_name] %}
                                         {% for child in child_data[table_name] %}
                                             <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
@@ -488,11 +496,11 @@ template_str = """
                                                 <div style="display: flex; flex-wrap: wrap;">
                                                     {% for key, value in child.items() %}
                                                         <div style="width: 48%; display:flex;align-items:baseline;gap:2px;  margin-right: 2%; margin-bottom: 10px;">
-                                                            <label style="font-weight: 600;">{{ key }}:</label><br />
+                                                            <label style="font-weight: 600;font-size: 13px;">{{ key }}:</label><br />
                                                             {% if value and value.endswith(('.pdf', '.jpg', '.png', '.jpeg')) %}
                                                                 <a href="{{ value }}" target="_blank">View Attachment</a>
                                                             {% else %}
-                                                                <input type="text" value="{{ value }}" class="block_input" readonly style="width: 100%; padding: 5px;" />
+                                                                <input type="text" value="{{ value }}" class="block_input" readonly style="width: 100%; padding: 5px; font-size: 14px;" />
                                                             {% endif %}
                                                         </div>
                                                     {% endfor %}
@@ -504,14 +512,14 @@ template_str = """
                                     {% endif %}
 
                                 {% elif table_name in child_table_data %}
-                                    <h3 class="childtablename">{{ table_name.replace("_", " ").title() }}</h3>
-                                    <div style="border:1px solid #ccc; padding:10px; margin-bottom:5px;">
+                                    <h3 class="childtablename" style="font-size: 14px;">{{ table_name.replace("_", " ").title() }}</h3>
+                                    <div style="border:1px solid #ccc; padding:10px; margin-bottom:5px;font-size: 13px;">
                                     
                                         <div style="display: flex; flex-wrap: wrap;">
                                             {% for column in child_table_data[table_name] %}
                                                 <div style="width: 48%; margin-right: 2%;display:flex;align-items:baseline;gap:2px; margin-bottom: 10px;">
-                                                    <label style="font-weight: 600;">{{ column }}:</label><br />
-                                                    <input type="text"  readonly class="block_input" style="width: 100%; padding: 5px; color: #ccc;" />
+                                                    <label style="font-weight: 600;font-size: 13px;">{{ column }}:</label><br />
+                                                    <input type="text"  readonly class="block_input" style="width: 100%; padding: 5px; color: #ccc;font-size: 13px;" />
                                                 </div>
                                             {% endfor %}
                                         </div>
@@ -521,23 +529,23 @@ template_str = """
                             {% else %}
 
                                 {% if table_name in child_data %}
-                                    <h3 class="childtablename" style=margin-left:3px;margin-right:3px;>{{ table_name.replace("_", " ").title() }}</h3>
+                                    <h3 class="childtablename" style=margin-left:3px;margin-right:3px;font-size: 14px;>{{ table_name.replace("_", " ").title() }}</h3>
                                     {% if child_data[table_name] %}
-                                        <table style="width: 100%; margin-bottom:5px; border-collapse: collapse; margin-left:3px;margin-right:3px;">
+                                        <table class="rounded-table" style="width: 100%; margin-bottom:5px; border-collapse: collapse;border-radius: 3px; margin-left:3px;margin-right:3px;">
                                             <thead>
                                                 <tr>
-                                                    <th style="border: 1px solid #ccc;width:3%; padding: 8px; background-color: #f2f2f2;">S.no</th>
+                                                    <th style="border: 1px solid #ccc;width:3%; padding: 8px; background-color: #f2f2f2;font-size: 13px;">S.no</th>
                                                     {% for key in child_data[table_name][0].keys() %}
-                                                        <th style="border: 1px solid #ccc; padding: 8px; background-color: #f2f2f2;">{{ key }}</th>
+                                                        <th style="border: 1px solid #ccc; padding: 8px; background-color: #f2f2f2;font-size: 13px;">{{ key }}</th>
                                                     {% endfor %}
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 {% for child in child_data[table_name] %}
                                                     <tr>
-                                                        <td style="border: 1px solid #ccc;padding: 8px;text-align:center;">{{ loop.index }}</td>
+                                                        <td style="border: 1px solid #ccc;padding: 8px;text-align:center;font-size: 13px;">{{ loop.index }}</td>
                                                         {% for value in child.values() %}
-                                                            <td style="border: 1px solid #ccc; padding: 8px; word-break: break-word;">{{ value if value else '—' }}</td>
+                                                            <td style="border: 1px solid #ccc; padding: 8px; word-break: break-word; font-size: 13px;">{{ value if value else '—' }}</td>
                                                         {% endfor %}
                                                     </tr>
                                                 {% endfor %}
@@ -549,21 +557,21 @@ template_str = """
 
                                 {% elif table_name in child_table_data %}
                                 
-                                    <h3 class="childtablename">{{ table_name.replace("_", " ").title() }}</h3>
-                                    <table style="width: 100%; margin-bottom:10px; border-collapse: collapse;">
+                                    <h3 class="childtablename" style="font-size: 14px;">{{ table_name.replace("_", " ").title() }}</h3>
+                                    <table class="rounded-table" style="width: 100%; margin-bottom:10px; border-collapse: collapse; border-radius: 3px;">
                                         <thead>
                                             <tr>
-                                                <th style="border: 1px solid #ccc;width:3%; padding: 8px; background-color: #f2f2f2;">S.no</th>
+                                                <th style="border: 1px solid #ccc;width:3%; padding: 8px; background-color: #f2f2f2;font-size: 13px;">S.no</th>
                                                 {% for column in child_table_data[table_name] %}
-                                                    <th style="border: 1px solid #ccc; padding: 8px; background-color: #f2f2f2;">{{ column }}</th>
+                                                    <th style="border: 1px solid #ccc; padding: 8px; background-color: #f2f2f2; font-size: 13px;">{{ column }}</th>
                                                 {% endfor %}
                                             </tr>
                                         </thead>
                                         <tbody>
                                             <tr>
-                                                <td style="border: 1px solid #ccc; padding: 8px; text-align: center;">-</td>
+                                                <td style="border: 1px solid #ccc; padding: 8px; text-align: center;font-size: 13px;">-</td>
                                                 {% for column in child_table_data[table_name] %}
-                                                    <td style="border: 1px solid #ccc; padding: 8px; text-align: center; color: #ccc;">-</td>
+                                                    <td style="border: 1px solid #ccc; padding: 8px; text-align: center; color: #ccc;font-size: 13px;">-</td>
                                                 {% endfor %}
                                             </tr>
                                         </tbody>
@@ -584,7 +592,7 @@ template_str = """
                                 {% for field in column.fields %}
                                
                                     <div class="field field-textarea">
-                                        <label for="{{ field.fieldname }}">{{ field.label }} <span style="padding-left:2px;">:</span></label>
+                                        <label for="{{ field.fieldname }}">{{ field.label }} <span style="padding-left:2px; font-size: 13px;">:</span></label>
 
                                         {% if field.fieldtype in ['Check', 'radio'] %}
                                             <div class="container-fluid">
@@ -662,9 +670,13 @@ template_str = """
                                                 <input type="text" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
                                             {% endif %}
                                         {% elif field.fieldtype == 'Phone' %}
-                                            <input type="tel" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
+                                             <span id="{{ field.fieldname }}" name="{{ field.fieldname }}" class="date-span">
+                                                {{ field['values'] }}
+                                            </span>
                                         {% elif field.fieldtype == 'Time' %}
-                                            <input type="time" id="{{ field.fieldname }}"  value="{{ field['values'] }}" name="{{ field.fieldname }}">
+                                             <span id="{{ field.fieldname }}" name="{{ field.fieldname }}" class="date-span">
+                                                {{ field['values'] }}
+                                            </span>
                                         {% elif field.fieldtype == 'Color' %}
                                             <input type="color" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
                                           {% elif field.fieldtype == 'Text' %}
@@ -682,7 +694,10 @@ template_str = """
                                                 style="height: {{ height }}px; border: none; width: 100%; font-size:13px;"
                                             >{{ value }}</textarea>
                                         {% elif field.fieldtype == 'Date' %}
-                                            <input type="text" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}" class="date-input" placeholder="__/__/____">
+                                            <span id="{{ field.fieldname }}" name="{{ field.fieldname }}" class="date-span">
+                                                {{ field['values'] }}
+                                            </span>
+
                                         {% elif field.fieldtype == 'Datetime' %}
                                             <span id="{{ field.fieldname }}"
                                                 style="font-size:13px; font-weight:500;border-bottom: 1px solid #cccccc;">

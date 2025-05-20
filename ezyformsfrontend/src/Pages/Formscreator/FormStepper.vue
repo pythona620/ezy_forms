@@ -1371,7 +1371,17 @@ function canShowDesignationButton(blockIndex) {
   );
 }
 
-
+// Watch and trim spaces
+watch(() => filterObj.value.form_name, (newVal) => {
+  filterObj.value.form_name = newVal.trim()
+})
+ 
+watch(() => filterObj.value.form_short_name, (newVal) => {
+  filterObj.value.form_short_name = newVal.trim()
+})
+watch(() => filterObj.value.series, (newVal) => {
+  filterObj.value.series = newVal.trim()
+})
 
 const draggedField = ref(null);
 
