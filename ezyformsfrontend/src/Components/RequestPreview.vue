@@ -645,17 +645,22 @@ watch(
     const finalData = {};
 
     for (const [tableIndex, rows] of Object.entries(tableRows)) {
-      const totalsRow = tableTotals.value[tableIndex] || {};
+      const totalsRow = tableTotals.value?.[tableIndex];
 
-      // Clone the rows and append the totals row
-      finalData[tableIndex] = [...rows, totalsRow];
+      if (totalsRow && Object.keys(totalsRow).length > 0) {
+        // Only add totals row if it has actual data
+        finalData[tableIndex] = [...rows, totalsRow];
+      } else {
+        // Otherwise, just send the rows
+        finalData[tableIndex] = [...rows];
+      }
     }
 
     emit('updateTableData', { ...finalData });
-        // emit('updateTableData', { ...tableRows });
   },
   { deep: true }
 );
+
 watch(
     () => props.tableRowsdata,
     (newData) => {

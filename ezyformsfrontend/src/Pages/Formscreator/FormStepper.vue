@@ -1870,33 +1870,33 @@ const processFields = (blockIndex, sectionIndex, tableIndex) => {
   //  // autoClose: 500,
   //  // transition: "zoom",
   //  //});
-  // axiosInstance
-  //   .post(apis.childtable, data)
-  //   .then((res) => {
-  //     if (res) {
-  //       ensureArrayPath(blockIndex, sectionIndex, 'afterCreated');
+  axiosInstance
+    .post(apis.childtable, data)
+    .then((res) => {
+      if (res) {
+        ensureArrayPath(blockIndex, sectionIndex, 'afterCreated');
 
-  //       // // Save original table to afterCreated
-  //       section.afterCreated[tableIndex] = table;
+        // // Save original table to afterCreated
+        section.afterCreated[tableIndex] = table;
 
-  //       blockArr[blockIndex].sections[sectionIndex].childTables[tableIndex] = []
+        blockArr[blockIndex].sections[sectionIndex].childTables[tableIndex] = []
 
-  //       toast.success("Table created successfully!", {
-  //         autoClose: 500,
-  //         transition: "zoom",
-  //       });
+        toast.success("Table created successfully!", {
+          autoClose: 500,
+          transition: "zoom",
+        });
 
-  //       const responseData = res.message?.[0]?.[0]?.child_doc;
+        const responseData = res.message?.[0]?.[0]?.child_doc;
 
-  //       // // Store the response data back to the table
-  //       blockArr[blockIndex].sections[sectionIndex].childTables[tableIndex] = responseData;
+        // // Store the response data back to the table
+        blockArr[blockIndex].sections[sectionIndex].childTables[tableIndex] = responseData;
 
-  //       // console.log("Table response saved:", responseData);
-  //     }
-  //   })
-  //   .catch((error) => {
-  //     console.error("Error creating table:", error);
-  //   });
+        // console.log("Table response saved:", responseData);
+      }
+    })
+    .catch((error) => {
+      console.error("Error creating table:", error);
+    });
 };
 
 const afterImmediateEditdeleteRow = (blockIndex, sectionIndex, tableName, index) => {
@@ -2140,7 +2140,8 @@ const addNewFieldedit = (tableName) => {
     label: "",
     value: "", // Keep value
     isNew: true,
-    options: childtableHeaders.value[tableName].options ? `\n${childtableHeaders.value[tableName].options}` : `\n${''}`
+    description:"",
+    options: childtableHeaders.value[tableName].options ? `\n${childtableHeaders.value[tableName].options}` : `${''}`
   });
   // console.log(childtableHeaders.value[tableName],"mmm");
 };
