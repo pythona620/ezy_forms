@@ -100,8 +100,7 @@
                                     columnIndex,
                                     fieldIndex
                                   )
-                              "
-                            class="form-control fs-6 border-dark form-check-input previewInputHeight font-10" />
+                              " class="form-control fs-6 border-dark form-check-input previewInputHeight font-10" />
                         </template>
 
                         <!-- Field Type Check or Radio -->
@@ -234,7 +233,8 @@
                                   columnIndex,
                                   fieldIndex
                                 )" class="form-control font-12 " />
-                            <button class="btn btn-dark text-dark bg-white" @click="ClickLink(field)"> <i class="bi bi-link-45deg font-15"></i></button>
+                            <button class="btn btn-dark text-dark bg-white" @click="ClickLink(field)"> <i
+                                class="bi bi-link-45deg font-15"></i></button>
 
                             <!-- <button type="button" class="btn btn-outline-secondary pb-0 btn-sm" data-bs-toggle="modal"
                               :data-bs-target="`#modal-${field.fieldname}`">
@@ -381,10 +381,12 @@
                                     <label class="font-12 fw-semibold">{{ field.label }}</label>
 
                                     <template v-if="isFilePath(row[field.fieldname])">
-                                      <div class="cursor-pointer text-primary" @click="openFile(row[field.fieldname])">
+                                      <div v-for="(file, i) in row[field.fieldname].split(',')" :key="i"
+                                        class="cursor-pointer text-primary d-block" @click="openFile(file)">
                                         View Attachment <i class="bi bi-eye-fill ps-1"></i>
                                       </div>
                                     </template>
+
 
                                     <template v-else>
                                       <input type="text" class="form-control font-12" :value="row[field.fieldname]"
@@ -408,10 +410,18 @@
                                   <tr v-for="(row, index) in props.childData[tableName]" :key="index">
                                     <!-- <td>{{ index + 1 }}</td> -->
                                     <td v-for="field in headers" :key="field.fieldname">
-                                      <span v-if="isFilePath(row[field.fieldname])" class="cursor-pointer"
-                                        @click="openFile(row[field.fieldname])">
-                                        <span>View Attachment <i class="bi bi-eye-fill ps-1"></i></span>
-                                      </span>
+                                      <template v-if="isFilePath(row[field.fieldname])">
+                                        <div class=" d-flex gap-1">
+                                          <span v-for="(file, i) in row[field.fieldname].split(',')" :key="i">
+                                            <span class="cursor-pointer text-decoration-underline d-flex mb-1"
+                                              @click="openFile(file)">
+                                              View<i class="bi bi-eye-fill ps-1"></i>
+                                            </span>
+                                          </span>
+                                        </div>
+                                      </template>
+
+                                      <!-- Show normal value if not a file path -->
                                       <span v-else>
                                         {{ row[field.fieldname] || "" }}
                                       </span>

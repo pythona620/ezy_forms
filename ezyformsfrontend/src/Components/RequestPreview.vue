@@ -377,8 +377,9 @@
                                                     class="font-11 multiselect" />
                                                                         </template> -->
 
-                                                                    <input v-else-if="fieldItem.fieldtype === 'Attach'"
-                                                                        type="file" class="form-control font-12"
+                                                                    <input v-else-if="fieldItem.fieldtype === 'Attach'" multiple
+                                                                        type="file" class="form-control font-12" 
+                                                                            accept="image/jpeg,image/png,application/pdf"
                                                                         @change="handleFileUpload($event, row, fieldItem.fieldname)" />
                                                                 </div>
                                                             </div>
@@ -482,35 +483,35 @@
                                                                                 class="form-control font-12"
                                                                                 v-model.number="row[field.fieldname]" />
                                                                         </template> -->
- <!-- <template v-if="field.fieldtype === 'Int'">
-  
-              <input
-                v-if="field.description && /[+\-*/]/.test(field.description)"
-                type="number"
-                class="form-control font-12"
-                :value="calculateFieldExpression(row, field.description)"
-                readonly
-              />
-              <input
-                v-else
-                type="number"
-                class="form-control font-12"
-                v-model.number="row[field.fieldname]"
-              />
-            </template> -->
-             <template v-if="field.fieldtype === 'Int'">
-        <input
-          v-if="field.description && /[+\-*/]/.test(field.description)"
-          type="number" class="form-control font-12"
-          :value="calculateFieldExpression(row, field.description, table)"
-          readonly
-        />
-        <input
-          v-else
-          type="number" class="form-control font-12"
-          v-model.number="row[field.fieldname]"
-        />
-      </template>
+                                                                        <!-- <template v-if="field.fieldtype === 'Int'">
+                                                                        
+                                                                                    <input
+                                                                                        v-if="field.description && /[+\-*/]/.test(field.description)"
+                                                                                        type="number"
+                                                                                        class="form-control font-12"
+                                                                                        :value="calculateFieldExpression(row, field.description)"
+                                                                                        readonly
+                                                                                    />
+                                                                                    <input
+                                                                                        v-else
+                                                                                        type="number"
+                                                                                        class="form-control font-12"
+                                                                                        v-model.number="row[field.fieldname]"
+                                                                                    />
+                                                                                    </template> -->
+                                                                            <template v-if="field.fieldtype === 'Int'">
+                                                                        <input
+                                                                        v-if="field.description && /[+\-*/]/.test(field.description)"
+                                                                        type="number" class="form-control font-12"
+                                                                        :value="calculateFieldExpression(row, field.description, table)"
+                                                                        readonly
+                                                                        />
+                                                                        <input
+                                                                        v-else
+                                                                        type="number" class="form-control font-12"
+                                                                        v-model.number="row[field.fieldname]"
+                                                                        />
+                                                                    </template>
 
 
                                                                         <template v-if="field.fieldtype === 'Datetime'">
@@ -522,7 +523,8 @@
 
                                                                         <template
                                                                             v-else-if="field.fieldtype === 'Attach'">
-                                                                            <input type="file"
+                                                                            <input type="file" multiple
+                                                                                accept="image/jpeg,image/png,application/pdf" 
                                                                                 class="form-control font-12"
                                                                                 @change="handleFileUpload($event, row, field.fieldname)" />
                                                                         </template>
@@ -762,6 +764,61 @@ watchEffect(() => {
     });
   }
 });
+const handleFileUpload = (event, row, fieldname) => {
+  const selectedFiles = Array.from(event.target.files);
+  if (!selectedFiles.length) return;
+
+  // Initialize the field if it's not already an array
+  if (!Array.isArray(row[fieldname])) {
+    row[fieldname] = [];
+  }
+
+  // Calculate total number of files (existing + new)
+  const totalFiles = row[fieldname].length + selectedFiles.length;
+
+  if (totalFiles > 5) {
+    alert("You can only upload a maximum of 5 files.");
+    return;
+  }
+
+  // Proceed with uploading each file
+  selectedFiles.forEach((file) => {
+    tableFileUpload(file, row, fieldname);
+  });
+};
+
+
+const tableFileUpload = (file, row, fieldname) => {
+  const randomNumber = generateRandomNumber();
+  const fileName = `mailfiles-${props.formName}${randomNumber}-@${file.name}`;
+
+  const formData = new FormData();
+  formData.append("file", file, fileName);
+  formData.append("is_private", "0");
+  formData.append("folder", "Home");
+
+  axiosInstance
+    .post(apis.uploadfile, formData)
+    .then((res) => {
+      if (res.message && res.message.file_url) {
+        const fileUrl = res.message.file_url;
+
+        // Append the file URL to a comma-separated string
+        if (!row[fieldname]) {
+          row[fieldname] = fileUrl;
+        } else {
+          row[fieldname] += `,${fileUrl}`;
+        }
+      } else {
+        console.error("file_url not found in the response.");
+      }
+    })
+    .catch((error) => {
+      console.error("Upload error:", error);
+    });
+};
+
+
 
 
 const handleSelectChange = (
@@ -1217,6 +1274,10 @@ const uploadFile = (file, field, index) => {
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 
 <style lang="scss" scoped>
+td:first-child,
+th:first-child {
+  width: 3%;
+}
 .multiselect {
     height: 30px !important;
     font-size: 12px !important;
