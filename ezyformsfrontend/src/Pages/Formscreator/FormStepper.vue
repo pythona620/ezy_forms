@@ -736,7 +736,7 @@
 
                                                             <!-- Label Input -->
                                                             <td v-if="editMode[tableName]">
-                                                              <input v-model="field.label" placeholder="Field Label"
+                                                              <input v-model="field.label" placeholder="Field Label" @blur="updateFieldname(field)"
                                                                 class="form-control"
                                                                 :class="{ 'border-1 border-danger': invalidFields[tableName]?.includes(index) }" />
                                                               <span v-if="invalidFields[tableName]?.includes(index)"
@@ -911,7 +911,7 @@
                                           <td>{{ index + 1 }}</td>
 
                                           <td v-if="editMode[table.tableName]">
-                                            <input v-model="field.label" placeholder="Field Label" class="form-control"
+                                            <input v-model="field.label" placeholder="Field Label" class="form-control" @blur="updateFieldname(field)"
                                               :class="{ 'border-1 border-danger': invalidFields[table.tableName]?.includes(index) }" />
                                             <span v-if="invalidFields[tableIndex]?.includes(index)"
                                               class="font-11 text-danger">Label
@@ -986,7 +986,7 @@
                                       <div class="d-flex justify-content-between align-items-center mt-1 mb-2">
                                         <div>
                                           <span :class="table.tableName ? 'd-none' : 'text-danger'">*</span>
-                                          <input v-model="table.tableName" placeholder="Table Name"
+                                          <input v-model="table.tableName" placeholder="Table Name" @blur="updateFieldname(table)"
                                             class="border-less-input font-14 p-0 inputHeight" :class="{
                                               'italic-style': !table.tableName,
                                               'fw-medium': table.tableName,
@@ -1018,7 +1018,7 @@
                                           <div class="d-flex justify-content-between">
                                             <div>
                                               <span :class="field.label ? 'd-none' : 'text-danger'">*</span>
-                                              <input v-model="field.label" placeholder="Name the field"
+                                              <input v-model="field.label" placeholder="Name the field" @blur="updateFieldname(field)"
                                                 class="border-less-input font-14 p-0 inputHeight" :class="{
                                                   'italic-style': !field.label,
                                                   'fw-medium': field.label,
@@ -1723,6 +1723,9 @@ onMounted(() => {
 //   }
 // };
 const childTables = ref([]);
+function generateFieldname(label) {
+  return label.toLowerCase().replace(/\s+/g, '_').replace(/[^\w_]/g, '');
+}
 
 const addChildTable = (blockIndex, sectionIndex) => {
   const section = blockArr[blockIndex].sections[sectionIndex];
@@ -1736,7 +1739,7 @@ const addChildTable = (blockIndex, sectionIndex) => {
   // Push a new child table with its own columns array
   section.childTables.push({
     label: "",
-    fieldname: `field_${newIndex}`,
+    fieldname: "",
     fieldtype: "Table", // optional clarity
     idx: newIndex,
     reqd: false,
@@ -1782,7 +1785,11 @@ const addFieldToTable = (blockIndex, sectionIndex, tableIndex) => {
 
   });
 };
-
+const updateFieldname = (field) => {
+  if (field.label) {
+    field.fieldname = generateFieldname(field.label);
+  }
+};
 
 const removeChildTable = (blockIndex, sectionIndex, tableIndex) => {
   blockArr[blockIndex].sections[sectionIndex].childTables.splice(tableIndex, 1);
@@ -1930,7 +1937,7 @@ const afterImmediateEditaddNewFieldedit = (blockIndex, sectionIndex, tableName) 
   const newIndex = table.columns.length;
 
   table.columns.push({
-    fieldname: `field_${newIndex}`,
+    fieldname: "",
     fieldtype: "",
     idx: newIndex + 1,
     label: "",
@@ -2134,7 +2141,7 @@ const addNewFieldedit = (tableName) => {
   const newIndex = childtableHeaders.value[tableName].length + 1;
 
   childtableHeaders.value[tableName].push({
-    fieldname: `field_${newIndex - 1}`, // Ensuring unique fieldname
+    fieldname: "", // Ensuring unique fieldname
     fieldtype: "",
     idx: newIndex, // Assign idx dynamically
     label: "",
