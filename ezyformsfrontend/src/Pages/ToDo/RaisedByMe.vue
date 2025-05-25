@@ -511,68 +511,7 @@ const updateFormData = (fieldValues) => {
   formData.value = formData.value.concat(fieldValues);
 };
 
-function ApproverFormSubmission(dataObj, type) {
-  let form = {};
-  form["doctype"] = selectedRequest.value.doctype_name;
-  form["company_field"] = selectedRequest.value.property;
-  form["name"] = doctypeForm.value.name;
-  if (emittedFormData.value.length) {
-    emittedFormData.value.map((each) => {
-      form[each.fieldname] = each.value;
-    });
-  }
 
-  // form['form_json']
-  const formData = new FormData();
-  formData.append("doc", JSON.stringify(form));
-  formData.append("action", "Save");
-  axiosInstance
-    .post(apis.savedocs, formData)
-    .then((response) => {
-      if (response?.docs) {
-        // approvalCancelFn(dataObj, type);
-      }
-    })
-    .catch((error) => {
-      console.error("Error fetching data:", error);
-    });
-}
-
-
-// // Function to handle form submission
-// const ApproverFormSubmission = () => {
-
-//   // if (emittedFormData.value.length) {
-//   //       emittedFormData.value.map((each) => {
-//   //           form[each.fieldname] = each.value
-//   //       })
-//   //   }
-
-//   let data = {
-//     "property": selectedRequest.value.property,
-//     "doctype": selectedRequest.value.doctype_name,
-//     "request_ids": selectedRequest.value.name,
-//     "reason": "",
-//     "action": selectedRequest.value.action,
-//     "files": "[]",
-//     "cluster_name": null,
-//     "url_for_approval_id": '',
-//     // https://ezyrecon.ezyinvoicing.com/home/wf-requests
-//     "current_level": selectedRequest.value.current_level
-//   }
-
-//   // axiosInstance.post(apis.requestApproval, { request_details: [data] })
-//   //   .then((response) => {
-
-//   toast.success("Rquest Approved", { autoClose: 1000 })
-//   const modal = bootstrap.Modal.getInstance(document.getElementById('viewRequest'));
-//   modal.hide();
-//   // })
-//   // .catch((error) => {
-//   //   console.error("Error fetching data:", error);
-//   // });
-
-// };
 
 function mapFormFieldsToRequest(doctypeData, showRequestData) {
   showRequestData.forEach((block) => {

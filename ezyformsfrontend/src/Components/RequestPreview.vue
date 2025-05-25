@@ -18,8 +18,9 @@
                                 </div>
                                 <div class="mx-3 my-2">
                                     <div v-for="(field, fieldIndex) in column.fields"
-                                        :key="'field-preview-' + fieldIndex" >
-                                        <div v-if="field.fieldtype !== 'Table'" :class="field.fieldtype === 'Check' ? ' d-flex mt-4 flex-row-reverse justify-content-start gap-3':''">
+                                        :key="'field-preview-' + fieldIndex">
+                                        <div v-if="field.fieldtype !== 'Table'"
+                                            :class="field.fieldtype === 'Check' ? ' d-flex mt-4 flex-row-reverse justify-content-start gap-3' : ''">
                                             <div v-if="field.label">
                                                 <label :for="'field-' +
                                                     sectionIndex +
@@ -28,13 +29,15 @@
                                                     '-' +
                                                     fieldIndex
                                                     ">
-                                                    <span class="font-12" :class="field.fieldtype === 'Small Text' ? 'fw-bold': ''">{{ field.label }}</span>
+                                                    <span class="font-12"
+                                                        :class="field.fieldtype === 'Small Text' ? 'fw-bold' : ''">{{
+                                                        field.label }}</span>
                                                     <span class="ms-1 text-danger">{{
                                                         field.reqd === 1 ? "*" : ""
-                                                        }}</span>
+                                                    }}</span>
                                                 </label>
                                             </div>
- 
+
                                             <template v-if="
                                                 field.fieldtype === 'Select' ||
                                                 field.fieldtype === 'Table MultiSelect'
@@ -67,7 +70,7 @@
                                             </template>
 
                                             <template v-else-if="
-                                                
+
                                                 field.fieldtype === 'radio' || field.fieldtype === 'Small Text'
                                             ">
                                                 <div class="container-fluid">
@@ -166,8 +169,7 @@
 
                                             </template>
                                             <template v-else-if="field.fieldtype == 'Check'">
-                                                <input type="checkbox" :value="field.value" 
-                                                    
+                                                <input type="checkbox" :value="field.value"
                                                     :placeholder="'Enter ' + field.label" :name="'field-' +
                                                         sectionIndex +
                                                         '-' +
@@ -184,10 +186,12 @@
                                                                     columnIndex,
                                                                     fieldIndex
                                                                 )
-                                                        " class="form-control form-check-input previewInputHeight font-10" />
+                                                        "
+                                                    class="form-control form-check-input previewInputHeight font-10" />
                                             </template>
                                             <template v-else-if="field.fieldtype == 'Datetime'">
-                                                <input type="datetime-local" :value="field.value"  :min="new Date().toISOString().slice(0, 16)"
+                                                <input type="datetime-local" :value="field.value"
+                                                    :min="new Date().toISOString().slice(0, 16)"
                                                     @click="forceOpenCalendar" ref="datetimeInput"
                                                     :placeholder="'Enter ' + field.label" :name="'field-' +
                                                         sectionIndex +
@@ -264,11 +268,11 @@
                                                     '-' +
                                                     fieldIndex
                                                     " class="form-control previewInputHeight"></textarea>
-                                                    <!-- :max="currentdate" -->
+                                                <!-- :max="currentdate" -->
                                                 <component v-if="
-                                                    field.fieldtype !== 'Datetime' && field.fieldtype !== 'Text' 
-                                                " :is="getFieldComponent(field.fieldtype)" :value="field.value" :min="past"
-                                                     @click="forceOpenCalendar"
+                                                    field.fieldtype !== 'Datetime' && field.fieldtype !== 'Text'
+                                                " :is="getFieldComponent(field.fieldtype)" :value="field.value"
+                                                    :min="past" @click="forceOpenCalendar"
                                                     :maxlength="getMaxLength(field)"
                                                     :type="getInputType(field.fieldtype)" :name="'field-' +
                                                         sectionIndex +
@@ -344,7 +348,7 @@
                                                                     :key="fieldItem.fieldname">
                                                                     <label class="font-12 fw-medium">{{
                                                                         fieldItem.label
-                                                                    }}</label>
+                                                                        }}</label>
 
                                                                     <input v-if="fieldItem.fieldtype === 'Data'"
                                                                         :title="row[fieldItem.fieldname]" type="text"
@@ -352,9 +356,10 @@
                                                                         :maxlength="fieldItem.fieldtype === 'Phone' ? '10' : '140'"
                                                                         v-model="row[fieldItem.fieldname]" />
 
-                                                                    <input v-else-if="fieldItem.fieldtype === 'Date'" :min="past"
-                                                                        :max="today" :title="row[fieldItem.fieldname]"
-                                                                        type="date" class="form-control font-12"
+                                                                    <input v-else-if="fieldItem.fieldtype === 'Date'"
+                                                                        :min="past" :max="today"
+                                                                        :title="row[fieldItem.fieldname]" type="date"
+                                                                        class="form-control font-12"
                                                                         v-model="row[fieldItem.fieldname]" />
 
                                                                     <input
@@ -398,18 +403,19 @@
                                             <div v-else>
                                                 <div v-for="(table, tableIndex) in props.tableHeaders" :key="tableIndex"
                                                     class="mt-3">
-                                                    <div v-if="tableIndex === field.options || tableIndex === field.fieldname">
+                                                    <div
+                                                        v-if="tableIndex === field.options || tableIndex === field.fieldname">
                                                         <div>
                                                             <span class="font-13 text-secondary ">{{
                                                                 tableIndex.replace(/_/g, " ")
-                                                                }}</span>
+                                                            }}</span>
                                                         </div>
                                                         <table class="table  rounded-table" border="1" width="100%">
                                                             <thead>
                                                                 <tr class=" font-12 fw-lighter">
                                                                     <th class="fw-medium text-center">#</th>
-                                                                    <th class=" fw-medium text-center" v-for="field in table"
-                                                                        :key="field.fieldname">
+                                                                    <th class=" fw-medium text-center"
+                                                                        v-for="field in table" :key="field.fieldname">
                                                                         {{ field.label }}
                                                                     </th>
                                                                     <th></th>
@@ -431,7 +437,8 @@
                                                                 <tr class=" position-relative"
                                                                     v-for="(row, rowIndex) in tableRows[tableIndex]"
                                                                     :key="rowIndex">
-                                                                    <td style="text-align: center;">{{ rowIndex + 1 }}
+                                                                    <td style="text-align: center;" class="font-12">{{
+                                                                        rowIndex + 1 }}
                                                                     </td>
                                                                     <td v-for="field in table" :key="field.fieldname"
                                                                         :title="row[field.fieldname]"
@@ -459,17 +466,53 @@
                                                                             </div>
                                                                         </template>
                                                                         <template v-if="field.fieldtype === 'Date'">
-                                                                            <input type="date"  :min="past"
+                                                                            <input type="date" :min="past"
                                                                                 :title="row[field.fieldname]"
                                                                                 class="form-control font-12"
                                                                                 v-model="row[field.fieldname]" />
                                                                         </template>
-                                                                        <template v-if="field.fieldtype === 'Int'">
-                                                                            <input type="Number"
+                                                                        <!-- <template v-if="field.fieldtype === 'Int'">
+                                                                            <input
+                                                                                v-if="field.label.toLowerCase() === 'total'"
+                                                                                type="number"
                                                                                 class="form-control font-12"
-                                                                                :title="row[field.fieldname]"
-                                                                                v-model="row[field.fieldname]" />
-                                                                        </template>
+                                                                                :value="calculateDynamicTotal(row, table)"
+                                                                                readonly />
+                                                                            <input v-else type="number"
+                                                                                class="form-control font-12"
+                                                                                v-model.number="row[field.fieldname]" />
+                                                                        </template> -->
+ <!-- <template v-if="field.fieldtype === 'Int'">
+  
+              <input
+                v-if="field.description && /[+\-*/]/.test(field.description)"
+                type="number"
+                class="form-control font-12"
+                :value="calculateFieldExpression(row, field.description)"
+                readonly
+              />
+              <input
+                v-else
+                type="number"
+                class="form-control font-12"
+                v-model.number="row[field.fieldname]"
+              />
+            </template> -->
+             <template v-if="field.fieldtype === 'Int'">
+        <input
+          v-if="field.description && /[+\-*/]/.test(field.description)"
+          type="number" class="form-control font-12"
+          :value="calculateFieldExpression(row, field.description, table)"
+          readonly
+        />
+        <input
+          v-else
+          type="number" class="form-control font-12"
+          v-model.number="row[field.fieldname]"
+        />
+      </template>
+
+
                                                                         <template v-if="field.fieldtype === 'Datetime'">
                                                                             <input type="datetime-local"
                                                                                 :title="row[field.fieldname]"
@@ -484,6 +527,7 @@
                                                                                 @change="handleFileUpload($event, row, field.fieldname)" />
                                                                         </template>
                                                                     </td>
+
                                                                     <td class="d-table-cell text-center align-middle">
                                                                         <span class="tableRowRemoveBtn "
                                                                             @click="removeRow(tableIndex, rowIndex)">
@@ -492,6 +536,17 @@
                                                                     </td>
                                                                 </tr>
 
+                                                            </tbody>
+                                                            <tfoot >
+                                                                <tr v-if="table.some(field => field.fieldtype === 'Int' && field.description && /[+\-*/]/.test(field.description))"  class="bg-light">
+                                                                    <td class="text-center font-12">Total</td>
+                                                                    <td v-for="field in table" :key="field.fieldname" class="text-center font-12">
+                                                                        <span v-if="field.fieldtype === 'Int' && field.description && /[+\-*/]/.test(field.description)">
+                                                                            {{ tableTotals[tableIndex]?.[field.fieldname] ?? 0 }}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td></td> 
+                                                                </tr>
                                                                 <tr>
                                                                     <td :colspan="table.length + 2"
                                                                         class="text-center text-muted">
@@ -502,7 +557,8 @@
                                                                     </td>
 
                                                                 </tr>
-                                                            </tbody>
+                                                            </tfoot>
+
                                                         </table>
 
                                                         <span
@@ -534,6 +590,7 @@ import { apis, doctypes } from "../shared/apiurls";
 import { reactive } from "vue";
 import Multiselect from "vue-multiselect";
 import "@vueform/multiselect/themes/default.css";
+import { watchEffect } from "vue";
 
 const props = defineProps({
     blockArr: {
@@ -564,7 +621,7 @@ const pad = (n) => n.toString().padStart(2, '0');
 
 // Format: YYYY-MM-DDTHH:MM (suitable for datetime-local input)
 const today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
-const currentdate = new Date().toISOString().split('T')[0];
+
 
 const getMaxLength = (field) => {
     const label = field.label?.toLowerCase() || '';
@@ -583,11 +640,21 @@ const getInputType = (type) => {
 };
 // Format as 'YYYY-MM-DDTHH:MM'
 watch(
-    () => tableRows,
-    () => {
-        emit('updateTableData', { ...tableRows });
-    },
-    { deep: true }
+  () => tableRows,
+  () => {
+    const finalData = {};
+
+    for (const [tableIndex, rows] of Object.entries(tableRows)) {
+      const totalsRow = tableTotals.value[tableIndex] || {};
+
+      // Clone the rows and append the totals row
+      finalData[tableIndex] = [...rows, totalsRow];
+    }
+
+    emit('updateTableData', { ...finalData });
+        // emit('updateTableData', { ...tableRows });
+  },
+  { deep: true }
 );
 watch(
     () => props.tableRowsdata,
@@ -618,6 +685,79 @@ const addRow = (tableIndex) => {
 const removeRow = (tableIndex, rowIndex) => {
     tableRows[tableIndex].splice(rowIndex, 1);
 };
+
+
+function calculateFieldExpression(row, expression, fields) {
+  // Map labels to fieldnames for substitution
+  const labelToFieldname = {};
+  fields.forEach(f => {
+    labelToFieldname[f.label] = f.fieldname;
+  });
+
+  // Replace label names in expression with actual row values
+  const formula = expression.replace(/\b(\w+)\b/g, (match) => {
+    const fn = labelToFieldname[match];
+    if (fn !== undefined && row[fn] !== undefined && row[fn] !== null && row[fn] !== '') {
+      return row[fn];
+    }
+    return 0; // fallback if no matching label
+  });
+
+  try {
+    return eval(formula);
+  } catch (e) {
+    console.error('Error evaluating formula:', formula, e);
+    return 0;
+  }
+}
+
+
+ 
+const tableTotals = computed(() => {
+  const totals = {};
+
+  for (const [tableIndex, rows] of Object.entries(tableRows)) {
+    totals[tableIndex] = {};
+
+    const fields = props.tableHeaders[tableIndex] || [];
+    fields.forEach((field) => {
+      if (field.fieldtype === 'Int') {
+        let sum = 0;
+
+        rows.forEach((row) => {
+          if (field.description && /[+\-*/]/.test(field.description)) {
+            // Calculate expression dynamically using labels and row data
+            sum += Number(calculateFieldExpression(row, field.description, fields)) || 0;
+          } 
+        //   else {
+        //     // Sum raw values
+        //     const val = parseFloat(row[field.fieldname]);
+        //     sum += isNaN(val) ? 0 : val;
+        //   }
+        });
+
+        totals[tableIndex][field.fieldname] = sum;
+      }
+    });
+  }
+
+  return totals;
+});
+watchEffect(() => {
+  for (const [tableIndex, rows] of Object.entries(tableRows)) {
+    const fields = props.tableHeaders[tableIndex] || [];
+
+    rows.forEach((row) => {
+      fields.forEach((field) => {
+        if (field.fieldtype === 'Int' && field.description && /[+\-*/]/.test(field.description)) {
+          const result = calculateFieldExpression(row, field.description, fields);
+          row[field.fieldname] = result; // 🔄 Store the computed value in tableRows
+        }
+      });
+    });
+  }
+});
+
 
 const handleSelectChange = (
     value,
@@ -737,6 +877,11 @@ const updateDateTimeFields = () => {
                                 // console.log("Setting field.value:", field.value); // Debugging log
                                 emit("updateField", field);
                             }
+                            // if( field.fieldtype === 'Data' && field.label === 'Total'){
+                            //     console.log(tableTotals.value);
+                            //     field.value = tableTotals.value
+                            //     emit("updateField", field)
+                            // }
 
                         });
                     });

@@ -149,12 +149,8 @@ onMounted(() => {
   // raiseRequest();
 });
 
-watch(business_unit.value, (newBu, oldBu) => {
-  
-  business_unit.value = newBu;
-  // console.log(newBu);
-  // console.log("[[[[]]]]", newBu,oldBu);
-  // localStorage.setItem("Bu", EzyBusinessUnit.value);
+watch(business_unit, (newBu, oldBu) => {
+  console.log(newBu);
 
   if (oldBu) {
     deptData(true);
@@ -162,6 +158,7 @@ watch(business_unit.value, (newBu, oldBu) => {
     deptData();
   }
 });
+
 function RequestUpdate() {
   // const filesArray = filepaths.value
   //   ? filepaths.value.split(",").map((filePath) => filePath.trim())

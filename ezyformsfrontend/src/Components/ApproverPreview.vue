@@ -1,8 +1,9 @@
 <template>
   <section>
+
     <div v-if="filteredBlocks.length" class="card p-3">
       <div v-for="(block, blockIndex) in filteredBlocks" :key="blockIndex" class="block-container rounded-2">
-        <div v-if="blockIndex === 0"><label class=" fw-bold ps-2">Request ID: </label> <span>
+        <div v-if="blockIndex === 0"><label class=" fw-bold font-12 ps-2">Request ID: </label> <span class="font-13">
             {{ selectedData.formname }}</span> </div>
         <div v-for="(section, sectionIndex) in block.sections" :key="'preview-' + sectionIndex"
           class="preview-section m-1">
@@ -22,7 +23,7 @@
                     ? (field.label === 'Approved By' ? 'align-items-end' : 'align-items-start')
                     : ''">
                     <div :class="(props.readonlyFor === 'true' || blockIndex < currentLevel) && field.fieldtype !== 'Small Text' && field.fieldtype !== 'Text' || field.fieldtype === 'Check'
-                      ? 'd-flex ' +(field.fieldtype === 'Check' ? 'mt-4 flex-row-reverse justify-content-end gap-2 w-0 align-items-start ' : '') + (field.label === 'Approved By' ? 'align-items-end' : 'align-items-start')
+                      ? 'd-flex ' + (field.fieldtype === 'Check' ? 'mt-4 flex-row-reverse justify-content-end gap-2 w-0 align-items-start ' : '') + (field.label === 'Approved By' ? 'align-items-end' : 'align-items-center')
                       : ''">
 
 
@@ -31,10 +32,11 @@
                           class=" label-text  whitespace-nowrap">
                           <span class="font-12 fw-medium">{{ field.label }}</span>
                           <span class="ms-1 text-danger">{{ field.reqd === 1 ? "*" : "" }}</span>
-                          <span class="pe-2" v-if="field.fieldtype !== 'Check' && (props.readonlyFor === 'true' || blockIndex < currentLevel)">:</span>
+                          <span class="pe-2"
+                            v-if="field.fieldtype !== 'Check' && (props.readonlyFor === 'true' || blockIndex < currentLevel)">:</span>
                         </label>
                       </div>
-                      <div v-if="field.fieldtype !== 'Table'" :class="field.fieldtype === 'Check' ? 'w-0':'w-100'">
+                      <div v-if="field.fieldtype !== 'Table'" :class="field.fieldtype === 'Check' ? 'w-0' : 'w-100'">
                         <!-- field.fieldtype === 'Select' || -->
                         <!-- Field Type Select or Multiselect -->
                         <template v-if="field.fieldtype === 'multiselect'">
@@ -79,31 +81,32 @@
                           </div>
                         </template>
 
-                    <template v-else-if="field.fieldtype == 'Check'">
-                                                <input type="checkbox" :checked="field.value" :disabled="blockIndex === 0 || props.readonlyFor === 'true'"
-                                                    
-                                                    :placeholder="'Enter ' + field.label" :name="'field-' +
-                                                        sectionIndex +
-                                                        '-' +
-                                                        columnIndex +
-                                                        '-' +
-                                                        fieldIndex
-                                                        " @change="
-                                                            (event) =>
-                                                                logFieldValue(
-                                                                    event,
-                                                                    blockIndex,
-                                                                    sectionIndex,
-                                                                    rowIndex,
-                                                                    columnIndex,
-                                                                    fieldIndex
-                                                                )
-                                                        " class="form-control fs-6 border-dark form-check-input previewInputHeight font-10" />
-                                            </template>
+                        <template v-else-if="field.fieldtype == 'Check'">
+                          <input type="checkbox" :checked="field.value"
+                            :disabled="blockIndex === 0 || props.readonlyFor === 'true'"
+                            :placeholder="'Enter ' + field.label" :name="'field-' +
+                              sectionIndex +
+                              '-' +
+                              columnIndex +
+                              '-' +
+                              fieldIndex
+                              " @change="
+                                (event) =>
+                                  logFieldValue(
+                                    event,
+                                    blockIndex,
+                                    sectionIndex,
+                                    rowIndex,
+                                    columnIndex,
+                                    fieldIndex
+                                  )
+                              "
+                            class="form-control fs-6 border-dark form-check-input previewInputHeight font-10" />
+                        </template>
 
                         <!-- Field Type Check or Radio -->
                         <template v-else-if="
-                          
+
 
                           field.fieldtype === 'radio'
                         ">
@@ -114,7 +117,7 @@
                               )" :key="index">
                                 <div>
                                   <input v-if="
-                                    
+
                                     index !== 0
                                   " class="form-check-input" type="checkbox" :disabled="blockIndex === 0 || props.readonlyFor === 'true'
                                     " :checked="field.value === option" :value="option"
@@ -231,10 +234,12 @@
                                   columnIndex,
                                   fieldIndex
                                 )" class="form-control font-12 " />
-                            <button type="button" class="btn btn-outline-secondary pb-0 btn-sm" data-bs-toggle="modal"
+                            <button class="btn btn-dark text-dark bg-white" @click="ClickLink(field)"> <i class="bi bi-link-45deg font-15"></i></button>
+
+                            <!-- <button type="button" class="btn btn-outline-secondary pb-0 btn-sm" data-bs-toggle="modal"
                               :data-bs-target="`#modal-${field.fieldname}`">
                               <i class="bi bi-link-45deg font-13"></i>
-                            </button>
+                            </button> -->
                           </div>
 
                           <!-- Bootstrap Modal -->
@@ -246,7 +251,8 @@
                               <div class="modal-content">
                                 <div class="modal-header">
                                   <h5 class="modal-title" :id="`label-${field.fieldname}`">
-                                    Select a {{ field.label }}
+                                    <!-- Select a  -->
+                                    {{ field.label }}
                                   </h5>
                                   <button type="button" class="btn-close" data-bs-dismiss="modal"
                                     aria-label="Close"></button>
@@ -322,16 +328,17 @@
 
                           <template v-if="blockIndex === 0 && field.fieldtype !== 'Int' && field.fieldtype !== 'Text'">
                             <span style="font-size: 12px;" :class="props.readonlyFor === 'true' || blockIndex < currentLevel
-                                ? 'border-0 image-border-bottom w-50 bg-transparent'
-                                : ''" :value="field.value" :type="field.fieldtype">
+                              ? 'border-0 image-border-bottom w-50 bg-transparent'
+                              : ''" :value="field.value" :type="field.fieldtype">
                               {{ field.value }}
                             </span>
                           </template>
                           <template v-else>
-                            <component v-if="blockIndex !== 0 && field.fieldtype !== 'Int' && field.fieldtype !== 'Text'" :style="{
-                              width: Math.min(100 + (field.value?.length * 2), 600) + 'px'
-                            }" :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'" :is="getFieldComponent(field.fieldtype)"
-                              :class="props.readonlyFor === 'true' || blockIndex < currentLevel
+                            <component
+                              v-if="blockIndex !== 0 && field.fieldtype !== 'Int' && field.fieldtype !== 'Text'" :style="{
+                                width: Math.min(100 + (field.value?.length * 2), 600) + 'px'
+                              }" :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'"
+                              :is="getFieldComponent(field.fieldtype)" :class="props.readonlyFor === 'true' || blockIndex < currentLevel
                                 ? 'border-0 image-border-bottom w-50 bg-transparent'
                                 : ''" :value="field.value" :type="field.fieldtype"
                               :readOnly="blockIndex < currentLevel || props.readonlyFor === 'true'"
@@ -393,20 +400,20 @@
                               <table class="table mb-0">
                                 <thead>
                                   <tr>
-                                    <th>#</th>
+                                    <!-- <th>#</th> -->
                                     <th v-for="field in headers" :key="field.fieldname">{{ field.label }}</th>
                                   </tr>
                                 </thead>
                                 <tbody>
                                   <tr v-for="(row, index) in props.childData[tableName]" :key="index">
-                                    <td>{{ index + 1 }}</td>
+                                    <!-- <td>{{ index + 1 }}</td> -->
                                     <td v-for="field in headers" :key="field.fieldname">
                                       <span v-if="isFilePath(row[field.fieldname])" class="cursor-pointer"
                                         @click="openFile(row[field.fieldname])">
                                         <span>View Attachment <i class="bi bi-eye-fill ps-1"></i></span>
                                       </span>
                                       <span v-else>
-                                        {{ row[field.fieldname] || "-" }}
+                                        {{ row[field.fieldname] || "" }}
                                       </span>
                                     </td>
                                   </tr>
@@ -428,6 +435,7 @@
 
       </div>
     </div>
+
   </section>
 </template>
 
@@ -435,8 +443,8 @@
 import { computed, defineProps, onMounted, ref, watch, nextTick, reactive } from "vue";
 import { apis, doctypes, domain } from "../shared/apiurls";
 import axiosInstance from "../shared/services/interceptor";
-import { useRoute } from "vue-router";
-import FormPreview from "./FormPreview.vue";
+import { useRoute, useRouter } from "vue-router";
+
 
 const props = defineProps({
   blockArr: {
@@ -461,10 +469,12 @@ const props = defineProps({
   },
 });
 const route = useRoute();
-
+const router = useRouter();
 const selectedData = ref({
   type: route.query.type || "", // Retrieve from query
   formname: route.query.name || "",
+  doctype: route.query.doctype_name || "",
+  businessUnit: route.query.business_unit || "",
 });
 
 const emit = defineEmits();
@@ -554,7 +564,25 @@ function getData(selectedFieldValue, selectedfieldOption) {
     });
 }
 
+function ClickLink(field) {
 
+  router.push({
+    name: "LinkPreviewComp",
+    query: {
+      routepath: route.path,
+      LinkDoctype: field.options,
+      LinkDoctypeId: field.value,
+      routepath: route.query.routepath,
+      formname: route.query.name || "", // Retrieve from query
+      form_short_name: route.query.doctype_name || "", // Retrieve from query
+      type: route.query.type || "", // Retrieve from query
+      readOnly: route.query.readOnly, // Retrieve from query
+      business_unit: selectedData.value.businessUnit || "", // Retrieve from query
+      status: route.query.status
+    },
+
+  });
+}
 const chunkedModalData = computed(() => {
   const entries = Object.entries(ModalData.value || {});
   const chunks = [];
@@ -1032,11 +1060,11 @@ td {
   font-size: 12px;
 }
 
-td:first-child {
-  min-width: 50px;
-  /* Adjust as needed */
-  width: auto !important;
-}
+// td:first-child {
+//   min-width: 50px;
+
+//   width: auto !important;
+// }
 
 .tableborder-child {
   border: 1px solid #ccc !important;

@@ -618,23 +618,23 @@ function receivedForMe(data) {
     order_by: "`tabWF Workflow Requests`.`creation` desc",
   };
 
-  const queryParamsCount = {
-    fields: JSON.stringify(["count(name) AS total_count"]),
-    limitPageLength: "None",
-    filters: JSON.stringify(filters),
-  };
+  // const queryParamsCount = {
+  //   fields: JSON.stringify(["count(name) AS total_count"]),
+  //   limitPageLength: "None",
+  //   filters: JSON.stringify(filters),
+  // };
 
-  // Fetch total count of records matching filters
-  axiosInstance
-    .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, {
-      params: queryParamsCount,
-    })
-    .then((res) => {
-      totalRecords.value = res.data[0].total_count;
-    })
-    .catch((error) => {
-      console.error("Error fetching total count:", error);
-    });
+  // // Fetch total count of records matching filters
+  // axiosInstance
+  //   .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, {
+  //     params: queryParamsCount,
+  //   })
+  //   .then((res) => {
+  //     totalRecords.value = res.data[0].total_count;
+  //   })
+  //   .catch((error) => {
+  //     console.error("Error fetching total count:", error);
+  //   });
 
   // Fetch the records matching filters
   axiosInstance
@@ -690,20 +690,21 @@ function getdata(formname) {
     .then((res) => {
       if (res.data) {
         doctypeForm.value = res.data[0];
+        console.log(doctypeForm.value.name,"lll");
         mapFormFieldsToRequest(doctypeForm.value, showRequest.value);
 
-        axiosInstance
-          .get(`${apis.resource}${selectedData.value.doctype_name}`)
-          .then((res) => {
-            datanew.value =res.data[0]
-            // console.log(`Data for :`, res.data[0]);
-          })
-          .catch((error) => {
-            console.error(`Error fetching data for :`, error);
-          });
+        // axiosInstance
+        //   .get(`${apis.resource}${selectedData.value.doctype_name}`)
+        //   .then((res) => {
+        //     datanew.value =res.data[0]
+        //     // console.log(`Data for :`, res.data[0]);
+        //   })
+        //   .catch((error) => {
+        //     console.error(`Error fetching data for :`, error);
+        //   });
         axiosInstance
           .get(
-            `${apis.resource}${selectedData.value.doctype_name}/${res.data[0].name}`
+            `${apis.resource}${selectedData.value.doctype_name}/${doctypeForm.value.name}`
           )
           .then((res) => {
             // console.log(`Data for :`, res.data);

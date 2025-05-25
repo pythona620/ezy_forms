@@ -537,7 +537,7 @@ function handleCellClick(check, index, type) {
 // }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 // .fixed-column {
 //   position: sticky !important;
 //   right: 0 !important;

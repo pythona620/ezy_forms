@@ -10,9 +10,9 @@
           </div>
           <div>
             <!-- <ButtonComp class="font-13 rounded-2" name="Save as Draft"></ButtonComp> -->
-            <button v-if="activeStep === 2 && blockArr.length && !$route.query.id" :disabled="hasErrors || isNextDisabled "
-              :style="{ cursor: hasErrors ? 'not-allowed' : 'pointer' }" type="butoon" class="btn font-13 btn-light"
-              @click="saveFormData('Draft')">
+            <button v-if="activeStep === 2 && blockArr.length && !$route.query.id"
+              :disabled="hasErrors || isNextDisabled" :style="{ cursor: hasErrors ? 'not-allowed' : 'pointer' }"
+              type="butoon" class="btn font-13 btn-light" @click="saveFormData('Draft')">
               <i class="bi bi-bookmark-check-fill"></i> Save As Draft
             </button>
           </div>
@@ -343,7 +343,7 @@
                                 </div>
 
                                 <button v-if="
-                                canShowDesignationButton(blockIndex) &&
+                                  canShowDesignationButton(blockIndex) &&
                                   paramId != undefined &&
                                   paramId != null &&
                                   paramId != 'new' &&
@@ -491,13 +491,9 @@
                                                                                     @dragstart="handleDragStart($event, fieldIndex, 'field', blockIndex, sectionIndex, rowIndex, columnIndex)"
                                                                                     @dragover="handleDragOver"
                                                                                     @drop="handleDrop($event, fieldIndex, 'field', blockIndex, sectionIndex, rowIndex, columnIndex)" -->
-                                                                                    <div
-  v-if="column.fields.length === 0"
-  class="empty-drop-zone"
-  @dragover.prevent
-  @drop="handleFieldDropAtIndex(blockIndex, sectionIndex, rowIndex, columnIndex, 0)"
->
-</div>
+                                        <div v-if="column.fields.length === 0" class="empty-drop-zone" @dragover.prevent
+                                          @drop="handleFieldDropAtIndex(blockIndex, sectionIndex, rowIndex, columnIndex, 0)">
+                                        </div>
                                         <div v-for="(field, fieldIndex) in column.fields" :key="'field-' + fieldIndex"
                                           @mouseenter="
                                             setHoveredField(
@@ -508,18 +504,15 @@
                                               fieldIndex
                                             )
                                             " @mouseleave="resetHoveredField" class="dynamicField m-1 draggable-item"
-                                            draggable="true"
-                                            @dragstart="handleDragStart($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
-                                        >
+                                          draggable="true"
+                                          @dragstart="handleDragStart($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
 
-                                        <div
-  class="drop-zone"
-  @dragover.prevent
-  @drop="handleFieldDropAtIndex(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
-></div>
+                                          <div class="drop-zone" @dragover.prevent
+                                            @drop="handleFieldDropAtIndex(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
+                                          </div>
 
-                                          <div v-if="field.fieldtype !== 'Table'"
-                                            class="px-1 dynamic_fied field-border" @dragover.prevent
+                                          <div v-if="field.fieldtype !== 'Table'" class="px-1 dynamic_fied field-border"
+                                            @dragover.prevent
                                             @drop="handleFieldDropAtIndex(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
                                             <div class="d-flex justify-content-between">
                                               <div class="flex-column d-flex">
@@ -602,7 +595,7 @@
                                               [
                                                 'Select',
                                                 'Table MultiSelect',
-                                                 'Small Text'
+                                                'Small Text'
                                               ].includes(field.fieldtype)
                                             ">
                                               <label class="font-12 fw-light" for="options">Enter Options:</label>
@@ -616,7 +609,7 @@
                                                 Options are required for this field type.
                                               </small>
                                             </div>
-                                            <!-- <div v-if="field.fieldtype === 'Link'">
+                                            <div v-if="field.fieldtype === 'Link'">
                                               <label class="font-12 fw-light" for="link-search">Search Doctype:</label>
                                               <input id="link-search" type="text" v-model="linkSearchQuery"
                                                 @input="fetchDoctypeList(linkSearchQuery)"
@@ -632,14 +625,14 @@
                                                 </li>
                                               </ul>
 
-                                              
+
                                               <input type="text"
                                                 v-model="blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex].options"
                                                 class="form-control font-12 mb-1"
                                                 :placeholder="linkSearchQuery ? 'Select from list' : 'Selected doctype will appear here'"
                                                 readonly />
-                                            </div> -->
-                                            <div v-if="field.fieldtype === 'Link'">
+                                            </div>
+                                            <!-- <div v-if="field.fieldtype === 'Link'">
                                               <span class="font-11 fw-light">Search Doctype:</span>
 
                                               <input type="text" v-model="activeSearch.query"
@@ -657,7 +650,7 @@
                                                   {{ result.name }}
                                                 </li>
                                               </ul>
-                                            </div>
+                                            </div> -->
 
 
 
@@ -694,11 +687,9 @@
                                             <small v-if="field.error" class="text-danger font-10">{{ field.error
                                             }}</small>
                                           </div>
-                                          <div
-  class="drop-zone"
-  @dragover.prevent
-  @drop="handleFieldDropAtIndex(blockIndex, sectionIndex, rowIndex, columnIndex, column.fields.length)"
-></div>
+                                          <div class="drop-zone" @dragover.prevent
+                                            @drop="handleFieldDropAtIndex(blockIndex, sectionIndex, rowIndex, columnIndex, column.fields.length)">
+                                          </div>
                                           <div class="childtableShow">
                                             <div>
                                               <div>
@@ -765,10 +756,24 @@
                                                                     {{ option.label }}
                                                                   </option>
                                                                 </select>
-                                                                <button class="btn btn-light btn-sm"
-                                                                  @click="deleteRow(tableName, index)">
-                                                                  <i class="bi bi-x-lg"></i>
-                                                                </button>
+                                                                <div class=" d-flex">
+                                                                  <div class=" d-flex align-items-center gap-2">
+                                                                    
+                                                                    <div class="d-flex align-items-center">
+                                                                      <input class="font-12 form-control-sm" v-model="field.description"
+                                                                        placeholder="description"
+                                                                        type="text" />  
+                                                                    </div>
+                                                                    <!-- <div>
+                                                                      <label for="mandatory"
+                                                                        class="font-12 m-0 fw-light">Calculate</label>
+                                                                    </div> -->
+                                                                  </div>
+                                                                  <button class="btn btn-light btn-sm"
+                                                                    @click="deleteRow(tableName, index)">
+                                                                    <i class="bi bi-x-lg"></i>
+                                                                  </button>
+                                                                </div>
                                                               </div>
                                                               <div v-if="
                                                                 [
@@ -1027,10 +1032,35 @@
                                                 }}
                                               </div>
                                             </div>
-                                            <button class="btn btn-sm trash-btn py-0"
-                                              @click="removeFieldFromTable(blockIndex, sectionIndex, tableIndex, fieldIndex)">
-                                              <i class="bi bi-x-lg"></i>
-                                            </button>
+                                            <div class="d-flex align-items-center">
+                                              <!-- <div class=" d-flex align-items-center gap-2">
+                                                <div class="d-flex align-items-center">
+                                                                      <input class="font-12 form-control-sm" v-model="field.description"
+                                                                        placeholder="Description"
+                                                                        type="text" />  
+                                                                    </div>
+                                                <div>
+                                                  <label for="mandatory" class="font-12 m-0 fw-light">Calculate</label>
+                                                </div>
+                                              </div> -->
+                                              <div class=" d-flex my-1">
+
+                                                 <input v-if="field.showDescription" v-model="field.description"
+                                              class="form-control font-12 "
+                                              placeholder="Enter field description"/>
+                                              <button class="btn btn-sm text-nowrap font-12"
+                                                  @click="field.showDescription = !field.showDescription">
+                                                  {{ field.showDescription ? 'Hide Description' : (field.description ?
+                                                    'Edit Description'
+                                                    : 'Add Description') }}
+                                                </button>
+                                              </div>
+
+                                              <button class="btn btn-sm trash-btn py-0"
+                                                @click="removeFieldFromTable(blockIndex, sectionIndex, tableIndex, fieldIndex)">
+                                                <i class="bi bi-x-lg"></i>
+                                              </button>
+                                            </div>
                                           </div>
 
                                           <select v-model="field.fieldtype" class="form-select font-13 mb-1"
@@ -1081,13 +1111,14 @@
                                     </div>
                                   </div>
                                 </div>
-                            </div>
+                              </div>
 
-                            <div class="d-flex justify-content-center align-items-center py-2 add-section-btn">
-                              <button class="btn btn-light border font-12" @click="addSection(blockIndex,sectionIndex)">
-                                <i class="bi bi-plus-circle me-1 fs-6"></i> Add Section
-                              </button>
-                            </div>
+                              <div class="d-flex justify-content-center align-items-center py-2 add-section-btn">
+                                <button class="btn btn-light border font-12"
+                                  @click="addSection(blockIndex, sectionIndex)">
+                                  <i class="bi bi-plus-circle me-1 fs-6"></i> Add Section
+                                </button>
+                              </div>
                             </div>
                             <div v-if="
                               blockIndex === 0
@@ -1375,7 +1406,7 @@ function canShowDesignationButton(blockIndex) {
 watch(() => filterObj.value.form_name, (newVal) => {
   filterObj.value.form_name = newVal.trim()
 })
- 
+
 watch(() => filterObj.value.form_short_name, (newVal) => {
   filterObj.value.form_short_name = newVal.trim()
 })
@@ -1717,6 +1748,7 @@ const addChildTable = (blockIndex, sectionIndex) => {
         fieldname: `field_0`,
         fieldtype: "",
         idx: 0,
+        description: '',
         reqd: false,
         ...(columns.fieldtype === "Select" && columns.options
           ? { options: columns.options ? `\n${columns.options}` : `\n${''}` }
@@ -1741,6 +1773,7 @@ const addFieldToTable = (blockIndex, sectionIndex, tableIndex) => {
     fieldname: `field_${table.columns.length}`,
     fieldtype: "",
     idx: table.columns.length,
+    description: '',
     reqd: false,
     ...(table.columns.fieldtype === "Select" && table.columns.options
       ? { options: table.columns.options ? `\n${table.columns.options}` : `\n${''}` }
@@ -1826,7 +1859,7 @@ const processFields = (blockIndex, sectionIndex, tableIndex) => {
     as_a_block: table.as_a_block === 1 ? 'true' : 'false',
   };
 
-  // //console.log(data);
+  console.log(data);
   // // ensureArrayPath(blockIndex, sectionIndex, 'afterCreated');
   // // table.newTable = false
 
@@ -1837,33 +1870,33 @@ const processFields = (blockIndex, sectionIndex, tableIndex) => {
   //  // autoClose: 500,
   //  // transition: "zoom",
   //  //});
-  axiosInstance
-    .post(apis.childtable, data)
-    .then((res) => {
-      if (res) {
-        ensureArrayPath(blockIndex, sectionIndex, 'afterCreated');
+  // axiosInstance
+  //   .post(apis.childtable, data)
+  //   .then((res) => {
+  //     if (res) {
+  //       ensureArrayPath(blockIndex, sectionIndex, 'afterCreated');
 
-        // // Save original table to afterCreated
-        section.afterCreated[tableIndex] = table;
+  //       // // Save original table to afterCreated
+  //       section.afterCreated[tableIndex] = table;
 
-        blockArr[blockIndex].sections[sectionIndex].childTables[tableIndex] = []
+  //       blockArr[blockIndex].sections[sectionIndex].childTables[tableIndex] = []
 
-        toast.success("Table created successfully!", {
-          autoClose: 500,
-          transition: "zoom",
-        });
+  //       toast.success("Table created successfully!", {
+  //         autoClose: 500,
+  //         transition: "zoom",
+  //       });
 
-        const responseData = res.message?.[0]?.[0]?.child_doc;
+  //       const responseData = res.message?.[0]?.[0]?.child_doc;
 
-        // // Store the response data back to the table
-        blockArr[blockIndex].sections[sectionIndex].childTables[tableIndex] = responseData;
+  //       // // Store the response data back to the table
+  //       blockArr[blockIndex].sections[sectionIndex].childTables[tableIndex] = responseData;
 
-        // console.log("Table response saved:", responseData);
-      }
-    })
-    .catch((error) => {
-      console.error("Error creating table:", error);
-    });
+  //       // console.log("Table response saved:", responseData);
+  //     }
+  //   })
+  //   .catch((error) => {
+  //     console.error("Error creating table:", error);
+  //   });
 };
 
 const afterImmediateEditdeleteRow = (blockIndex, sectionIndex, tableName, index) => {
@@ -2271,6 +2304,10 @@ const childfield = [
     label: "Datetime",
     type: "Datetime",
   },
+  {
+    label: "Number",
+    type: "Int",
+  },
   // {
   //   label: "Link",
   //   type: "Link"
@@ -2314,8 +2351,8 @@ const fieldTypes = [
     type: "Datetime",
   },
   {
-      label: "Check",
-      type: "Check",
+    label: "Check",
+    type: "Check",
   },
   // {
   //     label: "Radio",
@@ -2329,10 +2366,10 @@ const fieldTypes = [
     label: "Multi Select",
     type: "Small Text",
   },
-  // {
-  //   label: "Link",
-  //   type: "Link"
-  // }
+  {
+    label: "Link",
+    type: "Link"
+  }
   // {
   //     label: "Signature",
   //     type: "Signature",
@@ -2488,14 +2525,14 @@ function initializeDesignationValue(blockIndex) {
 
 // function canShowDesignationButton(blockIndex) {
 //   if (paramId === undefined || paramId === null || paramId === 'new') return false;
- 
+
 //   const roles = getWorkflowSetup(blockIndex).roles;
- 
+
 //   // First approver (blockIndex = 0)
 //   if (blockIndex === 0) {
 //     return roles.length === 0;
 //   }
- 
+
 //   // For subsequent approvers: check if previous approver has a role
 //   const prevRoles = getWorkflowSetup(blockIndex - 1).roles;
 //   return (
@@ -2505,7 +2542,7 @@ function initializeDesignationValue(blockIndex) {
 //     roles.length === 0
 //   );
 // }
- 
+
 
 const AddDesignCanvas = (idx) => {
   searchDesignation.value = ''
@@ -2826,7 +2863,7 @@ function formData(status) {
                 let toPath = localStorage.getItem('routepath');
                 if (status === "save") {
                   router.push({ path: toPath });
-                } 
+                }
                 else if (status === "Draft") {
                   router.push({ path: toPath });
 
@@ -3169,7 +3206,7 @@ const onFieldTypeChange = (
     blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex]
       .fields[fieldIndex].fieldtype;
   if (
-    
+
     fieldType !== "Select" ||
     fieldType !== "radio" ||
     fieldType !== "multiselect"
@@ -3317,7 +3354,7 @@ const isPreviewVisible = computed(() => {
 //spaces removed version
 function handleInputChange(event, fieldType) {
   let inputValue = event.target.value.trim();  // ✅ only trims start and end
- if (!inputValue) {
+  if (!inputValue) {
     if (fieldType === "form_name") {
       formNameError.value = "Input cannot be empty or only spaces";
     } else if (fieldType === "form_short_name") {
@@ -3464,6 +3501,7 @@ const hasDuplicates = (array) => new Set(array).size !== array.length;
   overflow: hidden;
   /* This ensures child elements respect the border radius */
 }
+
 .draggable-item {
   border: 1px dashed #ccc;
   padding: 10px;
@@ -3471,6 +3509,7 @@ const hasDuplicates = (array) => new Set(array).size !== array.length;
   cursor: grab;
   background: #f9f9f9;
 }
+
 .draggable-item:active {
   cursor: grabbing;
 }

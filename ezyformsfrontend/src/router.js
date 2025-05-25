@@ -18,7 +18,7 @@ import FormPreview from "./Components/FormPreview.vue";
 import FormPreviewComp from "./Components/FormPreviewComp.vue";
 import PdfPreview from "./Components/PdfPreview.vue";
 import EmailApprove from "./Components/EmailApprove.vue";
-
+import LinkPreviewComp from "./Components/LinkPreviewComp.vue";
 
 const routes = [
   {
@@ -57,6 +57,11 @@ const routes = [
     path: '/formpreviewComp',
     component: FormPreviewComp,
     name: 'FormPreviewComp'
+  },
+  {
+    path: '/linkpreviewComp',
+    component: LinkPreviewComp,
+    name: 'LinkPreviewComp'
   },
   {
     path: '/pdfpreview',

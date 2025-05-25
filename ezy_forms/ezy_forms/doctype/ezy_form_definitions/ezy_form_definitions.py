@@ -153,7 +153,7 @@ def enqueued_add_customized_fields_for_dynamic_doc(fields: list[dict], doctype: 
 
         for table_name in table_fieldnames:
             fields_in_child_doctype = frappe.db.sql(
-                f"SELECT IFNULL(options, '') AS options, fieldname, fieldtype, idx, label FROM `tabDocField` WHERE parent ='{table_name}';",
+                f"SELECT IFNULL(options, '') AS options,description, fieldname, fieldtype, idx, label FROM `tabDocField` WHERE parent ='{table_name}';",
                 as_dict=True
             )
 
@@ -307,6 +307,7 @@ def add_child_doctype(form_short_name: str, as_a_block: str, fields: list[dict],
                 new_label = field.get("label")
                 new_fieldtype = field.get("fieldtype")
                 new_options = field.get("options")
+                new_description = field.get("description")
 
                 if new_fieldtype == "Select" and new_options and not new_options.startswith("\n"):
                     new_options = "\n" + new_options
@@ -319,6 +320,8 @@ def add_child_doctype(form_short_name: str, as_a_block: str, fields: list[dict],
                         existing_field.fieldtype = new_fieldtype
                     if new_options:
                         existing_field.options = new_options
+                    if new_description:
+                        existing_field.description = new_description
 
                     fields_updated = True
                 else:
@@ -328,7 +331,8 @@ def add_child_doctype(form_short_name: str, as_a_block: str, fields: list[dict],
                         "fieldtype": new_fieldtype,
                         "parentfield": "fields",
                         "parenttype": "DocType",
-                        "options": new_options
+                        "options": new_options,
+                        "description": new_description
                     })
                     fields_updated = True
 
