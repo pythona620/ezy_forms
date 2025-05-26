@@ -2215,7 +2215,7 @@ const toggleEdit = (tableName, description) => {
     // Process all fields (both old and new)
     let allFields = childtableHeaders.value[tableName].map(({ isNew, ...rest }, index) => ({
       ...rest,
-      idx: index + 1, // Ensure `idx` is correctly set in sequential order
+      idx: index, // Ensure `idx` is correctly set in sequential order
     }));
 
     // ✅ Single API request to save both old and new fields

@@ -452,7 +452,12 @@ template_str = """
     {% set line_height = 16 %}
     {% set height = estimated_lines * line_height %}
 
-    {% set lines = value.split('\n') %}
+    {% if value %}
+        {% set lines = value.split('\n') %}
+    {% else %}
+        {% set lines = [] %}
+    {% endif %}
+
     <div style="height: {{ height }}px; border: none; width: 100%; margin-bottom: 0px; padding-bottom: 0px; line-height: {{ line_height }}px;">
         <div style="font-weight: bold;font-size: 15px;">{{ lines[0] }}</div>
         {% for line in lines[1:] %}
@@ -470,7 +475,9 @@ template_str = """
      </div>
     
 </div>
+{% if wf_generated_request_id %}
 <div class="requestId"><strong>Request ID:</strong><span>{{wf_generated_request_id}}</span></div>
+{% endif %}
 {% for block in data %}
     <div class="block">
         {% for section in block.sections %}
@@ -597,7 +604,12 @@ template_str = """
                                         {% if field.fieldtype in ['Check', 'radio'] %}
                                             <div class="container-fluid">
                                                 <div class="row">
-                                                    {% for option in field.options.split('\n') %}
+                                                    {% if field.options is string %}
+                                                        {% set options = field.options.split('\n') %}
+                                                    {% else %}
+                                                        {% set options = field.options %}
+                                                    {% endif %}
+                                                    {% for option in options %}
                                                         <div class="form-check col-4 mb-4">
                                                             <div>
                                                             
@@ -640,8 +652,11 @@ template_str = """
                                             </span>
 
                                        {% elif field.fieldtype == 'Small Text' %}
+                                        {% if field.options %}
                                             {% set options = field.options.strip().split('\n') %}
-                                            
+                                        {% else %}
+                                            {% set options = field.options %}
+                                        {% endif %}
                                             {% if field['values'] %}
                                                 {% set selected_values = field['values'] | replace('["', '') | replace('"]', '') | replace('","', ',') %}
                                                 {% set selected_values_list = selected_values.split(',') %}
@@ -804,9 +819,11 @@ def convert_html_to_pdf(html_content, pdf_path,options=None):
         frappe.log_error(f"PDF generation failed: {e}")
  
 def json_structure_call_for_html_view(json_obj: list, form_name: str, child_data, child_table_data,business_unit,wf_generated_request_id=None):
+    wf_generated_request_id=''
+    if wf_generated_request_id:
+        wf_generated_request_id=wf_generated_request_id
     if child_data is None:
         child_data = []
-        wf_generated_request_id=wf_generated_request_id
     site_url = frappe.utils.get_url()
     logo_of_company = site_url + "/files/company.png"
     if child_table_data is None:
@@ -818,7 +835,7 @@ def json_structure_call_for_html_view(json_obj: list, form_name: str, child_data
  
     business_unit = frappe.get_doc("Ezy Business Unit",business_unit)
     
-    company_logo = business_unit.bu_logo
+    company_logo = business_unit.bu_logo 
     letter_head = ''
     bu_name =''
 
@@ -945,7 +962,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
         if name is None:
             print_format = frappe.db.get_value("Ezy Form Definitions", form_short_name, "print_format")
             if print_format:
-                html_view_ = get_html_file_data(form_short_name,None,str(print_format))
+                html_view_ = get_html_file_data("DocType",form_short_name,str(print_format))
                 html_view = html_view_['html']
             else:
                 json_object = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_json")
