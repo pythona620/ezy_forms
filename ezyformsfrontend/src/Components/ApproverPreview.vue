@@ -365,9 +365,9 @@
                     <div v-if="blockIndex === 0 && field.fieldtype === 'Table'">
                       <div v-if="props.childHeaders && Object.keys(props.childHeaders).length">
                         <div v-for="(headers, tableName) in props.childHeaders" :key="tableName">
-                          <div v-if="field.options === tableName || field.fieldname === tableName">
+                          <div v-if="field.fieldname === tableName">
                             <div>
-                              <span class="font-13 fw-bold tablename">{{ tableName.replace(/_/g, " ") }}</span>
+                              <span class="font-13 fw-bold tablename">{{ field.label.replace(/_/g, " ") }}</span>
                             </div>
 
                             <!-- If description === 'true', use 2-column layout -->

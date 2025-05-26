@@ -495,7 +495,7 @@ template_str = """
                             {% if row.description == 'true' %}
                                 {% if table_name in child_data %}
                                 
-                                    <h3 class="childtablename" style="font-size: 14px;">{{ table_name.replace("_", " ").title() }}</h3>
+                                    <h3 class="childtablename" style="font-size: 14px;">{{ row.label.replace("_", " ") }}</h3>
                                     {% if child_data[table_name] %}
                                         {% for child in child_data[table_name] %}
                                             <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
@@ -519,7 +519,7 @@ template_str = """
                                     {% endif %}
 
                                 {% elif table_name in child_table_data %}
-                                    <h3 class="childtablename" style="font-size: 14px;">{{ table_name.replace("_", " ").title() }}</h3>
+                                    <h3 class="childtablename" style="font-size: 14px;">{{ row.label.replace("_", " ") }}</h3>
                                     <div style="border:1px solid #ccc; padding:10px; margin-bottom:5px;font-size: 13px;">
                                     
                                         <div style="display: flex; flex-wrap: wrap;">
@@ -536,7 +536,8 @@ template_str = """
                             {% else %}
 
                                 {% if table_name in child_data %}
-                                    <h3 class="childtablename" style=margin-left:3px;margin-right:3px;font-size: 14px;>{{ table_name.replace("_", " ").title() }}</h3>
+                                
+                                    <h3 class="childtablename" style=margin-left:3px;margin-right:3px;font-size: 14px;>{{ row.label.replace("_", " ") }}</h3>
                                     {% if child_data[table_name] %}
                                         <table class="rounded-table" style="width: 100%; margin-bottom:5px; border-collapse: collapse;border-radius: 3px; margin-left:3px;margin-right:3px;">
                                             <thead>
@@ -564,7 +565,7 @@ template_str = """
 
                                 {% elif table_name in child_table_data %}
                                 
-                                    <h3 class="childtablename" style="font-size: 14px;">{{ table_name.replace("_", " ").title() }}</h3>
+                                    <h3 class="childtablename" style="font-size: 14px;">{{ row.label.replace("_", " ") }}</h3>
                                     <table class="rounded-table" style="width: 100%; margin-bottom:10px; border-collapse: collapse; border-radius: 3px;">
                                         <thead>
                                             <tr>
@@ -599,6 +600,7 @@ template_str = """
                                 {% for field in column.fields %}
                                
                                     <div class="field field-textarea">
+                                    
                                         <label for="{{ field.fieldname }}">{{ field.label }} <span style="padding-left:2px; font-size: 13px;">:</span></label>
 
                                         {% if field.fieldtype in ['Check', 'radio'] %}

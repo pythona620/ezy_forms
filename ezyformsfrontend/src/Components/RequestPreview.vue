@@ -405,10 +405,10 @@
                                                 <div v-for="(table, tableIndex) in props.tableHeaders" :key="tableIndex"
                                                     class="mt-3">
                                                     <div
-                                                        v-if="tableIndex === field.options || tableIndex === field.fieldname">
+                                                        v-if="tableIndex === field.fieldname">
                                                         <div>
                                                             <span class="font-13 text-secondary ">{{
-                                                                tableIndex.replace(/_/g, " ")
+                                                                field.label.replace(/_/g, " ")
                                                             }}</span>
                                                         </div>
                                                         <table class="table  rounded-table" border="1" width="100%">
@@ -841,7 +841,7 @@ const handleSelectChange = (
     field.value = value;
 
     const mockEvent = { target: { value: field.value } };
-    console.log(mockEvent, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex);
+    // console.log(mockEvent, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex);
 
     logFieldValue(mockEvent, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex);
 };
@@ -1107,12 +1107,12 @@ const logFieldValue = (
         props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
             columnIndex
         ].fields[fieldIndex];
-    console.log(eve,
-        blockIndex,
-        sectionIndex,
-        rowIndex,
-        columnIndex,
-        fieldIndex);
+    // console.log(eve,
+    //     blockIndex,
+    //     sectionIndex,
+    //     rowIndex,
+    //     columnIndex,
+    //     fieldIndex);
 
 
     if (eve.target?.files && eve.target.files.length > 0) {
@@ -1150,7 +1150,7 @@ const logFieldValue = (
         }
     } else if (eve.target?.type === "Select") {
         field.value = eve.target.value;
-        console.log(field.value);
+        // console.log(field.value);
     } else if (eve.target?.type === "Table MultiSelect") {
         field.value = Array.from(
             eve.target.selectedOptions,
@@ -1192,7 +1192,7 @@ const logFieldValue = (
         }
 
         field["value"] = inputValue;
-        console.log(inputValue);
+        // console.log(inputValue);
     }
     validateField(
         field,

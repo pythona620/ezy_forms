@@ -737,7 +737,7 @@
 
                                                             <!-- Label Input -->
                                                             <td v-if="editMode[tableName]">
-                                                              <input v-model="field.label" placeholder="Field Label" @blur="updateFieldname(field)"
+                                                              <input v-model="field.label" placeholder="Field Label" 
                                                                 class="form-control"
                                                                 :class="{ 'border-1 border-danger': invalidFields[tableName]?.includes(index) }" />
                                                               <span v-if="invalidFields[tableName]?.includes(index)"
@@ -912,7 +912,7 @@
                                           <td>{{ index + 1 }}</td>
 
                                           <td v-if="editMode[table.tableName]">
-                                            <input v-model="field.label" placeholder="Field Label" class="form-control" @blur="updateFieldname(field)"
+                                            <input v-model="field.label" placeholder="Field Label" class="form-control" 
                                               :class="{ 'border-1 border-danger': invalidFields[table.tableName]?.includes(index) }" />
                                             <span v-if="invalidFields[tableIndex]?.includes(index)"
                                               class="font-11 text-danger">Label
@@ -1867,7 +1867,7 @@ const processFields = (blockIndex, sectionIndex, tableIndex) => {
     as_a_block: table.as_a_block === 1 ? 'true' : 'false',
   };
 
-  console.log(data);
+  // console.log(data); 
   // // ensureArrayPath(blockIndex, sectionIndex, 'afterCreated');
   // // table.newTable = false
 
@@ -1954,7 +1954,7 @@ const afterImmediateEdit = (blockIndex, sectionIndex, tableName) => {
 
   const section = blockArr[blockIndex].sections[sectionIndex];
   const table = section.afterCreated.find((t) => t.tableName === tableName);
-  console.log('table', table)
+  // console.log('table', table)
   if (!table) return;
 
   if (editMode[tableName]) {
@@ -2732,7 +2732,7 @@ function getFormData() {
 }
 
 function SetPrintFormatFn() {
-  console.log(is_landscape.value);
+  // console.log(is_landscape.value);
   const data = {};
 
   // Add print_format if it has a value
