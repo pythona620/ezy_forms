@@ -125,6 +125,8 @@ const tableheaders = ref([
     { th: "Owner of form", td_key: "owner_of_the_form" },
     { th: "Accessible departments", td_key: "accessible_departments" },
     { th: "Status", td_key: "form_status" },
+    { th: "Enable/Disable", td_key: "enable" },
+
 ]);
 
 const router = useRouter();
@@ -152,6 +154,7 @@ function actionCreated(rowData, actionEvent) {
                 query: {
                     routepath: route.path,
                     form_short_name: rowData.form_short_name,
+                    business_unit: businessUnit.value
 
                 },
             });
@@ -252,7 +255,7 @@ function toggleFunction(rowData, rowIndex, event) {
     const isCurrentlyEnabled = rowData.enable == '1' || rowData.enable === 1;
     const actionText = isCurrentlyEnabled ? 'Disable' : 'Enable';
 
-    if (confirm(`Are you sure you want to ${actionText} this Form?`)) {
+    if (confirm(`Are you sure you want to ${actionText} ${rowData.name} Form?`)) {
         rowData.enable = isCurrentlyEnabled ? 0 : 1;
 
         axiosInstance
@@ -331,7 +334,7 @@ function inLineFiltersData(searchedData) {
         tableheaders.value.forEach((header) => {
             const key = header.td_key;
             if (searchedData[key]) {
-                filters.push(key, "like", `%${searchedData[key]}%`);
+                filters.push([key, "like", `%${searchedData[key]}%`]);
             }
         });
 
@@ -345,7 +348,9 @@ function formCreation(item = null) {
     if (item == null) {
         router.push({
             name: "FormStepper", query: {
-                routepath: route.path
+                routepath: route.path,
+                business_unit: businessUnit.value,
+                
             },
         });
     } else {
@@ -353,7 +358,10 @@ function formCreation(item = null) {
             name: "FormStepper",
             params: { paramid: item.name },
             query: {
-                routepath: route.path
+                routepath: route.path,
+                business_unit: businessUnit.value,
+                id: item.name
+
             }
 
         });
@@ -428,7 +436,7 @@ function fetchTable(data) {
         ["form_status", "=", "Created"]
     ];
     if (data) {
-        filters.push(data)
+        filters.push(...data)
     }
 
 

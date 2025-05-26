@@ -73,7 +73,7 @@
                 </template>
                 <template v-if="isMasterRoute">
                     <ul class="list-unstyled">
-                        <router-link to="/forms/department/allforms" class="text-decoration-none text-black"
+                        <router-link :to="'/forms/department/allforms' ? '/forms/department/allforms' : '/forms/department/allforms'" class="text-decoration-none text-black"
                             active-class="active-link">
                             <li><i class="bi-icon fs-6 bi bi-file-earmark-richtext me-3"></i>All Forms</li>
                         </router-link>
@@ -367,6 +367,17 @@ li {
 
     /* margin: 0px 0px 0px 11px; */
 }
+li:hover {
+    background-color: var(--white-color);
+    color: var(--black-color);
+    font-weight: var(--font-weight-normal);
+    text-align: left;
+    /* font-size: var(--thirteen); */
+    /* line-height: 26px; */
+    /* border-radius: 4px; */
+
+    /* margin: 0px 0px 0px 11px; */
+}
 
 .bi-icon {
     font-size: var(--sixteen);
@@ -378,6 +389,7 @@ li {
     padding-top: 12px;
     border-radius: 10px;
     margin-top: 10px;
+    /* box-shadow: 4px 0 4px -2px #00000040; */
 
 }
 
@@ -389,6 +401,7 @@ li {
     line-height: 26px;
     text-align: left;
     border-radius: 6px;
+    
 
 
 
@@ -400,7 +413,7 @@ li {
     background-color: var(--white-color);
     color: var(--black-color);
     font-size: var(--thirteen);
-    font-weight: var(--font-weight-normal);
+    /* font-weight: var(--font-weight-normal); */
     line-height: 26px;
     text-align: left;
     border-radius: 4px;

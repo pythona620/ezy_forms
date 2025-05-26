@@ -13,172 +13,37 @@
                         <div class="row" v-for="(row, rowIndex) in section.rows" :key="rowIndex">
                             <div v-for="(column, columnIndex) in row.columns" :key="'column-preview-' + columnIndex"
                                 class="col dynamicColumn">
-                                <div v-if="column.label" class="p-3 border-bottom">
+                                <div v-if="column.label" class="p-2 border-bottom">
                                     <h6 class="m-0 font-12">{{ column.label }}</h6>
                                 </div>
                                 <div class="mx-3 my-2">
                                     <div v-for="(field, fieldIndex) in column.fields"
                                         :key="'field-preview-' + fieldIndex">
-                                        <div v-if="field.label">
-                                            <label :for="'field-' +
-                                                sectionIndex +
-                                                '-' +
-                                                columnIndex +
-                                                '-' +
-                                                fieldIndex
-                                                ">
-                                                <span class="font-12">{{ field.label }}</span>
-                                                <span class="ms-1 text-danger">{{
-                                                    field.reqd === 1 ? "*" : ""
-                                                }}</span>
-                                            </label>
-                                        </div>
-
-                                        <template v-if="
-                                            field.fieldtype === 'Select' ||
-                                            field.fieldtype === 'Table MultiSelect'
-                                        ">
-                                            <select :multiple="field.fieldtype === 'Table MultiSelect'"
-                                                :value="field.value" @change="
-                                                    (event) =>
-                                                        logFieldValue(
-                                                            event,
-                                                            blockIndex,
-                                                            sectionIndex,
-                                                            rowIndex,
-                                                            columnIndex,
-                                                            fieldIndex
-                                                        )
-                                                " class="form-select mb-2 font-13">
-                                                <option v-for="(option, index) in field.options?.split('\n')"
-                                                    :key="index" :value="option">
-                                                    {{ option }}
-                                                </option>
-                                            </select>
-                                        </template>
-
-                                        <template v-else-if="
-                                            field.fieldtype === 'Check' ||
-                                            field.fieldtype === 'radio' || field.fieldtype === 'Small Text'
-                                        ">
-                                            <div class="container-fluid">
-                                                <div class="row">
-                                                    <div class="form-check col-4 mb-4"  v-for="(option, index) in field?.options?.split(
-                                                        '\n'
-                                                    )" :key="index" :class="{ 'd-none': index === 0 }">
-                                                        <div>
-                                                            <input v-if="
-                                                                field.fieldtype === 'Check' || field.fieldtype === 'Small Text' && index !== 0
-                                                            " class="form-check-input" type="checkbox" :value="option"
-                                                                :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
-                                                                :id="`${option}-${index}`"
-                                                                :checked="field.value === option" @change="
-                                                                    (event) =>
-                                                                        logFieldValue(
-                                                                            event,
-                                                                            blockIndex,
-                                                                            sectionIndex,
-                                                                            rowIndex,
-                                                                            columnIndex,
-                                                                            fieldIndex
-                                                                        )
-                                                                " />
-
-                                                            <input v-else-if="field.fieldtype === 'radio'"
-                                                                class="form-check-input" type="radio"
-                                                                :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
-                                                                :id="`${option}-${index}`" :value="field.value" @change="
-                                                                    (event) =>
-                                                                        logFieldValue(
-                                                                            event,
-                                                                            blockIndex,
-                                                                            sectionIndex,
-                                                                            rowIndex,
-                                                                            columnIndex,
-                                                                            fieldIndex
-                                                                        )
-                                                                " />
-                                                        </div>
-                                                        <div>
-                                                            <label class="form-check-label font-12 m-0"
-                                                                :for="`${option}-${index}`">
-                                                                {{ option }}
-                                                            </label>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </template>
-
-                                        <template v-else-if="field.fieldtype == 'Attach'">
-                                            <input
-    :disabled="props.readonlyFor === 'true'"
-    type="file"
-    accept="image/jpeg,image/png,application/pdf"
-    :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
-    class="form-control previewInputHeight font-10 mt-2"
-    multiple
-    @change="
-      logFieldValue(
-        $event,
-        blockIndex,
-        sectionIndex,
-        rowIndex,
-        columnIndex,
-        fieldIndex
-      )
-    "
-  />
-  <div v-if="field.value" class="d-flex flex-wrap gap-2">
-    <div
-      v-for="(fileUrl, index) in field.value.split(',').map(f => f.trim())"
-      :key="index"
-      class="position-relative d-inline-block"
-      @mouseover="hovered = index"
-      @mouseleave="hovered = null"
-    >
-      <!-- Show image thumbnail -->
-      <img
-        v-if="isImageFile(fileUrl)"
-        :src="fileUrl"
-        class="img-thumbnail mt-2 cursor-pointer border-0"
-        style="max-width: 100px; max-height: 100px"
-      />
-
-      <!-- Show PDF icon if not image -->
-      <div
-        v-else
-        class="d-flex align-items-center justify-content-center border mt-2"
-        style="width: 100px; height: 100px; background: #f9f9f9"
-      >
-        <i class="bi bi-file-earmark-pdf fs-1 text-danger"></i>
-      </div>
-
-      <!-- Remove icon -->
-      <button
-        v-if="hovered === index"
-        @click="removeFile(index, field)"
-        class="btn btn-sm btn-light position-absolute"
-        style="top: 2px; right: 5px; border-radius: 50%; padding: 0 5px"
-      >
-        <i class="bi bi-x fs-6"></i>
-      </button>
-    </div>
-  </div>
-
-  <!-- File input for uploading -->
-
-</template>
-
-                                        <template v-else-if="field.fieldtype == 'Datetime'">
-                                            <input type="datetime-local" :value="field.value" @click="forceOpenCalendar"
-                                                ref="datetimeInput" :placeholder="'Enter ' + field.label" :name="'field-' +
+                                        <div v-if="field.fieldtype !== 'Table'"
+                                            :class="field.fieldtype === 'Check' ? ' d-flex mt-4 flex-row-reverse justify-content-start gap-3' : ''">
+                                            <div v-if="field.label">
+                                                <label :for="'field-' +
                                                     sectionIndex +
                                                     '-' +
                                                     columnIndex +
                                                     '-' +
                                                     fieldIndex
-                                                    " @change="
+                                                    ">
+                                                    <span class="font-12"
+                                                        :class="field.fieldtype === 'Small Text' ? 'fw-bold' : ''">{{
+                                                        field.label }}</span>
+                                                    <span class="ms-1 text-danger">{{
+                                                        field.reqd === 1 ? "*" : ""
+                                                    }}</span>
+                                                </label>
+                                            </div>
+
+                                            <template v-if="
+                                                field.fieldtype === 'Select' ||
+                                                field.fieldtype === 'Table MultiSelect'
+                                            ">
+                                                <!-- <select :multiple="field.fieldtype === 'Table MultiSelect'"
+                                                    :value="field.value" @change="
                                                         (event) =>
                                                             logFieldValue(
                                                                 event,
@@ -188,16 +53,196 @@
                                                                 columnIndex,
                                                                 fieldIndex
                                                             )
-                                                    " class="form-control previewInputHeight font-10" />
-                                        </template>
+                                                    " class="form-select mb-2 font-13">
+                                                    <option v-for="(option, index) in field.options?.split('\n')"
+                                                        :key="index" :value="option">
+                                                        {{ option }}
+                                                    </option>
+                                                </select> -->
+                                                <Multiselect :multiple="field.fieldtype === 'Table MultiSelect'"
+                                                    :maxlength="getMaxLength(field)"
+                                                    :options="field.options?.split('\n') || []"
+                                                    :modelValue="field.value" placeholder="Select"
+                                                    @update:modelValue="(val) => handleSelectChange(val, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+                                                    class="font-11 multiselect" />
 
-                                        <template v-else>
-                                            <input v-if="field.fieldtype === 'Datetime'" type="datetime-local"
+
+                                            </template>
+
+                                            <template v-else-if="
+
+                                                field.fieldtype === 'radio' || field.fieldtype === 'Small Text'
+                                            ">
+                                                <div class="container-fluid">
+                                                    <div class="row">
+                                                        <div class="form-check col-4 mb-1" v-for="(option, index) in field?.options?.split(
+                                                            '\n'
+                                                        )" :key="index" :class="{ 'd-none': index === 0 }">
+                                                            <div>
+                                                                <input v-if="
+                                                                    field.fieldtype === 'Small Text' && index !== 0
+                                                                " class="form-check-input" type="checkbox"
+                                                                    :value="option"
+                                                                    :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
+                                                                    :id="`${option}-${index}`"
+                                                                    :checked="field.value === option" @change="
+                                                                        (event) =>
+                                                                            logFieldValue(
+                                                                                event,
+                                                                                blockIndex,
+                                                                                sectionIndex,
+                                                                                rowIndex,
+                                                                                columnIndex,
+                                                                                fieldIndex
+                                                                            )
+                                                                    " />
+
+                                                                <input v-else-if="field.fieldtype === 'radio'"
+                                                                    class="form-check-input" type="radio"
+                                                                    :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
+                                                                    :id="`${option}-${index}`" :value="field.value"
+                                                                    @change="
+                                                                        (event) =>
+                                                                            logFieldValue(
+                                                                                event,
+                                                                                blockIndex,
+                                                                                sectionIndex,
+                                                                                rowIndex,
+                                                                                columnIndex,
+                                                                                fieldIndex
+                                                                            )
+                                                                    " />
+                                                            </div>
+                                                            <div>
+                                                                <label class="form-check-label font-12 m-0"
+                                                                    :for="`${option}-${index}`">
+                                                                    {{ option }}
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </template>
+
+                                            <template v-else-if="field.fieldtype == 'Attach'">
+                                                <input :disabled="props.readonlyFor === 'true'" type="file"
+                                                    accept="image/jpeg,image/png,application/pdf"
+                                                    :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                                                    class="form-control previewInputHeight font-10 mt-2" multiple
+                                                    @change="
+                                                        logFieldValue(
+                                                            $event,
+                                                            blockIndex,
+                                                            sectionIndex,
+                                                            rowIndex,
+                                                            columnIndex,
+                                                            fieldIndex
+                                                        )
+                                                        " />
+                                                <div v-if="field.value" class="d-flex flex-wrap gap-2">
+                                                    <div v-for="(fileUrl, index) in field.value.split(',').map(f => f.trim())"
+                                                        :key="index" class="position-relative d-inline-block"
+                                                        @mouseover="hovered = index" @mouseleave="hovered = null">
+                                                        <!-- Show image thumbnail -->
+                                                        <img v-if="isImageFile(fileUrl)" :src="fileUrl"
+                                                            class="img-thumbnail mt-2 cursor-pointer border-0"
+                                                            style="max-width: 100px; max-height: 100px" />
+
+                                                        <!-- Show PDF icon if not image -->
+                                                        <div v-else
+                                                            class="d-flex align-items-center justify-content-center border mt-2"
+                                                            style="width: 100px; height: 100px; background: #f9f9f9">
+                                                            <i class="bi bi-file-earmark-pdf fs-1 text-danger"></i>
+                                                        </div>
+
+                                                        <!-- Remove icon -->
+                                                        <button v-if="hovered === index"
+                                                            @click="removeFile(index, field)"
+                                                            class="btn btn-sm btn-light position-absolute"
+                                                            style="top: 2px; right: 5px; border-radius: 50%; padding: 0 5px">
+                                                            <i class="bi bi-x fs-6"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                                <!-- File input for uploading -->
+
+                                            </template>
+                                            <template v-else-if="field.fieldtype == 'Check'">
+                                                <input type="checkbox" :value="field.value"
+                                                    :placeholder="'Enter ' + field.label" :name="'field-' +
+                                                        sectionIndex +
+                                                        '-' +
+                                                        columnIndex +
+                                                        '-' +
+                                                        fieldIndex
+                                                        " @change="
+                                                            (event) =>
+                                                                logFieldValue(
+                                                                    event,
+                                                                    blockIndex,
+                                                                    sectionIndex,
+                                                                    rowIndex,
+                                                                    columnIndex,
+                                                                    fieldIndex
+                                                                )
+                                                        "
+                                                    class="form-control form-check-input previewInputHeight font-10" />
+                                            </template>
+                                            <template v-else-if="field.fieldtype == 'Datetime'">
+                                                <input type="datetime-local" :value="field.value"
+                                                    :min="new Date().toISOString().slice(0, 16)"
+                                                    @click="forceOpenCalendar" ref="datetimeInput"
+                                                    :placeholder="'Enter ' + field.label" :name="'field-' +
+                                                        sectionIndex +
+                                                        '-' +
+                                                        columnIndex +
+                                                        '-' +
+                                                        fieldIndex
+                                                        " @change="
+                                                            (event) =>
+                                                                logFieldValue(
+                                                                    event,
+                                                                    blockIndex,
+                                                                    sectionIndex,
+                                                                    rowIndex,
+                                                                    columnIndex,
+                                                                    fieldIndex
+                                                                )
+                                                        " class="form-control previewInputHeight font-10" />
+                                            </template>
+                                            <template v-else-if="field.fieldtype == 'Link'">
+                                                <input type="text" :value="field.value"
+                                                    @input="(e) => onInputChange(e.target.value, field)" @change="(event) =>
+                                                        logFieldValue(
+                                                            event,
+                                                            blockIndex,
+                                                            sectionIndex,
+                                                            rowIndex,
+                                                            columnIndex,
+                                                            fieldIndex
+                                                        )" class="form-control font-12 mb-1"
+                                                    @focus="() => setActiveField(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex, field)" />
+
+                                                <ul v-if="isActiveField(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) && linkSearchResults.length"
+                                                    class="list-group mt-1"
+                                                    style="max-height: 200px; overflow-y: auto;">
+                                                    <li v-for="(result, index) in linkSearchResults" :key="index"
+                                                        @click="selectDoctype(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex, result.name)"
+                                                        class="list-group-item list-group-item-action">
+                                                        {{ result.name }}
+                                                    </li>
+                                                </ul>
+                                            </template>
+
+
+                                            <template v-else>
+                                                <!-- <input v-if="field.fieldtype === 'Datetime'" type="datetime-local"
                                                 @click="forceOpenCalendar" ref="datetimeInput" :value="field.value"
-                                                class="form-control previewInputHeight font-10" />
-                                            <!-- <input v-if="field.fieldtype === 'Date'" type="date" :value="field.value"
                                                 class="form-control previewInputHeight font-10" /> -->
-                                            <!-- <input v-if="field.fieldtype == 'Int'" type="number"
+                                                <!-- <input v-if="field.fieldtype === 'Date'" type="date" :value="field.value"
+                                                class="form-control previewInputHeight font-10" /> -->
+                                                <!-- <input v-if="field.fieldtype == 'Int'" type="number"
                                                 :placeholder="'Enter ' + field.label" :value="field.value" :name="'field-' +
                                                     sectionIndex +
                                                     '-' +
@@ -205,61 +250,330 @@
                                                     '-' +
                                                     fieldIndex
                                                     " class="form-control previewInputHeight" /> -->
-                                            <!-- :value="field.value"  -->
-                                            <textarea v-if="field.fieldtype == 'Text'" @change="
-                                                (event) =>
-                                                    logFieldValue(
-                                                        event,
-                                                        blockIndex,
-                                                        sectionIndex,
-                                                        rowIndex,
-                                                        columnIndex,
-                                                        fieldIndex
-                                                    )
-                                            " v-model="field.value" :placeholder="'Enter ' + field.label" :name="'field-' +
-                                                sectionIndex +
-                                                '-' +
-                                                columnIndex +
-                                                '-' +
-                                                fieldIndex
-                                                " class="form-control previewInputHeight"></textarea>
-                                            <component v-if="
-                                                field.fieldtype !== 'Datetime' && field.fieldtype !== 'Text'
-                                            " :is="getFieldComponent(field.fieldtype)" :value="field.value"
-                                                :maxlength="field.fieldtype === 'Phone' ? '10' : null" :Type="field.fieldtype === 'Color'
-                                                    ? 'color'
-                                                    : field.fieldtype === 'Int'
-                                                        ? 'number'
-                                                        : field.fieldtype" :name="'field-' +
-                                                            sectionIndex +
-                                                            '-' +
-                                                            columnIndex +
-                                                            '-' +
+                                                <!-- :value="field.value"  -->
+                                                <textarea v-if="field.fieldtype == 'Text'" @change="
+                                                    (event) =>
+                                                        logFieldValue(
+                                                            event,
+                                                            blockIndex,
+                                                            sectionIndex,
+                                                            rowIndex,
+                                                            columnIndex,
                                                             fieldIndex
-                                                            " @change="
-                                                                (event) =>
-                                                                    logFieldValue(
-                                                                        event,
-                                                                        blockIndex,
-                                                                        sectionIndex,
-                                                                        rowIndex,
-                                                                        columnIndex,
-                                                                        fieldIndex
-                                                                    )
-                                                            " class="form-control previewInputHeight font-10">
-                                            </component>
-                                        </template>
-                                        <div v-if="
-                                            errorMessages[
-                                            `${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`
-                                            ]
-                                        " class="text-danger font-10 mt-1">
-                                            {{
+                                                        )
+                                                " v-model="field.value" :placeholder="'Enter ' + field.label" :name="'field-' +
+                                                    sectionIndex +
+                                                    '-' +
+                                                    columnIndex +
+                                                    '-' +
+                                                    fieldIndex
+                                                    " class="form-control previewInputHeight"></textarea>
+                                                <!-- :max="currentdate" -->
+                                                <component v-if="
+                                                    field.fieldtype !== 'Datetime' && field.fieldtype !== 'Text'
+                                                " :is="getFieldComponent(field.fieldtype)" :value="field.value"
+                                                    :min="past" @click="forceOpenCalendar"
+                                                    :maxlength="getMaxLength(field)"
+                                                    :type="getInputType(field.fieldtype)" :name="'field-' +
+                                                        sectionIndex +
+                                                        '-' +
+                                                        columnIndex +
+                                                        '-' +
+                                                        fieldIndex
+                                                        " @change="
+                                                            (event) =>
+                                                                logFieldValue(
+                                                                    event,
+                                                                    blockIndex,
+                                                                    sectionIndex,
+                                                                    rowIndex,
+                                                                    columnIndex,
+                                                                    fieldIndex
+                                                                )
+                                                        " class="form-control previewInputHeight font-10">
+                                                </component>
+                                            </template>
+                                            <div v-if="
                                                 errorMessages[
                                                 `${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`
                                                 ]
-                                            }}
+                                            " class="text-danger font-10 mt-1">
+                                                {{
+                                                    errorMessages[
+                                                    `${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`
+                                                    ]
+                                                }}
+                                            </div>
+                                            <span v-if="field.description !== 'Field'" class="font-11"><span
+                                                    class="fw-semibold">Description: </span>{{
+                                                        field.description }}</span>
                                         </div>
+                                        <div v-if="blockIndex === 0 && field.fieldtype === 'Table'">
+
+                                            <div v-if="field.fieldtype === 'Table' && field.description === 'true'">
+
+                                                <div v-for="(table, tableIndex) in props.tableHeaders" :key="tableIndex"
+                                                    class="mt-3">
+                                                    <div v-if="tableIndex === field.options">
+                                                        <div>
+                                                            <span class="font-13  fw-medium">{{
+                                                                tableIndex.replace(/_/g, " ") }}</span>
+                                                        </div>
+
+                                                        <div v-if="!tableRows[tableIndex] || tableRows[tableIndex].length === 0"
+                                                            class="text-center text-muted">
+                                                            <div class="d-flex flex-column align-items-center">
+                                                                <i class="bi bi-card-list fs-3 mb-2"></i>
+                                                                <span>No Data</span>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Block View -->
+                                                        <div v-for="(row, rowIndex) in tableRows[tableIndex]"
+                                                            :key="rowIndex"
+                                                            class="border p-3 mb-3 rounded bg-light-subtle">
+                                                            <div
+                                                                class="d-flex justify-content-between align-items-center mb-2">
+                                                                <span>Block {{ rowIndex + 1 }}</span>
+                                                                <span class="text-danger cursor-pointer"
+                                                                    @click="removeRow(tableIndex, rowIndex)">
+                                                                    <i class="bi bi-x-lg"></i>
+                                                                </span>
+                                                            </div>
+
+                                                            <div v-for="i in Math.ceil(table.length / 2)" :key="i"
+                                                                class="row mb-2">
+                                                                <div class="col-6"
+                                                                    v-for="fieldItem in table.slice((i - 1) * 2, i * 2)"
+                                                                    :key="fieldItem.fieldname">
+                                                                    <label class="font-12 fw-medium">{{
+                                                                        fieldItem.label
+                                                                        }}</label>
+
+                                                                    <input v-if="fieldItem.fieldtype === 'Data'"
+                                                                        :title="row[fieldItem.fieldname]" type="text"
+                                                                        class="form-control font-12 px-2"
+                                                                        :maxlength="fieldItem.fieldtype === 'Phone' ? '10' : '140'"
+                                                                        v-model="row[fieldItem.fieldname]" />
+
+                                                                    <input v-else-if="fieldItem.fieldtype === 'Date'"
+                                                                        :min="past" :max="today"
+                                                                        :title="row[fieldItem.fieldname]" type="date"
+                                                                        class="form-control font-12"
+                                                                        v-model="row[fieldItem.fieldname]" />
+
+                                                                    <input
+                                                                        v-else-if="fieldItem.fieldtype === 'Datetime'"
+                                                                        :title="row[fieldItem.fieldname]"
+                                                                        type="datetime-local"
+                                                                        class="form-control font-12"
+                                                                        v-model="row[fieldItem.fieldname]" />
+                                                                    <!-- <template v-else-if="fieldItem.fieldtype === 'Data' && row[fieldItem.fieldname] === 'Type of Manpower'">
+                                                                            <Multiselect :multiple="field.fieldtype === 'Table MultiSelect'"
+                                                    :maxlength="getMaxLength(field)"
+                                                    :options="field.options?.split('\n') || []"
+                                                    :modelValue="field.value" placeholder="Select"
+                                                    @update:modelValue="(val) => handleSelectChange(val, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+                                                    class="font-11 multiselect" />
+                                                                        </template> -->
+
+                                                                    <input v-else-if="fieldItem.fieldtype === 'Attach'" multiple
+                                                                        type="file" class="form-control font-12" 
+                                                                            accept="image/jpeg,image/png,application/pdf"
+                                                                        @change="handleFileUpload($event, row, fieldItem.fieldname)" />
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+
+                                                        <!-- Add Block Button -->
+                                                        <div class="text-center">
+                                                            <button
+                                                                class="btn btn-outline-light text-secondary addRow-btn fw-medium btn-sm font-12"
+                                                                @click="addRow(tableIndex)">
+                                                                Add Block
+                                                            </button>
+                                                        </div>
+
+                                                        <!-- <span v-if="field.description !== tableIndex" class="font-11">
+                                                            <span class="fw-semibold">Description: </span>{{ field.description }}
+                                                        </span> -->
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div v-else>
+                                                <div v-for="(table, tableIndex) in props.tableHeaders" :key="tableIndex"
+                                                    class="mt-3">
+                                                    <div
+                                                        v-if="tableIndex === field.options || tableIndex === field.fieldname">
+                                                        <div>
+                                                            <span class="font-13 text-secondary ">{{
+                                                                tableIndex.replace(/_/g, " ")
+                                                            }}</span>
+                                                        </div>
+                                                        <table class="table  rounded-table" border="1" width="100%">
+                                                            <thead>
+                                                                <tr class=" font-12 fw-lighter">
+                                                                    <th class="fw-medium text-center">#</th>
+                                                                    <th class=" fw-medium text-center"
+                                                                        v-for="field in table" :key="field.fieldname">
+                                                                        {{ field.label }}
+                                                                    </th>
+                                                                    <th></th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr
+                                                                    v-if="!tableRows[tableIndex] || tableRows[tableIndex].length === 0">
+                                                                    <td :colspan="table.length + 2"
+                                                                        class="text-center text-muted">
+                                                                        <div
+                                                                            class="d-flex bg-white py-3 flex-column align-items-center">
+                                                                            <i class="bi bi-card-list fs-3 mb-2"></i>
+                                                                            <span class=" font-13 text-secondary">No
+                                                                                Data</span>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr class=" position-relative"
+                                                                    v-for="(row, rowIndex) in tableRows[tableIndex]"
+                                                                    :key="rowIndex">
+                                                                    <td style="text-align: center;" class="font-12">{{
+                                                                        rowIndex + 1 }}
+                                                                    </td>
+                                                                    <td v-for="field in table" :key="field.fieldname"
+                                                                        :title="row[field.fieldname]"
+                                                                        :style="field.label !== 'Type of Manpower' ? { width: row[field.fieldname] ? Math.max(row[field.fieldname].length * 10, 100) + 'px' : 'auto' } : {}">
+
+
+                                                                        <template
+                                                                            v-if="field.fieldtype === 'Data' && field.label !== 'Type of Manpower'">
+                                                                            <input type="text"
+                                                                                :maxlength="field.fieldtype === 'Phone' ? '10' : '140'"
+                                                                                class="form-control font-12"
+                                                                                :title="row[field.fieldname]"
+                                                                                v-model="row[field.fieldname]" />
+                                                                        </template>
+
+                                                                        <template v-if="field.fieldtype === 'Select'">
+                                                                            <div>
+                                                                                <Multiselect
+                                                                                    :multiple="field.fieldtype === 'Table MultiSelect'"
+                                                                                    :options="field.options?.split('\n') || []"
+                                                                                    :model-value="row[field.fieldname]"
+                                                                                    placeholder="Select"
+                                                                                    @update:model-value="val => row[field.fieldname] = val"
+                                                                                    class="font-11 multiselect" />
+                                                                            </div>
+                                                                        </template>
+                                                                        <template v-if="field.fieldtype === 'Date'">
+                                                                            <input type="date" :min="past"
+                                                                                :title="row[field.fieldname]"
+                                                                                class="form-control font-12"
+                                                                                v-model="row[field.fieldname]" />
+                                                                        </template>
+                                                                        <!-- <template v-if="field.fieldtype === 'Int'">
+                                                                            <input
+                                                                                v-if="field.label.toLowerCase() === 'total'"
+                                                                                type="number"
+                                                                                class="form-control font-12"
+                                                                                :value="calculateDynamicTotal(row, table)"
+                                                                                readonly />
+                                                                            <input v-else type="number"
+                                                                                class="form-control font-12"
+                                                                                v-model.number="row[field.fieldname]" />
+                                                                        </template> -->
+                                                                        <!-- <template v-if="field.fieldtype === 'Int'">
+                                                                        
+                                                                                    <input
+                                                                                        v-if="field.description && /[+\-*/]/.test(field.description)"
+                                                                                        type="number"
+                                                                                        class="form-control font-12"
+                                                                                        :value="calculateFieldExpression(row, field.description)"
+                                                                                        readonly
+                                                                                    />
+                                                                                    <input
+                                                                                        v-else
+                                                                                        type="number"
+                                                                                        class="form-control font-12"
+                                                                                        v-model.number="row[field.fieldname]"
+                                                                                    />
+                                                                                    </template> -->
+                                                                            <template v-if="field.fieldtype === 'Int'">
+                                                                        <input
+                                                                        v-if="field.description && /[+\-*/]/.test(field.description)"
+                                                                        type="number" class="form-control font-12"
+                                                                        :value="calculateFieldExpression(row, field.description, table)"
+                                                                        readonly
+                                                                        />
+                                                                        <input
+                                                                        v-else
+                                                                        type="number" class="form-control font-12"
+                                                                        v-model.number="row[field.fieldname]"
+                                                                        />
+                                                                    </template>
+
+
+                                                                        <template v-if="field.fieldtype === 'Datetime'">
+                                                                            <input type="datetime-local"
+                                                                                :title="row[field.fieldname]"
+                                                                                class="form-control font-12"
+                                                                                v-model="row[field.fieldname]" />
+                                                                        </template>
+
+                                                                        <template
+                                                                            v-else-if="field.fieldtype === 'Attach'">
+                                                                            <input type="file" multiple
+                                                                                accept="image/jpeg,image/png,application/pdf" 
+                                                                                class="form-control font-12"
+                                                                                @change="handleFileUpload($event, row, field.fieldname)" />
+                                                                        </template>
+                                                                    </td>
+
+                                                                    <td class="d-table-cell text-center align-middle">
+                                                                        <span class="tableRowRemoveBtn "
+                                                                            @click="removeRow(tableIndex, rowIndex)">
+                                                                            <i class="bi bi-x-lg "></i>
+                                                                        </span>
+                                                                    </td>
+                                                                </tr>
+
+                                                            </tbody>
+                                                            <tfoot >
+                                                                <tr v-if="table.some(field => field.fieldtype === 'Int' && field.description && /[+\-*/]/.test(field.description))"  class="bg-light">
+                                                                    <td class="text-center font-12">Total</td>
+                                                                    <td v-for="field in table" :key="field.fieldname" class="text-center font-12">
+                                                                        <span v-if="field.fieldtype === 'Int' && field.description && /[+\-*/]/.test(field.description)">
+                                                                            {{ tableTotals[tableIndex]?.[field.fieldname] ?? 0 }}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td></td> 
+                                                                </tr>
+                                                                <tr>
+                                                                    <td :colspan="table.length + 2"
+                                                                        class="text-center text-muted">
+
+                                                                        <button
+                                                                            class="btn btn-outline-light text-secondary fw-medium addRow-btn btn-sm font-12"
+                                                                            @click="addRow(tableIndex)">Add Row</button>
+                                                                    </td>
+
+                                                                </tr>
+                                                            </tfoot>
+
+                                                        </table>
+
+                                                        <span
+                                                            v-if="field.description !== tableIndex && field.description !== 'True' && field.description !== 'false'"
+                                                            class="font-11"><span class="fw-semibold">
+                                                            </span>{{
+                                                                field.description }}</span>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+
                                     </div>
                                 </div>
                             </div>
@@ -274,7 +588,11 @@
 import { computed, defineProps, onMounted, ref, watch } from "vue";
 // import moment from "moment";
 import axiosInstance from "../shared/services/interceptor";
-import { apis } from "../shared/apiurls";
+import { apis, doctypes } from "../shared/apiurls";
+import { reactive } from "vue";
+import Multiselect from "vue-multiselect";
+import "@vueform/multiselect/themes/default.css";
+import { watchEffect } from "vue";
 
 const props = defineProps({
     blockArr: {
@@ -285,7 +603,309 @@ const props = defineProps({
         type: String,
         required: true,
     },
+    tableHeaders: {
+        type: [Array, Object]
+    },
+    tableRowsdata: {
+        type: Object,
+        default: () => ({}),
+    },
 });
+// Reactive states
+const linkSearchResults = ref([]);
+const currentFieldOptions = ref('');
+const tableRows = reactive({});
+
+const past = new Date().toISOString().split('T')[0]
+// const today = new Date().toISOString().split('T')[0]; 
+const now = new Date();
+const pad = (n) => n.toString().padStart(2, '0');
+
+// Format: YYYY-MM-DDTHH:MM (suitable for datetime-local input)
+const today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
+
+const getMaxLength = (field) => {
+    const label = field.label?.toLowerCase() || '';
+
+    if (label.includes('expense code')) return 6;
+    if (label.includes('cost center')) return 4;
+    if (field.fieldtype?.toLowerCase() === 'phone') return 10;
+
+    return 140;
+};
+const getInputType = (type) => {
+    const t = type?.toLowerCase();
+    if (t === 'color') return 'color';
+    if (t === 'int') return 'number';
+    return t;
+};
+// Format as 'YYYY-MM-DDTHH:MM'
+watch(
+  () => tableRows,
+  () => {
+    const finalData = {};
+
+    for (const [tableIndex, rows] of Object.entries(tableRows)) {
+      const totalsRow = tableTotals.value?.[tableIndex];
+
+      if (totalsRow && Object.keys(totalsRow).length > 0) {
+        // Only add totals row if it has actual data
+        finalData[tableIndex] = [...rows, totalsRow];
+      } else {
+        // Otherwise, just send the rows
+        finalData[tableIndex] = [...rows];
+      }
+    }
+
+    emit('updateTableData', { ...finalData });
+  },
+  { deep: true }
+);
+
+watch(
+    () => props.tableRowsdata,
+    (newData) => {
+        Object.keys(newData).forEach((key) => {
+            tableRows[key] = newData[key];
+        });
+    },
+    { immediate: true, deep: true }
+);
+
+
+const addRow = (tableIndex) => {
+    if (!tableRows[tableIndex]) {
+        tableRows[tableIndex] = []; // Initialize it if undefined
+    }
+
+    const newRow = Object.fromEntries(
+        props.tableHeaders[tableIndex].map((field) => [field.fieldname, ""])
+    );
+
+    tableRows[tableIndex].push(newRow);
+
+
+
+};
+
+const removeRow = (tableIndex, rowIndex) => {
+    tableRows[tableIndex].splice(rowIndex, 1);
+};
+
+
+function calculateFieldExpression(row, expression, fields) {
+  // Map labels to fieldnames for substitution
+  const labelToFieldname = {};
+  fields.forEach(f => {
+    labelToFieldname[f.label] = f.fieldname;
+  });
+
+  // Replace label names in expression with actual row values
+  const formula = expression.replace(/\b(\w+)\b/g, (match) => {
+    const fn = labelToFieldname[match];
+    if (fn !== undefined && row[fn] !== undefined && row[fn] !== null && row[fn] !== '') {
+      return row[fn];
+    }
+    return 0; // fallback if no matching label
+  });
+
+  try {
+    return eval(formula);
+  } catch (e) {
+    console.error('Error evaluating formula:', formula, e);
+    return 0;
+  }
+}
+
+
+ 
+const tableTotals = computed(() => {
+  const totals = {};
+
+  for (const [tableIndex, rows] of Object.entries(tableRows)) {
+    totals[tableIndex] = {};
+
+    const fields = props.tableHeaders[tableIndex] || [];
+    fields.forEach((field) => {
+      if (field.fieldtype === 'Int') {
+        let sum = 0;
+
+        rows.forEach((row) => {
+          if (field.description && /[+\-*/]/.test(field.description)) {
+            // Calculate expression dynamically using labels and row data
+            sum += Number(calculateFieldExpression(row, field.description, fields)) || 0;
+          } 
+        //   else {
+        //     // Sum raw values
+        //     const val = parseFloat(row[field.fieldname]);
+        //     sum += isNaN(val) ? 0 : val;
+        //   }
+        });
+
+        totals[tableIndex][field.fieldname] = sum;
+      }
+    });
+  }
+
+  return totals;
+});
+watchEffect(() => {
+  for (const [tableIndex, rows] of Object.entries(tableRows)) {
+    const fields = props.tableHeaders[tableIndex] || [];
+
+    rows.forEach((row) => {
+      fields.forEach((field) => {
+        if (field.fieldtype === 'Int' && field.description && /[+\-*/]/.test(field.description)) {
+          const result = calculateFieldExpression(row, field.description, fields);
+          row[field.fieldname] = result; // 🔄 Store the computed value in tableRows
+        }
+      });
+    });
+  }
+});
+const handleFileUpload = (event, row, fieldname) => {
+  const selectedFiles = Array.from(event.target.files);
+  if (!selectedFiles.length) return;
+
+  // Initialize the field if it's not already an array
+  if (!Array.isArray(row[fieldname])) {
+    row[fieldname] = [];
+  }
+
+  // Calculate total number of files (existing + new)
+  const totalFiles = row[fieldname].length + selectedFiles.length;
+
+  if (totalFiles > 5) {
+    alert("You can only upload a maximum of 5 files.");
+    return;
+  }
+
+  // Proceed with uploading each file
+  selectedFiles.forEach((file) => {
+    tableFileUpload(file, row, fieldname);
+  });
+};
+
+
+const tableFileUpload = (file, row, fieldname) => {
+  const randomNumber = generateRandomNumber();
+  const fileName = `mailfiles-${props.formName}${randomNumber}-@${file.name}`;
+
+  const formData = new FormData();
+  formData.append("file", file, fileName);
+  formData.append("is_private", "0");
+  formData.append("folder", "Home");
+
+  axiosInstance
+    .post(apis.uploadfile, formData)
+    .then((res) => {
+      if (res.message && res.message.file_url) {
+        const fileUrl = res.message.file_url;
+
+        // Append the file URL to a comma-separated string
+        if (!row[fieldname]) {
+          row[fieldname] = fileUrl;
+        } else {
+          row[fieldname] += `,${fileUrl}`;
+        }
+      } else {
+        console.error("file_url not found in the response.");
+      }
+    })
+    .catch((error) => {
+      console.error("Upload error:", error);
+    });
+};
+
+
+
+
+const handleSelectChange = (
+    value,
+    blockIndex,
+    sectionIndex,
+    rowIndex,
+    columnIndex,
+    fieldIndex
+) => {
+    const field =
+        props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
+            columnIndex
+        ].fields[fieldIndex];
+
+    field.value = value;
+
+    const mockEvent = { target: { value: field.value } };
+    console.log(mockEvent, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex);
+
+    logFieldValue(mockEvent, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex);
+};
+
+
+const activeSearch = reactive({
+    query: '',
+    key: '',
+});
+
+// Generate unique key for identifying field
+function getFieldKey(b, s, r, c, f) {
+    return `${b}-${s}-${r}-${c}-${f}`;
+}
+
+// Called when the input is focused
+function setActiveField(b, s, r, c, f, field) {
+    activeSearch.key = getFieldKey(b, s, r, c, f);
+    activeSearch.query = '';
+    currentFieldOptions.value = field.options;
+    fetchDoctypeList(''); // Load initial list on focus
+}
+
+// Check if field is the currently active one
+function isActiveField(b, s, r, c, f) {
+    return activeSearch.key === getFieldKey(b, s, r, c, f);
+}
+
+// Fetch from /api/resource/{field.options} with optional searchText
+function fetchDoctypeList(searchText) {
+    const resourceName = currentFieldOptions.value;
+    if (!resourceName || !activeSearch.key) return;
+
+    const filters = [];
+
+    if (searchText.trim()) {
+        filters.push(['name', 'like', `%${searchText}%`]);
+    }
+
+    axiosInstance
+        .get(`/api/resource/${encodeURIComponent(resourceName)}`, {
+            params: {
+                fields: JSON.stringify(['name']),
+                limit_page_length: '10',
+                filters: JSON.stringify(filters),
+            },
+        })
+        .then((res) => {
+            linkSearchResults.value = res.data || [];
+        })
+        .catch((error) => {
+            console.error('Error fetching link options:', error);
+        });
+}
+
+// Handle selection from dropdown
+function selectDoctype(b, s, r, c, f, name) {
+    const field = props.blockArr[b].sections[s].rows[r].columns[c].fields[f];
+    field.value = name;
+
+    // Manually trigger logFieldValue
+    const mockEvent = { target: { value: name } };
+    logFieldValue(mockEvent, b, s, r, c, f);
+
+    linkSearchResults.value = [];
+    activeSearch.query = '';
+    activeSearch.key = '';
+}
 
 
 const getCurrentDateTime = () => {
@@ -319,6 +939,11 @@ const updateDateTimeFields = () => {
                                 // console.log("Setting field.value:", field.value); // Debugging log
                                 emit("updateField", field);
                             }
+                            // if( field.fieldtype === 'Data' && field.label === 'Total'){
+                            //     console.log(tableTotals.value);
+                            //     field.value = tableTotals.value
+                            //     emit("updateField", field)
+                            // }
 
                         });
                     });
@@ -330,6 +955,10 @@ const updateDateTimeFields = () => {
 
 // Initialize datetime fields on component mount
 onMounted(() => {
+
+    Object.keys(props.tableRowsdata).forEach((key) => {
+        tableRows[key] = props.tableRowsdata[key];
+    });
     const storedData = localStorage.getItem("employeeData");
     let parsedData = [];
     if (storedData) {
@@ -380,14 +1009,14 @@ const datetimeInput = ref(null);
 const hovered = ref(null)
 
 const isImageFile = (url) => {
-  return /\.(jpg|jpeg|png|gif|png)$/i.test(url)
+    return /\.(jpg|jpeg|png|gif|png)$/i.test(url)
 }
 
 const removeFile = (index, field) => {
-  const files = field.value.split(',').map(f => f.trim())
-  files.splice(index, 1)
-  field.value = files.join(', ')
-  emit('updateField', field)
+    const files = field.value.split(',').map(f => f.trim())
+    files.splice(index, 1)
+    field.value = files.join(', ')
+    emit('updateField', field)
 }
 const forceOpenCalendar = (event) => {
     if (event.target.showPicker) {
@@ -446,6 +1075,10 @@ const allFieldsFilled = computed(() => {
             }
         }
     }
+    //     if (Object.keys(errorMessages.value).length > 0) {
+    //     return false;
+    //   }
+
     return true; // If all required fields are filled, return true
 });
 
@@ -470,7 +1103,13 @@ const logFieldValue = (
         props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
             columnIndex
         ].fields[fieldIndex];
-    // console.log(field.fieldtype);
+    console.log(eve,
+        blockIndex,
+        sectionIndex,
+        rowIndex,
+        columnIndex,
+        fieldIndex);
+
 
     if (eve.target?.files && eve.target.files.length > 0) {
         let files = Array.from(eve.target.files); // Convert FileList to an array
@@ -485,7 +1124,7 @@ const logFieldValue = (
         files.forEach((file) => uploadFile(file, field));
     } else if (eve.target?.type === "checkbox") {
         if (field.fieldtype === "Check") {
-            field.value = eve.target.checked ? eve.target.value : "";
+            field.value = eve.target.checked ? 1 : 0;
         } else if (field.fieldtype === "Small Text") {
             let selectedValues = field.value ? JSON.parse(field.value) : []; // Parse existing values or create an empty array
 
@@ -507,6 +1146,7 @@ const logFieldValue = (
         }
     } else if (eve.target?.type === "Select") {
         field.value = eve.target.value;
+        console.log(field.value);
     } else if (eve.target?.type === "Table MultiSelect") {
         field.value = Array.from(
             eve.target.selectedOptions,
@@ -516,7 +1156,23 @@ const logFieldValue = (
     else if (field.fieldtype === "Text") {
         field["value"] = eve.target.value; // Capture textarea value
         emit("updateField", field.value); // Emit updated value
-    } else {
+    }
+    else if (field.fieldtype === "Data") {
+        const inputValue = eve.target.value;
+        // const fieldKey = `${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`;
+
+        // if (inputValue.length > 139) {
+        //     errorMessages.value[fieldKey] = "Maximum 140 characters allowed.";
+        //     return;
+        // } else {
+        //     delete errorMessages.value[fieldKey];
+        // }
+
+        field["value"] = inputValue;
+        emit("updateField", field.value);
+    }
+
+    else {
         // field['value'] = eve.target.value;
         let inputValue = eve.target.value;
 
@@ -532,6 +1188,7 @@ const logFieldValue = (
         }
 
         field["value"] = inputValue;
+        console.log(inputValue);
     }
     validateField(
         field,
@@ -614,7 +1271,189 @@ const uploadFile = (file, field, index) => {
 //     }
 // };
 </script>
-<style setup>
+<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
+
+<style lang="scss" scoped>
+td:first-child,
+th:first-child {
+  width: 3%;
+}
+.multiselect {
+    height: 30px !important;
+    font-size: 12px !important;
+    width: 100% !important;
+}
+
+.multiselect {
+    margin: initial;
+    font-size: 11px !important;
+    border: 1px solid #e2e2e2 !important;
+    height: 30px !important;
+    border-radius: 8px !important;
+
+    .multiselect-wrapper {
+        height: 30px !important;
+    }
+
+    .multiselect-dropdown {
+        .multiselect-options {
+            font-size: 11px;
+
+            li.multiselect-option span {
+                font-size: 11px !important;
+            }
+
+            li.multiselect-option .is-selected {
+                background-color: grey !important;
+                font-size: 11px;
+            }
+        }
+    }
+}
+
+.multiselect__option span {
+    font-size: 11px;
+    /* Change this value to whatever size you need */
+}
+
+.multiselect .multiselect-option {
+    font-size: 11px;
+}
+
+.multiselect .multiselect-wrapper {
+    min-height: 30px !important;
+}
+
+.multiselect .multiselect--above {
+    min-height: 30px !important;
+}
+
+.multiselect__tags {
+    min-height: 30px !important;
+    padding: 0px;
+}
+
+.multiselect .multiselect__tags {
+    min-height: 30px !important;
+    font-size: 11px !important;
+}
+
+.multiselect .multiselect__placeholder {
+    font-size: 11px;
+}
+
+.multiselect .multiselect__single {
+    font-size: 11px;
+}
+
+.multiselect .multiselect__tags .multiselect__placeholder {
+    font-size: 11px;
+}
+
+::v-deep(.multiselect__placeholder) {
+    color: #adadad;
+    display: inline-block;
+    margin-bottom: 10px;
+    padding-top: 2px;
+    font-size: 12px !important;
+}
+
+
+::v-deep(.multiselect__select) {
+    position: absolute;
+    width: 40px;
+    height: 32px;
+    right: 1px;
+    /* top: 1px; */
+    padding: 4px 8px;
+    text-align: center;
+    transition: transform 0.2s ease;
+}
+
+::v-deep(.multiselect) {
+    height: 32px !important;
+    min-height: 32px !important;
+}
+
+::v-deep(.multiselect__single) {
+    font-size: 12px;
+    color: #212529 !important;
+}
+
+::v-deep(.multiselect__tags) {
+    height: 32px !important;
+    min-height: 32px !important;
+    display: flex;
+    align-items: center;
+    border: none;
+}
+
+::v-deep(.multiselect-wrapper),
+::v-deep(.multiselect-search) {
+    height: 32px !important;
+    min-height: 32px !important;
+    line-height: 32px !important;
+    display: flex;
+    align-items: center;
+}
+
+::v-deep(.multiselect-search) {
+    height: 32px !important;
+    min-height: 32px !important;
+    display: flex;
+    align-items: center;
+}
+
+::v-deep(.multiselect-wrapper) {
+    height: 32px !important;
+    min-height: 32px !important;
+    line-height: 32px !important;
+}
+
+::v-deep(.multiselect-search) {
+    position: absolute;
+    width: 40px !important;
+    height: 32px !important;
+    right: 1px;
+
+    padding: 4px 8px;
+    text-align: center;
+    transition: transform 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+::v-deep(.multiselect__element:hover) {
+    background-color: #eeeeee !important;
+}
+
+::v-deep(.multiselect__element:hover .multiselect__option) {
+    background-color: #eeeeee !important;
+    color: #000 !important;
+}
+
+::v-deep(.multiselect__tags) {
+    color: #000 !important;
+    font-size: 12px !important;
+}
+
+
+::v-deep(.multiselect__element:hover .multiselect__option--highlight) {
+    background-color: #eeeeee !important;
+    color: #000 !important;
+}
+
+/* Additional specific rule for `.multiselect__option` when hovered */
+::v-deep(.multiselect__option:hover) {
+    background-color: #eeeeee !important;
+    color: #000 !important;
+}
+
+.addRow-btn {
+    border: 1px dotted #cccccc;
+}
+
 .previewInputHeight {
     margin-bottom: 5px;
 }
@@ -649,5 +1488,32 @@ const uploadFile = (file, field, index) => {
 
 input::-webkit-input-placeholder {
     font-size: 10px;
+}
+
+table th {
+    color: #6c757d;
+}
+
+.tableRowRemoveBtn {
+
+    border-radius: 50%;
+    padding: 4px;
+}
+
+.tableRowRemoveBtn:hover {
+    background-color: #cccccc;
+    border-radius: 50%;
+    padding: 4px;
+}
+
+.tableRowRemoveBtn i {
+    cursor: pointer;
+}
+
+.rounded-table {
+    border-radius: 10px;
+    background-color: #ccc;
+    // overflow: hidden;
+    /* This ensures child elements respect the border radius */
 }
 </style>

@@ -12,12 +12,17 @@ from frappe.utils.background_jobs import enqueue
 from ezy_forms.ezy_forms.doctype.ezy_form_definitions.linking_flow_and_forms import enqueing_creation_of_roadmap
 from itertools import chain
 from frappe.utils import cstr
+from frappe.utils import now as frappe_now
+import re
+import json
+
+
  
 class EzyFormDefinitions(Document):
     pass
  
 @frappe.whitelist()
-def add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:str,form_name:str,accessible_departments:str,form_short_name:str,fields:list[dict],form_status:str):
+def add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:str,form_name:str,accessible_departments:str,form_short_name:str,fields:list[dict],form_status:str,series=None):
     return_response_for_doc_add = enqueue(
         enqueued_add_dynamic_doctype,
         owner_of_the_form=owner_of_the_form,
@@ -29,6 +34,7 @@ def add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:st
         fields=fields,
         form_status=form_status,
         now=True,
+        series =series,
         is_async=True,
         queue="short")
     return return_response_for_doc_add
@@ -56,7 +62,7 @@ def deleting_customized_field_from_custom_dynamic_doc(doctype:str,deleted_fields
         queue="short")
     return deleted_fields_qresponse
  
-def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:str,form_name:str,accessible_departments:str,form_short_name:str,fields:list[dict],form_status:str):
+def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:str,form_name:str,accessible_departments:str,form_short_name:str,fields:list[dict],form_status:str,series=None):
     """ Owner_of_the_form should come from Departments Doctype in Select Field."""
     """Adding DocTypes dynamically, giving Perms for the doctype and creating a default section-break field for DocType"""
     try:
@@ -64,6 +70,8 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
         doctype = form_short_name
         if isinstance(fields,str):
             fields = literal_eval(fields)
+        if frappe.db.exists("Ezy Form Definitions",{"name":form_short_name}):
+            frappe.set_value("Ezy Form Definitions",form_short_name,"form_status",form_status)
         if not frappe.db.exists("DocType",doctype):
             frappe.db.sql(f"DROP TABLE IF EXISTS `tab{doctype}`;")
             frappe.db.commit()
@@ -92,6 +100,12 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
             form_defs.form_status = form_status
             form_defs.owner_of_the_form = owner_of_the_form
             form_defs.active = 1
+            cleaned_series = re.sub(r'[^a-zA-Z0-9#\-/\.]', '', series or '') if series else None
+
+            # Apply logic
+            form_defs.series = None if not cleaned_series else (
+            cleaned_series.upper() + "-.####" if not re.search(r'[-/]\.#+$', cleaned_series.upper()) else cleaned_series.upper()
+        )
             form_defs.business_unit = business_unit
             form_defs.count = 0
             form_defs.insert(ignore_permissions=True).save()
@@ -139,9 +153,10 @@ def enqueued_add_customized_fields_for_dynamic_doc(fields: list[dict], doctype: 
 
         for table_name in table_fieldnames:
             fields_in_child_doctype = frappe.db.sql(
-                f"SELECT fieldname, fieldtype, idx, label FROM `tabDocField` WHERE parent ='{table_name}';",
+                f"SELECT IFNULL(options, '') AS options,description, fieldname, fieldtype, idx, label FROM `tabDocField` WHERE parent ='{table_name}';",
                 as_dict=True
             )
+
             for each_child in fields_in_child_doctype:
                 each_child['value'] = ''
             # Sort the fields by 'idx' within each child table
@@ -168,8 +183,6 @@ def enqueued_add_customized_fields_for_dynamic_doc(fields: list[dict], doctype: 
                             doc_for_existing_custom_field.options = dicts_of_docs_entries["options"]
                         else:
                             doc_for_existing_custom_field.options = "\n".join(dicts_of_docs_entries["options"])
-
-
       
                     if "default" in dicts_of_docs_entries:
                         doc_for_existing_custom_field.default = dicts_of_docs_entries["default"]
@@ -225,7 +238,8 @@ def enqueued_deleting_customized_field_from_custom_dynamic_doc(doctype:str,delet
         frappe.db.rollback()
         frappe.throw(str(e))
         return {"success": False, "message": str(e)}
- 
+
+@frappe.whitelist()    
 def bench_migrating_from_code():
     try:
         site_name = cstr(frappe.local.site)
@@ -235,7 +249,7 @@ def bench_migrating_from_code():
         frappe.log_error(str(e))
  
 def activating_perms(doctype,role):
-    if not frappe.db.exists("DocPerm",{"parent" : doctype,"parentfield":"permissions","parenttype":"DocType","role":role}):
+    if not frappe.db.exists("DocPerm",{"parent":doctype,"parentfield":"permissions","parenttype":"DocType","role":role}):
         perm_doc = frappe.new_doc("DocPerm")
         perm_doc.parent = doctype
         perm_doc.parentfield="permissions"
@@ -245,15 +259,17 @@ def activating_perms(doctype,role):
         frappe.db.commit()
  
 def activating_perms_for_all_roles_in_wf_roadmap():
-    # all_requestors = frappe.db.sql("""Select Unique(requestor) from `tabWF Requestors`;""",as_dict=True)
-    # all_approvers = frappe.db.sql("""Select Unique(role) from `tabWF Level Setup`;""",as_dict=True)
-    # all_roles_from_list_ofdicts_to_one_list_of_dict = all_requestors + all_approvers
-    # only_roles_to_list = list(chain.from_iterable(map(dict.values, all_roles_from_list_ofdicts_to_one_list_of_dict)))
-    # unique_roles_from_all_roles = list(set(only_roles_to_list))
+
     unique_roles_from_all_roles = frappe.db.get_list("WF Roles",pluck="name")
+    
+    child_entries = frappe.get_all(
+            "Doctype Permissions",
+            filters={"parent": "Ezy Doctype Permissions", "parenttype": "Ezy Doctype Permissions", "parentfield": "document_type"},
+            fields=["doctype_names"]
+        )
+    document_type_list = [entry["doctype_names"] for entry in child_entries]
  
-    doctypes = ["Ezy Business Unit","Ezy Form Definitions","Ezy Employee","Ezy Departments","WF Role Matrix","WF Workflow Requests","WF Roadmap","WF Activity Log","Ezy Category","Login Check","WF Roles"]
-    for doc in doctypes:
+    for doc in document_type_list:
         for role in unique_roles_from_all_roles:
             if not frappe.db.exists("Custom DocPerm",{"parent":doc,"role":role}):
                 form_perms = frappe.new_doc("Custom DocPerm")
@@ -267,77 +283,46 @@ def activating_perms_for_all_roles_in_wf_roadmap():
                 form_perms.delete = 1
                 form_perms.insert(ignore_permissions=True)
     frappe.db.commit()
-#  Child Table Creation
-# @frappe.whitelist()
-# def add_child_doctype(form_short_name:str,fields:list[dict]):
-#     try:
-#         doc = frappe.new_doc("DocType")
-#         doc.name = form_short_name
-#         doc.description = f"{doc.name}"
-#         doc.creation = frappe_now()
-#         doc.modified = frappe_now()
-#         doc.modified_by = frappe.session.user
-#         doc.module = "User Forms"
-#         doc.app = "ezy_forms"
-#         doc.custom = 1
-#         doc.istable = 1
-#         # doc.description = business_unit
-#         doc.insert(ignore_permissions=True)
-#         frappe.db.commit()
-#         doc.reload()
-        
-#         if len(fields)>0:
-#             # add_customized_fields_for_dynamic_doc(fields=fields,doctype=doctype,accessible_departments=accessible_departments)
-#             add_customized_fields_for_dynamic_doc(fields=fields,doctype=form_short_name)
-#         return [
-#                 {
-#                     "child_doc": {
-#                         "description": f"{doc.name}",
-#                         "fieldname": f"{doc.name}",
-#                         "fieldtype": "Table",   
-#                         "idx": 0,
-#                         "label": f"{doc.name}",
-#                         "reqd": 0,
-#                         "value": "",
-#                         "options":f"{doc.name}"
-#                     }
-#                 }
-#             ],"Table Added Successfully"
-#     except Exception as e:
-        # return e
+    
  
- 
-import frappe
-from frappe.utils import now as frappe_now
  
 @frappe.whitelist()
-def add_child_doctype(form_short_name: str, fields: list[dict],idx=None):
-
+def add_child_doctype(form_short_name: str, as_a_block: str, fields: list[dict], idx=None):
     try:
         doc = None  # Ensure 'doc' is always defined
         exist_child_table = None
-        if not idx :
+        if not idx:
             idx = 0
         # Check if the DocType exists
         if frappe.db.exists("DocType", form_short_name):
- 
+
             exist_child_table = frappe.get_doc("DocType", form_short_name)
             existing_fields = {field.fieldname: field for field in exist_child_table.fields}
             incoming_fieldnames = {field["fieldname"] for field in fields}
             fields_updated = False
- 
+
             # Update existing fields or add new ones
             for field in fields:
                 fieldname = field.get("fieldname")
                 new_label = field.get("label")
                 new_fieldtype = field.get("fieldtype")
-                
+                new_options = field.get("options")
+                new_description = field.get("description")
+
+                if new_fieldtype == "Select" and new_options and not new_options.startswith("\n"):
+                    new_options = "\n" + new_options
+
                 if fieldname in existing_fields:
                     existing_field = existing_fields[fieldname]
                     if new_label:
                         existing_field.label = new_label
                     if new_fieldtype:
                         existing_field.fieldtype = new_fieldtype
+                    if new_options:
+                        existing_field.options = new_options
+                    if new_description:
+                        existing_field.description = new_description
+
                     fields_updated = True
                 else:
                     new_field = exist_child_table.append("fields", {
@@ -345,27 +330,31 @@ def add_child_doctype(form_short_name: str, fields: list[dict],idx=None):
                         "label": new_label,
                         "fieldtype": new_fieldtype,
                         "parentfield": "fields",
-                        "parenttype": "DocType"
+                        "parenttype": "DocType",
+                        "options": new_options,
+                        "description": new_description
                     })
                     fields_updated = True
- 
+
             # Remove fields not in the incoming data
-            exist_child_table.fields = [field for field in exist_child_table.fields if field.fieldname in incoming_fieldnames]
-            
+            exist_child_table.fields = [
+                field for field in exist_child_table.fields if field.fieldname in incoming_fieldnames
+            ]
+
             if fields_updated:
                 exist_child_table.save(ignore_permissions=True)
                 frappe.db.commit()
                 exist_child_table.db_update()
-                
+
                 return f"Fields updated successfully in Doctype '{form_short_name}'."
             else:
                 return f"No changes made to Doctype '{form_short_name}'."
- 
+
         else:
             # Create new DocType
             doc = frappe.new_doc("DocType")
             doc.name = form_short_name
-            doc.description = f"{doc.name}"
+            doc.description = f"{as_a_block}"
             doc.creation = frappe_now()
             doc.modified = frappe_now()
             doc.modified_by = frappe.session.user
@@ -376,30 +365,37 @@ def add_child_doctype(form_short_name: str, fields: list[dict],idx=None):
             doc.insert(ignore_permissions=True)
             frappe.db.commit()
             doc.reload()
- 
+    
             for field in fields:
+                # Ensure Select field has '\n' at the start of options
+                if field.get("fieldtype") == "Select":
+                    opt = field.get("options") or ""
+                    if not opt.startswith("\n"):
+                        field["options"] = "\n" + opt
+
                 doc.append("fields", {
                     "fieldname": field.get("fieldname"),
                     "label": field.get("label"),
                     "fieldtype": field.get("fieldtype"),
                     "parentfield": "fields",
-                    "parenttype": "DocType"
+                    "parenttype": "DocType",
+                    "options": field.get("options")
                 })
-            
+
             doc.save(ignore_permissions=True)
             frappe.db.commit()
+
         if len(fields) > 0:
             add_customized_fields_for_dynamic_doc(fields=fields, doctype=form_short_name)
         child_doc_name = doc.name if doc else exist_child_table.name
- 
 
         return [
             {
                 "child_doc": {
-                    "description": child_doc_name,
+                    "description": as_a_block,
                     "fieldname": child_doc_name,
                     "fieldtype": "Table",
-                    "idx": idx ,
+                    "idx": idx,
                     "label": child_doc_name,
                     "reqd": 0,
                     "value": "",
@@ -407,8 +403,65 @@ def add_child_doctype(form_short_name: str, fields: list[dict],idx=None):
                 }
             }
         ], "Table Added Successfully"
-    
+
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Error in manage_child_doctype")
         return {"error": str(e)}
+
+
+
+
+@frappe.whitelist()
+def delete_roles_for_approver_roles(role:list|None,level:int|None,short_name:str|None, document_type:str|None, property:str|None):
+	level = int(level)
+	form_json, doc_name = frappe.get_value("Ezy Form Definitions", {'form_name': document_type, 'business_unit': property}, ["form_json", "name"])
+	form_def_json_str =form_json
+	form_json = json.loads(form_def_json_str)
+	# Remove the targeted approver step
+	workflow = form_json.get("workflow", [])
+	filtered_workflow = []
+	for step in workflow:
+		if (
+			step.get("type") == "approver"
+			and step.get("idx") == level
+			and any(r in role for r in step.get("roles", []))
+		):
+			continue  # Remove this step
+		filtered_workflow.append(step)
+	# Reindex the workflow steps
+	for i, step in enumerate(filtered_workflow):
+		step["idx"] = i
+	form_json["workflow"] = filtered_workflow
+	# Save it back
+	frappe.db.set_value("Ezy Form Definitions", doc_name, "form_json", json.dumps(form_json))
+	frappe.db.commit()
  
+	updated_roadmaps = []
+	doc = frappe.get_doc("WF Roadmap",{"document_type": short_name, "property": property},['wf_level_setup'])
+	original_level_count = len(doc.wf_level_setup)
+	# Prepare new child table list excluding the entry to delete
+	new_level_setup = []
+	for entry in doc.wf_level_setup:
+		if entry.role in role and entry.level == int(level):
+			continue  # Skip this entry (deleting it)
+		elif entry.level > int(level):
+			entry.level -= 1  # Shift down levels above the deleted one
+		new_level_setup.append(entry)
+	# Sort by level to maintain logical order
+	new_level_setup.sort(key=lambda x: x.level or 0)
+	# Update idx (serial number) in order
+	for idx, entry in enumerate(new_level_setup, start=1):
+		entry.idx = idx
+	doc.wf_level_setup = new_level_setup
+	level_changed = len(doc.wf_level_setup) != original_level_count
+	if level_changed:
+		doc.workflow_levels = len(doc.wf_level_setup)
+		doc.save(ignore_permissions=True)
+		frappe.db.commit()
+		updated_roadmaps.append(doc.name)	
+	frappe.db.commit()
+	return {
+		"status": "success",
+		"updated_workflow": filtered_workflow,
+		"updated_roadmaps": updated_roadmaps
+	}

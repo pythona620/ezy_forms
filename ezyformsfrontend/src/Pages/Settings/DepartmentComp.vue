@@ -14,7 +14,7 @@
 
                 <div class="d-flex align-items-center ">
 
-                    <button type="button" class="btn btn-dark buttoncomp CreateDepartments d-flex align-items-center "
+                    <button type="button" class="btn btn-dark buttoncomp CreateDepartments d-flex align-items-center " @click="CreateDeprtModal"
                         data-bs-toggle="modal" data-bs-target="#createDepartments">
                         Create Department
                     </button>
@@ -25,26 +25,37 @@
                         <div class="modal-content">
 
                             <div class="modal-body">
-                                <label class="font-13 ps-1" for="DepartmentCode">Department Code</label>
-                                <FormFields class="mb-3" tag="input" type="text" name="DepartmentCode"
-                                    id="DepartmentCode" placeholder="Enter department code"
-                                    v-model="CreateDepartments.department_code" />
+                                <div class="mb-3">
+                                    <label class="font-13 ps-1" for="DepartmentCode">Department Code</label>
+                                    <FormFields tag="input" type="text" name="DepartmentCode" id="DepartmentCode"
+                                        placeholder="Enter department code"
+                                        v-model="CreateDepartments.department_code" />
+                                    <span v-if="formErrors.department_code" class="text-danger font-12">
+                                        {{ formErrors.department_code }}
+                                    </span>
+                                </div>
 
-                                <label class="font-13 ps-1" for="Requedepartment_namested">Department name</label>
-                                <FormFields class="mb-3" tag="input" type="text" name="department_name"
-                                    id="department_name" placeholder="Enter department name"
-                                    v-model="CreateDepartments.department_name" />
+                                <div class="mb-3">
+                                    <label class="font-13 ps-1" for="Requedepartment_namested">Department name</label>
+                                    <FormFields tag="input" type="text" name="department_name"
+                                        id="department_name" placeholder="Enter department name"
+                                        v-model="CreateDepartments.department_name" />
+                                    <span v-if="formErrors.department_name" class="text-danger font-12">
+                                        {{ formErrors.department_name }}
+                                    </span>
+                                </div>
+
                                 <label class="font-13 ps-1" for="business_unit">Business Unit</label>
 
-                                <!-- <FormFields tag="select" placeholder="" class="mb-3" name="business_unit"
-                                    id="business_unit" v-model="CreateDepartments.business_unit"
-                                    :options="EzyFormsCompanys" /> -->
-                                <VueMultiselect v-model="CreateDepartments.business_unit" :options="EzyFormsCompanys"
+                                <FormFields tag="input" type="text" :disabled="CreateDepartments.business_unit.length ? true : false"
+                                    placeholder="" class="mb-3" name="business_unit" id="business_unit"
+                                    v-model="CreateDepartments.business_unit" />
+                                <!-- <VueMultiselect v-model="CreateDepartments.business_unit" :options="EzyFormsCompanys"
                                     :multiple="false" :close-on-select="false" :clear-on-select="false"
-                                    :preserve-search="true" placeholder="Select Business unit" class="font-11 mb-3">
-                                    <!-- taggable @tag="addDepartment"
+                                    :preserve-search="true" placeholder="Select Business unit" class="font-11 mb-3"> -->
+                                <!-- taggable @tag="addDepartment"
                                             tag-placeholder="Press enter to add department" -->
-                                    <!-- <template #option="{ option }">
+                                <!-- <template #option="{ option }">
                                                 <div class="custom-option">
                                                     <input type="checkbox" :checked="createEmployee.department.includes(
                         option
@@ -54,16 +65,17 @@
                                                 </div>
                                             </template> -->
 
-                                    <template #selection="{ values, isOpen }">
+                                <!-- <template #selection="{ values, isOpen }">
                                         <span class="multiselect__single font-10" v-if="values.length" v-show="!isOpen">
                                             {{ values.join(", ") }}
                                         </span>
                                     </template>
-                                </VueMultiselect>
+                                </VueMultiselect> -->
                                 <div class="d-flex align-items-center gap-2">
                                     <div class="w-100">
-                                        <label class="font-13 ps-1" for="ezy_departments_items">ADD Department Categories
-                                            </label>
+                                        <label class="font-13 ps-1" for="ezy_departments_items">ADD Department
+                                            Categories
+                                        </label>
                                         <FormFields class="mb-3" tag="input" type="text" name="ezy_departments_items"
                                             id="ezy_departments_items" placeholder="Enter category"
                                             v-model="newCategory" />
@@ -140,12 +152,12 @@
                     <div class="modal-body">
                         <div class="d-flex w-100 gap-3">
                             <FormFields class="w-100" tag="input" type="text" name="ezy_departments_items"
-                                            id="ezy_departments_items" placeholder="Enter category"
-                                            v-model="newCategory" />
+                                id="ezy_departments_items" placeholder="Enter category" v-model="newCategory" />
                             <ButtonComp class="buttoncomp" name="Add" @click="addCategoryInView" />
                         </div>
 
-                        <table v-if="categoriesDataEdit.ezy_departments_items.length >0 " class="table mt-3 global-table">
+                        <table v-if="categoriesDataEdit.ezy_departments_items.length > 0"
+                            class="table mt-3 global-table">
                             <thead>
                                 <tr>
                                     <th>#</th>
@@ -217,6 +229,11 @@ const actions = ref(
 
     ]
 )
+const formErrors = ref({
+    department_code: "",
+    department_name: ""
+});
+const departmenCodeData = ref([]);
 
 const filterObj = ref({
     limitPageLength: 'None',
@@ -229,6 +246,9 @@ const PaginationUpdateValue = (itemsPerPage) => {
     fetchTable();
 
 };
+
+
+
 // Handle updating the limit start
 const PaginationLimitStart = ([itemsPerPage, start]) => {
     filterObj.value.limitPageLength = itemsPerPage;
@@ -282,6 +302,32 @@ const CreateDepartments = ref({
 
     ]
 });
+watch(() => CreateDepartments.value.department_code, (newVal) => {
+    const trimmedVal = newVal.trim().toLowerCase();
+    const existingCodes = departmenCodeData.value
+        .filter(code => code !== null)
+        .map(code => code.trim().toLowerCase());
+
+    if (existingCodes.includes(trimmedVal)) {
+        formErrors.value.department_code = "Department code already exists.";
+    } else {
+        formErrors.value.department_code = "";
+    }
+});
+
+watch(() => CreateDepartments.value.department_name, (newVal) => {
+    const trimmedVal = newVal.trim().toLowerCase();
+    const existingNames = designiations.value
+        .filter(name => name !== null)
+        .map(name => name.trim().toLowerCase());
+
+    if (existingNames.includes(trimmedVal)) {
+        formErrors.value.department_name = "Department name already exists.";
+    } else {
+        formErrors.value.department_name = "";
+    }
+});
+
 
 const filterOnModal = reactive({
     applieddepartment_name: false,
@@ -386,7 +432,7 @@ function inLineFiltersData(searchedData) {
 
         //     // If there is a match for the key in searchedData, create a 'like' filter
         if (searchedData[key]) {
-            filters.push(key, "like", `%${searchedData[key]}%`);
+            filters.push([key, "like", `%${searchedData[key]}%`]);
         }
         //     // Add filter for selected option
         //     if (key === "selectedOption" && searchedData.selectedOption) {
@@ -415,7 +461,34 @@ function inLineFiltersData(searchedData) {
     }
     //   fetchTotalRecords(filters);
 }
+function CreateDeprtModal(){
+    const filters = [
+        ["business_unit", "like", `%${CreateDepartments.value.business_unit}%`]
+    ];
+   
+    const queryParams = {
+        fields: JSON.stringify(["department_name","department_code"]),
+        filters: JSON.stringify(filters),
+        limit_page_length: 'None',
+        limit_start: filterObj.value.limit_start,
+        order_by: "`tabEzy Departments`.`creation` desc"
+    };
+   
+    axiosInstance.get(apis.resource + doctypes.departments, { params: queryParams })
+        .then((res) => {
+            if (res.data) {
 
+               
+                designiations.value = [...new Set(res.data.map((designation) => designation.department_name))];
+                departmenCodeData.value = [...new Set(res.data.map((designation) => designation.department_code))];
+
+
+            }
+        })
+        .catch((error) => {
+            console.error("Error fetching department data:", error);
+        });
+}
 
 
 function deptData(data) {
@@ -423,7 +496,7 @@ function deptData(data) {
         ["business_unit", "like", `%${CreateDepartments.value.business_unit}%`]
     ];
     if (data) {
-        filters.push(data)
+        filters.push(...data)
     }
 
 
@@ -453,10 +526,7 @@ function deptData(data) {
     axiosInstance.get(apis.resource + doctypes.departments, { params: queryParams })
         .then((res) => {
             if (res.data) {
-
                 tableData.value = res.data;
-                designiations.value = [...new Set(res.data.map((designation) => designation.department_name))];
-
             }
         })
         .catch((error) => {
@@ -491,7 +561,7 @@ function cancelCreate() {
         ]
     }
     CreateDepartments.value.business_unit = businessUnit.value
-    
+
 }
 
 function createDepart() {
@@ -505,11 +575,11 @@ function createDepart() {
             toast.success("Department Created", { autoClose: 500, "transition": "zoom" })
             deptData()
             CreateDepartments.value = {
-        department_code: "",
-        department_name: "",
-        ezy_departments_items: [
-        ]
-    }
+                department_code: "",
+                department_name: "",
+                ezy_departments_items: [
+                ]
+            }
         }
 
     })

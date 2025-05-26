@@ -24,14 +24,14 @@
                                 <div class="">
                                     <!-- v-if="shouldShowButton" -->
                                     <ButtonComp
-                                        class="btn btn-outline-danger raiseReqBtn d-flex justify-content-center align-items-center  m-0 text-nowrap font-10"
-                                        name="Raise request" data-bs-toggle="modal" @click="raiseRequest"
+                                        class="btn btn-danger raiseReqBtn d-flex justify-content-center align-items-center  m-0 text-nowrap font-10"
+                                        name="Raise Request" data-bs-toggle="modal" @click="raiseRequest"
                                         data-bs-target="#riaseRequestModal" />
                                     <!-- @click="raiseRequest" -->
                                 </div>
                                 <div class="">
 
-                                    <FormFields tag="select" placeholder="" class="" name="roles" id="roles"
+                                    <FormFields tag="select" placeholder="" class="" name="roles" id="roles" 
                                         :Required="false" v-model="business_unit" :options="EzyFormsCompanys" />
                                 </div>
                                 <div class="logooutbtn m-0">
@@ -218,7 +218,7 @@ const tabsData = ref([
     { name: 'To do', icon: 'fa-solid fa-list-check', route: '/todo' },
     { name: 'Settings', icon: 'bi bi-gear', route: '/settings' },
     { name: 'Archive', icon: 'bi bi-archive', route: '/archived' },
-    { name: 'Form Creation', icon: 'bi bi-file-earmark-text', route: '/create-form' }
+    // { name: 'Form Creation', icon: 'bi bi-file-earmark-text', route: '/create-form' }
 ]);
 
 const selectedData = ref({
@@ -230,7 +230,7 @@ const isFormValid = ref(false);
 const route = useRoute(); // Initialize route to access route parameters
 const categoryOptions = ref([])
 const formList = ref([])
-const business_unit = ref('');
+const business_unit = ref(EzyBusinessUnit.value);
 const userInitial = ref('');
 const new_password = ref("")
 const username = ref('');
@@ -267,7 +267,7 @@ function logout() {
     // localStorage.removeItem('employeeData');
     axiosInstance.post(apis.logout)
         .then((response) => {
-            console.log(response.data);
+            console.log(response);
             localStorage.removeItem('UserName');
             localStorage.removeItem('employeeData');
             localStorage.removeItem('Bu');
@@ -290,14 +290,14 @@ onMounted(() => {
 
     ezyForms();
     activeTab.value = route.path;
-
+    localStorage.setItem("Bu", EzyBusinessUnit.value)
     // Retrieve data from localStorage
     const userData = JSON.parse(localStorage.getItem('employeeData'));
     const userName = JSON.parse(localStorage.getItem('UserName'));
     // const syetemmanger = JSON.parse(localStorage.getItem('systemManager'))
     if (userName) {
         // Set the username based on the UserName data, which is used to check if the user is Admin
-        username.value = userName.full_name;
+        username.value = userName.full_name;        
 
         if (userName.full_name === 'Administrator') {
 
@@ -348,14 +348,14 @@ function passwordChange() {
 const ezyForms = () => {
     const queryParams = {
         fields: JSON.stringify(["*"]),
-    };
+    }; 
 
     axiosInstance.get(apis.resource + doctypes.wfSettingEzyForms, {
         params: queryParams,
     }).then((res) => {
         if (res?.data?.length) {
             EzyFormsCompanys.value = res.data.map((company) => company.bu_code);
-            if (EzyFormsCompanys.value.length) {
+            if (EzyFormsCompanys.value.length && !business_unit.value.length) {
                 business_unit.value = EzyFormsCompanys.value[0];
             }
         }
@@ -364,7 +364,8 @@ const ezyForms = () => {
     });
 };
 watch(business_unit, (newBu, oldBu) => {
-    EzyBusinessUnit.value = newBu;
+    EzyBusinessUnit.value = newBu;  
+    console.log(EzyBusinessUnit.value,"pppppp"); 
     localStorage.setItem("Bu", EzyBusinessUnit.value)
     sessionStorage.setItem("Bu", EzyBusinessUnit.value)
 
@@ -675,6 +676,7 @@ const handleBuChange = (tab) => {
 
 .raiseReqBtn {
     border: 1px solid #FE212E !important;
+    font-size: 12px;
 }
 
 .raiseReqBtn:hover {

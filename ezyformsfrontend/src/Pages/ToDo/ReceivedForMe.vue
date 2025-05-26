@@ -2,9 +2,15 @@
   <div>
     <div class="d-flex justify-content-between align-items-center py-2">
       <div>
-        <h1 class="m-0 font-13">Requests received for me</h1>
+        <h1 class="m-0 font-13">Requests Assigned to me</h1>
         <p class="m-0 font-11 pt-1">{{ totalRecords }} request</p>
       </div>
+      <!-- <div>
+        <input type="checkbox" id="ViewOnlyReportee" v-model="ViewOnlyReportee" class="me-2 mt-1 form-check-input" @change="ViewOnlyRe" />
+              <label for="ViewOnlyReportee " class="SelectallDesignation  font-12 m-0 form-check-label">View Only Reportee</label>
+        
+        
+      </div> -->
     </div>
     <div class="mt-2">
       <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" viewType="viewPdf" isCheckbox="true"
@@ -32,7 +38,7 @@
             <div class="activity-log-container">
               <div v-for="(item, index) in activityData" :key="index" class="activity-log-item"
                 :class="{ 'last-item': index === activityData.length - 1 }">
-                <div class="activity-log-dot"></div>
+                <div class="activity-log-dot"></div>def add_roles_to_wf_requestors
                 <div class="activity-log-content">
                   <p class="font-12 mb-1">
                     On
@@ -133,14 +139,14 @@ const emittedFormData = ref([]);
 const selectedcurrentLevel = ref("");
 const activityData = ref([]);
 const responseData = ref([]);
-
+const ViewOnlyReportee =  ref(false);
 const tableheaders = ref([
   { th: "Request ID", td_key: "name" },
   // { th: "Form name", td_key: "name" },
   // { th: "Form category", td_key: "doctype_name" },
   // { th: "Owner of form", td_key: "owner" },
   { th: "Requested By", td_key: "requested_by" },
-  { th: "Requested department", td_key: "role" },
+  { th: "Requested Department", td_key: "role" },
   // { th: "Property", td_key: "property" },
   { th: "Approval Status", td_key: "status" },
   { th: "Workflow Status", td_key: "assigned_to_users" },
@@ -179,15 +185,31 @@ const Rejectloading = ref(false)
 //   }
 // });
 
+const viewlist = ref([])
+function ViewOnlyReport(){
+
+  // console.log(ViewOnlyReportee.value); 
+  axiosInstance
+    .post(apis.view_only_reportee,)
+    .then((response) => {
+      // console.log(response.message,"list");
+      viewlist.value = response.message;
+
+      // const filters = [ "name","in", viewlist.value];
+      receivedForMe()
+
+    })
+    .catch((error) => {
+      console.log(error);
+      });
+   
+
+}
 function actionCreated(rowData, actionEvent) {
   if (actionEvent.name === "View Request") {
     if (rowData) {
       selectedRequest.value = { ...rowData };
       selectedcurrentLevel.value = selectedRequest.value.current_level;
-
-
-      // console.log("doctype_name",selectedRequest.value.doctype_name);
-      // console.log("Property name",selectedRequest.value.property);
 
 
       // Rebuild the structured array from JSON
@@ -281,7 +303,6 @@ function viewPreview(data) {
       routepath: route.path,
       name: data.name,
       doctype_name: data.doctype_name,
-      readOnly: 'false',
       type: "mytasks",
 
     },
@@ -569,7 +590,8 @@ function inLineFiltersData(searchedData) {
             const key = header.td_key;
 
             if (searchedData[key]) {
-                filterObj.value.filters.push(key, "like", `%${searchedData[key]}%`);
+                // Push as an array of 3 items
+                filterObj.value.filters.push([key, "like", `%${searchedData[key]}%`]);
             }
         });
 
@@ -591,9 +613,11 @@ function receivedForMe(data) {
     ["assigned_to_users", "like", `%${EmpRequestdesignation?.designation}%`],
     ["property", "like", `%${newBusinessUnit.value.business_unit}%`],
     ["status", "!=", "Request Cancelled"],
+    ["name","in", viewlist.value]
   ];
   if (data) {
-    filters.push(data);
+    filters.push(...data);
+    console.log(data);
   }
 
   const queryParams = {
@@ -655,7 +679,7 @@ const fieldMapping = computed(() => ({
   role: { type: "input" },
 
 
-  status: { type: "select", options:["Completed","Request Raised","In Progress"] },
+  status: { type: "select", options:["Request Raised","In Progress"] },
 
 }));
 
@@ -666,7 +690,7 @@ watch(
     newBusinessUnit.value.business_unit = newVal;
 
     if (newVal.length) {
-      receivedForMe();
+      ViewOnlyReport();
     }
   },
   { immediate: true }

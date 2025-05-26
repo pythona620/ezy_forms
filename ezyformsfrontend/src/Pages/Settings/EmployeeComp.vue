@@ -40,26 +40,18 @@
                       <label class="font-13 ps-1" for="emp_name">Emp Name<span class="text-danger ps-1">*</span></label>
                       <FormFields class="mb-3" tag="input" type="text" name="emp_name" id="emp_name"
                         placeholder="Enter Emp Name" v-model="createEmployee.emp_name" />
-                      <label class="font-13 ps-1" for="emp_code">Emp code<span class="text-danger ps-1">*</span></label>
+                      <label class="font-13 ps-1" for="emp_code">Emp ID<span class="text-danger ps-1">*</span></label>
                       <FormFields class="mb-3" tag="input" type="text" name="emp_code" id="emp_code"
-                        placeholder="Enter Emp code" v-model="createEmployee.emp_code" />
-                        <div class="mb-3">
-  <label class="font-13 ps-1" for="emp_phone">Emp Phone</label>
-  <FormFields 
-    tag="input" 
-    type="text" 
-    name="emp_phone" 
-    id="emp_phone" 
-    maxlength="13"
-    @input="formatPhoneNumber" 
-    @change="validatephonenew" 
-    placeholder="Enter Phone Number"
-    v-model="createEmployee.emp_phone" 
-  />
-  <p v-if="phoneError" class="text-danger font-11 ps-1">
-    {{ phoneError }}
-  </p>
-</div>
+                        placeholder="Enter Emp ID" v-model="createEmployee.emp_code" />
+                      <div class="mb-3">
+                        <label class="font-13 ps-1" for="emp_phone">Emp Phone</label>
+                        <FormFields tag="input" type="text" name="emp_phone" id="emp_phone" maxlength="13"
+                          @input="formatPhoneNumber" @change="validatephonenew" placeholder="Enter Phone Number"
+                          v-model="createEmployee.emp_phone" />
+                        <p v-if="phoneError" class="text-danger font-11 ps-1">
+                          {{ phoneError }}
+                        </p>
+                      </div>
 
                       <div class="mb-3">
                         <label class="font-13 ps-1" for="emp_mail_id">Emp Mail ID<span
@@ -134,32 +126,22 @@
                                         <FormFields v-if="newDesignation" class="mb-3" tag="input" type="text"
                                             name="emp_code" id="emp_code" placeholder="Enter Designation"
                                             v-model="inputDesignation" /> -->
-                      <label class="font-13 ps-1" for="reporting_to">Reporting To</label>
+                      <label class="font-13 ps-1" for="reporting_to">Reports To</label>
                       <!-- <FormFields class="mb-3" tag="input" type="text" name="reporting_to"
-                                            id="reporting_to" placeholder="Enter Reporting To"
+                                            id="reporting_to" placeholder="Enter Reports To"
                                             v-model="createEmployee.reporting_to" /> -->
-                      <VueMultiselect v-model="createEmployee.reporting_to"
-                        :options="tableData.map((dept) => dept.emp_name)" :multiple="false" :close-on-select="true"
-                        :clear-on-select="false" :preserve-search="true" placeholder="Select Reporting To"
-                        class="font-11 mb-3">
-                        <!-- taggable
-                                            @tag="addReportingTo" tag-placeholder="Press enter to add reporting to" -->
-                        <!-- <template #option="{ option }">
-                                                <div class="custom-option">
-                                                    <input type="checkbox" :checked="createEmployee.reporting_to.includes(
-                        option
-                    )
-                        " class="custom-checkbox" />
-                                                    <span>{{ option }}</span>
-                                                </div>
-                                            </template> -->
+                                            <VueMultiselect v-model="createEmployee.reporting_to"
+                    :options="employeeEmails.map((dept) => dept.emp_mail_id)" :multiple="false" :close-on-select="true"
+                    :clear-on-select="false" :preserve-search="true" placeholder="Select Reports To"
+                    class="font-11 mb-3">
 
-                        <template #selection="{ values, isOpen }">
-                          <span class="multiselect__single font-10" v-if="values.length" v-show="!isOpen">
-                            {{ values.join(", ") }}
-                          </span>
-                        </template>
-                      </VueMultiselect>
+
+                    <template #selection="{ values, isOpen }">
+                      <span class="multiselect__single font-10" v-if="values.length" v-show="!isOpen">
+                        {{ values.join(", ") }}
+                      </span>
+                    </template>
+                  </VueMultiselect>
                       <label class="font-13 ps-1" for="reporting_designation">Reporting Designation</label>
                       <!-- <FormFields class="mb-3" tag="input" type="text" name="reporting_designation"
                                             id="reporting_designation" placeholder="Enter Reporting Designation"
@@ -327,7 +309,7 @@
                   <label class="font-13 ps-1" for="emp_name">Emp Name<span class="text-danger ps-1">*</span></label>
                   <FormFields class="mb-3" tag="input" type="text" name="emp_name" id="emp_name"
                     placeholder="Enter department code" v-model="createEmployee.emp_name" />
-                  <label class="font-13 ps-1" for="emp_code">Emp code<span class="text-danger ps-1">*</span></label>
+                  <label class="font-13 ps-1" for="emp_code">Emp ID<span class="text-danger ps-1">*</span></label>
                   <FormFields class="mb-3" tag="input" type="text" name="emp_code" id="emp_code"
                     placeholder="Enter department code" v-model="createEmployee.emp_code" />
                   <!-- <div class="mb-3">
@@ -343,7 +325,7 @@
                     <div class="input-container">
                       <FormFields tag="input" type="text" name="emp_phone" id="emp_phone" maxlength="10" class="w-100"
                         :readonly="true" placeholder="Enter Phone Number" v-model="createEmployee.emp_phone"
-                        @input="maskPhoneNumber" @change="validatePhone"  />
+                        @input="maskPhoneNumber" @change="validatePhone" />
                       <i :class="eyeIcon" class="eye-icon" @click="toggleMask"></i>
                     </div>
                     <p v-if="phoneError" class="text-danger font-11 ps-1">
@@ -410,10 +392,10 @@
                       </span>
                     </template>
                   </VueMultiselect>
-                  <label class="font-13 ps-1" for="reporting_to">Reporting To</label>
+                  <label class="font-13 ps-1" for="reporting_to">Reports To</label>
                   <VueMultiselect v-model="createEmployee.reporting_to"
-                    :options="tableData.map((dept) => dept.emp_name)" :multiple="false" :close-on-select="true"
-                    :clear-on-select="false" :preserve-search="true" placeholder="Select Reporting To"
+                    :options="employeeEmails.map((dept) => dept.emp_mail_id)" :multiple="false" :close-on-select="true"
+                    :clear-on-select="false" :preserve-search="true" placeholder="Select Reports To"
                     class="font-11 mb-3">
 
 
@@ -470,6 +452,25 @@
         </div>
       </div>
     </div>
+    <div class="modal fade" id="EmployeeToggleModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirm Employee Status</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Are you sure you want to <span id="empActionText"></span> "<span id="empRowName"></span>"?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-dark" @click="confirmEmployeeToggle">Yes, Proceed</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
   </div>
 
 </template>
@@ -518,17 +519,23 @@ const createEmployee = ref({
   signature: "",
 });
 
+const selectedEmpRow = ref(null);
+const empActionText = ref('');
+
+
 const bulkdata = ref([])
 
 const tableheaders = ref([
-  { th: "Emp Code", td_key: "emp_code" },
+  { th: "Emp ID", td_key: "emp_code" },
   { th: "Emp Name", td_key: "emp_name" },
   // { th: "Mail", td_key: "emp_mail_id" },
   { th: "Designation", td_key: "designation" },
   { th: "Department", td_key: "department" },
   { th: "Signature", td_key: "signature" },
 
-  { th: "Reporting To", td_key: "reporting_to" },
+  { th: "Reports To", td_key: "reporting_to" },
+  { th: "Emp Status", td_key: "enable" },
+
   // { th: "Reporting Designation", td_key: "reporting_designation" },
 ]);
 
@@ -698,7 +705,7 @@ const buluploding = () => {
 
 const formattedData = computed(() => {
   const data = bulkdata.value?.records || [];
-  
+
   return data.map((record, index) => {
     let email = "N/A";
     let messageText = "N/A";
@@ -1142,7 +1149,7 @@ watch(
   (newValue) => {
     if (newValue) {
       const selectedEmployee = tableData.value.find(
-        (emp) => emp.emp_name === newValue
+        (emp) => emp.emp_mail_id === newValue
       );
       if (selectedEmployee) {
         createEmployee.value.reporting_designation =
@@ -1185,13 +1192,15 @@ const isFormFilled = computed(() => {
 function createEmplBtn() {
   deptData();
   designationData();
+  employeeOptions();
 }
 function actionCreated(rowData, actionEvent) {
   if (actionEvent?.name === 'Edit Employee') {
     if (rowData) {
-      phoneError.value= ""
+      phoneError.value = ""
       deptData();
       designationData();
+      employeeOptions();
       createEmployee.value = { ...rowData }
       isMasked.value = true
       isEmailMasked.value = true
@@ -1212,43 +1221,37 @@ function actionCreated(rowData, actionEvent) {
 
 
 
+
 function toggleFunction(rowData) {
-  const isCurrentlyEnabled = rowData.enable == '1' || rowData.enable === 1;
-  const actionText = isCurrentlyEnabled ? 'Disable' : 'Enable';
+  selectedEmpRow.value = rowData;
+  const isEnabled = rowData.enable === '1' || rowData.enable === 1;
+  empActionText.value = isEnabled ? 'Disable' : 'Enable';
 
-  // if (confirm(`Are you sure you want to ${actionText} ${rowData.emp_name} this Employee?`)) {
-  const message = `Are you sure you want to ${actionText} \n"${rowData.emp_name}"?`;
+  document.getElementById('empActionText').innerText = empActionText.value;
+  document.getElementById('empRowName').innerText = rowData.emp_name;
 
-  if (confirm(message)) {
-    rowData.enable = isCurrentlyEnabled ? 0 : 1;
-
-    axiosInstance
-      .put(`${apis.resource}${doctypes.EzyEmployeeList}/${rowData.name}`, rowData)
-      .then((employeeResponse) => {
-        console.log("Employee Response:", employeeResponse.data);
-
-        const userUpdateData = { enabled: rowData.enable };
-
-        axiosInstance
-          .put(`${apis.resource}${doctypes.users}/${rowData.name}`, userUpdateData)
-          .then((userResponse) => {
-            console.log("User Account Response:", userResponse.data);
-            toast.success(`Form ${actionText}d successfully`, { autoClose: 700 });
-            // employeeData();
-            window.location.reload();
-          })
-          .catch((userError) => {
-            console.error("Error updating user account toggle:", userError);
-          });
-      })
-      .catch((error) => {
-        console.error("Error updating employee toggle:", error);
-      });
-  } else {
-    console.log("Action cancelled. Toggle remains unchanged.");
-  }
+  const modal = new bootstrap.Modal(document.getElementById('EmployeeToggleModal'));
+  modal.show();
 }
 
+function confirmEmployeeToggle() {
+  const isEnabled = selectedEmpRow.value.enable === '1' || selectedEmpRow.value.enable === 1;
+  selectedEmpRow.value.enable = isEnabled ? 0 : 1;
+
+  axiosInstance
+    .put(`${apis.resource}${doctypes.EzyEmployeeList}/${selectedEmpRow.value.name}`, selectedEmpRow.value)
+    .then(() => {
+      const userData = { enabled: selectedEmpRow.value.enable };
+      return axiosInstance.put(`${apis.resource}${doctypes.users}/${selectedEmpRow.value.name}`, userData);
+    })
+    .then(() => {
+      toast.success(`Employee ${empActionText.value}d successfully`);
+      window.location.reload();
+    })
+    .catch((err) => {
+      console.error('Toggle employee error:', err);
+    });
+}
 
 
 const fieldMapping = ref({
@@ -1318,7 +1321,7 @@ const uploadFile = (file, field) => {
 function deptData() {
   const queryParams = {
     fields: JSON.stringify(["*"]),
-    limit_page_length: filterObj.value.limitPageLength,
+    limit_page_length: "None",
     limit_start: filterObj.value.limit_start,
   };
 
@@ -1419,9 +1422,50 @@ function employeeData(data) {
     .then((res) => {
       if (res.data) {
         const newData = res.data
-        if(filterObj.value.limit_start === 0){
+        if (filterObj.value.limit_start === 0) {
 
           tableData.value = newData;
+          // designations.value = [...new Set(res.data.map((designation) => designation.designation))];
+          // reportingTo.value = [
+          //   ...new Set(res.data.map((reporting) => reporting.reporting_to)),
+          // ];
+          // reportingDesigination.value = [
+          //   ...new Set(
+          //     res.data.map(
+          //       (reportingDesigination) =>
+          //         reportingDesigination.reporting_designation
+          //     )
+          //   ),
+          // ];
+          // createEmployee.value.company_field = businessUnit.value;
+        }
+        else {
+          tableData.value = tableData.value.concat(newData);
+        }
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching department data:", error);
+    });
+}
+
+const employeeEmails=ref([]);
+
+function employeeOptions() {
+  const queryParams = {
+    fields: JSON.stringify(["*"]),
+    limit_page_length: "None",
+    filters: JSON.stringify([["company_field", "like", `%${newbusiness.value}%`]]),
+    order_by: "`tabEzy Employee`.`creation` desc",
+  };
+  axiosInstance
+    .get(apis.resource + doctypes.EzyEmployeeList, { params: queryParams })
+    .then((res) => {
+      if (res.data) {
+        const newData = res.data
+        if (filterObj.value.limit_start === 0) {
+
+          employeeEmails.value = newData;
           // designations.value = [...new Set(res.data.map((designation) => designation.designation))];
           reportingTo.value = [
             ...new Set(res.data.map((reporting) => reporting.reporting_to)),
@@ -1430,14 +1474,14 @@ function employeeData(data) {
             ...new Set(
               res.data.map(
                 (reportingDesigination) =>
-                reportingDesigination.reporting_designation
+                  reportingDesigination.reporting_designation
               )
             ),
           ];
           createEmployee.value.company_field = businessUnit.value;
         }
-        else{
-          tableData.value = tableData.value.concat(newData);
+        else {
+          employeeEmails.value = employeeEmails.value.concat(newData);
         }
       }
     })
@@ -1451,7 +1495,7 @@ function designationData() {
   const queryParams = {
     fields: JSON.stringify(["*"]),
     filters: JSON.stringify(filters),
-    limit_page_length: filterObj.value.limitPageLength,
+    limit_page_length:"None",
     limit_start: filterObj.value.limit_start,
     order_by: "`tabWF Roles`.`creation` desc",
   };

@@ -10,28 +10,42 @@ export function extractFieldsWithBreaks(data) {
   data.forEach((block) => {
     block.sections.forEach((section) => {
       section.rows.forEach((row) => {
+        
         row.columns.forEach((column) => {
           column.fields.forEach((field) => {
+
+            // if (section.childTables && section.childTables.length) {
+            //   section.childTables.forEach((table) => {
+            //     result.push({
+            //      ...table
+            //     });
+            //   });
+            // }
+
             let generatedFieldname = convertLabelToFieldName(field?.label);
 
             // Ensure unique fieldname
             generatedFieldname = getUniqueFieldname(generatedFieldname, fieldnameTracker);
 
             result.push({
-              description: "Field",
+              description: field.description ? field.description : "Field",
               fieldname: generatedFieldname,
               fieldtype: field.fieldtype,
               idx: index++, // Assign index
               label: field.label,
               reqd: field.reqd ? 1 : 0,
               value: field.value ? field.value : "",
-              ...(["Select", "Table MultiSelect", "Check","Small Text"].includes(field.fieldtype) && field.options
+              ...(["Select", "Table MultiSelect", "Check", "Small Text"].includes(field.fieldtype) && field.options
                 ? { options: field.options.startsWith("\n") ? field.options : `\n${field.options}` }
-                : {}),
+                : (field.fieldtype === "Link" || field.fieldtype === 'Table' && field.options
+                  ? { options: field.options } : {})),
+
+
             });
 
             previousFieldname = generatedFieldname;
           });
+
 
           const columnFieldname = getUniqueFieldname(convertLabelToFieldName(column?.label), fieldnameTracker);
 
@@ -46,6 +60,7 @@ export function extractFieldsWithBreaks(data) {
           previousFieldname = columnFieldname;
         });
 
+
         const rowFieldname = getUniqueFieldname(convertLabelToFieldName(row?.label), fieldnameTracker);
 
         result.push({
@@ -58,6 +73,63 @@ export function extractFieldsWithBreaks(data) {
 
         previousFieldname = rowFieldname;
       });
+      if (section.childTables && section.childTables.length) {
+        section.childTables.forEach((table) => {
+          // Section Break before the table
+          // const tableSectionBreakFieldname = getUniqueFieldname(`break_before_${table.label}`, fieldnameTracker);
+          // result.push({
+          //   description: "Section Break",
+          //   fieldname: tableSectionBreakFieldname,
+          //   fieldtype: "Section Break",
+          //   label: "",
+          //   idx: index++,
+          // });
+
+          // Actual table field
+          const tableFieldname = getUniqueFieldname(table.label, fieldnameTracker);
+          result.push({
+            description: table.description || "Table",
+            fieldname: tableFieldname,
+            fieldtype: "Table",
+            idx: index++,
+            label: table.label,
+            options: table.options || "",
+            reqd: table.reqd ? 1 : 0,
+            value: table.value 
+          });
+
+          // ✅ Column Break after table
+          const columnBreakFieldname = getUniqueFieldname(convertLabelToFieldName(`col_break_after_${table.label}`), fieldnameTracker);
+          result.push({
+            description: "Column Break",
+            fieldname: columnBreakFieldname,
+            fieldtype: "Column Break",
+            label: "",
+            idx: index++,
+          });
+
+          // ✅ Row Break after table
+          const rowBreakFieldname = getUniqueFieldname(convertLabelToFieldName(`row_break_after_${table.label}`), fieldnameTracker);
+          result.push({
+            description: "Row Break",
+            fieldname: rowBreakFieldname,
+            fieldtype: "Column Break",
+            label: "",
+            idx: index++,
+          });
+
+          // ✅ Section Break after table
+          // const sectionBreakFieldname = getUniqueFieldname(`section_break_after_${table.label}`, fieldnameTracker);
+          // result.push({
+          //   description: "Section Break",
+          //   fieldname: sectionBreakFieldname,
+          //   fieldtype: "Section Break",
+          //   label: "",
+          //   idx: index++,
+          // });
+        });
+      }
+
 
       const sectionFieldname = getUniqueFieldname(convertLabelToFieldName(section?.label), fieldnameTracker);
 
@@ -71,6 +143,7 @@ export function extractFieldsWithBreaks(data) {
 
       previousFieldname = sectionFieldname;
     });
+
 
     const blockFieldname = getUniqueFieldname(convertLabelToFieldName(block?.label), fieldnameTracker);
 
@@ -317,7 +390,8 @@ export function rebuildToStructuredArray(flatArray) {
             parent: item.parent,
             label: item.label,
             reqd: item.reqd,
-            options: item.options
+            options: item.options,
+            description: item.description
           });
         }
         break;
@@ -539,7 +613,7 @@ export function extractfieldlabels(obj) {
   if (obj.label && !excludedLabels.includes(obj.label.trim())) {
     fieldlabels.push(obj.label);
   }
-  
+
   if (obj.sections) obj.sections.forEach(section => fieldlabels.push(...extractfieldlabels(section)));
   if (obj.rows) obj.rows.forEach(row => fieldlabels.push(...extractfieldlabels(row)));
   if (obj.columns) obj.columns.forEach(column => fieldlabels.push(...extractfieldlabels(column)));

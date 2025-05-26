@@ -9,7 +9,10 @@
   "bu_name",
   "bu_code",
   "bu_logo",
-  "send_form_as_a_attach_through_mail"
+  "send_form_as_a_attach_through_mail",
+  "welcome_mail_to_employee",
+  "water_mark",
+  "letter_head"
  ],
  "fields": [
   {
@@ -33,11 +36,28 @@
    "fieldname": "send_form_as_a_attach_through_mail",
    "fieldtype": "Check",
    "label": "Send form as a attach through mail"
+  },
+  {
+   "default": "0",
+   "fieldname": "welcome_mail_to_employee",
+   "fieldtype": "Check",
+   "label": "Welcome mail to employee"
+  },
+  {
+   "fieldname": "letter_head",
+   "fieldtype": "Text",
+   "label": "Letter Head"
+  },
+  {
+   "default": "0",
+   "fieldname": "water_mark",
+   "fieldtype": "Check",
+   "label": "Water Mark"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-02-28 17:23:14.519499",
+ "modified": "2025-05-19 12:21:01.195421",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
  "name": "Ezy Business Unit",
@@ -52,7 +72,67 @@
    "print": 1,
    "read": 1,
    "report": 1,
+   "role": "Website Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Human Resource",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "IT assistance",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
    "role": "CS",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "junior Consultant",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Production Manager",
    "share": 1,
    "write": 1
   },
@@ -76,7 +156,31 @@
    "print": 1,
    "read": 1,
    "report": 1,
+   "role": "Team Lead",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
    "role": "Hd",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "IT",
    "share": 1,
    "write": 1
   },
@@ -100,7 +204,43 @@
    "print": 1,
    "read": 1,
    "report": 1,
+   "role": "Tl",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
    "role": "IT Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Junior Developer",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "DOF",
    "share": 1,
    "write": 1
   }

@@ -4,7 +4,7 @@
             <div>
                 <img class="m-auto d-flex" src="../../assets/box with files.svg" />
                 <h1 class="font-14 fw-bold m-0 text-center">
-                    The forms are archived.
+                    Archived Forms
                 </h1>
                 <p class="m-0 fw-normal font-12">You can access your archived forms by filtering.</p>
                 <div class=" mt-3">

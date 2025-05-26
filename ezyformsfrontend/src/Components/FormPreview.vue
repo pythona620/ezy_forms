@@ -72,7 +72,8 @@
                         </div>
                         <div class="mx-3 my-2">
                           <div v-for="(field, fieldIndex) in column.fields" :key="'field-preview-' + fieldIndex">
-                            <div v-if="field.label">
+                            <div v-if="field.label && field.fieldtype !== 'Table'" >
+                            <div>
                               <label :for="'field-' +
                                 sectionIndex +
                                 '-' +
@@ -89,9 +90,8 @@
                               <template v-if="field.fieldtype == 'Table MultiSelect'">
                                 <select :multiple="field.fieldtype == 'Table MultiSelect'
                                   " v-model="field.value" class="form-select mb-2 font-13">
-                                  <option v-for="(
-option, index
-                                    ) in field.options?.split('\n')" :key="index" :value="option">
+                                  <option v-for="(option, index
+                                  ) in field.options?.split('\n')" :key="index" :value="option">
                                     {{ option }}
                                   </option>
                                 </select>
@@ -99,20 +99,21 @@ option, index
                               <template v-else-if="
                                 field.fieldtype == 'Check' ||
                                 field.fieldtype == 'radio' ||
-                                field.fieldtype == 'Select' ||  field.fieldtype == 'Small Text'
+                                field.fieldtype == 'Select' || field.fieldtype == 'Small Text'
                               ">
                                 <div class="container-fluid">
                                   <div class="row">
                                     <div class="form-check col-4 mb-4" v-for="(
-option, index
-                                      ) in field?.options?.split('\n')" :key="index" :class="{ 'd-none': index === 0 }">
+                                      option, index
+                                      ) in field?.options?.split('\n')" :key="index" :class="{ 'd-none': index === 0 && !field.option }"
+                                      >
                                       <div class="d-flex gap-2 align-items-center">
                                         <div>
-                                          <input v-if="
-                                            field.fieldtype === 'Check' || field.fieldtype === 'Select' ||  field.fieldtype == 'Small Text' &&
-                                            index !== 0
-                                          " class="form-check-input" :type="field.fieldtype == 'Small Text' ? 'Checkbox':field.fieldtype " :name="option"
-                                            :id="option" readonly />
+                                          <input v-if=" (field?.options ||
+                                            field.fieldtype === 'Check' || field.fieldtype === 'Select' || field.fieldtype == 'Small Text') && index !== 0
+                                          " class="form-check-input"
+                                            :type="field.fieldtype == 'Small Text' ? 'Checkbox' : field.fieldtype"
+                                            :name="option" :id="option" readonly />
                                         </div>
                                         <div>
                                           <label class="form-check-label font-12 m-0" :for="option">{{ option }}</label>
@@ -143,6 +144,50 @@ option, index
                                   :type="field.fieldtype" class="form-control previewInputHeight font-10" />
                               </template>
                             </div>
+                            <span v-if="field.description !== 'Field'" class="font-11"><span v-if="field.description !== 'Field'"
+                                class="fw-semibold">Description: {{
+                                  field.description }}</span></span>
+                            </div>
+                            <div v-if="blockIndex === 0">
+
+
+                              <div v-for="(table, tableName) in props.childHeaders" :key="tableName">
+                                <!-- Table Title -->
+                                <div v-if="tableName === field.options || tableName === field.fieldname"> 
+                                <div >
+                                  <span class="font-13 fw-bold ps-1 tablename text-secondary">
+                                    {{ tableName.toString().replace(/_/g, " ") }}
+                                  </span>
+                                </div>
+
+                                <!-- Table -->
+                                <div class="tableborder-child">
+                                  <table class="table mt-2 table-striped">
+                                    <thead>
+                                      <tr>
+                                        <th>#</th>
+                                        <th v-for="field in table" :key="field.fieldname">
+                                          {{ field.label }}
+                                        </th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      <tr>
+                                        <td>{{ '-' }}</td>
+                                        <td v-for="(field, index) in table" :key="index">
+                                          <span>-</span>
+                                        </td>
+                                      </tr>
+                                    </tbody>
+                                  </table>
+                                </div>
+                                </div>
+                              </div>
+
+
+
+
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -150,44 +195,7 @@ option, index
                   </div>
                 </div>
               </div>
-              <div v-if="blockIndex === 0" class="mt-2 pb-2 mx-2">
 
-
-                <div v-for="(table, tableName) in props.childHeaders" :key="tableName">
-                  <!-- Table Title -->
-                  <div class="mt-2 pb-1 mx-1">
-                    <span class="font-13 fw-bold ps-1 tablename text-secondary">
-                      {{ tableName.toString().replace(/_/g, " ") }}
-                    </span>
-                  </div>
-
-                  <!-- Table -->
-                  <div class="tableborder-child">
-                    <table class="table mt-2 table-striped">
-                      <thead>
-                        <tr>
-                          <th>#</th>
-                          <th v-for="field in table" :key="field.fieldname">
-                            {{ field.label }}
-                          </th>
-                        </tr>
-                      </thead>
-                       <tbody>
-                        <tr>
-                          <td>{{ '-' }}</td>
-                          <td v-for="(field, index) in table" :key="index">
-                            <span>-</span>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-
-
-
-              </div>
             </div>
           </div>
         </div>

@@ -8,12 +8,13 @@ from ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions impor
 
 class EzyEmployee(Document):
 	def after_insert(self):
+		is_email_account_set = frappe.db.get_all("Email Account",{"enable_outgoing":["=",1],"default_outgoing":["=",1]})
 		###### Employee updating in User doc
 		user_doc = frappe.new_doc("User")
-		user_doc.email = self.emp_mail_id
 		user_doc.username = self.emp_name
-		user_doc.send_welcome_email = 0
+		user_doc.email = self.emp_mail_id
 		user_doc.first_name = self.emp_name.split(" ")[0]
+		user_doc.send_welcome_email = 1 if len(is_email_account_set) > 0 else 0
 		user_doc.insert(ignore_permissions=True)
 		frappe.db.commit()
 		user_doc.reload()
@@ -29,7 +30,12 @@ class EzyEmployee(Document):
 				adding_role_doc.role = self.designation
 				adding_role_doc.insert(ignore_permissions=True)
 				frappe.db.commit()
-			for doc_name in ["Ezy Employee","WF Workflow Requests","WF Roadmap","Ezy Business Unit","WF Roles","Ezy Form Definitions","Ezy Departments"]:
+			child_entries = frappe.get_all("Doctype Permissions",
+			filters={"parent": "Ezy Doctype Permissions", "parenttype": "Ezy Doctype Permissions", "parentfield": "document_type"},
+			fields=["doctype_names"]
+			)
+			document_type_list = [entry["doctype_names"] for entry in child_entries]
+			for doc_name in document_type_list:
 				if not frappe.db.exists("DocPerm",{"parent":doc_name,"parenttype":"DocType","role":self.designation,"parentfield":"permissions"}):
 					activating_perms(doc_name,self.designation)
 			bench_migrating_from_code()

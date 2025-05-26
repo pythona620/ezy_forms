@@ -2,7 +2,7 @@
   <div>
     <div class="d-flex justify-content-between align-items-center py-2">
       <div>
-        <h1 class="m-0 font-13">Requests raised by me</h1>
+        <h1 class="m-0 font-13">Requests Submitted</h1>
         <p class="m-0 font-11 pt-1">{{ totalRecords }} request</p>
       </div>
     </div>
@@ -218,10 +218,11 @@ const tableheaders = ref([
   { th: "Request ID", td_key: "name" }, 
   { th: "Form name", td_key: "doctype_name" },
   // { th: "Form category", td_key: "doctype_name" },
-  { th: "Owner of form", td_key: "role" },
+  { th: "My Forms", td_key: "role" },
   { th: "Requested on", td_key: "requested_on" },
   { th: "Approval Status", td_key: "status" },
   { th: "Workflow Status", td_key: "assigned_to_users" },
+  { th: "Approved Date", td_key: "modified" }
 ]);
 
 const actions = ref([
@@ -510,68 +511,7 @@ const updateFormData = (fieldValues) => {
   formData.value = formData.value.concat(fieldValues);
 };
 
-function ApproverFormSubmission(dataObj, type) {
-  let form = {};
-  form["doctype"] = selectedRequest.value.doctype_name;
-  form["company_field"] = selectedRequest.value.property;
-  form["name"] = doctypeForm.value.name;
-  if (emittedFormData.value.length) {
-    emittedFormData.value.map((each) => {
-      form[each.fieldname] = each.value;
-    });
-  }
 
-  // form['form_json']
-  const formData = new FormData();
-  formData.append("doc", JSON.stringify(form));
-  formData.append("action", "Save");
-  axiosInstance
-    .post(apis.savedocs, formData)
-    .then((response) => {
-      if (response?.docs) {
-        // approvalCancelFn(dataObj, type);
-      }
-    })
-    .catch((error) => {
-      console.error("Error fetching data:", error);
-    });
-}
-
-
-// // Function to handle form submission
-// const ApproverFormSubmission = () => {
-
-//   // if (emittedFormData.value.length) {
-//   //       emittedFormData.value.map((each) => {
-//   //           form[each.fieldname] = each.value
-//   //       })
-//   //   }
-
-//   let data = {
-//     "property": selectedRequest.value.property,
-//     "doctype": selectedRequest.value.doctype_name,
-//     "request_ids": selectedRequest.value.name,
-//     "reason": "",
-//     "action": selectedRequest.value.action,
-//     "files": "[]",
-//     "cluster_name": null,
-//     "url_for_approval_id": '',
-//     // https://ezyrecon.ezyinvoicing.com/home/wf-requests
-//     "current_level": selectedRequest.value.current_level
-//   }
-
-//   // axiosInstance.post(apis.requestApproval, { request_details: [data] })
-//   //   .then((response) => {
-
-//   toast.success("Rquest Approved", { autoClose: 1000 })
-//   const modal = bootstrap.Modal.getInstance(document.getElementById('viewRequest'));
-//   modal.hide();
-//   // })
-//   // .catch((error) => {
-//   //   console.error("Error fetching data:", error);
-//   // });
-
-// };
 
 function mapFormFieldsToRequest(doctypeData, showRequestData) {
   showRequestData.forEach((block) => {
@@ -615,7 +555,7 @@ function inLineFiltersData(searchedData) {
             const key = header.td_key;
 
             if (searchedData[key]) {
-                filters.push(key, "like", `%${searchedData[key]}%`);
+                filters.push([key, "like", `%${searchedData[key]}%`]);
             }
         });
 
@@ -640,7 +580,7 @@ function receivedForMe(data) {
   ];
 
   if (data) {
-    filters.push(data);
+    filters.push(...data);
   }
 
   // Define query parameters for data and count retrieval

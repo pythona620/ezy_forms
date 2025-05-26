@@ -1,26 +1,27 @@
 <template>
   <div class="">
     <div>
-      <div class="d-flex align-items-center justify-content-between py-2">
+      <div class="d-flex align-items-center justify-content-between py-3">
         <div>
           <h1 class="m-0 font-13">
-            Forms in {{ id }}
+            {{ id === 'allforms' ? 'All Forms' : id }}
           </h1>
           <p class="m-0 font-11 pt-1">
-            {{ totalRecords }} forms available
+            {{ totalRecords }} Forms Available
           </p>
         </div>
         <div v-if="userDesigination.includes('IT')" class="d-flex align-items-center gap-2">
-                <div class="d-flex align-items-center">
-                    <ButtonComp class="buttoncomp" @click="formCreation()" name="Create form"></ButtonComp>
-                </div>
-            </div>
+          <div class="d-flex align-items-center">
+            <ButtonComp class="buttoncomp" @click="formCreation()" name="Create Form"></ButtonComp>
+          </div>
+        </div>
 
       </div>
-      <div class="mt-3">
-        <GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true" actionType="dropdown"  raiseRequest="true" :enableDisable="isEnable" @cell-click="viewPreview"
-           @actionClicked="actionCreated" @toggle-click="toggleFunction" :actions="actions"
-          @updateFilters="inLineFiltersData" :field-mapping="fieldMapping" isFiltersoption="true" />
+      <div class="mt-1">
+        <GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true" actionType="dropdown"
+          raiseRequest="true" :enableDisable="isEnable" @cell-click="viewPreview" @actionClicked="actionCreated"
+          @toggle-click="toggleFunction" :actions="actions" @updateFilters="inLineFiltersData"
+          :field-mapping="fieldMapping" isFiltersoption="true" />
         <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
           @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
       </div>
@@ -73,6 +74,32 @@
         </div>
       </div>
     </div>
+    <!-- Button trigger modal -->
+    <!-- <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#EnableDisable">
+      Launch demo modal
+    </button> -->
+
+    <!-- Modal -->
+    <div class="modal fade" id="EnableDisable" tabindex="-1" aria-labelledby="EnableDisableLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="EnableDisableLabel">Confirm Action</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            Are you sure you want to <span id="actionTextSpan"></span> <span class=" fw-bold font-13"
+              id="rowNameSpan"></span> Form?
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-dark" @click="confirmAction">Yes, Proceed</button>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
 
     <!-- <FormPreview :blockArr="selectedForm" :formDescriptions="formDescriptions" :childHeaders="childtableHeaders" /> -->
 
@@ -95,11 +122,13 @@ import { useRoute } from 'vue-router';
 import ButtonComp from '../../Components/ButtonComp.vue';
 const totalRecords = ref(0);
 const tableheaders = ref([
-  { th: "Form name", td_key: "form_name" },
+  { th: "Form Name", td_key: "form_name" },
   { th: "Form Short Code", td_key: "form_short_name" },
-  { th: "Form category", td_key: "form_category" },
-  { th: "Accessible departments", td_key: "accessible_departments" },
+  { th: "Form Category", td_key: "form_category" },
+  { th: "Accessible Departments", td_key: "accessible_departments" },
   { th: "Status", td_key: "form_status" },
+  { th: "Form Status", td_key: "enable" },
+
 ]);
 const props = defineProps(['id']);
 const formDescriptions = ref({})
@@ -110,39 +139,63 @@ const route = useRoute();
 const pdfPreview = ref('')
 
 const childtableHeaders = ref([]);
+const userDesigination = ref('');
+const isEnable = ref("");
 
 
 // Business unit and filter object
 const businessUnit = computed(() => EzyBusinessUnit.value);
 const newBusinessUnit = ref({ business_unit: '' });
-const filterObj = ref({ limitPageLength: 20, limit_start: 0 });
-const actions = ref(
-  [
+const filterObj = ref({ limitPageLength: 20, limit_start: 0, filters: [] });
+const actions = computed(() => {
+  const baseActions = [
     { name: 'View form', icon: 'fa-solid fa-eye' },
     { name: 'Raise Request', icon: 'fa fa-file-text' },
-    // { name: 'Download Print format', icon: 'fa-solid fa-download' },
   ]
-)
+
+  if (userDesigination.value.includes('IT')) {
+    baseActions.push({ name: 'Edit Form', icon: 'fa-solid fa-edit' },)
+  }
+
+  return baseActions
+})
 
 
 const fieldMapping = ref({
   // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
   form_short_name: { type: "input" },
   form_category: { type: "input" },
-  form_status: { type: "select", options: ["Created", "Draft"] },
-
-  form_status: { type: "select", options: ["Created", "Draft"] },
+  form_status: { type: "select", options: ["Active", "Retired"] },
   form_name: { type: "input" },
+  enable: { type: "select", options: ["Enabled", "Disabled"] }
 
   // requested_on: { type: "date" },
 });
-function formCreation() {
-   
-        router.push({ name: "FormStepper" ,query:{
-            routepath: route.path
-        }, });
-        // console.log(route.path,"pppp");
-    }
+function formCreation(item = null) {
+  if (item == null) {
+    router.push({
+      name: "FormStepper", query: {
+        routepath: route.path,
+        business_unit: businessUnit.value,
+
+      },
+    });
+
+  } else {
+    router.push({
+      name: "FormStepper",
+      params: { paramid: item.name },
+      query: {
+        routepath: route.path,
+        business_unit: businessUnit.value,
+        id: item.name
+
+      }
+
+    });
+  }
+  localStorage.setItem('routepath', route.path)
+}
 
 function viewPreview(data, index, type) {
   // console.log(route.path);
@@ -154,12 +207,13 @@ function viewPreview(data, index, type) {
         query: {
           routepath: route.path,
           form_short_name: data.form_short_name,
+          business_unit: businessUnit.value,
 
         },
       });
     }
   }
-  if(type === 'raiseRequest'){
+  if (type === 'raiseRequest') {
     const parsedData = JSON.parse(data.form_json);
     const storedData = localStorage.getItem("employeeData");
     // console.log(parsedData);
@@ -168,8 +222,8 @@ function viewPreview(data, index, type) {
       const designation = JSON.parse(storedData).designation;
       // console.log(designation);
 
-      if(!parsedData.workflow.length){
-        toast.info("No Roles Added",{autoClose:500})
+      if (!parsedData.workflow.length) {
+        toast.info("No Roles Added", { autoClose: 500 })
       }
       const roles = parsedData.workflow[0].roles;
       // console.log(roles);
@@ -223,6 +277,7 @@ function actionCreated(rowData, actionEvent) {
         query: {
           routepath: route.path,
           form_short_name: rowData.form_short_name,
+          business_unit: businessUnit.value,
 
         },
       });
@@ -230,6 +285,9 @@ function actionCreated(rowData, actionEvent) {
     } else {
       toast.warn(" There is no form fields ")
     }
+  }
+  else if (actionEvent.name === 'Edit Form') {
+    formCreation(rowData);
   }
 
   if (actionEvent.name === 'Raise Request') {
@@ -240,8 +298,8 @@ function actionCreated(rowData, actionEvent) {
       const designation = JSON.parse(storedData).designation;
       // console.log(designation);
       if (!parsedData.workflow?.length) {
-    toast.info("No Roles Added", { autoClose: 500 });
-}
+        toast.info("No Roles Added", { autoClose: 500 });
+      }
       const roles = parsedData.workflow[0].roles;
       // console.log(roles);
 
@@ -329,39 +387,43 @@ function downloadPdf() {
 const responcedata = ref([]);
 
 // Toggle function triggered when a checkbox is clicked
+const selectedRowData = ref(null);
+const selectedActionText = ref('');
+
 function toggleFunction(rowData, rowIndex, event) {
-  // console.log("rowData", rowData);
-
-  // Decide the action based on the current state:
+  selectedRowData.value = rowData;
   const isCurrentlyEnabled = rowData.enable == '1' || rowData.enable === 1;
-  const actionText = isCurrentlyEnabled ? 'delete' : 'restore';
+  selectedActionText.value = isCurrentlyEnabled ? 'Disable' : 'Restore';
 
-  // Show the confirmation dialog with dynamic messaging:
-  if (confirm(`Are you sure you want to ${actionText} this Form?`)) {
-    // Toggle the state:
-    rowData.enable = isCurrentlyEnabled ? 0 : 1;
+  document.getElementById('actionTextSpan').innerText = selectedActionText.value;
+  document.getElementById('rowNameSpan').innerText = rowData.name;
 
-    axiosInstance
-      .put(`${apis.resource}${doctypes.EzyFormDefinitions}/${rowData.name}`, rowData)
-      .then((response) => {
-         responcedata.value = response.data;
-        // console.log("Response:", response.data);
-        // Adjust the toast message accordingly:
-        toast.success(`Form ${actionText}d successfully`, { autoClose: 700 });
-        // Refresh the table data after a short delay
-        setTimeout(() => {
-          fetchDepartmentDetails();
-        }, 1000);
-      })
-      .catch((error) => {
-        console.error("Error updating toggle:", error);
-      });
-  } 
-  // else {
-  //   // If canceled, do nothing – the checkbox remains unchanged.
-  //   console.log("Action cancelled. Toggle remains unchanged.");
-  // }
+  const modal = new bootstrap.Modal(document.getElementById('EnableDisable'));
+  modal.show();
+  window.currentModal = modal;
 }
+
+function confirmAction() {
+  if (!selectedRowData.value) return;
+
+  const isCurrentlyEnabled = selectedRowData.value.enable == '1' || selectedRowData.value.enable === 1;
+  selectedRowData.value.enable = isCurrentlyEnabled ? 0 : 1;
+
+  axiosInstance
+    .put(`${apis.resource}${doctypes.EzyFormDefinitions}/${selectedRowData.value.name}`, selectedRowData.value)
+    .then((response) => {
+      responcedata.value = response.data;
+      toast.success(`Form ${selectedActionText.value}d successfully`, { autoClose: 700 });
+      setTimeout(() => {
+        fetchDepartmentDetails();
+      }, 1000);
+      if (window.currentModal) window.currentModal.hide();
+    })
+    .catch((error) => {
+      console.error("Error updating toggle:", error);
+    });
+}
+
 
 
 // Watch business unit and department ID changes
@@ -370,7 +432,8 @@ watch(
   ([newBusinessUnitVal, newId]) => {
     newBusinessUnit.value.business_unit = newBusinessUnitVal;
     if (newBusinessUnitVal.length && newId && props.id !== ':id') {
-
+      filterObj.value.limit_start = 0;
+      filterObj.value.filters = [];
       fetchDepartmentDetails(newId || props.id, null);
     }
   },
@@ -396,40 +459,59 @@ const PaginationLimitStart = ([itemsPerPage, start]) => {
 const timeout = ref(null);
 
 function inLineFiltersData(searchedData) {
-    clearTimeout(timeout.value); // Clear previous timeout
+  clearTimeout(timeout.value); // Clear previous timeout
 
-    timeout.value = setTimeout(() => {
-        const filters = [];
+  timeout.value = setTimeout(() => {
+    filterObj.value.filters = [];
 
-        // Loop through the table headers and build dynamic filters
-        tableheaders.value.forEach((header) => {
-            const key = header.td_key;
 
-            if (searchedData[key]) {
-                filters.push(key, "like", `%${searchedData[key]}%`);
-            }
-        });
+    // Loop through the table headers and build dynamic filters
+    if (searchedData.form_status === 'Active') {
+      filterObj.value.filters.push(["form_status", "like", "Created"]);
+    }
+    if (searchedData.form_status === 'Retired') {
+      filterObj.value.filters.push(["form_status", "like", "Draft"]);
+    }
+    console.log(searchedData.enable);
+    if (searchedData.enable === 'Enabled') {
+      filterObj.value.filters.push(["enable", "=", 1]);
+    } else if (searchedData.enable === 'Disabled') {
+      filterObj.value.filters.push(["enable", "=", 0]);
+    }
 
-        // Call fetchDepartmentDetails with or without filters
-        if (filters.length) {
-            fetchDepartmentDetails(null, filters);
-        } else {
-            fetchDepartmentDetails();
-        }
-    }, 500); // Adjust debounce delay as needed
+
+    // Loop through other table headers and add filters
+    tableheaders.value.forEach((header) => {
+      const key = header.td_key;
+      const value = searchedData[key];
+
+      if (key === 'form_status' || key === 'enable') return; // Skip since we already handled it above
+
+      if (value) {
+        filterObj.value.filters.push([key, "like", `%${value}%`]);
+      }
+    });
+
+    // Call fetchDepartmentDetails with or without filters
+    if (filterObj.value.filters.length) {
+      fetchDepartmentDetails(null, filterObj.value.filters);
+    } else {
+      fetchDepartmentDetails();
+    }
+  }, 500); // Adjust debounce delay as needed
 }
 // Fetch department details function
 function fetchDepartmentDetails(id, data) {
 
   const filters = [
     ["business_unit", "like", `%${newBusinessUnit.value.business_unit}%`],
-    ["enable", "=", 1]
+
   ];
-  if (props.id && props.id !== "allforms") {
+  if (props.id && props.id !== "Allforms" && props.id !== "allforms") {
     filters.push(["owner_of_the_form", "=", props.id]);
   }
   if (data) {
-    filters.push(data)
+    filters.push(...data)
   }
 
   const queryParams = {
@@ -457,12 +539,12 @@ function fetchDepartmentDetails(id, data) {
   axiosInstance
     .get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParams })
     .then((response) => {
-      
-      if(filterObj.value.limit_start === 0){
+
+      if (filterObj.value.limit_start === 0) {
         tableData.value = response.data;
         formCategory.value = [...new Set(tableData.value.map((formCategory) => formCategory.form_category))];
 
-      }else {
+      } else {
         tableData.value = tableData.value.concat(response.data);
       }
     })
@@ -471,10 +553,10 @@ function fetchDepartmentDetails(id, data) {
     });
 }
 
-const userDesigination = ref('');
-const isEnable = ref("");
 
 onMounted(() => {
+  localStorage.removeItem('routepath')
+
   const userData = JSON.parse(localStorage.getItem('employeeData'));
   userDesigination.value = userData.designation || '';
   // console.log(userDesigination.value,"///");
@@ -482,7 +564,7 @@ onMounted(() => {
   if (userDesigination.value.includes("IT")) {
     isEnable.value = "true";
   }
-  if (route.path === "/forms/department/allforms") {
+  if (route.path === "/forms/department/allforms" || route.path === "/forms/department/Allforms") {
     router.replace("/forms/department/allforms");
   }
 

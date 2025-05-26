@@ -20,6 +20,8 @@ export const doctypes = {
   WFActivityLog: 'WF Activity Log',
   CheckUser: 'Login Check',
   SystemSettings:"System Settings",
+  Email_Account: 'Email Account',
+  doctypesList: 'DocType'
 
 
 };
@@ -60,7 +62,10 @@ export const apis = {
   Update_raising_request: domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.rejected_form_updating`,
   edit_form_before_approve: domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.edit_the_form_before_approve`,
   uploadbulkEmployeefile: domain + `/method/ezy_forms.ezy_forms.doctype.ezy_employee.bulk_import_data.import_bulk_data`,
-  childFieldsUpdation: domain + `/method/ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions.update_field_properties`
+  childFieldsUpdation: domain + `/method/ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions.update_field_properties`,
+ view_only_reportee : domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.pick_view_only_reportee`,
+ toMailApproval: domain + `/method/ezy_forms.ezy_forms.doctype.email_approval.custom_email_approval.email_approval`,
+ deleteAssigneRoles:domain+`/method/ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions.delete_roles_for_approver_roles`,
 };
 
 // export const tokens = {

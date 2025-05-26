@@ -11,91 +11,106 @@
     </div>
 
 
-<div class="approve_height">
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col-3"></div>
-        <div class="col-6">
-          <div class="mt-1">
-            <div class="text-center">
-              <div class="card border-0 shadow-none">
-                <div class="card-body pb-2 d-flex gap-3 align-items-center justify-content-center">
-                  <h5 class="card-title mb-0">{{ selectedData.doctype_name }}</h5>
-                  <div class="d-flex align-items-baseline gap-2 ps-1 ">
-                    <span v-if="tableData?.status !== 'Completed' && tableData.status !== 'Request Cancelled'"
-                      class="text-warning font-11 text-nowrap fw-bold">
-                      Pending ({{ tableData.current_level }} /
-                      {{ tableData?.total_levels }})</span>
-                    <span class=" font-11 status_completed fw-bold text-nowrap" v-if="tableData?.status === 'Completed'">
-                      Approved
-                    </span>
-                    <span class=" font-11 requestRejected text-nowrap" v-if="tableData?.status === 'Request Cancelled'">
-                      Request Rejected
-                    </span>
+    <div class="approve_height">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-3"></div>
+          <div class="col-6">
+            <div class="mt-1">
+              <div class="text-center">
+                <div class="card border-0 shadow-none">
+                  <div class="card-body pb-2 d-flex gap-2 align-items-center justify-content-center">
+                    <h5 class="card-title">{{ selectedData.doctype_name }}</h5>
+                    <div class="d-flex align-items-baseline gap-2 ps-1 ">
+                      <span v-if="tableData?.status !== 'Completed' && tableData.status !== 'Request Cancelled'"
+                        class="text-warning font-11 text-nowrap fw-bold">
+                        Pending ({{ tableData.current_level }} /
+                        {{ tableData?.total_levels }})</span>
+                      <span class=" font-11 status_completed text-nowrap" v-if="tableData?.status === 'Completed'">
+                        Approved
+                      </span>
+                      <span class=" font-11 requestRejected text-nowrap"
+                        v-if="tableData?.status === 'Request Cancelled'">
+                        Request Rejected
+                      </span>
+                    </div>
+                    <!-- <span v-if="tableData?.status === 'Completed'"><i
+                        class="bi approved-icon bi-check2-circle "></i></span>
+                    <span v-if="tableData?.status === 'Request Cancelled'"><i
+                        class="bi rejected-icon bi-x-circle"></i></span> -->
                   </div>
-                  <!-- <span v-if="tableData?.status === 'Completed'"><i class="bi approved-icon bi-check2-circle "></i></span>
-                  <span v-if="tableData?.status === 'Request Cancelled'"><i class="bi rejected-icon bi-x-circle"></i></span> -->
                 </div>
               </div>
-            </div>
-            <div class="position-relative ">
-              <div class="requestPreviewDiv pb-5">
-                <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel" :childData="responseData"
-                  :readonly-for="selectedData.readOnly" :childHeaders="tableHeaders" :employee-data="employeeData"
-                  @updateField="updateFormData" />
+              <div class="position-relative ">
+                <div class="requestPreviewDiv pb-5">              
+                  <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel"
+                    :childData="responseData" :readonly-for="selectedData.readOnly" :childHeaders="tableHeaders"
+                    :employee-data="employeeData" @updateField="updateFormData" />
 
-              </div>
+                </div>
 
-              <div v-if="selectedData.type == 'myforms' && tableData.status == 'Request Raised'"
-                class="d-flex justify-content-end approveBtns">
-                <button type="submit" class="btn Edit_btn" @click.prevent="EditformSubmission()">
-                  <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                  <span v-if="!loading"><i class="bi bi-pencil-fill font-15 me-2"></i><span
-                      class="font-12">Edit</span></span>
-                </button>
-              </div>
+                <div v-if="selectedData.type == 'myforms' && tableData.status == 'Request Raised'"
+                  class="d-flex justify-content-end approveBtns">
+                  <button type="submit" class="btn Edit_btn" @click.prevent="EditformSubmission()">
+                    <span v-if="loading" class="spinner-border spinner-border-sm" role="status"
+                      aria-hidden="true"></span>
+                    <span v-if="!loading"><i class="bi bi-pencil-fill font-15 me-2"></i><span
+                        class="font-12">Edit</span></span>
+                  </button>
+                </div>
 
-              <div v-if="selectedData.type === 'mytasks'" class="">
+                <div v-if="selectedData.type === 'mytasks'" class="">
 
-                <!-- v-if="!requestcancelled" -->
-                <div class="approveBtns pb-2 mb-2 mt-3 flex-column px-0 pe-4">
-                  <div class="form-floating mb-2 p-1">
-                    <textarea class="form-control font-12" placeholder="Leave a comment here" id="floatingTextarea"
-                      @input="resetCommentsValidation" :class="{ 'is-invalid': !isCommentsValid }"
-                      v-model="ApproverReason"></textarea>
-                    <label class="font-11" for="floatingTextarea">Comments..</label>
-                    <span v-if="!isCommentsValid" class="font-11 text-danger ps-1">Please enter comments**</span>
-                  </div>
-                  <div class=" d-flex justify-content-between ">
-                    <div>
-                      <button :disabled="rejectLoad" class="btn btn-outline-danger font-10 py-0 rejectbtn" type="button"
-                        @click="ApproverCancelSubmission(formData, 'Request Cancelled')">
-                        <span v-if="rejectLoad" class="spinner-border spinner-border-sm" role="status"
-                          aria-hidden="true"></span>
-                        <span v-if="!rejectLoad"><i class="bi bi-x-lg fw-bolder font-12 me-2"></i><span
-                            class="font-12">Reject</span></span>
-                      </button>
+                  <!-- v-if="!requestcancelled" -->
+                  <div class="approveBtns pb-2 mb-2 mt-3 flex-column px-0 pe-4">
+                    <div v-if="!canApprove & view_only_reportee === 1" class=" d-flex align-items-center gap-1">
+
+                      <span class=" font-12 text-danger">
+                        Note:
+                      </span>
+                      <span  class=" fw-bold font-12">You don’t have permission to
+                        Approve</span>
                     </div>
-                    <div>
-                      <button :disabled="loading" type="submit" class="btn btn-success approvebtn"
-                        @click.prevent="ApproverFormSubmission(emittedFormData, 'Approve')">
-                        <span v-if="loading" class="spinner-border spinner-border-sm" role="status"
-                          aria-hidden="true"></span>
-                        <span v-if="!loading"><i class="bi bi-check-lg font-15 me-2"></i><span
-                            class="font-12">Approve</span></span>
-                      </button>
 
+                    <div class="form-floating mb-2 p-1">
+                      <!-- :disabled="view_only_reportee === 1" -->
+                      <textarea :disabled="!canApprove & view_only_reportee === 1" class="form-control font-12" placeholder="Leave a comment here"
+                        id="floatingTextarea" @input="resetCommentsValidation"
+                        :class="{ 'is-invalid': !isCommentsValid }" v-model="ApproverReason"></textarea>
+                      <label class="font-11" for="floatingTextarea">Comments..</label>
+                      <span v-if="!isCommentsValid" class="font-11 text-danger ps-1">Please enter comments**</span>
                     </div>
-                  </div>
+                    <div class=" d-flex justify-content-between ">
+                      <div>
+                        <button :disabled="rejectLoad ||( !canApprove & view_only_reportee === 1)"
+                          class="btn btn-outline-danger font-10 py-0 rejectbtn" type="button"
+                          @click="ApproverCancelSubmission(formData, 'Request Cancelled')">
+                          <span v-if="rejectLoad" class="spinner-border spinner-border-sm" role="status"
+                            aria-hidden="true"></span>
+                          <span v-if="!rejectLoad"><i class="bi bi-x-lg fw-bolder font-12 me-2"></i><span
+                              class="font-12">Reject</span></span>
+                        </button>
+                      </div>
+                      <div>
+                        <button :disabled="loading || ( !canApprove & view_only_reportee === 1)" type="submit" class="btn btn-success approvebtn"
+                          @click.prevent="ApproverFormSubmission(emittedFormData, 'Approve')">
+                          <span v-if="loading" class="spinner-border spinner-border-sm" role="status"
+                            aria-hidden="true"></span>
+                          <span v-if="!loading"><i class="bi bi-check-lg font-15 me-2"></i><span
+                              class="font-12">Approve</span></span>
+                        </button>
 
+                      </div>
+                    </div>
+
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-        <div class="col-3">
-          <div class="activity-log-container ">
-            <!-- <div class=" w-100  mb-2">
+          <div class="col-3">
+            <div class="activity-log-container ">
+              <!-- <div class=" w-100  mb-2">
               <div class=" py-2 px-3">
 
                 <h5 class="font-13 fw-bold">{{ selectedData.doctype_name }} form approval</h5>
@@ -106,7 +121,7 @@
                   {{ tableData.total_levels }})</span>
               </div>
             </div> -->
-            <!-- <div class="mt-5 mb-3 pt-2 d-flex justify-content-between align-items-center">
+              <!-- <div class="mt-5 mb-3 pt-2 d-flex justify-content-between align-items-center">
               <h6 class="font-14 ps-3  mb-0">Activity log <span
                   v-if="tableData?.status !== 'Completed' && tableData.status !== 'Request Cancelled'"
                   class="text-warning font-12  fw-bold">
@@ -124,55 +139,61 @@
                   class="bi bi-arrow-down-circle fw-bold px-1"></i>Download
                 PDF</button>
             </div> -->
-            <div class="row mb-3">
-              <div class="col-xl-6 col-lg-12 col-md-12">
-                <div class="d-flex  align-items-baseline  mt-2">
-                  <div>
-                    <span class="font-12 text-nowrap fw-bold mb-0">Activity log
-                    </span>
+              <div class="row mb-3">
+                <div class="col-xl-6 col-lg-12 col-md-12">
+                  <div class="d-flex  align-items-baseline  mt-2">
+                    <div>
+                      <span class="font-12 text-nowrap fw-bold mb-0">Activity log
+                      </span>
+                    </div>
+                    <!-- <div class="d-flex align-items-baseline gap-2 ps-1 ">
+                      <span v-if="tableData?.status !== 'Completed' && tableData.status !== 'Request Cancelled'"
+                        class="text-warning font-11 text-nowrap fw-bold">
+                        Pending ({{ tableData.current_level }} /
+                        {{ tableData?.total_levels }})</span>
+                      <span class=" font-11 status_completed text-nowrap" v-if="tableData?.status === 'Completed'">
+                        Approved
+                      </span>
+                      <span class=" font-11 requestRejected text-nowrap"
+                        v-if="tableData?.status === 'Request Cancelled'">
+                        Request Rejected
+                      </span>
+                    </div> -->
                   </div>
-                  <!-- <div class="d-flex align-items-baseline gap-2 ps-1 ">
-                    <span v-if="tableData?.status !== 'Completed' && tableData.status !== 'Request Cancelled'"
-                      class="text-warning font-11 text-nowrap fw-bold">
-                      Pending ({{ tableData.current_level }} /
-                      {{ tableData?.total_levels }})</span>
-                    <span class=" font-11 status_completed text-nowrap" v-if="tableData?.status === 'Completed'">
-                      Approved
-                    </span>
-                    <span class=" font-11 requestRejected text-nowrap" v-if="tableData?.status === 'Request Cancelled'">
-                      Request Rejected
-                    </span>
-                  </div> -->
+
+
                 </div>
-
-
-              </div>
-              <div class="col-xl-6 col-lg-12 col-md-12">
-                <button v-if="tableData.status === 'Completed'"
-                  class="btn btn-light font-11 fw-bold h-0 text-decoration-underline" type="button" @click="downloadPdf"><i
-                    class="bi bi-arrow-down-circle fw-bold px-1"></i>Download
+                <div class="col-xl-6 col-lg-12 col-md-12">
+                  <button v-if="tableData.status === 'Completed'"
+                    class="btn btn-light font-11 fw-bold h-0 text-decoration-underline" type="button"
+                    @click="downloadPdf"><i class="bi bi-arrow-down-circle fw-bold px-1"></i>Download
                   </button>
+                   <!-- <button type="button" class="btn btn-outline-light  CreateDepartments " data-bs-toggle="modal"
+                    data-bs-target="#pdfView" @click="viewasPdfView">
+                    Preview
+                  </button> -->
+                  
+                </div>
               </div>
-            </div>
-            <div class="activity_height">
-            <div v-for="(item, index) in activityData" :key="index" class="activity-log-item"
-              :class="{ 'last-item': index === activityData.length - 1 }">
-              <div class="activity-log-dot"></div>
-              <div class="activity-log-content">
-                <p class="font-12 mb-1">
-                  <span class="strong-content">{{ formatAction(item.action) }} on </span>
-                  <span class="strong-content">{{ item.creation }} </span><br />
-                  <span class="strong-content"> {{ item.user_name }}</span><br />
-                  <span>{{ item.role }}</span><br />
-                  <span class="font-12 text-secondary">{{
-                    item.reason || "N/A"
-                    }}</span>.
+              <div class="activity_height">
+                <div v-for="(item, index) in activityData" :key="index" class="activity-log-item"
+                  :class="{ 'last-item': index === activityData.length - 1 }">
+                  <div class="activity-log-dot"></div>
+                  <div class="activity-log-content">
+                    <p class="font-12 mb-1">
+                      <span class="strong-content">{{ formatAction(item.action) }} on </span>
+                      <span class="strong-content">{{ formatCreation(item.creation) }}</span><br />
+                      <span class="strong-content"> {{ item.user_name }}</span><br />
+                      <span>{{ item.role }}</span><br />
+                      <span class="font-12 text-secondary">{{
+                        item.reason || "N/A"
+                        }}</span>.
 
-                </p>
+                    </p>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-            <!-- <div class="activity-log-item">
+              <!-- <div class="activity-log-item">
               <div class="pending"></div>
               <div class="activity-log-content">
                 <p class="font-12 mb-1">
@@ -182,10 +203,37 @@
                 </p>
               </div>
             </div> -->
+            </div>
+<div class="modal fade" id="pdfView" tabindex="-1" aria-labelledby="pdfViewLabel" aria-hidden="true">
+      <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+          <div class="modal-header py-2 d-block bg-dark text-white">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h5 class="m-0 text-white font-13" id="exampleModalLabel">
+                  PDF format
+                </h5>
+              </div>
+              <div class="">
+                <button button="button" class="btn btn-dark text-white font-13" @click="downloadPdf">
+                  Download Pdf<span class="ms-2"><i class="bi bi-download"></i></span>
+                </button>
+                <button type="button" class="btn btn-dark text-white font-13" @click="closemodal"
+                  data-bs-dismiss="modal">
+                  Close <i class="bi bi-x"></i>
+                </button>
+              </div>
+            </div>
           </div>
+          <div class="modal-body pdf-body">
+            <div v-html="pdfPreview"></div>
+          </div>
+          <div class="modal-footer"></div>
+        </div>
+      </div>
+    </div>
 
-
-          <!-- <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+            <!-- <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
 
             <div class="offcanvas-header">
               <h5 class="offcanvas-title" id="offcanvasRightLabel">Offcanvas right</h5>
@@ -195,10 +243,10 @@
               <div v-html="pdfPreview"></div>
             </div>
           </div> -->
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
 
   </div>
@@ -223,8 +271,8 @@ const selectedData = ref({
   doctype_name: route.query.doctype_name || "", // Retrieve from query
   type: route.query.type || "", // Retrieve from query
   readOnly: route.query.readOnly, // Retrieve from query
+  business_unit: route.query.business_unit || "", // Retrieve from query
 });
-// console.log(selectedData.value, "////");
 const backTo = ref(selectedData.value.routepath);
 // onMounted(() => {
 //   receivedForMe();
@@ -254,12 +302,21 @@ const tableHeaders = ref([]);
 const tableName = ref("");
 const responseData = ref([]);
 const employeeData = ref([]);
+const viewlist = ref([])
+const view_only_reportee = ref(0);
+
+const canApprove = ref(false);
+
+
 const resetCommentsValidation = () => {
   if (ApproverReason.value.trim() !== "") {
     // If comment is not empty, set isCommentsValid to true
     isCommentsValid.value = true;
   }
 };
+function formatCreation(dateStr) {
+  return dateStr.slice(0, 16);
+}
 
 const ApprovePDF = ref(true)
 // Format the date for display
@@ -309,7 +366,11 @@ watch(
     business_unit.value = local
     if (newVal) {
       // console.log(business_unit.value, newVal, "ll");
-      receivedForMe();
+      if(selectedData.value.type === "mytasks"){
+        ViewOnlyRe();
+      }else{
+        receivedForMe()
+      }
     }
   },
   { immediate: true }
@@ -531,7 +592,7 @@ function receivedForMe(data) {
     localStorage.getItem("employeeData")
   );
   const filters = [
-    ["property", "like", `%${business_unit.value}%`],
+    ["property", "like", `%${selectedData.value.business_unit}%`],
     ["name", "like", `%${selectedData.value.formname}%`],
   ];
   if (data) {
@@ -557,23 +618,23 @@ function receivedForMe(data) {
     order_by: "`tabWF Workflow Requests`.`creation` desc",
   };
 
-  const queryParamsCount = {
-    fields: JSON.stringify(["count(name) AS total_count"]),
-    limitPageLength: "None",
-    filters: JSON.stringify(filters),
-  };
+  // const queryParamsCount = {
+  //   fields: JSON.stringify(["count(name) AS total_count"]),
+  //   limitPageLength: "None",
+  //   filters: JSON.stringify(filters),
+  // };
 
-  // Fetch total count of records matching filters
-  axiosInstance
-    .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, {
-      params: queryParamsCount,
-    })
-    .then((res) => {
-      totalRecords.value = res.data[0].total_count;
-    })
-    .catch((error) => {
-      console.error("Error fetching total count:", error);
-    });
+  // // Fetch total count of records matching filters
+  // axiosInstance
+  //   .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, {
+  //     params: queryParamsCount,
+  //   })
+  //   .then((res) => {
+  //     totalRecords.value = res.data[0].total_count;
+  //   })
+  //   .catch((error) => {
+  //     console.error("Error fetching total count:", error);
+  //   });
 
   // Fetch the records matching filters
   axiosInstance
@@ -582,11 +643,18 @@ function receivedForMe(data) {
     })
     .then((res) => {
       tableData.value = res.data[0];
+      // console.log(tableData.value?.name,"ppppppppppppp");
+      selectedcurrentLevel.value = tableData.value?.current_level;
+      // console.log(selectedcurrentLevel.value, " current_level");
 
       showRequest.value = rebuildToStructuredArray(
         JSON.parse(tableData.value?.json_columns).fields
       );
-      // console.log(tableData.value);
+      // console.log(JSON.parse(
+      //   tableData.value?.json_columns
+      // ).workflow, "workflow");
+      view_only_reportee.value = JSON.parse(tableData.value?.json_columns)?.workflow[selectedcurrentLevel.value]?.view_only_reportee;
+      // console.log(" wrk === =>", view_only_reportee.value);
       tableHeaders.value = JSON.parse(
         tableData.value?.json_columns
       ).child_table_fields;
@@ -595,14 +663,15 @@ function receivedForMe(data) {
       if (res.data.length) {
         Wfactivitylog(tableData.value.name);
         getdata(tableData.value.name);
+       
       }
 
-      selectedcurrentLevel.value = tableData.value.current_level;
     })
     .catch((error) => {
       console.error("Error fetching records:", error);
     });
 }
+const datanew = ref([]);
 function getdata(formname) {
   const filters = [["wf_generated_request_id", "like", `%${formname}%`]];
   const queryParams = {
@@ -621,19 +690,21 @@ function getdata(formname) {
     .then((res) => {
       if (res.data) {
         doctypeForm.value = res.data[0];
+        console.log(doctypeForm.value.name,"lll");
         mapFormFieldsToRequest(doctypeForm.value, showRequest.value);
 
-        axiosInstance
-          .get(`${apis.resource}${selectedData.value.doctype_name}`)
-          .then((res) => {
-            console.log(`Data for :`, res.data[0]);
-          })
-          .catch((error) => {
-            console.error(`Error fetching data for :`, error);
-          });
+        // axiosInstance
+        //   .get(`${apis.resource}${selectedData.value.doctype_name}`)
+        //   .then((res) => {
+        //     datanew.value =res.data[0]
+        //     // console.log(`Data for :`, res.data[0]);
+        //   })
+        //   .catch((error) => {
+        //     console.error(`Error fetching data for :`, error);
+        //   });
         axiosInstance
           .get(
-            `${apis.resource}${selectedData.value.doctype_name}/${res.data[0].name}`
+            `${apis.resource}${selectedData.value.doctype_name}/${doctypeForm.value.name}`
           )
           .then((res) => {
             // console.log(`Data for :`, res.data);
@@ -661,31 +732,56 @@ function getdata(formname) {
       console.error("Error fetching categories data:", error);
     });
 }
-// function viewasPdfView() {
-//   console.log(doctypeForm.value, tableData.value);
-//   ApprovePDF.value = !ApprovePDF.value;
-//   const dataObj = {
-//     form_short_name: tableData.value.doctype_name,
-//     name: doctypeForm.value.name,
-//     business_unit: businessUnit.value
+function ViewOnlyRe() {
+  const queryParams = {
+    fields: JSON.stringify(["*"]),
+    limit_page_length: "None",
+    limit_start: 0,
 
-//   };
+  };
 
-//   axiosInstance
-//     .post(apis.preview_dynamic_form, dataObj)
-//     .then((response) => {
-//       pdfPreview.value = response.message;
-//       if (response.message) {
+  axiosInstance
+    .post(apis.view_only_reportee, {
+      params: queryParams,
+    })
+    .then((response) => {
 
-//       }
+      viewlist.value = response.message;
+
+      canApprove.value = viewlist.value.includes(selectedData.value.formname);
+      receivedForMe()
+
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+
+}
+function viewasPdfView() {
+
+  ApprovePDF.value = !ApprovePDF.value;
+  const dataObj = {
+    form_short_name: tableData.value.doctype_name,
+    name: doctypeForm.value.name,
+    business_unit: business_unit.value
+
+  };
+
+  axiosInstance
+    .post(apis.preview_dynamic_form, dataObj)
+    .then((response) => {
+      pdfPreview.value = response.message;
+      if (response.message) {
+
+      }
 
 
 
-//     })
-//     .catch((error) => {
-//       console.error("Error fetching data:", error);
-//     });
-// }
+    })
+    .catch((error) => {
+      console.error("Error fetching data:", error);
+    });
+}
 
 
 function downloadPdf() {
@@ -788,10 +884,12 @@ const requestcancelled = computed(() => {
   const lastAction = activityData.value[activityData.value.length - 1];
   return lastAction.action === "Request Cancelled";
 });
-
+const activityDatalog = ref([]);
 watch(activityData, (newVal) => {
-  console.log("Updated Activity Data:", newVal);
-  console.log("Request Cancelled?", requestcancelled.value);
+  // console.log("Updated Activity Data:", newVal);
+  activityDatalog.value = newVal;
+  // console.log("Request Cancelled?", requestcancelled.value);
+activityDatalog.value = requestcancelled.value
 });
 
 
@@ -805,15 +903,17 @@ watch(activityData, (newVal) => {
 
 // }
 
-.approve_height{
+.approve_height {
   overflow: hidden;
   height: 85vh;
 }
-.approved-icon{
+
+.approved-icon {
   color: #2BED12;
   font-size: 24px;
 }
-.rejected-icon{
+
+.rejected-icon {
   color: #d75159;
   font-size: 24px;
 }
@@ -920,7 +1020,8 @@ watch(activityData, (newVal) => {
   margin-bottom: 10px;
   /* Space between logs */
 }
-.activity_height{
+
+.activity_height {
   height: 80vh;
   overflow-y: scroll;
 }

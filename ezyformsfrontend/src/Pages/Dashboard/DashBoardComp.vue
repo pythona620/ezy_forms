@@ -14,7 +14,7 @@
                     <div class="chart-info">
                         <div class="total-count">
                             <strong>{{ chart.data.total }}</strong>
-                            <span class="font-14">Total forms</span>
+                            <span class="font-14">Total Forms</span>
                         </div>
                         <div>
                             <!-- Loop over the keys to create dynamic legends -->
@@ -60,7 +60,7 @@ const displayMapping = {
 };
 
 const filteredKeys = (title) => {
-    return title === "Requests received for me"
+    return title === "Requests Assigned to me"
         ? ["Pending", "request_raised"]  // Show only these for this chart
         : keys; // Show all keys for other charts
 };
@@ -98,7 +98,7 @@ async function fetchData() {
             // const tempCharts = [];
             // if (receivedTotal > 0) {
             //     tempCharts.push({
-            //         title: "Requests received for me",
+            //         title: "Requests Assigned to me",
             //         data: {
             //             ...receivedByUser,
             //             total: receivedTotal
@@ -108,7 +108,7 @@ async function fetchData() {
 
             // // Always add the "requested" chart regardless of requestedTotal value.
             // tempCharts.push({
-            //     title: "Requests made by me",
+            //     title: "Requests Submitted",
             //     data: {
             //         ...requestedByUser,
             //         total: requestedTotal
@@ -119,7 +119,7 @@ async function fetchData() {
 
             chartsData.value = [
                 {
-                    title: "Requests received for me",
+                    title: "Requests Assigned to me",
                     data: {
                         request_raised: receivedByUser.request_raised || 0,
                         Pending: receivedByUser.Pending || 0,
@@ -127,7 +127,7 @@ async function fetchData() {
                     }
                 },
                 {
-                    title: "Requests made by me",
+                    title: "Requests Submitted",
                     data: {
                         ...requestedByUser,
                         total: requestedTotal
@@ -184,7 +184,7 @@ function updateCharts() {
                     left: 'center',
                     top: 'center',
                     style: {
-                        text: `${chartData.data.total}\nTotal forms`,
+                        text: `${chartData.data.total}\nTotal Forms`,
                         textAlign: 'center',
                         fontSize: 16,
                         fontWeight: 'bold',
