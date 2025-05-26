@@ -1944,6 +1944,7 @@ const afterImmediateEditaddNewFieldedit = (blockIndex, sectionIndex, tableName) 
     label: "",
     value: "",
     isNew: true,
+    description: '',
 
   });
 };
