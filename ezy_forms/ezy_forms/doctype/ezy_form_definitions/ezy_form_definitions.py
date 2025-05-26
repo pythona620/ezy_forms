@@ -71,7 +71,8 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
         if isinstance(fields,str):
             fields = literal_eval(fields)
         if frappe.db.exists("Ezy Form Definitions",{"name":form_short_name}):
-            frappe.set_value("Ezy Form Definitions",form_short_name,"form_status",form_status)
+            # frappe.set_value("Ezy Form Definitions",form_short_name,"form_status",form_status)
+            frappe.set_value("Ezy Form Definitions",{"name":form_short_name},{"form_status":form_status,"accessible_departments":accessible_departments})
         if not frappe.db.exists("DocType",doctype):
             frappe.db.sql(f"DROP TABLE IF EXISTS `tab{doctype}`;")
             frappe.db.commit()
