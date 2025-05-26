@@ -411,15 +411,15 @@
                                     <!-- <td>{{ index + 1 }}</td> -->
                                     <td v-for="field in headers" :key="field.fieldname">
                                       <template v-if="isFilePath(row[field.fieldname])">
-                                        <div class=" d-flex gap-1">
-                                          <span v-for="(file, i) in row[field.fieldname].split(',')" :key="i">
-                                            <span class="cursor-pointer text-decoration-underline d-flex mb-1"
-                                              @click="openFile(file)">
-                                              View<i class="bi bi-eye-fill ps-1"></i>
+                                          <div class="d-flex gap-1">
+                                            <span v-for="(file, i) in row[field.fieldname].split(',').filter(f => f.trim() !== '')" :key="i">
+                                              <span class="cursor-pointer text-decoration-underline d-flex mb-1" @click="openFile(file)">
+                                                View <i class="bi bi-eye-fill ps-1"></i>
+                                              </span>
                                             </span>
-                                          </span>
-                                        </div>
-                                      </template>
+                                          </div>
+                                        </template>
+
 
                                       <!-- Show normal value if not a file path -->
                                       <span v-else>

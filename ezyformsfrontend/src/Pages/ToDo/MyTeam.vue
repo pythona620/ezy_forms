@@ -211,7 +211,7 @@ const responseData = ref([]);
 
 const tableheaders = ref([
   { th: "Request ID", td_key: "name" },
-  { th: "Form name", td_key: "doctype_name" },
+  { th: "Form Name", td_key: "doctype_name" },
   // { th: "Form category", td_key: "doctype_name" },
   { th: "Owner of form", td_key: "role" },
   { th: "Requested on", td_key: "requested_on" },

@@ -790,7 +790,7 @@ const handleFileUpload = (event, row, fieldname) => {
 
 const tableFileUpload = (file, row, fieldname) => {
   const randomNumber = generateRandomNumber();
-  const fileName = `mailfiles-${props.formName}${randomNumber}-@${file.name}`;
+  const fileName = `mailfiles-${randomNumber}-@${file.name}`;
 
   const formData = new FormData();
   formData.append("file", file, fileName);
@@ -803,11 +803,14 @@ const tableFileUpload = (file, row, fieldname) => {
       if (res.message && res.message.file_url) {
         const fileUrl = res.message.file_url;
 
-        // Append the file URL to a comma-separated string
-        if (!row[fieldname]) {
+        // Always store as comma-separated string
+        if (!row[fieldname] || typeof row[fieldname] !== 'string') {
           row[fieldname] = fileUrl;
         } else {
-          row[fieldname] += `,${fileUrl}`;
+          // Avoid duplicate comma
+          row[fieldname] = row[fieldname].trim() !== ""
+            ? `${row[fieldname]},${fileUrl}`
+            : fileUrl;
         }
       } else {
         console.error("file_url not found in the response.");
@@ -817,6 +820,7 @@ const tableFileUpload = (file, row, fieldname) => {
       console.error("Upload error:", error);
     });
 };
+
 
 
 

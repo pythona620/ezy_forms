@@ -172,7 +172,8 @@
                                   <span v-if="!filterObj.accessible_departments.length"
                                     class="text-danger">*</span></label>
                               </label>
-                              <VueMultiselect :disabled="selectedData.formId && selectedData.formId.length > 0"
+                              <!-- :disabled="selectedData.formId && selectedData.formId.length > 0" -->
+                              <VueMultiselect 
                                 v-model="filterObj.accessible_departments" :options="filteredOptions" :multiple="true"
                                 :close-on-select="false" :clear-on-select="false" :preserve-search="true"
                                 placeholder="Select Designation" class="font-11" @select="handleSelect"
