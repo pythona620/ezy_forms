@@ -31,7 +31,7 @@
                                                     ">
                                                     <span class="font-12"
                                                         :class="field.fieldtype === 'Small Text' ? 'fw-bold' : ''">{{
-                                                        field.label }}</span>
+                                                            field.label }}</span>
                                                     <span class="ms-1 text-danger">{{
                                                         field.reqd === 1 ? "*" : ""
                                                     }}</span>
@@ -61,7 +61,7 @@
                                                 </select> -->
                                                 <Multiselect :multiple="field.fieldtype === 'Table MultiSelect'"
                                                     :maxlength="getMaxLength(field)"
-                                                    :options="field.options?.split('\n') || []"
+                                                    :options="field.options?.split('\n').filter(opt => opt.trim() !== '') || []"
                                                     :modelValue="field.value" placeholder="Select"
                                                     @update:modelValue="(val) => handleSelectChange(val, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
                                                     class="font-11 multiselect" />
@@ -314,17 +314,19 @@
 
                                                 <div v-for="(table, tableIndex) in props.tableHeaders" :key="tableIndex"
                                                     class="mt-3">
-                                                    <div v-if="tableIndex === field.options">
+                                                    
+                                                    <div v-if="tableIndex === field.fieldname">
+                                                        
                                                         <div>
                                                             <span class="font-13  fw-medium">{{
-                                                                tableIndex.replace(/_/g, " ") }}</span>
+                                                                field.label.replace(/_/g, " ") }}</span>
                                                         </div>
 
                                                         <div v-if="!tableRows[tableIndex] || tableRows[tableIndex].length === 0"
                                                             class="text-center text-muted">
                                                             <div class="d-flex flex-column align-items-center">
                                                                 <i class="bi bi-card-list fs-3 mb-2"></i>
-                                                                <span>No Data</span>
+                                                                <span class=" font-13 text-secondary">No Data</span>
                                                             </div>
                                                         </div>
 
@@ -355,7 +357,17 @@
                                                                         class="form-control font-12 px-2"
                                                                         :maxlength="fieldItem.fieldtype === 'Phone' ? '10' : '140'"
                                                                         v-model="row[fieldItem.fieldname]" />
-
+                                                                    <template v-if="fieldItem.fieldtype === 'Select'">
+                                                                        <div>
+                                                                            <Multiselect
+                                                                                :multiple="fieldItem.fieldtype === 'Table MultiSelect'"
+                                                                                :options="(fieldItem.options?.split('\n').filter(opt => opt.trim() !== '') || [])"
+                                                                                :model-value="row[fieldItem.fieldname]"
+                                                                                placeholder="Select"
+                                                                                @update:model-value="val => row[fieldItem.fieldname] = val"
+                                                                                class="font-11 multiselect" />
+                                                                        </div>
+                                                                    </template>
                                                                     <input v-else-if="fieldItem.fieldtype === 'Date'"
                                                                         :min="past" :max="today"
                                                                         :title="row[fieldItem.fieldname]" type="date"
@@ -377,9 +389,10 @@
                                                     class="font-11 multiselect" />
                                                                         </template> -->
 
-                                                                    <input v-else-if="fieldItem.fieldtype === 'Attach'" multiple
-                                                                        type="file" class="form-control font-12" 
-                                                                            accept="image/jpeg,image/png,application/pdf"
+                                                                    <input v-else-if="fieldItem.fieldtype === 'Attach'"
+                                                                        multiple type="file"
+                                                                        class="form-control font-12"
+                                                                        accept="image/jpeg,image/png,application/pdf"
                                                                         @change="handleFileUpload($event, row, fieldItem.fieldname)" />
                                                                 </div>
                                                             </div>
@@ -404,8 +417,7 @@
                                             <div v-else>
                                                 <div v-for="(table, tableIndex) in props.tableHeaders" :key="tableIndex"
                                                     class="mt-3">
-                                                    <div
-                                                        v-if="tableIndex === field.fieldname">
+                                                    <div v-if="tableIndex === field.fieldname">
                                                         <div>
                                                             <span class="font-13 text-secondary ">{{
                                                                 field.label.replace(/_/g, " ")
@@ -459,7 +471,7 @@
                                                                             <div>
                                                                                 <Multiselect
                                                                                     :multiple="field.fieldtype === 'Table MultiSelect'"
-                                                                                    :options="field.options?.split('\n') || []"
+                                                                                    :options="field.options?.split('\n').filter(opt => opt.trim() !== '') || []"
                                                                                     :model-value="row[field.fieldname]"
                                                                                     placeholder="Select"
                                                                                     @update:model-value="val => row[field.fieldname] = val"
@@ -499,19 +511,17 @@
                                                                                         v-model.number="row[field.fieldname]"
                                                                                     />
                                                                                     </template> -->
-                                                                            <template v-if="field.fieldtype === 'Int'">
-                                                                        <input
-                                                                        v-if="field.description && /[+\-*/]/.test(field.description)"
-                                                                        type="number" class="form-control font-12"
-                                                                        :value="calculateFieldExpression(row, field.description, table)"
-                                                                        readonly
-                                                                        />
-                                                                        <input
-                                                                        v-else
-                                                                        type="number" class="form-control font-12"
-                                                                        v-model.number="row[field.fieldname]"
-                                                                        />
-                                                                    </template>
+                                                                        <template v-if="field.fieldtype === 'Int'">
+                                                                            <input
+                                                                                v-if="field.description && /[+\-*/]/.test(field.description)"
+                                                                                type="number"
+                                                                                class="form-control font-12"
+                                                                                :value="calculateFieldExpression(row, field.description, table)"
+                                                                                readonly />
+                                                                            <input v-else type="number"
+                                                                                class="form-control font-12"
+                                                                                v-model.number="row[field.fieldname]" />
+                                                                        </template>
 
 
                                                                         <template v-if="field.fieldtype === 'Datetime'">
@@ -524,7 +534,7 @@
                                                                         <template
                                                                             v-else-if="field.fieldtype === 'Attach'">
                                                                             <input type="file" multiple
-                                                                                accept="image/jpeg,image/png,application/pdf" 
+                                                                                accept="image/jpeg,image/png,application/pdf"
                                                                                 class="form-control font-12"
                                                                                 @change="handleFileUpload($event, row, field.fieldname)" />
                                                                         </template>
@@ -539,15 +549,20 @@
                                                                 </tr>
 
                                                             </tbody>
-                                                            <tfoot >
-                                                                <tr v-if="table.some(field => field.fieldtype === 'Int' && field.description && /[+\-*/]/.test(field.description))"  class="bg-light">
+                                                            <tfoot>
+                                                                <tr v-if="table.some(field => field.fieldtype === 'Int' && field.description && /[+\-*/]/.test(field.description))"
+                                                                    class="bg-light">
                                                                     <td class="text-center font-12">Total</td>
-                                                                    <td v-for="field in table" :key="field.fieldname" class="text-center font-12">
-                                                                        <span v-if="field.fieldtype === 'Int' && field.description && /[+\-*/]/.test(field.description)">
-                                                                            {{ tableTotals[tableIndex]?.[field.fieldname] ?? 0 }}
+                                                                    <td v-for="field in table" :key="field.fieldname"
+                                                                        class="text-center font-12">
+                                                                        <span
+                                                                            v-if="field.fieldtype === 'Int' && field.description && /[+\-*/]/.test(field.description)">
+                                                                            {{
+                                                                                tableTotals[tableIndex]?.[field.fieldname]
+                                                                                ?? 0 }}
                                                                         </span>
                                                                     </td>
-                                                                    <td></td> 
+                                                                    <td></td>
                                                                 </tr>
                                                                 <tr>
                                                                     <td :colspan="table.length + 2"
@@ -642,25 +657,25 @@ const getInputType = (type) => {
 };
 // Format as 'YYYY-MM-DDTHH:MM'
 watch(
-  () => tableRows,
-  () => {
-    const finalData = {};
+    () => tableRows,
+    () => {
+        const finalData = {};
 
-    for (const [tableIndex, rows] of Object.entries(tableRows)) {
-      const totalsRow = tableTotals.value?.[tableIndex];
+        for (const [tableIndex, rows] of Object.entries(tableRows)) {
+            const totalsRow = tableTotals.value?.[tableIndex];
 
-      if (totalsRow && Object.keys(totalsRow).length > 0) {
-        // Only add totals row if it has actual data
-        finalData[tableIndex] = [...rows, totalsRow];
-      } else {
-        // Otherwise, just send the rows
-        finalData[tableIndex] = [...rows];
-      }
-    }
+            if (totalsRow && Object.keys(totalsRow).length > 0) {
+                // Only add totals row if it has actual data
+                finalData[tableIndex] = [...rows, totalsRow];
+            } else {
+                // Otherwise, just send the rows
+                finalData[tableIndex] = [...rows];
+            }
+        }
 
-    emit('updateTableData', { ...finalData });
-  },
-  { deep: true }
+        emit('updateTableData', { ...finalData });
+    },
+    { deep: true }
 );
 
 watch(
@@ -695,130 +710,130 @@ const removeRow = (tableIndex, rowIndex) => {
 
 
 function calculateFieldExpression(row, expression, fields) {
-  // Map labels to fieldnames for substitution
-  const labelToFieldname = {};
-  fields.forEach(f => {
-    labelToFieldname[f.label] = f.fieldname;
-  });
+    // Map labels to fieldnames for substitution
+    const labelToFieldname = {};
+    fields.forEach(f => {
+        labelToFieldname[f.label] = f.fieldname;
+    });
 
-  // Replace label names in expression with actual row values
-  const formula = expression.replace(/\b(\w+)\b/g, (match) => {
-    const fn = labelToFieldname[match];
-    if (fn !== undefined && row[fn] !== undefined && row[fn] !== null && row[fn] !== '') {
-      return row[fn];
+    // Replace label names in expression with actual row values
+    const formula = expression.replace(/\b(\w+)\b/g, (match) => {
+        const fn = labelToFieldname[match];
+        if (fn !== undefined && row[fn] !== undefined && row[fn] !== null && row[fn] !== '') {
+            return row[fn];
+        }
+        return 0; // fallback if no matching label
+    });
+
+    try {
+        return eval(formula);
+    } catch (e) {
+        console.error('Error evaluating formula:', formula, e);
+        return 0;
     }
-    return 0; // fallback if no matching label
-  });
-
-  try {
-    return eval(formula);
-  } catch (e) {
-    console.error('Error evaluating formula:', formula, e);
-    return 0;
-  }
 }
 
 
- 
+
 const tableTotals = computed(() => {
-  const totals = {};
+    const totals = {};
 
-  for (const [tableIndex, rows] of Object.entries(tableRows)) {
-    totals[tableIndex] = {};
+    for (const [tableIndex, rows] of Object.entries(tableRows)) {
+        totals[tableIndex] = {};
 
-    const fields = props.tableHeaders[tableIndex] || [];
-    fields.forEach((field) => {
-      if (field.fieldtype === 'Int') {
-        let sum = 0;
+        const fields = props.tableHeaders[tableIndex] || [];
+        fields.forEach((field) => {
+            if (field.fieldtype === 'Int') {
+                let sum = 0;
 
-        rows.forEach((row) => {
-          if (field.description && /[+\-*/]/.test(field.description)) {
-            // Calculate expression dynamically using labels and row data
-            sum += Number(calculateFieldExpression(row, field.description, fields)) || 0;
-          } 
-        //   else {
-        //     // Sum raw values
-        //     const val = parseFloat(row[field.fieldname]);
-        //     sum += isNaN(val) ? 0 : val;
-        //   }
+                rows.forEach((row) => {
+                    if (field.description && /[+\-*/]/.test(field.description)) {
+                        // Calculate expression dynamically using labels and row data
+                        sum += Number(calculateFieldExpression(row, field.description, fields)) || 0;
+                    }
+                    //   else {
+                    //     // Sum raw values
+                    //     const val = parseFloat(row[field.fieldname]);
+                    //     sum += isNaN(val) ? 0 : val;
+                    //   }
+                });
+
+                totals[tableIndex][field.fieldname] = sum;
+            }
         });
+    }
 
-        totals[tableIndex][field.fieldname] = sum;
-      }
-    });
-  }
-
-  return totals;
+    return totals;
 });
 watchEffect(() => {
-  for (const [tableIndex, rows] of Object.entries(tableRows)) {
-    const fields = props.tableHeaders[tableIndex] || [];
+    for (const [tableIndex, rows] of Object.entries(tableRows)) {
+        const fields = props.tableHeaders[tableIndex] || [];
 
-    rows.forEach((row) => {
-      fields.forEach((field) => {
-        if (field.fieldtype === 'Int' && field.description && /[+\-*/]/.test(field.description)) {
-          const result = calculateFieldExpression(row, field.description, fields);
-          row[field.fieldname] = result; // 🔄 Store the computed value in tableRows
-        }
-      });
-    });
-  }
+        rows.forEach((row) => {
+            fields.forEach((field) => {
+                if (field.fieldtype === 'Int' && field.description && /[+\-*/]/.test(field.description)) {
+                    const result = calculateFieldExpression(row, field.description, fields);
+                    row[field.fieldname] = result; // 🔄 Store the computed value in tableRows
+                }
+            });
+        });
+    }
 });
 const handleFileUpload = (event, row, fieldname) => {
-  const selectedFiles = Array.from(event.target.files);
-  if (!selectedFiles.length) return;
+    const selectedFiles = Array.from(event.target.files);
+    if (!selectedFiles.length) return;
 
-  // Initialize the field if it's not already an array
-  if (!Array.isArray(row[fieldname])) {
-    row[fieldname] = [];
-  }
+    // Initialize the field if it's not already an array
+    if (!Array.isArray(row[fieldname])) {
+        row[fieldname] = [];
+    }
 
-  // Calculate total number of files (existing + new)
-  const totalFiles = row[fieldname].length + selectedFiles.length;
+    // Calculate total number of files (existing + new)
+    const totalFiles = row[fieldname].length + selectedFiles.length;
 
-  if (totalFiles > 5) {
-    alert("You can only upload a maximum of 5 files.");
-    return;
-  }
+    if (totalFiles > 5) {
+        alert("You can only upload a maximum of 5 files.");
+        return;
+    }
 
-  // Proceed with uploading each file
-  selectedFiles.forEach((file) => {
-    tableFileUpload(file, row, fieldname);
-  });
+    // Proceed with uploading each file
+    selectedFiles.forEach((file) => {
+        tableFileUpload(file, row, fieldname);
+    });
 };
 
 
 const tableFileUpload = (file, row, fieldname) => {
-  const randomNumber = generateRandomNumber();
-  const fileName = `mailfiles-${randomNumber}-@${file.name}`;
+    const randomNumber = generateRandomNumber();
+    const fileName = `mailfiles-${randomNumber}-@${file.name}`;
 
-  const formData = new FormData();
-  formData.append("file", file, fileName);
-  formData.append("is_private", "0");
-  formData.append("folder", "Home");
+    const formData = new FormData();
+    formData.append("file", file, fileName);
+    formData.append("is_private", "0");
+    formData.append("folder", "Home");
 
-  axiosInstance
-    .post(apis.uploadfile, formData)
-    .then((res) => {
-      if (res.message && res.message.file_url) {
-        const fileUrl = res.message.file_url;
+    axiosInstance
+        .post(apis.uploadfile, formData)
+        .then((res) => {
+            if (res.message && res.message.file_url) {
+                const fileUrl = res.message.file_url;
 
-        // Always store as comma-separated string
-        if (!row[fieldname] || typeof row[fieldname] !== 'string') {
-          row[fieldname] = fileUrl;
-        } else {
-          // Avoid duplicate comma
-          row[fieldname] = row[fieldname].trim() !== ""
-            ? `${row[fieldname]},${fileUrl}`
-            : fileUrl;
-        }
-      } else {
-        console.error("file_url not found in the response.");
-      }
-    })
-    .catch((error) => {
-      console.error("Upload error:", error);
-    });
+                // Always store as comma-separated string
+                if (!row[fieldname] || typeof row[fieldname] !== 'string') {
+                    row[fieldname] = fileUrl;
+                } else {
+                    // Avoid duplicate comma
+                    row[fieldname] = row[fieldname].trim() !== ""
+                        ? `${row[fieldname]},${fileUrl}`
+                        : fileUrl;
+                }
+            } else {
+                console.error("file_url not found in the response.");
+            }
+        })
+        .catch((error) => {
+            console.error("Upload error:", error);
+        });
 };
 
 
@@ -1280,8 +1295,9 @@ const uploadFile = (file, field, index) => {
 <style lang="scss" scoped>
 td:first-child,
 th:first-child {
-  width: 3%;
+    width: 3%;
 }
+
 .multiselect {
     height: 30px !important;
     font-size: 12px !important;

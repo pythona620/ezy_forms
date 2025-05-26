@@ -1749,7 +1749,7 @@ const addChildTable = (blockIndex, sectionIndex) => {
     columns: [
       {
         label: "",
-        fieldname: `field_0`,
+        fieldname: "",
         fieldtype: "",
         idx: 0,
         description: '',
@@ -1774,7 +1774,7 @@ const addFieldToTable = (blockIndex, sectionIndex, tableIndex) => {
 
   table.columns.push({
     label: "",
-    fieldname: `field_${table.columns.length}`,
+    fieldname: "",
     fieldtype: "",
     idx: table.columns.length,
     description: '',
