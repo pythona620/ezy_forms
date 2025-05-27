@@ -3381,7 +3381,10 @@ function handleInputChange(event, fieldType) {
   } else {
     formShortNameError.value = ""; // Clear error if input is valid
   }
-
+if (fieldType === "form_short_name" && /[^a-zA-Z ]/.test(inputValue)) {
+  formShortNameError.value = "Only alphabets and spaces are allowed";
+  return;
+}
   // Check for special characters (allow only letters and numbers)
   if (/[^a-zA-Z0-9& ]/.test(inputValue)) {  // ✅ allow spaces inside
     if (fieldType === "form_name") {

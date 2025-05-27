@@ -34,11 +34,11 @@ def rebuild_to_structured_array(flat_array):
                 result.insert(0, current_block)
 
             current_block = {
-                "fieldtype": item.get("fieldtype"),
-                "fieldname": item.get("fieldname"),
+                "fieldtype": item.get("fieldtype") if item.get("fieldtype") else '',
+                "fieldname": item.get("fieldname") if item.get("fieldname") else '',
                 "label": item.get("label") if item.get("label") else "",
-                "parent": item.get("parent"),
-                "idx": idx,
+                "parent": item.get("parent")if item.get("parent") else "",
+                "idx": idx or '',
                 "sections": []
             }
 
@@ -51,11 +51,11 @@ def rebuild_to_structured_array(flat_array):
                 current_block["sections"].insert(0, current_section)
 
             current_section = {
-                "fieldtype": item.get("fieldtype"),
-                "fieldname": item.get("fieldname"),
+                "fieldtype": item.get("fieldtype") if item.get("fieldtype") else '',
+                "fieldname": item.get("fieldname") if item.get("fieldname") else '',
                 "label": item.get("label") if item.get("label") else "",
-                "parent": item.get("parent"),
-                "idx": idx,
+                "parent": item.get("parent") if item.get("parent") else "",
+                "idx": idx or '',
                 "rows": []
             }
 
@@ -64,34 +64,34 @@ def rebuild_to_structured_array(flat_array):
                 current_section["rows"].insert(0, current_row)
 
             current_row = {
-                "fieldtype": item.get("fieldtype"),
-                "fieldname": item.get("fieldname"),
+                "fieldtype": item.get("fieldtype") if item.get("fieldtype") else '',
+                "fieldname": item.get("fieldname") if item.get("fieldname") else '',
                 "label": item.get("label") if item.get("label") and not item.get("label").lower().startswith("row_") else "",
-                "parent": item.get("parent"),
-                "idx": idx,
+                "parent": item.get("parent")if item.get("parent") else "",
+                "idx": idx or '',
                 "columns": []
             }
 
         elif description == "Column Break":
             current_column = {
-                "fieldtype": item.get("fieldtype"),
-                "fieldname": item.get("fieldname"),
+                "fieldtype": item.get("fieldtype") if item.get("fieldtype") else '',
+                "fieldname": item.get("fieldname") if item.get("fieldname") else '',
                 "label": item.get("label") if item.get("label") else "",
-                "parent": item.get("parent"),
-                "idx": idx,
+                "parent": item.get("parent")if item.get("parent") else "",
+                "idx": idx or '',
                 "fields": []
             }
             current_row["columns"].insert(0, current_column)
 
         elif child_type == 'Table':
             child_table_row = {
-                "fieldtype": item.get("fieldtype"),
-                "fieldname": item.get("fieldname"),
-                "label": item.get("label"),
-                "parent": item.get("parent"),
-                "options": item.get("options"),
-                "description": item.get("description"),
-                "idx": idx,
+                "fieldtype": item.get("fieldtype") if item.get("fieldtype") else '',
+                "fieldname": item.get("fieldname") if item.get("fieldname") else '',
+                "label": item.get("label") if item.get("label") else "",
+                "parent": item.get("parent")if item.get("parent") else "",
+                "options": item.get("options") if item.get("options") else [],
+                "description": item.get("description") if item.get("description") else "",
+                "idx": idx or '',
                 "child_table": []
             }
 
@@ -101,13 +101,13 @@ def rebuild_to_structured_array(flat_array):
         else:  # Regular field
             if current_column:
                 updated_field = {
-                    "fieldname": item.get("fieldname"),
-                    "fieldtype": item.get("fieldtype"),
-                    "parent": item.get("parent"),
-                    "label": item.get("label"),
-                    "description": item.get("description"),
+                    "fieldname": item.get("fieldname") if item.get("fieldname") else '',
+                    "fieldtype": item.get("fieldtype") if item.get("fieldtype") else '',
+                    "parent": item.get("parent")if item.get("parent") else "",
+                    "label": item.get("label") if item.get("label") else "",
+                    "description": item.get("description") if item.get("description") else "",
                     "reqd": item.get("reqd"),
-                    "options": item.get("options"),
+                    "options": item.get("options") if item.get("options") else [],
                     "values": item.get("value") if item.get("value") else "",
                     "idx": idx
                 }

@@ -153,7 +153,7 @@ def enqueued_add_customized_fields_for_dynamic_doc(fields: list[dict], doctype: 
 
         for table_name in table_fieldnames:
             fields_in_child_doctype = frappe.db.sql(
-                f"SELECT IFNULL(options, '') AS options,description, fieldname, fieldtype, idx, label FROM `tabDocField` WHERE parent ='{table_name}';",
+                f"SELECT IFNULL(options, '') AS options,IFNULL(description, '') AS description, fieldname, fieldtype, idx, label FROM `tabDocField` WHERE parent ='{table_name}';",
                 as_dict=True
             )
 
