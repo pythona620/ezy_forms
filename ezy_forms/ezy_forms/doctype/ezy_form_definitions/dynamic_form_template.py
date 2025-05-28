@@ -514,8 +514,7 @@ template_str = """
                                                 </div>
                                             </div>
                                         {% endfor %}
-                                    {% else %}
-                                        <p>No data available for {{ table_name }}</p>
+
                                     {% endif %}
 
                                 {% elif table_name in child_table_data %}
@@ -559,8 +558,7 @@ template_str = """
                                                 {% endfor %}
                                             </tbody>
                                         </table>
-                                    {% else %}
-                                        <p>No data available for {{ table_name }}</p>
+                                    
                                     {% endif %}
 
                                 {% elif table_name in child_table_data %}
@@ -603,7 +601,7 @@ template_str = """
                                     
                                         <label for="{{ field.fieldname }}">{{ field.label }} <span style="padding-left:2px; font-size: 13px;">:</span></label>
 
-                                        {% if field.fieldtype in ['Check', 'radio'] %}
+                                        {% if field.fieldtype in ['radio'] %}
                                             <div class="container-fluid">
                                                 <div class="row">
                                                     {% if field.options is string %}
@@ -646,13 +644,40 @@ template_str = """
                                                     {% endfor %}
                                                 </div>
                                             </div>
- 
-                                        {% elif field.fieldtype == 'Data' or field.fieldtype == 'Select' %}
+                                        {% elif field.fieldtype == 'Check' %}
+                                            <div class="checkbox-gap" style="display: flex; align-items: center; gap: 8px;">
+                                                <span class="custom-checkbox {% if field['values'] %}checked{% else %}unchecked{% endif %}"></span>
+                                            </div>
+
+                                        {% elif field.fieldtype == 'Data'  %}
                                             <span id="{{ field.fieldname }}"
                                                 style="font-size:13px; font-weight:500;border-bottom: 1px solid #cccccc;">
                                                 {{ field['values'] }}
                                             </span>
+                                        {% elif field.fieldtype == 'Select' %}
+                                        {% if field['values'] %}
+                                            {% set selected_values_list = field['values'].split(',') %}
+                                            <div class="checkbox-container">
+                                                {% for value in selected_values_list if value %}
+                                                    <div class="checkbox-gap">
+                                                        <span class="custom-checkbox checked"></span>
+                                                        <span>{{ value }}</span>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            {% set options = field.options.strip().split('\n') if field.options else [] %}
+                                            <div class="checkbox-container">
+                                                {% for option in options if option %}
+                                                    <div class="checkbox-gap">
+                                                        <span class="custom-checkbox unchecked"></span>
+                                                        <span style="margin-top:4px; margin-left:4px;">{{ option }}</span>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
 
+                                        
                                        {% elif field.fieldtype == 'Small Text' %}
                                         {% if field.options %}
                                             {% set options = field.options.strip().split('\n') %}
@@ -930,19 +955,18 @@ def preview_dynamic_form(form_short_name: str, business_unit=None, name=None):
             if iteration.get("fieldtype") == "Table":
                 child_table_name = str(iteration["fieldname"])
                 child_table_records = frappe.get_all(iteration["options"], filters={"parent": name}, fields=["*"])
-                
-                # Get field names and labels dynamically
-                field_names = [df.fieldname for df in frappe.get_meta(iteration["options"]).fields]
-                field_labels = {df.fieldname: df.label for df in frappe.get_meta(iteration["options"]).fields}
-
-                # Store child table data properly
-                data_list[child_table_name] = [
-                    {field_labels.get(field, field): record.get(field) for field in field_names}
-                    for record in child_table_records
-                ]
-
-
-
+                meta_fields = sorted(frappe.get_meta(iteration["options"]).fields, key=lambda f: f.idx)
+                field_names = [df.fieldname for df in meta_fields]
+                field_labels = {df.fieldname: df.label for df in meta_fields}
+                if child_table_records:
+                    data_list[child_table_name] = [
+                        {field_labels.get(field, field): record.get(field) for field in field_names}
+                        for record in child_table_records
+                    ]
+                else:
+                    data_list[child_table_name] = [
+                        {field_labels.get(field, field): "" for field in field_names}
+                    ]
     html_view = json_structure_call_for_html_view(
         json_obj=json_object,
         form_name=form_name,
@@ -1055,16 +1079,18 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                     if iteration.get("fieldtype") == "Table":
                         child_table_name = str(iteration["fieldname"])
                         child_table_records = frappe.get_all(iteration["options"], filters={"parent": name}, fields=["*"])
-                        
-                        # Get field names and labels dynamically
-                        field_names = [df.fieldname for df in frappe.get_meta(iteration["options"]).fields]
-                        field_labels = {df.fieldname: df.label for df in frappe.get_meta(iteration["options"]).fields}
-
-                        # Store child table data properly
-                        data_list[child_table_name] = [
-                            {field_labels.get(field, field): record.get(field) for field in field_names}
-                            for record in child_table_records
-                        ]
+                        meta_fields = sorted(frappe.get_meta(iteration["options"]).fields, key=lambda f: f.idx)
+                        field_names = [df.fieldname for df in meta_fields]
+                        field_labels = {df.fieldname: df.label for df in meta_fields}
+                        if child_table_records:
+                            data_list[child_table_name] = [
+                                {field_labels.get(field, field): record.get(field) for field in field_names}
+                                for record in child_table_records
+                            ]
+                        else:
+                            data_list[child_table_name] = [
+                                {field_labels.get(field, field): "" for field in field_names}
+                            ]
                 form_name = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_name")
                 html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_name,child_data=data_list,child_table_data=None,business_unit=business_unit,wf_generated_request_id=wf_generated_request_id)
                 
