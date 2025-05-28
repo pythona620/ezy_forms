@@ -1,0 +1,644 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-05-28 10:31:16.168708",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "date_time",
+  "first_name",
+  "last_name",
+  "the_porch_and_main_gate_is_manned_and_lighting_is_sufficient",
+  "porch_remarks",
+  "porch_image_upload",
+  "reception_area_is_clean_and_all_brand_standards_in_place",
+  "reception_remarks",
+  "reception_image_upload",
+  "public_areas_are_clean",
+  "public_areas_image_upload",
+  "public_areas_remarks",
+  "the_bar_and_restaurant_area_clean_and_in_order",
+  "bar_remarks",
+  "bar_image_upload",
+  "meeting_rooms_area_is_clean_and_well_maintained",
+  "meeting_rooms_remarks",
+  "metting_rooms_attcha_image",
+  "heart_of_the_house_areas_are_well_maintained",
+  "house_area_remarks",
+  "house_area_image_upload",
+  "food_at_staff_dinning_was_served_on_time_menu_is_as_per_the_day",
+  "food_and_staff_remarks",
+  "food_and_staff_image_upload",
+  "gym_is_well_maintained_fresh_towels_and_water_available",
+  "gym_remarks",
+  "gym_image_upload",
+  "pool_area_is_well_maintained_guard_is_present",
+  "pool_remarks",
+  "pool_image_upload",
+  "the_surrounding_and_back_of_the_house_areas_are_well_maintained",
+  "surrounding_remarks",
+  "surrounding_image_upload",
+  "check_on_general_upkeep_of_staff_locker_clean_and_pest_free",
+  "general_remarks",
+  "general_image_upload",
+  "quality_and_condition_of_water_bottling_plant",
+  "quality_remarks",
+  "quality_image_upload",
+  "spa_cleanliness_and_upkeep_is_inline_with_hotel_standards",
+  "spa_remarks",
+  "spa_image_upload",
+  "pest_free_in_the_hotel",
+  "pest_remarks",
+  "pest_image_upload",
+  "dishwasher_area_clean_in_main_kitchen_ibis_or_novotel",
+  "dishwasher_remarks",
+  "dishwasher_image_upload",
+  "main_kitchen_clean_and_neat_novotel_or_ibis",
+  "main_kitchen_remarks",
+  "main_kitchen_image_upload",
+  "garbage_area_neat_and_clean",
+  "garbage_remarks",
+  "garbage_image_upload",
+  "ird_clean_and_neat_novotel_or_ibis",
+  "ird_remarks",
+  "ird_image_upload",
+  "square_restaurant_and_bar",
+  "square_restaurant_and_bar_remarks",
+  "square_restaurant_and_bar_image_upload",
+  "ibis_restaurant_and_bar",
+  "ibis_restaurant_and_bar_remarks",
+  "ibis_restaurant_and_bar_image_upload",
+  "any_operation_hazzard_for_safety",
+  "any_operation_hazzard_for_safety_remarks",
+  "operation_hazzard_for_safety_image_upload",
+  "meet_hearirest",
+  "name1",
+  "name_2",
+  "name_3",
+  "column_break_bwet",
+  "feedback_1",
+  "feedback_2",
+  "feedback_3",
+  "heartiest_grooming_section",
+  "name_4",
+  "name_5",
+  "name_6",
+  "image_upload",
+  "column_break_stja",
+  "improvement_in_grooming_1",
+  "improvement_in_grooming_2",
+  "improvement_in_grooming_3",
+  "room_check_list_section",
+  "name_7",
+  "name_8",
+  "name_9",
+  "column_break_tqhp",
+  "remarks_1",
+  "remarks_2",
+  "remarks_3",
+  "section_break_rcpp",
+  "overall_remarks",
+  "overall_image_upload",
+  "signature"
+ ],
+ "fields": [
+  {
+   "default": "now",
+   "fieldname": "date_time",
+   "fieldtype": "Datetime",
+   "label": "Date Time"
+  },
+  {
+   "fieldname": "first_name",
+   "fieldtype": "Data",
+   "label": "First Name"
+  },
+  {
+   "fieldname": "last_name",
+   "fieldtype": "Data",
+   "label": "Last Name"
+  },
+  {
+   "fieldname": "the_porch_and_main_gate_is_manned_and_lighting_is_sufficient",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "The Porch and Main Gate is manned and lighting is sufficient.",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "porch_remarks",
+   "fieldtype": "Small Text",
+   "label": "Porch Remarks"
+  },
+  {
+   "fieldname": "porch_image_upload",
+   "fieldtype": "Attach",
+   "label": "Porch Image Upload"
+  },
+  {
+   "fieldname": "reception_area_is_clean_and_all_brand_standards_in_place",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Reception area is clean and all brand standards in place",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "reception_remarks",
+   "fieldtype": "Small Text",
+   "label": "Reception Remarks"
+  },
+  {
+   "fieldname": "reception_image_upload",
+   "fieldtype": "Attach",
+   "label": "Reception Image Upload"
+  },
+  {
+   "fieldname": "public_areas_are_clean",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Public Areas are clean",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "public_areas_image_upload",
+   "fieldtype": "Attach",
+   "label": "Public Areas Image Upload"
+  },
+  {
+   "fieldname": "public_areas_remarks",
+   "fieldtype": "Small Text",
+   "label": "Public Areas Remarks"
+  },
+  {
+   "fieldname": "the_bar_and_restaurant_area_clean_and_in_order",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "The Bar and Restaurant area clean and in order",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bar_remarks",
+   "fieldtype": "Small Text",
+   "label": "Bar Remarks"
+  },
+  {
+   "fieldname": "bar_image_upload",
+   "fieldtype": "Attach",
+   "label": "Bar Image Upload "
+  },
+  {
+   "fieldname": "meeting_rooms_area_is_clean_and_well_maintained",
+   "fieldtype": "Select",
+   "label": "Meeting rooms area is clean and well maintained. If no Meetings then lights are off",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "meeting_rooms_remarks",
+   "fieldtype": "Small Text",
+   "label": "meeting rooms Remarks"
+  },
+  {
+   "fieldname": "metting_rooms_attcha_image",
+   "fieldtype": "Attach",
+   "label": "metting Rooms Attcha image"
+  },
+  {
+   "fieldname": "heart_of_the_house_areas_are_well_maintained",
+   "fieldtype": "Select",
+   "label": "Heart of the house areas are well maintained.",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "house_area_remarks",
+   "fieldtype": "Small Text",
+   "label": "House Area Remarks"
+  },
+  {
+   "fieldname": "house_area_image_upload",
+   "fieldtype": "Attach",
+   "label": "House Area image upload"
+  },
+  {
+   "fieldname": "food_at_staff_dinning_was_served_on_time_menu_is_as_per_the_day",
+   "fieldtype": "Select",
+   "label": "Food at Staff dinning was served on time Menu is as per the day",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "food_and_staff_remarks",
+   "fieldtype": "Small Text",
+   "label": "Food and staff Remarks"
+  },
+  {
+   "fieldname": "food_and_staff_image_upload",
+   "fieldtype": "Attach",
+   "label": "Food and Staff Image upload"
+  },
+  {
+   "fieldname": "gym_is_well_maintained_fresh_towels_and_water_available",
+   "fieldtype": "Select",
+   "label": "GYM is well maintained, fresh towels and water available.",
+   "options": "\nyes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "gym_remarks",
+   "fieldtype": "Small Text",
+   "label": "GYM Remarks"
+  },
+  {
+   "fieldname": "gym_image_upload",
+   "fieldtype": "Attach",
+   "label": "GYM Image Upload"
+  },
+  {
+   "fieldname": "pool_area_is_well_maintained_guard_is_present",
+   "fieldtype": "Select",
+   "label": "Pool area is well maintained. Guard is present.",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "pool_remarks",
+   "fieldtype": "Small Text",
+   "label": "Pool Remarks"
+  },
+  {
+   "fieldname": "pool_image_upload",
+   "fieldtype": "Attach",
+   "label": "Pool Image Upload"
+  },
+  {
+   "fieldname": "the_surrounding_and_back_of_the_house_areas_are_well_maintained",
+   "fieldtype": "Select",
+   "label": "The surrounding and back of the house areas are well maintained.",
+   "options": "\nyes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "surrounding_remarks",
+   "fieldtype": "Small Text",
+   "label": "Surrounding remarks"
+  },
+  {
+   "fieldname": "surrounding_image_upload",
+   "fieldtype": "Attach Image",
+   "label": "Surrounding Image Upload"
+  },
+  {
+   "fieldname": "check_on_general_upkeep_of_staff_locker_clean_and_pest_free",
+   "fieldtype": "Select",
+   "label": "Check on General upkeep of Staff locker. Clean and pest free.",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "general_remarks",
+   "fieldtype": "Small Text",
+   "label": "General Remarks"
+  },
+  {
+   "fieldname": "general_image_upload",
+   "fieldtype": "Attach",
+   "label": "General image upload"
+  },
+  {
+   "fieldname": "quality_and_condition_of_water_bottling_plant",
+   "fieldtype": "Select",
+   "label": "Quality and condition of water bottling plant.",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "quality_remarks",
+   "fieldtype": "Small Text",
+   "label": "Quality Remarks"
+  },
+  {
+   "fieldname": "quality_image_upload",
+   "fieldtype": "Attach",
+   "label": "Quality Image Upload"
+  },
+  {
+   "fieldname": "spa_cleanliness_and_upkeep_is_inline_with_hotel_standards",
+   "fieldtype": "Select",
+   "label": "Spa cleanliness and upkeep is inline with hotel standards.",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "spa_remarks",
+   "fieldtype": "Small Text",
+   "label": "spa Remarks"
+  },
+  {
+   "fieldname": "spa_image_upload",
+   "fieldtype": "Attach",
+   "label": "Spa image Upload"
+  },
+  {
+   "fieldname": "pest_free_in_the_hotel",
+   "fieldtype": "Select",
+   "label": "Pest Free in the hotel. ",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "pest_remarks",
+   "fieldtype": "Small Text",
+   "label": "Pest Remarks"
+  },
+  {
+   "fieldname": "pest_image_upload",
+   "fieldtype": "Attach",
+   "label": "Pest Image upload"
+  },
+  {
+   "fieldname": "dishwasher_area_clean_in_main_kitchen_ibis_or_novotel",
+   "fieldtype": "Select",
+   "label": "Dishwasher area clean in main kitchen ibis or novotel",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "dishwasher_remarks",
+   "fieldtype": "Small Text",
+   "label": "Dishwasher Remarks"
+  },
+  {
+   "fieldname": "dishwasher_image_upload",
+   "fieldtype": "Attach",
+   "label": "Dishwasher image upload"
+  },
+  {
+   "fieldname": "main_kitchen_clean_and_neat_novotel_or_ibis",
+   "fieldtype": "Select",
+   "label": "Main kitchen Clean and Neat novotel or ibis",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "main_kitchen_remarks",
+   "fieldtype": "Small Text",
+   "label": "Main Kitchen remarks"
+  },
+  {
+   "fieldname": "main_kitchen_image_upload",
+   "fieldtype": "Attach",
+   "label": "Main Kitchen Image Upload"
+  },
+  {
+   "fieldname": "garbage_area_neat_and_clean",
+   "fieldtype": "Select",
+   "label": "Garbage Area neat and clean",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "garbage_remarks",
+   "fieldtype": "Small Text",
+   "label": "Garbage Remarks"
+  },
+  {
+   "fieldname": "garbage_image_upload",
+   "fieldtype": "Attach",
+   "label": "Garbage image upload"
+  },
+  {
+   "fieldname": "ird_clean_and_neat_novotel_or_ibis",
+   "fieldtype": "Select",
+   "label": "IRD Clean and Neat novotel or ibis",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "ird_remarks",
+   "fieldtype": "Small Text",
+   "label": "IRD Remarks"
+  },
+  {
+   "fieldname": "ird_image_upload",
+   "fieldtype": "Attach",
+   "label": "IRD image upload"
+  },
+  {
+   "fieldname": "square_restaurant_and_bar",
+   "fieldtype": "Rating",
+   "label": "Square Restaurant and Bar"
+  },
+  {
+   "fieldname": "square_restaurant_and_bar_remarks",
+   "fieldtype": "Small Text",
+   "label": "Square Restaurant and Bar Remarks"
+  },
+  {
+   "fieldname": "square_restaurant_and_bar_image_upload",
+   "fieldtype": "Attach",
+   "label": "Square Restaurant and Bar image upload"
+  },
+  {
+   "fieldname": "ibis_restaurant_and_bar",
+   "fieldtype": "Rating",
+   "label": "Ibis Restaurant and Bar"
+  },
+  {
+   "fieldname": "ibis_restaurant_and_bar_remarks",
+   "fieldtype": "Small Text",
+   "label": "Ibis Restaurant and Bar Remarks"
+  },
+  {
+   "fieldname": "ibis_restaurant_and_bar_image_upload",
+   "fieldtype": "Attach",
+   "label": "Ibis Restaurant and Bar image upload"
+  },
+  {
+   "fieldname": "any_operation_hazzard_for_safety",
+   "fieldtype": "Select",
+   "label": "Any operation Hazzard for safety",
+   "options": "\nyes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "any_operation_hazzard_for_safety_remarks",
+   "fieldtype": "Small Text",
+   "label": "Any operation Hazzard for safety Remarks"
+  },
+  {
+   "fieldname": "operation_hazzard_for_safety_image_upload",
+   "fieldtype": "Attach",
+   "label": "Operation Hazzard for safety image upload"
+  },
+  {
+   "fieldname": "meet_hearirest",
+   "fieldtype": "Section Break",
+   "label": "Meet three heartiest and update the gist of the conversation with name"
+  },
+  {
+   "fieldname": "name1",
+   "fieldtype": "Data",
+   "label": "Name 1"
+  },
+  {
+   "fieldname": "name_2",
+   "fieldtype": "Data",
+   "label": "Name 2"
+  },
+  {
+   "fieldname": "name_3",
+   "fieldtype": "Data",
+   "label": "Name 3"
+  },
+  {
+   "fieldname": "column_break_bwet",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "feedback_1",
+   "fieldtype": "Small Text",
+   "label": "Feedback 1"
+  },
+  {
+   "fieldname": "feedback_2",
+   "fieldtype": "Small Text",
+   "label": "Feedback 2"
+  },
+  {
+   "fieldname": "feedback_3",
+   "fieldtype": "Small Text",
+   "label": "Feedback 3"
+  },
+  {
+   "fieldname": "heartiest_grooming_section",
+   "fieldtype": "Section Break",
+   "label": "Heartiest Grooming"
+  },
+  {
+   "fieldname": "name_4",
+   "fieldtype": "Data",
+   "label": "Name 4"
+  },
+  {
+   "fieldname": "name_5",
+   "fieldtype": "Data",
+   "label": "name 5"
+  },
+  {
+   "fieldname": "name_6",
+   "fieldtype": "Data",
+   "label": "Name 6"
+  },
+  {
+   "fieldname": "column_break_stja",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "improvement_in_grooming_1",
+   "fieldtype": "Small Text",
+   "label": "Improvement in grooming 1"
+  },
+  {
+   "fieldname": "improvement_in_grooming_2",
+   "fieldtype": "Small Text",
+   "label": "Improvement in grooming 2"
+  },
+  {
+   "fieldname": "improvement_in_grooming_3",
+   "fieldtype": "Small Text",
+   "label": "Improvement in grooming 3"
+  },
+  {
+   "fieldname": "image_upload",
+   "fieldtype": "Attach",
+   "label": "image upload"
+  },
+  {
+   "fieldname": "room_check_list_section",
+   "fieldtype": "Section Break",
+   "label": "Room Check List"
+  },
+  {
+   "fieldname": "name_7",
+   "fieldtype": "Data",
+   "label": "Name 7"
+  },
+  {
+   "fieldname": "name_8",
+   "fieldtype": "Data",
+   "label": "Name 8"
+  },
+  {
+   "fieldname": "name_9",
+   "fieldtype": "Data",
+   "label": "Name 9"
+  },
+  {
+   "fieldname": "column_break_tqhp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "remarks_1",
+   "fieldtype": "Small Text",
+   "label": "Remarks 1"
+  },
+  {
+   "fieldname": "remarks_2",
+   "fieldtype": "Small Text",
+   "label": "Remarks 2"
+  },
+  {
+   "fieldname": "remarks_3",
+   "fieldtype": "Small Text",
+   "label": "Remarks 3"
+  },
+  {
+   "fieldname": "section_break_rcpp",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "overall_remarks",
+   "fieldtype": "Small Text",
+   "label": "Overall Remarks"
+  },
+  {
+   "fieldname": "overall_image_upload",
+   "fieldtype": "Attach",
+   "label": "Overall Image Upload"
+  },
+  {
+   "fieldname": "signature",
+   "fieldtype": "Signature",
+   "label": "Signature"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-05-28 12:56:10.249148",
+ "modified_by": "Administrator",
+ "module": "User Forms",
+ "name": "NICO MOD REPORT",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
