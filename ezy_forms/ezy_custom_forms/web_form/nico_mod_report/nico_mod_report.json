@@ -8,8 +8,10 @@
  "anonymous": 0,
  "apply_document_permissions": 0,
  "button_label": "Save",
+ "client_script": "let $brand = $('.navbar-brand'), // This is the logo in the navbar\r\n    $user = $('li.logged-in'), // This is the logged in user navbar item\r\n    $header = $('.web-form-header'); // This is the form header that contains the header \"User Registeration\"\r\n    $nav_item= $('.nav-item');\r\n    // Change the logo\r\n    $brand.empty().append('<img src=\"https://ezysuite.ezyforms.co/assets/ezy_forms/ezyformsfrontend/assets/Final-logo-ezyforms-removebg-preview-DcMik6cG.png\" alt=\"\"/>');\r\n    //$brand.hide()\r\n    $nav_item.hide()\r\n    // Hide the logged in user navbar item\r\n    $user.hide();\r\n    \r\nlet $nav_bar = $('.navbar navbar-light navbar-expand-lg')     \r\n    ",
  "condition_json": "[]",
  "creation": "2025-05-28 11:58:36.507999",
+ "custom_css": "",
  "doc_type": "NICO MOD REPORT",
  "docstatus": 0,
  "doctype": "Web Form",
@@ -18,7 +20,7 @@
  "list_columns": [],
  "login_required": 0,
  "max_attachment_size": 0,
- "modified": "2025-05-28 16:49:24.788208",
+ "modified": "2025-05-28 18:24:16.544301",
  "modified_by": "Administrator",
  "module": "ezy_custom_forms",
  "name": "nico-mod-report",
@@ -28,6 +30,8 @@
  "show_attachments": 0,
  "show_list": 0,
  "show_sidebar": 0,
+ "success_message": "NICO MOD REPORT SUBMITTED SUCESSFULLY",
+ "success_title": "REPORT SUBMITTED SUCESSFULLY",
  "title": "NICO MOD REPORT",
  "web_form_fields": [
   {
