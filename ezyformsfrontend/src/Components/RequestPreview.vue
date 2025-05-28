@@ -20,7 +20,7 @@
                                     <div v-for="(field, fieldIndex) in column.fields"
                                         :key="'field-preview-' + fieldIndex">
                                         <div v-if="field.fieldtype !== 'Table'"
-                                            :class="field.fieldtype === 'Check' ? ' d-flex mt-4 flex-row-reverse justify-content-start gap-3' : ''">
+                                            :class="field.fieldtype === 'Check' ? ' d-flex mt-4 flex-row-reverse justify-content-end gap-2' : ''">
                                             <div v-if="field.label">
                                                 <label :for="'field-' +
                                                     sectionIndex +
@@ -34,7 +34,7 @@
                                                             field.label }}</span>
                                                     <span class="ms-1 text-danger">{{
                                                         field.reqd === 1 ? "*" : ""
-                                                    }}</span>
+                                                        }}</span>
                                                 </label>
                                             </div>
 
@@ -211,29 +211,25 @@
                                                                 )
                                                         " class="form-control previewInputHeight font-10" />
                                             </template>
-                                            <template v-else-if="field.fieldtype == 'Link'">
-                                                <input type="text" :value="field.value"
-                                                    @input="(e) => onInputChange(e.target.value, field)" @change="(event) =>
-                                                        logFieldValue(
-                                                            event,
-                                                            blockIndex,
-                                                            sectionIndex,
-                                                            rowIndex,
-                                                            columnIndex,
-                                                            fieldIndex
-                                                        )" class="form-control font-12 mb-1"
-                                                    @focus="() => setActiveField(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex, field)" />
+                                            <template v-else-if="field.fieldtype === 'Link'">
+                                                <input type="text" v-model="field.value"
+                                                    @input="() => fetchDoctypeList(field.options, field.value)"
+                                                    @focus="() => fetchDoctypeList(field.options, field.value)"
+                                                    @change="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+                                                    class="form-control font-12 mb-1" />
 
-                                                <ul v-if="isActiveField(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) && linkSearchResults.length"
-                                                    class="list-group mt-1"
+
+                                                <ul v-if="linkSearchResults.length" class="list-group mt-1"
                                                     style="max-height: 200px; overflow-y: auto;">
                                                     <li v-for="(result, index) in linkSearchResults" :key="index"
-                                                        @click="selectDoctype(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex, result.name)"
+                                                        @click="selectDoctype(result.name, field, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
                                                         class="list-group-item list-group-item-action">
                                                         {{ result.name }}
                                                     </li>
                                                 </ul>
                                             </template>
+
+
 
 
                                             <template v-else>
@@ -304,19 +300,19 @@
                                                     ]
                                                 }}
                                             </div>
-                                            <span v-if="field.description !== 'Field'" class="font-11"><span
-                                                    class="fw-semibold">Description: </span>{{
-                                                        field.description }}</span>
                                         </div>
+                                        <span v-if="field.description !== 'Field' && field.fieldtype !== 'Table'"
+                                            class="font-11"><span class="fw-semibold">Description: </span>{{
+                                                field.description }}</span>
                                         <div v-if="blockIndex === 0 && field.fieldtype === 'Table'">
 
                                             <div v-if="field.fieldtype === 'Table' && field.description === 'true'">
 
                                                 <div v-for="(table, tableIndex) in props.tableHeaders" :key="tableIndex"
                                                     class="mt-3">
-                                                    
+
                                                     <div v-if="tableIndex === field.fieldname">
-                                                        
+
                                                         <div>
                                                             <span class="font-13  fw-medium">{{
                                                                 field.label.replace(/_/g, " ") }}</span>
@@ -348,17 +344,30 @@
                                                                 <div class="col-6"
                                                                     v-for="fieldItem in table.slice((i - 1) * 2, i * 2)"
                                                                     :key="fieldItem.fieldname">
-                                                                    <label class="font-12 fw-medium">{{
-                                                                        fieldItem.label
+                                                                    <label v-if="fieldItem.label !== 'Form Name'"
+                                                                        class="font-12 fw-medium">{{
+                                                                            fieldItem.label
                                                                         }}</label>
+                                                                    <template v-if="fieldItem.label === 'Form Name'">
+                                                                        <!-- Keep the same title tooltip and width logic -->
+                                                                        <span class="font-12"
+                                                                            :style="{ maxWidth: '100%' }"
+                                                                            :title="row[fieldItem.fieldname]">
+                                                                            {{ row[fieldItem.fieldname] || '—' }}
+                                                                        </span>
+                                                                    </template>
+                                                                    <template
+                                                                        v-if="fieldItem.fieldtype === 'Data' && fieldItem.label !== 'Form Name'">
 
-                                                                    <input v-if="fieldItem.fieldtype === 'Data'"
-                                                                        :title="row[fieldItem.fieldname]" type="text"
-                                                                        class="form-control font-12 px-2"
-                                                                        :maxlength="fieldItem.fieldtype === 'Phone' ? '10' : '140'"
-                                                                        v-model="row[fieldItem.fieldname]" />
+                                                                        <input :title="row[fieldItem.fieldname]"
+                                                                            type="text"
+                                                                            class="form-control font-12 px-2"
+                                                                            :maxlength="fieldItem.fieldtype === 'Phone' ? '10' : '140'"
+                                                                            v-model="row[fieldItem.fieldname]" />
+                                                                    </template>
                                                                     <template v-if="fieldItem.fieldtype === 'Select'">
                                                                         <div>
+
                                                                             <Multiselect
                                                                                 :multiple="fieldItem.fieldtype === 'Table MultiSelect'"
                                                                                 :options="(fieldItem.options?.split('\n').filter(opt => opt.trim() !== '') || [])"
@@ -368,19 +377,32 @@
                                                                                 class="font-11 multiselect" />
                                                                         </div>
                                                                     </template>
-                                                                    <input v-else-if="fieldItem.fieldtype === 'Date'"
-                                                                        :min="past" :max="today"
-                                                                        :title="row[fieldItem.fieldname]" type="date"
-                                                                        class="form-control font-12"
-                                                                        v-model="row[fieldItem.fieldname]" />
+                                                                    <template v-if="field.fieldtype === 'Text'">
+                                                                        <textarea class="form-control font-12" rows="3"
+                                                                            v-model="row[field.fieldname]"
+                                                                            :title="row[field.fieldname]"></textarea>
+                                                                    </template>
+                                                                    <template
+                                                                        v-else-if="fieldItem.fieldtype === 'Date'">
+                                                                        <input :min="past" :max="today"
+                                                                            :title="row[fieldItem.fieldname]"
+                                                                            type="date" class="form-control font-12"
+                                                                            v-model="row[fieldItem.fieldname]" />
+                                                                    </template>
+                                                                    <template v-if="fieldItem.fieldtype === 'Text'">
+                                                                        <textarea class="form-control font-12" rows="3"
+                                                                            v-model="row[fieldItem.fieldname]"
+                                                                            :title="row[fieldItem.fieldname]"></textarea>
+                                                                    </template>
+                                                                    <template
+                                                                        v-else-if="fieldItem.fieldtype === 'Datetime'">
 
-                                                                    <input
-                                                                        v-else-if="fieldItem.fieldtype === 'Datetime'"
-                                                                        :title="row[fieldItem.fieldname]"
-                                                                        type="datetime-local"
-                                                                        class="form-control font-12"
-                                                                        v-model="row[fieldItem.fieldname]" />
-                                                                    <!-- <template v-else-if="fieldItem.fieldtype === 'Data' && row[fieldItem.fieldname] === 'Type of Manpower'">
+
+                                                                        <input :title="row[fieldItem.fieldname]"
+                                                                            type="datetime-local"
+                                                                            class="form-control font-12"
+                                                                            v-model="row[fieldItem.fieldname]" />
+                                                                        <!-- <template v-else-if="fieldItem.fieldtype === 'Data' && row[fieldItem.fieldname] === 'Type of Manpower'">
                                                                             <Multiselect :multiple="field.fieldtype === 'Table MultiSelect'"
                                                     :maxlength="getMaxLength(field)"
                                                     :options="field.options?.split('\n') || []"
@@ -388,12 +410,14 @@
                                                     @update:modelValue="(val) => handleSelectChange(val, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
                                                     class="font-11 multiselect" />
                                                                         </template> -->
-
-                                                                    <input v-else-if="fieldItem.fieldtype === 'Attach'"
-                                                                        multiple type="file"
-                                                                        class="form-control font-12"
-                                                                        accept="image/jpeg,image/png,application/pdf"
-                                                                        @change="handleFileUpload($event, row, fieldItem.fieldname)" />
+                                                                    </template>
+                                                                    <template
+                                                                        v-else-if="fieldItem.fieldtype === 'Attach'">
+                                                                        <input multiple type="file"
+                                                                            class="form-control font-12"
+                                                                            accept="image/jpeg,image/png,application/pdf"
+                                                                            @change="handleFileUpload($event, row, fieldItem.fieldname)" />
+                                                                    </template>
                                                                 </div>
                                                             </div>
 
@@ -421,7 +445,7 @@
                                                         <div>
                                                             <span class="font-13 text-secondary ">{{
                                                                 field.label.replace(/_/g, " ")
-                                                            }}</span>
+                                                                }}</span>
                                                         </div>
                                                         <table class="table  rounded-table" border="1" width="100%">
                                                             <thead>
@@ -435,6 +459,8 @@
                                                                 </tr>
                                                             </thead>
                                                             <tbody>
+
+
                                                                 <tr
                                                                     v-if="!tableRows[tableIndex] || tableRows[tableIndex].length === 0">
                                                                     <td :colspan="table.length + 2"
@@ -447,24 +473,46 @@
                                                                         </div>
                                                                     </td>
                                                                 </tr>
-                                                                <tr class=" position-relative"
+                                                                <tr class="position-relative"
                                                                     v-for="(row, rowIndex) in tableRows[tableIndex]"
                                                                     :key="rowIndex">
-                                                                    <td style="text-align: center;" class="font-12">{{
-                                                                        rowIndex + 1 }}
+                                                                    <td style="text-align: center;" class="font-12">
+                                                                        {{
+                                                                            rowIndex + 1 }}
                                                                     </td>
                                                                     <td v-for="field in table" :key="field.fieldname"
-                                                                        :title="row[field.fieldname]"
-                                                                        :style="field.label !== 'Type of Manpower' ? { width: row[field.fieldname] ? Math.max(row[field.fieldname].length * 10, 100) + 'px' : 'auto' } : {}">
+                                                                        :title="row[field.fieldname]" :style="field.label !== 'Type of Manpower'
+                                                                            ? {
+                                                                                width: row[field.fieldname] ? Math.max(row[field.fieldname].length * 10, 100) + 'px' : 'auto',
+                                                                                maxWidth: '300px',
+                                                                                overflow: 'hidden',
+                                                                                textOverflow: 'ellipsis',
+                                                                                whiteSpace: 'nowrap'
+                                                                            }
+                                                                            : {}">
 
+                                                                        <template v-if="field.label === 'Form Name'">
+                                                                            <!-- Keep the same title tooltip and width logic -->
+                                                                            <span
+                                                                                class="font-12 d-inline-block text-truncate"
+                                                                                :style="{ maxWidth: '100%' }"
+                                                                                :title="row[field.fieldname]">
+                                                                                {{ row[field.fieldname] || '—' }}
+                                                                            </span>
+                                                                        </template>
 
                                                                         <template
-                                                                            v-if="field.fieldtype === 'Data' && field.label !== 'Type of Manpower'">
+                                                                            v-else-if="field.fieldtype === 'Data' && field.label !== 'Type of Manpower'">
                                                                             <input type="text"
                                                                                 :maxlength="field.fieldtype === 'Phone' ? '10' : '140'"
                                                                                 class="form-control font-12"
                                                                                 :title="row[field.fieldname]"
                                                                                 v-model="row[field.fieldname]" />
+                                                                        </template>
+                                                                        <template v-if="field.fieldtype === 'Text'">
+                                                                            <textarea class="form-control font-12"
+                                                                                rows="3" v-model="row[field.fieldname]"
+                                                                                :title="row[field.fieldname]"></textarea>
                                                                         </template>
 
                                                                         <template v-if="field.fieldtype === 'Select'">
@@ -479,38 +527,12 @@
                                                                             </div>
                                                                         </template>
                                                                         <template v-if="field.fieldtype === 'Date'">
-                                                                            <input type="date" :min="past"
+                                                                            <input type="date" :min="past" :max="today"
                                                                                 :title="row[field.fieldname]"
                                                                                 class="form-control font-12"
                                                                                 v-model="row[field.fieldname]" />
                                                                         </template>
-                                                                        <!-- <template v-if="field.fieldtype === 'Int'">
-                                                                            <input
-                                                                                v-if="field.label.toLowerCase() === 'total'"
-                                                                                type="number"
-                                                                                class="form-control font-12"
-                                                                                :value="calculateDynamicTotal(row, table)"
-                                                                                readonly />
-                                                                            <input v-else type="number"
-                                                                                class="form-control font-12"
-                                                                                v-model.number="row[field.fieldname]" />
-                                                                        </template> -->
-                                                                        <!-- <template v-if="field.fieldtype === 'Int'">
-                                                                        
-                                                                                    <input
-                                                                                        v-if="field.description && /[+\-*/]/.test(field.description)"
-                                                                                        type="number"
-                                                                                        class="form-control font-12"
-                                                                                        :value="calculateFieldExpression(row, field.description)"
-                                                                                        readonly
-                                                                                    />
-                                                                                    <input
-                                                                                        v-else
-                                                                                        type="number"
-                                                                                        class="form-control font-12"
-                                                                                        v-model.number="row[field.fieldname]"
-                                                                                    />
-                                                                                    </template> -->
+
                                                                         <template v-if="field.fieldtype === 'Int'">
                                                                             <input
                                                                                 v-if="field.description && /[+\-*/]/.test(field.description)"
@@ -531,6 +553,7 @@
                                                                                 v-model="row[field.fieldname]" />
                                                                         </template>
 
+
                                                                         <template
                                                                             v-else-if="field.fieldtype === 'Attach'">
                                                                             <input type="file" multiple
@@ -538,6 +561,8 @@
                                                                                 class="form-control font-12"
                                                                                 @change="handleFileUpload($event, row, field.fieldname)" />
                                                                         </template>
+
+
                                                                     </td>
 
                                                                     <td class="d-table-cell text-center align-middle">
@@ -638,7 +663,29 @@ const pad = (n) => n.toString().padStart(2, '0');
 
 // Format: YYYY-MM-DDTHH:MM (suitable for datetime-local input)
 const today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
-
+const formQuestions = ref([
+    "The Porch & Main Gate is manned and lighting is sufficient.",
+    "Reception area is clean & all brand standards in place.",
+    "Public Areas are clean, All furniture's in place, Kids corner is well organised, Music and lighting is right",
+    "The Bar & Restaurant area clean and in order. Music level Normal.",
+    "Meeting rooms area is clean and well maintained. If no Meetings then lights are off.",
+    "Heart of the house areas are well maintained.",
+    "Food at Staff dinning was served on time, Menu is as per the day. Taste of the Food to be checked and incorporate in MOD report.",
+    "GYM is well maintained, fresh towels and water available.",
+    "Pool area is well maintained. Guard is present.",
+    "The surrounding and back of the house areas are well maintained.",
+    "Check on General upkeep of Staff locker. Clean and pest free.",
+    "Quality and condition of water bottling plant.",
+    "Spa cleanliness and upkeep is inline with hotel standards.",
+    "Pest Free in the hotel.",
+    "Dishwasher area clean in main kitchen ibis / novotel",
+    "Main kitchen Clean and Neat novotel / ibis",
+    "Garbage Area neat and clean",
+    "IRD Clean and Neat novotel / ibis.",
+    "Square Restaurant and Bar",
+    "Ibis Restaurant and Bar",
+    "Any operation Hazzard for safety. (IF YES NEED DETAIL)",
+]);
 
 const getMaxLength = (field) => {
     const label = field.label?.toLowerCase() || '';
@@ -655,6 +702,7 @@ const getInputType = (type) => {
     if (t === 'int') return 'number';
     return t;
 };
+console.log(tableRows);
 // Format as 'YYYY-MM-DDTHH:MM'
 watch(
     () => tableRows,
@@ -672,11 +720,13 @@ watch(
                 finalData[tableIndex] = [...rows];
             }
         }
+        console.log(tableRows, "pppp");
 
         emit('updateTableData', { ...finalData });
     },
     { deep: true }
 );
+
 
 watch(
     () => props.tableRowsdata,
@@ -709,24 +759,53 @@ const removeRow = (tableIndex, rowIndex) => {
 };
 
 
+// function calculateFieldExpression(row, expression, fields) {
+//     // Map labels to fieldnames for substitution
+//     const labelToFieldname = {};
+//     fields.forEach(f => {
+//         labelToFieldname[f.label] = f.fieldname;
+//     });
+
+//     // Replace label names in expression with actual row values
+//     const formula = expression.replace(/\b(\w+)\b/g, (match) => {
+//         const fn = labelToFieldname[match];
+//         if (fn !== undefined && row[fn] !== undefined && row[fn] !== null && row[fn] !== '') {
+//             return row[fn];
+//         }
+//         return 0; // fallback if no matching label
+//     });
+
+//     try {
+//         return eval(formula);
+//     } catch (e) {
+//         console.error('Error evaluating formula:', formula, e);
+//         return 0;
+//     }
+// } 
 function calculateFieldExpression(row, expression, fields) {
-    // Map labels to fieldnames for substitution
-    const labelToFieldname = {};
+    const labelToValue = {};
+
+    // Build a map: label -> value from row
     fields.forEach(f => {
-        labelToFieldname[f.label] = f.fieldname;
+        const value = parseFloat(row[f.fieldname]);
+        labelToValue[f.label] = isNaN(value) ? 0 : value;
     });
 
-    // Replace label names in expression with actual row values
-    const formula = expression.replace(/\b(\w+)\b/g, (match) => {
-        const fn = labelToFieldname[match];
-        if (fn !== undefined && row[fn] !== undefined && row[fn] !== null && row[fn] !== '') {
-            return row[fn];
-        }
-        return 0; // fallback if no matching label
-    });
+    // Sort labels by length descending to avoid partial replacements (e.g., "Cost" before "Cost per Casual")
+    const sortedLabels = Object.keys(labelToValue).sort((a, b) => b.length - a.length);
+
+    let formula = expression;
+
+    // Replace each label (with possible spaces) in expression with the corresponding value
+    for (const label of sortedLabels) {
+        // Use regex with word boundary-like pattern to replace safely
+        const safeLabel = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // escape special regex characters
+        const regex = new RegExp(`\\b${safeLabel}\\b`, 'g');
+        formula = formula.replace(regex, labelToValue[label]);
+    }
 
     try {
-        return eval(formula);
+        return new Function(`return ${formula}`)();
     } catch (e) {
         console.error('Error evaluating formula:', formula, e);
         return 0;
@@ -860,39 +939,14 @@ const handleSelectChange = (
 
     logFieldValue(mockEvent, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex);
 };
+// const linkSearchResults = ref([])
 
-
-const activeSearch = reactive({
-    query: '',
-    key: '',
-});
-
-// Generate unique key for identifying field
-function getFieldKey(b, s, r, c, f) {
-    return `${b}-${s}-${r}-${c}-${f}`;
-}
-
-// Called when the input is focused
-function setActiveField(b, s, r, c, f, field) {
-    activeSearch.key = getFieldKey(b, s, r, c, f);
-    activeSearch.query = '';
-    currentFieldOptions.value = field.options;
-    fetchDoctypeList(''); // Load initial list on focus
-}
-
-// Check if field is the currently active one
-function isActiveField(b, s, r, c, f) {
-    return activeSearch.key === getFieldKey(b, s, r, c, f);
-}
-
-// Fetch from /api/resource/{field.options} with optional searchText
-function fetchDoctypeList(searchText) {
-    const resourceName = currentFieldOptions.value;
-    if (!resourceName || !activeSearch.key) return;
+function fetchDoctypeList(resourceName, searchText) {
+    if (!resourceName) return;
 
     const filters = [];
 
-    if (searchText.trim()) {
+    if (searchText && searchText.trim()) {
         filters.push(['name', 'like', `%${searchText}%`]);
     }
 
@@ -900,32 +954,24 @@ function fetchDoctypeList(searchText) {
         .get(`/api/resource/${encodeURIComponent(resourceName)}`, {
             params: {
                 fields: JSON.stringify(['name']),
-                limit_page_length: '10',
                 filters: JSON.stringify(filters),
             },
         })
         .then((res) => {
-            linkSearchResults.value = res.data || [];
+            linkSearchResults.value = res.data || []; // Ensure .data exists
         })
-        .catch((error) => {
-            console.error('Error fetching link options:', error);
+        .catch((err) => {
+            console.error('Error fetching doctype list:', err);
         });
 }
 
-// Handle selection from dropdown
-function selectDoctype(b, s, r, c, f, name) {
-    const field = props.blockArr[b].sections[s].rows[r].columns[c].fields[f];
+
+function selectDoctype(name, field, b, s, r, c, f) {
     field.value = name;
-
-    // Manually trigger logFieldValue
-    const mockEvent = { target: { value: name } };
-    logFieldValue(mockEvent, b, s, r, c, f);
-
+    const event = { target: { value: name } };
+    logFieldValue(event, b, s, r, c, f);
     linkSearchResults.value = [];
-    activeSearch.query = '';
-    activeSearch.key = '';
 }
-
 
 const getCurrentDateTime = () => {
     const localTime = new Date().toLocaleString("en-CA", {
@@ -988,7 +1034,7 @@ onMounted(() => {
         }
     }
     updateDateTimeFields();
-
+    updateFormQuestionsInTableRows();
 
     if (props.blockArr) {
         props.blockArr.forEach((block) => {
@@ -1021,6 +1067,21 @@ onMounted(() => {
         });
     }
 });
+function updateFormQuestionsInTableRows() {
+    for (const [tableIndex, fields] of Object.entries(props.tableHeaders)) {
+        const hasFormName = fields.some(f => f.label === 'Form Name');
+
+        if (hasFormName) {
+            const formNameField = fields.find(f => f.label === 'Form Name');
+
+            tableRows[tableIndex] = formQuestions.value.map((question) => {
+                const row = Object.fromEntries(fields.map(f => [f.fieldname, ""]));
+                row[formNameField.fieldname] = question;
+                return row;
+            });
+        }
+    }
+}
 
 const datetimeInput = ref(null);
 
@@ -1293,6 +1354,15 @@ const uploadFile = (file, field, index) => {
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 
 <style lang="scss" scoped>
+.text-ellipsis {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+    vertical-align: middle;
+}
+
 td:first-child,
 th:first-child {
     width: 3%;

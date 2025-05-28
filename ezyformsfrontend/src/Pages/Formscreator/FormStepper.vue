@@ -912,7 +912,7 @@
                                           <td>{{ index + 1 }}</td>
 
                                           <td v-if="editMode[table.tableName]">
-                                            <input v-model="field.label" placeholder="Field Label" class="form-control" 
+                                            <input v-model="field.label" placeholder="Field Label" class="form-control"  @blur="updateFieldname(field)"
                                               :class="{ 'border-1 border-danger': invalidFields[table.tableName]?.includes(index) }" />
                                             <span v-if="invalidFields[tableIndex]?.includes(index)"
                                               class="font-11 text-danger">Label
@@ -2317,6 +2317,10 @@ const childfield = [
   {
     label: "Number",
     type: "Int",
+  },
+   {
+    label: "TextArea",
+    type: "Text",
   },
   // {
   //   label: "Link",

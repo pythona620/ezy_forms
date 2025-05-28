@@ -84,7 +84,22 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
             doc.module = "User Forms"
             doc.app = "ezy_forms"
             doc.custom = 1
-            doc.description = business_unit
+            doc.autoname = "naming_series:"
+            doc.naming_rule ='By "Naming Series" field '
+            cleaned_series = re.sub(r'[^a-zA-Z0-9#\-/\.]', '', series or '') if series else None
+            series = None if not cleaned_series else (
+                    cleaned_series.upper() + "-.####" if not re.search(r'[-/]\.#+$', cleaned_series.upper()) else cleaned_series.upper()
+                )
+            doc.naming_series = series if series else f"{business_unit}_{doctype}"  # optional if you want to set a default value
+            doc.append("fields", frappe.get_doc({
+            "doctype": "DocField",
+            "label": "Naming Series",
+            "fieldname": "naming_series",
+            "fieldtype": "Select",
+            "options": series if series else f"{business_unit}_{doctype}-",
+            "reqd": 1,
+            "insert_after": "title"
+        }))
             doc.insert(ignore_permissions=True)
             frappe.db.commit()
             doc.reload()
@@ -296,7 +311,7 @@ def add_child_doctype(form_short_name: str, as_a_block: str, fields: list[dict],
             idx = 0
         # Check if the DocType exists
         # Adjust idx to be 1-based (instead of 0)
-        for i, field in enumerate(fields, start=0):
+        for i, field in enumerate(fields, start=1):
             field['idx'] = i
 
         # Your existing update code (simplified)
