@@ -71,7 +71,8 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
         if isinstance(fields,str):
             fields = literal_eval(fields)
         if frappe.db.exists("Ezy Form Definitions",{"name":form_short_name}):
-            frappe.set_value("Ezy Form Definitions",form_short_name,"form_status",form_status)
+            # frappe.set_value("Ezy Form Definitions",form_short_name,"form_status",form_status)
+            frappe.set_value("Ezy Form Definitions",{"name":form_short_name},{"form_status":form_status,"accessible_departments":accessible_departments,"owner_of_the_form":owner_of_the_form})
         if not frappe.db.exists("DocType",doctype):
             frappe.db.sql(f"DROP TABLE IF EXISTS `tab{doctype}`;")
             frappe.db.commit()
@@ -206,6 +207,7 @@ def enqueued_add_customized_fields_for_dynamic_doc(fields: list[dict], doctype: 
                     doc_for_existing_custom_field.idx = dicts_of_docs_entries["idx"]
                     doc_for_existing_custom_field.label = dicts_of_docs_entries["label"]
                     doc_for_existing_custom_field.fieldtype = dicts_of_docs_entries["fieldtype"]
+                    doc_for_existing_custom_field.reqd = dicts_of_docs_entries["reqd"]
                     doc_for_existing_custom_field.save(ignore_permissions=True)
                     frappe.db.commit()
                     doc_for_existing_custom_field.db_update()
