@@ -1,0 +1,503 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-05-28 17:22:21.007871",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "first_name",
+  "date_time",
+  "hotel_code",
+  "room_no",
+  "column_break_hgjy",
+  "last_name",
+  "general_section",
+  "entrance_door_neat_and_clean",
+  "all_light_and_switches_are_working_fine_and_clean",
+  "room_and_equipments_are_dust_free",
+  "walls_and_celling_are_crack_and_finger_mark_free",
+  "ac_grill_smoke_detector_and_vent_are_clean_and_dust_free",
+  "ac_effective",
+  "remarks",
+  "main_door_section",
+  "safety_latch_intact_and_smoothly_functioning",
+  "door_hinges_clean_and_free_from_stains_from_inside_and_outside",
+  "main_door_remarks",
+  "wardrobe_section",
+  "supplies_placed_according_to_standards",
+  "all_drawers_clean_and_dust_free",
+  "el_safe_clean_with_working_condition",
+  "wardrobe_remarks",
+  "minibar_cabinet_section",
+  "mini_bar_and_supply_tray_dust_free_amenities_placed",
+  "minibar_remarks",
+  "luggage_rack_section",
+  "mirror_clean_and_no_stains",
+  "mirror_remarks",
+  "tv_cabinet_section",
+  "tv_working_screen_clean_and_wires_are_neatly_placed",
+  "tv_remarks",
+  "writing_table_section",
+  "qr_scanner_sticker_are_in_place_and_table_free_from_dust",
+  "window_ledge_and_glass_clean_and_free_from_dust",
+  "curtains_aligned_neatly_and_stain_free",
+  "wrting_remarks",
+  "bed_section",
+  "bed_presentable_and_free_from_stains_and_creases",
+  "bed_remarks",
+  "bedside_table_section",
+  "remote_working",
+  "telephone_working_and_speed_dial_tested",
+  "bed_presentable_remarks",
+  "bathroom_section",
+  "bathroom_doo",
+  "bath_linen_stain_free",
+  "bathroom_remarks",
+  "vanity_counter_section",
+  "shaving_mirror_free_from_smudges_and_stains",
+  "hair_dryer_working",
+  "select_znth",
+  "select_zbdg",
+  "vanity_counter_remarks",
+  "floor_section",
+  "floor_has_good_fragrance_and_no_strain_in_carpets",
+  "all_lights_are_working",
+  "no_used_food_tray_found_in_floor",
+  "brand_stickers_and_shoe_shiner_working_fine",
+  "floor_reamrks",
+  "overall_section",
+  "overall_remarks",
+  "rating",
+  "proof_upload",
+  "proof_1_upload",
+  "signature"
+ ],
+ "fields": [
+  {
+   "fieldname": "first_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "First Name",
+   "reqd": 1
+  },
+  {
+   "default": "now",
+   "fieldname": "date_time",
+   "fieldtype": "Datetime",
+   "label": "Date Time ",
+   "read_only": 1
+  },
+  {
+   "fieldname": "hotel_code",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Hotel Code",
+   "options": "\nNCO\nICO",
+   "reqd": 1
+  },
+  {
+   "fieldname": "room_no",
+   "fieldtype": "Data",
+   "label": "Room No"
+  },
+  {
+   "fieldname": "column_break_hgjy",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "last_name",
+   "fieldtype": "Data",
+   "label": "Last Name"
+  },
+  {
+   "fieldname": "general_section",
+   "fieldtype": "Section Break",
+   "label": "GENERAL"
+  },
+  {
+   "fieldname": "entrance_door_neat_and_clean",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Entrance door neat and clean free from finger marks, dust, noise and lock polished. Peep hole clean & clear. ",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "all_light_and_switches_are_working_fine_and_clean",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "All Light and Switches are working fine and clean",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "room_and_equipments_are_dust_free",
+   "fieldtype": "Select",
+   "label": "Room and equipment's are dust free",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "walls_and_celling_are_crack_and_finger_mark_free",
+   "fieldtype": "Select",
+   "label": "Walls and Celling are crack and finger mark free",
+   "options": "\nyes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "ac_grill_smoke_detector_and_vent_are_clean_and_dust_free",
+   "fieldtype": "Select",
+   "label": "AC grill, Smoke detector and Vent are clean and dust free.",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "ac_effective",
+   "fieldtype": "Select",
+   "label": "AC effective",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "main_door_section",
+   "fieldtype": "Section Break",
+   "label": "MAIN DOOR"
+  },
+  {
+   "fieldname": "safety_latch_intact_and_smoothly_functioning",
+   "fieldtype": "Select",
+   "label": "Safety latch intact and smoothly functioning",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "door_hinges_clean_and_free_from_stains_from_inside_and_outside",
+   "fieldtype": "Select",
+   "label": "Door hinges clean and free from stains from inside and outside.",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "main_door_remarks",
+   "fieldtype": "Small Text",
+   "label": "Main Door Remarks"
+  },
+  {
+   "fieldname": "wardrobe_section",
+   "fieldtype": "Section Break",
+   "label": "WARDROBE "
+  },
+  {
+   "fieldname": "supplies_placed_according_to_standards",
+   "fieldtype": "Select",
+   "label": "Supplies placed according to standards",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "all_drawers_clean_and_dust_free",
+   "fieldtype": "Select",
+   "label": "All drawers clean and Dust free",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "el_safe_clean_with_working_condition",
+   "fieldtype": "Select",
+   "label": "El safe clean with working condition",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "wardrobe_remarks",
+   "fieldtype": "Small Text",
+   "label": "Wardrobe remarks"
+  },
+  {
+   "fieldname": "minibar_cabinet_section",
+   "fieldtype": "Section Break",
+   "label": "MINIBAR CABINET"
+  },
+  {
+   "fieldname": "mini_bar_and_supply_tray_dust_free_amenities_placed",
+   "fieldtype": "Select",
+   "label": "Mini bar and supply tray dust free amenities placed",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.mini_bar_and_supply_tray_dust_free_amenities_placed == \"No\"",
+   "fieldname": "minibar_remarks",
+   "fieldtype": "Small Text",
+   "label": "Minibar Remarks",
+   "options": "\nYes\nNo"
+  },
+  {
+   "fieldname": "luggage_rack_section",
+   "fieldtype": "Section Break",
+   "label": "LUGGAGE RACK "
+  },
+  {
+   "fieldname": "mirror_clean_and_no_stains",
+   "fieldtype": "Select",
+   "label": "Mirror clean and no stains.",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.mirror_clean_and_no_stains == \"No\"",
+   "fieldname": "mirror_remarks",
+   "fieldtype": "Small Text",
+   "label": "Mirror Remarks"
+  },
+  {
+   "fieldname": "tv_cabinet_section",
+   "fieldtype": "Section Break",
+   "label": "TV CABINET"
+  },
+  {
+   "fieldname": "tv_working_screen_clean_and_wires_are_neatly_placed",
+   "fieldtype": "Select",
+   "label": "TV working, Screen clean and Wires are neatly placed",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.tv_working_screen_clean_and_wires_are_neatly_placed == \"No\"",
+   "fieldname": "tv_remarks",
+   "fieldtype": "Small Text",
+   "label": "TV Remarks"
+  },
+  {
+   "fieldname": "writing_table_section",
+   "fieldtype": "Section Break",
+   "label": "WRITING TABLE "
+  },
+  {
+   "fieldname": "qr_scanner_sticker_are_in_place_and_table_free_from_dust",
+   "fieldtype": "Select",
+   "label": "QR scanner sticker are in place and Table free from dust",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "window_ledge_and_glass_clean_and_free_from_dust",
+   "fieldtype": "Select",
+   "label": "Window ledge and glass clean and free from dust",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "curtains_aligned_neatly_and_stain_free",
+   "fieldtype": "Select",
+   "label": "Curtains aligned neatly and stain free",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "wrting_remarks",
+   "fieldtype": "Small Text",
+   "label": "Wrting Remarks"
+  },
+  {
+   "fieldname": "bed_section",
+   "fieldtype": "Section Break",
+   "label": "BED"
+  },
+  {
+   "fieldname": "bed_presentable_and_free_from_stains_and_creases",
+   "fieldtype": "Select",
+   "label": "Bed presentable and free from stains and Creases.",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bed_remarks",
+   "fieldtype": "Small Text",
+   "label": "Bed Remarks"
+  },
+  {
+   "fieldname": "remote_working",
+   "fieldtype": "Select",
+   "label": "Remote working",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "telephone_working_and_speed_dial_tested",
+   "fieldtype": "Select",
+   "label": "Telephone Working and Speed dial tested.",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bed_presentable_remarks",
+   "fieldtype": "Small Text",
+   "label": "Bed Presentable Remarks"
+  },
+  {
+   "fieldname": "bedside_table_section",
+   "fieldtype": "Section Break",
+   "label": "BEDSIDE TABLE"
+  },
+  {
+   "fieldname": "bathroom_section",
+   "fieldtype": "Section Break",
+   "label": "Bathroom"
+  },
+  {
+   "fieldname": "bathroom_doo",
+   "fieldtype": "Select",
+   "label": "Bathroom door, Shower glass, Hand shower & Rain Shower heads clean without hard water marks",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bath_linen_stain_free",
+   "fieldtype": "Select",
+   "label": "Bath linen stain free",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bathroom_remarks",
+   "fieldtype": "Small Text",
+   "label": "Bathroom Remarks"
+  },
+  {
+   "fieldname": "vanity_counter_section",
+   "fieldtype": "Section Break",
+   "label": "VANITY COUNTER"
+  },
+  {
+   "fieldname": "shaving_mirror_free_from_smudges_and_stains",
+   "fieldtype": "Select",
+   "label": "Shaving Mirror free from smudges and stains",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "hair_dryer_working",
+   "fieldtype": "Select",
+   "label": "Hair dryer working, Amenities neatly places and aligned as per standard.",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "select_znth",
+   "fieldtype": "Select",
+   "label": "Dustbin clean and shining.",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "select_zbdg",
+   "fieldtype": "Select",
+   "label": "W/C clean and fresh, Toilet roll dispenser dust free and toilet roll folded",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "vanity_counter_remarks",
+   "fieldtype": "Small Text",
+   "label": "Vanity Counter Remarks"
+  },
+  {
+   "fieldname": "floor_section",
+   "fieldtype": "Section Break",
+   "label": "Floor"
+  },
+  {
+   "fieldname": "floor_has_good_fragrance_and_no_strain_in_carpets",
+   "fieldtype": "Select",
+   "label": "Floor has good fragrance and no Strain in Carpets",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "all_lights_are_working",
+   "fieldtype": "Select",
+   "label": "All Lights are working",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "no_used_food_tray_found_in_floor",
+   "fieldtype": "Select",
+   "label": "No used Food tray found in floor ",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "brand_stickers_and_shoe_shiner_working_fine",
+   "fieldtype": "Select",
+   "label": "Brand Stickers and Shoe Shiner working fine",
+   "options": "\nYes\nNo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "floor_reamrks",
+   "fieldtype": "Small Text",
+   "label": "Floor Reamarks"
+  },
+  {
+   "fieldname": "overall_section",
+   "fieldtype": "Section Break",
+   "label": "Overall"
+  },
+  {
+   "fieldname": "overall_remarks",
+   "fieldtype": "Small Text",
+   "label": "Overall Remarks"
+  },
+  {
+   "fieldname": "rating",
+   "fieldtype": "Rating",
+   "label": "Rating"
+  },
+  {
+   "fieldname": "proof_upload",
+   "fieldtype": "Attach",
+   "label": "Proof Upload"
+  },
+  {
+   "fieldname": "proof_1_upload",
+   "fieldtype": "Attach",
+   "label": "Proof 1 Upload"
+  },
+  {
+   "fieldname": "signature",
+   "fieldtype": "Signature",
+   "label": "Signature"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-05-28 18:15:18.834717",
+ "modified_by": "Administrator",
+ "module": "ezy_custom_forms",
+ "name": "NICO ROOM CHECK LIST",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
