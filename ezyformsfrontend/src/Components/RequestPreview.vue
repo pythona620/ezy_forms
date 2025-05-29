@@ -485,7 +485,6 @@
                                                                             ? {
                                                                                 width: row[field.fieldname] ? Math.max(row[field.fieldname].length * 10, 100) + 'px' : 'auto',
                                                                                 maxWidth: '300px',
-                                                                                overflow: 'hidden',
                                                                                 textOverflow: 'ellipsis',
                                                                                 whiteSpace: 'nowrap'
                                                                             }
