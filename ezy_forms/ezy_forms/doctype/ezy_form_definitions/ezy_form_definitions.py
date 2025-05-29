@@ -207,7 +207,7 @@ def enqueued_add_customized_fields_for_dynamic_doc(fields: list[dict], doctype: 
                     doc_for_existing_custom_field.idx = dicts_of_docs_entries["idx"]
                     doc_for_existing_custom_field.label = dicts_of_docs_entries["label"]
                     doc_for_existing_custom_field.fieldtype = dicts_of_docs_entries["fieldtype"]
-                    doc_for_existing_custom_field.reqd = dicts_of_docs_entries["reqd"]
+                    # doc_for_existing_custom_field.reqd = dicts_of_docs_entries["reqd"]
                     doc_for_existing_custom_field.save(ignore_permissions=True)
                     frappe.db.commit()
                     doc_for_existing_custom_field.db_update()
