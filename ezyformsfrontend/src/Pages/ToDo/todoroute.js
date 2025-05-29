@@ -1,8 +1,11 @@
+
+
 const ToDoComp = () => import("./ToDoComp.vue");
 const MyTeam = () => import("./MyTeam.vue");
 const RaisedByMe = () => import("./RaisedByMe.vue");
 const HistoryComp = () => import("./HistoryComp.vue");
 const ReceivedForMe = () => import("./ReceivedForMe.vue");
+const ReportsComp = () => import("./ReportsComp.vue");
 const todoroutes = [
   {
     path: "/todo",
@@ -34,6 +37,11 @@ const todoroutes = [
 
         name: "MyTeam",
       },
+      {
+        path: "reports",
+        component: ReportsComp,
+        name: "ReportsComp",
+      }
     ],
   },
 ];
