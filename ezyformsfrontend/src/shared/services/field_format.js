@@ -28,7 +28,7 @@ export function extractFieldsWithBreaks(data) {
             generatedFieldname = getUniqueFieldname(generatedFieldname, fieldnameTracker);
 
             result.push({
-              description: field.description ? field.description : "Field",
+              description: convertDescriptionIntoNormal(field.description ? field.description : "Field"),
               fieldname: generatedFieldname,
               fieldtype: field.fieldtype,
               idx: index++, // Assign index
@@ -776,4 +776,8 @@ function convertLabelToFieldName(label) {
     .toLowerCase()              // Convert to lowercase
     .replace(/\s+/g, '_')       // Replace spaces with underscores
     .replace(/[^a-z0-9_']/g, ''); // Remove non-alphanumeric characters except underscores and single quotes
+}
+function convertDescriptionIntoNormal(description) {
+  if (!description) return "";
+  return description.replace(/['"`]/g, "");
 }

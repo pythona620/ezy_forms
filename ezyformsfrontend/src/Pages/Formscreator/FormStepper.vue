@@ -172,7 +172,8 @@
                                   <span v-if="!filterObj.accessible_departments.length"
                                     class="text-danger">*</span></label>
                               </label>
-                              <VueMultiselect :disabled="selectedData.formId && selectedData.formId.length > 0"
+                              <!-- :disabled="selectedData.formId && selectedData.formId.length > 0" -->
+                              <VueMultiselect 
                                 v-model="filterObj.accessible_departments" :options="filteredOptions" :multiple="true"
                                 :close-on-select="false" :clear-on-select="false" :preserve-search="true"
                                 placeholder="Select Designation" class="font-11" @select="handleSelect"
@@ -736,7 +737,7 @@
 
                                                             <!-- Label Input -->
                                                             <td v-if="editMode[tableName]">
-                                                              <input v-model="field.label" placeholder="Field Label" @blur="updateFieldname(field)"
+                                                              <input v-model="field.label" placeholder="Field Label" 
                                                                 class="form-control"
                                                                 :class="{ 'border-1 border-danger': invalidFields[tableName]?.includes(index) }" />
                                                               <span v-if="invalidFields[tableName]?.includes(index)"
@@ -911,7 +912,7 @@
                                           <td>{{ index + 1 }}</td>
 
                                           <td v-if="editMode[table.tableName]">
-                                            <input v-model="field.label" placeholder="Field Label" class="form-control" @blur="updateFieldname(field)"
+                                            <input v-model="field.label" placeholder="Field Label" class="form-control"  @blur="updateFieldname(field)"
                                               :class="{ 'border-1 border-danger': invalidFields[table.tableName]?.includes(index) }" />
                                             <span v-if="invalidFields[tableIndex]?.includes(index)"
                                               class="font-11 text-danger">Label
@@ -1748,7 +1749,7 @@ const addChildTable = (blockIndex, sectionIndex) => {
     columns: [
       {
         label: "",
-        fieldname: `field_0`,
+        fieldname: "",
         fieldtype: "",
         idx: 0,
         description: '',
@@ -1773,7 +1774,7 @@ const addFieldToTable = (blockIndex, sectionIndex, tableIndex) => {
 
   table.columns.push({
     label: "",
-    fieldname: `field_${table.columns.length}`,
+    fieldname: "",
     fieldtype: "",
     idx: table.columns.length,
     description: '',
@@ -1866,7 +1867,7 @@ const processFields = (blockIndex, sectionIndex, tableIndex) => {
     as_a_block: table.as_a_block === 1 ? 'true' : 'false',
   };
 
-  console.log(data);
+  // console.log(data); 
   // // ensureArrayPath(blockIndex, sectionIndex, 'afterCreated');
   // // table.newTable = false
 
@@ -1943,6 +1944,7 @@ const afterImmediateEditaddNewFieldedit = (blockIndex, sectionIndex, tableName) 
     label: "",
     value: "",
     isNew: true,
+    description: '',
 
   });
 };
@@ -1952,7 +1954,7 @@ const afterImmediateEdit = (blockIndex, sectionIndex, tableName) => {
 
   const section = blockArr[blockIndex].sections[sectionIndex];
   const table = section.afterCreated.find((t) => t.tableName === tableName);
-  console.log('table', table)
+  // console.log('table', table)
   if (!table) return;
 
   if (editMode[tableName]) {
@@ -2213,7 +2215,7 @@ const toggleEdit = (tableName, description) => {
     // Process all fields (both old and new)
     let allFields = childtableHeaders.value[tableName].map(({ isNew, ...rest }, index) => ({
       ...rest,
-      idx: index + 1, // Ensure `idx` is correctly set in sequential order
+      idx: index, // Ensure `idx` is correctly set in sequential order
     }));
 
     // ✅ Single API request to save both old and new fields
@@ -2315,6 +2317,10 @@ const childfield = [
   {
     label: "Number",
     type: "Int",
+  },
+   {
+    label: "TextArea",
+    type: "Text",
   },
   // {
   //   label: "Link",
@@ -2730,7 +2736,7 @@ function getFormData() {
 }
 
 function SetPrintFormatFn() {
-  console.log(is_landscape.value);
+  // console.log(is_landscape.value);
   const data = {};
 
   // Add print_format if it has a value
@@ -3379,7 +3385,10 @@ function handleInputChange(event, fieldType) {
   } else {
     formShortNameError.value = ""; // Clear error if input is valid
   }
-
+if (fieldType === "form_short_name" && /[^a-zA-Z ]/.test(inputValue)) {
+  formShortNameError.value = "Only alphabets and spaces are allowed";
+  return;
+}
   // Check for special characters (allow only letters and numbers)
   if (/[^a-zA-Z0-9& ]/.test(inputValue)) {  // ✅ allow spaces inside
     if (fieldType === "form_name") {

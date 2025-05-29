@@ -46,8 +46,7 @@
                                 </div>
 
                                 <label class="font-13 ps-1" for="business_unit">Business Unit</label>
-
-                                <FormFields tag="input" type="text" :disabled="CreateDepartments.business_unit.length ? true : false"
+                                <FormFields tag="input" type="text" :disabled="CreateDepartments.business_unit ? true : false"
                                     placeholder="" class="mb-3" name="business_unit" id="business_unit"
                                     v-model="CreateDepartments.business_unit" />
                                 <!-- <VueMultiselect v-model="CreateDepartments.business_unit" :options="EzyFormsCompanys"
@@ -569,7 +568,7 @@ function createDepart() {
         ...CreateDepartments.value,
         "doctype": doctypes.departments
     }
-    // console.log(dataObj, "------------------");
+    console.log(dataObj, "------------------");
     axiosInstance.post(apis.resource + doctypes.departments, dataObj).then((res) => {
         if (res.data) {
             toast.success("Department Created", { autoClose: 500, "transition": "zoom" })

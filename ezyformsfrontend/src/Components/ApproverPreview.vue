@@ -365,9 +365,9 @@
                     <div v-if="blockIndex === 0 && field.fieldtype === 'Table'">
                       <div v-if="props.childHeaders && Object.keys(props.childHeaders).length">
                         <div v-for="(headers, tableName) in props.childHeaders" :key="tableName">
-                          <div v-if="field.options === tableName || field.fieldname === tableName">
+                          <div v-if="field.fieldname === tableName">
                             <div>
-                              <span class="font-13 fw-bold tablename">{{ tableName.replace(/_/g, " ") }}</span>
+                              <span class="font-13 fw-bold tablename">{{ field.label.replace(/_/g, " ") }}</span>
                             </div>
 
                             <!-- If description === 'true', use 2-column layout -->
@@ -382,8 +382,8 @@
 
                                     <template v-if="isFilePath(row[field.fieldname])">
                                       <div v-for="(file, i) in row[field.fieldname].split(',')" :key="i"
-                                        class="cursor-pointer text-primary d-block" @click="openFile(file)">
-                                        View Attachment <i class="bi bi-eye-fill ps-1"></i>
+                                        class="cursor-pointer text-dark d-block" @click="openFile(file)">
+                                        <span class="font-12">View Attachment </span><i class="bi bi-eye-fill ps-1"></i>
                                       </div>
                                     </template>
 
@@ -402,27 +402,27 @@
                               <table class="table mb-0">
                                 <thead>
                                   <tr>
-                                    <!-- <th>#</th> -->
-                                    <th v-for="field in headers" :key="field.fieldname">{{ field.label }}</th>
+                                    <th>#</th>
+                                    <th  v-for="field in headers" :key="field.fieldname">{{ field.label }}</th>
                                   </tr>
                                 </thead>
                                 <tbody>
                                   <tr v-for="(row, index) in props.childData[tableName]" :key="index">
-                                    <!-- <td>{{ index + 1 }}</td> -->
-                                    <td v-for="field in headers" :key="field.fieldname">
+                                    <td>{{ index + 1 }}</td>
+                                    <td  v-for="field in headers" :key="field.fieldname">
                                       <template v-if="isFilePath(row[field.fieldname])">
-                                        <div class=" d-flex gap-1">
-                                          <span v-for="(file, i) in row[field.fieldname].split(',')" :key="i">
-                                            <span class="cursor-pointer text-decoration-underline d-flex mb-1"
-                                              @click="openFile(file)">
-                                              View<i class="bi bi-eye-fill ps-1"></i>
+                                          <div class="d-flex flex-column gap-1">
+                                            <span v-for="(file, i) in row[field.fieldname].split(',').filter(f => f.trim() !== '')" :key="i">
+                                              <span class="cursor-pointer text-decoration-underline d-flex mb-1" @click="openFile(file)">
+                                                View <i class="bi bi-eye-fill ps-1"></i>
+                                              </span>
                                             </span>
-                                          </span>
-                                        </div>
-                                      </template>
+                                          </div>
+                                        </template>
+
 
                                       <!-- Show normal value if not a file path -->
-                                      <span v-else>
+                                      <span  v-else>
                                         {{ row[field.fieldname] || "" }}
                                       </span>
                                     </td>

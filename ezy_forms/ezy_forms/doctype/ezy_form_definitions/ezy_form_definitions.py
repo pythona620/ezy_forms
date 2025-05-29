@@ -85,7 +85,22 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
             doc.module = "User Forms"
             doc.app = "ezy_forms"
             doc.custom = 1
-            doc.description = business_unit
+            doc.autoname = "naming_series:"
+            doc.naming_rule ='By "Naming Series" field '
+            cleaned_series = re.sub(r'[^a-zA-Z0-9#\-/\.]', '', series or '') if series else None
+            series = None if not cleaned_series else (
+                    cleaned_series.upper() + "-.####" if not re.search(r'[-/]\.#+$', cleaned_series.upper()) else cleaned_series.upper()
+                )
+            doc.naming_series = series if series else f"{business_unit}_{doctype}"  # optional if you want to set a default value
+            doc.append("fields", frappe.get_doc({
+            "doctype": "DocField",
+            "label": "Naming Series",
+            "fieldname": "naming_series",
+            "fieldtype": "Select",
+            "options": series if series else f"{business_unit}_{doctype}-",
+            "reqd": 1,
+            "insert_after": "title"
+        }))
             doc.insert(ignore_permissions=True)
             frappe.db.commit()
             doc.reload()
@@ -154,7 +169,7 @@ def enqueued_add_customized_fields_for_dynamic_doc(fields: list[dict], doctype: 
 
         for table_name in table_fieldnames:
             fields_in_child_doctype = frappe.db.sql(
-                f"SELECT IFNULL(options, '') AS options,description, fieldname, fieldtype, idx, label FROM `tabDocField` WHERE parent ='{table_name}';",
+                f"SELECT IFNULL(options, '') AS options,IFNULL(description, '') AS description, fieldname, fieldtype, idx, label FROM `tabDocField` WHERE parent ='{table_name}';",
                 as_dict=True
             )
 
@@ -192,7 +207,7 @@ def enqueued_add_customized_fields_for_dynamic_doc(fields: list[dict], doctype: 
                     doc_for_existing_custom_field.idx = dicts_of_docs_entries["idx"]
                     doc_for_existing_custom_field.label = dicts_of_docs_entries["label"]
                     doc_for_existing_custom_field.fieldtype = dicts_of_docs_entries["fieldtype"]
-                    doc_for_existing_custom_field.reqd = dicts_of_docs_entries["reqd"]
+                    # doc_for_existing_custom_field.reqd = dicts_of_docs_entries["reqd"]
                     doc_for_existing_custom_field.save(ignore_permissions=True)
                     frappe.db.commit()
                     doc_for_existing_custom_field.db_update()
@@ -290,12 +305,18 @@ def activating_perms_for_all_roles_in_wf_roadmap():
  
 @frappe.whitelist()
 def add_child_doctype(form_short_name: str, as_a_block: str, fields: list[dict], idx=None):
+
     try:
         doc = None  # Ensure 'doc' is always defined
         exist_child_table = None
         if not idx:
             idx = 0
         # Check if the DocType exists
+        # Adjust idx to be 1-based (instead of 0)
+        for i, field in enumerate(fields, start=1):
+            field['idx'] = i
+
+        # Your existing update code (simplified)
         if frappe.db.exists("DocType", form_short_name):
 
             exist_child_table = frappe.get_doc("DocType", form_short_name)
@@ -306,6 +327,7 @@ def add_child_doctype(form_short_name: str, as_a_block: str, fields: list[dict],
             # Update existing fields or add new ones
             for field in fields:
                 fieldname = field.get("fieldname")
+                new_idx = field.get("idx")
                 new_label = field.get("label")
                 new_fieldtype = field.get("fieldtype")
                 new_options = field.get("options")
@@ -324,6 +346,8 @@ def add_child_doctype(form_short_name: str, as_a_block: str, fields: list[dict],
                         existing_field.options = new_options
                     if new_description:
                         existing_field.description = new_description
+                    if new_idx:
+                        existing_field.idx = new_idx
 
                     fields_updated = True
                 else:
@@ -334,7 +358,8 @@ def add_child_doctype(form_short_name: str, as_a_block: str, fields: list[dict],
                         "parentfield": "fields",
                         "parenttype": "DocType",
                         "options": new_options,
-                        "description": new_description
+                        "description": new_description,
+                        "idx": new_idx
                     })
                     fields_updated = True
 
@@ -351,6 +376,7 @@ def add_child_doctype(form_short_name: str, as_a_block: str, fields: list[dict],
                 return f"Fields updated successfully in Doctype '{form_short_name}'."
             else:
                 return f"No changes made to Doctype '{form_short_name}'."
+
 
         else:
             # Create new DocType
@@ -381,7 +407,8 @@ def add_child_doctype(form_short_name: str, as_a_block: str, fields: list[dict],
                     "fieldtype": field.get("fieldtype"),
                     "parentfield": "fields",
                     "parenttype": "DocType",
-                    "options": field.get("options")
+                    "options": field.get("options"),
+                    "idx":field.get('idx')
                 })
 
             doc.save(ignore_permissions=True)
@@ -397,7 +424,7 @@ def add_child_doctype(form_short_name: str, as_a_block: str, fields: list[dict],
                     "description": as_a_block,
                     "fieldname": child_doc_name,
                     "fieldtype": "Table",
-                    "idx": idx,
+                    "idx": idx or 0,
                     "label": child_doc_name,
                     "reqd": 0,
                     "value": "",

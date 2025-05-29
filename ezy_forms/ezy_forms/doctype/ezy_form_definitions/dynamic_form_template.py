@@ -34,11 +34,11 @@ def rebuild_to_structured_array(flat_array):
                 result.insert(0, current_block)
 
             current_block = {
-                "fieldtype": item.get("fieldtype"),
-                "fieldname": item.get("fieldname"),
+                "fieldtype": item.get("fieldtype") if item.get("fieldtype") else '',
+                "fieldname": item.get("fieldname") if item.get("fieldname") else '',
                 "label": item.get("label") if item.get("label") else "",
-                "parent": item.get("parent"),
-                "idx": idx,
+                "parent": item.get("parent")if item.get("parent") else "",
+                "idx": idx or '',
                 "sections": []
             }
 
@@ -51,11 +51,11 @@ def rebuild_to_structured_array(flat_array):
                 current_block["sections"].insert(0, current_section)
 
             current_section = {
-                "fieldtype": item.get("fieldtype"),
-                "fieldname": item.get("fieldname"),
+                "fieldtype": item.get("fieldtype") if item.get("fieldtype") else '',
+                "fieldname": item.get("fieldname") if item.get("fieldname") else '',
                 "label": item.get("label") if item.get("label") else "",
-                "parent": item.get("parent"),
-                "idx": idx,
+                "parent": item.get("parent") if item.get("parent") else "",
+                "idx": idx or '',
                 "rows": []
             }
 
@@ -64,34 +64,34 @@ def rebuild_to_structured_array(flat_array):
                 current_section["rows"].insert(0, current_row)
 
             current_row = {
-                "fieldtype": item.get("fieldtype"),
-                "fieldname": item.get("fieldname"),
+                "fieldtype": item.get("fieldtype") if item.get("fieldtype") else '',
+                "fieldname": item.get("fieldname") if item.get("fieldname") else '',
                 "label": item.get("label") if item.get("label") and not item.get("label").lower().startswith("row_") else "",
-                "parent": item.get("parent"),
-                "idx": idx,
+                "parent": item.get("parent")if item.get("parent") else "",
+                "idx": idx or '',
                 "columns": []
             }
 
         elif description == "Column Break":
             current_column = {
-                "fieldtype": item.get("fieldtype"),
-                "fieldname": item.get("fieldname"),
+                "fieldtype": item.get("fieldtype") if item.get("fieldtype") else '',
+                "fieldname": item.get("fieldname") if item.get("fieldname") else '',
                 "label": item.get("label") if item.get("label") else "",
-                "parent": item.get("parent"),
-                "idx": idx,
+                "parent": item.get("parent")if item.get("parent") else "",
+                "idx": idx or '',
                 "fields": []
             }
             current_row["columns"].insert(0, current_column)
 
         elif child_type == 'Table':
             child_table_row = {
-                "fieldtype": item.get("fieldtype"),
-                "fieldname": item.get("fieldname"),
-                "label": item.get("label"),
-                "parent": item.get("parent"),
-                "options": item.get("options"),
-                "description": item.get("description"),
-                "idx": idx,
+                "fieldtype": item.get("fieldtype") if item.get("fieldtype") else '',
+                "fieldname": item.get("fieldname") if item.get("fieldname") else '',
+                "label": item.get("label") if item.get("label") else "",
+                "parent": item.get("parent")if item.get("parent") else "",
+                "options": item.get("options") if item.get("options") else [],
+                "description": item.get("description") if item.get("description") else "",
+                "idx": idx or '',
                 "child_table": []
             }
 
@@ -101,13 +101,13 @@ def rebuild_to_structured_array(flat_array):
         else:  # Regular field
             if current_column:
                 updated_field = {
-                    "fieldname": item.get("fieldname"),
-                    "fieldtype": item.get("fieldtype"),
-                    "parent": item.get("parent"),
-                    "label": item.get("label"),
-                    "description": item.get("description"),
+                    "fieldname": item.get("fieldname") if item.get("fieldname") else '',
+                    "fieldtype": item.get("fieldtype") if item.get("fieldtype") else '',
+                    "parent": item.get("parent")if item.get("parent") else "",
+                    "label": item.get("label") if item.get("label") else "",
+                    "description": item.get("description") if item.get("description") else "",
                     "reqd": item.get("reqd"),
-                    "options": item.get("options"),
+                    "options": item.get("options") if item.get("options") else [],
                     "values": item.get("value") if item.get("value") else "",
                     "idx": idx
                 }
@@ -452,7 +452,12 @@ template_str = """
     {% set line_height = 16 %}
     {% set height = estimated_lines * line_height %}
 
-    {% set lines = value.split('\n') %}
+    {% if value %}
+        {% set lines = value.split('\n') %}
+    {% else %}
+        {% set lines = [] %}
+    {% endif %}
+
     <div style="height: {{ height }}px; border: none; width: 100%; margin-bottom: 0px; padding-bottom: 0px; line-height: {{ line_height }}px;">
         <div style="font-weight: bold;font-size: 15px;">{{ lines[0] }}</div>
         {% for line in lines[1:] %}
@@ -470,7 +475,9 @@ template_str = """
      </div>
     
 </div>
+{% if wf_generated_request_id %}
 <div class="requestId"><strong>Request ID:</strong><span>{{wf_generated_request_id}}</span></div>
+{% endif %}
 {% for block in data %}
     <div class="block">
         {% for section in block.sections %}
@@ -488,7 +495,7 @@ template_str = """
                             {% if row.description == 'true' %}
                                 {% if table_name in child_data %}
                                 
-                                    <h3 class="childtablename" style="font-size: 14px;">{{ table_name.replace("_", " ").title() }}</h3>
+                                    <h3 class="childtablename" style="font-size: 14px;">{{ row.label.replace("_", " ") }}</h3>
                                     {% if child_data[table_name] %}
                                         {% for child in child_data[table_name] %}
                                             <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
@@ -507,12 +514,11 @@ template_str = """
                                                 </div>
                                             </div>
                                         {% endfor %}
-                                    {% else %}
-                                        <p>No data available for {{ table_name }}</p>
+
                                     {% endif %}
 
                                 {% elif table_name in child_table_data %}
-                                    <h3 class="childtablename" style="font-size: 14px;">{{ table_name.replace("_", " ").title() }}</h3>
+                                    <h3 class="childtablename" style="font-size: 14px;">{{ row.label.replace("_", " ") }}</h3>
                                     <div style="border:1px solid #ccc; padding:10px; margin-bottom:5px;font-size: 13px;">
                                     
                                         <div style="display: flex; flex-wrap: wrap;">
@@ -529,7 +535,8 @@ template_str = """
                             {% else %}
 
                                 {% if table_name in child_data %}
-                                    <h3 class="childtablename" style=margin-left:3px;margin-right:3px;font-size: 14px;>{{ table_name.replace("_", " ").title() }}</h3>
+                                
+                                    <h3 class="childtablename" style=margin-left:3px;margin-right:3px;font-size: 14px;>{{ row.label.replace("_", " ") }}</h3>
                                     {% if child_data[table_name] %}
                                         <table class="rounded-table" style="width: 100%; margin-bottom:5px; border-collapse: collapse;border-radius: 3px; margin-left:3px;margin-right:3px;">
                                             <thead>
@@ -551,13 +558,12 @@ template_str = """
                                                 {% endfor %}
                                             </tbody>
                                         </table>
-                                    {% else %}
-                                        <p>No data available for {{ table_name }}</p>
+                                    
                                     {% endif %}
 
                                 {% elif table_name in child_table_data %}
                                 
-                                    <h3 class="childtablename" style="font-size: 14px;">{{ table_name.replace("_", " ").title() }}</h3>
+                                    <h3 class="childtablename" style="font-size: 14px;">{{ row.label.replace("_", " ") }}</h3>
                                     <table class="rounded-table" style="width: 100%; margin-bottom:10px; border-collapse: collapse; border-radius: 3px;">
                                         <thead>
                                             <tr>
@@ -592,12 +598,18 @@ template_str = """
                                 {% for field in column.fields %}
                                
                                     <div class="field field-textarea">
+                                    
                                         <label for="{{ field.fieldname }}">{{ field.label }} <span style="padding-left:2px; font-size: 13px;">:</span></label>
 
-                                        {% if field.fieldtype in ['Check', 'radio'] %}
+                                        {% if field.fieldtype in ['radio'] %}
                                             <div class="container-fluid">
                                                 <div class="row">
-                                                    {% for option in field.options.split('\n') %}
+                                                    {% if field.options is string %}
+                                                        {% set options = field.options.split('\n') %}
+                                                    {% else %}
+                                                        {% set options = field.options %}
+                                                    {% endif %}
+                                                    {% for option in options %}
                                                         <div class="form-check col-4 mb-4">
                                                             <div>
                                                             
@@ -632,16 +644,46 @@ template_str = """
                                                     {% endfor %}
                                                 </div>
                                             </div>
- 
-                                        {% elif field.fieldtype == 'Data' or field.fieldtype == 'Select' %}
+                                        {% elif field.fieldtype == 'Check' %}
+                                            <div class="checkbox-gap" style="display: flex; align-items: center; gap: 8px;">
+                                                <span class="custom-checkbox {% if field['values'] %}checked{% else %}unchecked{% endif %}"></span>
+                                            </div>
+
+                                        {% elif field.fieldtype == 'Data'  %}
                                             <span id="{{ field.fieldname }}"
                                                 style="font-size:13px; font-weight:500;border-bottom: 1px solid #cccccc;">
                                                 {{ field['values'] }}
                                             </span>
+                                        {% elif field.fieldtype == 'Select' %}
+                                        {% if field['values'] %}
+                                            {% set selected_values_list = field['values'].split(',') %}
+                                            <div class="checkbox-container">
+                                                {% for value in selected_values_list if value %}
+                                                    <div class="checkbox-gap">
+                                                        <span class="custom-checkbox checked"></span>
+                                                        <span>{{ value }}</span>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        {% else %}
+                                            {% set options = field.options.strip().split('\n') if field.options else [] %}
+                                            <div class="checkbox-container">
+                                                {% for option in options if option %}
+                                                    <div class="checkbox-gap">
+                                                        <span class="custom-checkbox unchecked"></span>
+                                                        <span style="margin-top:4px; margin-left:4px;">{{ option }}</span>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
 
+                                        
                                        {% elif field.fieldtype == 'Small Text' %}
+                                        {% if field.options %}
                                             {% set options = field.options.strip().split('\n') %}
-                                            
+                                        {% else %}
+                                            {% set options = field.options %}
+                                        {% endif %}
                                             {% if field['values'] %}
                                                 {% set selected_values = field['values'] | replace('["', '') | replace('"]', '') | replace('","', ',') %}
                                                 {% set selected_values_list = selected_values.split(',') %}
@@ -804,9 +846,11 @@ def convert_html_to_pdf(html_content, pdf_path,options=None):
         frappe.log_error(f"PDF generation failed: {e}")
  
 def json_structure_call_for_html_view(json_obj: list, form_name: str, child_data, child_table_data,business_unit,wf_generated_request_id=None):
+    wf_generated_request_id=''
+    if wf_generated_request_id:
+        wf_generated_request_id=wf_generated_request_id
     if child_data is None:
         child_data = []
-        wf_generated_request_id=wf_generated_request_id
     site_url = frappe.utils.get_url()
     logo_of_company = site_url + "/files/company.png"
     if child_table_data is None:
@@ -818,7 +862,7 @@ def json_structure_call_for_html_view(json_obj: list, form_name: str, child_data
  
     business_unit = frappe.get_doc("Ezy Business Unit",business_unit)
     
-    company_logo = business_unit.bu_logo
+    company_logo = business_unit.bu_logo 
     letter_head = ''
     bu_name =''
 
@@ -911,19 +955,18 @@ def preview_dynamic_form(form_short_name: str, business_unit=None, name=None):
             if iteration.get("fieldtype") == "Table":
                 child_table_name = str(iteration["fieldname"])
                 child_table_records = frappe.get_all(iteration["options"], filters={"parent": name}, fields=["*"])
-                
-                # Get field names and labels dynamically
-                field_names = [df.fieldname for df in frappe.get_meta(iteration["options"]).fields]
-                field_labels = {df.fieldname: df.label for df in frappe.get_meta(iteration["options"]).fields}
-
-                # Store child table data properly
-                data_list[child_table_name] = [
-                    {field_labels.get(field, field): record.get(field) for field in field_names}
-                    for record in child_table_records
-                ]
-
-
-
+                meta_fields = sorted(frappe.get_meta(iteration["options"]).fields, key=lambda f: f.idx)
+                field_names = [df.fieldname for df in meta_fields]
+                field_labels = {df.fieldname: df.label for df in meta_fields}
+                if child_table_records:
+                    data_list[child_table_name] = [
+                        {field_labels.get(field, field): record.get(field) for field in field_names}
+                        for record in child_table_records
+                    ]
+                else:
+                    data_list[child_table_name] = [
+                        {field_labels.get(field, field): "" for field in field_names}
+                    ]
     html_view = json_structure_call_for_html_view(
         json_obj=json_object,
         form_name=form_name,
@@ -945,7 +988,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
         if name is None:
             print_format = frappe.db.get_value("Ezy Form Definitions", form_short_name, "print_format")
             if print_format:
-                html_view_ = get_html_file_data(form_short_name,None,str(print_format))
+                html_view_ = get_html_file_data("DocType",form_short_name,str(print_format))
                 html_view = html_view_['html']
             else:
                 json_object = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_json")
@@ -1036,16 +1079,18 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                     if iteration.get("fieldtype") == "Table":
                         child_table_name = str(iteration["fieldname"])
                         child_table_records = frappe.get_all(iteration["options"], filters={"parent": name}, fields=["*"])
-                        
-                        # Get field names and labels dynamically
-                        field_names = [df.fieldname for df in frappe.get_meta(iteration["options"]).fields]
-                        field_labels = {df.fieldname: df.label for df in frappe.get_meta(iteration["options"]).fields}
-
-                        # Store child table data properly
-                        data_list[child_table_name] = [
-                            {field_labels.get(field, field): record.get(field) for field in field_names}
-                            for record in child_table_records
-                        ]
+                        meta_fields = sorted(frappe.get_meta(iteration["options"]).fields, key=lambda f: f.idx)
+                        field_names = [df.fieldname for df in meta_fields]
+                        field_labels = {df.fieldname: df.label for df in meta_fields}
+                        if child_table_records:
+                            data_list[child_table_name] = [
+                                {field_labels.get(field, field): record.get(field) for field in field_names}
+                                for record in child_table_records
+                            ]
+                        else:
+                            data_list[child_table_name] = [
+                                {field_labels.get(field, field): "" for field in field_names}
+                            ]
                 form_name = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_name")
                 html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_name,child_data=data_list,child_table_data=None,business_unit=business_unit,wf_generated_request_id=wf_generated_request_id)
                 
