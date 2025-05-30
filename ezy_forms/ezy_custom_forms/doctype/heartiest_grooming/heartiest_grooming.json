@@ -1,0 +1,40 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-05-30 12:08:34.728551",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "name1",
+  "improvement_in_grooming"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "name1",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Name"
+  },
+  {
+   "columns": 2,
+   "fieldname": "improvement_in_grooming",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Improvement In Grooming"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-05-30 12:24:36.474780",
+ "modified_by": "Administrator",
+ "module": "ezy_custom_forms",
+ "name": "Heartiest Grooming",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
