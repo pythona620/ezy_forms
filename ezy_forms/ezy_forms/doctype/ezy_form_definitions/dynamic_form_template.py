@@ -545,6 +545,7 @@ template_str = """
                                 {% endif %}
 
                             {% else %}
+                            
 
                                 {% if table_name in child_data %}
                                 
@@ -753,11 +754,12 @@ template_str = """
                                                 {% endif %}
                                                 {% set line_height = 18 %}
                                                 {% set height = estimated_lines * line_height %}
-                                            <pre
+                                            <div
                                                 id="{{ field.fieldname }}"
                                                 name="{{ field.fieldname }}"
-                                                style="border: none; width: 100%; font-size:13px; font-family: Arial, sans-serif;"
-                                            >{{ field['values'] | e }}</pre>
+                                                style="white-space: pre-wrap; border: none; width: 100%; font-size:13px;"
+                                            >{{ field['values'] | e }}</div>
+
 
 
                                         {% elif field.fieldtype == 'Date' %}
@@ -991,7 +993,7 @@ def preview_dynamic_form(form_short_name: str, business_unit=None, name=None):
             # Handling child table fields
             if iteration.get("fieldtype") == "Table":
                 child_table_name = str(iteration["fieldname"])
-                child_table_records = frappe.get_all(iteration["options"], filters={"parent": name}, fields=["*"])
+                child_table_records = frappe.get_all(iteration["options"], filters={"parent": name}, fields=["*"],order_by="idx asc",)
                 
                 # Get field names and labels dynamically
                 field_names = [df.fieldname for df in frappe.get_meta(iteration["options"]).fields]
@@ -1178,7 +1180,8 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                         child_table_records = frappe.get_all(
                             iteration["options"],
                             filters={"parent": name},
-                            fields=["*"]
+                            fields=["*"],
+                            order_by="idx asc",
                         )
 
                         # Get field names and labels dynamically
