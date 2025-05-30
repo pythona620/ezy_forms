@@ -309,7 +309,7 @@
                           <input v-if="field.fieldtype == 'Int'"
                             :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'" :readOnly="blockIndex < currentLevel || props.readonlyFor === 'true'
                               " type="number" v-model="field.value"
-                            :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 image-border-bottom w-50' : ' '"
+                            :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 image-border-bottom w-50 bg-white' : ' '"
                             :placeholder="'Enter ' + field.label" :value="field.value" :name="'field-' +
                               sectionIndex +
                               '-' +

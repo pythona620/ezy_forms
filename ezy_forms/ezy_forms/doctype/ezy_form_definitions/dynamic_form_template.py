@@ -669,7 +669,7 @@ template_str = """
                                                 <span class="custom-checkbox {% if field['values'] %}checked{% else %}unchecked{% endif %}"></span>
                                             </div>
 
-                                        {% elif field.fieldtype == 'Data'  %}
+                                        {% elif field.fieldtype == 'Data' or field.fieldtype == 'Int' %}
                                             <span id="{{ field.fieldname }}"
                                                 style="font-size:13px; font-weight:500;border-bottom: 1px solid #cccccc;">
                                                 {{ field['values'] }}
@@ -876,9 +876,11 @@ def convert_html_to_pdf(html_content, pdf_path,options=None):
         frappe.log_error(f"PDF generation failed: {e}")
  
 def json_structure_call_for_html_view(json_obj: list, form_name: str, child_data, child_table_data,business_unit,wf_generated_request_id=None,mail_attachment=None):
-    wf_generated_request_id=''
+   
     if wf_generated_request_id:
         wf_generated_request_id=wf_generated_request_id
+    else:
+        wf_generated_request_id = None
     if child_data is None:
         child_data = []
     site_url = frappe.utils.get_url()
@@ -1137,6 +1139,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
             
             print_format = frappe.db.get_value("Ezy Form Definitions", form_short_name, "print_format")
             
+            wf_generated_request_id = frappe.get_value(form_short_name,name,"wf_generated_request_id")
             if print_format:
                 html_view_ = get_html_file_data(form_short_name,name,print_format)
                 html_view = html_view_['html']
@@ -1146,7 +1149,6 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                 json_object = literal_eval(json_object)["fields"]
                 json_object = [ field for field in json_object]
                 user_doc = frappe.get_doc(form_short_name, name).as_dict()
-                wf_generated_request_id = frappe.get_value(form_short_name,name,"wf_generated_request_id")
                 data_list ={}
                 mail_attachment = [] 
                 for iteration in json_object:
