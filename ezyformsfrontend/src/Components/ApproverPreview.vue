@@ -365,7 +365,7 @@
                     <div v-if="blockIndex === 0 && field.fieldtype === 'Table'">
                       <div v-if="props.childHeaders && Object.keys(props.childHeaders).length">
                         <div v-for="(headers, tableName) in props.childHeaders" :key="tableName">
-                          <div v-if="field.fieldname === tableName">
+                          <div v-if="field.fieldname === tableName" class="overTable">
                             <div>
                               <span class="font-13 fw-bold tablename">{{ field.label.replace(/_/g, " ") }}</span>
                             </div>
@@ -989,6 +989,9 @@ const clearImage = (
 </script>
 
 <style lang="scss" scoped>
+.overTable{
+    overflow: auto;
+}
 .label-text {
   white-space: nowrap;
 }

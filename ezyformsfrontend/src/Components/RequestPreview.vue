@@ -441,7 +441,7 @@
                                             <div v-else>
                                                 <div v-for="(table, tableIndex) in props.tableHeaders" :key="tableIndex"
                                                     class="mt-3">
-                                                    <div v-if="tableIndex === field.fieldname">
+                                                    <div class="overTable" v-if="tableIndex === field.fieldname">
                                                         <div>
                                                             <span class="font-13 text-secondary ">{{
                                                                 field.label.replace(/_/g, " ")
@@ -1415,6 +1415,9 @@ const uploadFile = (file, field, index) => {
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 
 <style lang="scss" scoped>
+.overTable{
+    overflow: auto;
+}
 .text-ellipsis {
     max-width: 200px;
     overflow: hidden;
