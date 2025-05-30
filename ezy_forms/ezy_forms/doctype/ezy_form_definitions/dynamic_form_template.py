@@ -6,8 +6,8 @@ import requests
 from random import randint
 import os, sys
 import traceback
-from frappe.utils import get_bench_path, cstr
-from frappe.utils import get_bench_path, cstr, get_url
+from frappe.utils import get_bench_path, cstr,get_url
+from pdf2image import convert_from_path
  
 def rebuild_to_structured_array(flat_array):
     result = []
@@ -410,6 +410,18 @@ template_str = """
         border-radius: 3px;
         overflow: hidden;
     }
+    .attachments {
+    max-width: 100%;        /* Make sure images don't overflow their container */
+    height: auto;           /* Maintain aspect ratio */
+    display: block;         /* Remove inline spacing */
+    margin: 10px auto;      /* Center the image horizontally with vertical spacing */
+    border: 1px solid #ccc; /* Light border around the images */
+    border-radius: 4px;     /* Slightly rounded corners */
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1); /* Subtle shadow for depth */
+    object-fit: contain;    /* Ensure the entire image fits inside without distortion */
+    background-color: #f9f9f9; /* Light background behind transparent images */
+}  
+
         @media print {
             .table, .table th, .table td {
                 border: 1px solid black !important;
@@ -599,7 +611,15 @@ template_str = """
                                
                                     <div class="field field-textarea">
                                     
-                                        <label for="{{ field.fieldname }}">{{ field.label }} <span style="padding-left:2px; font-size: 13px;">:</span></label>
+                                        {% if field.fieldtype == 'Attach' and field.fieldname|lower == 'approved_by' %}
+                                            <label for="{{ field.fieldname }}">
+                                                Approved By <span style="padding-left:2px; font-size: 13px;">:</span>
+                                            </label>
+                                        {% elif field.fieldtype != 'Attach' %}
+                                            <label for="{{ field.fieldname }}">
+                                                {{ field.label }} <span style="padding-left:2px; font-size: 13px;">:</span>
+                                            </label>
+                                        {% endif %}
 
                                         {% if field.fieldtype in ['radio'] %}
                                             <div class="container-fluid">
@@ -705,7 +725,7 @@ template_str = """
                                                     {% endfor %}
                                                 </div>
                                             {% endif %}
-                                        {% elif field.fieldtype == 'Attach' %}
+                                        {% elif field.fieldtype == 'Attach' and "approved_by" in field.fieldname %}
                                             {% if field['values'] %}
                                                 <img  id="{{ field.fieldname }}" src="{{ site_url + field['values'] or ''  }}" class="signature-Imge" name="{{ field.fieldname }}">
                                             {% else %}
@@ -768,7 +788,17 @@ template_str = """
         
   
 {% endfor %}
- 
+ {% for attachment_group in mail_attachment %}
+    {% for file_path in attachment_group.split(',') %}
+        {% set cleaned_path = file_path.strip() %}
+        <div class="page">
+            <img 
+                src="{{ site_url + cleaned_path }}"
+                class="attachments">
+        </div>
+    {% endfor %}
+{% endfor %}
+
 
  
  
@@ -845,7 +875,7 @@ def convert_html_to_pdf(html_content, pdf_path,options=None):
     except Exception as e:
         frappe.log_error(f"PDF generation failed: {e}")
  
-def json_structure_call_for_html_view(json_obj: list, form_name: str, child_data, child_table_data,business_unit,wf_generated_request_id=None):
+def json_structure_call_for_html_view(json_obj: list, form_name: str, child_data, child_table_data,business_unit,wf_generated_request_id=None,mail_attachment=None):
     wf_generated_request_id=''
     if wf_generated_request_id:
         wf_generated_request_id=wf_generated_request_id
@@ -881,7 +911,7 @@ def json_structure_call_for_html_view(json_obj: list, form_name: str, child_data
 
 
     html_output = Template(template_str).render(
-        data=structered_data, form_name=form_name, child_data=child_data,letter_head=letter_head, child_table_data=child_table_data,company_logo=logo_of_company,site_url=site_url,bu_name=bu_name,wf_generated_request_id=wf_generated_request_id
+        data=structered_data, form_name=form_name, child_data=child_data,letter_head=letter_head, child_table_data=child_table_data,company_logo=logo_of_company,site_url=site_url,bu_name=bu_name,wf_generated_request_id=wf_generated_request_id,mail_attachment=mail_attachment or ''
     )
     
     return html_output
@@ -897,7 +927,7 @@ def preview_dynamic_form(form_short_name: str, business_unit=None, name=None):
     # Exclude "Attach" fields except those with "approved_by" in their fieldname
     json_object = [
         field for field in json_object
-        if field.get("fieldtype") != "Attach" or ("approved_by" in field.get("fieldname", "").lower())
+    
     ]
 
     labels = {}  # Dictionary to store multiple child table fields
@@ -955,18 +985,19 @@ def preview_dynamic_form(form_short_name: str, business_unit=None, name=None):
             if iteration.get("fieldtype") == "Table":
                 child_table_name = str(iteration["fieldname"])
                 child_table_records = frappe.get_all(iteration["options"], filters={"parent": name}, fields=["*"])
-                meta_fields = sorted(frappe.get_meta(iteration["options"]).fields, key=lambda f: f.idx)
-                field_names = [df.fieldname for df in meta_fields]
-                field_labels = {df.fieldname: df.label for df in meta_fields}
-                if child_table_records:
-                    data_list[child_table_name] = [
-                        {field_labels.get(field, field): record.get(field) for field in field_names}
-                        for record in child_table_records
-                    ]
-                else:
-                    data_list[child_table_name] = [
-                        {field_labels.get(field, field): "" for field in field_names}
-                    ]
+                
+                # Get field names and labels dynamically
+                field_names = [df.fieldname for df in frappe.get_meta(iteration["options"]).fields]
+                field_labels = {df.fieldname: df.label for df in frappe.get_meta(iteration["options"]).fields}
+
+                # Store child table data properly
+                data_list[child_table_name] = [
+                    {field_labels.get(field, field): record.get(field) for field in field_names}
+                    for record in child_table_records
+                ]
+
+
+
     html_view = json_structure_call_for_html_view(
         json_obj=json_object,
         form_name=form_name,
@@ -976,6 +1007,55 @@ def preview_dynamic_form(form_short_name: str, business_unit=None, name=None):
     )
     
     return html_view
+ 
+ 
+ 
+ 
+ 
+
+
+def handle_pdf_fields(field_values):
+    """
+    Converts PDF paths in `field_values` (comma-separated) to preview images
+    and returns updated file paths (pointing to the preview image instead of PDF).
+    """
+    site_path = frappe.get_site_path()
+    updated_paths = []
+
+    if not field_values:
+        return field_values
+
+    for file_path in field_values.split(','):
+        cleaned_path = file_path.strip()
+
+        if cleaned_path.endswith('.pdf'):
+            # Get file name
+            filename = os.path.basename(cleaned_path)
+            filename_jpg = filename.replace('.pdf', '.jpg')
+
+            # Full paths
+            pdf_abs_path = os.path.join(site_path, 'public', cleaned_path.lstrip('/'))
+            img_output_path = os.path.join(site_path, 'public', 'files', 'previews', filename_jpg)
+            img_web_path = f"/files/previews/{filename_jpg}"
+
+            try:
+                if not os.path.exists(img_output_path):
+                    # Convert PDF to image (first page)
+                    images = convert_from_path(pdf_abs_path, first_page=1, last_page=1)
+                    img_output_dir = os.path.dirname(img_output_path)
+                    os.makedirs(img_output_dir, exist_ok=True)
+                    images[0].save(img_output_path, 'JPEG')
+                    frappe.logger().info(f"PDF converted to image: {img_web_path}")
+                updated_paths.append(img_web_path)
+            except Exception as e:
+                frappe.log_error(f"PDF to image conversion failed: {e}")
+                updated_paths.append(cleaned_path)  # fallback to original
+        else:
+            updated_paths.append(cleaned_path)
+
+    return ', '.join(updated_paths)
+
+ 
  
  
 @frappe.whitelist()
@@ -1031,7 +1111,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                         # Store labels for each child table
                         labels[child_table_name] = [field["label"] for field in child_table_fields]
                 form_name = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_name")
-                html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_name,child_table_data=labels,child_data=None,business_unit=business_unit,wf_generated_request_id='')
+                html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_name,child_table_data=labels,child_data=None,business_unit=business_unit,wf_generated_request_id='',mail_attachment=None)
             random_number = randint(111, 999)
  
             pdf_filename = f"{form_short_name}_{random_number}  .pdf"
@@ -1064,35 +1144,48 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                 json_object = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_json")
 
                 json_object = literal_eval(json_object)["fields"]
-                json_object = [
-                    field for field in json_object
-                    if field.get("fieldtype") != "Attach" or ("approved_by" in field.get("fieldname", "").lower())
-                        ]
+                json_object = [ field for field in json_object]
                 user_doc = frappe.get_doc(form_short_name, name).as_dict()
                 wf_generated_request_id = frappe.get_value(form_short_name,name,"wf_generated_request_id")
                 data_list ={}
+                mail_attachment = [] 
                 for iteration in json_object:
                     if "value" in iteration:
                         iteration["value"] = user_doc.get(iteration["fieldname"], "")
 
+                    # Collect attachments except those with fieldname like "approved_by"
+
+                    # Convert PDFs in Attach fields to image previews
+                    if iteration.get("fieldtype") == "Attach" and iteration.get("value"):
+                        iteration["value"] = handle_pdf_fields(iteration["value"])
+                    if (
+                        iteration.get("fieldtype") == "Attach"
+                        and iteration.get("value")
+                        and "approved_by" not in iteration.get("fieldname", "").lower()
+                    ):
+                        mail_attachment.append(iteration["value"])  # Add to mail_attachment
+
                     # Handling child table fields
                     if iteration.get("fieldtype") == "Table":
                         child_table_name = str(iteration["fieldname"])
-                        child_table_records = frappe.get_all(iteration["options"], filters={"parent": name}, fields=["*"])
-                        meta_fields = sorted(frappe.get_meta(iteration["options"]).fields, key=lambda f: f.idx)
-                        field_names = [df.fieldname for df in meta_fields]
-                        field_labels = {df.fieldname: df.label for df in meta_fields}
-                        if child_table_records:
-                            data_list[child_table_name] = [
-                                {field_labels.get(field, field): record.get(field) for field in field_names}
-                                for record in child_table_records
-                            ]
-                        else:
-                            data_list[child_table_name] = [
-                                {field_labels.get(field, field): "" for field in field_names}
-                            ]
+                        child_table_records = frappe.get_all(
+                            iteration["options"],
+                            filters={"parent": name},
+                            fields=["*"]
+                        )
+
+                        # Get field names and labels dynamically
+                        field_names = [df.fieldname for df in frappe.get_meta(iteration["options"]).fields]
+                        field_labels = {df.fieldname: df.label for df in frappe.get_meta(iteration["options"]).fields}
+
+                        # Store child table data properly
+                        data_list[child_table_name] = [
+                            {field_labels.get(field, field): record.get(field) for field in field_names}
+                            for record in child_table_records
+                        ]
+        
                 form_name = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_name")
-                html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_name,child_data=data_list,child_table_data=None,business_unit=business_unit,wf_generated_request_id=wf_generated_request_id)
+                html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_name,child_data=data_list,child_table_data=None,business_unit=business_unit,wf_generated_request_id=wf_generated_request_id,mail_attachment=mail_attachment)
                 
             random_number = randint(111, 999)
     

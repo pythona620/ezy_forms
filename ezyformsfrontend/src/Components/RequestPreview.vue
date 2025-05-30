@@ -485,7 +485,6 @@
                                                                             ? {
                                                                                 width: row[field.fieldname] ? Math.max(row[field.fieldname].length * 10, 100) + 'px' : 'auto',
                                                                                 maxWidth: '300px',
-                                                                                overflow: 'hidden',
                                                                                 textOverflow: 'ellipsis',
                                                                                 whiteSpace: 'nowrap'
                                                                             }
@@ -581,7 +580,7 @@
                                                                     <td v-for="field in table" :key="field.fieldname"
                                                                         class="text-center font-12">
                                                                         <span
-                                                                            v-if="field.fieldtype === 'Int' && field.description && /[+\-*/]/.test(field.description)">
+                                                                            v-if="field.fieldtype === 'Int' && field.description && /[+\-*/]/.test(field.description) && field.label.includes('Total')">
                                                                             {{
                                                                                 tableTotals[tableIndex]?.[field.fieldname]
                                                                                 ?? 0 }}
@@ -759,24 +758,65 @@ const removeRow = (tableIndex, rowIndex) => {
 };
 
 
+
 // function calculateFieldExpression(row, expression, fields) {
-//     // Map labels to fieldnames for substitution
-//     const labelToFieldname = {};
+//     const labelToValue = {};
+
+//     // Build a map: label -> value from row
 //     fields.forEach(f => {
-//         labelToFieldname[f.label] = f.fieldname;
+//         const value = parseFloat(row[f.fieldname]);
+//         labelToValue[f.label] = isNaN(value) ? 0 : value;
 //     });
 
-//     // Replace label names in expression with actual row values
-//     const formula = expression.replace(/\b(\w+)\b/g, (match) => {
-//         const fn = labelToFieldname[match];
-//         if (fn !== undefined && row[fn] !== undefined && row[fn] !== null && row[fn] !== '') {
-//             return row[fn];
-//         }
-//         return 0; // fallback if no matching label
-//     });
+//     // Sort labels by length descending to avoid partial replacements (e.g., "Cost" before "Cost per Casual")
+//     const sortedLabels = Object.keys(labelToValue).sort((a, b) => b.length - a.length);
+
+//     let formula = expression;
+
+//     // Replace each label (with possible spaces) in expression with the corresponding value
+//     for (const label of sortedLabels) {
+//         // Use regex with word boundary-like pattern to replace safely
+//         const safeLabel = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // escape special regex characters
+//         const regex = new RegExp(`\\b${safeLabel}\\b`, 'g');
+//         formula = formula.replace(regex, labelToValue[label]);
+//     }
 
 //     try {
-//         return eval(formula);
+//         return new Function(`return ${formula}`)();
+//     } catch (e) {
+//         console.error('Error evaluating formula:', formula, e);
+//         return 0;
+//     }
+// }
+
+// function calculateFieldExpression(row, expression, fields) {
+//     const labelToValue = {};
+
+//     // Map: label -> value
+//     fields.forEach(f => {
+//         let value = parseFloat(row[f.fieldname]);
+//         labelToValue[f.label] = isNaN(value) ? 0 : value;
+//     });
+
+//     // Replace percentages (e.g., "Tax%" -> "Tax / 100")
+//     expression = expression.replace(/([a-zA-Z\s]+)%/g, (_, label) => {
+//         return `(${label.trim()} / 100)`;
+//     });
+
+//     // Sort labels by length descending to avoid partial match issues
+//     const sortedLabels = Object.keys(labelToValue).sort((a, b) => b.length - a.length);
+
+//     let formula = expression;
+
+//     // Replace label names with their numeric values
+//     for (const label of sortedLabels) {
+//         const safeLabel = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+//         const regex = new RegExp(`\\b${safeLabel}\\b`, 'g');
+//         formula = formula.replace(regex, labelToValue[label]);
+//     }
+
+//     try {
+//         return new Function(`return ${formula}`)();
 //     } catch (e) {
 //         console.error('Error evaluating formula:', formula, e);
 //         return 0;
@@ -785,25 +825,28 @@ const removeRow = (tableIndex, rowIndex) => {
 function calculateFieldExpression(row, expression, fields) {
     const labelToValue = {};
 
-    // Build a map: label -> value from row
+    // Step 1: Map label -> value
     fields.forEach(f => {
         const value = parseFloat(row[f.fieldname]);
         labelToValue[f.label] = isNaN(value) ? 0 : value;
     });
 
-    // Sort labels by length descending to avoid partial replacements (e.g., "Cost" before "Cost per Casual")
-    const sortedLabels = Object.keys(labelToValue).sort((a, b) => b.length - a.length);
+    // Step 2: Convert "Label%" to "(Label / 100)"
+    expression = expression.replace(/([a-zA-Z\s]+)%/g, (_, label) => {
+        return `(${label.trim()} / 100)`;
+    });
 
+    // Step 3: Replace labels with actual numeric values
+    const sortedLabels = Object.keys(labelToValue).sort((a, b) => b.length - a.length);
     let formula = expression;
 
-    // Replace each label (with possible spaces) in expression with the corresponding value
     for (const label of sortedLabels) {
-        // Use regex with word boundary-like pattern to replace safely
-        const safeLabel = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // escape special regex characters
+        const safeLabel = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // escape regex special chars
         const regex = new RegExp(`\\b${safeLabel}\\b`, 'g');
         formula = formula.replace(regex, labelToValue[label]);
     }
 
+    // Step 4: Safely evaluate formula
     try {
         return new Function(`return ${formula}`)();
     } catch (e) {
@@ -822,13 +865,13 @@ const tableTotals = computed(() => {
 
         const fields = props.tableHeaders[tableIndex] || [];
         fields.forEach((field) => {
-            if (field.fieldtype === 'Int') {
+            if (field.fieldtype === 'Int' && field.description && /[+\-*/]/.test(field.description) && field.label.includes('Total')) {
                 let sum = 0;
 
                 rows.forEach((row) => {
-                    if (field.description && /[+\-*/]/.test(field.description)) {
+                    if (field.description && /[+\-*/]/.test(field.description) && field.label.includes('Total')) {
                         // Calculate expression dynamically using labels and row data
-                        sum += Number(calculateFieldExpression(row, field.description, fields)) || 0;
+                        sum += Number(calculateFieldExpression(row, field.description, fields)) ;
                     }
                     //   else {
                     //     // Sum raw values
@@ -845,19 +888,37 @@ const tableTotals = computed(() => {
     return totals;
 });
 watchEffect(() => {
-    for (const [tableIndex, rows] of Object.entries(tableRows)) {
-        const fields = props.tableHeaders[tableIndex] || [];
+  for (const [tableIndex, rows] of Object.entries(tableRows)) {
+    const fields = props.tableHeaders[tableIndex] || [];
 
-        rows.forEach((row) => {
-            fields.forEach((field) => {
-                if (field.fieldtype === 'Int' && field.description && /[+\-*/]/.test(field.description)) {
-                    const result = calculateFieldExpression(row, field.description, fields);
-                    row[field.fieldname] = result; // 🔄 Store the computed value in tableRows
-                }
-            });
-        });
-    }
+    rows.forEach((row) => {
+      // First: calculate all independent fields like tax_amount
+      fields.forEach((field) => {
+        if (
+          field.fieldtype === 'Int' &&
+          field.description &&
+          /[+\-*/]/.test(field.description)
+        ) {
+          const result = calculateFieldExpression(row, field.description, fields);
+          row[field.fieldname] = result;
+        }
+      });
+
+      // Second pass to ensure dependent fields like total_amount are recalculated
+      fields.forEach((field) => {
+        if (
+          field.fieldtype === 'Int' &&
+          field.description &&
+          /[+\-*/]/.test(field.description)
+        ) {
+          const result = calculateFieldExpression(row, field.description, fields);
+          row[field.fieldname] = result;
+        }
+      });
+    });
+  }
 });
+
 const handleFileUpload = (event, row, fieldname) => {
     const selectedFiles = Array.from(event.target.files);
     if (!selectedFiles.length) return;
