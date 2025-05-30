@@ -173,7 +173,8 @@
                 {{ row[column.td_key].replace(/_/g, " ") || "-" }}
               </span> -->
               <span v-else>
-                {{ column.td_key === 'modified' ? '-' :  row[column.td_key]?.replace(/@[\w.-]+/, "") || "-" }}
+                <!-- ?.replace(/@[\w.-]+/, "") -->
+                {{ column.td_key === 'modified' ? '-' :  row[column.td_key] || "-" }}
               </span>
             </td>
             <!-- <td
