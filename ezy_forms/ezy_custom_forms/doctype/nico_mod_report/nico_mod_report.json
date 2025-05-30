@@ -1,6 +1,8 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
+ "autoname": "naming_series:",
  "creation": "2025-05-28 10:31:16.168708",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -82,7 +84,8 @@
   "section_break_rcpp",
   "overall_remarks",
   "overall_image_upload",
-  "signature"
+  "signature",
+  "naming_series"
  ],
  "fields": [
   {
@@ -538,14 +541,24 @@
    "fieldtype": "Table",
    "label": "Room Check List",
    "options": "Room Check List"
+  },
+  {
+   "default": "NCOR-.####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Naming Series",
+   "options": "NCOR-.####",
+   "print_hide": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-05-30 12:34:21.674609",
+ "modified": "2025-05-30 18:40:54.746726",
  "modified_by": "Administrator",
  "module": "ezy_custom_forms",
  "name": "NICO MOD REPORT",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -563,5 +576,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1
 }
