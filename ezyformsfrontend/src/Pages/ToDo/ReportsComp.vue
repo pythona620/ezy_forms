@@ -3,7 +3,7 @@
         <template v-if="!viewReport">
             <div class="d-flex justify-content-between align-items-center py-2">
                 <div>
-                    
+
                 </div>
 
             </div>
@@ -14,7 +14,7 @@
         </template>
         <template v-else>
             <div class="d-flex justify-content-between align-items-center py-2">
-               
+
 
             </div>
             <section>
@@ -100,25 +100,12 @@ function viewPreview(data) {
         .then((res) => {
             if (res) {
                 if (res?.message?.columns) {
-                    frappeBody.value = res?.message?.result.map((item) =>
-                        Object.values(item)
-                    );
-                    frappeTH.value = res?.message?.columns.map((item) => {
-                        let obj = {};
-                        obj["name"] = item?.label;
-                        // obj["width"] = 170;
-                        return obj;
-                    });
-                    //   if (frappeBody.value) {
-                    //     simulateCtrlF();
-                    //   }
-                    listData.value = res?.message?.result;
-                    listDataheaders.value = res?.message?.columns.map((item) => {
-                        let obj = {};
-                        obj["th"] = item?.label;
-                        obj["td_key"] = item?.fieldname;
-                        return obj;
-                    });
+                    frappeBody.value = res?.message?.result.map((item) => ({ ...item }));
+
+                    frappeTH.value = res?.message?.columns.map((item) => ({
+                        name: item?.fieldname,
+                        label: item?.label
+                    }));
 
                     new DataTable(document.getElementById("datatable"), {
                         columns: frappeTH.value,
@@ -126,6 +113,33 @@ function viewPreview(data) {
                         inlineFilters: true,
                         editable: false,
                     });
+
+                    // frappeBody.value = res?.message?.result.map((item) =>
+                    //     Object.values(item)
+                    // ); 
+                    // frappeTH.value = res?.message?.columns.map((item) => {
+                    //     let obj = {};
+                    //     obj["name"] = item?.label;
+                    //     // obj["width"] = 170;
+                    //     return obj;
+                    // });
+                    // //   if (frappeBody.value) {
+                    // //     simulateCtrlF();
+                    // //   }
+                    // listData.value = res?.message?.result;
+                    // listDataheaders.value = res?.message?.columns.map((item) => {
+                    //     let obj = {};
+                    //     obj["th"] = item?.label;
+                    //     obj["td_key"] = item?.fieldname;
+                    //     return obj;
+                    // });
+
+                    // new DataTable(document.getElementById("datatable"), {
+                    //     columns: frappeTH.value,
+                    //     data: frappeBody.value,
+                    //     inlineFilters: true,
+                    //     editable: false,
+                    // });
                 }
             }
         })
@@ -178,8 +192,8 @@ function exportReport(type) {
 onMounted(() => {
     ReportsData();
     // simulateCtrlF();
-     document.addEventListener("keydown", handleCtrlF);
-     
+    document.addEventListener("keydown", handleCtrlF);
+
 })
 onBeforeUnmount(() => {
     document.removeEventListener("keydown", handleCtrlF);
@@ -188,10 +202,11 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="scss" scoped>
-.dropdown-item{
+.dropdown-item {
     cursor: pointer;
 }
-.backtoListbtn{
-        border: 1px solid #ccc !important;
+
+.backtoListbtn {
+    border: 1px solid #ccc !important;
 }
 </style>
