@@ -39,7 +39,9 @@
                 </div>
             </section>
             <section>
-                <div id="datatable" tabindex="0" border="1" style="border-collapse: collapse; width: 100%;"></div>
+                <!-- <div id="datatable" tabindex="0" border="1" style="border-collapse: collapse; width: 100%;"></div> -->
+                <GlobalTable class=" newtable" :tHeaders="listDataheaders" :tData="listData" @cell-click="viewPreview" 
+                     />
             </section>
         </template>
     </section>
@@ -51,8 +53,8 @@ import GlobalTable from "../../Components/GlobalTable.vue";
 import axiosInstance from "../../shared/services/interceptor";
 import { apis, doctypes } from "../../shared/apiurls";
 import { onBeforeUnmount, onMounted, ref } from "vue";
-import DataTable from "frappe-datatable";
-import "frappe-datatable/dist/frappe-datatable.min.css";
+// import DataTable from "frappe-datatable";
+// import "frappe-datatable/dist/frappe-datatable.min.css";
 import ButtonComp from "../../Components/ButtonComp.vue";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
@@ -80,7 +82,7 @@ function ReportsData() {
             }
         })
         .catch((error) => {
-            console.error("Error fetching department data:", error);
+            console.error("Error:", error);
         });
 }
 const listData = ref([]);
@@ -100,19 +102,19 @@ function viewPreview(data) {
         .then((res) => {
             if (res) {
                 if (res?.message?.columns) {
-                    frappeBody.value = res?.message?.result.map((item) => ({ ...item }));
+                    // frappeBody.value = res?.message?.result.map((item) => ({ ...item }));
 
-                    frappeTH.value = res?.message?.columns.map((item) => ({
-                        name: item?.fieldname,
-                        label: item?.label
-                    }));
+                    // frappeTH.value = res?.message?.columns.map((item) => ({
+                    //     name: item?.fieldname,
+                    //     label: item?.label
+                    // }));
 
-                    new DataTable(document.getElementById("datatable"), {
-                        columns: frappeTH.value,
-                        data: frappeBody.value,
-                        inlineFilters: true,
-                        editable: false,
-                    });
+                    // new DataTable(document.getElementById("datatable"), {
+                    //     columns: frappeTH.value,
+                    //     data: frappeBody.value,
+                    //     inlineFilters: true,
+                    //     editable: false,
+                    // });
 
                     // frappeBody.value = res?.message?.result.map((item) =>
                     //     Object.values(item)
@@ -126,13 +128,14 @@ function viewPreview(data) {
                     // //   if (frappeBody.value) {
                     // //     simulateCtrlF();
                     // //   }
-                    // listData.value = res?.message?.result;
-                    // listDataheaders.value = res?.message?.columns.map((item) => {
-                    //     let obj = {};
-                    //     obj["th"] = item?.label;
-                    //     obj["td_key"] = item?.fieldname;
-                    //     return obj;
-                    // });
+                    listData.value = res?.message?.result;
+                    listDataheaders.value = res?.message?.columns.map((item) => {
+                        let obj = {};
+                        obj["th"] = item?.label;
+                        obj["td_key"] = item?.fieldname;
+                        return obj;
+                    });
+                    // console.log(listDataheaders.value, listData.value);
 
                     // new DataTable(document.getElementById("datatable"), {
                     //     columns: frappeTH.value,
@@ -144,7 +147,7 @@ function viewPreview(data) {
             }
         })
         .catch((error) => {
-            console.error("Error fetching department data:", error);
+            console.error("Error", error);
         });
 }
 function simulateCtrlF() {
@@ -201,7 +204,7 @@ onBeforeUnmount(() => {
 
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss" scoped >
 .dropdown-item {
     cursor: pointer;
 }
@@ -209,4 +212,5 @@ onBeforeUnmount(() => {
 .backtoListbtn {
     border: 1px solid #ccc !important;
 }
+
 </style>
