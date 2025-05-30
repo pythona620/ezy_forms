@@ -730,7 +730,7 @@
                                                         <!-- :draggable="editMode[tableName]" -->
                                                         <tbody @dragover.prevent="onDragOver"
                                                           @drop="onDrop($event, table)">
-                                                          <tr v-for="(field, index) in table" :key="index"
+                                                          <tr v-for="(field, index) in table" :key="index" :draggable="editMode[tableName]"
                                                             @dragstart="onDragStart(index)" @dragend="onDragEnd"
                                                             :class="{ dragging: draggingIndex === index }">
                                                             <td>{{ index + 1 }}</td>
@@ -2332,10 +2332,10 @@ const fieldTypes = [
     label: "Text",
     type: "Data",
   },
-  // {
-  //   label: "Number",
-  //   type: "Int",
-  // },
+  {
+    label: "Number",
+    type: "Int",
+  },
   {
     label: "Attach",
     type: "Attach",
