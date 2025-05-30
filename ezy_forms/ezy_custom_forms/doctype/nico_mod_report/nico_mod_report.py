@@ -25,7 +25,7 @@ class NICOMODREPORT(Document):
 		
 		sender = frappe.get_value("Email Account",{"enable_outgoing":1,"default_outgoing":1},"email_id")
 		frappe.sendmail(
-		recipients= "nithinreddy@caratred.com", 
+		recipients= "h6714.hod@accor.com", 
 		sender=sender,
 		message="Dear Team NICO MOD REPORT Form Has Submitted",
 		subject="NICO MOD REPORT Form",
