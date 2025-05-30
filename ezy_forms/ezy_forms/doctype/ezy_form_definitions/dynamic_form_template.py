@@ -741,20 +741,25 @@ template_str = """
                                             </span>
                                         {% elif field.fieldtype == 'Color' %}
                                             <input type="color" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
-                                          {% elif field.fieldtype == 'Text' %}
-                                            {% set value = field['values'] %}
-                                            {% set char_count = value | length %}
-                                            {% set newline_count = value.count('\n') %}
-                                            {% set est_line_length = 60 %}
-                                            {% set wrapped_lines = (char_count // est_line_length) %}
-                                            {% set estimated_lines = wrapped_lines + newline_count + 1 %}
-                                            {% set line_height = 18 %}
-                                            {% set height = estimated_lines * line_height %}
-                                            <textarea
+                                         {% elif field.fieldtype == 'Text' %}
+                                                {% set value = field['values'] %}
+                                                {% set char_count = value | length %}
+                                                {% set newline_count = value.count('\n') %}
+                                                {% set est_line_length = 60 %}
+                                                {% set wrapped_lines = (char_count // est_line_length) %}
+                                                {% set estimated_lines = newline_count + wrapped_lines %}
+                                                {% if estimated_lines < 2 %}
+                                                    {% set estimated_lines = 2 %}
+                                                {% endif %}
+                                                {% set line_height = 18 %}
+                                                {% set height = estimated_lines * line_height %}
+                                            <pre
                                                 id="{{ field.fieldname }}"
                                                 name="{{ field.fieldname }}"
-                                                style="height: {{ height }}px; border: none; width: 100%; font-size:13px;"
-                                            >{{ value }}</textarea>
+                                                style="border: none; width: 100%; font-size:13px; font-family: Arial, sans-serif;"
+                                            >{{ field['values'] | e }}</pre>
+
+
                                         {% elif field.fieldtype == 'Date' %}
                                             <span id="{{ field.fieldname }}" style="font-size:13px; font-weight:500;border-bottom: 1px solid #cccccc;" name="{{ field.fieldname }}" class="date-span">
                                                 {{ field['values'] }}
