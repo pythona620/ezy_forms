@@ -669,7 +669,7 @@ template_str = """
                                                 <span class="custom-checkbox {% if field['values'] %}checked{% else %}unchecked{% endif %}"></span>
                                             </div>
 
-                                        {% elif field.fieldtype == 'Data'  %}
+                                        {% elif field.fieldtype == 'Data' or field.fieldtype == 'Int' %}
                                             <span id="{{ field.fieldname }}"
                                                 style="font-size:13px; font-weight:500;border-bottom: 1px solid #cccccc;">
                                                 {{ field['values'] }}

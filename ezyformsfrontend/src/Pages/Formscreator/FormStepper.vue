@@ -2332,10 +2332,10 @@ const fieldTypes = [
     label: "Text",
     type: "Data",
   },
-  // {
-  //   label: "Number",
-  //   type: "Int",
-  // },
+  {
+    label: "Number",
+    type: "Int",
+  },
   {
     label: "Attach",
     type: "Attach",
