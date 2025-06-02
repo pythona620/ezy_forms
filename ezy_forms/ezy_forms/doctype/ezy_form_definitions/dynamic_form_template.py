@@ -507,7 +507,7 @@ template_str = """
                             {% if row.description == 'true' %}
                                 {% if table_name in child_data %}
                                 
-                                    <h3 class="childtablename" style="font-size: 14px;">{{ row.label.replace("_", " ") }}</h3>
+                                    <h3 class="childtablename" style="font-size: 14px;">{{ row.label.replace("_", " ").title() }}</h3>
                                     {% if child_data[table_name] %}
                                         {% for child in child_data[table_name] %}
                                             <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
@@ -545,37 +545,48 @@ template_str = """
                                 {% endif %}
 
                             {% else %}
+                            
 
                                 {% if table_name in child_data %}
                                 
-                                    <h3 class="childtablename" style=margin-left:3px;margin-right:3px;font-size: 14px;>{{ row.label.replace("_", " ") }}</h3>
-                                    {% if child_data[table_name] %}
-                                        <table class="rounded-table" style="width: 100%; margin-bottom:5px; border-collapse: collapse;border-radius: 3px; margin-left:3px;margin-right:3px;">
-                                            <thead>
-                                                <tr>
-                                                    <th style="border: 1px solid #ccc;width:3%; padding: 8px; background-color: #f2f2f2;font-size: 13px;">S.no</th>
-                                                    {% for key in child_data[table_name][0].keys() %}
-                                                        <th style="border: 1px solid #ccc; padding: 8px; background-color: #f2f2f2;font-size: 13px;">{{ key }}</th>
-                                                    {% endfor %}
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {% for child in child_data[table_name] %}
+                                    <h3 class="childtablename" style=margin-left:3px;margin-right:3px;font-size: 14px;>{{ row.label.replace("_", " ").title() }}</h3>
+                                        {% if child_data[table_name] %}
+                                            <table class="rounded-table" style="width: 100%; margin-bottom:5px; border-collapse: collapse; border-radius: 3px; margin-left:3px; margin-right:3px;">
+                                                <thead>
                                                     <tr>
-                                                        <td style="border: 1px solid #ccc;padding: 8px;text-align:center;font-size: 13px;">{{ loop.index }}</td>
-                                                        {% for value in child.values() %}
-                                                            <td style="border: 1px solid #ccc; padding: 8px; word-break: break-word; font-size: 13px;">{{ value if value else '—' }}</td>
+                                                        <th style="border: 1px solid #ccc; width:3%; padding: 8px; background-color: #f2f2f2; font-size: 13px;">S.no</th>
+                                                        {% for key in child_data[table_name][0].keys() %}
+                                                            <th style="border: 1px solid #ccc; padding: 8px; background-color: #f2f2f2; font-size: 13px;">{{ key }}</th>
                                                         {% endfor %}
                                                     </tr>
-                                                {% endfor %}
-                                            </tbody>
-                                        </table>
-                                    
-                                    {% endif %}
+                                                </thead>
+                                                <tbody>
+                                                    {% for child in child_data[table_name] %}
+                                                        <tr>
+                                                            <td style="border: 1px solid #ccc; padding: 8px; text-align:center; font-size: 13px;">{{ loop.index }}</td>
+                                                            {% set is_last_row = loop.last %}
+                                                            {% set has_data = child_data[table_name][-1]|select('string')|list|select %}
+                                                            {% for value in child.values() %}
+                                                                {% if is_last_row and loop.index0 == 0 and has_data %}
+                                                                    <td style="border: 1px solid #ccc; padding: 8px; word-break: break-word; font-size: 13px;">Total</td>
+                                                                {% else %}
+                                                                    <td style="border: 1px solid #ccc; padding: 8px; word-break: break-word; font-size: 13px;">
+                                                                        {{ value if value else '—' }}
+                                                                    </td>
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        {% endif %}
+
+
+
 
                                 {% elif table_name in child_table_data %}
                                 
-                                    <h3 class="childtablename" style="font-size: 14px;">{{ row.label.replace("_", " ") }}</h3>
+                                    <h3 class="childtablename" style="font-size: 14px;">{{ row.label.replace("_", " ").title() }}</h3>
                                     <table class="rounded-table" style="width: 100%; margin-bottom:10px; border-collapse: collapse; border-radius: 3px;">
                                         <thead>
                                             <tr>
@@ -753,11 +764,12 @@ template_str = """
                                                 {% endif %}
                                                 {% set line_height = 18 %}
                                                 {% set height = estimated_lines * line_height %}
-                                            <pre
+                                            <div
                                                 id="{{ field.fieldname }}"
                                                 name="{{ field.fieldname }}"
-                                                style="border: none; width: 100%; font-size:13px; font-family: Arial, sans-serif;"
-                                            >{{ field['values'] | e }}</pre>
+                                                style="white-space: pre-wrap; border: none; width: 100%; font-size:13px;"
+                                            >{{ field['values'] | e }}</div>
+
 
 
                                         {% elif field.fieldtype == 'Date' %}
@@ -793,6 +805,7 @@ template_str = """
         
   
 {% endfor %}
+<div><span style="font-weight:bold; font-size:13px;">Attachments:</span></div>
  {% for attachment_group in mail_attachment %}
     {% for file_path in attachment_group.split(',') %}
         {% set cleaned_path = file_path.strip() %}
@@ -991,7 +1004,7 @@ def preview_dynamic_form(form_short_name: str, business_unit=None, name=None):
             # Handling child table fields
             if iteration.get("fieldtype") == "Table":
                 child_table_name = str(iteration["fieldname"])
-                child_table_records = frappe.get_all(iteration["options"], filters={"parent": name}, fields=["*"])
+                child_table_records = frappe.get_all(iteration["options"], filters={"parent": name}, fields=["*"],order_by="idx asc",)
                 
                 # Get field names and labels dynamically
                 field_names = [df.fieldname for df in frappe.get_meta(iteration["options"]).fields]
@@ -1175,10 +1188,12 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                     # Handling child table fields
                     if iteration.get("fieldtype") == "Table":
                         child_table_name = str(iteration["fieldname"])
+                        #########################################
                         child_table_records = frappe.get_all(
                             iteration["options"],
                             filters={"parent": name},
-                            fields=["*"]
+                            fields=["*"],
+                            order_by="idx asc",
                         )
 
                         # Get field names and labels dynamically
@@ -1190,6 +1205,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                             {field_labels.get(field, field): record.get(field) for field in field_names}
                             for record in child_table_records
                         ]
+                        ##################################################z
         
                 form_name = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_name")
                 html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_name,child_data=data_list,child_table_data=None,business_unit=business_unit,wf_generated_request_id=wf_generated_request_id,mail_attachment=mail_attachment)
