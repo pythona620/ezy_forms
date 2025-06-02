@@ -34,7 +34,7 @@
                                                             field.label }}</span>
                                                     <span class="ms-1 text-danger">{{
                                                         field.reqd === 1 ? "*" : ""
-                                                    }}</span>
+                                                        }}</span>
                                                 </label>
                                             </div>
 
@@ -445,7 +445,7 @@
                                                         <div>
                                                             <span class="font-13 text-secondary ">{{
                                                                 field.label.replace(/_/g, " ")
-                                                            }}</span>
+                                                                }}</span>
                                                         </div>
                                                         <table class="table  rounded-table" border="1" width="100%">
                                                             <thead>
@@ -491,28 +491,25 @@
 
 
                                                                         <!-- <template v-if="rowIndex === 0 && fieldIndex === 0 && field.label === ' field 1'">
-              <span class="font-12 d-inline-block text-truncate text-center" :title="row[field.fieldname]" :style="{ maxWidth: '100%' }">
-                {{ row[field.fieldname] || 'Name' }}
-              </span>
-            </template> -->
-                                                                        <template
-                                                                            v-if="field.label === 'Details' && field.fieldname === 'field_0' && rowIndex === 0 && fieldIndex === 0">
-
-
-
+                                                                            <span class="font-12 d-inline-block text-truncate text-center" :title="row[field.fieldname]" :style="{ maxWidth: '100%' }">
+                                                                                {{ row[field.fieldname] || 'Name' }}
+                                                                            </span>
+                                                                            </template> -->
+                                                                        <!-- <template
+                                                                            v-if="field.label === 'Details' && field.fieldname == 'field_0'  && rowIndex === 0 && fieldIndex === 0">
                                                                             <span
                                                                                 class="font-12 d-inline-block text-truncate"
                                                                                 :style="{ maxWidth: '100%' }"
                                                                                 :title="row[field.fieldname]">
                                                                                 {{ row[field.fieldname] }}
                                                                             </span>
-                                                                        </template>
+                                                                        </template> -->
+                                                                        <!-- :disabled="rowIndex === 0 && fieldIndex === 0 && field.label !== 'Details' && field.fieldname == 'field_0'" -->
+                                                                        <!-- :class="field.label === 'Details' && field.fieldname === 'field_0' && rowIndex === 0 && fieldIndex === 0 ? 'bg-white border-0' : 'border-1'" -->
                                                                         <template
-                                                                            v-else-if="field.fieldtype === 'Data' && field.label !== 'Type of Manpower'">
+                                                                            v-if="field.fieldtype === 'Data' && field.label !== 'Type of Manpower'">
 
                                                                             <input type="text"
-                                                                                :disabled="rowIndex === 0 && fieldIndex === 0 && field.label === 'Details' && field.fieldname === 'field_0'"
-                                                                                :class="field.label === 'Details' && field.fieldname === 'field_0' && rowIndex === 0 && fieldIndex === 0 ? 'bg-white border-0' : 'border-1'"
                                                                                 :maxlength="field.fieldtype === 'Phone' ? '10' : '140'"
                                                                                 class="form-control font-12"
                                                                                 :title="row[field.fieldname]"
@@ -753,7 +750,7 @@ const getInputType = (type) => {
 watch(
     () => tableRows,
     () => {
-        updateFirstRowName();
+        // updateFirstRowName();
         const finalData = {};
 
         for (const [tableIndex, rows] of Object.entries(tableRows)) {
@@ -804,20 +801,21 @@ const addRow = (tableIndex) => {
 const removeRow = (tableIndex, rowIndex) => {
     tableRows[tableIndex].splice(rowIndex, 1);
 };
+// function updateFirstRowName() {
+//   for (const tableIndex in tableRows) {
+//     const rows = tableRows[tableIndex];
+//     const headers = props.tableHeaders[tableIndex];
 
-function updateFirstRowName() {
-    for (const tableIndex in tableRows) {
-        const rows = tableRows[tableIndex];
-        if (rows && rows.length > 0) {
-            const firstFieldName = props.tableHeaders[tableIndex]?.[0]?.fieldname;
+//     if (rows && rows.length > 0 && headers?.length > 0) {
+//       const firstFieldName = headers[0].fieldname;
 
-            if (firstFieldName === 'details') {
-                // Update the 'details' field in the first row object
-                rows[0]['details'] = 'Name';
-            }
-        }
-    }
-}
+//       // ✅ Use includes instead of exact match
+//       if (firstFieldName && firstFieldName.toLowerCase().includes('details')) {
+//         rows[0][firstFieldName] = 'Name';
+//       }
+//     }
+//   }
+// }
 
 
 
@@ -1347,24 +1345,24 @@ const logFieldValue = (
 
 
     if (eve.target?.files && eve.target.files.length > 0) {
-    let files = Array.from(eve.target.files); // Convert FileList to an array
+        let files = Array.from(eve.target.files); // Convert FileList to an array
 
-    // Normalize existing files into an array
-    let existingFiles = field["value"]
-        ? field["value"].split(',').map(f => f.trim())
-        : [];
+        // Normalize existing files into an array
+        let existingFiles = field["value"]
+            ? field["value"].split(',').map(f => f.trim())
+            : [];
 
-    const totalFiles = existingFiles.length + files.length;
-    if (totalFiles > 5) {
-        alert("You can upload a maximum of 5 files.");
-        files = files.slice(0, 5 - existingFiles.length); // Only allow up to 5 total
+        const totalFiles = existingFiles.length + files.length;
+        if (totalFiles > 5) {
+            alert("You can upload a maximum of 5 files.");
+            files = files.slice(0, 5 - existingFiles.length); // Only allow up to 5 total
+        }
+
+        files.forEach((file) => uploadFile(file, field));
+
+        // ✅ Reset file input to allow same file re-selection
+        eve.target.value = null;
     }
-
-    files.forEach((file) => uploadFile(file, field));
-
-    // ✅ Reset file input to allow same file re-selection
-    eve.target.value = null;
-}
 
     else if (eve.target?.type === "checkbox") {
         if (field.fieldtype === "Check") {
