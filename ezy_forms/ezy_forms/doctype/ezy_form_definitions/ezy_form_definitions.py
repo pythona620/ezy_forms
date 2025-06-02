@@ -302,6 +302,15 @@ def activating_perms_for_all_roles_in_wf_roadmap():
     frappe.db.commit()
     
  
+
+def sanitize_fieldname(name):
+    # Remove all special characters; keep only alphanumeric and underscores
+    name = re.sub(r'[^a-zA-Z0-9_]', '', name)
+    # Prefix with '_' if starts with digit
+    if name and name[0].isdigit():
+        name = '_' + name
+    return name
+
  
 @frappe.whitelist()
 def add_child_doctype(form_short_name: str, as_a_block: str, fields: list[dict], idx=None):
@@ -321,12 +330,22 @@ def add_child_doctype(form_short_name: str, as_a_block: str, fields: list[dict],
 
             exist_child_table = frappe.get_doc("DocType", form_short_name)
             existing_fields = {field.fieldname: field for field in exist_child_table.fields}
-            incoming_fieldnames = {field["fieldname"] for field in fields}
+            incoming_fieldnames = set()
             fields_updated = False
 
-            # Update existing fields or add new ones
             for field in fields:
-                fieldname = field.get("fieldname")
+                raw_fieldname = field.get("fieldname", "") or field.get("label", "")
+                clean_fieldname = sanitize_fieldname(raw_fieldname)
+
+                if not clean_fieldname:
+                    frappe.throw(f"Invalid fieldname after sanitization: '{raw_fieldname}' became empty.")
+
+                if raw_fieldname != clean_fieldname:
+                    print(f"Sanitized fieldname from '{raw_fieldname}' to '{clean_fieldname}'")
+                
+                field["fieldname"] = clean_fieldname  # Overwrite with sanitized version
+                incoming_fieldnames.add(clean_fieldname)        
+
                 new_idx = field.get("idx")
                 new_label = field.get("label")
                 new_fieldtype = field.get("fieldtype")
@@ -336,8 +355,8 @@ def add_child_doctype(form_short_name: str, as_a_block: str, fields: list[dict],
                 if new_fieldtype == "Select" and new_options and not new_options.startswith("\n"):
                     new_options = "\n" + new_options
 
-                if fieldname in existing_fields:
-                    existing_field = existing_fields[fieldname]
+                if clean_fieldname in existing_fields:
+                    existing_field = existing_fields[clean_fieldname]
                     if new_label:
                         existing_field.label = new_label
                     if new_fieldtype:
@@ -348,11 +367,10 @@ def add_child_doctype(form_short_name: str, as_a_block: str, fields: list[dict],
                         existing_field.description = new_description
                     if new_idx:
                         existing_field.idx = new_idx
-
                     fields_updated = True
                 else:
-                    new_field = exist_child_table.append("fields", {
-                        "fieldname": fieldname,
+                    exist_child_table.append("fields", {
+                        "fieldname": clean_fieldname,
                         "label": new_label,
                         "fieldtype": new_fieldtype,
                         "parentfield": "fields",
@@ -363,7 +381,7 @@ def add_child_doctype(form_short_name: str, as_a_block: str, fields: list[dict],
                     })
                     fields_updated = True
 
-            # Remove fields not in the incoming data
+            # Remove fields not in incoming data
             exist_child_table.fields = [
                 field for field in exist_child_table.fields if field.fieldname in incoming_fieldnames
             ]
@@ -372,6 +390,7 @@ def add_child_doctype(form_short_name: str, as_a_block: str, fields: list[dict],
                 exist_child_table.save(ignore_permissions=True)
                 frappe.db.commit()
                 exist_child_table.db_update()
+
 
                 return f"Fields updated successfully in Doctype '{form_short_name}'."
             else:
