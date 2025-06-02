@@ -21,8 +21,8 @@ def email_pdf_send(doc,method=None):
 		frappe.sendmail(
 		recipients= "h6714.hod@accor.com",
 		sender=sender[0]['email_id'],
-		message="Dear Team NICO MOD REPORT Form Has Submitted",
-		subject="NICO MOD REPORT Form",
+		message=f"Dear Team, {doc.doctype} has been submitted.",
+    	subject=f"{doc.doctype} Form",
 		# reply_to = frappe.session.user,
 		now=True,
 		attachments=[pdf_file],
