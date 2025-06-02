@@ -15,25 +15,4 @@ import pdfkit
 
 
 class NICOMODREPORT(Document):
-	
-	def after_insert(self):
-		pdf_file = frappe.get_print(
-        doctype= self.doctype,
-        name= self.name,
-        as_pdf=True
-    	)
-		
-		sender = frappe.get_value("Email Account",{"enable_outgoing":1,"default_outgoing":1},"email_id")
-		frappe.sendmail(
-		recipients= "h6714.hod@accor.com", 
-		sender=sender,
-		message="Dear Team NICO MOD REPORT Form Has Submitted",
-		subject="NICO MOD REPORT Form",
-		# reply_to = frappe.session.user,
-		now=True,
-		attachments=[{
-            "fname": f"{self.name}.pdf",
-            "fcontent": pdf_file
-        }],
-	)
-
+	pass

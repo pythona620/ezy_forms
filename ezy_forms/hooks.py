@@ -145,6 +145,9 @@ doc_events = {
 # 	}
 "Ezy Employee":{
         "after_insert":"ezy_forms.ezy_forms.doctype.login_check.login_check.after_insert_user"
+    },
+"NICO MOD REPORT":{
+    "after_insert":"ezy_forms.ezy_custom_forms.custom_script.mail.email_pdf_send"
     }
 }
 
