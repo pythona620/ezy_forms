@@ -40,7 +40,7 @@
             </section>
             <section>
                 <!-- <div id="datatable" tabindex="0" border="1" style="border-collapse: collapse; width: 100%;"></div> -->
-                <GlobalTable class=" newtable" :tHeaders="listDataheaders" :tData="listData" @cell-click="viewPreview" 
+                <GlobalTable class=" newtable" :tHeaders="listDataheaders" :tData="listData" @cell-click="downloadPdf" isAction="true" download="true"
                      />
             </section>
         </template>
@@ -51,7 +51,7 @@
 
 import GlobalTable from "../../Components/GlobalTable.vue";
 import axiosInstance from "../../shared/services/interceptor";
-import { apis, doctypes } from "../../shared/apiurls";
+import { apis, doctypes,domain } from "../../shared/apiurls";
 import { onBeforeUnmount, onMounted, ref } from "vue";
 // import DataTable from "frappe-datatable";
 // import "frappe-datatable/dist/frappe-datatable.min.css";
@@ -89,6 +89,7 @@ const listData = ref([]);
 const listDataheaders = ref([])
 const frappeBody = ref([]);
 const SelectedReportName = ref("");
+
 function viewPreview(data) {
     console.log(data.name);
     SelectedReportName.value = data.name;
@@ -189,6 +190,47 @@ function exportReport(type) {
     const url = apis.ExportReport + `?report_name=${encodeURIComponent(reportName)}&file_format_type=${encodeURIComponent(fileType)}`;
     // Trigger the file download
     window.open(url, '_blank');
+}
+
+
+function downloadPdf(data) {
+    console.log("data",data);
+  const dataObj = {
+    form_short_name: SelectedReportName.value,
+    name: data.name,
+    business_unit:"CRR"
+  };
+
+  axiosInstance
+    .post(apis.download_pdf_form, dataObj)
+    .then((response) => {
+      if (!response || !response.message) {
+        console.error("Invalid response:", response);
+        return;
+      }
+
+      let pdfUrl = domain + response.message;
+
+      // Remove '/api' from the URL if present
+      pdfUrl = pdfUrl.replace("/api", "");
+
+      // Extract filename safely
+      const fileName = response.message.includes("/")
+        ? response.message.split("/").pop()
+        : "download.pdf";
+
+      // Create and trigger download
+      const link = document.createElement("a");
+      link.href = pdfUrl;
+      link.download = fileName;
+      link.target = "_blank"; // Helps with some browser restrictions
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    })
+    .catch((error) => {
+      console.error("Error downloading PDF:", error);
+    });
 }
 
 

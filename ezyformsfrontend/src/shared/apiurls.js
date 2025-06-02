@@ -69,6 +69,7 @@ export const apis = {
  deleteAssigneRoles:domain+`/method/ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions.delete_roles_for_approver_roles`,
  repostListData: domain + `/method/frappe.desk.query_report.run`,
   ExportReport: domain + `/method/ezy_forms.ezy_custom_forms.custom_script.v1.export_report_api.export_report_data`,
+  approvedByMe:domain+`/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.approval_by_me`
 
 };
 

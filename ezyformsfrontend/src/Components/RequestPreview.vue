@@ -450,7 +450,7 @@
                                                         <table class="table  rounded-table" border="1" width="100%">
                                                             <thead>
                                                                 <tr class=" font-12 fw-lighter">
-                                                                    <th class="fw-medium text-center">#</th>
+                                                                    <!-- <th class="fw-medium text-center">#</th> -->
                                                                     <th class=" fw-medium text-center"
                                                                         v-for="field in table" :key="field.fieldname">
                                                                         {{ field.label }}
@@ -473,13 +473,12 @@
                                                                         </div>
                                                                     </td>
                                                                 </tr>
-                                                                <tr class="position-relative"
-                                                                    v-for="(row, rowIndex) in tableRows[tableIndex]"
+                                                                <tr v-for="(row, rowIndex) in tableRows[tableIndex]"
                                                                     :key="rowIndex">
-                                                                    <td style="text-align: center;" class="font-12">
+                                                                    <!-- <td style="text-align: center;" class="font-12">
                                                                         {{
                                                                             rowIndex + 1 }}
-                                                                    </td>
+                                                                    </td> -->
                                                                     <td v-for="field in table" :key="field.fieldname"
                                                                         :title="row[field.fieldname]" :style="field.label !== 'Type of Manpower'
                                                                             ? {
@@ -490,18 +489,26 @@
                                                                             }
                                                                             : {}">
 
-                                                                        <template v-if="field.label === 'Form Name'">
-                                                                            <!-- Keep the same title tooltip and width logic -->
+
+                                                                        <!-- <template v-if="rowIndex === 0 && fieldIndex === 0 && field.label === ' field 1'">
+                                                                            <span class="font-12 d-inline-block text-truncate text-center" :title="row[field.fieldname]" :style="{ maxWidth: '100%' }">
+                                                                                {{ row[field.fieldname] || 'Name' }}
+                                                                            </span>
+                                                                            </template> -->
+                                                                        <!-- <template
+                                                                            v-if="field.label === 'Details' && field.fieldname == 'field_0'  && rowIndex === 0 && fieldIndex === 0">
                                                                             <span
                                                                                 class="font-12 d-inline-block text-truncate"
                                                                                 :style="{ maxWidth: '100%' }"
                                                                                 :title="row[field.fieldname]">
-                                                                                {{ row[field.fieldname] || '—' }}
+                                                                                {{ row[field.fieldname] }}
                                                                             </span>
-                                                                        </template>
-
+                                                                        </template> -->
+                                                                        <!-- :disabled="rowIndex === 0 && fieldIndex === 0 && field.label !== 'Details' && field.fieldname == 'field_0'" -->
+                                                                        <!-- :class="field.label === 'Details' && field.fieldname === 'field_0' && rowIndex === 0 && fieldIndex === 0 ? 'bg-white border-0' : 'border-1'" -->
                                                                         <template
-                                                                            v-else-if="field.fieldtype === 'Data' && field.label !== 'Type of Manpower'">
+                                                                            v-if="field.fieldtype === 'Data' && field.label !== 'Type of Manpower'">
+
                                                                             <input type="text"
                                                                                 :maxlength="field.fieldtype === 'Phone' ? '10' : '140'"
                                                                                 class="form-control font-12"
@@ -514,7 +521,8 @@
                                                                                 :title="row[field.fieldname]"></textarea>
                                                                         </template>
 
-                                                                        <template v-if="field.fieldtype === 'Select'">
+                                                                        <template
+                                                                            v-else-if="field.fieldtype === 'Select'">
                                                                             <div>
                                                                                 <Multiselect
                                                                                     :multiple="field.fieldtype === 'Table MultiSelect'"
@@ -532,7 +540,7 @@
                                                                                 v-model="row[field.fieldname]" />
                                                                         </template>
 
-                                                                        <template v-if="field.fieldtype === 'Int'">
+                                                                        <template v-else-if="field.fieldtype === 'Int'">
                                                                             <input
                                                                                 v-if="field.description && /[+\-*/]/.test(field.description)"
                                                                                 type="number"
@@ -545,7 +553,8 @@
                                                                         </template>
 
 
-                                                                        <template v-if="field.fieldtype === 'Datetime'">
+                                                                        <template
+                                                                            v-else-if="field.fieldtype === 'Datetime'">
                                                                             <input type="datetime-local"
                                                                                 :title="row[field.fieldname]"
                                                                                 class="form-control font-12"
@@ -555,11 +564,46 @@
 
                                                                         <template
                                                                             v-else-if="field.fieldtype === 'Attach'">
+                                                                            <!-- File Input -->
                                                                             <input type="file" multiple
                                                                                 accept="image/jpeg,image/png,application/pdf"
                                                                                 class="form-control font-12"
                                                                                 @change="handleFileUpload($event, row, field.fieldname)" />
+
+                                                                            <!-- Preview Section -->
+                                                                            <div v-if="row[field.fieldname]"
+                                                                                class="d-flex flex-wrap gap-2">
+                                                                                <div v-for="(fileUrl, index) in normalizeFileList(row[field.fieldname])"
+                                                                                    :key="index"
+                                                                                    class="position-relative d-inline-block"
+                                                                                    @mouseover="hovered = index"
+                                                                                    @mouseleave="hovered = null">
+                                                                                    <!-- Show Image Thumbnail -->
+                                                                                    <img v-if="isImageChildFile(fileUrl)"
+                                                                                        :src="fileUrl"
+                                                                                        class="img-thumbnail mt-2 cursor-pointer border-0"
+                                                                                        style="max-width: 100px; max-height: 100px" />
+
+                                                                                    <!-- Show PDF Icon -->
+                                                                                    <div v-else
+                                                                                        class="d-flex align-items-center justify-content-center border mt-2"
+                                                                                        style="width: 100px; height: 100px; background: #f9f9f9">
+                                                                                        <i
+                                                                                            class="bi bi-file-earmark-pdf fs-1 text-danger"></i>
+                                                                                    </div>
+
+                                                                                    <!-- Remove Icon -->
+                                                                                    <button v-if="hovered === index"
+                                                                                        @click="removechildFile(index, field, row)"
+                                                                                        class="btn btn-sm btn-light position-absolute"
+                                                                                        style="top: 2px; right: 5px; border-radius: 50%; padding: 0 5px">
+                                                                                        <i class="bi bi-x fs-6"></i>
+                                                                                    </button>
+                                                                                </div>
+                                                                            </div>
                                                                         </template>
+
+
 
 
                                                                     </td>
@@ -586,7 +630,7 @@
                                                                                 ?? 0 }}
                                                                         </span>
                                                                     </td>
-                                                                    <td></td>
+                                                                    <!-- <td></td> -->
                                                                 </tr>
                                                                 <tr>
                                                                     <td :colspan="table.length + 2"
@@ -701,11 +745,12 @@ const getInputType = (type) => {
     if (t === 'int') return 'number';
     return t;
 };
-console.log(tableRows);
+// console.log(tableRows);
 // Format as 'YYYY-MM-DDTHH:MM'
 watch(
     () => tableRows,
     () => {
+        // updateFirstRowName();
         const finalData = {};
 
         for (const [tableIndex, rows] of Object.entries(tableRows)) {
@@ -756,6 +801,21 @@ const addRow = (tableIndex) => {
 const removeRow = (tableIndex, rowIndex) => {
     tableRows[tableIndex].splice(rowIndex, 1);
 };
+// function updateFirstRowName() {
+//   for (const tableIndex in tableRows) {
+//     const rows = tableRows[tableIndex];
+//     const headers = props.tableHeaders[tableIndex];
+
+//     if (rows && rows.length > 0 && headers?.length > 0) {
+//       const firstFieldName = headers[0].fieldname;
+
+//       // ✅ Use includes instead of exact match
+//       if (firstFieldName && firstFieldName.toLowerCase().includes('details')) {
+//         rows[0][firstFieldName] = 'Name';
+//       }
+//     }
+//   }
+// }
 
 
 
@@ -871,7 +931,7 @@ const tableTotals = computed(() => {
                 rows.forEach((row) => {
                     if (field.description && /[+\-*/]/.test(field.description) && field.label.includes('Total')) {
                         // Calculate expression dynamically using labels and row data
-                        sum += Number(calculateFieldExpression(row, field.description, fields)) ;
+                        sum += Number(calculateFieldExpression(row, field.description, fields));
                     }
                     //   else {
                     //     // Sum raw values
@@ -888,59 +948,79 @@ const tableTotals = computed(() => {
     return totals;
 });
 watchEffect(() => {
-  for (const [tableIndex, rows] of Object.entries(tableRows)) {
-    const fields = props.tableHeaders[tableIndex] || [];
+    for (const [tableIndex, rows] of Object.entries(tableRows)) {
+        const fields = props.tableHeaders[tableIndex] || [];
 
-    rows.forEach((row) => {
-      // First: calculate all independent fields like tax_amount
-      fields.forEach((field) => {
-        if (
-          field.fieldtype === 'Int' &&
-          field.description &&
-          /[+\-*/]/.test(field.description)
-        ) {
-          const result = calculateFieldExpression(row, field.description, fields);
-          row[field.fieldname] = result;
-        }
-      });
+        rows.forEach((row) => {
+            // First: calculate all independent fields like tax_amount
+            fields.forEach((field) => {
+                if (
+                    field.fieldtype === 'Int' &&
+                    field.description &&
+                    /[+\-*/]/.test(field.description)
+                ) {
+                    const result = calculateFieldExpression(row, field.description, fields);
+                    row[field.fieldname] = result;
+                }
+            });
 
-      // Second pass to ensure dependent fields like total_amount are recalculated
-      fields.forEach((field) => {
-        if (
-          field.fieldtype === 'Int' &&
-          field.description &&
-          /[+\-*/]/.test(field.description)
-        ) {
-          const result = calculateFieldExpression(row, field.description, fields);
-          row[field.fieldname] = result;
-        }
-      });
-    });
-  }
+            // Second pass to ensure dependent fields like total_amount are recalculated
+            fields.forEach((field) => {
+                if (
+                    field.fieldtype === 'Int' &&
+                    field.description &&
+                    /[+\-*/]/.test(field.description)
+                ) {
+                    const result = calculateFieldExpression(row, field.description, fields);
+                    row[field.fieldname] = result;
+                }
+            });
+        });
+    }
 });
 
+// const handleFileUpload = (event, row, fieldname) => {
+//     const selectedFiles = Array.from(event.target.files);
+//     if (!selectedFiles.length) return;
+
+//     // Initialize the field if it's not already an array
+//     if (!Array.isArray(row[fieldname])) {
+//         row[fieldname] = [];
+//     }
+
+//     // Calculate total number of files (existing + new)
+//     const totalFiles = row[fieldname].length + selectedFiles.length;
+
+//     if (totalFiles > 5) {
+//         alert("You can only upload a maximum of 5 files.");
+//         return;
+//     }
+
+//     // Proceed with uploading each file
+//     selectedFiles.forEach((file) => {
+//         tableFileUpload(file, row, fieldname);
+//     });
+// };
 const handleFileUpload = (event, row, fieldname) => {
-    const selectedFiles = Array.from(event.target.files);
+    let selectedFiles = Array.from(event.target.files); // ⬅ Change to 'let'
     if (!selectedFiles.length) return;
 
-    // Initialize the field if it's not already an array
-    if (!Array.isArray(row[fieldname])) {
-        row[fieldname] = [];
-    }
+    const existingFiles = normalizeFileList(row[fieldname]);
 
-    // Calculate total number of files (existing + new)
-    const totalFiles = row[fieldname].length + selectedFiles.length;
-
+    const totalFiles = existingFiles.length + selectedFiles.length;
     if (totalFiles > 5) {
         alert("You can only upload a maximum of 5 files.");
-        return;
+        selectedFiles = selectedFiles.slice(0, 5 - existingFiles.length); // ✅ Keep only required files
     }
 
-    // Proceed with uploading each file
     selectedFiles.forEach((file) => {
         tableFileUpload(file, row, fieldname);
     });
+
+    // ✅ Clear input to allow re-selecting same file
+    event.target.value = null;
 };
+
 
 
 const tableFileUpload = (file, row, fieldname) => {
@@ -958,15 +1038,12 @@ const tableFileUpload = (file, row, fieldname) => {
             if (res.message && res.message.file_url) {
                 const fileUrl = res.message.file_url;
 
-                // Always store as comma-separated string
-                if (!row[fieldname] || typeof row[fieldname] !== 'string') {
-                    row[fieldname] = fileUrl;
-                } else {
-                    // Avoid duplicate comma
-                    row[fieldname] = row[fieldname].trim() !== ""
-                        ? `${row[fieldname]},${fileUrl}`
-                        : fileUrl;
-                }
+                // Get current list and append
+                let files = normalizeFileList(row[fieldname]);
+                files.push(fileUrl);
+
+                // Store back as comma-separated string
+                row[fieldname] = files.join(',');
             } else {
                 console.error("file_url not found in the response.");
             }
@@ -978,7 +1055,22 @@ const tableFileUpload = (file, row, fieldname) => {
 
 
 
+const normalizeFileList = (value) => {
+    if (!value) return [];
+    if (Array.isArray(value)) return value;
+    if (typeof value === 'string') return value.split(',').map(f => f.trim());
+    return [];
+};
 
+const removechildFile = (index, field, row) => {
+    let files = normalizeFileList(row[field.fieldname]);
+    files.splice(index, 1);
+    row[field.fieldname] = files.join(',');
+};
+
+const isImageChildFile = (fileUrl) => {
+    return /\.(jpg|jpeg|png)$/i.test(fileUrl);
+};
 
 const handleSelectChange = (
     value,
@@ -1095,7 +1187,7 @@ onMounted(() => {
         }
     }
     updateDateTimeFields();
-    updateFormQuestionsInTableRows();
+    // updateFormQuestionsInTableRows();
 
     if (props.blockArr) {
         props.blockArr.forEach((block) => {
@@ -1128,21 +1220,21 @@ onMounted(() => {
         });
     }
 });
-function updateFormQuestionsInTableRows() {
-    for (const [tableIndex, fields] of Object.entries(props.tableHeaders)) {
-        const hasFormName = fields.some(f => f.label === 'Form Name');
+// function updateFormQuestionsInTableRows() {
+//     for (const [tableIndex, fields] of Object.entries(props.tableHeaders)) {
+//         const hasFormName = fields.some(f => f.label === 'Form Name');
 
-        if (hasFormName) {
-            const formNameField = fields.find(f => f.label === 'Form Name');
+//         if (hasFormName) {
+//             const formNameField = fields.find(f => f.label === 'Form Name');
 
-            tableRows[tableIndex] = formQuestions.value.map((question) => {
-                const row = Object.fromEntries(fields.map(f => [f.fieldname, ""]));
-                row[formNameField.fieldname] = question;
-                return row;
-            });
-        }
-    }
-}
+//             tableRows[tableIndex] = formQuestions.value.map((question) => {
+//                 const row = Object.fromEntries(fields.map(f => [f.fieldname, ""]));
+//                 row[formNameField.fieldname] = question;
+//                 return row;
+//             });
+//         }
+//     }
+// }
 
 const datetimeInput = ref(null);
 
@@ -1255,15 +1347,24 @@ const logFieldValue = (
     if (eve.target?.files && eve.target.files.length > 0) {
         let files = Array.from(eve.target.files); // Convert FileList to an array
 
-        if (files.length > 5) {
-            alert("You can upload a maximum of 5 files at a time.");
-            files = files.slice(0, 5); // Restrict to the first 5 files
+        // Normalize existing files into an array
+        let existingFiles = field["value"]
+            ? field["value"].split(',').map(f => f.trim())
+            : [];
+
+        const totalFiles = existingFiles.length + files.length;
+        if (totalFiles > 5) {
+            alert("You can upload a maximum of 5 files.");
+            files = files.slice(0, 5 - existingFiles.length); // Only allow up to 5 total
         }
 
-        field["value"] = ""; // Clear previous values before adding new ones
-
         files.forEach((file) => uploadFile(file, field));
-    } else if (eve.target?.type === "checkbox") {
+
+        // ✅ Reset file input to allow same file re-selection
+        eve.target.value = null;
+    }
+
+    else if (eve.target?.type === "checkbox") {
         if (field.fieldtype === "Check") {
             field.value = eve.target.checked ? 1 : 0;
         } else if (field.fieldtype === "Small Text") {
@@ -1375,7 +1476,33 @@ const generateRandomNumber = () => {
     return Math.floor(Math.random() * 1000000);
 };
 
-const uploadFile = (file, field, index) => {
+// const uploadFile = (file, field, index) => {
+//     const randomNumber = generateRandomNumber();
+//     let fileName = `mailfiles-${props.formName}${randomNumber}-@${file.name}`;
+
+//     const formData = new FormData();
+//     formData.append("file", file, fileName);
+//     formData.append("is_private", "0");
+//     formData.append("folder", "Home");
+//     axiosInstance
+//         .post(apis.uploadfile, formData)
+//         .then((res) => {
+//             if (res.message && res.message.file_url) {
+//                 if (field["value"]) {
+//                     field["value"] += `, ${res.message.file_url}`;
+//                 } else {
+//                     field["value"] = res.message.file_url;
+//                 }
+//                 emit("updateField", field);
+//             } else {
+//                 console.error("file_url not found in the response.");
+//             }
+//         })
+//         .catch((error) => {
+//             console.error("Upload error:", error);
+//         });
+// };
+const uploadFile = (file, field) => {
     const randomNumber = generateRandomNumber();
     let fileName = `mailfiles-${props.formName}${randomNumber}-@${file.name}`;
 
@@ -1383,6 +1510,7 @@ const uploadFile = (file, field, index) => {
     formData.append("file", file, fileName);
     formData.append("is_private", "0");
     formData.append("folder", "Home");
+
     axiosInstance
         .post(apis.uploadfile, formData)
         .then((res) => {
@@ -1415,9 +1543,10 @@ const uploadFile = (file, field, index) => {
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 
 <style lang="scss" scoped>
-.overTable{
-    overflow: auto;
-}
+// .overTable {
+//     overflow-x: auto;
+// }
+
 .text-ellipsis {
     max-width: 200px;
     overflow: hidden;
@@ -1427,10 +1556,10 @@ const uploadFile = (file, field, index) => {
     vertical-align: middle;
 }
 
-td:first-child,
-th:first-child {
-    width: 3%;
-}
+// td:first-child,
+// th:first-child {
+//     width: 3%;
+// } 
 
 .multiselect {
     height: 30px !important;
@@ -1444,6 +1573,7 @@ th:first-child {
     border: 1px solid #e2e2e2 !important;
     height: 30px !important;
     border-radius: 8px !important;
+    min-width: 200px;
 
     .multiselect-wrapper {
         height: 30px !important;

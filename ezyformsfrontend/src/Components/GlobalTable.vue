@@ -229,6 +229,12 @@
               </div>
             </td>
 
+             <td v-if="download === 'true'" class="text-center fixed-column position-relative">
+               <span>
+                <i class="bi bi-download eye-cursor" @click="handleCellClick(row, rowIndex, 'download')"></i>
+              </span>
+             </td>
+
 
 
             <!-- <td v-if="actionType === 'Toogle&dropdown'"
