@@ -2,14 +2,20 @@
   <div>
     <div class="d-flex justify-content-between align-items-center py-2">
       <div>
-        <h1 class="m-0 font-13">History</h1>
-        <p class="m-0 font-11 pt-1">{{ totalRecords }} request</p>
+        <h1 class="m-0 font-13">My Approval Forms</h1>
+        <p class="m-0 font-11 pt-1">{{ totalRecords }} Forms</p>
       </div>
+      <!-- <div>
+        <input type="checkbox" id="ViewOnlyReportee" v-model="ViewOnlyReportee" class="me-2 mt-1 form-check-input" @change="ViewOnlyRe" />
+              <label for="ViewOnlyReportee " class="SelectallDesignation  font-12 m-0 form-check-label">View Only Reportee</label>
+        
+        
+      </div> -->
     </div>
     <div class="mt-2">
       <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" viewType="viewPdf" isCheckbox="true"
-        @cell-click="viewPreview"  :actions="actions" @actionClicked="actionCreated"
-        isFiltersoption="true" :field-mapping="fieldMapping" @updateFilters="inLineFiltersData" />
+        @updateFilters="inLineFiltersData" :field-mapping="fieldMapping" @cell-click="viewPreview"
+        isFiltersoption="true" :actions="actions" @actionClicked="actionCreated" />
       <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
         @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
     </div>
@@ -17,102 +23,80 @@
       aria-labelledby="viewRequestLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
-          <!-- <div class="modal-header">
-            <h5 class="modal-title" id="viewRequestLabel">Request</h5>
-            <button button="button" class=" btn btn-dark text-white font-13" @click="downloadPdf">Download Pdf<span
-                class=" ms-2"><i class="bi bi-download"></i></span> </button>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div> -->
-          <!-- bg-dark text-white -->
-          <div class="modal-header py-2 d-block">
-            <div class="d-flex justify-content-between align-items-center">
-              <div>
-                <h5 class="m-0 font-13" id="viewRequest">Request Id: {{ selectedRequest.name }}
-                </h5>
-              </div>
-              <div class="">
-                <button button="button" class="btn btn-white text-dark font-13" @click="downloadPdf">
-                  Download Pdf<span class="ms-2"><i class="bi bi-download"></i></span>
-                </button>
-                <button type="button" class="btn btn-white text-dark font-13" @click="closemodal"
-                  data-bs-dismiss="modal">
-                  Close <i class="bi bi-x"></i>
-                </button>
-              </div>
-            </div>
+          <div class="modal-header">
+            <h5 class="modal-title font-13" id="viewRequestLabel">
+              Request Id: {{ selectedRequest.name?.replace(/_/g, " ") }}
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" @click="closeModal"
+              aria-label="Close"></button>
           </div>
           <div class="modal-body approvermodalbody">
-            <!-- <ApproverPreview :blockArr="showRequest" :current-level="totalLevels" @updateField="updateFormData" /> -->
+            <!-- <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel" :childData="responseData"
+              :childHeaders="tableHeaders" :employeeData="employeeData" @updateField="updateFormData" /> -->
           </div>
-          <div class="activity-log-container">
-            <div v-for="(item, index) in activityData" :key="index" class="activity-log-item"
-              :class="{ 'last-item': index === activityData.length - 1 }">
-              <div class="activity-log-dot"></div>
-              <div class="activity-log-content">
-                <p class="font-12 mb-1">
-                  On
-                  <strong class="strong-content">{{ formatDate(item.creation) }}</strong>,
-                  <strong class="strong-content">
-                    {{ item.user_name }}
-                  </strong>
-                  ({{ item.role }})
-                  <strong class="strong-content">{{ formatAction(item.action) }}</strong>
-                  the request
-                  <!-- with the comments: <strong class="strong-content">{{ item.reason || 'N/A' }}</strong>. -->
-                </p>
+          <div class="p-2">
+            <div class="activity-log-container">
+              <div v-for="(item, index) in activityData" :key="index" class="activity-log-item"
+                :class="{ 'last-item': index === activityData.length - 1 }">
+                <div class="activity-log-dot"></div>def add_roles_to_wf_requestors
+                <div class="activity-log-content">
+                  <p class="font-12 mb-1">
+                    On
+                    <strong class="strong-content">{{ formatDate(item.creation) }}</strong>,
+                    <strong class="strong-content">{{ item.user_name }}</strong>
+                    ({{ item.role }}) has
+                    <strong class="strong-content">{{
+                      formatAction(item.action)
+                    }}</strong>
+                    the request<span v-if="index !== 0 && item.reason">with the comments:</span>
+                    <strong v-if="index !== 0 && item.reason" class="strong-content">{{ item.reason || "N/A"
+                      }}</strong>
+                  </p>
+                </div>
               </div>
+            </div>
+            <div v-if="!requestcancelled" class="form-floating p-1">
+              <textarea class="form-control font-12" placeholder="Leave a comment here" id="floatingTextarea"
+                @input="resetCommentsValidation" :class="{ 'is-invalid': !isCommentsValid }"
+                v-model="ApproverReason"></textarea>
+              <label class="font-11" for="floatingTextarea">Comments..</label>
+              <span v-if="!isCommentsValid" class="font-11 text-danger ps-1">Please enter comments**</span>
             </div>
           </div>
           <!-- <div class="modal-footer">
-            <div class="d-flex justify-content-between align-items-center mt-3 gap-2">
-              <button type="button" class="btn btn-white text-dark  font-13" @click="closemodal"
-                data-bs-dismiss="modal">Close
-                <i class="bi bi-x"></i></button>
+            <div v-if="!requestcancelled" class="d-flex justify-content-between align-items-center mt-3 gap-2">
               <div>
-                <ButtonComp type="button" icon="x"
-                  class="btn btn-dark d-flex align-items-center  approvebtn border-1 text-nowrap font-10 "
-                  @click="approvalCancelFn(formData, 'Request Cancelled')" name="Cancel Request" />
+                <button type="submit" class="btn btn-outline-danger font-12 py-0 rejectbtn" :disabled="Rejectloading"
+                  @click.prevent="ApproverCancelSubmission(formData, 'Request Cancelled')">
+                  <span v-if="Rejectloading" class="spinner-border spinner-border-sm" role="status"
+                    aria-hidden="true"></span>
+                  <span v-if="!Rejectloading"><i class="bi bi-x-lg me-2"></i><span class="font-12">Reject</span></span>
+                </button>
+              </div>
+              <div>
+                <button type="submit" class="btn btn-success approvebtn" :disabled="loading"
+                  @click.prevent="ApproverFormSubmission(emittedFormData, 'Approve')">
+                  <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                  <span v-if="!loading"><i class="bi bi-check-lg font-15 me-2"></i><span
+                      class="font-12">Approve</span></span>
+                </button>
+
+
               </div>
             </div>
           </div> -->
-        </div>
-      </div>
-    </div>
-    <div class="modal fade" id="pdfView" tabindex="-1" aria-labelledby="pdfViewLabel" aria-hidden="true">
-      <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-          <div class="modal-header py-2 d-block bg-dark text-white">
-            <div class="d-flex justify-content-between align-items-center">
-              <div>
-                <h5 class="m-0 text-white font-13" id="exampleModalLabel">PDF format</h5>
-              </div>
-              <div class="">
-                <button button="button" class="btn btn-dark text-white font-13" @click="downloadPdf">
-                  Download Pdf<span class="ms-2"><i class="bi bi-download"></i></span>
-                </button>
-                <button type="button" class="btn btn-dark text-white font-13" @click="closemodal"
-                  data-bs-dismiss="modal">
-                  Close <i class="bi bi-x"></i>
-                </button>
-              </div>
-            </div>
-          </div>
-          <div class="modal-body pdf-body">
-            <div v-html="pdfPreview"></div>
-          </div>
-          <div class="modal-footer"></div>
+
         </div>
       </div>
     </div>
   </div>
 </template>
 <script setup>
-import FormFields from "../../Components/FormFields.vue";
 import ButtonComp from "../../Components/ButtonComp.vue";
 import GlobalTable from "../../Components/GlobalTable.vue";
 import axiosInstance from "../../shared/services/interceptor";
-import { apis, doctypes, domain } from "../../shared/apiurls";
-import { callWithErrorHandling, onMounted, ref, reactive, computed, watch } from "vue";
+import { apis, doctypes } from "../../shared/apiurls";
+import { onMounted, ref, reactive, computed, watch } from "vue";
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
 import PaginationComp from "../../Components/PaginationComp.vue";
 import { rebuildToStructuredArray } from "../../shared/services/field_format";
@@ -120,63 +104,104 @@ import { rebuildToStructuredArray } from "../../shared/services/field_format";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import { useRoute, useRouter } from "vue-router";
+const router = useRouter();
+const route = useRoute();
+
 const businessUnit = computed(() => {
   return EzyBusinessUnit.value;
 });
 const newBusinessUnit = ref({ business_unit: "" });
-const router = useRouter();
-const route = useRoute();
 
-const filterObj = ref({ limitPageLength: "None", limit_start: 0 });
+const filterObj = ref({ limitPageLength: 20, limit_start: 0, filters: [] });
 const totalRecords = ref(0);
-const selectedRequest = ref({});
-const showRequest = ref(null);
-const doctypeForm = ref([]);
 const idDta = ref([]);
 const docTypeName = ref([]);
 const statusOptions = ref([]);
-const formData = ref([]);
-const tableData = ref([]);
-const totalLevels = ref("");
-const pdfPreview = ref("");
+const emittedFormData = ref([]);
+const selectedcurrentLevel = ref("");
 const activityData = ref([]);
-
+const responseData = ref([]);
+const ViewOnlyReportee = ref(false);
 const tableheaders = ref([
   { th: "Request ID", td_key: "name" },
-  { th: "Form name", td_key: "doctype_name" },
+  // { th: "Form name", td_key: "name" },
   // { th: "Form category", td_key: "doctype_name" },
-  { th: "Owner of form", td_key: "role" },
-  { th: "Requested on", td_key: "requested_on" },
-  { th: "Requested department", td_key: "role" },
+  // { th: "Owner of form", td_key: "owner" },
+  { th: "Requested By", td_key: "requested_by" },
+  { th: "Requested Department", td_key: "role" },
+  // { th: "Property", td_key: "property" },
   { th: "Approval Status", td_key: "status" },
+  { th: "Workflow Status", td_key: "assigned_to_users" },
+
 ]);
-const fieldMapping = ref({
-  requested_on: { type: "input" },
-  // status: {
-  //   type: "select",
-  //   options: ["Request Raised", "In Progress", "Completed", "Request Cancelled"],
-  // },
-  name: { type: "input" },
-  doctype_name: { type: "input" },
-});
 
 const actions = ref([
   { name: "View Request", icon: "fa-solid fa-eye" },
-  { name: "PDF Format", icon: "bi bi-filetype-pdf" },
+
   // { name: 'Share this form', icon: 'fa-solid fa-share-alt' },
   // { name: 'Download Form', icon: 'fa-solid fa-download' },
   // { name: 'Edit Form', icon: 'fa-solid fa-edit' },
 ]);
+const tableData = ref([]);
+const selectedRequest = ref({});
+const showRequest = ref(null);
+const doctypeForm = ref([]);
+const ApproverReason = ref("");
+const employeeData = ref([]);
+const tableHeaders = ref([]);
 
+const loading = ref(false)
+const Rejectloading = ref(false)
+
+// onMounted(() => {
+//   const storedData = localStorage.getItem("employeeData");
+//   try {
+//     const parsedData = JSON.parse(storedData);
+
+//     // Ensure parsedData is an array
+//     employeeData.value = Array.isArray(parsedData) ? parsedData : [parsedData];
+
+//   } catch (error) {
+//     console.error("Error parsing employeeData from localStorage:", error);
+//     employeeData.value = []; // Fallback to empty array if there's an error
+//   }
+// });
+
+const viewlist = ref([])
+function ViewOnlyReport() {
+
+  // console.log(ViewOnlyReportee.value); 
+  axiosInstance
+    .post(apis.approvedByMe,)
+    .then((response) => {
+      viewlist.value = response.message;
+
+      // const filters = [ "name","in", viewlist.value];
+      receivedForMe()
+
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+
+
+}
 function actionCreated(rowData, actionEvent) {
   if (actionEvent.name === "View Request") {
     if (rowData) {
       selectedRequest.value = { ...rowData };
-      totalLevels.value = selectedRequest.value.total_levels;
+      selectedcurrentLevel.value = selectedRequest.value.current_level;
+
+
       // Rebuild the structured array from JSON
       showRequest.value = rebuildToStructuredArray(
-        JSON.parse(selectedRequest.value?.json_columns).fields
+        JSON.parse(selectedRequest.value?.json_columns)?.fields
       );
+
+      tableHeaders.value = JSON.parse(
+        selectedRequest.value?.json_columns
+      ).child_table_fields;
+      // console.log(tableHeaders.value, "lll");
 
       // Prepare the filters for fetching data
       const filters = [
@@ -197,14 +222,41 @@ function actionCreated(rowData, actionEvent) {
         })
         .then((res) => {
           if (res.data) {
-            doctypeForm.value = res.data;
+            doctypeForm.value = res.data[0];
+
             // Map values from doctypeForm to showRequest fields
-            mapFormFieldsToRequest(doctypeForm.value[0], showRequest.value);
+            mapFormFieldsToRequest(doctypeForm.value, showRequest.value);
+
+            axiosInstance
+              .get(
+                `${apis.resource}${selectedRequest.value.doctype_name}/${res.data[0].name}`
+              )
+              .then((res) => {
+                // console.log(`Data for :`, res.data);
+                // Identify the child table key dynamically
+                const childTables = Object.keys(res.data).filter((key) =>
+                  Array.isArray(res.data[key])
+                );
+                if (childTables.length) {
+                  responseData.value = {};
+
+                  childTables.forEach((tableKey) => {
+                    responseData.value[tableKey] = res.data[tableKey] || [];
+                  });
+                  // console.log("Response Data:", responseData.value);
+                }
+
+              })
+              .catch((error) => {
+                console.error(`Error fetching data for :`, error);
+              });
+
           }
         })
         .catch((error) => {
           console.error("Error fetching categories data:", error);
         });
+
       axiosInstance
         .get(`${apis.resource}${doctypes.WFActivityLog}/${selectedRequest.value.name}`)
         .then((res) => {
@@ -221,217 +273,28 @@ function actionCreated(rowData, actionEvent) {
     } else {
       console.warn(" There is no form fields ");
     }
-  } else if (actionEvent.name === "PDF Format") {
-    // pdfView
-    selectedRequest.value = rowData;
-    // Prepare the filters for fetching data
-    const filters = [
-      ["wf_generated_request_id", "like", `%${selectedRequest.value.name}%`],
-    ];
-    const queryParams = {
-      fields: JSON.stringify(["*"]),
-      limit_page_length: "None",
-      limit_start: 0,
-      filters: JSON.stringify(filters),
-      order_by: `\`tab${selectedRequest.value.doctype_name}\`.\`creation\` desc`,
-    };
-
-    // Fetch the doctype data
-    axiosInstance
-      .get(`${apis.resource}${selectedRequest.value.doctype_name}`, {
-        params: queryParams,
-      })
-      .then((res) => {
-        if (res.data) {
-          doctypeForm.value = res.data;
-
-          const dataObj = {
-            form_short_name: rowData.doctype_name,
-            name: doctypeForm.value[0].name,
-            business_unit: businessUnit.value
-
-          };
-
-          axiosInstance
-            .post(apis.preview_dynamic_form, dataObj)
-            .then((response) => {
-              pdfPreview.value = response.message;
-            })
-            .catch((error) => {
-              console.error("Error fetching data:", error);
-            });
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching categories data:", error);
-      });
-
-    const modal = new bootstrap.Modal(document.getElementById("pdfView"), {});
-    modal.show();
-  }
-}
-function viewPreview(data, index, type) {
-  // console.log(route.path);
-  if (type === "view") {
-    if (data) {
-      // console.log(data, "------------");
-      router.push({
-        name: "ApproveRequest",
-        query: {
-          routepath: route.path,
-          name: data.name,
-          doctype_name: data.doctype_name,
-          type: "myforms",
-          readOnly: 'true'
-        },
-      });
-    }
-  }
-  if (type === "download") {
-    selectedRequest.value = data;
-    // Prepare the filters for fetching data
-    const filters = [
-      ["wf_generated_request_id", "like", `%${selectedRequest.value.name}%`],
-    ];
-    const queryParams = {
-      fields: JSON.stringify(["*"]),
-      limit_page_length: "None",
-      limit_start: 0,
-      filters: JSON.stringify(filters),
-      order_by: `\`tab${selectedRequest.value.doctype_name}\`.\`creation\` desc`,
-    };
-    // Fetch the doctype data
-    axiosInstance
-      .get(`${apis.resource}${selectedRequest.value.doctype_name}`, {
-        params: queryParams,
-      })
-      .then((res) => {
-        if (res.data) {
-          doctypeForm.value = res.data;
-          const dataObj = {
-            form_short_name: data.doctype_name,
-            name: doctypeForm.value[0].name,
-          };
-          axiosInstance
-            .post(apis.preview_dynamic_form, dataObj)
-            .then((response) => {
-              pdfPreview.value = response.message;
-            })
-            .catch((error) => {
-              console.error("Error fetching data:", error);
-            });
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching categories data:", error);
-      });
-    const modal = new bootstrap.Modal(document.getElementById("pdfView"), {});
-    modal.show();
   }
 }
 
-// function viewPreview(data, index, type) {
-//   console.log(data, index, type);
+function viewPreview(data) {
+  // console.log(data);
+  router.push({
+    name: "ApproveRequest",
+    query: {
+      routepath: route.path,
+      name: data.name,
+      doctype_name: data.doctype_name,
+      type:'myforms',
+      readOnly:'true'
+    },
+  });
+}
 
-//   if (type === "view") {
-//     if (data) {
-//       selectedRequest.value = { ...data };
-//       totalLevels.value = selectedRequest.value.total_levels;
-//       // Rebuild the structured array from JSON
-//       showRequest.value = rebuildToStructuredArray(
-//         JSON.parse(selectedRequest.value?.json_columns).fields
-//       );
+// Computed property to determine if any action is cancelled
+const requestcancelled = computed(() => {
+  return activityData.value.some((item) => item.action === "Request Cancelled");
+});
 
-//       // Prepare the filters for fetching data
-//       const filters = [
-//         ["wf_generated_request_id", "like", `%${selectedRequest.value.name}%`],
-//       ];
-//       const queryParams = {
-//         fields: JSON.stringify(["*"]),
-//         limit_page_length: "None",
-//         limit_start: 0,
-//         filters: JSON.stringify(filters),
-//         order_by: `\`tab${selectedRequest.value.doctype_name}\`.\`creation\` desc`,
-//       };
-
-//       // Fetch the doctype data
-//       axiosInstance
-//         .get(`${apis.resource}${selectedRequest.value.doctype_name}`, {
-//           params: queryParams,
-//         })
-//         .then((res) => {
-//           if (res.data) {
-//             doctypeForm.value = res.data;
-//             // Map values from doctypeForm to showRequest fields
-//             mapFormFieldsToRequest(doctypeForm.value[0], showRequest.value);
-//           }
-//         })
-//         .catch((error) => {
-//           console.error("Error fetching categories data:", error);
-//         });
-//       axiosInstance
-//         .get(`${apis.resource}${doctypes.WFActivityLog}/${selectedRequest.value.name}`)
-//         .then((res) => {
-//           if (res.data) {
-//             // console.log(res.data);
-//             activityData.value = res.data.reason || []; // Ensure it's always an array
-//           }
-//         })
-//         .catch((error) => {
-//           console.error("Error fetching activity data:", error);
-//         });
-//       const modal = new bootstrap.Modal(document.getElementById("viewRequest"), {});
-//       modal.show();
-//     } else {
-//       console.warn(" There is no form fields ");
-//     }
-//   }
-//   if (type === "download") {
-//     selectedRequest.value = data;
-//     // Prepare the filters for fetching data
-//     const filters = [
-//       ["wf_generated_request_id", "like", `%${selectedRequest.value.name}%`],
-//     ];
-//     const queryParams = {
-//       fields: JSON.stringify(["*"]),
-//       limit_page_length: "None",
-//       limit_start: 0,
-//       filters: JSON.stringify(filters),
-//       order_by: `\`tab${selectedRequest.value.doctype_name}\`.\`creation\` desc`,
-//     };
-
-//     // Fetch the doctype data
-//     axiosInstance
-//       .get(`${apis.resource}${selectedRequest.value.doctype_name}`, {
-//         params: queryParams,
-//       })
-//       .then((res) => {
-//         if (res.data) {
-//           doctypeForm.value = res.data;
-
-//           const dataObj = {
-//             form_short_name: data.doctype_name,
-//             name: doctypeForm.value[0].name,
-//           };
-
-//           axiosInstance
-//             .post(apis.preview_dynamic_form, dataObj)
-//             .then((response) => {
-//               pdfPreview.value = response.message;
-//             })
-//             .catch((error) => {
-//               console.error("Error fetching data:", error);
-//             });
-//         }
-//       })
-//       .catch((error) => {
-//         console.error("Error fetching categories data:", error);
-//       });
-
-//     const modal = new bootstrap.Modal(document.getElementById("pdfView"), {});
-//     modal.show();
-//   }
-// }
 // Format the date for display
 const formatDate = (dateString) => {
   if (!dateString) return "N/A";
@@ -448,117 +311,207 @@ const formatAction = (action) => {
   };
   return actionMap[action] || action.toLowerCase();
 };
-// function downloadPdf() {
-
-//   const dataObj = {
-//     "form_short_name": selectedRequest.value.doctype_name,
-//     "name": doctypeForm.value[0].name
-//   };
-
-//   axiosInstance.post(apis.download_pdf_form, dataObj)
-//     .then((response) => {
-
-//       // Assuming 'domain' contains the base URL like 'https://example.com/api/'
-//       let pdfUrl = domain + response.message;
-
-//       // Remove 'api' from the URL if present
-//       pdfUrl = pdfUrl.replace('/api', '');
-
-//       window.open(pdfUrl);
-//     })
-//     .catch((error) => {
-//       console.error("Error fetching data:", error);
-//     });
-// }
-function downloadPdf() {
-  const dataObj = {
-    form_short_name: selectedRequest.value.doctype_name,
-    name: doctypeForm.value[0]?.name,
-    business_unit: businessUnit.value
-
-  };
-
-  axiosInstance
-    .post(apis.download_pdf_form, dataObj)
-    .then((response) => {
-      // Assuming 'domain' contains the base URL like 'https://example.com/api/'
-      let pdfUrl = domain + response.message;
-
-      // Remove 'api' from the URL if present
-      pdfUrl = pdfUrl.replace("/api", "");
-
-      // Create an anchor element to trigger the download
-      const link = document.createElement("a");
-      link.href = pdfUrl;
-      link.download = response.message.split("/").pop(); // Use the file name from the URL
-      link.click();
-    })
-    .catch((error) => {
-      console.error("Error fetching data:", error);
-    });
-}
-
 // Function to capture the form data from ApproverPreview
 const updateFormData = (fieldValues) => {
-  formData.value = formData.value.concat(fieldValues);
+  emittedFormData.value = emittedFormData.value.concat(fieldValues);
 };
+const isCommentsValid = ref(true); // Flag to validate comment field
 
+// function handleEditClick() {
+//   console.log("item", selectedRequest.value);
+
+//   // Hide the modal properly
+//   const modalElement = document.getElementById('viewRequest');
+//   if (modalElement) {
+//     const modalInstance = bootstrap.Modal.getInstance(modalElement); // Get existing modal instance
+//     if (modalInstance) {
+//       modalInstance.hide();
+//     }
+//   }
+
+//   // Navigate to the new route
+//   router.push({
+//     name: "RaiseRequest",
+//     query: {
+//       business_unit: selectedRequest.value.property,
+//       selectedForm: selectedRequest.value.doctype_name,
+//     }
+//   });
+// }
+
+
+
+
+// Function to handle approve button click
+// const handleApproveClick = () => {
+//   if (ApproverReason.value.trim() === "") {
+//     // Set the validation flag to false if comment is empty
+//     isCommentsValid.value = false;
+//   } else {
+//     // Proceed with the Approve action if comments are valid
+//     isCommentsValid.value = true;
+//     ApproverFormSubmission(emittedFormData.value, "Approve"); // Use emittedFormData instead of formData
+//   }
+// };
+
+const resetCommentsValidation = () => {
+  if (ApproverReason.value.trim() !== "") {
+    // If comment is not empty, set isCommentsValid to true
+    isCommentsValid.value = true;
+  }
+};
+// Function to handle form submission
 function ApproverFormSubmission(dataObj, type) {
+
+  if (ApproverReason.value.trim() === "") {
+    isCommentsValid.value = false; // Show validation error
+    return; // Stop execution
+  }
+
+  isCommentsValid.value = true;
+  loading.value = true; // Start loader
+
+
+
+
   let form = {};
-  form["doctype"] = selectedRequest.value.doctype_name;
-  form["company_field"] = selectedRequest.value.property;
-  form["name"] = doctypeForm.value.name;
   if (emittedFormData.value.length) {
     emittedFormData.value.map((each) => {
       form[each.fieldname] = each.value;
     });
   }
-
-  // form['form_json']
-  const formData = new FormData();
-  formData.append("doc", JSON.stringify(form));
-  formData.append("action", "Save");
   axiosInstance
-    .post(apis.savedocs, formData)
+    .put(
+      `${apis.resource}${selectedRequest.value.doctype_name}/${doctypeForm.value.name}`,
+      form
+    )
     .then((response) => {
-      if (response?.docs) {
-        approvalCancelFn(dataObj, type);
+      if (response?.data) {
+        approvalStatusFn(dataObj, type);
+
       }
     })
     .catch((error) => {
-      console.error("Error fetching data:", error);
-    });
+      console.error("Error submitting form:", error);
+    })
+
 }
 
-function approvalCancelFn(dataObj, type) {
+
+function approvalStatusFn(dataObj, type) {
+
+
+  // console.log(dataObj);
   let data = {
     property: selectedRequest.value.property,
     doctype: selectedRequest.value.doctype_name,
-    current_level: selectedRequest.value.current_level,
-    request_id: selectedRequest.value.name,
-    reason: type == "Request Cancelled" ? "Cancelled" : "",
-    files: [],
-    url_for_cancelling_id: "",
-    // "action": type,
-    // "cluster_name": null,
+    request_ids: [selectedRequest.value.name],
+    reason: ApproverReason.value,
+    action: type,
+    files: null,
+    cluster_name: null,
+    url_for_approval_id: "",
     // https://ezyrecon.ezyinvoicing.com/home/wf-requests
+    current_level: selectedRequest.value.current_level,
   };
 
   // need to check this api not working
   axiosInstance
-    .post(apis.wf_cancelling_request, data)
+    .post(apis.requestApproval, { request_details: [data] })
     .then((response) => {
-      if (response?.message?.success) {
-        toast.success(`${type}`, { autoClose: 1000 });
+      if (response?.message?.success === true) {
+        toast.success(`Request ${type}ed`, { autoClose: 1000, transition: "zoom" });
         const modal = bootstrap.Modal.getInstance(document.getElementById("viewRequest"));
         modal.hide();
+        ApproverReason.value = ""; // Clear reason after success
+
+
         receivedForMe();
+      } else {
+        toast.error(`Failed to ${type} request`, { autoClose: 1000, transition: "zoom" });
       }
     })
     .catch((error) => {
-      console.error("Error fetching data:", error);
+      console.error("Error processing request:", error);
+      // toast.error("An error occurred while processing your request.", { autoClose: 1000, transition: "zoom" });
+    })
+    .finally(() => {
+      loading.value = false; // Ensure loader stops
     });
 }
+
+
+// function ApproverCancelSubmission(dataObj, type) {
+
+//   if (ApproverReason.value.trim() === "") {
+//     // Set the validation flag to false if the comment is empty
+//     isCommentsValid.value = false;
+
+//     return; // Stop function execution
+//   }
+//   // Proceed if comments are valid
+//   isCommentsValid.value = true;
+
+//   Rejectloading.value = true; // Start loader
+
+
+
+//   let form = {};
+//   if (emittedFormData.value.length) {
+//     emittedFormData.value.map((each) => {
+//       form[each.fieldname] = each.value;
+//     });
+//   }
+//   axiosInstance
+//     .put(
+//       `${apis.resource}${selectedRequest.value.doctype_name}/${doctypeForm.value.name}`,
+//       form
+//     )
+//     .then((response) => {
+//       if (response?.data) {
+//         const modal = bootstrap.Modal.getInstance(document.getElementById("viewRequest"));
+//         modal.hide();
+//         approvalCancelFn(dataObj, type);
+//       }
+//     });
+// }
+// function approvalCancelFn(dataObj, type) {
+
+
+//   // console.log(dataObj, "data", type);
+//   let data = {
+//     property: selectedRequest.value.property,
+//     doctype: selectedRequest.value.doctype_name,
+//     request_id: selectedRequest.value.name,
+//     reason: ApproverReason.value,
+//     action: type,
+//     files: [],
+//     url_for_cancelling_id: "",
+//     current_level: selectedRequest.value.current_level,
+//   };
+
+//   axiosInstance
+//     .post(apis.wf_cancelling_request, data)
+//     .then((response) => {
+//       if (response?.message) {
+//         ApproverReason.value = "";
+//         if (type == "Request Cancelled") {
+//           toast.success(`${type}`, { autoClose: 1000, transition: "zoom" });
+//         }
+//         const modal = bootstrap.Modal.getInstance(document.getElementById("viewRequest"));
+//         modal.hide();
+//         receivedForMe();
+//       }
+//     })
+//     .catch((error) => {
+//       console.error("Error processing cancellation:", error);
+//       toast.error("An error occurred while processing your request.", { autoClose: 1000, transition: "zoom" });
+//     })
+//     .finally(() => {
+//       Rejectloading.value = false; // Ensure loader stops
+//     });
+// }
+
 
 
 
@@ -579,66 +532,77 @@ function mapFormFieldsToRequest(doctypeData, showRequestData) {
   });
 }
 
+function closeModal() {
+  isCommentsValid.value = true;
+}
+
 const PaginationUpdateValue = (itemsPerPage) => {
   filterObj.value.limitPageLength = itemsPerPage;
   filterObj.value.limit_start = 0;
-  receivedForMe();
+  if (filterObj.value.filters.length) {
+    receivedForMe(filterObj.value.filters);
+  } else {
+    receivedForMe();
+  }
 };
 // Handle updating the limit start
 const PaginationLimitStart = ([itemsPerPage, start]) => {
   filterObj.value.limitPageLength = itemsPerPage;
   filterObj.value.limit_start = start;
-  receivedForMe();
+  if (filterObj.value.filters.length) {
+    receivedForMe(filterObj.value.filters);
+  } else {
+    receivedForMe();
+  }
 };
-const timeout = ref(null); // Store the timeout reference
+
+const filters = ref([]);
+const timeout = ref(null);
 
 function inLineFiltersData(searchedData) {
-    // Clear the previous timeout to prevent multiple API calls
-    clearTimeout(timeout.value);
+  clearTimeout(timeout.value); // Clear previous timeout
 
-    // Set a new timeout to delay the API call
-    timeout.value = setTimeout(() => {
-        // Initialize filters array
-        const filters = [];
+  timeout.value = setTimeout(() => {
+    // Initialize filters array
+    filterObj.value.filters = [];
 
-        // Loop through the table headers and build dynamic filters
-        tableheaders.value.forEach((header) => {
-            const key = header.td_key;
+    // Loop through the table headers and build dynamic filters
+    tableheaders.value.forEach((header) => {
+      const key = header.td_key;
 
-            if (searchedData[key]) {
-                filters.push([key, "like", `%${searchedData[key]}%`]);
-            }
-        });
+      if (searchedData[key]) {
+        // Push as an array of 3 items
+        filterObj.value.filters.push([key, "like", `%${searchedData[key]}%`]);
+      }
+    });
 
-        // Call receivedForMe with or without filters
-        receivedForMe(filters.length ? filters : undefined);
-    }, 500); // Adjust debounce delay as needed (e.g., 500ms)
+    // Call receivedForMe with or without filters
+    if (filterObj.value.filters.length) {
+      receivedForMe(filterObj.value.filters);
+    } else {
+      receivedForMe();
+    }
+  }, 500); // Adjust debounce delay as needed
 }
 function receivedForMe(data) {
   // Initialize filters array for building dynamic query parameters
-  const EmpRequestMail = JSON.parse(localStorage.getItem("employeeData"));
 
-  // Calculate the date one month ago
-  const oneMonthAgo = new Date();
-  oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-  const formattedDate = oneMonthAgo.toISOString().split('T')[0];
+  const EmpRequestdesignation = JSON.parse(localStorage.getItem("employeeData"));
 
   const filters = [
-    ["requested_by", "like", EmpRequestMail.emp_mail_id],
     ["property", "like", `%${newBusinessUnit.value.business_unit}%`],
-    ["status", "=", "Completed"],
-    ["creation", ">=", formattedDate] // Filter to include records from the last month
+    // ["status", "!=", "Request Cancelled"],
+    ["name", "in", viewlist.value]
   ];
-
   if (data) {
     filters.push(...data);
+    console.log(data);
   }
 
-  // Define query parameters for data and count retrieval
   const queryParams = {
     fields: JSON.stringify(["*"]),
-    limit_page_length: filterObj.value?.limitPageLength,
-    limit_start: filterObj.value?.limit_start,
+    limit_page_length: filterObj.value.limitPageLength,
+    limit_start: filterObj.value.limit_start,
     filters: JSON.stringify(filters),
     order_by: "`tabWF Workflow Requests`.`creation` desc",
   };
@@ -651,7 +615,9 @@ function receivedForMe(data) {
 
   // Fetch total count of records matching filters
   axiosInstance
-    .get(`${apis?.resource}${doctypes?.WFWorkflowRequests}`, { params: queryParamsCount })
+    .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, {
+      params: queryParamsCount,
+    })
     .then((res) => {
       totalRecords.value = res.data[0].total_count;
     })
@@ -661,24 +627,41 @@ function receivedForMe(data) {
 
   // Fetch the records matching filters
   axiosInstance
-    .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, { params: queryParams })
+    .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, {
+      params: queryParams,
+    })
     .then((res) => {
-      const newData = res.data;
       if (filterObj.value.limit_start === 0) {
-        tableData.value = newData;
+
+        tableData.value = res.data;
         idDta.value = [...new Set(res.data.map((id) => id.name))];
         docTypeName.value = [
           ...new Set(res.data.map((docTypeName) => docTypeName.doctype_name)),
         ];
         statusOptions.value = [...new Set(res.data.map((status) => status.status))];
-      }else{
-        tableData.value = tableData.value.concat(newData);
       }
+      else {
+        tableData.value = tableData.value.concat(res.data);
+      }
+
     })
     .catch((error) => {
       console.error("Error fetching records:", error);
     });
 }
+const fieldMapping = computed(() => ({
+  // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
+  // credit_irn_generated: { type: "select", options: ["Pending", "Completed", "Error"] },
+  // role: { type: "input" },
+  name: { type: "input" },
+  requested_by: { type: "input" },
+  role: { type: "input" },
+
+
+  status: { type: "select", options: ["Request Raised", "In Progress"] },
+
+}));
+
 
 watch(
   businessUnit,
@@ -686,43 +669,59 @@ watch(
     newBusinessUnit.value.business_unit = newVal;
 
     if (newVal.length) {
-      receivedForMe();
+      ViewOnlyReport();
     }
   },
   { immediate: true }
 );
-onMounted(() => {
-  // receivedForMe()
-});
+
 </script>
 <style scoped>
 .approvebtn {
   width: 146px;
-  height: 30px;
-  /* background: #14D82B; */
+  /* height: 30px; */
+  background: #099819;
   color: white;
   padding: 5px 15px 5px 15px;
   gap: 7px;
   border-radius: 4px;
   opacity: 0px;
+  font-weight: bold;
+}
+
+.edit-btn {
+  background-color: #333;
+  color: white;
+  padding: 5px 15px 5px 15px;
+  border-radius: 4px;
+  font-weight: bold;
 }
 
 .rejectbtn {
   width: 146px;
-  height: 30px;
+  /* height: 30px; */
   background: #fe212e;
   color: white;
   padding: 5px 15px 5px 15px;
   gap: 7px;
   border-radius: 4px;
   opacity: 0px;
+  font-weight: bold;
 }
 
-.pdf-body {
-  width: 100%;
-  height: 70vh;
-  overflow-y: scroll;
-  /* overflow: hidden; */
+.cancelbtn {
+  width: 146px;
+  height: 30px;
+  background: #d1d0d0;
+  color: white;
+  padding: 5px 15px 5px 15px;
+  gap: 7px;
+  border-radius: 4px;
+  opacity: 0px;
+}
+
+.is-invalid {
+  border: 1px solid red;
 }
 
 /* Activity log container */
@@ -787,6 +786,4 @@ onMounted(() => {
 .activity-log-content strong {
   color: #333;
 }
-
-
 </style>
