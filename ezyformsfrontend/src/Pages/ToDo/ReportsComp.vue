@@ -40,8 +40,8 @@
             </section>
             <section>
                 <!-- <div id="datatable" tabindex="0" border="1" style="border-collapse: collapse; width: 100%;"></div> -->
-                <GlobalTable class=" newtable" :tHeaders="listDataheaders" :tData="listData" @cell-click="downloadPdf" isAction="true" download="true"
-                     />
+                <GlobalTable class=" newtable" :tHeaders="listDataheaders" :tData="listData" @cell-click="downloadPdf"
+                    isAction="true" download="true" />
             </section>
         </template>
     </section>
@@ -51,7 +51,7 @@
 
 import GlobalTable from "../../Components/GlobalTable.vue";
 import axiosInstance from "../../shared/services/interceptor";
-import { apis, doctypes,domain } from "../../shared/apiurls";
+import { apis, doctypes, domain } from "../../shared/apiurls";
 import { onBeforeUnmount, onMounted, ref } from "vue";
 // import DataTable from "frappe-datatable";
 // import "frappe-datatable/dist/frappe-datatable.min.css";
@@ -91,7 +91,7 @@ const frappeBody = ref([]);
 const SelectedReportName = ref("");
 
 function viewPreview(data) {
-    console.log(data.name);
+    console.log("data===", data);
     SelectedReportName.value = data.name;
     viewReport.value = true;
 
@@ -191,50 +191,53 @@ function exportReport(type) {
     // Trigger the file download
     window.open(url, '_blank');
 }
-
-
 function downloadPdf(data) {
-    console.log("data",data);
-  const dataObj = {
-    form_short_name: SelectedReportName.value,
-    name: data.name,
-    business_unit:"CRR"
-  };
+//   console.log("data", data);
 
-  axiosInstance
-    .post(apis.download_pdf_form, dataObj)
-    .then((response) => {
-      if (!response || !response.message) {
-        console.error("Invalid response:", response);
-        return;
-      }
+  const doctype = encodeURIComponent(SelectedReportName.value);
+  const name = encodeURIComponent(data.name);
 
-      let pdfUrl = domain + response.message;
+  // Strip /api from start if present
+  let baseUrl = apis.getReportData.replace("/api", "");
 
-      // Remove '/api' from the URL if present
-      pdfUrl = pdfUrl.replace("/api", "");
+  // Dynamically add query parameters
+  const separator = baseUrl.includes("?") ? "&" : "?";
+  const pdfUrl = `${window.location.origin}${baseUrl}${separator}doctype=${doctype}&name=${name}`;
 
-      // Extract filename safely
-      const fileName = response.message.includes("/")
-        ? response.message.split("/").pop()
-        : "download.pdf";
+//   console.log("Final PDF URL:", pdfUrl);
 
-      // Create and trigger download
-      const link = document.createElement("a");
-      link.href = pdfUrl;
-      link.download = fileName;
-      link.target = "_blank"; // Helps with some browser restrictions
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    })
-    .catch((error) => {
-      console.error("Error downloading PDF:", error);
-    });
+  // Open in a new tab instead of forcing download (safer for Frappe-style servers)
+  window.open(pdfUrl, "_blank");
 }
 
 
+
+// function downloadPdf(data) {
+//     console.log("data",data);
+//   const name = data.name;
+//   const doctype = SelectedReportName.value;
+
+//   if (!doctype || !name) {
+//     console.error("Missing doctype or name in data");
+//     return;
+//   }
+
+//   const pdfUrl = `${domain}/printview?doctype=${doctype}&name=${name}`;
+//   console.log(pdfUrl);
+
+//   // Trigger download
+//   const link = document.createElement("a");
+//   link.href = pdfUrl;
+//   link.target = "_blank"; // or "_self" if you want same tab
+//   link.download = `${name}.pdf`; // optional - will only work if `Content-Disposition: attachment` is set by server
+//   document.body.appendChild(link);
+//   link.click();
+//   document.body.removeChild(link);
+// }
+
+
 onMounted(() => {
+    // console.log(domain,process.env.BASE_URL);
     ReportsData();
     // simulateCtrlF();
     document.addEventListener("keydown", handleCtrlF);
@@ -246,7 +249,7 @@ onBeforeUnmount(() => {
 
 </script>
 
-<style lang="scss" scoped >
+<style lang="scss" scoped>
 .dropdown-item {
     cursor: pointer;
 }
@@ -254,5 +257,4 @@ onBeforeUnmount(() => {
 .backtoListbtn {
     border: 1px solid #ccc !important;
 }
-
 </style>
