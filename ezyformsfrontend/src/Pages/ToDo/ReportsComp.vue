@@ -192,24 +192,53 @@ function exportReport(type) {
     window.open(url, '_blank');
 }
 function downloadPdf(data) {
-//   console.log("data", data);
+  if (!data?.name || !SelectedReportName?.value) {
+    console.error("Missing required data for PDF download");
+    return;
+  }
 
-  const doctype = encodeURIComponent(SelectedReportName.value);
-  const name = encodeURIComponent(data.name);
+  const reportName = SelectedReportName.value;
+  const name = data.name;
 
-  // Strip /api from start if present
-  let baseUrl = apis.getReportData.replace("/api", "");
+  const url = apis.getReportData + `?doctype=${encodeURIComponent(reportName)}&name=${encodeURIComponent(name)}`;
 
-  // Dynamically add query parameters
-  const separator = baseUrl.includes("?") ? "&" : "?";
-  const pdfUrl = `${window.location.origin}${baseUrl}${separator}doctype=${doctype}&name=${name}`;
-
-//   console.log("Final PDF URL:", pdfUrl);
-
-  // Open in a new tab instead of forcing download (safer for Frappe-style servers)
-  window.open(pdfUrl, "_blank");
+  // Open the PDF in a new tab
+  window.open(url, "_blank");
 }
 
+
+// function downloadPdf(data) {
+//   console.log("data", data);
+
+//   const doctype = encodeURIComponent(SelectedReportName.value);
+//   const name = encodeURIComponent(data.name);
+
+//   // Remove /api if present
+//   let baseUrl = apis.getReportData.replace("/api", "");
+//   const separator = baseUrl.includes("?") ? "&" : "?";
+//   const pdfUrl = `${window.location.origin}${baseUrl}${separator}doctype=${doctype}&name=${name}`;
+
+//   // Use Axios to fetch the PDF as a Blob
+//   axiosInstance
+//     .get(pdfUrl, { responseType: "blob" })
+//     .then((response) => {
+//       const file = new Blob([response.data], { type: "application/pdf" });
+//       const fileURL = URL.createObjectURL(file);
+
+//       const link = document.createElement("a");
+//       link.href = fileURL;
+//       link.download = `${data.name}.pdf`;
+//       document.body.appendChild(link);
+//       link.click();
+//       document.body.removeChild(link);
+
+//       // Cleanup
+//       URL.revokeObjectURL(fileURL);
+//     })
+//     .catch((error) => {
+//       console.error("Failed to download PDF:", error);
+//     });
+// }
 
 
 // function downloadPdf(data) {
