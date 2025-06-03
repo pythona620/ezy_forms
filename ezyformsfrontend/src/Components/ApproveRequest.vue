@@ -21,7 +21,7 @@
                 <div class="card border-0 shadow-none">
                   <div class="card-body pb-2 d-flex gap-2 align-items-center justify-content-center">
                     <h5 class="card-title">{{ selectedData.doctype_name }}</h5>
-                    <div class="d-flex align-items-baseline gap-2 ps-1 ">
+                    <div  class="d-flex align-items-baseline gap-2 ps-1 ">
                       <span v-if="tableData?.status !== 'Completed' && tableData.status !== 'Request Cancelled'"
                         class="text-warning font-11 text-nowrap fw-bold">
                         Pending ({{ tableData.current_level }} /
@@ -49,7 +49,7 @@
 
                 </div>
 
-                <div v-if="selectedData.type == 'myforms' && tableData.status == 'Request Raised'"
+                <div v-if="selectedData.type == 'myforms' && tableData.status == 'Request Raised' && selectedData.type !== 'myapprovals'"
                   class="d-flex justify-content-end approveBtns">
                   <button type="submit" class="btn Edit_btn" @click.prevent="EditformSubmission()">
                     <span v-if="loading" class="spinner-border spinner-border-sm" role="status"
@@ -164,7 +164,7 @@
 
                 </div>
                 <div class="col-xl-6 col-lg-12 col-md-12">
-                  <button v-if="tableData.status === 'Completed'"
+                  <button v-if="tableData.status === 'Completed' && selectedData.type !== 'myapprovals'"
                     class="btn btn-light font-11 fw-bold h-0 text-decoration-underline" type="button"
                     @click="downloadPdf"><i class="bi bi-arrow-down-circle fw-bold px-1"></i>Download
                   </button>
@@ -598,8 +598,8 @@ function receivedForMe(data) {
   if (data) {
     filters.push(data);
   }
-  if (selectedData.value.type !== 'myteam') {
-    if (selectedData.value.type == "myforms") {
+  if (selectedData.value.type !== 'myteam' && selectedData.value.type !== 'myapprovals') {
+    if (selectedData.value.type == "myforms" ) {
       filters.push(["requested_by", "like", EmpRequestdesignation.emp_mail_id]);
     } else {
       filters.push([
