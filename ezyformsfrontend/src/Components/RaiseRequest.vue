@@ -68,7 +68,7 @@
             <!-- :disabled="!isFormValid" -->
             <button v-if="!selectedData.selectedFormId" class="btn btn-dark font-12" type="submit"
               @click="raiseRequestSubmission">
-              Raise Request
+              {{ selectedData.hasWorkflow == 'No'?'Save':'Raise Request' }}
             </button>
             <button v-if="selectedData.selectedFormId && $route.query.selectedFormStatus == 'Request Cancelled'"
               @click="RequestUpdate" class="btn btn-dark font-12" type="submit">
@@ -112,6 +112,7 @@ const selectedData = ref({
   selectedform: route.query.selectedForm || "", // Retrieve from query
   selectedFormId: route.query.selectedFormId || "", // Retrieve from query
   selectedBusiness_unit : route.query.business_unit || "", // Retrieve from query
+  hasWorkflow: route.query.has_workflow || "", // Retrieve from query
 });
 
 
@@ -956,7 +957,7 @@ function request_raising_fn(item) {
     module_name: "Ezy Forms",
     doctype_name: selectedData.value.selectedform,
     ids: [item.name],
-    reason: "Request Raised",
+    reason: selectedData.value.hasWorkflow === 'No' ? "Completed":"Request Raised",
     url_for_request_id: "",
     files: filepaths.value.length > 0 ? filepaths.value : [],
     property: business_unit.value,

@@ -406,6 +406,7 @@
                     </template>
                   </VueMultiselect>
                   <label class="font-13 ps-1" for="reporting_designation">Reporting Designation</label>
+                  
                   <VueMultiselect v-model="createEmployee.reporting_designation" :options="designations"
                     :multiple="false" :close-on-select="true" :clear-on-select="false" :preserve-search="true"
                     placeholder="Select Reporting Designation" class="font-11 mb-3"
@@ -1144,6 +1145,24 @@ const removeSignature = () => {
     fileInput.value = "";
   }
 };
+// watch(
+//   () => createEmployee.value.reporting_to,
+//   (newValue) => {
+//     if (newValue) {
+//       const selectedEmployee = tableData.value.find(
+//         (emp) => emp.emp_mail_id === newValue
+//       );
+//       if (selectedEmployee) {
+//         createEmployee.value.reporting_designation =
+//           selectedEmployee.designation;
+//           console.log(createEmployee.value.reporting_designation,selectedEmployee.designation);
+//       } 
+//       // else {
+//       //   createEmployee.value.reporting_designation = ""; // Reset if no match found
+//       // }
+//     }
+//   }
+// );
 watch(
   () => createEmployee.value.reporting_to,
   (newValue) => {
@@ -1152,15 +1171,12 @@ watch(
         (emp) => emp.emp_mail_id === newValue
       );
       if (selectedEmployee) {
-        createEmployee.value.reporting_designation =
-          selectedEmployee.designation || "";
-      } else {
-        createEmployee.value.reporting_designation = ""; // Reset if no match found
+        createEmployee.value.reporting_designation = selectedEmployee.designation;
       }
     }
-  }
+  },
+  { immediate: true } // <-- this will trigger the watcher on setup
 );
-
 // function addnewDesignation() {
 //     newDesignation.value = !newDesignation.value
 // }
@@ -1201,7 +1217,17 @@ function actionCreated(rowData, actionEvent) {
       deptData();
       designationData();
       employeeOptions();
-      createEmployee.value = { ...rowData }
+      createEmployee.value = { ...rowData };
+
+      // ✅ Set reporting_designation manually based on reporting_to
+      if (createEmployee.value.reporting_to) {
+        const selectedEmployee = tableData.value.find(
+          (emp) => emp.emp_mail_id === createEmployee.value.reporting_to
+        );
+        if (selectedEmployee) {
+          createEmployee.value.reporting_designation = selectedEmployee.designation;
+        }
+      }
       isMasked.value = true
       isEmailMasked.value = true
       maskPhoneNumber()
@@ -1360,7 +1386,7 @@ function inLineFiltersData(searchedData) {
 
     //     // If there is a match for the key in searchedData, create a 'like' filter
     if (searchedData[key]) {
-      filters.push(key, "like", `%${searchedData[key]}%`);
+      filters.push([key, "like", `%${searchedData[key]}%`]);
     }
     //     // Add filter for selected option
     //     if (key === "selectedOption" && searchedData.selectedOption) {
@@ -1391,7 +1417,7 @@ function inLineFiltersData(searchedData) {
 function employeeData(data) {
   const filters = [["company_field", "like", `%${newbusiness.value}%`]];
   if (data) {
-    filters.push(data);
+    filters.push(...data);
   }
 
   const queryParams = {

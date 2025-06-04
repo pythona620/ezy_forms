@@ -320,6 +320,7 @@ function actionCreated(rowData, actionEvent) {
             routepath: route.path,
             selectedForm: rowData.form_short_name,
             business_unit: rowData.business_unit,
+            has_workflow:rowData.has_workflow
 
 
           },
