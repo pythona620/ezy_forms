@@ -1001,56 +1001,66 @@ watchEffect(() => {
 //         tableFileUpload(file, row, fieldname);
 //     });
 // };
-const handleFileUpload = (event, row, fieldname) => {
-    let selectedFiles = Array.from(event.target.files); // ⬅ Change to 'let'
+const handleFileUpload = async (event, row, fieldname) => {
+    let selectedFiles = Array.from(event.target.files);
     if (!selectedFiles.length) return;
 
     const existingFiles = normalizeFileList(row[fieldname]);
 
-    const totalFiles = existingFiles.length + selectedFiles.length;
-    if (totalFiles > 5) {
-        alert("You can only upload a maximum of 5 files.");
-        selectedFiles = selectedFiles.slice(0, 5 - existingFiles.length); // ✅ Keep only required files
+    if (existingFiles.length >= 5) {
+        alert("Maximum 5 files are allowed.");
+        return;
     }
 
-    selectedFiles.forEach((file) => {
-        tableFileUpload(file, row, fieldname);
-    });
+    const remainingSlots = 5 - existingFiles.length;
+    if (selectedFiles.length > remainingSlots) {
+        alert(`Only ${remainingSlots} more file(s) can be uploaded.`);
+        selectedFiles = selectedFiles.slice(0, remainingSlots);
+    }
 
-    // ✅ Clear input to allow re-selecting same file
+    // Upload files sequentially to preserve order
+    for (const file of selectedFiles) {
+        await tableFileUpload(file, row, fieldname);
+    }
+
     event.target.value = null;
 };
 
 
 
 const tableFileUpload = (file, row, fieldname) => {
-    const randomNumber = generateRandomNumber();
-    const fileName = `mailfiles-${randomNumber}-@${file.name}`;
+    return new Promise((resolve, reject) => {
+        const randomNumber = generateRandomNumber();
+        const fileName = `mailfiles-${randomNumber}-@${file.name}`;
 
-    const formData = new FormData();
-    formData.append("file", file, fileName);
-    formData.append("is_private", "0");
-    formData.append("folder", "Home");
+        const formData = new FormData();
+        formData.append("file", file, fileName);
+        formData.append("is_private", "0");
+        formData.append("folder", "Home");
 
-    axiosInstance
-        .post(apis.uploadfile, formData)
-        .then((res) => {
-            if (res.message && res.message.file_url) {
-                const fileUrl = res.message.file_url;
+        axiosInstance
+            .post(apis.uploadfile, formData)
+            .then((res) => {
+                if (res.message && res.message.file_url) {
+                    const fileUrl = res.message.file_url;
 
-                // Get current list and append
-                let files = normalizeFileList(row[fieldname]);
-                files.push(fileUrl);
+                    // Get current list and append
+                    let files = normalizeFileList(row[fieldname]);
+                    files.push(fileUrl);
 
-                // Store back as comma-separated string
-                row[fieldname] = files.join(',');
-            } else {
-                console.error("file_url not found in the response.");
-            }
-        })
-        .catch((error) => {
-            console.error("Upload error:", error);
-        });
+                    // Store back as comma-separated string
+                    row[fieldname] = files.join(',');
+                    resolve(); // ✅ done
+                } else {
+                    console.error("file_url not found in the response.");
+                    reject();
+                }
+            })
+            .catch((error) => {
+                console.error("Upload error:", error);
+                reject();
+            });
+    });
 };
 
 

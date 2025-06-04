@@ -173,11 +173,10 @@
                                     class="text-danger">*</span></label>
                               </label>
                               <!-- :disabled="selectedData.formId && selectedData.formId.length > 0" -->
-                              <VueMultiselect 
-                                v-model="filterObj.accessible_departments" :options="filteredOptions" :multiple="true"
-                                :close-on-select="false" :clear-on-select="false" :preserve-search="true"
-                                placeholder="Select Designation" class="font-11" @select="handleSelect"
-                                @remove="handleRemove">
+                              <VueMultiselect v-model="filterObj.accessible_departments" :options="filteredOptions"
+                                :multiple="true" :close-on-select="false" :clear-on-select="false"
+                                :preserve-search="true" placeholder="Select Designation" class="font-11"
+                                @select="handleSelect" @remove="handleRemove">
                                 <template #option="{ option }">
                                   <div class="custom-option">
                                     <input type="checkbox" :checked="isChecked(option)" class="custom-checkbox"
@@ -195,43 +194,43 @@
 
 
 
-                              <!-- <VueMultiselect
-                              v-model="filterObj.accessible_departments"
-                              :options="formOptions"
-                              :multiple="true"
-                              :close-on-select="false"
-                              :clear-on-select="false"
-                              :preserve-search="true"
-                              placeholder="Select Designation"
-                              class="font-11"
-                            >
-                              <template #option="{ option }">
-                                <div class="custom-option">
-                                  <input
-                                    type="checkbox"
-                                    :checked="
-                                      filterObj.accessible_departments.includes(
-                                        option
-                                      )
-                                    "
-                                    class="custom-checkbox"
-                                  />
-                                  <span>{{ option }}</span>
-                                </div>
-                              </template>
+                                          <!-- <VueMultiselect
+                                          v-model="filterObj.accessible_departments"
+                                          :options="formOptions"
+                                          :multiple="true"
+                                          :close-on-select="false"
+                                          :clear-on-select="false"
+                                          :preserve-search="true"
+                                          placeholder="Select Designation"
+                                          class="font-11"
+                                        >
+                                          <template #option="{ option }">
+                                            <div class="custom-option">
+                                              <input
+                                                type="checkbox"
+                                                :checked="
+                                                  filterObj.accessible_departments.includes(
+                                                    option
+                                                  )
+                                                "
+                                                class="custom-checkbox"
+                                              />
+                                              <span>{{ option }}</span>
+                                            </div>
+                                          </template>
 
-                              <template #selection="{ values, isOpen }">
-                                <span
-                                  class="multiselect__single font-10"
-                                  v-if="values.length"
-                                  v-show="!isOpen"
-                                >
-                                  {{ values.join(", ") }} selected
-                                </span>
-                              </template>
-                            </VueMultiselect> -->
+                                          <template #selection="{ values, isOpen }">
+                                            <span
+                                              class="multiselect__single font-10"
+                                              v-if="values.length"
+                                              v-show="!isOpen"
+                                            >
+                                              {{ values.join(", ") }} selected
+                                            </span>
+                                          </template>
+                                        </VueMultiselect> -->
 
-                              <!-- <VueMultiselect v-model="filterObj.accessible_departments"
+                                          <!-- <VueMultiselect v-model="filterObj.accessible_departments"
                                                             :options="formOptions" :multiple="true"
                                                             :close-on-select="false" :clear-on-select="false"
                                                             :preserve-search="true" placeholder="Select Designation"
@@ -245,6 +244,22 @@
                                                             </template>
                                                         </VueMultiselect> -->
                             </div>
+                             <div class="mt-3">
+                            <div class="">
+                              <!-- <FormFields labeltext="Owner Of The Form" class="mb-3 w-100"
+                                                            tag="select" name="dept" id="dept"
+                                                            placeholder="Select Department" :options=formOptions
+                                                            v-model="filterObj.owner_of_the_form" /> -->
+                              <label for="">Has Workflow
+                                <!-- <span v-if="!filterObj.has_Workflow" class="text-danger">*</span> -->
+                                </label>
+<!-- :disabled="selectedData.formId && selectedData.formId.length > 0" -->
+                              <Multiselect 
+                                :options="['No']" 
+                                v-model="filterObj.has_workflow" placeholder="Select" :multiple="false"
+                                class="font-11 multiselect" :searchable="true" />
+                            </div>
+                          </div>
                           </div>
                         </div>
 
@@ -415,7 +430,7 @@
                                   <div class="d-flex justify-content-between align-items-center">
                                     <label class="rownames">{{
                                       getRowSuffix(rowIndex)
-                                    }}</label>
+                                      }}</label>
                                     <div>
                                       <button v-if="row.columns.length < 3"
                                         class="btn btn-light bg-transparent border-0 font-12" @click="
@@ -686,7 +701,7 @@
                                               placeholder="Enter field description"></textarea>
 
                                             <small v-if="field.error" class="text-danger font-10">{{ field.error
-                                            }}</small>
+                                              }}</small>
                                           </div>
                                           <div class="drop-zone" @dragover.prevent
                                             @drop="handleFieldDropAtIndex(blockIndex, sectionIndex, rowIndex, columnIndex, column.fields.length)">
@@ -730,14 +745,15 @@
                                                         <!-- :draggable="editMode[tableName]" -->
                                                         <tbody @dragover.prevent="onDragOver"
                                                           @drop="onDrop($event, table)">
-                                                          <tr v-for="(field, index) in table" :key="index" :draggable="editMode[tableName]"
+                                                          <tr v-for="(field, index) in table" :key="index"
+                                                            :draggable="editMode[tableName]"
                                                             @dragstart="onDragStart(index)" @dragend="onDragEnd"
                                                             :class="{ dragging: draggingIndex === index }">
                                                             <td>{{ index + 1 }}</td>
 
                                                             <!-- Label Input -->
                                                             <td v-if="editMode[tableName]">
-                                                              <input v-model="field.label" placeholder="Field Label" 
+                                                              <input v-model="field.label" placeholder="Field Label"
                                                                 class="form-control"
                                                                 :class="{ 'border-1 border-danger': invalidFields[tableName]?.includes(index) }" />
                                                               <span v-if="invalidFields[tableName]?.includes(index)"
@@ -759,11 +775,11 @@
                                                                 </select>
                                                                 <div class=" d-flex">
                                                                   <div class=" d-flex align-items-center gap-2">
-                                                                    
+
                                                                     <div class="d-flex align-items-center">
-                                                                      <input class="font-12 form-control-sm" v-model="field.description"
-                                                                        placeholder="description"
-                                                                        type="text" />  
+                                                                      <input class="font-12 form-control-sm"
+                                                                        v-model="field.description"
+                                                                        placeholder="description" type="text" />
                                                                     </div>
                                                                     <!-- <div>
                                                                       <label for="mandatory"
@@ -912,7 +928,8 @@
                                           <td>{{ index + 1 }}</td>
 
                                           <td v-if="editMode[table.tableName]">
-                                            <input v-model="field.label" placeholder="Field Label" class="form-control"  @blur="updateFieldname(field)"
+                                            <input v-model="field.label" placeholder="Field Label" class="form-control"
+                                              @blur="updateFieldname(field)"
                                               :class="{ 'border-1 border-danger': invalidFields[table.tableName]?.includes(index) }" />
                                             <span v-if="invalidFields[tableIndex]?.includes(index)"
                                               class="font-11 text-danger">Label
@@ -987,7 +1004,8 @@
                                       <div class="d-flex justify-content-between align-items-center mt-1 mb-2">
                                         <div>
                                           <span :class="table.tableName ? 'd-none' : 'text-danger'">*</span>
-                                          <input v-model="table.tableName" placeholder="Table Name" @blur="updateFieldname(table)"
+                                          <input v-model="table.tableName" placeholder="Table Name"
+                                            @blur="updateFieldname(table)"
                                             class="border-less-input font-14 p-0 inputHeight" :class="{
                                               'italic-style': !table.tableName,
                                               'fw-medium': table.tableName,
@@ -1019,7 +1037,8 @@
                                           <div class="d-flex justify-content-between">
                                             <div>
                                               <span :class="field.label ? 'd-none' : 'text-danger'">*</span>
-                                              <input v-model="field.label" placeholder="Name the field" @blur="updateFieldname(field)"
+                                              <input v-model="field.label" placeholder="Name the field"
+                                                @blur="updateFieldname(field)"
                                                 class="border-less-input font-14 p-0 inputHeight" :class="{
                                                   'italic-style': !field.label,
                                                   'fw-medium': field.label,
@@ -1046,10 +1065,9 @@
                                               </div> -->
                                               <div class=" d-flex my-1">
 
-                                                 <input v-if="field.showDescription" v-model="field.description"
-                                              class="form-control font-12 "
-                                              placeholder="Enter field description"/>
-                                              <button class="btn btn-sm text-nowrap font-12"
+                                                <input v-if="field.showDescription" v-model="field.description"
+                                                  class="form-control font-12 " placeholder="Enter field description" />
+                                                <button class="btn btn-sm text-nowrap font-12"
                                                   @click="field.showDescription = !field.showDescription">
                                                   {{ field.showDescription ? 'Hide Description' : (field.description ?
                                                     'Edit Description'
@@ -1351,7 +1369,8 @@ const filterObj = ref({
   business_unit: `${businessUnit.value.value || selectedData.value.business_unit || route.query.business_unit}`,
   form_category: "",
   owner_of_the_form: "",
-  series: ""
+  series: "",
+  has_workflow:""
 });
 const formDescriptions = computed(() => filterObj.value);
 const child_id = ref("");
@@ -1976,7 +1995,7 @@ const afterImmediateEdit = (blockIndex, sectionIndex, tableName) => {
     }));
 
     const formData = {
-      form_short_name: tableName,
+      form_short_name: formatTableName(tableName),
       fields: allFields,
       as_a_block: table.description
     };
@@ -2149,7 +2168,7 @@ const addNewFieldedit = (tableName) => {
     label: "",
     value: "", // Keep value
     isNew: true,
-    description:"",
+    description: "",
     options: childtableHeaders.value[tableName].options ? `\n${childtableHeaders.value[tableName].options}` : `${''}`
   });
   // console.log(childtableHeaders.value[tableName],"mmm");
@@ -2318,7 +2337,7 @@ const childfield = [
     label: "Number",
     type: "Int",
   },
-   {
+  {
     label: "TextArea",
     type: "Text",
   },
@@ -2919,7 +2938,7 @@ const addBlock = () => {
                     label: "", // First column with "Requested by"
                     fields: [
                       {
-                        label: "Requested by",
+                        label: "Requested By",
                         fieldtype: "Data",
                         options: "",
                         reqd: false,
@@ -3385,10 +3404,10 @@ function handleInputChange(event, fieldType) {
   } else {
     formShortNameError.value = ""; // Clear error if input is valid
   }
-if (fieldType === "form_short_name" && /[^a-zA-Z ]/.test(inputValue)) {
-  formShortNameError.value = "Only alphabets and spaces are allowed";
-  return;
-}
+  if (fieldType === "form_short_name" && /[^a-zA-Z ]/.test(inputValue)) {
+    formShortNameError.value = "Only alphabets and spaces are allowed";
+    return;
+  }
   // Check for special characters (allow only letters and numbers)
   if (/[^a-zA-Z0-9& ]/.test(inputValue)) {  // ✅ allow spaces inside
     if (fieldType === "form_name") {

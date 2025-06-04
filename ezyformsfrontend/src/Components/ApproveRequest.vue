@@ -178,7 +178,7 @@
               <div class="activity_height">
                 <div v-for="(item, index) in activityData" :key="index" class="activity-log-item"
                   :class="{ 'last-item': index === activityData.length - 1 }">
-                  <div class="activity-log-dot"></div>
+                  <div :class="item.action === 'Approved' || item.action === 'Request Raised' ? 'activity-log-dot': 'activityRedDot' "></div>
                   <div class="activity-log-content">
                     <p class="font-12 mb-1">
                       <span class="strong-content">{{ formatAction(item.action) }} on </span>
@@ -1091,6 +1091,53 @@ activityDatalog.value = requestcancelled.value
 /* Remove line for the last item */
 .activity-log-item.last-item .activity-log-dot::after {
   content: none;
+}
+.activityRedDot {
+  position: relative;
+  width: 16px;
+  /* Increase size to accommodate padding */
+  height: 16px;
+  background-color: white;
+  /* Inner padding effect */
+  border-radius: 50%;
+  border: 2px dotted #ccc;
+  /* Dotted border */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  margin-top: 3px;
+}
+
+/* Inner dot */
+.activityRedDot::before {
+  content: "";
+  width: 8px;
+  /* Inner dot size */
+  height: 8px;
+  background-color: #ed1212;
+  /* Inner dot color */
+  border-radius: 50%;
+  display: block;
+}
+
+/* Add vertical line using ::after */
+.activityRedDot::after {
+  content: "";
+  position: absolute;
+  top: 18px;
+  /* Position below the dot */
+  left: 50%;
+  width: 1px;
+  height: calc(100% + 50px);
+
+  /* Adjust line length */
+  background: repeating-linear-gradient(to bottom,
+      rgb(133, 133, 133),
+      rgb(133, 133, 133) 4px,
+      transparent 4px,
+      transparent 8px);
+  transform: translateX(-50%);
 }
 
 /* Activity log content */

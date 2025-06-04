@@ -57,12 +57,15 @@
                         <template v-if="
                           field.fieldtype === 'Select'
                         ">
+                        <div class="my-2">
+
                           
-                          <Multiselect :multiple="field.fieldtype === 'Table MultiSelect'"
+                          <Multiselect :multiple="field.fieldtype === 'Table MultiSelect'" :disabled="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel"
                             :options="field.options?.split('\n').filter(opt => opt.trim() !== '') || []"
                             :modelValue="field.value" placeholder="Select"
                             @update:modelValue="(val) => handleSelectChange(val, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
                             class="font-11 multiselect" />
+                        </div>
 
 
                         </template>
@@ -415,16 +418,16 @@
                               <table class="table mb-0">
                                 <thead>
                                   <tr>
-                                    <th>#</th>
-                                    <th v-for="field in headers" :key="field.fieldname">{{ field.label }}</th>
+                                    <!-- <th>#</th> -->
+                                    <th v-for="field in headers" :key="field.fieldname" class="text-center">{{ field.label }}</th>
                                   </tr>
                                 </thead>
                                 <tbody>
                                   <tr v-for="(row, index) in props.childData[tableName]" :key="index">
-                                    <td>{{ index + 1 }}</td>
-                                    <td v-for="field in headers" :key="field.fieldname">
+                                    <!-- <td>{{ index + 1 }}</td> -->
+                                    <td v-for="field in headers" :key="field.fieldname" class="text-center">
                                       <template v-if="isFilePath(row[field.fieldname])">
-                                        <div class="d-flex flex-column gap-1">
+                                        <div class="d-flex flex-column align-items-center gap-1">
                                           <span
                                             v-for="(file, i) in row[field.fieldname].split(',').filter(f => f.trim() !== '')"
                                             :key="i">
