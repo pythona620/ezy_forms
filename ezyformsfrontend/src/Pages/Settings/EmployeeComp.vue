@@ -886,14 +886,33 @@ const emailError = ref("");
 //     emailError.value = "";
 //   }
 // };
+// const validateEmail = () => {
+//   const email = originalEmail.value || createEmployee.value.emp_mail_id;
+//   const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+//   if (!emailPattern.test(email)) {
+//     emailError.value = "Invalid email address";
+//   } else {
+//     emailError.value = "";
+//   }
+// };
+
 const validateEmail = () => {
-  const email = originalEmail.value || createEmployee.value.emp_mail_id;
+  const email = (originalEmail.value || createEmployee.value.emp_mail_id)?.trim().toLowerCase();
   const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
   if (!emailPattern.test(email)) {
     emailError.value = "Invalid email address";
   } else {
-    emailError.value = "";
+    const emailAlreadyExists = employeeEmails.value.some(
+      emp => emp.emp_mail_id?.toLowerCase() === email
+    );
+
+    if (emailAlreadyExists) {
+      emailError.value = "Email already exists";
+    } else {
+      emailError.value = "";
+    }
   }
 };
 
@@ -1214,6 +1233,7 @@ function actionCreated(rowData, actionEvent) {
   if (actionEvent?.name === 'Edit Employee') {
     if (rowData) {
       phoneError.value = ""
+      emailError.value=""
       deptData();
       designationData();
       employeeOptions();
@@ -1558,7 +1578,13 @@ function createEmpl() {
       transition: "zoom",
     });
     return;
-
+  }
+  if(emailError.value){
+    toast.error("Employee Email Id already exists", {
+      autoClose: 1000,
+      transition: "zoom",
+    });
+    return; 
   }
   createEmployee.value.company_field = businessUnit.value;
   const dataObj = {
