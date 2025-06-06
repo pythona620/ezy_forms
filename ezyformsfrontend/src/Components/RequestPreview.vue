@@ -34,7 +34,7 @@
                                                             field.label }}</span>
                                                     <span class="ms-1 text-danger">{{
                                                         field.reqd === 1 ? "*" : ""
-                                                    }}</span>
+                                                        }}</span>
                                                 </label>
                                             </div>
 
@@ -509,7 +509,7 @@
                                                         <div>
                                                             <span class="font-13 text-secondary ">{{
                                                                 field.label.replace(/_/g, " ")
-                                                            }}</span>
+                                                                }}</span>
                                                         </div>
                                                         <table class="table  rounded-table" border="1" width="100%">
                                                             <thead>
@@ -598,7 +598,10 @@
                                                                             </div>
                                                                         </template>
                                                                         <template v-if="field.fieldtype === 'Date'">
-                                                                            <input type="date" :min="past" :max="today"
+
+                                                                            <input type="date"
+                                                                                :min="field.fieldname === 'expense_date' ? null : today"
+                                                                                :max="field.fieldname === 'expense_date' ? today : null"
                                                                                 :title="row[field.fieldname]"
                                                                                 class="form-control font-12"
                                                                                 v-model="row[field.fieldname]" />
@@ -692,6 +695,7 @@
                                                                     <td class="text-center font-12">Total</td>
                                                                     <td v-for="field in table" :key="field.fieldname"
                                                                         class="text-center font-12">
+
                                                                         <span
                                                                             v-if="field.fieldtype === 'Int' && field.description && /[+\-*/]/.test(field.description) && field.label.includes('Total')">
                                                                             {{
@@ -769,12 +773,17 @@ const currentFieldOptions = ref('');
 const tableRows = reactive({});
 
 const past = new Date().toISOString().split('T')[0]
-// const today = new Date().toISOString().split('T')[0]; 
+// const today = new Date().toISOString().split('T')[0];  
+// const now = new Date();
+// const pad = (n) => n.toString().padStart(2, '0');
+
+// // Format: YYYY-MM-DDTHH:MM (suitable for datetime-local input)
+// const today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
 const now = new Date();
 const pad = (n) => n.toString().padStart(2, '0');
 
-// Format: YYYY-MM-DDTHH:MM (suitable for datetime-local input)
-const today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+const today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+
 const formQuestions = ref([
     "The Porch & Main Gate is manned and lighting is sufficient.",
     "Reception area is clean & all brand standards in place.",
@@ -833,7 +842,7 @@ const closePreview = () => {
 watch(
     () => tableRows,
     () => {
-        // updateFirstRowName();
+        updateFirstRowName();
         const finalData = {};
 
         for (const [tableIndex, rows] of Object.entries(tableRows)) {
@@ -884,21 +893,21 @@ const addRow = (tableIndex) => {
 const removeRow = (tableIndex, rowIndex) => {
     tableRows[tableIndex].splice(rowIndex, 1);
 };
-// function updateFirstRowName() {
-//   for (const tableIndex in tableRows) {
-//     const rows = tableRows[tableIndex];
-//     const headers = props.tableHeaders[tableIndex];
+function updateFirstRowName() {
+    for (const tableIndex in tableRows) {
+        const rows = tableRows[tableIndex];
+        const headers = props.tableHeaders[tableIndex];
 
-//     if (rows && rows.length > 0 && headers?.length > 0) {
-//       const firstFieldName = headers[0].fieldname;
+        if (rows && rows.length > 0 && headers?.length > 0) {
+            const firstFieldName = headers[0].fieldname;
 
-//       // ✅ Use includes instead of exact match
-//       if (firstFieldName && firstFieldName.toLowerCase().includes('details')) {
-//         rows[0][firstFieldName] = 'Name';
-//       }
-//     }
-//   }
-// }
+            // ✅ Use includes instead of exact match
+            if (firstFieldName && firstFieldName.toLowerCase().includes('details')) {
+                rows[0][firstFieldName] = 'Name';
+            }
+        }
+    }
+}
 
 
 
