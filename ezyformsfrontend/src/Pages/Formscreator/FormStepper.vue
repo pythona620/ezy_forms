@@ -493,7 +493,7 @@
                                                                                     @dragover="handleDragOver"
                                                                                     @drop="handleDrop($event, fieldIndex, 'field', blockIndex, sectionIndex, rowIndex, columnIndex)" -->
                                         <div v-if="column.fields.length === 0" class="empty-drop-zone" @dragover.prevent
-                                          @drop="handleFieldDropAtIndex(blockIndex, sectionIndex, rowIndex, columnIndex, 0)">
+                                          @drop="(e) => handleFieldDropAtIndex(e, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
                                         </div>
                                         <div v-for="(field, fieldIndex) in column.fields" :key="'field-' + fieldIndex"
                                           @mouseenter="
@@ -509,12 +509,14 @@
                                           @dragstart="handleDragStart($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
 
                                           <div class="drop-zone" @dragover.prevent
-                                            @drop="handleFieldDropAtIndex(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
+                                            @drop="(e) => handleFieldDropAtIndex(e, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
                                           </div>
 
                                           <div v-if="field.fieldtype !== 'Table'" class="px-1 dynamic_fied field-border"
-                                            @dragover.prevent
-                                            @drop="handleFieldDropAtIndex(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
+                                            draggable="true"
+  @dragstart="handleDragStart($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+  @dragover.prevent
+  @drop="(e) => handleFieldDropAtIndex(e, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
                                             <div class="d-flex justify-content-between">
                                               <div class="flex-column d-flex">
                                                 <input v-model="field.label" placeholder="Name the field" :class="[
@@ -689,7 +691,7 @@
                                             }}</small>
                                           </div>
                                           <div class="drop-zone" @dragover.prevent
-                                            @drop="handleFieldDropAtIndex(blockIndex, sectionIndex, rowIndex, columnIndex, column.fields.length)">
+                                            @drop="(e) => handleFieldDropAtIndex(e, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
                                           </div>
                                           <div class="childtableShow">
                                             <div>
@@ -863,6 +865,12 @@
                                           </div>
                                         </div>
 
+                                        <div
+  class="drop-zone"
+  @dragover.prevent
+  @drop="(e) => handleFieldDropAtIndex(e, blockIndex, sectionIndex, rowIndex, columnIndex, fields.length)"
+  style="height: 10px; background-color: transparent"
+/>
                                         <div class="d-flex justify-content-center align-items-center my-2">
                                           <button class="btn btn-light btn-sm d-flex align-items-center addField m-2"
                                             @click="
@@ -997,6 +1005,9 @@
                                             class="text-danger font-12">
                                             {{ fieldErrors[`${blockIndex}-${sectionIndex}-${tableIndex}`].tableName }}
                                           </div>
+                                          <div v-if="tableExistsMessage" class="text-danger font-12">
+  {{ tableExistsMessage }}
+</div>
                                           <div class=" d-flex align-items-center gap-2">
                                             <div class="d-flex align-items-center">
                                               <input class="font-12" v-model="table.as_a_block" :true-value="1"
@@ -1428,6 +1439,7 @@ const handleDragStart = (event, blockIndex, sectionIndex, rowIndex, columnIndex,
 };
 
 const handleFieldDropAtIndex = (
+  event,
   targetBlock,
   targetSection,
   targetRow,
@@ -1444,37 +1456,85 @@ const handleFieldDropAtIndex = (
     fieldIndex: fromFieldIndex,
   } = draggedField.value;
 
-  // Avoid inserting into same place
-  const isSameLocation =
-    fromBlock === targetBlock &&
-    fromSection === targetSection &&
-    fromRow === targetRow &&
-    fromColumn === targetColumn;
-
   const fromFields =
     blockArr[fromBlock].sections[fromSection].rows[fromRow].columns[fromColumn].fields;
 
   const targetFields =
     blockArr[targetBlock].sections[targetSection].rows[targetRow].columns[targetColumn].fields;
 
-  // Remove from original position
+  // Avoid self-drop at same position
+  if (
+    fromBlock === targetBlock &&
+    fromSection === targetSection &&
+    fromRow === targetRow &&
+    fromColumn === targetColumn &&
+    fromFieldIndex === insertIndex
+  ) return;
+
+  // Remove dragged field
   const movedField = fromFields.splice(fromFieldIndex, 1)[0];
 
-  // Adjust insert index if from same array and before insert point
+  // Adjust insert index if dragging within same list and moving forward
   if (
-    isSameLocation &&
-    fromColumn === targetColumn &&
+    fromFields === targetFields &&
     fromFieldIndex < insertIndex
   ) {
-    insertIndex -= 1;
+    insertIndex--;
   }
 
-  // Insert at desired index
+  // Insert at new position
   targetFields.splice(insertIndex, 0, movedField);
 
   draggedField.value = null;
 };
 
+const tableExistsMessage = ref('');
+
+const GetDoctypeList = (searchText) => {
+  const filters = [
+    ['module', 'in', ['User Forms']],
+    ['istable', '=', 1],
+  ];
+
+  if (searchText?.trim()) {
+    filters.push(['name', 'like', `%${searchText}%`]);
+  }
+
+  const queryParams = {
+    fields: JSON.stringify(['name']),
+    filters: JSON.stringify(filters),
+    limit_page_length: '10',
+  };
+
+  return axiosInstance
+    .get(apis.resource + doctypes.doctypesList, { params: queryParams })
+    .then((res) => res.data || [])
+    .catch((error) => {
+      console.error('Error fetching doctype list:', error);
+      return [];
+    });
+};
+
+const matched=ref(null)
+
+const updateFieldname = async (field) => {
+  if (field.tableName) {
+    const searchText = field.tableName.trim();
+    const existing = await GetDoctypeList(searchText);
+
+     matched.value = existing.find(item => item.name.toLowerCase() === searchText.toLowerCase());
+
+    if (matched.value) {
+      tableExistsMessage.value = 'Table already exists';
+    }
+  } else {
+    tableExistsMessage.value = '';
+  }
+
+  if (field.label) {
+    field.fieldname = generateFieldname(field.label);
+  }
+};
 
 // const linkSearchQuery = ref('');
 // const linkSearchResults = ref([]);
@@ -1786,11 +1846,6 @@ const addFieldToTable = (blockIndex, sectionIndex, tableIndex) => {
 
   });
 };
-const updateFieldname = (field) => {
-  if (field.label) {
-    field.fieldname = generateFieldname(field.label);
-  }
-};
 
 const removeChildTable = (blockIndex, sectionIndex, tableIndex) => {
   blockArr[blockIndex].sections[sectionIndex].childTables.splice(tableIndex, 1);
@@ -1851,6 +1906,13 @@ const processFields = (blockIndex, sectionIndex, tableIndex) => {
   const hasErrors = isEmptyFieldType(blockIndex, sectionIndex, tableIndex);
   if (hasErrors) {
     toast.error("Please fix validation errors before creating the table", {
+      transition: "zoom",
+    });
+    return;
+  }
+  if(matched.value){
+    //  tableExistsMessage.value = 'Table already exists';
+    toast.error("Table already exists", {
       transition: "zoom",
     });
     return;
