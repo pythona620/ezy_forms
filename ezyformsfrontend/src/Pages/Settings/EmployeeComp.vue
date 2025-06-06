@@ -1395,43 +1395,72 @@ const PaginationLimitStart = ([itemsPerPage, start]) => {
   filterObj.value.limit_start = start;
   employeeData();
 };
+const timeout = ref(null);
 
 function inLineFiltersData(searchedData) {
   //   // Initialize filters array
-  const filters = [];
+  // const filters = [];
 
-  //   // Loop through the tableheaders and build dynamic filters based on the `searchedData`
-  tableheaders.value.forEach((header) => {
-    const key = header.td_key;
+  // //   // Loop through the tableheaders and build dynamic filters based on the `searchedData`
+  // tableheaders.value.forEach((header) => {
+  //   const key = header.td_key;
 
-    //     // If there is a match for the key in searchedData, create a 'like' filter
-    if (searchedData[key]) {
-      filters.push([key, "like", `%${searchedData[key]}%`]);
-    }
-    //     // Add filter for selected option
-    //     if (key === "selectedOption" && searchedData.selectedOption) {
-    //       filters.push([key, "=", searchedData.selectedOption]);
-    //     }
-    //     // Special handling for 'invoice_date' to create a 'Between' filter (if it's a date)
-    //     if (key === "invoice_date" && searchedData[key]) {
-    //       filters.push([key, "Between", [searchedData[key], searchedData[key]]]);
-    //     }
+  //   //     // If there is a match for the key in searchedData, create a 'like' filter
+  //   if (searchedData[key]) {
+  //     filters.push([key, "like", `%${searchedData[key]}%`]);
+  //   }
+  //   //     // Add filter for selected option
+  //   //     if (key === "selectedOption" && searchedData.selectedOption) {
+  //   //       filters.push([key, "=", searchedData.selectedOption]);
+  //   //     }
+  //   //     // Special handling for 'invoice_date' to create a 'Between' filter (if it's a date)
+  //   //     if (key === "invoice_date" && searchedData[key]) {
+  //   //       filters.push([key, "Between", [searchedData[key], searchedData[key]]]);
+  //   //     }
 
-    //     // Special handling for 'invoice_type' or 'irn_generated' to create an '=' filter
-    //     if ((key === "invoice_type" || key === "credit_irn_generated") && searchedData[key]) {
-    //       filters.push([key, "=", searchedData[key]]);
-    //     }
-  });
+  //   //     // Special handling for 'invoice_type' or 'irn_generated' to create an '=' filter
+  //   //     if ((key === "invoice_type" || key === "credit_irn_generated") && searchedData[key]) {
+  //   //       filters.push([key, "=", searchedData[key]]);
+  //   //     }
+  // });
 
-  //   // Log filters to verify
+  // //   // Log filters to verify
 
-  //   // Once the filters are built, pass them to fetchData function
-  if (filters.length) {
-    employeeData(filters);
-  } else {
-    employeeData();
-  }
+  // //   // Once the filters are built, pass them to fetchData function
+  // if (filters.length) {
+  //   employeeData(filters);
+  // } else {
+  //   employeeData();
+  // }
   //   fetchTotalRecords(filters);
+
+
+
+      clearTimeout(timeout.value); // Clear previous timeout
+
+    timeout.value = setTimeout(() => {
+        // Initialize filters array
+        filterObj.value.filters = [];
+
+        // Loop through the table headers and build dynamic filters
+        tableheaders.value.forEach((header) => {
+            const key = header.td_key;
+
+            if (searchedData[key]) {
+                // Push as an array of 3 items
+                filterObj.value.filters.push([key, "like", `%${searchedData[key]}%`]);
+            }
+        });
+
+        // Call receivedForMe with or without filters
+        if (filterObj.value.filters.length) {
+          filterObj.value.limit_start = 0;
+
+            employeeData(filterObj.value.filters);
+        } else {
+            employeeData();
+        }
+    }, 500);
 }
 
 function employeeData(data) {
@@ -1445,7 +1474,7 @@ function employeeData(data) {
     filters: JSON.stringify(filters),
     limit_page_length: filterObj.value.limitPageLength,
     limit_start: filterObj.value.limit_start,
-    order_by: "`tabEzy Employee`.`creation` desc",
+    order_by: "`tabEzy Employee`.`enable` DESC,`tabEzy Employee`.`creation` DESC",
   };
   const queryParamsCount = {
     fields: JSON.stringify(["count(name) AS total_count"]),
