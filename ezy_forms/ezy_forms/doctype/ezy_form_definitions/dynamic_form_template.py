@@ -449,6 +449,9 @@ template_str = """
             .watermark {
              display: block;
             }
+            .checkbox-gap{
+                margin:10px 0px;
+            }
             
         }
         
@@ -696,7 +699,7 @@ template_str = """
                                                 {% for value in selected_values_list if value %}
                                                     <div class="checkbox-gap">
                                                         <span class="custom-checkbox checked"></span>
-                                                        <span>{{ value }}</span>
+                                                        <span style="margin-top:5px;">{{ value }}</span>
                                                     </div>
                                                 {% endfor %}
                                             </div>

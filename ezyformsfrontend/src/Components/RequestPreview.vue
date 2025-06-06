@@ -34,7 +34,7 @@
                                                             field.label }}</span>
                                                     <span class="ms-1 text-danger">{{
                                                         field.reqd === 1 ? "*" : ""
-                                                        }}</span>
+                                                    }}</span>
                                                 </label>
                                             </div>
 
@@ -124,35 +124,28 @@
                                                 </div>
                                             </template>
 
+
                                             <template v-else-if="field.fieldtype == 'Attach'">
                                                 <input :disabled="props.readonlyFor === 'true'" type="file"
                                                     accept="image/jpeg,image/png,application/pdf"
                                                     :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
                                                     class="form-control previewInputHeight font-10 mt-2" multiple
-                                                    @change="
-                                                        logFieldValue(
-                                                            $event,
-                                                            blockIndex,
-                                                            sectionIndex,
-                                                            rowIndex,
-                                                            columnIndex,
-                                                            fieldIndex
-                                                        )
-                                                        " />
+                                                    @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
+
                                                 <div v-if="field.value" class="d-flex flex-wrap gap-2">
                                                     <div v-for="(fileUrl, index) in field.value.split(',').map(f => f.trim())"
                                                         :key="index" class="position-relative d-inline-block"
                                                         @mouseover="hovered = index" @mouseleave="hovered = null">
-                                                        <!-- Show image thumbnail -->
-                                                        <img v-if="isImageFile(fileUrl)" :src="fileUrl"
-                                                            class="img-thumbnail mt-2 cursor-pointer border-0"
-                                                            style="max-width: 100px; max-height: 100px" />
-
-                                                        <!-- Show PDF icon if not image -->
-                                                        <div v-else
-                                                            class="d-flex align-items-center justify-content-center border mt-2"
-                                                            style="width: 100px; height: 100px; background: #f9f9f9">
-                                                            <i class="bi bi-file-earmark-pdf fs-1 text-danger"></i>
+                                                        <!-- Click to open modal -->
+                                                        <div @click="openPreview(fileUrl)" style="cursor: pointer">
+                                                            <img v-if="isImageFile(fileUrl)" :src="fileUrl"
+                                                                class="img-thumbnail mt-2 border-0"
+                                                                style="max-width: 100px; max-height: 100px" />
+                                                            <div v-else
+                                                                class="d-flex align-items-center justify-content-center border mt-2"
+                                                                style="width: 100px; height: 100px; background: #f9f9f9">
+                                                                <i class="bi bi-file-earmark-pdf fs-1 text-danger"></i>
+                                                            </div>
                                                         </div>
 
                                                         <!-- Remove icon -->
@@ -165,8 +158,24 @@
                                                     </div>
                                                 </div>
 
-                                                <!-- File input for uploading -->
+                                                <!-- Modal Preview -->
+                                                <div v-if="showModal" class="modal-backdrop" @click.self="closePreview"
+                                                    style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1050;">
+                                                    <div
+                                                        style="background: white; padding: 20px; max-width: 90%; max-height: 90%; overflow: auto; border-radius: 8px; position: relative;">
 
+                                                        <button @click="closePreview"
+                                                            style="position: absolute; top: 10px; right: 10px; border: none; background: transparent; font-size: 20px;">&times;</button>
+
+                                                        <!-- Image Preview -->
+                                                        <img v-if="isImageFile(previewUrl)" :src="previewUrl"
+                                                            style="max-width: 100%; max-height: 80vh;" />
+
+                                                        <!-- PDF Preview -->
+                                                        <iframe v-else :src="previewUrl"
+                                                            style="width: 80vw; height: 80vh;" frameborder="0"></iframe>
+                                                    </div>
+                                                </div>
                                             </template>
                                             <template v-else-if="field.fieldtype == 'Check'">
                                                 <input type="checkbox" :value="field.value"
@@ -413,11 +422,66 @@
                                                                     </template>
                                                                     <template
                                                                         v-else-if="fieldItem.fieldtype === 'Attach'">
+                                                                        <!-- File Input -->
                                                                         <input multiple type="file"
                                                                             class="form-control font-12"
                                                                             accept="image/jpeg,image/png,application/pdf"
                                                                             @change="handleFileUpload($event, row, fieldItem.fieldname)" />
+
+                                                                        <!-- Preview Section -->
+                                                                        <div v-if="row[fieldItem.fieldname]"
+                                                                            class="d-flex flex-wrap gap-2">
+                                                                            <div v-for="(fileUrl, index) in normalizeFileList(row[fieldItem.fieldname])"
+                                                                                :key="index"
+                                                                                class="position-relative d-inline-block"
+                                                                                @mouseover="hovered = index"
+                                                                                @mouseleave="hovered = null">
+                                                                                <!-- Click to Preview -->
+                                                                                <div @click="openPreview(fileUrl)"
+                                                                                    style="cursor: pointer">
+                                                                                    <!-- Show image thumbnail -->
+                                                                                    <img v-if="isImageFile(fileUrl)"
+                                                                                        :src="fileUrl"
+                                                                                        class="img-thumbnail mt-2 border-0"
+                                                                                        style="max-width: 100px; max-height: 100px" />
+
+                                                                                    <!-- Show PDF icon -->
+                                                                                    <div v-else
+                                                                                        class="d-flex align-items-center justify-content-center border mt-2"
+                                                                                        style="width: 100px; height: 100px; background: #f9f9f9">
+                                                                                        <i
+                                                                                            class="bi bi-file-earmark-pdf fs-1 text-danger"></i>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <!-- Modal Preview -->
+                                                                        <div v-if="showModal" class="modal-backdrop"
+                                                                            @click.self="closePreview" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+           background: rgba(0,0,0,0.5); display: flex; align-items: center;
+           justify-content: center; z-index: 1050;">
+                                                                            <div style="background: white; padding: 20px; max-width: 90%; max-height: 90%;
+             overflow: auto; border-radius: 8px; position: relative;">
+                                                                                <button @click="closePreview" style="position: absolute; top: 10px; right: 10px;
+               border: none; background: transparent; font-size: 20px;">
+                                                                                    &times;
+                                                                                </button>
+
+                                                                                <!-- Image Preview -->
+                                                                                <img v-if="isImageFile(previewUrl)"
+                                                                                    :src="previewUrl"
+                                                                                    style="max-width: 100%; max-height: 80vh;" />
+
+                                                                                <!-- PDF Preview -->
+                                                                                <iframe v-else :src="previewUrl"
+                                                                                    style="width: 80vw; height: 80vh;"
+                                                                                    frameborder="0"></iframe>
+                                                                            </div>
+                                                                        </div>
                                                                     </template>
+
+
                                                                 </div>
                                                             </div>
 
@@ -445,7 +509,7 @@
                                                         <div>
                                                             <span class="font-13 text-secondary ">{{
                                                                 field.label.replace(/_/g, " ")
-                                                                }}</span>
+                                                            }}</span>
                                                         </div>
                                                         <table class="table  rounded-table" border="1" width="100%">
                                                             <thead>
@@ -578,18 +642,22 @@
                                                                                     class="position-relative d-inline-block"
                                                                                     @mouseover="hovered = index"
                                                                                     @mouseleave="hovered = null">
-                                                                                    <!-- Show Image Thumbnail -->
-                                                                                    <img v-if="isImageChildFile(fileUrl)"
-                                                                                        :src="fileUrl"
-                                                                                        class="img-thumbnail mt-2 cursor-pointer border-0"
-                                                                                        style="max-width: 100px; max-height: 100px" />
+                                                                                    <!-- Preview click -->
+                                                                                    <div @click="openPreview(fileUrl)"
+                                                                                        style="cursor: pointer">
+                                                                                        <!-- Show Image Thumbnail -->
+                                                                                        <img v-if="isImageChildFile(fileUrl)"
+                                                                                            :src="fileUrl"
+                                                                                            class="img-thumbnail mt-2 border-0"
+                                                                                            style="max-width: 100px; max-height: 100px" />
 
-                                                                                    <!-- Show PDF Icon -->
-                                                                                    <div v-else
-                                                                                        class="d-flex align-items-center justify-content-center border mt-2"
-                                                                                        style="width: 100px; height: 100px; background: #f9f9f9">
-                                                                                        <i
-                                                                                            class="bi bi-file-earmark-pdf fs-1 text-danger"></i>
+                                                                                        <!-- Show PDF Icon -->
+                                                                                        <div v-else
+                                                                                            class="d-flex align-items-center justify-content-center border mt-2"
+                                                                                            style="width: 100px; height: 100px; background: #f9f9f9">
+                                                                                            <i
+                                                                                                class="bi bi-file-earmark-pdf fs-1 text-danger"></i>
+                                                                                        </div>
                                                                                     </div>
 
                                                                                     <!-- Remove Icon -->
@@ -602,6 +670,7 @@
                                                                                 </div>
                                                                             </div>
                                                                         </template>
+
 
 
 
@@ -745,6 +814,20 @@ const getInputType = (type) => {
     if (t === 'int') return 'number';
     return t;
 };
+
+
+const previewUrl = ref('')
+const showModal = ref(false)
+
+const openPreview = (url) => {
+    previewUrl.value = url
+    showModal.value = true
+}
+
+const closePreview = () => {
+    showModal.value = false
+    previewUrl.value = ''
+}
 // console.log(tableRows);
 // Format as 'YYYY-MM-DDTHH:MM'
 watch(
@@ -1210,11 +1293,11 @@ onMounted(() => {
                                 emit("updateField", field);
 
                             }
-                            if (field.label.includes("Requested by")) {
+                            if (field.label.includes("Requested by") || field.label.includes("Requested By")) {
                                 field.value = parsedData.emp_name;
                                 emit("updateField", field);
-
                             }
+
                             if (field.fieldtype === "Date" && !field.value) {
                                 field.value = new Date().toISOString().split('T')[0]; // Ensure format is YYYY-MM-DD
                                 // console.log("Setting field.value:", field.value); // Debugging log

@@ -194,7 +194,7 @@
 
 
 
-                                          <!-- <VueMultiselect
+                              <!-- <VueMultiselect
                                           v-model="filterObj.accessible_departments"
                                           :options="formOptions"
                                           :multiple="true"
@@ -230,7 +230,7 @@
                                           </template>
                                         </VueMultiselect> -->
 
-                                          <!-- <VueMultiselect v-model="filterObj.accessible_departments"
+                              <!-- <VueMultiselect v-model="filterObj.accessible_departments"
                                                             :options="formOptions" :multiple="true"
                                                             :close-on-select="false" :clear-on-select="false"
                                                             :preserve-search="true" placeholder="Select Designation"
@@ -244,22 +244,28 @@
                                                             </template>
                                                         </VueMultiselect> -->
                             </div>
-                             <div class="mt-3">
-                            <div class="">
-                              <!-- <FormFields labeltext="Owner Of The Form" class="mb-3 w-100"
-                                                            tag="select" name="dept" id="dept"
-                                                            placeholder="Select Department" :options=formOptions
-                                                            v-model="filterObj.owner_of_the_form" /> -->
-                              <label for="">Has Workflow
-                                <!-- <span v-if="!filterObj.has_Workflow" class="text-danger">*</span> -->
+                            <div class="mt-3">
+                              <div class="">
+                                
+                                <label for="">Has Workflow
+                                  <!-- <span v-if="!filterObj.has_Workflow" class="text-danger">*</span> -->
                                 </label>
-<!-- :disabled="selectedData.formId && selectedData.formId.length > 0" -->
-                              <Multiselect 
-                                :options="['No']" 
-                                v-model="filterObj.has_workflow" placeholder="Select" :multiple="false"
-                                class="font-11 multiselect" :searchable="true" />
+                                <!-- :disabled="selectedData.formId && selectedData.formId.length > 0" -->
+                                <Multiselect :options="['No']" v-model="filterObj.has_workflow" placeholder="Select"
+                                  :multiple="false" class="font-11 multiselect" :searchable="true" />
+                              </div>
                             </div>
-                          </div>
+                            <div class="mt-3">
+                              <div class="">
+                               
+                                <label for="">Reverse Workflow
+                                  <!-- <span v-if="!filterObj.workflow_check" class="text-danger">*</span> -->
+                                </label>
+                                <!-- :disabled="selectedData.formId && selectedData.formId.length > 0" -->
+                                <Multiselect :options="['Yes']" v-model="filterObj.workflow_check" placeholder="Select"
+                                  :multiple="false" class="font-11 multiselect" :searchable="true" />
+                              </div>
+                            </div>
                           </div>
                         </div>
 
@@ -430,7 +436,7 @@
                                   <div class="d-flex justify-content-between align-items-center">
                                     <label class="rownames">{{
                                       getRowSuffix(rowIndex)
-                                      }}</label>
+                                    }}</label>
                                     <div>
                                       <button v-if="row.columns.length < 3"
                                         class="btn btn-light bg-transparent border-0 font-12" @click="
@@ -508,7 +514,7 @@
                                                                                     @dragover="handleDragOver"
                                                                                     @drop="handleDrop($event, fieldIndex, 'field', blockIndex, sectionIndex, rowIndex, columnIndex)" -->
                                         <div v-if="column.fields.length === 0" class="empty-drop-zone" @dragover.prevent
-                                          @drop="handleFieldDropAtIndex(blockIndex, sectionIndex, rowIndex, columnIndex, 0)">
+                                          @drop="(e) => handleFieldDropAtIndex(e, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
                                         </div>
                                         <div v-for="(field, fieldIndex) in column.fields" :key="'field-' + fieldIndex"
                                           @mouseenter="
@@ -524,12 +530,14 @@
                                           @dragstart="handleDragStart($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
 
                                           <div class="drop-zone" @dragover.prevent
-                                            @drop="handleFieldDropAtIndex(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
+                                            @drop="(e) => handleFieldDropAtIndex(e, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
                                           </div>
 
                                           <div v-if="field.fieldtype !== 'Table'" class="px-1 dynamic_fied field-border"
+                                            draggable="true"
+                                            @dragstart="handleDragStart($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
                                             @dragover.prevent
-                                            @drop="handleFieldDropAtIndex(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
+                                            @drop="(e) => handleFieldDropAtIndex(e, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
                                             <div class="d-flex justify-content-between">
                                               <div class="flex-column d-flex">
                                                 <input v-model="field.label" placeholder="Name the field" :class="[
@@ -701,10 +709,10 @@
                                               placeholder="Enter field description"></textarea>
 
                                             <small v-if="field.error" class="text-danger font-10">{{ field.error
-                                              }}</small>
+                                            }}</small>
                                           </div>
                                           <div class="drop-zone" @dragover.prevent
-                                            @drop="handleFieldDropAtIndex(blockIndex, sectionIndex, rowIndex, columnIndex, column.fields.length)">
+                                            @drop="(e) => handleFieldDropAtIndex(e, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
                                           </div>
                                           <div class="childtableShow">
                                             <div>
@@ -879,6 +887,9 @@
                                           </div>
                                         </div>
 
+                                        <div class="drop-zone" @dragover.prevent
+                                          @drop="(e) => handleFieldDropAtIndex(e, blockIndex, sectionIndex, rowIndex, columnIndex, fields.length)"
+                                          style="height: 10px; background-color: transparent" />
                                         <div class="d-flex justify-content-center align-items-center my-2">
                                           <button class="btn btn-light btn-sm d-flex align-items-center addField m-2"
                                             @click="
@@ -1014,6 +1025,9 @@
                                             v-if="fieldErrors[`${blockIndex}-${sectionIndex}-${tableIndex}`]?.tableName"
                                             class="text-danger font-12">
                                             {{ fieldErrors[`${blockIndex}-${sectionIndex}-${tableIndex}`].tableName }}
+                                          </div>
+                                          <div v-if="tableExistsMessage" class="text-danger font-12">
+                                            {{ tableExistsMessage }}
                                           </div>
                                           <div class=" d-flex align-items-center gap-2">
                                             <div class="d-flex align-items-center">
@@ -1370,7 +1384,9 @@ const filterObj = ref({
   form_category: "",
   owner_of_the_form: "",
   series: "",
-  has_workflow:""
+  has_workflow: "",
+  workflow_check:"  "
+
 });
 const formDescriptions = computed(() => filterObj.value);
 const child_id = ref("");
@@ -1447,6 +1463,7 @@ const handleDragStart = (event, blockIndex, sectionIndex, rowIndex, columnIndex,
 };
 
 const handleFieldDropAtIndex = (
+  event,
   targetBlock,
   targetSection,
   targetRow,
@@ -1463,37 +1480,85 @@ const handleFieldDropAtIndex = (
     fieldIndex: fromFieldIndex,
   } = draggedField.value;
 
-  // Avoid inserting into same place
-  const isSameLocation =
-    fromBlock === targetBlock &&
-    fromSection === targetSection &&
-    fromRow === targetRow &&
-    fromColumn === targetColumn;
-
   const fromFields =
     blockArr[fromBlock].sections[fromSection].rows[fromRow].columns[fromColumn].fields;
 
   const targetFields =
     blockArr[targetBlock].sections[targetSection].rows[targetRow].columns[targetColumn].fields;
 
-  // Remove from original position
+  // Avoid self-drop at same position
+  if (
+    fromBlock === targetBlock &&
+    fromSection === targetSection &&
+    fromRow === targetRow &&
+    fromColumn === targetColumn &&
+    fromFieldIndex === insertIndex
+  ) return;
+
+  // Remove dragged field
   const movedField = fromFields.splice(fromFieldIndex, 1)[0];
 
-  // Adjust insert index if from same array and before insert point
+  // Adjust insert index if dragging within same list and moving forward
   if (
-    isSameLocation &&
-    fromColumn === targetColumn &&
+    fromFields === targetFields &&
     fromFieldIndex < insertIndex
   ) {
-    insertIndex -= 1;
+    insertIndex--;
   }
 
-  // Insert at desired index
+  // Insert at new position
   targetFields.splice(insertIndex, 0, movedField);
 
   draggedField.value = null;
 };
 
+const tableExistsMessage = ref('');
+
+const GetDoctypeList = (searchText) => {
+  const filters = [
+    ['module', 'in', ['User Forms']],
+    ['istable', '=', 1],
+  ];
+
+  if (searchText?.trim()) {
+    filters.push(['name', 'like', `%${searchText}%`]);
+  }
+
+  const queryParams = {
+    fields: JSON.stringify(['name']),
+    filters: JSON.stringify(filters),
+    limit_page_length: '10',
+  };
+
+  return axiosInstance
+    .get(apis.resource + doctypes.doctypesList, { params: queryParams })
+    .then((res) => res.data || [])
+    .catch((error) => {
+      console.error('Error fetching doctype list:', error);
+      return [];
+    });
+};
+
+const matched = ref(null)
+
+const updateFieldname = async (field) => {
+  if (field.tableName) {
+    const searchText = field.tableName.trim();
+    const existing = await GetDoctypeList(searchText);
+
+    matched.value = existing.find(item => item.name.toLowerCase() === searchText.toLowerCase());
+
+    if (matched.value) {
+      tableExistsMessage.value = 'Table already exists';
+    }
+  } else {
+    tableExistsMessage.value = '';
+  }
+
+  if (field.label) {
+    field.fieldname = generateFieldname(field.label);
+  }
+};
 
 // const linkSearchQuery = ref('');
 // const linkSearchResults = ref([]);
@@ -1805,11 +1870,6 @@ const addFieldToTable = (blockIndex, sectionIndex, tableIndex) => {
 
   });
 };
-const updateFieldname = (field) => {
-  if (field.label) {
-    field.fieldname = generateFieldname(field.label);
-  }
-};
 
 const removeChildTable = (blockIndex, sectionIndex, tableIndex) => {
   blockArr[blockIndex].sections[sectionIndex].childTables.splice(tableIndex, 1);
@@ -1870,6 +1930,13 @@ const processFields = (blockIndex, sectionIndex, tableIndex) => {
   const hasErrors = isEmptyFieldType(blockIndex, sectionIndex, tableIndex);
   if (hasErrors) {
     toast.error("Please fix validation errors before creating the table", {
+      transition: "zoom",
+    });
+    return;
+  }
+  if (matched.value) {
+    //  tableExistsMessage.value = 'Table already exists';
+    toast.error("Table already exists", {
       transition: "zoom",
     });
     return;
