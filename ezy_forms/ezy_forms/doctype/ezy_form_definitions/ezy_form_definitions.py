@@ -102,7 +102,7 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
             "label": "Naming Series",
             "fieldname": "naming_series",
             "fieldtype": "Select",
-            "options": series if series else f"{business_unit}_{doctype}-",
+            "options": series if series else f"{business_unit}_{doctype.replace(' ', '_').upper() or doctype.upper()}-",
             "reqd": 1,
             "insert_after": "title"
         }))
