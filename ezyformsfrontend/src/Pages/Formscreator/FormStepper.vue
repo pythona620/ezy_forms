@@ -1385,7 +1385,7 @@ const filterObj = ref({
   owner_of_the_form: "",
   series: "",
   has_workflow: "",
-  workflow_check:"  "
+  workflow_check:""
 
 });
 const formDescriptions = computed(() => filterObj.value);
