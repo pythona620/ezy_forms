@@ -57,15 +57,20 @@
                         <template v-if="
                           field.fieldtype === 'Select'
                         ">
-                        <div class="my-2">
+                          <div class="my-2">
 
-                          
-                          <Multiselect :multiple="field.fieldtype === 'Table MultiSelect'" :disabled="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel"
-                            :options="field.options?.split('\n').filter(opt => opt.trim() !== '') || []"
-                            :modelValue="field.value" placeholder="Select"
-                            @update:modelValue="(val) => handleSelectChange(val, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
-                            class="font-11 multiselect" />
-                        </div>
+                            <div v-if="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel">
+                              <span class=" font-12">{{ field.value }}</span>
+                            </div>
+                            <div v-else>
+                              <Multiselect :multiple="field.fieldtype === 'Table MultiSelect'"
+                                :disabled="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel"
+                                :options="field.options?.split('\n').filter(opt => opt.trim() !== '') || []"
+                                :modelValue="field.value" placeholder="Select"
+                                @update:modelValue="(val) => handleSelectChange(val, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+                                class="font-11 multiselect" />
+                            </div>
+                          </div>
 
 
                         </template>
@@ -225,8 +230,8 @@
                           </div>
 
                           <!-- Fallback input when there's no file yet -->
-                          <input v-else :disabled="props.readonlyFor === 'true' || blockIndex < currentLevel" type="file"
-                            accept="image/jpeg,image/png,application/pdf"
+                          <input v-else :disabled="props.readonlyFor === 'true' || blockIndex < currentLevel"
+                            type="file" accept="image/jpeg,image/png,application/pdf"
                             :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'd-none' : ''"
                             :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
                             class="form-control previewInputHeight font-10" multiple
@@ -341,11 +346,12 @@
                             :ref="el => setRef(el, sectionIndex, columnIndex, fieldIndex)"
                             @input="adjustHeight(sectionIndex, columnIndex, fieldIndex)" />
 
-                          <template v-if="blockIndex === 0 && field.fieldtype !== 'Int' && field.fieldtype !== 'Text'">
-                            <span style="font-size: 12px;" :class="props.readonlyFor === 'true' || blockIndex < currentLevel
-                              ? 'border-0 image-border-bottom w-50 bg-transparent'
-                              : ''" :value="field.value" :type="field.fieldtype">
-                              {{ field.value }}
+                          <template
+                            v-if="blockIndex === 0 && field.fieldtype !== 'Int' && field.fieldtype !== 'Text' && field.fieldtype !== 'Select'">
+                            <span style="font-size: 12px;"
+                              :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 image-border-bottom w-50 bg-transparent' : ''"
+                              :value="field.value" :type="field.fieldtype">
+                              {{ field.fieldtype === 'Time' ? formatTime(field.value) : field.value }}
                             </span>
                           </template>
                           <template v-else>
@@ -356,7 +362,8 @@
                               }" :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'"
                               :is="getFieldComponent(field.fieldtype)" :class="props.readonlyFor === 'true' || blockIndex < currentLevel
                                 ? 'border-0 image-border-bottom w-50 bg-transparent'
-                                : ''" :value="field.value" :type="field.fieldtype"
+                                : ''" :value="field.fieldtype === 'Time' ? formatTime(field.value) : field.value"
+                              :type="field.fieldtype"
                               :readOnly="blockIndex < currentLevel || props.readonlyFor === 'true'"
                               :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex" @blur="
                                 (event) =>
@@ -419,7 +426,8 @@
                                 <thead>
                                   <tr>
                                     <!-- <th>#</th> -->
-                                    <th v-for="field in headers" :key="field.fieldname" class="text-center">{{ field.label }}</th>
+                                    <th v-for="field in headers" :key="field.fieldname" class="text-center">{{
+                                      field.label }}</th>
                                   </tr>
                                 </thead>
                                 <tbody>
@@ -542,7 +550,11 @@ const isImageFile = (value) => {
   return /\.(png|jpg|jpeg|gif)$/i.test(value);
 };
 
-
+function formatTime(value) {
+  if (!value) return '';
+  const timeParts = value.split(':');
+  return `${timeParts[0]}:${timeParts[1]}`;
+}
 function getFileArray(value) {
   return value.split(',').map(f => f.trim())
 }
@@ -1143,175 +1155,174 @@ td {
 }
 
 .multiselect {
-    height: 30px !important;
-    font-size: 12px !important;
-    width: 100% !important;
+  height: 30px !important;
+  font-size: 12px !important;
+  width: 100% !important;
 }
 
 .multiselect {
-    margin: initial;
-    font-size: 11px !important;
-    border: 1px solid #e2e2e2 !important;
+  margin: initial;
+  font-size: 11px !important;
+  border: 1px solid #e2e2e2 !important;
+  height: 30px !important;
+  border-radius: 8px !important;
+
+  .multiselect-wrapper {
     height: 30px !important;
-    border-radius: 8px !important;
+  }
 
-    .multiselect-wrapper {
-        height: 30px !important;
+  .multiselect-dropdown {
+    .multiselect-options {
+      font-size: 11px;
+
+      li.multiselect-option span {
+        font-size: 11px !important;
+      }
+
+      li.multiselect-option .is-selected {
+        background-color: grey !important;
+        font-size: 11px;
+      }
     }
-
-    .multiselect-dropdown {
-        .multiselect-options {
-            font-size: 11px;
-
-            li.multiselect-option span {
-                font-size: 11px !important;
-            }
-
-            li.multiselect-option .is-selected {
-                background-color: grey !important;
-                font-size: 11px;
-            }
-        }
-    }
+  }
 }
 
 .multiselect__option span {
-    font-size: 11px;
-    /* Change this value to whatever size you need */
+  font-size: 11px;
+  /* Change this value to whatever size you need */
 }
 
 .multiselect .multiselect-option {
-    font-size: 11px;
+  font-size: 11px;
 }
 
 .multiselect .multiselect-wrapper {
-    min-height: 30px !important;
+  min-height: 30px !important;
 }
 
 .multiselect .multiselect--above {
-    min-height: 30px !important;
+  min-height: 30px !important;
 }
 
 .multiselect__tags {
-    min-height: 30px !important;
-    padding: 0px;
+  min-height: 30px !important;
+  padding: 0px;
 }
 
 .multiselect .multiselect__tags {
-    min-height: 30px !important;
-    font-size: 11px !important;
+  min-height: 30px !important;
+  font-size: 11px !important;
 }
 
 .multiselect .multiselect__placeholder {
-    font-size: 11px;
+  font-size: 11px;
 }
 
 .multiselect .multiselect__single {
-    font-size: 11px;
+  font-size: 11px;
 }
 
 .multiselect .multiselect__tags .multiselect__placeholder {
-    font-size: 11px;
+  font-size: 11px;
 }
 
 ::v-deep(.multiselect__placeholder) {
-    color: #adadad;
-    display: inline-block;
-    margin-bottom: 10px;
-    padding-top: 2px;
-    font-size: 12px !important;
+  color: #adadad;
+  display: inline-block;
+  margin-bottom: 10px;
+  padding-top: 2px;
+  font-size: 12px !important;
 }
 
 
 ::v-deep(.multiselect__select) {
-    position: absolute;
-    width: 40px;
-    height: 32px;
-    right: 1px;
-    /* top: 1px; */
-    padding: 4px 8px;
-    text-align: center;
-    transition: transform 0.2s ease;
+  position: absolute;
+  width: 40px;
+  height: 32px;
+  right: 1px;
+  /* top: 1px; */
+  padding: 4px 8px;
+  text-align: center;
+  transition: transform 0.2s ease;
 }
 
 ::v-deep(.multiselect) {
-    height: 32px !important;
-    min-height: 32px !important;
+  height: 32px !important;
+  min-height: 32px !important;
 }
 
 ::v-deep(.multiselect__single) {
-    font-size: 12px;
-    color: #212529 !important;
+  font-size: 12px;
+  color: #212529 !important;
 }
 
 ::v-deep(.multiselect__tags) {
-    height: 32px !important;
-    min-height: 32px !important;
-    display: flex;
-    align-items: center;
-    border: none;
+  height: 32px !important;
+  min-height: 32px !important;
+  display: flex;
+  align-items: center;
+  border: none;
 }
 
 ::v-deep(.multiselect-wrapper),
 ::v-deep(.multiselect-search) {
-    height: 32px !important;
-    min-height: 32px !important;
-    line-height: 32px !important;
-    display: flex;
-    align-items: center;
+  height: 32px !important;
+  min-height: 32px !important;
+  line-height: 32px !important;
+  display: flex;
+  align-items: center;
 }
 
 ::v-deep(.multiselect-search) {
-    height: 32px !important;
-    min-height: 32px !important;
-    display: flex;
-    align-items: center;
+  height: 32px !important;
+  min-height: 32px !important;
+  display: flex;
+  align-items: center;
 }
 
 ::v-deep(.multiselect-wrapper) {
-    height: 32px !important;
-    min-height: 32px !important;
-    line-height: 32px !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  line-height: 32px !important;
 }
 
 ::v-deep(.multiselect-search) {
-    position: absolute;
-    width: 40px !important;
-    height: 32px !important;
-    right: 1px;
+  position: absolute;
+  width: 40px !important;
+  height: 32px !important;
+  right: 1px;
 
-    padding: 4px 8px;
-    text-align: center;
-    transition: transform 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  padding: 4px 8px;
+  text-align: center;
+  transition: transform 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 ::v-deep(.multiselect__element:hover) {
-    background-color: #eeeeee !important;
+  background-color: #eeeeee !important;
 }
 
 ::v-deep(.multiselect__element:hover .multiselect__option) {
-    background-color: #eeeeee !important;
-    color: #000 !important;
+  background-color: #eeeeee !important;
+  color: #000 !important;
 }
 
 ::v-deep(.multiselect__tags) {
-    color: #000 !important;
-    font-size: 12px !important;
+  color: #000 !important;
+  font-size: 12px !important;
 }
 
 
 ::v-deep(.multiselect__element:hover .multiselect__option--highlight) {
-    background-color: #eeeeee !important;
-    color: #000 !important;
+  background-color: #eeeeee !important;
+  color: #000 !important;
 }
 
 /* Additional specific rule for `.multiselect__option` when hovered */
 ::v-deep(.multiselect__option:hover) {
-    background-color: #eeeeee !important;
-    color: #000 !important;
+  background-color: #eeeeee !important;
+  color: #000 !important;
 }
-    
 </style>

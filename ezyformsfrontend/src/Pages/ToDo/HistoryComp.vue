@@ -578,6 +578,8 @@ function inLineFiltersData(searchedData) {
 
     // Call receivedForMe with or without filters
     if (filterObj.value.filters.length) {
+          filterObj.value.limit_start = 0;
+
       receivedForMe(filterObj.value.filters);
     } else {
       receivedForMe();
@@ -658,7 +660,7 @@ const fieldMapping = computed(() => ({
   role: { type: "input" },
 
 
-  status: { type: "select", options: ["Request Raised", "In Progress"] },
+  status: { type: "select", options: [ "In Progress","Completed","Request Cancelled"] },
 
 }));
 

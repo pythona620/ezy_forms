@@ -178,7 +178,7 @@
               <div class="activity_height">
                 <div v-for="(item, index) in activityData" :key="index" class="activity-log-item"
                   :class="{ 'last-item': index === activityData.length - 1 }">
-                  <div :class="item.action === 'Approved' || item.action === 'Request Raised' ? 'activity-log-dot': 'activityRedDot' "></div>
+                  <div :class="item.action === 'Approved' || item.action === 'Request Raised' || item.action === 'Completed' ? 'activity-log-dot': 'activityRedDot' "></div>
                   <div class="activity-log-content">
                     <p class="font-12 mb-1">
                       <span class="strong-content">{{ formatAction(item.action) }} on </span>

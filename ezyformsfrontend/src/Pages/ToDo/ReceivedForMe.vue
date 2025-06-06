@@ -597,6 +597,8 @@ function inLineFiltersData(searchedData) {
 
         // Call receivedForMe with or without filters
         if (filterObj.value.filters.length) {
+          filterObj.value.limit_start = 0;
+
             receivedForMe(filterObj.value.filters);
         } else {
             receivedForMe();
