@@ -103,7 +103,7 @@
 
                         <template v-else-if="field.fieldtype == 'Check'">
                           <input type="checkbox" :checked="field.value"
-                            :disabled="blockIndex === 0 || props.readonlyFor === 'true'"
+                            :disabled="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel"
                             :placeholder="'Enter ' + field.label" :name="'field-' +
                               sectionIndex +
                               '-' +
@@ -432,6 +432,7 @@
                                 </thead>
                                 <tbody>
                                   <tr v-for="(row, index) in props.childData[tableName]" :key="index">
+                                   
                                     <!-- <td>{{ index + 1 }}</td> -->
                                     <td v-for="field in headers" :key="field.fieldname" class="text-center">
                                       <template v-if="isFilePath(row[field.fieldname])">
