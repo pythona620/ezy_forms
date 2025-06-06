@@ -615,7 +615,9 @@ function receivedForMe(data) {
     ["assigned_to_users", "like", `%${EmpRequestdesignation?.designation}%`],
     ["property", "like", `%${newBusinessUnit.value.business_unit}%`],
     ["status", "!=", "Request Cancelled"],
-    ["name","in", viewlist.value]
+    
+    ["name","in", viewlist.value],
+    ["status", "!=", "Completed"]
   ];
   if (data) {
     filters.push(...data);
