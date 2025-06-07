@@ -405,13 +405,13 @@ const updateFormData = (fieldValues) => {
 
 // Function to handle form submission
 function ApproverFormSubmission(dataObj, type) {
-  if (ApproverReason.value.trim() === "") {
-    isCommentsValid.value = false; // Show validation error
-    return; // Stop execution
-  }
+  // if (ApproverReason.value.trim() === "") {
+  //   isCommentsValid.value = false; // Show validation error
+  //   return; // Stop execution
+  // }
 
 
-  isCommentsValid.value = true;
+  // isCommentsValid.value = true;
   loading.value = true; // Start loader
 
   let form = {};
@@ -448,7 +448,7 @@ function approvalStatusFn(dataObj, type) {
     property: tableData.value.property,
     doctype: tableData.value.doctype_name,
     request_ids: [tableData.value.name],
-    reason: ApproverReason.value,
+    reason: ApproverReason.value ? ApproverReason.value : "Approved",
     action: type,
     files: null,
     cluster_name: null,
@@ -487,12 +487,12 @@ function approvalStatusFn(dataObj, type) {
 
 function ApproverCancelSubmission(dataObj, type) {
 
-  if (ApproverReason.value.trim() === "") {
-    isCommentsValid.value = false;
-    return;
-  }
+  // if (ApproverReason.value.trim() === "") {
+  //   isCommentsValid.value = false;
+  //   return;
+  // }
 
-  isCommentsValid.value = true;
+  // isCommentsValid.value = true;
   rejectLoad.value = true; // Start loader
 
 
@@ -555,7 +555,7 @@ function approvalCancelFn(dataObj, type) {
     property: tableData.value.property,
     doctype: tableData.value.doctype_name,
     request_id: tableData.value.name,
-    reason: ApproverReason.value,
+    reason: ApproverReason.value ? ApproverReason.value : 'Request Cancelled',
     action: type,
     files: [],
     url_for_cancelling_id: "",

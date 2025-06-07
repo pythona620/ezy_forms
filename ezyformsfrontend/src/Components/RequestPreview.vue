@@ -272,8 +272,9 @@
                                                     columnIndex +
                                                     '-' +
                                                     fieldIndex
-                                                    " class="form-control previewInputHeight"></textarea>
+                                                    " class="form-control previewInputHeight font-12"></textarea>
                                                 <!-- :max="currentdate" -->
+                                                
                                                 <component v-if="
                                                     field.fieldtype !== 'Datetime' && field.fieldtype !== 'Text'
                                                 " :is="getFieldComponent(field.fieldtype)" :value="field.value"
@@ -341,7 +342,7 @@
                                                             class="border p-3 mb-3 rounded bg-light-subtle">
                                                             <div
                                                                 class="d-flex justify-content-between align-items-center mb-2">
-                                                                <span>Block {{ rowIndex + 1 }}</span>
+                                                                <span>Block #{{ rowIndex + 1 }}</span>
                                                                 <span class="text-danger cursor-pointer"
                                                                     @click="removeRow(tableIndex, rowIndex)">
                                                                     <i class="bi bi-x-lg"></i>
@@ -680,7 +681,7 @@
 
                                                                     </td>
 
-                                                                    <td class="d-table-cell text-center align-middle">
+                                                                    <td class="d-table-cell text-center align-middle removeRowTd">
                                                                         <span class="tableRowRemoveBtn "
                                                                             @click="removeRow(tableIndex, rowIndex)">
                                                                             <i class="bi bi-x-lg "></i>
@@ -697,7 +698,7 @@
                                                                         class="text-center font-12">
 
                                                                         <span
-                                                                            v-if="field.fieldtype === 'Int' && field.description && /[+\-*/]/.test(field.description) && field.label.includes('Total')">
+                                                                            v-if="field.fieldtype === 'Int' && field.description && /[+\-*/]/.test(field.description) && (field.label.includes('Total') || field.label.includes('Amount'))">
                                                                             {{
                                                                                 tableTotals[tableIndex]?.[field.fieldname]
                                                                                 ?? 0 }}
@@ -1017,11 +1018,11 @@ const tableTotals = computed(() => {
 
         const fields = props.tableHeaders[tableIndex] || [];
         fields.forEach((field) => {
-            if (field.fieldtype === 'Int' && field.description && /[+\-*/]/.test(field.description) && field.label.includes('Total')) {
+            if (field.fieldtype === 'Int' && field.description && /[+\-*/]/.test(field.description) && field.label.includes('Total') || field.label.includes('Amount')) {
                 let sum = 0;
 
                 rows.forEach((row) => {
-                    if (field.description && /[+\-*/]/.test(field.description) && field.label.includes('Total')) {
+                    if (field.description && /[+\-*/]/.test(field.description) && field.label.includes('Total') || field.label.includes('Amount')) {
                         // Calculate expression dynamically using labels and row data
                         sum += Number(calculateFieldExpression(row, field.description, fields));
                     }
@@ -1067,6 +1068,7 @@ watchEffect(() => {
                     row[field.fieldname] = result;
                 }
             });
+
         });
     }
 });
@@ -1322,6 +1324,8 @@ onMounted(() => {
         });
     }
 });
+
+
 // function updateFormQuestionsInTableRows() {
 //     for (const [tableIndex, fields] of Object.entries(props.tableHeaders)) {
 //         const hasFormName = fields.some(f => f.label === 'Form Name');
@@ -1573,6 +1577,60 @@ const validateField = (
         delete errorMessages.value[fieldKey]; // Clear error if valid
     }
 };
+watch(
+    () => tableTotals.value,
+    (totals) => {
+        if (!props.blockArr) return;
+
+        props.blockArr.forEach((block) => {
+            // Find the dynamic table name inside this block
+            let dynamicTableName = null;
+
+            outerLoop:
+            for (const section of block.sections) {
+                for (const row of section.rows) {
+                    for (const column of row.columns) {
+                        for (const field of column.fields) {
+                            // Check if field is a Table field and its name exists in totals
+                            if (
+                                (field.fieldtype === 'Table' || field.fieldtype === 'Link') &&
+                                (field.fieldname in totals)
+                            ) {
+                                dynamicTableName = field.fieldname;
+                                break outerLoop; // found it, stop searching
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (!dynamicTableName) return; // no table field found in this block
+
+            // Now update fields with fieldname 'gross_total' inside this block
+            block.sections.forEach((section) => {
+                section.rows.forEach((row) => {
+                    row.columns.forEach((column) => {
+                        column.fields.forEach((field) => {
+                            if (/gross total|gross amount|total amount/i.test(field.label)) {
+                                const obj = totals?.[dynamicTableName] || {};
+                                const matchedKey = Object.keys(obj).find(key =>
+                                    key.toLowerCase().includes('amount') || key.toLowerCase().includes('total') || key.toLowerCase().includes('total cost')
+                                );
+                                const totalValue = matchedKey ? obj[matchedKey] : 0;
+                                field.value = totalValue;
+                                emit("updateField", field);
+                            }
+
+
+                        });
+                    });
+                });
+            });
+        });
+    },
+    { deep: true, immediate: true }
+);
+
 
 const generateRandomNumber = () => {
     return Math.floor(Math.random() * 1000000);
@@ -1648,7 +1706,9 @@ const uploadFile = (file, field) => {
 // .overTable {
 //     overflow-x: auto;
 // }
-
+.removeRowTd{
+    width: 20px;
+}
 .text-ellipsis {
     max-width: 200px;
     overflow: hidden;

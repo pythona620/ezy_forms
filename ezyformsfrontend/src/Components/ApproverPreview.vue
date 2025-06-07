@@ -264,48 +264,7 @@
 
                           <!-- Bootstrap Modal -->
                           <!-- Bootstrap Modal -->
-                          <div class="modal fade" :id="`modal-${field.fieldname}`" tabindex="-1"
-                            :aria-labelledby="`label-${field.fieldname}`" aria-hidden="true"
-                            :ref="el => setModalRef(el, field)">
-                            <div class="modal-dialog modal-dialog-centered modal-lg">
-                              <div class="modal-content">
-                                <div class="modal-header">
-                                  <h5 class="modal-title" :id="`label-${field.fieldname}`">
-                                    <!-- Select a  -->
-                                    {{ field.label }}
-                                  </h5>
-                                  <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                    aria-label="Close"></button>
-                                </div>
-
-                                <div class="modal-body">
-                                  <div v-if="ModalData && Object.keys(ModalData).length">
-                                    <div class="row mb-3" v-for="(pair, index) in chunkedModalData" :key="index">
-                                      <div class="col-md-6" v-for="[key, value] in pair" :key="key">
-                                        <label class="form-label fw-semibold text-capitalize">
-                                          {{ key.replace(/_/g, ' ') }}:
-                                        </label>
-                                        <input type="text" class="form-control" :value="value" readonly />
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <div v-else>
-                                    <p>Loading data...</p>
-                                  </div>
-
-                                </div>
-
-                                <!-- <div class="modal-footer">
-                                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                    Close
-                                  </button>
-                                  <button type="button" class="btn btn-primary">
-                                    Save changes
-                                  </button>
-                                </div> -->
-                              </div>
-                            </div>
-                          </div>
+                         
 
                         </template>
 
@@ -397,7 +356,7 @@
                             <div v-if="field.description === 'true'">
                               <div v-for="(row, index) in props.childData[tableName]" :key="index"
                                 class="border p-2 mb-3 rounded bg-light">
-                                <div class="mb-2 font-12 fw-bold">Block #{{ index + 1 }}</div>
+                                <div class="mb-2 font-12 fw-bold">#{{ index + 1 }}</div>
                                 <div v-for="i in Math.ceil(headers.length / 2)" :key="i" class="row mb-2">
                                   <div class="col-6" v-for="field in headers.slice((i - 1) * 2, i * 2)"
                                     :key="field.fieldname">
