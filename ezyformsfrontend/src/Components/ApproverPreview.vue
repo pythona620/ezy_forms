@@ -356,7 +356,7 @@
                             <div v-if="field.description === 'true'">
                               <div v-for="(row, index) in props.childData[tableName]" :key="index"
                                 class="border p-2 mb-3 rounded bg-light">
-                                <div class="mb-2 font-12 fw-bold">Block #{{ index + 1 }}</div>
+                                <div class="mb-2 font-12 fw-bold">#{{ index + 1 }}</div>
                                 <div v-for="i in Math.ceil(headers.length / 2)" :key="i" class="row mb-2">
                                   <div class="col-6" v-for="field in headers.slice((i - 1) * 2, i * 2)"
                                     :key="field.fieldname">

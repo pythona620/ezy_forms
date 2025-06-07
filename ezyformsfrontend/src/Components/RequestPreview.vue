@@ -272,9 +272,9 @@
                                                     columnIndex +
                                                     '-' +
                                                     fieldIndex
-                                                    " class="form-control previewInputHeight"></textarea>
+                                                    " class="form-control previewInputHeight font-12"></textarea>
                                                 <!-- :max="currentdate" -->
-                                                {{ field.fieldname }}
+                                                
                                                 <component v-if="
                                                     field.fieldtype !== 'Datetime' && field.fieldtype !== 'Text'
                                                 " :is="getFieldComponent(field.fieldtype)" :value="field.value"
@@ -342,7 +342,7 @@
                                                             class="border p-3 mb-3 rounded bg-light-subtle">
                                                             <div
                                                                 class="d-flex justify-content-between align-items-center mb-2">
-                                                                <span>Block {{ rowIndex + 1 }}</span>
+                                                                <span>Block #{{ rowIndex + 1 }}</span>
                                                                 <span class="text-danger cursor-pointer"
                                                                     @click="removeRow(tableIndex, rowIndex)">
                                                                     <i class="bi bi-x-lg"></i>
@@ -681,7 +681,7 @@
 
                                                                     </td>
 
-                                                                    <td class="d-table-cell text-center align-middle">
+                                                                    <td class="d-table-cell text-center align-middle removeRowTd">
                                                                         <span class="tableRowRemoveBtn "
                                                                             @click="removeRow(tableIndex, rowIndex)">
                                                                             <i class="bi bi-x-lg "></i>
@@ -1706,7 +1706,9 @@ const uploadFile = (file, field) => {
 // .overTable {
 //     overflow-x: auto;
 // }
-
+.removeRowTd{
+    width: 20px;
+}
 .text-ellipsis {
     max-width: 200px;
     overflow: hidden;
