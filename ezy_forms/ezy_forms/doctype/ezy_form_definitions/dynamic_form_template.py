@@ -1044,44 +1044,75 @@ def preview_dynamic_form(form_short_name: str, business_unit=None, name=None):
 
 
 def handle_pdf_fields(field_values):
+
     """
+
     Converts PDF paths in `field_values` (comma-separated) to preview images
-    and returns updated file paths (pointing to the preview image instead of PDF).
+
+    and returns updated file paths (pointing to the preview images instead of PDFs).
+
     """
+
     site_path = frappe.get_site_path()
+
     updated_paths = []
-
+ 
     if not field_values:
+
         return field_values
-
+ 
     for file_path in field_values.split(','):
+
         cleaned_path = file_path.strip()
-
+ 
         if cleaned_path.endswith('.pdf'):
-            # Get file name
+
             filename = os.path.basename(cleaned_path)
-            filename_jpg = filename.replace('.pdf', '.jpg')
 
-            # Full paths
+            base_filename = filename.replace('.pdf', '')
+
             pdf_abs_path = os.path.join(site_path, 'public', cleaned_path.lstrip('/'))
-            img_output_path = os.path.join(site_path, 'public', 'files', 'previews', filename_jpg)
-            img_web_path = f"/files/previews/{filename_jpg}"
 
+            img_output_dir = os.path.join(site_path, 'public', 'files', 'previews', base_filename)
+
+            os.makedirs(img_output_dir, exist_ok=True)
+ 
             try:
-                if not os.path.exists(img_output_path):
-                    # Convert PDF to image (first page)
-                    images = convert_from_path(pdf_abs_path, first_page=1, last_page=1)
-                    img_output_dir = os.path.dirname(img_output_path)
-                    os.makedirs(img_output_dir, exist_ok=True)
-                    images[0].save(img_output_path, 'JPEG')
-                    frappe.logger().info(f"PDF converted to image: {img_web_path}")
-                updated_paths.append(img_web_path)
-            except Exception as e:
-                frappe.log_error(f"PDF to image conversion failed: {e}")
-                updated_paths.append(cleaned_path)  # fallback to original
-        else:
-            updated_paths.append(cleaned_path)
 
+                # Convert all pages
+
+                images = convert_from_path(pdf_abs_path)
+
+                page_paths = []
+ 
+                for i, img in enumerate(images):
+
+                    img_filename = f"{base_filename}_page_{i+1}.jpg"
+
+                    img_output_path = os.path.join(img_output_dir, img_filename)
+
+                    img_web_path = f"/files/previews/{base_filename}/{img_filename}"
+ 
+                    if not os.path.exists(img_output_path):
+
+                        img.save(img_output_path, 'JPEG')
+
+                        frappe.logger().info(f"Saved preview: {img_web_path}")
+ 
+                    page_paths.append(img_web_path)
+ 
+                updated_paths.extend(page_paths)
+ 
+            except Exception as e:
+
+                frappe.log_error(f"PDF to image conversion failed: {e}")
+
+                updated_paths.append(cleaned_path)
+
+        else:
+
+            updated_paths.append(cleaned_path)
+ 
     return ', '.join(updated_paths)
 
  
@@ -1196,7 +1227,9 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                         child_table_records = frappe.get_all(
                             iteration["options"],
                             filters={"parent": name},
-                            fields=["*"]
+                            fields=["*"],
+                            order_by="idx asc",
+                            
                         )
  
                         # Get field metadata

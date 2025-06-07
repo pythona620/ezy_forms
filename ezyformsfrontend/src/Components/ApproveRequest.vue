@@ -21,7 +21,7 @@
                 <div class="card border-0 shadow-none">
                   <div class="card-body pb-2 d-flex gap-2 align-items-center justify-content-center">
                     <h5 class="card-title">{{ selectedData.doctype_name }}</h5>
-                    <div  class="d-flex align-items-baseline gap-2 ps-1 ">
+                    <div class="d-flex align-items-baseline gap-2 ps-1 ">
                       <span v-if="tableData?.status !== 'Completed' && tableData.status !== 'Request Cancelled'"
                         class="text-warning font-11 text-nowrap fw-bold">
                         Pending ({{ tableData.current_level }} /
@@ -42,14 +42,15 @@
                 </div>
               </div>
               <div class="position-relative ">
-                <div class="requestPreviewDiv pb-5">              
+                <div class="requestPreviewDiv pb-5">
                   <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel"
                     :childData="responseData" :readonly-for="selectedData.readOnly" :childHeaders="tableHeaders"
                     :employee-data="employeeData" @updateField="updateFormData" />
 
                 </div>
 
-                <div v-if="selectedData.type == 'myforms' && tableData.status == 'Request Raised' && selectedData.type !== 'myapprovals'"
+                <div
+                  v-if="selectedData.type == 'myforms' && tableData.status == 'Request Raised' && selectedData.type !== 'myapprovals'"
                   class="d-flex justify-content-end approveBtns">
                   <button type="submit" class="btn Edit_btn" @click.prevent="EditformSubmission()">
                     <span v-if="loading" class="spinner-border spinner-border-sm" role="status"
@@ -68,21 +69,21 @@
                       <span class=" font-12 text-danger">
                         Note:
                       </span>
-                      <span  class=" fw-bold font-12">You don’t have permission to
+                      <span class=" fw-bold font-12">You don’t have permission to
                         Approve</span>
                     </div>
 
                     <div class="form-floating mb-2 p-1">
                       <!-- :disabled="view_only_reportee === 1" -->
-                      <textarea :disabled="!canApprove & view_only_reportee === 1" class="form-control font-12" placeholder="Leave a comment here"
-                        id="floatingTextarea" @input="resetCommentsValidation"
+                      <textarea :disabled="!canApprove & view_only_reportee === 1" class="form-control font-12"
+                        placeholder="Leave a comment here" id="floatingTextarea" @input="resetCommentsValidation"
                         :class="{ 'is-invalid': !isCommentsValid }" v-model="ApproverReason"></textarea>
                       <label class="font-11" for="floatingTextarea">Comments..</label>
                       <span v-if="!isCommentsValid" class="font-11 text-danger ps-1">Please enter comments**</span>
                     </div>
                     <div class=" d-flex justify-content-between ">
                       <div>
-                        <button :disabled="rejectLoad ||( !canApprove & view_only_reportee === 1)"
+                        <button :disabled="rejectLoad || (!canApprove & view_only_reportee === 1)"
                           class="btn btn-outline-danger font-10 py-0 rejectbtn" type="button"
                           @click="ApproverCancelSubmission(formData, 'Request Cancelled')">
                           <span v-if="rejectLoad" class="spinner-border spinner-border-sm" role="status"
@@ -92,7 +93,19 @@
                         </button>
                       </div>
                       <div>
-                        <button :disabled="loading || ( !canApprove & view_only_reportee === 1)" type="submit" class="btn btn-success approvebtn"
+                        <button :disabled="saveloading || (!canApprove & view_only_reportee === 1)" type="submit"
+                          class="btn btn-success approvebtn" @click.prevent="SaveDocWithoutApprove(route.query.name)">
+                          <span v-if="saveloading" class="spinner-border spinner-border-sm" role="status"
+                            aria-hidden="true"></span>
+                          <span v-if="!saveloading">
+                            <span class="font-12">Save</span>
+                          </span>
+                        </button>
+
+                      </div>
+                      <div>
+                        <button :disabled="loading || (!canApprove & view_only_reportee === 1)" type="submit"
+                          class="btn btn-success approvebtn"
                           @click.prevent="ApproverFormSubmission(emittedFormData, 'Approve')">
                           <span v-if="loading" class="spinner-border spinner-border-sm" role="status"
                             aria-hidden="true"></span>
@@ -168,17 +181,20 @@
                     class="btn btn-light font-11 fw-bold h-0 text-decoration-underline" type="button"
                     @click="downloadPdf"><i class="bi bi-arrow-down-circle fw-bold px-1"></i>Download
                   </button>
-                   <!-- <button type="button" class="btn btn-outline-light  CreateDepartments " data-bs-toggle="modal"
+                  <!-- <button type="button" class="btn btn-outline-light  CreateDepartments " data-bs-toggle="modal"
                     data-bs-target="#pdfView" @click="viewasPdfView">
                     Preview
                   </button> -->
-                  
+
                 </div>
               </div>
               <div class="activity_height">
                 <div v-for="(item, index) in activityData" :key="index" class="activity-log-item"
                   :class="{ 'last-item': index === activityData.length - 1 }">
-                  <div :class="item.action === 'Approved' || item.action === 'Request Raised' || item.action === 'Completed' ? 'activity-log-dot': 'activityRedDot' "></div>
+
+                  <div
+                    :class="item.action === 'Approved' || item.action === 'Request Raised' || item.action === '' || item.action === 'Completed' ? 'activity-log-dot' : 'activityRedDot'">
+                  </div>
                   <div class="activity-log-content">
                     <p class="font-12 mb-1">
                       <span class="strong-content">{{ formatAction(item.action) }} on </span>
@@ -187,7 +203,7 @@
                       <span>{{ item.role }}</span><br />
                       <span class="font-12 text-secondary">{{
                         item.reason || "N/A"
-                        }}</span>.
+                      }}</span>.
 
                     </p>
                   </div>
@@ -204,34 +220,34 @@
               </div>
             </div> -->
             </div>
-<div class="modal fade" id="pdfView" tabindex="-1" aria-labelledby="pdfViewLabel" aria-hidden="true">
-      <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-          <div class="modal-header py-2 d-block bg-dark text-white">
-            <div class="d-flex justify-content-between align-items-center">
-              <div>
-                <h5 class="m-0 text-white font-13" id="exampleModalLabel">
-                  PDF format
-                </h5>
-              </div>
-              <div class="">
-                <button button="button" class="btn btn-dark text-white font-13" @click="downloadPdf">
-                  Download Pdf<span class="ms-2"><i class="bi bi-download"></i></span>
-                </button>
-                <button type="button" class="btn btn-dark text-white font-13" @click="closemodal"
-                  data-bs-dismiss="modal">
-                  Close <i class="bi bi-x"></i>
-                </button>
+            <div class="modal fade" id="pdfView" tabindex="-1" aria-labelledby="pdfViewLabel" aria-hidden="true">
+              <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                  <div class="modal-header py-2 d-block bg-dark text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                        <h5 class="m-0 text-white font-13" id="exampleModalLabel">
+                          PDF format
+                        </h5>
+                      </div>
+                      <div class="">
+                        <button button="button" class="btn btn-dark text-white font-13" @click="downloadPdf">
+                          Download Pdf<span class="ms-2"><i class="bi bi-download"></i></span>
+                        </button>
+                        <button type="button" class="btn btn-dark text-white font-13" @click="closemodal"
+                          data-bs-dismiss="modal">
+                          Close <i class="bi bi-x"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="modal-body pdf-body">
+                    <div v-html="pdfPreview"></div>
+                  </div>
+                  <div class="modal-footer"></div>
+                </div>
               </div>
             </div>
-          </div>
-          <div class="modal-body pdf-body">
-            <div v-html="pdfPreview"></div>
-          </div>
-          <div class="modal-footer"></div>
-        </div>
-      </div>
-    </div>
 
             <!-- <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
 
@@ -296,6 +312,7 @@ const selectedcurrentLevel = ref("");
 const doctypeForm = ref([]);
 const loading = ref(false);
 const rejectLoad = ref(false)
+const saveloading = ref(false)
 const pdfPreview = ref("");
 const tableRows = ref([]);
 const tableHeaders = ref([]);
@@ -366,9 +383,9 @@ watch(
     business_unit.value = local
     if (newVal) {
       // console.log(business_unit.value, newVal, "ll");
-      if(selectedData.value.type === "mytasks"){
+      if (selectedData.value.type === "mytasks") {
         ViewOnlyRe();
-      }else{
+      } else {
         receivedForMe()
       }
     }
@@ -482,7 +499,42 @@ function approvalStatusFn(dataObj, type) {
       loading.value = false; // Ensure loader stops
     });
 }
+function SaveDocWithoutApprove(request_id) {
+  saveloading.value = true
+  // console.log(request_id,"data");
+  // console.log(selectedcurrentLevel.value,"current level");
+  // console.log(ApproverReason.value,"reason");
+  const EmpRequestdesignation = JSON.parse(
+    localStorage.getItem("employeeData")
+  );
+  // console.log(EmpRequestdesignation,"emp data");
 
+  let data = {
+    request_id: request_id,
+    reason: ApproverReason.value ? ApproverReason.value : "Approved",
+    current_level: selectedcurrentLevel.value,
+    user: EmpRequestdesignation.emp_mail_id,
+    role: EmpRequestdesignation.designation
+  };
+
+  axiosInstance
+    .post(apis.ActivitySaveComment, data)
+    .then((response) => {
+      if (response?.message?.success === true) {
+        ApproverReason.value = ""; // Clear reason after success
+        saveloading.value = false
+
+        window.location.reload()
+
+      } else {
+        toast.error(`Failed to request`, { autoClose: 1000, transition: "zoom" });
+      }
+    })
+    .catch((error) => {
+      console.error("Error processing request:", error);
+      toast.error("An error occurred while processing your request.", { autoClose: 1000, transition: "zoom" });
+    })
+}
 
 
 function ApproverCancelSubmission(dataObj, type) {
@@ -599,7 +651,7 @@ function receivedForMe(data) {
     filters.push(data);
   }
   if (selectedData.value.type !== 'myteam' && selectedData.value.type !== 'myapprovals') {
-    if (selectedData.value.type == "myforms" ) {
+    if (selectedData.value.type == "myforms") {
       filters.push(["requested_by", "like", EmpRequestdesignation.emp_mail_id]);
     } else {
       filters.push([
@@ -663,7 +715,7 @@ function receivedForMe(data) {
       if (res.data.length) {
         Wfactivitylog(tableData.value.name);
         getdata(tableData.value.name);
-       
+
       }
 
     })
@@ -690,7 +742,7 @@ function getdata(formname) {
     .then((res) => {
       if (res.data) {
         doctypeForm.value = res.data[0];
-        console.log(doctypeForm.value.name,"lll");
+        console.log(doctypeForm.value.name, "lll");
         mapFormFieldsToRequest(doctypeForm.value, showRequest.value);
 
         // axiosInstance
@@ -889,7 +941,7 @@ watch(activityData, (newVal) => {
   // console.log("Updated Activity Data:", newVal);
   activityDatalog.value = newVal;
   // console.log("Request Cancelled?", requestcancelled.value);
-activityDatalog.value = requestcancelled.value
+  activityDatalog.value = requestcancelled.value
 });
 
 
@@ -1092,6 +1144,7 @@ activityDatalog.value = requestcancelled.value
 .activity-log-item.last-item .activity-log-dot::after {
   content: none;
 }
+
 .activityRedDot {
   position: relative;
   width: 16px;
