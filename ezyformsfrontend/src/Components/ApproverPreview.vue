@@ -27,7 +27,7 @@
                       : ''">
 
 
-                      <div v-if="field.label && field.fieldtype !== 'Table'">
+                      <div v-if="field.label && field.fieldtype !== 'Table' && field.fieldname !== 'auto_calculations'">
                         <label :for="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
                           class=" label-text  whitespace-nowrap">
                           <span class="font-12 fw-medium">{{ field.label }}</span>
@@ -101,7 +101,7 @@
                           </div>
                         </template>
 
-                        <template v-else-if="field.fieldtype == 'Check'">
+                        <template v-else-if="field.fieldtype == 'Check' && field.fieldname !== 'auto_calculations'">
                           <input type="checkbox" :checked="field.value"
                             :disabled="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel"
                             :placeholder="'Enter ' + field.label" :name="'field-' +
@@ -253,7 +253,7 @@
                                   columnIndex,
                                   fieldIndex
                                 )" class="form-control font-12 " />
-                            <button class="btn btn-dark text-dark bg-white" @click="ClickLink(field)"> <i
+                            <button v-if="field.value" class="btn btn-dark text-dark bg-white" @click="ClickLink(field)"> <i
                                 class="bi bi-link-45deg font-15"></i></button>
 
                             <!-- <button type="button" class="btn btn-outline-secondary pb-0 btn-sm" data-bs-toggle="modal"
@@ -306,7 +306,7 @@
                             @input="adjustHeight(sectionIndex, columnIndex, fieldIndex)" />
 
                           <template
-                            v-if="blockIndex === 0 && field.fieldtype !== 'Int' && field.fieldtype !== 'Text' && field.fieldtype !== 'Select'">
+                            v-if="blockIndex === 0 && field.fieldtype !== 'Int' && field.fieldtype !== 'Text' && field.fieldtype !== 'Select' && field.fieldname !== 'auto_calculations'">
                             <span style="font-size: 12px;"
                               :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 image-border-bottom w-50 bg-transparent' : ''"
                               :value="field.value" :type="field.fieldtype">
@@ -315,7 +315,7 @@
                           </template>
                           <template v-else>
                             <component
-                              v-if="blockIndex !== 0 && field.fieldtype !== 'Int' && field.fieldtype !== 'Text' && field.fieldtype !== 'Select'"
+                              v-if="blockIndex !== 0 && field.fieldtype !== 'Int' && field.fieldtype !== 'Text' && field.fieldtype !== 'Select' && field.fieldname !== 'auto_calculations'"
                               :style="{
                                 width: Math.min(100 + (field.value?.length * 2), 600) + 'px'
                               }" :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'"
@@ -339,7 +339,7 @@
                         </template>
                       </div>
                     </div>
-                    <div v-if="field.description !== 'Field' && field.fieldtype !== 'Table'"
+                    <div v-if="field.description !== 'Field' && field.fieldtype !== 'Table' && field.fieldname !== 'auto_calculations'"
                       class="w-100 font-11 description-block mt-1">
                       <!-- <span class="fw-semibold"></span><br> -->
                       <span v-html="field.description.replace(/\n/g, '<br>')"></span>

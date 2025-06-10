@@ -1624,10 +1624,10 @@ function setActiveField(b, s, r, c, f) {
 function isActiveField(b, s, r, c, f) {
   return activeSearch.key === getFieldKey(b, s, r, c, f);
 }
-
+// ['module', 'in', ['User Forms']],
 function fetchDoctypeList(searchText) {
   const filters = [
-    ['module', 'in', ['User Forms']],
+    
     ['istable', '=', 0]
   ];
 

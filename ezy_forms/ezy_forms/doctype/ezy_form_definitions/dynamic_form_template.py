@@ -558,6 +558,7 @@ template_str = """
 
                                 {% if table_name in child_data %}
                                 
+                                
                                     <h3 class="childtablename" style=margin-left:3px;margin-right:3px;font-size: 14px;>{{ row.label.replace("_", " ").title() }}</h3>
                                         {% if child_data[table_name] %}
                                             <table class="rounded-table" style="width: 100%; margin-bottom:5px; border-collapse: collapse; border-radius: 3px; margin-left:3px; margin-right:3px;">
@@ -569,22 +570,28 @@ template_str = """
                                                         {% endfor %}
                                                     </tr>
                                                 </thead>
+                                               {% set keywords = ['total', 'amount', 'total cost', 'sub total'] %}
+
                                                 <tbody>
                                                     {% for child in child_data[table_name] %}
+                                                        {% set is_summary_row = child.values() | select('string') | map('lower') | select('in', keywords) | list | length > 0 %}
                                                         <tr>
-                                                            
-                                                            {% set is_last_row = loop.last %}
-                                                            {% set has_data = child_data[table_name][-1]|select('string')|list|select %}
                                                             {% for value in child.values() %}
-                                                               
-                                                                    <td style="border: 1px solid #ccc;text-align:center; padding: 8px; word-break: break-word; font-size: 13px;">
-                                                                        {{ value if value else ' ' }}
-                                                                    </td>
-                                                                
+                                                                <td style="
+                                                                    {{ 'border: none;' if is_summary_row else 'border: 1px solid #ccc;' }}
+                                                                    text-align:center;
+                                                                    padding: 8px;
+                                                                    word-break: break-word;
+                                                                    font-size: 13px;
+                                                                ">
+                                                                    {{ value if value else ' ' }}
+                                                                </td>
                                                             {% endfor %}
                                                         </tr>
                                                     {% endfor %}
                                                 </tbody>
+
+
                                             </table>
                                         {% endif %}
 
@@ -633,7 +640,7 @@ template_str = """
                                             <label for="{{ field.fieldname }}">
                                                 Approved By <span style="padding-left:2px; font-size: 13px;">:</span>
                                             </label>
-                                        {% elif field.fieldtype != 'Attach' %}
+                                        {% elif field.fieldtype != 'Attach' and field.fieldname != 'auto_calculations' %}
                                             <label for="{{ field.fieldname }}">
                                                 {{ field.label }} <span style="padding-left:2px; font-size: 13px;">:</span>
                                             </label>
@@ -682,27 +689,24 @@ template_str = """
                                                     {% endfor %}
                                                 </div>
                                             </div>
-                                        {% elif field.fieldtype == 'Check' %}
+                                        {% elif field.fieldtype == 'Check' and field.fieldname != 'auto_calculations' %}
                                             <div class="checkbox-gap" style="display: flex; align-items: center; gap: 8px;">
                                                 <span class="custom-checkbox {% if field['values'] %}checked{% else %}unchecked{% endif %}"></span>
                                             </div>
 
-                                        {% elif field.fieldtype == 'Data' or field.fieldtype == 'Int' %}
+                                        {% elif field.fieldtype == 'Data' or field.fieldtype == 'Int' and field.fieldname != 'auto_calculations' %}
                                             <span id="{{ field.fieldname }}"
                                                 style="font-size:13px; font-weight:500;border-bottom: 1px solid #cccccc;">
                                                 {{ field['values'] }}
                                             </span>
                                         {% elif field.fieldtype == 'Select' %}
+                                        
                                         {% if field['values'] %}
-                                            {% set selected_values_list = field['values'].split(',') %}
-                                            <div class="checkbox-container">
-                                                {% for value in selected_values_list if value %}
-                                                    <div class="checkbox-gap">
-                                                        <span class="custom-checkbox checked"></span>
-                                                        <span style="margin-top:5px;">{{ value }}</span>
-                                                    </div>
-                                                {% endfor %}
-                                            </div>
+                                         <span id="{{ field.fieldname }}"
+                                                style="font-size:13px; font-weight:500;border-bottom: 1px solid #cccccc;">
+                                                {{ field['values'] }}
+                                            </span>
+                                            
                                         {% else %}
                                             {% set options = field.options.strip().split('\n') if field.options else [] %}
                                             <div class="checkbox-container">
@@ -795,7 +799,7 @@ template_str = """
                                         {% endif %}
                                         
                                     </div>
-                                         {% if field.description != 'Field' %}
+                                         {% if field.description != 'Field' and field.fieldname != 'auto_calculations' %}
                                             <div class="w-100 description-block mt-1">
                                                
                                                 <span>{{ field.description | replace('\n', '<br>') | safe }}</span>
