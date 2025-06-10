@@ -181,10 +181,10 @@
                     class="btn btn-light font-11 fw-bold h-0 text-decoration-underline" type="button"
                     @click="downloadPdf"><i class="bi bi-arrow-down-circle fw-bold px-1"></i>Download
                   </button>
-                  <!-- <button type="button" class="btn btn-outline-light  CreateDepartments " data-bs-toggle="modal"
+                  <button type="button" class="btn btn-outline-light  CreateDepartments " data-bs-toggle="modal"
                     data-bs-target="#pdfView" @click="viewasPdfView">
                     Preview
-                  </button> -->
+                  </button>
 
                 </div>
               </div>
