@@ -19,7 +19,8 @@
   "form_json",
   "form_status",
   "print_format",
-  "is_landscape"
+  "is_landscape",
+  "workflow_check"
  ],
  "fields": [
   {
@@ -105,11 +106,16 @@
    "fieldname": "is_landscape",
    "fieldtype": "Check",
    "label": "Is Landscape"
+  },
+  {
+   "fieldname": "workflow_check",
+   "fieldtype": "Data",
+   "label": "Workflow Check"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-05-08 16:32:10.520014",
+ "modified": "2025-06-03 17:00:49.207656",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
  "name": "Ezy Form Definitions",
