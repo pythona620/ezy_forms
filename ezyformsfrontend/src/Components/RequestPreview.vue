@@ -19,7 +19,7 @@
                                 <div class="mx-3 my-2">
                                     <div v-for="(field, fieldIndex) in column.fields"
                                         :key="'field-preview-' + fieldIndex">
-                                        <div v-if="field.fieldtype !== 'Table'"
+                                        <div v-if="field.fieldtype !== 'Table' && field.fieldname !== 'auto_calculations'"
                                             :class="field.fieldtype === 'Check' ? ' d-flex mt-4 flex-row-reverse justify-content-end gap-2' : ''">
                                             <div v-if="field.label">
                                                 <label :for="'field-' +
@@ -34,7 +34,7 @@
                                                             field.label }}</span>
                                                     <span class="ms-1 text-danger">{{
                                                         field.reqd === 1 ? "*" : ""
-                                                        }}</span>
+                                                    }}</span>
                                                 </label>
                                             </div>
 
@@ -124,35 +124,28 @@
                                                 </div>
                                             </template>
 
+
                                             <template v-else-if="field.fieldtype == 'Attach'">
                                                 <input :disabled="props.readonlyFor === 'true'" type="file"
                                                     accept="image/jpeg,image/png,application/pdf"
                                                     :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
                                                     class="form-control previewInputHeight font-10 mt-2" multiple
-                                                    @change="
-                                                        logFieldValue(
-                                                            $event,
-                                                            blockIndex,
-                                                            sectionIndex,
-                                                            rowIndex,
-                                                            columnIndex,
-                                                            fieldIndex
-                                                        )
-                                                        " />
+                                                    @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
+
                                                 <div v-if="field.value" class="d-flex flex-wrap gap-2">
                                                     <div v-for="(fileUrl, index) in field.value.split(',').map(f => f.trim())"
                                                         :key="index" class="position-relative d-inline-block"
                                                         @mouseover="hovered = index" @mouseleave="hovered = null">
-                                                        <!-- Show image thumbnail -->
-                                                        <img v-if="isImageFile(fileUrl)" :src="fileUrl"
-                                                            class="img-thumbnail mt-2 cursor-pointer border-0"
-                                                            style="max-width: 100px; max-height: 100px" />
-
-                                                        <!-- Show PDF icon if not image -->
-                                                        <div v-else
-                                                            class="d-flex align-items-center justify-content-center border mt-2"
-                                                            style="width: 100px; height: 100px; background: #f9f9f9">
-                                                            <i class="bi bi-file-earmark-pdf fs-1 text-danger"></i>
+                                                        <!-- Click to open modal -->
+                                                        <div @click="openPreview(fileUrl)" style="cursor: pointer">
+                                                            <img v-if="isImageFile(fileUrl)" :src="fileUrl"
+                                                                class="img-thumbnail mt-2 border-0"
+                                                                style="max-width: 100px; max-height: 100px" />
+                                                            <div v-else
+                                                                class="d-flex align-items-center justify-content-center border mt-2"
+                                                                style="width: 100px; height: 100px; background: #f9f9f9">
+                                                                <i class="bi bi-file-earmark-pdf fs-1 text-danger"></i>
+                                                            </div>
                                                         </div>
 
                                                         <!-- Remove icon -->
@@ -165,10 +158,26 @@
                                                     </div>
                                                 </div>
 
-                                                <!-- File input for uploading -->
+                                                <!-- Modal Preview -->
+                                                <div v-if="showModal" class="modal-backdrop" @click.self="closePreview"
+                                                    style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1050;">
+                                                    <div
+                                                        style="background: white; padding: 20px; max-width: 90%; max-height: 90%; overflow: auto; border-radius: 8px; position: relative;">
 
+                                                        <button @click="closePreview"
+                                                            style="position: absolute; top: 10px; right: 10px; border: none; background: transparent; font-size: 20px;">&times;</button>
+
+                                                        <!-- Image Preview -->
+                                                        <img v-if="isImageFile(previewUrl)" :src="previewUrl"
+                                                            style="max-width: 100%; max-height: 80vh;" />
+
+                                                        <!-- PDF Preview -->
+                                                        <iframe v-else :src="previewUrl"
+                                                            style="width: 80vw; height: 80vh;" frameborder="0"></iframe>
+                                                    </div>
+                                                </div>
                                             </template>
-                                            <template v-else-if="field.fieldtype == 'Check'">
+                                            <template v-else-if="field.fieldtype == 'Check' && field.fieldname !== 'auto_calculations'">
                                                 <input type="checkbox" :value="field.value"
                                                     :placeholder="'Enter ' + field.label" :name="'field-' +
                                                         sectionIndex +
@@ -211,23 +220,35 @@
                                                                 )
                                                         " class="form-control previewInputHeight font-10" />
                                             </template>
-                                            <template v-else-if="field.fieldtype === 'Link'">
-                                                <input type="text" v-model="field.value"
-                                                    @input="() => fetchDoctypeList(field.options, field.value)"
-                                                    @focus="() => fetchDoctypeList(field.options, field.value)"
-                                                    @change="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
-                                                    class="form-control font-12 mb-1" />
+                                           <template v-else-if="field.fieldtype === 'Link'">
+    <input
+        type="text"
+        v-model="field.value"
+        @input="() => fetchDoctypeList(field.options, field.value)"
+        @focus="() => fetchDoctypeList(field.options, field.value)"
+        @change="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+        class="form-control font-12 mb-1"
+    />
 
-
-                                                <ul v-if="linkSearchResults.length" class="list-group mt-1"
-                                                    style="max-height: 200px; overflow-y: auto;">
-                                                    <li v-for="(result, index) in linkSearchResults" :key="index"
-                                                        @click="selectDoctype(result.name, field, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
-                                                        class="list-group-item list-group-item-action">
-                                                        {{ result.name }}
-                                                    </li>
-                                                </ul>
-                                            </template>
+    <ul v-if="linkSearchResults.length" class="list-group mt-1" style="max-height: 200px; overflow-y: auto;">
+        <li
+            v-for="(result, index) in linkSearchResults"
+            :key="index"
+            @click="selectDoctype(
+                result.name,
+                field,
+                blockIndex,
+                sectionIndex,
+                rowIndex,
+                columnIndex,
+                fieldIndex
+            )"
+            class="list-group-item list-group-item-action"
+        >
+            {{ field.options.includes('Ezy Departments') ? result.department_name : result.name }}
+        </li>
+    </ul>
+</template>
 
 
 
@@ -263,10 +284,11 @@
                                                     columnIndex +
                                                     '-' +
                                                     fieldIndex
-                                                    " class="form-control previewInputHeight"></textarea>
+                                                    " class="form-control previewInputHeight font-12"></textarea>
                                                 <!-- :max="currentdate" -->
+
                                                 <component v-if="
-                                                    field.fieldtype !== 'Datetime' && field.fieldtype !== 'Text'
+                                                    field.fieldtype !== 'Datetime' && field.fieldtype !== 'Text' && field.fieldname !== 'auto_calculations'
                                                 " :is="getFieldComponent(field.fieldtype)" :value="field.value"
                                                     :min="past" @click="forceOpenCalendar"
                                                     :maxlength="getMaxLength(field)"
@@ -301,7 +323,7 @@
                                                 }}
                                             </div>
                                         </div>
-                                        <span v-if="field.description !== 'Field' && field.fieldtype !== 'Table'"
+                                        <span v-if="field.description !== 'Field' && field.fieldtype !== 'Table' && field.fieldname !== 'auto_calculations'"
                                             class="font-11"><span class="fw-semibold">Description: </span>{{
                                                 field.description }}</span>
                                         <div v-if="blockIndex === 0 && field.fieldtype === 'Table'">
@@ -332,7 +354,7 @@
                                                             class="border p-3 mb-3 rounded bg-light-subtle">
                                                             <div
                                                                 class="d-flex justify-content-between align-items-center mb-2">
-                                                                <span>Block {{ rowIndex + 1 }}</span>
+                                                                <span>Block #{{ rowIndex + 1 }}</span>
                                                                 <span class="text-danger cursor-pointer"
                                                                     @click="removeRow(tableIndex, rowIndex)">
                                                                     <i class="bi bi-x-lg"></i>
@@ -413,11 +435,66 @@
                                                                     </template>
                                                                     <template
                                                                         v-else-if="fieldItem.fieldtype === 'Attach'">
+                                                                        <!-- File Input -->
                                                                         <input multiple type="file"
                                                                             class="form-control font-12"
                                                                             accept="image/jpeg,image/png,application/pdf"
                                                                             @change="handleFileUpload($event, row, fieldItem.fieldname)" />
+
+                                                                        <!-- Preview Section -->
+                                                                        <div v-if="row[fieldItem.fieldname]"
+                                                                            class="d-flex flex-wrap gap-2">
+                                                                            <div v-for="(fileUrl, index) in normalizeFileList(row[fieldItem.fieldname])"
+                                                                                :key="index"
+                                                                                class="position-relative d-inline-block"
+                                                                                @mouseover="hovered = index"
+                                                                                @mouseleave="hovered = null">
+                                                                                <!-- Click to Preview -->
+                                                                                <div @click="openPreview(fileUrl)"
+                                                                                    style="cursor: pointer">
+                                                                                    <!-- Show image thumbnail -->
+                                                                                    <img v-if="isImageFile(fileUrl)"
+                                                                                        :src="fileUrl"
+                                                                                        class="img-thumbnail mt-2 border-0"
+                                                                                        style="max-width: 100px; max-height: 100px" />
+
+                                                                                    <!-- Show PDF icon -->
+                                                                                    <div v-else
+                                                                                        class="d-flex align-items-center justify-content-center border mt-2"
+                                                                                        style="width: 100px; height: 100px; background: #f9f9f9">
+                                                                                        <i
+                                                                                            class="bi bi-file-earmark-pdf fs-1 text-danger"></i>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        <!-- Modal Preview -->
+                                                                        <div v-if="showModal" class="modal-backdrop"
+                                                                            @click.self="closePreview" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+           background: rgba(0,0,0,0.5); display: flex; align-items: center;
+           justify-content: center; z-index: 1050;">
+                                                                            <div style="background: white; padding: 20px; max-width: 90%; max-height: 90%;
+             overflow: auto; border-radius: 8px; position: relative;">
+                                                                                <button @click="closePreview" style="position: absolute; top: 10px; right: 10px;
+               border: none; background: transparent; font-size: 20px;">
+                                                                                    &times;
+                                                                                </button>
+
+                                                                                <!-- Image Preview -->
+                                                                                <img v-if="isImageFile(previewUrl)"
+                                                                                    :src="previewUrl"
+                                                                                    style="max-width: 100%; max-height: 80vh;" />
+
+                                                                                <!-- PDF Preview -->
+                                                                                <iframe v-else :src="previewUrl"
+                                                                                    style="width: 80vw; height: 80vh;"
+                                                                                    frameborder="0"></iframe>
+                                                                            </div>
+                                                                        </div>
                                                                     </template>
+
+
                                                                 </div>
                                                             </div>
 
@@ -445,7 +522,7 @@
                                                         <div>
                                                             <span class="font-13 text-secondary ">{{
                                                                 field.label.replace(/_/g, " ")
-                                                                }}</span>
+                                                            }}</span>
                                                         </div>
                                                         <table class="table  rounded-table" border="1" width="100%">
                                                             <thead>
@@ -508,12 +585,12 @@
                                                                         <!-- :class="field.label === 'Details' && field.fieldname === 'field_0' && rowIndex === 0 && fieldIndex === 0 ? 'bg-white border-0' : 'border-1'" -->
                                                                         <template
                                                                             v-if="field.fieldtype === 'Data' && field.label !== 'Type of Manpower'">
-
                                                                             <input type="text"
                                                                                 :maxlength="field.fieldtype === 'Phone' ? '10' : '140'"
                                                                                 class="form-control font-12"
                                                                                 :title="row[field.fieldname]"
                                                                                 v-model="row[field.fieldname]" />
+
                                                                         </template>
                                                                         <template v-if="field.fieldtype === 'Text'">
                                                                             <textarea class="form-control font-12"
@@ -534,13 +611,17 @@
                                                                             </div>
                                                                         </template>
                                                                         <template v-if="field.fieldtype === 'Date'">
-                                                                            <input type="date" :min="past" :max="today"
+
+                                                                            <input type="date"
+                                                                                :min="field.fieldname === 'expense_date' ? null : today"
+                                                                                :max="field.fieldname === 'expense_date' ? today : null"
                                                                                 :title="row[field.fieldname]"
                                                                                 class="form-control font-12"
                                                                                 v-model="row[field.fieldname]" />
                                                                         </template>
 
                                                                         <template v-else-if="field.fieldtype === 'Int'">
+                                                                            
                                                                             <input
                                                                                 v-if="field.description && /[+\-*/]/.test(field.description)"
                                                                                 type="number"
@@ -578,18 +659,22 @@
                                                                                     class="position-relative d-inline-block"
                                                                                     @mouseover="hovered = index"
                                                                                     @mouseleave="hovered = null">
-                                                                                    <!-- Show Image Thumbnail -->
-                                                                                    <img v-if="isImageChildFile(fileUrl)"
-                                                                                        :src="fileUrl"
-                                                                                        class="img-thumbnail mt-2 cursor-pointer border-0"
-                                                                                        style="max-width: 100px; max-height: 100px" />
+                                                                                    <!-- Preview click -->
+                                                                                    <div @click="openPreview(fileUrl)"
+                                                                                        style="cursor: pointer">
+                                                                                        <!-- Show Image Thumbnail -->
+                                                                                        <img v-if="isImageChildFile(fileUrl)"
+                                                                                            :src="fileUrl"
+                                                                                            class="img-thumbnail mt-2 border-0"
+                                                                                            style="max-width: 100px; max-height: 100px" />
 
-                                                                                    <!-- Show PDF Icon -->
-                                                                                    <div v-else
-                                                                                        class="d-flex align-items-center justify-content-center border mt-2"
-                                                                                        style="width: 100px; height: 100px; background: #f9f9f9">
-                                                                                        <i
-                                                                                            class="bi bi-file-earmark-pdf fs-1 text-danger"></i>
+                                                                                        <!-- Show PDF Icon -->
+                                                                                        <div v-else
+                                                                                            class="d-flex align-items-center justify-content-center border mt-2"
+                                                                                            style="width: 100px; height: 100px; background: #f9f9f9">
+                                                                                            <i
+                                                                                                class="bi bi-file-earmark-pdf fs-1 text-danger"></i>
+                                                                                        </div>
                                                                                     </div>
 
                                                                                     <!-- Remove Icon -->
@@ -606,9 +691,11 @@
 
 
 
+
                                                                     </td>
 
-                                                                    <td class="d-table-cell text-center align-middle">
+                                                                    <td
+                                                                        class="d-table-cell text-center align-middle removeRowTd">
                                                                         <span class="tableRowRemoveBtn "
                                                                             @click="removeRow(tableIndex, rowIndex)">
                                                                             <i class="bi bi-x-lg "></i>
@@ -618,19 +705,34 @@
 
                                                             </tbody>
                                                             <tfoot>
-                                                                <tr v-if="table.some(field => field.fieldtype === 'Int' && field.description && /[+\-*/]/.test(field.description))"
-                                                                    class="bg-light">
-                                                                    <td class="text-center font-12">Total</td>
-                                                                    <td v-for="field in table" :key="field.fieldname"
+                                                                <tr v-if="table.some(field =>
+                                                                    field.fieldtype === 'Int' &&
+                                                                    field.description &&
+                                                                    /[+\-*/]/.test(field.description) &&
+                                                                    (field.label.toLowerCase().includes('total') || field.label.toLowerCase().includes('amount'))
+                                                                )" class="bg-light">
+                                                                    <td v-for="(field, index) in table"
+                                                                        :key="field.fieldname"
                                                                         class="text-center font-12">
-                                                                        <span
-                                                                            v-if="field.fieldtype === 'Int' && field.description && /[+\-*/]/.test(field.description) && field.label.includes('Total')">
+                                                                        <!-- ✅ Always show 'Total' in the first column -->
+                                                                        <template v-if="index === 0">
+                                                                            Total
+
+                                                                        </template>
+                                                                        <!-- ✅ Other columns show totals conditionally -->
+                                                                        <template v-else-if="
+                                                                            field.fieldtype === 'Int' &&
+                                                                            field.description &&
+                                                                            /[+\-*/]/.test(field.description) &&
+                                                                            (field.label.toLowerCase().includes('total') || field.label.toLowerCase().includes('amount'))
+                                                                        ">
+
                                                                             {{
                                                                                 tableTotals[tableIndex]?.[field.fieldname]
                                                                                 ?? 0 }}
-                                                                        </span>
+                                                                        </template>
                                                                     </td>
-                                                                    <!-- <td></td> -->
+                                                                    <td></td>
                                                                 </tr>
                                                                 <tr>
                                                                     <td :colspan="table.length + 2"
@@ -700,12 +802,17 @@ const currentFieldOptions = ref('');
 const tableRows = reactive({});
 
 const past = new Date().toISOString().split('T')[0]
-// const today = new Date().toISOString().split('T')[0]; 
+// const today = new Date().toISOString().split('T')[0];  
+// const now = new Date();
+// const pad = (n) => n.toString().padStart(2, '0');
+
+// // Format: YYYY-MM-DDTHH:MM (suitable for datetime-local input)
+// const today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
 const now = new Date();
 const pad = (n) => n.toString().padStart(2, '0');
 
-// Format: YYYY-MM-DDTHH:MM (suitable for datetime-local input)
-const today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+const today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+
 const formQuestions = ref([
     "The Porch & Main Gate is manned and lighting is sufficient.",
     "Reception area is clean & all brand standards in place.",
@@ -745,26 +852,49 @@ const getInputType = (type) => {
     if (t === 'int') return 'number';
     return t;
 };
+
+
+const previewUrl = ref('')
+const showModal = ref(false)
+
+const openPreview = (url) => {
+    previewUrl.value = url
+    showModal.value = true
+}
+
+const closePreview = () => {
+    showModal.value = false
+    previewUrl.value = ''
+}
 // console.log(tableRows);
 // Format as 'YYYY-MM-DDTHH:MM'
 watch(
     () => tableRows,
     () => {
-        // updateFirstRowName();
+        updateFirstRowName();
         const finalData = {};
 
         for (const [tableIndex, rows] of Object.entries(tableRows)) {
             const totalsRow = tableTotals.value?.[tableIndex];
 
             if (totalsRow && Object.keys(totalsRow).length > 0) {
-                // Only add totals row if it has actual data
-                finalData[tableIndex] = [...rows, totalsRow];
+                // Clone the totalsRow to avoid modifying the original
+                const modifiedTotalsRow = { ...totalsRow };
+
+                // Get table headers to identify the first field
+                const fields = props.tableHeaders[tableIndex] || [];
+                const firstField = fields[0]?.fieldname;
+
+                if (firstField) {
+                    modifiedTotalsRow[firstField] = "Total";
+                }
+
+                // Append modified totals row
+                finalData[tableIndex] = [...rows, modifiedTotalsRow];
             } else {
-                // Otherwise, just send the rows
                 finalData[tableIndex] = [...rows];
             }
         }
-        console.log(tableRows, "pppp");
 
         emit('updateTableData', { ...finalData });
     },
@@ -801,21 +931,21 @@ const addRow = (tableIndex) => {
 const removeRow = (tableIndex, rowIndex) => {
     tableRows[tableIndex].splice(rowIndex, 1);
 };
-// function updateFirstRowName() {
-//   for (const tableIndex in tableRows) {
-//     const rows = tableRows[tableIndex];
-//     const headers = props.tableHeaders[tableIndex];
+function updateFirstRowName() {
+    for (const tableIndex in tableRows) {
+        const rows = tableRows[tableIndex];
+        const headers = props.tableHeaders[tableIndex];
 
-//     if (rows && rows.length > 0 && headers?.length > 0) {
-//       const firstFieldName = headers[0].fieldname;
+        if (rows && rows.length > 0 && headers?.length > 0) {
+            const firstFieldName = headers[0].fieldname;
 
-//       // ✅ Use includes instead of exact match
-//       if (firstFieldName && firstFieldName.toLowerCase().includes('details')) {
-//         rows[0][firstFieldName] = 'Name';
-//       }
-//     }
-//   }
-// }
+            // ✅ Use includes instead of exact match
+            if (firstFieldName && firstFieldName.toLowerCase().includes('details')) {
+                rows[0][firstFieldName] = 'Name';
+            }
+        }
+    }
+}
 
 
 
@@ -925,19 +1055,28 @@ const tableTotals = computed(() => {
 
         const fields = props.tableHeaders[tableIndex] || [];
         fields.forEach((field) => {
-            if (field.fieldtype === 'Int' && field.description && /[+\-*/]/.test(field.description) && field.label.includes('Total')) {
+            if (
+                field.fieldtype === 'Int' &&
+                field.description &&
+                /[+\-*/]/.test(field.description) &&
+                (field.label.toLowerCase().includes('total') || field.label.toLowerCase().includes('amount'))
+            ) {
                 let sum = 0;
 
                 rows.forEach((row) => {
-                    if (field.description && /[+\-*/]/.test(field.description) && field.label.includes('Total')) {
+                    if (
+                        field.description &&
+                        /[+\-*/]/.test(field.description) &&
+                        (field.label.toLowerCase().includes('total') || field.label.toLowerCase().includes('amount'))
+                    ) {
                         // Calculate expression dynamically using labels and row data
                         sum += Number(calculateFieldExpression(row, field.description, fields));
                     }
-                    //   else {
-                    //     // Sum raw values
-                    //     const val = parseFloat(row[field.fieldname]);
-                    //     sum += isNaN(val) ? 0 : val;
-                    //   }
+                    else {
+                        // Sum raw values
+                        const val = parseFloat(row[field.fieldname]);
+                        sum += isNaN(val) ? 0 : val;
+                    }
                 });
 
                 totals[tableIndex][field.fieldname] = sum;
@@ -975,6 +1114,7 @@ watchEffect(() => {
                     row[field.fieldname] = result;
                 }
             });
+
         });
     }
 });
@@ -1001,56 +1141,66 @@ watchEffect(() => {
 //         tableFileUpload(file, row, fieldname);
 //     });
 // };
-const handleFileUpload = (event, row, fieldname) => {
-    let selectedFiles = Array.from(event.target.files); // ⬅ Change to 'let'
+const handleFileUpload = async (event, row, fieldname) => {
+    let selectedFiles = Array.from(event.target.files);
     if (!selectedFiles.length) return;
 
     const existingFiles = normalizeFileList(row[fieldname]);
 
-    const totalFiles = existingFiles.length + selectedFiles.length;
-    if (totalFiles > 5) {
-        alert("You can only upload a maximum of 5 files.");
-        selectedFiles = selectedFiles.slice(0, 5 - existingFiles.length); // ✅ Keep only required files
+    if (existingFiles.length >= 5) {
+        alert("Maximum 5 files are allowed.");
+        return;
     }
 
-    selectedFiles.forEach((file) => {
-        tableFileUpload(file, row, fieldname);
-    });
+    const remainingSlots = 5 - existingFiles.length;
+    if (selectedFiles.length > remainingSlots) {
+        alert(`Only ${remainingSlots} more file(s) can be uploaded.`);
+        selectedFiles = selectedFiles.slice(0, remainingSlots);
+    }
 
-    // ✅ Clear input to allow re-selecting same file
+    // Upload files sequentially to preserve order
+    for (const file of selectedFiles) {
+        await tableFileUpload(file, row, fieldname);
+    }
+
     event.target.value = null;
 };
 
 
 
 const tableFileUpload = (file, row, fieldname) => {
-    const randomNumber = generateRandomNumber();
-    const fileName = `mailfiles-${randomNumber}-@${file.name}`;
+    return new Promise((resolve, reject) => {
+        const randomNumber = generateRandomNumber();
+        const fileName = `mailfiles-${randomNumber}-@${file.name}`;
 
-    const formData = new FormData();
-    formData.append("file", file, fileName);
-    formData.append("is_private", "0");
-    formData.append("folder", "Home");
+        const formData = new FormData();
+        formData.append("file", file, fileName);
+        formData.append("is_private", "0");
+        formData.append("folder", "Home");
 
-    axiosInstance
-        .post(apis.uploadfile, formData)
-        .then((res) => {
-            if (res.message && res.message.file_url) {
-                const fileUrl = res.message.file_url;
+        axiosInstance
+            .post(apis.uploadfile, formData)
+            .then((res) => {
+                if (res.message && res.message.file_url) {
+                    const fileUrl = res.message.file_url;
 
-                // Get current list and append
-                let files = normalizeFileList(row[fieldname]);
-                files.push(fileUrl);
+                    // Get current list and append
+                    let files = normalizeFileList(row[fieldname]);
+                    files.push(fileUrl);
 
-                // Store back as comma-separated string
-                row[fieldname] = files.join(',');
-            } else {
-                console.error("file_url not found in the response.");
-            }
-        })
-        .catch((error) => {
-            console.error("Upload error:", error);
-        });
+                    // Store back as comma-separated string
+                    row[fieldname] = files.join(',');
+                    resolve(); // ✅ done
+                } else {
+                    console.error("file_url not found in the response.");
+                    reject();
+                }
+            })
+            .catch((error) => {
+                console.error("Upload error:", error);
+                reject();
+            });
+    });
 };
 
 
@@ -1095,23 +1245,29 @@ const handleSelectChange = (
 // const linkSearchResults = ref([])
 
 function fetchDoctypeList(resourceName, searchText) {
+    console.log(resourceName);
     if (!resourceName) return;
 
     const filters = [];
 
     if (searchText && searchText.trim()) {
-        filters.push(['name', 'like', `%${searchText}%`]);
+        const searchField = resourceName.includes('Ezy Departments') ? 'department_name' : 'name';
+        filters.push([searchField, 'like', `%${searchText}%`]);
     }
+
+    const fields = resourceName.includes('Ezy Departments')
+        ? ['department_name', 'name']
+        : ['name'];
 
     axiosInstance
         .get(`/api/resource/${encodeURIComponent(resourceName)}`, {
             params: {
-                fields: JSON.stringify(['name']),
+                fields: JSON.stringify(fields),
                 filters: JSON.stringify(filters),
             },
         })
         .then((res) => {
-            linkSearchResults.value = res.data || []; // Ensure .data exists
+            linkSearchResults.value = res.data || [];
         })
         .catch((err) => {
             console.error('Error fetching doctype list:', err);
@@ -1200,11 +1356,11 @@ onMounted(() => {
                                 emit("updateField", field);
 
                             }
-                            if (field.label.includes("Requested by")) {
+                            if (field.label.includes("Requested by") || field.label.includes("Requested By")) {
                                 field.value = parsedData.emp_name;
                                 emit("updateField", field);
-
                             }
+
                             if (field.fieldtype === "Date" && !field.value) {
                                 field.value = new Date().toISOString().split('T')[0]; // Ensure format is YYYY-MM-DD
                                 // console.log("Setting field.value:", field.value); // Debugging log
@@ -1220,6 +1376,8 @@ onMounted(() => {
         });
     }
 });
+
+
 // function updateFormQuestionsInTableRows() {
 //     for (const [tableIndex, fields] of Object.entries(props.tableHeaders)) {
 //         const hasFormName = fields.some(f => f.label === 'Form Name');
@@ -1262,6 +1420,7 @@ watch(
     () => props.blockArr,
     () => {
         updateDateTimeFields();
+        
     },
     { deep: true }
 );
@@ -1471,37 +1630,67 @@ const validateField = (
         delete errorMessages.value[fieldKey]; // Clear error if valid
     }
 };
+watch(
+    () => tableTotals.value,
+    (totals) => {
+        if (!props.blockArr) return;
+
+        props.blockArr.forEach((block) => {
+            // Find the dynamic table name inside this block
+            let dynamicTableName = null;
+
+            outerLoop:
+            for (const section of block.sections) {
+                for (const row of section.rows) {
+                    for (const column of row.columns) {
+                        for (const field of column.fields) {
+                            // Check if field is a Table field and its name exists in totals
+                            if (
+                                (field.fieldtype === 'Table' || field.fieldtype === 'Link') &&
+                                (field.fieldname in totals)
+                            ) {
+                                dynamicTableName = field.fieldname;
+                                break outerLoop; // found it, stop searching
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (!dynamicTableName) return; // no table field found in this block
+
+            // Now update fields with fieldname 'gross_total' inside this block
+            block.sections.forEach((section) => {
+                section.rows.forEach((row) => {
+                    row.columns.forEach((column) => {
+                        column.fields.forEach((field) => {
+                            if (/sub total|sub amount|total amount/i.test(field.label)) {
+                                const obj = totals?.[dynamicTableName] || {};
+                                const matchedKey = Object.keys(obj).find(key =>
+                                    key.toLowerCase().includes('amount') || key.toLowerCase().includes('total') || key.toLowerCase().includes('total cost')
+                                );
+                                const totalValue = matchedKey ? obj[matchedKey] : 0;
+                                field.value = totalValue;
+                                emit("updateField", field);
+                            }
+                            
+
+
+                        });
+                    });
+                });
+            });
+        });
+    },
+    { deep: true, immediate: true }
+);
+
 
 const generateRandomNumber = () => {
     return Math.floor(Math.random() * 1000000);
 };
 
-// const uploadFile = (file, field, index) => {
-//     const randomNumber = generateRandomNumber();
-//     let fileName = `mailfiles-${props.formName}${randomNumber}-@${file.name}`;
 
-//     const formData = new FormData();
-//     formData.append("file", file, fileName);
-//     formData.append("is_private", "0");
-//     formData.append("folder", "Home");
-//     axiosInstance
-//         .post(apis.uploadfile, formData)
-//         .then((res) => {
-//             if (res.message && res.message.file_url) {
-//                 if (field["value"]) {
-//                     field["value"] += `, ${res.message.file_url}`;
-//                 } else {
-//                     field["value"] = res.message.file_url;
-//                 }
-//                 emit("updateField", field);
-//             } else {
-//                 console.error("file_url not found in the response.");
-//             }
-//         })
-//         .catch((error) => {
-//             console.error("Upload error:", error);
-//         });
-// };
 const uploadFile = (file, field) => {
     const randomNumber = generateRandomNumber();
     let fileName = `mailfiles-${props.formName}${randomNumber}-@${file.name}`;
@@ -1530,6 +1719,259 @@ const uploadFile = (file, field) => {
         });
 };
 
+ const flatFieldList = computed(() => {
+  return (props.blockArr || []).flatMap((block) =>
+    block.sections.flatMap((section) =>
+      section.rows.flatMap((row) =>
+        row.columns.flatMap((column) => column.fields)
+      )
+    )
+  );
+});
+
+watch(
+  flatFieldList,
+  () => {
+    performAutoCalculations();
+  },
+  { deep: true }
+);
+
+function performAutoCalculations() {
+  const blocks = props.blockArr || [];
+
+  // Step 1: Flatten all fields
+  const flatFields = blocks.flatMap(block =>
+    block.sections.flatMap(section =>
+      section.rows.flatMap(row =>
+        row.columns.flatMap(column => column.fields)
+      )
+    )
+  );
+
+  // Step 2: Find the auto_calculations field
+  const autoCalcField = flatFields.find(f => f.fieldname === 'auto_calculations');
+  if (!autoCalcField || !autoCalcField.description) return;
+
+  // Step 3: Parse labels to calculate
+  const labelsToCalculate = autoCalcField.description
+    .split(',')
+    .map(l => l.trim())
+    .filter(Boolean);
+
+  const labelToField = Object.fromEntries(
+    flatFields.map(f => [f.label?.trim(), f])
+  );
+
+  // Step 4: Find dynamicTableName from blocks
+  let dynamicTableName = null;
+  outerLoop:
+  for (const block of blocks) {
+    for (const section of block.sections) {
+      for (const row of section.rows) {
+        for (const column of row.columns) {
+          for (const field of column.fields) {
+            if (field.fieldtype === 'Table' && tableTotals.value[field.fieldname]) {
+              dynamicTableName = field.fieldname;
+              break outerLoop;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  const totals = tableTotals.value?.[dynamicTableName] || {};
+
+  // Step 5: Find subtotal key
+  const subTotalKey =
+    Object.keys(totals).find(key =>
+      /sub.*total|sub.*amount|net.*amount|total.*amount|total.*cost/i.test(key)
+    ) ||
+    Object.keys(totals).find(key => /amount|total/i.test(key));
+
+  const subTotal = subTotalKey ? parseFloat(totals[subTotalKey]) || 0 : 0;
+
+  // Step 6: Helper to get value only if label is in description
+  const getValue = (label) => {
+    if (!labelsToCalculate.includes(label)) return 0;
+    const field = labelToField[label];
+    const val = parseFloat(field?.value || 0);
+    return isNaN(val) ? 0 : val;
+  };
+
+  // Step 7: Get all required values
+  const freight = getValue("FREIGHT");
+  const cgst = getValue("CGST%");
+  const utgst = getValue("UTGST%");
+  const igst = getValue("IGST%");
+
+  const calculated = {};
+
+  // Step 8: Calculate tax amounts
+  if (labelsToCalculate.includes("CGST Amount")) {
+    calculated["CGST Amount"] = (subTotal * cgst) / 100;
+  }
+  if (labelsToCalculate.includes("UTGST Amount")) {
+    calculated["UTGST Amount"] = (subTotal * utgst) / 100;
+  }
+  if (labelsToCalculate.includes("IGST Amount")) {
+    calculated["IGST Amount"] = (subTotal * igst) / 100;
+  }
+
+  // Step 9: Calculate Gross Total if specified
+  if (labelsToCalculate.includes("Gross Total")) {
+    calculated["Gross Total"] =
+      subTotal +
+      (labelsToCalculate.includes("FREIGHT") ? freight : 0) +
+      (labelsToCalculate.includes("CGST Amount") ? calculated["CGST Amount"] || 0 : 0) +
+      (labelsToCalculate.includes("UTGST Amount") ? calculated["UTGST Amount"] || 0 : 0) +
+      (labelsToCalculate.includes("IGST Amount") ? calculated["IGST Amount"] || 0 : 0);
+  }
+
+  // Step 10: Update only changed values
+  for (const label of Object.keys(calculated)) {
+    if (!labelsToCalculate.includes(label)) continue;
+
+    const field = labelToField[label];
+    const newValue = Number(calculated[label].toFixed(2));
+    const currentValue = parseFloat(field?.value || 0);
+
+    if (field && currentValue.toFixed(2) !== newValue.toFixed(2)) {
+      field.value = newValue;
+      emit("updateField", field);
+    }
+  }
+}
+
+
+// function performAutoCalculations() {
+//   const blocks = props.blockArr || [];
+ 
+//   // Step 1: Flatten all fields from nested block structure
+//   const allFields = blocks.flatMap(block =>
+//     block.sections.flatMap(section =>
+//       section.rows.flatMap(row =>
+//         row.columns.flatMap(column => column.fields)
+//       )
+//     )
+//   );
+
+//   // Step 2: Find the 'Auto Calculations' field
+//   const autoCalcField = allFields.find(f => f.fieldname === 'auto_calculations');
+//   if (!autoCalcField || !autoCalcField.description) return;
+
+//   // Step 3: Get labels to calculate from description
+//   const labelsToCalculate = autoCalcField.description
+//     .split(',')
+//     .map(l => l.trim())
+//     .filter(Boolean);
+
+//   // Step 4: Map labels to field objects
+//   const labelToField = Object.fromEntries(
+//     allFields.map(f => [f.label?.trim(), f])
+//   );
+
+//   // Step 5: Helper to get numeric value from a label
+//   const getValue = (label) => {
+//     const field = labelToField[label];
+//     const val = parseFloat(field?.value || 0);
+//     return isNaN(val) ? 0 : val;
+//   };
+
+//   // Step 6: Perform Calculations
+//   const subTotal = getValue("Sub Total") || getValue("Sub Amount") || getValue("Total Amount");
+//   const freight = getValue("FREIGHT");
+//   const cgst = getValue("CGST%");
+//   const utgst = getValue("UTGST%");
+//   const igst = getValue("IGST%");
+
+//   const calculated = {};
+
+//   if (labelsToCalculate.includes("CGST Amount")) {
+//     calculated["CGST Amount"] = (subTotal * cgst) / 100;
+//   }
+//   if (labelsToCalculate.includes("UTGST Amount")) {
+//     calculated["UTGST Amount"] = (subTotal * utgst) / 100;
+//   }
+//   if (labelsToCalculate.includes("IGST Amount")) {
+//     calculated["IGST Amount"] = (subTotal * igst) / 100;
+//   }
+//   if (labelsToCalculate.includes("Gross Total")) {
+//     calculated["Gross Total"] =
+//       subTotal +
+//       freight +
+//       (calculated["CGST Amount"] || 0) +
+//       (calculated["UTGST Amount"] || 0) +
+//       (calculated["IGST Amount"] || 0);
+//   }
+
+//   // Step 7: Update fields and emit changes
+//   for (const label in calculated) {
+//     const field = labelToField[label];
+//     const newValue = calculated[label].toFixed(2);
+//     if (field && field.value !== newValue) {
+//       field.value = newValue;
+//       emit("updateField", field);
+//     }
+//   }
+// }
+
+// //  Utility to get any field by its fieldname
+// function getFieldByFieldname(fieldname) {
+//   for (const block of props.blockArr) {
+//     for (const section of block.sections) {
+//       for (const row of section.rows) {
+//         for (const column of row.columns) {
+//           const field = column.fields.find((f) => f.fieldname === fieldname);
+//           if (field) return field;
+//         }
+//       }
+//     }
+//   }
+//   return null;
+// }
+
+// // Computed totals
+// const calculatedTotals = computed(() => {
+//   const subTotal = parseFloat(getFieldByFieldname("sub_total")?.value || 0);
+//   const freight = parseFloat(getFieldByFieldname("freight")?.value || 0);
+//   const cgst = parseFloat(getFieldByFieldname("cgst")?.value || 0);
+//   const utgst = parseFloat(getFieldByFieldname("utgst")?.value || 0);
+//   const igst = parseFloat(getFieldByFieldname("igst")?.value || 0);
+
+//   const cgst_amount = (subTotal * cgst) / 100;
+//   const utgst_amount = (subTotal * utgst) / 100;
+//   const igst_amount = (subTotal * igst) / 100;
+
+//   const gross_total = subTotal + freight + cgst_amount + utgst_amount + igst_amount;
+
+//   return {
+//     cgst_amount,
+//     utgst_amount,
+//     igst_amount,
+//     gross_total
+//   };
+// });
+
+// // Watch changes and update fields
+// watchEffect(() => {
+//   const totals = calculatedTotals.value;
+
+//   const updateFieldValue = (fieldname, value) => {
+//     const field = getFieldByFieldname(fieldname);
+//     if (field && field.value !== value.toFixed(2)) {
+//       field.value = value.toFixed(2);
+//       emit("updateField", field);
+//     }
+//   };
+
+//   updateFieldValue("cgst_amount", totals.cgst_amount);
+//   updateFieldValue("utgst_amount", totals.utgst_amount);
+//   updateFieldValue("igst_amount", totals.igst_amount);
+//   updateFieldValue("gross_total", totals.gross_total);
+// });
+
 // const handleFileChange = (event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) => {
 //     const file = event.target.files[0]; // Get the first file selected
 //     if (file) {
@@ -1546,6 +1988,9 @@ const uploadFile = (file, field) => {
 // .overTable {
 //     overflow-x: auto;
 // }
+.removeRowTd {
+    width: 20px;
+}
 
 .text-ellipsis {
     max-width: 200px;

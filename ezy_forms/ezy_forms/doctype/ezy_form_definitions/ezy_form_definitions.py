@@ -22,7 +22,7 @@ class EzyFormDefinitions(Document):
     pass
  
 @frappe.whitelist()
-def add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:str,form_name:str,accessible_departments:str,form_short_name:str,fields:list[dict],form_status:str,series=None):
+def add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:str,form_name:str,accessible_departments:str,has_workflow:str|None,workflow_check:str| None,form_short_name:str,fields:list[dict],form_status:str,series=None):
     return_response_for_doc_add = enqueue(
         enqueued_add_dynamic_doctype,
         owner_of_the_form=owner_of_the_form,
@@ -35,6 +35,8 @@ def add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:st
         form_status=form_status,
         now=True,
         series =series,
+        has_workflow=has_workflow,
+        workflow_check = workflow_check,
         is_async=True,
         queue="short")
     return return_response_for_doc_add
@@ -62,7 +64,7 @@ def deleting_customized_field_from_custom_dynamic_doc(doctype:str,deleted_fields
         queue="short")
     return deleted_fields_qresponse
  
-def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:str,form_name:str,accessible_departments:str,form_short_name:str,fields:list[dict],form_status:str,series=None):
+def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:str,form_name:str,accessible_departments:str,form_short_name:str,fields:list[dict],form_status:str,has_workflow:str,workflow_check:str| None,series=None):
     """ Owner_of_the_form should come from Departments Doctype in Select Field."""
     """Adding DocTypes dynamically, giving Perms for the doctype and creating a default section-break field for DocType"""
     try:
@@ -71,7 +73,10 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
         if isinstance(fields,str):
             fields = literal_eval(fields)
         if frappe.db.exists("Ezy Form Definitions",{"name":form_short_name}):
-            # frappe.set_value("Ezy Form Definitions",form_short_name,"form_status",form_status)
+            
+            frappe.set_value("Ezy Form Definitions",form_short_name,"has_workflow",has_workflow)
+            frappe.set_value("Ezy Form Definitions",form_short_name,"workflow_check",workflow_check)
+            
             frappe.set_value("Ezy Form Definitions",{"name":form_short_name},{"form_status":form_status,"accessible_departments":accessible_departments,"owner_of_the_form":owner_of_the_form})
         if not frappe.db.exists("DocType",doctype):
             frappe.db.sql(f"DROP TABLE IF EXISTS `tab{doctype}`;")
@@ -97,7 +102,7 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
             "label": "Naming Series",
             "fieldname": "naming_series",
             "fieldtype": "Select",
-            "options": series if series else f"{business_unit}_{doctype}-",
+            "options": series if series else f"{business_unit}_{doctype.replace(' ', '_').upper() or doctype.upper()}-",
             "reqd": 1,
             "insert_after": "title"
         }))
@@ -124,6 +129,8 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
         )
             form_defs.business_unit = business_unit
             form_defs.count = 0
+            form_defs.has_workflow = has_workflow or ''
+            form_defs.workflow_check = workflow_check or ''
             form_defs.insert(ignore_permissions=True).save()
             form_defs.reload()
             frappe.db.commit()
@@ -316,25 +323,23 @@ def sanitize_fieldname(name):
 def add_child_doctype(form_short_name: str, as_a_block: str, fields: list[dict], idx=None):
 
     try:
-        doc = None  # Ensure 'doc' is always defined
-        exist_child_table = None
         if not idx:
             idx = 0
-        # Check if the DocType exists
-        # Adjust idx to be 1-based (instead of 0)
+
+        # Ensure all fields have a valid idx (1-based)
         for i, field in enumerate(fields, start=1):
             field['idx'] = i
 
-        # Your existing update code (simplified)
+        # Check if the DocType exists
         if frappe.db.exists("DocType", form_short_name):
-
+            # Load existing DocType
             exist_child_table = frappe.get_doc("DocType", form_short_name)
-            existing_fields = {field.fieldname: field for field in exist_child_table.fields}
+            existing_fields_dict = {field.fieldname: field for field in exist_child_table.fields}
             incoming_fieldnames = set()
             fields_updated = False
 
             for field in fields:
-                raw_fieldname = field.get("fieldname", "") or field.get("label", "")
+                raw_fieldname = field.get("fieldname") or field.get("label")
                 clean_fieldname = sanitize_fieldname(raw_fieldname)
 
                 if not clean_fieldname:
@@ -342,60 +347,50 @@ def add_child_doctype(form_short_name: str, as_a_block: str, fields: list[dict],
 
                 if raw_fieldname != clean_fieldname:
                     print(f"Sanitized fieldname from '{raw_fieldname}' to '{clean_fieldname}'")
-                
-                field["fieldname"] = clean_fieldname  # Overwrite with sanitized version
-                incoming_fieldnames.add(clean_fieldname)        
 
-                new_idx = field.get("idx")
-                new_label = field.get("label")
-                new_fieldtype = field.get("fieldtype")
-                new_options = field.get("options")
-                new_description = field.get("description")
+                field["fieldname"] = clean_fieldname
+                incoming_fieldnames.add(clean_fieldname)
 
-                if new_fieldtype == "Select" and new_options and not new_options.startswith("\n"):
-                    new_options = "\n" + new_options
+                new_field_data = {
+                    "label": field.get("label"),
+                    "fieldtype": field.get("fieldtype"),
+                    "options": ("\n" + field["options"]) if field.get("fieldtype") == "Select" and field.get("options") else field.get("options"),
+                    "description": field.get("description"),
+                    "idx": field.get("idx"),
+                }
 
-                if clean_fieldname in existing_fields:
-                    existing_field = existing_fields[clean_fieldname]
-                    if new_label:
-                        existing_field.label = new_label
-                    if new_fieldtype:
-                        existing_field.fieldtype = new_fieldtype
-                    if new_options:
-                        existing_field.options = new_options
-                    if new_description:
-                        existing_field.description = new_description
-                    if new_idx:
-                        existing_field.idx = new_idx
-                    fields_updated = True
+                if clean_fieldname in existing_fields_dict:
+                    # Update existing field
+                    existing_field = existing_fields_dict[clean_fieldname]
+                    for key, val in new_field_data.items():
+                        if val is not None and getattr(existing_field, key) != val:
+                            setattr(existing_field, key, val)
+                            fields_updated = True
                 else:
+                    # Add new field
                     exist_child_table.append("fields", {
                         "fieldname": clean_fieldname,
-                        "label": new_label,
-                        "fieldtype": new_fieldtype,
+                        **new_field_data,
                         "parentfield": "fields",
                         "parenttype": "DocType",
-                        "options": new_options,
-                        "description": new_description,
-                        "idx": new_idx
                     })
                     fields_updated = True
 
-            # Remove fields not in incoming data
-            exist_child_table.fields = [
-                field for field in exist_child_table.fields if field.fieldname in incoming_fieldnames
+            # Remove fields that are no longer present in the input
+            filtered_fields = [
+                f for f in exist_child_table.fields if f.fieldname in incoming_fieldnames
             ]
 
+            if len(filtered_fields) != len(exist_child_table.fields):
+                fields_updated = True
+            exist_child_table.fields = filtered_fields
+
             if fields_updated:
+                exist_child_table.flags.ignore_validate = True  # In case of schema issues
                 exist_child_table.save(ignore_permissions=True)
                 frappe.db.commit()
-                exist_child_table.db_update()
-
-
+                frappe.clear_cache(doctype=form_short_name)
                 return f"Fields updated successfully in Doctype '{form_short_name}'."
-            else:
-                return f"No changes made to Doctype '{form_short_name}'."
-
 
         else:
             # Create new DocType

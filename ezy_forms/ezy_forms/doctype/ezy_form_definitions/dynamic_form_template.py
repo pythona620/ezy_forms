@@ -362,15 +362,22 @@ template_str = """
               margin-bottom: 3px !important;
           }
  
-        .logo-div{
-            max-width: 300px;
-              min-width: 250px !important;
-        }
-         .header-left{
-            display: flex;
-            justify-content: center;
-            min-width: 400px;
-         }
+        /* .logo-div{*/
+           /*  max-width: 250px;*/
+           /*    min-width: 200px !important;*/
+       /*  }*/
+         .Form_name_div{
+  display: flex;
+  justify-content: center; /* center the h4 block */
+  text-align: center;      /* center the text inside h4 */
+  margin: 0px 10px;
+}
+
+.form-title {
+  font-size: 20px;
+  max-width: 600px;        /* optional, keeps it nicely readable */
+  word-wrap: break-word;
+}
          .header-right{
              min-width: 280px;
          }
@@ -442,6 +449,10 @@ template_str = """
             .watermark {
              display: block;
             }
+            .checkbox-gap{
+                margin:10px 0px;
+            }
+            
         }
         
    
@@ -478,12 +489,12 @@ template_str = """
     </div>
 </div>
 
-    <div class="header-left">
-        <h4 style="font-size:20px;">{{ form_name }}</h4>
+    <div class="Form_name_div">
+        <h4 class="form-title" style="font-size:20px;">{{ form_name }}</h4>
     </div>
     
     <div class="logo-div"> 
-        <img src="{{ company_logo }}" alt="logo" style="height: 55px; width: 245px; margin-bottom:0px">
+        <img class="img-fluid " src="{{ company_logo }}" alt="logo" style="height: 55px; margin-bottom:0px">
      </div>
     
 </div>
@@ -509,19 +520,17 @@ template_str = """
                                 
                                     <h3 class="childtablename" style="font-size: 14px;">{{ row.label.replace("_", " ").title() }}</h3>
                                     {% if child_data[table_name] %}
+                                 
                                         {% for child in child_data[table_name] %}
                                             <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
                                                 
                                                 <div style="display: flex; flex-wrap: wrap;">
                                                     {% for key, value in child.items() %}
-                                                        <div style="width: 48%; display:flex;align-items:baseline;gap:2px;  margin-right: 2%; margin-bottom: 10px;">
+                                                       <div style="width: 48%; display:flex;align-items:end;gap:2px; margin-right: 2%; margin-bottom: 10px;">
                                                             <label style="font-weight: 600;font-size: 13px;">{{ key }}:</label><br />
-                                                            {% if value and value.endswith(('.pdf', '.jpg', '.png', '.jpeg')) %}
-                                                                <a href="{{ value }}" target="_blank">View Attachment</a>
-                                                            {% else %}
-                                                                <input type="text" value="{{ value }}" class="block_input" readonly style="width: 100%; padding: 5px; font-size: 14px;" />
-                                                            {% endif %}
+                                                            <input type="text" value="{{ value }}" class="block_input" readonly style="width: 100%; padding: 5px; font-size: 14px;" />
                                                         </div>
+
                                                     {% endfor %}
                                                 </div>
                                             </div>
@@ -549,42 +558,47 @@ template_str = """
 
                                 {% if table_name in child_data %}
                                 
+                                
                                     <h3 class="childtablename" style=margin-left:3px;margin-right:3px;font-size: 14px;>{{ row.label.replace("_", " ").title() }}</h3>
                                         {% if child_data[table_name] %}
                                             <table class="rounded-table" style="width: 100%; margin-bottom:5px; border-collapse: collapse; border-radius: 3px; margin-left:3px; margin-right:3px;">
                                                 <thead>
                                                     <tr>
-                                                        <th style="border: 1px solid #ccc; width:3%; padding: 8px; background-color: #f2f2f2; font-size: 13px;">S.no</th>
+                                                        
                                                         {% for key in child_data[table_name][0].keys() %}
-                                                            <th style="border: 1px solid #ccc; padding: 8px; background-color: #f2f2f2; font-size: 13px;">{{ key }}</th>
+                                                            <th style="border: 1px solid #ccc;text-align:center; padding: 8px; background-color: #f2f2f2; font-size: 13px;">{{ key }}</th>
                                                         {% endfor %}
                                                     </tr>
                                                 </thead>
+                                               {% set keywords = ['total', 'amount', 'total cost', 'sub total'] %}
+
                                                 <tbody>
                                                     {% for child in child_data[table_name] %}
+                                                        {% set is_summary_row = child.values() | select('string') | map('lower') | select('in', keywords) | list | length > 0 %}
                                                         <tr>
-                                                            <td style="border: 1px solid #ccc; padding: 8px; text-align:center; font-size: 13px;">{{ loop.index }}</td>
-                                                            {% set is_last_row = loop.last %}
-                                                            {% set has_data = child_data[table_name][-1]|select('string')|list|select %}
                                                             {% for value in child.values() %}
-                                                                {% if is_last_row and loop.index0 == 0 and has_data %}
-                                                                    <td style="border: 1px solid #ccc; padding: 8px; word-break: break-word; font-size: 13px;">Total</td>
-                                                                {% else %}
-                                                                    <td style="border: 1px solid #ccc; padding: 8px; word-break: break-word; font-size: 13px;">
-                                                                        {{ value if value else '—' }}
-                                                                    </td>
-                                                                {% endif %}
+                                                                <td style="
+                                                                    {{ 'border: none;' if is_summary_row else 'border: 1px solid #ccc;' }}
+                                                                    text-align:center;
+                                                                    padding: 8px;
+                                                                    word-break: break-word;
+                                                                    font-size: 13px;
+                                                                ">
+                                                                    {{ value if value else ' ' }}
+                                                                </td>
                                                             {% endfor %}
                                                         </tr>
                                                     {% endfor %}
                                                 </tbody>
+
+
                                             </table>
                                         {% endif %}
 
 
 
 
-                                {% elif table_name in child_table_data %}
+                                    {% elif table_name in child_table_data %}
                                 
                                     <h3 class="childtablename" style="font-size: 14px;">{{ row.label.replace("_", " ").title() }}</h3>
                                     <table class="rounded-table" style="width: 100%; margin-bottom:10px; border-collapse: collapse; border-radius: 3px;">
@@ -626,7 +640,7 @@ template_str = """
                                             <label for="{{ field.fieldname }}">
                                                 Approved By <span style="padding-left:2px; font-size: 13px;">:</span>
                                             </label>
-                                        {% elif field.fieldtype != 'Attach' %}
+                                        {% elif field.fieldtype != 'Attach' and field.fieldname != 'auto_calculations' %}
                                             <label for="{{ field.fieldname }}">
                                                 {{ field.label }} <span style="padding-left:2px; font-size: 13px;">:</span>
                                             </label>
@@ -675,27 +689,24 @@ template_str = """
                                                     {% endfor %}
                                                 </div>
                                             </div>
-                                        {% elif field.fieldtype == 'Check' %}
+                                        {% elif field.fieldtype == 'Check' and field.fieldname != 'auto_calculations' %}
                                             <div class="checkbox-gap" style="display: flex; align-items: center; gap: 8px;">
                                                 <span class="custom-checkbox {% if field['values'] %}checked{% else %}unchecked{% endif %}"></span>
                                             </div>
 
-                                        {% elif field.fieldtype == 'Data' or field.fieldtype == 'Int' %}
+                                        {% elif field.fieldtype == 'Data' or field.fieldtype == 'Int' and field.fieldname != 'auto_calculations' %}
                                             <span id="{{ field.fieldname }}"
                                                 style="font-size:13px; font-weight:500;border-bottom: 1px solid #cccccc;">
                                                 {{ field['values'] }}
                                             </span>
                                         {% elif field.fieldtype == 'Select' %}
+                                        
                                         {% if field['values'] %}
-                                            {% set selected_values_list = field['values'].split(',') %}
-                                            <div class="checkbox-container">
-                                                {% for value in selected_values_list if value %}
-                                                    <div class="checkbox-gap">
-                                                        <span class="custom-checkbox checked"></span>
-                                                        <span>{{ value }}</span>
-                                                    </div>
-                                                {% endfor %}
-                                            </div>
+                                         <span id="{{ field.fieldname }}"
+                                                style="font-size:13px; font-weight:500;border-bottom: 1px solid #cccccc;">
+                                                {{ field['values'] }}
+                                            </span>
+                                            
                                         {% else %}
                                             {% set options = field.options.strip().split('\n') if field.options else [] %}
                                             <div class="checkbox-container">
@@ -788,7 +799,7 @@ template_str = """
                                         {% endif %}
                                         
                                     </div>
-                                         {% if field.description != 'Field' %}
+                                         {% if field.description != 'Field' and field.fieldname != 'auto_calculations' %}
                                             <div class="w-100 description-block mt-1">
                                                
                                                 <span>{{ field.description | replace('\n', '<br>') | safe }}</span>
@@ -803,19 +814,21 @@ template_str = """
         {% endfor %}
         
         
-  
 {% endfor %}
-<div><span style="font-weight:bold; font-size:13px;">Attachments:</span></div>
- {% for attachment_group in mail_attachment %}
-    {% for file_path in attachment_group.split(',') %}
-        {% set cleaned_path = file_path.strip() %}
-        <div class="page">
-            <img 
-                src="{{ site_url + cleaned_path }}"
-                class="attachments">
-        </div>
+{% if mail_attachment and mail_attachment | select | list %}
+    <div><span style="font-weight:bold; font-size:13px;">Attachments:</span></div>
+    {% for attachment_group in mail_attachment %}
+        {% for file_path in attachment_group.split(',') %}
+            {% set cleaned_path = file_path.strip() %}
+            <div class="page">
+                <img 
+                    src="{{ site_url + cleaned_path }}"
+                    class="attachments">
+            </div>
+        {% endfor %}
     {% endfor %}
-{% endfor %}
+{% endif %}
+
 
 
  
@@ -1035,47 +1048,77 @@ def preview_dynamic_form(form_short_name: str, business_unit=None, name=None):
 
 
 def handle_pdf_fields(field_values):
+
     """
+
     Converts PDF paths in `field_values` (comma-separated) to preview images
-    and returns updated file paths (pointing to the preview image instead of PDF).
+
+    and returns updated file paths (pointing to the preview images instead of PDFs).
+
     """
+
     site_path = frappe.get_site_path()
+
     updated_paths = []
-
+ 
     if not field_values:
+
         return field_values
-
+ 
     for file_path in field_values.split(','):
+
         cleaned_path = file_path.strip()
-
+ 
         if cleaned_path.endswith('.pdf'):
-            # Get file name
+
             filename = os.path.basename(cleaned_path)
-            filename_jpg = filename.replace('.pdf', '.jpg')
 
-            # Full paths
+            base_filename = filename.replace('.pdf', '')
+
             pdf_abs_path = os.path.join(site_path, 'public', cleaned_path.lstrip('/'))
-            img_output_path = os.path.join(site_path, 'public', 'files', 'previews', filename_jpg)
-            img_web_path = f"/files/previews/{filename_jpg}"
 
+            img_output_dir = os.path.join(site_path, 'public', 'files', 'previews', base_filename)
+
+            os.makedirs(img_output_dir, exist_ok=True)
+ 
             try:
-                if not os.path.exists(img_output_path):
-                    # Convert PDF to image (first page)
-                    images = convert_from_path(pdf_abs_path, first_page=1, last_page=1)
-                    img_output_dir = os.path.dirname(img_output_path)
-                    os.makedirs(img_output_dir, exist_ok=True)
-                    images[0].save(img_output_path, 'JPEG')
-                    frappe.logger().info(f"PDF converted to image: {img_web_path}")
-                updated_paths.append(img_web_path)
-            except Exception as e:
-                frappe.log_error(f"PDF to image conversion failed: {e}")
-                updated_paths.append(cleaned_path)  # fallback to original
-        else:
-            updated_paths.append(cleaned_path)
 
+                # Convert all pages
+
+                images = convert_from_path(pdf_abs_path)
+
+                page_paths = []
+ 
+                for i, img in enumerate(images):
+
+                    img_filename = f"{base_filename}_page_{i+1}.jpg"
+
+                    img_output_path = os.path.join(img_output_dir, img_filename)
+
+                    img_web_path = f"/files/previews/{base_filename}/{img_filename}"
+ 
+                    if not os.path.exists(img_output_path):
+
+                        img.save(img_output_path, 'JPEG')
+
+                        frappe.logger().info(f"Saved preview: {img_web_path}")
+ 
+                    page_paths.append(img_web_path)
+ 
+                updated_paths.extend(page_paths)
+ 
+            except Exception as e:
+
+                frappe.log_error(f"PDF to image conversion failed: {e}")
+
+                updated_paths.append(cleaned_path)
+
+        else:
+
+            updated_paths.append(cleaned_path)
+ 
     return ', '.join(updated_paths)
 
- 
  
  
 @frappe.whitelist()
@@ -1103,22 +1146,22 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                 for iteration in json_object:
                     if "value" in iteration:
                         iteration["value"] = user_doc.get(iteration["fieldname"], "")
-
+ 
                     # Handling child table fields
                     if iteration.get("fieldtype") == "Table":
                         iteration["value"] = frappe.get_all(iteration["options"], filters={"parent": name}, fields=["*"])
                         child_table_name = str(iteration["fieldname"])  
-
+ 
                         # Get the child table Doctype name
                         child_table_doctype = frappe.get_value(
                             "DocField",
                             {"parent": form_short_name, "fieldname": child_table_name},
                             "options"
                         )
-
+ 
                         if not child_table_doctype:
                             return {"error": f"Child table '{child_table_name}' not found"}
-
+ 
                         # Get the fields (columns) of the child table
                         child_table_fields = frappe.get_all(
                             "DocField",
@@ -1127,7 +1170,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                             fields=["label"],
                             order_by="idx asc"
                         )
-
+ 
                         # Store labels for each child table
                         labels[child_table_name] = [field["label"] for field in child_table_fields]
                 form_name = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_name")
@@ -1163,50 +1206,66 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                 html_view = html_view_['html']
             else:
                 json_object = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_json")
-
+ 
                 json_object = literal_eval(json_object)["fields"]
                 json_object = [ field for field in json_object]
                 user_doc = frappe.get_doc(form_short_name, name).as_dict()
                 data_list ={}
-                mail_attachment = [] 
+                mail_attachment = []
                 for iteration in json_object:
                     if "value" in iteration:
                         iteration["value"] = user_doc.get(iteration["fieldname"], "")
-
+ 
                     # Collect attachments except those with fieldname like "approved_by"
-
+ 
                     # Convert PDFs in Attach fields to image previews
                     if iteration.get("fieldtype") == "Attach" and iteration.get("value"):
                         iteration["value"] = handle_pdf_fields(iteration["value"])
-                    if (
-                        iteration.get("fieldtype") == "Attach"
-                        and iteration.get("value")
-                        and "approved_by" not in iteration.get("fieldname", "").lower()
-                    ):
-                        mail_attachment.append(iteration["value"])  # Add to mail_attachment
-
-                    # Handling child table fields
+ 
+                        if "approved_by" not in iteration.get("fieldname", "").lower():
+                            mail_attachment.append(iteration["value"])
+ 
+                    # Handle Table fields (child tables)
                     if iteration.get("fieldtype") == "Table":
                         child_table_name = str(iteration["fieldname"])
-                        #########################################
                         child_table_records = frappe.get_all(
                             iteration["options"],
                             filters={"parent": name},
                             fields=["*"],
                             order_by="idx asc",
+                            
                         )
+ 
+                        # Get field metadata
+                        meta_fields = frappe.get_meta(iteration["options"]).fields
+                        field_names = [df.fieldname for df in meta_fields]
+                        field_labels = {df.fieldname: df.label for df in meta_fields}
+                        field_types = {df.fieldname: df.fieldtype for df in meta_fields}
+ 
+                        processed_child_records = []
+                        ##############################
+                        for record in child_table_records:
+                            processed_record = {}
+                            for field in field_names:
+                                value = record.get(field)
+                                fieldtype = field_types.get(field)
 
-                        # Get field names and labels dynamically
-                        field_names = [df.fieldname for df in frappe.get_meta(iteration["options"]).fields]
-                        field_labels = {df.fieldname: df.label for df in frappe.get_meta(iteration["options"]).fields}
+                                # Handle Attach fields separately for mail attachment, but skip adding them to processed_record
+                                if fieldtype == "Attach":
+                                    if value:
+                                        value = handle_pdf_fields(value)
+                                        if "approved_by" not in field.lower():
+                                            mail_attachment.append(value)
+                                    continue  # Skip adding this field to processed_record
 
-                        # Store child table data properly
-                        data_list[child_table_name] = [
-                            {field_labels.get(field, field): record.get(field) for field in field_names}
-                            for record in child_table_records
-                        ]
-                        ##################################################z
-        
+                                # Add other field types normally
+                                processed_record[field_labels.get(field, field)] = value
+
+                            processed_child_records.append(processed_record)
+
+                        data_list[child_table_name] = processed_child_records
+
+                        #########################
                 form_name = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_name")
                 html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_name,child_data=data_list,child_table_data=None,business_unit=business_unit,wf_generated_request_id=wf_generated_request_id,mail_attachment=mail_attachment)
                 
@@ -1217,7 +1276,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
             absolute_pdf_path = os.path.join(get_bench_path(), "sites", cstr(frappe.local.site), pdf_path)
             opts={"orientation":"Landscape"if is_landscape else"Portrait"}
             convert_html_to_pdf(html_content=html_view,pdf_path=absolute_pdf_path,options=opts)
-
+ 
             
     
             new_file = frappe.get_doc({
@@ -1245,8 +1304,8 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
         exc_type, exc_obj, exc_tb = sys.exc_info()
         frappe.log_error("Error Downloading File", "line No:{}\n{}".format(exc_tb.tb_lineno, traceback.format_exc()))
         frappe.throw(str(e))
-        return {"success": False, "message": str(e)}
-    
+        return {"success": False, "message": str(e)}   
+     
     
 from frappe.www.printview import get_html_and_style
 

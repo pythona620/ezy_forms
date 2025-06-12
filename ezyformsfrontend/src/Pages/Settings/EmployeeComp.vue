@@ -406,6 +406,7 @@
                     </template>
                   </VueMultiselect>
                   <label class="font-13 ps-1" for="reporting_designation">Reporting Designation</label>
+                  
                   <VueMultiselect v-model="createEmployee.reporting_designation" :options="designations"
                     :multiple="false" :close-on-select="true" :clear-on-select="false" :preserve-search="true"
                     placeholder="Select Reporting Designation" class="font-11 mb-3"
@@ -885,14 +886,33 @@ const emailError = ref("");
 //     emailError.value = "";
 //   }
 // };
+// const validateEmail = () => {
+//   const email = originalEmail.value || createEmployee.value.emp_mail_id;
+//   const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+//   if (!emailPattern.test(email)) {
+//     emailError.value = "Invalid email address";
+//   } else {
+//     emailError.value = "";
+//   }
+// };
+
 const validateEmail = () => {
-  const email = originalEmail.value || createEmployee.value.emp_mail_id;
+  const email = (originalEmail.value || createEmployee.value.emp_mail_id)?.trim().toLowerCase();
   const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
   if (!emailPattern.test(email)) {
     emailError.value = "Invalid email address";
   } else {
-    emailError.value = "";
+    const emailAlreadyExists = employeeEmails.value.some(
+      emp => emp.emp_mail_id?.toLowerCase() === email
+    );
+
+    if (emailAlreadyExists) {
+      emailError.value = "Email already exists";
+    } else {
+      emailError.value = "";
+    }
   }
 };
 
@@ -1144,6 +1164,24 @@ const removeSignature = () => {
     fileInput.value = "";
   }
 };
+// watch(
+//   () => createEmployee.value.reporting_to,
+//   (newValue) => {
+//     if (newValue) {
+//       const selectedEmployee = tableData.value.find(
+//         (emp) => emp.emp_mail_id === newValue
+//       );
+//       if (selectedEmployee) {
+//         createEmployee.value.reporting_designation =
+//           selectedEmployee.designation;
+//           console.log(createEmployee.value.reporting_designation,selectedEmployee.designation);
+//       } 
+//       // else {
+//       //   createEmployee.value.reporting_designation = ""; // Reset if no match found
+//       // }
+//     }
+//   }
+// );
 watch(
   () => createEmployee.value.reporting_to,
   (newValue) => {
@@ -1152,15 +1190,12 @@ watch(
         (emp) => emp.emp_mail_id === newValue
       );
       if (selectedEmployee) {
-        createEmployee.value.reporting_designation =
-          selectedEmployee.designation || "";
-      } else {
-        createEmployee.value.reporting_designation = ""; // Reset if no match found
+        createEmployee.value.reporting_designation = selectedEmployee.designation;
       }
     }
-  }
+  },
+  { immediate: true } // <-- this will trigger the watcher on setup
 );
-
 // function addnewDesignation() {
 //     newDesignation.value = !newDesignation.value
 // }
@@ -1198,10 +1233,21 @@ function actionCreated(rowData, actionEvent) {
   if (actionEvent?.name === 'Edit Employee') {
     if (rowData) {
       phoneError.value = ""
+      emailError.value=""
       deptData();
       designationData();
       employeeOptions();
-      createEmployee.value = { ...rowData }
+      createEmployee.value = { ...rowData };
+
+      // ✅ Set reporting_designation manually based on reporting_to
+      if (createEmployee.value.reporting_to) {
+        const selectedEmployee = tableData.value.find(
+          (emp) => emp.emp_mail_id === createEmployee.value.reporting_to
+        );
+        if (selectedEmployee) {
+          createEmployee.value.reporting_designation = selectedEmployee.designation;
+        }
+      }
       isMasked.value = true
       isEmailMasked.value = true
       maskPhoneNumber()
@@ -1349,49 +1395,78 @@ const PaginationLimitStart = ([itemsPerPage, start]) => {
   filterObj.value.limit_start = start;
   employeeData();
 };
+const timeout = ref(null);
 
 function inLineFiltersData(searchedData) {
   //   // Initialize filters array
-  const filters = [];
+  // const filters = [];
 
-  //   // Loop through the tableheaders and build dynamic filters based on the `searchedData`
-  tableheaders.value.forEach((header) => {
-    const key = header.td_key;
+  // //   // Loop through the tableheaders and build dynamic filters based on the `searchedData`
+  // tableheaders.value.forEach((header) => {
+  //   const key = header.td_key;
 
-    //     // If there is a match for the key in searchedData, create a 'like' filter
-    if (searchedData[key]) {
-      filters.push(key, "like", `%${searchedData[key]}%`);
-    }
-    //     // Add filter for selected option
-    //     if (key === "selectedOption" && searchedData.selectedOption) {
-    //       filters.push([key, "=", searchedData.selectedOption]);
-    //     }
-    //     // Special handling for 'invoice_date' to create a 'Between' filter (if it's a date)
-    //     if (key === "invoice_date" && searchedData[key]) {
-    //       filters.push([key, "Between", [searchedData[key], searchedData[key]]]);
-    //     }
+  //   //     // If there is a match for the key in searchedData, create a 'like' filter
+  //   if (searchedData[key]) {
+  //     filters.push([key, "like", `%${searchedData[key]}%`]);
+  //   }
+  //   //     // Add filter for selected option
+  //   //     if (key === "selectedOption" && searchedData.selectedOption) {
+  //   //       filters.push([key, "=", searchedData.selectedOption]);
+  //   //     }
+  //   //     // Special handling for 'invoice_date' to create a 'Between' filter (if it's a date)
+  //   //     if (key === "invoice_date" && searchedData[key]) {
+  //   //       filters.push([key, "Between", [searchedData[key], searchedData[key]]]);
+  //   //     }
 
-    //     // Special handling for 'invoice_type' or 'irn_generated' to create an '=' filter
-    //     if ((key === "invoice_type" || key === "credit_irn_generated") && searchedData[key]) {
-    //       filters.push([key, "=", searchedData[key]]);
-    //     }
-  });
+  //   //     // Special handling for 'invoice_type' or 'irn_generated' to create an '=' filter
+  //   //     if ((key === "invoice_type" || key === "credit_irn_generated") && searchedData[key]) {
+  //   //       filters.push([key, "=", searchedData[key]]);
+  //   //     }
+  // });
 
-  //   // Log filters to verify
+  // //   // Log filters to verify
 
-  //   // Once the filters are built, pass them to fetchData function
-  if (filters.length) {
-    employeeData(filters);
-  } else {
-    employeeData();
-  }
+  // //   // Once the filters are built, pass them to fetchData function
+  // if (filters.length) {
+  //   employeeData(filters);
+  // } else {
+  //   employeeData();
+  // }
   //   fetchTotalRecords(filters);
+
+
+
+      clearTimeout(timeout.value); // Clear previous timeout
+
+    timeout.value = setTimeout(() => {
+        // Initialize filters array
+        filterObj.value.filters = [];
+
+        // Loop through the table headers and build dynamic filters
+        tableheaders.value.forEach((header) => {
+            const key = header.td_key;
+
+            if (searchedData[key]) {
+                // Push as an array of 3 items
+                filterObj.value.filters.push([key, "like", `%${searchedData[key]}%`]);
+            }
+        });
+
+        // Call receivedForMe with or without filters
+        if (filterObj.value.filters.length) {
+          filterObj.value.limit_start = 0;
+
+            employeeData(filterObj.value.filters);
+        } else {
+            employeeData();
+        }
+    }, 500);
 }
 
 function employeeData(data) {
   const filters = [["company_field", "like", `%${newbusiness.value}%`]];
   if (data) {
-    filters.push(data);
+    filters.push(...data);
   }
 
   const queryParams = {
@@ -1399,7 +1474,7 @@ function employeeData(data) {
     filters: JSON.stringify(filters),
     limit_page_length: filterObj.value.limitPageLength,
     limit_start: filterObj.value.limit_start,
-    order_by: "`tabEzy Employee`.`creation` desc",
+    order_by: "`tabEzy Employee`.`enable` DESC,`tabEzy Employee`.`creation` DESC",
   };
   const queryParamsCount = {
     fields: JSON.stringify(["count(name) AS total_count"]),
@@ -1532,7 +1607,13 @@ function createEmpl() {
       transition: "zoom",
     });
     return;
-
+  }
+  if(emailError.value){
+    toast.error("Employee Email Id already exists", {
+      autoClose: 1000,
+      transition: "zoom",
+    });
+    return; 
   }
   createEmployee.value.company_field = businessUnit.value;
   const dataObj = {

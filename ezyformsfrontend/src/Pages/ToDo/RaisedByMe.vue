@@ -218,7 +218,7 @@ const tableheaders = ref([
   { th: "Request ID", td_key: "name" }, 
   { th: "Form Name", td_key: "doctype_name" },
   // { th: "Form category", td_key: "doctype_name" },
-  { th: "My Forms", td_key: "role" },
+  { th: "Role", td_key: "role" },
   { th: "Requested on", td_key: "requested_on" },
   { th: "Approval Status", td_key: "status" },
   { th: "Workflow Status", td_key: "assigned_to_users" },
@@ -533,38 +533,52 @@ function mapFormFieldsToRequest(doctypeData, showRequestData) {
 const PaginationUpdateValue = (itemsPerPage) => {
   filterObj.value.limitPageLength = itemsPerPage;
   filterObj.value.limit_start = 0;
-  receivedForMe();
+  if (filterObj.value.filters.length) {
+    receivedForMe(filterObj.value.filters);
+  } 
+  else {
+    receivedForMe();
+  }
 };
 // Handle updating the limit start
 const PaginationLimitStart = ([itemsPerPage, start]) => {
   filterObj.value.limitPageLength = itemsPerPage;
   filterObj.value.limit_start = start;
-  receivedForMe();
+  if (filterObj.value.filters.length) {
+    receivedForMe(filterObj.value.filters);
+  }
+   else {
+    receivedForMe();
+  }
 };
+
 const timeout = ref(null);
 
 function inLineFiltersData(searchedData) {
+  console.log(searchedData);
     clearTimeout(timeout.value); // Clear previous timeout
 
     timeout.value = setTimeout(() => {
         // Initialize filters array
-        const filters = [];
+        filterObj.value.filters = [];
 
         // Loop through the table headers and build dynamic filters
         tableheaders.value.forEach((header) => {
             const key = header.td_key;
 
             if (searchedData[key]) {
-                filters.push([key, "like", `%${searchedData[key]}%`]);
+              filterObj.value.filters.push([key, "like", `%${searchedData[key]}%`]);
+
             }
         });
 
         // Call receivedForMe with or without filters
-        if (filters.length) {
-            receivedForMe(filters);
-        } else {
-            receivedForMe();
-        }
+        if (filterObj.value.filters.length) {
+          filterObj.value.limit_start = 0;
+      receivedForMe(filterObj.value.filters);
+    } else {
+      receivedForMe();
+    }
 
         // Optionally call fetchTotalRecords
         // fetchTotalRecords(filters);

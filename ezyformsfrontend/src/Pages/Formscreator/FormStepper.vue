@@ -173,11 +173,10 @@
                                     class="text-danger">*</span></label>
                               </label>
                               <!-- :disabled="selectedData.formId && selectedData.formId.length > 0" -->
-                              <VueMultiselect 
-                                v-model="filterObj.accessible_departments" :options="filteredOptions" :multiple="true"
-                                :close-on-select="false" :clear-on-select="false" :preserve-search="true"
-                                placeholder="Select Designation" class="font-11" @select="handleSelect"
-                                @remove="handleRemove">
+                              <VueMultiselect v-model="filterObj.accessible_departments" :options="filteredOptions"
+                                :multiple="true" :close-on-select="false" :clear-on-select="false"
+                                :preserve-search="true" placeholder="Select Designation" class="font-11"
+                                @select="handleSelect" @remove="handleRemove">
                                 <template #option="{ option }">
                                   <div class="custom-option">
                                     <input type="checkbox" :checked="isChecked(option)" class="custom-checkbox"
@@ -196,40 +195,40 @@
 
 
                               <!-- <VueMultiselect
-                              v-model="filterObj.accessible_departments"
-                              :options="formOptions"
-                              :multiple="true"
-                              :close-on-select="false"
-                              :clear-on-select="false"
-                              :preserve-search="true"
-                              placeholder="Select Designation"
-                              class="font-11"
-                            >
-                              <template #option="{ option }">
-                                <div class="custom-option">
-                                  <input
-                                    type="checkbox"
-                                    :checked="
-                                      filterObj.accessible_departments.includes(
-                                        option
-                                      )
-                                    "
-                                    class="custom-checkbox"
-                                  />
-                                  <span>{{ option }}</span>
-                                </div>
-                              </template>
+                                          v-model="filterObj.accessible_departments"
+                                          :options="formOptions"
+                                          :multiple="true"
+                                          :close-on-select="false"
+                                          :clear-on-select="false"
+                                          :preserve-search="true"
+                                          placeholder="Select Designation"
+                                          class="font-11"
+                                        >
+                                          <template #option="{ option }">
+                                            <div class="custom-option">
+                                              <input
+                                                type="checkbox"
+                                                :checked="
+                                                  filterObj.accessible_departments.includes(
+                                                    option
+                                                  )
+                                                "
+                                                class="custom-checkbox"
+                                              />
+                                              <span>{{ option }}</span>
+                                            </div>
+                                          </template>
 
-                              <template #selection="{ values, isOpen }">
-                                <span
-                                  class="multiselect__single font-10"
-                                  v-if="values.length"
-                                  v-show="!isOpen"
-                                >
-                                  {{ values.join(", ") }} selected
-                                </span>
-                              </template>
-                            </VueMultiselect> -->
+                                          <template #selection="{ values, isOpen }">
+                                            <span
+                                              class="multiselect__single font-10"
+                                              v-if="values.length"
+                                              v-show="!isOpen"
+                                            >
+                                              {{ values.join(", ") }} selected
+                                            </span>
+                                          </template>
+                                        </VueMultiselect> -->
 
                               <!-- <VueMultiselect v-model="filterObj.accessible_departments"
                                                             :options="formOptions" :multiple="true"
@@ -244,6 +243,28 @@
                                                                 </span>
                                                             </template>
                                                         </VueMultiselect> -->
+                            </div>
+                            <div class="mt-3">
+                              <div class="">
+                                
+                                <label for="">Has Workflow
+                                  <!-- <span v-if="!filterObj.has_Workflow" class="text-danger">*</span> -->
+                                </label>
+                                <!-- :disabled="selectedData.formId && selectedData.formId.length > 0" -->
+                                <Multiselect :options="['No']" v-model="filterObj.has_workflow" placeholder="Select"
+                                  :multiple="false" class="font-11 multiselect" :searchable="true" />
+                              </div>
+                            </div>
+                            <div class="mt-3">
+                              <div class="">
+                               
+                                <label for="">Reverse Workflow
+                                  <!-- <span v-if="!filterObj.workflow_check" class="text-danger">*</span> -->
+                                </label>
+                                <!-- :disabled="selectedData.formId && selectedData.formId.length > 0" -->
+                                <Multiselect :options="['Yes']" v-model="filterObj.workflow_check" placeholder="Select"
+                                  :multiple="false" class="font-11 multiselect" :searchable="true" />
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -493,7 +514,7 @@
                                                                                     @dragover="handleDragOver"
                                                                                     @drop="handleDrop($event, fieldIndex, 'field', blockIndex, sectionIndex, rowIndex, columnIndex)" -->
                                         <div v-if="column.fields.length === 0" class="empty-drop-zone" @dragover.prevent
-                                          @drop="handleFieldDropAtIndex(blockIndex, sectionIndex, rowIndex, columnIndex, 0)">
+                                          @drop="(e) => handleFieldDropAtIndex(e, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
                                         </div>
                                         <div v-for="(field, fieldIndex) in column.fields" :key="'field-' + fieldIndex"
                                           @mouseenter="
@@ -509,12 +530,14 @@
                                           @dragstart="handleDragStart($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
 
                                           <div class="drop-zone" @dragover.prevent
-                                            @drop="handleFieldDropAtIndex(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
+                                            @drop="(e) => handleFieldDropAtIndex(e, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
                                           </div>
 
                                           <div v-if="field.fieldtype !== 'Table'" class="px-1 dynamic_fied field-border"
+                                            draggable="true"
+                                            @dragstart="handleDragStart($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
                                             @dragover.prevent
-                                            @drop="handleFieldDropAtIndex(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
+                                            @drop="(e) => handleFieldDropAtIndex(e, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
                                             <div class="d-flex justify-content-between">
                                               <div class="flex-column d-flex">
                                                 <input v-model="field.label" placeholder="Name the field" :class="[
@@ -689,7 +712,7 @@
                                             }}</small>
                                           </div>
                                           <div class="drop-zone" @dragover.prevent
-                                            @drop="handleFieldDropAtIndex(blockIndex, sectionIndex, rowIndex, columnIndex, column.fields.length)">
+                                            @drop="(e) => handleFieldDropAtIndex(e, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
                                           </div>
                                           <div class="childtableShow">
                                             <div>
@@ -730,14 +753,15 @@
                                                         <!-- :draggable="editMode[tableName]" -->
                                                         <tbody @dragover.prevent="onDragOver"
                                                           @drop="onDrop($event, table)">
-                                                          <tr v-for="(field, index) in table" :key="index" :draggable="editMode[tableName]"
+                                                          <tr v-for="(field, index) in table" :key="index"
+                                                            :draggable="editMode[tableName]"
                                                             @dragstart="onDragStart(index)" @dragend="onDragEnd"
                                                             :class="{ dragging: draggingIndex === index }">
                                                             <td>{{ index + 1 }}</td>
 
                                                             <!-- Label Input -->
                                                             <td v-if="editMode[tableName]">
-                                                              <input v-model="field.label" placeholder="Field Label" 
+                                                              <input v-model="field.label" placeholder="Field Label"
                                                                 class="form-control"
                                                                 :class="{ 'border-1 border-danger': invalidFields[tableName]?.includes(index) }" />
                                                               <span v-if="invalidFields[tableName]?.includes(index)"
@@ -759,11 +783,11 @@
                                                                 </select>
                                                                 <div class=" d-flex">
                                                                   <div class=" d-flex align-items-center gap-2">
-                                                                    
+
                                                                     <div class="d-flex align-items-center">
-                                                                      <input class="font-12 form-control-sm" v-model="field.description"
-                                                                        placeholder="description"
-                                                                        type="text" />  
+                                                                      <input class="font-12 form-control-sm"
+                                                                        v-model="field.description"
+                                                                        placeholder="description" type="text" />
                                                                     </div>
                                                                     <!-- <div>
                                                                       <label for="mandatory"
@@ -863,6 +887,9 @@
                                           </div>
                                         </div>
 
+                                        <div class="drop-zone" @dragover.prevent
+                                          @drop="(e) => handleFieldDropAtIndex(e, blockIndex, sectionIndex, rowIndex, columnIndex, fields.length)"
+                                          style="height: 10px; background-color: transparent" />
                                         <div class="d-flex justify-content-center align-items-center my-2">
                                           <button class="btn btn-light btn-sm d-flex align-items-center addField m-2"
                                             @click="
@@ -912,7 +939,8 @@
                                           <td>{{ index + 1 }}</td>
 
                                           <td v-if="editMode[table.tableName]">
-                                            <input v-model="field.label" placeholder="Field Label" class="form-control"  @blur="updateFieldname(field)"
+                                            <input v-model="field.label" placeholder="Field Label" class="form-control"
+                                              @blur="updateFieldname(field)"
                                               :class="{ 'border-1 border-danger': invalidFields[table.tableName]?.includes(index) }" />
                                             <span v-if="invalidFields[tableIndex]?.includes(index)"
                                               class="font-11 text-danger">Label
@@ -987,7 +1015,8 @@
                                       <div class="d-flex justify-content-between align-items-center mt-1 mb-2">
                                         <div>
                                           <span :class="table.tableName ? 'd-none' : 'text-danger'">*</span>
-                                          <input v-model="table.tableName" placeholder="Table Name" @blur="updateFieldname(table)"
+                                          <input v-model="table.tableName" placeholder="Table Name"
+                                            @blur="updateFieldname(table)"
                                             class="border-less-input font-14 p-0 inputHeight" :class="{
                                               'italic-style': !table.tableName,
                                               'fw-medium': table.tableName,
@@ -996,6 +1025,9 @@
                                             v-if="fieldErrors[`${blockIndex}-${sectionIndex}-${tableIndex}`]?.tableName"
                                             class="text-danger font-12">
                                             {{ fieldErrors[`${blockIndex}-${sectionIndex}-${tableIndex}`].tableName }}
+                                          </div>
+                                          <div v-if="tableExistsMessage" class="text-danger font-12">
+                                            {{ tableExistsMessage }}
                                           </div>
                                           <div class=" d-flex align-items-center gap-2">
                                             <div class="d-flex align-items-center">
@@ -1019,7 +1051,8 @@
                                           <div class="d-flex justify-content-between">
                                             <div>
                                               <span :class="field.label ? 'd-none' : 'text-danger'">*</span>
-                                              <input v-model="field.label" placeholder="Name the field" @blur="updateFieldname(field)"
+                                              <input v-model="field.label" placeholder="Name the field"
+                                                @blur="updateFieldname(field)"
                                                 class="border-less-input font-14 p-0 inputHeight" :class="{
                                                   'italic-style': !field.label,
                                                   'fw-medium': field.label,
@@ -1046,10 +1079,9 @@
                                               </div> -->
                                               <div class=" d-flex my-1">
 
-                                                 <input v-if="field.showDescription" v-model="field.description"
-                                              class="form-control font-12 "
-                                              placeholder="Enter field description"/>
-                                              <button class="btn btn-sm text-nowrap font-12"
+                                                <input v-if="field.showDescription" v-model="field.description"
+                                                  class="form-control font-12 " placeholder="Enter field description" />
+                                                <button class="btn btn-sm text-nowrap font-12"
                                                   @click="field.showDescription = !field.showDescription">
                                                   {{ field.showDescription ? 'Hide Description' : (field.description ?
                                                     'Edit Description'
@@ -1351,7 +1383,10 @@ const filterObj = ref({
   business_unit: `${businessUnit.value.value || selectedData.value.business_unit || route.query.business_unit}`,
   form_category: "",
   owner_of_the_form: "",
-  series: ""
+  series: "",
+  has_workflow: "",
+  workflow_check:""
+
 });
 const formDescriptions = computed(() => filterObj.value);
 const child_id = ref("");
@@ -1428,6 +1463,7 @@ const handleDragStart = (event, blockIndex, sectionIndex, rowIndex, columnIndex,
 };
 
 const handleFieldDropAtIndex = (
+  event,
   targetBlock,
   targetSection,
   targetRow,
@@ -1444,37 +1480,85 @@ const handleFieldDropAtIndex = (
     fieldIndex: fromFieldIndex,
   } = draggedField.value;
 
-  // Avoid inserting into same place
-  const isSameLocation =
-    fromBlock === targetBlock &&
-    fromSection === targetSection &&
-    fromRow === targetRow &&
-    fromColumn === targetColumn;
-
   const fromFields =
     blockArr[fromBlock].sections[fromSection].rows[fromRow].columns[fromColumn].fields;
 
   const targetFields =
     blockArr[targetBlock].sections[targetSection].rows[targetRow].columns[targetColumn].fields;
 
-  // Remove from original position
+  // Avoid self-drop at same position
+  if (
+    fromBlock === targetBlock &&
+    fromSection === targetSection &&
+    fromRow === targetRow &&
+    fromColumn === targetColumn &&
+    fromFieldIndex === insertIndex
+  ) return;
+
+  // Remove dragged field
   const movedField = fromFields.splice(fromFieldIndex, 1)[0];
 
-  // Adjust insert index if from same array and before insert point
+  // Adjust insert index if dragging within same list and moving forward
   if (
-    isSameLocation &&
-    fromColumn === targetColumn &&
+    fromFields === targetFields &&
     fromFieldIndex < insertIndex
   ) {
-    insertIndex -= 1;
+    insertIndex--;
   }
 
-  // Insert at desired index
+  // Insert at new position
   targetFields.splice(insertIndex, 0, movedField);
 
   draggedField.value = null;
 };
 
+const tableExistsMessage = ref('');
+
+const GetDoctypeList = (searchText) => {
+  const filters = [
+    ['module', 'in', ['User Forms']],
+    ['istable', '=', 1],
+  ];
+
+  if (searchText?.trim()) {
+    filters.push(['name', 'like', `%${searchText}%`]);
+  }
+
+  const queryParams = {
+    fields: JSON.stringify(['name']),
+    filters: JSON.stringify(filters),
+    limit_page_length: '10',
+  };
+
+  return axiosInstance
+    .get(apis.resource + doctypes.doctypesList, { params: queryParams })
+    .then((res) => res.data || [])
+    .catch((error) => {
+      console.error('Error fetching doctype list:', error);
+      return [];
+    });
+};
+
+const matched = ref(null)
+
+const updateFieldname = async (field) => {
+  if (field.tableName) {
+    const searchText = field.tableName.trim();
+    const existing = await GetDoctypeList(searchText);
+
+    matched.value = existing.find(item => item.name.toLowerCase() === searchText.toLowerCase());
+
+    if (matched.value) {
+      tableExistsMessage.value = 'Table already exists';
+    }
+  } else {
+    tableExistsMessage.value = '';
+  }
+
+  if (field.label) {
+    field.fieldname = generateFieldname(field.label);
+  }
+};
 
 // const linkSearchQuery = ref('');
 // const linkSearchResults = ref([]);
@@ -1540,10 +1624,10 @@ function setActiveField(b, s, r, c, f) {
 function isActiveField(b, s, r, c, f) {
   return activeSearch.key === getFieldKey(b, s, r, c, f);
 }
-
+// ['module', 'in', ['User Forms']],
 function fetchDoctypeList(searchText) {
   const filters = [
-    ['module', 'in', ['User Forms']],
+    
     ['istable', '=', 0]
   ];
 
@@ -1786,11 +1870,6 @@ const addFieldToTable = (blockIndex, sectionIndex, tableIndex) => {
 
   });
 };
-const updateFieldname = (field) => {
-  if (field.label) {
-    field.fieldname = generateFieldname(field.label);
-  }
-};
 
 const removeChildTable = (blockIndex, sectionIndex, tableIndex) => {
   blockArr[blockIndex].sections[sectionIndex].childTables.splice(tableIndex, 1);
@@ -1851,6 +1930,13 @@ const processFields = (blockIndex, sectionIndex, tableIndex) => {
   const hasErrors = isEmptyFieldType(blockIndex, sectionIndex, tableIndex);
   if (hasErrors) {
     toast.error("Please fix validation errors before creating the table", {
+      transition: "zoom",
+    });
+    return;
+  }
+  if (matched.value) {
+    //  tableExistsMessage.value = 'Table already exists';
+    toast.error("Table already exists", {
       transition: "zoom",
     });
     return;
@@ -1976,7 +2062,7 @@ const afterImmediateEdit = (blockIndex, sectionIndex, tableName) => {
     }));
 
     const formData = {
-      form_short_name: tableName,
+      form_short_name: formatTableName(tableName),
       fields: allFields,
       as_a_block: table.description
     };
@@ -2149,7 +2235,7 @@ const addNewFieldedit = (tableName) => {
     label: "",
     value: "", // Keep value
     isNew: true,
-    description:"",
+    description: "",
     options: childtableHeaders.value[tableName].options ? `\n${childtableHeaders.value[tableName].options}` : `${''}`
   });
   // console.log(childtableHeaders.value[tableName],"mmm");
@@ -2318,7 +2404,7 @@ const childfield = [
     label: "Number",
     type: "Int",
   },
-   {
+  {
     label: "TextArea",
     type: "Text",
   },
@@ -2919,7 +3005,7 @@ const addBlock = () => {
                     label: "", // First column with "Requested by"
                     fields: [
                       {
-                        label: "Requested by",
+                        label: "Requested By",
                         fieldtype: "Data",
                         options: "",
                         reqd: false,
@@ -3385,10 +3471,10 @@ function handleInputChange(event, fieldType) {
   } else {
     formShortNameError.value = ""; // Clear error if input is valid
   }
-if (fieldType === "form_short_name" && /[^a-zA-Z ]/.test(inputValue)) {
-  formShortNameError.value = "Only alphabets and spaces are allowed";
-  return;
-}
+  if (fieldType === "form_short_name" && /[^a-zA-Z ]/.test(inputValue)) {
+    formShortNameError.value = "Only alphabets and spaces are allowed";
+    return;
+  }
   // Check for special characters (allow only letters and numbers)
   if (/[^a-zA-Z0-9& ]/.test(inputValue)) {  // ✅ allow spaces inside
     if (fieldType === "form_name") {

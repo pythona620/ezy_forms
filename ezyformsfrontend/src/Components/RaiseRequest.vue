@@ -68,7 +68,7 @@
             <!-- :disabled="!isFormValid" -->
             <button v-if="!selectedData.selectedFormId" class="btn btn-dark font-12" type="submit"
               @click="raiseRequestSubmission">
-              Raise Request
+              {{ selectedData.hasWorkflow == 'No'?'Save':'Raise Request' }}
             </button>
             <button v-if="selectedData.selectedFormId && $route.query.selectedFormStatus == 'Request Cancelled'"
               @click="RequestUpdate" class="btn btn-dark font-12" type="submit">
@@ -112,6 +112,7 @@ const selectedData = ref({
   selectedform: route.query.selectedForm || "", // Retrieve from query
   selectedFormId: route.query.selectedFormId || "", // Retrieve from query
   selectedBusiness_unit : route.query.business_unit || "", // Retrieve from query
+  hasWorkflow: route.query.has_workflow || "", // Retrieve from query
 });
 
 
@@ -209,115 +210,100 @@ function updateChildRecords(childTables, child_id_name) {
     });
 }
 
-function EditRequestUpdate() {
-  // Filter valid tables that have child data
-  const validTables = tableName.value.filter((table) => {
-    const childData = tableRows.value[table.options];
-    return childData && childData.length;
-  });
-
-  let childTables = [];
-
-  // Iterate through valid tables and collect their fields
-  validTables.forEach((table) => {
-    const childTableName = table.options;
-    const childFields = tableRows.value[childTableName] || [];
-
-    childTables.push({
-      child_table: childTableName,
-      child_fields: childFields,
-    });
-  });
-
-  // console.log(childTables, childTables.length,"Child Tables Data");
-
-  // Call function to update child records
-  if(childTables.length){
-    updateChildRecords(childTables, child_id_name.value);
-  }
-
-
-  let form = {};
-  if (emittedFormData.value.length) {
-    emittedFormData.value.map((each) => {
-      form[each.fieldname] = each.value;
-    });
-  }
-
-  let data_obj = {
-    form_id: route.query.selectedFormId,
-    updated_fields: form, // Pass the form JSON here
-
-  };
-  // console.log(data_obj,"lll");
-
-  axiosInstance
-    .post(apis.edit_form_before_approve, data_obj)
-    .then((resp) => {
-      if (resp?.message?.success) {
-
-        toast.success("Request Raised", {
-          autoClose: 2000,
-          transition: "zoom",
-          onClose: () => {
-            router.push({ path: "/todo/raisedbyme" });
-          },
-        });
-      }
-    });
-}
-
-
-
-// async function EditRequestUpdate() {
-//   let form = {};
-//   if (emittedFormData.value.length) {
-//     emittedFormData.value.forEach((each) => {
-//       form[each.fieldname] = each.value;
-//     });
-//   }
-
-//   // Filter valid tables that have child data
+// function EditRequestUpdate() {
 //   const validTables = tableName.value.filter((table) => {
 //     const childData = tableRows.value[table.options];
 //     return childData && childData.length;
 //   });
+//   console.log("tableName.value==",tableName.value);
+//   console.log("tableRows=",tableRows.value);
 
-//   let child_table = "";
-//   let child_fields = [];
+//   let childTables = [];
 
-//   // Ensure we process only the first valid table
-//   if (validTables.length) {
-//     const table = validTables[0]; // Picking the first valid table
-//     child_table = table.options;
-//     child_fields = tableRows.value[child_table] || [];
+//   // Iterate through valid tables and collect their fields
+//   validTables.forEach((table) => {
+//     const childTableName = table.options;
+//     const childFields = tableRows.value[childTableName] || [];
+
+//     childTables.push({
+//       child_table: childTableName,
+//       child_fields: childFields,
+//     });
+//   });
+
+//   // console.log(childTables, childTables.length,"Child Tables Data");
+
+//   // Call function to update child records
+//   if(childTables.length){
+//     updateChildRecords(childTables, child_id_name.value);
+//   }
+
+
+//   let form = {};
+//   if (emittedFormData.value.length) {
+//     emittedFormData.value.map((each) => {
+//       form[each.fieldname] = each.value;
+//     });
 //   }
 
 //   let data_obj = {
 //     form_id: route.query.selectedFormId,
-//     updated_fields: form, // Form updates
-//     child_table, // Single child table name
-//     child_fields // Corresponding child table fields
+//     updated_fields: form, // Pass the form JSON here
+
 //   };
+//   // console.log(data_obj,"lll");
 
-//   console.log(data_obj, "lll");
+//   axiosInstance
+//     .post(apis.edit_form_before_approve, data_obj)
+//     .then((resp) => {
+//       if (resp?.message?.success) {
 
-//   axiosInstance.post(apis.edit_form_before_approve, data_obj).then((resp) => {
-//     if (resp?.message?.success) {
-//       toast.success("Request Raised", {
-//         autoClose: 2000,
-//         transition: "zoom",
-//         onClose: () => {
-//           router.push({ path: "/todo/raisedbyme" });
-//         },
-//       });
-//     }
-//   });
+//         toast.success("Request Raised", {
+//           autoClose: 2000,
+//           transition: "zoom",
+//           onClose: () => {
+//             router.push({ path: "/todo/raisedbyme" });
+//           },
+//         });
+//       }
+//     });
 // }
 
 
 
+function EditRequestUpdate() {
+  let form = {};
 
+  // Include normal form fields
+  if (emittedFormData.value.length) {
+    emittedFormData.value.forEach((each) => {
+      form[each.fieldname] = each.value;
+    });
+  }
+
+  // Dynamically include all child tables
+  for (const [childTableKey, childRows] of Object.entries(tableRows.value)) {
+    if (Array.isArray(childRows) && childRows.length) {
+      form[childTableKey] = childRows.map(row => ({ ...row }));
+    }
+  }
+
+  const data_obj = {
+    form_id: route.query.selectedFormId,
+    updated_fields: form,
+  };
+  axiosInstance.post(apis.edit_form_before_approve, data_obj).then((resp) => {
+    if (resp?.message?.success) {
+      toast.success("Request Raised", {
+        autoClose: 2000,
+        transition: "zoom",
+        onClose: () => {
+          router.push({ path: "/todo/raisedbyme" });
+        },
+      });
+    }
+  });
+}
 
 // const tableRows = ref([]);
 
@@ -956,7 +942,7 @@ function request_raising_fn(item) {
     module_name: "Ezy Forms",
     doctype_name: selectedData.value.selectedform,
     ids: [item.name],
-    reason: "Request Raised",
+    reason: selectedData.value.hasWorkflow === 'No' ? "Completed":"Request Raised",
     url_for_request_id: "",
     files: filepaths.value.length > 0 ? filepaths.value : [],
     property: business_unit.value,

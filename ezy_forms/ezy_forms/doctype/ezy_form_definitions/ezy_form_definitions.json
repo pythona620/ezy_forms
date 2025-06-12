@@ -20,6 +20,7 @@
   "form_status",
   "print_format",
   "is_landscape",
+  "has_workflow",
   "workflow_check"
  ],
  "fields": [
@@ -108,14 +109,19 @@
    "label": "Is Landscape"
   },
   {
+   "fieldname": "has_workflow",
+   "fieldtype": "Data",
+   "label": "Has Workflow"
+  },
+  {
    "fieldname": "workflow_check",
    "fieldtype": "Data",
-   "label": "Workflow Check"
+   "label": "Reverse Workflow"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-06-03 17:00:49.207656",
+ "modified": "2025-06-06 11:30:53.010362",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
  "name": "Ezy Form Definitions",

@@ -24,17 +24,19 @@
                 <div v-for="(arrayData, key) in arrayFields" :key="key" class="mt-4">
                     <h5 class="text-capitalize font-13">{{ key.replace(/_/g, ' ') }}</h5>
                     <div v-if="arrayData.length">
-                    <table class="table table-bordered table-sm">
+                    <table class="table table-bordered table-sm table-responsive overflow-auto overflow-scroll">
                         <thead>
                             <tr>
-                                <th v-for="header in getTableHeaders(arrayData)" :key="header" class="text-capitalize">
+                                
+                                <th v-for="header in getTableHeaders(arrayData)" :key="header" class="text-capitalize text-center text-block">
                                     {{ header.replace(/_/g, ' ') }}
                                 </th>
                             </tr>
                         </thead>
                         <tbody>
+                            
                             <tr v-for="(row, rowIndex) in arrayData" :key="rowIndex">
-                                <td v-for="header in getTableHeaders(arrayData)" :key="header">{{ row[header] }}</td>
+                                <td class="text-center" v-for="header in getTableHeaders(arrayData)" :key="header">{{ row[header] }}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -106,8 +108,16 @@ function fetchDepartmentDetails() {
 
 // Separate flat fields and nested arrays
 const topLevelFields = computed(() => {
-    return Object.entries(displayedBlocks.value || {}).filter(([_, value]) => !Array.isArray(value))
+    const hiddenFields = [
+        'name', 'owner', 'creation', 'modified', 'modified_by','company_field',
+        'docstatus', 'idx', 'doctype', 'parent', 'parenttype', 'parentfield'
+    ]
+
+    return Object.entries(displayedBlocks.value || {}).filter(
+        ([key, value]) => !Array.isArray(value) && !hiddenFields.includes(key)
+    )
 })
+
 
 const groupedTopLevelFields = computed(() => {
     const grouped = []
@@ -129,8 +139,9 @@ const arrayFields = computed(() => {
 
 // Extract table headers from first object in array
 function getTableHeaders(dataArray) {
-    if (!dataArray.length) return []
-    return Object.keys(dataArray[0]).filter(k => k.startsWith('field_'))
+  if (!dataArray.length) return []
+  const hiddenFields = ['name', 'owner', 'creation', 'modified', 'modified_by', 'docstatus', 'idx', 'parent', 'parentfield', 'parenttype', 'doctype']
+  return Object.keys(dataArray[0]).filter(key => !hiddenFields.includes(key))
 }
 
 function backToForm(){
@@ -152,7 +163,7 @@ router.push({
 </script>
 
 
-<style scoped>
+<style lang="scss" scoped>
 .previewInputHeight {
     /* height: 35px; */
     margin-bottom: 5px;
@@ -252,5 +263,8 @@ td {
 .form-containe-div {
     height: 80vh;
     overflow-y: scroll;
+}
+input:focus{
+box-shadow: none;
 }
 </style>

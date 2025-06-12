@@ -27,7 +27,7 @@
                       : ''">
 
 
-                      <div v-if="field.label && field.fieldtype !== 'Table'">
+                      <div v-if="field.label && field.fieldtype !== 'Table' && field.fieldname !== 'auto_calculations'">
                         <label :for="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
                           class=" label-text  whitespace-nowrap">
                           <span class="font-12 fw-medium">{{ field.label }}</span>
@@ -57,12 +57,20 @@
                         <template v-if="
                           field.fieldtype === 'Select'
                         ">
-                          
-                          <Multiselect :multiple="field.fieldtype === 'Table MultiSelect'"
-                            :options="field.options?.split('\n').filter(opt => opt.trim() !== '') || []"
-                            :modelValue="field.value" placeholder="Select"
-                            @update:modelValue="(val) => handleSelectChange(val, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
-                            class="font-11 multiselect" />
+                          <div class="my-2">
+
+                            <div v-if="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel">
+                              <span class=" font-12">{{ field.value }}</span>
+                            </div>
+                            <div v-else>
+                              <Multiselect :multiple="field.fieldtype === 'Table MultiSelect'"
+                                :disabled="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel"
+                                :options="field.options?.split('\n').filter(opt => opt.trim() !== '') || []"
+                                :modelValue="field.value" placeholder="Select"
+                                @update:modelValue="(val) => handleSelectChange(val, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+                                class="font-11 multiselect" />
+                            </div>
+                          </div>
 
 
                         </template>
@@ -93,9 +101,9 @@
                           </div>
                         </template>
 
-                        <template v-else-if="field.fieldtype == 'Check'">
+                        <template v-else-if="field.fieldtype == 'Check' && field.fieldname !== 'auto_calculations'">
                           <input type="checkbox" :checked="field.value"
-                            :disabled="blockIndex === 0 || props.readonlyFor === 'true'"
+                            :disabled="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel"
                             :placeholder="'Enter ' + field.label" :name="'field-' +
                               sectionIndex +
                               '-' +
@@ -222,8 +230,8 @@
                           </div>
 
                           <!-- Fallback input when there's no file yet -->
-                          <input v-else :disabled="props.readonlyFor === 'true' || blockIndex < currentLevel" type="file"
-                            accept="image/jpeg,image/png,application/pdf"
+                          <input v-else :disabled="props.readonlyFor === 'true' || blockIndex < currentLevel"
+                            type="file" accept="image/jpeg,image/png,application/pdf"
                             :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'd-none' : ''"
                             :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
                             class="form-control previewInputHeight font-10" multiple
@@ -245,7 +253,7 @@
                                   columnIndex,
                                   fieldIndex
                                 )" class="form-control font-12 " />
-                            <button class="btn btn-dark text-dark bg-white" @click="ClickLink(field)"> <i
+                            <button v-if="field.value" class="btn btn-dark text-dark bg-white" @click="ClickLink(field)"> <i
                                 class="bi bi-link-45deg font-15"></i></button>
 
                             <!-- <button type="button" class="btn btn-outline-secondary pb-0 btn-sm" data-bs-toggle="modal"
@@ -256,48 +264,7 @@
 
                           <!-- Bootstrap Modal -->
                           <!-- Bootstrap Modal -->
-                          <div class="modal fade" :id="`modal-${field.fieldname}`" tabindex="-1"
-                            :aria-labelledby="`label-${field.fieldname}`" aria-hidden="true"
-                            :ref="el => setModalRef(el, field)">
-                            <div class="modal-dialog modal-dialog-centered modal-lg">
-                              <div class="modal-content">
-                                <div class="modal-header">
-                                  <h5 class="modal-title" :id="`label-${field.fieldname}`">
-                                    <!-- Select a  -->
-                                    {{ field.label }}
-                                  </h5>
-                                  <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                    aria-label="Close"></button>
-                                </div>
-
-                                <div class="modal-body">
-                                  <div v-if="ModalData && Object.keys(ModalData).length">
-                                    <div class="row mb-3" v-for="(pair, index) in chunkedModalData" :key="index">
-                                      <div class="col-md-6" v-for="[key, value] in pair" :key="key">
-                                        <label class="form-label fw-semibold text-capitalize">
-                                          {{ key.replace(/_/g, ' ') }}:
-                                        </label>
-                                        <input type="text" class="form-control" :value="value" readonly />
-                                      </div>
-                                    </div>
-                                  </div>
-                                  <div v-else>
-                                    <p>Loading data...</p>
-                                  </div>
-
-                                </div>
-
-                                <!-- <div class="modal-footer">
-                                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                    Close
-                                  </button>
-                                  <button type="button" class="btn btn-primary">
-                                    Save changes
-                                  </button>
-                                </div> -->
-                              </div>
-                            </div>
-                          </div>
+                         
 
                         </template>
 
@@ -338,22 +305,24 @@
                             :ref="el => setRef(el, sectionIndex, columnIndex, fieldIndex)"
                             @input="adjustHeight(sectionIndex, columnIndex, fieldIndex)" />
 
-                          <template v-if="blockIndex === 0 && field.fieldtype !== 'Int' && field.fieldtype !== 'Text'">
-                            <span style="font-size: 12px;" :class="props.readonlyFor === 'true' || blockIndex < currentLevel
-                              ? 'border-0 image-border-bottom w-50 bg-transparent'
-                              : ''" :value="field.value" :type="field.fieldtype">
-                              {{ field.value }}
+                          <template
+                            v-if="blockIndex === 0 && field.fieldtype !== 'Int' && field.fieldtype !== 'Text' && field.fieldtype !== 'Select' && field.fieldname !== 'auto_calculations'">
+                            <span style="font-size: 12px;"
+                              :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 image-border-bottom w-50 bg-transparent' : ''"
+                              :value="field.value" :type="field.fieldtype">
+                              {{ field.fieldtype === 'Time' ? formatTime(field.value) : field.value }}
                             </span>
                           </template>
                           <template v-else>
                             <component
-                              v-if="blockIndex !== 0 && field.fieldtype !== 'Int' && field.fieldtype !== 'Text' && field.fieldtype !== 'Select'"
+                              v-if="blockIndex !== 0 && field.fieldtype !== 'Int' && field.fieldtype !== 'Text' && field.fieldtype !== 'Select' && field.fieldname !== 'auto_calculations'"
                               :style="{
                                 width: Math.min(100 + (field.value?.length * 2), 600) + 'px'
                               }" :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'"
                               :is="getFieldComponent(field.fieldtype)" :class="props.readonlyFor === 'true' || blockIndex < currentLevel
                                 ? 'border-0 image-border-bottom w-50 bg-transparent'
-                                : ''" :value="field.value" :type="field.fieldtype"
+                                : ''" :value="field.fieldtype === 'Time' ? formatTime(field.value) : field.value"
+                              :type="field.fieldtype"
                               :readOnly="blockIndex < currentLevel || props.readonlyFor === 'true'"
                               :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex" @blur="
                                 (event) =>
@@ -370,7 +339,7 @@
                         </template>
                       </div>
                     </div>
-                    <div v-if="field.description !== 'Field' && field.fieldtype !== 'Table'"
+                    <div v-if="field.description !== 'Field' && field.fieldtype !== 'Table' && field.fieldname !== 'auto_calculations'"
                       class="w-100 font-11 description-block mt-1">
                       <!-- <span class="fw-semibold"></span><br> -->
                       <span v-html="field.description.replace(/\n/g, '<br>')"></span>
@@ -387,7 +356,7 @@
                             <div v-if="field.description === 'true'">
                               <div v-for="(row, index) in props.childData[tableName]" :key="index"
                                 class="border p-2 mb-3 rounded bg-light">
-                                <div class="mb-2 font-12 fw-bold">Block #{{ index + 1 }}</div>
+                                <div class="mb-2 font-12 fw-bold">#{{ index + 1 }}</div>
                                 <div v-for="i in Math.ceil(headers.length / 2)" :key="i" class="row mb-2">
                                   <div class="col-6" v-for="field in headers.slice((i - 1) * 2, i * 2)"
                                     :key="field.fieldname">
@@ -415,16 +384,18 @@
                               <table class="table mb-0">
                                 <thead>
                                   <tr>
-                                    <th>#</th>
-                                    <th v-for="field in headers" :key="field.fieldname">{{ field.label }}</th>
+                                    <!-- <th>#</th> -->
+                                    <th v-for="field in headers" :key="field.fieldname" class="text-center">{{
+                                      field.label }}</th>
                                   </tr>
                                 </thead>
                                 <tbody>
                                   <tr v-for="(row, index) in props.childData[tableName]" :key="index">
-                                    <td>{{ index + 1 }}</td>
-                                    <td v-for="field in headers" :key="field.fieldname">
+                                   
+                                    <!-- <td>{{ index + 1 }}</td> -->
+                                    <td v-for="field in headers" :key="field.fieldname" class="text-center">
                                       <template v-if="isFilePath(row[field.fieldname])">
-                                        <div class="d-flex flex-column gap-1">
+                                        <div class="d-flex flex-column align-items-center gap-1">
                                           <span
                                             v-for="(file, i) in row[field.fieldname].split(',').filter(f => f.trim() !== '')"
                                             :key="i">
@@ -539,7 +510,11 @@ const isImageFile = (value) => {
   return /\.(png|jpg|jpeg|gif)$/i.test(value);
 };
 
-
+function formatTime(value) {
+  if (!value) return '';
+  const timeParts = value.split(':');
+  return `${timeParts[0]}:${timeParts[1]}`;
+}
 function getFileArray(value) {
   return value.split(',').map(f => f.trim())
 }
@@ -1140,175 +1115,174 @@ td {
 }
 
 .multiselect {
-    height: 30px !important;
-    font-size: 12px !important;
-    width: 100% !important;
+  height: 30px !important;
+  font-size: 12px !important;
+  width: 100% !important;
 }
 
 .multiselect {
-    margin: initial;
-    font-size: 11px !important;
-    border: 1px solid #e2e2e2 !important;
+  margin: initial;
+  font-size: 11px !important;
+  border: 1px solid #e2e2e2 !important;
+  height: 30px !important;
+  border-radius: 8px !important;
+
+  .multiselect-wrapper {
     height: 30px !important;
-    border-radius: 8px !important;
+  }
 
-    .multiselect-wrapper {
-        height: 30px !important;
+  .multiselect-dropdown {
+    .multiselect-options {
+      font-size: 11px;
+
+      li.multiselect-option span {
+        font-size: 11px !important;
+      }
+
+      li.multiselect-option .is-selected {
+        background-color: grey !important;
+        font-size: 11px;
+      }
     }
-
-    .multiselect-dropdown {
-        .multiselect-options {
-            font-size: 11px;
-
-            li.multiselect-option span {
-                font-size: 11px !important;
-            }
-
-            li.multiselect-option .is-selected {
-                background-color: grey !important;
-                font-size: 11px;
-            }
-        }
-    }
+  }
 }
 
 .multiselect__option span {
-    font-size: 11px;
-    /* Change this value to whatever size you need */
+  font-size: 11px;
+  /* Change this value to whatever size you need */
 }
 
 .multiselect .multiselect-option {
-    font-size: 11px;
+  font-size: 11px;
 }
 
 .multiselect .multiselect-wrapper {
-    min-height: 30px !important;
+  min-height: 30px !important;
 }
 
 .multiselect .multiselect--above {
-    min-height: 30px !important;
+  min-height: 30px !important;
 }
 
 .multiselect__tags {
-    min-height: 30px !important;
-    padding: 0px;
+  min-height: 30px !important;
+  padding: 0px;
 }
 
 .multiselect .multiselect__tags {
-    min-height: 30px !important;
-    font-size: 11px !important;
+  min-height: 30px !important;
+  font-size: 11px !important;
 }
 
 .multiselect .multiselect__placeholder {
-    font-size: 11px;
+  font-size: 11px;
 }
 
 .multiselect .multiselect__single {
-    font-size: 11px;
+  font-size: 11px;
 }
 
 .multiselect .multiselect__tags .multiselect__placeholder {
-    font-size: 11px;
+  font-size: 11px;
 }
 
 ::v-deep(.multiselect__placeholder) {
-    color: #adadad;
-    display: inline-block;
-    margin-bottom: 10px;
-    padding-top: 2px;
-    font-size: 12px !important;
+  color: #adadad;
+  display: inline-block;
+  margin-bottom: 10px;
+  padding-top: 2px;
+  font-size: 12px !important;
 }
 
 
 ::v-deep(.multiselect__select) {
-    position: absolute;
-    width: 40px;
-    height: 32px;
-    right: 1px;
-    /* top: 1px; */
-    padding: 4px 8px;
-    text-align: center;
-    transition: transform 0.2s ease;
+  position: absolute;
+  width: 40px;
+  height: 32px;
+  right: 1px;
+  /* top: 1px; */
+  padding: 4px 8px;
+  text-align: center;
+  transition: transform 0.2s ease;
 }
 
 ::v-deep(.multiselect) {
-    height: 32px !important;
-    min-height: 32px !important;
+  height: 32px !important;
+  min-height: 32px !important;
 }
 
 ::v-deep(.multiselect__single) {
-    font-size: 12px;
-    color: #212529 !important;
+  font-size: 12px;
+  color: #212529 !important;
 }
 
 ::v-deep(.multiselect__tags) {
-    height: 32px !important;
-    min-height: 32px !important;
-    display: flex;
-    align-items: center;
-    border: none;
+  height: 32px !important;
+  min-height: 32px !important;
+  display: flex;
+  align-items: center;
+  border: none;
 }
 
 ::v-deep(.multiselect-wrapper),
 ::v-deep(.multiselect-search) {
-    height: 32px !important;
-    min-height: 32px !important;
-    line-height: 32px !important;
-    display: flex;
-    align-items: center;
+  height: 32px !important;
+  min-height: 32px !important;
+  line-height: 32px !important;
+  display: flex;
+  align-items: center;
 }
 
 ::v-deep(.multiselect-search) {
-    height: 32px !important;
-    min-height: 32px !important;
-    display: flex;
-    align-items: center;
+  height: 32px !important;
+  min-height: 32px !important;
+  display: flex;
+  align-items: center;
 }
 
 ::v-deep(.multiselect-wrapper) {
-    height: 32px !important;
-    min-height: 32px !important;
-    line-height: 32px !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  line-height: 32px !important;
 }
 
 ::v-deep(.multiselect-search) {
-    position: absolute;
-    width: 40px !important;
-    height: 32px !important;
-    right: 1px;
+  position: absolute;
+  width: 40px !important;
+  height: 32px !important;
+  right: 1px;
 
-    padding: 4px 8px;
-    text-align: center;
-    transition: transform 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  padding: 4px 8px;
+  text-align: center;
+  transition: transform 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 ::v-deep(.multiselect__element:hover) {
-    background-color: #eeeeee !important;
+  background-color: #eeeeee !important;
 }
 
 ::v-deep(.multiselect__element:hover .multiselect__option) {
-    background-color: #eeeeee !important;
-    color: #000 !important;
+  background-color: #eeeeee !important;
+  color: #000 !important;
 }
 
 ::v-deep(.multiselect__tags) {
-    color: #000 !important;
-    font-size: 12px !important;
+  color: #000 !important;
+  font-size: 12px !important;
 }
 
 
 ::v-deep(.multiselect__element:hover .multiselect__option--highlight) {
-    background-color: #eeeeee !important;
-    color: #000 !important;
+  background-color: #eeeeee !important;
+  color: #000 !important;
 }
 
 /* Additional specific rule for `.multiselect__option` when hovered */
 ::v-deep(.multiselect__option:hover) {
-    background-color: #eeeeee !important;
-    color: #000 !important;
+  background-color: #eeeeee !important;
+  color: #000 !important;
 }
-    
 </style>

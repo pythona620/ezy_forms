@@ -291,6 +291,7 @@ function actionCreated(rowData, actionEvent) {
   }
 
   if (actionEvent.name === 'Raise Request') {
+    // console.log(rowData);
     const parsedData = JSON.parse(rowData.form_json);
     const storedData = localStorage.getItem("employeeData");
 
@@ -313,20 +314,23 @@ function actionCreated(rowData, actionEvent) {
       }
       // console.log(route.path, "sadasda");
 
-      if (hasAccess) {
+      if (hasAccess && rowData.enable === 1) {
         router.push({
           name: "RaiseRequest",
           query: {
             routepath: route.path,
             selectedForm: rowData.form_short_name,
             business_unit: rowData.business_unit,
+            has_workflow:rowData.has_workflow
 
 
           },
         });
-      } else {
-        toast.info("You do not have permission to access this Form.");
-      }
+      } else if (rowData.enable === 0) {
+      toast.info("This form is currently disabled.", { autoClose: 500 });
+    } else {
+      toast.info("You do not have permission to access this Form.", { autoClose: 500 });
+    }
     }
     //  else {
     //   console.log("No employee data found in localStorage.");

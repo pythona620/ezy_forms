@@ -597,6 +597,8 @@ function inLineFiltersData(searchedData) {
 
         // Call receivedForMe with or without filters
         if (filterObj.value.filters.length) {
+          filterObj.value.limit_start = 0;
+
             receivedForMe(filterObj.value.filters);
         } else {
             receivedForMe();
@@ -613,7 +615,9 @@ function receivedForMe(data) {
     ["assigned_to_users", "like", `%${EmpRequestdesignation?.designation}%`],
     ["property", "like", `%${newBusinessUnit.value.business_unit}%`],
     ["status", "!=", "Request Cancelled"],
-    ["name","in", viewlist.value]
+    
+    ["name","in", viewlist.value],
+    ["status", "!=", "Completed"]
   ];
   if (data) {
     filters.push(...data);
