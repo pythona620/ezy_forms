@@ -96,7 +96,7 @@
                       <div class=" d-flex gap-2">
 
                     
-                      <div>
+                      <div v-if="selectedData.designation.includes('Security')">
                         <button :disabled="saveloading || (!canApprove & view_only_reportee === 1)" type="submit"
                           class="btn btn-outline-secondary" @click.prevent="SaveDocWithoutApprove(route.query.name)">
                           <span v-if="saveloading" class="spinner-border spinner-border-sm" role="status"
