@@ -44,8 +44,8 @@
               <div class="position-relative ">
                 <div class="requestPreviewDiv pb-5">
                   <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel"
-                    :childData="responseData" :readonly-for="selectedData.readOnly" :childHeaders="tableHeaders"
-                    :employee-data="employeeData" @updateField="updateFormData" />
+                    @updateTableData="approvalChildData" :childData="responseData" :readonly-for="selectedData.readOnly"
+                    :childHeaders="tableHeaders" :employee-data="employeeData" @updateField="updateFormData" />
 
                 </div>
 
@@ -85,20 +85,24 @@
                       <div>
                         <button :disabled="rejectLoad || (!canApprove & view_only_reportee === 1)"
                           class="btn btn-outline-danger font-10 py-0 rejectbtn" type="button"
-                          @click="ApproverCancelSubmission(formData, 'Request Cancelled')">
+                          @click="ApproverCancelSubmission(formData, 'Reject')">
                           <span v-if="rejectLoad" class="spinner-border spinner-border-sm" role="status"
                             aria-hidden="true"></span>
                           <span v-if="!rejectLoad"><i class="bi bi-x-lg fw-bolder font-12 me-2"></i><span
                               class="font-12">Reject</span></span>
                         </button>
                       </div>
+                      <!-- v-if="selectedData.designation.includes('Security')" -->
+                      <div class=" d-flex gap-2">
+
+                    
                       <div>
                         <button :disabled="saveloading || (!canApprove & view_only_reportee === 1)" type="submit"
-                          class="btn btn-success approvebtn" @click.prevent="SaveDocWithoutApprove(route.query.name)">
+                          class="btn btn-outline-secondary" @click.prevent="SaveDocWithoutApprove(route.query.name)">
                           <span v-if="saveloading" class="spinner-border spinner-border-sm" role="status"
                             aria-hidden="true"></span>
                           <span v-if="!saveloading">
-                            <span class="font-12">Save</span>
+                            <span class="font-12 fw-bold">Save</span>
                           </span>
                         </button>
 
@@ -114,6 +118,7 @@
                         </button>
 
                       </div>
+                        </div>
                     </div>
 
                   </div>
@@ -203,7 +208,7 @@
                       <span>{{ item.role }}</span><br />
                       <span class="font-12 text-secondary">{{
                         item.reason || "N/A"
-                      }}</span>.
+                        }}</span>.
 
                     </p>
                   </div>
@@ -288,6 +293,7 @@ const selectedData = ref({
   type: route.query.type || "", // Retrieve from query
   readOnly: route.query.readOnly, // Retrieve from query
   business_unit: route.query.business_unit || "", // Retrieve from query
+  designation: route.query.designation || "", // Retrieve from query
 });
 const backTo = ref(selectedData.value.routepath);
 // onMounted(() => {
@@ -393,8 +399,11 @@ watch(
   { immediate: true }
 );
 
-
-
+const childtablesData = ref({});
+function approvalChildData(data) {
+  childtablesData.value = data;
+  console.log(data);
+}
 
 
 
@@ -420,8 +429,40 @@ const updateFormData = (fieldValues) => {
   // console.log(emittedFormData.value, "======");
 };
 
+const ChildTableData = async () => {
+  const childEntries = Object.entries(childtablesData.value);
+
+  if (!childEntries.length) return;
+
+  const formPromises = childEntries.map(([tableName, rows]) => {
+    if (!rows || !rows.length) {
+      console.warn(`⚠ Skipping empty child table: ${tableName}`);
+      return null;
+    }
+
+    const form = {
+      doctype: selectedData.value.doctype_name,
+      company_field: business_unit.value,
+      [tableName]: rows
+    };
+
+    const formData = new FormData();
+    formData.append("doc", JSON.stringify(form));
+    formData.append("action", "Save");
+
+    return axiosInstance.post(apis.savedocs, formData);
+  }).filter(Boolean);
+
+  try {
+    const responses = await Promise.all(formPromises);
+    return responses; // Return if needed
+  } catch (error) {
+    console.error("❌ Error submitting child tables:", error);
+    throw error; // Important: so raiseRequestSubmission halts
+  }
+};
 // Function to handle form submission
-function ApproverFormSubmission(dataObj, type) {
+async function ApproverFormSubmission(dataObj, type) {
   // if (ApproverReason.value.trim() === "") {
   //   isCommentsValid.value = false; // Show validation error
   //   return; // Stop execution
@@ -431,11 +472,21 @@ function ApproverFormSubmission(dataObj, type) {
   // isCommentsValid.value = true;
   loading.value = true; // Start loader
 
-  let form = {};
+  let form = {
+    ...childtablesData.value
+  };
   if (Array.isArray(emittedFormData.value) && emittedFormData.value.length) {
     emittedFormData.value.forEach((each) => {
       form[each.fieldname] = each.value;
     });
+  }
+  try {
+    // ✅ Submit child table data first
+    await ChildTableData();
+  } catch (error) {
+    toast.error("❌ Child table submission failed");
+    loading.value = false;
+    return;
   }
   // console.log(loading.value, dataObj, type, form);
 
@@ -499,41 +550,78 @@ function approvalStatusFn(dataObj, type) {
       loading.value = false; // Ensure loader stops
     });
 }
-function SaveDocWithoutApprove(request_id) {
-  saveloading.value = true
-  // console.log(request_id,"data");
-  // console.log(selectedcurrentLevel.value,"current level");
-  // console.log(ApproverReason.value,"reason");
-  const EmpRequestdesignation = JSON.parse(
-    localStorage.getItem("employeeData")
-  );
-  // console.log(EmpRequestdesignation,"emp data");
-
-  let data = {
-    request_id: request_id,
-    reason: ApproverReason.value ? ApproverReason.value : "Approved",
-    current_level: selectedcurrentLevel.value,
-    user: EmpRequestdesignation.emp_mail_id,
-    role: EmpRequestdesignation.designation
+async function SaveDocWithoutApprove(request_id) {
+  saveloading.value = true;
+  let form = {
+    ...childtablesData.value
   };
+  if (Array.isArray(emittedFormData.value) && emittedFormData.value.length) {
+    emittedFormData.value.forEach((each) => {
+      form[each.fieldname] = each.value;
+    });
+  }
+  try {
+    // ✅ Submit child table data first
+    await ChildTableData();
+  } catch (error) {
+    toast.error("❌ Child table submission failed");
+    loading.value = false;
+    return;
+  }
+  // console.log(loading.value, dataObj, type, form);
 
   axiosInstance
-    .post(apis.ActivitySaveComment, data)
+    .put(`${apis.resource}${selectedData.value.doctype_name}/${doctypeForm.value.name}`, form)
     .then((response) => {
-      if (response?.message?.success === true) {
-        ApproverReason.value = ""; // Clear reason after success
-        saveloading.value = false
+      if (response?.data) {
 
-        window.location.reload()
+        const EmpRequestdesignation = JSON.parse(
+          localStorage.getItem("employeeData")
+        );
+        // console.log(EmpRequestdesignation,"emp data");
+
+        let data = {
+          request_id: request_id,
+          reason: ApproverReason.value ? ApproverReason.value : "Approved",
+          current_level: selectedcurrentLevel.value,
+          user: EmpRequestdesignation.emp_mail_id,
+          role: EmpRequestdesignation.designation
+        };
+
+        axiosInstance
+          .post(apis.ActivitySaveComment, data)
+          .then((response) => {
+            if (response?.message?.success === true) {
+              ApproverReason.value = ""; // Clear reason after success
+              saveloading.value = false
+              window.location.reload()
+              // receivedForMe()
+
+            } else {
+              toast.error(`Failed to request`, { autoClose: 1000, transition: "zoom" });
+            }
+          })
+          .catch((error) => {
+            console.error("Error processing request:", error);
+            toast.error("An error occurred while processing your request.", { autoClose: 1000, transition: "zoom" });
+          })
+
+
 
       } else {
-        toast.error(`Failed to request`, { autoClose: 1000, transition: "zoom" });
+        loading.value = false; // Stop loader on failure
+        toast.error("Failed to submit form", { autoClose: 1000, transition: "zoom" });
       }
     })
     .catch((error) => {
-      console.error("Error processing request:", error);
-      toast.error("An error occurred while processing your request.", { autoClose: 1000, transition: "zoom" });
-    })
+      console.error("Error submitting form:", error);
+      loading.value = false; // Stop loader on error
+      toast.error("An error occurred while submitting the form.", { autoClose: 1000, transition: "zoom" });
+    });
+  // console.log(request_id,"data");
+  // console.log(selectedcurrentLevel.value,"current level");
+  // console.log(ApproverReason.value,"reason");
+
 }
 
 
@@ -606,16 +694,17 @@ function approvalCancelFn(dataObj, type) {
   let data = {
     property: tableData.value.property,
     doctype: tableData.value.doctype_name,
-    request_id: tableData.value.name,
-    reason: ApproverReason.value ? ApproverReason.value : 'Request Cancelled',
+    request_ids: [tableData.value.name],
+    reason: ApproverReason.value ? ApproverReason.value : "Reject",
     action: type,
-    files: [],
-    url_for_cancelling_id: "",
+    files: null,
+    cluster_name: null,
+    url_for_approval_id: "",
     current_level: tableData.value.current_level,
   };
 
   axiosInstance
-    .post(apis.wf_cancelling_request, data)
+    .post(apis.requestApproval, { request_details: [data] })
     .then((response) => {
       if (response?.message) {
         toast.success(`${type}`, {

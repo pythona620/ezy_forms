@@ -424,6 +424,7 @@ export default {
                   emp_name: employeeData.emp_name,
                   emp_mail_id: employeeData.emp_mail_id,
                   designation: employeeData.designation,
+                  department: employeeData.department,
                   // department: employeeData.department,
                 };
 
