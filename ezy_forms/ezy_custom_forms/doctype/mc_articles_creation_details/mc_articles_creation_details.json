@@ -1,0 +1,96 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-06-10 12:18:48.441633",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "article_no",
+  "article_name",
+  "item_group",
+  "tax",
+  "profit_expense",
+  "unit",
+  "hsn",
+  "par_level",
+  "auth_level"
+ ],
+ "fields": [
+  {
+   "columns": 1,
+   "fieldname": "article_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Article No"
+  },
+  {
+   "columns": 1,
+   "fieldname": "article_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Article Name"
+  },
+  {
+   "columns": 1,
+   "fieldname": "item_group",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Item Group"
+  },
+  {
+   "columns": 1,
+   "fieldname": "tax",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Tax"
+  },
+  {
+   "columns": 1,
+   "fieldname": "profit_expense",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Profit /Expense"
+  },
+  {
+   "columns": 1,
+   "fieldname": "unit",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Unit"
+  },
+  {
+   "columns": 1,
+   "fieldname": "hsn",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "HSN"
+  },
+  {
+   "columns": 1,
+   "fieldname": "par_level",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "PAR Level"
+  },
+  {
+   "columns": 1,
+   "fieldname": "auth_level",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Auth Level"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-06-10 12:22:31.471885",
+ "modified_by": "Administrator",
+ "module": "ezy_custom_forms",
+ "name": "MC Articles Creation Details",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
