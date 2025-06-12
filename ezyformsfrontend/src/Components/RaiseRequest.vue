@@ -892,6 +892,7 @@ function WfRequestUpdate() {
             const childTables = Object.keys(res.data).filter((key) =>
               Array.isArray(res.data[key])
             );
+            console.log(childTables);
             
             
             if (childTables.length) {

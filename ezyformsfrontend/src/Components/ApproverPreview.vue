@@ -253,7 +253,9 @@
                                   columnIndex,
                                   fieldIndex
                                 )" class="form-control font-12 " />
-                            <button v-if="field.value" class="btn btn-dark text-dark bg-white" @click="ClickLink(field)"> <i
+
+                            <button v-if="field.value && field.label !== 'Department'"
+                              class="btn btn-dark text-dark bg-white" @click="ClickLink(field)"> <i
                                 class="bi bi-link-45deg font-15"></i></button>
 
                             <!-- <button type="button" class="btn btn-outline-secondary pb-0 btn-sm" data-bs-toggle="modal"
@@ -264,7 +266,7 @@
 
                           <!-- Bootstrap Modal -->
                           <!-- Bootstrap Modal -->
-                         
+
 
                         </template>
 
@@ -339,20 +341,31 @@
                         </template>
                       </div>
                     </div>
-                    <div v-if="field.description !== 'Field' && field.fieldtype !== 'Table' && field.fieldname !== 'auto_calculations'"
+                    <div
+                      v-if="field.description !== 'Field' && field.fieldtype !== 'Table' && field.fieldname !== 'auto_calculations'"
                       class="w-100 font-11 description-block mt-1">
                       <!-- <span class="fw-semibold"></span><br> -->
                       <span v-html="field.description.replace(/\n/g, '<br>')"></span>
                     </div>
-                    <div v-if="blockIndex === 0 && field.fieldtype === 'Table'">
+                    <div v-if="field.fieldtype === 'Table'">
                       <div v-if="props.childHeaders && Object.keys(props.childHeaders).length">
                         <div v-for="(headers, tableName) in props.childHeaders" :key="tableName">
                           <div v-if="field.fieldname === tableName" class="overTable">
-                            <div>
+                            <div class=" d-flex justify-content-between align-items-center">
                               <span class="font-13 fw-bold tablename">{{ field.label.replace(/_/g, " ") }}</span>
+                              <div v-if="selectedData.formStatus !== 'Completed'">
+
+                                <!-- <button class="btn btn-sm btn-light"
+                                  @click="editableTables[tableName] = !editableTables[tableName]">
+                                  {{ editableTables[tableName] ? 'Cancel' : 'Edit' }}
+                                </button> -->
+                              </div>
                             </div>
 
-                            <!-- If description === 'true', use 2-column layout -->
+                            <!-- Add Row Button -->
+
+
+                            <!-- 2-column layout -->
                             <div v-if="field.description === 'true'">
                               <div v-for="(row, index) in props.childData[tableName]" :key="index"
                                 class="border p-2 mb-3 rounded bg-light">
@@ -361,39 +374,37 @@
                                   <div class="col-6" v-for="field in headers.slice((i - 1) * 2, i * 2)"
                                     :key="field.fieldname">
                                     <label class="font-12 fw-semibold">{{ field.label }}</label>
-
                                     <template v-if="isFilePath(row[field.fieldname])">
                                       <div v-for="(file, i) in row[field.fieldname].split(',')" :key="i"
                                         class="cursor-pointer text-dark d-block" @click="openFile(file)">
-                                        <span class="font-12">View Attachment </span><i class="bi bi-eye-fill ps-1"></i>
+                                        <span class="font-12">View Attachment </span>
+                                        <i class="bi bi-eye-fill ps-1"></i>
                                       </div>
                                     </template>
-
-
                                     <template v-else>
-                                      <input type="text" class="form-control font-12" :value="row[field.fieldname]"
-                                        disabled />
+                                      <input type="text" class="form-control font-12" v-model="row[field.fieldname]" />
                                     </template>
                                   </div>
                                 </div>
                               </div>
                             </div>
 
-                            <!-- Else, show table view -->
+                            <!-- Table layout -->
                             <div v-else class="tableborder-child">
+
                               <table class="table mb-0">
                                 <thead>
                                   <tr>
-                                    <!-- <th>#</th> -->
-                                    <th v-for="field in headers" :key="field.fieldname" class="text-center">{{
-                                      field.label }}</th>
+                                    <th v-for="field in headers" :key="field.fieldname" class="text-center">
+                                      {{ field.label }}
+                                    </th>
+                                    <th v-if="blockIndex !== 0"></th>
                                   </tr>
                                 </thead>
                                 <tbody>
                                   <tr v-for="(row, index) in props.childData[tableName]" :key="index">
-                                   
-                                    <!-- <td>{{ index + 1 }}</td> -->
-                                    <td v-for="field in headers" :key="field.fieldname" class="text-center">
+                                    <td v-for="field in headers" :key="field.fieldname"
+                                      class="text-center align-middle">
                                       <template v-if="isFilePath(row[field.fieldname])">
                                         <div class="d-flex flex-column align-items-center gap-1">
                                           <span
@@ -406,17 +417,42 @@
                                           </span>
                                         </div>
                                       </template>
+                                      <template v-else>
+
+                                        <template v-if="field.fieldtype === 'Data'">
+                                          <input type="text" :class="blockIndex === 0 ? 'bg-white border-0' : null"
+                                            :disabled="blockIndex === 0"
+                                            class="form-control form-control-sm text-center"
+                                            v-model="row[field.fieldname]" />
+                                        </template>
+
+                                        <template v-else-if="field.fieldtype === 'Select'">
+                                          <div>
+                                            <Multiselect :multiple="field.fieldtype === 'Table MultiSelect'"
+                                              :options="field.options?.split('\n').filter(opt => opt.trim() !== '') || []"
+                                              :model-value="row[field.fieldname]" placeholder="Select"
+                                              @update:model-value="val => row[field.fieldname] = val"
+                                              class="font-11 multiselect" />
+                                          </div>
+                                        </template>
 
 
-                                      <!-- Show normal value if not a file path -->
-                                      <span v-else>
-                                        {{ row[field.fieldname] || "" }}
+                                      </template>
+                                    </td>
+                                    <td v-if="blockIndex !== 0"
+                                      class="d-table-cell text-center align-middle removeRowTd">
+                                      <span class="tableRowRemoveBtn " @click="removeRow(tableName, index)">
+                                        <i class="bi bi-x-lg "></i>
                                       </span>
                                     </td>
                                   </tr>
                                 </tbody>
                               </table>
                             </div>
+                            <button v-if="blockIndex !== 0 && selectedData.formStatus !== 'Completed'"
+                              class="btn btn-sm btn-light my-2" @click="addRow(tableName)">
+                              + Add Row
+                            </button>
 
                           </div>
                         </div>
@@ -473,13 +509,14 @@ const selectedData = ref({
   formname: route.query.name || "",
   doctype: route.query.doctype_name || "",
   businessUnit: route.query.business_unit || "",
+  formStatus: route.query.status || "",
 });
 
 const emit = defineEmits();
 const filePaths = ref([]);
 const tableName = ref("");
 const errorMessages = ref({});
-
+// const editableTables = reactive({});
 const hoverStates = ref({});
 const textAreaRefs = reactive({});
 const replaceInputIndexes = ref([]);
@@ -509,7 +546,34 @@ const isImageFile = (value) => {
   if (!value) return false;
   return /\.(png|jpg|jpeg|gif)$/i.test(value);
 };
+function addRow(tableName) {
+  const headers = props.childHeaders[tableName];
+  const newRow = {};
 
+  headers.forEach((header) => {
+    newRow[header.fieldname] = '';
+  });
+
+  if (!props.childData[tableName]) {
+    props.childData[tableName] = [];
+  }
+
+  props.childData[tableName].push(newRow);
+}
+
+const removeRow = (tableName, rowIndex) => {
+  if (props.childData[tableName]) {
+    props.childData[tableName].splice(rowIndex, 1);
+  }
+};
+
+watch(
+  () => props.childData,
+  (newVal) => {
+    emit('updateTableData', { ...newVal });
+  },
+  { deep: true }
+);
 function formatTime(value) {
   if (!value) return '';
   const timeParts = value.split(':');
@@ -527,6 +591,7 @@ onMounted(() => {
     el.style.height = 'auto';
     el.style.height = el.scrollHeight + 'px';
   });
+
 
 });
 

@@ -1,135 +1,86 @@
 <template>
     <div>
-        <div class="d-flex justify-content-between align-items-center ">
+        <div class="d-flex justify-content-between align-items-center py-2 ">
             <div>
                 <h1 class="m-0 font-13">
                     Roles
                 </h1>
-                <p class="m-0 font-11 pt-1">
+                <!-- <p class="m-0 font-11 pt-1">
                     19 Roles
-                </p>
+                </p> -->
             </div>
             <div class="d-flex gap-2 align-items-center">
-                <div class="d-flex">
-                    <div>
-                        <!-- <FormFields labeltext="" class="mb-3" tag="input" type="search" placeholder="Search File Name"
-                        name="Value" id="Value" v-model="filterObj.search" /> -->
-                    </div>
-                    <div>
-                        <button type="button" class=" filterbtn d-flex align-items-center " data-bs-toggle="modal"
-                            data-bs-target="#fileterModal">
-                            <span> <i class="ri-filter-2-line"></i></span>
-                        </button>
 
-                    </div>
+
+                <div class="d-flex align-items-center ">
+
+                    <button type="button" class="btn btn-dark buttoncomp CreateDepartments d-flex align-items-center "
+                        @click="CreateNewRoleBtn" data-bs-toggle="modal" data-bs-target="#createDepartments">
+                        Create Role
+                    </button>
                 </div>
-                <div class="modal fade" id="fileterModal" tabindex="-1" aria-labelledby="fileterModalLabel"
+                <div class="modal fade" id="createDepartments" tabindex="-1" aria-labelledby="createDepartmentsLabel"
                     aria-hidden="true">
-                    <div class="modal-dialog modal-xl">
+                    <div class="modal-dialog modal-lg">
                         <div class="modal-content">
 
                             <div class="modal-body">
-                                <div class="row">
-                                    <div class="col-3">
-                                        <label class="font-13 ps-1" for="Requested">Roles:</label>
-                                        <FormFields class="mb-3" tag="input" type="search" name="Requested"
-                                            id="Requested" placeholder="Search" v-model="filterOnModal.roles" />
-                                    </div>
-                                    <div class="col-3">
-                                        <label class="font-13 ps-1 fw-medium" for="dept">Requested Dept:</label>
-                                        <FormFields tag="select" placeholder="Select Department" class="mb-3"
-                                            name="dept" v-model="filterOnModal.Requested_dept" id="dept"
-                                            :Required="false"
-                                            :options="['JW Marriott Golfshire Banglore', 'JW Marriott Golfshire Banglore']" />
-                                    </div>
-                                    <div class="col-3">
-                                        <label class="font-13 ps-1" for="dept">Owner OF Form:</label>
-                                        <FormFields tag="select" placeholder="Select Department" class="mb-3"
-                                            name="dept" v-model="filterOnModal.Owner_OF_Form" id="dept"
-                                            :Required="false"
-                                            :options="['JW Marriott Golfshire Banglore', 'JW Marriott Golfshire Banglore']" />
-                                    </div>
-                                    <div class="col-3">
-                                        <label class="font-13 ps-1" for="dept">Form Category:</label>
-                                        <FormFields tag="select" placeholder="Select Department" class="mb-3"
-                                            name="dept" v-model="filterOnModal.Form_Category" id="dept"
-                                            :Required="false"
-                                            :options="['JW Marriott Golfshire Banglore', 'JW Marriott Golfshire Banglore']" />
-                                    </div>
-                                    <div class="col-3">
-                                        <label class="font-13 ps-1" for="Requested">Form Name:</label>
-                                        <FormFields class="mb-3" tag="input" type="search" name="Requested"
-                                            id="Requested" placeholder="Search"
-                                            v-model="filterOnModal.department_name" />
-                                    </div>
-                                    <div class="col-3">
-                                        <label class="font-13 ps-1" for="Requested">Requested Period:</label>
-                                        <FormFields class="mb-3" tag="input" type="date" name="Requested" id="Requested"
-                                            placeholder="Jan-2024-Dec-2024" v-model="filterOnModal.Requested_Period" />
-                                    </div>
-                                    <div class="col-3">
-                                        <FormFields tag="radio" :options="radioOptions" name="exampleRadio"
-                                            id="exampleRadio" v-model="filterOnModal.Approval_status"
-                                            labeltext="Approval Status" />
-                                    </div>
-                                    <div class="col-3">
-                                        <label class="font-13 ps-1" for="Requested">Requested Id:</label>
-                                        <FormFields class="mb-3" tag="input" type="search" name="Requested"
-                                            id="Requested" placeholder="Search" v-model="filterOnModal.RequestedId" />
-                                    </div>
-                                </div>
+                               <div class="mt-3">
+                            <div class="">
+                              <!-- <FormFields labeltext="Form Cateogry" class="mb-3" tag="select"
+                                                            name="desgination" id="desgination"
+                                                            placeholder="Select Cateogry" :options=departments
+                                                            v-model="filterObj.form_category" /> -->
+
+                              <label for="">New Role
+                                </label>
+
+                              <Multiselect 
+                                :options="ExistRoles" v-model="filterObj.role" placeholder="Select Cateogry"
+                                :multiple="false" :searchable="true" class="font-11 multiselect" />
+                            </div>
+                          </div>
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="cancelfilter border-0 text-nowrap font-10 "
-                                    @click="resetFilters" data-bs-dismiss="modal"><span
-                                        class="font-14 me-1">x</span>Cancel
-                                    Filter</button>
+                                <button type="button"
+                                    class="cancelfilter border-1 text-nowrap font-10 d-flex justify-content-center align-items-center"
+                                    @click="cancelCreate" data-bs-dismiss="modal"><span class="font-16 me-1"><i
+                                            class="bi bi-x "></i></span>Cancel
+                                </button>
 
                                 <button type="button"
-                                    class="applyfilter text-nowrap border-0 bg-primary text-white font-10 d-flex justify-content-center align-items-center"
-                                    data-bs-dismiss="modal" @click="applyFilters"><span class="font-16 me-1"><i
+                                    class="applyfilter btn btn-dark text-nowrap font-10 d-flex justify-content-center align-items-center"
+                                    data-bs-dismiss="modal" @click="createNewRoleFN"><span class="font-16 me-1"><i
                                             class="bi bi-check2 "></i></span>
-                                    Apply
-                                    Filter</button>
+                                    Create ROle</button>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="d-flex align-items-center mb-1">
-                    <ButtonComp class="buttoncomp" name="Action"></ButtonComp>
                 </div>
             </div>
         </div>
         <div class="mt-2">
             <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction='true' isCheckbox="true"
                 actionType="dropdown" />
+            <PaginationComp :currentRecords="tableData.length" :totalRecords="tableData.length"
+                            @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
         </div>
     </div>
-    <!-- <div>help
-        <div class="text-center position-relative">
-        </div>
-        <div class="dropdown">
-            <p class="p-0 actions" data-bs-toggle="dropdown" aria-expanded="false">
-                <span>...</span>
-            </p>
-            <ul class="dropdown-menu actionsdropdown">
-                <li v-for="(action, index) in actions" :key="index">
-                    <a class="dropdown-item "> <i :class="action.icon"></i> {{ action.name }}</a>
-                </li>
-            </ul>
-        </div>
-    </div> -->
+    
 
 </template>
 <script setup>
 
 import FormFields from '../../Components/FormFields.vue';
-import ButtonComp from '../../Components/ButtonComp.vue';
+// import ButtonComp from '../../Components/ButtonComp.vue';
 import GlobalTable from '../../Components/GlobalTable.vue';
 import axiosInstance from '../../shared/services/interceptor';
 import { apis, doctypes } from '../../shared/apiurls';
 import { onMounted, ref, computed, watch } from 'vue';
-import { EzyBusinessUnit } from "../../shared/services/business_unit";
+import Multiselect from "vue-multiselect";
+import "@vueform/multiselect/themes/default.css";
+import PaginationComp from '../../Components/PaginationComp.vue';
+// import { EzyBusinessUnit } from "../../shared/services/business_unit";
 
 // const actions = ref(
 //     [
@@ -148,23 +99,14 @@ import { EzyBusinessUnit } from "../../shared/services/business_unit";
 onMounted(() => {
     rolesData()
 })
-const radioOptions = ref(["yes", "no"])
+const ExistRoles = ref([])
 const filterObj = ref({
     limitPageLength: 'None',
     limitstart: 0,
-    business_unit: ""
+    business_unit: "",
+    role:''
 });
-const filterOnModal = ref({
-    roles: "",
-    Requested_dept: "",
-    Owner_OF_Form: "",
-    Form_Category: "",
-    department_name: "",
-    Requested_Period: "",
-    Approval_status: "",
-    RequestedId: ""
 
-})
 // watch(
 //     businessUnit,
 //     (newVal) => {
@@ -187,40 +129,17 @@ function rolesData() {
 
         // ["business_unit", "like", `%${filterObj.value.business_unit}%`]
     ];
-    if (filterOnModal.value.Requested_id) {
-        filters.push(["Requested_id", "like", `%${filterOnModal.value.roles}%`]);
-    }
-    if (filterOnModal.value.Requested_dept) {
-        filters.push(["Requested_dept", "like", `%${filterOnModal.value.Requested_dept}%`]);
-    }
-    if (filterOnModal.value.Owner_OF_Form) {
-        filters.push(["Owner_OF_Form", "like", `%${filterOnModal.value.Owner_OF_Form}%`]);
-    }
-    if (filterOnModal.value.Form_Category) {
-        filters.push(["Form_Category", "like", `%${filterOnModal.value.Form_Category}%`]);
-    }
-    if (filterOnModal.value.department_name) {
-        filters.push(["designation_name", "like", `%${filterOnModal.value.department_name}%`]);
-    }
-    if (filterOnModal.value.Requested_Period) {
-        filters.push(["Requested_Period", "like", `%${filterOnModal.value.Requested_Period}%`]);
-    }
-    if (filterOnModal.value.Approval_status) {
-        filters.push(["Approval_status", "like", `%${filterOnModal.value.Approval_status}%`]);
-    }
-    if (filterOnModal.value.RequestedId) {
-        filters.push(["RequestedId", "like", `%${filterOnModal.value.RequestedId}%`]);
-    }
+   
 
     const queryParams = {
         fields: JSON.stringify(["*"]),
         filters: JSON.stringify(filters),
         limit_page_length: filterObj.value.limitPageLength,
         limitstart: filterObj.value.limitstart,
-        order_by: "`tabRole`.`creation` desc"
+        // order_by: "`tabWf Roles`.`creation` desc"
     };
 
-    axiosInstance.get(apis.resource + '/' + doctypes.roles, { params: queryParams })
+    axiosInstance.get(apis.resource + '/' + doctypes.designations, { params: queryParams })
         .then((res) => {
             if (res.data) {
 
@@ -230,6 +149,42 @@ function rolesData() {
         .catch((error) => {
             console.error("Error fetching department data:", error);
         });
+}
+function CreateNewRoleBtn(){
+ const filters = [];
+  const queryParams = {
+    fields: JSON.stringify(["*"]),
+    filters: JSON.stringify(filters),
+    limit_page_length:"None",
+    // order_by: "`tabRoles`.`creation` desc",
+  };
+
+  axiosInstance
+    .get(apis.resource + doctypes.roles, { params: queryParams })
+    .then((res) => {
+      if (res.data) {
+        ExistRoles.value = [...new Set(res.data.map((user) => user.name))];
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching designations data:", error);
+    });
+}
+
+
+function createNewRoleFN(){
+    axiosInstance
+            .post(apis.resource + doctypes.designations, {
+              role: filterObj.value.role,
+            }) // Adjust payload as needed
+            .then((response) => {
+              if (response.data) {
+                rolesData()
+              }
+            })
+            .catch((error) => {
+              console.error("Error creating designation:", error);
+            });
 }
 </script>
 <style scoped>

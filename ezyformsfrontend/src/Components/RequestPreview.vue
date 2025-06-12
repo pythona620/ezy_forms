@@ -220,35 +220,36 @@
                                                                 )
                                                         " class="form-control previewInputHeight font-10" />
                                             </template>
-                                           <template v-else-if="field.fieldtype === 'Link'">
-    <input
-        type="text"
-        v-model="field.value"
-        @input="() => fetchDoctypeList(field.options, field.value)"
-        @focus="() => fetchDoctypeList(field.options, field.value)"
-        @change="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
-        class="form-control font-12 mb-1"
-    />
+<template v-else-if="field.fieldtype === 'Link'">
+  <input
+    type="text"
+    v-model="field.value"
+    @input="() => fetchDoctypeList(field.options, field.value, field)"
+    @focus="() => fetchDoctypeList(field.options, field.value, field)"
+    @change="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+    class="form-control font-12 mb-1"
+  />
 
-    <ul v-if="linkSearchResults.length" class="list-group mt-1" style="max-height: 200px; overflow-y: auto;">
-        <li
-            v-for="(result, index) in linkSearchResults"
-            :key="index"
-            @click="selectDoctype(
-                result.name,
-                field,
-                blockIndex,
-                sectionIndex,
-                rowIndex,
-                columnIndex,
-                fieldIndex
-            )"
-            class="list-group-item list-group-item-action"
-        >
-            {{ field.options.includes('Ezy Departments') ? result.department_name : result.name }}
-        </li>
-    </ul>
+  <ul v-if="field.linkSearchResults && field.linkSearchResults.length" class="list-group mt-1" style="max-height: 200px; overflow-y: auto;">
+    <li
+      v-for="(result, index) in field.linkSearchResults"
+      :key="index"
+      @click="selectDoctype(
+        result,
+        field,
+        blockIndex,
+        sectionIndex,
+        rowIndex,
+        columnIndex,
+        fieldIndex
+      )"
+      class="list-group-item list-group-item-action"
+    >
+       {{ field.options.includes('Ezy Departments') ? result.department_name : result.name }}
+    </li>
+  </ul>
 </template>
+
 
 
 
@@ -1244,8 +1245,10 @@ const handleSelectChange = (
 };
 // const linkSearchResults = ref([])
 
-function fetchDoctypeList(resourceName, searchText) {
-    console.log(resourceName);
+function fetchDoctypeList(resourceName, searchText,field) {
+    const EmpRequestdesignation = JSON.parse(
+          localStorage.getItem("employeeData")
+        );
     if (!resourceName) return;
 
     const filters = [];
@@ -1254,6 +1257,11 @@ function fetchDoctypeList(resourceName, searchText) {
         const searchField = resourceName.includes('Ezy Departments') ? 'department_name' : 'name';
         filters.push([searchField, 'like', `%${searchText}%`]);
     }
+    if (resourceName.includes('Ezy Departments')) {
+        
+        filters.push(['name', 'like', `%${EmpRequestdesignation.department}%`]);
+    }
+   
 
     const fields = resourceName.includes('Ezy Departments')
         ? ['department_name', 'name']
@@ -1267,20 +1275,49 @@ function fetchDoctypeList(resourceName, searchText) {
             },
         })
         .then((res) => {
-            linkSearchResults.value = res.data || [];
+            field.linkSearchResults = res.data || [];
         })
         .catch((err) => {
             console.error('Error fetching doctype list:', err);
         });
 }
 
+// function selectDoctype(result, field, b, s, r, c, f) {
+//   field.value = result.name;
 
-function selectDoctype(name, field, b, s, r, c, f) {
-    field.value = name;
-    const event = { target: { value: name } };
+//   const deptNameField = findFieldByName('department_name');
+//   if (deptNameField && result.department_name) {
+//     deptNameField.value = result.department_name;
+//      emit("updateField", deptNameField);
+//   }
+
+//   const event = { target: { value: result.name } };
+//   logFieldValue(event, b, s, r, c, f);
+//   field.linkSearchResults = [];
+// }
+
+// function findFieldByName(fieldname) {
+//   for (const block of props.blockArr) {
+//     for (const section of block.sections) {
+//       for (const row of section.rows) {
+//         for (const column of row.columns) {
+//           const found = column.fields.find((f) => f.fieldname === fieldname);
+//           if (found) return found;
+//         }
+//       }
+//     }
+//   }
+//   return null;
+// }
+
+function selectDoctype(result, field, b, s, r, c, f) {
+    field.value = result.name; // set value as name
+    console.log('Selected result:', result); // full object
+    const event = { target: { value: result.name } };
     logFieldValue(event, b, s, r, c, f);
-    linkSearchResults.value = [];
-}
+    field.linkSearchResults = [];
+    
+} 
 
 const getCurrentDateTime = () => {
     const localTime = new Date().toLocaleString("en-CA", {
@@ -1313,7 +1350,7 @@ const updateDateTimeFields = () => {
                                 // console.log("Setting field.value:", field.value); // Debugging log
                                 emit("updateField", field);
                             }
-                            // if( field.fieldtype === 'Data' && field.label === 'Total'){
+                            // if( field.fieldtype === 'Data' && field.fieldname === 'department_name'){
                             //     console.log(tableTotals.value);
                             //     field.value = tableTotals.value
                             //     emit("updateField", field)
@@ -1364,6 +1401,10 @@ onMounted(() => {
                             if (field.fieldtype === "Date" && !field.value) {
                                 field.value = new Date().toISOString().split('T')[0]; // Ensure format is YYYY-MM-DD
                                 // console.log("Setting field.value:", field.value); // Debugging log
+                                emit("updateField", field);
+                            }
+                            if(field.label.includes("Department Name") || field.label.includes("Department name")){
+                                field.value = parsedData.designation;
                                 emit("updateField", field);
                             }
 
