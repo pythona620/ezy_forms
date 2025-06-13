@@ -210,14 +210,14 @@
                                 </div>
 
                                 <!-- Remove icon -->
-                                <!-- <button
-                                      v-if="blockIndex !== 0 && props.readonlyFor !== 'true'"
+                                <button
+                                      v-if="blockIndex !== 0 && props.readonlyFor !== 'true' && blockIndex == currentLevel"
                                       @click="replaceInput(i)"
                                       class="btn btn-sm btn-outline-secondary position-absolute top-0 end-0"
                                       style="z-index: 20; padding: 2px 6px; font-size: 12px;"
                                     >
                                       ×
-                                    </button> -->
+                                    </button>
                               </template>
 
                               <!-- PDF block -->
@@ -398,13 +398,19 @@
                                     <th v-for="field in headers" :key="field.fieldname" class="text-center">
                                       {{ field.label }}
                                     </th>
-                                    <th v-if="blockIndex !== 0"></th>
+                                    <th v-if="blockIndex !== 0 || props.readonlyFor === 'true'  " width="3%"></th>
                                   </tr>
                                 </thead>
                                 <tbody>
                                   <tr v-for="(row, index) in props.childData[tableName]" :key="index">
-                                    <td v-for="field in headers" :key="field.fieldname"
-                                      class="text-center align-middle">
+                                    <td v-for="field in headers" :key="field.fieldname" :style="field.label !== 'Type of Manpower'
+                                      ? {
+                                        width: row[field.fieldname] ? Math.max(row[field.fieldname].length * 10, 100) + 'px' : 'auto',
+                                        maxWidth: '300px',
+                                        textOverflow: 'ellipsis',
+                                        whiteSpace: 'nowrap'
+                                      }
+                                      : {}" class="text-center align-middle">
                                       <template v-if="isFilePath(row[field.fieldname])">
                                         <div class="d-flex flex-column align-items-center gap-1">
                                           <span
@@ -420,28 +426,65 @@
                                       <template v-else>
 
                                         <template v-if="field.fieldtype === 'Data'">
-                                          <input type="text" :class="blockIndex === 0 ? 'bg-white border-0' : null"
-                                            :disabled="blockIndex === 0"
-                                            class="form-control form-control-sm text-center"
+                                          <input v-if="props.readonlyFor !== 'true' && blockIndex !== 0 &&  blockIndex == currentLevel" type="text"
+                                            :class="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel ? 'bg-white border-0' : null"
+                                            :disabled="blockIndex === 0 || props.readonlyFor === 'true' ||  blockIndex < currentLevel"
+                                            class="form-control form-control-sm font-12 text-center"
                                             v-model="row[field.fieldname]" />
+                                             <span v-else>
+                                            {{ row[field.fieldname] }}
+
+                                          </span>
+                                        </template>
+                                        <template v-if="field.fieldtype === 'Int'">
+
+
+                                          <input v-if="field.description && /[+\-*/]/.test(field.description)" disabled :class="blockIndex === 0 || props.readonlyFor === 'true' ? 'bg-white border-0' : null"
+                                            type="number" class="form-control font-12" 
+                                            :value="calculateFieldExpression(row, field.description, headers)"
+                                            readonly />
+                                          <input v-else type="number" class="form-control font-12" :class="blockIndex === 0 || props.readonlyFor === 'true' ? 'bg-white border-0' : null" :disabled="blockIndex === 0 || props.readonlyFor === 'true'"
+                                            v-model.number="row[field.fieldname]" />
                                         </template>
 
+                                        <template v-if="field.fieldtype === 'Date'">
+                                          <input v-if="props.readonlyFor !== 'true' && blockIndex !== 0 &&  blockIndex == currentLevel" type="date" class="form-control form-control-sm font-12 text-center"
+                                            :class="blockIndex === 0 || props.readonlyFor === 'true' ||  blockIndex < currentLevel ? 'bg-white border-0' : null"
+                                            :disabled="blockIndex === 0 || props.readonlyFor === 'true'||  blockIndex < currentLevel"
+                                            :max="field.fieldname === 'RetrunDate' ? today : null"
+                                            :min="field.fieldname === 'RetrunDate' ? oneWeekAgo : null"
+                                            v-model="row[field.fieldname]" />
+                                             <span v-else>
+                                            {{ row[field.fieldname] }}
+
+                                          </span>
+                                        </template>
+
+
+
                                         <template v-else-if="field.fieldtype === 'Select'">
-                                          <div>
+
+                                          <div v-if="props.readonlyFor !== 'true' && blockIndex !== 0 &&  blockIndex == currentLevel">
                                             <Multiselect :multiple="field.fieldtype === 'Table MultiSelect'"
                                               :options="field.options?.split('\n').filter(opt => opt.trim() !== '') || []"
                                               :model-value="row[field.fieldname]" placeholder="Select"
                                               @update:model-value="val => row[field.fieldname] = val"
                                               class="font-11 multiselect" />
                                           </div>
+                                          <span v-else>
+                                            {{ row[field.fieldname] }}
+
+                                          </span>
                                         </template>
 
 
                                       </template>
                                     </td>
-                                    <td v-if="blockIndex !== 0"
+                                    <td v-if="blockIndex !== 0 ||  props.readonlyFor === 'true'  "
                                       class="d-table-cell text-center align-middle removeRowTd">
-                                      <span class="tableRowRemoveBtn " @click="removeRow(tableName, index)">
+                                      
+                                      <span v-if="props.readonlyFor !== 'true'" class="tableRowRemoveBtn "  :class="blockIndex!== 0 && blockIndex < currentLevel ? 'd-none':null" 
+                                        @click="removeRow(tableName, index)">
                                         <i class="bi bi-x-lg "></i>
                                       </span>
                                     </td>
@@ -449,8 +492,9 @@
                                 </tbody>
                               </table>
                             </div>
-                            <button v-if="blockIndex !== 0 && selectedData.formStatus !== 'Completed'"
-                              class="btn btn-sm btn-light my-2" @click="addRow(tableName)">
+                            <button
+                              v-if="blockIndex !== 0 && selectedData.formStatus !== 'Completed' && props.readonlyFor !== 'true'"
+                              class="btn btn-sm btn-light font-12 my-2" @click="addRow(tableName)">
                               + Add Row
                             </button>
 
@@ -511,7 +555,12 @@ const selectedData = ref({
   businessUnit: route.query.business_unit || "",
   formStatus: route.query.status || "",
 });
+const todayDate = new Date();
+const today = todayDate.toISOString().split('T')[0];
 
+const lastWeek = new Date();
+lastWeek.setDate(todayDate.getDate() - 6); // includes today, so use 6 instead of 7
+const oneWeekAgo = lastWeek.toISOString().split('T')[0];
 const emit = defineEmits();
 const filePaths = ref([]);
 const tableName = ref("");
@@ -566,6 +615,38 @@ const removeRow = (tableName, rowIndex) => {
     props.childData[tableName].splice(rowIndex, 1);
   }
 };
+function calculateFieldExpression(row, expression, fields) {
+  const labelToValue = {};
+
+  // Step 1: Map label -> value
+  fields.forEach(f => {
+    const value = parseFloat(row[f.fieldname]);
+    labelToValue[f.label] = isNaN(value) ? 0 : value;
+  });
+
+  // Step 2: Convert "Label%" to "(Label / 100)"
+  expression = expression.replace(/([a-zA-Z\s]+)%/g, (_, label) => {
+    return `(${label.trim()} / 100)`;
+  });
+
+  // Step 3: Replace labels with actual numeric values
+  const sortedLabels = Object.keys(labelToValue).sort((a, b) => b.length - a.length);
+  let formula = expression;
+
+  for (const label of sortedLabels) {
+    const safeLabel = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // escape regex special chars
+    const regex = new RegExp(`\\b${safeLabel}\\b`, 'g');
+    formula = formula.replace(regex, labelToValue[label]);
+  }
+
+  // Step 4: Safely evaluate formula
+  try {
+    return new Function(`return ${formula}`)();
+  } catch (e) {
+    console.error('Error evaluating formula:', formula, e);
+    return 0;
+  }
+}
 
 watch(
   () => props.childData,
@@ -1191,6 +1272,8 @@ td {
   border: 1px solid #e2e2e2 !important;
   height: 30px !important;
   border-radius: 8px !important;
+  min-width: 200px;
+
 
   .multiselect-wrapper {
     height: 30px !important;

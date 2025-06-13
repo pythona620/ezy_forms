@@ -204,7 +204,10 @@
                     <p class="font-12 mb-1">
                       <span class="strong-content">{{ formatAction(item.action) }} on </span>
                       <span class="strong-content">{{ formatCreation(item.creation) }}</span><br />
-                      <span class="strong-content"> {{ item.user_name }}</span><br />
+                      <span class="strong-content"> {{ item.user_name }} 
+                        <!-- (<span class="text-secondary"> {{ item.role }}</span>) -->
+                        </span>
+                        <br />
                       <span>{{ item.role }}</span><br />
                       <span class="font-12 text-secondary">{{
                         item.reason || "N/A"

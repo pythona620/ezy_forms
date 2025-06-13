@@ -7,8 +7,51 @@
     <div class="container">
       <div v-if="blockArr.length" class="position-relative">
         <div class="requestPreviewDiv" ref="mainBlockRef">
-          <RequestPreview :blockArr="blockArr" :formName="selectedData.selectedform" :tableHeaders="tableHeaders" @updateField="handleFieldUpdate" :tableRowsdata="tableRows"
-            @formValidation="isFormValid = $event" @updateTableData="handleTableData" />
+          <div>
+            <!-- Open Modal -->
+            <!-- <button class="btn btn-outline-secondary" @click="openModal">Open Modal</button> -->
+
+            <!-- Modal -->
+            <div v-if="showModal" class="modal d-block " tabindex="-1">
+              <div class="modal-dialog">
+                <div class="modal-content">
+
+                  <!-- Header -->
+                  <div class="modal-header">
+                    <h5 class="modal-title">Select Form</h5>
+                    <button type="button" class="btn-close" @click="showModal = false"></button>
+                  </div>
+
+                  <!-- Body -->
+                  <div class="modal-body ">
+                    <div class="position-relative ">
+                    <input type="text" class="form-control mb-2" v-model="searchQuery"
+                      placeholder="Search and select form..." @input="fetchDepartmentDetails"
+                      @focus="showDropdown = true" @blur="hideDropdownWithDelay" />
+
+                    <ul v-if="showDropdown && formOptions.length"
+                      class="list-group position-absolute w-100 zindex-dropdown">
+                      <li v-for="option in formOptions" :key="option.value"
+                        class="list-group-item list-group-item-action font-12" @mousedown.prevent="selectOption(option)">
+                        {{ option.label }}
+                      </li>
+                    </ul>
+                    </div>
+
+                  </div>
+
+                  <!-- Footer -->
+                  <div class="modal-footer">
+                    <button class="btn btn-dark" @click="toSelectedFormRaise">Raise</button>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+          <RequestPreview :blockArr="blockArr" :formName="selectedData.selectedform" :tableHeaders="tableHeaders"
+            @updateField="handleFieldUpdate" :tableRowsdata="tableRows" @formValidation="isFormValid = $event"
+            @updateTableData="handleTableData" />
           <!-- @formValidation="isFormValid = $event" -->
 
           <!-- <span class="font-13 fw-bold">{{ table.childTableName.replace(/_/g, " ") }}</span> -->
@@ -35,27 +78,27 @@
                       <template v-if="field.fieldtype === 'Data'">
                         <input type="text" class="form-control font-12" v-model="row[field.fieldname]" />
                       </template>
-                      <template v-if="field.fieldtype === 'Date'">
+<template v-if="field.fieldtype === 'Date'">
                         <input type="date" class="form-control font-12" v-model="row[field.fieldname]" />
                       </template>
-                      <template v-if="field.fieldtype === 'Datetime'">
+<template v-if="field.fieldtype === 'Datetime'">
                         <input type="datetime-local" class="form-control font-12" v-model="row[field.fieldname]" />
                       </template>
-                      <template v-else-if="field.fieldtype === 'Attach'">
+<template v-else-if="field.fieldtype === 'Attach'">
                         <input type="file" class="form-control font-12"
                           @change="handleFileUpload($event, row, field.fieldname)" />
                       </template>
-                    </td>
-                    <td>
-                      <span @click="removeRow(tableIndex, rowIndex)"><i class="bi bi-x-lg"></i></span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+</td>
+<td>
+  <span @click="removeRow(tableIndex, rowIndex)"><i class="bi bi-x-lg"></i></span>
+</td>
+</tr>
+</tbody>
+</table>
 
-              <button class="btn btn-light font-12" @click="addRow(tableIndex)">Add Row</button>
-            </div>
-          </div> -->
+<button class="btn btn-light font-12" @click="addRow(tableIndex)">Add Row</button>
+</div>
+</div> -->
 
 
         </div>
@@ -68,7 +111,7 @@
             <!-- :disabled="!isFormValid" -->
             <button v-if="!selectedData.selectedFormId" class="btn btn-dark font-12" type="submit"
               @click="raiseRequestSubmission">
-              {{ selectedData.hasWorkflow == 'No'?'Save':'Raise Request' }}
+              {{ selectedData.hasWorkflow == 'No' ? 'Save' : 'Raise Request' }}
             </button>
             <button v-if="selectedData.selectedFormId && $route.query.selectedFormStatus == 'Request Cancelled'"
               @click="RequestUpdate" class="btn btn-dark font-12" type="submit">
@@ -90,7 +133,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch,nextTick } from "vue";
+import { computed, onMounted, ref, watch, nextTick } from "vue";
 import { apis, doctypes, domain } from "../shared/apiurls";
 import RequestPreview from "./RequestPreview.vue";
 import Multiselect from "@vueform/multiselect";
@@ -111,7 +154,7 @@ const selectedData = ref({
   selectedCategory: route.query.selectedCategory || "", // Retrieve from query
   selectedform: route.query.selectedForm || "", // Retrieve from query
   selectedFormId: route.query.selectedFormId || "", // Retrieve from query
-  selectedBusiness_unit : route.query.business_unit || "", // Retrieve from query
+  selectedBusiness_unit: route.query.business_unit || "", // Retrieve from query
   hasWorkflow: route.query.has_workflow || "", // Retrieve from query
 });
 
@@ -159,6 +202,82 @@ watch(business_unit, (newBu, oldBu) => {
     deptData();
   }
 });
+const showModal = ref(false)
+const showDropdown = ref(false)
+const searchQuery = ref('')
+const formOptions = ref([])
+const selectedFormName = ref('')
+
+
+
+function openModal() {
+  showModal.value = true
+  searchQuery.value = ''
+  fetchDepartmentDetails()
+}
+
+function hideDropdownWithDelay() {
+  setTimeout(() => {
+    showDropdown.value = false
+  }, 150)
+}
+
+function selectOption(option) {
+  selectedFormName.value = option.value
+  searchQuery.value = option.label
+  showDropdown.value = false
+}
+
+function fetchDepartmentDetails() {
+  const filters = [
+    ['business_unit', 'like', `%${selectedData.value.selectedBusiness_unit}%`]
+  ]
+
+  if (searchQuery.value.trim()) {
+    filters.push(['form_short_name', 'like', `%${searchQuery.value.trim()}%`])
+
+  }
+
+  const queryParams = {
+    fields: JSON.stringify(['name', 'form_short_name']), // ✅ Add this field
+    limit_page_length: 'None',
+    filters: JSON.stringify(filters),
+    order_by:
+      '`tabEzy Form Definitions`.`enable` DESC, `tabEzy Form Definitions`.`creation` DESC'
+  }
+
+  axiosInstance
+    .get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParams })
+    .then((response) => {
+      console.log("API Response:", response) // ✅ check this
+      const data = response.data
+      formOptions.value = data.map(item => ({
+        label: item.form_short_name || item.name,
+        value: item.name
+      }))
+    })
+
+    .catch((error) => {
+      console.error('Error fetching department details:', error)
+    })
+}
+
+function toSelectedFormRaise() {
+  router.push({
+    name: 'RaiseRequest',
+    query: {
+      routepath: selectedData.value.routepath,
+      selectedForm: selectedFormName.value,
+      business_unit: selectedData.value.selectedBusiness_unit
+    }
+  })
+
+
+  selectedData.value.selectedform = selectedFormName.value
+  formDefinations()
+  showModal.value = false
+}
+
 
 function RequestUpdate() {
   // const filesArray = filepaths.value
@@ -867,7 +986,7 @@ function WfRequestUpdate() {
     .then((res) => {
       if (res.data && res.data.length > 0) {
         const doctypeForm = res.data[0];
-        
+
         // console.log( blockArr.value);
 
         // Map response data to UI fields
@@ -893,8 +1012,8 @@ function WfRequestUpdate() {
               Array.isArray(res.data[key])
             );
             console.log(childTables);
-            
-            
+
+
             if (childTables.length) {
               tableRows.value = {};
 
@@ -903,7 +1022,7 @@ function WfRequestUpdate() {
               });
               child_id_name.value = res.data.name
               // console.log(res.data,"000000");
-              
+
             }
           })
           .catch((error) => {
@@ -943,7 +1062,7 @@ function request_raising_fn(item) {
     module_name: "Ezy Forms",
     doctype_name: selectedData.value.selectedform,
     ids: [item.name],
-    reason: selectedData.value.hasWorkflow === 'No' ? "Completed":"Request Raised",
+    reason: selectedData.value.hasWorkflow === 'No' ? "Completed" : "Request Raised",
     url_for_request_id: "",
     files: filepaths.value.length > 0 ? filepaths.value : [],
     property: business_unit.value,
@@ -962,10 +1081,26 @@ function request_raising_fn(item) {
 }
 
 
+
+
 // window.location.reload();
 </script>
 
 <style scoped>
+.zindex-dropdown {
+  z-index: 1050;
+  max-height: 200px;
+  overflow-y: auto;
+}
+.modal {
+  background: rgba(0, 0, 0, 0.5);
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 .requestPreviewDiv {
   height: 80vh;
   overflow-y: auto;
@@ -1038,8 +1173,9 @@ button {
   padding: 5px 10px;
   cursor: pointer;
 }
+
 .bi-x-lg::before {
-    content: "\f659";
-    margin-top: 8px;
+  content: "\f659";
+  margin-top: 8px;
 }
 </style>
