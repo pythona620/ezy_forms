@@ -1,6 +1,8 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
+ "autoname": "naming_series:",
  "creation": "2025-05-28 10:31:16.168708",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -72,34 +74,18 @@
   "any_operation_hazzard_for_safety_remarks",
   "operation_hazzard_for_safety_image_upload",
   "meet_hearirest",
-  "name1",
-  "name_2",
-  "name_3",
   "column_break_bwet",
-  "feedback_1",
-  "feedback_2",
-  "feedback_3",
+  "heartiest_and_update",
   "heartiest_grooming_section",
-  "name_4",
-  "name_5",
-  "name_6",
-  "image_upload",
   "column_break_stja",
-  "improvement_in_grooming_1",
-  "improvement_in_grooming_2",
-  "improvement_in_grooming_3",
   "room_check_list_section",
-  "name_7",
-  "name_8",
-  "name_9",
-  "column_break_tqhp",
-  "remarks_1",
-  "remarks_2",
-  "remarks_3",
+  "room_check_list",
+  "image_upload",
   "section_break_rcpp",
   "overall_remarks",
   "overall_image_upload",
-  "signature"
+  "signature",
+  "naming_series"
  ],
  "fields": [
   {
@@ -252,7 +238,7 @@
    "fieldname": "gym_is_well_maintained_fresh_towels_and_water_available",
    "fieldtype": "Select",
    "label": "GYM is well maintained, fresh towels and water available.",
-   "options": "\nyes\nNo",
+   "options": "\nYes\nNo",
    "reqd": 1
   },
   {
@@ -288,7 +274,7 @@
    "fieldname": "the_surrounding_and_back_of_the_house_areas_are_well_maintained",
    "fieldtype": "Select",
    "label": "The surrounding and back of the house areas are well maintained.",
-   "options": "\nyes\nNo",
+   "options": "\nYes\nNo",
    "reqd": 1
   },
   {
@@ -480,7 +466,7 @@
    "fieldname": "any_operation_hazzard_for_safety",
    "fieldtype": "Select",
    "label": "Any operation Hazzard for safety",
-   "options": "\nyes\nNo",
+   "options": "\nYes\nNo",
    "reqd": 1
   },
   {
@@ -500,58 +486,14 @@
    "label": "Meet three heartiest and update the gist of the conversation with name"
   },
   {
-   "fieldname": "name1",
-   "fieldtype": "Data",
-   "label": "Name 1"
-  },
-  {
-   "fieldname": "name_2",
-   "fieldtype": "Data",
-   "label": "Name 2"
-  },
-  {
-   "fieldname": "name_3",
-   "fieldtype": "Data",
-   "label": "Name 3"
-  },
-  {
    "fieldname": "column_break_bwet",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "feedback_1",
-   "fieldtype": "Small Text",
-   "label": "Feedback 1"
-  },
-  {
-   "fieldname": "feedback_2",
-   "fieldtype": "Small Text",
-   "label": "Feedback 2"
-  },
-  {
-   "fieldname": "feedback_3",
-   "fieldtype": "Small Text",
-   "label": "Feedback 3"
+   "fieldtype": "Section Break",
+   "label": "heartiest and update"
   },
   {
    "fieldname": "heartiest_grooming_section",
    "fieldtype": "Section Break",
    "label": "Heartiest Grooming"
-  },
-  {
-   "fieldname": "name_4",
-   "fieldtype": "Data",
-   "label": "Name 4"
-  },
-  {
-   "fieldname": "name_5",
-   "fieldtype": "Data",
-   "label": "name 5"
-  },
-  {
-   "fieldname": "name_6",
-   "fieldtype": "Data",
-   "label": "Name 6"
   },
   {
    "fieldname": "image_upload",
@@ -560,61 +502,14 @@
   },
   {
    "fieldname": "column_break_stja",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "improvement_in_grooming_1",
-   "fieldtype": "Small Text",
-   "label": "Improvement in grooming 1"
-  },
-  {
-   "fieldname": "improvement_in_grooming_2",
-   "fieldtype": "Small Text",
-   "label": "Improvement in grooming 2"
-  },
-  {
-   "fieldname": "improvement_in_grooming_3",
-   "fieldtype": "Small Text",
-   "label": "Improvement in grooming 3"
+   "fieldtype": "Table",
+   "label": "Heartiest Grooming",
+   "options": "Heartiest Grooming"
   },
   {
    "fieldname": "room_check_list_section",
    "fieldtype": "Section Break",
    "label": "Room Check List"
-  },
-  {
-   "fieldname": "name_7",
-   "fieldtype": "Data",
-   "label": "Name 7"
-  },
-  {
-   "fieldname": "name_8",
-   "fieldtype": "Data",
-   "label": "Name 8"
-  },
-  {
-   "fieldname": "name_9",
-   "fieldtype": "Data",
-   "label": "Name 9"
-  },
-  {
-   "fieldname": "column_break_tqhp",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "remarks_1",
-   "fieldtype": "Small Text",
-   "label": "Remarks 1"
-  },
-  {
-   "fieldname": "remarks_2",
-   "fieldtype": "Small Text",
-   "label": "Remarks 2"
-  },
-  {
-   "fieldname": "remarks_3",
-   "fieldtype": "Small Text",
-   "label": "Remarks 3"
   },
   {
    "fieldname": "section_break_rcpp",
@@ -634,14 +529,36 @@
    "fieldname": "signature",
    "fieldtype": "Signature",
    "label": "Signature"
+  },
+  {
+   "fieldname": "heartiest_and_update",
+   "fieldtype": "Table",
+   "label": "heartiest and update",
+   "options": "heartiest and update"
+  },
+  {
+   "fieldname": "room_check_list",
+   "fieldtype": "Table",
+   "label": "Room Check List",
+   "options": "Room Check List"
+  },
+  {
+   "default": "NCOR-.####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Naming Series",
+   "options": "NCOR-.####",
+   "print_hide": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-05-28 18:39:51.519181",
+ "modified": "2025-05-30 18:40:54.746726",
  "modified_by": "Administrator",
  "module": "ezy_custom_forms",
  "name": "NICO MOD REPORT",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -659,5 +576,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1
 }

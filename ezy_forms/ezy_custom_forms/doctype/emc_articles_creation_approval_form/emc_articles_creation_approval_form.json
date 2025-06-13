@@ -1,0 +1,72 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-06-07 13:07:32.111401",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "unit_name",
+  "date",
+  "outlet_name",
+  "requested_by",
+  "section_break_kmmh",
+  "emc_articles_details"
+ ],
+ "fields": [
+  {
+   "fieldname": "unit_name",
+   "fieldtype": "Select",
+   "label": "Unit Name",
+   "options": "\nNovotel\nIbis"
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date"
+  },
+  {
+   "fieldname": "outlet_name",
+   "fieldtype": "Data",
+   "label": "Outlet Name"
+  },
+  {
+   "fieldname": "requested_by",
+   "fieldtype": "Data",
+   "label": "Requested by"
+  },
+  {
+   "fieldname": "section_break_kmmh",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "emc_articles_details",
+   "fieldtype": "Table",
+   "label": "EMC Articles Details",
+   "options": "EMC Articles Details"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-06-07 13:21:02.250527",
+ "modified_by": "Administrator",
+ "module": "ezy_custom_forms",
+ "name": "EMC Articles Creation Approval Form",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -69,7 +69,6 @@
   "overall_remarks",
   "rating",
   "proof_upload",
-  "proof_1_upload",
   "signature"
  ],
  "fields": [
@@ -141,7 +140,7 @@
    "fieldname": "walls_and_celling_are_crack_and_finger_mark_free",
    "fieldtype": "Select",
    "label": "Walls and Celling are crack and finger mark free",
-   "options": "\nyes\nNo",
+   "options": "\nYes\nNo",
    "reqd": 1
   },
   {
@@ -466,11 +465,6 @@
    "label": "Proof Upload"
   },
   {
-   "fieldname": "proof_1_upload",
-   "fieldtype": "Attach",
-   "label": "Proof 1 Upload"
-  },
-  {
    "fieldname": "signature",
    "fieldtype": "Signature",
    "label": "Signature"
@@ -478,7 +472,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-05-28 18:15:18.834717",
+ "modified": "2025-06-02 17:26:29.470691",
  "modified_by": "Administrator",
  "module": "ezy_custom_forms",
  "name": "NICO ROOM CHECK LIST",

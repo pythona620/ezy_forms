@@ -1,0 +1,85 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-06-07 13:12:05.701896",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "column_break_ikgi",
+  "menu_name",
+  "major_group",
+  "family_group",
+  "slu",
+  "cost",
+  "price",
+  "cost_"
+ ],
+ "fields": [
+  {
+   "columns": 1,
+   "fieldname": "menu_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Menu Name"
+  },
+  {
+   "fieldname": "major_group",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Major Group"
+  },
+  {
+   "columns": 1,
+   "fieldname": "family_group",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Family Group"
+  },
+  {
+   "columns": 1,
+   "fieldname": "slu",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "SLU"
+  },
+  {
+   "columns": 1,
+   "fieldname": "cost",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "COST"
+  },
+  {
+   "columns": 1,
+   "fieldname": "price",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Price"
+  },
+  {
+   "columns": 1,
+   "fieldname": "cost_",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Cost %"
+  },
+  {
+   "columns": 1,
+   "fieldname": "column_break_ikgi",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-06-07 13:23:28.474580",
+ "modified_by": "Administrator",
+ "module": "ezy_custom_forms",
+ "name": "EMC Articles Details",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
