@@ -18,8 +18,9 @@ def email_pdf_send(doc,method=None):
 		)
 		
 		sender = frappe.db.get_list("Email Account",{"enable_outgoing":1,"default_outgoing":1},["email_id"],ignore_permissions=True)
+		mail = frappe.db.get_single_value("Notifications Mail", "mail_id")
 		frappe.sendmail(
-		recipients= "h6714.hod@accor.com",
+		recipients= mail,
 		sender=sender[0]['email_id'],
 		message=f"Dear Team, {doc.doctype} has been submitted.",
     	subject=f"{doc.doctype} Form",
