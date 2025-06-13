@@ -148,7 +148,7 @@
                                 class="fw-semibold">Description: {{
                                   field.description }}</span></span>
                             </div>
-                            <div v-if="blockIndex === 0">
+                            <div>
 
 
                               <div v-for="(table, tableName) in props.childHeaders" :key="tableName">

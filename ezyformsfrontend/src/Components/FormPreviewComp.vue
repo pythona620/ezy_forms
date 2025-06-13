@@ -150,7 +150,7 @@ option, index
                                                     field.description }}</span>
 
                                             </div>
-                                            <div v-if="blockIndex === 0" >
+                                            <div >
 
 
                                                 <div v-for="(table, tableName) in childtableHeaders" :key="tableName">
