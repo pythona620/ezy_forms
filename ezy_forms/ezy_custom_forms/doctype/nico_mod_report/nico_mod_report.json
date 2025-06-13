@@ -73,7 +73,6 @@
   "any_operation_hazzard_for_safety",
   "any_operation_hazzard_for_safety_remarks",
   "operation_hazzard_for_safety_image_upload",
-  "meet_hearirest",
   "column_break_bwet",
   "heartiest_and_update",
   "heartiest_grooming_section",
@@ -113,15 +112,18 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval:doc.the_porch_and_main_gate_is_manned_and_lighting_is_sufficient == \"No\"",
+   "depends_on": "eval:doc.the_porch_and_main_gate_is_manned_and_lighting_is_sufficient == \"Yes\"",
    "fieldname": "porch_remarks",
    "fieldtype": "Small Text",
    "label": "Porch Remarks"
   },
   {
    "fieldname": "porch_image_upload",
-   "fieldtype": "Attach",
-   "label": "Porch Image Upload"
+   "fieldtype": "Table",
+   "ignore_user_permissions": 1,
+   "label": "Porch Image Upload",
+   "make_attachment_public": 1,
+   "options": "Attachments"
   },
   {
    "fieldname": "reception_area_is_clean_and_all_brand_standards_in_place",
@@ -132,15 +134,18 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval:doc.reception_area_is_clean_and_all_brand_standards_in_place == \"No\"",
+   "depends_on": "eval:doc.reception_area_is_clean_and_all_brand_standards_in_place == \"Yes\"",
    "fieldname": "reception_remarks",
    "fieldtype": "Small Text",
    "label": "Reception Remarks"
   },
   {
    "fieldname": "reception_image_upload",
-   "fieldtype": "Attach",
-   "label": "Reception Image Upload"
+   "fieldtype": "Table",
+   "ignore_user_permissions": 1,
+   "label": "Reception Image Upload",
+   "make_attachment_public": 1,
+   "options": "Attachments"
   },
   {
    "fieldname": "public_areas_are_clean",
@@ -152,11 +157,14 @@
   },
   {
    "fieldname": "public_areas_image_upload",
-   "fieldtype": "Attach",
-   "label": "Public Areas Image Upload"
+   "fieldtype": "Table",
+   "ignore_user_permissions": 1,
+   "label": "Public Areas Image Upload",
+   "make_attachment_public": 1,
+   "options": "Attachments"
   },
   {
-   "depends_on": "eval:doc.public_areas_are_clean == \"No\"",
+   "depends_on": "eval:doc.public_areas_are_clean == \"Yes\"",
    "fieldname": "public_areas_remarks",
    "fieldtype": "Small Text",
    "label": "Public Areas Remarks"
@@ -170,15 +178,18 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval:doc.the_bar_and_restaurant_area_clean_and_in_order == \"No\"",
+   "depends_on": "eval:doc.the_bar_and_restaurant_area_clean_and_in_order == \"Yes\"",
    "fieldname": "bar_remarks",
    "fieldtype": "Small Text",
    "label": "Bar Remarks"
   },
   {
    "fieldname": "bar_image_upload",
-   "fieldtype": "Attach",
-   "label": "Bar Image Upload "
+   "fieldtype": "Table",
+   "ignore_user_permissions": 1,
+   "label": "Bar Image Upload ",
+   "make_attachment_public": 1,
+   "options": "Attachments"
   },
   {
    "fieldname": "meeting_rooms_area_is_clean_and_well_maintained",
@@ -188,15 +199,18 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval:doc.meeting_rooms_area_is_clean_and_well_maintained == \"No\"",
+   "depends_on": "eval:doc.meeting_rooms_area_is_clean_and_well_maintained == \"Yes\"",
    "fieldname": "meeting_rooms_remarks",
    "fieldtype": "Small Text",
    "label": "meeting rooms Remarks"
   },
   {
    "fieldname": "metting_rooms_attcha_image",
-   "fieldtype": "Attach",
-   "label": "metting Rooms Attcha image"
+   "fieldtype": "Table",
+   "ignore_user_permissions": 1,
+   "label": "metting Rooms Attcha image",
+   "make_attachment_public": 1,
+   "options": "Attachments"
   },
   {
    "fieldname": "heart_of_the_house_areas_are_well_maintained",
@@ -206,15 +220,18 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval.doc.heart_of_the_house_areas_are_well_maintained == \"No\"",
+   "depends_on": "eval.doc.heart_of_the_house_areas_are_well_maintained == \"Yes\"",
    "fieldname": "house_area_remarks",
    "fieldtype": "Small Text",
    "label": "House Area Remarks"
   },
   {
    "fieldname": "house_area_image_upload",
-   "fieldtype": "Attach",
-   "label": "House Area image upload"
+   "fieldtype": "Table",
+   "ignore_user_permissions": 1,
+   "label": "House Area image upload",
+   "make_attachment_public": 1,
+   "options": "Attachments"
   },
   {
    "fieldname": "food_at_staff_dinning_was_served_on_time_menu_is_as_per_the_day",
@@ -224,15 +241,18 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval:doc.food_at_staff_dinning_was_served_on_time_menu_is_as_per_the_day ==\"No\"",
+   "depends_on": "eval:doc.food_at_staff_dinning_was_served_on_time_menu_is_as_per_the_day ==\"Yes\"",
    "fieldname": "food_and_staff_remarks",
    "fieldtype": "Small Text",
    "label": "Food and staff Remarks"
   },
   {
    "fieldname": "food_and_staff_image_upload",
-   "fieldtype": "Attach",
-   "label": "Food and Staff Image upload"
+   "fieldtype": "Table",
+   "ignore_user_permissions": 1,
+   "label": "Food and Staff Image upload",
+   "make_attachment_public": 1,
+   "options": "Attachments"
   },
   {
    "fieldname": "gym_is_well_maintained_fresh_towels_and_water_available",
@@ -242,15 +262,18 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval:doc.gym_is_well_maintained_fresh_towels_and_water_available == \"No\"",
+   "depends_on": "eval:doc.gym_is_well_maintained_fresh_towels_and_water_available == \"Yes\"",
    "fieldname": "gym_remarks",
    "fieldtype": "Small Text",
    "label": "GYM Remarks"
   },
   {
    "fieldname": "gym_image_upload",
-   "fieldtype": "Attach",
-   "label": "GYM Image Upload"
+   "fieldtype": "Table",
+   "ignore_user_permissions": 1,
+   "label": "GYM Image Upload",
+   "make_attachment_public": 1,
+   "options": "Attachments"
   },
   {
    "fieldname": "pool_area_is_well_maintained_guard_is_present",
@@ -260,15 +283,18 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval:doc.pool_area_is_well_maintained_guard_is_present == \"No\"",
+   "depends_on": "eval:doc.pool_area_is_well_maintained_guard_is_present == \"Yes\"",
    "fieldname": "pool_remarks",
    "fieldtype": "Small Text",
    "label": "Pool Remarks"
   },
   {
    "fieldname": "pool_image_upload",
-   "fieldtype": "Attach",
-   "label": "Pool Image Upload"
+   "fieldtype": "Table",
+   "ignore_user_permissions": 1,
+   "label": "Pool Image Upload",
+   "make_attachment_public": 1,
+   "options": "Attachments"
   },
   {
    "fieldname": "the_surrounding_and_back_of_the_house_areas_are_well_maintained",
@@ -278,15 +304,18 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval:doc.the_surrounding_and_back_of_the_house_areas_are_well_maintained == \"No\"",
+   "depends_on": "eval:doc.the_surrounding_and_back_of_the_house_areas_are_well_maintained == \"Yes\"",
    "fieldname": "surrounding_remarks",
    "fieldtype": "Small Text",
    "label": "Surrounding remarks"
   },
   {
    "fieldname": "surrounding_image_upload",
-   "fieldtype": "Attach Image",
-   "label": "Surrounding Image Upload"
+   "fieldtype": "Table",
+   "ignore_user_permissions": 1,
+   "label": "Surrounding Image Upload",
+   "make_attachment_public": 1,
+   "options": "Attachments"
   },
   {
    "fieldname": "check_on_general_upkeep_of_staff_locker_clean_and_pest_free",
@@ -296,15 +325,18 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval:doc.check_on_general_upkeep_of_staff_locker_clean_and_pest_free == \"No\"",
+   "depends_on": "eval:doc.check_on_general_upkeep_of_staff_locker_clean_and_pest_free == \"Yes\"",
    "fieldname": "general_remarks",
    "fieldtype": "Small Text",
    "label": "General Remarks"
   },
   {
    "fieldname": "general_image_upload",
-   "fieldtype": "Attach",
-   "label": "General image upload"
+   "fieldtype": "Table",
+   "ignore_user_permissions": 1,
+   "label": "General image upload",
+   "make_attachment_public": 1,
+   "options": "Attachments"
   },
   {
    "fieldname": "quality_and_condition_of_water_bottling_plant",
@@ -314,15 +346,18 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval:doc.quality_and_condition_of_water_bottling_plant == \"No\"",
+   "depends_on": "eval:doc.quality_and_condition_of_water_bottling_plant == \"Yes\"",
    "fieldname": "quality_remarks",
    "fieldtype": "Small Text",
    "label": "Quality Remarks"
   },
   {
    "fieldname": "quality_image_upload",
-   "fieldtype": "Attach",
-   "label": "Quality Image Upload"
+   "fieldtype": "Table",
+   "ignore_user_permissions": 1,
+   "label": "Quality Image Upload",
+   "make_attachment_public": 1,
+   "options": "Attachments"
   },
   {
    "fieldname": "spa_cleanliness_and_upkeep_is_inline_with_hotel_standards",
@@ -332,15 +367,18 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval:doc.spa_cleanliness_and_upkeep_is_inline_with_hotel_standards == \"No\"",
+   "depends_on": "eval:doc.spa_cleanliness_and_upkeep_is_inline_with_hotel_standards == \"Yes\"",
    "fieldname": "spa_remarks",
    "fieldtype": "Small Text",
    "label": "spa Remarks"
   },
   {
    "fieldname": "spa_image_upload",
-   "fieldtype": "Attach",
-   "label": "Spa image Upload"
+   "fieldtype": "Table",
+   "ignore_user_permissions": 1,
+   "label": "Spa image Upload",
+   "make_attachment_public": 1,
+   "options": "Attachments"
   },
   {
    "fieldname": "pest_free_in_the_hotel",
@@ -350,15 +388,18 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval:doc.pest_free_in_the_hotel == \"No\"",
+   "depends_on": "eval:doc.pest_free_in_the_hotel == \"Yes\"",
    "fieldname": "pest_remarks",
    "fieldtype": "Small Text",
    "label": "Pest Remarks"
   },
   {
    "fieldname": "pest_image_upload",
-   "fieldtype": "Attach",
-   "label": "Pest Image upload"
+   "fieldtype": "Table",
+   "ignore_user_permissions": 1,
+   "label": "Pest Image upload",
+   "make_attachment_public": 1,
+   "options": "Attachments"
   },
   {
    "fieldname": "dishwasher_area_clean_in_main_kitchen_ibis_or_novotel",
@@ -368,15 +409,18 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval:doc.dishwasher_area_clean_in_main_kitchen_ibis_or_novotel == \"No\"",
+   "depends_on": "eval:doc.dishwasher_area_clean_in_main_kitchen_ibis_or_novotel == \"Yes\"",
    "fieldname": "dishwasher_remarks",
    "fieldtype": "Small Text",
    "label": "Dishwasher Remarks"
   },
   {
    "fieldname": "dishwasher_image_upload",
-   "fieldtype": "Attach",
-   "label": "Dishwasher image upload"
+   "fieldtype": "Table",
+   "ignore_user_permissions": 1,
+   "label": "Dishwasher image upload",
+   "make_attachment_public": 1,
+   "options": "Attachments"
   },
   {
    "fieldname": "main_kitchen_clean_and_neat_novotel_or_ibis",
@@ -386,15 +430,18 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval:doc.main_kitchen_clean_and_neat_novotel_or_ibis == \"No\"",
+   "depends_on": "eval:doc.main_kitchen_clean_and_neat_novotel_or_ibis == \"Yes\"",
    "fieldname": "main_kitchen_remarks",
    "fieldtype": "Small Text",
    "label": "Main Kitchen remarks"
   },
   {
    "fieldname": "main_kitchen_image_upload",
-   "fieldtype": "Attach",
-   "label": "Main Kitchen Image Upload"
+   "fieldtype": "Table",
+   "ignore_user_permissions": 1,
+   "label": "Main Kitchen Image Upload",
+   "make_attachment_public": 1,
+   "options": "Attachments"
   },
   {
    "fieldname": "garbage_area_neat_and_clean",
@@ -404,15 +451,18 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval:doc.garbage_area_neat_and_clean == \"No\"",
+   "depends_on": "eval:doc.garbage_area_neat_and_clean == \"Yes\"",
    "fieldname": "garbage_remarks",
    "fieldtype": "Small Text",
    "label": "Garbage Remarks"
   },
   {
    "fieldname": "garbage_image_upload",
-   "fieldtype": "Attach",
-   "label": "Garbage image upload"
+   "fieldtype": "Table",
+   "ignore_user_permissions": 1,
+   "label": "Garbage image upload",
+   "make_attachment_public": 1,
+   "options": "Attachments"
   },
   {
    "fieldname": "ird_clean_and_neat_novotel_or_ibis",
@@ -422,15 +472,18 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval:doc.ird_clean_and_neat_novotel_or_ibis == \"No\"",
+   "depends_on": "eval:doc.ird_clean_and_neat_novotel_or_ibis == \"Yes\"",
    "fieldname": "ird_remarks",
    "fieldtype": "Small Text",
    "label": "IRD Remarks"
   },
   {
    "fieldname": "ird_image_upload",
-   "fieldtype": "Attach",
-   "label": "IRD image upload"
+   "fieldtype": "Table",
+   "ignore_user_permissions": 1,
+   "label": "IRD image upload",
+   "make_attachment_public": 1,
+   "options": "Attachments"
   },
   {
    "fieldname": "square_restaurant_and_bar",
@@ -444,8 +497,11 @@
   },
   {
    "fieldname": "square_restaurant_and_bar_image_upload",
-   "fieldtype": "Attach",
-   "label": "Square Restaurant and Bar image upload"
+   "fieldtype": "Table",
+   "ignore_user_permissions": 1,
+   "label": "Square Restaurant and Bar image upload",
+   "make_attachment_public": 1,
+   "options": "Attachments"
   },
   {
    "fieldname": "ibis_restaurant_and_bar",
@@ -459,8 +515,11 @@
   },
   {
    "fieldname": "ibis_restaurant_and_bar_image_upload",
-   "fieldtype": "Attach",
-   "label": "Ibis Restaurant and Bar image upload"
+   "fieldtype": "Table",
+   "ignore_user_permissions": 1,
+   "label": "Ibis Restaurant and Bar image upload",
+   "make_attachment_public": 1,
+   "options": "Attachments"
   },
   {
    "fieldname": "any_operation_hazzard_for_safety",
@@ -470,20 +529,18 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval:doc.any_operation_hazzard_for_safety == \"No\"",
+   "depends_on": "eval:doc.any_operation_hazzard_for_safety == \"Yes\"",
    "fieldname": "any_operation_hazzard_for_safety_remarks",
    "fieldtype": "Small Text",
    "label": "Any operation Hazzard for safety Remarks"
   },
   {
    "fieldname": "operation_hazzard_for_safety_image_upload",
-   "fieldtype": "Attach",
-   "label": "Operation Hazzard for safety image upload"
-  },
-  {
-   "fieldname": "meet_hearirest",
-   "fieldtype": "Section Break",
-   "label": "Meet three heartiest and update the gist of the conversation with name"
+   "fieldtype": "Table",
+   "ignore_user_permissions": 1,
+   "label": "Operation Hazzard for safety image upload",
+   "make_attachment_public": 1,
+   "options": "Attachments"
   },
   {
    "fieldname": "column_break_bwet",
@@ -497,8 +554,11 @@
   },
   {
    "fieldname": "image_upload",
-   "fieldtype": "Attach",
-   "label": "image upload"
+   "fieldtype": "Table",
+   "ignore_user_permissions": 1,
+   "label": "image upload",
+   "make_attachment_public": 1,
+   "options": "Attachments"
   },
   {
    "fieldname": "column_break_stja",
@@ -522,8 +582,11 @@
   },
   {
    "fieldname": "overall_image_upload",
-   "fieldtype": "Attach",
-   "label": "Overall Image Upload"
+   "fieldtype": "Table",
+   "ignore_user_permissions": 1,
+   "label": "Overall Image Upload",
+   "make_attachment_public": 1,
+   "options": "Attachments"
   },
   {
    "fieldname": "signature",
@@ -547,6 +610,7 @@
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "hidden": 1,
+   "ignore_user_permissions": 1,
    "label": "Naming Series",
    "options": "NCOR-.####",
    "print_hide": 1
@@ -554,7 +618,8 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-05-30 18:40:54.746726",
+ "make_attachments_public": 1,
+ "modified": "2025-06-13 14:45:21.384097",
  "modified_by": "Administrator",
  "module": "ezy_custom_forms",
  "name": "NICO MOD REPORT",
@@ -570,6 +635,18 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Guest",
    "share": 1,
    "write": 1
   }
