@@ -37,6 +37,9 @@ after_migrate = ["ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_defi
 
 # include js, css files in header of web form
 # webform_include_js = {"doctype": "public/js/doctype.js"}
+webform_include_js = {
+    "emc-articles-creation-approval-form":"ezy_forms.ezy_forms.public.web_form_list.js"
+    }
 # webform_include_css = {"doctype": "public/css/doctype.css"}
 
 # include js in page
@@ -151,7 +154,10 @@ doc_events = {
     },
 "NICO ROOM CHECK LIST":{
     "after_insert":"ezy_forms.ezy_custom_forms.custom_script.mail.email_pdf_send"
-    }
+    },
+"File":{
+    "after_insert":"ezy_forms.ezy_custom_forms.custom_script.mail.make_file_public_after_insert"
+}
 }
 
 # Scheduled Tasks
