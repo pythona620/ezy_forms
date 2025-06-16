@@ -400,16 +400,20 @@
                                                                                 class="font-11 multiselect" />
                                                                         </div>
                                                                     </template>
-                                                                    <template v-if="field.fieldtype === 'Text'">
-                                                                        <textarea class="form-control font-12" rows="3"
-                                                                            v-model="row[field.fieldname]"
-                                                                            :title="row[field.fieldname]"></textarea>
-                                                                    </template>
+                                                                   
                                                                     <template
                                                                         v-else-if="fieldItem.fieldtype === 'Date'">
-                                                                        <input :min="past" :max="today"
+                                                                        <input :min="field.fieldname === 'expense_date' ? null : today"
+                                                                                :max="field.fieldname === 'expense_date' ? today : null"
                                                                             :title="row[fieldItem.fieldname]"
                                                                             type="date" class="form-control font-12"
+                                                                            v-model="row[fieldItem.fieldname]" />
+                                                                    </template>
+                                                                    <template
+                                                                        v-else-if="fieldItem.fieldtype === 'Int'">
+                                                                        <input 
+                                                                            :title="row[fieldItem.fieldname]"
+                                                                            type="number" class="form-control font-12"
                                                                             v-model="row[fieldItem.fieldname]" />
                                                                     </template>
                                                                     <template v-if="fieldItem.fieldtype === 'Text'">
@@ -417,6 +421,7 @@
                                                                             v-model="row[fieldItem.fieldname]"
                                                                             :title="row[fieldItem.fieldname]"></textarea>
                                                                     </template>
+                                                                   
                                                                     <template
                                                                         v-else-if="fieldItem.fieldtype === 'Datetime'">
 

@@ -807,6 +807,7 @@ function receivedForMe(data) {
       if (res.data.length) {
         Wfactivitylog(tableData.value.name);
         getdata(tableData.value.name);
+        
 
       }
 
@@ -862,6 +863,7 @@ function getdata(formname) {
               childTables.forEach((tableKey) => {
                 responseData.value[tableKey] = res.data[tableKey] || [];
               });
+              // NewActivityLogData(res.data.name) 
               // console.log("Response Data:", responseData.value);
             }
           })
@@ -1006,6 +1008,30 @@ function Wfactivitylog(formname) {
     });
 }
 
+
+function NewActivityLogData (name){
+
+  const dataObj = {
+    doctype: selectedData.value.doctype_name,
+    docname: name,
+  
+  };
+
+  axiosInstance
+    .post(apis.activityLogWithChild, dataObj)
+    .then((response) => {
+      pdfPreview.value = response.message;
+      if (response.message) {
+
+      }
+
+
+
+    })
+    .catch((error) => {
+      console.error("Error fetching data:", error);
+    });
+}
 function mapFormFieldsToRequest(doctypeData, showRequestData) {
   showRequestData.forEach((block) => {
     block.sections.forEach((section) => {
