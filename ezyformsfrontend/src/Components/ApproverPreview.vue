@@ -351,14 +351,7 @@
                       <div v-if="props.childHeaders && Object.keys(props.childHeaders).length">
                         <div v-for="(headers, tableName) in props.childHeaders" :key="tableName">
                           <div v-if="field.fieldname === tableName" class="overTable">
-
-
-                            <!-- Add Row Button -->
-
-
-                            <!-- 2-column layout -->
-                            <div v-if="field.description === 'true'">
-                              <div class=" d-flex justify-content-between align-items-center">
+ <div class=" d-flex justify-content-between align-items-center">
                                 <span class="font-13 fw-bold tablename">{{ field.label.replace(/_/g, " ") }}</span>
                                 <div v-if="selectedData.formStatus !== 'Completed'">
 
@@ -368,6 +361,13 @@
                                 </button> -->
                                 </div>
                               </div>
+
+                            <!-- Add Row Button -->
+
+
+                            <!-- 2-column layout -->
+                            <div v-if="field.description === 'true'">
+                              
                               <div v-for="(row, index) in props.childData[tableName]" :key="index"
                                 class="border p-2 mb-3 rounded bg-light">
                                 <div class="mb-2 font-12 fw-bold">#{{ blockIndex + 1 }}</div>
@@ -491,17 +491,8 @@
                             </div>
 
                             <!-- Table layout -->
-                            <div v-else class="tableborder-child">
-                              <div class=" d-flex justify-content-between align-items-center">
-                                <span class="font-13 fw-bold tablename">{{ field.label.replace(/_/g, " ") }}</span>
-                                <div v-if="selectedData.formStatus !== 'Completed'">
-
-                                  <!-- <button class="btn btn-sm btn-light"
-                                  @click="editableTables[tableName] = !editableTables[tableName]">
-                                  {{ editableTables[tableName] ? 'Cancel' : 'Edit' }}
-                                </button> -->
-                                </div>
-                              </div>
+                            <div v-else class="tableborder-child ">
+                             
                               <table class="table mb-0">
                                 <thead>
                                   <tr>
