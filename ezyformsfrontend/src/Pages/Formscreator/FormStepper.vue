@@ -255,17 +255,17 @@
                                   :multiple="false" class="font-11 multiselect" :searchable="true" />
                               </div>
                             </div>
-                            <div class="mt-3">
+                            <!-- <div class="mt-3">
                               <div class="">
 
                                 <label for="">Reverse Workflow
-                                  <!-- <span v-if="!filterObj.workflow_check" class="text-danger">*</span> -->
+                                 
                                 </label>
-                                <!-- :disabled="selectedData.formId && selectedData.formId.length > 0" -->
+                               
                                 <Multiselect :options="['Yes']" v-model="filterObj.workflow_check" placeholder="Select"
                                   :multiple="false" class="font-11 multiselect" :searchable="true" />
                               </div>
-                            </div>
+                            </div> -->
                           </div>
                         </div>
 
@@ -1244,7 +1244,7 @@
       </div>
     </div>
 
-    <div class="offcanvas w-25 offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+    <div class="offcanvas addOffCanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
       <div class="offcanvas-header add_designationHeader">
         <span id="offcanvasRightLabel" class="font-14">
           
@@ -3658,6 +3658,9 @@ const hasDuplicates = (array) => new Set(array).size !== array.length;
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 
 <style lang="scss" scoped>
+.addOffCanvas{
+      width: 530px;
+}
 .SearchDesignation{
       border: none;
     border-bottom: 1px solid #ccc;
