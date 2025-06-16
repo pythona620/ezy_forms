@@ -526,9 +526,12 @@ template_str = """
                                                 
                                                 <div style="display: flex; flex-wrap: wrap;">
                                                     {% for key, value in child.items() %}
-                                                       <div style="width: 48%; display:flex;align-items:end;gap:2px; margin-right: 2%; margin-bottom: 10px;">
+                                                       <div style="width: 48%; display:flex;gap:2px; margin-right: 2%; margin-bottom: 10px;">
                                                             <label style="font-weight: 600;font-size: 13px;">{{ key }}:</label><br />
-                                                            <input type="text" value="{{ value }}" class="block_input" readonly style="width: 100%; padding: 5px; font-size: 14px;" />
+                                                            <span style="font-size:13px; font-weight:500; margin-left: 2%;">
+                                                            {{ value}}
+                                                            </span>
+                                                           
                                                         </div>
 
                                                     {% endfor %}
@@ -546,7 +549,7 @@ template_str = """
                                             {% for column in child_table_data[table_name] %}
                                                 <div style="width: 48%; margin-right: 2%;display:flex;align-items:baseline;gap:2px; margin-bottom: 10px;">
                                                     <label style="font-weight: 600;font-size: 13px;">{{ column }}:</label><br />
-                                                    <input type="text"  readonly class="block_input" style="width: 100%; padding: 5px; color: #ccc;font-size: 13px;" />
+                                                    <input type="text"  readonly class="block_input" style="width: 100%;  color: #ccc;font-size: 13px;" />
                                                 </div>
                                             {% endfor %}
                                         </div>
@@ -1266,6 +1269,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                         data_list[child_table_name] = processed_child_records
 
                         #########################
+                json_object = [ field for field in json_object if ("value" not in field   or field["value"] not in [None, ""]  ) and field.get("fieldname", "") not in ["approved_on", "approved_by", "approver"] ]
                 form_name = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_name")
                 html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_name,child_data=data_list,child_table_data=None,business_unit=business_unit,wf_generated_request_id=wf_generated_request_id,mail_attachment=mail_attachment)
                 
