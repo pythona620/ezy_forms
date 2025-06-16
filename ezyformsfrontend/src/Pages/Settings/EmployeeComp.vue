@@ -174,7 +174,7 @@
                       <!-- <FormFields class="mb-3" tag="input" type="text" name="reporting_designation"
                                             id="reporting_designation" placeholder="Enter Reporting Designation"
                                             v-model="createEmployee.reporting_designation" /> -->
-                      <VueMultiselect v-model="createEmployee.reporting_designation" :options="designations"
+                      <VueMultiselect v-model="createEmployee.reporting_designation" :options="designations" :allow-empty="true"
                         :multiple="false" :close-on-select="true" :clear-on-select="false" :preserve-search="true"
                         placeholder="Select Reporting Designation" class="font-11 mb-3"
                         :disabled="!!createEmployee.reporting_to">
@@ -438,7 +438,7 @@
                   </div>
                   <label class="font-13 ps-1" for="reporting_to">Reports To</label>
                   <VueMultiselect v-model="createEmployee.reporting_to"
-                    :options="employeeEmails.map((dept) => dept.emp_mail_id)" :multiple="false" :close-on-select="true"
+                    :options="employeeEmails.map((dept) => dept.emp_mail_id)" :multiple="false" :close-on-select="true" :allow-empty="true"
                     :clear-on-select="false" :preserve-search="true" placeholder="Select Reports To"
                     class="font-11 mb-3">
 
@@ -563,6 +563,22 @@ const createEmployee = ref({
   company_field: "",
   signature: "",
 });
+watch(
+  () => createEmployee.reporting_to,
+  (newVal) => {
+    if (newVal) {
+      const matchedEmployee = employeeEmails.find(emp => emp.emp_mail_id === newVal);
+      if (matchedEmployee) {
+        createEmployee.reporting_designation = matchedEmployee.designation || '';
+        console.log(createEmployee.reporting_designation,newVal,createEmployee.reporting_to);
+      } else {
+        createEmployee.reporting_designation = '';
+      }
+    } else {
+      createEmployee.reporting_designation = '';
+    }
+  }
+);
 
 const selectedEmpRow = ref(null);
 const empActionText = ref('');
@@ -1325,14 +1341,14 @@ function actionCreated(rowData, actionEvent) {
       employeeOptions();
 
       // Set reporting_designation if reporting_to is present
-      if (rowData.reporting_to) {
-        const selectedEmployee = tableData.value.find(
-          (emp) => emp.emp_mail_id === rowData.reporting_to
-        );
-        if (selectedEmployee) {
-          createEmployee.value.reporting_designation = selectedEmployee.designation;
-        }
-      }
+      // if (rowData.reporting_to) {
+      //   const selectedEmployee = tableData.value.find(
+      //     (emp) => emp.emp_mail_id === rowData.reporting_to
+      //   );
+      //   // if (selectedEmployee) {
+      //   //   createEmployee.value.reporting_designation = selectedEmployee.designation;
+      //   // }
+      // }
 
       // Mask phone/email and show modal
       isMasked.value = true;
@@ -1352,6 +1368,17 @@ function actionCreated(rowData, actionEvent) {
 }
 
 
+// watch(
+//   () => createEmployee.reporting_to,
+//   (newVal) => {
+//     if (newVal) {
+//       const matchedEmployee = employeeEmails.find(emp => emp.emp_mail_id === newVal);
+//       createEmployee.reporting_designation = matchedEmployee?.designation || '';
+//     } else {
+//       createEmployee.reporting_designation = '';
+//     }
+//   }
+// );
 
 
 
@@ -1616,6 +1643,7 @@ function employeeData(data) {
 
 const employeeEmails = ref([]);
 
+
 function employeeOptions() {
   const queryParams = {
     fields: JSON.stringify(["*"]),
@@ -1654,7 +1682,16 @@ function employeeOptions() {
       console.error("Error fetching department data:", error);
     });
 }
-
+watch(
+  () => createEmployee.value.reporting_to,
+  (newValue) => {
+    const selected = employeeEmails.value.find(
+      (emp) => emp.emp_mail_id === newValue
+    );
+    createEmployee.value.reporting_designation = selected?.designation ;
+  },
+  { immediate: true } // ✅ if editing existing record
+);
 function designationData() {
   const filters = [];
   const queryParams = {
@@ -1747,12 +1784,25 @@ function createEmpl() {
 }
 
 function SaveEditEmp() {
-    if (!createEmployee.value.designation && searchText.value) {
-    createEmployee.value.designation = searchText.value
+  if (!createEmployee.value.designation && searchText.value) {
+    createEmployee.value.designation = searchText.value;
   }
+
+  // Auto-set reporting_designation based on selected reporting_to
+  if (createEmployee.value.reporting_to) {
+    const selectedReportee = employeeEmails.value.find(
+      emp => emp.emp_mail_id === createEmployee.value.reporting_to
+    );
+    if (selectedReportee) {
+      createEmployee.value.reporting_designation = selectedReportee.designation;
+    }
+  } else {
+    createEmployee.value.reporting_designation = ""; // Clear if reporting_to is empty
+  }
+
   const payload = {
     ...createEmployee.value,
-    department: createEmployee.value.department?.name || "", // only send department name
+    department: createEmployee.value.department?.name || "", // Only send name
   };
 
   axiosInstance
@@ -1763,7 +1813,7 @@ function SaveEditEmp() {
     .then((response) => {
       if (response.data) {
         toast.success("Changes Saved", { autoClose: 500, transition: "zoom" });
-        employeeData();
+        employeeData(); // refresh list
       }
     })
     .catch((error) => {
