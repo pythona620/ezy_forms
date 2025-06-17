@@ -99,20 +99,35 @@
         <div><img class="imgmix" src="../assets/Final-logo-ezyforms-removebg-preview.png" /></div>
       </div>
       <div>
-        <div class="mb-3">
-          <label class="font-13" for="email">Mail</label>
-          <input class="form-control m-0" type="text" id="email" v-model="SignUpdata.email" />
-          <!-- <div class="invalid-feedback font-11 mt-1" v-if="errors.email">
+        <div class="mb-2">
+          <label class="font-13" for="email">Email</label>
+          <input class="form-control m-0" type="email" id="email" v-model="SignUpdata.email" @blur="validateEmail" :class="{ 'is-invalid': errors.email }" />
+          <div class="invalid-feedback font-11 mt-1" v-if="errors.email">
             {{ errors.email }}
-          </div> -->
+          </div>
         </div>
         <div class="mb-2">
           <label class="font-13" for="full_name">User Name</label>
           <input type="text" class="form-control m-0 bg-white" id="name" v-model="SignUpdata.full_name" />
         </div>
+        <div class="mb-2">
+          <label class="font-13" for="emp_code">Employee Id</label>
+          <input type="text" class="form-control m-0 bg-white" id="emp_code" v-model="SignUpdata.emp_code" @blur="validateEmpCode" :class="{ 'is-invalid': errors.emp_code }" />
+          <div class="invalid-feedback font-11 mt-1" v-if="errors.emp_code">
+            {{ errors.emp_code }}
+          </div>
+        </div>
+        <div class="mb-2">
+          <label class="font-13" for="emp_phone">Phone Number</label>
+          <input type="text" class="form-control m-0 bg-white" id="emp_phone" v-model="SignUpdata.emp_phone" @input="filterPhoneInput" @blur="validatePhone" :class="{ 'is-invalid': errors.emp_phone }" />
+          <div class="invalid-feedback font-11 mt-1" v-if="errors.emp_phone">
+            {{ errors.emp_phone }}
+          </div>
+        </div>
+        
       </div>
       <div>
-        <button type="submit" :disabled="!SignUpdata.email || !SignUpdata.full_name" @click="SignUp" class="border-0 btn btn-dark button w-100 mb-4 py-2 font-13 text-white rounded-1">
+        <button type="submit" :disabled="!SignUpdata.email || !SignUpdata.full_name || !SignUpdata.emp_code || !SignUpdata.emp_phone" @click="SignUp()" class="border-0 btn btn-dark button w-100 mb-4 py-2 font-13 text-white rounded-1">
           Sign Up
         </button>
       </div>
@@ -240,6 +255,54 @@ export default {
         this.passwordError = "";
       }
     },
+     validateEmail() {
+      const email = this.SignUpdata.email;
+      const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      if (!email) {
+        this.errors.email = "Email is required *";
+      } else if (!regex.test(email)) {
+        this.errors.email = "Please enter a valid email address *";
+      } else {
+        delete this.errors.email;
+      }
+    },
+    validatePhone() {
+      const phone = this.SignUpdata.emp_phone;
+      if (!phone) {
+        this.errors.emp_phone = "Phone number is required *";
+      } else if (phone.length !== 10) {
+        this.errors.emp_phone = "Phone number must be 10 digits *";
+      } else {
+        delete this.errors.emp_phone;
+      }
+    },
+
+    filterPhoneInput() {
+    // Allow only digits and limit to 10 characters
+      this.SignUpdata.emp_phone = this.SignUpdata.emp_phone.replace(/\D/g, '').slice(0, 10);
+    },
+
+validateEmpCode() {
+      const url = window.location.href;
+      // const url="ncomr.ezyforms.co/ezyformsfrontend#/";
+
+        if(!this.SignUpdata.emp_code){
+            this.errors.emp_code = "Employee Id is required *";
+        } 
+      // Apply validation only if URL contains 'ncomr'
+        else if (url.includes('ncomr')) {
+        const code = this.SignUpdata.emp_code.trim();
+        if (!code.startsWith('NICO-')) {
+          this.errors.emp_code = "Employee Id must start with 'NICO-'";
+        } else {
+          this.errors.emp_code = '';
+        }
+      }
+      else {
+        this.errors.emp_code = '';
+      }
+    },
 
     handleInput(event, index) {
       const value = event.target.value;
@@ -322,25 +385,30 @@ export default {
     // },
 
     SignUp() {
-      axiosInstance
-        .post(apis.signUp, this.SignUpdata)
-        .then((res) => {
-          if (res) {
-            console.log("signup=", res);
-            this.ShowLoginPage = true;
-            this.showOtpPage = false;
-            this.ShowSignUpPage=false;
-            toast.success(res.message)
-            const modal = bootstrap.Modal.getInstance(
-              document.getElementById("EmployeeToggleModal")
-            );
-            modal.hide();
-          }
-
-        })
-        .catch((error) => {
-          console.error("Login error: ", error);
-        })
+      this.validateEmail()
+      this.validatePhone()
+      this.validateEmpCode()
+      if (!this.errors.email && !this.errors.emp_phone && !this.errors.emp_code) {
+        axiosInstance
+          .post(apis.signUp, this.SignUpdata)
+          .then((res) => {
+            if (res) {
+              // console.log("signup=", res);
+              this.ShowLoginPage = true;
+              this.showOtpPage = false;
+              this.ShowSignUpPage=false;
+              toast.success("Please contact your IT Manager to verify your sign-up")
+              const modal = bootstrap.Modal.getInstance(
+                document.getElementById("EmployeeToggleModal")
+              );
+              modal.hide();
+            }
+  
+          })
+          .catch((error) => {
+            console.error("Login error: ", error);
+          })
+      }
     },
 
     backTologin() {
@@ -415,7 +483,7 @@ export default {
               this.showOtpPage = false;
             }
             if(this.isFirstLogin===0 && this.enableCheck==0){
-              toast.error("User disabled")
+              toast.error("User is disabled. Please contact your IT Manager to verify your sign-up")
             }
             if (this.isFirstLogin === 1) {
               this.showPwdField = true;

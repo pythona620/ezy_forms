@@ -149,8 +149,8 @@ const settingsSideBarData = [
     // { name: 'Notifications', icon: 'bi bi-bell', route: 'notifications' },
     { name: 'Department', icon: 'bi bi-clock-history', route: 'department' },
     { name: 'Designation', icon: 'bi bi-people', route: 'designations' },
-    // { name: 'Categories', icon: 'bi bi-tags', route: 'categories' },
     { name: 'Employees', icon: 'bi bi-people', route: 'employee' },
+    { name: 'New Employee', icon: 'bi bi-tags', route: 'newemployee' },
     { name: 'System Settings', icon: 'bi bi-people', route: 'authenticationpage' },
     // {name: 'Roles',icon:' bi bi-people', route:'role'},
     // { name: 'Workflow Settings', icon: 'bi bi-gear', route: 'WorkflowSettings'}
@@ -163,6 +163,7 @@ const firstSettingsTitle = 'My Details';
 // const secondSettingsTitle = 'Workflow';
 const thirdSettingsTitle = 'Master';
 const forthSettingsTitle = 'Employee';
+
 const fifthSettingsTitle = 'System Settings';
 
 
@@ -226,8 +227,8 @@ const filteredSettingsGroups = computed(() => {
     return userDesigination.value.toLowerCase().includes('it')
         ? {
             thirdSettingsGroup: settingsSideBarData.slice(1, 3),
-            forthSettingsGroup: settingsSideBarData.slice(3, 4),
-            fifthSettingsGroup: settingsSideBarData.slice(4)
+            forthSettingsGroup: settingsSideBarData.slice(3, 5),
+            fifthSettingsGroup: settingsSideBarData.slice(5)
 
         }
         : { thirdSettingsGroup: [], forthSettingsGroup: [] };

@@ -11,6 +11,8 @@ const Categories = () => import("./Catagories.vue");
 const ActivityLog = () => import("./DepartmentComp.vue");
 const EsignComp = () => import("./EsignComp.vue");
 const AuthenticationPage=()=>import("./AuthenticationPage.vue");
+const WebEmployee=()=>import("./WebEmployee.vue");
+
 const settingRoutes = [
   {
     path: "/settings",
@@ -22,6 +24,11 @@ const settingRoutes = [
         path: "employee",
         component: EmployeeComp,
         name: "EmployeeComp",
+      },
+      {
+        path: "newemployee",
+        component: WebEmployee,
+        name: "WebEmployee",
       },
       {
         path: "profile",
