@@ -1409,7 +1409,7 @@ onMounted(() => {
                                 emit("updateField", field);
                             }
                             if(field.label.includes("Department Name") || field.label.includes("Department name")){
-                                field.value = parsedData.designation;
+                                field.value = parsedData.department;
                                 emit("updateField", field);
                             }
 
