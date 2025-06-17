@@ -351,23 +351,23 @@
                       <div v-if="props.childHeaders && Object.keys(props.childHeaders).length">
                         <div v-for="(headers, tableName) in props.childHeaders" :key="tableName">
                           <div v-if="field.fieldname === tableName" class="overTable">
+                            <div class=" d-flex justify-content-between align-items-center">
+                              <span class="font-13 fw-bold tablename">{{ field.label.replace(/_/g, " ") }}</span>
+                              <div v-if="selectedData.formStatus !== 'Completed'">
 
+                                <!-- <button class="btn btn-sm btn-light"
+                                  @click="editableTables[tableName] = !editableTables[tableName]">
+                                  {{ editableTables[tableName] ? 'Cancel' : 'Edit' }}
+                                </button> -->
+                              </div>
+                            </div>
 
                             <!-- Add Row Button -->
 
 
                             <!-- 2-column layout -->
                             <div v-if="field.description === 'true'">
-                              <div class=" d-flex justify-content-between align-items-center">
-                                <span class="font-13 fw-bold tablename">{{ field.label.replace(/_/g, " ") }}</span>
-                                <div v-if="selectedData.formStatus !== 'Completed'">
 
-                                  <!-- <button class="btn btn-sm btn-light"
-                                  @click="editableTables[tableName] = !editableTables[tableName]">
-                                  {{ editableTables[tableName] ? 'Cancel' : 'Edit' }}
-                                </button> -->
-                                </div>
-                              </div>
                               <div v-for="(row, index) in props.childData[tableName]" :key="index"
                                 class="border p-2 mb-3 rounded bg-light">
                                 <div class="mb-2 font-12 fw-bold">#{{ blockIndex + 1 }}</div>
@@ -380,6 +380,15 @@
                                     <template v-if="field.fieldtype === 'Data' && field.label !== 'Form Name'">
 
                                       <input :title="row[field.fieldname]" type="text"
+                                        :class="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel ? 'bg-white border-0' : null"
+                                        :disabled="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel"
+                                        class="form-control font-12 px-2"
+                                        :maxlength="field.fieldtype === 'Phone' ? '10' : '140'"
+                                        v-model="row[field.fieldname]" />
+                                    </template>
+                                    <template v-if="field.fieldtype === 'Int'">
+
+                                      <input :title="row[field.fieldname]" type="number"
                                         :class="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel ? 'bg-white border-0' : null"
                                         :disabled="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel"
                                         class="form-control font-12 px-2"
@@ -399,8 +408,10 @@
                                     </template>
                                     <template v-else-if="field.fieldtype === 'Attach'">
                                       <!-- File Input -->{{ field.value }}
-                                      <input multiple type="file" class="form-control font-12" :disabled="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel"
-                                        accept="image/jpeg,image/png,application/pdf" :class="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel ? 'bg-white d-none border-0' : null"
+                                      <input multiple type="file" class="form-control font-12"
+                                        :disabled="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel"
+                                        accept="image/jpeg,image/png,application/pdf"
+                                        :class="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel ? 'bg-white d-none border-0' : null"
                                         @change="handleFileUpload($event, row, field.fieldname)" />
 
                                       <!-- Preview Section -->
@@ -491,17 +502,8 @@
                             </div>
 
                             <!-- Table layout -->
-                            <div v-else class="tableborder-child">
-                              <div class=" d-flex justify-content-between align-items-center">
-                                <span class="font-13 fw-bold tablename">{{ field.label.replace(/_/g, " ") }}</span>
-                                <div v-if="selectedData.formStatus !== 'Completed'">
+                            <div v-else class="tableborder-child ">
 
-                                  <!-- <button class="btn btn-sm btn-light"
-                                  @click="editableTables[tableName] = !editableTables[tableName]">
-                                  {{ editableTables[tableName] ? 'Cancel' : 'Edit' }}
-                                </button> -->
-                                </div>
-                              </div>
                               <table class="table mb-0">
                                 <thead>
                                   <tr>
@@ -583,10 +585,13 @@
 
                                           </span>
                                         </template>
+
+
+
                                         <template v-if="field.fieldtype === 'Datetime'">
                                           <input
                                             v-if="props.readonlyFor !== 'true' && blockIndex !== 0 && blockIndex == currentLevel"
-                                            type="text"
+                                            type="datetime-local"
                                             :class="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel ? 'bg-white border-0' : null"
                                             :disabled="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel"
                                             class="form-control form-control-sm font-12 text-center"
@@ -610,18 +615,29 @@
                                           </span> -->
                                         </template>
                                         <template v-if="field.fieldtype === 'Int'">
+                                          <!-- Expression based field -->
+                                          <template v-if="field.description && /[+\-*/]/.test(field.description)">
+                                            <input disabled type="number" class="form-control font-12"
+                                              :class="blockIndex === 0 || props.readonlyFor === 'true' ? 'bg-white border-0' : null"
+                                              :value="calculateFieldExpression(row, field.description, headers)"
+                                              readonly />
+                                          </template>
 
+                                          <!-- Editable input -->
+                                          <template v-else-if="!(blockIndex === 0 || props.readonlyFor === 'true')">
+                                            <input type="number" class="form-control font-12"
+                                              :class="blockIndex === 0 || props.readonlyFor === 'true' ? 'bg-white border-0' : null"
+                                              v-model.number="row[field.fieldname]" />
+                                          </template>
 
-                                          <input v-if="field.description && /[+\-*/]/.test(field.description)" disabled
-                                            :class="blockIndex === 0 || props.readonlyFor === 'true' ? 'bg-white border-0' : null"
-                                            type="number" class="form-control font-12"
-                                            :value="calculateFieldExpression(row, field.description, headers)"
-                                            readonly />
-                                          <input v-else type="number" class="form-control font-12"
-                                            :class="blockIndex === 0 || props.readonlyFor === 'true' ? 'bg-white border-0' : null"
-                                            :disabled="blockIndex === 0 || props.readonlyFor === 'true'"
-                                            v-model.number="row[field.fieldname]" />
+                                          <!-- Read-only display -->
+                                          <template v-else>
+                                            <span>
+                                              {{ row[field.fieldname] }}
+                                            </span>
+                                          </template>
                                         </template>
+
 
                                         <template v-if="field.fieldtype === 'Date'">
                                           <input
