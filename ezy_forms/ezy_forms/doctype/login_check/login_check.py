@@ -47,7 +47,8 @@ def check_is_first_time_or_not(user_id,company=None):
         login_dict = login_doc.as_dict()
         
         enable_two_factor_auth = frappe.db.get_value("System Settings", "System Settings", "enable_two_factor_auth")
-        
+        enable_check = frappe.get_value('User',{"email":user_id},'enabled')
+        login_dict["enable_check"] = 1 if enable_check else 0
         login_dict["enable_two_factor_auth"] = enable_two_factor_auth
         
         
