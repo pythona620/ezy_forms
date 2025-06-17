@@ -38,13 +38,14 @@
 
         <br />
         <button :disabled="!showPwdField" @click="Login" type="submit"
-          class="border-0 btn btn-dark button w-100 py-2 font-13 text-white rounded-1">
+          class="border-0 btn btn-dark button w-100 py-2 mb-4 font-13 text-white rounded-1">
           <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
           <span v-if="!loading">Log In</span>
         </button>
-      </div>
-    </div>
 
+      </div>
+      <div class="font-13 m-0 cursor-pointer text-center" @click="OpenSignUp"><span class="sign">Not a user? Sign Up</span></div>
+    </div>
 
     <div v-if="showOtpPage">
       <div class="d-flex gap-2 p-2 justify-content-center align-items-center">
@@ -91,6 +92,31 @@
 
         </div>
       </div>
+    </div>
+
+     <div v-if="ShowSignUpPage" class="input-div p-5">
+      <div class="d-flex gap-2 p-2 justify-content-center align-items-center">
+        <div><img class="imgmix" src="../assets/Final-logo-ezyforms-removebg-preview.png" /></div>
+      </div>
+      <div>
+        <div class="mb-3">
+          <label class="font-13" for="email">Mail</label>
+          <input class="form-control m-0" type="text" id="email" v-model="SignUpdata.email" />
+          <!-- <div class="invalid-feedback font-11 mt-1" v-if="errors.email">
+            {{ errors.email }}
+          </div> -->
+        </div>
+        <div class="mb-2">
+          <label class="font-13" for="full_name">User Name</label>
+          <input type="text" class="form-control m-0 bg-white" id="name" v-model="SignUpdata.full_name" />
+        </div>
+      </div>
+      <div>
+        <button type="submit" :disabled="!SignUpdata.email || !SignUpdata.full_name" @click="SignUp" class="border-0 btn btn-dark button w-100 mb-4 py-2 font-13 text-white rounded-1">
+          Sign Up
+        </button>
+      </div>
+      <div class="font-13 m-0 cursor-pointer text-center" @click="OpenLogin"><span class="sign">Existing user? Log In</span></div>
     </div>
 
     <div class="modal fade" id="changePassword" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
@@ -158,6 +184,9 @@ export default {
         usr: "",
         pwd: "",
       },
+      SignUpdata: {
+        redirect_to: '/app/website-settings/Website Settings',
+      },
       storeData: [],
       errors: {},
       email: "",
@@ -171,11 +200,13 @@ export default {
       loading: false,
       showOtpPage: false,
       ShowLoginPage: true,
+      ShowSignUpPage: false,
       otp: ["", "", "", "", "", ""],
       errorMessage: "",
       storeData: [],
       isFirstLogin: "",
-      twoFactorAuth: ""
+      twoFactorAuth: "",
+      enable_check:""
       // timeLeft: 60,
       // timer: null,
       // resentMessage: "",
@@ -247,6 +278,16 @@ export default {
         this.otp[index] = "";
       }
     },
+    OpenSignUp(){
+      this.ShowLoginPage = false;
+      this.showOtpPage = false;
+      this.ShowSignUpPage=true
+    },
+    OpenLogin(){
+      this.ShowLoginPage = true;
+      this.showOtpPage = false;
+      this.ShowSignUpPage=false;
+    },
     // validateOtp() {
     //   const otpValue = this.otp.join("");
 
@@ -279,6 +320,28 @@ export default {
     //   this.resentMessage = "Resent OTP successfully!";
     //   this.startCountdown();
     // },
+
+    SignUp() {
+      axiosInstance
+        .post(apis.signUp, this.SignUpdata)
+        .then((res) => {
+          if (res) {
+            console.log("signup=", res);
+            this.ShowLoginPage = true;
+            this.showOtpPage = false;
+            this.ShowSignUpPage=false;
+            toast.success(res.message)
+            const modal = bootstrap.Modal.getInstance(
+              document.getElementById("EmployeeToggleModal")
+            );
+            modal.hide();
+          }
+
+        })
+        .catch((error) => {
+          console.error("Login error: ", error);
+        })
+    },
 
     backTologin() {
       this.ShowLoginPage = true;
@@ -342,13 +405,17 @@ export default {
             this.isFirstLogin = res.message.is_first_login;
             this.twoFactorAuth = res.message.enable_two_factor_auth
             this.user_id_name = res.message.name;
-            if (this.isFirstLogin === 0) {
+            this.enableCheck=res.message.enable_check
+            if (this.isFirstLogin === 0 && this.enableCheck===1) {
               const modal = new bootstrap.Modal(
                 document.getElementById("changePassword")
               );
               modal.show();
               this.showPwdField = false;
               this.showOtpPage = false;
+            }
+            if(this.isFirstLogin===0 && this.enableCheck==0){
+              toast.error("User disabled")
             }
             if (this.isFirstLogin === 1) {
               this.showPwdField = true;
@@ -721,5 +788,9 @@ input:focus {
     font-size: 12px;
     color: var(--bs-danger-text);
   }
+}
+.sign:hover{
+  // border-bottom: 1px solid black;
+  cursor: pointer;
 }
 </style>
