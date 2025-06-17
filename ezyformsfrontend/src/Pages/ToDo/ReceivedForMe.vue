@@ -304,6 +304,7 @@ function viewPreview(data) {
       name: data.name,
       doctype_name: data.doctype_name,
       type: "mytasks",
+      designation: employeeData.value
 
     },
   });
@@ -609,6 +610,7 @@ function receivedForMe(data) {
   // Initialize filters array for building dynamic query parameters
 
   const EmpRequestdesignation = JSON.parse(localStorage.getItem("employeeData"));
+  employeeData.value = EmpRequestdesignation.designation;
 
   const filters = [
     // assigned_to_users

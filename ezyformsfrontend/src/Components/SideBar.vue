@@ -152,6 +152,8 @@ const settingsSideBarData = [
     // { name: 'Categories', icon: 'bi bi-tags', route: 'categories' },
     { name: 'Employees', icon: 'bi bi-people', route: 'employee' },
     { name: 'System Settings', icon: 'bi bi-people', route: 'authenticationpage' },
+    // {name: 'Roles',icon:' bi bi-people', route:'role'},
+    // { name: 'Workflow Settings', icon: 'bi bi-gear', route: 'WorkflowSettings'}
 
 
 
@@ -162,6 +164,7 @@ const firstSettingsTitle = 'My Details';
 const thirdSettingsTitle = 'Master';
 const forthSettingsTitle = 'Employee';
 const fifthSettingsTitle = 'System Settings';
+
 
 
 

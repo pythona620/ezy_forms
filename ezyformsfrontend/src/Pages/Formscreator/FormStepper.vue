@@ -175,7 +175,7 @@
                               <!-- :disabled="selectedData.formId && selectedData.formId.length > 0" -->
                               <VueMultiselect v-model="filterObj.accessible_departments" :options="filteredOptions"
                                 :multiple="true" :close-on-select="false" :clear-on-select="false"
-                                :preserve-search="true" placeholder="Select Designation" class="font-11"
+                                :preserve-search="true" placeholder="Select Department" class="font-11"
                                 @select="handleSelect" @remove="handleRemove">
                                 <template #option="{ option }">
                                   <div class="custom-option">
@@ -246,7 +246,7 @@
                             </div>
                             <div class="mt-3">
                               <div class="">
-                                
+
                                 <label for="">Has Workflow
                                   <!-- <span v-if="!filterObj.has_Workflow" class="text-danger">*</span> -->
                                 </label>
@@ -255,17 +255,17 @@
                                   :multiple="false" class="font-11 multiselect" :searchable="true" />
                               </div>
                             </div>
-                            <div class="mt-3">
+                            <!-- <div class="mt-3">
                               <div class="">
-                               
+
                                 <label for="">Reverse Workflow
-                                  <!-- <span v-if="!filterObj.workflow_check" class="text-danger">*</span> -->
+                                 
                                 </label>
-                                <!-- :disabled="selectedData.formId && selectedData.formId.length > 0" -->
+                               
                                 <Multiselect :options="['Yes']" v-model="filterObj.workflow_check" placeholder="Select"
                                   :multiple="false" class="font-11 multiselect" :searchable="true" />
                               </div>
-                            </div>
+                            </div> -->
                           </div>
                         </div>
 
@@ -436,7 +436,7 @@
                                   <div class="d-flex justify-content-between align-items-center">
                                     <label class="rownames">{{
                                       getRowSuffix(rowIndex)
-                                    }}</label>
+                                      }}</label>
                                     <div>
                                       <button v-if="row.columns.length < 3"
                                         class="btn btn-light bg-transparent border-0 font-12" @click="
@@ -709,7 +709,7 @@
                                               placeholder="Enter field description"></textarea>
 
                                             <small v-if="field.error" class="text-danger font-10">{{ field.error
-                                            }}</small>
+                                              }}</small>
                                           </div>
                                           <div class="drop-zone" @dragover.prevent
                                             @drop="(e) => handleFieldDropAtIndex(e, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
@@ -717,7 +717,7 @@
                                           <div class="childtableShow">
                                             <div>
                                               <div>
-                                                <div v-if="blockIndex === 0" class="mt-2">
+                                                <div class="mt-2">
 
                                                   <div v-if="field.fieldtype === 'Table'" class="childTableContainer">
 
@@ -1003,7 +1003,7 @@
                                 </div>
                               </div>
                               <div>
-                                <div v-if="blockIndex === 0">
+                                <div>
 
                                   <button class="btn btn-light addRow mb-3 mt-4"
                                     @click="addChildTable(blockIndex, sectionIndex)">
@@ -1244,50 +1244,90 @@
       </div>
     </div>
 
-    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+    <div class="offcanvas addOffCanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
       <div class="offcanvas-header add_designationHeader">
         <span id="offcanvasRightLabel" class="font-14">
-          Add designation for
-          {{ selectedBlockIndex == 0 ? "Requestor" : "Approver" }}
+          
+          {{ selectedBlockIndex == 0 ? "Add designation for Requestor" : `Approval Settings For Level-${selectedBlockIndex}` }}
         </span>
 
         <button type="button" class="btn-close bg-light text-reset" data-bs-dismiss="offcanvas"
           aria-label="Close"></button>
       </div>
-      <div class="offcanvas-body">
+      <div class="offcanvas-body p-0">
         <div class="">
-          <div class="form-check ps-1" v-if="selectedBlockIndex !== 0">
-            <div>
+          <div class="">
 
-              <input type="checkbox" id="ViewOnlyReportee" v-model="ViewOnlyReportee"
-                class="me-2 mt-1  form-check-input" />
-              <label for="ViewOnlyReportee " class="SelectallDesignation fw-bold mt-1 form-check-label">View Only
-                Reportee</label>
+
+            <div v-if="selectedBlockIndex !== 0" class="p-3 py-4 approval-border-bottom d-flex align-items-center gap-3"
+              >
+              <div>
+                <div class=" form-control" aria-disabled="">
+
+                  <span class=" font-12">Approver Level {{ selectedBlockIndex }}</span>
+                </div>
+              </div>
+              <div>
+                <label for="" class="fw-bold font-12 ">On Rejection</label>
+              </div>
+              <div class="ms-2">
+                <select v-model.number="OnRejection" class="form-select font-12 mt-1 me-2">
+                  <option disabled value="">Select Lower Level</option>
+                  <option v-for="level in lowerApproverLevels" :key="level" :value="level">
+                    {{ level === 0 ? 'Requester' : 'Approver Level ' + level }}
+                  </option>
+                </select>
+              </div>
+            </div>
+            <div v-if="selectedBlockIndex !== 0" class="p-3 approval-border-bottom ">
+
+              <div class="form-check ps-0" v-if="selectedBlockIndex !== 0">
+                <div>
+                  <input type="checkbox" id="ViewOnlyReportee" v-model="ViewOnlyReportee"
+                    class="me-2  mt-0 form-check-input designationCheckBox" />
+                  <label for="ViewOnlyReportee " class="SelectallDesignation fw-bold mt-1 form-check-label">View Only
+                    Reportee</label>
+                </div>
+              </div>
             </div>
           </div>
-          <input v-model="searchDesignation" class="px-2 py-1 rounded-2 form-control shadow-none my-3" type="text"
+
+        </div>
+        <div class="p-3 listofdesignations">
+          <input v-model="searchDesignation" class="SearchDesignation rounded-2 form-control shadow-none my-1" type="text"
             placeholder="Search Designation" />
 
           <div class="form-check ps-1" v-if="DesignationList.length && selectedBlockIndex == 0">
             <div>
               <!-- :disabled="ViewOnlyReportee"  -->
-              <input type="checkbox" id="selectAll" v-model="isAllSelected" class="me-2 mt-1 form-check-input" />
-              <label for="selectAll" class="SelectallDesignation fw-bold m-0 form-check-label">Select all</label>
+              <input type="checkbox" id="selectAll" v-model="isAllSelected"
+                class="me-2 mt-0 designationCheckBox form-check-input" />
+              <label for="selectAll" class="SelectallDesignation fw-bold mx-2 form-check-label">Select all</label>
             </div>
 
           </div>
-        </div>
-        <ul v-if="DesignationList.length" class="list-unstyled">
-          <li v-for="(item, index) in filteredDesignationList" :key="index" class="designationList">
-            <input type="checkbox" v-model="designationValue" :value="item" class="designationCheckBox"
-              @change="handleSingleSelect" />
-            <!-- :class="{ 'opacity-50': ViewOnlyReportee }" -->
-            <span class="ps-2">{{ item }}</span>
-          </li>
-        </ul>
-        <div v-else>
-          <div class="d-flex justify-content-center">
-            <span>No Designations Found</span>
+          <!-- Selected Items Display -->
+          <!-- <div v-if="designationValue.length" class="d-flex flex-wrap gap-2 mt-3">
+            <span v-for="(selected, i) in designationValue" :key="i"
+              class="badge bg-secondary d-flex align-items-center">
+              {{ selected }}
+              <button type="button" class="btn-close btn-close-white ms-2" aria-label="Remove"
+                @click="removeDesignation(selected)" style="font-size: 0.6rem;"></button>
+            </span>
+          </div> -->
+
+          <ul v-if="DesignationList.length" class="list-unstyled designation-scroll">
+            <li v-for="(item, index) in filteredDesignationList" :key="index" class="designationList form-check">
+              <input type="checkbox" :id="`SelectedDisignation_${index}`" v-model="designationValue" :value="item"
+                class="designationCheckBox  form-check-input mt-0" @change="handleSingleSelect" />
+              <label :for="`SelectedDisignation_${index}`" class="ps-2">{{ item }}</label>
+
+            </li>
+          </ul>
+          <div v-else>
+            <div class="d-flex justify-content-center">
+              <span>No Designations Found</span>
+            </div>
           </div>
         </div>
       </div>
@@ -1347,6 +1387,7 @@ const selectedBlockIndex = ref("");
 let workflowSetup = reactive([]);
 const searchDesignation = ref("");
 const ViewOnlyReportee = ref(false);
+const OnRejection = ref('');
 const wrkAfterGetData = ref([]);
 // const hasWorkflowToastShown = ref(false);
 const tableFieldsCache = ref([]);
@@ -1385,7 +1426,7 @@ const filterObj = ref({
   owner_of_the_form: "",
   series: "",
   has_workflow: "",
-  workflow_check:""
+  workflow_check: ""
 
 });
 const formDescriptions = computed(() => filterObj.value);
@@ -1437,7 +1478,12 @@ function canShowDesignationButton(blockIndex) {
     roles.length === 0
   );
 }
-
+function removeDesignation(item) {
+  const index = designationValue.value.indexOf(item);
+  if (index !== -1) {
+    designationValue.value.splice(index, 1);
+  }
+}
 // Watch and trim spaces
 watch(() => filterObj.value.form_name, (newVal) => {
   filterObj.value.form_name = newVal.trim()
@@ -1627,7 +1673,7 @@ function isActiveField(b, s, r, c, f) {
 // ['module', 'in', ['User Forms']],
 function fetchDoctypeList(searchText) {
   const filters = [
-    
+
     ['istable', '=', 0]
   ];
 
@@ -1657,8 +1703,17 @@ function selectDoctype(b, s, r, c, f, name) {
   activeSearch.query = '';
   activeSearch.key = ''; // deactivate
 }
+const lowerApproverLevels = computed(() => {
+  if (!blockArr?.length) return []
 
+  if (selectedBlockIndex.value === 1) {
+    // Only show requester (index 0)
+    return [0]
+  }
 
+  // For index > 1, show all levels below current (excluding requester if needed)
+  return Array.from({ length: selectedBlockIndex.value }, (_, i) => i).filter(i => i < selectedBlockIndex.value)
+})
 
 //=========================================================
 // const activeLinkField = ref({});
@@ -2586,6 +2641,9 @@ function addDesignationBtn() {
   if (selectedBlockIndex.value !== 0) {
     xyz.view_only_reportee = ViewOnlyReportee.value === true ? 1 : 0;
   }
+  if (selectedBlockIndex.value !== 0) {
+    xyz.on_rejection = OnRejection.value ? OnRejection.value : 0;
+  }
 
 
   const existingIndex = workflowSetup.findIndex((item) => item.idx === xyz.idx);
@@ -2615,6 +2673,7 @@ function initializeDesignationValue(blockIndex) {
 
   // Check for view_only_reportee flag
   ViewOnlyReportee.value = currentSetup.view_only_reportee === 1;
+  OnRejection.value = currentSetup.on_rejection
 }
 
 // Initialize `designationValue` based on the roles for the given block index
@@ -2647,6 +2706,7 @@ function initializeDesignationValue(blockIndex) {
 const AddDesignCanvas = (idx) => {
   searchDesignation.value = ''
   ViewOnlyReportee.value = false;
+  OnRejection.value = '';
   // console.log(idx, "---clicked idex", selectedBlockIndex.value);
   if (filterObj.value.accessible_departments.length) {
     designationData(filterObj.value.accessible_departments);
@@ -3598,6 +3658,18 @@ const hasDuplicates = (array) => new Set(array).size !== array.length;
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 
 <style lang="scss" scoped>
+.addOffCanvas{
+      width: 530px;
+}
+.SearchDesignation{
+      border: none;
+    border-bottom: 1px solid #ccc;
+
+}
+.approval-border-bottom {
+  border-bottom: 1px solid #ccc;
+}
+
 .rounded-table {
   border-radius: 10px;
   background-color: #ccc;
@@ -3674,7 +3746,11 @@ const hasDuplicates = (array) => new Set(array).size !== array.length;
 .SelectallDesignation {
   color: #1b14df;
 }
-
+.designation-scroll {
+  max-height: 500px; /* or any height you prefer */
+  overflow-y: auto;
+  padding-right: 8px; /* prevent content from hiding under scrollbar */
+}
 .CancelNdSave {
   background-color: #fafafa;
   position: sticky;
@@ -3793,7 +3869,7 @@ input {
 
 input[type="checkbox"] {
   margin-left: 5px;
-  height: 15px;
+  height: 18px;
 }
 
 has context menu .form-container {

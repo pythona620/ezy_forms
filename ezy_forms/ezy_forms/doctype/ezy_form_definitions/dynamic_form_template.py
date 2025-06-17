@@ -153,12 +153,12 @@ template_str = """
          .row {
             display: flex;
             flex-wrap: wrap;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
 
         .column {
             flex: 1;
-            padding:0px 2px;
+            padding:0px 15px;
           
             
         }
@@ -211,7 +211,7 @@ template_str = """
             padding-left: 4px ;
             background: transparent;
             flex: 1;
-            border-bottom: 1px solid #cccccc;
+            
             font-weight:500;
             color:#000;
             font-size: 13px;
@@ -226,7 +226,7 @@ template_str = """
                padding-left: 50px ;
             background: transparent;
             flex: 1;
-            border-bottom: 1px solid #cccccc;
+            
             font-weight:600;
         }
         .field select, .field textarea {
@@ -240,7 +240,7 @@ template_str = """
             padding: 0px 5px;
             background: transparent;
             flex: 1;
-            border-bottom: 1px solid #cccccc;
+            
             resize: none; /* Disable manual resizing */
             overflow-y: hidden; /* Hide scrollbar */ /* Allows users to resize the textarea */
 }
@@ -350,10 +350,10 @@ template_str = """
       
           }
           .signature-Imge{
-              min-width: 80px;
-              max-width: 90px;
+              min-width: 70px;
+              max-width: 70px;
               padding-bottom: 5px;
-              border-bottom: 1px solid #cccccc;
+              
               
           }
           .childtablename{
@@ -367,17 +367,17 @@ template_str = """
            /*    min-width: 200px !important;*/
        /*  }*/
          .Form_name_div{
-  display: flex;
-  justify-content: center; /* center the h4 block */
-  text-align: center;      /* center the text inside h4 */
-  margin: 0px 10px;
-}
+            display: flex;
+            justify-content: center; /* center the h4 block */
+            text-align: center;      /* center the text inside h4 */
+            margin: 0px 10px;
+            }
 
-.form-title {
-  font-size: 20px;
-  max-width: 600px;        /* optional, keeps it nicely readable */
-  word-wrap: break-word;
-}
+            .form-title {
+            font-size: 20px;
+            max-width: 600px;        /* optional, keeps it nicely readable */
+            word-wrap: break-word;
+            }
          .header-right{
              min-width: 280px;
          }
@@ -411,7 +411,7 @@ template_str = """
         }
         .rounded-table {
         width: 100%;
-        margin-bottom: 10px;
+        margin-bottom: 5px;
         border-collapse: separate;
         border-spacing: 0;
         border-radius: 3px;
@@ -522,13 +522,16 @@ template_str = """
                                     {% if child_data[table_name] %}
                                  
                                         {% for child in child_data[table_name] %}
-                                            <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
+                                            <div style="border:1px solid #ccc; padding:10px; margin-bottom:5px;">
                                                 
                                                 <div style="display: flex; flex-wrap: wrap;">
                                                     {% for key, value in child.items() %}
-                                                       <div style="width: 48%; display:flex;align-items:end;gap:2px; margin-right: 2%; margin-bottom: 10px;">
+                                                       <div style="width: 48%; display:flex;gap:2px; margin-right: 2%; margin-bottom: 10px;">
                                                             <label style="font-weight: 600;font-size: 13px;">{{ key }}:</label><br />
-                                                            <input type="text" value="{{ value }}" class="block_input" readonly style="width: 100%; padding: 5px; font-size: 14px;" />
+                                                            <span style="font-size:13px; font-weight:500; margin-left: 2%;">
+                                                            {{ value}}
+                                                            </span>
+                                                           
                                                         </div>
 
                                                     {% endfor %}
@@ -546,7 +549,7 @@ template_str = """
                                             {% for column in child_table_data[table_name] %}
                                                 <div style="width: 48%; margin-right: 2%;display:flex;align-items:baseline;gap:2px; margin-bottom: 10px;">
                                                     <label style="font-weight: 600;font-size: 13px;">{{ column }}:</label><br />
-                                                    <input type="text"  readonly class="block_input" style="width: 100%; padding: 5px; color: #ccc;font-size: 13px;" />
+                                                    <input type="text"  readonly class="block_input" style="width: 100%;  color: #ccc;font-size: 13px;" />
                                                 </div>
                                             {% endfor %}
                                         </div>
@@ -561,7 +564,7 @@ template_str = """
                                 
                                     <h3 class="childtablename" style=margin-left:3px;margin-right:3px;font-size: 14px;>{{ row.label.replace("_", " ").title() }}</h3>
                                         {% if child_data[table_name] %}
-                                            <table class="rounded-table" style="width: 100%; margin-bottom:5px; border-collapse: collapse; border-radius: 3px; margin-left:3px; margin-right:3px;">
+                                            <table class="rounded-table" style="width: 100%;border-collapse: collapse; border-radius: 3px; margin-left:3px; margin-right:3px;">
                                                 <thead>
                                                     <tr>
                                                         
@@ -636,7 +639,7 @@ template_str = """
                                
                                     <div class="field field-textarea">
                                     
-                                        {% if field.fieldtype == 'Attach' and field.fieldname|lower == 'approved_by' %}
+                                        {% if field.fieldtype == 'Attach' and 'approved_by' in field.fieldname|lower  %}
                                             <label for="{{ field.fieldname }}">
                                                 Approved By <span style="padding-left:2px; font-size: 13px;">:</span>
                                             </label>
@@ -696,14 +699,14 @@ template_str = """
 
                                         {% elif field.fieldtype == 'Data' or field.fieldtype == 'Int' and field.fieldname != 'auto_calculations' %}
                                             <span id="{{ field.fieldname }}"
-                                                style="font-size:13px; font-weight:500;border-bottom: 1px solid #cccccc;">
+                                                style="font-size:13px; font-weight:500;">
                                                 {{ field['values'] }}
                                             </span>
                                         {% elif field.fieldtype == 'Select' %}
                                         
                                         {% if field['values'] %}
                                          <span id="{{ field.fieldname }}"
-                                                style="font-size:13px; font-weight:500;border-bottom: 1px solid #cccccc;">
+                                                style="font-size:13px; font-weight:500;">
                                                 {{ field['values'] }}
                                             </span>
                                             
@@ -754,11 +757,11 @@ template_str = """
                                                 <input type="text" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
                                             {% endif %}
                                         {% elif field.fieldtype == 'Phone' %}
-                                             <span id="{{ field.fieldname }}" style="font-size:13px; font-weight:500;border-bottom: 1px solid #cccccc;" name="{{ field.fieldname }}" class="date-span">
+                                             <span id="{{ field.fieldname }}" style="font-size:13px; font-weight:500;" name="{{ field.fieldname }}" class="date-span">
                                                 {{ field['values'] }}
                                             </span>
                                         {% elif field.fieldtype == 'Time' %}
-                                             <span id="{{ field.fieldname }}" style="font-size:13px; font-weight:500;border-bottom: 1px solid #cccccc;" name="{{ field.fieldname }}" class="date-span">
+                                             <span id="{{ field.fieldname }}" style="font-size:13px; font-weight:500;" name="{{ field.fieldname }}" class="date-span">
                                                 {{ field['values'] }}
                                             </span>
                                         {% elif field.fieldtype == 'Color' %}
@@ -784,13 +787,13 @@ template_str = """
 
 
                                         {% elif field.fieldtype == 'Date' %}
-                                            <span id="{{ field.fieldname }}" style="font-size:13px; font-weight:500;border-bottom: 1px solid #cccccc;" name="{{ field.fieldname }}" class="date-span">
+                                            <span id="{{ field.fieldname }}" style="font-size:13px; font-weight:500;" name="{{ field.fieldname }}" class="date-span">
                                                 {{ field['values'] }}
                                             </span>
 
                                         {% elif field.fieldtype == 'Datetime' %}
                                             <span id="{{ field.fieldname }}"
-                                                style="font-size:13px; font-weight:500;border-bottom: 1px solid #cccccc;">
+                                                style="font-size:13px; font-weight:500;">
                                                 {{ field['values'] }}
                                             </span>
                         
@@ -1266,6 +1269,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                         data_list[child_table_name] = processed_child_records
 
                         #########################
+                json_object = [ field for field in json_object if ("value" not in field   or field["value"] not in [None, ""]  ) and field.get("fieldname", "") not in ["approved_on", "approved_by", "approver"] ]
                 form_name = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_name")
                 html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_name,child_data=data_list,child_table_data=None,business_unit=business_unit,wf_generated_request_id=wf_generated_request_id,mail_attachment=mail_attachment)
                 

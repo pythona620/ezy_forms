@@ -71,6 +71,7 @@ export const apis = {
   ExportReport: domain + `/method/ezy_forms.ezy_custom_forms.custom_script.v1.export_report_api.export_report_data`,
   approvedByMe:domain+`/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.approval_by_me`,
   ActivitySaveComment: domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.save_button_commite_update`,
+  activityLogWithChild: domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.get_doc_changes`,
   getReportData:  `/printview`
   // getReportData: domain + `/api/method/frappe.utils.print_format.download_pdf`
 };

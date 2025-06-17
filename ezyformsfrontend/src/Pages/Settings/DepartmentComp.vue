@@ -81,7 +81,7 @@
                                     </div>
                                     <ButtonComp class="buttoncomp mt-2" name="Add" @click="addCategory" />
                                 </div>
-                                <div v-if="CreateDepartments.ezy_departments_items.length > 0">
+                                <div v-if="CreateDepartments.ezy_departments_items">
                                     <table class="table mt-3 global-table">
                                         <thead>
                                             <tr>
@@ -145,17 +145,44 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="viewCategoryLabel">Departments Items</h5>
+                        <h5 class="modal-title" id="viewCategoryLabel">Department Data</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
+                        <div>
+                             <div class="mb-3">
+                                
+                                    <label class="font-13 ps-1" for="DepartmentCode">Department Code</label>
+                                    <FormFields tag="input" type="text" name="DepartmentCode" id="DepartmentCode"
+                                        placeholder="Enter department code"
+                                        v-model="CreateDepartments.department_code" />
+                                    <span v-if="formErrors.department_code" class="text-danger font-12">
+                                        {{ formErrors.department_code }}
+                                    </span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="font-13 ps-1" for="Requedepartment_namested">Department name</label>
+                                    <FormFields tag="input" type="text" name="department_name"
+                                        id="department_name" placeholder="Enter department name"
+                                        v-model="CreateDepartments.department_name" />
+                                    <span v-if="formErrors.department_name" class="text-danger font-12">
+                                        {{ formErrors.department_name }}
+                                    </span>
+                                </div>
+
+                                <label class="font-13 ps-1" for="business_unit">Business Unit</label>
+                                <FormFields tag="input" type="text" :disabled="CreateDepartments.business_unit ? true : false"
+                                    placeholder="" class="mb-3" name="business_unit" id="business_unit"
+                                    v-model="CreateDepartments.business_unit" />
+                        </div>
                         <div class="d-flex w-100 gap-3">
                             <FormFields class="w-100" tag="input" type="text" name="ezy_departments_items"
                                 id="ezy_departments_items" placeholder="Enter category" v-model="newCategory" />
                             <ButtonComp class="buttoncomp" name="Add" @click="addCategoryInView" />
                         </div>
 
-                        <table v-if="categoriesDataEdit.ezy_departments_items.length > 0"
+                        <table v-if="categoriesDataEdit.ezy_departments_items"
                             class="table mt-3 global-table">
                             <thead>
                                 <tr>
@@ -183,7 +210,14 @@
                         </table>
                     </div>
                     <div class="modal-footer">
-                        <ButtonComp class="btn btn-dark  font-11" name="Save Categories" @click="saveCategories()" />
+                         <button type="button"
+                                    class="applyfilter btn btn-dark text-nowrap font-10 d-flex justify-content-center align-items-center"
+                                    data-bs-dismiss="modal"
+                                    :disabled="!CreateDepartments.department_code || !CreateDepartments.department_name || !CreateDepartments.business_unit"
+                                    @click="UpdateDeprtment"><span class="font-16 me-1"><i
+                                            class="bi bi-check2 "></i></span>
+                                    Save Department</button>
+                        <!-- <ButtonComp class="btn btn-dark  font-11" name="Save Categories" @click="saveCategories()" /> -->
                     </div>
                 </div>
             </div>
@@ -255,28 +289,7 @@ const PaginationLimitStart = ([itemsPerPage, start]) => {
     fetchTable();
 
 };
-function actionCreated(rowData, actionEvent) {
-    if (actionEvent.name === 'View Categories') {
-        if (rowData) {
-            axiosInstance.get(`${apis.resource}${doctypes.departments}/${rowData.name}`)
-                .then((res) => {
-                    if (res.data) {
-                        categoriesDataEdit.value = res.data;
 
-                    }
-                })
-                .catch((error) => {
-                    console.error("Error fetching categories data:", error);
-                });
-
-            const modal = new bootstrap.Modal(document.getElementById('viewCategory'), {});
-            modal.show();
-        } else {
-            console.warn("No form fields provided.");
-            formCreation(rowData);
-        }
-    }
-}
 const tableheaders = ref([
     { th: "Name", td_key: "name" },
     { th: "Department Code", td_key: "department_code" },
@@ -350,7 +363,29 @@ watch(
     },
     { immediate: true }
 );
+function actionCreated(rowData, actionEvent) {
+    if (actionEvent.name === 'View Categories') {
+        if (rowData) {
+            CreateDepartments.value = {...rowData}
+            axiosInstance.get(`${apis.resource}${doctypes.departments}/${rowData.name}`)
+                .then((res) => {
+                    if (res.data) {
+                        categoriesDataEdit.value = res.data;
 
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error fetching categories data:", error);
+                });
+
+            const modal = new bootstrap.Modal(document.getElementById('viewCategory'), {});
+            modal.show();
+        } else {
+            console.warn("No form fields provided.");
+            formCreation(rowData);
+        }
+    }
+}
 function addCategory() {
     if (newCategory.value) {
         CreateDepartments.value.ezy_departments_items.push({
@@ -566,7 +601,8 @@ function cancelCreate() {
 function createDepart() {
     const dataObj = {
         ...CreateDepartments.value,
-        "doctype": doctypes.departments
+        "doctype": doctypes.departments,
+       
     }
     console.log(dataObj, "------------------");
     axiosInstance.post(apis.resource + doctypes.departments, dataObj).then((res) => {
@@ -583,6 +619,36 @@ function createDepart() {
 
     })
 }
+function UpdateDeprtment() {
+    // Merge category data into CreateDepartments
+    CreateDepartments.value.ezy_departments_items = categoriesDataEdit.value.ezy_departments_items;
+
+    const dataObj = {
+        ...CreateDepartments.value,
+        doctype: doctypes.departments,
+    };
+
+    axiosInstance
+        .put(`${apis.resource}${doctypes.departments}/${CreateDepartments.value.name}`, dataObj)
+        .then((res) => {
+            if (res.data) {
+                toast.success("Department Updated", { autoClose: 500, transition: "zoom" });
+                deptData();
+
+                // Reset values
+                CreateDepartments.value = {
+                    department_code: '',
+                    department_name: '',
+                    business_unit: '',
+                    ezy_departments_items: []
+                };
+            }
+        })
+        .catch((error) => {
+            console.error("Error updating department:", error.response?.data || error);
+        });
+}
+
 </script>
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 

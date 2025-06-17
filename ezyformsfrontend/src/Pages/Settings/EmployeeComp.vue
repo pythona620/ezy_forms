@@ -28,7 +28,7 @@
             <div class="modal-content">
               <div class="modal-header">
                 <h5 class="modal-title" id="createDepartmentsLabel">
-                  Ezy Employee
+                  Employee Creation
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" @click="cancelCreate"
                   aria-label="Close"></button>
@@ -70,48 +70,75 @@
                                             :options="departmentsList" /> -->
                       <VueMultiselect v-model="createEmployee.department" :options="departmentsList" :multiple="false"
                         :close-on-select="true" :clear-on-select="false" :preserve-search="true"
-                        placeholder="Select department" class="font-11 mb-3">
-                        <!-- taggable @tag="addDepartment"
-                                            tag-placeholder="Press enter to add department" -->
-                        <!-- <template #option="{ option }">
-                                                <div class="custom-option">
-                                                    <input type="checkbox" :checked="createEmployee.department.includes(
-                        option
-                    )
-                        " class="custom-checkbox" />
-                                                    <span>{{ option }}</span>
-                                                </div>
-                                            </template> -->
-
+                        placeholder="Select department" label="department_name" track-by="name" class="font-11 mb-3">
                         <template #selection="{ values, isOpen }">
                           <span class="multiselect__single font-10" v-if="values.length" v-show="!isOpen">
-                            {{ values.join(", ") }}
+                            {{values.map(v => v.department_name).join(", ")}}
                           </span>
                         </template>
                       </VueMultiselect>
+
                     </div>
                     <div class="col">
-                      <label class="font-13 ps-1" for="Designation">Designation<span
+                      <div class="position-relative mb-3">
+                        <label class="font-13 ps-1" for="Designation">
+                          Designation<span class="text-danger ps-1">*</span>
+                        </label>
+
+                        <input type="text" v-model="searchText" @input="filterDesignations" class="form-control font-12"
+                          placeholder="Search or type new role" />
+
+                        <ul class="list-group position-absolute w-100 zindex-dropdown"
+                          v-if="searchText && (filteredDesignations.length || showCreateButton)">
+                          <li v-for="(role, index) in filteredDesignations" :key="index"
+                            class="list-group-item list-group-item-action font-12" @click="selectDesignation(role)"
+                            style="cursor: pointer">
+                            {{ role }}
+                          </li>
+
+                          <!-- Create Role option as part of the dropdown -->
+                          <li v-if="searchText && filteredDesignations.length === 0"
+                            class="list-group-item list-group-item-action font-12 text-primary" style="cursor: pointer"
+                            @click="showModal = true">
+                            ➕ Create role "<strong>{{ searchText }}</strong>"
+                          </li>
+
+                        </ul>
+
+
+
+
+                        <!-- Modal -->
+                        <div class="modal fade" :class="{ show: showModal }" style="display: block;" v-if="showModal">
+                          <div class="modal-dialog">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h5 class="modal-title">Create New Role</h5>
+                                <button type="button" class="btn-close" @click="showModal = false"></button>
+                              </div>
+                              <div class="modal-body">
+                                <label for="" class="font-12 fw-bold">Designation</label>
+                                <input type="text" class="form-control font-12" v-model="newRole"
+                                  placeholder="Enter role name" />
+                              </div>
+                              <div class="modal-footer">
+                                <button class="btn btn-secondary" @click="showModal = false">Cancel</button>
+                                <button class="btn btn-dark" @click="createRole">Save Role</button>
+                              </div>
+                            </div>
+                          </div>
+
+                        </div>
+                      </div>
+                      <!-- <div>
+                       <label class="font-13 ps-1" for="Designation">Designation<span
                           class="text-danger ps-1">*</span></label>
-                      <!-- <FormFields class="mb-3" tag="input" type="text" name="Designation"
-                                                id="Designation" placeholder="Enter Designation"
-                                                v-model="createEmployee.designation" /> -->
-                      <!-- <FormFields tag="select" placeholder="Select Desigination" class="mb-3"
-                                            name="Designation" v-model="createEmployee.designation" id="dept"
-                                            :Required="false" :options="designations" /> -->
+                     
                       <VueMultiselect v-model="createEmployee.designation" :options="designations" :multiple="false"
                         :close-on-select="true" :clear-on-select="false" :preserve-search="true"
                         placeholder="Select designation" class="font-11 mb-3" taggable @tag="addDesignation"
                         tag-placeholder="Press enter to add designation">
-                        <!-- <template #option="{ option }">
-                                                <div class="custom-option">
-                                                    <input type="checkbox" :checked="createEmployee.designation.includes(
-                        option
-                    )
-                        " class="custom-checkbox" />
-                                                    <span>{{ option }}</span>
-                                                </div>
-                                            </template> -->
+                        
 
                         <template #selection="{ values, isOpen }">
                           <span class="multiselect__single font-10" v-if="values.length" v-show="!isOpen">
@@ -119,6 +146,7 @@
                           </span>
                         </template>
                       </VueMultiselect>
+                     </div> -->
                       <!-- <div class=""><button @click="addnewDesignation" type="button"
                                                 class="btn btn-white text-decoration-underline font-11">Add new
                                                 designation <span><i class=" bi bi-plus"></i></span></button>
@@ -130,23 +158,23 @@
                       <!-- <FormFields class="mb-3" tag="input" type="text" name="reporting_to"
                                             id="reporting_to" placeholder="Enter Reports To"
                                             v-model="createEmployee.reporting_to" /> -->
-                                            <VueMultiselect v-model="createEmployee.reporting_to"
-                    :options="employeeEmails.map((dept) => dept.emp_mail_id)" :multiple="false" :close-on-select="true"
-                    :clear-on-select="false" :preserve-search="true" placeholder="Select Reports To"
-                    class="font-11 mb-3">
+                      <VueMultiselect v-model="createEmployee.reporting_to"
+                        :options="employeeEmails.map((dept) => dept.emp_mail_id)" :multiple="false"
+                        :close-on-select="true" :clear-on-select="false" :preserve-search="true"
+                        placeholder="Select Reports To" class="font-11 mb-3">
 
 
-                    <template #selection="{ values, isOpen }">
-                      <span class="multiselect__single font-10" v-if="values.length" v-show="!isOpen">
-                        {{ values.join(", ") }}
-                      </span>
-                    </template>
-                  </VueMultiselect>
+                        <template #selection="{ values, isOpen }">
+                          <span class="multiselect__single font-10" v-if="values.length" v-show="!isOpen">
+                            {{ values.join(", ") }}
+                          </span>
+                        </template>
+                      </VueMultiselect>
                       <label class="font-13 ps-1" for="reporting_designation">Reporting Designation</label>
                       <!-- <FormFields class="mb-3" tag="input" type="text" name="reporting_designation"
                                             id="reporting_designation" placeholder="Enter Reporting Designation"
                                             v-model="createEmployee.reporting_designation" /> -->
-                      <VueMultiselect v-model="createEmployee.reporting_designation" :options="designations"
+                      <VueMultiselect v-model="createEmployee.reporting_designation" :options="designations" :allow-empty="true"
                         :multiple="false" :close-on-select="true" :clear-on-select="false" :preserve-search="true"
                         placeholder="Select Reporting Designation" class="font-11 mb-3"
                         :disabled="!!createEmployee.reporting_to">
@@ -347,54 +375,70 @@
                   </div>
                   <label class="font-13 ps-1 fw-medium" for="dept">Departments<span
                       class="text-danger ps-1">*</span></label>
+
                   <VueMultiselect v-model="createEmployee.department" :options="departmentsList" :multiple="false"
                     :close-on-select="true" :clear-on-select="false" :preserve-search="true"
-                    placeholder="Select department" class="font-11 mb-3">
-                    <!-- taggable @tag="addDepartment"
-                                            tag-placeholder="Press enter to add department" -->
-                    <!-- <template #option="{ option }">
-                                                <div class="custom-option">
-                                                    <input type="checkbox" :checked="createEmployee.department.includes(
-                        option
-                    )
-                        " class="custom-checkbox" />
-                                                    <span>{{ option }}</span>
-                                                </div>
-                                            </template> -->
-
+                    placeholder="Select department" label="department_name" track-by="name" class="font-11 mb-3">
                     <template #selection="{ values, isOpen }">
                       <span class="multiselect__single font-10" v-if="values.length" v-show="!isOpen">
-                        {{ values.join(", ") }}
+                        {{values.map(v => v.department_name).join(", ")}}
                       </span>
                     </template>
                   </VueMultiselect>
                 </div>
                 <div class="col">
-                  <label class="font-13 ps-1" for="Designation">Designation<span
-                      class="text-danger ps-1">*</span></label>
-                  <VueMultiselect v-model="createEmployee.designation" :options="designations" :multiple="false"
-                    :close-on-select="true" :clear-on-select="false" :preserve-search="true"
-                    placeholder="Select designation" class="font-11 mb-3" taggable @tag="addDesignation"
-                    tag-placeholder="Press enter to add designation">
-                    <!-- <template #option="{ option }">
-                                                <div class="custom-option">
-                                                    <input type="checkbox" :checked="createEmployee.designation.includes(
-                        option
-                    )
-                        " class="custom-checkbox" />
-                                                    <span>{{ option }}</span>
-                                                </div>
-                                            </template> -->
+                  <div class="position-relative mb-3">
+                    <label class="font-13 ps-1" for="Designation">
+                      Designation<span class="text-danger ps-1">*</span>
+                    </label>
 
-                    <template #selection="{ values, isOpen }">
-                      <span class="multiselect__single font-10" v-if="values.length" v-show="!isOpen">
-                        {{ values.join(", ") }}
-                      </span>
-                    </template>
-                  </VueMultiselect>
+                    <input type="text" v-model="searchText" @input="filterDesignations" class="form-control font-12"
+                      placeholder="Search or type new role" />
+
+                    <ul class="list-group position-absolute w-100 zindex-dropdown"
+                      v-if="searchText && (filteredDesignations.length || showCreateButton)">
+                      <li v-for="(role, index) in filteredDesignations" :key="index"
+                        class="list-group-item list-group-item-action font-12" @click="selectDesignation(role)"
+                        style="cursor: pointer">
+                        {{ role }}
+                      </li>
+
+                      <!-- Create Role option as part of the dropdown -->
+                      <li v-if="searchText && filteredDesignations.length === 0"
+                        class="list-group-item list-group-item-action font-12 text-primary" style="cursor: pointer"
+                        @click="showModal = true">
+                        ➕ Create role "<strong>{{ searchText }}</strong>"
+                      </li>
+
+                    </ul>
+
+
+
+
+                    <!-- Modal -->
+                    <div class="modal fade" :class="{ show: showModal }" style="display: block;" v-if="showModal">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title">Create New Role</h5>
+                            <button type="button" class="btn-close" @click="showModal = false"></button>
+                          </div>
+                          <div class="modal-body">
+                            <label for="" class="font-12 fw-bold">Designation</label>
+                            <input type="text" class="form-control font-12" v-model="newRole" placeholder="Enter role name" />
+                          </div>
+                          <div class="modal-footer">
+                            <button class="btn btn-secondary" @click="showModal = false">Cancel</button>
+                            <button class="btn btn-dark" @click="createRole">Save Role</button>
+                          </div>
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
                   <label class="font-13 ps-1" for="reporting_to">Reports To</label>
                   <VueMultiselect v-model="createEmployee.reporting_to"
-                    :options="employeeEmails.map((dept) => dept.emp_mail_id)" :multiple="false" :close-on-select="true"
+                    :options="employeeEmails.map((dept) => dept.emp_mail_id)" :multiple="false" :close-on-select="true" :allow-empty="true"
                     :clear-on-select="false" :preserve-search="true" placeholder="Select Reports To"
                     class="font-11 mb-3">
 
@@ -406,7 +450,7 @@
                     </template>
                   </VueMultiselect>
                   <label class="font-13 ps-1" for="reporting_designation">Reporting Designation</label>
-                  
+
                   <VueMultiselect v-model="createEmployee.reporting_designation" :options="designations"
                     :multiple="false" :close-on-select="true" :clear-on-select="false" :preserve-search="true"
                     placeholder="Select Reporting Designation" class="font-11 mb-3"
@@ -454,22 +498,22 @@
       </div>
     </div>
     <div class="modal fade" id="EmployeeToggleModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Confirm Employee Status</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        Are you sure you want to <span id="empActionText"></span> "<span id="empRowName"></span>"?
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-dark" @click="confirmEmployeeToggle">Yes, Proceed</button>
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Confirm Employee Status</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            Are you sure you want to <span id="empActionText"></span> "<span id="empRowName"></span>"?
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-dark" @click="confirmEmployeeToggle">Yes, Proceed</button>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</div>
 
 
   </div>
@@ -519,10 +563,28 @@ const createEmployee = ref({
   company_field: "",
   signature: "",
 });
+watch(
+  () => createEmployee.reporting_to,
+  (newVal) => {
+    if (newVal) {
+      const matchedEmployee = employeeEmails.find(emp => emp.emp_mail_id === newVal);
+      if (matchedEmployee) {
+        createEmployee.reporting_designation = matchedEmployee.designation || '';
+        console.log(createEmployee.reporting_designation,newVal,createEmployee.reporting_to);
+      } else {
+        createEmployee.reporting_designation = '';
+      }
+    } else {
+      createEmployee.reporting_designation = '';
+    }
+  }
+);
 
 const selectedEmpRow = ref(null);
 const empActionText = ref('');
-
+const searchText = ref('')
+const showModal = ref(false)
+const filteredDesignations = ref([])
 
 const bulkdata = ref([])
 
@@ -1143,19 +1205,56 @@ const addDesignation = (newTag) => {
       });
   }
 };
-// const addReportingTo = (newTag) => {
-//     if (!tableData.value.map(dept => dept.emp_name).includes(newTag)) {
-//         tableData.value.push({ emp_name: newTag });
-//     }
-//     createEmployee.value.reporting_to = newTag;
-// };
+const newRole = ref('')
+watch(showModal, (visible) => {
+  if (visible) newRole.value = searchText.value
+})
 
-// const addReportingDesignation = (newTag) => {
-//     if (!designations.value.includes(newTag)) {
-//         designations.value.push(newTag);
-//     }
-//     createEmployee.value.reporting_designation = newTag;
-// };
+const filterDesignations = () => {
+  const search = searchText.value.toLowerCase().trim()
+  filteredDesignations.value = designations.value.filter((role) =>
+    role.toLowerCase().includes(search)
+  )
+}
+
+const selectDesignation = (role) => {
+  createEmployee.value.designation = role
+  searchText.value = role
+  filteredDesignations.value = []
+}
+
+const showCreateButton = computed(() => {
+  const text = searchText.value.trim()
+  return text && !designations.value.includes(text) && text.length > 1
+})
+
+const createRole = () => {
+  const roleName = searchText.value.trim()
+  if (!roleName) return
+
+  axiosInstance
+    .post(apis.resource + doctypes.roles, { role_name: roleName })
+    .then((response) => {
+      if (response.data?.role_name) {
+        axiosInstance
+          .post(apis.resource + doctypes.designations, {
+            role: response.data.role_name,
+          })
+          .then((res) => {
+            if (res.data?.role) {
+              designations.value.push(res.data.role)
+              createEmployee.value.designation = res.data.role
+              searchText.value = res.data.role
+              filteredDesignations.value = []
+              showModal.value = false
+            }
+          })
+      }
+    })
+    .catch((err) => {
+      console.error('Error creating role:', err)
+    })
+}
 const removeSignature = () => {
   createEmployee.value.signature = null; // Reset the signature
 
@@ -1164,24 +1263,7 @@ const removeSignature = () => {
     fileInput.value = "";
   }
 };
-// watch(
-//   () => createEmployee.value.reporting_to,
-//   (newValue) => {
-//     if (newValue) {
-//       const selectedEmployee = tableData.value.find(
-//         (emp) => emp.emp_mail_id === newValue
-//       );
-//       if (selectedEmployee) {
-//         createEmployee.value.reporting_designation =
-//           selectedEmployee.designation;
-//           console.log(createEmployee.value.reporting_designation,selectedEmployee.designation);
-//       } 
-//       // else {
-//       //   createEmployee.value.reporting_designation = ""; // Reset if no match found
-//       // }
-//     }
-//   }
-// );
+
 watch(
   () => createEmployee.value.reporting_to,
   (newValue) => {
@@ -1229,29 +1311,51 @@ function createEmplBtn() {
   designationData();
   employeeOptions();
 }
+
 function actionCreated(rowData, actionEvent) {
   if (actionEvent?.name === 'Edit Employee') {
     if (rowData) {
-      phoneError.value = ""
-      emailError.value=""
-      deptData();
+      // Reset errors
+      phoneError.value = "";
+      emailError.value = "";
+
+      // Assign base employee data (excluding department for now)
+      createEmployee.value = {
+        ...rowData,
+        department: "", // set after deptData loads
+      };
+
+
+  // Set searchText to current designation
+  searchText.value = rowData.designation || ''
+      // Load departments and set matching department object
+      deptData(() => {
+        const matchedDept = departmentsList.value.find(
+          (dept) => dept.name === rowData.department
+        );
+        createEmployee.value.department = matchedDept || "";
+      });
+
+      // Load designation and employee options
       designationData();
       employeeOptions();
-      createEmployee.value = { ...rowData };
 
-      // ✅ Set reporting_designation manually based on reporting_to
-      if (createEmployee.value.reporting_to) {
-        const selectedEmployee = tableData.value.find(
-          (emp) => emp.emp_mail_id === createEmployee.value.reporting_to
-        );
-        if (selectedEmployee) {
-          createEmployee.value.reporting_designation = selectedEmployee.designation;
-        }
-      }
-      isMasked.value = true
-      isEmailMasked.value = true
-      maskPhoneNumber()
-      maskEmail()
+      // Set reporting_designation if reporting_to is present
+      // if (rowData.reporting_to) {
+      //   const selectedEmployee = tableData.value.find(
+      //     (emp) => emp.emp_mail_id === rowData.reporting_to
+      //   );
+      //   // if (selectedEmployee) {
+      //   //   createEmployee.value.reporting_designation = selectedEmployee.designation;
+      //   // }
+      // }
+
+      // Mask phone/email and show modal
+      isMasked.value = true;
+      isEmailMasked.value = true;
+      maskPhoneNumber();
+      maskEmail();
+
       const modal = new bootstrap.Modal(document.getElementById('exampleModal'), {});
       modal.show();
     } else {
@@ -1260,10 +1364,21 @@ function actionCreated(rowData, actionEvent) {
     }
   }
 
-  // For enable action from the checkbox
-
+  // Handle other actions like enabling here if needed
 }
 
+
+// watch(
+//   () => createEmployee.reporting_to,
+//   (newVal) => {
+//     if (newVal) {
+//       const matchedEmployee = employeeEmails.find(emp => emp.emp_mail_id === newVal);
+//       createEmployee.reporting_designation = matchedEmployee?.designation || '';
+//     } else {
+//       createEmployee.reporting_designation = '';
+//     }
+//   }
+// );
 
 
 
@@ -1364,7 +1479,7 @@ const uploadFile = (file, field) => {
       console.error("Upload error:", error);
     });
 };
-function deptData() {
+function deptData(callback) {
   const queryParams = {
     fields: JSON.stringify(["*"]),
     limit_page_length: "None",
@@ -1375,13 +1490,15 @@ function deptData() {
     .get(apis.resource + doctypes.departments, { params: queryParams })
     .then((res) => {
       if (res.data) {
-        departmentsList.value = res.data.map((department) => department.name);
+        departmentsList.value = res.data;
+        if (callback) callback(); // Execute after fetch
       }
     })
     .catch((error) => {
       console.error("Error fetching department data:", error);
     });
 }
+
 
 // Handle updating the current value
 const PaginationUpdateValue = (itemsPerPage) => {
@@ -1436,31 +1553,31 @@ function inLineFiltersData(searchedData) {
 
 
 
-      clearTimeout(timeout.value); // Clear previous timeout
+  clearTimeout(timeout.value); // Clear previous timeout
 
-    timeout.value = setTimeout(() => {
-        // Initialize filters array
-        filterObj.value.filters = [];
+  timeout.value = setTimeout(() => {
+    // Initialize filters array
+    filterObj.value.filters = [];
 
-        // Loop through the table headers and build dynamic filters
-        tableheaders.value.forEach((header) => {
-            const key = header.td_key;
+    // Loop through the table headers and build dynamic filters
+    tableheaders.value.forEach((header) => {
+      const key = header.td_key;
 
-            if (searchedData[key]) {
-                // Push as an array of 3 items
-                filterObj.value.filters.push([key, "like", `%${searchedData[key]}%`]);
-            }
-        });
+      if (searchedData[key]) {
+        // Push as an array of 3 items
+        filterObj.value.filters.push([key, "like", `%${searchedData[key]}%`]);
+      }
+    });
 
-        // Call receivedForMe with or without filters
-        if (filterObj.value.filters.length) {
-          filterObj.value.limit_start = 0;
+    // Call receivedForMe with or without filters
+    if (filterObj.value.filters.length) {
+      filterObj.value.limit_start = 0;
 
-            employeeData(filterObj.value.filters);
-        } else {
-            employeeData();
-        }
-    }, 500);
+      employeeData(filterObj.value.filters);
+    } else {
+      employeeData();
+    }
+  }, 500);
 }
 
 function employeeData(data) {
@@ -1524,7 +1641,8 @@ function employeeData(data) {
     });
 }
 
-const employeeEmails=ref([]);
+const employeeEmails = ref([]);
+
 
 function employeeOptions() {
   const queryParams = {
@@ -1564,13 +1682,22 @@ function employeeOptions() {
       console.error("Error fetching department data:", error);
     });
 }
-
+watch(
+  () => createEmployee.value.reporting_to,
+  (newValue) => {
+    const selected = employeeEmails.value.find(
+      (emp) => emp.emp_mail_id === newValue
+    );
+    createEmployee.value.reporting_designation = selected?.designation ;
+  },
+  { immediate: true } // ✅ if editing existing record
+);
 function designationData() {
   const filters = [];
   const queryParams = {
     fields: JSON.stringify(["*"]),
     filters: JSON.stringify(filters),
-    limit_page_length:"None",
+    limit_page_length: "None",
     limit_start: filterObj.value.limit_start,
     order_by: "`tabWF Roles`.`creation` desc",
   };
@@ -1599,7 +1726,6 @@ watch(
   },
   { immediate: true }
 );
-
 function createEmpl() {
   if (!isFormFilled.value) {
     toast.error("Please fill all required fields", {
@@ -1608,18 +1734,22 @@ function createEmpl() {
     });
     return;
   }
-  if(emailError.value){
+  if (emailError.value) {
     toast.error("Employee Email Id already exists", {
       autoClose: 1000,
       transition: "zoom",
     });
-    return; 
+    return;
   }
+
   createEmployee.value.company_field = businessUnit.value;
+
   const dataObj = {
     ...createEmployee.value,
+    department: createEmployee.value.department?.name || "", // ✅ only send name
     doctype: doctypes.EzyEmployeeList,
   };
+  console.log(dataObj);
   loading.value = true;
 
   axiosInstance
@@ -1630,6 +1760,7 @@ function createEmpl() {
           autoClose: 500,
           transition: "zoom",
         });
+
         const modal = bootstrap.Modal.getInstance(
           document.getElementById("createDepartments")
         );
@@ -1648,33 +1779,70 @@ function createEmpl() {
       console.error("Error creating employee:", error);
     })
     .finally(() => {
-      loading.value = false; // Ensure loading is false regardless of success or failure
+      loading.value = false;
     });
 }
+
 function SaveEditEmp() {
+  if (!createEmployee.value.designation && searchText.value) {
+    createEmployee.value.designation = searchText.value;
+  }
+
+  // Auto-set reporting_designation based on selected reporting_to
+  if (createEmployee.value.reporting_to) {
+    const selectedReportee = employeeEmails.value.find(
+      emp => emp.emp_mail_id === createEmployee.value.reporting_to
+    );
+    if (selectedReportee) {
+      createEmployee.value.reporting_designation = selectedReportee.designation;
+    }
+  } else {
+    createEmployee.value.reporting_designation = ""; // Clear if reporting_to is empty
+  }
+
+  const payload = {
+    ...createEmployee.value,
+    department: createEmployee.value.department?.name || "", // Only send name
+  };
+
   axiosInstance
     .put(
       `${apis.resource}${doctypes.EzyEmployeeList}/${createEmployee.value.name}`,
-      createEmployee.value
+      payload
     )
     .then((response) => {
       if (response.data) {
         toast.success("Changes Saved", { autoClose: 500, transition: "zoom" });
-        employeeData();
+        employeeData(); // refresh list
       }
     })
     .catch((error) => {
-      console.error("Error saving categories:", error);
+      console.error("Error saving employee:", error);
     });
 }
+
 </script>
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 <style lang="scss" scoped>
+.list-group {
+  z-index: 1;
+}
+.zindex-dropdown {
+  z-index: 1055; /* higher than .modal's z-index */
+  max-height: 200px;
+  overflow-y: auto;
+}
+
 .global-table th {
   background-color: #f2f2f2 !important;
   text-align: left;
   color: #999999;
   font-size: 12px;
+}
+
+.modal.show {
+  display: block;
+  background: rgba(0, 0, 0, 0.6);
 }
 
 .filterbtn {

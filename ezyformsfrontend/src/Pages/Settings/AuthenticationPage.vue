@@ -77,19 +77,7 @@ const businessUnit = computed(() => {
 // //     Bussines_unit.value = storedBu;
 // //   }
 // });
-watch(
-  businessUnit,
-  (newVal) => {
-    if (newVal && newVal.length) {
-      Bussines_unit.value= newVal;
-     
-    enable_two_factor();
-    BussinesUnit();
-    email_account()
-    }
-  },
-  { immediate: true }
-);
+
 
 
 const handleToggle = (index) => {
@@ -229,6 +217,7 @@ const enable_two_factor = () => {
             console.error("Error fetching system settings:", error);
         });
 };
+
 const email_account = () => {
     const queryParams = {
         fields: JSON.stringify(["default_outgoing","enable_outgoing"]),
@@ -260,6 +249,20 @@ const email_account = () => {
             console.error("Error fetching system settings:", error);
         });
 };
+
+watch(
+  businessUnit,
+  (newVal) => {
+    if (newVal && newVal.length) {
+      Bussines_unit.value= newVal;
+     
+    BussinesUnit();
+    email_account()
+    enable_two_factor();
+    }
+  },
+  { immediate: true }
+);
 
 
 </script>

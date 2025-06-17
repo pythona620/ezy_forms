@@ -90,6 +90,7 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
             doc.module = "User Forms"
             doc.app = "ezy_forms"
             doc.custom = 1
+            doc.track_changes = 1
             doc.autoname = "naming_series:"
             doc.naming_rule ='By "Naming Series" field '
             cleaned_series = re.sub(r'[^a-zA-Z0-9#\-/\.]', '', series or '') if series else None

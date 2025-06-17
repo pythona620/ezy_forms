@@ -192,7 +192,7 @@ const router = useRouter();
 
 const newBusinessUnit = ref({ business_unit: "" });
 
-const filterObj = ref({ limitPageLength: 20, limit_start: 0 });
+const filterObj = ref({ limitPageLength: 20, limit_start: 0, filters:[] });
 const totalRecords = ref(0);
 const selectedRequest = ref({});
 const showRequest = ref(null);
