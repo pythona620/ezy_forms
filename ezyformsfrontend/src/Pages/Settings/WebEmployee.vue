@@ -3,17 +3,17 @@
 
 
     <div>
-      <div class="d-flex justify-content-between align-items-center py-2">
+      <div class="d-flex justify-content-between align-items-center mt-2 py-2">
         <div>
           <h1 class="m-0 font-13">
-            Employees
+            New Employees
             <!-- ({{ totalRecords }}) -->
           </h1>
           <!-- <p class="m-0 font-11 pt-1">
                 374 users
             </p> -->
         </div>
-        <div class="d-flex align-items-center gap-2">
+        <!-- <div class="d-flex align-items-center gap-2">
           <button type="button" class=" btn btn-light  CreateDepartments  font-12 " @click="bulkEmp">
             Import Employees
           </button>
@@ -21,7 +21,8 @@
             data-bs-target="#createDepartments" @click="createEmplBtn">
             Create Employee
           </button>
-        </div>
+        </div> -->
+        
         <div class="modal fade" id="createDepartments" data-bs-backdrop="static" tabindex="-1" data-bs-keyboard="false"
           aria-labelledby="createDepartmentsLabel" aria-hidden="true">
           <div class="modal-dialog modal-lg">
@@ -1581,7 +1582,7 @@ function inLineFiltersData(searchedData) {
 }
 
 function employeeData(data) {
-  const filters = [["company_field", "like", `%${newbusiness.value}%`],["is_web_form","=","0"]];
+  const filters = [["company_field", "like", `%${newbusiness.value}%`],["is_web_form","=","1"]];
   if (data) {
     filters.push(...data);
   }

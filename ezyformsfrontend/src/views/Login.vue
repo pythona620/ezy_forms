@@ -38,13 +38,14 @@
 
         <br />
         <button :disabled="!showPwdField" @click="Login" type="submit"
-          class="border-0 btn btn-dark button w-100 py-2 font-13 text-white rounded-1">
+          class="border-0 btn btn-dark button w-100 py-2 mb-4 font-13 text-white rounded-1">
           <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
           <span v-if="!loading">Log In</span>
         </button>
-      </div>
-    </div>
 
+      </div>
+      <div class="font-13 m-0 cursor-pointer text-center" @click="OpenSignUp"><span class="sign">Not a user? Sign Up</span></div>
+    </div>
 
     <div v-if="showOtpPage">
       <div class="d-flex gap-2 p-2 justify-content-center align-items-center">
@@ -91,6 +92,49 @@
 
         </div>
       </div>
+    </div>
+
+     <div v-if="ShowSignUpPage" class="input-div p-5">
+      <div class="d-flex gap-2 p-2 justify-content-center align-items-center">
+        <div><img class="imgmix" src="../assets/Final-logo-ezyforms-removebg-preview.png" /></div>
+      </div>
+      <div>
+        <div class="mb-2">
+          <label class="font-13" for="email">Email</label>
+          <input class="form-control m-0" type="email" id="email" v-model="SignUpdata.email" @blur="validateEmail" :class="{ 'is-invalid': errors.email }" />
+          <div class="invalid-feedback font-11 mt-1" v-if="errors.email">
+            {{ errors.email }}
+          </div>
+        </div>
+        <div class="mb-2">
+          <label class="font-13" for="full_name">User Name</label>
+          <input type="text" class="form-control m-0 bg-white" id="name" v-model="SignUpdata.full_name" @blur="validateFullName" :class="{ 'is-invalid': errors.full_name }" />
+          <div class="invalid-feedback font-11 mt-1" v-if="errors.full_name">
+            {{ errors.full_name }}
+          </div>
+        </div>
+        <div class="mb-2">
+          <label class="font-13" for="emp_code">Employee Id</label>
+          <input type="text" class="form-control m-0 bg-white" id="emp_code" v-model="SignUpdata.emp_code" @blur="validateEmpCode" :class="{ 'is-invalid': errors.emp_code }" />
+          <div class="invalid-feedback font-11 mt-1" v-if="errors.emp_code">
+            {{ errors.emp_code }}
+          </div>
+        </div>
+        <div class="mb-2">
+          <label class="font-13" for="emp_phone">Phone Number</label>
+          <input type="text" class="form-control m-0 bg-white" id="emp_phone" v-model="SignUpdata.emp_phone" @input="filterPhoneInput" @blur="validatePhone" :class="{ 'is-invalid': errors.emp_phone }" />
+          <div class="invalid-feedback font-11 mt-1" v-if="errors.emp_phone">
+            {{ errors.emp_phone }}
+          </div>
+        </div>
+        
+      </div>
+      <div>
+        <button type="submit" :disabled="!SignUpdata.email || !SignUpdata.full_name || !SignUpdata.emp_code || !SignUpdata.emp_phone" @click="SignUp()" class="border-0 btn btn-dark button w-100 mb-4 py-2 font-13 text-white rounded-1">
+          Sign Up
+        </button>
+      </div>
+      <div class="font-13 m-0 cursor-pointer text-center" @click="OpenLogin"><span class="sign">Existing user? Log In</span></div>
     </div>
 
     <div class="modal fade" id="changePassword" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
@@ -158,6 +202,9 @@ export default {
         usr: "",
         pwd: "",
       },
+      SignUpdata: {
+        redirect_to: '/app/website-settings/Website Settings',
+      },
       storeData: [],
       errors: {},
       email: "",
@@ -171,11 +218,13 @@ export default {
       loading: false,
       showOtpPage: false,
       ShowLoginPage: true,
+      ShowSignUpPage: false,
       otp: ["", "", "", "", "", ""],
       errorMessage: "",
       storeData: [],
       isFirstLogin: "",
-      twoFactorAuth: ""
+      twoFactorAuth: "",
+      enable_check:""
       // timeLeft: 60,
       // timer: null,
       // resentMessage: "",
@@ -207,6 +256,63 @@ export default {
         this.passwordError = "Password must be at least 6 characters long.";
       } else {
         this.passwordError = "";
+      }
+    },
+     validateEmail() {
+      const email = this.SignUpdata.email;
+      const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      if (!email) {
+        this.errors.email = "Email is required *";
+      } else if (!regex.test(email)) {
+        this.errors.email = "Please enter a valid email address *";
+      } else {
+        delete this.errors.email;
+      }
+    },
+    validatePhone() {
+      const phone = this.SignUpdata.emp_phone;
+      if (!phone) {
+        this.errors.emp_phone = "Phone number is required *";
+      } else if (phone.length !== 10) {
+        this.errors.emp_phone = "Phone number must be 10 digits *";
+      } else {
+        delete this.errors.emp_phone;
+      }
+    },
+
+    filterPhoneInput() {
+    // Allow only digits and limit to 10 characters
+      this.SignUpdata.emp_phone = this.SignUpdata.emp_phone.replace(/\D/g, '').slice(0, 10);
+    },
+
+validateEmpCode() {
+  const url = window.location.href;
+
+  // Trim spaces and update the actual data
+  this.SignUpdata.emp_code = this.SignUpdata.emp_code.trim();
+
+  if (!this.SignUpdata.emp_code) {
+    this.errors.emp_code = "Employee Id is required *";
+  } else if (url.includes('ncomr')) {
+    if (!this.SignUpdata.emp_code.startsWith('NICO-')) {
+      this.errors.emp_code = "Employee Id must start with 'NICO-'";
+    } else {
+      this.errors.emp_code = '';
+    }
+  } else {
+    this.errors.emp_code = '';
+  }
+},
+
+
+    validateFullName(){
+      this.SignUpdata.full_name = this.SignUpdata.full_name.trim();
+      if (!this.SignUpdata.full_name) {
+        this.errors.full_name = "User Name is required *";
+      } 
+      else {
+        delete this.errors.full_name;
       }
     },
 
@@ -247,6 +353,16 @@ export default {
         this.otp[index] = "";
       }
     },
+    OpenSignUp(){
+      this.ShowLoginPage = false;
+      this.showOtpPage = false;
+      this.ShowSignUpPage=true
+    },
+    OpenLogin(){
+      this.ShowLoginPage = true;
+      this.showOtpPage = false;
+      this.ShowSignUpPage=false;
+    },
     // validateOtp() {
     //   const otpValue = this.otp.join("");
 
@@ -279,6 +395,41 @@ export default {
     //   this.resentMessage = "Resent OTP successfully!";
     //   this.startCountdown();
     // },
+
+    SignUp() {
+      this.validateEmail()
+      this.validatePhone()
+      this.validateEmpCode()
+      if (!this.errors.email && !this.errors.emp_phone && !this.errors.emp_code) {
+        axiosInstance
+          .post(apis.signUp, this.SignUpdata)
+          .then((res) => {
+            if (res) {
+              // console.log("signup=", res);
+              if(res.message=='Already Registered'){
+                toast.error(res.message)
+              }
+              else if(res.message=='Please contact your IT Manager to verify your sign-up'){
+                toast.success(res.message)
+                this.ShowLoginPage = true;
+                this.showOtpPage = false;
+                this.ShowSignUpPage=false;
+              }
+              else{
+                toast.success(res.message)
+              }
+              const modal = bootstrap.Modal.getInstance(
+                document.getElementById("EmployeeToggleModal")
+              );
+              modal.hide();
+            }
+  
+          })
+          .catch((error) => {
+            console.error("Login error: ", error);
+          })
+      }
+    },
 
     backTologin() {
       this.ShowLoginPage = true;
@@ -342,13 +493,17 @@ export default {
             this.isFirstLogin = res.message.is_first_login;
             this.twoFactorAuth = res.message.enable_two_factor_auth
             this.user_id_name = res.message.name;
-            if (this.isFirstLogin === 0) {
+            this.enableCheck=res.message.enable_check
+            if (this.isFirstLogin === 0 && this.enableCheck===1) {
               const modal = new bootstrap.Modal(
                 document.getElementById("changePassword")
               );
               modal.show();
               this.showPwdField = false;
               this.showOtpPage = false;
+            }
+            if(this.isFirstLogin===0 && this.enableCheck==0){
+              toast.error("User is disabled. Please contact your IT Manager to verify your sign-up")
             }
             if (this.isFirstLogin === 1) {
               this.showPwdField = true;
@@ -721,5 +876,9 @@ input:focus {
     font-size: 12px;
     color: var(--bs-danger-text);
   }
+}
+.sign:hover{
+  // border-bottom: 1px solid black;
+  cursor: pointer;
 }
 </style>

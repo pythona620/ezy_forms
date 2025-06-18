@@ -189,9 +189,10 @@ doc_events = {
 # Overriding Methods
 # ------------------------------
 #
-# override_whitelisted_methods = {
-# 	"frappe.desk.doctype.event.event.get_events": "ezy_forms.event.get_events"
-# }
+override_whitelisted_methods = {
+    # "frappe.desk.doctype.event.event.get_events": "ezy_forms.event.get_events"
+"frappe.core.doctype.user.user.sign_up":"ezy_forms.ezy_custom_forms.custom_script.v1.sign_up.sign_up"
+}
 #
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,

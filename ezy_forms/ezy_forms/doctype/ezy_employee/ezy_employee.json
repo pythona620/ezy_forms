@@ -11,6 +11,7 @@
   "profile_image",
   "company_field",
   "emp_code",
+  "is_web_form",
   "emp_name",
   "emp_phone",
   "emp_mail_id",
@@ -82,6 +83,11 @@
    "fieldname": "enable",
    "fieldtype": "Check",
    "label": "enable"
+  },
+  {
+   "fieldname": "is_web_form",
+   "fieldtype": "Check",
+   "label": "Is Web Form"
   },
   {
    "fieldname": "profile_image",

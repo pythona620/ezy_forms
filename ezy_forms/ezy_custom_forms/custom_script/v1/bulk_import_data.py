@@ -40,6 +40,7 @@ def import_bulk_data(file: str | None, doctype: str | None):
         })
         data_import_doc.insert(ignore_permissions=True)
         frappe.db.set_value("Data Import", data_import_doc.name, "import_file", file)
+        frappe.db.set_value("Data Import", data_import_doc.name, "status", "Pending")  # keep it pending
         frappe.db.commit()
 
         # Get template preview and logs
@@ -47,56 +48,91 @@ def import_bulk_data(file: str | None, doctype: str | None):
             templet = get_preview_from_template(data_import=data_import_doc.name, import_file=file)
             get_logs = get_import_logs(data_import=data_import_doc.name)
         except Exception as e:
-            frappe.log_error(f"Preview/Logs error: {str(e)}")
+
             frappe.response["data"] = {"message": _("Preview/Logs error: ") + str(e), "success": False}
             return
 
         template_warnings = [warning["message"] for warning in templet.get("warnings", [])]
         log_warnings = get_logs.get("messages", []) if isinstance(get_logs, dict) else []
 
-        # Handle missing Ezy Departments
+        # Handle missing Ezy Departments and WF Roles
         missing_departments = []
         created_departments = []
+        missing_roles = []
+        created_roles = []
 
         for warning in template_warnings:
             if "do not exist for Ezy Departments" in warning:
                 dept_list = warning.split(":")[1].strip().split(", ")
                 missing_departments.extend(dept_list)
+            elif "do not exist for WF Roles" in warning:
+                role_list = warning.split(":")[1].strip().split(", ")
+                missing_roles.extend(role_list)
 
-        if missing_departments:
-            ignored, content = get_file(file_doc.file_url)
-            df = pd.read_excel(content, engine="openpyxl")
+        # Read Excel
+        ignored, content = get_file(file_doc.file_url)
+        df = pd.read_excel(content, engine="openpyxl")
 
-            for dept_code_raw in missing_departments:
-                parts = dept_code_raw.split("-")
-                dept_code = f"{parts[0]}-{parts[-1]}" if len(parts) >= 3 else dept_code_raw
-
-                try:
-                    row = df[df["Department"] == dept_code_raw].iloc[0]
-                    business_unit = row.get("Company Field", "")
-                except Exception as e:
-                    frappe.log_error(f"Error extracting department from Excel: {e}")
+        # Create missing departments
+        for dept_code_raw in missing_departments:
+            try:
+                if "-" not in dept_code_raw:
+                    frappe.log_error(f"Invalid department format: {dept_code_raw}")
                     continue
 
-                if not frappe.db.exists("Ezy Departments", {"department_code": dept_code}):
+                parts = dept_code_raw.split("-", 1)
+                business_unit = parts[0]
+                department_code = parts[1]
+                department_name = department_code
+
+                if not frappe.db.exists("Ezy Departments", {"department_code": department_code}):
                     frappe.get_doc({
                         "doctype": "Ezy Departments",
-                        "department_code": dept_code,
-                        "department_name": dept_code,
+                        "department_code": department_code,
+                        "department_name": department_name,
                         "business_unit": business_unit
                     }).insert(ignore_permissions=True)
                     created_departments.append(dept_code_raw)
 
-        # Remove warnings for departments that were created
+            except Exception as e:
+                frappe.log_error(f"Error creating department from {dept_code_raw}: {str(e)}")
+
+        # Create missing roles
+        for role in missing_roles:
+            try:
+                if not frappe.db.exists("Role", {"name": role}):
+                    frappe.get_doc({
+                        "doctype": "Role",
+                        "role_name": role
+                    }).insert(ignore_permissions=True)
+
+                if not frappe.db.exists("WF Roles", {"role": role}):
+                    frappe.get_doc({
+                        "doctype": "WF Roles",
+                        "role": role,
+                        "role_name": role
+                    }).insert(ignore_permissions=True)
+
+                created_roles.append(role)
+            except Exception as e:
+                frappe.log_error(f"Error creating WF Role {role}: {str(e)}")
+
+        # Clean up warnings
         cleaned_template_warnings = []
         for warning in template_warnings:
             if "do not exist for Ezy Departments" in warning:
-                # Extract dept list and filter out created ones
                 dept_part = warning.split(":")[1].strip()
                 remaining_depts = [d for d in dept_part.split(", ") if d not in created_departments]
                 if remaining_depts:
                     cleaned_template_warnings.append(
                         f"The following values do not exist for Ezy Departments: {', '.join(remaining_depts)}"
+                    )
+            elif "do not exist for WF Roles" in warning:
+                role_part = warning.split(":")[1].strip()
+                remaining_roles = [r for r in role_part.split(", ") if r not in created_roles]
+                if remaining_roles:
+                    cleaned_template_warnings.append(
+                        f"The following values do not exist for WF Roles: {', '.join(remaining_roles)}"
                     )
             else:
                 cleaned_template_warnings.append(warning)
@@ -115,7 +151,7 @@ def import_bulk_data(file: str | None, doctype: str | None):
             }
             return
 
-        # Get import results
+        # Import results
         import_status = frappe.db.get_value("Data Import", data_import_doc.name, "status")
         logs = frappe.get_all("Data Import Log",
                               filters={"data_import": data_import_doc.name},
