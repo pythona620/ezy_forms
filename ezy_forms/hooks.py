@@ -152,9 +152,6 @@ doc_events = {
 "NICO ROOM CHECK LIST":{
     "after_insert":"ezy_forms.ezy_custom_forms.custom_script.mail.email_pdf_send"
     },
-"User":{
-        "after_insert":"ezy_forms.ezy_custom_forms.custom_script.v1.sign_up.employee_creation"
-    }
 }
 
 # Scheduled Tasks
