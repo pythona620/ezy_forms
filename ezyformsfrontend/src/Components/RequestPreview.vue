@@ -85,7 +85,7 @@
                                                                     :value="option"
                                                                     :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
                                                                     :id="`${option}-${index}`"
-                                                                    :checked="field.value === option" @change="
+                                                                    :checked="(JSON.parse(field.value || '[]') || []).includes(option)" @change="
                                                                         (event) =>
                                                                             logFieldValue(
                                                                                 event,
@@ -178,7 +178,7 @@
                                                 </div>
                                             </template>
                                             <template v-else-if="field.fieldtype == 'Check' && field.fieldname !== 'auto_calculations'">
-                                                <input type="checkbox" :value="field.value"
+                                                <input type="checkbox" :value="field.value" :checked="field.value"
                                                     :placeholder="'Enter ' + field.label" :name="'field-' +
                                                         sectionIndex +
                                                         '-' +
