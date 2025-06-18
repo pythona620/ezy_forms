@@ -9,16 +9,17 @@ from ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions impor
 class EzyEmployee(Document):
 	def after_insert(self):
 		is_email_account_set = frappe.db.get_all("Email Account",{"enable_outgoing":["=",1],"default_outgoing":["=",1]})
+		if not frappe.db.exists("User",{"email":self.emp_mail_id}):
 		###### Employee updating in User doc
-		user_doc = frappe.new_doc("User")
-		user_doc.username = self.emp_name
-		user_doc.email = self.emp_mail_id
-		user_doc.first_name = self.emp_name.split(" ")[0]
-		user_doc.send_welcome_email = 1 if len(is_email_account_set) > 0 else 0
-		user_doc.insert(ignore_permissions=True)
-		frappe.db.commit()
-		user_doc.reload()
-
+			user_doc = frappe.new_doc("User")
+			user_doc.username = self.emp_name
+			user_doc.email = self.emp_mail_id
+			user_doc.first_name = self.emp_name.split(" ")[0]
+			user_doc.send_welcome_email = 1 if len(is_email_account_set) > 0 else 0
+			user_doc.insert(ignore_permissions=True)
+			frappe.db.commit()
+			user_doc.reload()
+ 
 		if self.designation:
 			if not frappe.db.exists("Role",{"role_name":self.designation}):
 				adding_role_doc = frappe.new_doc("Role")
@@ -40,12 +41,13 @@ class EzyEmployee(Document):
 					activating_perms(doc_name,self.designation)
 			bench_migrating_from_code()
 		###### Adding role to User after creating role in Role DocType
-		user_doc = frappe.get_doc("User",self.emp_mail_id)
-		user_doc.append("roles",{"role":self.designation})
-		user_doc.save(ignore_permissions=True)
-		frappe.db.commit()
-		user_doc.reload()
-
+		if self.designation:
+			user_doc = frappe.get_doc("User",self.emp_mail_id)
+			user_doc.append("roles",{"role":self.designation})
+			user_doc.save(ignore_permissions=True)
+			frappe.db.commit()
+			user_doc.reload()
+ 
 		if self.reporting_designation:
 			if not frappe.db.exists("Role",{"role_name":self.reporting_designation}):
 				adding_role_doc = frappe.new_doc("Role")
@@ -57,7 +59,7 @@ class EzyEmployee(Document):
 				adding_role_doc.role = self.reporting_designation
 				adding_role_doc.insert(ignore_permissions=True)
 				frappe.db.commit()
-		if self.company_field:
+		if self.company_field and self.designation:
 			if not frappe.db.exists("WF Role Matrix",{"name":self.company_field}):
 				role_matrix = frappe.new_doc("WF Role Matrix")
 				role_matrix.property = self.company_field
