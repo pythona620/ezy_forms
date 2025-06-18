@@ -108,7 +108,10 @@
         </div>
         <div class="mb-2">
           <label class="font-13" for="full_name">User Name</label>
-          <input type="text" class="form-control m-0 bg-white" id="name" v-model="SignUpdata.full_name" />
+          <input type="text" class="form-control m-0 bg-white" id="name" v-model="SignUpdata.full_name" @blur="validateFullName" :class="{ 'is-invalid': errors.full_name }" />
+          <div class="invalid-feedback font-11 mt-1" v-if="errors.full_name">
+            {{ errors.full_name }}
+          </div>
         </div>
         <div class="mb-2">
           <label class="font-13" for="emp_code">Employee Id</label>
@@ -284,23 +287,32 @@ export default {
     },
 
 validateEmpCode() {
-      const url = window.location.href;
-      // const url="ncomr.ezyforms.co/ezyformsfrontend#/";
+  const url = window.location.href;
 
-        if(!this.SignUpdata.emp_code){
-            this.errors.emp_code = "Employee Id is required *";
-        } 
-      // Apply validation only if URL contains 'ncomr'
-        else if (url.includes('ncomr')) {
-        const code = this.SignUpdata.emp_code.trim();
-        if (!code.startsWith('NICO-')) {
-          this.errors.emp_code = "Employee Id must start with 'NICO-'";
-        } else {
-          this.errors.emp_code = '';
-        }
-      }
+  // Trim spaces and update the actual data
+  this.SignUpdata.emp_code = this.SignUpdata.emp_code.trim();
+
+  if (!this.SignUpdata.emp_code) {
+    this.errors.emp_code = "Employee Id is required *";
+  } else if (url.includes('ncomr')) {
+    if (!this.SignUpdata.emp_code.startsWith('NICO-')) {
+      this.errors.emp_code = "Employee Id must start with 'NICO-'";
+    } else {
+      this.errors.emp_code = '';
+    }
+  } else {
+    this.errors.emp_code = '';
+  }
+},
+
+
+    validateFullName(){
+      this.SignUpdata.full_name = this.SignUpdata.full_name.trim();
+      if (!this.SignUpdata.full_name) {
+        this.errors.full_name = "User Name is required *";
+      } 
       else {
-        this.errors.emp_code = '';
+        delete this.errors.full_name;
       }
     },
 
@@ -394,10 +406,18 @@ validateEmpCode() {
           .then((res) => {
             if (res) {
               // console.log("signup=", res);
-              this.ShowLoginPage = true;
-              this.showOtpPage = false;
-              this.ShowSignUpPage=false;
-              toast.success("Please contact your IT Manager to verify your sign-up")
+              if(res.message=='Already Registered'){
+                toast.error(res.message)
+              }
+              else if(res.message=='Please contact your IT Manager to verify your sign-up'){
+                toast.success(res.message)
+                this.ShowLoginPage = true;
+                this.showOtpPage = false;
+                this.ShowSignUpPage=false;
+              }
+              else{
+                toast.success(res.message)
+              }
               const modal = bootstrap.Modal.getInstance(
                 document.getElementById("EmployeeToggleModal")
               );
