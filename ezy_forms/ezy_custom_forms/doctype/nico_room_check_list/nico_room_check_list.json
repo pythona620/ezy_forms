@@ -461,8 +461,9 @@
   },
   {
    "fieldname": "proof_upload",
-   "fieldtype": "Attach",
-   "label": "Proof Upload"
+   "fieldtype": "Table",
+   "label": "Proof Upload",
+   "options": "Attachments"
   },
   {
    "fieldname": "signature",
@@ -472,7 +473,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-06-02 17:26:29.470691",
+ "modified": "2025-06-13 14:52:15.344512",
  "modified_by": "Administrator",
  "module": "ezy_custom_forms",
  "name": "NICO ROOM CHECK LIST",
