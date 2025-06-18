@@ -63,6 +63,6 @@ def sign_up(email: str, full_name: str,emp_phone:str|None,emp_code:str|None, red
 
 		if redirect_to:
 			frappe.cache.hset("redirect_after_login", user.name, redirect_to)
-	return 2, _("Please contact your IT Manager to verify your sign-up")
+	return _("Please contact your IT Manager to verify your sign-up")
 
 
