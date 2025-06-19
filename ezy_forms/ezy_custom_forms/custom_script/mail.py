@@ -18,8 +18,9 @@ def email_pdf_send(doc,method=None):
 		)
 		
 		sender = frappe.db.get_list("Email Account",{"enable_outgoing":1,"default_outgoing":1},["email_id"],ignore_permissions=True)
+		mail = frappe.db.get_single_value("Notifications Mail", "mail_id")
 		frappe.sendmail(
-		recipients= "h6714.hod@accor.com",
+		recipients= mail,
 		sender=sender[0]['email_id'],
 		message=f"Dear Team, {doc.doctype} has been submitted.",
     	subject=f"{doc.doctype} Form",
@@ -30,3 +31,28 @@ def email_pdf_send(doc,method=None):
 		
 	except Exception as e:
 		frappe.log_error("email_pdf_send",e)
+  
+  
+
+
+import shutil
+ 
+def make_file_public_after_insert(doc, method=None):
+    if doc.is_private:
+        # Extract the filename
+        filename = os.path.basename(doc.file_url)
+ 
+        # Construct full source and target paths
+        private_path = frappe.get_site_path("private", "files", filename)
+        public_path = frappe.get_site_path("public", "files", filename)
+ 
+        # Ensure the private file exists before moving
+        if os.path.exists(private_path):
+            shutil.move(private_path, public_path)
+ 
+            # Update file doc
+            doc.db_set("is_private", 0)
+            doc.db_set("file_url", f"/files/{filename}")
+        else:
+            frappe.log_error(f"File not found at {private_path}", "make_file_public_after_insert Error")
+            frappe.throw(f"Private file {filename} does not exist.")
