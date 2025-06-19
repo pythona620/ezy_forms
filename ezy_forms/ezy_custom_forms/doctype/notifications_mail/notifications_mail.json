@@ -5,19 +5,26 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "mail_id"
+  "mail_id",
+  "sign_up_approver"
  ],
  "fields": [
   {
    "fieldname": "mail_id",
    "fieldtype": "Data",
    "label": "Mail Id"
+  },
+  {
+   "fieldname": "sign_up_approver",
+   "fieldtype": "Data",
+   "label": "Sign up Approver",
+   "options": "Email"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-06-13 14:26:04.980658",
+ "modified": "2025-06-19 10:21:56.208307",
  "modified_by": "Administrator",
  "module": "ezy_custom_forms",
  "name": "Notifications Mail",
@@ -34,6 +41,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []

@@ -2,7 +2,7 @@ import frappe
 from frappe.website.utils import get_home_page, is_signup_disabled
 from frappe.utils import escape_html
 from frappe import _
- 
+
 @frappe.whitelist(allow_guest=True)
 def sign_up(email: str, full_name: str,emp_phone:str|None,emp_code:str|None, redirect_to: str|None) -> tuple[int, str]:
 	if is_signup_disabled():
@@ -55,7 +55,7 @@ def sign_up(email: str, full_name: str,emp_phone:str|None,emp_code:str|None, red
 			})
 			doc.insert(ignore_permissions=True)
 			frappe.db.commit()
-
+			send_mail_when_user_signup(emp_name = full_name,emp_mail_id=email)
 		# set default signup role as per Portal Settings
 		default_role = frappe.db.get_single_value("Portal Settings", "default_role")
 		if default_role:
@@ -63,6 +63,32 @@ def sign_up(email: str, full_name: str,emp_phone:str|None,emp_code:str|None, red
 
 		if redirect_to:
 			frappe.cache.hset("redirect_after_login", user.name, redirect_to)
-	return _("Please contact your IT Manager to verify your sign-up")
+	return  _("Please contact your IT Manager to verify your sign-up")
 
 
+
+
+@frappe.whitelist()
+def send_mail_when_user_signup(emp_name:str|None,emp_mail_id:str|None):
+	recipction_mail = frappe.get_value("Notifications Mail","Notifications Mail",'sign_up_approver')
+	if recipction_mail:
+		subject = "Employee sign-up Attempt – Access Enablement Required"
+		message = f"""
+		Dear IT Team,<br><br>
+		An employee has submitted a sign-up request for the site. Please find the details below:<br><br>
+		<ul>
+			<li><strong>Email ID:</strong> {emp_mail_id}</li>
+			<li><strong>Employee Name:</strong> {emp_name}</li>
+		</ul>
+  		<br>
+		Kindly initiate the necessary steps to enable their access.<br><br>
+		Thank you for your support.<br>
+		Best regards,<br>
+		IT Team
+		"""
+		frappe.sendmail(
+			recipients=[recipction_mail],
+			subject=subject,
+			message=message,
+			now = True
+		)
