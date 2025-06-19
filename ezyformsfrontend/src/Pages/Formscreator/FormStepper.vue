@@ -526,8 +526,10 @@
                                               fieldIndex
                                             )
                                             " @mouseleave="resetHoveredField" class="dynamicField m-1 draggable-item"
-                                          draggable="true"
-                                          @dragstart="handleDragStart($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
+                                         draggable="true"
+       @dragstart="handleDragStart($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+       @dragover.prevent
+       @drop="handleFieldDropAtIndex($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
 
                                           <div class="drop-zone" @dragover.prevent
                                             @drop="(e) => handleFieldDropAtIndex(e, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
@@ -886,6 +888,11 @@
                                             </div>
                                           </div>
                                         </div>
+                                        <div class="drop-zone-bottom"
+       @dragover.prevent
+       @drop="handleFieldDropAtIndex($event, blockIndex, sectionIndex, rowIndex, columnIndex, column.fields.length)"
+       style="background-color: #f0f0f0; border: 1px dashed #ccc; margin: 4px;">
+  </div>
 
                                         <div class="drop-zone" @dragover.prevent
                                           @drop="(e) => handleFieldDropAtIndex(e, blockIndex, sectionIndex, rowIndex, columnIndex, fields.length)"
@@ -2915,6 +2922,7 @@ function SetPrintFormatFn() {
 function deptData() {
   const queryParams = {
     fields: JSON.stringify(["*"]),
+    limit_page_length:"none"
   };
 
   axiosInstance
