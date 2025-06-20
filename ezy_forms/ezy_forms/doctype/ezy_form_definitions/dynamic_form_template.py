@@ -1269,7 +1269,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                         data_list[child_table_name] = processed_child_records
 
                         #########################
-                json_object = [ field for field in json_object if ("value" not in field   or field["value"] not in [None, ""]  ) and field.get("fieldname", "") not in ["approved_on", "approved_by", "approver"] ]
+                json_object = list(filter(lambda dict :False if (('value' in dict) and not(dict.get('value')) and (dict.get('fieldname').startswith('approved') or dict.get('fieldname').startswith('approver'))) else True,json_object))
                 form_name = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_name")
                 html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_name,child_data=data_list,child_table_data=None,business_unit=business_unit,wf_generated_request_id=wf_generated_request_id,mail_attachment=mail_attachment)
                 
@@ -1280,9 +1280,6 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
             absolute_pdf_path = os.path.join(get_bench_path(), "sites", cstr(frappe.local.site), pdf_path)
             opts={"orientation":"Landscape"if is_landscape else"Portrait"}
             convert_html_to_pdf(html_content=html_view,pdf_path=absolute_pdf_path,options=opts)
- 
-            
-    
             new_file = frappe.get_doc({
                 "doctype": "File",
                 "file_name": pdf_filename,
