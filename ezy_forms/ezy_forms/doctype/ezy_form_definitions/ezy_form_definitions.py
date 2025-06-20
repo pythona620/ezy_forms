@@ -353,13 +353,15 @@ def add_child_doctype(form_short_name: str, as_a_block: str, fields: list[dict],
                 incoming_fieldnames.add(clean_fieldname)
 
                 new_field_data = {
-                    "label": field.get("label"),
-                    "fieldtype": field.get("fieldtype"),
-                    "options": ("\n" + field["options"]) if field.get("fieldtype") == "Select" and field.get("options") else field.get("options"),
-                    "description": field.get("description"),
-                    "idx": field.get("idx"),
-                }
-
+                            "label": field.get("label"),
+                            "fieldtype": field.get("fieldtype"),
+                            "options": (
+                                ("\n" if not field["options"].startswith("\n") else "") +
+                                "\n".join([opt.strip() for opt in field["options"].split("\n") if opt.strip()])
+                            ) if field.get("fieldtype") == "Select" and field.get("options") else field.get("options"),
+                            "description": field.get("description"),
+                            "idx": field.get("idx"),
+                        }
                 if clean_fieldname in existing_fields_dict:
                     # Update existing field
                     existing_field = existing_fields_dict[clean_fieldname]
