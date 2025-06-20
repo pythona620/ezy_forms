@@ -5,8 +5,9 @@ from frappe import _
 
 @frappe.whitelist(allow_guest=True)
 def sign_up(email: str, full_name: str,emp_phone:str|None,emp_code:str|None, redirect_to: str|None) -> tuple[int, str]:
+    
 	if is_signup_disabled():
-		frappe.throw(_("Sign Up is disabled"), title=_("Not Allowed"))
+		return _("Sign Up is disabled")
  
 	user = frappe.db.get("User", {"email": email})
 	if user:
