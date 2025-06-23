@@ -105,3 +105,15 @@ def role_based_accessible_requests(role:str,business_unit:str):
 		frappe.db.rollback()
 		frappe.throw(str(e))
 		return {"success": False, "message": str(e)}
+
+
+
+
+
+@frappe.whitelist()
+def employee_last_login_activate(login_manager): 
+	frappe.db.set_value('Ezy Employee',{"emp_mail_id":frappe.session.user},"last_login",frappe.utils.now())
+	frappe.db.set_value('Ezy Employee',{"emp_mail_id":frappe.session.user},"last_ip",frappe.local.request_ip)
+	frappe.db.commit()
+ 
+    
