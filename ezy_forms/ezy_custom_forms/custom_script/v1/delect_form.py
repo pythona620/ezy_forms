@@ -6,7 +6,10 @@ def delete_form_and_related(form_short_name=None):
     # Delete Ezy Form Definition
     try:    
         ezy_form_definition = frappe.get_doc("Ezy Form Definitions", {"form_short_name": form_short_name})
+        activate_log = frappe.get_doc("WF Activity Log",ezy_form_definition.name)
+        frappe.delete_doc("WF Activity Log",activate_log.name, force=1)
         ezy_form_definition.delete()
+        frappe.db.commit()
     except frappe.DoesNotExistError:
         pass
 
@@ -29,3 +32,4 @@ def delete_form_and_related(form_short_name=None):
         pass
     frappe.db.commit()
     return f"Deleted all records and DocType related to: {form_short_name}"
+    
