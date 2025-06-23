@@ -16,7 +16,10 @@
   "emp_phone",
   "emp_mail_id",
   "department",
+  "acknowledge_on",
   "designation",
+  "last_login",
+  "last_ip",
   "reporting_to",
   "reporting_designation",
   "signature"
@@ -32,6 +35,21 @@
    "fieldtype": "Data",
    "label": "Emp Name"
   },
+  {
+    "fieldname": "last_login",
+    "fieldtype": "Datetime",
+    "label": "Last Log in"
+   },
+   {
+    "fieldname": "last_ip",
+    "fieldtype": "Data",
+    "label": "IP"
+   },
+   {
+    "fieldname": "acknowledge_on",
+    "fieldtype": "Datetime",
+    "label": "Acknowledge On"
+   },
   {
    "fieldname": "emp_mail_id",
    "fieldtype": "Data",

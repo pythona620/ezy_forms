@@ -641,7 +641,7 @@ template_str = """
                                     
                                         {% if field.fieldtype == 'Attach' and 'approved_by' in field.fieldname|lower  %}
                                             <label for="{{ field.fieldname }}">
-                                                Approved By <span style="padding-left:2px; font-size: 13px;">:</span>
+                                            
                                             </label>
                                         {% elif field.fieldtype != 'Attach' and field.fieldname != 'auto_calculations' %}
                                             <label for="{{ field.fieldname }}">
@@ -750,9 +750,9 @@ template_str = """
                                                     {% endfor %}
                                                 </div>
                                             {% endif %}
-                                        {% elif field.fieldtype == 'Attach' and "approved_by" in field.fieldname %}
+                                        {% elif field.fieldtype == 'Attach' %}
                                             {% if field['values'] %}
-                                                <img  id="{{ field.fieldname }}" src="{{ site_url + field['values'] or ''  }}" class="signature-Imge" name="{{ field.fieldname }}">
+                                            <strong>{{ field.label }}</strong> <span style="padding-left:2px; font-size: 13px;">:</span>   <img  id="{{ field.fieldname }}" src="{{ site_url + field['values'] or ''  }}"  name="{{ field.fieldname }}">
                                             {% else %}
                                                 <input type="text" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
                                             {% endif %}
@@ -818,19 +818,6 @@ template_str = """
         
         
 {% endfor %}
-{% if mail_attachment and mail_attachment | select | list %}
-    <div><span style="font-weight:bold; font-size:13px;">Attachments:</span></div>
-    {% for attachment_group in mail_attachment %}
-        {% for file_path in attachment_group.split(',') %}
-            {% set cleaned_path = file_path.strip() %}
-            <div class="page">
-                <img 
-                    src="{{ site_url + cleaned_path }}"
-                    class="attachments">
-            </div>
-        {% endfor %}
-    {% endfor %}
-{% endif %}
 
 
 
