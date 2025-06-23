@@ -600,7 +600,7 @@ const tableheaders = ref([
   { th: "Reports To", td_key: "reporting_to" },
   { th: "Creation Date", td_key: "creation" },
   { th: "last Login", td_key: "last_login" },
-  { th: "last Update", td_key: "last_ip" },
+  { th: "last Login IP", td_key: "last_ip" },
   { th: "Emp Status", td_key: "enable" },
 
   // { th: "Reporting Designation", td_key: "reporting_designation" },
