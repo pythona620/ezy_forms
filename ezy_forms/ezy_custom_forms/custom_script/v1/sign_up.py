@@ -4,9 +4,10 @@ from frappe.utils import escape_html
 from frappe import _
 
 @frappe.whitelist(allow_guest=True)
-def sign_up(email: str, full_name: str,emp_phone:str|None,emp_code:str|None, redirect_to: str|None) -> tuple[int, str]:
+def sign_up(email: str, full_name: str,emp_phone:str|None,emp_code:str|None, redirect_to: str|None,acknowledge_on=None) -> tuple[int, str]:
+    
 	if is_signup_disabled():
-		frappe.throw(_("Sign Up is disabled"), title=_("Not Allowed"))
+		return _("Sign Up is disabled")
  
 	user = frappe.db.get("User", {"email": email})
 	if user:
@@ -51,6 +52,7 @@ def sign_up(email: str, full_name: str,emp_phone:str|None,emp_code:str|None, red
 				"enable":0,
 				"is_web_form":1,
 				'emp_phone':emp_phone,
+				"acknowledge_on": acknowledge_on if acknowledge_on else frappe.utils.now(),
 				"emp_code":emp_code
 			})
 			doc.insert(ignore_permissions=True)

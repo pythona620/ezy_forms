@@ -23,7 +23,7 @@ app_license = "mit"
 after_migrate = ["ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions.activating_perms_for_all_roles_in_wf_roadmap"]
 # Includes in <head>
 # ------------------
-
+on_session_creation = "ezy_forms.ezy_forms.doctype.ezy_employee.ezy_employee.employee_last_login_activate"
 # include js, css files in header of desk.html
 # app_include_css = "/assets/ezy_forms/css/ezy_forms.css"
 # app_include_js = "/assets/ezy_forms/js/ezy_forms.js"
