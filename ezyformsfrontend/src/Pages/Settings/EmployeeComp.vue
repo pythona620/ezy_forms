@@ -597,6 +597,9 @@ const tableheaders = ref([
   { th: "Signature", td_key: "signature" },
 
   { th: "Reports To", td_key: "reporting_to" },
+  { th: "Creation Date", td_key: "creation" },
+  { th: "last Login", td_key: "last" },
+  { th: "last Update", td_key: "Updated" },
   { th: "Emp Status", td_key: "enable" },
 
   // { th: "Reporting Designation", td_key: "reporting_designation" },
