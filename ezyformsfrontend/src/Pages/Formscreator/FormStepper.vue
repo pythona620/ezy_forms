@@ -68,78 +68,79 @@
                       <div class="row">
                         <div class="col-4"></div>
                         <div class="col-4">
-                          <div class="mt-3">
-                            <div class="">
-                              <FormFields :disabled="selectedData.formId && selectedData.formId.length > 0"
-                                labeltext="Form Name" class="formHeight" type="text" tag="input" name="Value"
-                                id="formName" validationStar="true" placeholder="Untitled Form"
-                                @change="(event) => handleInputChange(event, 'form_name')"
-                                v-model="filterObj.form_name" />
-                              <span v-if="formNameError" class="text-danger ErrorMsg ms-2">
-                                {{ formNameError }}</span>
+                          <div class="aboutFields">
+                            <div class="mt-3">
+                              <div class="">
+                                <FormFields :disabled="selectedData.formId && selectedData.formId.length > 0"
+                                  labeltext="Form Name" class="formHeight" type="text" tag="input" name="Value"
+                                  id="formName" validationStar="true" placeholder="Untitled Form"
+                                  @change="(event) => handleInputChange(event, 'form_name')" v-model="filterObj.form_name" />
+                                <span v-if="formNameError" class="text-danger ErrorMsg ms-2">
+                                  {{ formNameError }}</span>
+                              </div>
                             </div>
-                          </div>
-                          <div class="mt-3">
-                            <div class="">
-                              <FormFields :disabled="selectedData.formId && selectedData.formId.length > 0"
-                                labeltext="Form Short Code" class="formHeight" type="text" tag="input" name="Value"
-                                id="formShortCode" validationStar="true" placeholder="Untitled Form" @change="
-                                  (event) => handleInputChange(event, 'form_short_name')
-                                " v-model="filterObj.form_short_name" />
-                              <span v-if="formShortNameError" class="text-danger ErrorMsg ms-2">
-                                {{ formShortNameError }}</span>
-                              <!-- <label for="">Form Short Code</label>
+                            <div class="mt-3">
+                              <div class="">
+                                <FormFields :disabled="selectedData.formId && selectedData.formId.length > 0"
+                                  labeltext="Form Short Code" class="formHeight" type="text" tag="input" name="Value"
+                                  id="formShortCode" validationStar="true" placeholder="Untitled Form" @change="
+                                    (event) => handleInputChange(event, 'form_short_name')
+                                  " v-model="filterObj.form_short_name" />
+                                <span v-if="formShortNameError" class="text-danger ErrorMsg ms-2">
+                                  {{ formShortNameError }}</span>
+                                <!-- <label for="">Form Short Code</label>
 
                                                         <Multiselect :options=formOptions
                                                             v-model="filterObj.form_short_name"
                                                             placeholder="Untitle Form" :multiple="true"
                                                             :searchable="true" /> -->
+                              </div>
+                              <div>
+                                <FormFields :disabled="selectedData.formId && selectedData.formId.length > 0"
+                                  labeltext="Form Naming series" class="formHeight mt-2" type="text" tag="input"
+                                  name="Value" id="formNameSeries" placeholder="Form Naming series"
+                                  v-model="filterObj.series" />
+                                <small class="text-muted" style="font-size:12px">
+                                  Note : Enter <code>YY-YY</code>, <code>YYYY</code>, or <code>ABC</code>. The system
+                                  will
+                                  default to the format <code> 24-25-0001</code>, <code> 2025-0001</code>, or
+                                  <code> ABC-0001</code> respectively.
+                                </small>
+                              </div>
                             </div>
-                            <div>
-                              <FormFields :disabled="selectedData.formId && selectedData.formId.length > 0"
-                                labeltext="Form Naming series" class="formHeight mt-2" type="text" tag="input"
-                                name="Value" id="formNameSeries" placeholder="Form Naming series"
-                                v-model="filterObj.series" />
-                              <small class="text-muted" style="font-size:12px">
-                                Note : Enter <code>YY-YY</code>, <code>YYYY</code>, or <code>ABC</code>. The system will
-                                default to the format <code> 24-25-0001</code>, <code> 2025-0001</code>, or
-                                <code> ABC-0001</code> respectively.
-                              </small>
-                            </div>
-                          </div>
-                          <div class="mt-3">
-                            <div class="">
-                              <!-- <FormFields labeltext="Owner Of The Form" class="mb-3 w-100"
+                            <div class="mt-3">
+                              <div class="">
+                                <!-- <FormFields labeltext="Owner Of The Form" class="mb-3 w-100"
                                                             tag="select" name="dept" id="dept"
                                                             placeholder="Select Department" :options=formOptions
                                                             v-model="filterObj.owner_of_the_form" /> -->
-                              <label for="">Owner Of The Form
-                                <span v-if="!filterObj.owner_of_the_form" class="text-danger">*</span></label>
+                                <label for="">Owner Of The Form
+                                  <span v-if="!filterObj.owner_of_the_form" class="text-danger">*</span></label>
 
-                              <Multiselect :disabled="selectedData.formId && selectedData.formId.length > 0"
-                                :options="OwnerOfTheFormData" @change="OwnerOftheForm"
-                                v-model="filterObj.owner_of_the_form" placeholder="Select Department" :multiple="false"
-                                class="font-11 multiselect" :searchable="true" />
+                                <Multiselect :disabled="selectedData.formId && selectedData.formId.length > 0"
+                                  :options="OwnerOfTheFormData" @change="OwnerOftheForm"
+                                  v-model="filterObj.owner_of_the_form" placeholder="Select Department"
+                                  :multiple="false" class="font-11 multiselect" :searchable="true" />
+                              </div>
                             </div>
-                          </div>
-                          <div class="mt-3">
-                            <div class="">
-                              <!-- <FormFields labeltext="Form Cateogry" class="mb-3" tag="select"
+                            <div class="mt-3">
+                              <div class="">
+                                <!-- <FormFields labeltext="Form Cateogry" class="mb-3" tag="select"
                                                             name="desgination" id="desgination"
                                                             placeholder="Select Cateogry" :options=departments
                                                             v-model="filterObj.form_category" /> -->
 
-                              <label for="">Form Cateogry
-                                <span v-if="!filterObj.form_category" class="text-danger">*</span></label>
+                                <label for="">Form Cateogry
+                                  <span v-if="!filterObj.form_category" class="text-danger">*</span></label>
 
-                              <Multiselect :disabled="selectedData.formId && selectedData.formId.length > 0"
-                                :options="departments" v-model="filterObj.form_category" placeholder="Select Cateogry"
-                                :multiple="false" :searchable="true" class="font-11 multiselect" />
+                                <Multiselect :disabled="selectedData.formId && selectedData.formId.length > 0"
+                                  :options="departments" v-model="filterObj.form_category" placeholder="Select Cateogry"
+                                  :multiple="false" :searchable="true" class="font-11 multiselect" />
+                              </div>
                             </div>
-                          </div>
-                          <div class="mt-3">
-                            <div class="">
-                              <!-- <FormFields labeltext="Accessbility Departments" class="mb-3"
+                            <div class="mt-3">
+                              <div class="">
+                                <!-- <FormFields labeltext="Accessbility Departments" class="mb-3"
                             <Multiselect
                               :options="departments"
                               v-model="filterObj.form_category"
@@ -152,110 +153,75 @@
                         </div>
                         <div class="mt-3">
                           <div class=""> -->
-                              <!-- <FormFields labeltext="Accessbility Departments" class="mb-3"
+                                <!-- <FormFields labeltext="Accessbility Departments" class="mb-3"
                                                             tag="multiselect" name="desgination" id="Departments"
                                                             placeholder="Select Desigination" :options=formOptions
                                                             v-model="filterObj.accessible_departments" /> -->
-                              <!-- <v-select v-model="filterObj.accessible_departments"
+                                <!-- <v-select v-model="filterObj.accessible_departments"
                                                             :options="formOptions"></v-select> -->
-                            </div>
-                            <!-- <label for="">Accessbility Departments</label> -->
-                            <!-- <Multiselect :options=formOptions
+                              </div>
+                              <!-- <label for="">Accessbility Departments</label> -->
+                              <!-- <Multiselect :options=formOptions
                                                         v-model="filterObj.accessible_departments"
                                                         placeholder="Select Desigination" :multiple="true"
                                                         track-by="code" :close-on-select="false"
                                                         :clear-on-select="false" :searchable="true" /> -->
 
-                            <div>
-                              <label class="typo__label">
-                                <label for="">Accessibility Departments
-                                  <span v-if="!filterObj.accessible_departments.length"
-                                    class="text-danger">*</span></label>
-                              </label>
-                              <!-- :disabled="selectedData.formId && selectedData.formId.length > 0" -->
-                              <VueMultiselect v-model="filterObj.accessible_departments" :options="filteredOptions"
-                                :multiple="true" :close-on-select="false" :clear-on-select="false"
-                                :preserve-search="true" placeholder="Select Department" class="font-11"
-                                @select="handleSelect" @remove="handleRemove">
-                                <template #option="{ option }">
-                                  <div class="custom-option">
-                                    <input type="checkbox" :checked="isChecked(option)" class="custom-checkbox"
-                                      @change="toggleOption(option, $event)" @click.stop />
-                                    <span>{{ option }}</span>
-                                  </div>
-                                </template>
-
-                                <template #selection="{ values, isOpen }">
-                                  <span class="multiselect__single font-10" v-if="values.length" v-show="!isOpen">
-                                    {{ formattedSelection }}
-                                  </span>
-                                </template>
-                              </VueMultiselect>
-
-
-
-                              <!-- <VueMultiselect
-                                          v-model="filterObj.accessible_departments"
-                                          :options="formOptions"
-                                          :multiple="true"
-                                          :close-on-select="false"
-                                          :clear-on-select="false"
-                                          :preserve-search="true"
-                                          placeholder="Select Designation"
-                                          class="font-11"
-                                        >
-                                          <template #option="{ option }">
-                                            <div class="custom-option">
-                                              <input
-                                                type="checkbox"
-                                                :checked="
-                                                  filterObj.accessible_departments.includes(
-                                                    option
-                                                  )
-                                                "
-                                                class="custom-checkbox"
-                                              />
-                                              <span>{{ option }}</span>
-                                            </div>
-                                          </template>
-
-                                          <template #selection="{ values, isOpen }">
-                                            <span
-                                              class="multiselect__single font-10"
-                                              v-if="values.length"
-                                              v-show="!isOpen"
-                                            >
-                                              {{ values.join(", ") }} selected
-                                            </span>
-                                          </template>
-                                        </VueMultiselect> -->
-
-                              <!-- <VueMultiselect v-model="filterObj.accessible_departments"
-                                                            :options="formOptions" :multiple="true"
-                                                            :close-on-select="false" :clear-on-select="false"
-                                                            :preserve-search="true" placeholder="Select Designation"
-                                                            class="font-11">
-                                                            <template #selection="{ values, isOpen }">
-                                                                <span class="multiselect__single font-10 d-flex"
-                                                                    v-if="values.length" v-show="!isOpen">
-                                                                    {{ values.join(", ") }}
-                                                                    <span class=" ps-2 fw-bold"> selected</span>
-                                                                </span>
-                                                            </template>
-                                                        </VueMultiselect> -->
-                            </div>
-                            <div class="mt-3">
-                              <div class="">
-
-                                <label for="">Has Workflow
-                                  <!-- <span v-if="!filterObj.has_Workflow" class="text-danger">*</span> -->
+                              <div>
+                                <label class="typo__label">
+                                  <label for="">Accessibility Departments
+                                    <span v-if="!filterObj.accessible_departments.length"
+                                      class="text-danger">*</span></label>
                                 </label>
                                 <!-- :disabled="selectedData.formId && selectedData.formId.length > 0" -->
-                                <Multiselect :options="['No']" v-model="filterObj.has_workflow" placeholder="Select"
-                                  :multiple="false" class="font-11 multiselect" :searchable="true" />
+                                <VueMultiselect v-model="filterObj.accessible_departments" :options="filteredOptions"
+                                  :multiple="true" :close-on-select="false" :clear-on-select="false"
+                                  :preserve-search="true" placeholder="Select Department" class="font-11"
+                                  @select="handleSelect" @remove="handleRemove">
+                                  <template #option="{ option }">
+                                    <div class="custom-option">
+                                      <input type="checkbox" :checked="isChecked(option)" class="custom-checkbox"
+                                        @change="toggleOption(option, $event)" @click.stop />
+                                      <span>{{ option }}</span>
+                                    </div>
+                                  </template>
+
+                                  <template #selection="{ values, isOpen }">
+                                    <span class="multiselect__single font-10" v-if="values.length" v-show="!isOpen">
+                                      {{ formattedSelection }}
+                                    </span>
+                                  </template>
+                                </VueMultiselect>
+
+
+
                               </div>
-                            </div>
-                            <!-- <div class="mt-3">
+                              <div class="mt-3">
+                                <div class="">
+
+                                  <label for="">Has Workflow
+                                    <!-- <span v-if="!filterObj.has_Workflow" class="text-danger">*</span> -->
+                                  </label>
+                                  <!-- :disabled="selectedData.formId && selectedData.formId.length > 0" -->
+                                  <Multiselect :options="['No']" v-model="filterObj.has_workflow" placeholder="Select"
+                                    :multiple="false" class="font-11 multiselect" :searchable="true" />
+                                </div>
+                              </div>
+                              <!-- <div class="my-2">
+                                <div class="form-check d-flex align-items-center p-0 pe-3">
+                                  <input class="form-check-input" type="checkbox" id="LinkTo"
+                                    v-model="filterObj.LinkTo" />
+                                  <label class="form-check-label font-12 mx-2 ps-1 " for="LinkTo">
+                                    Link To
+                                  </label>
+                                </div>
+                                <div v-if="filterObj.LinkTo" class="mt-2">
+                                  <label for="standardFormInput">Standard Form</label>
+                                  <input type="text" class="form-control" id="standardFormInput"
+                                    v-model="filterObj.standard_form" placeholder="Enter standard form" />
+                                </div>
+                              </div> -->
+                              <!-- <div class="mt-3">
                               <div class="">
 
                                 <label for="">Reverse Workflow
@@ -266,6 +232,7 @@
                                   :multiple="false" class="font-11 multiselect" :searchable="true" />
                               </div>
                             </div> -->
+                            </div>
                           </div>
                         </div>
 
@@ -436,7 +403,7 @@
                                   <div class="d-flex justify-content-between align-items-center">
                                     <label class="rownames">{{
                                       getRowSuffix(rowIndex)
-                                      }}</label>
+                                    }}</label>
                                     <div>
                                       <button v-if="row.columns.length < 3"
                                         class="btn btn-light bg-transparent border-0 font-12" @click="
@@ -533,8 +500,7 @@
                                             @drop="(e) => handleFieldDropAtIndex(e, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
                                           </div>
 
-                                          <div v-if="field.fieldtype !== 'Table'" class="px-1 dynamic_fied field-border"
-                                            draggable="true"
+                                          <div v-if="field.fieldtype !== 'Table'" class="px-1 dynamic_fied field-border" draggable="true"
                                             @dragstart="handleDragStart($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
                                             @dragover.prevent
                                             @drop="(e) => handleFieldDropAtIndex(e, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
@@ -650,6 +616,29 @@
                                               </ul>
 
 
+                                              <!-- <input type="text"
+                                                v-model="blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex].options"
+                                                class="form-control font-12 mb-1"
+                                                :placeholder="linkSearchQuery ? 'Select from list' : 'Selected doctype will appear here'"
+                                                readonly />
+                                            </div>
+                                            <div v-if="field.fieldtype === 'Table'">
+                                              <label class="font-12 fw-light" for="link-search">Search Doctype:</label>
+                                              <input id="link-search" type="text" v-model="linkSearchQuery"
+                                                @input="fetchChildDoctypeList(linkSearchQuery)"
+                                                @focus="dropdownVisible = true" class="form-control font-12 mb-1"
+                                                placeholder="Type to search..." />
+
+                                              <ul v-if="linkSearchResults.length && dropdownVisible"
+                                                class="list-group mt-1" style="max-height: 200px; overflow-y: auto;">
+                                                <li v-for="(result, index) in linkSearchResults" :key="index"
+                                                  @click="selectDoctype(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex, result.name)"
+                                                  class="list-group-item list-group-item-action">
+                                                  {{ result.name }}
+                                                </li>
+                                              </ul> -->
+
+
                                               <input type="text"
                                                 v-model="blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex].options"
                                                 class="form-control font-12 mb-1"
@@ -709,7 +698,7 @@
                                               placeholder="Enter field description"></textarea>
 
                                             <small v-if="field.error" class="text-danger font-10">{{ field.error
-                                              }}</small>
+                                            }}</small>
                                           </div>
                                           <div class="drop-zone" @dragover.prevent
                                             @drop="(e) => handleFieldDropAtIndex(e, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
@@ -723,7 +712,7 @@
 
                                                     <div v-for="(table, tableName) in childtableHeaders"
                                                       :key="tableName" class="childTable">
-                                                      <h5 class=" font-13" v-if="tableName === field.fieldname">{{
+                                                      <h5 class=" font-13" v-if="tableName === field.fieldname || tableName === field.options ">{{
                                                         tableName.replace(/_/g,
                                                           ' ') }}</h5>
                                                       <div
@@ -740,7 +729,8 @@
                                                             Blocks</label>
                                                         </div>
                                                       </div>
-                                                      <table v-if="tableName === field.fieldname"
+                                                      <table
+                                                        v-if="tableName === field.options || tableName === field.fieldname"
                                                         class="table table-bordered rounded-table">
                                                         <thead>
                                                           <tr>
@@ -1244,11 +1234,14 @@
       </div>
     </div>
 
-    <div class="offcanvas addOffCanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+    <div class="offcanvas addOffCanvas offcanvas-end" tabindex="-1" id="offcanvasRight"
+      aria-labelledby="offcanvasRightLabel">
       <div class="offcanvas-header add_designationHeader">
         <span id="offcanvasRightLabel" class="font-14">
-          
-          {{ selectedBlockIndex == 0 ? "Add designation for Requestor" : `Approval Settings For Level-${selectedBlockIndex}` }}
+
+          {{ selectedBlockIndex == 0 ? "Add designation for Requestor" : `Approval Settings For
+          Level-${selectedBlockIndex}`
+          }}
         </span>
 
         <button type="button" class="btn-close bg-light text-reset" data-bs-dismiss="offcanvas"
@@ -1259,8 +1252,8 @@
           <div class="">
 
 
-            <div v-if="selectedBlockIndex !== 0" class="p-3 py-4 approval-border-bottom d-flex align-items-center gap-3"
-              >
+            <div v-if="selectedBlockIndex !== 0"
+              class="p-3 py-4 approval-border-bottom d-flex align-items-center gap-3">
               <div>
                 <div class=" form-control" aria-disabled="">
 
@@ -1294,8 +1287,8 @@
 
         </div>
         <div class="p-3 listofdesignations">
-          <input v-model="searchDesignation" class="SearchDesignation rounded-2 form-control shadow-none my-1" type="text"
-            placeholder="Search Designation" />
+          <input v-model="searchDesignation" class="SearchDesignation rounded-2 form-control shadow-none my-1"
+            type="text" placeholder="Search Designation" />
 
           <div class="form-check ps-1" v-if="DesignationList.length && selectedBlockIndex == 0">
             <div>
@@ -1428,6 +1421,14 @@ const filterObj = ref({
   has_workflow: "",
   workflow_check: ""
 
+});
+const formNameModel = computed({
+  get() {
+    return filterObj.form_name || route.query.form_name || "";
+  },
+  set(val) {
+    filterObj.form_name = val;
+  }
 });
 const formDescriptions = computed(() => filterObj.value);
 const child_id = ref("");
@@ -1696,7 +1697,30 @@ function fetchDoctypeList(searchText) {
       console.error('Error fetching doctype list:', error);
     });
 }
+function fetchChildDoctypeList(searchText) {
+  const filters = [
+    ['istable', '=', 1]
+  ];
 
+  if (searchText?.trim()) {
+    filters.push(['name', 'like', `%${searchText}%`]);
+  }
+
+  const queryParams = {
+    fields: JSON.stringify(['name']),
+    filters: JSON.stringify(filters),
+    limit_page_length: '10',
+  };
+
+  axiosInstance
+    .get(apis.resource + doctypes.doctypesList, { params: queryParams })
+    .then((res) => {
+      linkSearchResults.value = res.data || [];
+    })
+    .catch((error) => {
+      console.error('Error fetching doctype list:', error);
+    });
+}
 function selectDoctype(b, s, r, c, f, name) {
   blockArr[b].sections[s].rows[r].columns[c].fields[f].options = name;
   linkSearchResults.value = [];
@@ -1837,6 +1861,13 @@ const isHoveredColumn = (blockIndex, sectionIndex, rowIndex, columnIndex) => {
     hoveredColumnIndexes.value.columnIndex === columnIndex
   );
 };
+const Predata = ref([
+  {
+
+    "form_json": "",
+
+  }
+]);
 onMounted(() => {
   deptData();
   paramId.value = route.params.paramid || "new";
@@ -1849,7 +1880,36 @@ onMounted(() => {
   }
   let Bu_Unit = localStorage.getItem("Bu");
   filterObj.value.business_unit = Bu_Unit;
+  if (route.query.preId === 'PreDefine') {
+    const formJsonFromStorage = localStorage.getItem("form_json");
+
+    if (formJsonFromStorage) {
+      // Update the Predata with stored form JSON
+      Predata.value[0].form_json = formJsonFromStorage;
+
+      const formData = Predata.value[0];
+
+      console.log(typeof formJsonFromStorage); // Should log: 'string'
+
+      // Parse and rebuild the structured array from form fields
+      const parsedJson = JSON.parse(formData.form_json);
+      const structuredArr = rebuildToStructuredArray(parsedJson.fields);
+
+      // Assign child table headers
+      childtableHeaders.value = parsedJson.child_table_fields;
+
+      // Push each structured item into blockArr
+      structuredArr.forEach(item => {
+        blockArr.push(item);
+      });
+
+      // If needed: preserve or apply the form name
+      // filterObj.value.form_name = { ...formData.form_name };
+    }
+
+  }
 });
+
 
 
 // Store multiple child tables
@@ -2474,6 +2534,10 @@ const fieldTypes = [
     type: "Data",
   },
   {
+    label: "Table",
+    type: "Table",
+  },
+  {
     label: "Number",
     type: "Int",
   },
@@ -2768,6 +2832,7 @@ function cancelForm() {
   router.push({
     path: selectedData.value.routepath || localStorage.getItem('routepath'),
   });
+  localStorage.removeItem('form_json');
 
 }
 
@@ -3553,7 +3618,7 @@ function handleInputChange(event, fieldType) {
 
   // Set filter based on fieldType
   const filters = [
-    [fieldType, "like", `%${inputValue}%`],
+    [fieldType, "=", `%${inputValue}%`],
     ["business_unit", "like", `%${filterObj.value.business_unit}%`],
   ];
   const queryParams = {
@@ -3658,14 +3723,24 @@ const hasDuplicates = (array) => new Set(array).size !== array.length;
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 
 <style lang="scss" scoped>
-.addOffCanvas{
-      width: 530px;
+.aboutFields {
+  height: 80dvh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 10px;
+  padding-bottom: 40px;
 }
-.SearchDesignation{
-      border: none;
-    border-bottom: 1px solid #ccc;
+
+.addOffCanvas {
+  width: 530px;
+}
+
+.SearchDesignation {
+  border: none;
+  border-bottom: 1px solid #ccc;
 
 }
+
 .approval-border-bottom {
   border-bottom: 1px solid #ccc;
 }
@@ -3746,11 +3821,15 @@ const hasDuplicates = (array) => new Set(array).size !== array.length;
 .SelectallDesignation {
   color: #1b14df;
 }
+
 .designation-scroll {
-  max-height: 500px; /* or any height you prefer */
+  max-height: 500px;
+  /* or any height you prefer */
   overflow-y: auto;
-  padding-right: 8px; /* prevent content from hiding under scrollbar */
+  padding-right: 8px;
+  /* prevent content from hiding under scrollbar */
 }
+
 .CancelNdSave {
   background-color: #fafafa;
   position: sticky;

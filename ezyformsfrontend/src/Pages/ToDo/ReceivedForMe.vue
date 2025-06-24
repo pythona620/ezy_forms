@@ -172,17 +172,18 @@ const loading = ref(false)
 const Rejectloading = ref(false)
 
 // onMounted(() => {
-//   const storedData = localStorage.getItem("employeeData");
-//   try {
-//     const parsedData = JSON.parse(storedData);
+     
+//   // const storedData = localStorage.getItem("employeeData");
+//   // try {
+//   //   const parsedData = JSON.parse(storedData);
 
-//     // Ensure parsedData is an array
-//     employeeData.value = Array.isArray(parsedData) ? parsedData : [parsedData];
+//   //   // Ensure parsedData is an array
+//   //   employeeData.value = Array.isArray(parsedData) ? parsedData : [parsedData];
 
-//   } catch (error) {
-//     console.error("Error parsing employeeData from localStorage:", error);
-//     employeeData.value = []; // Fallback to empty array if there's an error
-//   }
+//   // } catch (error) {
+//   //   console.error("Error parsing employeeData from localStorage:", error);
+//   //   employeeData.value = []; // Fallback to empty array if there's an error
+//   // }
 // });
 
 const viewlist = ref([])
@@ -196,7 +197,16 @@ function ViewOnlyReport(){
       viewlist.value = response.message;
 
       // const filters = [ "name","in", viewlist.value];
-      receivedForMe()
+    //    if (route.query.status) {
+    //   filterObj.value.filters = [
+    //     ["name", "in", viewlist.value],
+    //     ["status", "=", route.query.status],
+    //   ];
+        
+      
+    //   // filterObj.value.filters.push(["status", "=", route.query.status]);
+    // }
+      receivedForMe(filterObj.value.filters);
 
     })
     .catch((error) => {
@@ -580,31 +590,33 @@ const filters = ref([]);
 const timeout = ref(null);
 
 function inLineFiltersData(searchedData) {
-    clearTimeout(timeout.value); // Clear previous timeout
+  clearTimeout(timeout.value); // Clear previous timeout
 
-    timeout.value = setTimeout(() => {
-        // Initialize filters array
-        filterObj.value.filters = [];
+  timeout.value = setTimeout(() => {
+    // Initialize filters array
+    filterObj.value.filters = [];
 
-        // Loop through the table headers and build dynamic filters
-        tableheaders.value.forEach((header) => {
-            const key = header.td_key;
+    // Loop through the table headers and build dynamic filters
+    tableheaders.value.forEach((header) => {
+      const key = header.td_key;
 
-            if (searchedData[key]) {
-                // Push as an array of 3 items
-                filterObj.value.filters.push([key, "like", `%${searchedData[key]}%`]);
-            }
-        });
+      if (searchedData[key]) {
+        // Push as an array of 3 items
+        filterObj.value.filters.push([key, "like", `%${searchedData[key]}%`]);
+      }
+    });
 
-        // Call receivedForMe with or without filters
-        if (filterObj.value.filters.length) {
-          filterObj.value.limit_start = 0;
+    // Check if status is present in the route query params
 
-            receivedForMe(filterObj.value.filters);
-        } else {
-            receivedForMe();
-        }
-    }, 500); // Adjust debounce delay as needed
+
+    // Call receivedForMe with or without filters
+    if (filterObj.value.filters.length) {
+      filterObj.value.limit_start = 0;
+      receivedForMe(filterObj.value.filters);
+    } else {
+      receivedForMe();
+    }
+  }, 500); // Adjust debounce delay as needed
 }
 function receivedForMe(data) {
   // Initialize filters array for building dynamic query parameters

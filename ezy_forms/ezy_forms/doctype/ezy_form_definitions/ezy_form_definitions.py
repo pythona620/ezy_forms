@@ -170,7 +170,7 @@ def enqueued_add_customized_fields_for_dynamic_doc(fields: list[dict], doctype: 
             _[0] for _ in frappe.db.sql(f"SELECT fieldname FROM `tabDocField` WHERE parent ='{doctype}';")
         ]
 
-        table_fieldnames = [item["fieldname"] for item in fields if item.get("fieldtype") == "Table"]
+        table_fieldnames = [item["options"] for item in fields if item.get("fieldtype") == "Table"]
         
         # Initialize as an empty dictionary
         child_table_fields = {"child_table_fields": {}}
@@ -180,7 +180,7 @@ def enqueued_add_customized_fields_for_dynamic_doc(fields: list[dict], doctype: 
                 f"SELECT IFNULL(options, '') AS options,IFNULL(description, '') AS description, fieldname, fieldtype, idx, label FROM `tabDocField` WHERE parent ='{table_name}';",
                 as_dict=True
             )
-
+           
             for each_child in fields_in_child_doctype:
                 each_child['value'] = ''
             # Sort the fields by 'idx' within each child table
@@ -188,9 +188,10 @@ def enqueued_add_customized_fields_for_dynamic_doc(fields: list[dict], doctype: 
  
             # Store the sorted results in the dictionary
             child_table_fields["child_table_fields"][table_name] = sorted_fields
-
+            
         # Sort the dictionary keys before returning
         child_table_fields["child_table_fields"] = dict(sorted(child_table_fields["child_table_fields"].items()))
+      
         for dicts_of_docs_entries in fields:
             if dicts_of_docs_entries["fieldname"] in fields_in_mentioned_doctype:
                 doc_exists_name_or_not = frappe.db.exists("DocField", dicts_of_docs_entries)             

@@ -25,17 +25,18 @@
                   <!-- Body -->
                   <div class="modal-body ">
                     <div class="position-relative ">
-                    <input type="text" class="form-control mb-2" v-model="searchQuery"
-                      placeholder="Search and select form..." @input="fetchDepartmentDetails"
-                      @focus="showDropdown = true" @blur="hideDropdownWithDelay" />
+                      <input type="text" class="form-control mb-2" v-model="searchQuery"
+                        placeholder="Search and select form..." @input="fetchDepartmentDetails"
+                        @focus="showDropdown = true" @blur="hideDropdownWithDelay" />
 
-                    <ul v-if="showDropdown && formOptions.length"
-                      class="list-group position-absolute w-100 zindex-dropdown">
-                      <li v-for="option in formOptions" :key="option.value"
-                        class="list-group-item list-group-item-action font-12" @mousedown.prevent="selectOption(option)">
-                        {{ option.label }}
-                      </li>
-                    </ul>
+                      <ul v-if="showDropdown && formOptions.length"
+                        class="list-group position-absolute w-100 zindex-dropdown">
+                        <li v-for="option in formOptions" :key="option.value"
+                          class="list-group-item list-group-item-action font-12"
+                          @mousedown.prevent="selectOption(option)">
+                          {{ option.label }}
+                        </li>
+                      </ul>
                     </div>
 
                   </div>
@@ -49,9 +50,9 @@
               </div>
             </div>
           </div>
-          <RequestPreview :blockArr="blockArr" :formName="selectedData.selectedform" :tableHeaders="tableHeaders"
-            @updateField="handleFieldUpdate" :tableRowsdata="tableRows" @formValidation="isFormValid = $event"
-            @updateTableData="handleTableData" />
+          <RequestPreview :blockArr="blockArr" :formName="selectedData.selectedform" :tableHeaders="tableHeaders" :linked_id="linkedId"
+            :LinkedChildTableData="LinkedChildTableData" @updateField="handleFieldUpdate" :tableRowsdata="tableRows"
+            @formValidation="isFormValid = $event" @updateTableData="handleTableData" />
           <!-- @formValidation="isFormValid = $event" -->
 
           <!-- <span class="font-13 fw-bold">{{ table.childTableName.replace(/_/g, " ") }}</span> -->
@@ -113,6 +114,10 @@
               @click="raiseRequestSubmission">
               {{ selectedData.hasWorkflow == 'No' ? 'Save' : 'Raise Request' }}
             </button>
+            <!-- <button  class="btn btn-dark font-12" type="submit"
+              @click="raiseRequestSubmission">
+              {{ selectedData.hasWorkflow == 'No' ? 'Save' : 'Raise Request' }}
+            </button> -->
             <button v-if="selectedData.selectedFormId && $route.query.selectedFormStatus == 'Request Cancelled'"
               @click="RequestUpdate" class="btn btn-dark font-12" type="submit">
               Update Request
@@ -156,6 +161,10 @@ const selectedData = ref({
   selectedFormId: route.query.selectedFormId || "", // Retrieve from query
   selectedBusiness_unit: route.query.business_unit || "", // Retrieve from query
   hasWorkflow: route.query.has_workflow || "", // Retrieve from query
+  linkedDocName: route.query.linkedForm || "", // Retrieve from query
+  main_form_Id: route.query.main_form_Id || "", // Retrieve from query
+  type: route.query.type || "", // Retrieve from query
+  main_form: route.query.main_form || "", // Retrieve from query
 });
 
 
@@ -182,15 +191,26 @@ const filterObj = ref({
   limit_start: 0,
   limitPageLength: 100,
 });
-
+const LinkedChildTableData = ref([]);
 function backToForm() {
   blockArr.value = [];
+  router.push({
+    path: selectedData.value.routepath,
+    query: {
+      routepath: route.path,
+      doctype_name: route.query.main_form,
+      business_unit: selectedData.value.selectedBusiness_unit,
+      name: selectedData.value.main_form_Id,
+      type: selectedData.value.type,
+    },
+  });
 }
 
 
 onMounted(() => {
   formDefinations();
   // raiseRequest();
+  gettingDataToLink()
 });
 
 watch(business_unit, (newBu, oldBu) => {
@@ -556,7 +576,7 @@ function formDefinations() {
       `${selectedData.value?.selectedCategory}`,
     ]);
   }
-  if (selectedData.value.selectedform) {
+  if (selectedData.value.selectedform ) {
     filters.push([
       "form_short_name",
       "=",
@@ -580,7 +600,7 @@ function formDefinations() {
       const form_json = res.data[0].form_json;
 
       blockArr.value = rebuildToStructuredArray(JSON.parse(form_json).fields);
-      if (selectedData.value.selectedFormId) {
+      if (selectedData.value.selectedFormId ) {
         WfRequestUpdate();
       }
 
@@ -733,10 +753,11 @@ const ChildTableData = async () => {
     }
 
     const form = {
-      doctype: selectedData.value.selectedform,
+      doctype: selectedData.value.selectedform ? selectedData.value.selectedform : selectedData.value.linkedDocName,
       company_field: business_unit.value,
-      [tableName]: rows
+      [tableName.toLowerCase()]: rows
     };
+    // .toLowerCase()
 
     const formData = new FormData();
     formData.append("doc", JSON.stringify(form));
@@ -753,47 +774,73 @@ const ChildTableData = async () => {
     throw error; // Important: so raiseRequestSubmission halts
   }
 };
-async function raiseRequestSubmission() {
-  if (!isFormValid.value) {
-    toast.error("Please Check Fields");
-    return;
-  }
+const linkedId = ref(""); 
+  async function raiseRequestSubmission() {
+    if (!isFormValid.value) {
+      toast.error("Please Check Fields");
+      return;
+    }
 
-  try {
-    await ChildTableData(); // ✅ Wait until all child table APIs are done
-  } catch (error) {
-    toast.error("Child table submission failed");
-    return; // Stop main form submission
-  }
+    // try {
+    //   await ChildTableData(); // ✅ Wait until all child table APIs are done
+    // } catch (error) {
+    //   toast.error("Child table submission failed");
+    //   return; // Stop main form submission
+    // }  
 
-  // Merge all child tables into main form
-  let form = {
-    doctype: selectedData.value.selectedform,
-    company_field: business_unit.value,
-    ...childtablesData.value // ✅ use collected tableData directly
+    // Merge all child tables into main form
+    let form = {
+      doctype: selectedData.value.selectedform ? selectedData.value.selectedform : selectedData.value.linkedDocName,
+      company_field: business_unit.value,
+      ...childtablesData.value // ✅ use collected tableData directly
+    };
+
+    // Append other form fields
+    if (emittedFormData.value.length) {
+      emittedFormData.value.forEach((each) => {
+        form[each.fieldname] = each.value;
+      });
+    }
+    if (linkedId.value) {
+  form.linked_id = linkedId.value;
+}
+console.log(form, "Final Form Data to Submit");
+
+    // const formData = new FormData();
+    // formData.append("doc", JSON.stringify(form));
+    // formData.append("action", "Save");
+    // console.log(form, "formData");
+    // axiosInstance
+    //   .post(apis.savedocs, formData)
+    //   .then((response) => {
+    //     request_raising_fn(response.docs[0]);
+    //   })
+    //   .catch((error) => {
+    //     console.error("❌ Error submitting main form:", error);
+    //   });
+  }
+function gettingDataToLink() {
+  const dataObj = {
+    wf_request: selectedData.value.main_form_Id,
   };
 
-  // Append other form fields
-  if (emittedFormData.value.length) {
-    emittedFormData.value.forEach((each) => {
-      form[each.fieldname] = each.value;
-    });
-  }
-
-  const formData = new FormData();
-  formData.append("doc", JSON.stringify(form));
-  formData.append("action", "Save");
-
   axiosInstance
-    .post(apis.savedocs, formData)
+    .post(apis.gettingDataTo, dataObj)
     .then((response) => {
-      request_raising_fn(response.docs[0]);
+
+      LinkedChildTableData.value = response.message.testing_items_list;
+      linkedId.value = response.message.linked_id;
+      console.log(LinkedChildTableData.value, "Data");
+
+
+
+
     })
     .catch((error) => {
-      console.error("❌ Error submitting main form:", error);
+      console.error("Error fetching data:", error);
     });
-}
 
+}
 
 // const ChildTableData = async () => {
 //   if (!tableName.value.length) return;
@@ -994,16 +1041,18 @@ function WfRequestUpdate() {
 
 
         axiosInstance
-          .get(`${apis.resource}${selectedData.value.selectedform}`)
+          .get(`${apis.resource}${selectedData.value.selectedform }`)
           .then((res) => {
             console.log(`Data for :`, res.data[0]);
+            newMainId.value = res.data[0].name
+
           })
           .catch((error) => {
             console.error(`Error fetching data for :`, error);
           });
         axiosInstance
           .get(
-            `${apis.resource}${selectedData.value.selectedform}/${res.data[0].name}`
+            `${apis.resource}${selectedData.value.selectedform }/${res.data[0].name}`
           )
           .then((res) => {
             // console.log(`Data for :`, res.data);
@@ -1060,7 +1109,7 @@ function request_raising_fn(item) {
   //   : [];
   let data_obj = {
     module_name: "Ezy Forms",
-    doctype_name: selectedData.value.selectedform,
+    doctype_name: selectedData.value.selectedform ? selectedData.value.selectedform : selectedData.value.linkedDocName,
     ids: [item.name],
     reason: selectedData.value.hasWorkflow === 'No' ? "Completed" : "Request Raised",
     url_for_request_id: "",
@@ -1092,15 +1141,19 @@ function request_raising_fn(item) {
   max-height: 200px;
   overflow-y: auto;
 }
+
 .modal {
   background: rgba(0, 0, 0, 0.5);
   position: fixed;
-  top: 0; left: 0;
-  width: 100vw; height: 100vh;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
 }
+
 .requestPreviewDiv {
   height: 80vh;
   overflow-y: auto;

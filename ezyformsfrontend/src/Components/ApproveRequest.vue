@@ -186,10 +186,14 @@
                     class="btn btn-light font-11 fw-bold h-0 text-decoration-underline" type="button"
                     @click="downloadPdf"><i class="bi bi-arrow-down-circle fw-bold px-1"></i>Download
                   </button>
-                  <!-- <button type="button" class="btn btn-outline-light  CreateDepartments " data-bs-toggle="modal"
+                  <button type="button" class="btn btn-light font-12  CreateDepartments " 
+                    data-bs-target="#pdfView" @click="toLinkedForm">
+                    To Linked
+                  </button> 
+                  <button type="button" class="btn btn-outline-light font-12  CreateDepartments " data-bs-toggle="modal"
                     data-bs-target="#pdfView" @click="viewasPdfView">
                     Preview
-                  </button> -->
+                  </button>
 
                 </div>
               </div>
@@ -330,6 +334,7 @@ const responseData = ref([]);
 const employeeData = ref([]);
 const viewlist = ref([])
 const view_only_reportee = ref(0);
+const linkedNew_Id = ref([]);
 
 const canApprove = ref(false);
 
@@ -483,15 +488,28 @@ async function ApproverFormSubmission(dataObj, type) {
       form[each.fieldname] = each.value;
     });
   }
-  try {
-    // ✅ Submit child table data first
-    await ChildTableData();
-  } catch (error) {
-    toast.error("❌ Child table submission failed");
-    loading.value = false;
-    return;
-  }
-  // console.log(loading.value, dataObj, type, form);
+  // try {
+  //   // ✅ Submit child table data first
+  //   await ChildTableData();
+  // } catch (error) {
+  //   toast.error("❌ Child table submission failed");
+  //   loading.value = false;
+  //   return;
+  // }
+  // console.log(childtablesData.value);
+  // let updatedata = {
+  //   ...childtablesData.value,
+  // }
+  //  axiosInstance
+  //   .put(`${apis.resource}${'Standard Form'}/${linkedNew_Id.value}`, updatedata)
+  //   .then((response) => {
+  //    console.log(response);
+  //   })
+  //   .catch((error) => {
+  //     console.error("Error submitting form:", error);
+  //     loading.value = false; // Stop loader on error
+  //     toast.error("An error occurred while submitting the form.", { autoClose: 1000, transition: "zoom" });
+  //   });
 
   axiosInstance
     .put(`${apis.resource}${selectedData.value.doctype_name}/${doctypeForm.value.name}`, form)
@@ -563,14 +581,14 @@ async function SaveDocWithoutApprove(request_id) {
       form[each.fieldname] = each.value;
     });
   }
-  try {
-    // ✅ Submit child table data first
-    await ChildTableData();
-  } catch (error) {
-    toast.error("❌ Child table submission failed");
-    loading.value = false;
-    return;
-  }
+  // try {
+  //   // ✅ Submit child table data first
+  //   await ChildTableData();
+  // } catch (error) {
+  //   toast.error("❌ Child table submission failed");
+  //   loading.value = false;
+  //   return;
+  // }
   // console.log(loading.value, dataObj, type, form);
 
   axiosInstance
@@ -816,7 +834,6 @@ function receivedForMe(data) {
       console.error("Error fetching records:", error);
     });
 }
-const datanew = ref([]);
 function getdata(formname) {
   const filters = [["wf_generated_request_id", "like", `%${formname}%`]];
   const queryParams = {
@@ -836,6 +853,8 @@ function getdata(formname) {
       if (res.data) {
         doctypeForm.value = res.data[0];
         console.log(doctypeForm.value.name, "lll");
+        console.log(doctypeForm.value.linked_id,'linked_id');  
+        linkedNew_Id.value = doctypeForm.value.linked_id;
         mapFormFieldsToRequest(doctypeForm.value, showRequest.value);
 
         // axiosInstance
@@ -1007,7 +1026,22 @@ function Wfactivitylog(formname) {
       console.error("Error fetching activity data:", error);
     });
 }
+function toLinkedForm(){
 
+      router.push({
+          name: "RaiseRequest",
+          query: {
+            routepath: route.path,
+            linkedForm: "LInked Form",
+            has_workflow: 'Yes',
+            type:'myforms',
+            main_form : selectedData.value.doctype_name,
+            business_unit: selectedData.value.business_unit,
+            main_form_Id: selectedData.value.formname,
+            selectedFormStatus: selectedData.value.type,
+          },
+        });
+}  
 
 function NewActivityLogData (name){
 

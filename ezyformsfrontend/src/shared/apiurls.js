@@ -22,7 +22,8 @@ export const doctypes = {
   SystemSettings:"System Settings",
   Email_Account: 'Email Account',
   doctypesList: 'DocType',
-  reportsApi: 'Report'
+  reportsApi: 'Report',
+  preDefinedForm: 'Predefined Doctype',
 
 
 };
@@ -72,6 +73,8 @@ export const apis = {
   approvedByMe:domain+`/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.approval_by_me`,
   ActivitySaveComment: domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.save_button_commite_update`,
   activityLogWithChild: domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.get_doc_changes`,
+  gettingDataTo: domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.form_redict_gate_pass`,
+
   getReportData:  `/printview`
   // getReportData: domain + `/api/method/frappe.utils.print_format.download_pdf`
 };

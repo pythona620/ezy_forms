@@ -243,7 +243,7 @@
                             <input type="text" :value="field.value"
                               :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'"
                               @input="(e) => onInputChange(e.target.value, field)"
-                              :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 image-border-bottom w-50 pb-0 bg-transparent' : ''"
+                              :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 image-border-bottom pb-0 bg-transparent' : ''"
                               @change="(event) =>
                                 logFieldValue(
                                   event,
@@ -347,10 +347,12 @@
                       <!-- <span class="fw-semibold"></span><br> -->
                       <span v-html="field.description.replace(/\n/g, '<br>')"></span>
                     </div>
+                    
                     <div v-if="field.fieldtype === 'Table'">
                       <div v-if="props.childHeaders && Object.keys(props.childHeaders).length">
                         <div v-for="(headers, tableName) in props.childHeaders" :key="tableName">
-                          <div v-if="field.fieldname === tableName" class="overTable">
+                         <!-- || tableName === field.options -->
+                          <div v-if="field.fieldname === tableName || tableName === field.options" class="overTable">
                             <div class=" d-flex justify-content-between align-items-center">
                               <span class="font-13 fw-bold tablename">{{ field.label.replace(/_/g, " ") }}</span>
                               <div v-if="selectedData.formStatus !== 'Completed'">
@@ -514,11 +516,12 @@
                                   </tr>
                                 </thead>
                                 <tbody>
-                                  <tr v-for="(row, index) in props.childData[tableName]" :key="index">
+                                  <!-- .toLowerCase() -->
+                                  <tr v-for="(row, index) in props.childData[tableName.toLowerCase()]" :key="index">
                                     <td v-for="field in headers" :key="field.fieldname" :style="field.label !== 'Type of Manpower'
                                       ? {
                                         width: row[field.fieldname] ? Math.max(row[field.fieldname].length * 10, 100) + 'px' : 'auto',
-                                        maxWidth: '300px',
+                                        maxWidth: '250px',
                                         textOverflow: 'ellipsis',
                                         whiteSpace: 'nowrap'
                                       }
@@ -538,7 +541,7 @@
                                       <template v-else>
                                         <template v-if="field.fieldtype === 'Attach'">
                                           <!-- File Input -->
-                                          <input type="file" multiple accept="image/jpeg,image/png,application/pdf"
+                                          <input v-if="blockIndex !== 0 && props.readonlyFor !== 'true' || blockIndex == currentLevel" type="file" multiple accept="image/jpeg,image/png,application/pdf"
                                             class="form-control font-12"
                                             @change="handleFileUpload($event, row, field.fieldname)" />
 
@@ -617,7 +620,7 @@
                                         <template v-if="field.fieldtype === 'Int'">
                                           <!-- Expression based field -->
                                           <template v-if="field.description && /[+\-*/]/.test(field.description)">
-                                            <input disabled type="number" class="form-control font-12"
+                                            <input disabled type="number" class="form-control text-center font-12"
                                               :class="blockIndex === 0 || props.readonlyFor === 'true' ? 'bg-white border-0' : null"
                                               :value="calculateFieldExpression(row, field.description, headers)"
                                               readonly />
@@ -625,13 +628,13 @@
 
                                           <!-- Editable input -->
                                           <template v-else-if="!(blockIndex === 0 || props.readonlyFor === 'true')">
-                                            <input type="number" class="form-control font-12"
+                                            <input type="number" class="form-control text-center font-12"
                                               :class="blockIndex === 0 || props.readonlyFor === 'true' ? 'bg-white border-0' : null"
                                               v-model.number="row[field.fieldname]" />
                                           </template>
 
                                           <!-- Read-only display -->
-                                          <template v-else>
+                                          <template v-else-if="(blockIndex === 0 || props.readonlyFor === 'true')">
                                             <span>
                                               {{ row[field.fieldname] }}
                                             </span>

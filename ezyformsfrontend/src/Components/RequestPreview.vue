@@ -19,6 +19,7 @@
                                 <div class="mx-3 my-2">
                                     <div v-for="(field, fieldIndex) in column.fields"
                                         :key="'field-preview-' + fieldIndex">
+                                        
                                         <div v-if="field.fieldtype !== 'Table' && field.fieldname !== 'auto_calculations'"
                                             :class="field.fieldtype === 'Check' ? ' d-flex mt-4 flex-row-reverse justify-content-end gap-2' : ''">
                                             <div v-if="field.label">
@@ -73,19 +74,23 @@
 
                                                 field.fieldtype === 'radio' || field.fieldtype === 'Small Text'
                                             ">
+                                            
                                                 <div class="container-fluid">
                                                     <div class="row">
                                                         <div class="form-check col-4 mb-1" v-for="(option, index) in field?.options?.split(
                                                             '\n'
                                                         )" :key="index" :class="{ 'd-none': index === 0 }">
                                                             <div>
+                                                              
+                                                             
                                                                 <input v-if="
                                                                     field.fieldtype === 'Small Text' && index !== 0
                                                                 " class="form-check-input" type="checkbox"
                                                                     :value="option"
                                                                     :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
                                                                     :id="`${option}-${index}`"
-                                                                    :checked="field.value === option" @change="
+                                                                     :checked="JSON.parse(field.value || '[]').includes(option.trim())"
+ @change="
                                                                         (event) =>
                                                                             logFieldValue(
                                                                                 event,
@@ -179,7 +184,7 @@
                                             </template>
                                             <template v-else-if="field.fieldtype == 'Check' && field.fieldname !== 'auto_calculations'">
                                                 <input type="checkbox" :value="field.value"
-                                                    :placeholder="'Enter ' + field.label" :name="'field-' +
+                                                    :placeholder="'Enter ' + field.label" :checked="field.value ? 1 : 0 " :name="'field-' +
                                                         sectionIndex +
                                                         '-' +
                                                         columnIndex +
@@ -220,35 +225,35 @@
                                                                 )
                                                         " class="form-control previewInputHeight font-10" />
                                             </template>
-<template v-else-if="field.fieldtype === 'Link'">
-  <input
-    type="text"
-    v-model="field.value"
-    @input="() => fetchDoctypeList(field.options, field.value, field)"
-    @focus="() => fetchDoctypeList(field.options, field.value, field)"
-    @change="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
-    class="form-control font-12 mb-1"
-  />
+                                            <template v-else-if="field.fieldtype === 'Link'">
+                                            <input
+                                                type="text"
+                                                v-model="field.value"
+                                                @input="() => fetchDoctypeList(field.options, field.value, field)"
+                                                @focus="() => fetchDoctypeList(field.options, field.value, field)"
+                                                @change="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+                                                class="form-control font-12 mb-1"
+                                            />
 
-  <ul v-if="field.linkSearchResults && field.linkSearchResults.length" class="list-group mt-1" style="max-height: 200px; overflow-y: auto;">
-    <li
-      v-for="(result, index) in field.linkSearchResults"
-      :key="index"
-      @click="selectDoctype(
-        result,
-        field,
-        blockIndex,
-        sectionIndex,
-        rowIndex,
-        columnIndex,
-        fieldIndex
-      )"
-      class="list-group-item list-group-item-action"
-    >
-       {{ field.options.includes('Ezy Departments') ? result.department_name : result.name }}
-    </li>
-  </ul>
-</template>
+                                            <ul v-if="field.linkSearchResults && field.linkSearchResults.length" class="list-group mt-1" style="max-height: 200px; overflow-y: auto;">
+                                                <li
+                                                v-for="(result, index) in field.linkSearchResults"
+                                                :key="index"
+                                                @click="selectDoctype(
+                                                    result,
+                                                    field,
+                                                    blockIndex,
+                                                    sectionIndex,
+                                                    rowIndex,
+                                                    columnIndex,
+                                                    fieldIndex
+                                                )"
+                                                class="list-group-item list-group-item-action"
+                                                >
+                                                {{ field.options.includes('Ezy Departments') ? result.department_name : result.name }}
+                                                </li>
+                                            </ul>
+                                            </template>
 
 
 
@@ -325,14 +330,14 @@
                                             </div>
                                         </div>
                                         <span v-if="field.description !== 'Field' && field.fieldtype !== 'Table' && field.fieldname !== 'auto_calculations'"
-                                            class="font-11"><span class="fw-semibold">Description: </span>{{
+                                            class="font-11"><span  class="fw-semibold">Description: </span>{{
                                                 field.description }}</span>
                                         <div v-if="blockIndex === 0 && field.fieldtype === 'Table'">
 
                                             <div v-if="field.fieldtype === 'Table' && field.description === 'true'">
-
                                                 <div v-for="(table, tableIndex) in props.tableHeaders" :key="tableIndex"
                                                     class="mt-3">
+                                                      <!-- || tableIndex === field.options  -->
 
                                                     <div v-if="tableIndex === field.fieldname">
 
@@ -524,7 +529,15 @@
                                             <div v-else>
                                                 <div v-for="(table, tableIndex) in props.tableHeaders" :key="tableIndex"
                                                     class="mt-3">
-                                                    <div class="overTable" v-if="tableIndex === field.fieldname">
+                                                    
+                                                     <!-- || tableIndex === field.options -->
+                                                    <div
+  class="overTable"
+  v-if="
+    tableIndex.toLowerCase() === field.fieldname.toLowerCase() ||
+    (field.options && tableIndex.toLowerCase() === field.options.toLowerCase())
+  "
+>
                                                         <div>
                                                             <span class="font-13 text-secondary ">{{
                                                                 field.label.replace(/_/g, " ")
@@ -545,7 +558,7 @@
 
 
                                                                 <tr
-                                                                    v-if="!tableRows[tableIndex] || tableRows[tableIndex].length === 0">
+                                                                    v-if="!tableRows[tableIndex.toLowerCase()] || tableRows[tableIndex.toLowerCase()].length === 0">
                                                                     <td :colspan="table.length + 2"
                                                                         class="text-center text-muted">
                                                                         <div
@@ -556,13 +569,13 @@
                                                                         </div>
                                                                     </td>
                                                                 </tr>
-                                                                <tr v-for="(row, rowIndex) in tableRows[tableIndex]"
+                                                                <tr v-for="(row, rowIndex) in tableRows[tableIndex.toLowerCase()]"
                                                                     :key="rowIndex">
                                                                     <!-- <td style="text-align: center;" class="font-12">
                                                                         {{
                                                                             rowIndex + 1 }}
                                                                     </td> -->
-                                                                    <td v-for="field in table" :key="field.fieldname"
+                                                                    <td v-for="field in table" :key="field.fieldname" class=" position-relative"
                                                                         :title="row[field.fieldname]" :style="field.label !== 'Type of Manpower'
                                                                             ? {
                                                                                 width: row[field.fieldname] ? Math.max(row[field.fieldname].length * 10, 100) + 'px' : 'auto',
@@ -591,11 +604,22 @@
                                                                         <!-- :class="field.label === 'Details' && field.fieldname === 'field_0' && rowIndex === 0 && fieldIndex === 0 ? 'bg-white border-0' : 'border-1'" -->
                                                                         <template
                                                                             v-if="field.fieldtype === 'Data' && field.label !== 'Type of Manpower'">
-                                                                            <input type="text"
-                                                                                :maxlength="field.fieldtype === 'Phone' ? '10' : '140'"
-                                                                                class="form-control font-12"
-                                                                                :title="row[field.fieldname]"
-                                                                                v-model="row[field.fieldname]" />
+                                                                            <input
+      type="text"
+      :maxlength="field.fieldtype === 'Phone' ? '10' : '140'"
+      class="form-control font-12"
+      v-model="row[field.fieldname]"
+    />
+      <!-- @focus="focusedField = { rowIndex, fieldname: field.fieldname }"
+      @blur="focusedField = { rowIndex: null, fieldname: null }" -->
+
+    <!-- Show popup only if this specific field in this specific row is focused -->
+    <!-- <div
+      v-if="focusedField.rowIndex === rowIndex && focusedField.fieldname === field.fieldname"
+      class="custom-popup"
+    >
+      {{ row[field.fieldname] }}
+    </div> -->
 
                                                                         </template>
                                                                         <template v-if="field.fieldtype === 'Text'">
@@ -634,10 +658,11 @@
                                                                                 class="form-control font-12"
                                                                                 :value="calculateFieldExpression(row, field.description, table)"
                                                                                 readonly />
-                                                                            <input v-else type="number"
+                                                                            <input v-else type="number" :disabled=" field.label === 'Qty' && route.query.main_form"
                                                                                 class="form-control font-12"
                                                                                 v-model.number="row[field.fieldname]" />
-                                                                        </template>
+                                                                        </template>  
+                                                                        
 
 
                                                                         <template
@@ -755,7 +780,7 @@
                                                         </table>
 
                                                         <span
-                                                            v-if="field.description !== tableIndex && field.description !== 'True' && field.description !== 'false'"
+                                                            v-if="field.description !== tableIndex && field.description !== 'True' && field.description !== 'false' && field.description !== 'Field'"
                                                             class="font-11"><span class="fw-semibold">
                                                             </span>{{
                                                                 field.description }}</span>
@@ -784,6 +809,7 @@ import { reactive } from "vue";
 import Multiselect from "vue-multiselect";
 import "@vueform/multiselect/themes/default.css";
 import { watchEffect } from "vue";
+import { useRoute } from "vue-router";
 
 const props = defineProps({
     blockArr: {
@@ -801,11 +827,23 @@ const props = defineProps({
         type: Object,
         default: () => ({}),
     },
+    LinkedChildTableData:{
+        type: Object,
+        default: () => ({}),
+    },
+    linked_id: {
+        type: String,
+        default: null,
+    },
+
 });
+const route = useRoute();
 // Reactive states
 const linkSearchResults = ref([]);
 const currentFieldOptions = ref('');
 const tableRows = reactive({});
+// const showPopup = ref(null); 
+const focusedField = ref({ rowIndex: null, fieldname: null })
 
 const past = new Date().toISOString().split('T')[0]
 // const today = new Date().toISOString().split('T')[0];  
@@ -875,13 +913,13 @@ const closePreview = () => {
 // console.log(tableRows);
 // Format as 'YYYY-MM-DDTHH:MM'
 watch(
-    () => tableRows,
-    () => {
-        updateFirstRowName();
-        const finalData = {};
+  () => tableRows,
+  () => {
+    updateFirstRowName();
+    const finalData = {};
 
-        for (const [tableIndex, rows] of Object.entries(tableRows)) {
-            const totalsRow = tableTotals.value?.[tableIndex];
+    for (const [tableIndex, rows] of Object.entries(tableRows)) {
+      const totalsRow = tableTotals.value?.[tableIndex];
 
             if (totalsRow && Object.keys(totalsRow).length > 0) {
                 // Clone the totalsRow to avoid modifying the original
@@ -900,11 +938,11 @@ watch(
             } else {
                 finalData[tableIndex] = [...rows];
             }
-        }
+    }
 
-        emit('updateTableData', { ...finalData });
-    },
-    { deep: true }
+    emit('updateTableData', { ...finalData });
+  },
+  { deep: true }
 );
 
 
@@ -929,6 +967,8 @@ const addRow = (tableIndex) => {
     );
 
     tableRows[tableIndex].push(newRow);
+    console.log(tableRows, "tableRows after addRow");
+    
 
 
 
@@ -1355,6 +1395,11 @@ const updateDateTimeFields = () => {
                                 // console.log("Setting field.value:", field.value); // Debugging log
                                 emit("updateField", field);
                             }
+                            if(field.fieldname.includes('linked_id') || field.label.includes('Linked ID')){
+                                
+                                field.value = props.linked_id;
+                                emit("updateField", field);
+                            }
                             // if( field.fieldtype === 'Data' && field.fieldname === 'department_name'){
                             //     console.log(tableTotals.value);
                             //     field.value = tableTotals.value
@@ -1368,13 +1413,31 @@ const updateDateTimeFields = () => {
         });
     }
 };
-
+const emp_dep = ref('')
 // Initialize datetime fields on component mount
 onMounted(() => {
+    console.log(props.LinkedChildTableData , "LinkedChildTableData");
+    // if (props.LinkedChildTableData && Object.keys(props.LinkedChildTableData).length > 0) {
+    // for (const [key, value] of Object.entries(props.LinkedChildTableData)) {
+    //   tableRows[key] = Array.isArray(value) ? value : [value];
+    //     }
+    // }
+    // Object.keys(props.tableRowsdata).forEach((key) => {
+    //     tableRows[key] = props.tableRowsdata[key];
+    // });
 
-    Object.keys(props.tableRowsdata).forEach((key) => {
-        tableRows[key] = props.tableRowsdata[key];
-    });
+    console.log(tableRows, "tableRows");
+  if (props.LinkedChildTableData && Object.keys(props.LinkedChildTableData).length > 0) {
+    for (const [key, value] of Object.entries(props.LinkedChildTableData)) {
+      tableRows[key.toLowerCase()] = Array.isArray(value) ? value : [value];
+    }
+  }
+
+  // Convert tableRowsdata keys to lowercase
+  Object.keys(props.tableRowsdata).forEach((key) => {
+    tableRows[key.toLowerCase()] = props.tableRowsdata[key];
+  });
+
     const storedData = localStorage.getItem("employeeData");
     let parsedData = [];
     if (storedData) {
@@ -1384,6 +1447,7 @@ onMounted(() => {
             console.error("Error parsing employeeData from localStorage:", error);
         }
     }
+    
     updateDateTimeFields();
     // updateFormQuestionsInTableRows();
 
@@ -1409,6 +1473,7 @@ onMounted(() => {
                                 emit("updateField", field);
                             }
                             if(field.label.includes("Department Name") || field.label.includes("Department name")){
+                                emp_dep.value = parsedData.department;
                                 field.value = parsedData.department;
                                 emit("updateField", field);
                             }
@@ -2037,7 +2102,31 @@ function performAutoCalculations() {
 .removeRowTd {
     width: 20px;
 }
+.custom-popup {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  background: #000000a3;
+  color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 5px 10px;
+  font-size: 12px;
+  z-index: 999;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  max-width: 250px;           /* LIMIT width */
+  white-space: normal;        /* ALLOW wrapping */
+  word-wrap: break-word;      /* BREAK long words */
+}
+.custom-popup.top {
+  bottom: 100%; /* Show above */
+  margin-bottom: 5px;
+}
 
+.custom-popup.bottom {
+  top: 100%; /* Show below */
+  margin-top: 5px;
+}
 .text-ellipsis {
     max-width: 200px;
     overflow: hidden;
