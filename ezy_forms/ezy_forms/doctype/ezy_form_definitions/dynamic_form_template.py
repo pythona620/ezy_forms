@@ -817,7 +817,7 @@ template_str = """
         
 {% endfor %}
 
-{% if mail_attachment %}
+{% if mail_attachment%}
     <div><span style="font-weight:bold; font-size:13px;">Attachments:</span></div>
     {% for attachment in mail_attachment %}
         <div class="page">
