@@ -20,10 +20,10 @@
                 </div>
                 <div class="mx-1 my-1">
                   <div v-for="(field, fieldIndex) in column.fields" :key="'field-preview-' + fieldIndex" :class="(props.readonlyFor === 'true' || blockIndex < currentLevel) && field.fieldtype !== 'Small Text' && field.fieldtype !== 'Text'
-                    ? (field.label === 'Approved By' ? 'align-items-end' : 'align-items-start')
+                    ? (field.label === 'Approved By' ? ' d-flex align-items-end' : 'align-items-start')
                     : ''">
                     <div v-if="!(blockIndex !== 0 && !field.value)" :class="(props.readonlyFor === 'true' || blockIndex < currentLevel) && field.fieldtype !== 'Small Text' && field.fieldtype !== 'Text' || field.fieldtype === 'Check'
-                      ? 'd-flex ' + (field.fieldtype === 'Check' ? 'mt-4 flex-row-reverse justify-content-end gap-2 w-0 align-items-start ' : '') + (field.label === 'Approved By' ? 'align-items-end' : 'align-items-center')
+                      ? 'd-flex ' + (field.fieldtype === 'Check' ? 'mt-4 flex-row-reverse justify-content-end gap-2 w-0 align-items-start ' : '') + (field.label === 'Approved By' ? 'align-items-start' : 'align-items-center')
                       : ''">
 
 
@@ -238,7 +238,7 @@
                             @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
                         </template>
 
-                        <template v-else-if="field.fieldtype == 'Link'">
+                        <template v-else-if="field.fieldtype == 'Link' && field.fieldname !== ''">
                           <div class="d-flex align-items-center gap-2">
                             <input type="text" :value="field.value"
                               :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'"
@@ -255,7 +255,7 @@
                                 )" class="form-control font-12 " />
 
                             <button v-if="field.value && field.label !== 'Department'"
-                              class="btn btn-dark text-dark bg-white" @click="ClickLink(field)"> <i
+                              class="btn btn-dark text-dark bg-white border-0 p-0" @click="ClickLink(field)"> <i
                                 class="bi bi-link-45deg font-15"></i></button>
 
                             <!-- <button type="button" class="btn btn-outline-secondary pb-0 btn-sm" data-bs-toggle="modal"
@@ -398,12 +398,16 @@
                                     <template v-if="field.fieldtype === 'Select'">
                                       <div>
 
-                                        <Multiselect :multiple="field.fieldtype === 'Table MultiSelect'"
+                                        <Multiselect v-if="props.readonlyFor !== 'true' && blockIndex !== 0 && blockIndex == currentLevel" :multiple="field.fieldtype === 'Table MultiSelect'"
                                           :disabled="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel"
                                           :options="(field.options?.split('\n').filter(opt => opt.trim() !== '') || [])"
                                           :model-value="row[field.fieldname]" placeholder="Select"
                                           @update:model-value="val => row[field.fieldname] = val"
                                           class="font-11 multiselect" />
+                                           <span v-else>
+                                            {{ row[field.fieldname] }}
+
+                                          </span>
                                       </div>
                                     </template>
                                     <template v-else-if="field.fieldtype === 'Attach'">

@@ -74,6 +74,7 @@ export const apis = {
   activityLogWithChild: domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.get_doc_changes`,
   getReportData:  `/printview`,
   signUp:domain+`/method/ezy_forms.ezy_custom_forms.custom_script.v1.sign_up.sign_up`,
+  deleteEmployee:domain+`/method/ezy_forms.ezy_forms.doctype.ezy_employee.ezy_employee.employee_rejection`,
   // getReportData: domain + `/api/method/frappe.utils.print_format.download_pdf`
 };
 
