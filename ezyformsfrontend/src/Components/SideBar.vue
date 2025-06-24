@@ -150,8 +150,8 @@ const settingsSideBarData = [
     { name: 'Department', icon: 'bi bi-clock-history', route: 'department' },
     { name: 'Designation', icon: 'bi bi-people', route: 'designations' },
     { name: 'Active Employees', icon: 'bi bi-people', route: 'employee' },
-    { name: 'Inactive Employee', icon: 'bi bi-people', route: 'inactiveEmployee' },
-    { name: 'Employee Approval', icon: 'bi bi-people', route: 'employeeapproval' },
+    { name: 'Inactive Employees', icon: 'bi bi-people', route: 'inactiveEmployee' },
+    { name: 'Employee Approvals', icon: 'bi bi-people', route: 'employeeapproval' },
     { name: 'System Settings', icon: 'bi bi-tags', route: 'authenticationpage' },
     // {name: 'Roles',icon:' bi bi-people', route:'role'},
     // { name: 'Workflow Settings', icon: 'bi bi-gear', route: 'WorkflowSettings'}

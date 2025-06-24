@@ -13,15 +13,11 @@
                 374 users
             </p> -->
         </div>
-        <!-- <div class="d-flex align-items-center gap-2">
-          <button type="button" class=" btn btn-light  CreateDepartments  font-12 " @click="bulkEmp">
-            Import Employees
+        <div class="d-flex align-items-center gap-2">
+          <button type="button" class=" btn btn-light  CreateDepartments font-12" data-bs-toggle="modal" data-bs-target="#ExportEmployeeModal">
+            Export Employees
           </button>
-          <button type="button" class="btn btn-dark  CreateDepartments " data-bs-toggle="modal"
-            data-bs-target="#createDepartments" @click="createEmplBtn">
-            Create Employee
-          </button>
-        </div> -->
+        </div>
         
         <div class="modal fade" id="createDepartments" data-bs-backdrop="static" tabindex="-1" data-bs-keyboard="false"
           aria-labelledby="createDepartmentsLabel" aria-hidden="true">
@@ -516,6 +512,42 @@
       </div>
     </div>
 
+    <div class="modal fade" id="ExportEmployeeModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Export Employee</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            Are you sure you want to export the employee details?
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-dark" @click="exportEmployeesToExcel">Yes, Proceed</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="DeleteEmployeeModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Delete Employee</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            Are you sure you want to delete <span>"{{rowDetails.emp_name}}"</span>?
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-dark" @click="deleteEmployee()">Yes, Proceed</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
 
   </div>
 
@@ -644,6 +676,38 @@ const handleFileChange = (event) => {
 const generateRandomNumber = () => {
   return Math.floor(Math.random() * 1000000);
 };
+
+
+const exportEmployeesToExcel = async () => {
+  const filters = [["company_field", "like", `%${newbusiness.value}%`],["is_web_form","=","1"]];
+  const queryParams = {
+    fields: JSON.stringify(["*"]),
+    limit_start: 0,
+    limit_page_length: "none",
+    filters: JSON.stringify(filters),
+}
+  try {
+    const response = await axiosInstance.get(
+      apis.resource + doctypes.EzyEmployeeList,
+      { params: queryParams }
+    )
+
+    if (response.data) {
+      const employees = response.data
+          const modal = bootstrap.Modal.getInstance(
+          document.getElementById("ExportEmployeeModal")
+          );
+          modal.hide();
+          toast.success("Successfully Completed")
+      const worksheet = XLSX.utils.json_to_sheet(employees)
+      const workbook = XLSX.utils.book_new()
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Employees')
+      XLSX.writeFile(workbook, 'EmployeeDetails.xlsx')
+    }
+  } catch (error) {
+    console.error('Error exporting employee data:', error)
+  }
+}
 
 
 const uploadbulkFile = (file) => {
@@ -1316,7 +1380,10 @@ function createEmplBtn() {
   employeeOptions();
 }
 
+const rowDetails=ref([])
+
 function actionCreated(rowData, actionEvent) {
+  rowDetails.value=rowData;
   if (actionEvent?.name === 'Edit Employee') {
     if (rowData) {
       // Reset errors
@@ -1368,21 +1435,32 @@ function actionCreated(rowData, actionEvent) {
     }
   }
   if (actionEvent.name === 'Delete Employee') {
+      const modal = new bootstrap.Modal(document.getElementById('DeleteEmployeeModal'), {});
+      modal.show();
+  }
+}
+
+function deleteEmployee(){
   const payload = {
-    empl_mail_id: rowData?.emp_mail_id,
+    empl_mail_id: rowDetails.value?.emp_mail_id,
   };
  
   axiosInstance
     .post(apis.deleteEmployee, payload)
     .then((res) => {
-      console.log("Delete Success:", res.data);
+     if(res){
+       console.log("Delete Success:", res);
+        toast.success(res.message)
+        employeeData()
+        const modal = bootstrap.Modal.getInstance(
+          document.getElementById("DeleteEmployeeModal")
+        );
+        modal.hide();
+     }
     })
     .catch((error) => {
       console.error("Delete error:", error?.response?.data || error.message);
     });
-}
-
-  // Handle other actions like enabling here if needed
 }
 
 
@@ -1425,10 +1503,37 @@ function confirmEmployeeToggle() {
     })
     .then(() => {
       toast.success(`Employee ${empActionText.value}d successfully`);
-      window.location.reload();
+      const modal = bootstrap.Modal.getInstance(
+          document.getElementById("EmployeeToggleModal")
+        );
+        modal.hide();
+      if(selectedEmpRow.value.enable === 1){
+        EmpUnableMail()
+      }
+      else{
+        employeeData()
+      }
     })
     .catch((err) => {
       console.error('Toggle employee error:', err);
+    });
+}
+
+function EmpUnableMail(){
+  const payload={
+      emp_mail:selectedEmpRow.value.emp_mail_id,
+  }
+
+  axiosInstance
+    .post(apis.unablUpdateEmail, payload)
+    .then((res) => {
+      if(res){
+        console.log(res);
+        employeeData()
+      }
+    })
+    .catch((error) => {
+      console.error("Upload error:", error);
     });
 }
 
