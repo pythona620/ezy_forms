@@ -300,11 +300,9 @@ import 'vue3-select/dist/vue3-select.css'
 export default {
   props: ["id"],
   components: {
+    Vue3Select,
     FormFields,
     ButtonComp
-  },
-  components: {
-    Vue3Select
   },
   data() {
     return {
@@ -699,6 +697,7 @@ export default {
                   emp_mail_id: employeeData.emp_mail_id,
                   designation: employeeData.designation,
                   department: employeeData.department,
+                  emp_code:employeeData.emp_code
                   // department: employeeData.department,
                 };
 

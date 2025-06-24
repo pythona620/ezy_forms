@@ -3,30 +3,26 @@
 
 
     <div>
-      <div class="d-flex justify-content-between align-items-center py-2">
+      <div class="d-flex justify-content-between align-items-center mt-2 py-2">
         <div>
           <h1 class="m-0 font-13">
-            Active Employees
+            Inactive Employees
             <!-- ({{ totalRecords }}) -->
           </h1>
           <!-- <p class="m-0 font-11 pt-1">
                 374 users
             </p> -->
         </div>
-        <div class="d-flex align-items-center gap-2">
-           <!-- <button type="button" class=" btn btn-light  CreateDepartments font-12" data-bs-toggle="modal" data-bs-target="#ExportEmployeeModal">
-            Export Employees
-          </button> -->
-
+        <!-- <div class="d-flex align-items-center gap-2">
           <button type="button" class=" btn btn-light  CreateDepartments  font-12 " @click="bulkEmp">
             Import Employees
           </button>
-          
           <button type="button" class="btn btn-dark  CreateDepartments " data-bs-toggle="modal"
             data-bs-target="#createDepartments" @click="createEmplBtn">
             Create Employee
           </button>
-        </div>
+        </div> -->
+        
         <div class="modal fade" id="createDepartments" data-bs-backdrop="static" tabindex="-1" data-bs-keyboard="false"
           aria-labelledby="createDepartmentsLabel" aria-hidden="true">
           <div class="modal-dialog modal-lg">
@@ -515,24 +511,6 @@
           <div class="modal-footer">
             <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
             <button type="button" class="btn btn-dark" @click="confirmEmployeeToggle">Yes, Proceed</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="modal fade" id="ExportEmployeeModal" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Export Employee</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            Please confirm: Export Employee Details?
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="button" class="btn btn-dark" @click="exportEmployeesToExcel">Yes, Proceed</button>
           </div>
         </div>
       </div>
@@ -1477,37 +1455,6 @@ function selectedSignature(event) {
   }
 }
 
-// Export function
-const exportEmployeesToExcel = async () => {
-  const filters = [["company_field", "like", `%${newbusiness.value}%`],["is_web_form","=","0"]];
-  const queryParams = {
-    fields: JSON.stringify(["*"]),
-    limit_start: 0,
-    limit_page_length: "none",
-    filters: JSON.stringify(filters),
-}
-  try {
-    const response = await axiosInstance.get(
-      apis.resource + doctypes.EzyEmployeeList,
-      { params: queryParams }
-    )
-
-    if (response.data) {
-      const employees = response.data
-          const modal = bootstrap.Modal.getInstance(
-          document.getElementById("ExportEmployeeModal")
-          );
-          modal.hide();
-      const worksheet = XLSX.utils.json_to_sheet(employees)
-      const workbook = XLSX.utils.book_new()
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'Employees')
-      XLSX.writeFile(workbook, 'EmployeeDetails.xlsx')
-    }
-  } catch (error) {
-    console.error('Error exporting employee data:', error)
-  }
-}
-
 // const generateRandomNumber = () => {
 //     return Math.floor(Math.random() * 1000000);
 // };
@@ -1638,7 +1585,7 @@ function inLineFiltersData(searchedData) {
 }
 
 function employeeData(data) {
-  const filters = [["company_field", "like", `%${newbusiness.value}%`],["is_web_form","=","0"],["enable","=","1"]];
+  const filters = [["company_field", "like", `%${newbusiness.value}%`],["is_web_form","=","0"],["enable","=","0"]];
   if (data) {
     filters.push(...data);
   }
@@ -1716,7 +1663,6 @@ function employeeOptions() {
         if (filterObj.value.limit_start === 0) {
 
           employeeEmails.value = newData;
-          // console.log("employeeEmails",employeeEmails.value);
           // designations.value = [...new Set(res.data.map((designation) => designation.designation))];
           reportingTo.value = [
             ...new Set(res.data.map((reporting) => reporting.reporting_to)),

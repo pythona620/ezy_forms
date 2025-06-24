@@ -187,9 +187,31 @@ function backToForm() {
   blockArr.value = [];
 }
 
+const ip_address = ref(null)
+ 
+const getClientIP = async () => {
+  try {
+    const response = await fetch('https://api.ipify.org?format=json')
+    const data = await response.json()
+    ip_address.value = data.ip
+    console.log("ip_address.value",ip_address.value);
+
+  } catch (error) {
+    console.error('Error fetching IP:', error)
+  }
+}
+
+
 
 onMounted(() => {
+  getClientIP()
   formDefinations();
+  const storedData = localStorage.getItem("employeeData");
+   if (storedData) {
+    employeeData.value = JSON.parse(storedData);
+    // console.log("employeeData======================",employeeData.value);
+  } 
+
   // raiseRequest();
 });
 
@@ -1066,6 +1088,8 @@ function request_raising_fn(item) {
     url_for_request_id: "",
     files: filepaths.value.length > 0 ? filepaths.value : [],
     property: business_unit.value,
+    ip_address:ip_address.value,
+    employee_id:employeeData.value.emp_code,
   };
   axiosInstance.post(apis.raising_request, data_obj).then((resp) => {
     if (resp?.message?.success === true) {

@@ -149,9 +149,10 @@ const settingsSideBarData = [
     // { name: 'Notifications', icon: 'bi bi-bell', route: 'notifications' },
     { name: 'Department', icon: 'bi bi-clock-history', route: 'department' },
     { name: 'Designation', icon: 'bi bi-people', route: 'designations' },
-    { name: 'Employees', icon: 'bi bi-people', route: 'employee' },
-    { name: 'New Employee', icon: 'bi bi-tags', route: 'newemployee' },
-    { name: 'System Settings', icon: 'bi bi-people', route: 'authenticationpage' },
+    { name: 'Active Employees', icon: 'bi bi-people', route: 'employee' },
+    { name: 'Inactive Employee', icon: 'bi bi-people', route: 'inactiveEmployee' },
+    { name: 'Employee Approval', icon: 'bi bi-people', route: 'employeeapproval' },
+    { name: 'System Settings', icon: 'bi bi-tags', route: 'authenticationpage' },
     // {name: 'Roles',icon:' bi bi-people', route:'role'},
     // { name: 'Workflow Settings', icon: 'bi bi-gear', route: 'WorkflowSettings'}
 
@@ -227,8 +228,8 @@ const filteredSettingsGroups = computed(() => {
     return userDesigination.value.toLowerCase().includes('it')
         ? {
             thirdSettingsGroup: settingsSideBarData.slice(1, 3),
-            forthSettingsGroup: settingsSideBarData.slice(3, 5),
-            fifthSettingsGroup: settingsSideBarData.slice(5)
+            forthSettingsGroup: settingsSideBarData.slice(3, 6),
+            fifthSettingsGroup: settingsSideBarData.slice(6)
 
         }
         : { thirdSettingsGroup: [], forthSettingsGroup: [] };
