@@ -749,7 +749,7 @@ template_str = """
                                             {% if field.fieldtype == 'Attach' and "approved_by" in field.fieldname %}
                                              <img  id="{{ field.fieldname }}" src="{{ site_url + field['values'] or ''  }}" style="width: 80px; height: 80px; object-fit: contain; display: block; margin-left: 119px ; margin-top: -51px;"  name="{{ field.fieldname }}">
                                             {% else %}
-                                            <img  id="{{ field.fieldname }}" src="{{ site_url + field['values'] or ''  }}"  name="{{ field.fieldname }}">
+                                            {{ field['values'] }}
                                             {% endif %}
                                             {% else %}
                                                 <input type="text" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
@@ -817,17 +817,15 @@ template_str = """
         
 {% endfor %}
 
-{% if mail_attachment and mail_attachment | select | list %}
+{% if mail_attachment%}
     <div><span style="font-weight:bold; font-size:13px;">Attachments:</span></div>
-    {% for attachment_group in mail_attachment %}
-        {% for file_path in attachment_group.split(',') %}
-            {% set cleaned_path = file_path.strip() %}
-            <div class="page">
-                <img 
-                    src="{{ site_url + cleaned_path }}"
-                    class="attachments">
-            </div>
-        {% endfor %}
+    {% for attachment in mail_attachment %}
+        <div class="page">
+            <div style="font-size:12px; margin-bottom: 4px;"><b>{{ attachment.label }}</b></div>
+            <img 
+                src="{{ site_url + attachment.file_url }}"
+                class="attachments">
+        </div>
     {% endfor %}
 {% endif %}
 
@@ -1222,10 +1220,15 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                     # Convert PDFs in Attach fields to image previews
                     if iteration.get("fieldtype") == "Attach" and iteration.get("value"):
                         iteration["value"] = handle_pdf_fields(iteration["value"])
- 
-                        # if "approved_by" not in iteration.get("fieldname", "").lower():
-                        #     # mail_attachment.append(iteration["value"])
- 
+                        
+                        # Construct a display name using the label or fallback to fieldname
+                        field_label = iteration.get("label") or iteration.get("fieldname")
+                        attachment_info = {
+                            "label": field_label,
+                            "file_url": iteration["value"]
+                        }
+                        if "approved_by" not in iteration.get("fieldname", "").lower():
+                            mail_attachment.append(attachment_info)
                     # Handle Table fields (child tables)
                     if iteration.get("fieldtype") == "Table":
                         child_table_name = str(iteration["fieldname"])
@@ -1256,7 +1259,11 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                                     if value:
                                         value = handle_pdf_fields(value)
                                         if "approved_by" not in field.lower():
-                                            mail_attachment.append(value)
+                                            attachment_child_info = {
+                                                    "label": field_labels.get(field, field),
+                                                    "file_url": value
+                                                }
+                                            mail_attachment.append(attachment_child_info)
                                     continue  # Skip adding this field to processed_record
 
                                 # Add other field types normally
