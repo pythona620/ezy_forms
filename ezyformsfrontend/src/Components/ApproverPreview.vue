@@ -238,12 +238,12 @@
                             @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
                         </template>
 
-                        <template v-else-if="field.fieldtype == 'Link' && field.fieldname !== ''">
+                        <template v-else-if="field.fieldtype == 'Link' && field.fieldname !== 'department_name'">
                           <div class="d-flex align-items-center gap-2">
                             <input type="text" :value="field.value"
                               :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'"
                               @input="(e) => onInputChange(e.target.value, field)"
-                              :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 image-border-bottom w-50 pb-0 bg-transparent' : ''"
+                              :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0  w-50 pb-0 bg-transparent' : ''"
                               @change="(event) =>
                                 logFieldValue(
                                   event,
@@ -255,7 +255,7 @@
                                 )" class="form-control font-12 " />
 
                             <button v-if="field.value && field.label !== 'Department'"
-                              class="btn btn-dark text-dark bg-white border-0 p-0" @click="ClickLink(field)"> <i
+                              class="btn btn-dark text-dark bg-white  p-1" @click="ClickLink(field)"> <i
                                 class="bi bi-link-45deg font-15"></i></button>
 
                             <!-- <button type="button" class="btn btn-outline-secondary pb-0 btn-sm" data-bs-toggle="modal"
@@ -274,7 +274,7 @@
 
                         <template v-else-if="field.fieldtype == 'Datetime'">
                           <input type="datetime-local" v-model="field.value"
-                            :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 image-border-bottom bg-white  pb-0 bg-transparent ' : ' '"
+                            :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 bg-white  pb-0 bg-transparent ' : ' '"
                             :disabled="blockIndex" :readOnly="blockIndex < currentLevel || props.readonlyFor === 'true'
                               " :placeholder="'Enter ' + field.label" :name="'field-' +
                                 sectionIndex +
@@ -290,7 +290,7 @@
                           <input v-if="field.fieldtype == 'Int'"
                             :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'" :readOnly="blockIndex < currentLevel || props.readonlyFor === 'true'
                               " type="number" v-model="field.value"
-                            :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 image-border-bottom w-50 bg-white' : ' '"
+                            :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0  w-50 bg-white' : ' '"
                             :placeholder="'Enter ' + field.label" :value="field.value" :name="'field-' +
                               sectionIndex +
                               '-' +
@@ -310,7 +310,7 @@
                           <template
                             v-if="blockIndex === 0 && field.fieldtype !== 'Int' && field.fieldtype !== 'Text' && field.fieldtype !== 'Select' && field.fieldname !== 'auto_calculations'">
                             <span style="font-size: 12px;"
-                              :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 image-border-bottom w-50 bg-transparent' : ''"
+                              :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0  w-50 bg-transparent' : ''"
                               :value="field.value" :type="field.fieldtype">
                               {{ field.fieldtype === 'Time' ? formatTime(field.value) : field.value }}
                             </span>
@@ -322,7 +322,7 @@
                                 width: Math.min(100 + (field.value?.length * 2), 600) + 'px'
                               }" :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'"
                               :is="getFieldComponent(field.fieldtype)" :class="props.readonlyFor === 'true' || blockIndex < currentLevel
-                                ? 'border-0 image-border-bottom w-50 bg-transparent'
+                                ? 'border-0  w-50 bg-transparent'
                                 : ''" :value="field.fieldtype === 'Time' ? formatTime(field.value) : field.value"
                               :type="field.fieldtype"
                               :readOnly="blockIndex < currentLevel || props.readonlyFor === 'true'"
@@ -1466,6 +1466,7 @@ const clearImage = (
   background-color: #ffffff;
   padding: 0;
   padding-bottom: 1px;
+  
 }
 
 .section-label {
