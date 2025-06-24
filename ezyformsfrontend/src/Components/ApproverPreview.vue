@@ -542,7 +542,7 @@
                                       <template v-else>
                                         <template v-if="field.fieldtype === 'Attach'">
                                           <!-- File Input -->
-                                          <input type="file" multiple accept="image/jpeg,image/png,application/pdf"
+                                          <input v-if="props.readonlyFor !== 'true' && blockIndex !== 0 && blockIndex == currentLevel" type="file" multiple accept="image/jpeg,image/png,application/pdf"
                                             class="form-control font-12"
                                             @change="handleFileUpload($event, row, field.fieldname)" />
 

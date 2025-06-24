@@ -31,6 +31,20 @@
                 </div>
             </div>
         </div>
+        <div class="row mt-3">
+            <div class="col-6 ">
+
+            <div class="chart-wrapper ">
+                <div id="donutchart" style="width: 450px; height: 400px;"></div>
+            </div>
+            </div>
+            <!-- <div class="col-6 ">
+
+            <div class="chart-wrapper ">
+                <div id="donutchart" style="width: 450px; height: 400px;"></div>
+            </div>
+            </div> -->
+        </div>
     </div>
 </template>
 
@@ -145,7 +159,39 @@ async function fetchData() {
         console.error("Error fetching data:", error);
     }
 }
+// Google Charts loader
+onMounted(() => {
+    fetchData()
+    // Load Google Charts script
+    const script = document.createElement('script')
+    script.src = 'https://www.gstatic.com/charts/loader.js'
+    script.onload = () => {
+        google.charts.load('current', { packages: ['corechart'] })
+        google.charts.setOnLoadCallback(drawDonutChart)
+    }
+    document.head.appendChild(script)
+})
 
+function drawDonutChart() {
+    const data = google.visualization.arrayToDataTable([
+        ['Task', 'Hours per Day'],
+        ['Pending', 11],
+        ['Request Rejected', 2],
+        ['Completed', 10],
+        ['Completed', 7],
+    ])
+
+    const options = {
+        title: 'Top 5 Forms',
+        pieHole: 0.4,
+        backgroundColor: '#f8f9fa'
+    }
+
+    const chart = new google.visualization.PieChart(
+        document.getElementById('donutchart')
+    )
+    chart.draw(data, options)
+}
 // Function to initialize and update each chart dynamically
 function updateCharts() {
     chartsData.value.forEach((chartData, index) => {
@@ -200,7 +246,7 @@ function updateCharts() {
 }
 
 // Fetch data and initialize charts when the component mounts
-onMounted(fetchData);
+// onMounted(fetchData);
 </script>
 
 <style scoped>
