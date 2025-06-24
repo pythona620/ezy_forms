@@ -819,14 +819,18 @@ template_str = """
 
 {% if mail_attachment%}
     <div><span style="font-weight:bold; font-size:13px;">Attachments:</span></div>
-    {% for attachment in mail_attachment %}
-        <div class="page">
-            <div style="font-size:12px; margin-bottom: 4px;"><b>{{ attachment.label }}</b></div>
-            <img 
-                src="{{ site_url + attachment.file_url }}"
-                class="attachments">
-        </div>
+    {% for attachment_group in mail_attachment %}
+        {% for file_path in attachment_group.file_url.split(',') %}
+            {% set cleaned_path = file_path.strip() %}
+            <div class="page">
+                <div style="font-size:12px; margin-bottom: 4px;"><b>{{ attachment_group.label }}</b></div>
+                <img 
+                    src="{{ site_url + cleaned_path }}"
+                    class="attachments">
+            </div>
+        {% endfor %}
     {% endfor %}
+
 {% endif %}
 
 
