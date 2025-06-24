@@ -171,19 +171,12 @@ const tableHeaders = ref([]);
 const loading = ref(false)
 const Rejectloading = ref(false)
 
-// onMounted(() => {
-//   const storedData = localStorage.getItem("employeeData");
-//   try {
-//     const parsedData = JSON.parse(storedData);
-
-//     // Ensure parsedData is an array
-//     employeeData.value = Array.isArray(parsedData) ? parsedData : [parsedData];
-
-//   } catch (error) {
-//     console.error("Error parsing employeeData from localStorage:", error);
-//     employeeData.value = []; // Fallback to empty array if there's an error
-//   }
-// });
+onMounted(() => {
+  getClientIP()
+  const storedData = localStorage.getItem("employeeData");
+  employeeData.value = JSON.parse(storedData);
+  
+});
 
 const viewlist = ref([])
 function ViewOnlyReport(){
@@ -416,7 +409,18 @@ function ApproverFormSubmission(dataObj, type) {
     })
 
 }
+const ip_address = ref(null)
+ 
+const getClientIP = async () => {
+  try {
+    const response = await fetch('https://api.ipify.org?format=json')
+    const data = await response.json()
+    ip_address.value = data.ip
 
+  } catch (error) {
+    console.error('Error fetching IP:', error)
+  }
+}
 
 function approvalStatusFn(dataObj, type) {
 
@@ -431,6 +435,8 @@ function approvalStatusFn(dataObj, type) {
     files: null,
     cluster_name: null,
     url_for_approval_id: "",
+    // ip_address:ip_address.value,
+    // employee_id:employeeData.value.emp_code,
     // https://ezyrecon.ezyinvoicing.com/home/wf-requests
     current_level: selectedRequest.value.current_level,
   };

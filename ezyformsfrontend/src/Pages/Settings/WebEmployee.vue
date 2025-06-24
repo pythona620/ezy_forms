@@ -6,7 +6,7 @@
       <div class="d-flex justify-content-between align-items-center mt-2 py-2">
         <div>
           <h1 class="m-0 font-13">
-            New Employees
+            Employee Approvals
             <!-- ({{ totalRecords }}) -->
           </h1>
           <!-- <p class="m-0 font-11 pt-1">
@@ -1285,7 +1285,7 @@ watch(
 // function addnewDesignation() {
 //     newDesignation.value = !newDesignation.value
 // }
-const actions = ref([{ name: "Edit Employee", icon: "fa-solid fa-eye" }]);
+const actions = ref([{ name: "Edit Employee", icon: "fa-solid fa-eye" },{ name: "Delete Employee", icon: "fas fa-trash-alt" }]);
 const isFormFilled = computed(() => {
   return [
     createEmployee.value.emp_code,
@@ -1367,6 +1367,20 @@ function actionCreated(rowData, actionEvent) {
       formCreation(rowData);
     }
   }
+  if (actionEvent.name === 'Delete Employee') {
+  const payload = {
+    empl_mail_id: rowData?.emp_mail_id,
+  };
+ 
+  axiosInstance
+    .post(apis.deleteEmployee, payload)
+    .then((res) => {
+      console.log("Delete Success:", res.data);
+    })
+    .catch((error) => {
+      console.error("Delete error:", error?.response?.data || error.message);
+    });
+}
 
   // Handle other actions like enabling here if needed
 }
