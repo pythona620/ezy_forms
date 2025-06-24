@@ -192,7 +192,7 @@ template_str = """
         }
         .field {
             display: flex;
-            align-items: baseline;
+            
             padding: 4px 0px;
             margin: 5px 5px;
         }
@@ -350,9 +350,9 @@ template_str = """
       
           }
           .signature-Imge{
-              min-width: 70px;
-              max-width: 70px;
-              padding-bottom: 5px;
+              min-width: 40px;
+              max-width: 40px;
+
               
               
           }
@@ -437,9 +437,6 @@ template_str = """
             .table{
                 width: 100% !important;
                 margin:0px 3px;
-            }
-            .column{
-                padding:0px;
             }
             textarea {
                 border: none;
@@ -639,11 +636,8 @@ template_str = """
                                
                                     <div class="field field-textarea">
                                     
-                                        {% if field.fieldtype == 'Attach' and 'approved_by' in field.fieldname|lower  %}
-                                            <label for="{{ field.fieldname }}">
-                                            
-                                            </label>
-                                        {% elif field.fieldtype != 'Attach' and field.fieldname != 'auto_calculations' %}
+                                  
+                                        {% if field.fieldname != 'auto_calculations' %}
                                             <label for="{{ field.fieldname }}">
                                                 {{ field.label }} <span style="padding-left:2px; font-size: 13px;">:</span>
                                             </label>
@@ -752,7 +746,11 @@ template_str = """
                                             {% endif %}
                                         {% elif field.fieldtype == 'Attach' %}
                                             {% if field['values'] %}
-                                            <strong>{{ field.label }}</strong> <span style="padding-left:2px; font-size: 13px;">:</span>   <img  id="{{ field.fieldname }}" src="{{ site_url + field['values'] or ''  }}"  name="{{ field.fieldname }}">
+                                            {% if field.fieldtype == 'Attach' and "approved_by" in field.fieldname %}
+                                             <img  id="{{ field.fieldname }}" src="{{ site_url + field['values'] or ''  }}" style="width: 80px; height: 80px; object-fit: contain; display: block; margin-left: 119px ; margin-top: -51px;"  name="{{ field.fieldname }}">
+                                            {% else %}
+                                            <img  id="{{ field.fieldname }}" src="{{ site_url + field['values'] or ''  }}"  name="{{ field.fieldname }}">
+                                            {% endif %}
                                             {% else %}
                                                 <input type="text" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
                                             {% endif %}
@@ -819,6 +817,19 @@ template_str = """
         
 {% endfor %}
 
+{% if mail_attachment and mail_attachment | select | list %}
+    <div><span style="font-weight:bold; font-size:13px;">Attachments:</span></div>
+    {% for attachment_group in mail_attachment %}
+        {% for file_path in attachment_group.split(',') %}
+            {% set cleaned_path = file_path.strip() %}
+            <div class="page">
+                <img 
+                    src="{{ site_url + cleaned_path }}"
+                    class="attachments">
+            </div>
+        {% endfor %}
+    {% endfor %}
+{% endif %}
 
 
  
@@ -1212,8 +1223,8 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                     if iteration.get("fieldtype") == "Attach" and iteration.get("value"):
                         iteration["value"] = handle_pdf_fields(iteration["value"])
  
-                        if "approved_by" not in iteration.get("fieldname", "").lower():
-                            mail_attachment.append(iteration["value"])
+                        # if "approved_by" not in iteration.get("fieldname", "").lower():
+                        #     # mail_attachment.append(iteration["value"])
  
                     # Handle Table fields (child tables)
                     if iteration.get("fieldtype") == "Table":

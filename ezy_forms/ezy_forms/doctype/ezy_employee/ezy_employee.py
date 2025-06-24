@@ -5,6 +5,7 @@ import frappe
 from frappe.model.document import Document
 import sys
 from ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions import activating_perms, bench_migrating_from_code
+import socket as so
 
 class EzyEmployee(Document):
 	def after_insert(self):
@@ -112,8 +113,27 @@ def role_based_accessible_requests(role:str,business_unit:str):
 
 @frappe.whitelist()
 def employee_last_login_activate(login_manager): 
+	hostname = so.gethostname()
+	ip_address = so.gethostbyname(hostname)
 	frappe.db.set_value('Ezy Employee',{"emp_mail_id":frappe.session.user},"last_login",frappe.utils.now())
-	frappe.db.set_value('Ezy Employee',{"emp_mail_id":frappe.session.user},"last_ip",frappe.local.request_ip)
+	frappe.db.set_value('Ezy Employee',{"emp_mail_id":frappe.session.user},"last_ip",ip_address)
 	frappe.db.commit()
  
-    
+ 
+
+ 
+@frappe.whitelist()
+def employee_rejection(empl_mail_id):
+	# Get the employee document
+	employee = frappe.get_doc("Ezy Employee", {"emp_mail_id": empl_mail_id})
+	# Delete the employee
+	frappe.delete_doc("Ezy Employee", employee.name, force=1)
+
+	# Get the user document
+	user_doc = frappe.get_doc("User", empl_mail_id)
+	# Delete the user
+	frappe.delete_doc("User", user_doc.name, force=1)
+	login_check = frappe.get_doc("Login Check",{"user_id":empl_mail_id})
+	frappe.delete_doc("Login Check", login_check.name, force=1)
+	frappe.db.commit()
+	return "Employee Deleted"
