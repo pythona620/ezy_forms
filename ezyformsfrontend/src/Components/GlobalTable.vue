@@ -79,9 +79,12 @@
                   'textcancel fw-medium': row[column.td_key] === 'Cancelled',
                   'text-danger fw-medium': row[column.td_key] === 'Request Cancelled',
                 }"></i>
+                <span class="tooltip-text" :title="row[column.td_key]">
+
                 {{ row[column.td_key]
                 }}<span v-if="row.current_level !== undefined && row.total_levels !== undefined">
                   ({{ row.current_level }} / {{ row.total_levels }})
+                </span>
                 </span>
               </span>
 
@@ -102,13 +105,13 @@
                 {{ row[column.td_key] === 'Created' ? 'Active' : 'Retired' }}
               </span>
               <!-- Default Column Rendering -->
-              <span v-else-if="
-                column.td_key === 'requested_on' || column.td_key === 'invoice_date'">
+              <span class="tooltip-text" :title="formatDate(row[column.td_key])" v-else-if="
+                column.td_key === 'requested_on' || column.td_key === 'invoice_date' || column.td_key === 'creation' ">
                 {{ formatDate(row[column.td_key]) }}
               </span>
 
               <!-- Show unformatted date for 'modified' when status === 'Request Raised' -->
-              <span
+              <span class="tooltip-text" :title="formatDate(row[column.td_key])"
   v-else-if="column.td_key === 'modified' && row.status !== 'Request Raised'"
 >
   {{ formatDate(row[column.td_key]) }}
@@ -172,7 +175,7 @@
               <!-- <span v-else>
                 {{ row[column.td_key].replace(/_/g, " ") || "-" }}
               </span> -->
-              <span v-else>
+              <span v-else class="tooltip-text" :title="row[column.td_key] || '-'">
                 <!-- ?.replace(/@[\w.-]+/, "") -->
                 {{ column.td_key === 'modified' ? '-' :  row[column.td_key] || "-" }}
               </span>
@@ -559,6 +562,34 @@ function handleCellClick(check, index, type) {
 //   white-space: nowrap;
 //   vertical-align: middle;
 // }
+// .tooltip-text {
+//   position: relative;
+//   display: inline-block;
+//   cursor: help;
+// }
+
+// .tooltip-text::after {
+//   content: attr(title);
+//   position: absolute;
+//   bottom: 100%; /* Show above the element */
+//   left: 50%;
+//   transform: translateX(-50%);
+//   background-color: #333;
+//   color: #fff;
+//   padding: 4px 8px;
+//   border-radius: 4px;
+//   white-space: nowrap;
+//   font-size: 12px;
+//   z-index: 1000;
+//   opacity: 0;
+//   pointer-events: none;
+//   transition: opacity 0.2s ease-in-out;
+// }
+
+// .tooltip-text:hover::after {
+//   opacity: 1;
+// }
+
 
 .form-check-input {
   font-size: 15px;
