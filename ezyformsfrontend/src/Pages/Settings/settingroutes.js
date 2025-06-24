@@ -12,6 +12,7 @@ const ActivityLog = () => import("./DepartmentComp.vue");
 const EsignComp = () => import("./EsignComp.vue");
 const AuthenticationPage=()=>import("./AuthenticationPage.vue");
 const WebEmployee=()=>import("./WebEmployee.vue");
+const InactiveEmployee=()=>import("./InactiveEmployee.vue")
 
 const settingRoutes = [
   {
@@ -26,7 +27,12 @@ const settingRoutes = [
         name: "EmployeeComp",
       },
       {
-        path: "newemployee",
+        path: "inactiveEmployee",
+        component: InactiveEmployee,
+        name: "InactiveEmployee",
+      },
+      {
+        path: "employeeapproval",
         component: WebEmployee,
         name: "WebEmployee",
       },
