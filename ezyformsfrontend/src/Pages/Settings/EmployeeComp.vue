@@ -14,9 +14,9 @@
             </p> -->
         </div>
         <div class="d-flex align-items-center gap-2">
-           <!-- <button type="button" class=" btn btn-light  CreateDepartments font-12" data-bs-toggle="modal" data-bs-target="#ExportEmployeeModal">
+           <button type="button" class=" btn btn-light  CreateDepartments font-12" data-bs-toggle="modal" data-bs-target="#ExportEmployeeModal">
             Export Employees
-          </button> -->
+          </button>
 
           <button type="button" class=" btn btn-light  CreateDepartments  font-12 " @click="bulkEmp">
             Import Employees
@@ -528,7 +528,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            Please confirm: Export Employee Details?
+            Are you sure you want to export the employee details?
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -1479,7 +1479,7 @@ function selectedSignature(event) {
 
 // Export function
 const exportEmployeesToExcel = async () => {
-  const filters = [["company_field", "like", `%${newbusiness.value}%`],["is_web_form","=","0"]];
+  const filters = [["company_field", "like", `%${newbusiness.value}%`],["is_web_form","=","0"],["enable","=","1"]];
   const queryParams = {
     fields: JSON.stringify(["*"]),
     limit_start: 0,
@@ -1498,6 +1498,7 @@ const exportEmployeesToExcel = async () => {
           document.getElementById("ExportEmployeeModal")
           );
           modal.hide();
+          toast.success("Successfully Completed")
       const worksheet = XLSX.utils.json_to_sheet(employees)
       const workbook = XLSX.utils.book_new()
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Employees')
