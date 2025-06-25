@@ -1039,7 +1039,7 @@ function getEmploye() {
   // console.log(storedData, "=============================");
   const queryParams = {
     filters: JSON.stringify([["Ezy Employee", "emp_mail_id", "=", storedData?.emp_mail_id]]),
-    fields: JSON.stringify(["emp_name", "signature"]),
+    fields: JSON.stringify(["emp_name", "signature", "designation","department"]),
 
   };
 
