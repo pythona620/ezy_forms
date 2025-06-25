@@ -32,29 +32,13 @@
             </div>
         </div>
         <div class="row mt-3">
-            <div class="col-6 ">
+            <div class="dashboard-table">
+                <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" viewType="viewPdf" isCheckbox="true"
+                        @updateFilters="inLineFiltersData" :field-mapping="fieldMapping" @cell-click="viewPreview"
+                        isFiltersoption="true" :actions="actions"  />
+            </div>
 
-            <div class="chart-wrapper ">
-                <div id="donutchart" style="width: 450px; height: 400px;"></div>
-                <!-- <div>
-                    <div><label for="">Form Name</label>
-                    <ul name="" id="">
-                        <li class=" font-12" value="">System access application form</li>
-                        <li class=" font-12" value="">Information System Configuration Change Form</li>
-                        <li class=" font-12" value="">Monthly System Review</li>
-                        <li class=" font-12" value="">System User Rights Review</li>
-                    </ul>
-                    </div>
-                    
-                </div> -->
-            </div>
-            </div>
-            <!-- <div class="col-6 ">
-
-            <div class="chart-wrapper ">
-                <div id="donutchart" style="width: 450px; height: 400px;"></div>
-            </div>
-            </div> -->
+           
         </div>
     </div>
 </template>
@@ -62,9 +46,51 @@
 <script setup>
 import { ref, onMounted, nextTick } from 'vue';
 import * as echarts from 'echarts';
-import { apis } from "../../shared/apiurls";
+import { apis, doctypes } from "../../shared/apiurls";
 import axiosInstance from "../../shared/services/interceptor";
+import GlobalTable from "../../Components/GlobalTable.vue";
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
+import { useRoute, useRouter } from "vue-router";
+import { computed } from 'vue';
+import { watch } from 'vue';
+import { EzyBusinessUnit } from "../../shared/services/business_unit";
+const router = useRouter();
+const route = useRoute();
 
+const businessUnit = computed(() => {
+  return EzyBusinessUnit.value;
+});
+const newBusinessUnit = ref({ business_unit: "" });
+
+const idDta = ref([]);
+const tableData = ref([]);
+const employeeData = ref([]);
+const filterObj = ref({ limitPageLength: 20, limit_start: 0, filters: [] });
+const docTypeName = ref([]);
+const totalRecords = ref(0);
+const statusOptions = ref([]);
+
+const tableheaders = ref([
+  { th: "Request ID", td_key: "name" },
+  // { th: "Form name", td_key: "name" },
+  // { th: "Form category", td_key: "doctype_name" },
+  // { th: "Owner of form", td_key: "owner" },
+  { th: "Requested By", td_key: "requested_by" },
+  { th: "Requested Department", td_key: "role" },
+  // { th: "Property", td_key: "property" },
+  { th: "Approval Status", td_key: "status" },
+  { th: "Workflow Status", td_key: "assigned_to_users" },
+
+]);
+
+const actions = ref([
+  { name: "View Request", icon: "fa-solid fa-eye" },
+
+  // { name: 'Share this form', icon: 'fa-solid fa-share-alt' },
+  // { name: 'Download Form', icon: 'fa-solid fa-download' },
+  // { name: 'Edit Form', icon: 'fa-solid fa-edit' },
+]);
 // Define keys used for legends and chart series
 const keys = ['Approved', 'Pending', 'request_raised', 'Request_cancelled'];
 
@@ -174,36 +200,174 @@ async function fetchData() {
 onMounted(() => {
     fetchData()
     // Load Google Charts script
-    const script = document.createElement('script')
-    script.src = 'https://www.gstatic.com/charts/loader.js'
-    script.onload = () => {
-        google.charts.load('current', { packages: ['corechart'] })
-        google.charts.setOnLoadCallback(drawDonutChart)
-    }
-    document.head.appendChild(script)
+    // const script = document.createElement('script')
+    // script.src = 'https://www.gstatic.com/charts/loader.js'
+    // script.onload = () => {
+    //     google.charts.load('current', { packages: ['corechart'] })
+    //     google.charts.setOnLoadCallback(drawDonutChart)
+    // }
+    // document.head.appendChild(script)
 })
+const viewlist = ref([])
+function ViewOnlyReport(){
 
-function drawDonutChart() {
-    const data = google.visualization.arrayToDataTable([
-        ['Task', 'Hours per Day'],
-        ['Pending', 11],
-        ['Request Rejected', 2],
-        ['Request Raised', 10],
-        ['Completed', 7],
-    ],
+  // console.log(ViewOnlyReportee.value); 
+  axiosInstance
+    .post(apis.view_only_reportee,)
+    .then((response) => {
+      // console.log(response.message,"list");
+      viewlist.value = response.message;
+
+      // const filters = [ "name","in", viewlist.value];
+      receivedForMe()
+
+    })
+    .catch((error) => {
+      console.log(error);
+      });
+   
+
+}
+function viewPreview(data) {
+  // console.log(data);
+  router.push({
+    name: "ApproveRequest",
+    query: {
+      routepath: route.path,
+      name: data.name,
+      doctype_name: data.doctype_name,
+      type: "mytasks",
+      designation: employeeData.value
+
+    },
+  });
+}
+
+const timeout = ref(null);
+
+function inLineFiltersData(searchedData) {
+    clearTimeout(timeout.value); // Clear previous timeout
+
+    timeout.value = setTimeout(() => {
+        // Initialize filters array
+        filterObj.value.filters = [];
+
+        // Loop through the table headers and build dynamic filters
+        tableheaders.value.forEach((header) => {
+            const key = header.td_key;
+
+            if (searchedData[key]) {
+                // Push as an array of 3 items
+                filterObj.value.filters.push([key, "like", `%${searchedData[key]}%`]);
+            }
+        });
+
+        // Call receivedForMe with or without filters
+        if (filterObj.value.filters.length) {
+          filterObj.value.limit_start = 0;
+
+            receivedForMe(filterObj.value.filters);
+        } else {
+            receivedForMe();
+        }
+    }, 500); // Adjust debounce delay as needed
+}
+function receivedForMe(data) {
+  // Initialize filters array for building dynamic query parameters
+
+  const EmpRequestdesignation = JSON.parse(localStorage.getItem("employeeData"));
+  employeeData.value = EmpRequestdesignation.designation;
+
+  const filters = [
+    // assigned_to_users
+    ["assigned_to_users", "like", `%${EmpRequestdesignation?.designation}%`],
+    ["property", "like", `%${newBusinessUnit.value.business_unit}%`],
+    ["status", "!=", "Request Cancelled"],
+    
+    ["name","in", viewlist.value],
+    ["status", "!=", "Completed"]
+  ];
+  if (data) {
+    filters.push(...data);
+    console.log(data);
+  }
+
+  const queryParams = {
+    fields: JSON.stringify(["*"]),
+    limit_page_length: filterObj.value.limitPageLength,
+    limit_start: filterObj.value.limit_start,
+    filters: JSON.stringify(filters),
+    order_by: "`tabWF Workflow Requests`.`creation` desc",
+  };
+
+  const queryParamsCount = {
+    fields: JSON.stringify(["count(name) AS total_count"]),
+    limitPageLength: "None",
+    filters: JSON.stringify(filters),
+  };
+
+  // Fetch total count of records matching filters
+  axiosInstance
+    .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, {
+      params: queryParamsCount,
+    })
+    .then((res) => {
+      totalRecords.value = res.data[0].total_count;
+    })
+    .catch((error) => {
+      console.error("Error fetching total count:", error);
+    });
+
+  // Fetch the records matching filters
+  axiosInstance
+    .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, {
+      params: queryParams,
+    })
+    .then((res) => {
+      if (filterObj.value.limit_start === 0) {
+
+        tableData.value = res.data;
+        idDta.value = [...new Set(res.data.map((id) => id.name))];
+        docTypeName.value = [
+          ...new Set(res.data.map((docTypeName) => docTypeName.doctype_name)),
+        ];
+        statusOptions.value = [...new Set(res.data.map((status) => status.status))];
+      }
+      else {
+        tableData.value = tableData.value.concat(res.data);
+      }
+
+    })
+    .catch((error) => {
+      console.error("Error fetching records:", error);
+    });
+}
+const fieldMapping = computed(() => ({
+  // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
+  // credit_irn_generated: { type: "select", options: ["Pending", "Completed", "Error"] },
+  // role: { type: "input" },
+  name: { type: "input" },
+  requested_by: { type: "input" },
+  role: { type: "input" },
+
+
+  status: { type: "select", options:["Request Raised","In Progress"] },
+
+}));
+
+
+watch(
+  businessUnit,
+  (newVal) => {
+    newBusinessUnit.value.business_unit = newVal;
+
+    if (newVal.length) {
+      ViewOnlyReport();
+    }
+  },
+  { immediate: true }
 );
 
-    const options = {
-        title: 'Top 5 Forms',
-        pieHole: 0.4,
-        backgroundColor: '#f8f9fa'
-    }
-
-    const chart = new google.visualization.PieChart(
-        document.getElementById('donutchart')
-    )
-    chart.draw(data, options)
-}
 // Function to initialize and update each chart dynamically
 function updateCharts() {
     chartsData.value.forEach((chartData, index) => {
@@ -262,6 +426,13 @@ function updateCharts() {
 </script>
 
 <style scoped>
+
+
+
+.dashboard-table{
+    height: 50dvh;
+    overflow: auto;
+}
 .main-div {
     background-color: #fafafa;
 }

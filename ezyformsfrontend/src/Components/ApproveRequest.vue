@@ -538,7 +538,7 @@ function approvalStatusFn(dataObj, type) {
           autoClose: 500,
           transition: "zoom",
           onClose: () => {
-            router.push({ name: "ReceivedForMe" }); // Navigate after toast closes
+            router.push({ path: selectedData.value.routepath}); // Navigate after toast closes
           }
         });
       } else {
