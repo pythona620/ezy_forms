@@ -224,8 +224,8 @@
                               <a v-else :href="file" target="_blank"
                                 class="d-flex align-items-center justify-content-center mt-2 border rounded bg-light"
                                 style="width: 70px; height: 70px; text-decoration: none;">
-                                 <!-- <img src="../assets/attach.png" alt="" width="50px"> -->
-                                <i class="bi bi-file-earmark-pdf-fill fs-2 text-danger"></i>
+                                 <img src="../assets/attach.png" alt="" width="50px">
+                                <!-- <i class="bi bi-file-earmark-pdf-fill fs-2 text-danger"></i> -->
                               </a>
                             </div>
                           </div>
