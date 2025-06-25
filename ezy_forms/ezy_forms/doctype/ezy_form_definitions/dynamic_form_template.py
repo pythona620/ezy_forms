@@ -749,7 +749,9 @@ template_str = """
                                             {% if field.fieldtype == 'Attach' and "approved_by" in field.fieldname %}
                                              <img  id="{{ field.fieldname }}" src="{{ site_url + field['values'] or ''  }}" style="width: 80px; height: 80px; object-fit: contain; display: block; margin-left: 119px ; margin-top: -51px;"  name="{{ field.fieldname }}">
                                             {% else %}
-                                            {{ field['values'] }}
+                                            {% for file in field['values'].split(',') %}
+                                            {{ file.strip().split('@')[-1] if '@' in file else file.strip().split('/')[-1] }}{% if not loop.last %}, {% endif %}
+                                            {% endfor %}
                                             {% endif %}
                                             {% else %}
                                                 <input type="text" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
@@ -1129,7 +1131,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
     """Generates a PDF for the dynamic form with filled data"""
     try:
         
-    
+        attachment_info =None
         is_landscape = frappe.db.get_value("Ezy Form Definitions", form_short_name, "is_landscape")
         if name is None:
             print_format = frappe.db.get_value("Ezy Form Definitions", form_short_name, "print_format")
@@ -1222,17 +1224,20 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                     # Collect attachments except those with fieldname like "approved_by"
  
                     # Convert PDFs in Attach fields to image previews
-                    if iteration.get("fieldtype") == "Attach" and iteration.get("value"):
-                        iteration["value"] = handle_pdf_fields(iteration["value"])
-                        
+                    if iteration.get("fieldtype") == "Attach" and iteration.get("value"):                        
+                        if "pdf" in  iteration["value"].lower():
+                            iteration["value"] = handle_pdf_fields(iteration["value"])
+                        else:
+                            iteration["value"] =   iteration["value"]                       
                         # Construct a display name using the label or fallback to fieldname
                         field_label = iteration.get("label") or iteration.get("fieldname")
-                        attachment_info = {
-                            "label": field_label,
-                            "file_url": iteration["value"]
-                        }
-                        if "approved_by" not in iteration.get("fieldname", "").lower():
-                            mail_attachment.append(attachment_info)
+                        if "xlsx" not in  iteration["value"].lower():
+                            attachment_info = {
+                                "label": field_label,
+                                "file_url": iteration["value"]
+                            }
+                            if "approved_by" not in iteration.get("fieldname", "").lower():
+                                mail_attachment.append(attachment_info)
                     # Handle Table fields (child tables)
                     if iteration.get("fieldtype") == "Table":
                         child_table_name = str(iteration["fieldname"])
@@ -1262,7 +1267,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                                 if fieldtype == "Attach":
                                     if value:
                                         value = handle_pdf_fields(value)
-                                        if "approved_by" not in field.lower():
+                                        if "approved_by" not in field.lower() and  "xlsx" not in  iteration["value"].lower():
                                             attachment_child_info = {
                                                     "label": field_labels.get(field, field),
                                                     "file_url": value
