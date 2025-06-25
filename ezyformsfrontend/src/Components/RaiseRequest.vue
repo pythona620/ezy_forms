@@ -142,7 +142,7 @@
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-dark" :disabled="!acknowledge" @click="raiseRequestSubmission">Yes, Proceed</button>
+                <button type="button" class="btn btn-dark" :disabled="!acknowledge || saveloading" @click="raiseRequestSubmission">Yes, Proceed</button>
               </div>
           </div>
         </div>
@@ -178,6 +178,7 @@ const selectedData = ref({
 });
 
 const acknowledge=ref('')
+const saveloading = ref(false)
 const business_unit = ref(localStorage.getItem('Bu')); // Retrieve from query
 const isFormValid = ref(false);
 // const isFormValid = computed(() => allFieldsFilled.value);
@@ -1095,6 +1096,7 @@ function mapFormFieldsToRequest(doctypeData, blockArr) {
   });
 }
 function request_raising_fn(item) {
+  saveloading.value = true;
   // console.log(filepaths.value, "---filepaths");
   // const filesArray = filepaths.value
   //   ? filepaths.value.split(",").map((filePath) => filePath.trim())
@@ -1116,6 +1118,7 @@ function request_raising_fn(item) {
           document.getElementById("ExportEmployeeModal")
           );
           modal.hide();
+              saveloading.value = false;
 
       toast.success("Request Raised", {
         autoClose: 1000,

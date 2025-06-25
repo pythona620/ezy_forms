@@ -22,7 +22,8 @@ export const doctypes = {
   SystemSettings:"System Settings",
   Email_Account: 'Email Account',
   doctypesList: 'DocType',
-  reportsApi: 'Report'
+  reportsApi: 'Report',
+  ActivityLog:'Activity Log',
 
 
 };
