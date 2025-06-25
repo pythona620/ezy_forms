@@ -1304,7 +1304,7 @@
           <input v-model="searchDesignation" class="SearchDesignation rounded-2 form-control shadow-none my-1" type="text"
             placeholder="Search Designation" />
 
-          <div class="form-check ps-1" v-if="DesignationList.length && selectedBlockIndex == 0">
+          <div class="form-check ps-1 mt-3" v-if="DesignationList.length">
             <div>
               <!-- :disabled="ViewOnlyReportee"  -->
               <input type="checkbox" id="selectAll" v-model="isAllSelected"
