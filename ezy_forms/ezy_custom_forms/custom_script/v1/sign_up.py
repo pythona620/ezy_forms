@@ -4,7 +4,7 @@ from frappe.utils import escape_html
 from frappe import _
 
 @frappe.whitelist(allow_guest=True)
-def sign_up(email: str, full_name: str,emp_phone:str|None,emp_code:str|None,dept:str|None, redirect_to: str|None,acknowledge_on=None) -> tuple[int, str]:
+def sign_up(email: str, full_name: str,designation:str|None,emp_phone:str|None,emp_code:str|None,dept:str|None, redirect_to: str|None,acknowledge_on=None) -> tuple[int, str]:
     
 	if is_signup_disabled():
 		return _("Sign Up is disabled")
@@ -51,6 +51,7 @@ def sign_up(email: str, full_name: str,emp_phone:str|None,emp_code:str|None,dept
 				"company_field":company,
 				"enable":0,
 				"is_web_form":1,
+				"designation":designation,
 				'emp_phone':emp_phone,
 				"department":dept if dept else None,
 				"acknowledge_on": acknowledge_on if acknowledge_on else frappe.utils.now(),
