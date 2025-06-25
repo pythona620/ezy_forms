@@ -36,6 +36,17 @@
 
             <div class="chart-wrapper ">
                 <div id="donutchart" style="width: 450px; height: 400px;"></div>
+                <!-- <div>
+                    <div><label for="">Form Name</label>
+                    <ul name="" id="">
+                        <li class=" font-12" value="">System access application form</li>
+                        <li class=" font-12" value="">Information System Configuration Change Form</li>
+                        <li class=" font-12" value="">Monthly System Review</li>
+                        <li class=" font-12" value="">System User Rights Review</li>
+                    </ul>
+                    </div>
+                    
+                </div> -->
             </div>
             </div>
             <!-- <div class="col-6 ">
@@ -177,9 +188,10 @@ function drawDonutChart() {
         ['Task', 'Hours per Day'],
         ['Pending', 11],
         ['Request Rejected', 2],
-        ['Completed', 10],
+        ['Request Raised', 10],
         ['Completed', 7],
-    ])
+    ],
+);
 
     const options = {
         title: 'Top 5 Forms',
