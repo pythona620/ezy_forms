@@ -109,8 +109,8 @@
               <span> <i class="bi bi-x"></i></span>Clear form
             </button>
             <!-- :disabled="!isFormValid" -->
-            <button v-if="!selectedData.selectedFormId" class="btn btn-dark font-12" type="submit"
-              @click="raiseRequestSubmission">
+            <button v-if="!selectedData.selectedFormId" data-bs-toggle="modal" data-bs-target="#ExportEmployeeModal" class="btn btn-dark font-12" type="submit"
+              >
               {{ selectedData.hasWorkflow == 'No' ? 'Save' : 'Raise Request' }}
             </button>
             <button v-if="selectedData.selectedFormId && $route.query.selectedFormStatus == 'Request Cancelled'"
@@ -129,6 +129,25 @@
         <div class="no-form">No Form</div>
       </div>
     </div>
+    <div class="modal fade" id="ExportEmployeeModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Acknowledgement</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+              <div class="modal-body">
+                <input type="checkbox" v-model="acknowledge" class="me-1 mt-1" />
+                  I acknowledge that the information provided is correct.
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-dark" :disabled="!acknowledge" @click="raiseRequestSubmission">Yes, Proceed</button>
+              </div>
+          </div>
+        </div>
+      </div>
+    
   </div>
 </template>
 
@@ -158,7 +177,7 @@ const selectedData = ref({
   hasWorkflow: route.query.has_workflow || "", // Retrieve from query
 });
 
-
+const acknowledge=ref('')
 const business_unit = ref(localStorage.getItem('Bu')); // Retrieve from query
 const isFormValid = ref(false);
 // const isFormValid = computed(() => allFieldsFilled.value);
@@ -1093,6 +1112,11 @@ function request_raising_fn(item) {
   };
   axiosInstance.post(apis.raising_request, data_obj).then((resp) => {
     if (resp?.message?.success === true) {
+      const modal = bootstrap.Modal.getInstance(
+          document.getElementById("ExportEmployeeModal")
+          );
+          modal.hide();
+
       toast.success("Request Raised", {
         autoClose: 1000,
         transition: "zoom",
@@ -1116,15 +1140,15 @@ function request_raising_fn(item) {
   max-height: 200px;
   overflow-y: auto;
 }
-.modal {
+/* .modal {
   background: rgba(0, 0, 0, 0.5);
   position: fixed;
   top: 0; left: 0;
   width: 100vw; height: 100vh;
-  display: flex;
+  display: flex; 
   align-items: center;
   justify-content: center;
-}
+} */
 .requestPreviewDiv {
   height: 80vh;
   overflow-y: auto;

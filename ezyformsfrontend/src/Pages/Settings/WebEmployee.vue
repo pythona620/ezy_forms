@@ -14,7 +14,7 @@
             </p> -->
         </div>
         <div class="d-flex align-items-center gap-2">
-          <button type="button" class=" btn btn-light  CreateDepartments font-12" data-bs-toggle="modal" data-bs-target="#ExportEmployeeModal">
+          <button type="button" class=" btn export-btn  CreateDepartments font-12" data-bs-toggle="modal" data-bs-target="#ExportEmployeeModal">
             Export Employees
           </button>
         </div>
@@ -694,15 +694,21 @@ const exportEmployeesToExcel = async () => {
 
     if (response.data) {
       const employees = response.data
-          const modal = bootstrap.Modal.getInstance(
+      if(employees.length){
+        const modal = bootstrap.Modal.getInstance(
           document.getElementById("ExportEmployeeModal")
           );
           modal.hide();
           toast.success("Successfully Completed")
-      const worksheet = XLSX.utils.json_to_sheet(employees)
-      const workbook = XLSX.utils.book_new()
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'Employees')
-      XLSX.writeFile(workbook, 'EmployeeDetails.xlsx')
+
+        const worksheet = XLSX.utils.json_to_sheet(employees)
+        const workbook = XLSX.utils.book_new()
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Employees')
+        XLSX.writeFile(workbook, 'EmployeeDetails.xlsx')
+      }
+      else{
+        toast.error("No Employee Details")
+      }
     }
   } catch (error) {
     console.error('Error exporting employee data:', error)
@@ -2215,6 +2221,9 @@ function SaveEditEmp() {
   // align-items: center;
   // justify-content: center;
 
+}
+.export-btn{
+  background-color: #99999961;
 }
 
 .warning-box {
