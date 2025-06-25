@@ -127,7 +127,7 @@
 
                                            <template v-else-if="field.fieldtype == 'Attach'">
   <!-- File Input -->
-  <input
+  <input v-if="field.fieldname !== 'requestor_signature' || field.label !== 'Requestor Signature'"
     :disabled="props.readonlyFor === 'true'"
     type="file"
     accept=".jpeg,.jpg,.png,.pdf,.xlsx,.xls"
@@ -1507,6 +1507,12 @@ onMounted(() => {
                                 field.value = parsedData.designation;
                                 emit("updateField", field);
                             }
+                             if(field.label.includes("Requestor Signature") || field.fieldname.includes("requestor_signature")){
+                                field.value = parsedData.emp_signature;
+                                emit("updateField", field);
+                            }
+                            
+
 
 
 
