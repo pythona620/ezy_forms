@@ -32,8 +32,11 @@
             </div>
         </div>
         <div class="row mt-3">
-            <div class="dashboard-table">
-                <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" viewType="viewPdf" isCheckbox="true"
+            <div>
+                <h6 class=" fw-bold">My Tasks</h6>
+            </div>
+            <div>
+                <GlobalTable class="dashboard-table" :tHeaders="tableheaders" :tData="tableData" isAction="true" viewType="viewPdf" isCheckbox="true"
                         @updateFilters="inLineFiltersData" :field-mapping="fieldMapping" @cell-click="viewPreview"
                         isFiltersoption="true" :actions="actions"  />
             </div>
