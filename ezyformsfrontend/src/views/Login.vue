@@ -129,6 +129,10 @@
           <Vue3Select v-model="SignUpdata.dept" :options="this.deptDetails" placeholder="Select Department" />
         </div>
         <div class="mb-2">
+          <label class="font-13" for="emp_code">Designation</label>
+          <Vue3Select v-model="SignUpdata.designation" :options="this.disignationDetails" placeholder="Select Designation" />
+        </div>
+        <div class="mb-2">
           <label class="font-13" for="emp_phone">Phone Number</label>
           <input type="text" class="form-control m-0 bg-white" id="emp_phone" v-model="SignUpdata.emp_phone"
             @input="filterPhoneInput" @blur="validatePhone" :class="{ 'is-invalid': errors.emp_phone }" />
@@ -332,10 +336,12 @@ export default {
       errorMessage: "",
       storeData: [],
       deptDetails: [],
+      disignationDetails:[],
       isFirstLogin: "",
       twoFactorAuth: "",
       enable_check: "",
       acknowledge:'',
+      designation:'',
       // timeLeft: 60,
       // timer: null,
       // resentMessage: "",
@@ -781,10 +787,30 @@ export default {
           console.error("Error fetching department data:", error);
         });
     },
+    designationData() {
+      const queryParams = {
+        fields: JSON.stringify(["name"]),
+        limit_page_length: "none"
+      };
+
+      axiosInstance
+        .get(apis.resource + doctypes.designations, { params: queryParams })
+        .then((res) => {
+          if (res?.data?.length) {
+            this.disignationDetails = res.data.map((disg) => disg.name);
+            console.log(this.disignationDetails);
+
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching department data:", error);
+        });
+    },
 
   },
   mounted() {
     this.deptData()
+    this.designationData()
     const url = window.location.href;
     if (url.includes('ncomr')) {
       this.SignUpdata.emp_code = 'NICO-';
