@@ -78,6 +78,8 @@
                   'text-primary fw-medium': row[column.td_key] === 'In Progress',
                   'textcancel fw-medium': row[column.td_key] === 'Cancelled',
                   'text-danger fw-medium': row[column.td_key] === 'Request Cancelled',
+                  'text-success fw-medium': row[column.td_key] === 'Success',
+                  'text-danger fw-medium': row[column.td_key] === 'Failed',
                 }"></i>
                 <span class="tooltip-text" :title="row[column.td_key]">
 
@@ -106,7 +108,7 @@
               </span>
               <!-- Default Column Rendering -->
               <span class="tooltip-text" :title="formatDate(row[column.td_key])" v-else-if="
-                column.td_key === 'requested_on' || column.td_key === 'invoice_date' || column.td_key === 'creation' ">
+                column.td_key === 'requested_on' || column.td_key === 'invoice_date' || column.td_key === 'creation' || column.td_key==='communication_date' ">
                 {{ formatDate(row[column.td_key]) }}
               </span>
 
