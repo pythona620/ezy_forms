@@ -293,7 +293,9 @@ def activating_perms_for_all_roles_in_wf_roadmap():
             fields=["doctype_names"]
         )
     document_type_list = [entry["doctype_names"] for entry in child_entries]
- 
+    custom_feilds = frappe.get_all("DocType",filters={'module':["in",["User Forms","ezy_custom_forms"]]})
+    custom_feilds_list = [doc.name for doc in custom_feilds]
+    document_type_list.extend(custom_feilds_list)
     for doc in document_type_list:
         for role in unique_roles_from_all_roles:
             if not frappe.db.exists("Custom DocPerm",{"parent":doc,"role":role}):

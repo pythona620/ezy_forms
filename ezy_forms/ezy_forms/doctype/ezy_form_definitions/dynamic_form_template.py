@@ -633,7 +633,7 @@ template_str = """
                                 <h3 class="columnlabel">{{ column.label }}</h3>
                                 {% endif %}
                                 {% for field in column.fields %}
-                               
+                                    
                                     <div class="field field-textarea">
                                     
                                   
@@ -745,17 +745,32 @@ template_str = """
                                                 </div>
                                             {% endif %}
                                         {% elif field.fieldtype == 'Attach' %}
-                                            {% if field['values'] %}
-                                            {% if field.fieldtype == 'Attach' and "approved_by" in field.fieldname %}
-                                             <img  id="{{ field.fieldname }}" src="{{ site_url + field['values'] or ''  }}" style="width: 80px; height: 80px; object-fit: contain; display: block; margin-left: 119px ; margin-top: -51px;"  name="{{ field.fieldname }}">
-                                            {% else %}
-                                            {% for file in field['values'].split(',') %}
-                                            {{ file.strip().split('@')[-1] if '@' in file else file.strip().split('/')[-1] }}{% if not loop.last %}, {% endif %}
-                                            {% endfor %}
-                                            {% endif %}
-                                            {% else %}
-                                                <input type="text" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
-                                            {% endif %}
+    {% if field['values'] %}
+        {% if field.fieldtype == 'Attach' and "approved_by" in field.fieldname %}
+            <img  
+                id="{{ field.fieldname }}" 
+                src="{{ site_url + field['values'] or '' }}" 
+                style="width: 80px; height: 80px; object-fit: contain; display: block; margin-left: 119px; margin-top: -51px;"  
+                name="{{ field.fieldname }}"
+            >
+        {% else %}
+            <ul style="padding-left: 20px; margin: 5px 0;">
+                {% for file in field['values'].split(',') %}
+                    <li>
+                        {{ file.strip().split('@')[-1] if '@' in file else file.strip().split('/')[-1] }}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% else %}
+        <input 
+            type="text" 
+            id="{{ field.fieldname }}" 
+            value="{{ field['values'] }}" 
+            name="{{ field.fieldname }}"
+        >
+    {% endif %}
+
                                         {% elif field.fieldtype == 'Phone' %}
                                              <span id="{{ field.fieldname }}" style="font-size:13px; font-weight:500;" name="{{ field.fieldname }}" class="date-span">
                                                 {{ field['values'] }}
@@ -808,6 +823,7 @@ template_str = """
                                                 <span>{{ field.description | replace('\n', '<br>') | safe }}</span>
                                             </div>
                                         {% endif %}
+                                        
                                 {% endfor %}
                             </div>
                         {% endfor %}
@@ -1266,8 +1282,8 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                                 # Handle Attach fields separately for mail attachment, but skip adding them to processed_record
                                 if fieldtype == "Attach":
                                     if value:
-                                        value = handle_pdf_fields(value)
-                                        if "approved_by" not in field.lower() and  "xlsx" not in  iteration["value"].lower():
+                                        if "approved_by" not in field.lower() and  "xlsx" not in  value.lower():
+                                            value = handle_pdf_fields(value)
                                             attachment_child_info = {
                                                     "label": field_labels.get(field, field),
                                                     "file_url": value
