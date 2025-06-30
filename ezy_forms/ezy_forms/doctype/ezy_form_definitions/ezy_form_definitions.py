@@ -11,10 +11,11 @@ from ast import literal_eval
 from frappe.utils.background_jobs import enqueue
 from ezy_forms.ezy_forms.doctype.ezy_form_definitions.linking_flow_and_forms import enqueing_creation_of_roadmap
 from itertools import chain
-from frappe.utils import cstr
+from frappe.utils import cstr,get_site_path
 from frappe.utils import now as frappe_now
 import re
 import json
+import shutil
 
 
  
@@ -310,8 +311,14 @@ def activating_perms_for_all_roles_in_wf_roadmap():
                 form_perms.delete = 1
                 form_perms.insert(ignore_permissions=True)
     frappe.db.commit()
-    
- 
+    # Check if the path exists
+    folder_path = get_site_path("public", "files", "Attachment folder")
+
+    delete = lambda path: os.unlink(path) if os.path.isfile(path) or os.path.islink(path) else shutil.rmtree(path)
+
+    if os.path.exists(folder_path) and os.path.isdir(folder_path):
+        [delete(os.path.join(folder_path, f)) for f in os.listdir(folder_path)]
+        
 
 def sanitize_fieldname(name):
     # Remove all special characters; keep only alphanumeric and underscores
