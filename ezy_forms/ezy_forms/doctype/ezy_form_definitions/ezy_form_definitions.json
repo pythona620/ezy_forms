@@ -21,7 +21,10 @@
   "print_format",
   "is_landscape",
   "has_workflow",
-  "workflow_check"
+  "workflow_check",
+  "is_predefined_doctype",
+  "is_linked",
+  "is_linked_form"
  ],
  "fields": [
   {
@@ -117,17 +120,47 @@
    "fieldname": "workflow_check",
    "fieldtype": "Data",
    "label": "Reverse Workflow"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_predefined_doctype",
+   "fieldtype": "Check",
+   "label": " Is Predefined Doctype"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_linked",
+   "fieldtype": "Check",
+   "label": "Is linked"
+  },
+  {
+   "fieldname": "is_linked_form",
+   "fieldtype": "Link",
+   "label": "Is linked Form",
+   "options": "DocType"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-06-06 11:30:53.010362",
+ "modified": "2025-06-26 16:01:43.811819",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
  "name": "Ezy Form Definitions",
  "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Jr. Check",
+   "share": 1,
+   "write": 1
+  },
   {
    "create": 1,
    "delete": 1,
@@ -148,7 +181,31 @@
    "print": 1,
    "read": 1,
    "report": 1,
+   "role": "Random Dev",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
    "role": "IT assistance",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "IA",
    "share": 1,
    "write": 1
   },
@@ -184,7 +241,31 @@
    "print": 1,
    "read": 1,
    "report": 1,
+   "role": "Hr",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
    "role": "Team Lead",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "GM",
    "share": 1,
    "write": 1
   },
