@@ -118,7 +118,7 @@ const tableheaders = ref([
     { th: "Short Name", td_key: "form_short_name" },
   
     { th: "Status", td_key: "form_status" },
-    { th: "Enable/Disable", td_key: "enable" },
+    // { th: "Enable/Disable", td_key: "enable" },
 
 ]);
 

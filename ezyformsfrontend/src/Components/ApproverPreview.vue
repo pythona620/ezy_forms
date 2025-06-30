@@ -272,7 +272,7 @@
 
 
 
-                        <template v-else-if="field.fieldtype == 'Datetime'">
+                        <template v-else-if="field.fieldtype == 'Datetime'  && props.readonlyFor !== 'true' ">
                           <input type="datetime-local" v-model="field.value"
                             :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 image-border-bottom bg-white  pb-0 bg-transparent ' : ' '"
                             :disabled="blockIndex" :readOnly="blockIndex < currentLevel || props.readonlyFor === 'true'

@@ -158,7 +158,7 @@
                 PDF</button>
             </div> -->
               <div class="row mb-3">
-                <div class="col-xl-6 col-lg-12 col-md-12">
+                <div class="col-xl-3 col-lg-12 col-md-12">
                   <div class="d-flex  align-items-baseline  mt-2">
                     <div>
                       <span class="font-12 text-nowrap fw-bold mb-0">Activity log
@@ -181,20 +181,23 @@
 
 
                 </div>
-                <div class="col-xl-6 col-lg-12 col-md-12">
+                <div class="col-xl-9 col-lg-12 col-md-12">
+                  <div class=" d-flex justify-content-end gap-2">
+
                   <button v-if="tableData.status === 'Completed' && selectedData.type !== 'myapprovals'"
-                    class="btn btn-light font-11 fw-bold h-0 text-decoration-underline" type="button"
+                    class="btn btn-light font-11 fw-bold h-0 nowrap text-decoration-underline" type="button"
                     @click="downloadPdf"><i class="bi bi-arrow-down-circle fw-bold px-1"></i>Download
                   </button>
-                  <button type="button" class="btn btn-light font-12  CreateDepartments " 
+                  <button v-if="linked_status !== 'Submitted' && tableData?.status === 'Completed'" type="button" class="btn btn-light font-11 nowrap fw-bold text-decoration-underline  CreateDepartments " 
                     data-bs-target="#pdfView" @click="toLinkedForm">
-                    To Linked
+                    Raise Link<i class="bi bi-arrow-up-right-circle px-1"></i>
                   </button> 
-                  <button type="button" class="btn btn-outline-light font-12  CreateDepartments " data-bs-toggle="modal"
+                  <!-- <button type="button" class="btn btn-outline-light font-12  CreateDepartments " data-bs-toggle="modal"
                     data-bs-target="#pdfView" @click="viewasPdfView">
                     Preview
-                  </button>
+                  </button> -->
 
+                  </div>
                 </div>
               </div>
               <div class="activity_height">
@@ -335,7 +338,7 @@ const employeeData = ref([]);
 const viewlist = ref([])
 const view_only_reportee = ref(0);
 const linkedNew_Id = ref([]);
-
+const mainStandardForm = ref('')
 const canApprove = ref(false);
 
 
@@ -481,7 +484,7 @@ async function ApproverFormSubmission(dataObj, type) {
   loading.value = true; // Start loader
 
   let form = {
-    ...childtablesData.value
+    // ...childtablesData.value
   };
   if (Array.isArray(emittedFormData.value) && emittedFormData.value.length) {
     emittedFormData.value.forEach((each) => {
@@ -496,20 +499,7 @@ async function ApproverFormSubmission(dataObj, type) {
   //   loading.value = false;
   //   return;
   // }
-  // console.log(childtablesData.value);
-  // let updatedata = {
-  //   ...childtablesData.value,
-  // }
-  //  axiosInstance
-  //   .put(`${apis.resource}${'Standard Form'}/${linkedNew_Id.value}`, updatedata)
-  //   .then((response) => {
-  //    console.log(response);
-  //   })
-  //   .catch((error) => {
-  //     console.error("Error submitting form:", error);
-  //     loading.value = false; // Stop loader on error
-  //     toast.error("An error occurred while submitting the form.", { autoClose: 1000, transition: "zoom" });
-  //   });
+
 
   axiosInstance
     .put(`${apis.resource}${selectedData.value.doctype_name}/${doctypeForm.value.name}`, form)
@@ -527,6 +517,8 @@ async function ApproverFormSubmission(dataObj, type) {
       toast.error("An error occurred while submitting the form.", { autoClose: 1000, transition: "zoom" });
     });
 }
+
+
 const dataObje = ref([])
 // Function to handle approval status
 function approvalStatusFn(dataObj, type) {
@@ -551,6 +543,11 @@ function approvalStatusFn(dataObj, type) {
       // console.log("API Response:", response);
 
       if (response?.message?.success === true) {
+        console.log(tableData.value.current_level,tableData.value.total_levels,"current level and total level");
+        if (tableData.value.current_level === tableData.value.total_levels && mainStandardForm.value.length && linked_status.value !== 'Submitted') {
+          DynamicCalculateMethod(); // Call this only if it's the last level
+        }
+        // DynamicCalculateMethod()
         ApproverReason.value = ""; // Clear reason after success
         toast.success(`Request ${type}ed`, {
           autoClose: 500,
@@ -569,6 +566,22 @@ function approvalStatusFn(dataObj, type) {
     })
     .finally(() => {
       loading.value = false; // Ensure loader stops
+    });
+}
+function DynamicCalculateMethod() {
+  const dataObj = {
+    request_id: linkedNew_Id.value,
+    doctype_1: mainStandardForm.value,
+  };
+
+  axiosInstance
+    .post(apis.dynmic_calculations, dataObj)
+    .then((response) => {
+    console.log(response);
+     
+    })
+    .catch((error) => {
+      console.error("Error fetching data:", error);
     });
 }
 async function SaveDocWithoutApprove(request_id) {
@@ -834,6 +847,7 @@ function receivedForMe(data) {
       console.error("Error fetching records:", error);
     });
 }
+const linked_status = ref(false)
 function getdata(formname) {
   const filters = [["wf_generated_request_id", "like", `%${formname}%`]];
   const queryParams = {
@@ -852,9 +866,21 @@ function getdata(formname) {
     .then((res) => {
       if (res.data) {
         doctypeForm.value = res.data[0];
-        console.log(doctypeForm.value.name, "lll");
-        console.log(doctypeForm.value.linked_id,'linked_id');  
-        linkedNew_Id.value = doctypeForm.value.linked_id;
+        console.log(typeof doctypeForm.value.status, "lll");
+        if (doctypeForm.value.linked_id) {
+          console.log(doctypeForm.value.linked_id,'linked_id');  
+          linkedNew_Id.value = doctypeForm.value.linked_id;
+        } 
+        if (doctypeForm.value.status ==='Submitted') {
+          console.log(doctypeForm.value.status,'status');
+          linked_status.value = doctypeForm.value.status;
+        }
+        
+        if(doctypeForm.value.return_gate_pass){
+          mainStandardForm.value = doctypeForm.value.return_gate_pass;
+        }
+
+
         mapFormFieldsToRequest(doctypeForm.value, showRequest.value);
 
         // axiosInstance

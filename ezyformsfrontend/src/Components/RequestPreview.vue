@@ -483,12 +483,12 @@
                                                                         <!-- Modal Preview -->
                                                                         <div v-if="showModal" class="modal-backdrop"
                                                                             @click.self="closePreview" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-           background: rgba(0,0,0,0.5); display: flex; align-items: center;
-           justify-content: center; z-index: 1050;">
+                                                                                background: rgba(0,0,0,0.5); display: flex; align-items: center;
+                                                                                justify-content: center; z-index: 1050;">
                                                                             <div style="background: white; padding: 20px; max-width: 90%; max-height: 90%;
-             overflow: auto; border-radius: 8px; position: relative;">
+                                                                                overflow: auto; border-radius: 8px; position: relative;">
                                                                                 <button @click="closePreview" style="position: absolute; top: 10px; right: 10px;
-               border: none; background: transparent; font-size: 20px;">
+                                                                                    border: none; background: transparent; font-size: 20px;">
                                                                                     &times;
                                                                                 </button>
 
@@ -531,13 +531,7 @@
                                                     class="mt-3">
                                                     
                                                      <!-- || tableIndex === field.options -->
-                                                    <div
-  class="overTable"
-  v-if="
-    tableIndex.toLowerCase() === field.fieldname.toLowerCase() ||
-    (field.options && tableIndex.toLowerCase() === field.options.toLowerCase())
-  "
->
+                                                    <div class="overTable" v-if="tableIndex.toLowerCase() === field.fieldname.toLowerCase() ||(field.options && tableIndex.toLowerCase() === field.options.toLowerCase())">
                                                         <div>
                                                             <span class="font-13 text-secondary ">{{
                                                                 field.label.replace(/_/g, " ")
@@ -1400,6 +1394,10 @@ const updateDateTimeFields = () => {
                                 field.value = props.linked_id;
                                 emit("updateField", field);
                             }
+                            if(field.fieldname.includes('return_gate_pass') || field.label.includes('Return Gate Pass')){
+                                field.value = route.query.main_form || '';
+                                emit("updateField", field);
+                            }
                             // if( field.fieldtype === 'Data' && field.fieldname === 'department_name'){
                             //     console.log(tableTotals.value);
                             //     field.value = tableTotals.value
@@ -1416,7 +1414,7 @@ const updateDateTimeFields = () => {
 const emp_dep = ref('')
 // Initialize datetime fields on component mount
 onMounted(() => {
-    console.log(props.LinkedChildTableData , "LinkedChildTableData");
+    // console.log(props.LinkedChildTableData , "LinkedChildTableData");
     // if (props.LinkedChildTableData && Object.keys(props.LinkedChildTableData).length > 0) {
     // for (const [key, value] of Object.entries(props.LinkedChildTableData)) {
     //   tableRows[key] = Array.isArray(value) ? value : [value];
@@ -1426,17 +1424,26 @@ onMounted(() => {
     //     tableRows[key] = props.tableRowsdata[key];
     // });
 
-    console.log(tableRows, "tableRows");
-  if (props.LinkedChildTableData && Object.keys(props.LinkedChildTableData).length > 0) {
-    for (const [key, value] of Object.entries(props.LinkedChildTableData)) {
-      tableRows[key.toLowerCase()] = Array.isArray(value) ? value : [value];
-    }
+ if (props.LinkedChildTableData && props.LinkedChildTableData.rows) {
+    const tableName = props.LinkedChildTableData.table_name.toLowerCase();
+    tableRows[tableName] = props.LinkedChildTableData.rows;
   }
 
-  // Convert tableRowsdata keys to lowercase
+  // ✅ Merge tableRowsdata
   Object.keys(props.tableRowsdata).forEach((key) => {
     tableRows[key.toLowerCase()] = props.tableRowsdata[key];
   });
+
+//   if (props.LinkedChildTableData && Object.keys(props.LinkedChildTableData).length > 0) {
+//     for (const [key, value] of Object.entries(props.LinkedChildTableData)) {
+//       tableRows[key.toLowerCase()] = Array.isArray(value) ? value : [value];
+//     }
+//   }
+
+//   // Convert tableRowsdata keys to lowercase
+//   Object.keys(props.tableRowsdata).forEach((key) => {
+//     tableRows[key.toLowerCase()] = props.tableRowsdata[key];
+//   });
 
     const storedData = localStorage.getItem("employeeData");
     let parsedData = [];

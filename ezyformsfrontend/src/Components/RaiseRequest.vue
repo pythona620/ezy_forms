@@ -50,9 +50,9 @@
               </div>
             </div>
           </div>
-          <RequestPreview :blockArr="blockArr" :formName="selectedData.selectedform" :tableHeaders="tableHeaders" :linked_id="linkedId"
-            :LinkedChildTableData="LinkedChildTableData" @updateField="handleFieldUpdate" :tableRowsdata="tableRows"
-            @formValidation="isFormValid = $event" @updateTableData="handleTableData" />
+          <RequestPreview :blockArr="blockArr" :formName="selectedData.selectedform" :tableHeaders="tableHeaders"
+            :linked_id="selectedData.main_form_Id" :LinkedChildTableData="LinkedChildTableData" @updateField="handleFieldUpdate"
+            :tableRowsdata="tableRows" @formValidation="isFormValid = $event" @updateTableData="handleTableData" />
           <!-- @formValidation="isFormValid = $event" -->
 
           <!-- <span class="font-13 fw-bold">{{ table.childTableName.replace(/_/g, " ") }}</span> -->
@@ -197,7 +197,8 @@ function backToForm() {
   router.push({
     path: selectedData.value.routepath,
     query: {
-      routepath: route.path,
+      
+      routepath: '/todo/raisedbyme',
       doctype_name: route.query.main_form,
       business_unit: selectedData.value.selectedBusiness_unit,
       name: selectedData.value.main_form_Id,
@@ -208,10 +209,16 @@ function backToForm() {
 
 
 onMounted(() => {
+  loadInitialData();
+});
+
+const loadInitialData = () => {
+  if (selectedData.value.main_form_Id) {
+    gettingDataToLink();
+  }
   formDefinations();
   // raiseRequest();
-  gettingDataToLink()
-});
+};
 
 watch(business_unit, (newBu, oldBu) => {
   console.log(newBu);
@@ -576,11 +583,11 @@ function formDefinations() {
       `${selectedData.value?.selectedCategory}`,
     ]);
   }
-  if (selectedData.value.selectedform ) {
+  if (selectedData.value.selectedform || selectedData.value.linkedDocName) {
     filters.push([
       "form_short_name",
       "=",
-      `${selectedData.value?.selectedform}`,
+      `${selectedData.value?.selectedform || selectedData.value.linkedDocName}`,
     ]);
   }
 
@@ -593,14 +600,14 @@ function formDefinations() {
   };
 
   axiosInstance
-    .get(`${apis.resource}${doctypes.EzyFormDefinitions}`, {
+    .get(`${apis.resource}${doctypes.EzyFormDefinitions || selectedData.value.linkedDocName}`, {
       params: queryParams,
     })
     .then((res) => {
       const form_json = res.data[0].form_json;
 
       blockArr.value = rebuildToStructuredArray(JSON.parse(form_json).fields);
-      if (selectedData.value.selectedFormId ) {
+      if (selectedData.value.selectedFormId) {
         WfRequestUpdate();
       }
 
@@ -774,51 +781,126 @@ const ChildTableData = async () => {
     throw error; // Important: so raiseRequestSubmission halts
   }
 };
-const linkedId = ref(""); 
-  async function raiseRequestSubmission() {
-    if (!isFormValid.value) {
-      toast.error("Please Check Fields");
-      return;
-    }
-
-    // try {
-    //   await ChildTableData(); // ✅ Wait until all child table APIs are done
-    // } catch (error) {
-    //   toast.error("Child table submission failed");
-    //   return; // Stop main form submission
-    // }  
-
-    // Merge all child tables into main form
-    let form = {
-      doctype: selectedData.value.selectedform ? selectedData.value.selectedform : selectedData.value.linkedDocName,
-      company_field: business_unit.value,
-      ...childtablesData.value // ✅ use collected tableData directly
-    };
-
-    // Append other form fields
-    if (emittedFormData.value.length) {
-      emittedFormData.value.forEach((each) => {
-        form[each.fieldname] = each.value;
-      });
-    }
-    if (linkedId.value) {
-  form.linked_id = linkedId.value;
-}
-console.log(form, "Final Form Data to Submit");
-
-    // const formData = new FormData();
-    // formData.append("doc", JSON.stringify(form));
-    // formData.append("action", "Save");
-    // console.log(form, "formData");
-    // axiosInstance
-    //   .post(apis.savedocs, formData)
-    //   .then((response) => {
-    //     request_raising_fn(response.docs[0]);
-    //   })
-    //   .catch((error) => {
-    //     console.error("❌ Error submitting main form:", error);
-    //   });
+const linkedId = ref("");
+async function raiseRequestSubmission() {
+  if (!isFormValid.value) {
+    toast.error("Please Check Fields");
+    return;
   }
+
+  const childEntries = Object.entries(childtablesData.value);
+
+  if (!childEntries.length) {
+    toast.error("No child table data found!");
+    return;
+  }
+
+  // Prepare the form data
+  const form = {
+    doctype: selectedData.value.selectedform 
+      ? selectedData.value.selectedform 
+      : selectedData.value.linkedDocName,
+    company_field: business_unit.value,
+  };
+  if(selectedData.value.main_form_Id){
+    form.is_linked_form = selectedData.value.main_form_Id;
+  }
+
+  // Append all child tables
+  childEntries.forEach(([tableName, rows]) => {
+    if (rows && rows.length) {
+      form[tableName.toLowerCase()] = rows;
+    } else {
+      console.warn(`⚠ Skipping empty child table: ${tableName}`);
+    }
+  });
+
+  // Append emitted form data
+  if (emittedFormData.value.length) {
+    emittedFormData.value.forEach((each) => {
+      form[each.fieldname] = each.value;
+    });
+  }
+
+  // Append linked ID if exists
+  if (linkedId.value) {
+    form.linked_id = linkedId.value;
+  }
+
+  console.log(form, "✅ Final Form Data to Submit");
+
+  const formData = new FormData();
+  formData.append("doc", JSON.stringify(form));
+  formData.append("action", "Save");
+
+  try {
+    const response = await axiosInstance.post(apis.savedocs, formData);
+    console.log(response, "✅ Form submitted successfully");
+
+    if (response) {
+      request_raising_fn(response.docs[0]);
+    } else {
+      toast.error("Submission successful but no response data.");
+    }
+  } catch (error) {
+    console.error("❌ Error submitting main form:", error);
+    toast.error("Error submitting the form.");
+  }
+}
+
+// async function raiseRequestSubmission() {
+//   if (!isFormValid.value) {
+//     toast.error("Please Check Fields");
+//     return;
+//   }
+
+//   // try {
+//   //   await ChildTableData(); // ✅ Wait until all child table APIs are done
+//   // } catch (error) {
+//   //   toast.error("Child table submission failed");
+//   //   return; // Stop main form submission
+//   // }  
+//   const childEntries = Object.entries(childtablesData.value);
+
+//   if (!childEntries.length) return;
+
+//   const formPromises = childEntries.map(([tableName, rows]) => {
+//     if (!rows || !rows.length) {
+//       console.warn(`⚠ Skipping empty child table: ${tableName}`);
+//       return null;
+//     }
+
+//     // Merge all child tables into main form
+//     let form = {
+//       doctype: selectedData.value.selectedform ? selectedData.value.selectedform : selectedData.value.linkedDocName,
+//       company_field: business_unit.value,
+//       [tableName.toLowerCase()]: rows // ✅ use collected tableData directly
+//     };
+
+//     // Append other form fields
+//     if (emittedFormData.value.length) {
+//       emittedFormData.value.forEach((each) => {
+//         form[each.fieldname] = each.value;
+//       });
+//     }
+//     if (linkedId.value) {
+//       form.linked_id = linkedId.value;
+//     }
+//     console.log(form, "Final Form Data to Submit");
+//   });
+//     const formData = new FormData();
+//     formData.append("doc", JSON.stringify(form));
+//     formData.append("action", "Save");
+//     console.log(form, "formData");
+//     axiosInstance
+//       .post(apis.savedocs, formData)
+//       .then((response) => {
+//         request_raising_fn(response.docs[0]);
+//       })
+//       .catch((error) => {
+//         console.error("❌ Error submitting main form:", error);
+//       });
+//   }
 function gettingDataToLink() {
   const dataObj = {
     wf_request: selectedData.value.main_form_Id,
@@ -827,19 +909,26 @@ function gettingDataToLink() {
   axiosInstance
     .post(apis.gettingDataTo, dataObj)
     .then((response) => {
+      const responseData = response.message;
+      linkedId.value = responseData.linked_id;
 
-      LinkedChildTableData.value = response.message.testing_items_list;
-      linkedId.value = response.message.linked_id;
-      console.log(LinkedChildTableData.value, "Data");
+      // ✅ Find table name dynamically (excluding 'linked_id')
+      const tableKey = Object.keys(responseData).find(
+        (key) => key !== 'linked_id'
+      );
 
+      if (tableKey) {
+        LinkedChildTableData.value = {
+          table_name: tableKey,
+          rows: responseData[tableKey],
+        };
 
-
-
+        console.log(LinkedChildTableData.value, "Linked Child Table Data");
+      }
     })
     .catch((error) => {
       console.error("Error fetching data:", error);
     });
-
 }
 
 // const ChildTableData = async () => {
@@ -1009,125 +1098,125 @@ function gettingDataToLink() {
 
 const child_id_name = ref((''))
 
-function WfRequestUpdate() {
-  const filters = [
-    [
-      "wf_generated_request_id",
-      "like",
-      `%${selectedData.value.selectedFormId}%`,
-    ],
-  ];
+  function WfRequestUpdate() {
+    const filters = [
+      [
+        "wf_generated_request_id",
+        "like",
+        `%${selectedData.value.selectedFormId}%`,
+      ],
+    ];
 
-  const queryParams = {
-    fields: JSON.stringify(["*"]),
-    limit_page_length: null,
-    limit_start: 0,
-    filters: JSON.stringify(filters),
-    order_by: `\`tab${selectedData.value.selectedform}\`.\`creation\` desc`,
-  };
+    const queryParams = {
+      fields: JSON.stringify(["*"]),
+      limit_page_length: null,
+      limit_start: 0,
+      filters: JSON.stringify(filters),
+      order_by: `\`tab${selectedData.value.selectedform}\`.\`creation\` desc`,
+    };
 
-  axiosInstance
-    .get(`${apis.resource}${selectedData.value.selectedform}`, {
-      params: queryParams,
-    })
-    .then((res) => {
-      if (res.data && res.data.length > 0) {
-        const doctypeForm = res.data[0];
+    axiosInstance
+      .get(`${apis.resource}${selectedData.value.selectedform}`, {
+        params: queryParams,
+      })
+      .then((res) => {
+        if (res.data && res.data.length > 0) {
+          const doctypeForm = res.data[0];
 
-        // console.log( blockArr.value);
+          // console.log( blockArr.value);
 
-        // Map response data to UI fields
-        mapFormFieldsToRequest(doctypeForm, blockArr.value);
-
-
-        axiosInstance
-          .get(`${apis.resource}${selectedData.value.selectedform }`)
-          .then((res) => {
-            console.log(`Data for :`, res.data[0]);
-            newMainId.value = res.data[0].name
-
-          })
-          .catch((error) => {
-            console.error(`Error fetching data for :`, error);
-          });
-        axiosInstance
-          .get(
-            `${apis.resource}${selectedData.value.selectedform }/${res.data[0].name}`
-          )
-          .then((res) => {
-            // console.log(`Data for :`, res.data);
-            // Identify the child table key dynamically
-            const childTables = Object.keys(res.data).filter((key) =>
-              Array.isArray(res.data[key])
-            );
-            console.log(childTables);
+          // Map response data to UI fields
+          mapFormFieldsToRequest(doctypeForm, blockArr.value);
 
 
-            if (childTables.length) {
-              tableRows.value = {};
+          axiosInstance
+            .get(`${apis.resource}${selectedData.value.selectedform}`)
+            .then((res) => {
+              console.log(`Data for :`, res.data[0]);
+              newMainId.value = res.data[0].name
 
-              childTables.forEach((tableKey) => {
-                tableRows.value[tableKey] = res.data[tableKey] || [];
-              });
-              child_id_name.value = res.data.name
-              // console.log(res.data,"000000");
+            })
+            .catch((error) => {
+              console.error(`Error fetching data for :`, error);
+            });
+          axiosInstance
+            .get(
+              `${apis.resource}${selectedData.value.selectedform}/${res.data[0].name}`
+            )
+            .then((res) => {
+              // console.log(`Data for :`, res.data);
+              // Identify the child table key dynamically
+              const childTables = Object.keys(res.data).filter((key) =>
+                Array.isArray(res.data[key])
+              );
+              console.log(childTables);
 
-            }
-          })
-          .catch((error) => {
-            console.error(`Error fetching data for :`, error);
-          });
-      }
-    })
-    .catch((error) => {
-      console.error("Error fetching data:", error);
-    });
-}
 
-function mapFormFieldsToRequest(doctypeData, blockArr) {
-  if (!doctypeData) return; // Ensure valid data
+              if (childTables.length) {
+                tableRows.value = {};
 
-  blockArr.forEach((block) => {
-    block.sections?.forEach((section) => {
-      section.rows?.forEach((row) => {
-        row.columns?.forEach((column) => {
-          column.fields?.forEach((field) => {
-            // Check if the field exists in the API response
-            if (doctypeData.hasOwnProperty(field.fieldname)) {
-              field.value = doctypeData[field.fieldname] ?? ""; // Set value reactively
-            }
+                childTables.forEach((tableKey) => {
+                  tableRows.value[tableKey] = res.data[tableKey] || [];
+                });
+                child_id_name.value = res.data.name
+                // console.log(res.data,"000000");
+
+              }
+            })
+            .catch((error) => {
+              console.error(`Error fetching data for :`, error);
+            });
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
+  }
+
+  function mapFormFieldsToRequest(doctypeData, blockArr) {
+    if (!doctypeData) return; // Ensure valid data
+
+    blockArr.forEach((block) => {
+      block.sections?.forEach((section) => {
+        section.rows?.forEach((row) => {
+          row.columns?.forEach((column) => {
+            column.fields?.forEach((field) => {
+              // Check if the field exists in the API response
+              if (doctypeData.hasOwnProperty(field.fieldname)) {
+                field.value = doctypeData[field.fieldname] ?? ""; // Set value reactively
+              }
+            });
           });
         });
       });
     });
-  });
-}
-function request_raising_fn(item) {
-  // console.log(filepaths.value, "---filepaths");
-  // const filesArray = filepaths.value
-  //   ? filepaths.value.split(",").map((filePath) => filePath.trim())
-  //   : [];
-  let data_obj = {
-    module_name: "Ezy Forms",
-    doctype_name: selectedData.value.selectedform ? selectedData.value.selectedform : selectedData.value.linkedDocName,
-    ids: [item.name],
-    reason: selectedData.value.hasWorkflow === 'No' ? "Completed" : "Request Raised",
-    url_for_request_id: "",
-    files: filepaths.value.length > 0 ? filepaths.value : [],
-    property: business_unit.value,
-  };
-  axiosInstance.post(apis.raising_request, data_obj).then((resp) => {
-    if (resp?.message?.success === true) {
-      toast.success("Request Raised", {
-        autoClose: 1000,
-        transition: "zoom",
-        onClose: () => {
-          router.push({ path: "/todo/raisedbyme" });
-        },
-      });
-    }
-  });
-}
+  }
+  function request_raising_fn(item) {
+    // console.log(filepaths.value, "---filepaths");
+    // const filesArray = filepaths.value
+    //   ? filepaths.value.split(",").map((filePath) => filePath.trim())
+    //   : [];
+    let data_obj = {
+      module_name: "Ezy Forms",
+      doctype_name: selectedData.value.selectedform ? selectedData.value.selectedform : selectedData.value.linkedDocName,
+      ids: [item.name],
+      reason: selectedData.value.hasWorkflow === 'No' ? "Completed" : "Request Raised",
+      url_for_request_id: "",
+      files: filepaths.value.length > 0 ? filepaths.value : [],
+      property: business_unit.value,
+    };
+    axiosInstance.post(apis.raising_request, data_obj).then((resp) => {
+      if (resp?.message?.success === true) {
+        toast.success("Request Raised", {
+          autoClose: 1000,
+          transition: "zoom",
+          onClose: () => {
+            router.push({ path: "/todo/raisedbyme" });
+          },
+        });
+      }
+    });
+  }
 
 
 

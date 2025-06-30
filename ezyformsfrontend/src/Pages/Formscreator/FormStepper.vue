@@ -64,24 +64,31 @@
                         <!-- :disabled="isNextDisabled" -->
                       </div>
                     </div>
-                    <div class="container-fluid p-0">
+                    <div class="container-fluid aboutFields p-0">
                       <div class="row">
                         <div class="col-4"></div>
                         <div class="col-4">
-                          <div class="aboutFields">
+                          <div class="">
                             <div class="mt-3">
-                              <div class="">
-                                <FormFields :disabled="selectedData.formId && selectedData.formId.length > 0"
+                              <div class=" position-relative">
+                                <span v-if="route.query.preId"
+                                  class=" font-12 position-absolute PredefinedLabel">Predefined<i
+                                    class="bi bi-check2-circle"></i></span>
+                                    
+                                    <!-- || route.query.form_name -->
+                                <FormFields
+                                  :disabled="selectedData.formId && selectedData.formId.length > 0 "
                                   labeltext="Form Name" class="formHeight" type="text" tag="input" name="Value"
                                   id="formName" validationStar="true" placeholder="Untitled Form"
-                                  @change="(event) => handleInputChange(event, 'form_name')" v-model="filterObj.form_name" />
+                                  @change="(event) => handleInputChange(event, 'form_name')" v-model="formNameModel" />
                                 <span v-if="formNameError" class="text-danger ErrorMsg ms-2">
                                   {{ formNameError }}</span>
                               </div>
                             </div>
                             <div class="mt-3">
                               <div class="">
-                                <FormFields :disabled="selectedData.formId && selectedData.formId.length > 0"
+                                <FormFields
+                                  :disabled="selectedData.formId && selectedData.formId.length > 0"
                                   labeltext="Form Short Code" class="formHeight" type="text" tag="input" name="Value"
                                   id="formShortCode" validationStar="true" placeholder="Untitled Form" @change="
                                     (event) => handleInputChange(event, 'form_short_name')
@@ -138,36 +145,10 @@
                                   :multiple="false" :searchable="true" class="font-11 multiselect" />
                               </div>
                             </div>
-                            <div class="mt-3">
-                              <div class="">
-                                <!-- <FormFields labeltext="Accessbility Departments" class="mb-3"
-                            <Multiselect
-                              :options="departments"
-                              v-model="filterObj.form_category"
-                              placeholder="Select Cateogry"
-                              :multiple="false"
-                              :searchable="true"
-                              class="font-11 multiselect"
-                            />
-                          </div>
-                        </div>
-                        <div class="mt-3">
-                          <div class=""> -->
-                                <!-- <FormFields labeltext="Accessbility Departments" class="mb-3"
-                                                            tag="multiselect" name="desgination" id="Departments"
-                                                            placeholder="Select Desigination" :options=formOptions
-                                                            v-model="filterObj.accessible_departments" /> -->
-                                <!-- <v-select v-model="filterObj.accessible_departments"
-                                                            :options="formOptions"></v-select> -->
-                              </div>
-                              <!-- <label for="">Accessbility Departments</label> -->
-                              <!-- <Multiselect :options=formOptions
-                                                        v-model="filterObj.accessible_departments"
-                                                        placeholder="Select Desigination" :multiple="true"
-                                                        track-by="code" :close-on-select="false"
-                                                        :clear-on-select="false" :searchable="true" /> -->
+                            
+                              
 
-                              <div>
+                              <div class="mt-3">
                                 <label class="typo__label">
                                   <label for="">Accessibility Departments
                                     <span v-if="!filterObj.accessible_departments.length"
@@ -207,20 +188,44 @@
                                     :multiple="false" class="font-11 multiselect" :searchable="true" />
                                 </div>
                               </div>
-                              <!-- <div class="my-2">
+                              <div class="my-2 mb-5">
                                 <div class="form-check d-flex align-items-center p-0 pe-3">
-                                  <input class="form-check-input" type="checkbox" id="LinkTo"
-                                    v-model="filterObj.LinkTo" />
-                                  <label class="form-check-label font-12 mx-2 ps-1 " for="LinkTo">
-                                    Link To
+                                  <input class="form-check-input linketoCheck p-1" type="checkbox" id="is_linked"
+                                    v-model="filterObj.is_linked"   :true-value="1" :false-value="0"/>
+                                  <label class="form-check-label font-12 mx-2 mb-0 ps-1" for="is_linked">
+                                    Link
                                   </label>
                                 </div>
-                                <div v-if="filterObj.LinkTo" class="mt-2">
-                                  <label for="standardFormInput">Standard Form</label>
-                                  <input type="text" class="form-control" id="standardFormInput"
-                                    v-model="filterObj.standard_form" placeholder="Enter standard form" />
+                                <div>
+                                  
+                                 <!-- <div class="form-check d-flex align-items-center p-0 pe-3">
+                                  <input class="form-check-input linketoCheck p-1" type="checkbox" id="is_predefined_doctype"
+                                    v-model="filterObj.is_predefined_doctype"   :true-value="1" :false-value="0"/>
+                                  <label class="form-check-label font-12 mx-2 mb-0 ps-1" for="is_predefined_doctype">
+                                    is_predefined_doctype
+                                  </label>
+                                </div> -->
+                                 
                                 </div>
-                              </div> -->
+
+                                <div v-if="filterObj.is_linked" class="mt-2 position-relative mb-5">
+                                  <label for="standardFormInput">Standard Form</label>
+                                  <input type="text" class="form-control standardFormInput" id="standardFormInput"
+                                    v-model="filterObj.is_linked_form" placeholder="Type to search Form Name..."
+                                    @input="searchForm" @focus="showSuggestions = true" @blur="hideSuggestions" />
+                                    
+
+                                  <!-- Suggestions Dropdown -->
+                                  <ul v-if="showSuggestions && filteredForms.length"
+                                    class="list-group position-absolute w-100 z-3 formslist">
+                                    <li class="list-group-item formlistitem" v-for="(item, index) in filteredForms" :key="index"
+                                      @mousedown.prevent="selectForm(item.name)">
+                                      {{ item.name }}
+                                    </li>
+                                  </ul>
+                                </div>
+                              </div>
+
                               <!-- <div class="mt-3">
                               <div class="">
 
@@ -231,8 +236,8 @@
                                 <Multiselect :options="['Yes']" v-model="filterObj.workflow_check" placeholder="Select"
                                   :multiple="false" class="font-11 multiselect" :searchable="true" />
                               </div>
-                            </div> -->
-                            </div>
+                               </div> -->
+                            
                           </div>
                         </div>
 
@@ -403,7 +408,7 @@
                                   <div class="d-flex justify-content-between align-items-center">
                                     <label class="rownames">{{
                                       getRowSuffix(rowIndex)
-                                    }}</label>
+                                      }}</label>
                                     <div>
                                       <button v-if="row.columns.length < 3"
                                         class="btn btn-light bg-transparent border-0 font-12" @click="
@@ -500,7 +505,8 @@
                                             @drop="(e) => handleFieldDropAtIndex(e, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
                                           </div>
 
-                                          <div v-if="field.fieldtype !== 'Table'" class="px-1 dynamic_fied field-border" draggable="true"
+                                          <div v-if="field.fieldtype !== 'Table'" class="px-1 dynamic_fied field-border"
+                                            draggable="true"
                                             @dragstart="handleDragStart($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
                                             @dragover.prevent
                                             @drop="(e) => handleFieldDropAtIndex(e, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
@@ -698,7 +704,7 @@
                                               placeholder="Enter field description"></textarea>
 
                                             <small v-if="field.error" class="text-danger font-10">{{ field.error
-                                            }}</small>
+                                              }}</small>
                                           </div>
                                           <div class="drop-zone" @dragover.prevent
                                             @drop="(e) => handleFieldDropAtIndex(e, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
@@ -712,9 +718,11 @@
 
                                                     <div v-for="(table, tableName) in childtableHeaders"
                                                       :key="tableName" class="childTable">
-                                                      <h5 class=" font-13" v-if="tableName === field.fieldname || tableName === field.options ">{{
-                                                        tableName.replace(/_/g,
-                                                          ' ') }}</h5>
+                                                      <h5 class=" font-13"
+                                                        v-if="tableName === field.fieldname || tableName === field.options">
+                                                        {{
+                                                          tableName.replace(/_/g,
+                                                            ' ') }}</h5>
                                                       <div
                                                         v-if="editMode[tableName] && tableName === currentEditingTable"
                                                         class=" d-flex align-items-center gap-2">
@@ -1389,7 +1397,9 @@ const fieldErrors = reactive({});
 const childtableHeaders = ref([]);
 // const childtableName = ref("");
 // const childTableresponseData = ref([]);
-
+const filteredForms = ref([]);
+const showSuggestions = ref(false);
+let debounceTimeout = null;
 const tableName = ref("");
 let paramId = ref("");
 const businessUnit = computed(() => {
@@ -1410,6 +1420,16 @@ const is_landscape = ref(false)
 // const computedDisabled = computed(() => {
 //   return paramId.value.length > 0
 // })
+const formNameModel = computed({
+  get() {
+    return filterObj.value.form_name || route.query.form_name || "";
+  },
+  set(val) {
+    filterObj.value.form_name = val;
+  }
+});
+
+
 const filterObj = ref({
   form_name: "",
   form_short_name: "",
@@ -1419,17 +1439,26 @@ const filterObj = ref({
   owner_of_the_form: "",
   series: "",
   has_workflow: "",
-  workflow_check: ""
+  workflow_check: "",
+  is_linked: 0,
+  is_linked_form: "",
+  is_predefined_doctype: route.query.id? 1 : 0,
+
 
 });
-const formNameModel = computed({
-  get() {
-    return filterObj.form_name || route.query.form_name || "";
+// route.query.preId ? 1: 0
+
+watch(
+  () => route.query.form_name,
+  (newVal) => {
+    if (newVal) {
+      filterObj.value.form_name = newVal;
+      filterObj.value.form_short_name = newVal;
+    }
   },
-  set(val) {
-    filterObj.form_name = val;
-  }
-});
+  { immediate: true }
+);
+
 const formDescriptions = computed(() => filterObj.value);
 const child_id = ref("");
 const updateBtnDiv = ref(false);
@@ -1606,7 +1635,52 @@ const updateFieldname = async (field) => {
     field.fieldname = generateFieldname(field.label);
   }
 };
+function searchForm() {
+  const searchValue = filterObj.value.is_linked_form;
+  if (!searchValue) {
+    filteredForms.value = [];
+    return;
+  }
 
+  // Debounce to avoid too many API calls
+  clearTimeout(debounceTimeout);
+  debounceTimeout = setTimeout(() => {
+    const filters = [
+      ["business_unit", "like", `%${businessUnit.value.value}%`],
+      ["name", "like", `%${searchValue}%`]
+    ];
+
+    const queryParams = {
+      fields: JSON.stringify(["name"]),
+      limit_page_length: 10,
+      limit_start: 0,
+      filters: JSON.stringify(filters),
+      order_by: "`tabEzy Form Definitions`.`enable` DESC, `tabEzy Form Definitions`.`creation` DESC"
+    };
+
+    axiosInstance
+      .get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParams })
+      .then((response) => {
+        filteredForms.value = response.data || [];
+      })
+      .catch((error) => {
+        console.error("Error fetching form definitions:", error);
+      });
+  }, 300); // ✅ Debounce delay 300ms
+}
+
+// ✅ Select item from suggestion
+function selectForm(name) {
+  filterObj.value.is_linked_form = name;
+  showSuggestions.value = false;
+}
+
+// ✅ Hide suggestions when input loses focus (small delay to allow click)
+function hideSuggestions() {
+  setTimeout(() => {
+    showSuggestions.value = false;
+  }, 200);
+}
 // const linkSearchQuery = ref('');
 // const linkSearchResults = ref([]);
 // const dropdownVisible = ref(false); // Controls dropdown visibility
@@ -1881,6 +1955,7 @@ onMounted(() => {
   let Bu_Unit = localStorage.getItem("Bu");
   filterObj.value.business_unit = Bu_Unit;
   if (route.query.preId === 'PreDefine') {
+  // filterObj.value.is_linked = 1; 
     const formJsonFromStorage = localStorage.getItem("form_json");
 
     if (formJsonFromStorage) {
@@ -1889,7 +1964,7 @@ onMounted(() => {
 
       const formData = Predata.value[0];
 
-      console.log(typeof formJsonFromStorage); // Should log: 'string'
+      // console.log(typeof formJsonFromStorage); // Should log: 'string'
 
       // Parse and rebuild the structured array from form fields
       const parsedJson = JSON.parse(formData.form_json);
@@ -2198,140 +2273,6 @@ const afterImmediateEdit = (blockIndex, sectionIndex, tableName) => {
 };
 
 
-// Function to add a new child table
-// const addChildTable = () => {
-//   const existingFieldsCount = Object.values(childtableHeaders.value).reduce((acc, table) => {
-//     return acc + (Array.isArray(table) ? table.length : 0);
-//   }, 0);
-
-//   // New index starts from the total existing fields
-//   const newIndex = existingFieldsCount + childTables.value.length;
-
-//   childTables.value.push({
-//     idx: newIndex,
-//     tableName: "",
-//     formattedTableName: "",
-//     columns: reactive([
-//       {
-//         label: "",
-//         fieldname: `field_${columns.length}`, // This will be updated once the label is entered
-//         fieldtype: "",
-//         idx: columns.length,
-//         reqd: false,
-//       }
-//     ]),
-//      // Use `ref([])` instead of `reactive([])`
-//     // Store new fields separately
-//   });
-
-// };
-
-// const addChildTable = () => {
-//   const existingFieldsCount = Object.values(childtableHeaders.value).reduce((acc, table) => {
-//     return acc + (Array.isArray(table) ? table.length : 0);
-//   }, 0);
-
-//   const newIndex = existingFieldsCount + childTables.value.length;
-
-//   const fieldtype = ""; // Or set default if needed, like 'Data', 'Link', etc.
-
-//   const field = {
-//     label: "",
-//     fieldname: `field_${newIndex}`,
-//     fieldtype,
-//     idx: newIndex,
-//     reqd: false,
-//   };
-
-//   if (fieldtype === "Link") {
-//     field.options = "";
-//   }
-
-//   childTables.value.push({
-//     idx: newIndex,
-//     tableName: "",
-//     formattedTableName: "",
-//     columns: reactive([field]),
-//   });
-// };
-
-// // Function to remove a specific child table
-// const removeChildTable = (tableIndex) => {
-//   childTables.value.splice(tableIndex, 1);
-// };
-
-// // Function to add a field to a specific table
-// const addFieldToTable = (tableIndex) => {
-//   const columns = childTables.value[tableIndex].columns;
-
-//   columns.push({
-//     label: "",
-//     fieldname: "", // This will be updated once the label is entered
-//     fieldtype: "",
-//     idx: columns.length,
-//     reqd: false,
-
-//   });
-//   if (newField.fieldtype === 'Link') {
-//     newField.options = "";
-//   }
-
-//   // Watch for label changes and update fieldname dynamically
-//   watch(() => columns[columns.length - 1]?.label, (newLabel) => {
-//     columns[columns.length - 1].fieldname = `${newLabel.replace(/\s+/g, "_").toLowerCase()}_${columns.length - 1}`;
-//   });
-// };
-
-// // Function to remove a field from a specific table
-// const removeFieldFromTable = (tableIndex, fieldIndex) => {
-//   childTables.value[tableIndex].columns.splice(fieldIndex, 1);
-// };
-// // Format table name dynamically
-
-// // Validate if table fields are complete
-// const isEmptyFieldType = (tableIndex) => {
-//   return (
-//     !childTables.value[tableIndex].tableName.length ||
-//     childTables.value[tableIndex].columns.some(
-//       (field) => !field.fieldtype || !field.label
-//     )
-//   );
-// };
-
-// // Process fields for a specific table
-// const processFields = (tableIndex) => {
-//   if (isEmptyFieldType(tableIndex)) {
-//     toast.error("Please fill in all required fields before proceeding.", {
-//       transition: "zoom",
-//     });
-//     return;
-//   }
-
-//   const data = {
-//     form_short_name: childTables.value[tableIndex].formattedTableName,
-//     fields: childTables.value[tableIndex].columns,
-//     idx: childTables.value[tableIndex].idx
-//   };
-
-
-
-//   axiosInstance
-//     .post(apis.childtable, data)
-//     .then((res) => {
-//       if (res) {
-//         toast.success("Table created successfully!", { autoClose: 500 }, {
-//           transition: "zoom",
-//         });
-//         const firstTableField = res.message[0][0].child_doc;
-//         if (firstTableField) {
-//           tableFieldsCache.value.push(firstTableField);
-//         }
-//       }
-//     })
-//     .catch((error) => {
-//       console.error("Error saving form data:", error);
-//     });
-// };
 
 const editMode = reactive({});
 
@@ -3052,7 +2993,7 @@ function formData(status) {
   };
 
   dataObj.accessible_departments = dataObj.accessible_departments.toString();
-  // console.log(dataObj, "---data obj");
+  console.log(dataObj, "---data obj");
   axiosInstance
     .post(apis.savedata, dataObj)
     .then((res) => {
@@ -3723,6 +3664,46 @@ const hasDuplicates = (array) => new Set(array).size !== array.length;
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 
 <style lang="scss" scoped>
+.formlist {
+  max-height: 180px; /* 🔥 Set desired height */
+  overflow-y: auto;  /* 🔥 Enable vertical scroll */
+  overflow-x: hidden;
+  border: 1px solid #dcdcdc;
+  border-radius: 4px;
+  background-color: white;
+  z-index: 999;
+}
+
+.formlistitem {
+  cursor: pointer;
+}
+
+.formlistitem:hover {
+  background-color: #f0f0f0;
+}
+.PredefinedLabel {
+  font-size: 12px;
+  margin-left: 10px;
+  border: 1px solid #ccc;
+  padding: 2px 5px;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  left: 70px;
+  // right: 0;
+
+
+
+}
+.standardFormInput:focus{
+  box-shadow: none;
+  outline: 0;
+  border: 1px solid #000;
+  
+}
+.linketoCheck {
+  width: 18px;
+}
+
 .aboutFields {
   height: 80dvh;
   overflow-y: auto;
