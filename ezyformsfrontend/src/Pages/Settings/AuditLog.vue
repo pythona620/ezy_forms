@@ -26,7 +26,7 @@
         <div class="offcanvas offcanvas-end" data-bs-backdrop="static" tabindex="-1" id="staticBackdrop"
             aria-labelledby="staticBackdropLabel">
             <div class="offcanvas-header">
-                <h5 class="offcanvas-title" id="staticBackdropLabel">Audit Logs</h5>
+                <h5 class="offcanvas-title" id="staticBackdropLabel" :title="viewLogs.docname">{{ viewLogs.docname }}</h5>
                 <button type="button" class="btn-close shadow-none" data-bs-dismiss="offcanvas" aria-label="Close"></button>
             </div>
             <div class="offcanvas-body">
@@ -40,20 +40,26 @@
                     </ul>
                 </div> -->
                 <!-- Added Logs -->
-                <div v-if="addedLogs.length">
-                <h6>Added</h6>
+                <div class="offcanvas-div" v-if="addedLogs.length">
+                <h6 class="font-9">Added</h6>
                 <ul>
                     <li v-for="(item, index) in addedLogs" class="mb-2" :key="'added-' + index">
-                    <!-- Field Name = {{ item[0] }}, Value = {{ JSON.stringify(item[1]) }} -->
-                        <p class="m-0 font-13"><strong>Field Name =</strong> {{ item[0] }}</p>
-                        <p class="m-0 font-13"><strong>Value =</strong> {{ item[1] }}</p>
+                    <p class="m-0 font-13"><strong>Field Name =</strong> {{ item[0] }}</p>
+                    <template v-if="typeof item[1] === 'object' && item[1] !== null">
+                        <div v-for="(val, key) in item[1]" :key="key">
+                        <p class="m-0 font-13"><strong>{{ key }}:</strong> {{ val }}</p>
+                        </div>
+                    </template>
+                    <p class="m-0 font-13" v-else>
+                        <strong>Value =</strong> {{ item[1] }}
+                    </p>
                     </li>
                 </ul>
                 </div>
 
                 <!-- Changed Logs -->
-                <div v-if="changedLogs.length">
-                <h6>Changed</h6>
+                <div class="offcanvas-div" v-if="changedLogs.length">
+                <h6 class="font-9">Changes</h6>
                 <ul>
                     <li v-for="(item, index) in changedLogs" class="mb-2" :key="'changed-' + index">
                     <!-- Field Name = {{ item[0] }}, Old Value = {{ item[1] }}, New Value = {{ item[2] }} -->
@@ -327,6 +333,15 @@ const changedLogs = computed(() => parsedLogData.value.changed || []);
     text-align: left;
     color: #999999;
     font-size: 12px;
+}
+.offcanvas-title{
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+}
+.offcanvas-div{
+    background-color: #f2f2f2;
+    padding: 10px;
 }
 
 .filterbtn {
