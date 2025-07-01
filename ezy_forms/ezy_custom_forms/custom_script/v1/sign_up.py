@@ -66,7 +66,7 @@ def sign_up(email: str, full_name: str,designation:str|None,emp_phone:str|None,e
 		if default_role:
 			user.add_roles(default_role)
 
-		if  user: 
+		if  user:
 			new_doc = frappe.new_doc("Login Check")
 			new_doc.user_id = user
 			new_doc.insert(ignore_permissions=True)
