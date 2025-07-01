@@ -201,7 +201,7 @@ const thirdSettingsTitle = 'Master';
 const forthSettingsTitle = 'Employee';
 
 const fifthSettingsTitle = 'System Settings';
-const sixthTitle = 'Audit logs';
+const sixthTitle = 'Audits';
 const seventhSettingsTitle = 'Form Creation';
 
 
@@ -268,8 +268,8 @@ const filteredSettingsGroups = computed(() => {
             thirdSettingsGroup: settingsSideBarData.slice(1, 3),
             forthSettingsGroup: settingsSideBarData.slice(3, 6),
             fifthSettingsGroup: settingsSideBarData.slice(6,7),
-            sixthGroup: settingsSideBarData.slice(7,8),
-            seventhGroup: settingsSideBarData.slice(8),
+            sixthGroup: settingsSideBarData.slice(7,9),
+            seventhGroup: settingsSideBarData.slice(9),
 
         }
         : { thirdSettingsGroup: [], forthSettingsGroup: []};
