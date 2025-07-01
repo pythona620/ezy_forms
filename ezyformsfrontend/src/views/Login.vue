@@ -718,7 +718,8 @@ export default {
                   emp_mail_id: employeeData.emp_mail_id,
                   designation: employeeData.designation,
                   department: employeeData.department,
-                  emp_code:employeeData.emp_code
+                  emp_code:employeeData.emp_code,
+                  emp_signature: employeeData.signature,
                   // department: employeeData.department,
                 };
 

@@ -223,8 +223,9 @@
                               <!-- PDF block -->
                               <a v-else :href="file" target="_blank"
                                 class="d-flex align-items-center justify-content-center mt-2 border rounded bg-light"
-                                style="width: 100px; height: 100px; text-decoration: none;">
-                                <i class="bi bi-file-earmark-pdf-fill fs-2 text-danger"></i>
+                                style="width: 70px; height: 70px; text-decoration: none;">
+                                 <img src="../assets/attach.png" alt="" width="50px">
+                                <!-- <i class="bi bi-file-earmark-pdf-fill fs-2 text-danger"></i> -->
                               </a>
                             </div>
                           </div>
@@ -562,7 +563,8 @@
                                                 <div v-else
                                                   class="d-flex align-items-center justify-content-center border mt-2"
                                                   style="width: 100px; height: 100px; background: #f9f9f9">
-                                                  <i class="bi bi-file-earmark-pdf fs-1 text-danger"></i>
+                                                  <!-- <i class="bi bi-file-earmark-pdf fs-1 text-danger"></i> -->
+                                                  <img src="../assets/attach.png" alt="">
                                                 </div>
                                               </div>
 
@@ -1037,7 +1039,7 @@ function getEmploye() {
   // console.log(storedData, "=============================");
   const queryParams = {
     filters: JSON.stringify([["Ezy Employee", "emp_mail_id", "=", storedData?.emp_mail_id]]),
-    fields: JSON.stringify(["emp_name", "signature"]),
+    fields: JSON.stringify(["emp_name", "signature", "designation","department"]),
 
   };
 

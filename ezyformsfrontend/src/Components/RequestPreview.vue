@@ -125,58 +125,124 @@
                                             </template>
 
 
-                                            <template v-else-if="field.fieldtype == 'Attach'">
-                                                <input :disabled="props.readonlyFor === 'true'" type="file"
-                                                    accept="image/jpeg,image/png,application/pdf"
-                                                    :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
-                                                    class="form-control previewInputHeight font-10 mt-2" multiple
-                                                    @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
+                                           <template v-else-if="field.fieldtype == 'Attach'">
+  <!-- File Input -->
+                                                <input 
+                                                v-if="(field.fieldname !== 'requestor_signature' && field.label !== 'Requestor Signature') || !field.value"
+                                                :disabled="props.readonlyFor === 'true'"
+                                                type="file"
+                                                accept=".jpeg,.jpg,.png,.pdf,.xlsx,.xls"
+                                                :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                                                class="form-control previewInputHeight font-10 mt-2"
+                                                multiple
+                                                @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+                                                />
 
+
+                                                <!-- Preview Section -->
                                                 <div v-if="field.value" class="d-flex flex-wrap gap-2">
-                                                    <div v-for="(fileUrl, index) in field.value.split(',').map(f => f.trim())"
-                                                        :key="index" class="position-relative d-inline-block"
-                                                        @mouseover="hovered = index" @mouseleave="hovered = null">
-                                                        <!-- Click to open modal -->
-                                                        <div @click="openPreview(fileUrl)" style="cursor: pointer">
-                                                            <img v-if="isImageFile(fileUrl)" :src="fileUrl"
-                                                                class="img-thumbnail mt-2 border-0"
-                                                                style="max-width: 100px; max-height: 100px" />
-                                                            <div v-else
-                                                                class="d-flex align-items-center justify-content-center border mt-2"
-                                                                style="width: 100px; height: 100px; background: #f9f9f9">
-                                                                <i class="bi bi-file-earmark-pdf fs-1 text-danger"></i>
-                                                            </div>
-                                                        </div>
-
-                                                        <!-- Remove icon -->
-                                                        <button v-if="hovered === index"
-                                                            @click="removeFile(index, field)"
-                                                            class="btn btn-sm btn-light position-absolute"
-                                                            style="top: 2px; right: 5px; border-radius: 50%; padding: 0 5px">
-                                                            <i class="bi bi-x fs-6"></i>
-                                                        </button>
-                                                    </div>
-                                                </div>
-
-                                                <!-- Modal Preview -->
-                                                <div v-if="showModal" class="modal-backdrop" @click.self="closePreview"
-                                                    style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1050;">
                                                     <div
-                                                        style="background: white; padding: 20px; max-width: 90%; max-height: 90%; overflow: auto; border-radius: 8px; position: relative;">
-
-                                                        <button @click="closePreview"
-                                                            style="position: absolute; top: 10px; right: 10px; border: none; background: transparent; font-size: 20px;">&times;</button>
-
+                                                    v-for="(fileUrl, index) in field.value.split(',').map(f => f.trim())"
+                                                    :key="index"
+                                                    class="position-relative d-inline-block"
+                                                    @mouseover="hovered = index"
+                                                    @mouseleave="hovered = null"
+                                                    >
+                                                    <!-- Click to open modal -->
+                                                    <div @click="openPreview(fileUrl)" style="cursor: pointer">
                                                         <!-- Image Preview -->
-                                                        <img v-if="isImageFile(previewUrl)" :src="previewUrl"
-                                                            style="max-width: 100%; max-height: 80vh;" />
+                                                        <img
+                                                        v-if="isImageFile(fileUrl)"
+                                                        :src="fileUrl"
+                                                        class="img-thumbnail mt-2 border-0"
+                                                        style="max-width: 100px; max-height: 100px"
+                                                        />
 
                                                         <!-- PDF Preview -->
-                                                        <iframe v-else :src="previewUrl"
-                                                            style="width: 80vw; height: 80vh;" frameborder="0"></iframe>
+                                                        <div
+                                                        v-else-if="isPdfFile(fileUrl)"
+                                                        class="d-flex align-items-center justify-content-center border mt-2"
+                                                        style="width: 100px; height: 100px; background: #f9f9f9"
+                                                        >
+                                                        <i class="bi bi-file-earmark-pdf fs-1 text-danger"></i>
+                                                        </div>
+
+                                                        <!-- Excel Preview -->
+                                                        <div
+                                                        v-else-if="isExcelFile(fileUrl)"
+                                                        class="d-flex align-items-center justify-content-center border mt-2"
+                                                        style="width: 100px; height: 100px; background: #f9f9f9"
+                                                        >
+                                                        <i class="bi bi-file-earmark-spreadsheet fs-1 text-success"></i>
+                                                        </div>
+
+                                                        <!-- Other File Types -->
+                                                        <div
+                                                        v-else
+                                                        class="d-flex align-items-center justify-content-center border mt-2"
+                                                        style="width: 100px; height: 100px; background: #f9f9f9"
+                                                        >
+                                                        <i class="bi bi-file-earmark fs-1"></i>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Remove icon -->
+                                                    <button
+                                                        v-if="hovered === index"
+                                                        @click="removeFile(index, field)"
+                                                        class="btn btn-sm btn-light position-absolute"
+                                                        style="top: 2px; right: 5px; border-radius: 50%; padding: 0 5px"
+                                                    >
+                                                        <i class="bi bi-x fs-6"></i>
+                                                    </button>
                                                     </div>
                                                 </div>
-                                            </template>
+                                                
+
+                                                <!-- Modal Preview -->
+                                                <div
+                                                    v-if="showModal"
+                                                    class="modal-backdrop"
+                                                    @click.self="closePreview"
+                                                    style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1050;"
+                                                >
+                                                    <div
+                                                    style="background: white; padding: 20px; max-width: 90%; max-height: 90%; overflow: auto; border-radius: 8px; position: relative;"
+                                                    >
+                                                    <button
+                                                        @click="closePreview"
+                                                        style="position: absolute; top: 10px; right: 10px; border: none; background: transparent; font-size: 20px;"
+                                                    >
+                                                        &times;
+                                                    </button>
+
+                                                    <!-- Image Preview -->
+                                                    <img
+                                                        v-if="isImageFile(previewUrl)"
+                                                        :src="previewUrl"
+                                                        style="max-width: 100%; max-height: 80vh;"
+                                                    />
+
+                                                    <!-- PDF Preview -->
+                                                    <iframe
+                                                        v-else-if="isPdfFile(previewUrl)"
+                                                        :src="previewUrl"
+                                                        style="width: 80vw; height: 80vh;"
+                                                        frameborder="0"
+                                                    ></iframe>
+
+                                                    <!-- Excel and Others -->
+                                                    <div v-else style="text-align: center;">
+                                                        <i class="bi bi-file-earmark-spreadsheet fs-1 text-success" v-if="isExcelFile(previewUrl)"></i>
+                                                        <i class="bi bi-file-earmark fs-1" v-else></i>
+                                                        <p class="mt-2">Preview not available for this file type. <br />
+                                                        <a :href="previewUrl" target="_blank" class="btn btn-sm btn-primary mt-2">Download</a>
+                                                        </p>
+                                                    </div>
+                                                    </div>
+                                                </div>
+                                                </template>
+
                                             <template v-else-if="field.fieldtype == 'Check' && field.fieldname !== 'auto_calculations'">
                                                 <input type="checkbox" :value="field.value" :checked="field.value"
                                                     :placeholder="'Enter ' + field.label" :name="'field-' +
@@ -220,35 +286,35 @@
                                                                 )
                                                         " class="form-control previewInputHeight font-10" />
                                             </template>
-<template v-else-if="field.fieldtype === 'Link'">
-  <input
-    type="text"
-    v-model="field.value"
-    @input="() => fetchDoctypeList(field.options, field.value, field)"
-    @focus="() => fetchDoctypeList(field.options, field.value, field)"
-    @change="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
-    class="form-control font-12 mb-1"
-  />
+                                                <template v-else-if="field.fieldtype === 'Link'">
+                                                <input
+                                                    type="text"
+                                                    v-model="field.value"
+                                                    @input="() => fetchDoctypeList(field.options, field.value, field)"
+                                                    @focus="() => fetchDoctypeList(field.options, field.value, field)"
+                                                    @change="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+                                                    class="form-control font-12 mb-1"
+                                                />
 
-  <ul v-if="field.linkSearchResults && field.linkSearchResults.length" class="list-group mt-1" style="max-height: 200px; overflow-y: auto;">
-    <li
-      v-for="(result, index) in field.linkSearchResults"
-      :key="index"
-      @click="selectDoctype(
-        result,
-        field,
-        blockIndex,
-        sectionIndex,
-        rowIndex,
-        columnIndex,
-        fieldIndex
-      )"
-      class="list-group-item list-group-item-action"
-    >
-       {{ field.options.includes('Ezy Departments') ? result.department_name : result.name }}
-    </li>
-  </ul>
-</template>
+                                                <ul v-if="field.linkSearchResults && field.linkSearchResults.length" class="list-group mt-1" style="max-height: 200px; overflow-y: auto;">
+                                                    <li
+                                                    v-for="(result, index) in field.linkSearchResults"
+                                                    :key="index"
+                                                    @click="selectDoctype(
+                                                        result,
+                                                        field,
+                                                        blockIndex,
+                                                        sectionIndex,
+                                                        rowIndex,
+                                                        columnIndex,
+                                                        fieldIndex
+                                                    )"
+                                                    class="list-group-item list-group-item-action"
+                                                    >
+                                                    {{ field.options.includes('Ezy Departments') ? result.department_name : result.name }}
+                                                    </li>
+                                                </ul>
+                                                </template>
 
 
 
@@ -864,13 +930,41 @@ const previewUrl = ref('')
 const showModal = ref(false)
 
 const openPreview = (url) => {
-    previewUrl.value = url
-    showModal.value = true
-}
+  previewUrl.value = url;
+  showModal.value = true;
+};
 
 const closePreview = () => {
-    showModal.value = false
-    previewUrl.value = ''
+  showModal.value = false;
+  previewUrl.value = '';
+};
+
+// const isImageFile = (url) => {
+//   return url.match(/\.(jpeg|jpg|png)$/i);
+// };
+
+const isPdfFile = (url) => {
+  return url.match(/\.pdf$/i);
+};
+
+const isExcelFile = (url) => {
+  return url.match(/\.(xlsx|xls)$/i);
+};
+
+// const removeFile = (index, field) => {
+//   const files = field.value.split(',').map(f => f.trim());
+//   files.splice(index, 1);
+//   field.value = files.join(',');
+// };
+const isImageFile = (url) => {
+    return /\.(jpg|jpeg|png|gif|png)$/i.test(url)
+}
+
+const removeFile = (index, field) => {
+    const files = field.value.split(',').map(f => f.trim())
+    files.splice(index, 1)
+    field.value = files.join(', ')
+    emit('updateField', field)
 }
 // console.log(tableRows);
 // Format as 'YYYY-MM-DDTHH:MM'
@@ -1369,8 +1463,10 @@ const updateDateTimeFields = () => {
     }
 };
 
+
 // Initialize datetime fields on component mount
-onMounted(() => {
+onMounted(async() => {
+    await getEmploye()
 
     Object.keys(props.tableRowsdata).forEach((key) => {
         tableRows[key] = props.tableRowsdata[key];
@@ -1399,7 +1495,8 @@ onMounted(() => {
 
                             }
                             if (field.label.includes("Requested by") || field.label.includes("Requested By")) {
-                                field.value = parsedData.emp_name;
+                                // console.log(emp_data.value, "name===========");
+                                field.value = emp_data.value.emp_name;
                                 emit("updateField", field);
                             }
 
@@ -1409,9 +1506,19 @@ onMounted(() => {
                                 emit("updateField", field);
                             }
                             if(field.label.includes("Department Name") || field.label.includes("Department name")){
-                                field.value = parsedData.department;
+                                field.value = emp_data.value.department;
                                 emit("updateField", field);
                             }
+                            if(field.label.includes("Designation") || field.label.includes("Designation name")){
+                                field.value = emp_data.value.designation;
+                                emit("updateField", field);
+                            }
+                             if(field.label.includes("Requestor Signature") || field.fieldname.includes("requestor_signature")){
+                                field.value = emp_data.value.signature;
+                                emit("updateField", field);
+                            }
+                            
+
 
 
 
@@ -1423,6 +1530,36 @@ onMounted(() => {
     }
 });
 
+const emp_data = ref({});
+
+async function getEmploye() {
+  const storedData = JSON.parse(localStorage.getItem("employeeData"));
+  const queryParams = {
+    filters: JSON.stringify([
+      ["Ezy Employee", "emp_mail_id", "=", storedData?.emp_mail_id],
+    ]),
+    fields: JSON.stringify(["emp_name", "signature", "designation", "department"]),
+  };
+
+  try {
+    const response = await axiosInstance.get(`${apis.resource}${doctypes.EzyEmployeeList}`, { params: queryParams });
+    const data = response.data?.[0];
+
+    if (data) {
+      emp_data.value = {
+        emp_name: data.emp_name,
+        signature: data.signature,
+        designation: data.designation,
+        department: data.department,
+      };
+    //   console.log(emp_data.value, "emp_data");
+    } else {
+      console.warn("No employee data found.");
+    }
+  } catch (error) {
+    console.error("Error fetching employee:", error);
+  }
+}
 
 // function updateFormQuestionsInTableRows() {
 //     for (const [tableIndex, fields] of Object.entries(props.tableHeaders)) {
@@ -1445,16 +1582,7 @@ const datetimeInput = ref(null);
 
 const hovered = ref(null)
 
-const isImageFile = (url) => {
-    return /\.(jpg|jpeg|png|gif|png)$/i.test(url)
-}
 
-const removeFile = (index, field) => {
-    const files = field.value.split(',').map(f => f.trim())
-    files.splice(index, 1)
-    field.value = files.join(', ')
-    emit('updateField', field)
-}
 const forceOpenCalendar = (event) => {
     if (event.target.showPicker) {
         event.target.showPicker(); // Opens the date picker in supported browsers

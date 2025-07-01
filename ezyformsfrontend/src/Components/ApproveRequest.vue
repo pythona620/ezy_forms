@@ -182,7 +182,7 @@
 
                 </div>
                 <div class="col-xl-6 col-lg-12 col-md-12">
-                  <button v-if="tableData.status === 'Completed' && selectedData.type !== 'myapprovals'"
+                  <button v-if="tableData.status === 'Completed' "
                     class="btn btn-light font-11 fw-bold h-0 text-decoration-underline" type="button"
                     @click="downloadPdf"><i class="bi bi-arrow-down-circle fw-bold px-1"></i>Download
                   </button>
@@ -538,7 +538,7 @@ function approvalStatusFn(dataObj, type) {
           autoClose: 500,
           transition: "zoom",
           onClose: () => {
-            router.push({ name: "ReceivedForMe" }); // Navigate after toast closes
+            router.push({ path: selectedData.value.routepath}); // Navigate after toast closes
           }
         });
       } else {
