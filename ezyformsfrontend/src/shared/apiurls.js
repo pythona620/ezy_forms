@@ -24,7 +24,8 @@ export const doctypes = {
   doctypesList: 'DocType',
   reportsApi: 'Report',
   ActivityLog:'Activity Log',
-
+  version:'Version',
+  
 
 };
 

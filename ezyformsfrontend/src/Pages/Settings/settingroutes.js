@@ -14,6 +14,7 @@ const AuthenticationPage=()=>import("./AuthenticationPage.vue");
 const WebEmployee=()=>import("./WebEmployee.vue");
 const InactiveEmployee=()=>import("./InactiveEmployee.vue")
 const ActivityLog=()=>import("./ActivityLog.vue")
+const AuditLog=()=>import("./AuditLog.vue")
 
 const settingRoutes = [
   {
@@ -92,6 +93,11 @@ const settingRoutes = [
         path: "activitylog",
         component: ActivityLog,
         name: "ActivityLog",
+      },
+      {
+        path: "auditlog",
+        component: AuditLog,
+        name: "auditlog",
       },
     ],
   },

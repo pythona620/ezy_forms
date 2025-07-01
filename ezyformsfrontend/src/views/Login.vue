@@ -95,12 +95,13 @@
       </div>
     </div>
 
-    <div v-if="ShowSignUpPage" class="input-div p-5">
+    <div v-if="ShowSignUpPage" class="input-div1 px-5 py-3">
       <div class="d-flex gap-2 p-2 justify-content-center align-items-center">
         <div><img class="imgmix" src="../assets/Final-logo-ezyforms-removebg-preview.png" /></div>
       </div>
-      <div>
-        <div class="mb-2">
+      <div class="container">
+       <div class="row">
+         <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
           <label class="font-13" for="email">Email</label>
           <input class="form-control m-0" type="email" id="email" v-model="SignUpdata.email" @blur="validateEmail"
             :class="{ 'is-invalid': errors.email }" />
@@ -108,7 +109,7 @@
             {{ errors.email }}
           </div>
         </div>
-        <div class="mb-2">
+        <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
           <label class="font-13" for="full_name">User Name</label>
           <input type="text" class="form-control m-0 bg-white" id="name" v-model="SignUpdata.full_name"
             @blur="validateFullName" :class="{ 'is-invalid': errors.full_name }" />
@@ -116,7 +117,7 @@
             {{ errors.full_name }}
           </div>
         </div>
-        <div class="mb-2">
+        <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
           <label class="font-13" for="emp_code">Employee Id</label>
           <input type="text" class="form-control  m-0 bg-white" id="emp_code" v-model="SignUpdata.emp_code"
             @input="validateEmpCode" :class="{ 'is-invalid': errors.emp_code }" />
@@ -124,15 +125,7 @@
             {{ errors.emp_code }}
           </div>
         </div>
-        <div class="mb-2">
-          <label class="font-13" for="emp_code">Department</label>
-          <Vue3Select v-model="SignUpdata.dept" :options="this.deptDetails" placeholder="Select Department" />
-        </div>
-        <div class="mb-2">
-          <label class="font-13" for="emp_code">Designation</label>
-          <Vue3Select v-model="SignUpdata.designation" :options="this.disignationDetails" placeholder="Select Designation" />
-        </div>
-        <div class="mb-2">
+        <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
           <label class="font-13" for="emp_phone">Phone Number</label>
           <input type="text" class="form-control m-0 bg-white" id="emp_phone" v-model="SignUpdata.emp_phone"
             @input="filterPhoneInput" @blur="validatePhone" :class="{ 'is-invalid': errors.emp_phone }" />
@@ -140,16 +133,30 @@
             {{ errors.emp_phone }}
           </div>
         </div>
+        <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
+          <label class="font-13" for="emp_code">Designation</label>
+          <Vue3Select v-model="SignUpdata.designation" :options="this.disignationDetails" placeholder="Select Designation" />
+        </div>
+         <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
+          <label class="font-13" for="emp_code">Department</label>
+          <Vue3Select v-model="SignUpdata.dept" :options="this.deptDetails" placeholder="Select Department" />
+        </div>
+        <div class="mt-2 col-lg-12 col-md-12 col-sm-12">
+          <DigitalSignature ref="digitalSignature" @signature-saved="onSignatureSaved" @signature-cleared="onSignatureCleared"
+          @signature-removed="onSignatureRemoved" @signature-uploaded="onSignatureUploaded" />
+        </div>
+       </div>
 
       </div>
+
+
       <div>
-        <button :disabled="!SignUpdata.email || !SignUpdata.full_name || !SignUpdata.emp_code || !SignUpdata.emp_phone || !SignUpdata.dept" type="submit" data-bs-toggle="modal" data-bs-target="#EmployeeToggleModal"
+        <button :disabled="!SignUpdata.email || !SignUpdata.full_name || !SignUpdata.emp_code || !SignUpdata.emp_phone || !SignUpdata.dept || !SignUpdata.signature" type="submit" data-bs-toggle="modal" data-bs-target="#EmployeeToggleModal"
           class="border-0 btn btn-dark button w-100 mb-4 py-2 font-13 text-white rounded-1">
-          Sign Up
+          Sign up
         </button>
       </div>
-      <div class="font-13 m-0 cursor-pointer text-center" @click="OpenLogin"><span class="sign">Existing user? Log
-          In</span></div>
+      <div class="font-13 m-0 cursor-pointer text-center" @click="OpenLogin"><span class="sign">Existing user? Log In</span></div>
     </div>
 
     <div class="modal fade" id="changePassword" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
@@ -299,14 +306,16 @@ import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import { nextTick } from "vue";
 import Vue3Select from 'vue3-select'
-import 'vue3-select/dist/vue3-select.css'
+import 'vue3-select/dist/vue3-select.css';
+import DigitalSignature from '../views/DigitalSignature.vue';
 
 export default {
   props: ["id"],
   components: {
     Vue3Select,
     FormFields,
-    ButtonComp
+    ButtonComp,
+    DigitalSignature
   },
   data() {
     return {
@@ -342,6 +351,7 @@ export default {
       enable_check: "",
       acknowledge:'',
       designation:'',
+      signature: null,
       // timeLeft: 60,
       // timer: null,
       // resentMessage: "",
@@ -468,7 +478,9 @@ export default {
     OpenSignUp() {
       this.ShowLoginPage = false;
       this.showOtpPage = false;
-      this.ShowSignUpPage = true
+      this.ShowSignUpPage = true;
+      this.deptData()
+      this.designationData()
     },
     OpenLogin() {
       this.ShowLoginPage = true;
@@ -542,6 +554,9 @@ export default {
           })
       }
     },
+
+
+
     //  getFormattedDateTime() {
     //   const now = new Date();
     //   const day = now.getDate().toString().padStart(2, '0');
@@ -779,8 +794,7 @@ export default {
         .then((res) => {
           if (res?.data?.length) {
             this.deptDetails = res.data.map((dept) => dept.name);
-            console.log(this.deptDetails);
-
+            // console.log(this.deptDetails);
           }
         })
         .catch((error) => {
@@ -798,8 +812,7 @@ export default {
         .then((res) => {
           if (res?.data?.length) {
             this.disignationDetails = res.data.map((disg) => disg.name);
-            console.log(this.disignationDetails);
-
+            // console.log(this.disignationDetails);
           }
         })
         .catch((error) => {
@@ -807,10 +820,135 @@ export default {
         });
     },
 
+onSignatureSaved(signatureData) {
+  const base64 = signatureData.dataUrl;
+
+  // Convert base64 to File
+  const arr = base64.split(',');
+  const mime = arr[0].match(/:(.*?);/)[1];
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+
+  const file = new File([u8arr], "signature.png", { type: mime });
+
+  // Call upload function
+  this.uploadFile(file, "signature");
+
+  // Optional: clear error or store locally
+  this.errors.signature = null;
+  console.log("Signature ready for upload:", file);
+},
+
+uploadFile(file, field) {
+      let fileName = `${file.name}`;
+
+      const formData = new FormData();
+      formData.append("file", file, fileName);
+      formData.append("is_private", "0");
+      formData.append("folder", "Home");
+
+      axiosInstance
+        .post(apis.uploadfile, formData)
+        .then((res) => {
+          if (res.message && res.message.file_url) {
+            if (field === "signature") {
+              this.SignUpdata.signature = res.message.file_url;
+            }
+            console.log("Uploaded file URL:", this.SignUpdata.signature);
+          } else {
+            console.error("file_url not found in the response.");
+          }
+        })
+        .catch((error) => {
+          console.error("Upload error:", error);
+        });
+    },
+
+    selectedSignature(event) {
+      const file = event.target.files[0];
+      if (file) {
+        this.uploadFile(file, "signature");
+      }
+    },
+    
+    onSignatureCleared() {
+      this.SignUpdata.signature = null;
+      this.errors.signature = 'Signature is required';
+    },
+    
+    onSignatureRemoved() {
+      this.SignUpdata.signature = null;
+      this.errors.signature = 'Signature is required';
+    },
+    
+    onSignatureUploaded(signatureData) {
+      this.SignUpdata.signature = signatureData;
+      this.errors.signature = null;
+      console.log('Signature uploaded:', signatureData);
+    },
+    
+  
+    // Form submission
+    submitForm() {
+      // Validate all fields
+      this.validateEmail();
+      this.validateFullName();
+      this.validateEmpCode();
+      this.validatePhone();
+      
+      // Validate signature
+      if (!this.SignUpdata.signature) {
+        this.errors.signature = 'Digital signature is required';
+        return;
+      }
+      
+      if (this.isFormValid) {
+        // Prepare form data for submission
+        const formData = new FormData();
+        
+        // Add text fields
+        Object.keys(this.SignUpdata).forEach(key => {
+          if (key !== 'signature') {
+            formData.append(key, this.SignUpdata[key]);
+          }
+        });
+        
+        // Add signature as blob
+        if (this.SignUpdata.signature && this.SignUpdata.signature.blob) {
+          formData.append('signature', this.SignUpdata.signature.blob, 'signature.png');
+        }
+        
+        // Submit to your backend
+        this.submitToServer(formData);
+      }
+    },
+    
+    async submitToServer(formData) {
+      try {
+        // Replace with your actual API endpoint
+        const response = await fetch('/api/employee-signup', {
+          method: 'POST',
+          body: formData
+        });
+        
+        if (response.ok) {
+          this.successMessage = 'Registration successful!';
+          // Reset form or redirect as needed
+        } else {
+          throw new Error('Registration failed');
+        }
+      } catch (error) {
+        console.error('Submission error:', error);
+        this.successMessage = 'Registration failed. Please try again.';
+      }
+    },
+
   },
   mounted() {
-    this.deptData()
-    this.designationData()
     const url = window.location.href;
     if (url.includes('ncomr')) {
       this.SignUpdata.emp_code = 'NICO-';
@@ -930,6 +1068,15 @@ export default {
   position: relative;
   min-width: 420px;
 }
+.input-div1 {
+  border: 1px solid #eeeeee;
+  box-shadow: 0px 2px 14px 0px #00000017;
+  background-color: #ffffff59;
+  border-radius: 6px;
+  z-index: 1;
+  position: relative;
+  width: 50% !important;
+}
 
 .label {
   color: #111111;
@@ -1016,6 +1163,9 @@ input:focus {
     margin: 0 auto;
     height: auto;
   }
+.input-div1 {
+  width: 90vw !important;
+}
 }
 
 @media (max-width: 480px) {
@@ -1023,7 +1173,9 @@ input:focus {
     width: 90vw;
     padding: 20px;
   }
-
+.input-div1 {
+  width: 1000vw !important;
+}
   .input-box {
     height: 60px;
     font-size: 16px;

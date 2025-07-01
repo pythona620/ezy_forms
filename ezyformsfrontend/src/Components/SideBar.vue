@@ -167,6 +167,7 @@ const settingsSideBarData = [
     { name: 'Employee Approvals', icon: 'bi bi-people', route: 'employeeapproval' },
     { name: 'System Settings', icon: 'bi bi-tags', route: 'authenticationpage' },
     { name: 'Activity Log', icon: 'bi bi-clock-history', route: 'activitylog' },
+    { name: 'Audit Log', icon: 'bi bi-clock', route: 'auditlog' },
 
     // {name: 'Roles',icon:' bi bi-people', route:'role'},
     // { name: 'Workflow Settings', icon: 'bi bi-gear', route: 'WorkflowSettings'}
@@ -181,7 +182,7 @@ const thirdSettingsTitle = 'Master';
 const forthSettingsTitle = 'Employee';
 
 const fifthSettingsTitle = 'System Settings';
-const sixthTitle = 'Audit logs';
+const sixthTitle = 'Audit';
 
 
 
