@@ -1,0 +1,59 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-06-23 12:10:50.892623",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "form_name",
+  "form_status",
+  "section_break_ivzx",
+  "form_json"
+ ],
+ "fields": [
+  {
+   "fieldname": "form_name",
+   "fieldtype": "Data",
+   "label": "Form Name"
+  },
+  {
+   "fieldname": "form_status",
+   "fieldtype": "Select",
+   "label": "Form status",
+   "options": "\nEnable\nDisabled"
+  },
+  {
+   "fieldname": "section_break_ivzx",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "form_json",
+   "fieldtype": "Small Text",
+   "label": "form json"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-06-23 16:29:01.486715",
+ "modified_by": "Administrator",
+ "module": "ezy_forms",
+ "name": "Predefined Doctype",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

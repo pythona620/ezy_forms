@@ -221,7 +221,7 @@
             <td v-if="actionType === 'dropdown'" class="text-center fixed-column position-relative">
               <div class="dropdown">
                 <p class="p-0 actions" data-bs-toggle="dropdown" aria-expanded="false">
-                  <span>...</span>
+                  <span @click="actionDropDown(row)">...</span>
                 </p>
                 <ul class="dropdown-menu actionsdropdown">
                   <li class="py-1" @click="selectedAction(row, action)" v-for="(action, index) in actions" :key="index">
@@ -387,13 +387,15 @@ const props = defineProps({
   }
 });
 
-const emits = defineEmits(["actionClicked", "updateFilters", "cell-click", "toggle-click"]);
+const emits = defineEmits(["actionClicked", "updateFilters", "cell-click", "toggle-click","actionClickedDropDown"]);
 
 function selectedAction(row, action) {
   emits("actionClicked", row, action);
   // console.log(row, action);
 }
-
+function actionDropDown (row) {
+  emits("actionClickedDropDown", row);
+  }
 
 function handleToggle(row, index, event) {
   // Emit the custom event. The parent component will handle showing the confirmation.
@@ -623,7 +625,7 @@ function handleCellClick(check, index, type) {
   text-align: left;
   color: #2EC400;
   background-color: #effbeb;
-  border: 0.5px dotted #2EC400;
+  // border: 0.5px dotted #2EC400; 
   opacity: 0.8;
   padding: 5px 10px;
   border-radius: 6px;

@@ -4,17 +4,17 @@
       <div class="d-flex align-items-center justify-content-between py-3">
         <div>
           <h1 class="m-0 font-13">
-            {{ id === 'allforms' ? 'All Forms' : id }}
+            {{ id === 'allforms' ? 'All Active Forms' : id.toUpperCase() }}
           </h1>
           <p class="m-0 font-11 pt-1">
             {{ totalRecords }} Forms Available
           </p>
         </div>
-        <div v-if="userDesigination.includes('IT')" class="d-flex align-items-center gap-2">
+        <!-- <div v-if="userDesigination.includes('IT')" class="d-flex align-items-center gap-2">
           <div class="d-flex align-items-center">
             <ButtonComp class="buttoncomp" @click="formCreation()" name="Create Form"></ButtonComp>
           </div>
-        </div>
+        </div>  -->
 
       </div>
       <div class="mt-1">
@@ -112,22 +112,22 @@ import axiosInstance from '../../shared/services/interceptor';
 import { apis, doctypes, domain } from '../../shared/apiurls';
 import GlobalTable from '../../Components/GlobalTable.vue';
 import { EzyBusinessUnit } from '../../shared/services/business_unit';
-import { rebuildToStructuredArray } from '../../shared/services/field_format';
+// import { rebuildToStructuredArray } from '../../shared/services/field_format';
 import PaginationComp from "../../Components/PaginationComp.vue"
-import FormPreview from '../../Components/FormPreview.vue'
+// import FormPreview from '../../Components/FormPreview.vue'
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import router from '../../router';
 import { useRoute } from 'vue-router';
-import ButtonComp from '../../Components/ButtonComp.vue';
+// import ButtonComp from '../../Components/ButtonComp.vue';
 const totalRecords = ref(0);
 const tableheaders = ref([
   { th: "Form Name", td_key: "form_name" },
   { th: "Form Short Code", td_key: "form_short_name" },
-  { th: "Form Category", td_key: "form_category" },
+  { th: "Owner Of The Form", td_key: "owner_of_the_form" },
   { th: "Accessible Departments", td_key: "accessible_departments" },
-  { th: "Status", td_key: "form_status" },
-  { th: "Form Status", td_key: "enable" },
+  // { th: "Status", td_key: "form_status" },
+  // { th: "Form Status", td_key: "enable" },
 
 ]);
 const props = defineProps(['id']);
@@ -153,9 +153,9 @@ const actions = computed(() => {
     { name: 'Raise Request', icon: 'fa fa-file-text' },
   ]
 
-  if (userDesigination.value.includes('IT')) {
-    baseActions.push({ name: 'Edit Form', icon: 'fa-solid fa-edit' },)
-  }
+  // if (userDesigination.value.includes('IT')) {
+  //   baseActions.push({ name: 'Edit Form', icon: 'fa-solid fa-edit' },)
+  // }
 
   return baseActions
 })
@@ -509,8 +509,10 @@ function fetchDepartmentDetails(id, data) {
 
   const filters = [
     ["business_unit", "like", `%${newBusinessUnit.value.business_unit}%`],
+    ["form_status", "like", "created"],
 
   ];
+  filterObj.value.filters.push(...filters);
   if (props.id && props.id !== "Allforms" && props.id !== "allforms") {
     filters.push(["owner_of_the_form", "=", props.id]);
   }
@@ -522,13 +524,13 @@ function fetchDepartmentDetails(id, data) {
     fields: JSON.stringify(["*"]),
     limit_page_length: filterObj.value.limitPageLength,
     limit_start: filterObj.value.limit_start,
-    filters: JSON.stringify(filters),
-    order_by: "`tabEzy Form Definitions`.`enable` DESC, `tabEzy Form Definitions`.`creation` DESC"
+    filters: JSON.stringify(filterObj.value.filters),
+    order_by: "`tabEzy Form Definitions`.`enable` DESC, `tabEzy Form Definitions`.`modified` DESC"
   };
   const queryParamsCount = {
     fields: JSON.stringify(["count(name) AS total_count"]),
     limitPageLength: "None",
-    filters: JSON.stringify(filters)
+    filters: JSON.stringify(filterObj.value.filters),
   }
   axiosInstance.get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParamsCount })
     .then((res) => {

@@ -291,7 +291,7 @@ const PaginationLimitStart = ([itemsPerPage, start]) => {
 };
 
 const tableheaders = ref([
-    { th: "Name", td_key: "name" },
+    // { th: "Name", td_key: "name" },
     { th: "Department Code", td_key: "department_code" },
     { th: "Department Name", td_key: "department_name" },
     { th: "Business Unit", td_key: "business_unit" },

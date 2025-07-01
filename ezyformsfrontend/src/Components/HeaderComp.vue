@@ -21,6 +21,28 @@
                         </div>
                         <div class="col-3 d-flex justify-content-end align-items-center pe-1">
                             <div class="d-flex gap-3 justify-content-end align-items-center m-0 me-2">
+                                <!-- <button class="btn btn-outline-danger" type="button" data-bs-toggle="offcanvas"
+                                    data-bs-target="#offcanvasRight" aria-controls="offcanvasRight"><i
+                                        class="bi bi-bell-fill"></i></button> -->
+
+                                <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight"
+                                    aria-labelledby="offcanvasRightLabel">
+                                    <div class="offcanvas-header">
+                                        <h5 id="offcanvasRightLabel">Notifications</h5>
+                                        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"
+                                            aria-label="Close"></button>
+                                    </div>
+                                    <div class="offcanvas-body">
+                                        <ul class="list-unstyled designation-scroll">
+                                            <li v-for="(item, index) in SocketList" :key="index"
+                                                class="designationList form-check">
+                                               {{ item
+                                                    }}
+                                            </li>
+                                        </ul>
+
+                                    </div>
+                                </div>
                                 <div class="">
                                     <!-- v-if="shouldShowButton" -->
                                     <ButtonComp
@@ -31,7 +53,7 @@
                                 </div>
                                 <div class="">
 
-                                    <FormFields tag="select" placeholder="" class="" name="roles" id="roles" 
+                                    <FormFields tag="select" placeholder="" class="" name="roles" id="roles"
                                         :Required="false" v-model="business_unit" :options="EzyFormsCompanys" />
                                 </div>
                                 <div class="logooutbtn m-0">
@@ -194,7 +216,6 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router'; // Import useRouter
 import { apis, doctypes } from '../shared/apiurls';
 import axiosInstance from '../shared/services/interceptor';
@@ -208,14 +229,28 @@ import { rebuildToStructuredArray } from "../shared/services/field_format";
 import RequestPreview from './RequestPreview.vue';
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
+import { ref, onMounted, watch, computed,onUnmounted } from 'vue';
+// import socket from '../socketService';
+// import { io } from "socket.io-client";
 
+// onMounted(() => {
+//   socket.on("custom_event", handleCustomEvent);
+// });
+
+// onUnmounted(() => {
+//   socket.off("custom_event", handleCustomEvent);
+// });
+
+// function handleCustomEvent(data) {
+//   console.log("Got socket data:", data);
+// }
 const router = useRouter(); // Initialize router
 
 // Define reactive variables
 const tabsData = ref([
     { name: 'Dashboard', icon: 'bi bi-columns-gap', route: '/dashboard' },
-    { name: 'Forms', icon: 'bi bi-file-earmark-text', route: '/forms' },
     { name: 'To do', icon: 'fa-solid fa-list-check', route: '/todo' },
+    { name: 'Forms', icon: 'bi bi-file-earmark-text', route: '/forms' },
     { name: 'Settings', icon: 'bi bi-gear', route: '/settings' },
     { name: 'Archive', icon: 'bi bi-archive', route: '/archived' },
     // { name: 'Form Creation', icon: 'bi bi-file-earmark-text', route: '/create-form' }
@@ -225,7 +260,7 @@ const selectedData = ref({
     SelectedDepartment: '',
     selectedCategory: "",
     selectedform: ""
-});
+}); 
 const isFormValid = ref(false);
 const route = useRoute(); // Initialize route to access route parameters
 const categoryOptions = ref([])
@@ -253,7 +288,7 @@ const filterObj = ref({
 
 
 
-
+const SocketList = ref([])
 
 //IF THE USER DESIGNATION INCLUDES (IT) THEN ONLY FORM CREATION WILL APPREAR IN HEADER ""
 
@@ -297,7 +332,7 @@ onMounted(() => {
     // const syetemmanger = JSON.parse(localStorage.getItem('systemManager'))
     if (userName) {
         // Set the username based on the UserName data, which is used to check if the user is Admin
-        username.value = userName.full_name;        
+        username.value = userName.full_name;
 
         if (userName.full_name === 'Administrator') {
 
@@ -348,7 +383,7 @@ function passwordChange() {
 const ezyForms = () => {
     const queryParams = {
         fields: JSON.stringify(["*"]),
-    }; 
+    };
 
     axiosInstance.get(apis.resource + doctypes.wfSettingEzyForms, {
         params: queryParams,
@@ -364,8 +399,8 @@ const ezyForms = () => {
     });
 };
 watch(business_unit, (newBu, oldBu) => {
-    EzyBusinessUnit.value = newBu;  
-    console.log(EzyBusinessUnit.value,"pppppp"); 
+    EzyBusinessUnit.value = newBu;
+    console.log(EzyBusinessUnit.value, "pppppp");
     localStorage.setItem("Bu", EzyBusinessUnit.value)
     sessionStorage.setItem("Bu", EzyBusinessUnit.value)
 

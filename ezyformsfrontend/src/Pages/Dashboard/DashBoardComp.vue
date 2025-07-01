@@ -125,6 +125,8 @@ const chartsData = ref([]);
 // Array to store refs for each dynamically rendered chart container
 const chartRefs = [];
 
+// const router = useRouter();
+
 // API call that fetches the data and processes it
 async function fetchData() {
     try {
@@ -147,7 +149,7 @@ async function fetchData() {
                 (requestedByUser.request_raised || 0) +
                 (requestedByUser.Request_cancelled || 0);
 
-            // Build an array for the charts.
+ // Build an array for the charts.
             // Only add the "received" chart if receivedTotal > 0.
             // const tempCharts = [];
             // if (receivedTotal > 0) {
@@ -417,6 +419,18 @@ function updateCharts() {
                     }
                 }
             });
+
+            // // Add click event for chart values
+            // chartInstance.off('click'); // Remove previous listeners if any
+            // chartInstance.on('click', function(params) {
+            //     // Route based on chart title
+            //     let path = chartData.title === "Requests Assigned to me"
+            //         ? '/todo/receivedform'
+            //         : '/todo/raisedbyme';
+            //     // If the clicked name is "Pending", send "In Progress" instead
+            //     let status = params.name === 'Pending' ? 'In Progress' : params.name;
+            //     router.push({ path, query: { status } });
+            // });
 
             // Ensure the chart resizes when the window size changes
             window.addEventListener('resize', () => chartInstance.resize());
