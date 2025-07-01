@@ -8,9 +8,15 @@ const WorkFLow = () => import("./WorkFlow.vue");
 const Roles = () => import("./RolesComp.vue");
 const RolesMatrix = () => import("./RolesMatrix.vue");
 const Categories = () => import("./Catagories.vue");
-const ActivityLog = () => import("./DepartmentComp.vue");
+const DepartmentComp = () => import("./DepartmentComp.vue");
 const EsignComp = () => import("./EsignComp.vue");
 const AuthenticationPage=()=>import("./AuthenticationPage.vue");
+const WebEmployee=()=>import("./WebEmployee.vue");
+const InactiveEmployee=()=>import("./InactiveEmployee.vue")
+const ActivityLog=()=>import("./ActivityLog.vue")
+const CreateForm=()=>import("./CreateForm.vue")
+
+
 const settingRoutes = [
   {
     path: "/settings",
@@ -22,6 +28,16 @@ const settingRoutes = [
         path: "employee",
         component: EmployeeComp,
         name: "EmployeeComp",
+      },
+      {
+        path: "inactiveEmployee",
+        component: InactiveEmployee,
+        name: "InactiveEmployee",
+      },
+      {
+        path: "employeeapproval",
+        component: WebEmployee,
+        name: "WebEmployee",
       },
       {
         path: "profile",
@@ -61,8 +77,8 @@ const settingRoutes = [
       },
       {
         path: "department",
-        component: ActivityLog,
-        name: "ActivityLog",
+        component: DepartmentComp,
+        name: "DepartmentComp",
       },
       {
         path: "esign",
@@ -73,6 +89,16 @@ const settingRoutes = [
         path: "authenticationpage",
         component: AuthenticationPage,
         name: "authenticationpage",
+      },
+      {
+        path: "activitylog",
+        component: ActivityLog,
+        name: "ActivityLog",
+      },
+      {
+        path: "CreateForm",
+        component: CreateForm,
+        name: "CreateForm",
       },
     ],
   },

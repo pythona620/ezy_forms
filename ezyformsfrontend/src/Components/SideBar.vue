@@ -69,6 +69,32 @@
                         </router-link>
                     </ul>
 
+                    <h2 v-if="filteredSettingsGroups.sixthGroup" class="font-10 m-0 text-muted ps-2">{{
+                        sixthTitle }}</h2>
+                    <ul class="list-unstyled" v-if="filteredSettingsGroups.sixthGroup">
+                        <router-link v-for="(list, index) in filteredSettingsGroups.sixthGroup" :key="index"
+                            :to="`${baseRoute}/${list.route.toLowerCase()}`" class="text-decoration-none text-black"
+                            active-class="active-link">
+                            <li :title="list.name">
+                                <i :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
+                                {{ list.name }}
+                            </li>
+                        </router-link>
+                    </ul>
+                    
+                    <h2 v-if="filteredSettingsGroups.seventhGroup" class="font-10 m-0 text-muted ps-2">{{
+                        seventhSettingsTitle }}</h2>
+                    <ul class="list-unstyled" v-if="filteredSettingsGroups.seventhGroup">
+                        <router-link v-for="(list, index) in filteredSettingsGroups.seventhGroup" :key="index"
+                            :to="`${baseRoute}/${list.route.toLowerCase()}`" class="text-decoration-none text-black"
+                            active-class="active-link">
+                            <li :title="list.name">
+                                <i :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
+                                {{ list.name }}
+                            </li>
+                        </router-link>
+                    </ul>
+
 
                 </template>
                 <template v-if="isMasterRoute">
@@ -154,9 +180,13 @@ const settingsSideBarData = [
     // { name: 'Notifications', icon: 'bi bi-bell', route: 'notifications' },
     { name: 'Department', icon: 'bi bi-clock-history', route: 'department' },
     { name: 'Designation', icon: 'bi bi-people', route: 'designations' },
-    // { name: 'Categories', icon: 'bi bi-tags', route: 'categories' },
-    { name: 'Employees', icon: 'bi bi-people', route: 'employee' },
-    { name: 'System Settings', icon: 'bi bi-people', route: 'authenticationpage' },
+    { name: 'Active Employees', icon: 'bi bi-people', route: 'employee' },
+    { name: 'Inactive Employees', icon: 'bi bi-people', route: 'inactiveEmployee' },
+    { name: 'Employee Approvals', icon: 'bi bi-people', route: 'employeeapproval' },
+    { name: 'System Settings', icon: 'bi bi-tags', route: 'authenticationpage' },
+    { name: 'Activity Log', icon: 'bi bi-clock-history', route: 'activitylog' },
+    { name: 'Form Creation' , icon: 'bi bi-file-earmark-text', route: 'CreateForm' },
+
     // {name: 'Roles',icon:' bi bi-people', route:'role'},
     // { name: 'Workflow Settings', icon: 'bi bi-gear', route: 'WorkflowSettings'}
 
@@ -168,17 +198,21 @@ const firstSettingsTitle = 'My Details';
 // const secondSettingsTitle = 'Workflow';
 const thirdSettingsTitle = 'Master';
 const forthSettingsTitle = 'Employee';
+
 const fifthSettingsTitle = 'System Settings';
+const sixthTitle = 'Audit logs';
+const seventhSettingsTitle = 'Form Creation';
+
 
 
 
 
 
 const todoSideBarData = [
-    { name: 'My Tasks', icon: 'bi bi-bucket', route: 'receivedform' },
-    { name: 'My Forms', icon: 'bi bi-send', route: 'raisedbyme' },
-    { name: 'My Team', icon: 'bi bi-people', route: 'myteam' },
-    { name: 'History', icon: 'bi bi-clock-history', route: 'history' },
+    { name: 'My Pending Approval', icon: 'bi bi-bucket', route: 'receivedform' },
+    { name: 'My Requests', icon: 'bi bi-send', route: 'raisedbyme' },
+    { name: 'My Team Requests', icon: 'bi bi-people', route: 'myteam' },
+    { name: 'My Approvals', icon: 'bi bi-clock-history', route: 'history' },
     { name: 'Reports', icon: 'bi bi-gear', route: 'reports'}
 
 ];
@@ -231,11 +265,13 @@ const filteredSettingsGroups = computed(() => {
     return userDesigination.value.toLowerCase().includes('it')
         ? {
             thirdSettingsGroup: settingsSideBarData.slice(1, 3),
-            forthSettingsGroup: settingsSideBarData.slice(3, 4),
-            fifthSettingsGroup: settingsSideBarData.slice(4)
+            forthSettingsGroup: settingsSideBarData.slice(3, 6),
+            fifthSettingsGroup: settingsSideBarData.slice(6,7),
+            sixthGroup: settingsSideBarData.slice(7,8),
+            seventhGroup: settingsSideBarData.slice(8),
 
         }
-        : { thirdSettingsGroup: [], forthSettingsGroup: [] };
+        : { thirdSettingsGroup: [], forthSettingsGroup: []};
 });
 
 // Define the title based on the current route
@@ -398,6 +434,7 @@ li:hover {
     padding-top: 12px;
     border-radius: 10px;
     margin-top: 10px;
+    overflow-y: auto;
     /* box-shadow: 4px 0 4px -2px #00000040; */
 
 }

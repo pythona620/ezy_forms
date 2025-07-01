@@ -23,7 +23,7 @@ app_license = "mit"
 after_migrate = ["ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions.activating_perms_for_all_roles_in_wf_roadmap"]
 # Includes in <head>
 # ------------------
-
+on_session_creation = "ezy_forms.ezy_forms.doctype.ezy_employee.ezy_employee.employee_last_login_activate"
 # include js, css files in header of desk.html
 # app_include_css = "/assets/ezy_forms/css/ezy_forms.css"
 # app_include_js = "/assets/ezy_forms/js/ezy_forms.js"
@@ -37,6 +37,9 @@ after_migrate = ["ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_defi
 
 # include js, css files in header of web form
 # webform_include_js = {"doctype": "public/js/doctype.js"}
+webform_include_js = {
+    "emc-articles-creation-approval-form":"ezy_forms.ezy_forms.public.web_form_list.js"
+    }
 # webform_include_css = {"doctype": "public/css/doctype.css"}
 
 # include js in page
@@ -152,6 +155,9 @@ doc_events = {
 "NICO ROOM CHECK LIST":{
     "after_insert":"ezy_forms.ezy_custom_forms.custom_script.mail.email_pdf_send"
     },
+"File":{
+    "after_insert":"ezy_forms.ezy_custom_forms.custom_script.mail.make_file_public_after_insert"
+}
 }
 
 # Scheduled Tasks

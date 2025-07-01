@@ -24,6 +24,7 @@ export const doctypes = {
   doctypesList: 'DocType',
   reportsApi: 'Report',
   preDefinedForm: 'Predefined Doctype',
+  ActivityLog:'Activity Log',
 
 
 };
@@ -75,9 +76,10 @@ export const apis = {
   activityLogWithChild: domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.get_doc_changes`,
   gettingDataTo: domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.form_redict_gate_pass`,
   dynmic_calculations: domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.dynamic_calutae`,
-
-
-  getReportData:  `/printview`
+  getReportData:  `/printview`,
+  signUp:domain+`/method/ezy_forms.ezy_custom_forms.custom_script.v1.sign_up.sign_up`,
+  deleteEmployee:domain+`/method/ezy_forms.ezy_forms.doctype.ezy_employee.ezy_employee.employee_rejection`,
+  unablUpdateEmail:domain+`/method/ezy_forms.ezy_forms.doctype.login_check.login_check.employee_update_notification`,
   // getReportData: domain + `/api/method/frappe.utils.print_format.download_pdf`
 };
 

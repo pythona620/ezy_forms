@@ -77,7 +77,7 @@
                                     
                                     <!-- || route.query.form_name -->
                                 <FormFields
-                                  :disabled="selectedData.formId && selectedData.formId.length > 0 "
+                                  :disabled="selectedData.formId && selectedData.formId.length > 0 || route.query.form_name "
                                   labeltext="Form Name" class="formHeight" type="text" tag="input" name="Value"
                                   id="formName" validationStar="true" placeholder="Untitled Form"
                                   @change="(event) => handleInputChange(event, 'form_name')" v-model="formNameModel" />
@@ -150,7 +150,7 @@
 
                               <div class="mt-3">
                                 <label class="typo__label">
-                                  <label for="">Accessibility Departments
+                                  <label for="">Accessibility To Departments
                                     <span v-if="!filterObj.accessible_departments.length"
                                       class="text-danger">*</span></label>
                                 </label>
@@ -498,8 +498,10 @@
                                               fieldIndex
                                             )
                                             " @mouseleave="resetHoveredField" class="dynamicField m-1 draggable-item"
-                                          draggable="true"
-                                          @dragstart="handleDragStart($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
+                                         draggable="true"
+       @dragstart="handleDragStart($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+       @dragover.prevent
+       @drop="handleFieldDropAtIndex($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
 
                                           <div class="drop-zone" @dragover.prevent
                                             @drop="(e) => handleFieldDropAtIndex(e, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
@@ -884,6 +886,11 @@
                                             </div>
                                           </div>
                                         </div>
+                                        <div class="drop-zone-bottom"
+       @dragover.prevent
+       @drop="handleFieldDropAtIndex($event, blockIndex, sectionIndex, rowIndex, columnIndex, column.fields.length)"
+       style="background-color: #f0f0f0; border: 1px dashed #ccc; margin: 4px;">
+  </div>
 
                                         <div class="drop-zone" @dragover.prevent
                                           @drop="(e) => handleFieldDropAtIndex(e, blockIndex, sectionIndex, rowIndex, columnIndex, fields.length)"
@@ -1298,7 +1305,7 @@
           <input v-model="searchDesignation" class="SearchDesignation rounded-2 form-control shadow-none my-1"
             type="text" placeholder="Search Designation" />
 
-          <div class="form-check ps-1" v-if="DesignationList.length && selectedBlockIndex == 0">
+          <div class="form-check ps-1 mt-3" v-if="DesignationList.length">
             <div>
               <!-- :disabled="ViewOnlyReportee"  -->
               <input type="checkbox" id="selectAll" v-model="isAllSelected"
@@ -2921,6 +2928,7 @@ function SetPrintFormatFn() {
 function deptData() {
   const queryParams = {
     fields: JSON.stringify(["*"]),
+    limit_page_length:"none"
   };
 
   axiosInstance

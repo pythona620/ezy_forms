@@ -4,17 +4,17 @@
       <div class="d-flex align-items-center justify-content-between py-3">
         <div>
           <h1 class="m-0 font-13">
-            {{ id === 'allforms' ? 'All Forms' : id }}
+            {{ id === 'allforms' ? 'All Active Forms' : id.toUpperCase() }}
           </h1>
           <p class="m-0 font-11 pt-1">
             {{ totalRecords }} Forms Available
           </p>
         </div>
-        <div v-if="userDesigination.includes('IT')" class="d-flex align-items-center gap-2">
+        <!-- <div v-if="userDesigination.includes('IT')" class="d-flex align-items-center gap-2">
           <div class="d-flex align-items-center">
             <ButtonComp class="buttoncomp" @click="formCreation()" name="Create Form"></ButtonComp>
           </div>
-        </div>
+        </div>  -->
 
       </div>
       <div class="mt-1">
@@ -124,10 +124,10 @@ const totalRecords = ref(0);
 const tableheaders = ref([
   { th: "Form Name", td_key: "form_name" },
   { th: "Form Short Code", td_key: "form_short_name" },
-  { th: "Form Category", td_key: "form_category" },
+  // { th: "Form Category", td_key: "form_category" },
   { th: "Accessible Departments", td_key: "accessible_departments" },
-  { th: "Status", td_key: "form_status" },
-  { th: "Form Status", td_key: "enable" },
+  // { th: "Status", td_key: "form_status" },
+  // { th: "Form Status", td_key: "enable" },
 
 ]);
 const props = defineProps(['id']);
@@ -153,9 +153,9 @@ const actions = computed(() => {
     { name: 'Raise Request', icon: 'fa fa-file-text' },
   ]
 
-  if (userDesigination.value.includes('IT')) {
-    baseActions.push({ name: 'Edit Form', icon: 'fa-solid fa-edit' },)
-  }
+  // if (userDesigination.value.includes('IT')) {
+  //   baseActions.push({ name: 'Edit Form', icon: 'fa-solid fa-edit' },)
+  // }
 
   return baseActions
 })
@@ -509,6 +509,7 @@ function fetchDepartmentDetails(id, data) {
 
   const filters = [
     ["business_unit", "like", `%${newBusinessUnit.value.business_unit}%`],
+    ["form_status", "like", "created"],
 
   ];
   if (props.id && props.id !== "Allforms" && props.id !== "allforms") {

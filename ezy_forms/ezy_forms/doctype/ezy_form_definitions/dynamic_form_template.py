@@ -192,7 +192,7 @@ template_str = """
         }
         .field {
             display: flex;
-            align-items: baseline;
+            
             padding: 4px 0px;
             margin: 5px 5px;
         }
@@ -350,9 +350,9 @@ template_str = """
       
           }
           .signature-Imge{
-              min-width: 70px;
-              max-width: 70px;
-              padding-bottom: 5px;
+              min-width: 40px;
+              max-width: 40px;
+
               
               
           }
@@ -437,9 +437,6 @@ template_str = """
             .table{
                 width: 100% !important;
                 margin:0px 3px;
-            }
-            .column{
-                padding:0px;
             }
             textarea {
                 border: none;
@@ -639,11 +636,8 @@ template_str = """
                                
                                     <div class="field field-textarea">
                                     
-                                        {% if field.fieldtype == 'Attach' and 'approved_by' in field.fieldname|lower  %}
-                                            <label for="{{ field.fieldname }}">
-                                                Approved By <span style="padding-left:2px; font-size: 13px;">:</span>
-                                            </label>
-                                        {% elif field.fieldtype != 'Attach' and field.fieldname != 'auto_calculations' %}
+                                  
+                                        {% if field.fieldname != 'auto_calculations' %}
                                             <label for="{{ field.fieldname }}">
                                                 {{ field.label }} <span style="padding-left:2px; font-size: 13px;">:</span>
                                             </label>
@@ -697,7 +691,7 @@ template_str = """
                                                 <span class="custom-checkbox {% if field['values'] %}checked{% else %}unchecked{% endif %}"></span>
                                             </div>
 
-                                        {% elif field.fieldtype == 'Data' or field.fieldtype == 'Int' and field.fieldname != 'auto_calculations' %}
+                                        {% elif field.fieldtype == 'Data' or field.fieldtype == 'Int' or field.fieldtype =='Link' and field.fieldname != 'auto_calculations' %}
                                             <span id="{{ field.fieldname }}"
                                                 style="font-size:13px; font-weight:500;">
                                                 {{ field['values'] }}
@@ -750,9 +744,15 @@ template_str = """
                                                     {% endfor %}
                                                 </div>
                                             {% endif %}
-                                        {% elif field.fieldtype == 'Attach' and "approved_by" in field.fieldname %}
+                                        {% elif field.fieldtype == 'Attach' %}
                                             {% if field['values'] %}
-                                                <img  id="{{ field.fieldname }}" src="{{ site_url + field['values'] or ''  }}" class="signature-Imge" name="{{ field.fieldname }}">
+                                            {% if field.fieldtype == 'Attach' and "approved_by" in field.fieldname %}
+                                             <img  id="{{ field.fieldname }}" src="{{ site_url + field['values'] or ''  }}" style="width: 80px; height: 80px; object-fit: contain; display: block; margin-left: 119px ; margin-top: -51px;"  name="{{ field.fieldname }}">
+                                            {% else %}
+                                            {% for file in field['values'].split(',') %}
+                                            {{ file.strip().split('@')[-1] if '@' in file else file.strip().split('/')[-1] }}{% if not loop.last %}, {% endif %}
+                                            {% endfor %}
+                                            {% endif %}
                                             {% else %}
                                                 <input type="text" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
                                             {% endif %}
@@ -818,20 +818,22 @@ template_str = """
         
         
 {% endfor %}
-{% if mail_attachment and mail_attachment | select | list %}
+
+{% if mail_attachment%}
     <div><span style="font-weight:bold; font-size:13px;">Attachments:</span></div>
     {% for attachment_group in mail_attachment %}
-        {% for file_path in attachment_group.split(',') %}
+        {% for file_path in attachment_group.file_url.split(',') %}
             {% set cleaned_path = file_path.strip() %}
             <div class="page">
+                <div style="font-size:12px; margin-bottom: 4px;"><b>{{ attachment_group.label }}</b></div>
                 <img 
                     src="{{ site_url + cleaned_path }}"
                     class="attachments">
             </div>
         {% endfor %}
     {% endfor %}
-{% endif %}
 
+{% endif %}
 
 
  
@@ -1128,7 +1130,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
     """Generates a PDF for the dynamic form with filled data"""
     try:
         
-    
+        attachment_info =None
         is_landscape = frappe.db.get_value("Ezy Form Definitions", form_short_name, "is_landscape")
         if name is None:
             print_format = frappe.db.get_value("Ezy Form Definitions", form_short_name, "print_format")
@@ -1221,12 +1223,20 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                     # Collect attachments except those with fieldname like "approved_by"
  
                     # Convert PDFs in Attach fields to image previews
-                    if iteration.get("fieldtype") == "Attach" and iteration.get("value"):
-                        iteration["value"] = handle_pdf_fields(iteration["value"])
- 
-                        if "approved_by" not in iteration.get("fieldname", "").lower():
-                            mail_attachment.append(iteration["value"])
- 
+                    if iteration.get("fieldtype") == "Attach" and iteration.get("value"):                        
+                        if "pdf" in  iteration["value"].lower():
+                            iteration["value"] = handle_pdf_fields(iteration["value"])
+                        else:
+                            iteration["value"] =   iteration["value"]                       
+                        # Construct a display name using the label or fallback to fieldname
+                        field_label = iteration.get("label") or iteration.get("fieldname")
+                        if "xlsx" not in  iteration["value"].lower():
+                            attachment_info = {
+                                "label": field_label,
+                                "file_url": iteration["value"]
+                            }
+                            if "approved_by" not in iteration.get("fieldname", "").lower():
+                                mail_attachment.append(attachment_info)
                     # Handle Table fields (child tables)
                     if iteration.get("fieldtype") == "Table":
                         child_table_name = str(iteration["fieldname"])
@@ -1256,8 +1266,12 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                                 if fieldtype == "Attach":
                                     if value:
                                         value = handle_pdf_fields(value)
-                                        if "approved_by" not in field.lower():
-                                            mail_attachment.append(value)
+                                        if "approved_by" not in field.lower() and  "xlsx" not in  iteration["value"].lower():
+                                            attachment_child_info = {
+                                                    "label": field_labels.get(field, field),
+                                                    "file_url": value
+                                                }
+                                            mail_attachment.append(attachment_child_info)
                                     continue  # Skip adding this field to processed_record
  
                                 # Add other field types normally
@@ -1279,9 +1293,6 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
             absolute_pdf_path = os.path.join(get_bench_path(), "sites", cstr(frappe.local.site), pdf_path)
             opts={"orientation":"Landscape"if is_landscape else"Portrait"}
             convert_html_to_pdf(html_content=html_view,pdf_path=absolute_pdf_path,options=opts)
- 
-            
-    
             new_file = frappe.get_doc({
                 "doctype": "File",
                 "file_name": pdf_filename,

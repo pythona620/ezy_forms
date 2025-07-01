@@ -8,6 +8,7 @@
  "engine": "InnoDB",
  "field_order": [
   "enable",
+  "enable_on",
   "profile_image",
   "company_field",
   "emp_code",
@@ -16,7 +17,10 @@
   "emp_phone",
   "emp_mail_id",
   "department",
+  "acknowledge_on",
   "designation",
+  "last_login",
+  "last_ip",
   "reporting_to",
   "reporting_designation",
   "signature"
@@ -31,6 +35,21 @@
    "fieldname": "emp_name",
    "fieldtype": "Data",
    "label": "Emp Name"
+  },
+  {
+   "fieldname": "last_login",
+   "fieldtype": "Datetime",
+   "label": "Last Log in"
+  },
+  {
+   "fieldname": "last_ip",
+   "fieldtype": "Data",
+   "label": "IP"
+  },
+  {
+   "fieldname": "acknowledge_on",
+   "fieldtype": "Datetime",
+   "label": "Acknowledge On"
   },
   {
    "fieldname": "emp_mail_id",
@@ -85,6 +104,7 @@
    "label": "enable"
   },
   {
+   "default": "0",
    "fieldname": "is_web_form",
    "fieldtype": "Check",
    "label": "Is Web Form"
@@ -93,11 +113,16 @@
    "fieldname": "profile_image",
    "fieldtype": "Attach",
    "label": "Profile Image"
+  },
+  {
+   "fieldname": "enable_on",
+   "fieldtype": "Datetime",
+   "label": "Enable on"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-03-13 11:44:51.428433",
+ "modified": "2025-06-24 13:13:37.012718",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
  "name": "Ezy Employee",
@@ -165,6 +190,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": []

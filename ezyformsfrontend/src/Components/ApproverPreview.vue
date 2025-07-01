@@ -20,10 +20,10 @@
                 </div>
                 <div class="mx-1 my-1">
                   <div v-for="(field, fieldIndex) in column.fields" :key="'field-preview-' + fieldIndex" :class="(props.readonlyFor === 'true' || blockIndex < currentLevel) && field.fieldtype !== 'Small Text' && field.fieldtype !== 'Text'
-                    ? (field.label === 'Approved By' ? 'align-items-end' : 'align-items-start')
+                    ? (field.label === 'Approved By' ? ' d-flex align-items-end' : 'align-items-start')
                     : ''">
                     <div v-if="!(blockIndex !== 0 && !field.value)" :class="(props.readonlyFor === 'true' || blockIndex < currentLevel) && field.fieldtype !== 'Small Text' && field.fieldtype !== 'Text' || field.fieldtype === 'Check'
-                      ? 'd-flex ' + (field.fieldtype === 'Check' ? 'mt-4 flex-row-reverse justify-content-end gap-2 w-0 align-items-start ' : '') + (field.label === 'Approved By' ? 'align-items-end' : 'align-items-center')
+                      ? 'd-flex ' + (field.fieldtype === 'Check' ? 'mt-4 flex-row-reverse justify-content-end gap-2 w-0 align-items-start ' : '') + (field.label === 'Approved By' ? 'align-items-start' : 'align-items-center')
                       : ''">
 
 
@@ -183,7 +183,7 @@
                             @click="removeFileAtIndex(i)"></i> -->
 
                         <!-- @click="openInNewWindow(field.value)" -->
-                        <template v-else-if="field.fieldtype == 'Attach'">
+  <template v-else-if="field.fieldtype == 'Attach'">
                           <div v-if="field.value" class="d-flex gap-2 flex-wrap">
                             <div v-for="(file, i) in getFileArray(field.value)" :key="i"
                               class="position-relative d-inline-block"
@@ -194,37 +194,17 @@
                                   class="form-control previewInputHeight font-10"
                                   @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
                               </div>
-
                               <!-- Image block -->
                               <template v-else-if="isImageFile(file)">
                                 <img :src="file" class="img-thumbnail cursor-pointer border-0 border-bottom-0"
-                                  @click="openFile(file)" style="max-width: 100px; max-height: 100px" />
-                                <!-- @mouseover="handleMouseOver(blockIndex + '-' + fieldIndex, i)"
-                                @mouseleave="handleMouseLeave(blockIndex + '-' + fieldIndex)" -->
-
-                                <!-- Hover preview -->
-                                <div v-if="hoverStates[blockIndex + '-' + fieldIndex] === i"
-                                  class="image-popup position-absolute"
-                                  style="top: 0; left: 110%; width: 200px; background: white; z-index: 10; box-shadow: 0px 0px 10px rgba(0,0,0,0.2); border-radius: 5px; padding: 5px;">
-                                  <img :src="file" alt="Enlarged Preview" style="width: 100%; border-radius: 5px;" />
-                                </div>
-
-                                <!-- Remove icon -->
-                                <!-- <button
-                                      v-if="blockIndex !== 0 && props.readonlyFor !== 'true' && blockIndex == currentLevel"
-                                      @click="replaceInput(i)"
-                                      class="btn btn-sm btn-outline-secondary position-absolute top-0 end-0"
-                                      style="z-index: 20; padding: 2px 6px; font-size: 12px;"
-                                    >
-                                      ×
-                                    </button> -->
+                                  @click="openFile(file)" style="max-width: 80px; max-height: 80px" />
                               </template>
-
                               <!-- PDF block -->
                               <a v-else :href="file" target="_blank"
-                                class="d-flex align-items-center justify-content-center mt-2 border rounded bg-light"
-                                style="width: 100px; height: 100px; text-decoration: none;">
-                                <i class="bi bi-file-earmark-pdf-fill fs-2 text-danger"></i>
+                                class="d-flex align-items-center justify-content-center mt-2 bg-light"
+                                style="width: 50px; height: 50px; text-decoration: none;">
+                                 <img src="../assets/attach.png" alt="" width="50px">
+                                
                               </a>
                             </div>
                           </div>
@@ -238,12 +218,20 @@
                             @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
                         </template>
 
-                        <template v-else-if="field.fieldtype == 'Link'">
+
+                        <!-- Hover preview -->
+                                <!-- <div v-if="hoverStates[blockIndex + '-' + fieldIndex] === i"
+                                  class="image-popup position-absolute"
+                                  style="top: 0; left: 110%; width: 200px; background: white; z-index: 10; box-shadow: 0px 0px 10px rgba(0,0,0,0.2); border-radius: 5px; padding: 5px;">
+                                  <img :src="file" alt="Enlarged Preview" style="width: 100%; border-radius: 5px;" />
+                                </div> -->
+
+                        <template v-else-if="field.fieldtype == 'Link' && field.fieldname !== 'department_name'">
                           <div class="d-flex align-items-center gap-2">
                             <input type="text" :value="field.value"
                               :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'"
                               @input="(e) => onInputChange(e.target.value, field)"
-                              :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 image-border-bottom pb-0 bg-transparent' : ''"
+                              :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0  w-50 pb-0 bg-transparent' : ''"
                               @change="(event) =>
                                 logFieldValue(
                                   event,
@@ -255,7 +243,7 @@
                                 )" class="form-control font-12 " />
 
                             <button v-if="field.value && field.label !== 'Department'"
-                              class="btn btn-dark text-dark bg-white" @click="ClickLink(field)"> <i
+                              class="btn btn-dark text-dark bg-white  p-1" @click="ClickLink(field)"> <i
                                 class="bi bi-link-45deg font-15"></i></button>
 
                             <!-- <button type="button" class="btn btn-outline-secondary pb-0 btn-sm" data-bs-toggle="modal"
@@ -274,7 +262,7 @@
 
                         <template v-else-if="field.fieldtype == 'Datetime'  && props.readonlyFor !== 'true' ">
                           <input type="datetime-local" v-model="field.value"
-                            :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 image-border-bottom bg-white  pb-0 bg-transparent ' : ' '"
+                            :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 bg-white  pb-0 bg-transparent ' : ' '"
                             :disabled="blockIndex" :readOnly="blockIndex < currentLevel || props.readonlyFor === 'true'
                               " :placeholder="'Enter ' + field.label" :name="'field-' +
                                 sectionIndex +
@@ -290,7 +278,7 @@
                           <input v-if="field.fieldtype == 'Int'"
                             :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'" :readOnly="blockIndex < currentLevel || props.readonlyFor === 'true'
                               " type="number" v-model="field.value"
-                            :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 image-border-bottom w-50 bg-white' : ' '"
+                            :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0  w-50 bg-white' : ' '"
                             :placeholder="'Enter ' + field.label" :value="field.value" :name="'field-' +
                               sectionIndex +
                               '-' +
@@ -310,7 +298,7 @@
                           <template
                             v-if="blockIndex === 0 && field.fieldtype !== 'Int' && field.fieldtype !== 'Text' && field.fieldtype !== 'Select' && field.fieldname !== 'auto_calculations'">
                             <span style="font-size: 12px;"
-                              :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 image-border-bottom w-50 bg-transparent' : ''"
+                              :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0  w-50 bg-transparent' : ''"
                               :value="field.value" :type="field.fieldtype">
                               {{ field.fieldtype === 'Time' ? formatTime(field.value) : field.value }}
                             </span>
@@ -322,7 +310,7 @@
                                 width: Math.min(100 + (field.value?.length * 2), 600) + 'px'
                               }" :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'"
                               :is="getFieldComponent(field.fieldtype)" :class="props.readonlyFor === 'true' || blockIndex < currentLevel
-                                ? 'border-0 image-border-bottom w-50 bg-transparent'
+                                ? 'border-0  w-50 bg-transparent'
                                 : ''" :value="field.fieldtype === 'Time' ? formatTime(field.value) : field.value"
                               :type="field.fieldtype"
                               :readOnly="blockIndex < currentLevel || props.readonlyFor === 'true'"
@@ -400,12 +388,16 @@
                                     <template v-if="field.fieldtype === 'Select'">
                                       <div>
 
-                                        <Multiselect :multiple="field.fieldtype === 'Table MultiSelect'"
+                                        <Multiselect v-if="props.readonlyFor !== 'true' && blockIndex !== 0 && blockIndex == currentLevel" :multiple="field.fieldtype === 'Table MultiSelect'"
                                           :disabled="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel"
                                           :options="(field.options?.split('\n').filter(opt => opt.trim() !== '') || [])"
                                           :model-value="row[field.fieldname]" placeholder="Select"
                                           @update:model-value="val => row[field.fieldname] = val"
                                           class="font-11 multiselect" />
+                                           <span v-else>
+                                            {{ row[field.fieldname] }}
+
+                                          </span>
                                       </div>
                                     </template>
                                     <template v-else-if="field.fieldtype === 'Attach'">
@@ -541,7 +533,7 @@
                                       <template v-else>
                                         <template v-if="field.fieldtype === 'Attach'">
                                           <!-- File Input -->
-                                          <input v-if="blockIndex !== 0 && props.readonlyFor !== 'true' || blockIndex == currentLevel" type="file" multiple accept="image/jpeg,image/png,application/pdf"
+                                          <input v-if="props.readonlyFor !== 'true' && blockIndex !== 0 && blockIndex == currentLevel" type="file" multiple accept="image/jpeg,image/png,application/pdf"
                                             class="form-control font-12"
                                             @change="handleFileUpload($event, row, field.fieldname)" />
 
@@ -561,7 +553,8 @@
                                                 <div v-else
                                                   class="d-flex align-items-center justify-content-center border mt-2"
                                                   style="width: 100px; height: 100px; background: #f9f9f9">
-                                                  <i class="bi bi-file-earmark-pdf fs-1 text-danger"></i>
+                                                  <!-- <i class="bi bi-file-earmark-pdf fs-1 text-danger"></i> -->
+                                                  <img src="../assets/attach.png" alt="">
                                                 </div>
                                               </div>
 
@@ -1036,7 +1029,7 @@ function getEmploye() {
   // console.log(storedData, "=============================");
   const queryParams = {
     filters: JSON.stringify([["Ezy Employee", "emp_mail_id", "=", storedData?.emp_mail_id]]),
-    fields: JSON.stringify(["emp_name", "signature"]),
+    fields: JSON.stringify(["emp_name", "signature", "designation","department"]),
 
   };
 
@@ -1225,14 +1218,47 @@ const getAllFieldsData = () => {
 //     return fieldsData;
 // };
 
+const selectedFile = ref('');
+
+
+const previewVisible = ref(false);
+
+const openFileModal = (file) => {
+  selectedFile.value = file;
+  previewVisible.value = false;  // Reset preview
+  showModal.value = true;
+};
+
+// const closeModal = () => {
+//   showModal.value = false;
+//   selectedFile.value = '';
+//   previewVisible.value = false;
+// };
+
+// const isImageFile = (file) => {
+//   return /\.(jpg|jpeg|png|gif)$/i.test(file);
+// };
+
+// const isPdfFile = (file) => {
+//   return /\.(pdf)$/i.test(file);
+// };
+
+// const getFileName = (file) => {
+//   try {
+//     return decodeURIComponent(file.split('/').pop());
+//   } catch {
+//     return file;
+//   }
+// }; 
+
 const openFile = (filePath) => {
   const fileUrl = filePath.trim();
 
   if (/\.(pdf)$/i.test(fileUrl)) {
-    // For PDFs: open in new tab
+    // For PDFs: open in a new tab
     window.open(fileUrl, '_blank');
   } else if (/\.(jpg|jpeg|png|gif)$/i.test(fileUrl)) {
-    // For images: create a new tab and write <img> inside it
+    // For images: open in a new tab with an <img> tag
     const win = window.open();
     win.document.write(`
       <html>
@@ -1435,6 +1461,40 @@ const clearImage = (
 </script>
 
 <style lang="scss" scoped>
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 8px;
+  width: 80vw;
+  max-width: 900px;
+  overflow: hidden;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+
+.modal-header, .modal-footer {
+  padding: 10px 16px;
+  background: #f1f1f1;
+}
+
+.modal-body {
+  padding: 16px;
+}
+
+.btn-close {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+}
 .overTable {
   overflow: auto;
 }
@@ -1465,6 +1525,7 @@ const clearImage = (
   background-color: #ffffff;
   padding: 0;
   padding-bottom: 1px;
+  
 }
 
 .section-label {

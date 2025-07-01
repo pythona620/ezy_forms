@@ -38,13 +38,15 @@
 
         <br />
         <button :disabled="!showPwdField" @click="Login" type="submit"
-          class="border-0 btn btn-dark button w-100 py-2 font-13 text-white rounded-1">
+          class="border-0 btn btn-dark button w-100 py-2 mb-4 font-13 text-white rounded-1">
           <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
           <span v-if="!loading">Log In</span>
         </button>
-      </div>
-    </div>
 
+      </div>
+      <div class="font-13 m-0 cursor-pointer text-center" @click="OpenSignUp"><span class="sign">Not a user? Sign
+          Up</span></div>
+    </div>
 
     <div v-if="showOtpPage">
       <div class="d-flex gap-2 p-2 justify-content-center align-items-center">
@@ -93,6 +95,63 @@
       </div>
     </div>
 
+    <div v-if="ShowSignUpPage" class="input-div p-5">
+      <div class="d-flex gap-2 p-2 justify-content-center align-items-center">
+        <div><img class="imgmix" src="../assets/Final-logo-ezyforms-removebg-preview.png" /></div>
+      </div>
+      <div>
+        <div class="mb-2">
+          <label class="font-13" for="email">Email</label>
+          <input class="form-control m-0" type="email" id="email" v-model="SignUpdata.email" @blur="validateEmail"
+            :class="{ 'is-invalid': errors.email }" />
+          <div class="invalid-feedback font-11 mt-1" v-if="errors.email">
+            {{ errors.email }}
+          </div>
+        </div>
+        <div class="mb-2">
+          <label class="font-13" for="full_name">User Name</label>
+          <input type="text" class="form-control m-0 bg-white" id="name" v-model="SignUpdata.full_name"
+            @blur="validateFullName" :class="{ 'is-invalid': errors.full_name }" />
+          <div class="invalid-feedback font-11 mt-1" v-if="errors.full_name">
+            {{ errors.full_name }}
+          </div>
+        </div>
+        <div class="mb-2">
+          <label class="font-13" for="emp_code">Employee Id</label>
+          <input type="text" class="form-control  m-0 bg-white" id="emp_code" v-model="SignUpdata.emp_code"
+            @input="validateEmpCode" :class="{ 'is-invalid': errors.emp_code }" />
+          <div class="invalid-feedback font-11 mt-1" v-if="errors.emp_code">
+            {{ errors.emp_code }}
+          </div>
+        </div>
+        <div class="mb-2">
+          <label class="font-13" for="emp_code">Department</label>
+          <Vue3Select v-model="SignUpdata.dept" :options="this.deptDetails" placeholder="Select Department" />
+        </div>
+        <div class="mb-2">
+          <label class="font-13" for="emp_code">Designation</label>
+          <Vue3Select v-model="SignUpdata.designation" :options="this.disignationDetails" placeholder="Select Designation" />
+        </div>
+        <div class="mb-2">
+          <label class="font-13" for="emp_phone">Phone Number</label>
+          <input type="text" class="form-control m-0 bg-white" id="emp_phone" v-model="SignUpdata.emp_phone"
+            @input="filterPhoneInput" @blur="validatePhone" :class="{ 'is-invalid': errors.emp_phone }" />
+          <div class="invalid-feedback font-11 mt-1" v-if="errors.emp_phone">
+            {{ errors.emp_phone }}
+          </div>
+        </div>
+
+      </div>
+      <div>
+        <button :disabled="!SignUpdata.email || !SignUpdata.full_name || !SignUpdata.emp_code || !SignUpdata.emp_phone || !SignUpdata.dept" type="submit" data-bs-toggle="modal" data-bs-target="#EmployeeToggleModal"
+          class="border-0 btn btn-dark button w-100 mb-4 py-2 font-13 text-white rounded-1">
+          Sign Up
+        </button>
+      </div>
+      <div class="font-13 m-0 cursor-pointer text-center" @click="OpenLogin"><span class="sign">Existing user? Log
+          In</span></div>
+    </div>
+
     <div class="modal fade" id="changePassword" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
       aria-labelledby="changePasswordLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-sm">
@@ -135,6 +194,99 @@
         </div>
       </div>
     </div>
+
+    <div class="modal fade" id="EmployeeToggleModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered ">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Acknowledgement</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body font-11">
+            <div>
+              <h6 class="text-center mb-4"><strong>Concerns: GDPR, PCI DSS, E-mail, Internet, Hardware &
+                  Software</strong></h6>
+              <h6><strong>Confirmation of User Request for Access & Inventory</strong></h6>
+              <p>This document confirms the user's request for access to the hotel's software and hardware facilities,
+                under the following terms:</p>
+
+              <h6><strong>User Commitments & Conditions:</strong></h6>
+              <ul>
+                <li><strong>Official Use Only:</strong> I will use the hotel internet, mobile SIM, laptop, computer, and
+                  email for official purposes only.</li>
+                <li><strong>Confidentiality:</strong> I will keep information and documents safe against unauthorized
+                  access.</li>
+                <li><strong>No Portable Storage Will be Used:</strong> I will not use any external storage while coming
+                  to the office.</li>
+                <li><strong>Payment Processing:</strong> I will ensure that data entries and payments follow the correct
+                  process. UPI transactions must only use the company’s assigned bank accounts.</li>
+                <li><strong>Damage Control:</strong> If there are losses, theft, or damage, I will pay damage myself.
+                  All electronic items will be used safely and handled with care.</li>
+                <li><strong>Access Care:</strong> I will take care that the system will not be accessed by anyone else.
+                  All electronic items will be used safely and handled with good intent.</li>
+                <li><strong>Logout Protocol:</strong> I will ensure logout emails and applications are logged out after
+                  use, and I will not share or use anyone else's login or password.</li>
+                <li><strong>Usage Limit:</strong> I will use the hotel laptop, SIM, and email for assigned purposes only
+                  and will never bypass company firewalls or site restrictions.</li>
+                <li><strong>Prohibited Software:</strong> I will not use another user’s account.</li>
+                <li><strong>Software Installation:</strong> I will not install any software that is not approved by
+                  ACCORD or the IT department.</li>
+                <li><strong>Data Backup:</strong> I will not remove or delete data unless in accordance with the backup
+                  and retention process. A folder in the D-drive will be used as a backup reference.</li>
+                <li><strong>Virus & PCI DSS Compliance:</strong> I will ensure that my system is virus-free and does not
+                  store unauthorized data or scripts.</li>
+                <li><strong>GDPR Compliance:</strong> In accordance with GDPR, including what constitutes personal data
+                  under the rights of data subjects (e.g. access, correction, deletion), I will comply.</li>
+                <li><strong>Limited Email Use:</strong> Email is to be used for strictly business purposes. I must not
+                  use such email for sending jokes, chain mails, or bulk emails.</li>
+                <li><strong>Data Handling:</strong> I will not download or store third-party software, films, images, or
+                  attachments which have not been approved by the IT department.</li>
+                <li><strong>Data Retention:</strong> I will use company storage for all documents. I understand that
+                  hotel systems should not be retained longer than required for business reasons. If no longer
+                  necessary, files must be deleted.</li>
+                <li><strong>Responsible Use:</strong> I will ensure the system is responsibly used and email
+                  communication is courteous and professional.</li>
+                <li><strong>Audit & Accountability:</strong> I understand that it is my responsibility and that all
+                  actions involving personal data must be documented and justified.</li>
+                <li><strong>Email Etiquette:</strong> I will use only proper formats (no slang or memes) in email and
+                  ensure group communication uses proper language in tone and timing.</li>
+                <li><strong>External Data:</strong> I will not share data or respond to unofficial personal requests for
+                  data, documents, images, screenshots, or system files. Any unauthorized request must be reported to
+                  the TAC Department.</li>
+                <li><strong>Storage of Confidential Data:</strong> I will only store personal data and will not disclose
+                  or share it outside of authorized channels.</li>
+              </ul>
+
+              <h6><strong>Access Monitoring:</strong></h6>
+              <p>I understand that my access to the system will be monitored. If a pattern of concern is kept and that
+                as a result of continuing breach of the rules and policies will lead to disciplinary action in line with
+                HR and IT procedures.</p>
+
+              <h6><strong>WARNING</strong></h6>
+              <p>Any user who engages in conduct that contravenes the current IT policy, particularly in the accessing
+                or sending of inappropriate communications or misconduct will be subject to disciplinary action.</p>
+              <p>Such violations will be referred to HR and/or the appropriate legal proceeding.</p>
+
+              <h6><strong>PLEASE NOTE</strong></h6>
+              <p>By utilizing ACCORD's software and hardware facilities, I acknowledge that I have read and understood
+                each part of the Information system Conditions. I agree to follow the terms of the GDPR, PCI DSS,
+                Application, Hardware, Internet, and Email policy. I acknowledge that a serious or continuing breach of
+                this policy will lead to dismissal by the TAC Department.</p>
+            </div>
+
+            <div class="mt-4">
+              <input type="checkbox" v-model="acknowledge" class="me-1 mt-1" />
+              I acknowledge that the information provided is correct.
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" @click="SignUp" :disabled="!acknowledge" class="btn btn-dark">Yes, Proceed</button>
+            
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -146,9 +298,13 @@ import ButtonComp from '../Components/ButtonComp.vue'
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import { nextTick } from "vue";
+import Vue3Select from 'vue3-select'
+import 'vue3-select/dist/vue3-select.css'
+
 export default {
   props: ["id"],
   components: {
+    Vue3Select,
     FormFields,
     ButtonComp
   },
@@ -157,6 +313,10 @@ export default {
       formdata: {
         usr: "",
         pwd: "",
+      },
+      SignUpdata: {
+        redirect_to: '/app/website-settings/Website Settings',
+        acknowledge_on: null,
       },
       storeData: [],
       errors: {},
@@ -171,11 +331,17 @@ export default {
       loading: false,
       showOtpPage: false,
       ShowLoginPage: true,
+      ShowSignUpPage: false,
       otp: ["", "", "", "", "", ""],
       errorMessage: "",
       storeData: [],
+      deptDetails: [],
+      disignationDetails:[],
       isFirstLogin: "",
-      twoFactorAuth: ""
+      twoFactorAuth: "",
+      enable_check: "",
+      acknowledge:'',
+      designation:'',
       // timeLeft: 60,
       // timer: null,
       // resentMessage: "",
@@ -207,6 +373,58 @@ export default {
         this.passwordError = "Password must be at least 6 characters long.";
       } else {
         this.passwordError = "";
+      }
+    },
+    validateEmail() {
+      const email = this.SignUpdata.email;
+      const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      if (!email) {
+        this.errors.email = "Email is required *";
+      } else if (!regex.test(email)) {
+        this.errors.email = "Please enter a valid email address *";
+      } else {
+        delete this.errors.email;
+      }
+    },
+    validatePhone() {
+      const phone = this.SignUpdata.emp_phone;
+      if (!phone) {
+        this.errors.emp_phone = "Phone number is required *";
+      } else if (phone.length !== 10) {
+        this.errors.emp_phone = "Phone number must be 10 digits *";
+      } else {
+        delete this.errors.emp_phone;
+      }
+    },
+
+    filterPhoneInput() {
+      // Allow only digits and limit to 10 characters
+      this.SignUpdata.emp_phone = this.SignUpdata.emp_phone.replace(/\D/g, '').slice(0, 10);
+    },
+
+    validateEmpCode() {
+      const url = window.location.href;
+      // const url="ncomr.ezyforms.co"
+
+      // Trim spaces and update the actual data
+      this.SignUpdata.emp_code = this.SignUpdata.emp_code.trim();
+
+      if (!this.SignUpdata.emp_code) {
+        this.errors.emp_code = "Employee Id is required *";
+      } else {
+        this.errors.emp_code = '';
+      }
+    },
+
+
+    validateFullName() {
+      this.SignUpdata.full_name = this.SignUpdata.full_name.trim();
+      if (!this.SignUpdata.full_name) {
+        this.errors.full_name = "User Name is required *";
+      }
+      else {
+        delete this.errors.full_name;
       }
     },
 
@@ -247,6 +465,16 @@ export default {
         this.otp[index] = "";
       }
     },
+    OpenSignUp() {
+      this.ShowLoginPage = false;
+      this.showOtpPage = false;
+      this.ShowSignUpPage = true
+    },
+    OpenLogin() {
+      this.ShowLoginPage = true;
+      this.showOtpPage = false;
+      this.ShowSignUpPage = false;
+    },
     // validateOtp() {
     //   const otpValue = this.otp.join("");
 
@@ -278,6 +506,52 @@ export default {
     //   this.errorMessage = "";
     //   this.resentMessage = "Resent OTP successfully!";
     //   this.startCountdown();
+    // },
+
+    SignUp() {
+      this.validateEmail()
+      this.validatePhone()
+      this.validateEmpCode()
+      if (!this.errors.email && !this.errors.emp_phone && !this.errors.emp_code) {
+        axiosInstance
+          .post(apis.signUp, this.SignUpdata)
+          .then((res) => {
+            if (res) {
+              // console.log("signup=", res);
+              if (res.message == 'Already Registered') {
+                toast.error(res.message)
+              }
+              else if (res.message == 'Please contact your IT Manager to verify your sign-up') {
+                toast.success(res.message)
+                this.ShowLoginPage = true;
+                this.showOtpPage = false;
+                this.ShowSignUpPage = false;
+              }
+              else {
+                toast.success(res.message)
+              }
+              const modal = bootstrap.Modal.getInstance(
+                document.getElementById("EmployeeToggleModal")
+              );
+              modal.hide();
+            }
+
+          })
+          .catch((error) => {
+            console.error("Login error: ", error);
+          })
+      }
+    },
+    //  getFormattedDateTime() {
+    //   const now = new Date();
+    //   const day = now.getDate().toString().padStart(2, '0');
+    //   const month = (now.getMonth() + 1).toString().padStart(2, '0');
+    //   const year = now.getFullYear();
+    //   const hours = now.getHours().toString().padStart(2, '0');
+    //   const minutes = now.getMinutes().toString().padStart(2, '0');
+    //   const seconds = now.getSeconds().toString().padStart(2, '0');
+
+    //   return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
     // },
 
     backTologin() {
@@ -342,13 +616,17 @@ export default {
             this.isFirstLogin = res.message.is_first_login;
             this.twoFactorAuth = res.message.enable_two_factor_auth
             this.user_id_name = res.message.name;
-            if (this.isFirstLogin === 0) {
+            this.enableCheck = res.message.enable_check
+            if (this.isFirstLogin === 0 && this.enableCheck === 1) {
               const modal = new bootstrap.Modal(
                 document.getElementById("changePassword")
               );
               modal.show();
               this.showPwdField = false;
               this.showOtpPage = false;
+            }
+            if (this.isFirstLogin === 0 && this.enableCheck == 0) {
+              toast.error("User is disabled. Please contact your IT Manager to verify your sign-up")
             }
             if (this.isFirstLogin === 1) {
               this.showPwdField = true;
@@ -425,6 +703,8 @@ export default {
                   emp_mail_id: employeeData.emp_mail_id,
                   designation: employeeData.designation,
                   department: employeeData.department,
+                  emp_code:employeeData.emp_code,
+                  emp_signature: employeeData.signature,
                   // department: employeeData.department,
                 };
 
@@ -454,8 +734,7 @@ export default {
         .catch((error) => {
           console.error("Error fetching user data:", error);
         });
-    }
-    ,
+    },
 
 
     validateOtp() {
@@ -490,7 +769,53 @@ export default {
           });
       }
     },
+    deptData() {
+      const queryParams = {
+        fields: JSON.stringify(["name"]),
+        limit_page_length: "none"
+      };
 
+      axiosInstance
+        .get(apis.resource + doctypes.departments, { params: queryParams })
+        .then((res) => {
+          if (res?.data?.length) {
+            this.deptDetails = res.data.map((dept) => dept.name);
+            console.log(this.deptDetails);
+
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching department data:", error);
+        });
+    },
+    designationData() {
+      const queryParams = {
+        fields: JSON.stringify(["name"]),
+        limit_page_length: "none"
+      };
+
+      axiosInstance
+        .get(apis.resource + doctypes.designations, { params: queryParams })
+        .then((res) => {
+          if (res?.data?.length) {
+            this.disignationDetails = res.data.map((disg) => disg.name);
+            console.log(this.disignationDetails);
+
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching department data:", error);
+        });
+    },
+
+  },
+  mounted() {
+    this.deptData()
+    this.designationData()
+    const url = window.location.href;
+    if (url.includes('ncomr')) {
+      this.SignUpdata.emp_code = 'NICO-';
+    }
   },
 
   computed: {
@@ -721,5 +1046,32 @@ input:focus {
     font-size: 12px;
     color: var(--bs-danger-text);
   }
+}
+
+.nico-text {
+  position: relative;
+  left: 53px;
+}
+
+.empId {
+  position: relative;
+  right: 45px;
+  width: 100%;
+}
+
+
+.sign:hover {
+  // border-bottom: 1px solid black;
+  cursor: pointer;
+}
+
+.vs__selected-options {
+  font-size: 13px !important;
+}
+
+.v-select * {
+  box-sizing: border-box;
+  font-size: 13px !important;
+  // background-color: white;
 }
 </style>

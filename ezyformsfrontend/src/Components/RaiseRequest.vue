@@ -110,8 +110,8 @@
               <span> <i class="bi bi-x"></i></span>Clear form
             </button>
             <!-- :disabled="!isFormValid" -->
-            <button v-if="!selectedData.selectedFormId" class="btn btn-dark font-12" type="submit"
-              @click="raiseRequestSubmission">
+            <button v-if="!selectedData.selectedFormId" data-bs-toggle="modal" data-bs-target="#ExportEmployeeModal" class="btn btn-dark font-12" type="submit"
+              >
               {{ selectedData.hasWorkflow == 'No' ? 'Save' : 'Raise Request' }}
             </button>
             <!-- <button  class="btn btn-dark font-12" type="submit"
@@ -134,6 +134,25 @@
         <div class="no-form">No Form</div>
       </div>
     </div>
+    <div class="modal fade" id="ExportEmployeeModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Acknowledgement</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+              <div class="modal-body">
+                <input type="checkbox" v-model="acknowledge" class="me-1 mt-1" />
+                  I acknowledge that the information provided is correct.
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-dark" :disabled="!acknowledge || saveloading" @click="raiseRequestSubmission">Yes, Proceed</button>
+              </div>
+          </div>
+        </div>
+      </div>
+    
   </div>
 </template>
 
@@ -167,7 +186,8 @@ const selectedData = ref({
   main_form: route.query.main_form || "", // Retrieve from query
 });
 
-
+const acknowledge=ref('')
+const saveloading = ref(false)
 const business_unit = ref(localStorage.getItem('Bu')); // Retrieve from query
 const isFormValid = ref(false);
 // const isFormValid = computed(() => allFieldsFilled.value);
@@ -207,6 +227,21 @@ function backToForm() {
   });
 }
 
+const ip_address = ref(null)
+ 
+const getClientIP = async () => {
+  try {
+    const response = await fetch('https://api.ipify.org?format=json')
+    const data = await response.json()
+    ip_address.value = data.ip
+    console.log("ip_address.value",ip_address.value);
+
+  } catch (error) {
+    console.error('Error fetching IP:', error)
+  }
+}
+
+
 
 onMounted(() => {
   loadInitialData();
@@ -216,7 +251,14 @@ const loadInitialData = () => {
   if (selectedData.value.main_form_Id) {
     gettingDataToLink();
   }
+  getClientIP()
   formDefinations();
+  const storedData = localStorage.getItem("employeeData");
+   if (storedData) {
+    employeeData.value = JSON.parse(storedData);
+    // console.log("employeeData======================",employeeData.value);
+  } 
+
   // raiseRequest();
 };
 
@@ -1191,32 +1233,41 @@ const child_id_name = ref((''))
       });
     });
   }
-  function request_raising_fn(item) {
-    // console.log(filepaths.value, "---filepaths");
-    // const filesArray = filepaths.value
-    //   ? filepaths.value.split(",").map((filePath) => filePath.trim())
-    //   : [];
-    let data_obj = {
-      module_name: "Ezy Forms",
-      doctype_name: selectedData.value.selectedform ? selectedData.value.selectedform : selectedData.value.linkedDocName,
-      ids: [item.name],
-      reason: selectedData.value.hasWorkflow === 'No' ? "Completed" : "Request Raised",
-      url_for_request_id: "",
-      files: filepaths.value.length > 0 ? filepaths.value : [],
-      property: business_unit.value,
-    };
-    axiosInstance.post(apis.raising_request, data_obj).then((resp) => {
-      if (resp?.message?.success === true) {
-        toast.success("Request Raised", {
-          autoClose: 1000,
-          transition: "zoom",
-          onClose: () => {
-            router.push({ path: "/todo/raisedbyme" });
-          },
-        });
-      }
-    });
-  }
+function request_raising_fn(item) {
+  saveloading.value = true;
+  // console.log(filepaths.value, "---filepaths");
+  // const filesArray = filepaths.value
+  //   ? filepaths.value.split(",").map((filePath) => filePath.trim())
+  //   : [];
+  let data_obj = {
+    module_name: "Ezy Forms",
+    doctype_name: selectedData.value.selectedform ? selectedData.value.selectedform : selectedData.value.linkedDocName,
+    ids: [item.name],
+    reason: selectedData.value.hasWorkflow === 'No' ? "Completed" : "Request Raised",
+    url_for_request_id: "",
+    files: filepaths.value.length > 0 ? filepaths.value : [],
+    property: business_unit.value,
+    ip_address:ip_address.value,
+    employee_id:employeeData.value.emp_code,
+  };
+  axiosInstance.post(apis.raising_request, data_obj).then((resp) => {
+    if (resp?.message?.success === true) {
+      const modal = bootstrap.Modal.getInstance(
+          document.getElementById("ExportEmployeeModal")
+          );
+          modal.hide();
+              saveloading.value = false;
+
+      toast.success("Request Raised", {
+        autoClose: 1000,
+        transition: "zoom",
+        onClose: () => {
+          router.push({ path: "/todo/raisedbyme" });
+        },
+      });
+    }
+  });
+}
 
 
 
@@ -1230,19 +1281,15 @@ const child_id_name = ref((''))
   max-height: 200px;
   overflow-y: auto;
 }
-
-.modal {
+/* .modal {
   background: rgba(0, 0, 0, 0.5);
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  display: flex;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  display: flex; 
   align-items: center;
   justify-content: center;
-}
-
+} */
 .requestPreviewDiv {
   height: 80vh;
   overflow-y: auto;

@@ -6,7 +6,7 @@
       <div class="d-flex justify-content-between align-items-center py-2">
         <div>
           <h1 class="m-0 font-13">
-            Employees
+            Active Employees
             <!-- ({{ totalRecords }}) -->
           </h1>
           <!-- <p class="m-0 font-11 pt-1">
@@ -14,9 +14,14 @@
             </p> -->
         </div>
         <div class="d-flex align-items-center gap-2">
-          <button type="button" class=" btn btn-light  CreateDepartments  font-12 " @click="bulkEmp">
+           <button type="button" class=" btn export-btn  CreateDepartments font-12" data-bs-toggle="modal" data-bs-target="#ExportEmployeeModal">
+            Export Employees
+          </button>
+
+          <button type="button" class=" btn export-btn  CreateDepartments  font-12 " @click="bulkEmp">
             Import Employees
           </button>
+          
           <button type="button" class="btn btn-dark  CreateDepartments " data-bs-toggle="modal"
             data-bs-target="#createDepartments" @click="createEmplBtn">
             Create Employee
@@ -515,6 +520,24 @@
       </div>
     </div>
 
+    <div class="modal fade" id="ExportEmployeeModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Export Employee</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            Are you sure you want to export the employee details?
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-dark" @click="exportEmployeesToExcel">Yes, Proceed</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
 
   </div>
 
@@ -597,6 +620,9 @@ const tableheaders = ref([
   { th: "Signature", td_key: "signature" },
 
   { th: "Reports To", td_key: "reporting_to" },
+  { th: "Creation Date", td_key: "creation" },
+  { th: "last Login", td_key: "last_login" },
+  { th: "last Login IP", td_key: "last_ip" },
   { th: "Emp Status", td_key: "enable" },
 
   // { th: "Reporting Designation", td_key: "reporting_designation" },
@@ -1399,6 +1425,18 @@ function confirmEmployeeToggle() {
   const isEnabled = selectedEmpRow.value.enable === '1' || selectedEmpRow.value.enable === 1;
   selectedEmpRow.value.enable = isEnabled ? 0 : 1;
 
+  if(selectedEmpRow.value.enable==0){
+    // Get current date and time in "YYYY-MM-DD HH:mm:ss" format
+  const now = new Date();
+  const pad = (n) => n.toString().padStart(2, '0');
+  const currentDateTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+
+  // Add current_date to the payload
+  selectedEmpRow.value.enable_on = currentDateTime;
+
+  console.log("selectedEmpRow.value",selectedEmpRow.value.enable_on);
+  }
+
   axiosInstance
     .put(`${apis.resource}${doctypes.EzyEmployeeList}/${selectedEmpRow.value.name}`, selectedEmpRow.value)
     .then(() => {
@@ -1448,6 +1486,44 @@ function selectedSignature(event) {
   const file = event.target.files[0];
   if (file) {
     uploadFile(file, "signature");
+  }
+}
+
+// Export function
+const exportEmployeesToExcel = async () => {
+  const filters = [["company_field", "like", `%${newbusiness.value}%`],["is_web_form","=","0"],["enable","=","1"]];
+  const queryParams = {
+    fields: JSON.stringify(["*"]),
+    limit_start: 0,
+    limit_page_length: "none",
+    filters: JSON.stringify(filters),
+}
+  try {
+    const response = await axiosInstance.get(
+      apis.resource + doctypes.EzyEmployeeList,
+      { params: queryParams }
+    )
+
+    if (response.data) {
+      const employees = response.data
+      if(employees.length){
+        const modal = bootstrap.Modal.getInstance(
+          document.getElementById("ExportEmployeeModal")
+          );
+          modal.hide();
+          toast.success("Successfully Completed")
+
+        const worksheet = XLSX.utils.json_to_sheet(employees)
+        const workbook = XLSX.utils.book_new()
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Employees')
+        XLSX.writeFile(workbook, 'EmployeeDetails.xlsx')
+      }
+      else{
+        toast.error("No Employee Details")
+      }
+    }
+  } catch (error) {
+    console.error('Error exporting employee data:', error)
   }
 }
 
@@ -1581,7 +1657,7 @@ function inLineFiltersData(searchedData) {
 }
 
 function employeeData(data) {
-  const filters = [["company_field", "like", `%${newbusiness.value}%`]];
+  const filters = [["company_field", "like", `%${newbusiness.value}%`],["is_web_form","=","0"],["enable","=","1"]];
   if (data) {
     filters.push(...data);
   }
@@ -1659,6 +1735,7 @@ function employeeOptions() {
         if (filterObj.value.limit_start === 0) {
 
           employeeEmails.value = newData;
+          // console.log("employeeEmails",employeeEmails.value);
           // designations.value = [...new Set(res.data.map((designation) => designation.designation))];
           reportingTo.value = [
             ...new Set(res.data.map((reporting) => reporting.reporting_to)),
@@ -1864,6 +1941,10 @@ function SaveEditEmp() {
   font-size: var(--eleven);
 
   // height: 32px;
+}
+
+.export-btn{
+  background-color: #99999961;
 }
 
 .cancelfilter {
