@@ -209,7 +209,7 @@ const seventhSettingsTitle = 'Form Creation';
 
 
 const todoSideBarData = [
-    { name: 'My Pending Approval', icon: 'bi bi-bucket', route: 'receivedform' },
+    { name: 'Assigned To Me', icon: 'bi bi-bucket', route: 'receivedform' },
     { name: 'My Requests', icon: 'bi bi-send', route: 'raisedbyme' },
     { name: 'My Team Requests', icon: 'bi bi-people', route: 'myteam' },
     { name: 'My Approvals', icon: 'bi bi-clock-history', route: 'history' },
@@ -306,6 +306,7 @@ const userAdmin = ref('');
 const userDesigination = ref('');
 
 onMounted(() => {
+    // gettingDepartmentNames()
     // Retrieve data from localStorage
     const userData = JSON.parse(localStorage.getItem('employeeData'));
     const userName = JSON.parse(localStorage.getItem('UserName'));
@@ -331,24 +332,51 @@ onMounted(() => {
     }
 })
 
-function deptData() {
-    const filters = [
-        ["business_unit", "like", `%${newBusinessUnit.value.business_unit}%`]
-    ];
-    const queryParams = {
-        fields: JSON.stringify(["*"]),
-        limit_page_length: filterObj.value.limitPageLength,
-        limitstart: filterObj.value.limitstart,
-        filters: JSON.stringify(filters),
+// function deptData() {
+//     const filters = [
+//         ["business_unit", "like", `%${newBusinessUnit.value.business_unit}%`]
+//     ];
+//     const queryParams = {
+//         fields: JSON.stringify(["*"]),
+//         limit_page_length: filterObj.value.limitPageLength,
+//         limitstart: filterObj.value.limitstart,
+//         filters: JSON.stringify(filters),
 
-        order_by: "`tabEzy Departments`.`department_name` asc",
+//         order_by: "`tabEzy Departments`.`department_name` asc",
 
+//     };
+
+//     axiosInstance.get(apis.resource + doctypes.departments, { params: queryParams })
+//         .then((res) => {
+//             if (res.data) {
+//                 deptartmentData.value = res.data;
+
+
+//                 formSideBarData.value = deptartmentData.value
+//                     .sort((a, b) => a.department_name.localeCompare(b.department_name))
+//                     .map(department => ({
+//                         name: department.department_name,
+//                         route: department.name,
+//                     }));
+
+
+//             }
+//         })
+//         .catch((error) => {
+//             console.error("Error fetching department data:", error);
+//         });
+// }
+function gettingDepartmentNames(){
+   let dataObj = {
+        business_unit: newBusinessUnit.value.business_unit
     };
+   
 
-    axiosInstance.get(apis.resource + doctypes.departments, { params: queryParams })
-        .then((res) => {
-            if (res.data) {
-                deptartmentData.value = res.data;
+   axiosInstance
+    .post(apis.DepartmentNames,dataObj)
+    .then((response) => {
+        console.log(response);
+            deptartmentData.value = response.message;
 
 
                 formSideBarData.value = deptartmentData.value
@@ -357,14 +385,16 @@ function deptData() {
                         name: department.department_name,
                         route: department.name,
                     }));
+     
 
-
-            }
-        })
-        .catch((error) => {
-            console.error("Error fetching department data:", error);
-        });
+    })
+    .catch((error) => {
+      console.log(error);
+      });
 }
+
+
+
 const iconClasses = [
     "bi-file-earmark-check",
     "bi-question-octagon",
@@ -382,7 +412,7 @@ watch(
         newBusinessUnit.value.business_unit = newBusinessUnitVal;
 
         if (isMaster && newBusinessUnitVal.length) {
-            deptData();
+            gettingDepartmentNames();
         }
     },
     { immediate: true }

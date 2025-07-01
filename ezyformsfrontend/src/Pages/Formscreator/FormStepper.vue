@@ -150,7 +150,7 @@
 
                               <div class="mt-3">
                                 <label class="typo__label">
-                                  <label for="">Accessibility To Departments
+                                  <label for="">Accessible to department
                                     <span v-if="!filterObj.accessible_departments.length"
                                       class="text-danger">*</span></label>
                                 </label>

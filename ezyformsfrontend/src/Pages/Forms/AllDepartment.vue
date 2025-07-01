@@ -112,19 +112,19 @@ import axiosInstance from '../../shared/services/interceptor';
 import { apis, doctypes, domain } from '../../shared/apiurls';
 import GlobalTable from '../../Components/GlobalTable.vue';
 import { EzyBusinessUnit } from '../../shared/services/business_unit';
-import { rebuildToStructuredArray } from '../../shared/services/field_format';
+// import { rebuildToStructuredArray } from '../../shared/services/field_format';
 import PaginationComp from "../../Components/PaginationComp.vue"
-import FormPreview from '../../Components/FormPreview.vue'
+// import FormPreview from '../../Components/FormPreview.vue'
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import router from '../../router';
 import { useRoute } from 'vue-router';
-import ButtonComp from '../../Components/ButtonComp.vue';
+// import ButtonComp from '../../Components/ButtonComp.vue';
 const totalRecords = ref(0);
 const tableheaders = ref([
   { th: "Form Name", td_key: "form_name" },
   { th: "Form Short Code", td_key: "form_short_name" },
-  // { th: "Form Category", td_key: "form_category" },
+  { th: "Owner Of The Form", td_key: "owner_of_the_form" },
   { th: "Accessible Departments", td_key: "accessible_departments" },
   // { th: "Status", td_key: "form_status" },
   // { th: "Form Status", td_key: "enable" },
@@ -512,6 +512,7 @@ function fetchDepartmentDetails(id, data) {
     ["form_status", "like", "created"],
 
   ];
+  filterObj.value.filters.push(...filters);
   if (props.id && props.id !== "Allforms" && props.id !== "allforms") {
     filters.push(["owner_of_the_form", "=", props.id]);
   }
@@ -523,13 +524,13 @@ function fetchDepartmentDetails(id, data) {
     fields: JSON.stringify(["*"]),
     limit_page_length: filterObj.value.limitPageLength,
     limit_start: filterObj.value.limit_start,
-    filters: JSON.stringify(filters),
+    filters: JSON.stringify(filterObj.value.filters),
     order_by: "`tabEzy Form Definitions`.`enable` DESC, `tabEzy Form Definitions`.`modified` DESC"
   };
   const queryParamsCount = {
     fields: JSON.stringify(["count(name) AS total_count"]),
     limitPageLength: "None",
-    filters: JSON.stringify(filters)
+    filters: JSON.stringify(filterObj.value.filters),
   }
   axiosInstance.get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParamsCount })
     .then((res) => {

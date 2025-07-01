@@ -20,9 +20,9 @@
       </div>
       <div class="mt-1">
         <GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true" actionType="dropdown"
-          raiseRequest="true" :enableDisable="isEnable" @cell-click="viewPreview" @actionClicked="actionCreated"
-          @toggle-click="toggleFunction" :actions="actions" @updateFilters="inLineFiltersData"
-          :field-mapping="fieldMapping" isFiltersoption="true" />
+          @actionClickedDropDown="actionClickedDropDown" raiseRequest="true" :enableDisable="isEnable"
+          @cell-click="viewPreview" @actionClicked="actionCreated" @toggle-click="toggleFunction" :actions="actions"
+          @updateFilters="inLineFiltersData" :field-mapping="fieldMapping" isFiltersoption="true" />
         <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
           @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
       </div>
@@ -128,7 +128,7 @@ const tableheaders = ref([
   // { th: "Form Category", td_key: "form_category" },
   { th: "Accessible Departments", td_key: "accessible_departments" },
   { th: "Status", td_key: "form_status" },
-  { th: "Form Status", td_key: "enable" },
+  // { th: "Form Status", td_key: "enable" },
 
 ]);
 const props = defineProps(['id']);
@@ -148,18 +148,7 @@ const isEnable = ref("");
 const businessUnit = computed(() => EzyBusinessUnit.value);
 const newBusinessUnit = ref({ business_unit: '' });
 const filterObj = ref({ limitPageLength: 20, limit_start: 0, filters: [] });
-const actions = computed(() => {
-  const baseActions = [
-    { name: 'View form', icon: 'fa-solid fa-eye' },
-    { name: 'Raise Request', icon: 'fa fa-file-text' },
-  ]
 
-  if (userDesigination.value.includes('IT')) {
-    baseActions.push({ name: 'Edit Form', icon: 'fa-solid fa-edit' },)
-  }
-
-  return baseActions
-})
 
 
 const fieldMapping = ref({
@@ -197,6 +186,7 @@ function formCreation(item = null) {
   }
   localStorage.setItem('routepath', route.path)
 }
+
 
 function viewPreview(data, index, type) {
   // console.log(route.path);
@@ -261,6 +251,55 @@ function viewPreview(data, index, type) {
 
 
 }
+
+
+const actions = ref([]);
+
+function actionClickedDropDown(row) {
+  const baseActions = [
+    { name: 'View form', icon: 'fa-solid fa-eye' },
+
+  ];
+
+  if (row.form_status === 'Created') {
+    baseActions.push({ name: 'Raise Request', icon: 'fa fa-file-text'})
+    baseActions.push({ name: 'In-active this form', icon: 'fa-solid fa-ban' });
+  }
+  if (row.form_status === 'Draft') {
+    baseActions.push({ name: 'Active this form', icon: 'fa-solid fa-check' });
+  }
+  if (userDesigination.value.includes('IT')) {
+    baseActions.push({ name: 'Edit Form', icon: 'fa-solid fa-edit' });
+  }
+
+  actions.value = baseActions;
+
+}
+
+// function actionClickedDropDown(row){
+
+//   console.log(row.form_status, "actionClickedDropDown");
+//   if(row.form_status === 'Created'){
+//     actions.value.push({ name: 'In-active this form', icon: 'fa-solid fa-ban' });
+//   }
+//   if(row.form_status === 'Draft'){
+//     actions.value.push({ name: 'Active this form', icon: 'fa-solid fa-check' });
+//   }
+// }
+
+// const actions = computed(() => {
+//   const baseActions = [
+//     { name: 'View form', icon: 'fa-solid fa-eye' },
+//     { name: 'Raise Request', icon: 'fa fa-file-text' },
+
+//   ]
+
+//   if (userDesigination.value.includes('IT')) {
+//     baseActions.push({ name: 'Edit Form', icon: 'fa-solid fa-edit' },)
+//   }
+
+//   return baseActions
+// })
 function actionCreated(rowData, actionEvent) {
   if (actionEvent.name === 'View form') {
     if (rowData) {
@@ -322,16 +361,16 @@ function actionCreated(rowData, actionEvent) {
             routepath: route.path,
             selectedForm: rowData.form_short_name,
             business_unit: rowData.business_unit,
-            has_workflow:rowData.has_workflow
+            has_workflow: rowData.has_workflow
 
 
           },
         });
       } else if (rowData.enable === 0) {
-      toast.info("This form is currently disabled.", { autoClose: 500 });
-    } else {
-      toast.info("You do not have permission to access this Form.", { autoClose: 500 });
-    }
+        toast.info("This form is currently disabled.", { autoClose: 500 });
+      } else {
+        toast.info("You do not have permission to access this Form.", { autoClose: 500 });
+      }
     }
     //  else {
     //   console.log("No employee data found in localStorage.");
@@ -359,6 +398,12 @@ function actionCreated(rowData, actionEvent) {
       });
     const modal = new bootstrap.Modal(document.getElementById('pdfView'), {});
     modal.show();
+  }
+  if (actionEvent.name === 'Active this form') {
+    toggleFunction(rowData, null, null);
+  }
+  if (actionEvent.name === 'In-active this form') {
+    toggleFunction(rowData, null, null);
   }
 }
 
@@ -440,7 +485,7 @@ watch(
     // if (newBusinessUnitVal.length && newId && props.id !== ':id') {
     //   filterObj.value.limit_start = 0;
     //   filterObj.value.filters = [];
-      fetchDepartmentDetails();
+    fetchDepartmentDetails();
     // }
   },
   { immediate: true }
@@ -478,7 +523,7 @@ function inLineFiltersData(searchedData) {
     if (searchedData.form_status === 'Retired') {
       filterObj.value.filters.push(["form_status", "like", "Draft"]);
     }
-    console.log(searchedData.enable);
+    // console.log(searchedData.enable);
     if (searchedData.enable === 'Enabled') {
       filterObj.value.filters.push(["enable", "=", 1]);
     } else if (searchedData.enable === 'Disabled') {
@@ -511,9 +556,10 @@ function fetchDepartmentDetails(id, data) {
 
   const filters = [
     ["business_unit", "like", `%${newBusinessUnit.value.business_unit}%`],
-    
+
 
   ];
+  filterObj.value.filters.push(...filters);
   if (props.id && props.id !== "Allforms" && props.id !== "allforms") {
     filters.push(["owner_of_the_form", "=", props.id]);
   }
@@ -525,13 +571,13 @@ function fetchDepartmentDetails(id, data) {
     fields: JSON.stringify(["*"]),
     limit_page_length: filterObj.value.limitPageLength,
     limit_start: filterObj.value.limit_start,
-    filters: JSON.stringify(filters),
+    filters: JSON.stringify(filterObj.value.filters),
     order_by: "`tabEzy Form Definitions`.`enable` DESC, `tabEzy Form Definitions`.`modified` DESC"
   };
   const queryParamsCount = {
     fields: JSON.stringify(["count(name) AS total_count"]),
     limitPageLength: "None",
-    filters: JSON.stringify(filters)
+    filters: JSON.stringify(filterObj.value.filters),
   }
   axiosInstance.get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParamsCount })
     .then((res) => {

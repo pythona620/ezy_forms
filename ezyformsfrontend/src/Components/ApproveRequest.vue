@@ -43,6 +43,7 @@
               </div>
               <div class="position-relative ">
                 <div class="requestPreviewDiv pb-5">
+                  
                   <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel"
                     @updateTableData="approvalChildData" :childData="responseData" :readonly-for="selectedData.readOnly"
                     :childHeaders="tableHeaders" :employee-data="employeeData" @updateField="updateFormData" />
@@ -95,30 +96,30 @@
                       <!-- v-if="selectedData.designation.includes('Security')" -->
                       <div class=" d-flex gap-2">
 
-                    
-                      <div v-if="selectedData.designation?.toLowerCase().includes('security')">
-                        <button :disabled="saveloading || (!canApprove & view_only_reportee === 1)" type="submit"
-                          class="btn btn-outline-secondary" @click.prevent="SaveDocWithoutApprove(route.query.name)">
-                          <span v-if="saveloading" class="spinner-border spinner-border-sm" role="status"
-                            aria-hidden="true"></span>
-                          <span v-if="!saveloading">
-                            <span class="font-12 fw-bold">Save</span>
-                          </span>
-                        </button>
 
-                      </div>
-                      <div>
-                        <button :disabled="loading || (!canApprove & view_only_reportee === 1)" type="submit"
-                          class="btn btn-success approvebtn"
-                          @click.prevent="ApproverFormSubmission(emittedFormData, 'Approve')">
-                          <span v-if="loading" class="spinner-border spinner-border-sm" role="status"
-                            aria-hidden="true"></span>
-                          <span v-if="!loading"><i class="bi bi-check-lg font-15 me-2"></i><span
-                              class="font-12">Approve</span></span>
-                        </button>
+                        <div v-if="selectedData.designation?.toLowerCase().includes('security')">
+                          <button :disabled="saveloading || (!canApprove & view_only_reportee === 1)" type="submit"
+                            class="btn btn-outline-secondary" @click.prevent="SaveDocWithoutApprove(route.query.name)">
+                            <span v-if="saveloading" class="spinner-border spinner-border-sm" role="status"
+                              aria-hidden="true"></span>
+                            <span v-if="!saveloading">
+                              <span class="font-12 fw-bold">Save</span>
+                            </span>
+                          </button>
 
-                      </div>
                         </div>
+                        <div>
+                          <button :disabled="loading || (!canApprove & view_only_reportee === 1)" type="submit"
+                            class="btn btn-success approvebtn"
+                            @click.prevent="ApproverFormSubmission(emittedFormData, 'Approve')">
+                            <span v-if="loading" class="spinner-border spinner-border-sm" role="status"
+                              aria-hidden="true"></span>
+                            <span v-if="!loading"><i class="bi bi-check-lg font-15 me-2"></i><span
+                                class="font-12">Approve</span></span>
+                          </button>
+
+                        </div>
+                      </div>
                     </div>
 
                   </div>
@@ -127,7 +128,7 @@
             </div>
           </div>
           <div class="col-3">
-            <div class="activity-log-container ">
+            <div class="activity-log-container px-4 ">
               <!-- <div class=" w-100  mb-2">
               <div class=" py-2 px-3">
 
@@ -158,13 +159,10 @@
                 PDF</button>
             </div> -->
               <div class="row mb-3">
-                <div class="col-xl-3 col-lg-12 col-md-12">
+                <!-- <div class="col-xl-3 col-lg-12 col-md-12">
                   <div class="d-flex  align-items-baseline  mt-2">
-                    <div>
-                      <span class="font-12 text-nowrap fw-bold mb-0">Activity log
-                      </span>
-                    </div>
-                    <!-- <div class="d-flex align-items-baseline gap-2 ps-1 ">
+                   
+                    <div class="d-flex align-items-baseline gap-2 ps-1 ">
                       <span v-if="tableData?.status !== 'Completed' && tableData.status !== 'Request Cancelled'"
                         class="text-warning font-11 text-nowrap fw-bold">
                         Pending ({{ tableData.current_level }} /
@@ -176,23 +174,29 @@
                         v-if="tableData?.status === 'Request Cancelled'">
                         Request Rejected
                       </span>
-                    </div> -->
+                    </div>
                   </div>
 
 
-                </div>
-                <div class="col-xl-9 col-lg-12 col-md-12">
-                  <div class=" d-flex justify-content-end gap-2">
-
-                  <button v-if="tableData.status === 'Completed' "
-                    class="btn btn-light font-11 fw-bold h-0 nowrap text-decoration-underline" type="button"
-                    @click="downloadPdf"><i class="bi bi-arrow-down-circle fw-bold px-1"></i>Download
-                  </button>
-                  <button v-if="linked_status !== 'Submitted' && tableData?.status === 'Completed'" type="button" class="btn btn-light font-11 nowrap fw-bold text-decoration-underline  CreateDepartments " 
-                    data-bs-target="#pdfView" @click="toLinkedForm">
-                    Raise Link<i class="bi bi-arrow-up-right-circle px-1"></i>
-                  </button> 
-                  <!-- <button type="button" class="btn btn-outline-light font-12  CreateDepartments " data-bs-toggle="modal"
+                </div> -->
+                <div class="col-xl-12 col-lg-12 col-md-12">
+                  <div class=" d-flex justify-content-between gap-2">
+                    <div>
+                      <button v-if="linked_status !== 'Completed' && tableData?.status === 'Completed'" type="button"
+                        class="btn btn-light font-14 nowrap h-auto fw-bold border border-dark   CreateDepartments "
+                        data-bs-target="#pdfView" @click="toLinkedForm">
+                        Raise Link<i class="bi bi-arrow-right px-2"></i>
+                      </button>
+                    
+                    </div>
+                    <div>
+                      <button
+                        v-if="tableData.status === 'Completed' && linked_status !== 'Completed' || linked_status === 'Completed'"
+                        class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto " type="button"
+                        @click="downloadPdf"><i class="bi bi-download px-2 fw-bold"></i>Download
+                      </button>
+                    </div>
+                    <!-- <button type="button" class="btn btn-outline-light font-12  CreateDepartments " data-bs-toggle="modal"
                     data-bs-target="#pdfView" @click="viewasPdfView">
                     Preview
                   </button> -->
@@ -201,6 +205,10 @@
                 </div>
               </div>
               <div class="activity_height">
+                <div class=" py-2">
+                  <span class="font-12 text-nowrap  fw-bold mb-0">Activity log
+                  </span>
+                </div>
                 <div v-for="(item, index) in activityData" :key="index" class="activity-log-item"
                   :class="{ 'last-item': index === activityData.length - 1 }">
 
@@ -211,29 +219,20 @@
                     <p class="font-12 mb-1">
                       <span class="strong-content">{{ formatAction(item.action) }} on </span>
                       <span class="strong-content">{{ formatCreation(item.creation) }}</span><br />
-                      <span class="strong-content"> {{ item.user_name }} 
+                      <span class="strong-content"> {{ item.user_name }}
                         <!-- (<span class="text-secondary"> {{ item.role }}</span>) -->
-                        </span>
-                        <br />
+                      </span>
+                      <br />
                       <span>{{ item.role }}</span><br />
                       <span class="font-12 text-secondary">{{
                         item.reason || "N/A"
-                        }}</span>.
+                      }}</span>.
 
                     </p>
                   </div>
                 </div>
               </div>
-              <!-- <div class="activity-log-item">
-              <div class="pending"></div>
-              <div class="activity-log-content">
-                <p class="font-12 mb-1">
-                  <span class="font-12 text-secondary">
-                    Pending
-                  </span>
-                </p>
-              </div>
-            </div> -->
+
             </div>
             <div class="modal fade" id="pdfView" tabindex="-1" aria-labelledby="pdfViewLabel" aria-hidden="true">
               <div class="modal-dialog modal-xl">
@@ -306,14 +305,10 @@ const selectedData = ref({
   designation: route.query.designation || "", // Retrieve from query
 });
 const backTo = ref(selectedData.value.routepath);
-// onMounted(() => {
-//   receivedForMe();
-//   // Wfactivitylog(selectedData.value.formname);
-//   // getdata(selectedData.value.formname);
-// });
+
 
 const router = useRouter();
-
+const linked_status = ref('')
 const businessUnit = computed(() => EzyBusinessUnit.value);
 const business_unit = ref('');
 const filterObj = ref({ limitPageLength: "None", limit_start: 0 });
@@ -353,6 +348,7 @@ function formatCreation(dateStr) {
 }
 
 const ApprovePDF = ref(true)
+
 // Format the date for display
 // const formatDate = (dateString) => {
 //   if (!dateString) return "N/A";
@@ -413,7 +409,7 @@ watch(
 const childtablesData = ref({});
 function approvalChildData(data) {
   childtablesData.value = data;
-  console.log(data);
+  // console.log(data);
 }
 
 
@@ -542,8 +538,9 @@ function approvalStatusFn(dataObj, type) {
     .then((response) => {
       // console.log("API Response:", response);
 
+
       if (response?.message?.success === true) {
-        console.log(tableData.value.current_level,tableData.value.total_levels,"current level and total level");
+        // console.log(tableData.value.current_level,tableData.value.total_levels,"current level and total level");
         if (tableData.value.current_level === tableData.value.total_levels && mainStandardForm.value.length && linked_status.value !== 'Completed') {
           DynamicCalculateMethod(); // Call this only if it's the last level
         }
@@ -553,7 +550,7 @@ function approvalStatusFn(dataObj, type) {
           autoClose: 500,
           transition: "zoom",
           onClose: () => {
-            router.push({ path: selectedData.value.routepath}); // Navigate after toast closes
+            router.push({ path: selectedData.value.routepath }); // Navigate after toast closes
           }
         });
       } else {
@@ -572,13 +569,14 @@ function DynamicCalculateMethod() {
   const dataObj = {
     request_id: linkedNew_Id.value,
     doctype_1: mainStandardForm.value,
+    doctype_2: tableData.value.doctype_name
   };
 
   axiosInstance
     .post(apis.dynmic_calculations, dataObj)
     .then((response) => {
-    console.log(response);
-     
+      console.log(response);
+
     })
     .catch((error) => {
       console.error("Error fetching data:", error);
@@ -838,7 +836,7 @@ function receivedForMe(data) {
       if (res.data.length) {
         Wfactivitylog(tableData.value.name);
         getdata(tableData.value.name);
-        
+
 
       }
 
@@ -847,7 +845,7 @@ function receivedForMe(data) {
       console.error("Error fetching records:", error);
     });
 }
-const linked_status = ref(false)
+
 function getdata(formname) {
   const filters = [["wf_generated_request_id", "like", `%${formname}%`]];
   const queryParams = {
@@ -866,17 +864,18 @@ function getdata(formname) {
     .then((res) => {
       if (res.data) {
         doctypeForm.value = res.data[0];
-        console.log(typeof doctypeForm.value.status, "lll");
-        if (doctypeForm.value.linked_id) {
-          console.log(doctypeForm.value.linked_id,'linked_id');  
-          linkedNew_Id.value = doctypeForm.value.linked_id;
-        } 
-        if (doctypeForm.value.status ==='Submitted') {
-          console.log(doctypeForm.value.status,'status');
-          linked_status.value = doctypeForm.value.status;
+        console.log(typeof doctypeForm.value.form_status, "lll");
+        if (doctypeForm.value.returnable_gate_pass_id) {
+          console.log(doctypeForm.value.returnable_gate_pass_id, 'linked_id');
+          linkedNew_Id.value = doctypeForm.value.returnable_gate_pass_id;
         }
-        
-        if(doctypeForm.value.return_gate_pass){
+        if (doctypeForm.value.form_status === 'Completed') {
+          console.log(doctypeForm.value.form_status, 'status');
+          linked_status.value = doctypeForm.value.form_status;
+
+        }
+
+        if (doctypeForm.value.return_gate_pass) {
           mainStandardForm.value = doctypeForm.value.return_gate_pass;
         }
 
@@ -1052,29 +1051,29 @@ function Wfactivitylog(formname) {
       console.error("Error fetching activity data:", error);
     });
 }
-function toLinkedForm(){
+function toLinkedForm() {
 
-      router.push({
-          name: "RaiseRequest",
-          query: {
-            routepath: route.path,
-            linkedForm: "LInked Form",
-            has_workflow: 'Yes',
-            type:'myforms',
-            main_form : selectedData.value.doctype_name,
-            business_unit: selectedData.value.business_unit,
-            main_form_Id: selectedData.value.formname,
-            selectedFormStatus: selectedData.value.type,
-          },
-        });
-}  
+  router.push({
+    name: "RaiseRequest",
+    query: {
+      routepath: route.path,
+      linkedForm: tableData.value.is_linked_form,
+      has_workflow: 'Yes',
+      type: 'myforms',
+      main_form: selectedData.value.doctype_name,
+      business_unit: selectedData.value.business_unit,
+      main_form_Id: selectedData.value.formname,
+      selectedFormStatus: selectedData.value.type,
+    },
+  });
+}
 
-function NewActivityLogData (name){
+function NewActivityLogData(name) {
 
   const dataObj = {
     doctype: selectedData.value.doctype_name,
     docname: name,
-  
+
   };
 
   axiosInstance
