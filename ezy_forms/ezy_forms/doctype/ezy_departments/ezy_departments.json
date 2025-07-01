@@ -602,5 +602,6 @@
  "sort_order": "DESC",
  "states": [],
  "title_field": "department_name",
- "translated_doctype": 1
+ "translated_doctype": 1,
+ "track_changes": 1
 }

@@ -185,6 +185,7 @@ const settingsSideBarData = [
     { name: 'Employee Approvals', icon: 'bi bi-people', route: 'employeeapproval' },
     { name: 'System Settings', icon: 'bi bi-tags', route: 'authenticationpage' },
     { name: 'Activity Log', icon: 'bi bi-clock-history', route: 'activitylog' },
+    { name: 'Audit Log', icon: 'bi bi-clock', route: 'auditlog' },
     { name: 'Form Creation' , icon: 'bi bi-file-earmark-text', route: 'CreateForm' },
 
     // {name: 'Roles',icon:' bi bi-people', route:'role'},
