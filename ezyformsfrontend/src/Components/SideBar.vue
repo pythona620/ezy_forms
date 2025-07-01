@@ -81,6 +81,19 @@
                             </li>
                         </router-link>
                     </ul>
+                    
+                    <h2 v-if="filteredSettingsGroups.seventhGroup" class="font-10 m-0 text-muted ps-2">{{
+                        seventhSettingsTitle }}</h2>
+                    <ul class="list-unstyled" v-if="filteredSettingsGroups.seventhGroup">
+                        <router-link v-for="(list, index) in filteredSettingsGroups.seventhGroup" :key="index"
+                            :to="`${baseRoute}/${list.route.toLowerCase()}`" class="text-decoration-none text-black"
+                            active-class="active-link">
+                            <li :title="list.name">
+                                <i :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
+                                {{ list.name }}
+                            </li>
+                        </router-link>
+                    </ul>
 
 
                 </template>
@@ -90,6 +103,11 @@
                             active-class="active-link">
                             <li><i class="bi-icon fs-6 bi bi-file-earmark-richtext me-3"></i>All Forms</li>
                         </router-link>
+                        <router-link :to="'/forms/department/predefineForm'" class="text-decoration-none text-black"
+                            active-class="active-link">
+                            <li><i class="bi-icon fs-6 bi bi-file-earmark-richtext me-3"></i>Predefined Forms</li>
+                        </router-link>
+
                         <router-link v-for="(department, index) in formSideBarData" :key="department.route"
                             :to="`/forms/department/${department.route}`" class="text-decoration-none text-black"
                             active-class="active-link">
@@ -167,6 +185,8 @@ const settingsSideBarData = [
     { name: 'Employee Approvals', icon: 'bi bi-people', route: 'employeeapproval' },
     { name: 'System Settings', icon: 'bi bi-tags', route: 'authenticationpage' },
     { name: 'Activity Log', icon: 'bi bi-clock-history', route: 'activitylog' },
+    { name: 'Audit Log', icon: 'bi bi-clock', route: 'auditlog' },
+    { name: 'Form Creation' , icon: 'bi bi-file-earmark-text', route: 'CreateForm' },
 
     // {name: 'Roles',icon:' bi bi-people', route:'role'},
     // { name: 'Workflow Settings', icon: 'bi bi-gear', route: 'WorkflowSettings'}
@@ -181,7 +201,8 @@ const thirdSettingsTitle = 'Master';
 const forthSettingsTitle = 'Employee';
 
 const fifthSettingsTitle = 'System Settings';
-const sixthTitle = 'Audit logs';
+const sixthTitle = 'Audits';
+const seventhSettingsTitle = 'Form Creation';
 
 
 
@@ -189,10 +210,10 @@ const sixthTitle = 'Audit logs';
 
 
 const todoSideBarData = [
-    { name: 'My Tasks', icon: 'bi bi-bucket', route: 'receivedform' },
-    { name: 'My Forms', icon: 'bi bi-send', route: 'raisedbyme' },
-    { name: 'My Team', icon: 'bi bi-people', route: 'myteam' },
-    { name: 'History', icon: 'bi bi-clock-history', route: 'history' },
+    { name: 'Assigned To Me', icon: 'bi bi-bucket', route: 'receivedform' },
+    { name: 'My Requests', icon: 'bi bi-send', route: 'raisedbyme' },
+    { name: 'My Team Requests', icon: 'bi bi-people', route: 'myteam' },
+    { name: 'My Approvals', icon: 'bi bi-clock-history', route: 'history' },
     { name: 'Reports', icon: 'bi bi-gear', route: 'reports'}
 
 ];
@@ -247,10 +268,11 @@ const filteredSettingsGroups = computed(() => {
             thirdSettingsGroup: settingsSideBarData.slice(1, 3),
             forthSettingsGroup: settingsSideBarData.slice(3, 6),
             fifthSettingsGroup: settingsSideBarData.slice(6,7),
-            sixthGroup: settingsSideBarData.slice(7)
+            sixthGroup: settingsSideBarData.slice(7,9),
+            seventhGroup: settingsSideBarData.slice(9),
 
         }
-        : { thirdSettingsGroup: [], forthSettingsGroup: [] };
+        : { thirdSettingsGroup: [], forthSettingsGroup: []};
 });
 
 // Define the title based on the current route
@@ -285,6 +307,7 @@ const userAdmin = ref('');
 const userDesigination = ref('');
 
 onMounted(() => {
+    // gettingDepartmentNames()
     // Retrieve data from localStorage
     const userData = JSON.parse(localStorage.getItem('employeeData'));
     const userName = JSON.parse(localStorage.getItem('UserName'));
@@ -310,24 +333,51 @@ onMounted(() => {
     }
 })
 
-function deptData() {
-    const filters = [
-        ["business_unit", "like", `%${newBusinessUnit.value.business_unit}%`]
-    ];
-    const queryParams = {
-        fields: JSON.stringify(["*"]),
-        limit_page_length: filterObj.value.limitPageLength,
-        limitstart: filterObj.value.limitstart,
-        filters: JSON.stringify(filters),
+// function deptData() {
+//     const filters = [
+//         ["business_unit", "like", `%${newBusinessUnit.value.business_unit}%`]
+//     ];
+//     const queryParams = {
+//         fields: JSON.stringify(["*"]),
+//         limit_page_length: filterObj.value.limitPageLength,
+//         limitstart: filterObj.value.limitstart,
+//         filters: JSON.stringify(filters),
 
-        order_by: "`tabEzy Departments`.`department_name` asc",
+//         order_by: "`tabEzy Departments`.`department_name` asc",
 
+//     };
+
+//     axiosInstance.get(apis.resource + doctypes.departments, { params: queryParams })
+//         .then((res) => {
+//             if (res.data) {
+//                 deptartmentData.value = res.data;
+
+
+//                 formSideBarData.value = deptartmentData.value
+//                     .sort((a, b) => a.department_name.localeCompare(b.department_name))
+//                     .map(department => ({
+//                         name: department.department_name,
+//                         route: department.name,
+//                     }));
+
+
+//             }
+//         })
+//         .catch((error) => {
+//             console.error("Error fetching department data:", error);
+//         });
+// }
+function gettingDepartmentNames(){
+   let dataObj = {
+        business_unit: newBusinessUnit.value.business_unit
     };
+   
 
-    axiosInstance.get(apis.resource + doctypes.departments, { params: queryParams })
-        .then((res) => {
-            if (res.data) {
-                deptartmentData.value = res.data;
+   axiosInstance
+    .post(apis.DepartmentNames,dataObj)
+    .then((response) => {
+        console.log(response);
+            deptartmentData.value = response.message;
 
 
                 formSideBarData.value = deptartmentData.value
@@ -336,14 +386,16 @@ function deptData() {
                         name: department.department_name,
                         route: department.name,
                     }));
+     
 
-
-            }
-        })
-        .catch((error) => {
-            console.error("Error fetching department data:", error);
-        });
+    })
+    .catch((error) => {
+      console.log(error);
+      });
 }
+
+
+
 const iconClasses = [
     "bi-file-earmark-check",
     "bi-question-octagon",
@@ -361,7 +413,7 @@ watch(
         newBusinessUnit.value.business_unit = newBusinessUnitVal;
 
         if (isMaster && newBusinessUnitVal.length) {
-            deptData();
+            gettingDepartmentNames();
         }
     },
     { immediate: true }

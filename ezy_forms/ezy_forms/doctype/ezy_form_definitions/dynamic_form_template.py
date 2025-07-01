@@ -6,9 +6,13 @@ import requests
 from random import randint
 import os, sys
 import traceback
-from frappe.utils import get_bench_path, cstr,get_url
+from frappe.utils import get_bench_path, cstr,get_url,now_datetime,get_site_path, get_url
 from pdf2image import convert_from_path
- 
+import zipfile
+from frappe.utils.file_manager import get_file_path
+
+
+
 def rebuild_to_structured_array(flat_array):
     result = []
     current_block = None
@@ -633,7 +637,7 @@ template_str = """
                                 <h3 class="columnlabel">{{ column.label }}</h3>
                                 {% endif %}
                                 {% for field in column.fields %}
-                               
+                                    
                                     <div class="field field-textarea">
                                     
                                   
@@ -745,17 +749,32 @@ template_str = """
                                                 </div>
                                             {% endif %}
                                         {% elif field.fieldtype == 'Attach' %}
-                                            {% if field['values'] %}
-                                            {% if field.fieldtype == 'Attach' and "approved_by" in field.fieldname %}
-                                             <img  id="{{ field.fieldname }}" src="{{ site_url + field['values'] or ''  }}" style="width: 80px; height: 80px; object-fit: contain; display: block; margin-left: 119px ; margin-top: -51px;"  name="{{ field.fieldname }}">
-                                            {% else %}
-                                            {% for file in field['values'].split(',') %}
-                                            {{ file.strip().split('@')[-1] if '@' in file else file.strip().split('/')[-1] }}{% if not loop.last %}, {% endif %}
-                                            {% endfor %}
-                                            {% endif %}
-                                            {% else %}
-                                                <input type="text" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
-                                            {% endif %}
+    {% if field['values'] %}
+        {% if field.fieldtype == 'Attach' and "approved_by" in field.fieldname %}
+            <img  
+                id="{{ field.fieldname }}" 
+                src="{{ site_url + field['values'] or '' }}" 
+                style="width: 80px; height: 80px; object-fit: contain; display: block; margin-left: 119px; margin-top: -51px;"  
+                name="{{ field.fieldname }}"
+            >
+        {% else %}
+            <ul style="padding-left: 20px; margin: 5px 0;">
+                {% for file in field['values'].split(',') %}
+                    <li>
+                        {{ file.strip().split('@')[-1] if '@' in file else file.strip().split('/')[-1] }}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% else %}
+        <input 
+            type="text" 
+            id="{{ field.fieldname }}" 
+            value="{{ field['values'] }}" 
+            name="{{ field.fieldname }}"
+        >
+    {% endif %}
+
                                         {% elif field.fieldtype == 'Phone' %}
                                              <span id="{{ field.fieldname }}" style="font-size:13px; font-weight:500;" name="{{ field.fieldname }}" class="date-span">
                                                 {{ field['values'] }}
@@ -808,6 +827,7 @@ template_str = """
                                                 <span>{{ field.description | replace('\n', '<br>') | safe }}</span>
                                             </div>
                                         {% endif %}
+                                        
                                 {% endfor %}
                             </div>
                         {% endfor %}
@@ -819,21 +839,6 @@ template_str = """
         
 {% endfor %}
 
-{% if mail_attachment%}
-    <div><span style="font-weight:bold; font-size:13px;">Attachments:</span></div>
-    {% for attachment_group in mail_attachment %}
-        {% for file_path in attachment_group.file_url.split(',') %}
-            {% set cleaned_path = file_path.strip() %}
-            <div class="page">
-                <div style="font-size:12px; margin-bottom: 4px;"><b>{{ attachment_group.label }}</b></div>
-                <img 
-                    src="{{ site_url + cleaned_path }}"
-                    class="attachments">
-            </div>
-        {% endfor %}
-    {% endfor %}
-
-{% endif %}
 
 
  
@@ -1049,85 +1054,19 @@ def preview_dynamic_form(form_short_name: str, business_unit=None, name=None):
  
  
  
- 
-
-
-def handle_pdf_fields(field_values):
-
-    """
-
-    Converts PDF paths in `field_values` (comma-separated) to preview images
-
-    and returns updated file paths (pointing to the preview images instead of PDFs).
-
-    """
-
-    site_path = frappe.get_site_path()
-
-    updated_paths = []
- 
-    if not field_values:
-
-        return field_values
- 
-    for file_path in field_values.split(','):
-
-        cleaned_path = file_path.strip()
- 
-        if cleaned_path.endswith('.pdf'):
-
-            filename = os.path.basename(cleaned_path)
-
-            base_filename = filename.replace('.pdf', '')
-
-            pdf_abs_path = os.path.join(site_path, 'public', cleaned_path.lstrip('/'))
-
-            img_output_dir = os.path.join(site_path, 'public', 'files', 'previews', base_filename)
-
-            os.makedirs(img_output_dir, exist_ok=True)
- 
-            try:
-
-                # Convert all pages
-
-                images = convert_from_path(pdf_abs_path)
-
-                page_paths = []
- 
-                for i, img in enumerate(images):
-
-                    img_filename = f"{base_filename}_page_{i+1}.jpg"
-
-                    img_output_path = os.path.join(img_output_dir, img_filename)
-
-                    img_web_path = f"/files/previews/{base_filename}/{img_filename}"
- 
-                    if not os.path.exists(img_output_path):
-
-                        img.save(img_output_path, 'JPEG')
-
-                        frappe.logger().info(f"Saved preview: {img_web_path}")
- 
-                    page_paths.append(img_web_path)
- 
-                updated_paths.extend(page_paths)
- 
-            except Exception as e:
-
-                frappe.log_error(f"PDF to image conversion failed: {e}")
-
-                updated_paths.append(cleaned_path)
-
+def add_file_to_zip(item, file_url, zipf):
+    try:
+        full_path = get_file_path(file_url)
+        if os.path.exists(full_path):
+            arcname = f"{item.get('label', 'Attachments')}/{os.path.basename(full_path)}"
+            zipf.write(full_path, arcname)
         else:
+            frappe.log_error(f"File does not exist: {full_path}", f"ZIP Creation Warning: {file_url[:100]}")
+    except Exception as e:
+        frappe.log_error(f"Error processing file_url: {file_url}\nException: {str(e)}", f"ZIP Creation Error: {file_url[:100]}")
 
-            updated_paths.append(cleaned_path)
- 
-    return ', '.join(updated_paths)
-
- 
- 
 @frappe.whitelist()
-def download_filled_form(form_short_name: str, name: str|None,business_unit=None):
+def download_filled_form(form_short_name: str, name: str|None,business_unit=None,from_raise_request=None):
     """Generates a PDF for the dynamic form with filled data"""
     try:
         
@@ -1223,21 +1162,16 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
  
                     # Collect attachments except those with fieldname like "approved_by"
  
-                    # Convert PDFs in Attach fields to image previews
-                    if iteration.get("fieldtype") == "Attach" and iteration.get("value"):                        
-                        if "pdf" in  iteration["value"].lower():
-                            iteration["value"] = handle_pdf_fields(iteration["value"])
-                        else:
-                            iteration["value"] =   iteration["value"]                       
+                    if iteration.get("fieldtype") == "Attach" and iteration.get("value"):                                              
+                        iteration["value"] =   iteration["value"]     
                         # Construct a display name using the label or fallback to fieldname
                         field_label = iteration.get("label") or iteration.get("fieldname")
-                        if "xlsx" not in  iteration["value"].lower():
-                            attachment_info = {
-                                "label": field_label,
-                                "file_url": iteration["value"]
-                            }
-                            if "approved_by" not in iteration.get("fieldname", "").lower():
-                                mail_attachment.append(attachment_info)
+                        attachment_info = {
+                            "label": 'Form Attachments',
+                            "file_url": iteration["value"]
+                        }
+                        if "approved_by" not in iteration.get("fieldname", "").lower():
+                            mail_attachment.append(attachment_info)
                     # Handle Table fields (child tables)
                     if iteration.get("fieldtype") == "Table":
                         child_table_name = str(iteration["fieldname"])
@@ -1256,72 +1190,93 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                         field_types = {df.fieldname: df.fieldtype for df in meta_fields}
  
                         processed_child_records = []
-                        ##############################
                         for record in child_table_records:
-                            processed_record = {}
                             for field in field_names:
                                 value = record.get(field)
                                 fieldtype = field_types.get(field)
 
-                                # Handle Attach fields separately for mail attachment, but skip adding them to processed_record
-                                if fieldtype == "Attach":
-                                    if value:
-                                        value = handle_pdf_fields(value)
-                                        if "approved_by" not in field.lower() and  "xlsx" not in  iteration["value"].lower():
-                                            attachment_child_info = {
-                                                    "label": field_labels.get(field, field),
-                                                    "file_url": value
-                                                }
-                                            mail_attachment.append(attachment_child_info)
-                                    continue  # Skip adding this field to processed_record
+                                if fieldtype == "Attach" and value:
+                                    # Split the comma-separated file URLs
+                                    file_urls = [url.strip() for url in value.split(',') if url.strip()]
+                                    
+                                    for file_url in file_urls:
+                                        # Add to mail_attachment
+                                        mail_attachment.append({
+                                            "label": "Form Attachments",
+                                            "file_url": file_url
+                                        })
 
-                                # Add other field types normally
-                                processed_record[field_labels.get(field, field)] = value
+                                        # Also store each file as a separate record in data_list
+                                        processed_child_records.append({
+                                            field_labels.get(field, field): file_url
+                                        })
 
-                            processed_child_records.append(processed_record)
-
-                        data_list[child_table_name] = processed_child_records
-
-                        #########################
+                        # Add to data_list
+                        if processed_child_records: 
+                            data_list[child_table_name] = processed_child_records
+ 
+            #########################
                 json_object = list(filter(lambda dict :False if (('value' in dict) and not(dict.get('value')) and (dict.get('fieldname').startswith('approved') or dict.get('fieldname').startswith('approver'))) else True,json_object))
                 form_name = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_name")
                 html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_name,child_data=data_list,child_table_data=None,business_unit=business_unit,wf_generated_request_id=wf_generated_request_id,mail_attachment=mail_attachment)
                 
             random_number = randint(111, 999)
     
-            pdf_filename = f"{form_short_name}_{name}_{random_number}mailfiles.pdf"
-            pdf_path = f"private/files/{pdf_filename}"
+            pdf_filename = f"{form_short_name}_{name}mailfiles.pdf"
+            pdf_path = f"public/files/{pdf_filename}"
             absolute_pdf_path = os.path.join(get_bench_path(), "sites", cstr(frappe.local.site), pdf_path)
             opts={"orientation":"Landscape"if is_landscape else"Portrait"}
             convert_html_to_pdf(html_content=html_view,pdf_path=absolute_pdf_path,options=opts)
-            new_file = frappe.get_doc({
-                "doctype": "File",
-                "file_name": pdf_filename,
-                "file_url": f"/{pdf_path}",
-                "is_private": 1,
-                "attached_to_doctype": form_short_name,
-                "attached_to_name": name
-            })
-            new_file.insert(ignore_permissions=True)
-            frappe.db.commit()
-    
-            file_url = get_url(new_file.file_url)
-    
-            return file_url
- 
+            if from_raise_request !=None:
+                new_file = frappe.get_doc({
+                    "doctype": "File",
+                    "file_name": pdf_filename,
+                    "is_private": 0,
+                    "attached_to_doctype": form_short_name,
+                    "attached_to_name": name
+                })
+                new_file.insert(ignore_permissions=True)
+                frappe.db.commit()
+        
+                file_url = get_url(new_file.file_url)
+        
+                return file_url
+            else:
+                site_url = get_url()
+                new_file = f"{site_url}/files/{pdf_filename}"
+                zip_filename = None
+                if len(mail_attachment) > 0:
+                    folder_path = get_site_path("public", "files", "Attachment folder")
+                    os.makedirs(folder_path, exist_ok=True)
+                    # Add PDF file to attachments (for zipping)
+                    mail_attachment.append({
+                        "label": "Form Attachments",
+                        "file_url": f"/files/{pdf_filename}"  # Relative path
+                    })
+                    # Prepare ZIP path
+                    zip_filename = f"{name}.zip"
+                    zip_path = os.path.join(folder_path, zip_filename)
+
+                    # Create ZIP file
+                    clean_file_urls = lambda item: [
+                        '/' + u.split('/', 3)[3] if u.startswith("http") and len(u.split('/', 3)) > 3 else u.strip()
+                        for u in item.get('file_url', '').split(',') if u.strip()
+                    ]
+                    # Create ZIP file
+                    with zipfile.ZipFile(zip_path, 'w') as zipf:
+                        [add_file_to_zip(item, file_url, zipf) for item in mail_attachment for file_url in clean_file_urls(item)]
+
+                    relative_zip_path = f"/files/Attachment folder/{zip_filename}"
+                    full_download_url = f"{site_url}{relative_zip_path}"
+
+                file_url= get_url(full_download_url if zip_filename else new_file)
+                return file_url
+
+
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         frappe.log_error("Error Downloading File", f"line No:{exc_tb.tb_lineno}\n{traceback.format_exc()}")
         frappe.throw(str(e))
- 
- 
-    except Exception as e:
-        exc_type, exc_obj, exc_tb = sys.exc_info()
-        frappe.log_error("Error Downloading File", "line No:{}\n{}".format(exc_tb.tb_lineno, traceback.format_exc()))
-        frappe.throw(str(e))
-        return {"success": False, "message": str(e)}   
-     
-    
 from frappe.www.printview import get_html_and_style
 
 def get_html_file_data(doc=None,data=None,print_format=None):

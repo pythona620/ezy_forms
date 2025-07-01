@@ -11,10 +11,11 @@ from ast import literal_eval
 from frappe.utils.background_jobs import enqueue
 from ezy_forms.ezy_forms.doctype.ezy_form_definitions.linking_flow_and_forms import enqueing_creation_of_roadmap
 from itertools import chain
-from frappe.utils import cstr
+from frappe.utils import cstr,get_site_path
 from frappe.utils import now as frappe_now
 import re
 import json
+import shutil
 
 
  
@@ -22,7 +23,7 @@ class EzyFormDefinitions(Document):
     pass
  
 @frappe.whitelist()
-def add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:str,form_name:str,accessible_departments:str,has_workflow:str|None,workflow_check:str| None,form_short_name:str,fields:list[dict],form_status:str,series=None):
+def add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:str,form_name:str,accessible_departments:str,has_workflow:str|None,is_linked_form:str| None, is_linked:int | None, is_predefined_doctype:int |None, form_short_name:str,fields:list[dict],form_status:str,series=None):
     return_response_for_doc_add = enqueue(
         enqueued_add_dynamic_doctype,
         owner_of_the_form=owner_of_the_form,
@@ -36,7 +37,9 @@ def add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:st
         now=True,
         series =series,
         has_workflow=has_workflow,
-        workflow_check = workflow_check,
+        is_linked_form = is_linked_form,
+        is_linked=is_linked,
+        is_predefined_doctype=is_predefined_doctype,
         is_async=True,
         queue="short")
     return return_response_for_doc_add
@@ -64,7 +67,7 @@ def deleting_customized_field_from_custom_dynamic_doc(doctype:str,deleted_fields
         queue="short")
     return deleted_fields_qresponse
  
-def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:str,form_name:str,accessible_departments:str,form_short_name:str,fields:list[dict],form_status:str,has_workflow:str,workflow_check:str| None,series=None):
+def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_category:str,form_name:str,accessible_departments:str,form_short_name:str,fields:list[dict],form_status:str,has_workflow:str,is_linked:int | None,is_predefined_doctype: int|None,is_linked_form:str| None,series=None):
     """ Owner_of_the_form should come from Departments Doctype in Select Field."""
     """Adding DocTypes dynamically, giving Perms for the doctype and creating a default section-break field for DocType"""
     try:
@@ -75,9 +78,9 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
         if frappe.db.exists("Ezy Form Definitions",{"name":form_short_name}):
             
             frappe.set_value("Ezy Form Definitions",form_short_name,"has_workflow",has_workflow)
-            frappe.set_value("Ezy Form Definitions",form_short_name,"workflow_check",workflow_check)
+            # frappe.set_value("Ezy Form Definitions",form_short_name,"is_linked_form", is_linked_form)
             
-            frappe.set_value("Ezy Form Definitions",{"name":form_short_name},{"form_status":form_status,"accessible_departments":accessible_departments,"owner_of_the_form":owner_of_the_form})
+            frappe.set_value("Ezy Form Definitions",{"name":form_short_name},{"form_status":form_status,"accessible_departments":accessible_departments,"owner_of_the_form":owner_of_the_form,"is_linked_form":is_linked_form,"is_linked":is_linked,"is_predefined_doctype":is_predefined_doctype})
         if not frappe.db.exists("DocType",doctype):
             frappe.db.sql(f"DROP TABLE IF EXISTS `tab{doctype}`;")
             frappe.db.commit()
@@ -131,7 +134,9 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
             form_defs.business_unit = business_unit
             form_defs.count = 0
             form_defs.has_workflow = has_workflow or ''
-            form_defs.workflow_check = workflow_check or ''
+            form_defs.is_linked_form = is_linked_form or ''
+            form_defs.is_linked = is_linked
+            form_defs.is_predefined_doctype = is_predefined_doctype
             form_defs.insert(ignore_permissions=True).save()
             form_defs.reload()
             frappe.db.commit()
@@ -170,7 +175,7 @@ def enqueued_add_customized_fields_for_dynamic_doc(fields: list[dict], doctype: 
             _[0] for _ in frappe.db.sql(f"SELECT fieldname FROM `tabDocField` WHERE parent ='{doctype}';")
         ]
 
-        table_fieldnames = [item["fieldname"] for item in fields if item.get("fieldtype") == "Table"]
+        table_fieldnames = [item["options"] for item in fields if item.get("fieldtype") == "Table"]
         
         # Initialize as an empty dictionary
         child_table_fields = {"child_table_fields": {}}
@@ -180,7 +185,7 @@ def enqueued_add_customized_fields_for_dynamic_doc(fields: list[dict], doctype: 
                 f"SELECT IFNULL(options, '') AS options,IFNULL(description, '') AS description, fieldname, fieldtype, idx, label FROM `tabDocField` WHERE parent ='{table_name}';",
                 as_dict=True
             )
-
+           
             for each_child in fields_in_child_doctype:
                 each_child['value'] = ''
             # Sort the fields by 'idx' within each child table
@@ -188,9 +193,10 @@ def enqueued_add_customized_fields_for_dynamic_doc(fields: list[dict], doctype: 
  
             # Store the sorted results in the dictionary
             child_table_fields["child_table_fields"][table_name] = sorted_fields
-
+            
         # Sort the dictionary keys before returning
         child_table_fields["child_table_fields"] = dict(sorted(child_table_fields["child_table_fields"].items()))
+      
         for dicts_of_docs_entries in fields:
             if dicts_of_docs_entries["fieldname"] in fields_in_mentioned_doctype:
                 doc_exists_name_or_not = frappe.db.exists("DocField", dicts_of_docs_entries)             
@@ -293,7 +299,9 @@ def activating_perms_for_all_roles_in_wf_roadmap():
             fields=["doctype_names"]
         )
     document_type_list = [entry["doctype_names"] for entry in child_entries]
- 
+    custom_feilds = frappe.get_all("DocType",filters={'module':["in",["User Forms","ezy_custom_forms"]]})
+    custom_feilds_list = [doc.name for doc in custom_feilds]
+    document_type_list.extend(custom_feilds_list)
     for doc in document_type_list:
         for role in unique_roles_from_all_roles:
             if not frappe.db.exists("Custom DocPerm",{"parent":doc,"role":role}):
@@ -308,8 +316,14 @@ def activating_perms_for_all_roles_in_wf_roadmap():
                 form_perms.delete = 1
                 form_perms.insert(ignore_permissions=True)
     frappe.db.commit()
-    
- 
+    # Check if the path exists
+    folder_path = get_site_path("public", "files", "Attachment folder")
+
+    delete = lambda path: os.unlink(path) if os.path.isfile(path) or os.path.islink(path) else shutil.rmtree(path)
+
+    if os.path.exists(folder_path) and os.path.isdir(folder_path):
+        [delete(os.path.join(folder_path, f)) for f in os.listdir(folder_path)]
+        
 
 def sanitize_fieldname(name):
     # Remove all special characters; keep only alphanumeric and underscores
