@@ -4,7 +4,7 @@ from frappe.utils import escape_html
 from frappe import _
 
 @frappe.whitelist(allow_guest=True)
-def sign_up(email: str, full_name: str,designation:str|None,emp_phone:str|None,emp_code:str|None,dept:str|None, redirect_to: str|None,acknowledge_on=None,signature=None) -> tuple[int, str]:
+def sign_up(email: str, full_name: str,designation:str|None,acknowledgement:str|None,emp_phone:str|None,emp_code:str|None,dept:str|None, redirect_to: str|None,acknowledge_on=None,signature=None) -> tuple[int, str]:
 	
 	if is_signup_disabled():
 		return _("Sign Up is disabled")
@@ -53,6 +53,7 @@ def sign_up(email: str, full_name: str,designation:str|None,emp_phone:str|None,e
 				"is_web_form":1,
 				"designation":designation,
 				"signature":signature,
+				"acknowledgement":acknowledgement,
 				'emp_phone':emp_phone,
 				"department":dept if dept else None,
 				"acknowledge_on": acknowledge_on if acknowledge_on else frappe.utils.now(),
@@ -82,6 +83,7 @@ def sign_up(email: str, full_name: str,designation:str|None,emp_phone:str|None,e
 def send_mail_when_user_signup(emp_name:str|None,emp_mail_id:str|None):
 	recipction_mail = frappe.get_value("Notifications Mail","Notifications Mail",'sign_up_approver')
 	if recipction_mail:
+		
 		subject = "Employee sign-up Attempt – Access Enablement Required"
 		message = f"""
 		Dear IT Team,<br><br>
@@ -102,3 +104,86 @@ def send_mail_when_user_signup(emp_name:str|None,emp_mail_id:str|None):
 			message=message,
 			now = True
 		)
+
+from frappe.utils import get_url
+
+@frappe.whitelist(allow_guest=True)
+def employee_update_notification(emp_mail):
+    if not emp_mail:
+        frappe.throw("Employee email is required.")
+
+    # Get employee name using the email as the 'name' field in Ezy Employee
+    emp_mail, emp_name = frappe.db.get_value(
+        "Ezy Employee", {"name": emp_mail}, ["name", "emp_name"]
+    )
+
+    if not emp_mail or not emp_name:
+        frappe.throw("Employee not found.")
+
+    site_url = get_url()
+    
+    # Get the mail ID from the 'Notifications Mail' doctype
+    mail_id = frappe.get_value("Notifications Mail", "Notifications Mail", "mail_id")
+
+    # Get the email template
+    email_template = frappe.get_doc("Email Template", "Account Activation")
+
+    # Default subject and message
+    subject = "Your Ezy Forms Profile is Now Active"
+    message = f"""
+        Hi {emp_name},<br>
+        Your user account in Ezy Forms has been successfully activated by the IT team.<br>
+        You can now log in and start using the system. If you haven’t received your login details or need help accessing your account, please contact IT support. - <b>Email:<b> {mail_id} <br> 
+        Login Link: <a href="{site_url}/ezyformsfrontend#/">View Page</a><br>
+        Let us know if you have any questions.
+    """
+
+    # If template is available and using HTML
+    if email_template and email_template.use_html:
+        subject = email_template.subject or subject
+        message = frappe.render_template(email_template.response_html,{
+            "site_url": f'{site_url}/ezyformsfrontend#/',
+            "emp_name": emp_name,
+            "mail_id": mail_id,
+        })
+
+    # Send the email
+    frappe.sendmail(
+        recipients=[emp_mail],
+        subject=subject,
+        message=message,
+        now=True
+    )
+
+    return "Notification sent successfully"
+
+  
+@frappe.whitelist(allow_guest=True)
+def get_signup_value():
+    return_value = {}
+    web_signup_value =  frappe.get_value("Website Settings", "Website Settings", "disable_signup") or 0
+    return_value["is_signup"] = web_signup_value
+    return return_value
+
+
+
+def email_template_create():
+    message = '''
+        Hi {{emp_name}},<br>
+        Your user account in Ezy Forms has been successfully activated by the IT team.<br>
+        You can now log in and start using the system. If you haven’t received your login details or need help accessing your account, please contact IT support. {% if mail_id %}- Email: {{mail_id}}{% endif %} <br> 
+        Login Link: <a href="{{site_url}}">View Page</a><br>
+        Let us know if you have any questions.
+    '''
+    if not frappe.db.exists("Email Template", "Account Activation"):
+        template = frappe.new_doc("Email Template")
+        template.update({
+            "name": "Account Activation",
+            "subject": "Your Ezy Forms Profile is Now Active",
+            "use_html": 1,
+            "response_html": message
+        })
+        template.insert(ignore_permissions=True)
+        frappe.db.commit()
+        return "Email Template Created"
+    
