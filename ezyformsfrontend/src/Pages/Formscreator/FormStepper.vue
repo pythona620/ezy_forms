@@ -180,17 +180,17 @@
                               <div class="mt-3">
                                 <div class="">
 
-                                  <label for="">Has Workflow
+                                  <label for="">Has Workflow <span class="fw-normal font-11 text-secondary">(optional)</span>
                                     <!-- <span v-if="!filterObj.has_Workflow" class="text-danger">*</span> -->
-                                  </label>
+                                  </label> 
                                   <!-- :disabled="selectedData.formId && selectedData.formId.length > 0" -->
-                                  <Multiselect :options="['No']" v-model="filterObj.has_workflow" placeholder="Select"
+                                  <Multiselect :options="['Yes','No']" v-model="filterObj.has_workflow" placeholder="Select"
                                     :multiple="false" class="font-11 multiselect" :searchable="true" />
                                 </div>
                               </div>
                               <div class="my-2 mb-5">
                                 <div class="form-check d-flex align-items-center p-0 pe-3">
-                                  <input class="form-check-input linketoCheck p-1" type="checkbox" id="is_linked"
+                                  <input class="form-check-input linketoCheck p-1" :disabled="filterObj.is_predefined_doctype == 1" type="checkbox" id="is_linked"
                                     v-model="filterObj.is_linked"   :true-value="1" :false-value="0"/>
                                   <label class="form-check-label font-12 mx-2 mb-0 ps-1" for="is_linked">
                                     Link
@@ -209,8 +209,8 @@
                                 </div>
 
                                 <div v-if="filterObj.is_linked" class="mt-2 position-relative mb-5">
-                                  <label for="standardFormInput">Standard Form</label>
-                                  <input type="text" class="form-control standardFormInput" id="standardFormInput"
+                                  <label for="standardFormInput">Form</label>
+                                  <input type="text" class="form-control standardFormInput" id="standardFormInput" :disabled="filterObj.is_predefined_doctype == 1"
                                     v-model="filterObj.is_linked_form" placeholder="Type to search Form Name..."
                                     @input="searchForm" @focus="showSuggestions = true" @blur="hideSuggestions" />
                                     

@@ -43,7 +43,7 @@
               </div>
               <div class="position-relative ">
                 <div class="requestPreviewDiv pb-5">
-                  
+
                   <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel"
                     @updateTableData="approvalChildData" :childData="responseData" :readonly-for="selectedData.readOnly"
                     :childHeaders="tableHeaders" :employee-data="employeeData" @updateField="updateFormData" />
@@ -182,12 +182,14 @@
                 <div class="col-xl-12 col-lg-12 col-md-12">
                   <div class=" d-flex justify-content-between gap-2">
                     <div>
-                      <button v-if="selectedData.type == 'myforms' && linked_status !== 'Completed'  && tableData?.status === 'Completed' && tableData.is_linked_form !== null" type="button"
+                      <button
+                        v-if="selectedData.type == 'myforms' && linked_status !== 'Completed' && tableData?.status === 'Completed' && tableData.is_linked_form !== null"
+                        type="button"
                         class="btn btn-light font-14 nowrap h-auto fw-bold border border-dark   CreateDepartments "
                         data-bs-target="#pdfView" @click="toLinkedForm">
-                        Raise Link  <i class="bi bi-arrow-right px-2"></i>
+                        Raise Link <i class="bi bi-arrow-right px-2"></i>
                       </button>
-                    
+
                     </div>
                     <div>
                       <button
@@ -205,33 +207,128 @@
                 </div>
               </div>
               <div class="activity_height">
-                <div class=" py-2">
-                  <span class="font-12 text-nowrap  fw-bold mb-0">Activity log
-                  </span>
+                <!-- Tabs -->
+                <div class="d-flex mb-2">
+                  <button class="btn btn-light tab_btn" :class="{ active: activeTab === 'activity', 'border-0': !tableData.is_linked_form }"
+                    @click="activeTab = 'activity'">
+                    Activity Log
+                  </button>
+                  <button v-if="tableData.is_linked_form" class="btn btn-light tab_btn" :class="{ active: activeTab === 'linked' }"
+                    @click="linked_list_btn">
+                    Linked Forms
+                  </button>
                 </div>
-                <div v-for="(item, index) in activityData" :key="index" class="activity-log-item"
-                  :class="{ 'last-item': index === activityData.length - 1 }">
 
-                  <div
-                    :class="item.action === 'Approved' || item.action === 'Request Raised' || item.action === '' || item.action === 'Completed' ? 'activity-log-dot' : 'activityRedDot'">
+                <!-- Activity Log -->
+                <div v-if="activeTab === 'activity'">
+                  <!-- <div class="py-2">
+                    <span class="font-12 text-nowrap fw-bold mb-0">Activity Log</span>
+                  </div> -->
+                  <div v-for="(item, index) in activityData" :key="index" class="activity-log-item"
+                    :class="{ 'last-item': index === activityData.length - 1 }">
+                    <div :class="item.action === 'Approved' || item.action === 'Request Raised' || item.action === '' || item.action === 'Completed'
+                      ? 'activity-log-dot'
+                      : 'activityRedDot'"></div>
+                    <div class="activity-log-content">
+                      <p class="font-12 mb-1">
+                        <span class="strong-content">{{ formatAction(item.action) }} on </span>
+                        <span class="strong-content">{{ formatCreation(item.creation) }}</span><br />
+                        <span class="strong-content">{{ item.user_name }}</span><br />
+                        <span>{{ item.role }}</span><br />
+                        <span class="font-12 text-secondary">{{ item.reason || "N/A" }}</span>.
+                      </p>
+                    </div>
                   </div>
-                  <div class="activity-log-content">
-                    <p class="font-12 mb-1">
-                      <span class="strong-content">{{ formatAction(item.action) }} on </span>
-                      <span class="strong-content">{{ formatCreation(item.creation) }}</span><br />
-                      <span class="strong-content"> {{ item.user_name }}
-                        <!-- (<span class="text-secondary"> {{ item.role }}</span>) -->
-                      </span>
-                      <br />
-                      <span>{{ item.role }}</span><br />
-                      <span class="font-12 text-secondary">{{
-                        item.reason || "N/A"
-                      }}</span>.
+                </div>
 
-                    </p>
+                <!-- Linked Forms -->
+                <div v-else-if="activeTab === 'linked'">
+                  <div v-if="linkedForms.length === 0" class="text-center py-3">
+                    <p class="font-12 text-secondary">No linked forms available.</p>
+
+                  </div>
+                  <div v-else>
+
+                    <table class="table overflow-scroll  table-sm">
+                      <thead class="table-light">
+                        <tr>
+                          <!-- <th class="font-12">S.No</th> -->
+                          <th class="font-12">Request ID</th>
+                          <th class="font-12">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="(item, index) in linkedForms" :key="index">
+                          <!-- <td class="font-12">{{ index + 1 }}</td> -->
+                          <td class="font-12 align-middle">{{ item.link_form_id }}</td>
+                          <td>
+                            <button class="btn btn-light btn-sm" data-bs-toggle="modal"
+                              data-bs-target="#listofLinkedForms" @click="openModal(item)">
+                              View
+                            </button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- Modal -->
+              <div class="modal fade" id="listofLinkedForms" tabindex="-1" aria-labelledby="exampleModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                  <div class="modal-content">
+                    <div class="modal-header py-2">
+                      <h5 class="modal-title font-14">Linked Form Details</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body linkedformspreview">
+                      <!-- Show key-value -->
+                      <!-- <table class="table table-bordered table-sm">
+                        <tbody>
+                          <tr v-for="(item, index) in normalFields" :key="index">
+                            <th class="font-12 text-nowrap">
+                              {{ formatKey(item.key) }}
+                            </th>
+                            <td class="font-12">{{ item.value }}</td>
+                          </tr>
+                        </tbody>
+                      </table> -->
+                      <div class="row">
+                        <div class="col-md-6 mb-2" v-for="(item, index) in normalFields" :key="index">
+                          <label class="fw-bold font-12">{{ formatKey(item.key) }}</label>
+                          <p class="font-12 mb-2">{{ item.value }}</p>
+                        </div>
+                      </div>
+
+
+                      <!-- 🔥 Array Fields -->
+                      <div v-for="(arrayItem, key) in arrayFields" :key="key" class="mb-3 overflow-auto">
+                        <strong class="font-12">{{ formatKey(key) }}</strong>
+                        <table class="table table-bordered table-sm">
+                          <thead class="table-light">
+                            <tr>
+                              <th v-for="header in getFilteredKeys(arrayItem)" :key="header" class="font-12">
+                                {{ formatKey(header) }}
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr v-for="(row, rowIndex) in arrayItem" :key="rowIndex">
+                              <td v-for="header in getFilteredKeys(arrayItem)" :key="header" class="font-12">
+                                {{ row[header] }}
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
+
 
             </div>
             <div class="modal fade" id="pdfView" tabindex="-1" aria-labelledby="pdfViewLabel" aria-hidden="true">
@@ -336,7 +433,7 @@ const view_only_reportee = ref(0);
 const linkedNew_Id = ref([]);
 const mainStandardForm = ref('')
 const canApprove = ref(false);
-
+const activeTab = ref("activity");
 
 const resetCommentsValidation = () => {
   if (ApproverReason.value.trim() !== "") {
@@ -436,6 +533,102 @@ const updateFormData = (fieldValues) => {
 
   // console.log(emittedFormData.value, "======");
 };
+const linkedForms = ref([]);
+
+// Modal Selected Item
+const selectedLinkedForm = ref({});
+
+function openModal(item) {
+  // selectedLinkedForm.value = item;
+          axiosInstance
+          .get(
+            `${apis.resource}${tableData.value.is_linked_form}/${item.link_form_id}`
+          )
+          .then((res) => {
+            selectedLinkedForm.value = res.data;
+            
+          })
+          .catch((error) => {
+            console.error(`Error fetching data for :`, error);
+          });
+
+
+}
+const excludedFields = [
+  "name",
+  "owner",
+  "creation",
+  "modified",
+  "modified_by",
+  "docstatus",
+  "idx",
+  "parent",
+  "parentfield",
+  "parenttype",
+  "doctype"
+];
+
+// ✅ Normal key-value fields
+const normalFields = computed(() => {
+  return Object.entries(selectedLinkedForm.value)
+    .filter(
+      ([key, value]) =>
+        !excludedFields.includes(key) && !Array.isArray(value)
+    )
+    .map(([key, value]) => ({ key, value }));
+});
+
+// ✅ Array fields (like items)
+const arrayFields = computed(() => {
+  const result = {};
+  for (const [key, value] of Object.entries(selectedLinkedForm.value)) {
+    if (Array.isArray(value) && !excludedFields.includes(key)) {
+      result[key] = value;
+    }
+  }
+  return result;
+});
+
+// ✅ Filter keys in table headers
+function getFilteredKeys(arr) {
+  if (!arr.length) return [];
+  return Object.keys(arr[0]).filter(
+    (key) => !excludedFields.includes(key)
+  );
+}
+
+// ✅ Format key to look pretty
+function formatKey(key) {
+  return key
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (l) => l.toUpperCase());
+}
+function linked_list_btn() {
+  activeTab.value = 'linked'
+  fetching_linked_doc_list()
+}
+
+function fetching_linked_doc_list() {
+  console.log(selectedData.value.name);
+  let data = {
+    standard_form_id: route.query.name ? route.query.name : '',
+    linked_form_name: tableData.value.is_linked_form ? tableData.value.is_linked_form : '',
+  }
+
+  // console.log(ViewOnlyReportee.value); 
+  axiosInstance
+    .post(apis.linked_doc_list, data)
+    .then((response) => {
+      console.log(response.message);
+      linkedForms.value = response.message;
+
+    })
+    .catch((error) => {
+      console.log(error);
+    });
+
+
+}
 
 const ChildTableData = async () => {
   const childEntries = Object.entries(childtablesData.value);
@@ -521,7 +714,7 @@ const dataObje = ref([])
 function approvalStatusFn(dataObj, type) {
   dataObje.value = dataObj;
   // console.log("Approval Data:", dataObj);
-  
+
   let data = {
     property: tableData.value.property,
     doctype: tableData.value.doctype_name,
@@ -533,12 +726,12 @@ function approvalStatusFn(dataObj, type) {
     url_for_approval_id: "",
     current_level: tableData.value.current_level,
   };
-  
+
   axiosInstance
-  .post(apis.requestApproval, { request_details: [data] })
+    .post(apis.requestApproval, { request_details: [data] })
     .then((response) => {
       // console.log("API Response:", response);
-      
+
 
       console.log(selectedcurrentLevel.value === selectedtotalLevels.value, "current level and total level");
       if (response?.message?.success === true) {
@@ -817,10 +1010,11 @@ function receivedForMe(data) {
     })
     .then((res) => {
       tableData.value = res.data[0];
-      
+
       selectedcurrentLevel.value = tableData.value?.current_level;
       selectedtotalLevels.value = tableData.value?.total_levels;
       // console.log(selectedcurrentLevel.value, " current_level");
+      //  console.log(tableData.value.is_linked_form, "is_linked_form==========");
 
       showRequest.value = rebuildToStructuredArray(
         JSON.parse(tableData.value?.json_columns).fields
@@ -866,12 +1060,12 @@ function getdata(formname) {
     .then((res) => {
       if (res.data) {
         doctypeForm.value = res.data[0];
-       
+
         if (doctypeForm.value.returnable_gate_pass_id) {
-          console.log(doctypeForm.value.returnable_gate_pass_id, 'returnable_gate_pass_id');
+          // console.log(doctypeForm.value.returnable_gate_pass_id, 'returnable_gate_pass_id');
           linkedNew_Id.value = doctypeForm.value.returnable_gate_pass_id;
         }
-        
+
         if (doctypeForm.value.form_status == "Completed") {
           console.log(doctypeForm.value.form_status, 'linked_status');
           linked_status.value = doctypeForm.value.form_status;
@@ -1057,24 +1251,24 @@ function Wfactivitylog(formname) {
 }
 
 function toLinkedForm() {
-  if(tableData.value.is_linked_form && linked_status.value !== 'Completed') {
+  if (tableData.value.is_linked_form && linked_status.value !== 'Completed') {
     router.push({
-    name: "RaiseRequest",
-    query: {
-      routepath: route.path,
-      linkedForm: tableData.value.is_linked_form,
-      has_workflow: 'Yes',
-      type: 'myforms',
-      main_form: selectedData.value.doctype_name,
-      business_unit: selectedData.value.business_unit,
-      main_form_Id: selectedData.value.formname,
-      selectedFormStatus: selectedData.value.type,
-    },
-  });
-}else{
-  toast.error("No linked form available", { autoClose: 1000, transition: "zoom" });
-}
-  
+      name: "RaiseRequest",
+      query: {
+        routepath: route.path,
+        linkedForm: tableData.value.is_linked_form,
+        has_workflow: 'Yes',
+        type: 'myforms',
+        main_form: selectedData.value.doctype_name,
+        business_unit: selectedData.value.business_unit,
+        main_form_Id: selectedData.value.formname,
+        selectedFormStatus: selectedData.value.type,
+      },
+    });
+  } else {
+    toast.error("No linked form available", { autoClose: 1000, transition: "zoom" });
+  }
+
   // console.log("Linked Form Data:", tableData.value.is_linked_form);
   // console.log("Selected Data:", selectedData.value);
 
@@ -1143,6 +1337,10 @@ watch(activityData, (newVal) => {
 //   z-index: 1000 !important;
 
 // }
+.linkedformspreview {
+  height: 700px;
+  overflow: scroll;
+}
 
 .approve_height {
   overflow: hidden;
@@ -1434,5 +1632,31 @@ td {
   top: 0;
   background-color: #fff;
   z-index: 10;
+}
+
+
+.activity-log-content {
+  flex-grow: 1;
+}
+
+.tab_btn {
+  border-radius: 0px;
+  border-top-right-radius: 5px;
+  border-top-left-radius: 5px;
+  border-bottom: 1px solid #ddd;
+  font-size: 14px;
+  background-color: #fff;
+
+}
+
+.tab_btn.active {
+  background-color: #fff;
+  color: #000;
+  border-bottom: 0px;
+  font-weight: bold;
+}
+
+.tab_btn:hover {
+  background-color: #f2f2f2;
 }
 </style>

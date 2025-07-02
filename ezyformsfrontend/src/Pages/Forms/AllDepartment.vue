@@ -123,9 +123,9 @@ import { useRoute } from 'vue-router';
 const totalRecords = ref(0);
 const tableheaders = ref([
   { th: "Form Name", td_key: "form_name" },
-  { th: "Form Short Code", td_key: "form_short_name" },
+  // { th: "Form Short Code", td_key: "form_short_name" },
   { th: "Owner Of The Form", td_key: "owner_of_the_form" },
-  { th: "Accessible Departments", td_key: "accessible_departments" },
+  // { th: "Accessible Departments", td_key: "accessible_departments" },
   // { th: "Status", td_key: "form_status" },
   // { th: "Form Status", td_key: "enable" },
 
