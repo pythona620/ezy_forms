@@ -18,7 +18,7 @@
 
       </div>
       <div class="mt-1">
-        <GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true" actionType="dropdown"
+        <GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true" view="viewPreview" isRequest="true"
           raiseRequest="true" :enableDisable="isEnable" @cell-click="viewPreview" @actionClicked="actionCreated"
           @toggle-click="toggleFunction" :actions="actions" @updateFilters="inLineFiltersData"
           :field-mapping="fieldMapping" isFiltersoption="true" />
