@@ -5,7 +5,7 @@ from frappe import _
 
 @frappe.whitelist(allow_guest=True)
 def sign_up(email: str, full_name: str,designation:str|None,emp_phone:str|None,emp_code:str|None,dept:str|None, redirect_to: str|None,acknowledge_on=None,signature=None) -> tuple[int, str]:
-    
+	
 	if is_signup_disabled():
 		return _("Sign Up is disabled")
  
@@ -52,7 +52,7 @@ def sign_up(email: str, full_name: str,designation:str|None,emp_phone:str|None,e
 				"enable":0,
 				"is_web_form":1,
 				"designation":designation,
-    			"signature":signature,
+				"signature":signature,
 				'emp_phone':emp_phone,
 				"department":dept if dept else None,
 				"acknowledge_on": acknowledge_on if acknowledge_on else frappe.utils.now(),
@@ -66,6 +66,11 @@ def sign_up(email: str, full_name: str,designation:str|None,emp_phone:str|None,e
 		if default_role:
 			user.add_roles(default_role)
 
+		if  user:
+			new_doc = frappe.new_doc("Login Check")
+			new_doc.user_id = user
+			new_doc.insert(ignore_permissions=True)
+			frappe.db.commit()
 		if redirect_to:
 			frappe.cache.hset("redirect_after_login", user.name, redirect_to)
 	return  _("Please contact your IT Manager to verify your sign-up")
