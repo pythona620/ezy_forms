@@ -1175,20 +1175,15 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                     # Handle Table fields (child tables)
                     if iteration.get("fieldtype") == "Table":
                         child_table_name = str(iteration["fieldname"])
-                        child_table_records = frappe.get_all(
-                            iteration["options"],
-                            filters={"parent": name},
-                            fields=["*"],
-                            order_by="idx asc",
-                            
-                        )
- 
+                        child_table_records = frappe.get_all( iteration["options"],  filters={"parent": name},   fields=["*"],  order_by="idx asc", )
+
+                       # Get field names and labels dynamically
+                        field_names = [df.fieldname for df in frappe.get_meta(iteration["options"]).fields]
+                        field_labels = {df.fieldname: df.label for df in frappe.get_meta(iteration["options"]).fields}
+                        # Store child table data properly
                         # Get field metadata
                         meta_fields = frappe.get_meta(iteration["options"]).fields
-                        field_names = [df.fieldname for df in meta_fields]
-                        field_labels = {df.fieldname: df.label for df in meta_fields}
                         field_types = {df.fieldname: df.fieldtype for df in meta_fields}
- 
                         processed_child_records = []
                         for record in child_table_records:
                             for field in field_names:
@@ -1210,11 +1205,10 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                                         processed_child_records.append({
                                             field_labels.get(field, field): file_url
                                         })
-
-                        # Add to data_list
-                        if processed_child_records: 
-                            data_list[child_table_name] = processed_child_records
- 
+                        data_list[child_table_name] = [
+                            {field_labels.get(field, field): record.get(field) for field in field_names}
+                            for record in child_table_records
+                        ]
             #########################
                 json_object = list(filter(lambda dict :False if (('value' in dict) and not(dict.get('value')) and (dict.get('fieldname').startswith('approved') or dict.get('fieldname').startswith('approver'))) else True,json_object))
                 form_name = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_name")
