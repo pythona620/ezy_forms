@@ -376,18 +376,13 @@ function gettingDepartmentNames(){
    axiosInstance
     .post(apis.DepartmentNames,dataObj)
     .then((response) => {
-        console.log(response);
             deptartmentData.value = response.message;
-
-
                 formSideBarData.value = deptartmentData.value
                     .sort((a, b) => a.department_name.localeCompare(b.department_name))
                     .map(department => ({
                         name: department.department_name,
                         route: department.name,
                     }));
-     
-
     })
     .catch((error) => {
       console.log(error);

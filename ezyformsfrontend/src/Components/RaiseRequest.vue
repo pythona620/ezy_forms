@@ -51,7 +51,7 @@
             </div>
           </div>
           <RequestPreview :blockArr="blockArr" :formName="selectedData.selectedform" :tableHeaders="tableHeaders"
-            :linked_id="selectedData.main_form_Id" :LinkedChildTableData="LinkedChildTableData" @updateField="handleFieldUpdate"
+            :linked_id="linkedId" :LinkedChildTableData="LinkedChildTableData" @updateField="handleFieldUpdate"
             :tableRowsdata="tableRows" @formValidation="isFormValid = $event" @updateTableData="handleTableData" />
           <!-- @formValidation="isFormValid = $event" -->
 
@@ -186,6 +186,7 @@ const selectedData = ref({
   main_form: route.query.main_form || "", // Retrieve from query
 });
 
+const retun_id_from_linked_doc = ref("");
 const acknowledge=ref('')
 const saveloading = ref(false)
 const business_unit = ref(localStorage.getItem('Bu')); // Retrieve from query
@@ -844,8 +845,8 @@ async function raiseRequestSubmission() {
       : selectedData.value.linkedDocName,
     company_field: business_unit.value,
   };
-  if(selectedData.value.main_form_Id){
-    form.is_linked_form = selectedData.value.main_form_Id;
+  if(selectedData.value.main_form){
+    form.is_linked_form = selectedData.value.main_form;
   }
 
   // Append all child tables
@@ -866,7 +867,7 @@ async function raiseRequestSubmission() {
 
   // Append linked ID if exists
   if (linkedId.value) {
-    form.linked_id = linkedId.value;
+    form.returnable_gate_pass_id = linkedId.value;
   }
 
   console.log(form, "✅ Final Form Data to Submit");
@@ -952,11 +953,11 @@ function gettingDataToLink() {
     .post(apis.gettingDataTo, dataObj)
     .then((response) => {
       const responseData = response.message;
-      linkedId.value = responseData.linked_id;
+      linkedId.value = responseData.returnable_gate_pass_id;
 
       // ✅ Find table name dynamically (excluding 'linked_id')
       const tableKey = Object.keys(responseData).find(
-        (key) => key !== 'linked_id'
+        (key) => key !== 'returnable_gate_pass_id'
       );
 
       if (tableKey) {
