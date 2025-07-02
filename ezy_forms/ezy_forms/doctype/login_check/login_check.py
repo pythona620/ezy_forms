@@ -74,18 +74,3 @@ def update_password(user_id,new_password,company=None):
         
         
 
- 
-@frappe.whitelist(allow_guest=True)
-def employee_update_notification(emp_mail):
-
-    emp_mail,emp_name = frappe.db.get_value("Ezy Employee",{"name":emp_mail},["name","emp_name"])
-    
-    frappe.sendmail(
-            recipients=emp_mail,
-            subject="Employee Profile Status",
-            message=f"""Dear {emp_name},<br><br>
-            Your employee profile has been enabled. Please check your details.<br><br>
-            Regards,<br>IT Team""",
-            now = True
-        )
-    return "Notification sent successfully"

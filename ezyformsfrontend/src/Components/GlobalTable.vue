@@ -12,6 +12,7 @@
             {{ column.th }}
           </th>
           <!-- <th class="text-center fixed-column" v-if="enableDisable == 'true'">Enable/Disable</th> -->
+          <th class="text-center fixed-column" v-if="isRequest == 'true'">Raise Request</th>
           <th class="text-center fixed-column" v-if="isAction == 'true'">Action</th>
         </tr>
       </thead>
@@ -56,6 +57,7 @@
           </td>
           <!-- <td class="text-center fixed-column" v-if="enableDisable == 'true'"></td> -->
           <td class="text-center fixed-column" v-if="isAction == 'true'"></td>
+          <td class="text-center fixed-column" v-if="isRequest == 'true'"></td>
         </tr>
         <template v-if="tData.length">
           <tr v-for="(row, rowIndex) in tData" :key="rowIndex">
@@ -234,12 +236,31 @@
               </div>
             </td>
 
+            <!-- <td v-if="isRequest == 'true' && viewType === 'viewPdf'"  class="text-center fixed-column position-relative">
+                <span class="px-2 font-13 cursor-pointer" @click="handleCellClick(row, rowIndex, 'view')">
+                    View<i class="ri-eye-line eye-cursor ms-1"></i>
+                </span>
+             </td> -->
+
              <td v-if="download === 'true'" class="text-center fixed-column position-relative">
                <span>
                 <i class="bi bi-download eye-cursor" @click="handleCellClick(row, rowIndex, 'download')"></i>
               </span>
              </td>
 
+             <!-- Raise Request Column -->
+            <td v-if="isRequest === 'true'" class="text-center fixed-column position-relative">
+              <span v-if="raiseRequest === 'true'">
+                  <p @click="handleCellClick(row, rowIndex, 'raiseRequest')" class="p-0 m-0"><span class="raiseRequest">Raise Request</span></p>
+              </span>
+            </td>
+
+             <!-- Action Column -->
+            <td v-if="isAction === 'true' && view === 'viewPreview'" class="text-center fixed-column position-relative">
+              <span class=" font-13 view-text" @click="handleCellClick(row, rowIndex, 'view')">
+                View <i class="ri-eye-line eye-cursor ms-1"></i>
+              </span>
+            </td>
 
 
             <!-- <td v-if="actionType === 'Toogle&dropdown'"
@@ -364,11 +385,17 @@ const props = defineProps({
   viewType: {
     type: String,
   },
+  view:{
+    type:String
+  },
   // class: {
   //   type: String,
   //   required: true,
   // },
   isAction: {
+    type: String,
+  },
+  isRequest:{
     type: String,
   },
   isCheckbox: {
@@ -593,7 +620,17 @@ function handleCellClick(check, index, type) {
 // .tooltip-text:hover::after {
 //   opacity: 1;
 // }
-
+.raiseRequest{
+  background-color: transparent;
+  border-bottom: 1px solid blue;
+  font-size: 13px;
+  color: blue;
+  cursor: pointer;
+  font-weight:300;
+}
+// .raiseRequest:hover{
+//   border-bottom: 1px solid blue;
+// }
 
 .form-check-input {
   font-size: 15px;
@@ -894,6 +931,10 @@ th:first-child {
 
 .eye-cursor {
   cursor: pointer;
+}
+.view-text{
+  font-size: 13px;
+  font-weight: 300;
 }
 
 .select-filetrs:focus {
