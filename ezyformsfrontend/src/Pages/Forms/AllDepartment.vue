@@ -18,7 +18,7 @@
 
       </div>
       <div class="mt-1">
-        <GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true" actionType="dropdown"
+        <GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true" view="viewPreview" isRequest="true"
           raiseRequest="true" :enableDisable="isEnable" @cell-click="viewPreview" @actionClicked="actionCreated"
           @toggle-click="toggleFunction" :actions="actions" @updateFilters="inLineFiltersData"
           :field-mapping="fieldMapping" isFiltersoption="true" />
@@ -125,7 +125,7 @@ const tableheaders = ref([
   { th: "Form Name", td_key: "form_name" },
   { th: "Form Short Code", td_key: "form_short_name" },
   { th: "Owner Of The Form", td_key: "owner_of_the_form" },
-  { th: "Accessible Departments", td_key: "accessible_departments" },
+  // { th: "Accessible Departments", td_key: "accessible_departments" },
   // { th: "Status", td_key: "form_status" },
   // { th: "Form Status", td_key: "enable" },
 
