@@ -17,6 +17,7 @@
   "emp_phone",
   "emp_mail_id",
   "department",
+  "acknowledgement",
   "acknowledge_on",
   "designation",
   "last_login",
@@ -118,11 +119,17 @@
    "fieldname": "enable_on",
    "fieldtype": "Datetime",
    "label": "Enable on"
+  },
+  {
+   "fieldname": "acknowledgement",
+   "fieldtype": "Link",
+   "label": "Acknowledgement",
+   "options": "Acknowledgement"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-06-24 13:13:37.012718",
+ "modified": "2025-07-02 11:49:44.984614",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
  "name": "Ezy Employee",
