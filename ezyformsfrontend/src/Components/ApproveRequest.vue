@@ -182,10 +182,10 @@
                 <div class="col-xl-12 col-lg-12 col-md-12">
                   <div class=" d-flex justify-content-between gap-2">
                     <div>
-                      <button v-if="linked_status !== 'Completed' && tableData?.status === 'Completed'" type="button"
+                      <button v-if="selectedData.type == 'myforms' && linked_status !== 'Completed'  && tableData?.status === 'Completed' && tableData.is_linked_form !== null" type="button"
                         class="btn btn-light font-14 nowrap h-auto fw-bold border border-dark   CreateDepartments "
                         data-bs-target="#pdfView" @click="toLinkedForm">
-                        Raise Link<i class="bi bi-arrow-right px-2"></i>
+                        Raise Link  <i class="bi bi-arrow-right px-2"></i>
                       </button>
                     
                     </div>
@@ -320,6 +320,7 @@ const isCommentsValid = ref(true);
 const activityData = ref([]);
 const ApproverReason = ref("");
 const selectedcurrentLevel = ref("");
+const selectedtotalLevels = ref("");
 const doctypeForm = ref([]);
 const loading = ref(false);
 const rejectLoad = ref(false)
@@ -520,7 +521,7 @@ const dataObje = ref([])
 function approvalStatusFn(dataObj, type) {
   dataObje.value = dataObj;
   // console.log("Approval Data:", dataObj);
-
+  
   let data = {
     property: tableData.value.property,
     doctype: tableData.value.doctype_name,
@@ -532,16 +533,16 @@ function approvalStatusFn(dataObj, type) {
     url_for_approval_id: "",
     current_level: tableData.value.current_level,
   };
-
+  
   axiosInstance
-    .post(apis.requestApproval, { request_details: [data] })
+  .post(apis.requestApproval, { request_details: [data] })
     .then((response) => {
       // console.log("API Response:", response);
+      
 
-
+      console.log(selectedcurrentLevel.value === selectedtotalLevels.value, "current level and total level");
       if (response?.message?.success === true) {
-        // console.log(tableData.value.current_level,tableData.value.total_levels,"current level and total level");
-        if (tableData.value.current_level === tableData.value.total_levels && mainStandardForm.value.length && linked_status.value !== 'Completed') {
+        if (selectedcurrentLevel.value === selectedtotalLevels.value && mainStandardForm.value.length && doctypeForm.value.return_gate_pass_name.length) {
           DynamicCalculateMethod(); // Call this only if it's the last level
         }
         // DynamicCalculateMethod()
@@ -816,8 +817,9 @@ function receivedForMe(data) {
     })
     .then((res) => {
       tableData.value = res.data[0];
-      // console.log(tableData.value?.name,"ppppppppppppp");
+      
       selectedcurrentLevel.value = tableData.value?.current_level;
+      selectedtotalLevels.value = tableData.value?.total_levels;
       // console.log(selectedcurrentLevel.value, " current_level");
 
       showRequest.value = rebuildToStructuredArray(
@@ -864,19 +866,21 @@ function getdata(formname) {
     .then((res) => {
       if (res.data) {
         doctypeForm.value = res.data[0];
-        console.log(typeof doctypeForm.value.form_status, "lll");
+       
         if (doctypeForm.value.returnable_gate_pass_id) {
-          console.log(doctypeForm.value.returnable_gate_pass_id, 'linked_id');
+          console.log(doctypeForm.value.returnable_gate_pass_id, 'returnable_gate_pass_id');
           linkedNew_Id.value = doctypeForm.value.returnable_gate_pass_id;
         }
-        if (doctypeForm.value.form_status === 'Completed') {
-          console.log(doctypeForm.value.form_status, 'status');
+        
+        if (doctypeForm.value.form_status == "Completed") {
+          console.log(doctypeForm.value.form_status, 'linked_status');
           linked_status.value = doctypeForm.value.form_status;
 
         }
+        // console.log(doctypeForm.value.return_gate_pass_name);
 
-        if (doctypeForm.value.return_gate_pass) {
-          mainStandardForm.value = doctypeForm.value.return_gate_pass;
+        if (doctypeForm.value.return_gate_pass_name) {
+          mainStandardForm.value = doctypeForm.value.return_gate_pass_name;
         }
 
 
@@ -1051,9 +1055,10 @@ function Wfactivitylog(formname) {
       console.error("Error fetching activity data:", error);
     });
 }
-function toLinkedForm() {
 
-  router.push({
+function toLinkedForm() {
+  if(tableData.value.is_linked_form && linked_status.value !== 'Completed') {
+    router.push({
     name: "RaiseRequest",
     query: {
       routepath: route.path,
@@ -1066,6 +1071,13 @@ function toLinkedForm() {
       selectedFormStatus: selectedData.value.type,
     },
   });
+}else{
+  toast.error("No linked form available", { autoClose: 1000, transition: "zoom" });
+}
+  
+  // console.log("Linked Form Data:", tableData.value.is_linked_form);
+  // console.log("Selected Data:", selectedData.value);
+
 }
 
 function NewActivityLogData(name) {

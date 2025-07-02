@@ -177,47 +177,41 @@
                             </div>
                           </div>
                         </template>
-                        <!-- <i class="bi bi-x-lg position-absolute text-danger cursor-pointer"
-                            :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'd-none' : ''"
-                            style="top: -10px; right: -5px; font-size: 13px; background: white; border-radius: 50%; padding: 3px"
-                            @click="removeFileAtIndex(i)"></i> -->
+
 
                         <!-- @click="openInNewWindow(field.value)" -->
                         <template v-else-if="field.fieldtype == 'Attach'">
                           <div v-if="field.value" class="d-flex gap-2 align-items-center flex-wrap">
                             <div v-for="(file, i) in getFileArray(field.value)" :key="i"
                               class="position-relative d-inline-block"
-                              :class="props.readonlyFor === 'true' ? ' border-bottom-0' : ''">
+                              :class="props.readonlyFor === 'true' ? 'border-bottom-0' : ''">
+
                               <!-- Show file input if flagged for replacement -->
                               <div v-if="replaceInputIndexes.includes(i)">
                                 <input type="file" accept="image/jpeg,image/png,application/pdf"
                                   class="form-control previewInputHeight font-10"
                                   @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
                               </div>
+
                               <!-- Image block -->
                               <template v-else-if="isImageFile(file)">
                                 <template v-if="blockIndex === 0">
-                                  <span class="cursor-pointer text-decoration-underline font-12 d-flex "
-                                    @click="openFile(file)">
-                                    <a href="">
-
+                                  <span class="cursor-pointer text-decoration-underline font-12 d-flex"
+                                    @click="openFileModal(file)">
                                     <i class="bi bi-file-earmark-image fs-4"></i>
-                                    </a>
                                   </span>
                                 </template>
                                 <template v-else>
-
                                   <img :src="file" class="img-thumbnail cursor-pointer border-0 border-bottom-0"
                                     @click="openFile(file)" style="max-width: 80px; max-height: 80px" />
                                 </template>
                               </template>
+
                               <!-- PDF block -->
                               <a v-else :href="file" target="_blank"
-                                class="d-flex align-items-center justify-content-center bg-light"
-                                style="width: 30px; height: 30px; text-decoration: none;">
-                                <i class="bi bi-filetype-pdf fs-4" width="50px"></i>
-                                <!-- <img src="../assets/attach.png" alt="" width="50px">  -->
-
+                                class="d-flex align-items-center justify-content-center border rounded bg-light"
+                                style="width: 20px; height: 20px; text-decoration: none;">
+                                <img src="../assets/attach.png" alt="" width="25px">
                               </a>
                             </div>
                           </div>
@@ -229,7 +223,55 @@
                             :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
                             class="form-control previewInputHeight font-10" multiple
                             @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
+                        <div class="modal fade" id="fileModal" tabindex="-1" aria-labelledby="fileModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title font-14" id="fileModalLabel">Attachment</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"
+          aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body d-flex flex-column gap-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <span class="font-13">{{ selectedFileName }}</span>
+          <div class="d-flex gap-2 align-items-center">
+            <!-- ✅ Toggle Button -->
+            <button type="button" class="btn btn-light btn-sm"
+              @click="showPreview = !showPreview">
+              {{ showPreview ? 'Hide' : 'Show' }}
+            </button>
+
+            <!-- Download Button -->
+            <a :href="selectedFileUrl" download class="btn btn-light btn-sm">Download</a>
+          </div>
+        </div>
+
+        <!-- ✅ Preview Area -->
+        <div v-if="showPreview" class="preview-area mt-2">
+          <!-- Image Preview -->
+          <img v-if="isImageFile(selectedFileUrl)" :src="selectedFileUrl"
+            class="img-fluid border rounded" style="max-width: 100%;" />
+
+          <!-- PDF Preview -->
+          <iframe v-else-if="isPdfFile(selectedFileUrl)"
+    :src="selectedFileUrl"
+    width="100%" height="500px"
+    style="border:1px solid #ccc;">
+  </iframe>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
                         </template>
+
+                        <!-- Modal -->
+
 
 
                         <!-- Hover preview -->
@@ -539,7 +581,7 @@
                                             v-for="(file, i) in row[field.fieldname].split(',').filter(f => f.trim() !== '')"
                                             :key="i">
                                             <span class="cursor-pointer text-decoration-underline d-flex mb-1"
-                                              @click="openFile(file)">
+                                              @click="openFileModal(file)">
                                               View <i class="bi bi-eye-fill ps-1"></i>
                                             </span>
                                           </span>
@@ -560,9 +602,9 @@
                                               :key="index" class="position-relative d-inline-block"
                                               @mouseover="hovered = index" @mouseleave="hovered = null">
                                               <!-- Preview click -->
-                                              <div @click="openPreview(fileUrl)" style="cursor: pointer">
+                                              <div @click="openFileModal(file)" style="cursor: pointer">
                                                 <!-- Show Image Thumbnail -->
-                                                <img v-if="isImageChildFile(fileUrl)" :src="fileUrl"
+                                                <img v-if="openFileModal(file)" :src="fileUrl"
                                                   class="img-thumbnail mt-2 border-0"
                                                   style="max-width: 100px; max-height: 100px" />
 
@@ -1240,11 +1282,11 @@ const selectedFile = ref('');
 
 const previewVisible = ref(false);
 
-const openFileModal = (file) => {
-  selectedFile.value = file;
-  previewVisible.value = false;  // Reset preview
-  showModal.value = true;
-};
+// const openFileModal = (file) => {
+//   selectedFile.value = file;
+//   previewVisible.value = false;  // Reset preview
+//   showModal.value = true;
+// };
 
 // const closeModal = () => {
 //   showModal.value = false;
@@ -1474,39 +1516,28 @@ const clearImage = (
 };
 
 
+// Modal handling
+const selectedFileName = ref('');
+const selectedFileUrl = ref('');
+const showPreview = ref(false);
+function openFileModal(file) {
+  selectedFileUrl.value = file;
+  const parts = file.split('/');
+  selectedFileName.value = parts[parts.length - 1];
+  showPreview.value = false; // Reset preview when opening modal again
+
+  const modal = new bootstrap.Modal(document.getElementById('fileModal'));
+  modal.show();
+}
+
+
+const isPdfFile = (url) => {
+  return url.match(/\.pdf$/i);
+};
 
 </script>
 
 <style lang="scss" scoped>
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background-color: rgba(0, 0, 0, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-}
-
-.modal-content {
-  background: white;
-  border-radius: 8px;
-  width: 80vw;
-  max-width: 900px;
-  overflow: hidden;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-}
-
-.modal-header,
-.modal-footer {
-  padding: 10px 16px;
-  background: #f1f1f1;
-}
-
-.modal-body {
-  padding: 16px;
-}
-
 .btn-close {
   background: transparent;
   border: none;

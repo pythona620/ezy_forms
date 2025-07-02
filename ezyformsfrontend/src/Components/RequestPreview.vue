@@ -1482,7 +1482,7 @@ const updateDateTimeFields = () => {
                                 // console.log("Setting field.value:", field.value); // Debugging log
                                 emit("updateField", field);
                             }
-                            if(field.fieldname.includes('linked_id') || field.label.includes('Linked ID')){
+                            if(field.fieldname.includes('returnable_gate_pass_id') || field.label.includes('Returnable Gate Pass Id')){
                                 
                                 field.value = props.linked_id;
                                 emit("updateField", field);
