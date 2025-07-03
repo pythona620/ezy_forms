@@ -12,6 +12,7 @@
   "form_category",
   "series",
   "owner_of_the_form",
+  "form_department",
   "active",
   "count",
   "accessible_departments",
@@ -43,9 +44,10 @@
   },
   {
    "fieldname": "owner_of_the_form",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Owner Of The Form"
+   "label": "Owner Of The Form",
+   "options": "Ezy Departments"
   },
   {
    "default": "0",
@@ -138,11 +140,19 @@
    "fieldtype": "Link",
    "label": "Is linked Form",
    "options": "DocType"
+  },
+  {
+   "fetch_from": "owner_of_the_form.department_name",
+   "fieldname": "form_department",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Form Department",
+   "options": "Ezy Departments"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-06-26 16:01:43.811819",
+ "modified": "2025-07-02 18:22:56.462796",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
  "name": "Ezy Form Definitions",
