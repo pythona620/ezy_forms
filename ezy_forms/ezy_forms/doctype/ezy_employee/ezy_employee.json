@@ -24,7 +24,11 @@
   "last_ip",
   "reporting_to",
   "reporting_designation",
-  "signature"
+  "signature",
+  "attachment_one",
+"attachment_two",
+"attachment_three",
+"attachment_four" 
  ],
  "fields": [
   {
@@ -93,6 +97,23 @@
    "fieldtype": "Attach",
    "label": "Signature"
   },
+  {
+    "fieldname": "attachment_four",
+    "fieldtype": "Attach",
+    "label": "Attachment Four"
+   },  {
+    "fieldname": "attachment_one",
+    "fieldtype": "Attach",
+    "label": "Attachment One"
+   },  {
+    "fieldname": "attachment_three",
+    "fieldtype": "Attach",
+    "label": "Attachment Three"
+   },  {
+    "fieldname": "attachment_two",
+    "fieldtype": "Attach",
+    "label": "Attachment Two"
+   },
   {
    "fieldname": "emp_phone",
    "fieldtype": "Data",
