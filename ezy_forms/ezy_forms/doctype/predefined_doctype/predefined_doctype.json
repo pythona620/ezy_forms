@@ -27,7 +27,7 @@
   {
    "fieldname": "form_json",
    "fieldtype": "Small Text",
-   "label": "form json"
+   "label": "form json" 
   },
   {
    "fieldname": "form_status",
