@@ -1,20 +1,24 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "field:form_name",
  "creation": "2025-06-23 12:10:50.892623",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
   "form_name",
-  "installed",
+  "form_status",
   "section_break_ivzx",
-  "form_json"
+  "form_json",
+  "is_linked",
+  "linked_form_name"
  ],
  "fields": [
   {
    "fieldname": "form_name",
    "fieldtype": "Data",
-   "label": "Form Name"
+   "label": "Form Name",
+   "unique": 1
   },
   {
    "fieldname": "section_break_ivzx",
@@ -26,18 +30,34 @@
    "label": "form json"
   },
   {
-   "fieldname": "installed",
+   "fieldname": "form_status",
    "fieldtype": "Select",
-   "label": "Installed",
-   "options": "\nYes\nNo"
+   "label": "Form status",
+   "options": "\nEnable\nDisabled"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_linked",
+   "fieldtype": "Check",
+   "label": "Is linked",
+   "options": "\n"
+  },
+  {
+   "depends_on": "eval:doc.is_linked == 1",
+   "description": "Note:If have a linked form first create the form ",
+   "fieldname": "linked_form_name",
+   "fieldtype": "Link",
+   "label": "Linked Form Name",
+   "options": "DocType"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-02 12:23:46.982421",
+ "modified": "2025-07-03 11:16:40.826750",
  "modified_by": "Administrator",
  "module": "ezy_forms",
  "name": "Predefined Doctype",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
