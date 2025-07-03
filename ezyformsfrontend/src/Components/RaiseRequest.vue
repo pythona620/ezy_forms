@@ -212,6 +212,8 @@ const filterObj = ref({
   limit_start: 0,
   limitPageLength: 100,
 });
+const checkingIs_linked = ref([]);
+const is_linked_form = ref("");
 const LinkedChildTableData = ref([]);
 function backToForm() {
   blockArr.value = [];
@@ -246,6 +248,7 @@ const getClientIP = async () => {
 
 onMounted(() => {
   loadInitialData();
+  console.log(route.query);
 });
 
 const loadInitialData = () => {
@@ -331,6 +334,7 @@ function fetchDepartmentDetails() {
       console.error('Error fetching department details:', error)
     })
 }
+
 
 function toSelectedFormRaise() {
   router.push({
@@ -647,6 +651,7 @@ function formDefinations() {
       params: queryParams,
     })
     .then((res) => {
+      checkingIs_linked.value = res.data[0];
       const form_json = res.data[0].form_json;
 
       blockArr.value = rebuildToStructuredArray(JSON.parse(form_json).fields);
@@ -833,10 +838,10 @@ async function raiseRequestSubmission() {
 
   const childEntries = Object.entries(childtablesData.value);
 
-  if (!childEntries.length) {
-    toast.error("No child table data found!");
-    return;
-  }
+  // if (!childEntries.length) {
+  //   toast.error("No child table data found!");
+  //   return;
+  // }
 
   // Prepare the form data
   const form = {
@@ -845,9 +850,7 @@ async function raiseRequestSubmission() {
       : selectedData.value.linkedDocName,
     company_field: business_unit.value,
   };
-  if(selectedData.value.main_form){
-    form.is_linked_form = selectedData.value.main_form;
-  }
+ 
 
   // Append all child tables
   childEntries.forEach(([tableName, rows]) => {
@@ -1276,7 +1279,7 @@ function request_raising_fn(item) {
 // window.location.reload();
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .zindex-dropdown {
   z-index: 1050;
   max-height: 200px;

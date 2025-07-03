@@ -8,7 +8,7 @@
     </div>
     <div class="mt-2">
       <!-- actionType="dropdown" -->
-      <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" viewType="viewPdf" isCheckbox="true"
+      <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" isCheckbox="true" viewType="viewPdf"  
         @cell-click="viewPreview" :actions="actions" @actionClicked="actionCreated" isFiltersoption="true"
         :field-mapping="fieldMapping" @updateFilters="inLineFiltersData" />
       <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
@@ -217,7 +217,7 @@ const loading = ref(false);
 const tableheaders = ref([
   { th: "Request ID", td_key: "name" }, 
   { th: "Form Name", td_key: "doctype_name" },
-  // { th: "Linked Form", td_key: "is_linked_form" },
+  { th: "Linked Form", td_key: "is_linked_form" },
   // { th: "Business Unit", td_key: "property" },
   // { th: "Form category", td_key: "doctype_name" },
   // { th: "Role", td_key: "role" },
@@ -235,20 +235,41 @@ const actions = ref([
   // { name: 'Edit Form', icon: 'fa-solid fa-edit' },
 ]);
 
-function viewPreview(data) {
-  router.push({
-    name: "ApproveRequest",
-    query: {
-      routepath: route.path,
-      name: data.name,
-      doctype_name: data.doctype_name,
-      business_unit:data.property,
-      status:data.status,
-      type: "myforms",
-      readOnly: 'true'
+function viewPreview(data,idex,type) {
+  if(type === 'view'){
 
-    },
-  });
+    router.push({
+      name: "ApproveRequest",
+      query: {
+        routepath: route.path,
+        name: data.name,
+        doctype_name: data.doctype_name,
+        business_unit:data.property,
+        status:data.status,
+        type: "myforms",
+        readOnly: 'true'
+        
+      },
+    });
+  }
+  // if(type === 'raiseRequest'){
+  //   router.push({
+  //     name: "RaiseRequest",
+  //     query: {
+  //       routepath: route.path,
+  //       main_form: data.doctype_name,
+  //       main_form_id: data.name,
+  //       business_unit:data.property,
+  //       status:data.status,
+  //       type: "myforms",
+  //       readOnly: 'false',
+  //       has_workflow: 'Yes',
+  //       linkedForm:data.is_linked_form,
+  //       selectedFormStatus: data.status
+  //     }
+  //     });
+
+  // }
 }
 function handleEditClick() {
   const modalElement = document.getElementById("viewRequest");

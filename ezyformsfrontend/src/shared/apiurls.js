@@ -27,6 +27,7 @@ export const doctypes = {
   ActivityLog:'Activity Log',
   version:'Version',
   
+  
 
 };
 
@@ -82,6 +83,7 @@ export const apis = {
   deleteEmployee:domain+`/method/ezy_forms.ezy_forms.doctype.ezy_employee.ezy_employee.employee_rejection`,
   unablUpdateEmail:domain+`/method/ezy_forms.ezy_forms.doctype.login_check.login_check.employee_update_notification`,
   DepartmentNames: domain + `/method/ezy_forms.ezy_forms.doctype.ezy_departments.ezy_departments.side_nav_department_and_forms`,
+  linked_doc_list: domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.linked_form_list`,
   // getReportData: domain + `/api/method/frappe.utils.print_format.download_pdf`
 };
 

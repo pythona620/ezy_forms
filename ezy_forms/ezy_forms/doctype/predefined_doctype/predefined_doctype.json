@@ -6,7 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "form_name",
-  "form_status",
+  "installed",
   "section_break_ivzx",
   "form_json"
  ],
@@ -17,12 +17,6 @@
    "label": "Form Name"
   },
   {
-   "fieldname": "form_status",
-   "fieldtype": "Select",
-   "label": "Form status",
-   "options": "\nEnable\nDisabled"
-  },
-  {
    "fieldname": "section_break_ivzx",
    "fieldtype": "Section Break"
   },
@@ -30,11 +24,17 @@
    "fieldname": "form_json",
    "fieldtype": "Small Text",
    "label": "form json"
+  },
+  {
+   "fieldname": "installed",
+   "fieldtype": "Select",
+   "label": "Installed",
+   "options": "\nYes\nNo"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-06-23 16:29:01.486715",
+ "modified": "2025-07-02 12:23:46.982421",
  "modified_by": "Administrator",
  "module": "ezy_forms",
  "name": "Predefined Doctype",
