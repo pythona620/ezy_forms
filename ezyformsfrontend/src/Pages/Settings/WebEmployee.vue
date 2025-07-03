@@ -634,7 +634,7 @@ watch(
       const matchedEmployee = employeeEmails.find(emp => emp.emp_mail_id === newVal);
       if (matchedEmployee) {
         createEmployee.reporting_designation = matchedEmployee.designation || '';
-        console.log(createEmployee.reporting_designation,newVal,createEmployee.reporting_to);
+        // console.log(createEmployee.reporting_designation,newVal,createEmployee.reporting_to);
       } else {
         createEmployee.reporting_designation = '';
       }
@@ -1487,7 +1487,7 @@ function deleteEmployee(){
     .post(apis.deleteEmployee, payload)
     .then((res) => {
      if(res){
-       console.log("Delete Success:", res);
+      //  console.log("Delete Success:", res);
         toast.success(res.message)
         employeeData()
         const modal = bootstrap.Modal.getInstance(
@@ -1566,7 +1566,7 @@ function EmpUnableMail(){
     .post(apis.unablUpdateEmail, payload)
     .then((res) => {
       if(res){
-        console.log(res);
+        // console.log(res);
         employeeData()
       }
     })
@@ -1658,7 +1658,7 @@ const uploadFile = (file, field) => {
         }
         selectedEmpRow.value[field] = res.message.file_url;
         uploadedFields.value.push(field);
-        console.log(`Uploaded ${field}:`, res.message.file_url);
+        // console.log(`Uploaded ${field}:`, res.message.file_url);
         // console.log("Uploaded file URL:", res.message.file_url);
       } else {
         console.error("file_url not found in the response.");
@@ -1938,7 +1938,7 @@ function createEmpl() {
     department: createEmployee.value.department?.name || "", // ✅ only send name
     doctype: doctypes.EzyEmployeeList,
   };
-  console.log(dataObj);
+  // console.log(dataObj);
   loading.value = true;
 
   axiosInstance

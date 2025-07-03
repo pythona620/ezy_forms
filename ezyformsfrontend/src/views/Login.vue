@@ -848,7 +848,7 @@ export default {
 
       // Optional: clear error or store locally
       this.errors.signature = null;
-      console.log("Signature ready for upload:", file);
+      // console.log("Signature ready for upload:", file);
     },
     handleSignUp() {
       const signatureComponent = this.$refs.digitalSignature;
@@ -901,7 +901,7 @@ export default {
             if (field === "signature") {
               this.SignUpdata.signature = res.message.file_url;
             }
-            console.log("Uploaded file URL:", this.SignUpdata.signature);
+            // console.log("Uploaded file URL:", this.SignUpdata.signature);
           } else {
             console.error("file_url not found in the response.");
           }
@@ -931,7 +931,7 @@ export default {
     onSignatureUploaded(signatureData) {
       this.SignUpdata.signature = signatureData;
       this.errors.signature = null;
-      console.log('Signature uploaded:', signatureData);
+      // console.log('Signature uploaded:', signatureData);
     },
 
 
