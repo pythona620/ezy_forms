@@ -7,7 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "form_name",
-  "form_status",
+  "installed",
   "section_break_ivzx",
   "form_json",
   "is_linked",
@@ -27,13 +27,7 @@
   {
    "fieldname": "form_json",
    "fieldtype": "Small Text",
-   "label": "form json" 
-  },
-  {
-   "fieldname": "form_status",
-   "fieldtype": "Select",
-   "label": "Form status",
-   "options": "\nYes\nNo"
+   "label": "form json"
   },
   {
    "default": "0",
@@ -49,11 +43,17 @@
    "fieldtype": "Link",
    "label": "Linked Form Name",
    "options": "DocType"
+  },
+  {
+   "fieldname": "installed",
+   "fieldtype": "Select",
+   "label": "Installed",
+   "options": "\nYes\nNo"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-03 11:16:40.826750",
+ "modified": "2025-07-03 11:37:20.703513",
  "modified_by": "Administrator",
  "module": "ezy_forms",
  "name": "Predefined Doctype",
