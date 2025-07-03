@@ -502,16 +502,15 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            Are you sure you want to <span id="empActionText"></span> "<span id="empRowName"></span>"? <br>
+            Are you sure you want to <span id="empActionText"></span> "<span id="empRowName"></span>"?
 
-            <div v-if="empActionText=='Disable'">
+            <!-- <div v-if="empActionText=='Disable'">
               <label for="name" class="font-13 mt-3">Attachments</label>
             <input type="file" @change="handleSingleAttach" class="form-control mb-3" :disabled="uploadedFields.length >= 4" />
             <div v-if="uploadedFields.length >= 4" class="text-success mt-2">
               All attachments uploaded.
             </div>
 
-            <!-- Uploaded Images List -->
             <div class="row mt-3">
               <div
                 v-for="(field, index) in uploadedFields"
@@ -533,7 +532,7 @@
               </div>
 
             </div>
-            </div>
+            </div> -->
 
           </div>
           <div class="modal-footer">
@@ -635,7 +634,7 @@ watch(
       const matchedEmployee = employeeEmails.find(emp => emp.emp_mail_id === newVal);
       if (matchedEmployee) {
         createEmployee.reporting_designation = matchedEmployee.designation || '';
-        console.log(createEmployee.reporting_designation,newVal,createEmployee.reporting_to);
+        // console.log(createEmployee.reporting_designation,newVal,createEmployee.reporting_to);
       } else {
         createEmployee.reporting_designation = '';
       }
@@ -1488,7 +1487,7 @@ function deleteEmployee(){
     .post(apis.deleteEmployee, payload)
     .then((res) => {
      if(res){
-       console.log("Delete Success:", res);
+      //  console.log("Delete Success:", res);
         toast.success(res.message)
         employeeData()
         const modal = bootstrap.Modal.getInstance(
@@ -1567,7 +1566,7 @@ function EmpUnableMail(){
     .post(apis.unablUpdateEmail, payload)
     .then((res) => {
       if(res){
-        console.log(res);
+        // console.log(res);
         employeeData()
       }
     })
@@ -1659,7 +1658,7 @@ const uploadFile = (file, field) => {
         }
         selectedEmpRow.value[field] = res.message.file_url;
         uploadedFields.value.push(field);
-        console.log(`Uploaded ${field}:`, res.message.file_url);
+        // console.log(`Uploaded ${field}:`, res.message.file_url);
         // console.log("Uploaded file URL:", res.message.file_url);
       } else {
         console.error("file_url not found in the response.");
@@ -1939,7 +1938,7 @@ function createEmpl() {
     department: createEmployee.value.department?.name || "", // ✅ only send name
     doctype: doctypes.EzyEmployeeList,
   };
-  console.log(dataObj);
+  // console.log(dataObj);
   loading.value = true;
 
   axiosInstance
