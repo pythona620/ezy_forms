@@ -51,7 +51,7 @@
             </div>
           </div>
           <RequestPreview :blockArr="blockArr" :formName="selectedData.selectedform" :tableHeaders="tableHeaders"
-            :linked_id="selectedData.main_form_Id" :LinkedChildTableData="LinkedChildTableData" @updateField="handleFieldUpdate"
+            :linked_id="linkedId" :LinkedChildTableData="LinkedChildTableData" @updateField="handleFieldUpdate"
             :tableRowsdata="tableRows" @formValidation="isFormValid = $event" @updateTableData="handleTableData" />
           <!-- @formValidation="isFormValid = $event" -->
 
@@ -110,8 +110,8 @@
               <span> <i class="bi bi-x"></i></span>Clear form
             </button>
             <!-- :disabled="!isFormValid" -->
-            <button v-if="!selectedData.selectedFormId" data-bs-toggle="modal" data-bs-target="#ExportEmployeeModal" class="btn btn-dark font-12" type="submit"
-              >
+            <button v-if="!selectedData.selectedFormId" data-bs-toggle="modal" data-bs-target="#ExportEmployeeModal"
+              class="btn btn-dark font-12" type="submit">
               {{ selectedData.hasWorkflow == 'No' ? 'Save' : 'Raise Request' }}
             </button>
             <!-- <button  class="btn btn-dark font-12" type="submit"
@@ -135,24 +135,31 @@
       </div>
     </div>
     <div class="modal fade" id="ExportEmployeeModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title">Acknowledgement</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-              <div class="modal-body">
-                <input type="checkbox" v-model="acknowledge" class="me-1 mt-1" />
-                  I acknowledge that the information provided is correct.
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-dark" :disabled="!acknowledge || saveloading" @click="raiseRequestSubmission">Yes, Proceed</button>
-              </div>
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Acknowledgement</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <input type="checkbox" v-model="acknowledge" class="me-1 mt-1" />
+            I acknowledge that the information provided is correct.
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary font-12" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-dark" :disabled="!acknowledge || saveloading"
+              @click="raiseRequestSubmission">
+              <span v-if="saveloading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              <span v-if="!saveloading">
+                <span class="font-12 fw-bold">Yes, Proceed</span>
+              </span>
+
+            </button>
           </div>
         </div>
       </div>
-    
+    </div>
+
   </div>
 </template>
 
@@ -186,7 +193,8 @@ const selectedData = ref({
   main_form: route.query.main_form || "", // Retrieve from query
 });
 
-const acknowledge=ref('')
+const retun_id_from_linked_doc = ref("");
+const acknowledge = ref('')
 const saveloading = ref(false)
 const business_unit = ref(localStorage.getItem('Bu')); // Retrieve from query
 const isFormValid = ref(false);
@@ -211,13 +219,15 @@ const filterObj = ref({
   limit_start: 0,
   limitPageLength: 100,
 });
+const checkingIs_linked = ref([]);
+const is_linked_form = ref("");
 const LinkedChildTableData = ref([]);
 function backToForm() {
   blockArr.value = [];
   router.push({
     path: selectedData.value.routepath,
     query: {
-      
+
       routepath: '/todo/raisedbyme',
       doctype_name: route.query.main_form,
       business_unit: selectedData.value.selectedBusiness_unit,
@@ -228,13 +238,13 @@ function backToForm() {
 }
 
 const ip_address = ref(null)
- 
+
 const getClientIP = async () => {
   try {
     const response = await fetch('https://api.ipify.org?format=json')
     const data = await response.json()
     ip_address.value = data.ip
-    console.log("ip_address.value",ip_address.value);
+    console.log("ip_address.value", ip_address.value);
 
   } catch (error) {
     console.error('Error fetching IP:', error)
@@ -245,6 +255,7 @@ const getClientIP = async () => {
 
 onMounted(() => {
   loadInitialData();
+  console.log(route.query);
 });
 
 const loadInitialData = () => {
@@ -254,10 +265,10 @@ const loadInitialData = () => {
   getClientIP()
   formDefinations();
   const storedData = localStorage.getItem("employeeData");
-   if (storedData) {
+  if (storedData) {
     employeeData.value = JSON.parse(storedData);
     // console.log("employeeData======================",employeeData.value);
-  } 
+  }
 
   // raiseRequest();
 };
@@ -330,6 +341,7 @@ function fetchDepartmentDetails() {
       console.error('Error fetching department details:', error)
     })
 }
+
 
 function toSelectedFormRaise() {
   router.push({
@@ -646,6 +658,7 @@ function formDefinations() {
       params: queryParams,
     })
     .then((res) => {
+      checkingIs_linked.value = res.data[0];
       const form_json = res.data[0].form_json;
 
       blockArr.value = rebuildToStructuredArray(JSON.parse(form_json).fields);
@@ -832,21 +845,19 @@ async function raiseRequestSubmission() {
 
   const childEntries = Object.entries(childtablesData.value);
 
-  if (!childEntries.length) {
-    toast.error("No child table data found!");
-    return;
-  }
+  // if (!childEntries.length) {
+  //   toast.error("No child table data found!");
+  //   return;
+  // }
 
   // Prepare the form data
   const form = {
-    doctype: selectedData.value.selectedform 
-      ? selectedData.value.selectedform 
+    doctype: selectedData.value.selectedform
+      ? selectedData.value.selectedform
       : selectedData.value.linkedDocName,
     company_field: business_unit.value,
   };
-  if(selectedData.value.main_form_Id){
-    form.is_linked_form = selectedData.value.main_form_Id;
-  }
+
 
   // Append all child tables
   childEntries.forEach(([tableName, rows]) => {
@@ -866,7 +877,7 @@ async function raiseRequestSubmission() {
 
   // Append linked ID if exists
   if (linkedId.value) {
-    form.linked_id = linkedId.value;
+    form.returnable_gate_pass_id = linkedId.value;
   }
 
   console.log(form, "✅ Final Form Data to Submit");
@@ -952,11 +963,11 @@ function gettingDataToLink() {
     .post(apis.gettingDataTo, dataObj)
     .then((response) => {
       const responseData = response.message;
-      linkedId.value = responseData.linked_id;
+      linkedId.value = responseData.returnable_gate_pass_id;
 
       // ✅ Find table name dynamically (excluding 'linked_id')
       const tableKey = Object.keys(responseData).find(
-        (key) => key !== 'linked_id'
+        (key) => key !== 'returnable_gate_pass_id'
       );
 
       if (tableKey) {
@@ -1140,99 +1151,99 @@ function gettingDataToLink() {
 
 const child_id_name = ref((''))
 
-  function WfRequestUpdate() {
-    const filters = [
-      [
-        "wf_generated_request_id",
-        "like",
-        `%${selectedData.value.selectedFormId}%`,
-      ],
-    ];
+function WfRequestUpdate() {
+  const filters = [
+    [
+      "wf_generated_request_id",
+      "like",
+      `%${selectedData.value.selectedFormId}%`,
+    ],
+  ];
 
-    const queryParams = {
-      fields: JSON.stringify(["*"]),
-      limit_page_length: null,
-      limit_start: 0,
-      filters: JSON.stringify(filters),
-      order_by: `\`tab${selectedData.value.selectedform}\`.\`creation\` desc`,
-    };
+  const queryParams = {
+    fields: JSON.stringify(["*"]),
+    limit_page_length: null,
+    limit_start: 0,
+    filters: JSON.stringify(filters),
+    order_by: `\`tab${selectedData.value.selectedform}\`.\`creation\` desc`,
+  };
 
-    axiosInstance
-      .get(`${apis.resource}${selectedData.value.selectedform}`, {
-        params: queryParams,
-      })
-      .then((res) => {
-        if (res.data && res.data.length > 0) {
-          const doctypeForm = res.data[0];
+  axiosInstance
+    .get(`${apis.resource}${selectedData.value.selectedform}`, {
+      params: queryParams,
+    })
+    .then((res) => {
+      if (res.data && res.data.length > 0) {
+        const doctypeForm = res.data[0];
 
-          // console.log( blockArr.value);
+        // console.log( blockArr.value);
 
-          // Map response data to UI fields
-          mapFormFieldsToRequest(doctypeForm, blockArr.value);
-
-
-          axiosInstance
-            .get(`${apis.resource}${selectedData.value.selectedform}`)
-            .then((res) => {
-              console.log(`Data for :`, res.data[0]);
-              newMainId.value = res.data[0].name
-
-            })
-            .catch((error) => {
-              console.error(`Error fetching data for :`, error);
-            });
-          axiosInstance
-            .get(
-              `${apis.resource}${selectedData.value.selectedform}/${res.data[0].name}`
-            )
-            .then((res) => {
-              // console.log(`Data for :`, res.data);
-              // Identify the child table key dynamically
-              const childTables = Object.keys(res.data).filter((key) =>
-                Array.isArray(res.data[key])
-              );
-              console.log(childTables);
+        // Map response data to UI fields
+        mapFormFieldsToRequest(doctypeForm, blockArr.value);
 
 
-              if (childTables.length) {
-                tableRows.value = {};
+        axiosInstance
+          .get(`${apis.resource}${selectedData.value.selectedform}`)
+          .then((res) => {
+            console.log(`Data for :`, res.data[0]);
+            newMainId.value = res.data[0].name
 
-                childTables.forEach((tableKey) => {
-                  tableRows.value[tableKey] = res.data[tableKey] || [];
-                });
-                child_id_name.value = res.data.name
-                // console.log(res.data,"000000");
+          })
+          .catch((error) => {
+            console.error(`Error fetching data for :`, error);
+          });
+        axiosInstance
+          .get(
+            `${apis.resource}${selectedData.value.selectedform}/${res.data[0].name}`
+          )
+          .then((res) => {
+            // console.log(`Data for :`, res.data);
+            // Identify the child table key dynamically
+            const childTables = Object.keys(res.data).filter((key) =>
+              Array.isArray(res.data[key])
+            );
+            console.log(childTables);
 
-              }
-            })
-            .catch((error) => {
-              console.error(`Error fetching data for :`, error);
-            });
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-      });
-  }
 
-  function mapFormFieldsToRequest(doctypeData, blockArr) {
-    if (!doctypeData) return; // Ensure valid data
+            if (childTables.length) {
+              tableRows.value = {};
 
-    blockArr.forEach((block) => {
-      block.sections?.forEach((section) => {
-        section.rows?.forEach((row) => {
-          row.columns?.forEach((column) => {
-            column.fields?.forEach((field) => {
-              // Check if the field exists in the API response
-              if (doctypeData.hasOwnProperty(field.fieldname)) {
-                field.value = doctypeData[field.fieldname] ?? ""; // Set value reactively
-              }
-            });
+              childTables.forEach((tableKey) => {
+                tableRows.value[tableKey] = res.data[tableKey] || [];
+              });
+              child_id_name.value = res.data.name
+              // console.log(res.data,"000000");
+
+            }
+          })
+          .catch((error) => {
+            console.error(`Error fetching data for :`, error);
+          });
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching data:", error);
+    });
+}
+
+function mapFormFieldsToRequest(doctypeData, blockArr) {
+  if (!doctypeData) return; // Ensure valid data
+
+  blockArr.forEach((block) => {
+    block.sections?.forEach((section) => {
+      section.rows?.forEach((row) => {
+        row.columns?.forEach((column) => {
+          column.fields?.forEach((field) => {
+            // Check if the field exists in the API response
+            if (doctypeData.hasOwnProperty(field.fieldname)) {
+              field.value = doctypeData[field.fieldname] ?? ""; // Set value reactively
+            }
           });
         });
       });
     });
-  }
+  });
+}
 function request_raising_fn(item) {
   saveloading.value = true;
   // console.log(filepaths.value, "---filepaths");
@@ -1247,16 +1258,16 @@ function request_raising_fn(item) {
     url_for_request_id: "",
     files: filepaths.value.length > 0 ? filepaths.value : [],
     property: business_unit.value,
-    ip_address:ip_address.value,
-    employee_id:employeeData.value.emp_code,
+    ip_address: ip_address.value,
+    employee_id: employeeData.value.emp_code,
   };
   axiosInstance.post(apis.raising_request, data_obj).then((resp) => {
     if (resp?.message?.success === true) {
       const modal = bootstrap.Modal.getInstance(
-          document.getElementById("ExportEmployeeModal")
-          );
-          modal.hide();
-              saveloading.value = false;
+        document.getElementById("ExportEmployeeModal")
+      );
+      modal.hide();
+      saveloading.value = false;
 
       toast.success("Request Raised", {
         autoClose: 1000,
@@ -1275,12 +1286,13 @@ function request_raising_fn(item) {
 // window.location.reload();
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .zindex-dropdown {
   z-index: 1050;
   max-height: 200px;
   overflow-y: auto;
 }
+
 /* .modal {
   background: rgba(0, 0, 0, 0.5);
   position: fixed;

@@ -266,7 +266,7 @@ function actionClickedDropDown(row) {
     baseActions.push({ name: 'In-active this form', icon: 'fa-solid fa-ban' });
   }
   if (row.form_status === 'Draft') {
-    baseActions.push({ name: 'Active this form', icon: 'fa-solid fa-check' });
+    baseActions.push({ name: 'Actived this form', icon: 'fa-solid fa-check' });
   }
   if (userDesigination.value.includes('IT')) {
     baseActions.push({ name: 'Edit Form', icon: 'fa-solid fa-edit' });
@@ -399,7 +399,7 @@ function actionCreated(rowData, actionEvent) {
     const modal = new bootstrap.Modal(document.getElementById('pdfView'), {});
     modal.show();
   }
-  if (actionEvent.name === 'Active this form') {
+  if (actionEvent.name === 'Actived this form') {
     toggleFunction(rowData, null, null);
   }
   if (actionEvent.name === 'In-active this form') {
@@ -572,7 +572,7 @@ function fetchDepartmentDetails(id, data) {
     limit_page_length: filterObj.value.limitPageLength,
     limit_start: filterObj.value.limit_start,
     filters: JSON.stringify(filterObj.value.filters),
-    order_by: "`tabEzy Form Definitions`.`enable` DESC, `tabEzy Form Definitions`.`modified` DESC"
+    order_by: "`tabEzy Form Definitions`.`enable` DESC, `tabEzy Form Definitions`.`creation` DESC"
   };
   const queryParamsCount = {
     fields: JSON.stringify(["count(name) AS total_count"]),

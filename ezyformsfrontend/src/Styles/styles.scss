@@ -83,6 +83,24 @@ body {
   font-family: "Poppins", sans-serif !important;
   font-optical-sizing: auto;
 }
+.p-tooltip {
+  background-color: #333 !important;  // Tooltip background
+  color: #fff !important;             // Tooltip text color
+  font-size: 14px !important;
+  border-radius: 4px !important;
+  padding: 8px 12px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Optional: Customize tooltip arrow */
+.p-tooltip-arrow {
+  color: #333 !important; /* Should match the tooltip background */
+}
+
+/* Optional: Text inside the tooltip */
+.p-tooltip-text {
+  font-weight: 500 !important;
+}
 .buttoncomp {
   background-color: var(--darkbtn);
   color: var(--white-color);

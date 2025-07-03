@@ -174,7 +174,7 @@
           :disabled="!SignUpdata.email || !SignUpdata.full_name || !SignUpdata.emp_code || !SignUpdata.emp_phone || !SignUpdata.dept || !SignUpdata.signature"
           type="submit" data-bs-toggle="modal" data-bs-target="#EmployeeToggleModal"
           class="border-0 btn btn-dark button w-100 mb-4 py-2 font-13 text-white rounded-1">
-          Sign up
+          Sign Up
         </button>
       </div>
       <div class="font-13 m-0 cursor-pointer text-center" @click="OpenLogin"><span class="sign">Existing user? Log

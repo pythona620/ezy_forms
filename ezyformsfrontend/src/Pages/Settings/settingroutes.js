@@ -1,5 +1,6 @@
 import Designations from "./Designations.vue";
 
+
 const SettingsPage = () => import("./SettingsPage.vue");
 const ProfileComp = () => import("./ProfileComp.vue");
 const NotificationComp = () => import("./NotificationComp.vue");
@@ -17,6 +18,7 @@ const ActivityLog=()=>import("./ActivityLog.vue")
 const CreateForm=()=>import("./CreateForm.vue")
 const AuditLog=()=>import("./AuditLog.vue");
 const AcknowledgementComp=()=>import("./AcknowledgementComp.vue");
+const PreDefineForms=()=>import("./PreDefineForms.vue")
 
 const settingRoutes = [
   {
@@ -111,6 +113,11 @@ const settingRoutes = [
         component: AcknowledgementComp,
         name: "acknowledgement",
       },
+      {
+        path: "predefinedforms",
+        component: PreDefineForms,
+        name: "PredefinedForms",
+      }
     ],
   },
 ];

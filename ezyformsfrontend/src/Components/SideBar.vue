@@ -115,11 +115,6 @@
                             active-class="active-link">
                             <li><i class="bi-icon fs-6 bi bi-file-earmark-richtext me-3"></i>All Forms</li>
                         </router-link>
-                        <router-link :to="'/forms/department/predefineForm'" class="text-decoration-none text-black"
-                            active-class="active-link">
-                            <li><i class="bi-icon fs-6 bi bi-file-earmark-richtext me-3"></i>Predefined Forms</li>
-                        </router-link>
-
                         <router-link v-for="(department, index) in formSideBarData" :key="department.route"
                             :to="`/forms/department/${department.route}`" class="text-decoration-none text-black"
                             active-class="active-link">
@@ -199,6 +194,7 @@ const settingsSideBarData = [
     { name: 'Activity Log', icon: 'bi bi-clock-history', route: 'activitylog' },
     { name: 'Audit Log', icon: 'bi bi-clock', route: 'auditlog' },
     { name: 'Form Creation' , icon: 'bi bi-file-earmark-text', route: 'CreateForm' },
+    { name: 'Predefined Forms', icon: 'bi bi-file-earmark-text', route: 'predefinedforms' },
     { name: 'Acknowledgement' , icon: 'bi bi-file-earmark-text', route: 'acknowledgement' },
 
     // {name: 'Roles',icon:' bi bi-people', route:'role'},
@@ -283,8 +279,8 @@ const filteredSettingsGroups = computed(() => {
             forthSettingsGroup: settingsSideBarData.slice(3, 6),
             fifthSettingsGroup: settingsSideBarData.slice(6,7),
             sixthGroup: settingsSideBarData.slice(7,9),
-            seventhGroup: settingsSideBarData.slice(9,10),
-            eightGroup: settingsSideBarData.slice(10),
+            seventhGroup: settingsSideBarData.slice(9,11),
+            eightGroup: settingsSideBarData.slice(11),
 
         }
         : { thirdSettingsGroup: [], forthSettingsGroup: []};
@@ -391,18 +387,13 @@ function gettingDepartmentNames(){
    axiosInstance
     .post(apis.DepartmentNames,dataObj)
     .then((response) => {
-        console.log(response);
             deptartmentData.value = response.message;
-
-
                 formSideBarData.value = deptartmentData.value
                     .sort((a, b) => a.department_name.localeCompare(b.department_name))
                     .map(department => ({
                         name: department.department_name,
                         route: department.name,
                     }));
-     
-
     })
     .catch((error) => {
       console.log(error);

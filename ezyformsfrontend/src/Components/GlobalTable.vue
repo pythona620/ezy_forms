@@ -66,7 +66,9 @@
 								@change="selectedCheckList(row, rowIndex)" />
 						</td> -->
             <td class="">{{ rowIndex + 1 }}</td>
-            <td :title="row[column.td_key] ? row[column.td_key].toString() : '-'" v-for="(column, colIndex) in tHeaders"
+                       
+            <!-- v-tooltip.top="row[column.td_key] ? row[column.td_key].toString() : '-'" -->
+            <td v-for="(column, colIndex) in tHeaders"
               :class="column.td_key === 'form_status' ? 'text-center' : ''" :key="colIndex">
 
               <!-- <span :class="{'accessible-departments': column.td_key === 'accessible_departments'}" v-if="column.td_key === 'accessible_departments'">
@@ -83,12 +85,12 @@
                   'text-success fw-medium': row[column.td_key] === 'Success',
                   'text-danger fw-medium': row[column.td_key] === 'Failed',
                 }"></i>
-                <span class="tooltip-text" :title="row[column.td_key]">
+                <span class="tooltip-text" v-tooltip.top="row[column.td_key]">
 
-                {{ row[column.td_key]
-                }}<span v-if="row.current_level !== undefined && row.total_levels !== undefined">
-                  ({{ row.current_level }} / {{ row.total_levels }})
-                </span>
+                  {{ row[column.td_key]
+                  }}<span v-if="row.current_level !== undefined && row.total_levels !== undefined">
+                    ({{ row.current_level }} / {{ row.total_levels }})
+                  </span>
                 </span>
               </span>
 
@@ -109,17 +111,17 @@
                 {{ row[column.td_key] === 'Created' ? 'Active' : 'Retired' }}
               </span>
               <!-- Default Column Rendering -->
-              <span class="tooltip-text" :title="formatDate(row[column.td_key])" v-else-if="
-                column.td_key === 'requested_on' || column.td_key === 'invoice_date' || column.td_key === 'creation' || column.td_key==='communication_date' ">
+              <span class="tooltip-text" v-tooltip.top="formatDate(row[column.td_key])"
+                v-else-if="
+                  column.td_key === 'requested_on' || column.td_key === 'invoice_date' || column.td_key === 'creation' || column.td_key === 'communication_date'">
                 {{ formatDate(row[column.td_key]) }}
               </span>
 
               <!-- Show unformatted date for 'modified' when status === 'Request Raised' -->
-              <span class="tooltip-text" :title="formatDate(row[column.td_key])"
-  v-else-if="column.td_key === 'modified' && row.status !== 'Request Raised'"
->
-  {{ formatDate(row[column.td_key]) }}
-</span>
+              <span class="tooltip-text" v-tooltip.top="formatDate(row[column.td_key])"
+                v-else-if="column.td_key === 'modified' && row.status !== 'Request Raised'">
+                {{ formatDate(row[column.td_key]) }}
+              </span>
               <span v-else-if="column.td_key === 'signature'">
                 <div v-if="row[column.td_key]">
                   <i class="bi bi-check2 fw-bolder font-13 text-success"></i>
@@ -179,9 +181,11 @@
               <!-- <span v-else>
                 {{ row[column.td_key].replace(/_/g, " ") || "-" }}
               </span> -->
-              <span v-else class="tooltip-text" :title="row[column.td_key] || '-'">
+                            <!-- <span v-else class="tooltip-text" :title="row[column.td_key] || '-'"> -->
+
+              <span v-else class="tooltip-text" v-tooltip.top="row[column.td_key] || '-'" >
                 <!-- ?.replace(/@[\w.-]+/, "") -->
-                {{ column.td_key === 'modified' ? '-' :  row[column.td_key] || "-" }}
+                {{ column.td_key === 'modified' ? '-' : row[column.td_key] || "-" }}
               </span>
             </td>
             <!-- <td
@@ -209,17 +213,20 @@
                 </div>
               </div>
             </td> -->
-            <div v-if="isAction == 'true' && viewType === 'viewPdf'" class="text-center">
-              <span class="px-2">
-                <i @click="handleCellClick(row, rowIndex, 'view')" class="ri-eye-line eye-cursor"></i>
-              </span>
-              <span v-if="download === 'true'">
-                <i class="bi bi-download eye-cursor" @click="handleCellClick(row, rowIndex, 'download')"></i>
-              </span>
-              <span v-if="raiseRequest === 'true'">
-                <i class="bi bi-send eye-cursor mx-1" @click="handleCellClick(row, rowIndex, 'raiseRequest')"></i>
-              </span>
-            </div>
+            <td v-if="isAction == 'true' && viewType === 'viewPdf'" class="text-center align-middle">
+
+              <div>
+                <span v-if="raiseRequest === 'true'" class="px-4">
+                  <i v-tooltip.top="'Raise Request'" class="bi bi-send eye-cursor mx-1" @click="handleCellClick(row, rowIndex, 'raiseRequest')"></i>
+                </span>
+                <span class="px-2">
+                  <i v-tooltip.top="'View'" @click="handleCellClick(row, rowIndex, 'view')" class="ri-eye-line eye-cursor"></i>
+                </span>
+                <span v-if="download === 'true'">
+                  <i class="bi bi-download eye-cursor" @click="handleCellClick(row, rowIndex, 'download')"></i>
+                </span>
+              </div>
+            </td>
             <td v-if="actionType === 'dropdown'" class="text-center fixed-column position-relative">
               <div class="dropdown">
                 <p class="p-0 actions" data-bs-toggle="dropdown" aria-expanded="false">
@@ -242,20 +249,21 @@
                 </span>
              </td> -->
 
-             <td v-if="download === 'true'" class="text-center fixed-column position-relative">
-               <span>
+            <td v-if="download === 'true'" class="text-center fixed-column position-relative">
+              <span>
                 <i class="bi bi-download eye-cursor" @click="handleCellClick(row, rowIndex, 'download')"></i>
-              </span>
-             </td>
-
-             <!-- Raise Request Column -->
-            <td v-if="isRequest === 'true'" class="text-center fixed-column position-relative">
-              <span v-if="raiseRequest === 'true'">
-                  <p @click="handleCellClick(row, rowIndex, 'raiseRequest')" class="p-0 m-0"><span class="raiseRequest">Raise Request</span></p>
               </span>
             </td>
 
-             <!-- Action Column -->
+            <!-- Raise Request Column -->
+            <td v-if="isRequest === 'true'" class="text-center fixed-column position-relative">
+              <span v-if="raiseRequest === 'true'">
+                <p @click="handleCellClick(row, rowIndex, 'raiseRequest')" class="p-0 m-0"><span
+                    class="raiseRequest">Raise Request</span></p>
+              </span>
+            </td>
+
+            <!-- Action Column -->
             <td v-if="isAction === 'true' && view === 'viewPreview'" class="text-center fixed-column position-relative">
               <span class=" font-13 view-text" @click="handleCellClick(row, rowIndex, 'view')">
                 View <i class="ri-eye-line eye-cursor ms-1"></i>
@@ -385,8 +393,8 @@ const props = defineProps({
   viewType: {
     type: String,
   },
-  view:{
-    type:String
+  view: {
+    type: String
   },
   // class: {
   //   type: String,
@@ -395,7 +403,7 @@ const props = defineProps({
   isAction: {
     type: String,
   },
-  isRequest:{
+  isRequest: {
     type: String,
   },
   isCheckbox: {
@@ -414,15 +422,15 @@ const props = defineProps({
   }
 });
 
-const emits = defineEmits(["actionClicked", "updateFilters", "cell-click", "toggle-click","actionClickedDropDown"]);
+const emits = defineEmits(["actionClicked", "updateFilters", "cell-click", "toggle-click", "actionClickedDropDown"]);
 
 function selectedAction(row, action) {
   emits("actionClicked", row, action);
   // console.log(row, action);
 }
-function actionDropDown (row) {
+function actionDropDown(row) {
   emits("actionClickedDropDown", row);
-  }
+}
 
 function handleToggle(row, index, event) {
   // Emit the custom event. The parent component will handle showing the confirmation.
@@ -620,14 +628,15 @@ function handleCellClick(check, index, type) {
 // .tooltip-text:hover::after {
 //   opacity: 1;
 // }
-.raiseRequest{
+.raiseRequest {
   background-color: transparent;
   border-bottom: 1px solid blue;
   font-size: 13px;
   color: blue;
   cursor: pointer;
-  font-weight:300;
+  font-weight: 300;
 }
+
 // .raiseRequest:hover{
 //   border-bottom: 1px solid blue;
 // }
@@ -667,7 +676,8 @@ function handleCellClick(check, index, type) {
   padding: 5px 10px;
   border-radius: 6px;
 }
-.draftForm{
+
+.draftForm {
   font-size: 11px;
   font-weight: 500;
   text-align: left;
@@ -675,7 +685,7 @@ function handleCellClick(check, index, type) {
   background-color: #f6f4c9;
   opacity: 0.8;
   padding: 5px 10px;
-  border:1px dotted #ffbb00; 
+  border: 1px dotted #ffbb00;
   border-radius: 6px;
 }
 
@@ -931,8 +941,10 @@ th:first-child {
 
 .eye-cursor {
   cursor: pointer;
+  font-size: 14px;
 }
-.view-text{
+
+.view-text {
   font-size: 13px;
   font-weight: 300;
 }
