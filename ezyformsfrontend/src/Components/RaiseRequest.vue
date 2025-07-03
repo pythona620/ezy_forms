@@ -248,6 +248,7 @@ const getClientIP = async () => {
 
 onMounted(() => {
   loadInitialData();
+  console.log(route.query);
 });
 
 const loadInitialData = () => {
@@ -837,10 +838,10 @@ async function raiseRequestSubmission() {
 
   const childEntries = Object.entries(childtablesData.value);
 
-  if (!childEntries.length) {
-    toast.error("No child table data found!");
-    return;
-  }
+  // if (!childEntries.length) {
+  //   toast.error("No child table data found!");
+  //   return;
+  // }
 
   // Prepare the form data
   const form = {
@@ -1278,7 +1279,7 @@ function request_raising_fn(item) {
 // window.location.reload();
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .zindex-dropdown {
   z-index: 1050;
   max-height: 200px;

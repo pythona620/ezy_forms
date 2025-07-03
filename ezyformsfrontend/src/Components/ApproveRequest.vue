@@ -284,7 +284,7 @@
                       <h5 class="modal-title font-14">Linked Form Details</h5>
                       <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body linkedformspreview">
+                    <div class="modal-body linkedformspreview p-4">
                       <!-- Show key-value -->
                       <!-- <table class="table table-bordered table-sm">
                         <tbody>
@@ -297,7 +297,7 @@
                         </tbody>
                       </table> -->
                       <div class="row">
-                        <div class="col-md-6 mb-2" v-for="(item, index) in normalFields" :key="index">
+                        <div class="col-md-6 mb-2 " v-for="(item, index) in normalFields" :key="index">
                           <label class="fw-bold font-12">{{ formatKey(item.key) }}</label>
                           <p class="font-12 mb-2">{{ item.value }}</p>
                         </div>

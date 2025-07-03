@@ -27,6 +27,7 @@ export const doctypes = {
   ActivityLog:'Activity Log',
   version:'Version',
   
+  
 
 };
 

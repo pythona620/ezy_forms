@@ -124,7 +124,7 @@ const totalRecords = ref(0);
 const tableheaders = ref([
   { th: "Form Name", td_key: "form_name" },
   // { th: "Form Short Code", td_key: "form_short_name" },
-  { th: "Owner Of The Form", td_key: "owner_of_the_form" },
+  { th: "Owner Of The Form", td_key: "form_department" },
   // { th: "Accessible Departments", td_key: "accessible_departments" },
   // { th: "Status", td_key: "form_status" },
   // { th: "Form Status", td_key: "enable" },
@@ -525,7 +525,7 @@ function fetchDepartmentDetails(id, data) {
     limit_page_length: filterObj.value.limitPageLength,
     limit_start: filterObj.value.limit_start,
     filters: JSON.stringify(filterObj.value.filters),
-    order_by: "`tabEzy Form Definitions`.`enable` DESC, `tabEzy Form Definitions`.`modified` DESC"
+    order_by: "`tabEzy Form Definitions`.`enable` DESC, `tabEzy Form Definitions`.`creation` DESC"
   };
   const queryParamsCount = {
     fields: JSON.stringify(["count(name) AS total_count"]),

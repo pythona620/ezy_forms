@@ -126,7 +126,7 @@ const router = useRouter();
 
 const selectedForm = ref(null);
 const actions = ref([
-    { name: 'Set up Form', icon: 'fa-solid fa-eye' },
+    { name: 'Set up Form', icon: 'fa-solid fa-edit' },
 ]);
 const childtableHeaders = ref([]);
 
@@ -140,10 +140,14 @@ function actionCreated(rowData, actionEvent) {
                     preId: 'PreDefine',
                     business_unit: businessUnit.value,
                     form_name: rowData.form_name,
+                    preName: rowData.name
+
 
                 },
             });
             localStorage.setItem("form_json", rowData.form_json)
+            localStorage.setItem("preName" , rowData.name)
+            localStorage.setItem("routepath", route.path)
 
         
     }
@@ -243,29 +247,7 @@ function inLineFiltersData(searchedData) {
 
 
 
-function formCreation(item = null) {
-    if (item == null) {
-        router.push({
-            name: "FormStepper", query: {
-                routepath: route.path,
-                business_unit: businessUnit.value,
 
-            },
-        });
-    } else {
-        router.push({
-            name: "FormStepper",
-            params: { paramid: item.name },
-            query: {
-                routepath: route.path,
-                business_unit: businessUnit.value,
-                id: item.name
-
-            }
-
-        });
-    }
-}
 // Handle updating the current value
 const PaginationUpdateValue = (itemsPerPage) => {
     filterObj.value.limitPageLength = itemsPerPage;
