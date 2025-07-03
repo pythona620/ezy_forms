@@ -7,15 +7,15 @@
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
-  "activate",
+  "enable",
   "acknowledgement"
  ],
  "fields": [
   {
    "default": "0",
-   "fieldname": "activate",
+   "fieldname": "enable",
    "fieldtype": "Check",
-   "label": "Activate"
+   "label": "Enable"
   },
   {
    "fieldname": "acknowledgement",
