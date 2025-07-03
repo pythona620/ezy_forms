@@ -33,7 +33,7 @@
    "fieldname": "form_status",
    "fieldtype": "Select",
    "label": "Form status",
-   "options": "\nEnable\nDisabled"
+   "options": "\nYes\nNo"
   },
   {
    "default": "0",
