@@ -103,11 +103,6 @@
                             active-class="active-link">
                             <li><i class="bi-icon fs-6 bi bi-file-earmark-richtext me-3"></i>All Forms</li>
                         </router-link>
-                        <router-link :to="'/forms/department/predefineForm'" class="text-decoration-none text-black"
-                            active-class="active-link">
-                            <li><i class="bi-icon fs-6 bi bi-file-earmark-richtext me-3"></i>Predefined Forms</li>
-                        </router-link>
-
                         <router-link v-for="(department, index) in formSideBarData" :key="department.route"
                             :to="`/forms/department/${department.route}`" class="text-decoration-none text-black"
                             active-class="active-link">
@@ -187,6 +182,7 @@ const settingsSideBarData = [
     { name: 'Activity Log', icon: 'bi bi-clock-history', route: 'activitylog' },
     { name: 'Audit Log', icon: 'bi bi-clock', route: 'auditlog' },
     { name: 'Form Creation' , icon: 'bi bi-file-earmark-text', route: 'CreateForm' },
+    { name: 'Predefined Forms', icon: 'bi bi-file-earmark-text', route: 'predefinedforms' },
 
     // {name: 'Roles',icon:' bi bi-people', route:'role'},
     // { name: 'Workflow Settings', icon: 'bi bi-gear', route: 'WorkflowSettings'}

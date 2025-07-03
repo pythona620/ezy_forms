@@ -74,10 +74,10 @@
                                 <span v-if="route.query.preId"
                                   class=" font-12 position-absolute PredefinedLabel">Predefined<i
                                     class="bi bi-check2-circle"></i></span>
-                                    
-                                    <!-- || route.query.form_name -->
-                                <FormFields
-                                  :disabled="selectedData.formId && selectedData.formId.length > 0 || route.query.form_name "
+
+                                <!-- || route.query.form_name -->
+                                <!-- || route.query.form_name   -->
+                                <FormFields :disabled="selectedData.formId && selectedData.formId.length > 0"
                                   labeltext="Form Name" class="formHeight" type="text" tag="input" name="Value"
                                   id="formName" validationStar="true" placeholder="Untitled Form"
                                   @change="(event) => handleInputChange(event, 'form_name')" v-model="formNameModel" />
@@ -87,8 +87,7 @@
                             </div>
                             <div class="mt-3">
                               <div class="">
-                                <FormFields
-                                  :disabled="selectedData.formId && selectedData.formId.length > 0"
+                                <FormFields :disabled="selectedData.formId && selectedData.formId.length > 0"
                                   labeltext="Form Short Code" class="formHeight" type="text" tag="input" name="Value"
                                   id="formShortCode" validationStar="true" placeholder="Untitled Form" @change="
                                     (event) => handleInputChange(event, 'form_short_name')
@@ -145,88 +144,92 @@
                                   :multiple="false" :searchable="true" class="font-11 multiselect" />
                               </div>
                             </div>
-                            
-                              
 
-                              <div class="mt-3">
-                                <label class="typo__label">
-                                  <label for="">Accessible to department
-                                    <span v-if="!filterObj.accessible_departments.length"
-                                      class="text-danger">*</span></label>
+
+
+                            <div class="mt-3">
+                              <label class="typo__label">
+                                <label for="">Accessible to department
+                                  <span v-if="!filterObj.accessible_departments.length"
+                                    class="text-danger">*</span></label>
+                              </label>
+                              <!-- :disabled="selectedData.formId && selectedData.formId.length > 0" -->
+                              <VueMultiselect v-model="filterObj.accessible_departments" :options="filteredOptions"
+                                :multiple="true" :close-on-select="false" :clear-on-select="false"
+                                :preserve-search="true" placeholder="Select Department" class="font-11"
+                                @select="handleSelect" @remove="handleRemove">
+                                <template #option="{ option }">
+                                  <div class="custom-option">
+                                    <input type="checkbox" :checked="isChecked(option)" class="custom-checkbox"
+                                      @change="toggleOption(option, $event)" @click.stop />
+                                    <span>{{ option }}</span>
+                                  </div>
+                                </template>
+
+                                <template #selection="{ values, isOpen }">
+                                  <span class="multiselect__single font-10" v-if="values.length" v-show="!isOpen">
+                                    {{ formattedSelection }}
+                                  </span>
+                                </template>
+                              </VueMultiselect>
+
+
+
+                            </div>
+                            <div class="mt-3">
+                              <div class="">
+
+                                <label for="">Has Workflow <span
+                                    class="fw-normal font-11 text-secondary">(optional)</span>
+                                  <!-- <span v-if="!filterObj.has_Workflow" class="text-danger">*</span> -->
                                 </label>
                                 <!-- :disabled="selectedData.formId && selectedData.formId.length > 0" -->
-                                <VueMultiselect v-model="filterObj.accessible_departments" :options="filteredOptions"
-                                  :multiple="true" :close-on-select="false" :clear-on-select="false"
-                                  :preserve-search="true" placeholder="Select Department" class="font-11"
-                                  @select="handleSelect" @remove="handleRemove">
-                                  <template #option="{ option }">
-                                    <div class="custom-option">
-                                      <input type="checkbox" :checked="isChecked(option)" class="custom-checkbox"
-                                        @change="toggleOption(option, $event)" @click.stop />
-                                      <span>{{ option }}</span>
-                                    </div>
-                                  </template>
-
-                                  <template #selection="{ values, isOpen }">
-                                    <span class="multiselect__single font-10" v-if="values.length" v-show="!isOpen">
-                                      {{ formattedSelection }}
-                                    </span>
-                                  </template>
-                                </VueMultiselect>
-
-
-
+                                <Multiselect :options="['Yes', 'No']" v-model="filterObj.has_workflow"
+                                  placeholder="Select" :multiple="false" class="font-11 multiselect"
+                                  :searchable="true" />
                               </div>
-                              <div class="mt-3">
-                                <div class="">
-
-                                  <label for="">Has Workflow
-                                    <!-- <span v-if="!filterObj.has_Workflow" class="text-danger">*</span> -->
-                                  </label>
-                                  <!-- :disabled="selectedData.formId && selectedData.formId.length > 0" -->
-                                  <Multiselect :options="['No']" v-model="filterObj.has_workflow" placeholder="Select"
-                                    :multiple="false" class="font-11 multiselect" :searchable="true" />
-                                </div>
+                            </div>
+                            <div class="my-2 mb-5">
+                              <div v-if="route.query.preId" class="form-check d-flex align-items-center p-0 pe-3">
+                                <input class="form-check-input linketoCheck p-1"
+                                  :disabled="filterObj.is_predefined_doctype == 1" type="checkbox" id="is_linked"
+                                  v-model="filterObj.is_linked" :true-value="1" :false-value="0" />
+                                <label class="form-check-label font-12 mx-2 mb-0 ps-1" for="is_linked">
+                                  Link
+                                </label>
                               </div>
-                              <div class="my-2 mb-5">
-                                <div class="form-check d-flex align-items-center p-0 pe-3">
-                                  <input class="form-check-input linketoCheck p-1" type="checkbox" id="is_linked"
-                                    v-model="filterObj.is_linked"   :true-value="1" :false-value="0"/>
-                                  <label class="form-check-label font-12 mx-2 mb-0 ps-1" for="is_linked">
-                                    Link
-                                  </label>
-                                </div>
-                                <div>
-                                  
-                                 <!-- <div class="form-check d-flex align-items-center p-0 pe-3">
+                              <div>
+
+                                <!-- <div class="form-check d-flex align-items-center p-0 pe-3">
                                   <input class="form-check-input linketoCheck p-1" type="checkbox" id="is_predefined_doctype"
                                     v-model="filterObj.is_predefined_doctype"   :true-value="1" :false-value="0"/>
                                   <label class="form-check-label font-12 mx-2 mb-0 ps-1" for="is_predefined_doctype">
                                     is_predefined_doctype
                                   </label>
                                 </div> -->
-                                 
-                                </div>
 
-                                <div v-if="filterObj.is_linked" class="mt-2 position-relative mb-5">
-                                  <label for="standardFormInput">Standard Form</label>
-                                  <input type="text" class="form-control standardFormInput" id="standardFormInput"
-                                    v-model="filterObj.is_linked_form" placeholder="Type to search Form Name..."
-                                    @input="searchForm" @focus="showSuggestions = true" @blur="hideSuggestions" />
-                                    
-
-                                  <!-- Suggestions Dropdown -->
-                                  <ul v-if="showSuggestions && filteredForms.length"
-                                    class="list-group position-absolute w-100 z-3 formslist">
-                                    <li class="list-group-item formlistitem" v-for="(item, index) in filteredForms" :key="index"
-                                      @mousedown.prevent="selectForm(item.name)">
-                                      {{ item.name }}
-                                    </li>
-                                  </ul>
-                                </div>
                               </div>
 
-                              <!-- <div class="mt-3">
+                              <div v-if="filterObj.is_linked" class="mt-2 position-relative mb-5">
+                                <label for="standardFormInput">Form</label>
+                                <input type="text" class="form-control standardFormInput" id="standardFormInput"
+                                  :disabled="filterObj.is_predefined_doctype == 1" v-model="filterObj.is_linked_form"
+                                  placeholder="Type to search Form Name..." @input="searchForm"
+                                  @focus="showSuggestions = true" @blur="hideSuggestions" />
+
+
+                                <!-- Suggestions Dropdown -->
+                                <ul v-if="showSuggestions && filteredForms.length"
+                                  class="list-group position-absolute w-100 z-3 formslist">
+                                  <li class="list-group-item formlistitem" v-for="(item, index) in filteredForms"
+                                    :key="index" @mousedown.prevent="selectForm(item.name)">
+                                    {{ item.name }}
+                                  </li>
+                                </ul>
+                              </div>
+                            </div>
+
+                            <!-- <div class="mt-3">
                               <div class="">
 
                                 <label for="">Reverse Workflow
@@ -237,7 +240,7 @@
                                   :multiple="false" class="font-11 multiselect" :searchable="true" />
                               </div>
                                </div> -->
-                            
+
                           </div>
                         </div>
 
@@ -408,7 +411,7 @@
                                   <div class="d-flex justify-content-between align-items-center">
                                     <label class="rownames">{{
                                       getRowSuffix(rowIndex)
-                                      }}</label>
+                                    }}</label>
                                     <div>
                                       <button v-if="row.columns.length < 3"
                                         class="btn btn-light bg-transparent border-0 font-12" @click="
@@ -498,10 +501,10 @@
                                               fieldIndex
                                             )
                                             " @mouseleave="resetHoveredField" class="dynamicField m-1 draggable-item"
-                                         draggable="true"
-       @dragstart="handleDragStart($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
-       @dragover.prevent
-       @drop="handleFieldDropAtIndex($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
+                                          draggable="true"
+                                          @dragstart="handleDragStart($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+                                          @dragover.prevent
+                                          @drop="handleFieldDropAtIndex($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
 
                                           <div class="drop-zone" @dragover.prevent
                                             @drop="(e) => handleFieldDropAtIndex(e, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
@@ -706,7 +709,7 @@
                                               placeholder="Enter field description"></textarea>
 
                                             <small v-if="field.error" class="text-danger font-10">{{ field.error
-                                              }}</small>
+                                            }}</small>
                                           </div>
                                           <div class="drop-zone" @dragover.prevent
                                             @drop="(e) => handleFieldDropAtIndex(e, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
@@ -886,11 +889,10 @@
                                             </div>
                                           </div>
                                         </div>
-                                        <div class="drop-zone-bottom"
-       @dragover.prevent
-       @drop="handleFieldDropAtIndex($event, blockIndex, sectionIndex, rowIndex, columnIndex, column.fields.length)"
-       style="background-color: #f0f0f0; border: 1px dashed #ccc; margin: 4px;">
-  </div>
+                                        <div class="drop-zone-bottom" @dragover.prevent
+                                          @drop="handleFieldDropAtIndex($event, blockIndex, sectionIndex, rowIndex, columnIndex, column.fields.length)"
+                                          style="background-color: #f0f0f0; border: 1px dashed #ccc; margin: 4px;">
+                                        </div>
 
                                         <div class="drop-zone" @dragover.prevent
                                           @drop="(e) => handleFieldDropAtIndex(e, blockIndex, sectionIndex, rowIndex, columnIndex, fields.length)"
@@ -1449,7 +1451,7 @@ const filterObj = ref({
   workflow_check: "",
   is_linked: 0,
   is_linked_form: "",
-  is_predefined_doctype: route.query.id? 1 : 0,
+  is_predefined_doctype: route.query.id ? 1 : 0,
 
 
 });
@@ -1962,7 +1964,7 @@ onMounted(() => {
   let Bu_Unit = localStorage.getItem("Bu");
   filterObj.value.business_unit = Bu_Unit;
   if (route.query.preId === 'PreDefine') {
-  // filterObj.value.is_linked = 1; 
+    // filterObj.value.is_linked = 1; 
     const formJsonFromStorage = localStorage.getItem("form_json");
 
     if (formJsonFromStorage) {
@@ -2928,7 +2930,7 @@ function SetPrintFormatFn() {
 function deptData() {
   const queryParams = {
     fields: JSON.stringify(["*"]),
-    limit_page_length:"none"
+    limit_page_length: "none"
   };
 
   axiosInstance
@@ -3002,11 +3004,28 @@ function formData(status) {
 
   dataObj.accessible_departments = dataObj.accessible_departments.toString();
   console.log(dataObj, "---data obj");
+
+
   axiosInstance
     .post(apis.savedata, dataObj)
     .then((res) => {
       // console.log(res, "res");
       if (res && res.message && res.message.message) {
+        let preId = localStorage.getItem("preName");
+        if (preId) {
+
+          let predData = {
+            installed: 'Yes'
+          }
+          axiosInstance.put(`${apis.resource}${doctypes.preDefinedForm}/${preId}`, predData)
+            .then(res => {
+              console.log(res);
+              localStorage.removeItem('preName')
+            })
+            .catch(error => {
+              console.error("Error fetching ezyForms data:", error);
+            });
+        }
         // tableFieldsCache.value = [];
         router.push({
           params: { paramid: res.message.message },
@@ -3673,8 +3692,10 @@ const hasDuplicates = (array) => new Set(array).size !== array.length;
 
 <style lang="scss" scoped>
 .formlist {
-  max-height: 180px; /* 🔥 Set desired height */
-  overflow-y: auto;  /* 🔥 Enable vertical scroll */
+  max-height: 180px;
+  /* 🔥 Set desired height */
+  overflow-y: auto;
+  /* 🔥 Enable vertical scroll */
   overflow-x: hidden;
   border: 1px solid #dcdcdc;
   border-radius: 4px;
@@ -3689,6 +3710,7 @@ const hasDuplicates = (array) => new Set(array).size !== array.length;
 .formlistitem:hover {
   background-color: #f0f0f0;
 }
+
 .PredefinedLabel {
   font-size: 12px;
   margin-left: 10px;
@@ -3702,12 +3724,14 @@ const hasDuplicates = (array) => new Set(array).size !== array.length;
 
 
 }
-.standardFormInput:focus{
+
+.standardFormInput:focus {
   box-shadow: none;
   outline: 0;
   border: 1px solid #000;
-  
+
 }
+
 .linketoCheck {
   width: 18px;
 }

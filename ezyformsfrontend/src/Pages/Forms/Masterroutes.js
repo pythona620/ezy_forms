@@ -4,7 +4,7 @@
 // Import necessary components
 const MasterPage = () => import("./MasterPage.vue");
 const AllDeptComp = () => import('./AllDepartment.vue');
-const PreDefineForms = () => import('./PreDefineForms.vue');
+
 
 // Define the Master routes
 const Masterroutes = [
@@ -19,12 +19,7 @@ const Masterroutes = [
         name: 'DepartmentDetail/:id',
         props: true, // Automatically pass route params as props
       },
-      {
-    path: "/forms/department/predefineForm",
-    component: PreDefineForms,
-    name: 'PreDefineForms',
-    props: true, // Automatically pass route params as props
-  }
+     
     ],
   },
   

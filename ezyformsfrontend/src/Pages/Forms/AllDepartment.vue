@@ -18,8 +18,8 @@
 
       </div>
       <div class="mt-1">
-        <GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true" view="viewPreview" isRequest="true"
-          raiseRequest="true" :enableDisable="isEnable" @cell-click="viewPreview" @actionClicked="actionCreated"
+        <GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true" viewType="viewPdf"  raiseRequest="true"
+          :enableDisable="isEnable" @cell-click="viewPreview" @actionClicked="actionCreated"
           @toggle-click="toggleFunction" :actions="actions" @updateFilters="inLineFiltersData"
           :field-mapping="fieldMapping" isFiltersoption="true" />
         <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
@@ -123,8 +123,8 @@ import { useRoute } from 'vue-router';
 const totalRecords = ref(0);
 const tableheaders = ref([
   { th: "Form Name", td_key: "form_name" },
-  { th: "Form Short Code", td_key: "form_short_name" },
-  { th: "Owner Of The Form", td_key: "owner_of_the_form" },
+  // { th: "Form Short Code", td_key: "form_short_name" },
+  { th: "Department", td_key: "form_department" },
   // { th: "Accessible Departments", td_key: "accessible_departments" },
   // { th: "Status", td_key: "form_status" },
   // { th: "Form Status", td_key: "enable" },
@@ -512,20 +512,21 @@ function fetchDepartmentDetails(id, data) {
     ["form_status", "like", "created"],
 
   ];
-  filterObj.value.filters.push(...filters);
   if (props.id && props.id !== "Allforms" && props.id !== "allforms") {
+    console.log(props.id);
     filters.push(["owner_of_the_form", "=", props.id]);
   }
   if (data) {
     filters.push(...data)
   }
+  filterObj.value.filters.push(...filters);
 
   const queryParams = {
     fields: JSON.stringify(["*"]),
     limit_page_length: filterObj.value.limitPageLength,
     limit_start: filterObj.value.limit_start,
     filters: JSON.stringify(filterObj.value.filters),
-    order_by: "`tabEzy Form Definitions`.`enable` DESC, `tabEzy Form Definitions`.`modified` DESC"
+    order_by: "`tabEzy Form Definitions`.`enable` DESC, `tabEzy Form Definitions`.`creation` DESC"
   };
   const queryParamsCount = {
     fields: JSON.stringify(["count(name) AS total_count"]),

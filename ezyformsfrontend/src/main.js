@@ -4,6 +4,7 @@ import router from "./router";
 import "../src/Styles/styles.scss";
 import '@vueform/multiselect/themes/default.css';
 import "vue3-toastify/dist/index.css";
+ import Tooltip from 'primevue/tooltip';
 // import PrimeVue from 'primevue/config';
 // import Aura from '@primevue/themes/aura';
 // import Tooltip from 'primevue/tooltip';
@@ -14,6 +15,8 @@ import "vue3-toastify/dist/index.css";
 const app = createApp(App);
 
 app.use(router);
+app.directive('tooltip', Tooltip);
+
 // app.use(PrimeVue, {
 //     theme: {
 //         preset: Aura
