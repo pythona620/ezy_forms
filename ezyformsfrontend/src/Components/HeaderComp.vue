@@ -405,10 +405,10 @@ watch(business_unit, (newBu, oldBu) => {
     sessionStorage.setItem("Bu", EzyBusinessUnit.value)
 
     if (route.path.includes('forms') && newBu !== oldBu) {
-        deptData(true);
+        gettingDepartmentNames(true);
     } else if (route.path.includes('forms') && newBu === oldBu) {
 
-        deptData();
+        gettingDepartmentNames();
     }
 });
 
@@ -416,6 +416,27 @@ function logoClick() {
     router.push({
         path: '/dashboard/maindash'
     })
+}
+function gettingDepartmentNames(){
+   let dataObj = {
+        business_unit: business_unit.value
+    };
+   
+
+   axiosInstance
+    .post(apis.DepartmentNames,dataObj)
+    .then((response) => {
+            deptartmentData.value = response.message;
+                formSideBarData.value = deptartmentData.value
+                    .sort((a, b) => a.department_name.localeCompare(b.department_name))
+                    .map(department => ({
+                        name: department.department_name,
+                        route: department.name,
+                    }));
+    })
+    .catch((error) => {
+      console.log(error);
+      });
 }
 
 function deptData(value = null) {
@@ -569,7 +590,7 @@ function SelectedDepartment(departmentName) {
 
     const queryParams = {
         fields: JSON.stringify(["*"]),
-        limit_page_length: filterObj.value.limitPageLength,
+        limit_page_length: 'None',
         limit_start: filterObj.value.limit_start,
         filters: JSON.stringify(filters),
         order_by: "`tabEzy Form Definitions`.`creation` desc",
@@ -627,7 +648,7 @@ function SelectedDepartment(departmentName) {
 const emittedFormData = ref([]);
 const filepaths = ref('')
 function raiseRequest() {
-    deptData()
+    gettingDepartmentNames()
 }
 
 

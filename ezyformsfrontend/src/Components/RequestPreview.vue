@@ -535,12 +535,31 @@
                                                                                         style="max-width: 100px; max-height: 100px" />
 
                                                                                     <!-- Show PDF icon -->
-                                                                                    <div v-else
-                                                                                        class="d-flex align-items-center justify-content-center border mt-2"
-                                                                                        style="width: 100px; height: 100px; background: #f9f9f9">
-                                                                                        <i
-                                                                                            class="bi bi-file-earmark-pdf fs-1 text-danger"></i>
-                                                                                    </div>
+                                                                                     <div
+                                                                                            v-else-if="isPdfFile(fileUrl)"
+                                                                                            class="d-flex align-items-center justify-content-center border mt-2"
+                                                                                            style="width: 100px; height: 100px; background: #f9f9f9"
+                                                                                            >
+                                                                                            <i class="bi bi-file-earmark-pdf fs-1 text-danger"></i>
+                                                                                            </div>
+
+                                                                                            <!-- Excel Preview -->
+                                                                                            <div
+                                                                                            v-else-if="isExcelFile(fileUrl)"
+                                                                                            class="d-flex align-items-center justify-content-center border mt-2"
+                                                                                            style="width: 100px; height: 100px; background: #f9f9f9"
+                                                                                            >
+                                                                                            <i class="bi bi-file-earmark-spreadsheet fs-1 text-success"></i>
+                                                                                            </div>
+
+                                                                                            <!-- Other File Types -->
+                                                                                            <div
+                                                                                            v-else
+                                                                                            class="d-flex align-items-center justify-content-center border mt-2"
+                                                                                            style="width: 100px; height: 100px; background: #f9f9f9"
+                                                                                            >
+                                                                                            <i class="bi bi-file-earmark fs-1"></i>
+                                                                                            </div>
                                                                                 </div>
                                                                             </div>
                                                                         </div>
@@ -664,21 +683,21 @@
                                                                         <template
                                                                             v-if="field.fieldtype === 'Data' && field.label !== 'Type of Manpower'">
                                                                             <input
-      type="text"
-      :maxlength="field.fieldtype === 'Phone' ? '10' : '140'"
-      class="form-control font-12"
-      v-model="row[field.fieldname]"
-    />
-      <!-- @focus="focusedField = { rowIndex, fieldname: field.fieldname }"
-      @blur="focusedField = { rowIndex: null, fieldname: null }" -->
+                                                                                type="text"
+                                                                                :maxlength="field.fieldtype === 'Phone' ? '10' : '140'"
+                                                                                class="form-control font-12"
+                                                                                v-model="row[field.fieldname]"
+                                                                                />
+                                                                                <!-- @focus="focusedField = { rowIndex, fieldname: field.fieldname }"
+                                                                                @blur="focusedField = { rowIndex: null, fieldname: null }" -->
 
-    <!-- Show popup only if this specific field in this specific row is focused -->
-    <!-- <div
-      v-if="focusedField.rowIndex === rowIndex && focusedField.fieldname === field.fieldname"
-      class="custom-popup"
-    >
-      {{ row[field.fieldname] }}
-    </div> -->
+                                                                                <!-- Show popup only if this specific field in this specific row is focused -->
+                                                                                <!-- <div
+                                                                                v-if="focusedField.rowIndex === rowIndex && focusedField.fieldname === field.fieldname"
+                                                                                class="custom-popup"
+                                                                                >
+                                                                                {{ row[field.fieldname] }}
+                                                                                </div> -->
 
                                                                         </template>
                                                                         <template v-if="field.fieldtype === 'Text'">
@@ -759,12 +778,31 @@
                                                                                             style="max-width: 100px; max-height: 100px" />
 
                                                                                         <!-- Show PDF Icon -->
-                                                                                        <div v-else
+                                                                                         <div
+                                                                                            v-else-if="isPdfFile(fileUrl)"
                                                                                             class="d-flex align-items-center justify-content-center border mt-2"
-                                                                                            style="width: 100px; height: 100px; background: #f9f9f9">
-                                                                                            <i
-                                                                                                class="bi bi-file-earmark-pdf fs-1 text-danger"></i>
-                                                                                        </div>
+                                                                                            style="width: 100px; height: 100px; background: #f9f9f9"
+                                                                                            >
+                                                                                            <i class="bi bi-file-earmark-pdf fs-1 text-danger"></i>
+                                                                                            </div>
+
+                                                                                            <!-- Excel Preview -->
+                                                                                            <div
+                                                                                            v-else-if="isExcelFile(fileUrl)"
+                                                                                            class="d-flex align-items-center justify-content-center border mt-2"
+                                                                                            style="width: 100px; height: 100px; background: #f9f9f9"
+                                                                                            >
+                                                                                            <i class="bi bi-file-earmark-spreadsheet fs-1 text-success"></i>
+                                                                                            </div>
+
+                                                                                            <!-- Other File Types -->
+                                                                                            <div
+                                                                                            v-else
+                                                                                            class="d-flex align-items-center justify-content-center border mt-2"
+                                                                                            style="width: 100px; height: 100px; background: #f9f9f9"
+                                                                                            >
+                                                                                            <i class="bi bi-file-earmark fs-1"></i>
+                                                                                            </div>
                                                                                     </div>
 
                                                                                     <!-- Remove Icon -->

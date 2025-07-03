@@ -8,7 +8,8 @@
     </div>
     <div class="mt-2">
       <!-- actionType="dropdown" -->
-      <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" isCheckbox="true" viewType="viewPdf"  
+      <!-- raiseRequest="true" -->
+      <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" isCheckbox="true" viewType="viewPdf" 
         @cell-click="viewPreview" :actions="actions" @actionClicked="actionCreated" isFiltersoption="true"
         :field-mapping="fieldMapping" @updateFilters="inLineFiltersData" />
       <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
@@ -258,7 +259,7 @@ function viewPreview(data,idex,type) {
   //     query: {
   //       routepath: route.path,
   //       main_form: data.doctype_name,
-  //       main_form_id: data.name,
+  //       main_form_Id: data.name,
   //       business_unit:data.property,
   //       status:data.status,
   //       type: "myforms",
@@ -712,7 +713,7 @@ onMounted(() => {
   // receivedForMe()
 });
 </script>
-<style scoped>
+<style lang="scss" scoped>
 .approvebtn {
   width: 146px;
   height: 30px;
