@@ -48,7 +48,7 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from "vue";
+import { ref, watch, computed,onMounted } from "vue";
 import axiosInstance from "../../shared/services/interceptor";
 import { apis, doctypes } from "../../shared/apiurls";
 import { toast } from "vue3-toastify";
@@ -58,6 +58,7 @@ const tableData = ref([
     { title: "Two Factor Authentication", checked: false },
     { title: "Send Form as an Attachment Via an E-Mail ", checked: false },
     { title: "Welcome E-Mail Configuration", checked: false },
+    { title: "Sign Up", checked: false },
 ]);
 
 const default_mail = ref(false);
@@ -70,13 +71,9 @@ const businessUnit = computed(() => {
   return EzyBusinessUnit.value;
 });
 
-// onMounted(() => {
-
-// //      const storedBu = localStorage.getItem('Bu');
-// //   if (storedBu) {
-// //     Bussines_unit.value = storedBu;
-// //   }
-// });
+onMounted(() => {
+    signUp();
+});
 
 
 
@@ -100,6 +97,10 @@ const handleToggle = (index) => {
         confirmMessage.value = isChecked
             ? "Are you sure you want to enable E-Mail Configuration?"
             : "Are you sure you want to disable E-Mail Configuration?";
+    } else if (index === 3) {
+        confirmMessage.value = isChecked
+            ? "Are you sure you want to enable Sign up?"
+            : "Are you sure you want to disable Sign up?";
     }
 
     // Show the modal
@@ -117,6 +118,7 @@ const confirmAction = () => {
     const isChecked = selectedCheckedState.value === false ? 1 : 0;
     console.log(selectedCheckedState.value);
     const newStatus = isChecked ? 1 : 0;
+    const webSiteStatus = isChecked ? 0 :1;
 
     // Toggle the checkbox state on confirm
     tableData.value[index].checked = !isChecked;
@@ -171,6 +173,20 @@ const confirmAction = () => {
             toast.info("Please Configure Default Mail First!");
             tableData.value[index].checked = false;
         }
+    } else if (index === 3) {
+        axiosInstance
+            .put(`${apis.resource}${doctypes.websiteSettings}/${encodeURIComponent("Website Settings")}`, {
+                disable_signup: webSiteStatus,
+            })
+            .then(() => {
+                toast.success(`Sign up ${webSiteStatus === 1 ? "Disabled" : "Enabled"} Successfully!`, { autoClose: 700 });
+                const modal = bootstrap.Modal.getInstance(document.getElementById('EnableDisable'));
+                modal.hide();
+                signUp();
+            })
+            .catch(() => {
+                toast.error("Failed to update Sign up!");
+            });
     }
 };
 
@@ -211,6 +227,24 @@ const enable_two_factor = () => {
             if (res.data) {
 
                 tableData.value[0].checked = res.data.enable_two_factor_auth == 1;
+            }
+        })
+        .catch((error) => {
+            console.error("Error fetching system settings:", error);
+        });
+};
+
+const signUp = () => {
+    const docName = "Website Settings";
+    const queryParams = {
+        fields: JSON.stringify(["*"]),
+    };
+
+    axiosInstance
+        .get(`${apis.resource}${doctypes.websiteSettings}/${encodeURIComponent(docName)}`, { params: queryParams })
+        .then((res) => {
+            if (res.data) {
+                tableData.value[3].checked = res.data.disable_signup == 0;
             }
         })
         .catch((error) => {

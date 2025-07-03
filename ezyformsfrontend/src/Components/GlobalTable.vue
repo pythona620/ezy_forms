@@ -159,14 +159,14 @@
                   </span>
                 </div>
               </span>
-              <span class="text-center fixed-column" v-else-if="column.td_key === 'enable'">
+              <span class="text-center fixed-column" v-else-if="column.td_key === 'enable' || column.td_key === 'activate'">
                 <div class="d-flex justify-content-center align-items-center gap-2">
-                  <span :class="row.enable == 0 ? 'text-secondary font-11' : ''">
-                    {{ row.enable == '1' ? '' : 'Disabled' }}
+                  <span :class="row.enable || row.activate  == 0 ? 'text-secondary font-11' : ''">
+                    {{ row.enable || row.activate  == '1' ? '' : 'Disabled' }}
                   </span>
                   <div class="form-check d-flex justify-content-center form-switch text-end">
                     <input class="form-check-input shadow-none" type="checkbox" role="switch"
-                      :checked="row.enable == '0'" @click.prevent="handleToggle(row, index, $event)" />
+                      :checked="row.enable == '0' || row.activate === 0" @click.prevent="handleToggle(row, index, $event)" />
                   </div>
                 </div>
               </span>

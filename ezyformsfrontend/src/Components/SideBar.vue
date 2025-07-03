@@ -95,6 +95,18 @@
                         </router-link>
                     </ul>
 
+                    <h2 v-if="filteredSettingsGroups.eightGroup" class="font-10 m-0 text-muted ps-2">{{
+                        eightSettingsTitle }}</h2>
+                    <ul class="list-unstyled" v-if="filteredSettingsGroups.eightGroup">
+                        <router-link v-for="(list, index) in filteredSettingsGroups.eightGroup" :key="index"
+                            :to="`${baseRoute}/${list.route.toLowerCase()}`" class="text-decoration-none text-black"
+                            active-class="active-link">
+                            <li :title="list.name">
+                                <i :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
+                                {{ list.name }}
+                            </li>
+                        </router-link>
+                    </ul>
 
                 </template>
                 <template v-if="isMasterRoute">
@@ -187,6 +199,7 @@ const settingsSideBarData = [
     { name: 'Activity Log', icon: 'bi bi-clock-history', route: 'activitylog' },
     { name: 'Audit Log', icon: 'bi bi-clock', route: 'auditlog' },
     { name: 'Form Creation' , icon: 'bi bi-file-earmark-text', route: 'CreateForm' },
+    { name: 'Acknowledgement' , icon: 'bi bi-file-earmark-text', route: 'acknowledgement' },
 
     // {name: 'Roles',icon:' bi bi-people', route:'role'},
     // { name: 'Workflow Settings', icon: 'bi bi-gear', route: 'WorkflowSettings'}
@@ -203,6 +216,7 @@ const forthSettingsTitle = 'Employee';
 const fifthSettingsTitle = 'System Settings';
 const sixthTitle = 'Audits';
 const seventhSettingsTitle = 'Form Creation';
+const eightSettingsTitle = 'Acknowledgement';
 
 
 
@@ -269,7 +283,8 @@ const filteredSettingsGroups = computed(() => {
             forthSettingsGroup: settingsSideBarData.slice(3, 6),
             fifthSettingsGroup: settingsSideBarData.slice(6,7),
             sixthGroup: settingsSideBarData.slice(7,9),
-            seventhGroup: settingsSideBarData.slice(9),
+            seventhGroup: settingsSideBarData.slice(9,10),
+            eightGroup: settingsSideBarData.slice(10),
 
         }
         : { thirdSettingsGroup: [], forthSettingsGroup: []};
@@ -446,8 +461,12 @@ li {
 li:hover {
     background-color: var(--white-color);
     color: var(--black-color);
-    font-weight: var(--font-weight-normal);
+    /* font-weight: var(--font-weight-normal); */
     text-align: left;
+    color: #DC3E45;
+    font-weight: 500;
+    font-size: var(--twelve);
+    
     /* font-size: var(--thirteen); */
     /* line-height: 26px; */
     /* border-radius: 4px; */
@@ -472,12 +491,13 @@ li:hover {
 
 .active-link>li {
     background-color: var(--white-color);
-    color: var(--text-color);
+    color: #DC3E45;
     font-size: var(--thirteen);
     font-weight: var(--font-weight-medium);
     line-height: 26px;
     text-align: left;
-    border-radius: 6px;
+    border-radius: 0px;
+    border-left: 5px solid #DC3E45;
     
 
 

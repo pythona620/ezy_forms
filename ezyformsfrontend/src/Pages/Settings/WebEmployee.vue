@@ -502,7 +502,39 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            Are you sure you want to <span id="empActionText"></span> "<span id="empRowName"></span>"?
+            Are you sure you want to <span id="empActionText"></span> "<span id="empRowName"></span>"? <br>
+
+            <div v-if="empActionText=='Disable'">
+              <label for="name" class="font-13 mt-3">Attachments</label>
+            <input type="file" @change="handleSingleAttach" class="form-control mb-3" :disabled="uploadedFields.length >= 4" />
+            <div v-if="uploadedFields.length >= 4" class="text-success mt-2">
+              All attachments uploaded.
+            </div>
+
+            <!-- Uploaded Images List -->
+            <div class="row mt-3">
+              <div
+                v-for="(field, index) in uploadedFields"
+                :key="index"
+                class="col-3 mb-3 text-center"
+              >
+                <img
+                  :src="selectedEmpRow[field]"
+                  alt="Uploaded"
+                  class="img-thumbnail"
+                  style="height: 100px; object-fit: cover;"
+                />
+                <button
+                  @click="removeImage(field)"
+                  class="btn btn-sm btn-danger mt-2"
+                >
+                  Remove
+                </button>
+              </div>
+
+            </div>
+            </div>
+
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -633,6 +665,7 @@ const tableheaders = ref([
   { th: "Creation Date", td_key: "creation" },
   { th: "last Login", td_key: "last_login" },
   { th: "last Login IP", td_key: "last_ip" },
+  { th: "Acknowledge On", td_key: "acknowledge_on" },
   { th: "Emp Status", td_key: "enable" },
 
   // { th: "Reporting Designation", td_key: "reporting_designation" },
@@ -1584,6 +1617,31 @@ function selectedSignature(event) {
 //     return Math.floor(Math.random() * 1000000);
 // };
 
+const uploadedFields = ref([]);  // to track filled fields
+
+const handleSingleAttach = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    const nextField = getNextField();
+    if (nextField) {
+      uploadFile(file, nextField);
+    } else {
+      console.warn('All fields are filled.');
+    }
+  }
+  event.target.value = '';  // Clear file input after each selection
+};
+
+const getNextField = () => {
+  const fields = ['attachment_one', 'attachment_two', 'attachment_three', 'attachment_four'];
+  return fields.find((field) => !selectedEmpRow.value[field]);
+};
+
+const removeImage = (field) => {
+  selectedEmpRow.value[field] = '';
+  uploadedFields.value = uploadedFields.value.filter(f => f !== field);
+};
+
 const uploadFile = (file, field) => {
   let fileName = `${file.name}`;
 
@@ -1599,6 +1657,9 @@ const uploadFile = (file, field) => {
         if (field === "signature") {
           createEmployee.value.signature = res.message.file_url;
         }
+        selectedEmpRow.value[field] = res.message.file_url;
+        uploadedFields.value.push(field);
+        console.log(`Uploaded ${field}:`, res.message.file_url);
         // console.log("Uploaded file URL:", res.message.file_url);
       } else {
         console.error("file_url not found in the response.");
