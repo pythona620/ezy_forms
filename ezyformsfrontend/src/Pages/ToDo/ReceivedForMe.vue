@@ -150,7 +150,7 @@ const tableheaders = ref([
   { th: "Requested Department", td_key: "role" },
   // { th: "Property", td_key: "property" },
   { th: "Approval Status", td_key: "status" },
-  { th: "Workflow Status", td_key: "assigned_to_users" },
+  { th: "Pending With", td_key: "assigned_to_users" },
 
 ]);
 

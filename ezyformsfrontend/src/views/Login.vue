@@ -44,7 +44,8 @@
         </button>
 
       </div>
-      <div v-if="isSignup == 0" class="font-13 m-0 cursor-pointer text-center" @click="OpenSignUp"><span class="sign">Not
+      <div v-if="isSignup == 0" class="font-13 m-0 cursor-pointer text-center" @click="OpenSignUp"><span
+          class="sign">Not
           a user? Sign
           Up</span></div>
     </div>
@@ -144,26 +145,33 @@
             <Vue3Select v-model="SignUpdata.dept" :options="this.deptDetails" placeholder="Select Department" />
           </div>
           <div class="mt-2 col-lg-12 col-md-12 col-sm-12">
-            <DigitalSignature v-if="!this.digitalSign" ref="digitalSignature" @signature-saved="onSignatureSaved"
-              @signature-cleared="onSignatureCleared" @signature-removed="onSignatureRemoved"
-              @signature-uploaded="onSignatureUploaded" />
 
-            <div v-if="SignUpdata.signature && this.digitalSign" class="mt-2">
-              <label class="font-13" for="emp_code">Uploaded Signature:</label><br>
-              <img :src="SignUpdata.signature" alt="Signature" class="img-thumbnail mt-1" style="max-width: 100px;" />
+            <span class="me-4">
+              <input type="radio" value="digital" v-model="selectedOption" class="form-check-input mt-1 input-border" />
+              <label class="font-13 ms-2" for="emp_code">Digital Signature</label>
+            </span>
+            <span class="">
+              <input type="radio" value="upload" v-model="selectedOption" class="form-check-input m-1 input-border" />
+              <label class="font-13 ms-2" for="emp_code">Upload Signature:</label>
+            </span>
+
+            <div v-if="selectedOption === 'digital'">
+              <DigitalSignature ref="digitalSignature" class="mt-3" @signature-saved="onSignatureSaved"
+                @signature-cleared="onSignatureCleared" @signature-removed="onSignatureRemoved"
+                @signature-uploaded="onSignatureUploaded" />
             </div>
 
-            <div>
-              <input type="file" ref="signatureInputRef" class="d-none" id="signatureInput" @change="selectedSignature"
-                aria-describedby="fileHelpId" accept="image/png, image/jpeg" />
-               <button v-if="this.digitalSign" type="button" class="add-signiture-btn me-3" @click="openDigitakSignature">
-                Digital Signature
-              </button>
-              <button type="button" class="add-signiture-btn" :class="{ 'add-signiture': !this.digitalSign }" @click="openSignatureInput">
-                Add Signature
-              </button>
+            <div v-if="selectedOption === 'upload'">
+              <input type="file" ref="signatureInputRef" class="form-control mt-3" id="signatureInput"
+                @change="selectedSignature" aria-describedby="fileHelpId" accept="image/png, image/jpeg" />
+
+              <div v-if="SignUpdata.signature " class="mt-2">
+                <label class="font-13" for="emp_code">Uploaded Signature:</label><br>
+                <img :src="SignUpdata.signature" alt="Signature" class="img-thumbnail mt-1" style="max-width: 100px;" />
+              </div>
 
             </div>
+
           </div>
         </div>
 
@@ -171,8 +179,8 @@
 
       <div>
         <button
-          :disabled="!SignUpdata.email || !SignUpdata.full_name || !SignUpdata.emp_code || !SignUpdata.emp_phone || !SignUpdata.dept || !SignUpdata.signature"
-          type="submit" data-bs-toggle="modal" data-bs-target="#EmployeeToggleModal"
+          :disabled="!SignUpdata.email || !SignUpdata.full_name || !SignUpdata.emp_code || !SignUpdata.emp_phone || !SignUpdata.dept"
+          type="submit" @click="handleSignUp"
           class="border-0 btn btn-dark button w-100 mb-4 py-2 font-13 text-white rounded-1">
           Sign Up
         </button>
@@ -309,7 +317,9 @@ export default {
       acknowledgementHtml: "",
       acknowledge: false,
       acknowledgementName: "",
-      digitalSign: false,
+      isDigital: false,
+      isUploadImage: false,
+      selectedOption: "",
       // timeLeft: 60,
       // timer: null,
       // resentMessage: "",
@@ -715,7 +725,7 @@ export default {
                   emp_mail_id: employeeData.emp_mail_id,
                   designation: employeeData.designation,
                   department: employeeData.department,
-                  emp_code:employeeData.emp_code,
+                  emp_code: employeeData.emp_code,
                   emp_signature: employeeData.signature,
                   // department: employeeData.department,
                 };
@@ -840,12 +850,33 @@ export default {
       this.errors.signature = null;
       console.log("Signature ready for upload:", file);
     },
-    openDigitakSignature(){
-      this.digitalSign = false;
+    handleSignUp() {
+      const signatureComponent = this.$refs.digitalSignature;
+      if (signatureComponent && signatureComponent.getSignatureData) {
+        const signatureData = signatureComponent.getSignatureData();
+        if (signatureData) {
+          this.onSignatureSaved(signatureData);
+          const modal = new bootstrap.Modal(document.getElementById('EmployeeToggleModal'));
+          modal.show();
+        } else {
+          console.log("No signature data available");
+        }
+      }
+      else if (this.SignUpdata.signature) {
+        // Show modal manually
+        const modal = new bootstrap.Modal(document.getElementById('EmployeeToggleModal'));
+        modal.show();
+      }
+      else {
+        toast.error("signature Not Added")
+      }
+    },
+    openDigitakSignature() {
+      this.isDigital = true;
     },
     openSignatureInput() {
       this.$refs.signatureInputRef.click();
-      this.digitalSign = true;
+      this.isDigital = false;
     },
 
     selectedSignature(event) {
@@ -888,12 +919,12 @@ export default {
     },
 
     onSignatureCleared() {
-      this.SignUpdata.signature = null;
+      this.SignUpdata.signature = "";
       this.errors.signature = 'Signature is required';
     },
 
     onSignatureRemoved() {
-      this.SignUpdata.signature = null;
+      this.SignUpdata.signature = "";
       this.errors.signature = 'Signature is required';
     },
 
@@ -987,7 +1018,12 @@ export default {
 .loginpageheight {
   height: 100vh;
 }
-
+.checkbox-input{
+  width: 50px;
+}
+.input-border{
+  border: 1px solid black;
+}
 .Message-div {
   background-color: #DEFDE9;
   padding: 20px 50px;
@@ -995,12 +1031,12 @@ export default {
   font-size: 12px;
 }
 
-.add-signiture {
-  position: relative;
-  bottom: 77px;
-  left: 205px;
-}
-.add-signiture-btn{
+// .add-signiture {
+//   position: relative;
+//   bottom: 77px;
+//   left: 205px;
+// }
+.add-signiture-btn {
   border: 1px solid #dc3545;
   color: #dc3545;
   border-radius: 5px;
@@ -1094,6 +1130,7 @@ export default {
   position: relative;
   min-width: 420px;
 }
+
 .input-div1 {
   border: 1px solid #eeeeee;
   box-shadow: 0px 2px 14px 0px #00000017;

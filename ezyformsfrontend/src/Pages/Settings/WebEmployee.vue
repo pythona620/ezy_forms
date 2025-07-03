@@ -502,16 +502,15 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            Are you sure you want to <span id="empActionText"></span> "<span id="empRowName"></span>"? <br>
+            Are you sure you want to <span id="empActionText"></span> "<span id="empRowName"></span>"?
 
-            <div v-if="empActionText=='Disable'">
+            <!-- <div v-if="empActionText=='Disable'">
               <label for="name" class="font-13 mt-3">Attachments</label>
             <input type="file" @change="handleSingleAttach" class="form-control mb-3" :disabled="uploadedFields.length >= 4" />
             <div v-if="uploadedFields.length >= 4" class="text-success mt-2">
               All attachments uploaded.
             </div>
 
-            <!-- Uploaded Images List -->
             <div class="row mt-3">
               <div
                 v-for="(field, index) in uploadedFields"
@@ -533,7 +532,7 @@
               </div>
 
             </div>
-            </div>
+            </div> -->
 
           </div>
           <div class="modal-footer">
