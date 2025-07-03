@@ -110,8 +110,8 @@
               <span> <i class="bi bi-x"></i></span>Clear form
             </button>
             <!-- :disabled="!isFormValid" -->
-            <button v-if="!selectedData.selectedFormId" data-bs-toggle="modal" data-bs-target="#ExportEmployeeModal" class="btn btn-dark font-12" type="submit"
-              >
+            <button v-if="!selectedData.selectedFormId" data-bs-toggle="modal" data-bs-target="#ExportEmployeeModal"
+              class="btn btn-dark font-12" type="submit">
               {{ selectedData.hasWorkflow == 'No' ? 'Save' : 'Raise Request' }}
             </button>
             <!-- <button  class="btn btn-dark font-12" type="submit"
@@ -135,24 +135,31 @@
       </div>
     </div>
     <div class="modal fade" id="ExportEmployeeModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title">Acknowledgement</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-              <div class="modal-body">
-                <input type="checkbox" v-model="acknowledge" class="me-1 mt-1" />
-                  I acknowledge that the information provided is correct.
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-dark" :disabled="!acknowledge || saveloading" @click="raiseRequestSubmission">Yes, Proceed</button>
-              </div>
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Acknowledgement</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <input type="checkbox" v-model="acknowledge" class="me-1 mt-1" />
+            I acknowledge that the information provided is correct.
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary font-12" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-dark" :disabled="!acknowledge || saveloading"
+              @click="raiseRequestSubmission">
+              <span v-if="saveloading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              <span v-if="!saveloading">
+                <span class="font-12 fw-bold">Yes, Proceed</span>
+              </span>
+
+            </button>
           </div>
         </div>
       </div>
-    
+    </div>
+
   </div>
 </template>
 
@@ -187,7 +194,7 @@ const selectedData = ref({
 });
 
 const retun_id_from_linked_doc = ref("");
-const acknowledge=ref('')
+const acknowledge = ref('')
 const saveloading = ref(false)
 const business_unit = ref(localStorage.getItem('Bu')); // Retrieve from query
 const isFormValid = ref(false);
@@ -220,7 +227,7 @@ function backToForm() {
   router.push({
     path: selectedData.value.routepath,
     query: {
-      
+
       routepath: '/todo/raisedbyme',
       doctype_name: route.query.main_form,
       business_unit: selectedData.value.selectedBusiness_unit,
@@ -231,13 +238,13 @@ function backToForm() {
 }
 
 const ip_address = ref(null)
- 
+
 const getClientIP = async () => {
   try {
     const response = await fetch('https://api.ipify.org?format=json')
     const data = await response.json()
     ip_address.value = data.ip
-    console.log("ip_address.value",ip_address.value);
+    console.log("ip_address.value", ip_address.value);
 
   } catch (error) {
     console.error('Error fetching IP:', error)
@@ -258,10 +265,10 @@ const loadInitialData = () => {
   getClientIP()
   formDefinations();
   const storedData = localStorage.getItem("employeeData");
-   if (storedData) {
+  if (storedData) {
     employeeData.value = JSON.parse(storedData);
     // console.log("employeeData======================",employeeData.value);
-  } 
+  }
 
   // raiseRequest();
 };
@@ -845,12 +852,12 @@ async function raiseRequestSubmission() {
 
   // Prepare the form data
   const form = {
-    doctype: selectedData.value.selectedform 
-      ? selectedData.value.selectedform 
+    doctype: selectedData.value.selectedform
+      ? selectedData.value.selectedform
       : selectedData.value.linkedDocName,
     company_field: business_unit.value,
   };
- 
+
 
   // Append all child tables
   childEntries.forEach(([tableName, rows]) => {
@@ -1144,99 +1151,99 @@ function gettingDataToLink() {
 
 const child_id_name = ref((''))
 
-  function WfRequestUpdate() {
-    const filters = [
-      [
-        "wf_generated_request_id",
-        "like",
-        `%${selectedData.value.selectedFormId}%`,
-      ],
-    ];
+function WfRequestUpdate() {
+  const filters = [
+    [
+      "wf_generated_request_id",
+      "like",
+      `%${selectedData.value.selectedFormId}%`,
+    ],
+  ];
 
-    const queryParams = {
-      fields: JSON.stringify(["*"]),
-      limit_page_length: null,
-      limit_start: 0,
-      filters: JSON.stringify(filters),
-      order_by: `\`tab${selectedData.value.selectedform}\`.\`creation\` desc`,
-    };
+  const queryParams = {
+    fields: JSON.stringify(["*"]),
+    limit_page_length: null,
+    limit_start: 0,
+    filters: JSON.stringify(filters),
+    order_by: `\`tab${selectedData.value.selectedform}\`.\`creation\` desc`,
+  };
 
-    axiosInstance
-      .get(`${apis.resource}${selectedData.value.selectedform}`, {
-        params: queryParams,
-      })
-      .then((res) => {
-        if (res.data && res.data.length > 0) {
-          const doctypeForm = res.data[0];
+  axiosInstance
+    .get(`${apis.resource}${selectedData.value.selectedform}`, {
+      params: queryParams,
+    })
+    .then((res) => {
+      if (res.data && res.data.length > 0) {
+        const doctypeForm = res.data[0];
 
-          // console.log( blockArr.value);
+        // console.log( blockArr.value);
 
-          // Map response data to UI fields
-          mapFormFieldsToRequest(doctypeForm, blockArr.value);
-
-
-          axiosInstance
-            .get(`${apis.resource}${selectedData.value.selectedform}`)
-            .then((res) => {
-              console.log(`Data for :`, res.data[0]);
-              newMainId.value = res.data[0].name
-
-            })
-            .catch((error) => {
-              console.error(`Error fetching data for :`, error);
-            });
-          axiosInstance
-            .get(
-              `${apis.resource}${selectedData.value.selectedform}/${res.data[0].name}`
-            )
-            .then((res) => {
-              // console.log(`Data for :`, res.data);
-              // Identify the child table key dynamically
-              const childTables = Object.keys(res.data).filter((key) =>
-                Array.isArray(res.data[key])
-              );
-              console.log(childTables);
+        // Map response data to UI fields
+        mapFormFieldsToRequest(doctypeForm, blockArr.value);
 
 
-              if (childTables.length) {
-                tableRows.value = {};
+        axiosInstance
+          .get(`${apis.resource}${selectedData.value.selectedform}`)
+          .then((res) => {
+            console.log(`Data for :`, res.data[0]);
+            newMainId.value = res.data[0].name
 
-                childTables.forEach((tableKey) => {
-                  tableRows.value[tableKey] = res.data[tableKey] || [];
-                });
-                child_id_name.value = res.data.name
-                // console.log(res.data,"000000");
+          })
+          .catch((error) => {
+            console.error(`Error fetching data for :`, error);
+          });
+        axiosInstance
+          .get(
+            `${apis.resource}${selectedData.value.selectedform}/${res.data[0].name}`
+          )
+          .then((res) => {
+            // console.log(`Data for :`, res.data);
+            // Identify the child table key dynamically
+            const childTables = Object.keys(res.data).filter((key) =>
+              Array.isArray(res.data[key])
+            );
+            console.log(childTables);
 
-              }
-            })
-            .catch((error) => {
-              console.error(`Error fetching data for :`, error);
-            });
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-      });
-  }
 
-  function mapFormFieldsToRequest(doctypeData, blockArr) {
-    if (!doctypeData) return; // Ensure valid data
+            if (childTables.length) {
+              tableRows.value = {};
 
-    blockArr.forEach((block) => {
-      block.sections?.forEach((section) => {
-        section.rows?.forEach((row) => {
-          row.columns?.forEach((column) => {
-            column.fields?.forEach((field) => {
-              // Check if the field exists in the API response
-              if (doctypeData.hasOwnProperty(field.fieldname)) {
-                field.value = doctypeData[field.fieldname] ?? ""; // Set value reactively
-              }
-            });
+              childTables.forEach((tableKey) => {
+                tableRows.value[tableKey] = res.data[tableKey] || [];
+              });
+              child_id_name.value = res.data.name
+              // console.log(res.data,"000000");
+
+            }
+          })
+          .catch((error) => {
+            console.error(`Error fetching data for :`, error);
+          });
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching data:", error);
+    });
+}
+
+function mapFormFieldsToRequest(doctypeData, blockArr) {
+  if (!doctypeData) return; // Ensure valid data
+
+  blockArr.forEach((block) => {
+    block.sections?.forEach((section) => {
+      section.rows?.forEach((row) => {
+        row.columns?.forEach((column) => {
+          column.fields?.forEach((field) => {
+            // Check if the field exists in the API response
+            if (doctypeData.hasOwnProperty(field.fieldname)) {
+              field.value = doctypeData[field.fieldname] ?? ""; // Set value reactively
+            }
           });
         });
       });
     });
-  }
+  });
+}
 function request_raising_fn(item) {
   saveloading.value = true;
   // console.log(filepaths.value, "---filepaths");
@@ -1251,16 +1258,16 @@ function request_raising_fn(item) {
     url_for_request_id: "",
     files: filepaths.value.length > 0 ? filepaths.value : [],
     property: business_unit.value,
-    ip_address:ip_address.value,
-    employee_id:employeeData.value.emp_code,
+    ip_address: ip_address.value,
+    employee_id: employeeData.value.emp_code,
   };
   axiosInstance.post(apis.raising_request, data_obj).then((resp) => {
     if (resp?.message?.success === true) {
       const modal = bootstrap.Modal.getInstance(
-          document.getElementById("ExportEmployeeModal")
-          );
-          modal.hide();
-              saveloading.value = false;
+        document.getElementById("ExportEmployeeModal")
+      );
+      modal.hide();
+      saveloading.value = false;
 
       toast.success("Request Raised", {
         autoClose: 1000,
@@ -1285,6 +1292,7 @@ function request_raising_fn(item) {
   max-height: 200px;
   overflow-y: auto;
 }
+
 /* .modal {
   background: rgba(0, 0, 0, 0.5);
   position: fixed;
