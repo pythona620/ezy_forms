@@ -291,34 +291,42 @@
                                                         " class="form-control previewInputHeight font-10" />
                                             </template>
                                             <template v-else-if="field.fieldtype === 'Link'">
-                                            <input
-                                                type="text"
-                                                v-model="field.value"
-                                                @input="() => fetchDoctypeList(field.options, field.value, field)"
-                                                @focus="() => fetchDoctypeList(field.options, field.value, field)"
-                                                @change="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
-                                                class="form-control font-12 mb-1"
-                                            />
+  <div style="position: relative;">
+    <input
+      type="text"
+      v-model="field.value"
+      @focus="field.showDropdown = true"
+      @blur="() => field.showDropdown = false"
+      @input="() => fetchDoctypeList(field.options, field.value, field)"
+      @change="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+      class="form-control font-12 mb-1"
+    />
 
-                                            <ul v-if="field.linkSearchResults && field.linkSearchResults.length" class="list-group mt-1" style="max-height: 200px; overflow-y: auto;">
-                                                <li
-                                                v-for="(result, index) in field.linkSearchResults"
-                                                :key="index"
-                                                @click="selectDoctype(
-                                                    result,
-                                                    field,
-                                                    blockIndex,
-                                                    sectionIndex,
-                                                    rowIndex,
-                                                    columnIndex,
-                                                    fieldIndex
-                                                )"
-                                                class="list-group-item list-group-item-action"
-                                                >
-                                                {{ field.options.includes('Ezy Departments') ? result.department_name : result.name }}
-                                                </li>
-                                            </ul>
-                                            </template>
+    <ul
+      v-if="field.showDropdown && field.linkSearchResults && field.linkSearchResults.length"
+      class="list-group mt-1"
+      style="max-height: 200px; overflow-y: auto;"
+    >
+      <li
+        v-for="(result, index) in field.linkSearchResults"
+        :key="index"
+        @mousedown.prevent="selectDoctype(
+          result,
+          field,
+          blockIndex,
+          sectionIndex,
+          rowIndex,
+          columnIndex,
+          fieldIndex
+        ); field.showDropdown = false"
+        class="list-group-item list-group-item-action"
+      >
+        {{ field.options.includes('Ezy Departments') ? result.department_name : result.name }}
+      </li>
+    </ul>
+  </div>
+</template>
+
 
 
 
