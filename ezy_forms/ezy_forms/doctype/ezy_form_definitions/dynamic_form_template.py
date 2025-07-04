@@ -821,7 +821,7 @@ template_str = """
                                         {% endif %}
                                         
                                     </div>
-                                         {% if field.description != 'Field' and field.fieldname != 'auto_calculations' %}
+                                         {% if field.description != 'Field' and field.fieldname != 'auto_calculations' and field.fieldname != 'Disable' %}
                                             <div class="w-100 description-block mt-1">
                                                
                                                 <span>{{ field.description | replace('\n', '<br>') | safe }}</span>
