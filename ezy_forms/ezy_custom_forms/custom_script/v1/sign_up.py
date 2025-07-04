@@ -61,10 +61,9 @@ def sign_up(email: str, full_name: str,designation:str|None,emp_phone:str|None,e
 			})
 			doc.insert(ignore_permissions=True)
 			frappe.db.commit()
-		if  user:
-			new_doc = frappe.new_doc("Login Check")
-			new_doc.user_id = user
-			new_doc.insert(ignore_permissions=True)
+			new_doc_record = frappe.new_doc("Login Check")
+			new_doc_record.update({"user_id" : user.email,})
+			new_doc_record.insert(ignore_permissions=True)
 			frappe.db.commit()
 		send_mail_when_user_signup(emp_name = full_name,emp_mail_id=email)
 		# set default signup role as per Portal Settings
