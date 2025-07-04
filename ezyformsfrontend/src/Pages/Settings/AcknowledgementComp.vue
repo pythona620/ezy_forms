@@ -3,75 +3,79 @@
         <div class="d-flex justify-content-between align-items-center  py-2">
             <div>
                 <h1 class="mt-3 font-13">
-                    Audit Log
+                    Acknowledgement
                 </h1>
             </div>
-            <!-- <div class="d-flex gap-2 align-items-center">
+            <div class="d-flex gap-2 align-items-center">
                 <div class="d-flex align-items-center ">
-                    <button type="button" class="btn btn-dark buttoncomp CreateDepartments d-flex align-items-center " @click="CreateDeprtModal"
-                        data-bs-toggle="modal" data-bs-target="#createDepartments">
-                        Create Department
+                    <button type="button" class="btn btn-dark CreateDepartments " data-bs-toggle="modal"
+                        data-bs-target="#AcknowledgementModal" @click="openCreateModal">
+                        Create Acknowledgement
                     </button>
                 </div>
-            </div> -->
+
+            </div>
         </div>
         <div class="mt-2">
-            <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" viewType="viewPdf"
-                @cell-click="viewPreview" isCheckbox="true" isFiltersoption="true" :field-mapping="fieldMapping"
-                @updateFilters="inLineFiltersData" />
+            <GlobalTable :tHeaders="tableheaders" :tData="tableData" enableDisable="true" isAction="true"
+                viewType="viewPdf" isFiltersoption="true" @cell-click="viewPreview" :field-mapping="fieldMapping"
+                @updateFilters="inLineFiltersData" @toggle-click="toggleFunction" />
             <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
                 @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
         </div>
 
-        <div class="offcanvas offcanvas-end" data-bs-backdrop="static" tabindex="-1" id="staticBackdrop"
-            aria-labelledby="staticBackdropLabel">
-            <div class="offcanvas-header">
-                <h5 class="offcanvas-title" id="staticBackdropLabel" :title="viewLogs.docname">{{ viewLogs.docname }}</h5>
-                <button type="button" class="btn-close shadow-none" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        <!-- Modal -->
+        <div class="modal fade" id="AcknowledgementModal" data-bs-backdrop="static" tabindex="-1"
+            aria-labelledby="AcknowledgementLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="AcknowledgementLabel">Acknowledgement</h5>
+                        <button @click="close" type="button" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <label for="password" class="font-13">Acknowledgement Name</label><br />
+                        <FormFields tag="input" type="text" name="acknowledgementName" id="acknowledgementName"
+                            placeholder="Enter Name" class="mb-4" v-model="acknowledgementName" />
+
+                        <label for="password" class="font-13">Acknowledgement</label><br />
+                        <QuillEditor v-model:content="content" contentType="html" theme="snow" style="height: 300px" />
+                    </div>
+                    <div class="modal-footer">
+                        <button @click="close" type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                            Close
+                        </button>
+                        <button v-if="isSubmitBtn" type="button" class="btn btn-dark" @click="createAcknowledgement">
+                            Submit
+                        </button>
+
+                        <button v-else type="button" class="btn btn-dark" @click="UpdateAcknowledgement">
+                            Update
+                        </button>
+                    </div>
+                </div>
             </div>
-            <div class="offcanvas-body">
-                <!-- <div v-if="changedLogs.length">
-                    <ul>
-                        <li v-for="(item, index) in changedLogs" :key="index">
-                            <p class="text-nowrap m-0 font-13"><strong>Field Name =</strong> {{ item[0] }}</p>
-                            <p class="text-nowrap m-0 font-13"><strong>Old Value =</strong> {{ item[1] }}</p>
-                            <p class="text-nowrap m-0 font-13"><strong>New Value =</strong> {{ item[2] }}</p>
-                        </li>
-                    </ul>
-                </div> -->
-                <!-- Added Logs -->
-                <div class="offcanvas-div" v-if="addedLogs.length">
-                <h6 class="font-9">Added</h6>
-                <ul>
-                    <li v-for="(item, index) in addedLogs" class="mb-2" :key="'added-' + index">
-                    <p class="m-0 font-13"><strong>Field Name =</strong> {{ item[0] }}</p>
-                    <template v-if="typeof item[1] === 'object' && item[1] !== null">
-                        <div v-for="(val, key) in item[1]" :key="key">
-                        <p class="m-0 font-13"><strong>{{ key }}:</strong> {{ val }}</p>
-                        </div>
-                    </template>
-                    <p class="m-0 font-13" v-else>
-                        <strong>Value =</strong> {{ item[1] }}
-                    </p>
-                    </li>
-                </ul>
-                </div>
+        </div>
 
-                <!-- Changed Logs -->
-                <div class="offcanvas-div" v-if="changedLogs.length">
-                <h6 class="font-9">Changes</h6>
-                <ul>
-                    <li v-for="(item, index) in changedLogs" class="mb-2" :key="'changed-' + index">
-                    <!-- Field Name = {{ item[0] }}, Old Value = {{ item[1] }}, New Value = {{ item[2] }} -->
-                        <p class="m-0 font-13"><strong>Field Name =</strong> {{ item[0] }}</p>
-                        <p class="m-0 font-13"><strong>Old Value =</strong> {{ item[1] }}</p>
-                        <p class="m-0 font-13"><strong>New Value =</strong> {{ item[2] }}</p>
-                    </li>
-                </ul>
-                </div>
 
-                <div v-if="!addedLogs.length && !changedLogs.length">
-                No added or changed data.
+        <div class="modal fade" id="EmployeeToggleModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Confirm Acknowledgement Status</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Are you sure you want to
+                        <span class="fw-bold">{{ empActionText }}</span>
+                        "<span class="fw-semibold">{{ selectedEmpRow.name }}</span>"?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-dark" data-bs-dismiss="modal"
+                            @click="confirmEmployeeToggle">Yes, Proceed</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -81,6 +85,7 @@
 </template>
 <script setup>
 import GlobalTable from '../../Components/GlobalTable.vue';
+import FormFields from '../../Components/FormFields.vue';
 import PaginationComp from '../../Components/PaginationComp.vue'
 import axiosInstance from '../../shared/services/interceptor';
 import { apis, doctypes } from '../../shared/apiurls';
@@ -89,26 +94,130 @@ import { EzyBusinessUnit } from "../../shared/services/business_unit";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import "@vueform/multiselect/themes/default.css";
+import { QuillEditor } from '@vueup/vue-quill';
+// Quill styles (needed for toolbar, fonts, etc.)
+import '@vueup/vue-quill/dist/vue-quill.snow.css'
+
+const totalRecords = ref(0);
+const departmenCodeData = ref([]);
+const tableData = ref([]);
+const categoriesDataEdit = ref({ ezy_departments_items: [] });
+const designiations = ref([]);
+
+const acknowledgementName = ref("");
+
+
+const content = ref('')  // Reactive content binding
+const isSubmitBtn=ref(false)
+
+// Function to open Modal for Create
+function openCreateModal() {
+  isSubmitBtn.value = true;  // Show Submit button
+  acknowledgementName.value = "";  // Reset form
+  content.value = "";
+}
+
+function createAcknowledgement() {
+    const dataObj = {
+        acknowledgement: content.value,
+        naming_series: acknowledgementName.value,
+    }
+    // console.log(dataObj, "------------------");
+    axiosInstance.post(apis.resource + doctypes.acknowledgement, dataObj)
+        .then((res) => {
+            if (res.data) {
+                // console.log("res", res.data);
+                const modal = bootstrap.Modal.getInstance(
+                    document.getElementById("AcknowledgementModal")
+                );
+                modal.hide();
+                isSubmitBtn.value = false;
+                activitylog()
+            }
+        })
+}
+
+function UpdateAcknowledgement(){
+    const updatedData = {
+        acknowledgement: content.value,
+        naming_series: acknowledgementName.value,
+      };
+     axiosInstance
+        .put(`${apis.resource}${doctypes.acknowledgement}/${acknowledgementData.value.name}`, updatedData)
+        .then((response) => {
+            if (response.data) {
+                toast.success(`acknowledgement Updated successfully`, { autoClose: 700 });
+                activitylog()
+                const modal = bootstrap.Modal.getInstance(
+                    document.getElementById("AcknowledgementModal")
+                );
+                modal.hide();
+            }
+
+        })
+        .catch((error) => {
+            console.error("Error updating toggle:", error);
+        });
+}
+
+const acknowledgementData=ref("")
+
+function close() {
+    acknowledgementName.value = '';  // use the correct key from your data
+    content.value = '';
+    isSubmitBtn.value = false;  // Show Submit button
+}
+
+function viewPreview(data) {
+    acknowledgementName.value = data.naming_series || '';  // use the correct key from your data
+    content.value = data.acknowledgement || '';
+    acknowledgementData.value=data;
+
+
+    // console.log("data",data);
+    // console.log("acknowledgementName.value",acknowledgementName.value);
+    // console.log("content.value",content.value);
+
+    const modal = new bootstrap.Modal(document.getElementById('AcknowledgementModal'));
+    modal.show();
+}
+const selectedEmpRow = ref({});
+const empActionText = ref('');
+
+function toggleFunction(rowData) {
+    selectedEmpRow.value = rowData;
+    const isEnabled = rowData.enable === 0;
+    // empActionText.value = isEnabled ? 'Disable' : 'Enable';
+    empActionText.value = isEnabled ? 'Enable' : 'Disable';
+
+    const modal = new bootstrap.Modal(document.getElementById('EmployeeToggleModal'));
+    modal.show();
+}
+
+ function confirmEmployeeToggle() {
+
+    const isEnabled = selectedEmpRow.value.enable === '1' || selectedEmpRow.value.enable === 1;
+    selectedEmpRow.value.enable = isEnabled ? 0 : 1;
+
+    axiosInstance
+        .put(`${apis.resource}${doctypes.acknowledgement}/${selectedEmpRow.value.name}`, selectedEmpRow.value)
+        .then((response) => {
+            if (response.data) {
+                toast.success(`acknowledgement ${empActionText.value}d successfully`, { autoClose: 700 });
+                activitylog()
+            }
+
+        })
+        .catch((error) => {
+            console.error("Error updating toggle:", error);
+        });
+}
+
+
 
 const businessUnit = computed(() => {
     return EzyBusinessUnit.value;
 });
-// onMounted(() => {
-//     ezyForms();
-// })
-const totalRecords = ref(0);
-
-const tableData = ref([]);
-const radioOptions = ref(["yes", "no"])
-const EzyFormsCompanys = ref([]);
-const newCategory = ref("");
-const editIndex = ref(null);
-const editCategory = ref("");
-const categoriesData = ref([])
-const categoriesDataEdit = ref({ ezy_departments_items: [] });
-const designiations = ref([]);
-const timeout = ref(null);
-const viewLogs = ref([])
 
 
 const filterObj = ref({
@@ -120,22 +229,17 @@ const formErrors = ref({
     department_code: "",
     department_name: ""
 });
-const departmenCodeData = ref([]);
+
 
 const tableheaders = ref([
-    { th: "Document Name", td_key: "docname" },
-    { th: "Doctype Name", td_key: "ref_doctype" },
-    { th: "Modified By", td_key: "modified_by" },
-    { th: "Modified Date", td_key: "modified" },
-    // { th: "Property Name", td_key: "property" },
-    // { th: "Old Value", td_key: "old_value" },
-    // { th: "New Value", td_key: "new_value" },
-])
+    { th: "Name", td_key: "name" },
+    { th: "Status", td_key: "activate" },
 
+])
 const fieldMapping = ref({
-    docname: { type: "input" },
-    ref_doctype: { type: "input" },
-    modified_by: { type: "input" },
+    full_name: { type: "input" },
+    subject: { type: "input" },
+    status: { type: "select", options: ["Success", "Failed"] },
 });
 const CreateDepartments = ref({
     department_code: "",
@@ -179,13 +283,14 @@ const filterOnModal = reactive({
     department_name: "",
     department_code: ''
 
+
 })
 
 watch(
     businessUnit,
     (newVal) => {
         CreateDepartments.value.business_unit = newVal;
-        console.log("teDepartments",CreateDepartments.value.business_unit);
+
         if (newVal.length) {
 
             activitylog()
@@ -193,6 +298,9 @@ watch(
     },
     { immediate: true }
 );
+
+
+const timeout = ref(null);
 
 function inLineFiltersData(searchedData) {
     // Clear the previous timeout to prevent multiple API calls while typing
@@ -225,47 +333,34 @@ function inLineFiltersData(searchedData) {
 const PaginationUpdateValue = (itemsPerPage) => {
     filterObj.value.limitPageLength = itemsPerPage;
     filterObj.value.limit_start = 0;
-    //   if(filterObj.value.filters){
-    //     activitylog(filterObj.value.filters)
-    //   }
-    //   else{
-
     activitylog();
-    // }
 };
+
 // Handle updating the limit start
 const PaginationLimitStart = ([itemsPerPage, start]) => {
     filterObj.value.limitPageLength = itemsPerPage;
     filterObj.value.limit_start = start;
-    //   if(filterObj.value.filters){
-    //     activitylog(filterObj.value.filters)
-    //   }
-    //   else{
-
     activitylog();
-    // }
 };
 
 function activitylog(data) {
-
     if (data) {
         filterObj.value.filters.push(...data)
     }
-    filterObj.value.filters.push(["ref_doctype", "in", ["Ezy Employee", "Ezy Departments","WF Roles"]]);
 
     const queryParams = {
         fields: JSON.stringify(["*"]),
         filters: JSON.stringify(filterObj.value.filters),
         limit_page_length: filterObj.value.limitPageLength,
         limit_start: filterObj.value.limit_start,
-        order_by: "`tabVersion`.`creation` desc"
+        order_by: "`tabAcknowledgement`.`creation` desc"
     };
     const queryParamsCount = {
         fields: JSON.stringify(["count(name) AS total_count"]),
         limitPageLength: "None",
         filters: JSON.stringify(filterObj.value.filters),
     }
-    axiosInstance.get(`${apis.resource}${doctypes.version}`, { params: queryParamsCount })
+    axiosInstance.get(`${apis.resource}${doctypes.acknowledgement}`, { params: queryParamsCount })
         .then((res) => {
             // console.log(res.data[0].total_count);
             totalRecords.value = res.data[0].total_count
@@ -275,7 +370,7 @@ function activitylog(data) {
             console.error("Error fetching ezyForms data:", error);
         });
 
-    axiosInstance.get(apis.resource + doctypes.version, { params: queryParams })
+    axiosInstance.get(apis.resource + doctypes.acknowledgement, { params: queryParams })
         .then((res) => {
             if (res.data) {
                 const newData = res.data
@@ -293,39 +388,8 @@ function activitylog(data) {
 }
 
 
-function viewPreview(rowData) {
-    viewLogs.value = rowData;
-
-    const parsedData = JSON.parse(rowData.data);
-
-    // console.log("Changed array:", parsedData);
-
-    parsedData.changed.forEach(change => {
-        const [fieldName, oldValue, newValue] = change;
-        // console.log(`Field Name = ${fieldName}, Old Value = ${oldValue}, New Value = ${newValue}`);
-    });
-
-    const offcanvasElement = document.getElementById('staticBackdrop');
-    const offcanvas = new bootstrap.Offcanvas(offcanvasElement);
-    offcanvas.show();
-}
-
-const parsedLogData = computed(() => {
-  try {
-    return viewLogs.value?.data ? JSON.parse(viewLogs.value.data) : {};
-  } catch (e) {
-    return {};
-  }
-});
-
-const addedLogs = computed(() => parsedLogData.value.added || []);
-const changedLogs = computed(() => parsedLogData.value.changed || []);
-
-
-
 
 </script>
-<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 
 <style lang="scss" scoped>
 .global-table th {
@@ -333,15 +397,6 @@ const changedLogs = computed(() => parsedLogData.value.changed || []);
     text-align: left;
     color: #999999;
     font-size: 12px;
-}
-.offcanvas-title{
-    overflow: hidden;
-    text-overflow: ellipsis;
-    width: 100%;
-}
-.offcanvas-div{
-    background-color: #f2f2f2;
-    padding: 10px;
 }
 
 .filterbtn {
@@ -356,6 +411,7 @@ const changedLogs = computed(() => parsedLogData.value.changed || []);
 .CreateDepartments {
     width: 100% !important;
     padding: 5px 10px !important;
+    font-size: 13px;
 }
 
 .cancelfilter {

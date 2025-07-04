@@ -16,7 +16,8 @@ const WebEmployee=()=>import("./WebEmployee.vue");
 const InactiveEmployee=()=>import("./InactiveEmployee.vue")
 const ActivityLog=()=>import("./ActivityLog.vue")
 const CreateForm=()=>import("./CreateForm.vue")
-const AuditLog=()=>import("./AuditLog.vue")
+const AuditLog=()=>import("./AuditLog.vue");
+const AcknowledgementComp=()=>import("./AcknowledgementComp.vue");
 const PreDefineForms=()=>import("./PreDefineForms.vue")
 
 const settingRoutes = [
@@ -106,6 +107,11 @@ const settingRoutes = [
         path: "auditlog",
         component: AuditLog,
         name: "auditlog",
+      },
+      {
+        path: "acknowledgement",
+        component: AcknowledgementComp,
+        name: "acknowledgement",
       },
       {
         path: "predefinedforms",
