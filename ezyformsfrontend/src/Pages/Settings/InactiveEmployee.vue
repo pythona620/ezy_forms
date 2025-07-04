@@ -460,6 +460,12 @@
                       </span>
                     </template>
                   </VueMultiselect>
+                  <div class="mb-3">
+                    <label class="font-13 ps-1" for="reporting_to">Acknowledge On</label><br>
+                    <input class="mb-3 date-time " tag="input" type="datetime-local" name="acknowledge_on" id="acknowledge_on"
+                      placeholder="Enter department code" :value="trimMilliseconds(createEmployee.acknowledge_on)"
+                      readonly />
+                  </div>
                   <div class="mb-3 font-11">
                     <label for="signatureInput" class="form-label mb-0 font-13 ps-1">
                       Add Signature
@@ -633,6 +639,11 @@ const tableheaders = ref([
 
 
 // Extract and format data
+
+function trimMilliseconds(datetime) {
+  if (!datetime) return '';
+  return datetime.split('.')[0];
+}
 
 const fileInput = ref(null);
 const progress = ref(0);
@@ -2293,5 +2304,22 @@ function SaveEditEmp() {
 }
 .export-btn{
   background-color: #99999961;
+}
+.date-time{
+  display: block;
+    width: 100%;
+    padding: .375rem .75rem;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--bs-body-color);
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-color: var(--bs-body-bg);
+    background-clip: padding-box;
+    border: var(--bs-border-width) solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius);
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
 }
 </style>

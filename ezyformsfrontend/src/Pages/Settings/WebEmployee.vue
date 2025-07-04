@@ -14,11 +14,12 @@
             </p> -->
         </div>
         <div class="d-flex align-items-center gap-2">
-          <button type="button" class=" btn export-btn  CreateDepartments font-12" data-bs-toggle="modal" data-bs-target="#ExportEmployeeModal">
+          <button type="button" class=" btn export-btn  CreateDepartments font-12" data-bs-toggle="modal"
+            data-bs-target="#ExportEmployeeModal">
             Export Employees
           </button>
         </div>
-        
+
         <div class="modal fade" id="createDepartments" data-bs-backdrop="static" tabindex="-1" data-bs-keyboard="false"
           aria-labelledby="createDepartmentsLabel" aria-hidden="true">
           <div class="modal-dialog modal-lg">
@@ -171,9 +172,9 @@
                       <!-- <FormFields class="mb-3" tag="input" type="text" name="reporting_designation"
                                             id="reporting_designation" placeholder="Enter Reporting Designation"
                                             v-model="createEmployee.reporting_designation" /> -->
-                      <VueMultiselect v-model="createEmployee.reporting_designation" :options="designations" :allow-empty="true"
-                        :multiple="false" :close-on-select="true" :clear-on-select="false" :preserve-search="true"
-                        placeholder="Select Reporting Designation" class="font-11 mb-3"
+                      <VueMultiselect v-model="createEmployee.reporting_designation" :options="designations"
+                        :allow-empty="true" :multiple="false" :close-on-select="true" :clear-on-select="false"
+                        :preserve-search="true" placeholder="Select Reporting Designation" class="font-11 mb-3"
                         :disabled="!!createEmployee.reporting_to">
                         <!-- taggable
                                             @tag="addReportingDesignation"
@@ -422,7 +423,8 @@
                           </div>
                           <div class="modal-body">
                             <label for="" class="font-12 fw-bold">Designation</label>
-                            <input type="text" class="form-control font-12" v-model="newRole" placeholder="Enter role name" />
+                            <input type="text" class="form-control font-12" v-model="newRole"
+                              placeholder="Enter role name" />
                           </div>
                           <div class="modal-footer">
                             <button class="btn btn-secondary" @click="showModal = false">Cancel</button>
@@ -435,8 +437,8 @@
                   </div>
                   <label class="font-13 ps-1" for="reporting_to">Reports To</label>
                   <VueMultiselect v-model="createEmployee.reporting_to"
-                    :options="employeeEmails.map((dept) => dept.emp_mail_id)" :multiple="false" :close-on-select="true" :allow-empty="true"
-                    :clear-on-select="false" :preserve-search="true" placeholder="Select Reports To"
+                    :options="employeeEmails.map((dept) => dept.emp_mail_id)" :multiple="false" :close-on-select="true"
+                    :allow-empty="true" :clear-on-select="false" :preserve-search="true" placeholder="Select Reports To"
                     class="font-11 mb-3">
 
 
@@ -460,6 +462,13 @@
                       </span>
                     </template>
                   </VueMultiselect>
+                  <div class="mb-3">
+                    <label class="font-13 ps-1" for="reporting_to">Acknowledge On</label><br>
+                    <input class="mb-3 date-time " tag="input" type="datetime-local" name="acknowledge_on" id="acknowledge_on"
+                      placeholder="Enter department code" :value="trimMilliseconds(createEmployee.acknowledge_on)"
+                      readonly />
+                  </div>
+
                   <div class="mb-3 font-11">
                     <label for="signatureInput" class="form-label mb-0 font-13 ps-1">
                       Add Signature
@@ -480,6 +489,7 @@
                       <img :src="createEmployee.signature" alt="Signature" class="img-fluid signature-img" />
                     </div>
                   </div>
+
                 </div>
               </div>
             </div>
@@ -569,7 +579,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            Are you sure you want to delete <span>"{{rowDetails.emp_name}}"</span>?
+            Are you sure you want to delete <span>"{{ rowDetails.emp_name }}"</span>?
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -664,7 +674,7 @@ const tableheaders = ref([
   { th: "Creation Date", td_key: "creation" },
   { th: "last Login", td_key: "last_login" },
   { th: "last Login IP", td_key: "last_ip" },
-  { th: "Acknowledge On", td_key: "acknowledge_on" },
+  // { th: "Acknowledge On", td_key: "acknowledge_on" },
   { th: "Emp Status", td_key: "enable" },
 
   // { th: "Reporting Designation", td_key: "reporting_designation" },
@@ -680,7 +690,10 @@ const tableheaders = ref([
 //   },
 
 // ])
-
+function trimMilliseconds(datetime) {
+  if (!datetime) return '';
+  return datetime.split('.')[0];
+}
 
 // Extract and format data
 
@@ -711,13 +724,13 @@ const generateRandomNumber = () => {
 
 
 const exportEmployeesToExcel = async () => {
-  const filters = [["company_field", "like", `%${newbusiness.value}%`],["is_web_form","=","1"]];
+  const filters = [["company_field", "like", `%${newbusiness.value}%`], ["is_web_form", "=", "1"]];
   const queryParams = {
     fields: JSON.stringify(["*"]),
     limit_start: 0,
     limit_page_length: "none",
     filters: JSON.stringify(filters),
-}
+  }
   try {
     const response = await axiosInstance.get(
       apis.resource + doctypes.EzyEmployeeList,
@@ -726,19 +739,19 @@ const exportEmployeesToExcel = async () => {
 
     if (response.data) {
       const employees = response.data
-      if(employees.length){
+      if (employees.length) {
         const modal = bootstrap.Modal.getInstance(
           document.getElementById("ExportEmployeeModal")
-          );
-          modal.hide();
-          toast.success("Successfully Completed")
+        );
+        modal.hide();
+        toast.success("Successfully Completed")
 
         const worksheet = XLSX.utils.json_to_sheet(employees)
         const workbook = XLSX.utils.book_new()
         XLSX.utils.book_append_sheet(workbook, worksheet, 'Employees')
         XLSX.writeFile(workbook, 'EmployeeDetails.xlsx')
       }
-      else{
+      else {
         toast.error("No Employee Details")
       }
     }
@@ -1387,7 +1400,7 @@ watch(
 // function addnewDesignation() {
 //     newDesignation.value = !newDesignation.value
 // }
-const actions = ref([{ name: "Edit Employee", icon: "fa-solid fa-eye" },{ name: "Delete Employee", icon: "fas fa-trash-alt" }]);
+const actions = ref([{ name: "Edit Employee", icon: "fa-solid fa-eye" }, { name: "Delete Employee", icon: "fas fa-trash-alt" }]);
 const isFormFilled = computed(() => {
   return [
     createEmployee.value.emp_code,
@@ -1418,10 +1431,10 @@ function createEmplBtn() {
   employeeOptions();
 }
 
-const rowDetails=ref([])
+const rowDetails = ref([])
 
 function actionCreated(rowData, actionEvent) {
-  rowDetails.value=rowData;
+  rowDetails.value = rowData;
   if (actionEvent?.name === 'Edit Employee') {
     if (rowData) {
       // Reset errors
@@ -1435,8 +1448,8 @@ function actionCreated(rowData, actionEvent) {
       };
 
 
-  // Set searchText to current designation
-  searchText.value = rowData.designation || ''
+      // Set searchText to current designation
+      searchText.value = rowData.designation || ''
       // Load departments and set matching department object
       deptData(() => {
         const matchedDept = departmentsList.value.find(
@@ -1473,28 +1486,28 @@ function actionCreated(rowData, actionEvent) {
     }
   }
   if (actionEvent.name === 'Delete Employee') {
-      const modal = new bootstrap.Modal(document.getElementById('DeleteEmployeeModal'), {});
-      modal.show();
+    const modal = new bootstrap.Modal(document.getElementById('DeleteEmployeeModal'), {});
+    modal.show();
   }
 }
 
-function deleteEmployee(){
+function deleteEmployee() {
   const payload = {
     empl_mail_id: rowDetails.value?.emp_mail_id,
   };
- 
+
   axiosInstance
     .post(apis.deleteEmployee, payload)
     .then((res) => {
-     if(res){
-      //  console.log("Delete Success:", res);
+      if (res) {
+        //  console.log("Delete Success:", res);
         toast.success(res.message)
         employeeData()
         const modal = bootstrap.Modal.getInstance(
           document.getElementById("DeleteEmployeeModal")
         );
         modal.hide();
-     }
+      }
     })
     .catch((error) => {
       console.error("Delete error:", error?.response?.data || error.message);
@@ -1542,13 +1555,13 @@ function confirmEmployeeToggle() {
     .then(() => {
       toast.success(`Employee ${empActionText.value}d successfully`);
       const modal = bootstrap.Modal.getInstance(
-          document.getElementById("EmployeeToggleModal")
-        );
-        modal.hide();
-      if(selectedEmpRow.value.enable === 1){
+        document.getElementById("EmployeeToggleModal")
+      );
+      modal.hide();
+      if (selectedEmpRow.value.enable === 1) {
         EmpUnableMail()
       }
-      else{
+      else {
         employeeData()
       }
     })
@@ -1557,15 +1570,15 @@ function confirmEmployeeToggle() {
     });
 }
 
-function EmpUnableMail(){
-  const payload={
-      emp_mail:selectedEmpRow.value.emp_mail_id,
+function EmpUnableMail() {
+  const payload = {
+    emp_mail: selectedEmpRow.value.emp_mail_id,
   }
 
   axiosInstance
     .post(apis.unablUpdateEmail, payload)
     .then((res) => {
-      if(res){
+      if (res) {
         // console.log(res);
         employeeData()
       }
@@ -1770,7 +1783,7 @@ function inLineFiltersData(searchedData) {
 }
 
 function employeeData(data) {
-  const filters = [["company_field", "like", `%${newbusiness.value}%`],["is_web_form","=","1"]];
+  const filters = [["company_field", "like", `%${newbusiness.value}%`], ["is_web_form", "=", "1"], ["enable", "=", "0"]];
   if (data) {
     filters.push(...data);
   }
@@ -1877,7 +1890,7 @@ watch(
     const selected = employeeEmails.value.find(
       (emp) => emp.emp_mail_id === newValue
     );
-    createEmployee.value.reporting_designation = selected?.designation ;
+    createEmployee.value.reporting_designation = selected?.designation;
   },
   { immediate: true } // ✅ if editing existing record
 );
@@ -2016,8 +2029,10 @@ function SaveEditEmp() {
 .list-group {
   z-index: 1;
 }
+
 .zindex-dropdown {
-  z-index: 1055; /* higher than .modal's z-index */
+  z-index: 1055;
+  /* higher than .modal's z-index */
   max-height: 200px;
   overflow-y: auto;
 }
@@ -2053,6 +2068,23 @@ function SaveEditEmp() {
   font-size: var(--eleven);
 
   // height: 32px;
+}
+.date-time{
+  display: block;
+    width: 100%;
+    padding: .375rem .75rem;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--bs-body-color);
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-color: var(--bs-body-bg);
+    background-clip: padding-box;
+    border: var(--bs-border-width) solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius);
+    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
 }
 
 .cancelfilter {
@@ -2282,7 +2314,8 @@ function SaveEditEmp() {
   // justify-content: center;
 
 }
-.export-btn{
+
+.export-btn {
   background-color: #99999961;
 }
 
