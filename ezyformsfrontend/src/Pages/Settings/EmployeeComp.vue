@@ -511,6 +511,35 @@
           </div>
           <div class="modal-body">
             Are you sure you want to <span id="empActionText"></span> "<span id="empRowName"></span>"?
+
+            <!-- <label for="name" class="font-13 mt-3">Attachments</label>
+            <input type="file" @change="handleSingleAttach" class="form-control mb-3" :disabled="uploadedFields.length >= 4" />
+            <div v-if="uploadedFields.length >= 4" class="text-success mt-2">
+              All attachments uploaded.
+            </div>
+
+            <div class="row mt-3">
+              <div
+                v-for="(field, index) in uploadedFields"
+                :key="index"
+                class="col-3 mb-3 text-center"
+              >
+                <img
+                  :src="selectedEmpRow[field]"
+                  alt="Uploaded"
+                  class="img-thumbnail"
+                  style="height: 100px; object-fit: cover;"
+                />
+                <button
+                  @click="removeImage(field)"
+                  class="btn btn-sm btn-danger mt-2"
+                >
+                  Remove
+                </button>
+              </div>
+
+            </div> -->
+
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -593,7 +622,7 @@ watch(
       const matchedEmployee = employeeEmails.find(emp => emp.emp_mail_id === newVal);
       if (matchedEmployee) {
         createEmployee.reporting_designation = matchedEmployee.designation || '';
-        console.log(createEmployee.reporting_designation,newVal,createEmployee.reporting_to);
+        // console.log(createEmployee.reporting_designation,newVal,createEmployee.reporting_to);
       } else {
         createEmployee.reporting_designation = '';
       }
@@ -1434,7 +1463,7 @@ function confirmEmployeeToggle() {
   // Add current_date to the payload
   selectedEmpRow.value.enable_on = currentDateTime;
 
-  console.log("selectedEmpRow.value",selectedEmpRow.value.enable_on);
+  // console.log("selectedEmpRow.value",selectedEmpRow.value.enable_on);
   }
 
   axiosInstance
@@ -1531,6 +1560,31 @@ const exportEmployeesToExcel = async () => {
 //     return Math.floor(Math.random() * 1000000);
 // };
 
+const uploadedFields = ref([]);  // to track filled fields
+
+const handleSingleAttach = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    const nextField = getNextField();
+    if (nextField) {
+      uploadFile(file, nextField);
+    } else {
+      console.warn('All fields are filled.');
+    }
+  }
+  event.target.value = '';  // Clear file input after each selection
+};
+
+const getNextField = () => {
+  const fields = ['attachment_one', 'attachment_two', 'attachment_three', 'attachment_four'];
+  return fields.find((field) => !selectedEmpRow.value[field]);
+};
+
+const removeImage = (field) => {
+  selectedEmpRow.value[field] = '';
+  uploadedFields.value = uploadedFields.value.filter(f => f !== field);
+};
+
 const uploadFile = (file, field) => {
   let fileName = `${file.name}`;
 
@@ -1546,6 +1600,9 @@ const uploadFile = (file, field) => {
         if (field === "signature") {
           createEmployee.value.signature = res.message.file_url;
         }
+        selectedEmpRow.value[field] = res.message.file_url;
+        uploadedFields.value.push(field);
+        // console.log(`Uploaded ${field}:`, res.message.file_url);
         // console.log("Uploaded file URL:", res.message.file_url);
       } else {
         console.error("file_url not found in the response.");
@@ -1555,6 +1612,7 @@ const uploadFile = (file, field) => {
       console.error("Upload error:", error);
     });
 };
+
 function deptData(callback) {
   const queryParams = {
     fields: JSON.stringify(["*"]),
@@ -1826,7 +1884,7 @@ function createEmpl() {
     department: createEmployee.value.department?.name || "", // ✅ only send name
     doctype: doctypes.EzyEmployeeList,
   };
-  console.log(dataObj);
+  // console.log(dataObj);
   loading.value = true;
 
   axiosInstance
@@ -1920,6 +1978,11 @@ function SaveEditEmp() {
 .modal.show {
   display: block;
   background: rgba(0, 0, 0, 0.6);
+}
+.remove-btn{
+  padding: 6px;
+  position: relative;
+  top: 36px;
 }
 
 .filterbtn {

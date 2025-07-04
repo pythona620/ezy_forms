@@ -2,7 +2,7 @@
   <div class="signature-container">
     <!-- Digital Signature Canvas -->
     <div class="signature-section mb-3">
-      <label class="font-13 mb-2">Digital Signature</label>
+      <!-- <label class="font-13 mb-2">Digital Signature</label> -->
       <div class="signature-canvas-container">
         <canvas
           ref="signatureCanvas"
@@ -30,13 +30,13 @@
         >
           Clear
         </button>
-        <button
+        <!-- <button
           type="button"
           class="save-btn"
           @click="saveSignature"
         >
           Save Signature
-        </button>
+        </button> -->
         <!-- <button
           type="button"
           class="btn btn-outline-info btn-sm"
