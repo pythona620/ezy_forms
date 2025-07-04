@@ -8,8 +8,8 @@
             </div>
             <div class="d-flex gap-2 align-items-center">
                 <div class="d-flex align-items-center ">
-                    <button type="button" class="btn btn-dark  CreateDepartments " data-bs-toggle="modal"
-                        data-bs-target="#AcknowledgementModal">
+                    <button type="button" class="btn btn-dark CreateDepartments " data-bs-toggle="modal"
+                        data-bs-target="#AcknowledgementModal" @click="openCreateModal">
                         Create Acknowledgement
                     </button>
                 </div>
@@ -46,8 +46,12 @@
                         <button @click="close" type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                             Close
                         </button>
-                        <button type="button" class="btn btn-dark" @click="createAcknowledgement">
+                        <button v-if="isSubmitBtn" type="button" class="btn btn-dark" @click="createAcknowledgement">
                             Submit
+                        </button>
+
+                        <button v-else type="button" class="btn btn-dark" @click="UpdateAcknowledgement">
+                            Update
                         </button>
                     </div>
                 </div>
@@ -104,10 +108,14 @@ const acknowledgementName = ref("");
 
 
 const content = ref('')  // Reactive content binding
+const isSubmitBtn=ref(false)
 
-// function submit() {
-//   console.log("content", content.value)  // Logs HTML content
-// }
+// Function to open Modal for Create
+function openCreateModal() {
+  isSubmitBtn.value = true;  // Show Submit button
+  acknowledgementName.value = "";  // Reset form
+  content.value = "";
+}
 
 function createAcknowledgement() {
     const dataObj = {
@@ -118,24 +126,53 @@ function createAcknowledgement() {
     axiosInstance.post(apis.resource + doctypes.acknowledgement, dataObj)
         .then((res) => {
             if (res.data) {
-                console.log("res", res.data);
+                // console.log("res", res.data);
                 const modal = bootstrap.Modal.getInstance(
                     document.getElementById("AcknowledgementModal")
                 );
                 modal.hide();
+                isSubmitBtn.value = false;
                 activitylog()
+            }
+        })
+}
+
+function UpdateAcknowledgement(){
+    const updatedData = {
+        acknowledgement: content.value,
+        naming_series: acknowledgementName.value,
+      };
+     axiosInstance
+        .put(`${apis.resource}${doctypes.acknowledgement}/${acknowledgementData.value.name}`, updatedData)
+        .then((response) => {
+            if (response.data) {
+                toast.success(`acknowledgement Updated successfully`, { autoClose: 700 });
+                activitylog()
+                const modal = bootstrap.Modal.getInstance(
+                    document.getElementById("AcknowledgementModal")
+                );
+                modal.hide();
             }
 
         })
+        .catch((error) => {
+            console.error("Error updating toggle:", error);
+        });
 }
+
+const acknowledgementData=ref("")
+
 function close() {
     acknowledgementName.value = '';  // use the correct key from your data
     content.value = '';
+    isSubmitBtn.value = false;  // Show Submit button
 }
 
 function viewPreview(data) {
-    acknowledgementName.value = data.name || '';  // use the correct key from your data
+    acknowledgementName.value = data.naming_series || '';  // use the correct key from your data
     content.value = data.acknowledgement || '';
+    acknowledgementData.value=data;
+
 
     // console.log("data",data);
     // console.log("acknowledgementName.value",acknowledgementName.value);
@@ -149,7 +186,6 @@ const empActionText = ref('');
 
 function toggleFunction(rowData) {
     selectedEmpRow.value = rowData;
-    console.log(selectedEmpRow.value);
     const isEnabled = rowData.enable === 0;
     // empActionText.value = isEnabled ? 'Disable' : 'Enable';
     empActionText.value = isEnabled ? 'Enable' : 'Disable';
