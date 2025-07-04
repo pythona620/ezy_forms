@@ -14,14 +14,15 @@
             </p> -->
         </div>
         <div class="d-flex align-items-center gap-2">
-           <button type="button" class=" btn export-btn  CreateDepartments font-12" data-bs-toggle="modal" data-bs-target="#ExportEmployeeModal">
+          <button type="button" class=" btn export-btn  CreateDepartments font-12" data-bs-toggle="modal"
+            data-bs-target="#ExportEmployeeModal">
             Export Employees
           </button>
 
           <button type="button" class=" btn export-btn  CreateDepartments  font-12 " @click="bulkEmp">
             Import Employees
           </button>
-          
+
           <button type="button" class="btn btn-dark  CreateDepartments " data-bs-toggle="modal"
             data-bs-target="#createDepartments" @click="createEmplBtn">
             Create Employee
@@ -179,9 +180,9 @@
                       <!-- <FormFields class="mb-3" tag="input" type="text" name="reporting_designation"
                                             id="reporting_designation" placeholder="Enter Reporting Designation"
                                             v-model="createEmployee.reporting_designation" /> -->
-                      <VueMultiselect v-model="createEmployee.reporting_designation" :options="designations" :allow-empty="true"
-                        :multiple="false" :close-on-select="true" :clear-on-select="false" :preserve-search="true"
-                        placeholder="Select Reporting Designation" class="font-11 mb-3"
+                      <VueMultiselect v-model="createEmployee.reporting_designation" :options="designations"
+                        :allow-empty="true" :multiple="false" :close-on-select="true" :clear-on-select="false"
+                        :preserve-search="true" placeholder="Select Reporting Designation" class="font-11 mb-3"
                         :disabled="!!createEmployee.reporting_to">
                         <!-- taggable
                                             @tag="addReportingDesignation"
@@ -353,18 +354,33 @@
                           {{ phoneError }}
                         </p>
                       </div> -->
-                  <div class="mb-3">
+                  <!-- <div class="mb-3">
                     <label class="font-13 ps-1" for="emp_phone">Emp Phone</label>
                     <div class="input-container">
                       <FormFields tag="input" type="text" name="emp_phone" id="emp_phone" maxlength="10" class="w-100"
-                        :readonly="true" placeholder="Enter Phone Number" v-model="createEmployee.emp_phone"
-                        @input="maskPhoneNumber" @change="validatePhone" />
+                        :readonly="true" placeholder="Enter Phone Number" v-model="createEmployee.emp_phone" @blur="maskPhoneNumber"
+                        @change="validatePhone" />
                       <i :class="eyeIcon" class="eye-icon" @click="toggleMask"></i>
                     </div>
                     <p v-if="phoneError" class="text-danger font-11 ps-1">
                       {{ phoneError }}
                     </p>
-                  </div>
+                  </div> -->
+                  
+                    <div class="mb-3">
+                      <label class="font-13 ps-1" for="emp_phone">Emp Phone</label>
+                      <div class="input-container">
+                        <input type="text" name="emp_phone"  id="emp_phone" maxlength="13" class="w-100 form-control font-12"
+                          :readonly="false" :value="displayPhone" @input="updatePhone" @blur="validatePhone"
+                          placeholder="Enter Phone Number" />
+                        <i :class="eyeIcon" class="eye-icon" @click="toggleMask"></i>
+                      </div>
+
+                      <p v-if="phoneError" class="text-danger font-11 ps-1">
+                        {{ phoneError }}
+                      </p>
+                    </div>
+                 
                   <div class="mb-3">
                     <label class="font-13 ps-1" for="emp_mail_id">Emp Mail ID<span
                         class="text-danger ps-1">*</span></label>
@@ -430,7 +446,8 @@
                           </div>
                           <div class="modal-body">
                             <label for="" class="font-12 fw-bold">Designation</label>
-                            <input type="text" class="form-control font-12" v-model="newRole" placeholder="Enter role name" />
+                            <input type="text" class="form-control font-12" v-model="newRole"
+                              placeholder="Enter role name" />
                           </div>
                           <div class="modal-footer">
                             <button class="btn btn-secondary" @click="showModal = false">Cancel</button>
@@ -443,8 +460,8 @@
                   </div>
                   <label class="font-13 ps-1" for="reporting_to">Reports To</label>
                   <VueMultiselect v-model="createEmployee.reporting_to"
-                    :options="employeeEmails.map((dept) => dept.emp_mail_id)" :multiple="false" :close-on-select="true" :allow-empty="true"
-                    :clear-on-select="false" :preserve-search="true" placeholder="Select Reports To"
+                    :options="employeeEmails.map((dept) => dept.emp_mail_id)" :multiple="false" :close-on-select="true"
+                    :allow-empty="true" :clear-on-select="false" :preserve-search="true" placeholder="Select Reports To"
                     class="font-11 mb-3">
 
 
@@ -593,7 +610,7 @@ watch(
       const matchedEmployee = employeeEmails.find(emp => emp.emp_mail_id === newVal);
       if (matchedEmployee) {
         createEmployee.reporting_designation = matchedEmployee.designation || '';
-        console.log(createEmployee.reporting_designation,newVal,createEmployee.reporting_to);
+        console.log(createEmployee.reporting_designation, newVal, createEmployee.reporting_to);
       } else {
         createEmployee.reporting_designation = '';
       }
@@ -1023,83 +1040,138 @@ function backtoEmployeeList() {
 
 
 const isMasked = ref(true);
-const originalPhone = ref("");
+// const originalPhone = ref("");
 
 
 const eyeIcon = computed(() => (isMasked.value ? "bi bi-eye-slash-fill" : "bi bi-eye-fill"));
 
 // Ensure +91 is always prefixed
-const existformatPhoneNumber = (phone) => {
-  phone = phone.replace(/\D/g, ""); // Remove non-numeric characters
-  if (phone.startsWith("91") && phone.length === 12) {
-    phone = "+" + phone;
-  } else if (phone.length === 10) {
-    phone = "+91" + phone;
-  }
-  return phone;
-};
+// const existformatPhoneNumber = (phone) => {
+//   phone = phone.replace(/\D/g, ""); // Remove non-numeric characters
+//   if (phone.startsWith("91") && phone.length === 12) {
+//     phone = "+" + phone;
+//   } else if (phone.length === 10) {
+//     phone = "+91" + phone;
+//   }
+//   return phone;
+// };
 
-// Watch input field for changes
-watch(
-  () => createEmployee.value.emp_phone,
-  (newVal) => {
-    if (!newVal.startsWith("+91")) {
-      createEmployee.value.emp_phone = existformatPhoneNumber(newVal);
-    }
+// // Watch input field for changes
+// watch(
+//   () => createEmployee.value.emp_phone,
+//   (newVal) => {
+//     if (!newVal.startsWith("+91")) {
+//       createEmployee.value.emp_phone = existformatPhoneNumber(newVal);
+//     }
 
-    // Update originalPhone only when unmasked
-    if (!isMasked.value) {
-      originalPhone.value = createEmployee.value.emp_phone;
-    }
-  },
-  { immediate: true } // Run immediately to set +91 on initial load
-);
+//     // Update originalPhone only when unmasked
+//     if (!isMasked.value) {
+//       originalPhone.value = createEmployee.value.emp_phone;
+//     }
+//   },
+//   { immediate: true } // Run immediately to set +91 on initial load
+// );
 
 // Mask phone number
-const maskPhoneNumber = () => {
-  let phone = createEmployee.value.emp_phone || "";
-  phone = existformatPhoneNumber(phone);
+// const maskPhoneNumber = () => {
+//   let phone = createEmployee.value.emp_phone || "";
 
-  if (!/^\+91\d{10}$/.test(phone)) {
-    phoneError.value = "Phone number must start with +91 and have 10 digits.";
-    return;
-  } else {
-    phoneError.value = "";
-  }
+//   if (!phone.startsWith("+91")) {
+//     phone = existformatPhoneNumber(phone);
+//   }
 
-  originalPhone.value = phone;
+//   if (!/^\+91\d{10}$/.test(phone)) {
+//     phoneError.value = "Phone number must start with +91 and have 10 digits.";
+//     return;
+//   } else {
+//     phoneError.value = "";
+//   }
 
-  // Mask the number when required
-  createEmployee.value.emp_phone = isMasked.value
-    ? "+91 ******" + phone.slice(-4)
-    : phone;
-};
+//   // Store the unmasked phone
+//   originalPhone.value = phone;
 
+//   // Mask only if isMasked is true
+//   if (isMasked.value) {
+//     createEmployee.value.emp_phone = "+91 ******" + phone.slice(-4);
+//   } else {
+//     createEmployee.value.emp_phone = phone;
+//   }
+// };
+// watch(
+//   () => createEmployee.value.emp_phone,
+//   (newVal, oldVal) => {
+//     // You could add validation here, but avoid masking during typing
+//     if (!newVal.startsWith("+91") && newVal.length === 10) {
+//       createEmployee.value.emp_phone = "+91" + newVal;
+//     }
+//   },
+//   { immediate: true }
+// );
 // Toggle between masked and unmasked
-const toggleMask = () => {
-  if (!originalPhone.value) return;
+// const toggleMask = () => {
+//   if (!originalPhone.value) return;
 
-  if (isMasked.value) {
-    const confirmView = window.confirm("Are you sure you want to see the phone number?");
-    if (!confirmView) return;
-  }
+//   if (isMasked.value) {
+//     const confirmView = window.confirm("Are you sure you want to see the phone number?");
+//     if (!confirmView) return;
+//   }
 
-  isMasked.value = !isMasked.value;
-  createEmployee.value.emp_phone = isMasked.value
-    ? "+91 ******" + originalPhone.value.slice(-4)
-    : originalPhone.value;
-};
+//   isMasked.value = !isMasked.value;
+//   createEmployee.value.emp_phone = isMasked.value
+//     ? "+91 ******" + originalPhone.value.slice(-4)
+//     : originalPhone.value;
+// };
 
 // Validate phone number
+// const validatePhone = () => {
+//   let phone = originalPhone.value.replace("+91", ""); // Remove +91 for validation
+//   if (!/^\d{10}$/.test(phone)) {
+//     phoneError.value = "Phone number must be 10 digits.";
+//   } else {
+//     phoneError.value = "";
+//   }
+// };
+// const phoneError = ref('');
+// const isMasked = ref(true);
+
+// 🔑 Computed to display either masked or actual phone
+const displayPhone = computed(() => {
+  const phone = createEmployee.value.emp_phone || '';
+  if (!phone) return '';
+
+  if (isMasked.value && phone.startsWith('+91') && phone.length === 13) {
+    return '+91 ******' + phone.slice(-4);
+  }
+
+  return phone;
+});
+
+// 🔑 Update real phone number on typing
+const updatePhone = (e) => {
+  let value = e.target.value;
+
+  // Ensure it starts with +91
+  if (!value.startsWith('+91')) {
+    value = '+91' + value.replace(/\D/g, '').slice(-10);
+  }
+
+  createEmployee.value.emp_phone = value;
+};
+
+// 🔑 Validate on blur
 const validatePhone = () => {
-  let phone = originalPhone.value.replace("+91", ""); // Remove +91 for validation
+  const phone = createEmployee.value.emp_phone.replace('+91', '');
   if (!/^\d{10}$/.test(phone)) {
-    phoneError.value = "Phone number must be 10 digits.";
+    phoneError.value = 'Phone number must be 10 digits.';
   } else {
-    phoneError.value = "";
+    phoneError.value = '';
   }
 };
 
+// 🔑 Toggle mask
+const toggleMask = () => {
+  isMasked.value = !isMasked.value;
+};
 
 // const validatephone = () => {
 //   if (createEmployee.value.emp_phone) {
@@ -1352,8 +1424,8 @@ function actionCreated(rowData, actionEvent) {
       };
 
 
-  // Set searchText to current designation
-  searchText.value = rowData.designation || ''
+      // Set searchText to current designation
+      searchText.value = rowData.designation || ''
       // Load departments and set matching department object
       deptData(() => {
         const matchedDept = departmentsList.value.find(
@@ -1379,7 +1451,7 @@ function actionCreated(rowData, actionEvent) {
       // Mask phone/email and show modal
       isMasked.value = true;
       isEmailMasked.value = true;
-      maskPhoneNumber();
+      // maskPhoneNumber();
       maskEmail();
 
       const modal = new bootstrap.Modal(document.getElementById('exampleModal'), {});
@@ -1425,16 +1497,16 @@ function confirmEmployeeToggle() {
   const isEnabled = selectedEmpRow.value.enable === '1' || selectedEmpRow.value.enable === 1;
   selectedEmpRow.value.enable = isEnabled ? 0 : 1;
 
-  if(selectedEmpRow.value.enable==0){
+  if (selectedEmpRow.value.enable == 0) {
     // Get current date and time in "YYYY-MM-DD HH:mm:ss" format
-  const now = new Date();
-  const pad = (n) => n.toString().padStart(2, '0');
-  const currentDateTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    const now = new Date();
+    const pad = (n) => n.toString().padStart(2, '0');
+    const currentDateTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
 
-  // Add current_date to the payload
-  selectedEmpRow.value.enable_on = currentDateTime;
+    // Add current_date to the payload
+    selectedEmpRow.value.enable_on = currentDateTime;
 
-  console.log("selectedEmpRow.value",selectedEmpRow.value.enable_on);
+    console.log("selectedEmpRow.value", selectedEmpRow.value.enable_on);
   }
 
   axiosInstance
@@ -1491,13 +1563,13 @@ function selectedSignature(event) {
 
 // Export function
 const exportEmployeesToExcel = async () => {
-  const filters = [["company_field", "like", `%${newbusiness.value}%`],["is_web_form","=","0"],["enable","=","1"]];
+  const filters = [["company_field", "like", `%${newbusiness.value}%`], ["is_web_form", "=", "0"], ["enable", "=", "1"]];
   const queryParams = {
     fields: JSON.stringify(["*"]),
     limit_start: 0,
     limit_page_length: "none",
     filters: JSON.stringify(filters),
-}
+  }
   try {
     const response = await axiosInstance.get(
       apis.resource + doctypes.EzyEmployeeList,
@@ -1506,19 +1578,19 @@ const exportEmployeesToExcel = async () => {
 
     if (response.data) {
       const employees = response.data
-      if(employees.length){
+      if (employees.length) {
         const modal = bootstrap.Modal.getInstance(
           document.getElementById("ExportEmployeeModal")
-          );
-          modal.hide();
-          toast.success("Successfully Completed")
+        );
+        modal.hide();
+        toast.success("Successfully Completed")
 
         const worksheet = XLSX.utils.json_to_sheet(employees)
         const workbook = XLSX.utils.book_new()
         XLSX.utils.book_append_sheet(workbook, worksheet, 'Employees')
         XLSX.writeFile(workbook, 'EmployeeDetails.xlsx')
       }
-      else{
+      else {
         toast.error("No Employee Details")
       }
     }
@@ -1657,7 +1729,7 @@ function inLineFiltersData(searchedData) {
 }
 
 function employeeData(data) {
-  const filters = [["company_field", "like", `%${newbusiness.value}%`],["is_web_form","=","0"],["enable","=","1"]];
+  const filters = [["company_field", "like", `%${newbusiness.value}%`], ["is_web_form", "=", "0"], ["enable", "=", "1"]];
   if (data) {
     filters.push(...data);
   }
@@ -1765,7 +1837,7 @@ watch(
     const selected = employeeEmails.value.find(
       (emp) => emp.emp_mail_id === newValue
     );
-    createEmployee.value.reporting_designation = selected?.designation ;
+    createEmployee.value.reporting_designation = selected?.designation;
   },
   { immediate: true } // ✅ if editing existing record
 );
@@ -1904,8 +1976,10 @@ function SaveEditEmp() {
 .list-group {
   z-index: 1;
 }
+
 .zindex-dropdown {
-  z-index: 1055; /* higher than .modal's z-index */
+  z-index: 1055;
+  /* higher than .modal's z-index */
   max-height: 200px;
   overflow-y: auto;
 }
@@ -1943,7 +2017,7 @@ function SaveEditEmp() {
   // height: 32px;
 }
 
-.export-btn{
+.export-btn {
   background-color: #99999961;
 }
 
