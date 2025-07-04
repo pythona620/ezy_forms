@@ -44,7 +44,9 @@
         </button>
 
       </div>
-      <div class="font-13 m-0 cursor-pointer text-center" @click="OpenSignUp"><span class="sign">Not a User? Sign
+      <div v-if="isSignup == 0" class="font-13 m-0 cursor-pointer text-center" @click="OpenSignUp"><span
+          class="sign">Not
+          a user? Sign
           Up</span></div>
     </div>
 
@@ -100,63 +102,91 @@
         <div><img class="imgmix" src="../assets/Final-logo-ezyforms-removebg-preview.png" /></div>
       </div>
       <div class="container">
-       <div class="row">
-         <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
-          <label class="font-13" for="email">Email</label>
-          <input class="form-control m-0" type="email" id="email" v-model="SignUpdata.email" @blur="validateEmail"
-            :class="{ 'is-invalid': errors.email }" />
-          <div class="invalid-feedback font-11 mt-1" v-if="errors.email">
-            {{ errors.email }}
+        <div class="row">
+          <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
+            <label class="font-13" for="email">Email</label>
+            <input class="form-control m-0" type="email" id="email" v-model="SignUpdata.email" @blur="validateEmail"
+              :class="{ 'is-invalid': errors.email }" />
+            <div class="invalid-feedback font-11 mt-1" v-if="errors.email">
+              {{ errors.email }}
+            </div>
+          </div>
+          <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
+            <label class="font-13" for="full_name">User Name</label>
+            <input type="text" class="form-control m-0 bg-white" id="name" v-model="SignUpdata.full_name"
+              @blur="validateFullName" :class="{ 'is-invalid': errors.full_name }" />
+            <div class="invalid-feedback font-11 mt-1" v-if="errors.full_name">
+              {{ errors.full_name }}
+            </div>
+          </div>
+          <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
+            <label class="font-13" for="emp_code">Employee Id</label>
+            <input type="text" class="form-control  m-0 bg-white" id="emp_code" v-model="SignUpdata.emp_code"
+              @input="validateEmpCode" :class="{ 'is-invalid': errors.emp_code }" />
+            <div class="invalid-feedback font-11 mt-1" v-if="errors.emp_code">
+              {{ errors.emp_code }}
+            </div>
+          </div>
+          <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
+            <label class="font-13" for="emp_phone">Phone Number</label>
+            <input type="text" class="form-control m-0 bg-white" id="emp_phone" v-model="SignUpdata.emp_phone"
+              @input="filterPhoneInput" @blur="validatePhone" :class="{ 'is-invalid': errors.emp_phone }" />
+            <div class="invalid-feedback font-11 mt-1" v-if="errors.emp_phone">
+              {{ errors.emp_phone }}
+            </div>
+          </div>
+          <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
+            <label class="font-13" for="emp_code">Designation</label>
+            <Vue3Select v-model="SignUpdata.designation" :options="this.disignationDetails"
+              placeholder="Select Designation" />
+          </div>
+          <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
+            <label class="font-13" for="emp_code">Department</label>
+            <Vue3Select v-model="SignUpdata.dept" :options="this.deptDetails" placeholder="Select Department" />
+          </div>
+          <div class="mt-2 col-lg-12 col-md-12 col-sm-12">
+
+            <span class="me-4">
+              <input type="radio" value="digital" v-model="selectedOption" class="form-check-input mt-1 input-border" />
+              <label class="font-13 ms-2" for="emp_code">Digital Signature</label>
+            </span>
+            <span class="">
+              <input type="radio" value="upload" v-model="selectedOption" class="form-check-input m-1 input-border" />
+              <label class="font-13 ms-2" for="emp_code">Upload Signature:</label>
+            </span>
+
+            <div v-if="selectedOption === 'digital'">
+              <DigitalSignature ref="digitalSignature" class="mt-3" @signature-saved="onSignatureSaved"
+                @signature-cleared="onSignatureCleared" @signature-removed="onSignatureRemoved"
+                @signature-uploaded="onSignatureUploaded" />
+            </div>
+
+            <div v-if="selectedOption === 'upload'">
+              <input type="file" ref="signatureInputRef" class="form-control mt-3" id="signatureInput"
+                @change="selectedSignature" aria-describedby="fileHelpId" accept="image/png, image/jpeg" />
+
+              <div v-if="SignUpdata.signature " class="mt-2">
+                <label class="font-13" for="emp_code">Uploaded Signature:</label><br>
+                <img :src="SignUpdata.signature" alt="Signature" class="img-thumbnail mt-1" style="max-width: 100px;" />
+              </div>
+
+            </div>
+
           </div>
         </div>
-        <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
-          <label class="font-13" for="full_name">User Name</label>
-          <input type="text" class="form-control m-0 bg-white" id="name" v-model="SignUpdata.full_name"
-            @blur="validateFullName" :class="{ 'is-invalid': errors.full_name }" />
-          <div class="invalid-feedback font-11 mt-1" v-if="errors.full_name">
-            {{ errors.full_name }}
-          </div>
-        </div>
-        <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
-          <label class="font-13" for="emp_code">Employee Id</label>
-          <input type="text" class="form-control  m-0 bg-white" id="emp_code" v-model="SignUpdata.emp_code"
-            @input="validateEmpCode" :class="{ 'is-invalid': errors.emp_code }" />
-          <div class="invalid-feedback font-11 mt-1" v-if="errors.emp_code">
-            {{ errors.emp_code }}
-          </div>
-        </div>
-        <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
-          <label class="font-13" for="emp_phone">Phone Number</label>
-          <input type="text" class="form-control m-0 bg-white" id="emp_phone" v-model="SignUpdata.emp_phone"
-            @input="filterPhoneInput" @blur="validatePhone" :class="{ 'is-invalid': errors.emp_phone }" />
-          <div class="invalid-feedback font-11 mt-1" v-if="errors.emp_phone">
-            {{ errors.emp_phone }}
-          </div>
-        </div>
-        <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
-          <label class="font-13" for="emp_code">Designation</label>
-          <Vue3Select v-model="SignUpdata.designation" :options="this.disignationDetails" placeholder="Select Designation" />
-        </div>
-         <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
-          <label class="font-13" for="emp_code">Department</label>
-          <Vue3Select v-model="SignUpdata.dept" :options="this.deptDetails" placeholder="Select Department" />
-        </div>
-        <div class="mt-2 col-lg-12 col-md-12 col-sm-12">
-          <DigitalSignature ref="digitalSignature" @signature-saved="onSignatureSaved" @signature-cleared="onSignatureCleared"
-          @signature-removed="onSignatureRemoved" @signature-uploaded="onSignatureUploaded" />
-        </div>
-       </div>
 
       </div>
 
-
       <div>
-        <button :disabled="!SignUpdata.email || !SignUpdata.full_name || !SignUpdata.emp_code || !SignUpdata.emp_phone || !SignUpdata.dept || !SignUpdata.signature" type="submit" data-bs-toggle="modal" data-bs-target="#EmployeeToggleModal"
+        <button
+          :disabled="!SignUpdata.email || !SignUpdata.full_name || !SignUpdata.emp_code || !SignUpdata.emp_phone || !SignUpdata.dept"
+          type="submit" @click="handleSignUp"
           class="border-0 btn btn-dark button w-100 mb-4 py-2 font-13 text-white rounded-1">
           Sign Up
         </button>
       </div>
-      <div class="font-13 m-0 cursor-pointer text-center" @click="OpenLogin"><span class="sign">Existing User? Log In</span></div>
+      <div class="font-13 m-0 cursor-pointer text-center" @click="OpenLogin"><span class="sign">Existing user? Log
+          In</span></div>
     </div>
 
     <div class="modal fade" id="changePassword" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
@@ -210,77 +240,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body font-11">
-            <div>
-              <h6 class="text-center mb-4"><strong>Concerns: GDPR, PCI DSS, E-mail, Internet, Hardware &
-                  Software</strong></h6>
-              <h6><strong>Confirmation of User Request for Access & Inventory</strong></h6>
-              <p>This document confirms the user's request for access to the hotel's software and hardware facilities,
-                under the following terms:</p>
-
-              <h6><strong>User Commitments & Conditions:</strong></h6>
-              <ul>
-                <li><strong>Official Use Only:</strong> I will use the hotel internet, mobile SIM, laptop, computer, and
-                  email for official purposes only.</li>
-                <li><strong>Confidentiality:</strong> I will keep information and documents safe against unauthorized
-                  access.</li>
-                <li><strong>No Portable Storage Will be Used:</strong> I will not use any external storage while coming
-                  to the office.</li>
-                <li><strong>Payment Processing:</strong> I will ensure that data entries and payments follow the correct
-                  process. UPI transactions must only use the company’s assigned bank accounts.</li>
-                <li><strong>Damage Control:</strong> If there are losses, theft, or damage, I will pay damage myself.
-                  All electronic items will be used safely and handled with care.</li>
-                <li><strong>Access Care:</strong> I will take care that the system will not be accessed by anyone else.
-                  All electronic items will be used safely and handled with good intent.</li>
-                <li><strong>Logout Protocol:</strong> I will ensure logout emails and applications are logged out after
-                  use, and I will not share or use anyone else's login or password.</li>
-                <li><strong>Usage Limit:</strong> I will use the hotel laptop, SIM, and email for assigned purposes only
-                  and will never bypass company firewalls or site restrictions.</li>
-                <li><strong>Prohibited Software:</strong> I will not use another user’s account.</li>
-                <li><strong>Software Installation:</strong> I will not install any software that is not approved by
-                  ACCORD or the IT department.</li>
-                <li><strong>Data Backup:</strong> I will not remove or delete data unless in accordance with the backup
-                  and retention process. A folder in the D-drive will be used as a backup reference.</li>
-                <li><strong>Virus & PCI DSS Compliance:</strong> I will ensure that my system is virus-free and does not
-                  store unauthorized data or scripts.</li>
-                <li><strong>GDPR Compliance:</strong> In accordance with GDPR, including what constitutes personal data
-                  under the rights of data subjects (e.g. access, correction, deletion), I will comply.</li>
-                <li><strong>Limited Email Use:</strong> Email is to be used for strictly business purposes. I must not
-                  use such email for sending jokes, chain mails, or bulk emails.</li>
-                <li><strong>Data Handling:</strong> I will not download or store third-party software, films, images, or
-                  attachments which have not been approved by the IT department.</li>
-                <li><strong>Data Retention:</strong> I will use company storage for all documents. I understand that
-                  hotel systems should not be retained longer than required for business reasons. If no longer
-                  necessary, files must be deleted.</li>
-                <li><strong>Responsible Use:</strong> I will ensure the system is responsibly used and email
-                  communication is courteous and professional.</li>
-                <li><strong>Audit & Accountability:</strong> I understand that it is my responsibility and that all
-                  actions involving personal data must be documented and justified.</li>
-                <li><strong>Email Etiquette:</strong> I will use only proper formats (no slang or memes) in email and
-                  ensure group communication uses proper language in tone and timing.</li>
-                <li><strong>External Data:</strong> I will not share data or respond to unofficial personal requests for
-                  data, documents, images, screenshots, or system files. Any unauthorized request must be reported to
-                  the TAC Department.</li>
-                <li><strong>Storage of Confidential Data:</strong> I will only store personal data and will not disclose
-                  or share it outside of authorized channels.</li>
-              </ul>
-
-              <h6><strong>Access Monitoring:</strong></h6>
-              <p>I understand that my access to the system will be monitored. If a pattern of concern is kept and that
-                as a result of continuing breach of the rules and policies will lead to disciplinary action in line with
-                HR and IT procedures.</p>
-
-              <h6><strong>WARNING</strong></h6>
-              <p>Any user who engages in conduct that contravenes the current IT policy, particularly in the accessing
-                or sending of inappropriate communications or misconduct will be subject to disciplinary action.</p>
-              <p>Such violations will be referred to HR and/or the appropriate legal proceeding.</p>
-
-              <h6><strong>PLEASE NOTE</strong></h6>
-              <p>By utilizing ACCORD's software and hardware facilities, I acknowledge that I have read and understood
-                each part of the Information system Conditions. I agree to follow the terms of the GDPR, PCI DSS,
-                Application, Hardware, Internet, and Email policy. I acknowledge that a serious or continuing breach of
-                this policy will lead to dismissal by the TAC Department.</p>
-            </div>
-
+            <div class="ql-editor read-mode" v-html="acknowledgementHtml"></div>
             <div class="mt-4">
               <input type="checkbox" v-model="acknowledge" class="me-1 mt-1" />
               I acknowledge that the information provided is correct.
@@ -289,7 +249,7 @@
           <div class="modal-footer">
             <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
             <button type="button" @click="SignUp" :disabled="!acknowledge" class="btn btn-dark">Yes, Proceed</button>
-            
+
           </div>
         </div>
       </div>
@@ -345,13 +305,21 @@ export default {
       errorMessage: "",
       storeData: [],
       deptDetails: [],
-      disignationDetails:[],
+      disignationDetails: [],
       isFirstLogin: "",
       twoFactorAuth: "",
       enable_check: "",
-      acknowledge:'',
-      designation:'',
+      acknowledge: '',
+      designation: '',
       signature: null,
+      isSignup: null,
+      isActivate: null,
+      acknowledgementHtml: "",
+      acknowledge: false,
+      acknowledgementName: "",
+      isDigital: false,
+      isUploadImage: false,
+      selectedOption: "",
       // timeLeft: 60,
       // timer: null,
       // resentMessage: "",
@@ -481,6 +449,7 @@ export default {
       this.ShowSignUpPage = true;
       this.deptData()
       this.designationData()
+      this.acknowledgeData()
     },
     OpenLogin() {
       this.ShowLoginPage = true;
@@ -553,6 +522,44 @@ export default {
             console.error("Login error: ", error);
           })
       }
+    },
+
+    checkSignUpPage() {
+      axiosInstance
+        .get(`${apis.GetsignUp}`)
+        .then((res) => {
+          if (res.message) {
+            this.isSignup = res.message.is_signup;
+          }
+        })
+        .catch((error) => {
+          console.error("error: ", error);
+        });
+    },
+
+    acknowledgeData() {
+      const queryParams = {
+        fields: JSON.stringify(["*"]),
+        limit_page_length: "none"
+      };
+
+      axiosInstance
+        .get(apis.resource + doctypes.acknowledgement, { params: queryParams })
+        .then((res) => {
+          if (res?.data?.length) {
+            const active = res.data.filter(item => item.enable == 1);
+            if (active.length > 0) {
+              const firstActive = active[0];
+              this.acknowledgementHtml = firstActive.acknowledgement;
+              this.SignUpdata.acknowledgement = firstActive.name;
+              // console.log("Acknowledgement HTML:", firstActive.acknowledgement);
+              // console.log("this.SignUpdata.acknowledgement :", this.SignUpdata.acknowledgement);
+            }
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching acknowledgement data:", error);
+        });
     },
 
 
@@ -718,7 +725,7 @@ export default {
                   emp_mail_id: employeeData.emp_mail_id,
                   designation: employeeData.designation,
                   department: employeeData.department,
-                  emp_code:employeeData.emp_code,
+                  emp_code: employeeData.emp_code,
                   emp_signature: employeeData.signature,
                   // department: employeeData.department,
                 };
@@ -821,30 +828,65 @@ export default {
         });
     },
 
-onSignatureSaved(signatureData) {
-  const base64 = signatureData.dataUrl;
+    onSignatureSaved(signatureData) {
+      const base64 = signatureData.dataUrl;
 
-  // Convert base64 to File
-  const arr = base64.split(',');
-  const mime = arr[0].match(/:(.*?);/)[1];
-  const bstr = atob(arr[1]);
-  let n = bstr.length;
-  const u8arr = new Uint8Array(n);
-  while (n--) {
-    u8arr[n] = bstr.charCodeAt(n);
-  }
+      // Convert base64 to File
+      const arr = base64.split(',');
+      const mime = arr[0].match(/:(.*?);/)[1];
+      const bstr = atob(arr[1]);
+      let n = bstr.length;
+      const u8arr = new Uint8Array(n);
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+      }
 
-  const file = new File([u8arr], "signature.png", { type: mime });
+      const file = new File([u8arr], "signature.png", { type: mime });
 
-  // Call upload function
-  this.uploadFile(file, "signature");
+      // Call upload function
+      this.uploadFile(file, "signature");
 
-  // Optional: clear error or store locally
-  this.errors.signature = null;
-  console.log("Signature ready for upload:", file);
-},
+      // Optional: clear error or store locally
+      this.errors.signature = null;
+      // console.log("Signature ready for upload:", file);
+    },
+    handleSignUp() {
+      const signatureComponent = this.$refs.digitalSignature;
+      if (signatureComponent && signatureComponent.getSignatureData) {
+        const signatureData = signatureComponent.getSignatureData();
+        if (signatureData) {
+          this.onSignatureSaved(signatureData);
+          const modal = new bootstrap.Modal(document.getElementById('EmployeeToggleModal'));
+          modal.show();
+        } else {
+          console.log("No signature data available");
+        }
+      }
+      else if (this.SignUpdata.signature) {
+        // Show modal manually
+        const modal = new bootstrap.Modal(document.getElementById('EmployeeToggleModal'));
+        modal.show();
+      }
+      else {
+        toast.error("signature Not Added")
+      }
+    },
+    openDigitakSignature() {
+      this.isDigital = true;
+    },
+    openSignatureInput() {
+      this.$refs.signatureInputRef.click();
+      this.isDigital = false;
+    },
 
-uploadFile(file, field) {
+    selectedSignature(event) {
+      const file = event.target.files[0];
+      if (file) {
+        uploadFile(file, "signature");
+      }
+    },
+
+    uploadFile(file, field) {
       let fileName = `${file.name}`;
 
       const formData = new FormData();
@@ -859,7 +901,7 @@ uploadFile(file, field) {
             if (field === "signature") {
               this.SignUpdata.signature = res.message.file_url;
             }
-            console.log("Uploaded file URL:", this.SignUpdata.signature);
+            // console.log("Uploaded file URL:", this.SignUpdata.signature);
           } else {
             console.error("file_url not found in the response.");
           }
@@ -875,24 +917,24 @@ uploadFile(file, field) {
         this.uploadFile(file, "signature");
       }
     },
-    
+
     onSignatureCleared() {
-      this.SignUpdata.signature = null;
+      this.SignUpdata.signature = "";
       this.errors.signature = 'Signature is required';
     },
-    
+
     onSignatureRemoved() {
-      this.SignUpdata.signature = null;
+      this.SignUpdata.signature = "";
       this.errors.signature = 'Signature is required';
     },
-    
+
     onSignatureUploaded(signatureData) {
       this.SignUpdata.signature = signatureData;
       this.errors.signature = null;
-      console.log('Signature uploaded:', signatureData);
+      // console.log('Signature uploaded:', signatureData);
     },
-    
-  
+
+
     // Form submission
     submitForm() {
       // Validate all fields
@@ -900,34 +942,34 @@ uploadFile(file, field) {
       this.validateFullName();
       this.validateEmpCode();
       this.validatePhone();
-      
+
       // Validate signature
       if (!this.SignUpdata.signature) {
         this.errors.signature = 'Digital signature is required';
         return;
       }
-      
+
       if (this.isFormValid) {
         // Prepare form data for submission
         const formData = new FormData();
-        
+
         // Add text fields
         Object.keys(this.SignUpdata).forEach(key => {
           if (key !== 'signature') {
             formData.append(key, this.SignUpdata[key]);
           }
         });
-        
+
         // Add signature as blob
         if (this.SignUpdata.signature && this.SignUpdata.signature.blob) {
           formData.append('signature', this.SignUpdata.signature.blob, 'signature.png');
         }
-        
+
         // Submit to your backend
         this.submitToServer(formData);
       }
     },
-    
+
     async submitToServer(formData) {
       try {
         // Replace with your actual API endpoint
@@ -935,7 +977,7 @@ uploadFile(file, field) {
           method: 'POST',
           body: formData
         });
-        
+
         if (response.ok) {
           this.successMessage = 'Registration successful!';
           // Reset form or redirect as needed
@@ -950,6 +992,7 @@ uploadFile(file, field) {
 
   },
   mounted() {
+    this.checkSignUpPage();
     const url = window.location.href;
     if (url.includes('ncomr')) {
       this.SignUpdata.emp_code = 'NICO-';
@@ -975,7 +1018,12 @@ uploadFile(file, field) {
 .loginpageheight {
   height: 100vh;
 }
-
+.checkbox-input{
+  width: 50px;
+}
+.input-border{
+  border: 1px solid black;
+}
 .Message-div {
   background-color: #DEFDE9;
   padding: 20px 50px;
@@ -983,6 +1031,19 @@ uploadFile(file, field) {
   font-size: 12px;
 }
 
+// .add-signiture {
+//   position: relative;
+//   bottom: 77px;
+//   left: 205px;
+// }
+.add-signiture-btn {
+  border: 1px solid #dc3545;
+  color: #dc3545;
+  border-radius: 5px;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 400;
+}
 
 .input-field {
   font-size: 18px;
@@ -1069,6 +1130,7 @@ uploadFile(file, field) {
   position: relative;
   min-width: 420px;
 }
+
 .input-div1 {
   border: 1px solid #eeeeee;
   box-shadow: 0px 2px 14px 0px #00000017;
@@ -1164,9 +1226,10 @@ input:focus {
     margin: 0 auto;
     height: auto;
   }
-.input-div1 {
-  width: 90vw !important;
-}
+
+  .input-div1 {
+    width: 90vw !important;
+  }
 }
 
 @media (max-width: 480px) {
@@ -1174,9 +1237,11 @@ input:focus {
     width: 90vw;
     padding: 20px;
   }
-.input-div1 {
-  width: 1000vw !important;
-}
+
+  .input-div1 {
+    width: 1000vw !important;
+  }
+
   .input-box {
     height: 60px;
     font-size: 16px;
