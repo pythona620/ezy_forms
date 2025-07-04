@@ -684,7 +684,7 @@
                                                                             v-if="field.fieldtype === 'Data' && field.label !== 'Type of Manpower'">
                                                                             <input
                                                                                 type="text"
-                                                                                :maxlength="field.fieldtype === 'Phone' ? '10' : '140'"
+                                                                                :maxlength="field.fieldtype === 'Phone' ? '10' : '140'" :disabled="field.description === 'Disable'"
                                                                                 class="form-control font-12"
                                                                                 v-model="row[field.fieldname]"
                                                                                 />
@@ -728,18 +728,33 @@
                                                                                 v-model="row[field.fieldname]" />
                                                                         </template>
 
-                                                                        <template v-else-if="field.fieldtype === 'Int'">
-                                                                            
-                                                                            <input
-                                                                                v-if="field.description && /[+\-*/]/.test(field.description)"
-                                                                                type="number"
-                                                                                class="form-control font-12"
-                                                                                :value="calculateFieldExpression(row, field.description, table)"
-                                                                                readonly />
-                                                                            <input v-else type="number" :disabled=" field.label === 'Qty' && route.query.main_form"
-                                                                                class="form-control font-12"
-                                                                                v-model.number="row[field.fieldname]" />
-                                                                        </template>  
+                                                                       <template v-else-if="field.fieldtype === 'Int'">
+    <!-- For calculated fields -->
+    <input
+        v-if="field.description && /[+\-*/]/.test(field.description)"
+        type="number"
+        class="form-control font-12"
+        :value="calculateFieldExpression(row, field.description, table)"
+        readonly
+    />
+
+    <!-- For normal fields with dynamic validation -->
+    <div v-else>
+        <input
+            type="number"
+            class="form-control font-12"
+            :class="{ 'border-danger': hasFieldError(row, field) }"
+            v-model.number="row[field.fieldname]"
+            :disabled="(field.label === 'Qty' && route.query.main_form) || field.description === 'Disable'"
+            @input="validateFields(row, table)"
+        />
+        <!-- Error message display -->
+        <div v-if="hasFieldError(row, field)" class="text-danger py-1 font-10">
+            {{ getFieldError(row, field) }}
+        </div>
+    </div>
+</template>
+  
                                                                         
 
 
@@ -993,6 +1008,95 @@ const getInputType = (type) => {
     if (t === 'int') return 'number';
     return t;
 };
+const fieldErrors = ref({});
+
+function validateFields(row, fields) {
+    fields.forEach(field => {
+        if (!field.description) return;
+
+        const fieldValue = parseFloat(row[field.fieldname]) || 0;
+
+        // ⚠️ Don't run validation if input is empty (optional)
+        if (row[field.fieldname] === '' || row[field.fieldname] === null || row[field.fieldname] === undefined) {
+            clearFieldError(row, field.fieldname);
+            return;
+        }
+
+        const conditions = field.description.split(',').map(c => c.trim()).filter(Boolean);
+
+        for (const cond of conditions) {
+            const match = cond.match(/^(.+?)([><!=]{1,2})$/);
+            if (!match) continue;
+
+            const [_, compareLabel, operator] = match;
+            const compareField = fields.find(f => f.label === compareLabel);
+            if (!compareField) continue;
+
+            const compareValue = parseFloat(row[compareField.fieldname]) || 0;
+
+            // ✅ DYNAMIC CASE: If Remaining Qty = 0, skip all validations against it
+            if (compareLabel === 'Remaining Qty' && compareValue === 0) {
+                clearFieldError(row, field.fieldname);
+                continue; // Go to the next condition
+            }
+
+            let isError = false;
+
+            switch (operator) {
+                case '>':
+                case '>=':
+                    isError = fieldValue > compareValue;
+                    break;
+                case '<':
+                case '<=':
+                    isError = fieldValue < compareValue;
+                    break;
+                case '!=':
+                    isError = fieldValue != compareValue;
+                    break;
+                case '==':
+                    isError = fieldValue == compareValue;
+                    break;
+                default:
+                    break;
+            }
+
+            if (isError) {
+                setFieldError(row, field.fieldname, `${field.label} cannot be greater than ${compareLabel}`);
+                return; // Stop at first failed condition
+            } else {
+                clearFieldError(row, field.fieldname);
+            }
+        }
+    });
+}
+
+// Error handling
+function setFieldError(row, fieldname, message) {
+    const rowKey = row.__row_id || row.id || JSON.stringify(row);
+    if (!fieldErrors.value[rowKey]) fieldErrors.value[rowKey] = {};
+    fieldErrors.value[rowKey][fieldname] = message;
+}
+
+function clearFieldError(row, fieldname) {
+    const rowKey = row.__row_id || row.id || JSON.stringify(row);
+    if (fieldErrors.value[rowKey]) {
+        delete fieldErrors.value[rowKey][fieldname];
+        if (Object.keys(fieldErrors.value[rowKey]).length === 0) {
+            delete fieldErrors.value[rowKey];
+        }
+    }
+}
+
+function hasFieldError(row, field) {
+    const rowKey = row.__row_id || row.id || JSON.stringify(row);
+    return !!(fieldErrors.value[rowKey] && fieldErrors.value[rowKey][field.fieldname]);
+}
+
+function getFieldError(row, field) {
+    const rowKey = row.__row_id || row.id || JSON.stringify(row);
+    return fieldErrors.value[rowKey]?.[field.fieldname] || '';
+}
 
 
 const previewUrl = ref('')
@@ -1429,7 +1533,7 @@ function fetchDoctypeList(resourceName, searchText,field) {
     }
     if (resourceName.includes('Ezy Departments')) {
         
-        filters.push(['name', 'like', `%${EmpRequestdesignation.department}%`]);
+        // filters.push(['name', 'like', `%${EmpRequestdesignation.department}%`]);
     }
    
 
@@ -1742,6 +1846,12 @@ const allFieldsFilled = computed(() => {
                             (!field.value || field.value.toString().trim() === "")
                         ) {
                             return false;
+                        }
+                         const rowKey = row.__row_id || row.id || JSON.stringify(row);
+                        const fieldError = fieldErrors.value[rowKey]?.[field.fieldname];
+
+                        if (fieldError) {
+                            return false; // ❌ Found an error, form is not valid
                         }
                     }
                 }
@@ -2549,5 +2659,10 @@ table th {
     background-color: #ccc;
     // overflow: hidden;
     /* This ensures child elements respect the border radius */
+}
+input:focus{
+    box-shadow: none;
+    border: 1px solid #000;
+
 }
 </style>
