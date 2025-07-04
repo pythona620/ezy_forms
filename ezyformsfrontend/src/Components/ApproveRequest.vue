@@ -97,7 +97,7 @@
                       <div class=" d-flex gap-2">
 
 
-                        <div v-if="selectedData.designation?.toLowerCase().includes('security')">
+                        <!-- <div v-if="selectedData.designation?.toLowerCase().includes('security')">
                           <button :disabled="saveloading || (!canApprove & view_only_reportee === 1)" type="submit"
                             class="btn btn-outline-secondary" @click.prevent="SaveDocWithoutApprove(route.query.name)">
                             <span v-if="saveloading" class="spinner-border spinner-border-sm" role="status"
@@ -107,7 +107,7 @@
                             </span>
                           </button>
 
-                        </div>
+                        </div> -->
                         <div>
                           <button :disabled="loading || (!canApprove & view_only_reportee === 1)" type="submit"
                             class="btn btn-success approvebtn"
@@ -183,12 +183,19 @@
                   <div class=" d-flex justify-content-between gap-2">
                     <div>
                       <button
-                        v-if="selectedData.type == 'myforms' && linked_status !== 'Completed' && tableData?.status === 'Completed' && tableData.is_linked_form !== null"
-                        type="button"
-                        class="btn btn-light font-14 nowrap h-auto fw-bold border border-dark   CreateDepartments "
-                        data-bs-target="#pdfView" @click="toLinkedForm">
-                        Raise Link <i class="bi bi-arrow-right px-2"></i>
-                      </button>
+                              v-if="(selectedData.type === 'myforms' || selectedData.type === 'myteam') &&
+                                    linked_status !== 'Completed' &&
+                                    tableData?.status === 'Completed' &&
+                                    tableData?.is_linked_form !== '' "
+                              type="button"
+                              class="btn btn-light font-14 nowrap h-auto fw-bold border border-dark CreateDepartments"
+                              data-bs-target="#pdfView"
+                              @click="toLinkedForm"
+                            >
+                              Raise Link <i class="bi bi-arrow-right px-2"></i>
+                            </button>
+
+                      
 
                     </div>
                     <div>
@@ -260,7 +267,7 @@
                       <tbody>
                         <tr v-for="(item, index) in linkedForms" :key="index">
                           <!-- <td class="font-12">{{ index + 1 }}</td> -->
-                          <td class="font-12 align-middle">{{ item.link_form_id }}</td>
+                          <td class="font-12 nowrap align-middle">{{ item.link_form_id }}</td>
                           <td>
                             <button class="btn btn-light btn-sm" data-bs-toggle="modal"
                               data-bs-target="#listofLinkedForms" @click="openModal(item)">
