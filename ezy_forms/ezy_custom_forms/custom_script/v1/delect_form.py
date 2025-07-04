@@ -12,7 +12,24 @@ def delete_form_and_related(form_short_name=None):
         frappe.db.commit()
     except frappe.DoesNotExistError:
         pass
-
+    
+    
+    try:
+        parent_docs = frappe.get_all("WF Setting", fields=["name"])
+        for doc_info in parent_docs:
+            doc = frappe.get_doc("WF Setting", doc_info.name)
+            removed = False
+            for row in doc.wf_doctype_and_field:
+                if row.workflow_doctype == form_short_name:
+                    doc.remove(row)
+                    removed = True
+            if removed:
+                doc.save()
+                frappe.db.commit()
+    except frappe.DoesNotExistError:
+        pass
+    
+    
     # Delete WF Roadmap
     try:
         wf_roadmap = frappe.get_doc("WF Roadmap", {"document_type": form_short_name})
@@ -27,7 +44,10 @@ def delete_form_and_related(form_short_name=None):
 
     # Delete the DocType
     try:
-        frappe.delete_doc("DocType", form_short_name, force=1)
+        records_in_doctye = frappe.get_all(form_short_name)
+        for record in records_in_doctye:
+            frappe.delete_doc(form_short_name, record.name)
+        frappe.delete_doc("DocType", form_short_name, )
     except frappe.DoesNotExistError:
         pass
     frappe.db.commit()

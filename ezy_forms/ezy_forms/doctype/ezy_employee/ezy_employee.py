@@ -6,8 +6,10 @@ from frappe.model.document import Document
 import sys
 from ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions import activating_perms, bench_migrating_from_code
 import socket as so
-
+from ezy_forms.ezy_forms.doctype.login_check.login_check import after_insert_user
 class EzyEmployee(Document):
+	def before_save(self):
+		after_insert_user(self)
 	def after_insert(self):
 		is_email_account_set = frappe.db.get_all("Email Account",{"enable_outgoing":["=",1],"default_outgoing":["=",1]})
 		if not frappe.db.exists("User",{"email":self.emp_mail_id}):
@@ -124,16 +126,19 @@ def employee_last_login_activate(login_manager):
  
 @frappe.whitelist()
 def employee_rejection(empl_mail_id):
-	# Get the employee document
-	employee = frappe.get_doc("Ezy Employee", {"emp_mail_id": empl_mail_id})
-	# Delete the employee
-	frappe.delete_doc("Ezy Employee", employee.name, force=1)
+    # Delete Ezy Employee if exists
+    employee_name = frappe.db.get_value("Ezy Employee", {"emp_mail_id": empl_mail_id})
+    if employee_name:
+        frappe.delete_doc("Ezy Employee", employee_name, force=1)
 
-	# Get the user document
-	user_doc = frappe.get_doc("User", empl_mail_id)
-	# Delete the user
-	frappe.delete_doc("User", user_doc.name, force=1)
-	login_check = frappe.get_doc("Login Check",{"user_id":empl_mail_id})
-	frappe.delete_doc("Login Check", login_check.name, force=1)
-	frappe.db.commit()
-	return "Employee Deleted"
+    # Delete User if exists
+    if frappe.db.exists("User", empl_mail_id):
+        frappe.delete_doc("User", empl_mail_id, force=1)
+
+    # Delete Login Check if exists
+    login_check_name = frappe.db.get_value("Login Check", {"user_id": empl_mail_id})
+    if login_check_name:
+        frappe.delete_doc("Login Check", login_check_name, force=1)
+
+    frappe.db.commit()
+    return "Employee Deleted (if found)"
