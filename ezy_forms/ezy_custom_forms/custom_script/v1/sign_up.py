@@ -118,7 +118,7 @@ def employee_update_notification(emp_mail):
 
 	if not emp_mail or not emp_name:
 		frappe.throw("Employee not found.")
-	frappe.set_value("Ezy Employee", emp_name, "is_web_form", 0)
+	frappe.set_value("Ezy Employee", emp_mail, "is_web_form", 0)
 	site_url = get_url()
 	
 	# Get the mail ID from the 'Notifications Mail' doctype
