@@ -184,9 +184,11 @@
                     <div>
                       <button
                               v-if="(selectedData.type === 'myforms' || selectedData.type === 'myteam') &&
-                                    linked_status !== 'Completed' &&
-                                    tableData?.status === 'Completed' &&
-                                    tableData?.is_linked_form !== '' "
+      linked_status !== 'Completed' &&
+      tableData?.status === 'Completed' &&
+      tableData?.is_linked_form &&
+      
+      Object.keys(tableData.is_linked_form).length > 0"
                               type="button"
                               class="btn btn-light font-14 nowrap h-auto fw-bold border border-dark CreateDepartments"
                               data-bs-target="#pdfView"

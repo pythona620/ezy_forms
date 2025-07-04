@@ -60,7 +60,8 @@
                                                         {{ option }}
                                                     </option>
                                                 </select> -->
-                                                <Multiselect :multiple="field.fieldtype === 'Table MultiSelect'"
+                                                
+                                                <Multiselect :multiple="field.fieldtype === 'Table MultiSelect' " :disabled="field.description === 'Disable'"
                                                     :maxlength="getMaxLength(field)"
                                                     :options="field.options?.split('\n').filter(opt => opt.trim() !== '') || []"
                                                     :modelValue="field.value" placeholder="Select"
@@ -291,34 +292,42 @@
                                                         " class="form-control previewInputHeight font-10" />
                                             </template>
                                             <template v-else-if="field.fieldtype === 'Link'">
-                                            <input
-                                                type="text"
-                                                v-model="field.value"
-                                                @input="() => fetchDoctypeList(field.options, field.value, field)"
-                                                @focus="() => fetchDoctypeList(field.options, field.value, field)"
-                                                @change="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
-                                                class="form-control font-12 mb-1"
-                                            />
+  <div style="position: relative;">
+    <input
+      type="text"
+      v-model="field.value"
+      @focus="field.showDropdown = true"
+      @blur="() => field.showDropdown = false"
+      @input="() => fetchDoctypeList(field.options, field.value, field)"
+      @change="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+      class="form-control font-12 mb-1"
+    />
 
-                                            <ul v-if="field.linkSearchResults && field.linkSearchResults.length" class="list-group mt-1" style="max-height: 200px; overflow-y: auto;">
-                                                <li
-                                                v-for="(result, index) in field.linkSearchResults"
-                                                :key="index"
-                                                @click="selectDoctype(
-                                                    result,
-                                                    field,
-                                                    blockIndex,
-                                                    sectionIndex,
-                                                    rowIndex,
-                                                    columnIndex,
-                                                    fieldIndex
-                                                )"
-                                                class="list-group-item list-group-item-action"
-                                                >
-                                                {{ field.options.includes('Ezy Departments') ? result.department_name : result.name }}
-                                                </li>
-                                            </ul>
-                                            </template>
+    <ul
+      v-if="field.showDropdown && field.linkSearchResults && field.linkSearchResults.length"
+      class="list-group mt-1"
+      style="max-height: 200px; overflow-y: auto;"
+    >
+      <li
+        v-for="(result, index) in field.linkSearchResults"
+        :key="index"
+        @mousedown.prevent="selectDoctype(
+          result,
+          field,
+          blockIndex,
+          sectionIndex,
+          rowIndex,
+          columnIndex,
+          fieldIndex
+        ); field.showDropdown = false"
+        class="list-group-item list-group-item-action"
+      >
+        {{ field.options.includes('Ezy Departments') ? result.department_name : result.name }}
+      </li>
+    </ul>
+  </div>
+</template>
+
 
 
 
@@ -360,7 +369,7 @@
 
                                                 <component v-if="
                                                     field.fieldtype !== 'Datetime' && field.fieldtype !== 'Text' && field.fieldname !== 'auto_calculations'
-                                                " :is="getFieldComponent(field.fieldtype)" :value="field.value"
+                                                " :is="getFieldComponent(field.fieldtype)" :value="field.value" :disabled="field.description === 'Disable'"
                                                     :min="past" @click="forceOpenCalendar"
                                                     :maxlength="getMaxLength(field)"
                                                     :type="getInputType(field.fieldtype)" :name="'field-' +
@@ -394,7 +403,7 @@
                                                 }}
                                             </div>
                                         </div>
-                                        <span v-if="field.description !== 'Field' && field.fieldtype !== 'Table' && field.fieldname !== 'auto_calculations'"
+                                        <span v-if="field.description !== 'Field' && field.fieldtype !== 'Table' && field.fieldname !== 'auto_calculations' && field.description !== 'Disable'"
                                             class="font-11"><span  class="fw-semibold">Description: </span>{{
                                                 field.description }}</span>
                                         <div v-if="blockIndex === 0 && field.fieldtype === 'Table'">
@@ -878,7 +887,7 @@
                                                                     <td></td>
                                                                 </tr>
                                                                 <tr>
-                                                                    <td :colspan="table.length + 2"
+                                                                    <td v-if="!route.query.main_form" :colspan="table.length + 2"
                                                                         class="text-center text-muted">
 
                                                                         <button
@@ -892,7 +901,7 @@
                                                         </table>
 
                                                         <span
-                                                            v-if="field.description !== tableIndex && field.description !== 'True' && field.description !== 'false' && field.description !== 'Field'"
+                                                            v-if="field.description !== tableIndex && field.description !== 'True' && field.description !== 'false' && field.description !== 'Field' "
                                                             class="font-11"><span class="fw-semibold">
                                                             </span>{{
                                                                 field.description }}</span>

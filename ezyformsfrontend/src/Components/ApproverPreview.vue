@@ -22,9 +22,10 @@
                   <div v-for="(field, fieldIndex) in column.fields" :key="'field-preview-' + fieldIndex" :class="(props.readonlyFor === 'true' || blockIndex < currentLevel) && field.fieldtype !== 'Small Text' && field.fieldtype !== 'Text'
                     ? (field.label === 'Approved By' ? ' d-flex align-items-end' : 'align-items-start')
                     : ''">
-                    <div v-if="!(blockIndex !== 0 && !field.value)" :class="(props.readonlyFor === 'true' || blockIndex < currentLevel) && field.fieldtype !== 'Small Text' && field.fieldtype !== 'Text' || field.fieldtype === 'Check'
-                      ? 'd-flex ' + (field.fieldtype === 'Check' ? 'mt-4 flex-row-reverse justify-content-end gap-2 w-0 align-items-start ' : '') + (field.label === 'Approved By' ? 'align-items-start' : 'align-items-center')
+                    <div  :class="(props.readonlyFor === 'true' || blockIndex < currentLevel) && field.fieldtype !== 'Small Text' && field.fieldtype !== 'Text' || field.fieldtype === 'Check'
+                      ? 'd-flex ' + (field.fieldtype === 'Check' ? 'mt-1 flex-row-reverse justify-content-end gap-2 w-0 align-items-start ' : '') + (field.label === 'Approved By' ? 'align-items-start' : 'align-items-center')
                       : ''">
+                      
 
 
                       <div v-if="field.label && field.fieldtype !== 'Table' && field.fieldname !== 'auto_calculations'">
@@ -102,6 +103,7 @@
                         </template>
 
                         <template v-else-if="field.fieldtype == 'Check' && field.fieldname !== 'auto_calculations'">
+                       
                           <input type="checkbox" :checked="field.value"
                             :disabled="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel"
                             :placeholder="'Enter ' + field.label" :name="'field-' +
@@ -181,10 +183,12 @@
 
                         <!-- @click="openInNewWindow(field.value)" -->
                         <template v-else-if="field.fieldtype == 'Attach'">
-                          <div v-if="field.value" class="d-flex gap-2 align-items-center flex-wrap">
+                         
+                          <div v-if="field.value " class="d-flex gap-2 align-items-center flex-wrap">
                             <div v-for="(file, i) in getFileArray(field.value)" :key="i"
                               class="position-relative d-inline-block"
-                              :class="props.readonlyFor === 'true' ? 'border-bottom-0' : ''">
+                              :class="{ 'border-bottom-0': props.readonlyFor === 'true' }"
+>
 
                               <!-- Show file input if flagged for replacement -->
                               <div v-if="replaceInputIndexes.includes(i)">
@@ -195,7 +199,8 @@
 
                               <!-- Image block -->
                               <template v-else-if="isImageFile(file)">
-                                <template v-if="blockIndex === 0">
+                                
+                                <template v-if="blockIndex === 0 && field.fieldname !== 'requestor_signature'">
                                   <span class="cursor-pointer text-decoration-underline font-12 d-flex"
                                     @click="openFileModal(file)">
                                     <i class="bi bi-file-earmark-image fs-4"></i>
@@ -351,7 +356,7 @@
                             @input="adjustHeight(sectionIndex, columnIndex, fieldIndex)" />
 
                           <template
-                            v-if="blockIndex === 0 && field.fieldtype !== 'Int' && field.fieldtype !== 'Text' && field.fieldtype !== 'Select' && field.fieldname !== 'auto_calculations'">
+                            v-if="blockIndex === 0 && field.fieldtype !== 'Int' && field.fieldtype !== 'Text' && field.fieldtype !== 'Select' && field.fieldname !== 'auto_calculations' ">
                             <span style="font-size: 12px;"
                               :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0  w-50 bg-transparent' : ''"
                               :value="field.value" :type="field.fieldtype">
@@ -385,7 +390,7 @@
                       </div>
                     </div>
                     <div
-                      v-if="field.description !== 'Field' && field.fieldtype !== 'Table' && field.fieldname !== 'auto_calculations'"
+                      v-if="field.description !== 'Field' && field.fieldtype !== 'Table' && field.fieldname !== 'auto_calculations' && field.description !== 'Disable'"
                       class="w-100 font-11 description-block mt-1">
                       <!-- <span class="fw-semibold"></span><br> -->
                       <span v-html="field.description.replace(/\n/g, '<br>')"></span>

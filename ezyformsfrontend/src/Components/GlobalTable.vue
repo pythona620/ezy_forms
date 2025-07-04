@@ -166,10 +166,10 @@
               </span> -->
                             <!-- <span v-else class="tooltip-text" :title="row[column.td_key] || '-'"> -->
 
-              <span v-else class="tooltip-text" v-tooltip.top="row[column.td_key] || '-'" >
-                <!-- ?.replace(/@[\w.-]+/, "") -->
-                {{ column.td_key === 'modified' ? '-' : row[column.td_key] || "-" }}
-              </span>
+              <span v-else class="tooltip-text" v-tooltip.top="getTooltipText(row[column.td_key])">
+  {{ getDisplayText(column.td_key, row[column.td_key]) }}
+</span>
+
             </td>
             <!-- <td
               class="text-center d-flex justify-content-center position-relative"
@@ -422,7 +422,15 @@ function handleToggle(row, index, event) {
 }
 const focusedFields = reactive({});
 
+function getDisplayText(key, value) {
+  if (key === 'modified') return '-';
+  return value ? value.replace(/_/g, ' ') : '-';
+}
 
+function getTooltipText(value) {
+   
+  return value ? value.replace(/_/g, ' ') : '-';
+}
 const allCheck = ref(false);
 // function formatDate(dateString) {
 //   if (!dateString) return "-"; // Handle empty or null values
