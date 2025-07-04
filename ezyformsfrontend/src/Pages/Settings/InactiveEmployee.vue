@@ -1647,7 +1647,7 @@ function inLineFiltersData(searchedData) {
 }
 
 function employeeData(data) {
-  const filters = [["company_field", "like", `%${newbusiness.value}%`],["is_web_form","=","0"],["enable","=","0"]];
+  const filters = [["company_field", "like", `%${newbusiness.value}%`],["enable","=","0"]];
   if (data) {
     filters.push(...data);
   }
