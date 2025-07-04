@@ -184,15 +184,17 @@
                     <div>
                       <button
                               v-if="(selectedData.type === 'myforms' || selectedData.type === 'myteam') &&
-                                    linked_status !== 'Completed' &&
-                                    tableData?.status === 'Completed' &&
-                                    tableData?.is_linked_form !== '' "
+      linked_status !== 'Completed' &&
+      tableData?.status === 'Completed' &&
+      tableData?.is_linked_form &&
+      
+      Object.keys(tableData.is_linked_form).length > 0"
                               type="button"
                               class="btn btn-light font-14 nowrap h-auto fw-bold border border-dark CreateDepartments"
                               data-bs-target="#pdfView"
                               @click="toLinkedForm"
                             >
-                              Raise Link {{ typeof tableData.is_linked_form }} <i class="bi bi-arrow-right px-2"></i>
+                              Raise Link <i class="bi bi-arrow-right px-2"></i>
                             </button>
 
                       
