@@ -182,7 +182,7 @@
                 <div class="col-xl-12 col-lg-12 col-md-12">
                   <div class=" d-flex justify-content-between gap-2">
                     <div>
-                      <button
+                      <!-- <button
                               v-if="(selectedData.type === 'myforms' || selectedData.type === 'myteam') &&
                                     linked_status !== 'Completed' &&
                                     tableData?.status === 'Completed' &&
@@ -193,7 +193,7 @@
                               @click="toLinkedForm"
                             >
                               Raise Link <i class="bi bi-arrow-right px-2"></i>
-                            </button>
+                            </button> -->
 
                       
 
