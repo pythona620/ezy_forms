@@ -367,19 +367,30 @@
                     </p>
                   </div> -->
                   
-                    <div class="mb-3">
-                      <label class="font-13 ps-1" for="emp_phone">Emp Phone</label>
-                      <div class="input-container">
-                        <input type="text" name="emp_phone"  id="emp_phone" maxlength="13" class="w-100 form-control font-12"
-                          :readonly="false" :value="displayPhone" @input="updatePhone" @blur="validatePhone"
-                          placeholder="Enter Phone Number" />
-                        <i :class="eyeIcon" class="eye-icon" @click="toggleMask"></i>
-                      </div>
+<div class="mb-3">
+  <label class="font-13 ps-1" for="emp_phone">Emp Phone</label>
+  <div class="input-container">
+    <input
+      type="text"
+      name="emp_phone"
+      id="emp_phone"
+      maxlength="13"
+      class="w-100 font-12  form-control"
+      :readonly="isMasked"
+      :value="isMasked ? maskNumber(createEmployee.emp_phone) : createEmployee.emp_phone"
+      @input="handleInput"
+      @blur="formatPhoneNumber"
+      placeholder="Enter Phone Number"
+    />
+    <i :class="eyeIcon" class="eye-icon" @click="toggleMask"></i>
+  </div>
 
-                      <p v-if="phoneError" class="text-danger font-11 ps-1">
-                        {{ phoneError }}
-                      </p>
-                    </div>
+  <p v-if="phoneError" class="text-danger font-11 ps-1">
+    {{ phoneError }}
+  </p>
+</div>
+
+
                  
                   <div class="mb-3">
                     <label class="font-13 ps-1" for="emp_mail_id">Emp Mail ID<span
@@ -1134,44 +1145,36 @@ const eyeIcon = computed(() => (isMasked.value ? "bi bi-eye-slash-fill" : "bi bi
 // const phoneError = ref('');
 // const isMasked = ref(true);
 
-// 🔑 Computed to display either masked or actual phone
-const displayPhone = computed(() => {
-  const phone = createEmployee.value.emp_phone || '';
-  if (!phone) return '';
 
-  if (isMasked.value && phone.startsWith('+91') && phone.length === 13) {
-    return '+91 ******' + phone.slice(-4);
-  }
+// function maskNumber(phone) {
+//   if (!phone || phone.length < 13) return phone;
+//   return '+91 ******' + phone.slice(-4);
+// }
 
-  return phone;
-});
+// // ✅ Handle input: DO NOT format while typing
+// function handleInput(e) {
+//   createEmployee.value.emp_phone = e.target.value;
+// }
 
-// 🔑 Update real phone number on typing
-const updatePhone = (e) => {
-  let value = e.target.value;
+// // ✅ Format on blur (or when saving)
+// function formatPhoneNumber() {
+//   let value = createEmployee.value.emp_phone.replace(/\D/g, ''); // Keep only digits
+//   if (value.startsWith('91') && value.length > 10) {
+//     value = value.slice(2);
+//   }
+//   if (value.length === 10) {
+//     createEmployee.value.emp_phone = '+91' + value;
+//     phoneError.value = '';
+//   } else {
+//     phoneError.value = 'Phone number must be 10 digits.';
+//   }
+// }
 
-  // Ensure it starts with +91
-  if (!value.startsWith('+91')) {
-    value = '+91' + value.replace(/\D/g, '').slice(-10);
-  }
-
-  createEmployee.value.emp_phone = value;
-};
-
-// 🔑 Validate on blur
-const validatePhone = () => {
-  const phone = createEmployee.value.emp_phone.replace('+91', '');
-  if (!/^\d{10}$/.test(phone)) {
-    phoneError.value = 'Phone number must be 10 digits.';
-  } else {
-    phoneError.value = '';
-  }
-};
-
-// 🔑 Toggle mask
-const toggleMask = () => {
-  isMasked.value = !isMasked.value;
-};
+// // Toggle mask
+// function toggleMask() {
+//   isMasked.value = !isMasked.value;
+//   eyeIcon.value = isMasked.value ? 'bi-eye' : 'bi-eye-slash';
+// }
 
 // const validatephone = () => {
 //   if (createEmployee.value.emp_phone) {
@@ -1180,7 +1183,38 @@ const toggleMask = () => {
 //     phoneError.value = phonePattern.test(phone) ? "" : "Invalid phone number.";
 //   }
 // };
+// ✅ Display as ******1234 when masked
+function maskNumber(phone) {
+  if (!phone || phone.length < 13) return phone;
+  return '+91 ******' + phone.slice(-4);
+}
 
+// ✅ Allow input when unmasked
+function handleInput(e) {
+  createEmployee.value.emp_phone = e.target.value;
+}
+
+// ✅ Format to +91xxxxxxxxxx on blur
+function formatPhoneNumber() {
+  let value = createEmployee.value.emp_phone.replace(/\D/g, '');
+
+  if (value.startsWith('91') && value.length > 10) {
+    value = value.slice(2);
+  }
+
+  if (value.length === 10) {
+    createEmployee.value.emp_phone = '+91' + value;
+    phoneError.value = '';
+  } else {
+    phoneError.value = 'Phone number must be 10 digits.';
+  }
+}
+
+// ✅ Toggle mask & readonly
+function toggleMask() {
+  isMasked.value = !isMasked.value;
+  eyeIcon.value = isMasked.value ? 'bi-eye' : 'bi-eye-slash';
+}
 
 const isEmailMasked = ref(true);
 const originalEmail = ref("");
@@ -1227,25 +1261,25 @@ const maskEmailFormat = (email) => {
   const [localPart, domain] = email.split("@");
   return localPart.length > 3 ? localPart.slice(0, 3) + "***@" + domain : email;
 };
-// Ensure +91 is always prefixed
-const formatPhoneNumber = (event) => {
-  let value = event.target.value;
+// // Ensure +91 is always prefixed
+// const formatPhoneNumber = (event) => {
+//   let value = event.target.value;
 
-  // Remove non-numeric characters except '+'
-  value = value.replace(/[^0-9+]/g, "");
+//   // Remove non-numeric characters except '+'
+//   value = value.replace(/[^0-9+]/g, "");
 
-  // Ensure +91 is always at the start
-  if (!value.startsWith("+91")) {
-    value = "+91" + value.replace(/^91/, ""); // Remove leading '91' if entered without '+'
-  }
+//   // Ensure +91 is always at the start
+//   if (!value.startsWith("+91")) {
+//     value = "+91" + value.replace(/^91/, ""); // Remove leading '91' if entered without '+'
+//   }
 
-  // Limit total length to 13 characters
-  if (value.length > 13) {
-    value = value.slice(0, 13);
-  }
+//   // Limit total length to 13 characters
+//   if (value.length > 13) {
+//     value = value.slice(0, 13);
+//   }
 
-  createEmployee.value.emp_phone = value;
-};
+//   createEmployee.value.emp_phone = value;
+// };
 
 // Validate phone number
 const validatephonenew = () => {
