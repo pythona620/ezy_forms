@@ -131,34 +131,17 @@
                   <i class="bi bi-x-lg fw-bolder text-danger"></i>
                 </span>
               </span>
-              <span v-else-if="column.td_key === 'assigned_to_users'">
+              <span  v-else-if="column.td_key === 'assigned_to_users'">
                 <div>
-                  <span>
-                    {{
-                      (() => {
-                        try {
-                          let value = JSON.parse(row[column.td_key].replace(/'/g, '"')); // Replace single quotes & parse
+                  <span
+                      v-tooltip.top="getAssignedToUsers(row, column)"
+                      
+                    >
+                      <div>
+                        <span>{{ getAssignedToUsers(row, column) }}</span>
+                      </div>
+                    </span>
 
-                          // If status is 'Completed', return 'Completed'
-                          if (row.status === 'Completed') {
-                            return 'Completed';
-                          }
-                          if (row.status === 'Request Cancelled') {
-                            return 'Request Cancelled';
-                          }
-
-                          // If value is an empty array, return "-"
-                          if (Array.isArray(value) && value.length === 0) {
-                            return "-";
-                          }
-
-                          return Array.isArray(value) ? `Pending at- ${value.join(", ")}` : `Pending at- ${value}`;
-                        } catch (error) {
-                          return row[column.td_key] || "User not assigned"; // Fallback if parsing fails
-                        }
-                      })()
-                    }}
-                  </span>
                 </div>
               </span>
               <span class="text-center fixed-column" v-else-if="column.td_key === 'enable' || column.td_key === 'activate'">
@@ -213,9 +196,9 @@
                 </div>
               </div>
             </td> -->
-            <td v-if="isAction == 'true' && viewType === 'viewPdf'" class="text-center align-middle">
+            <!-- <td > -->
 
-              <div>
+              <div v-if="isAction == 'true' && viewType === 'viewPdf'" class="text-center align-middle">
                 <span v-if="raiseRequest === 'true'" class="px-4">
                   <i v-tooltip.top="'Raise Request'" class="bi bi-send eye-cursor mx-1" @click="handleCellClick(row, rowIndex, 'raiseRequest')"></i>
                 </span>
@@ -226,11 +209,11 @@
                   <i class="bi bi-download eye-cursor" @click="handleCellClick(row, rowIndex, 'download')"></i>
                 </span>
               </div>
-            </td>
+            <!-- </td> -->
             <td v-if="actionType === 'dropdown'" class="text-center fixed-column position-relative">
               <div class="dropdown">
-                <p class="p-0 actions" data-bs-toggle="dropdown" aria-expanded="false">
-                  <span @click="actionDropDown(row)">...</span>
+                <p @click="actionDropDown(row)" class="p-0 actions" data-bs-toggle="dropdown" aria-expanded="false">
+                  <span >...</span>
                 </p>
                 <ul class="dropdown-menu actionsdropdown">
                   <li class="py-1" @click="selectedAction(row, action)" v-for="(action, index) in actions" :key="index">
@@ -516,6 +499,27 @@ function formatDate(dateString) {
     return "-";
   }
 }
+function getAssignedToUsers(row, column) {
+  try {
+    let value = JSON.parse(row[column.td_key].replace(/'/g, '"'));
+
+    if (row.status === 'Completed') {
+      return 'Completed';
+    }
+    if (row.status === 'Request Cancelled') {
+      return 'Request Cancelled';
+    }
+
+    if (Array.isArray(value) && value.length === 0) {
+      return "-";
+    }
+
+    return Array.isArray(value) ? `Pending at- ${value.join(", ")}` : `Pending at- ${value}`;
+  } catch (error) {
+    return row[column.td_key] || "User not assigned";
+  }
+}
+
 
 function SelectedAll() {
   allCheck.value = !allCheck.value;
