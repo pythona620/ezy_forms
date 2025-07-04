@@ -134,7 +134,8 @@
         <div class="no-form">No Form</div>
       </div>
     </div>
-    <div class="modal fade" id="ExportEmployeeModal" tabindex="-1" aria-hidden="true">
+    <!-- :class="{'z-1':saveloading}" -->
+    <div class="modal fade " id="ExportEmployeeModal" tabindex="-1" aria-hidden="true" >
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
@@ -1256,7 +1257,7 @@ function request_raising_fn(item) {
     ids: [item.name],
     reason: selectedData.value.hasWorkflow === 'No' ? "Completed" : "Request Raised",
     url_for_request_id: "",
-    files: filepaths.value.length > 0 ? filepaths.value : [],
+    files: [],
     property: business_unit.value,
     ip_address: ip_address.value,
     employee_id: employeeData.value.emp_code,
