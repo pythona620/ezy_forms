@@ -23,7 +23,7 @@
                     ? (field.label === 'Approved By' ? ' d-flex align-items-end' : 'align-items-start')
                     : ''">
                     <div
-                          v-if="!( !field.value && ['Approver', 'Approved On', 'Approved By'].includes(field.label) )"
+                          v-if="!(blockIndex !== 0 && !field.value && ['Approver', 'Approved On', 'Approved By'].includes(field.label) )"
                           :class="(props.readonlyFor === 'true' || blockIndex < currentLevel) && field.fieldtype !== 'Small Text' && field.fieldtype !== 'Text' || field.fieldtype === 'Check'
                                     ? 'd-flex ' + (field.fieldtype === 'Check' ? 'mt-1 flex-row-reverse justify-content-end gap-2 w-0 align-items-start ' : '') + (field.label === 'Approved By' ? 'align-items-start' : 'align-items-center nowrap')
                                     : ''" >
