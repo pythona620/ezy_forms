@@ -587,7 +587,7 @@ function openModal(item) {
     .get(`${apis.resource}${doctypes.WFActivityLog}/${'CRR_TEST_RETURN_FORM-0000008'}`)
     .then((res) => {
       if (res.data) {
-        console.log(res.data);
+        // console.log(res.data);
         linkedActivity.value = res.data.reason;
         // activityData.value = res.data.reason || []; // Ensure it's always an array
       }
@@ -654,7 +654,7 @@ function linked_list_btn() {
 }
 
 function fetching_linked_doc_list() {
-  console.log(selectedData.value.name);
+  // console.log(selectedData.value.name);
   let data = {
     standard_form_id: route.query.name ? route.query.name : '',
     linked_form_name: tableData.value.is_linked_form ? tableData.value.is_linked_form : '',
@@ -664,7 +664,7 @@ function fetching_linked_doc_list() {
   axiosInstance
     .post(apis.linked_doc_list, data)
     .then((response) => {
-      console.log(response.message);
+      // console.log(response.message);
       linkedForms.value = response.message;
 
     })
@@ -778,7 +778,7 @@ function approvalStatusFn(dataObj, type) {
       // console.log("API Response:", response);
 
 
-      console.log(selectedcurrentLevel.value === selectedtotalLevels.value, "current level and total level");
+      // console.log(selectedcurrentLevel.value === selectedtotalLevels.value, "current level and total level");
       if (response?.message?.success === true) {
         if (selectedcurrentLevel.value === selectedtotalLevels.value && mainStandardForm.value.length && doctypeForm.value.return_gate_pass_name.length) {
           DynamicCalculateMethod(); // Call this only if it's the last level
@@ -1112,7 +1112,7 @@ function getdata(formname) {
         }
 
         if (doctypeForm.value.form_status == "Completed") {
-          console.log(doctypeForm.value.form_status, 'linked_status');
+          // console.log(doctypeForm.value.form_status, 'linked_status');
           linked_status.value = doctypeForm.value.form_status;
 
         }

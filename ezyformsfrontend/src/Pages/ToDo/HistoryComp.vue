@@ -128,6 +128,8 @@ const tableheaders = ref([
   // { th: "Form category", td_key: "doctype_name" },
   // { th: "Owner of form", td_key: "owner" },
   { th: "Requested By", td_key: "requested_by" },
+  { th: "Linked Form", td_key: "is_linked_form" },
+
   { th: "Requested Department", td_key: "role" },
   // { th: "Property", td_key: "property" },
   { th: "Approval Status", td_key: "status" },

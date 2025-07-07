@@ -245,7 +245,7 @@ const getClientIP = async () => {
     const response = await fetch('https://api.ipify.org?format=json')
     const data = await response.json()
     ip_address.value = data.ip
-    console.log("ip_address.value", ip_address.value);
+    // console.log("ip_address.value", ip_address.value);
 
   } catch (error) {
     console.error('Error fetching IP:', error)
@@ -256,7 +256,7 @@ const getClientIP = async () => {
 
 onMounted(() => {
   loadInitialData();
-  console.log(route.query);
+  // console.log(route.query);
 });
 
 const loadInitialData = () => {
@@ -330,7 +330,7 @@ function fetchDepartmentDetails() {
   axiosInstance
     .get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParams })
     .then((response) => {
-      console.log("API Response:", response) // ✅ check this
+      // console.log("API Response:", response) // ✅ check this
       const data = response.data
       formOptions.value = data.map(item => ({
         label: item.form_short_name || item.name,
@@ -404,7 +404,7 @@ function updateChildRecords(childTables, child_id_name) {
   axiosInstance
     .put(`${apis.resource}${selectedData.value.selectedform}/${child_id_name}`, requestData)
     .then((response) => {
-      console.log(`Updated Record for All Child Tables:`, response.data);
+      // console.log(`Updated Record for All Child Tables:`, response.data);
     })
     .catch((error) => {
       console.error(`Error updating records:`, error);
@@ -801,7 +801,7 @@ const handleFieldUpdate = (field) => {
 
 function handleTableData(data) {
   childtablesData.value = data;
-  console.log('Updated Table Data:', childtablesData.value);
+  // console.log('Updated Table Data:', childtablesData.value);
 }
 
 const ChildTableData = async () => {
@@ -895,7 +895,7 @@ async function raiseRequestSubmission() {
     form.returnable_gate_pass_id = linkedId.value;
   }
 
-  console.log(form, "✅ Final Form Data to Submit");
+  // console.log(form, "✅ Final Form Data to Submit");
 
   const formData = new FormData();
   formData.append("doc", JSON.stringify(form));
@@ -903,7 +903,7 @@ async function raiseRequestSubmission() {
 
   try {
     const response = await axiosInstance.post(apis.savedocs, formData);
-    console.log(response, "✅ Form submitted successfully");
+    // console.log(response, "✅ Form submitted successfully");
 
     if (response) {
       request_raising_fn(response.docs[0]);
@@ -991,7 +991,7 @@ function gettingDataToLink() {
           rows: responseData[tableKey],
         };
 
-        console.log(LinkedChildTableData.value, "Linked Child Table Data");
+        // console.log(LinkedChildTableData.value, "Linked Child Table Data");
       }
     })
     .catch((error) => {
@@ -1217,7 +1217,7 @@ function WfRequestUpdate() {
             const childTables = Object.keys(res.data).filter((key) =>
               Array.isArray(res.data[key])
             );
-            console.log(childTables);
+            // console.log(childTables);
 
 
             if (childTables.length) {
