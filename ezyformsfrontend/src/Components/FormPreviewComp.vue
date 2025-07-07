@@ -96,6 +96,7 @@ option, index
                                                     field.fieldtype == 'radio' ||
                                                     field.fieldtype == 'Select' || field.fieldtype == 'Small Text'
                                                 ">
+                                                
                                                     <div class="container">
                                                         <div class="row">
                                                             <div class="col-4 form-check mb-4" v-for="(

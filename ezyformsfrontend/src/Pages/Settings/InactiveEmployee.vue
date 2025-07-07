@@ -373,7 +373,7 @@
                   <label class="font-13 ps-1 fw-medium" for="dept">Departments<span
                       class="text-danger ps-1">*</span></label>
 
-                  <VueMultiselect v-model="createEmployee.department" :options="departmentsList" :multiple="false"
+                  <VueMultiselect v-model="createEmployee.department" :options="departmentsList" :multiple="false" @update:modelValue="onDepartmentChange"
                     :close-on-select="true" :clear-on-select="false" :preserve-search="true"
                     placeholder="Select department" label="department_name" track-by="name" class="font-11 mb-3">
                     <template #selection="{ values, isOpen }">
@@ -382,8 +382,7 @@
                       </span>
                     </template>
                   </VueMultiselect>
-                </div>
-                <div class="col">
+                  
                   <div class="position-relative mb-3">
                     <label class="font-13 ps-1" for="Designation">
                       Designation<span class="text-danger ps-1">*</span>
@@ -433,6 +432,14 @@
 
                     </div>
                   </div>
+                  <div class="ms-1">
+                         <input type="checkbox" id="isHOD" true-value="1" false-value="0" v-model="createEmployee.is_hod" class="form-check-input mt-1 input-border" />
+                        <label class="font-13 ms-2 " for="isHOD">Is HOD</label>
+                  </div>
+
+                </div>
+                <div class="col">
+                  
                   <label class="font-13 ps-1" for="reporting_to">Reports To</label>
                   <VueMultiselect v-model="createEmployee.reporting_to"
                     :options="employeeEmails.map((dept) => dept.emp_mail_id)" :multiple="false" :close-on-select="true" :allow-empty="true"
@@ -466,6 +473,10 @@
                       placeholder="Enter department code" :value="trimMilliseconds(createEmployee.acknowledge_on)"
                       readonly />
                   </div>
+                  <div class="mb-3">
+                    <label for="" class="font-12 fw-bold">Remarks</label>
+                    <textarea type="text" class="form-control font-12 shadow-none remarks" readonly v-model="createEmployee.remarks" />
+                  </div>
                   <div class="mb-3 font-11">
                     <label for="signatureInput" class="form-label mb-0 font-13 ps-1">
                       Add Signature
@@ -486,6 +497,7 @@
                       <img :src="createEmployee.signature" alt="Signature" class="img-fluid signature-img" />
                     </div>
                   </div>
+                  
                 </div>
               </div>
             </div>
@@ -500,6 +512,7 @@
         </div>
       </div>
     </div>
+
     <div class="modal fade" id="EmployeeToggleModal" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -1409,7 +1422,39 @@ function actionCreated(rowData, actionEvent) {
 //   }
 // );
 
+function onDepartmentChange(selectedDepartment) {
+  // console.log('Selected department:', selectedDepartment);
+  fetchingIsHod(selectedDepartment.name); // Call your API function here
+}
+ 
+function fetchingIsHod(department) {
+   const filters = [["company_field", "like", `%${newbusiness.value}%`],["enable","=","1"],
+  ["department", "like", `%${department}%`],["is_hod","=",1]];
+ 
+ 
+  const queryParams = {
+    fields: JSON.stringify(["*"]),
+    filters: JSON.stringify(filters),
+    limit_page_length: "none",
+    order_by: "`tabEzy Employee`.`enable` DESC,`tabEzy Employee`.`creation` DESC",
+  };
+  axiosInstance
+    .get(apis.resource + doctypes.EzyEmployeeList, { params: queryParams })
+    .then((res) => {
+    //  console.log(res);
+     createEmployee.value.reporting_to = res.data[0].name;
+     createEmployee.reporting_designation = res.data[0].designation;
+    //  console.log("res.name",res.data[0].name);
+    //  console.log("res.designation",res.data[0].designation);
 
+    })
+    .catch((error) => {
+      createEmployee.value.reporting_to = "";
+      createEmployee.reporting_designation = "";
+      console.error("Error fetching department data:", error);
+    });
+ 
+}
 
 
 function toggleFunction(rowData) {
@@ -1647,7 +1692,7 @@ function inLineFiltersData(searchedData) {
 }
 
 function employeeData(data) {
-  const filters = [["company_field", "like", `%${newbusiness.value}%`],["enable","=","0"]];
+  const filters = [["company_field", "like", `%${newbusiness.value}%`],["is_web_form", "=", "0"],["enable","=","0"]];
   if (data) {
     filters.push(...data);
   }
@@ -2321,5 +2366,9 @@ function SaveEditEmp() {
     border: var(--bs-border-width) solid var(--bs-border-color);
     border-radius: var(--bs-border-radius);
     transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+.remarks{
+  border: 1px solid #c5bdbd;
+  border-radius: 5px
 }
 </style>

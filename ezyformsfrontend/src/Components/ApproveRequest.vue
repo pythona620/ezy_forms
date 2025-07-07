@@ -182,20 +182,18 @@
                 <div class="col-xl-12 col-lg-12 col-md-12">
                   <div class=" d-flex justify-content-between gap-2">
                     <div>
-                      <!-- <button
-                              v-if="(selectedData.type === 'myforms' || selectedData.type === 'myteam') &&
-                                    linked_status !== 'Completed' &&
-                                    tableData?.status === 'Completed' &&
-                                    tableData?.is_linked_form !== '' "
-                              type="button"
-                              class="btn btn-light font-14 nowrap h-auto fw-bold border border-dark CreateDepartments"
-                              data-bs-target="#pdfView"
-                              @click="toLinkedForm"
-                            >
-                              Raise Link <i class="bi bi-arrow-right px-2"></i>
-                            </button> -->
+                      <button v-if="(selectedData.type === 'myforms' || selectedData.type === 'myteam' || selectedData.type === 'myapprovals') &&
+                        linked_status !== 'Completed' &&
+                        tableData?.status === 'Completed' &&
+                        tableData?.is_linked_form &&
 
-                      
+                        Object.keys(tableData.is_linked_form).length > 0" type="button"
+                        class="btn btn-light font-14 nowrap h-auto fw-bold border border-dark CreateDepartments"
+                        data-bs-target="#pdfView" @click="toLinkedForm">
+                        Raise Link <i class="bi bi-arrow-right px-2"></i>
+                      </button>
+
+
 
                     </div>
                     <div>
@@ -205,10 +203,10 @@
                         @click="downloadPdf"><i class="bi bi-download px-2 fw-bold"></i>Download
                       </button>
                     </div>
-                    <!-- <button type="button" class="btn btn-outline-light font-12  CreateDepartments " data-bs-toggle="modal"
-                    data-bs-target="#pdfView" @click="viewasPdfView">
-                    Preview
-                  </button> -->
+                    <!-- <button type="button" class="btn btn-outline-light font-12  CreateDepartments "
+                      data-bs-toggle="modal" data-bs-target="#pdfView" @click="viewasPdfView">
+                      Preview
+                    </button> -->
 
                   </div>
                 </div>
@@ -216,12 +214,13 @@
               <div class="activity_height">
                 <!-- Tabs -->
                 <div class="d-flex mb-2">
-                  <button class="btn btn-light tab_btn" :class="{ active: activeTab === 'activity', 'border-0': !tableData.is_linked_form }"
+                  <button class="btn btn-light tab_btn"
+                    :class="{ active: activeTab === 'activity', 'border-0': !tableData.is_linked_form }"
                     @click="activeTab = 'activity'">
                     Activity Log
                   </button>
-                  <button v-if="tableData.is_linked_form" class="btn btn-light tab_btn" :class="{ active: activeTab === 'linked' }"
-                    @click="linked_list_btn">
+                  <button v-if="tableData.is_linked_form" class="btn btn-light tab_btn"
+                    :class="{ active: activeTab === 'linked' }" @click="linked_list_btn">
                     Linked Forms
                   </button>
                 </div>
@@ -254,22 +253,22 @@
                     <p class="font-12 text-secondary">No linked forms available.</p>
 
                   </div>
-                  <div v-else>
+                  <div v-else class="px-1">
 
                     <table class="table overflow-scroll  table-sm">
                       <thead class="table-light">
                         <tr>
-                          <!-- <th class="font-12">S.No</th> -->
+                          <th class="font-12">S.No</th>
                           <th class="font-12">Request ID</th>
                           <th class="font-12">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
                         <tr v-for="(item, index) in linkedForms" :key="index">
-                          <!-- <td class="font-12">{{ index + 1 }}</td> -->
-                          <td class="font-12 nowrap align-middle">{{ item.link_form_id }}</td>
+                          <td class="font-12 align-middle text-center">{{ index + 1 }}</td>
+                          <td class="font-12 nowrap align-middle">{{ item.link_form_id.replace(/_/g, ' ') }}</td>
                           <td>
-                            <button class="btn btn-light btn-sm" data-bs-toggle="modal"
+                            <button class="btn btn-light btn-sm font-14" data-bs-toggle="modal"
                               data-bs-target="#listofLinkedForms" @click="openModal(item)">
                               View
                             </button>
@@ -304,11 +303,33 @@
                         </tbody>
                       </table> -->
                       <div class="row">
-                        <div class="col-md-6 mb-2 " v-for="(item, index) in normalFields" :key="index">
-                          <label class="fw-bold font-12">{{ formatKey(item.key) }}</label>
-                          <p class="font-12 mb-2">{{ item.value }}</p>
+                        <div class=" col-md-12">
+                          <div class="row">
+                            <div class="col-md-6 mb-2 " v-for="(item, index) in normalFields" :key="index">
+                              <label class="fw-bold font-12">{{ formatKey(item.key) }}</label>
+                              <p class="font-12 mb-2">{{ item.value }}</p>
+                            </div>
+                          </div>
                         </div>
+                        <!-- <div class=" col-md-6 ">
+                          <div v-for="(item, index) in linkedActivity" :key="index" class="activity-log-item"
+                            :class="{ 'last-item': index === linkedActivity.length - 1 }">
+                            <div :class="item.action === 'Approved' || item.action === 'Request Raised' || item.action === '' || item.action === 'Completed'
+                              ? 'activity-log-dot'
+                              : 'activityRedDot'"></div>
+                            <div class="activity-log-content">
+                              <p class="font-12 mb-1">
+                                <span class="strong-content">{{ formatAction(item.action) }} on </span>
+                                <span class="strong-content">{{ formatCreation(item.creation) }}</span><br />
+                                <span class="strong-content">{{ item.user_name }}</span><br />
+                                <span>{{ item.role }}</span><br />
+                                <span class="font-12 text-secondary">{{ item.reason || "N/A" }}</span>.
+                              </p>
+                            </div>
+                          </div>
+                        </div> -->
                       </div>
+
 
 
                       <!-- 🔥 Array Fields -->
@@ -331,6 +352,9 @@
                           </tbody>
                         </table>
                       </div>
+
+
+
                     </div>
                   </div>
                 </div>
@@ -441,6 +465,7 @@ const linkedNew_Id = ref([]);
 const mainStandardForm = ref('')
 const canApprove = ref(false);
 const activeTab = ref("activity");
+const linkedActivity = ref([]);
 
 const resetCommentsValidation = () => {
   if (ApproverReason.value.trim() !== "") {
@@ -547,17 +572,30 @@ const selectedLinkedForm = ref({});
 
 function openModal(item) {
   // selectedLinkedForm.value = item;
-          axiosInstance
-          .get(
-            `${apis.resource}${tableData.value.is_linked_form}/${item.link_form_id}`
-          )
-          .then((res) => {
-            selectedLinkedForm.value = res.data;
-            
-          })
-          .catch((error) => {
-            console.error(`Error fetching data for :`, error);
-          });
+  axiosInstance
+    .get(
+      `${apis.resource}${tableData.value.is_linked_form}/${item.link_form_id}`
+    )
+    .then((res) => {
+      selectedLinkedForm.value = res.data;
+
+    })
+    .catch((error) => {
+      console.error(`Error fetching data for :`, error);
+    });
+  axiosInstance
+    .get(`${apis.resource}${doctypes.WFActivityLog}/${'CRR_TEST_RETURN_FORM-0000008'}`)
+    .then((res) => {
+      if (res.data) {
+        console.log(res.data);
+        linkedActivity.value = res.data.reason;
+        // activityData.value = res.data.reason || []; // Ensure it's always an array
+      }
+    })
+    .catch((error) => {
+      console.log(error)
+    });
+
 
 
 }

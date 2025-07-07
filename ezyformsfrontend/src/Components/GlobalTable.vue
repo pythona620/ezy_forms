@@ -13,7 +13,7 @@
           </th>
           <!-- <th class="text-center fixed-column" v-if="enableDisable == 'true'">Enable/Disable</th> -->
           <th class="text-center fixed-column" v-if="isRequest == 'true'">Raise Request</th>
-          <th class="text-center fixed-column" v-if="isAction == 'true'">Action</th>
+          <th class="text-center fixed-action" v-if="isAction == 'true'">Action</th>
         </tr>
       </thead>
       <tbody>
@@ -166,10 +166,10 @@
               </span> -->
                             <!-- <span v-else class="tooltip-text" :title="row[column.td_key] || '-'"> -->
 
-              <span v-else class="tooltip-text" v-tooltip.top="row[column.td_key] || '-'" >
-                <!-- ?.replace(/@[\w.-]+/, "") -->
-                {{ column.td_key === 'modified' ? '-' : row[column.td_key] || "-" }}
-              </span>
+              <span v-else class="tooltip-text" v-tooltip.top="getTooltipText(row[column.td_key])">
+  {{ getDisplayText(column.td_key, row[column.td_key]) }}
+</span>
+
             </td>
             <!-- <td
               class="text-center d-flex justify-content-center position-relative"
@@ -232,7 +232,7 @@
                 </span>
              </td> -->
 
-            <td v-if="download === 'true'" class="text-center fixed-column position-relative">
+            <td v-if="download === 'true'" class="text-center fixed-action position-relative">
               <span>
                 <i class="bi bi-download eye-cursor" @click="handleCellClick(row, rowIndex, 'download')"></i>
               </span>
@@ -422,7 +422,15 @@ function handleToggle(row, index, event) {
 }
 const focusedFields = reactive({});
 
+function getDisplayText(key, value) {
+  if (key === 'modified') return '-';
+  return value ? value.replace(/_/g, ' ') : '-';
+}
 
+function getTooltipText(value) {
+   
+  return value ? value.replace(/_/g, ' ') : '-';
+}
 const allCheck = ref(false);
 // function formatDate(dateString) {
 //   if (!dateString) return "-"; // Handle empty or null values
@@ -959,4 +967,13 @@ th:first-child {
   border: 1px solid #dee2e6;
 
 }
+
+.fixed-action {
+  position: sticky !important;
+  right: 0 !important;
+  background: white !important;
+
+}
+
+
 </style>

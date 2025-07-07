@@ -60,7 +60,8 @@
                                                         {{ option }}
                                                     </option>
                                                 </select> -->
-                                                <Multiselect :multiple="field.fieldtype === 'Table MultiSelect'"
+                                                
+                                                <Multiselect :multiple="field.fieldtype === 'Table MultiSelect' " :disabled="field.description === 'Disable'"
                                                     :maxlength="getMaxLength(field)"
                                                     :options="field.options?.split('\n').filter(opt => opt.trim() !== '') || []"
                                                     :modelValue="field.value" placeholder="Select"
@@ -266,7 +267,7 @@
                                                                     fieldIndex
                                                                 )
                                                         "
-                                                    class="form-control form-check-input previewInputHeight font-10" />
+                                                    class=" form-check-input previewInputHeight mb-0 font-20" />
                                             </template>
                                             <template v-else-if="field.fieldtype == 'Datetime'">
                                                 <input type="datetime-local" :value="field.value"
@@ -368,7 +369,7 @@
 
                                                 <component v-if="
                                                     field.fieldtype !== 'Datetime' && field.fieldtype !== 'Text' && field.fieldname !== 'auto_calculations'
-                                                " :is="getFieldComponent(field.fieldtype)" :value="field.value"
+                                                " :is="getFieldComponent(field.fieldtype)" :value="field.value" :disabled="field.description === 'Disable'"
                                                     :min="past" @click="forceOpenCalendar"
                                                     :maxlength="getMaxLength(field)"
                                                     :type="getInputType(field.fieldtype)" :name="'field-' +
@@ -402,7 +403,7 @@
                                                 }}
                                             </div>
                                         </div>
-                                        <span v-if="field.description !== 'Field' && field.fieldtype !== 'Table' && field.fieldname !== 'auto_calculations'"
+                                        <span v-if="field.description !== 'Field' && field.fieldtype !== 'Table' && field.fieldname !== 'auto_calculations' && field.description !== 'Disable'"
                                             class="font-11"><span  class="fw-semibold">Description: </span>{{
                                                 field.description }}</span>
                                         <div v-if="blockIndex === 0 && field.fieldtype === 'Table'">
@@ -886,7 +887,7 @@
                                                                     <td></td>
                                                                 </tr>
                                                                 <tr>
-                                                                    <td :colspan="table.length + 2"
+                                                                    <td v-if="!route.query.main_form" :colspan="table.length + 2"
                                                                         class="text-center text-muted">
 
                                                                         <button
@@ -900,7 +901,7 @@
                                                         </table>
 
                                                         <span
-                                                            v-if="field.description !== tableIndex && field.description !== 'True' && field.description !== 'false' && field.description !== 'Field'"
+                                                            v-if="field.description !== tableIndex && field.description !== 'True' && field.description !== 'false' && field.description !== 'Field' "
                                                             class="font-11"><span class="fw-semibold">
                                                             </span>{{
                                                                 field.description }}</span>
@@ -957,6 +958,12 @@ const props = defineProps({
     },
 
 });
+const errorStatus = ref(false)
+const emit = defineEmits();
+defineExpose({
+  errorStatus
+})
+const errorMessages = ref({});
 const route = useRoute();
 // Reactive states
 const linkSearchResults = ref([]);
@@ -1017,94 +1024,6 @@ const getInputType = (type) => {
     return t;
 };
 const fieldErrors = ref({});
-
-function validateFields(row, fields) {
-    fields.forEach(field => {
-        if (!field.description) return;
-
-        const fieldValue = parseFloat(row[field.fieldname]) || 0;
-
-        // ⚠️ Don't run validation if input is empty (optional)
-        if (row[field.fieldname] === '' || row[field.fieldname] === null || row[field.fieldname] === undefined) {
-            clearFieldError(row, field.fieldname);
-            return;
-        }
-
-        const conditions = field.description.split(',').map(c => c.trim()).filter(Boolean);
-
-        for (const cond of conditions) {
-            const match = cond.match(/^(.+?)([><!=]{1,2})$/);
-            if (!match) continue;
-
-            const [_, compareLabel, operator] = match;
-            const compareField = fields.find(f => f.label === compareLabel);
-            if (!compareField) continue;
-
-            const compareValue = parseFloat(row[compareField.fieldname]) || 0;
-
-            // ✅ DYNAMIC CASE: If Remaining Qty = 0, skip all validations against it
-            if (compareLabel === 'Remaining Qty' && compareValue === 0) {
-                clearFieldError(row, field.fieldname);
-                continue; // Go to the next condition
-            }
-
-            let isError = false;
-
-            switch (operator) {
-                case '>':
-                case '>=':
-                    isError = fieldValue > compareValue;
-                    break;
-                case '<':
-                case '<=':
-                    isError = fieldValue < compareValue;
-                    break;
-                case '!=':
-                    isError = fieldValue != compareValue;
-                    break;
-                case '==':
-                    isError = fieldValue == compareValue;
-                    break;
-                default:
-                    break;
-            }
-
-            if (isError) {
-                setFieldError(row, field.fieldname, `${field.label} cannot be greater than ${compareLabel}`);
-                return; // Stop at first failed condition
-            } else {
-                clearFieldError(row, field.fieldname);
-            }
-        }
-    });
-}
-
-// Error handling
-function setFieldError(row, fieldname, message) {
-    const rowKey = row.__row_id || row.id || JSON.stringify(row);
-    if (!fieldErrors.value[rowKey]) fieldErrors.value[rowKey] = {};
-    fieldErrors.value[rowKey][fieldname] = message;
-}
-
-function clearFieldError(row, fieldname) {
-    const rowKey = row.__row_id || row.id || JSON.stringify(row);
-    if (fieldErrors.value[rowKey]) {
-        delete fieldErrors.value[rowKey][fieldname];
-        if (Object.keys(fieldErrors.value[rowKey]).length === 0) {
-            delete fieldErrors.value[rowKey];
-        }
-    }
-}
-
-function hasFieldError(row, field) {
-    const rowKey = row.__row_id || row.id || JSON.stringify(row);
-    return !!(fieldErrors.value[rowKey] && fieldErrors.value[rowKey][field.fieldname]);
-}
-
-function getFieldError(row, field) {
-    const rowKey = row.__row_id || row.id || JSON.stringify(row);
-    return fieldErrors.value[rowKey]?.[field.fieldname] || '';
-}
 
 
 const previewUrl = ref('')
@@ -1817,8 +1736,7 @@ watch(
     },
     { deep: true }
 );
-const emit = defineEmits();
-const errorMessages = ref({});
+
 const getFieldComponent = (type) => {
     switch (type) {
         case "Data":
@@ -2241,6 +2159,119 @@ function performAutoCalculations() {
       emit("updateField", field);
     }
   }
+}
+function emitErrorStatus() {
+    console.log(fieldErrors.value)
+  errorStatus.value = Object.values(fieldErrors.value).some(
+    rowErrors => Object.keys(rowErrors).length > 0
+  )
+}
+
+function validateFields(row, fields) {
+  fields.forEach(field => {
+    if (!field.description) return
+
+    const fieldValue = parseFloat(row[field.fieldname]) || 0
+
+    if (row[field.fieldname] === '' || row[field.fieldname] === null || row[field.fieldname] === undefined) {
+      clearFieldError(row, field.fieldname)
+      return
+    }
+
+    const conditions = field.description.split(',').map(c => c.trim()).filter(Boolean)
+
+    for (const cond of conditions) {
+      const match = cond.match(/^(.+?)\s*([><!=]{1,2})\s*(.+)$/)
+      if (!match) continue
+
+      const [_, leftLabel, operator, rightLabel] = match
+
+      const leftField = fields.find(f => f.label === leftLabel)
+      const rightField = fields.find(f => f.label === rightLabel)
+
+      const leftValue = leftField ? parseFloat(row[leftField.fieldname]) || 0 : 0
+      const rightValue = rightField ? parseFloat(row[rightField.fieldname]) || 0 : 0
+
+      if (leftValue === 0) {
+        clearFieldError(row, field.fieldname)
+        continue
+      }
+
+      let isError = false
+
+      switch (operator) {
+        case '>':
+          isError = !(leftValue > fieldValue)
+          break
+        case '>=':
+          isError = !(leftValue >= fieldValue)
+          break
+        case '<':
+          isError = !(leftValue < fieldValue)
+          break
+        case '<=':
+          isError = !(leftValue <= fieldValue)
+          break
+        case '!=':
+          isError = !(leftValue != fieldValue)
+          break
+        case '==':
+          isError = !(leftValue == fieldValue)
+          break
+      }
+
+      if (isError) {
+        const operatorText = {
+          '>': 'less than',
+          '>=': 'less than or equal to',
+          '<': 'greater than',
+          '<=': 'greater than or equal to',
+          '!=': 'different from',
+          '==': 'equal to',
+        }[operator] || operator
+
+        setFieldError(row, field.fieldname, `${field.label} must be ${operatorText} ${leftLabel}`)
+        return
+      } else {
+        clearFieldError(row, field.fieldname)
+      }
+    }
+  })
+}
+
+function getRowKey(row) {
+  return row.idx // or row.id, or row.__row_id, anything unique and constant
+}
+
+function setFieldError(row, fieldname, message) {
+  const rowKey = getRowKey(row)
+  if (!fieldErrors.value[rowKey]) {
+    fieldErrors.value[rowKey] = {}
+  }
+  fieldErrors.value[rowKey][fieldname] = message
+  emitErrorStatus()
+}
+
+function clearFieldError(row, fieldname) {
+  const rowKey = getRowKey(row)
+  if (fieldErrors.value[rowKey]) {
+    delete fieldErrors.value[rowKey][fieldname]
+    if (Object.keys(fieldErrors.value[rowKey]).length === 0) {
+      delete fieldErrors.value[rowKey]
+    }
+    fieldErrors.value = { ...fieldErrors.value }
+  }
+  emitErrorStatus()
+}
+
+function hasFieldError(row, field) {
+  const rowKey = getRowKey(row)
+  return !!(fieldErrors.value[rowKey] && fieldErrors.value[rowKey][field.fieldname])
+}
+
+function getFieldError(row, field) {
+  const rowKey = getRowKey(row)
+  return fieldErrors.value[rowKey]?.[field.fieldname] || ''
 }
 
 

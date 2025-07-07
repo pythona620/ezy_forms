@@ -50,7 +50,7 @@
               </div>
             </div>
           </div>
-          <RequestPreview :blockArr="blockArr" :formName="selectedData.selectedform" :tableHeaders="tableHeaders"
+          <RequestPreview :blockArr="blockArr" :formName="selectedData.selectedform" :tableHeaders="tableHeaders"  ref="childRef"
             :linked_id="linkedId" :LinkedChildTableData="LinkedChildTableData" @updateField="handleFieldUpdate"
             :tableRowsdata="tableRows" @formValidation="isFormValid = $event" @updateTableData="handleTableData" />
           <!-- @formValidation="isFormValid = $event" -->
@@ -110,7 +110,7 @@
               <span> <i class="bi bi-x"></i></span>Clear form
             </button>
             <!-- :disabled="!isFormValid" -->
-            <button v-if="!selectedData.selectedFormId" data-bs-toggle="modal" data-bs-target="#ExportEmployeeModal"
+            <button v-if="!selectedData.selectedFormId"  @click="toRaiseReqBtn"
               class="btn btn-dark font-12" type="submit">
               {{ selectedData.hasWorkflow == 'No' ? 'Save' : 'Raise Request' }}
             </button>
@@ -143,7 +143,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <input type="checkbox" v-model="acknowledge" class="me-1 mt-1" />
+            <input type="checkbox" v-model="acknowledge" class="me-1 mt-1 form-check-input shadow-none" />
             I acknowledge that the information provided is correct.
           </div>
           <div class="modal-footer">
@@ -838,9 +838,23 @@ const ChildTableData = async () => {
   }
 };
 const linkedId = ref("");
+
+const childRef = ref(null)
+
+function toRaiseReqBtn() {
+  const hasError = childRef.value?.errorStatus ?? false
+  if (hasError) {
+    toast.error('Please fix errors before submitting.')
+  } else {
+    const modal = new bootstrap.Modal(document.getElementById('ExportEmployeeModal'))
+    modal.show()
+  }
+}
+
+
 async function raiseRequestSubmission() {
   if (!isFormValid.value) {
-    toast.error("Please Check Fields");
+    toast.error("Please Fill All Mandatory Fields");
     return;
   }
 

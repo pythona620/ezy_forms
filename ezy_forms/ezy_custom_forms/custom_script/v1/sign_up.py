@@ -25,7 +25,7 @@ def sign_up(email: str, full_name: str,designation:str|None,emp_phone:str|None,e
 				http_status_code=429,
 			)
  
-		from frappe.utils import random_string
+		from frappe.utils import generate_hash
 	
 		user = frappe.get_doc(
 				{
@@ -34,13 +34,13 @@ def sign_up(email: str, full_name: str,designation:str|None,emp_phone:str|None,e
 					"first_name": escape_html(full_name),
 					"enabled": 0,
 					'send_welcome_email': 0,
-					"new_password": random_string(10),
+					"new_password": generate_hash(length=10),
 					"user_type": "Website User",
 				}
 			)
 		user.flags.ignore_permissions = True
 		user.flags.ignore_password_policy = True
-		user.insert()
+		user.insert(ignore_permissions = True)
 		company_field = frappe.get_all("Ezy Business Unit",fields = ['name'])
 		company = company_field[0].name
 		if not frappe.db.exists("Ezy Employee", {"emp_mail_id": user.email}):
@@ -61,16 +61,11 @@ def sign_up(email: str, full_name: str,designation:str|None,emp_phone:str|None,e
 			})
 			doc.insert(ignore_permissions=True)
 			frappe.db.commit()
-			new_doc_record = frappe.new_doc("Login Check")
-			new_doc_record.update({"user_id" : user.email,})
-			new_doc_record.insert(ignore_permissions=True)
-			frappe.db.commit()
-		send_mail_when_user_signup(emp_name = full_name,emp_mail_id=email)
-		# set default signup role as per Portal Settings
+			send_mail_when_user_signup(emp_name = full_name,emp_mail_id=email)
+		# set default signup role as per Portal Set	tings
 		default_role = frappe.db.get_single_value("Portal Settings", "default_role")
 		if default_role:
 			user.add_roles(default_role)
-
 		if redirect_to:
 			frappe.cache.hset("redirect_after_login", user.name, redirect_to)
 	return  _("Please contact your IT Manager to verify your sign-up")
@@ -80,29 +75,31 @@ def sign_up(email: str, full_name: str,designation:str|None,emp_phone:str|None,e
 
 @frappe.whitelist()
 def send_mail_when_user_signup(emp_name:str|None,emp_mail_id:str|None):
-	recipction_mail = frappe.get_value("Notifications Mail","Notifications Mail",'sign_up_approver')
-	if recipction_mail:
-		
-		subject = "Employee sign-up Attempt – Access Enablement Required"
-		message = f"""
-		Dear IT Team,<br><br>
-		An employee has submitted a sign-up request for the site. Please find the details below:<br><br>
-		<ul>
-			<li><strong>Email ID:</strong> {emp_mail_id}</li>
-			<li><strong>Employee Name:</strong> {emp_name}</li>
-		</ul>
-  		<br>
-		Kindly initiate the necessary steps to enable their access.<br><br>
-		Thank you for your support.<br>
-		Best regards,<br>
-		IT Team
-		"""
-		frappe.sendmail(
-			recipients=[recipction_mail],
-			subject=subject,
-			message=message,
-			now = True
-		)
+	sender = frappe.get_value("Email Account",{"enable_outgoing":1,"default_outgoing":1},"email_id")
+	if sender:
+		recipction_mail = frappe.get_value("Notifications Mail","Notifications Mail",'sign_up_approver')
+		if recipction_mail:
+			
+			subject = "Employee sign-up Attempt – Access Enablement Required"
+			message = f"""
+			Dear IT Team,<br><br>
+			An employee has submitted a sign-up request for the site. Please find the details below:<br><br>
+			<ul>
+				<li><strong>Email ID:</strong> {emp_mail_id}</li>
+				<li><strong>Employee Name:</strong> {emp_name}</li>
+			</ul>
+			<br>
+			Kindly initiate the necessary steps to enable their access.<br><br>
+			Thank you for your support.<br>
+			Best regards,<br>
+			IT Team
+			"""
+			frappe.sendmail(
+				recipients=[recipction_mail],
+				subject=subject,
+				message=message,
+				now = True
+			)
 
 from frappe.utils import get_url
 
@@ -118,7 +115,7 @@ def employee_update_notification(emp_mail):
 
 	if not emp_mail or not emp_name:
 		frappe.throw("Employee not found.")
-	frappe.set_value("Ezy Employee", emp_mail, "is_web_form", 0)
+
 	site_url = get_url()
 	
 	# Get the mail ID from the 'Notifications Mail' doctype
@@ -145,15 +142,15 @@ def employee_update_notification(emp_mail):
 			"emp_name": emp_name,
 			"mail_id": mail_id,
 		})
-	try:
-		frappe.sendmail(
-			recipients=[emp_mail],
-			subject=subject,
-			message=message,
-			now=True
-		)
-	except Exception as e:
-		frappe.log_error(f"Error sending email to {emp_mail}: {str(e)}")
+
+	# Send the email
+	frappe.sendmail(
+		recipients=[emp_mail],
+		subject=subject,
+		message=message,
+		now=True
+	)
+
 	return "Notification sent successfully"
 
   
@@ -186,3 +183,18 @@ def email_template_create():
 		frappe.db.commit()
 		return "Email Template Created"
 	
+
+	child_entries = frappe.get_all(
+			"Doctype Permissions",
+			filters={"parent": "Ezy Doctype Permissions", "parenttype": "Ezy Doctype Permissions", "parentfield": "guest_permissions"},
+			fields=["doctype_names"]
+		)
+	document_type_list = [entry["doctype_names"] for entry in child_entries]
+	if document_type_list:
+		for doc in document_type_list:
+			form_perms = frappe.new_doc("Custom DocPerm")
+			form_perms.parent = doc
+			form_perms.role ="Guest"
+			form_perms.read = 1
+			form_perms.insert(ignore_permissions=True)
+		frappe.db.commit()
