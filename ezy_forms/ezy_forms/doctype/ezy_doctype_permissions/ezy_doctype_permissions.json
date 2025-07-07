@@ -5,7 +5,9 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "document_type"
+  "document_type",
+  "column_break_vdod",
+  "guest_permissions"
  ],
  "fields": [
   {
@@ -13,12 +15,22 @@
    "fieldtype": "Table MultiSelect",
    "label": "Document Type",
    "options": "Doctype Permissions"
+  },
+  {
+   "fieldname": "column_break_vdod",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "guest_permissions",
+   "fieldtype": "Table MultiSelect",
+   "label": "Guest Permissions",
+   "options": "Doctype Permissions"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-04-22 12:58:27.147049",
+ "modified": "2025-07-07 11:33:34.498586",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
  "name": "Ezy Doctype Permissions",
@@ -35,6 +47,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
