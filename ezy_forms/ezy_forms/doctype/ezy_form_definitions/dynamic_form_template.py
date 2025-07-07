@@ -588,7 +588,15 @@ template_str = """
                                                                     word-break: break-word;
                                                                     font-size: 13px;
                                                                 ">
-                                                                    {{ value if value else ' ' }}
+                                                                    {% if value %}
+                                                                        {% if  "/" in value %}
+                                                                            {{ value.replace('/files/', '')}}
+                                                                        {% else %}
+                                                                            {{ value if value else ' ' }}
+                                                                        {% endif %}
+                                                                    {% else %}
+                                                                        {{ ' ' }}
+                                                                    {% endif %}
                                                                 </td>
                                                             {% endfor %}
                                                         </tr>
@@ -821,7 +829,7 @@ template_str = """
                                         {% endif %}
                                         
                                     </div>
-                                         {% if field.description != 'Field' and field.fieldname != 'auto_calculations' and field.fieldname != 'Disable' %}
+                                         {% if field.description != 'Field' and field.fieldname != 'auto_calculations' %}
                                             <div class="w-100 description-block mt-1">
                                                
                                                 <span>{{ field.description | replace('\n', '<br>') | safe }}</span>
@@ -1221,50 +1229,35 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
             absolute_pdf_path = os.path.join(get_bench_path(), "sites", cstr(frappe.local.site), pdf_path)
             opts={"orientation":"Landscape"if is_landscape else"Portrait"}
             convert_html_to_pdf(html_content=html_view,pdf_path=absolute_pdf_path,options=opts)
-            if from_raise_request !=None:
-                new_file = frappe.get_doc({
-                    "doctype": "File",
-                    "file_name": pdf_filename,
-                    "is_private": 0,
-                    "attached_to_doctype": form_short_name,
-                    "attached_to_name": name
+            site_url = get_url()
+            new_file = f"{site_url}/files/{pdf_filename}"
+            zip_filename = None
+            if len(mail_attachment) > 1:
+                folder_path = get_site_path("public", "files", "Attachment folder")
+                os.makedirs(folder_path, exist_ok=True)
+                # Add PDF file to attachments (for zipping)
+                mail_attachment.append({
+                    "label": "Form Attachments",
+                    "file_url": f"/files/{pdf_filename}"  # Relative path
                 })
-                new_file.insert(ignore_permissions=True)
-                frappe.db.commit()
-        
-                file_url = get_url(new_file.file_url)
-        
-                return file_url
-            else:
-                site_url = get_url()
-                new_file = f"{site_url}/files/{pdf_filename}"
-                zip_filename = None
-                if len(mail_attachment) > 0:
-                    folder_path = get_site_path("public", "files", "Attachment folder")
-                    os.makedirs(folder_path, exist_ok=True)
-                    # Add PDF file to attachments (for zipping)
-                    mail_attachment.append({
-                        "label": "Form Attachments",
-                        "file_url": f"/files/{pdf_filename}"  # Relative path
-                    })
-                    # Prepare ZIP path
-                    zip_filename = f"{name}.zip"
-                    zip_path = os.path.join(folder_path, zip_filename)
+                # Prepare ZIP path
+                zip_filename = f"{name}.zip"
+                zip_path = os.path.join(folder_path, zip_filename)
 
-                    # Create ZIP file
-                    clean_file_urls = lambda item: [
-                        '/' + u.split('/', 3)[3] if u.startswith("http") and len(u.split('/', 3)) > 3 else u.strip()
-                        for u in item.get('file_url', '').split(',') if u.strip()
-                    ]
-                    # Create ZIP file
-                    with zipfile.ZipFile(zip_path, 'w') as zipf:
-                        [add_file_to_zip(item, file_url, zipf) for item in mail_attachment for file_url in clean_file_urls(item)]
+                # Create ZIP file
+                clean_file_urls = lambda item: [
+                    '/' + u.split('/', 3)[3] if u.startswith("http") and len(u.split('/', 3)) > 3 else u.strip()
+                    for u in item.get('file_url', '').split(',') if u.strip()
+                ]
+                # Create ZIP file
+                with zipfile.ZipFile(zip_path, 'w') as zipf:
+                    [add_file_to_zip(item, file_url, zipf) for item in mail_attachment for file_url in clean_file_urls(item)]
 
-                    relative_zip_path = f"/files/Attachment folder/{zip_filename}"
-                    full_download_url = f"{site_url}{relative_zip_path}"
+                relative_zip_path = f"/files/Attachment folder/{zip_filename}"
+                full_download_url = f"{site_url}{relative_zip_path}"
 
-                file_url= get_url(full_download_url if zip_filename else new_file)
-                return file_url
+            file_url= get_url(full_download_url if zip_filename else new_file)
+            return file_url
 
 
     except Exception as e:
