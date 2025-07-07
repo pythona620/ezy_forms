@@ -112,7 +112,7 @@ def employee_last_login_activate(login_manager):
 @frappe.whitelist()
 def employee_rejection(empl_mail_id):
 	# Delete Ezy Employee if exists
-	employee_name = frappe.db.get_value("Ezy Employee", {"emp_mail_id": empl_mail_id})
+	employee_name,propertys = frappe.db.get_value("Ezy Employee", {"emp_mail_id": empl_mail_id},['name','company_field'])
 	if employee_name:
 		frappe.delete_doc("Ezy Employee", employee_name, force=1)
 
@@ -126,15 +126,12 @@ def employee_rejection(empl_mail_id):
 		frappe.delete_doc("Login Check", login_check_name, force=1)
 
 	# Remove from WF Users child table in WF Role Matrix
-	role_matrix_list = frappe.get_all("WF Role Matrix", fields=["name"])
-	for rm in role_matrix_list:
-		doc = frappe.get_doc("WF Role Matrix", rm.name)
-		updated = False
-		doc.users = [user for user in doc.users if not (user.mail == empl_mail_id)]
-		if len(doc.users) < len(doc.get("users")):
-			updated = True
-		if updated:
-			doc.save()
+	role_matrix_list = frappe.db.get_value("WF Role Matrix", {"property": propertys}, "name")
+
+	if role_matrix_list:
+		doc = frappe.get_doc("WF Role Matrix", role_matrix_list)
+		doc.set("users", [user for user in doc.users if user.mail != empl_mail_id])
+		doc.save(ignore_permissions=True)
 
 	frappe.db.commit()
 	return "Employee Deleted "
