@@ -662,8 +662,8 @@
                                                                         {{
                                                                             rowIndex + 1 }}
                                                                     </td> -->
-                                                                    <td v-for="field in table" :key="field.fieldname" class=" position-relative"
-                                                                        :title="row[field.fieldname]" :style="field.label !== 'Type of Manpower'
+                                                                    <td v-for="field in table" :key="field.fieldname" class=" position-relative" 
+                                                                         :style="field.label !== 'Type of Manpower'
                                                                             ? {
                                                                                 width: row[field.fieldname] ? Math.max(row[field.fieldname].length * 10, 100) + 'px' : 'auto',
                                                                                 maxWidth: '300px',
@@ -693,7 +693,7 @@
                                                                             v-if="field.fieldtype === 'Data' && field.label !== 'Type of Manpower'">
                                                                             <input
                                                                                 type="text"
-                                                                                :maxlength="field.fieldtype === 'Phone' ? '10' : '140'" :disabled="field.description === 'Disable'"
+                                                                                :maxlength="field.fieldtype === 'Phone' ? '10' : '140'" v-tooltip.top="row[field.fieldname]" :disabled="field.description === 'Disable'"
                                                                                 class="form-control font-12"
                                                                                 v-model="row[field.fieldname]"
                                                                                 />
@@ -718,7 +718,7 @@
                                                                         <template
                                                                             v-else-if="field.fieldtype === 'Select'">
                                                                             <div>
-                                                                                <Multiselect
+                                                                                <Multiselect v-tooltip.top="row[field.fieldname]"
                                                                                     :multiple="field.fieldtype === 'Table MultiSelect'"
                                                                                     :options="field.options?.split('\n').filter(opt => opt.trim() !== '') || []"
                                                                                     :model-value="row[field.fieldname]"
@@ -729,7 +729,7 @@
                                                                         </template>
                                                                         <template v-if="field.fieldtype === 'Date'">
 
-                                                                            <input type="date"
+                                                                            <input type="date" v-tooltip.top="row[field.fieldname]"
                                                                                 :min="field.fieldname === 'expense_date' ? null : today"
                                                                                 :max="field.fieldname === 'expense_date' ? today : null"
                                                                                 :title="row[field.fieldname]"
@@ -769,7 +769,7 @@
 
                                                                         <template
                                                                             v-else-if="field.fieldtype === 'Datetime'">
-                                                                            <input type="datetime-local"
+                                                                            <input type="datetime-local" v-tooltip.top="row[field.fieldname]"
                                                                                 :title="row[field.fieldname]"
                                                                                 class="form-control font-12"
                                                                                 v-model="row[field.fieldname]" />
@@ -1123,7 +1123,7 @@ const addRow = (tableIndex) => {
     );
 
     tableRows[tableIndex].push(newRow);
-    console.log(tableRows, "tableRows after addRow");
+    // console.log(tableRows, "tableRows after addRow");
     
 
 
@@ -1513,7 +1513,7 @@ function fetchDoctypeList(resourceName, searchText,field) {
 
 function selectDoctype(result, field, b, s, r, c, f) {
     field.value = result.name; // set value as name
-    console.log('Selected result:', result); // full object
+    // console.log('Selected result:', result); // full object
     const event = { target: { value: result.name } };
     logFieldValue(event, b, s, r, c, f);
     field.linkSearchResults = [];
@@ -2161,7 +2161,7 @@ function performAutoCalculations() {
   }
 }
 function emitErrorStatus() {
-    console.log(fieldErrors.value)
+    // console.log(fieldErrors.value)
   errorStatus.value = Object.values(fieldErrors.value).some(
     rowErrors => Object.keys(rowErrors).length > 0
   )
