@@ -13,7 +13,7 @@
           </th>
           <!-- <th class="text-center fixed-column" v-if="enableDisable == 'true'">Enable/Disable</th> -->
           <th class="text-center fixed-column" v-if="isRequest == 'true'">Raise Request</th>
-          <th class="text-center fixed-column" v-if="isAction == 'true'">Action</th>
+          <th class="text-center fixed-action" v-if="isAction == 'true'">Action</th>
         </tr>
       </thead>
       <tbody>
@@ -249,7 +249,7 @@
                 </span>
              </td> -->
 
-            <td v-if="download === 'true'" class="text-center fixed-column position-relative">
+            <td v-if="download === 'true'" class="text-center fixed-action position-relative">
               <span>
                 <i class="bi bi-download eye-cursor" @click="handleCellClick(row, rowIndex, 'download')"></i>
               </span>
@@ -955,4 +955,13 @@ th:first-child {
   border: 1px solid #dee2e6;
 
 }
+
+.fixed-action {
+  position: sticky !important;
+  right: 0 !important;
+  background: white !important;
+
+}
+
+
 </style>

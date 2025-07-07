@@ -147,12 +147,12 @@
           <div class="mt-2 col-lg-12 col-md-12 col-sm-12">
 
             <span class="me-4">
-              <input type="radio" value="digital" v-model="selectedOption" class="form-check-input mt-1 input-border" />
-              <label class="font-13 ms-2" for="emp_code">Digital Signature</label>
+              <input type="radio" id="digital" value="digital" v-model="selectedOption" class="form-check-input mt-1 input-border" />
+              <label class="font-13 ms-2" for="digital">Digital Signature</label>
             </span>
             <span class="">
-              <input type="radio" value="upload" v-model="selectedOption" class="form-check-input m-1 input-border" />
-              <label class="font-13 ms-2" for="emp_code">Upload Signature:</label>
+              <input type="radio" id="upload" value="upload" v-model="selectedOption" class="form-check-input m-1 input-border" />
+              <label class="font-13 ms-2" for="upload">Upload Signature:</label>
             </span>
 
             <div v-if="selectedOption === 'digital'">

@@ -73,7 +73,7 @@
                       <!-- <FormFields tag="select" placeholder="Select Department" class="mb-3"
                                             name="dept" v-model="createEmployee.department" id="dept" :Required="false"
                                             :options="departmentsList" /> -->
-                      <VueMultiselect v-model="createEmployee.department" :options="departmentsList" :multiple="false"
+                      <VueMultiselect v-model="createEmployee.department" :options="departmentsList" :multiple="false" @update:modelValue="onDepartmentChange"
                         :close-on-select="true" :clear-on-select="false" :preserve-search="true"
                         placeholder="Select department" label="department_name" track-by="name" class="font-11 mb-3">
                         <template #selection="{ values, isOpen }">
@@ -82,6 +82,11 @@
                           </span>
                         </template>
                       </VueMultiselect>
+
+                      <div class="ms-1">
+                         <input type="checkbox" id="isHOD" true-value="1" false-value="0" v-model="createEmployee.is_hod" class="form-check-input mt-1 input-border" />
+                        <label class="font-13 ms-2 " for="isHOD">Is HOD</label>
+                      </div>
 
                     </div>
                     <div class="col">
@@ -224,6 +229,7 @@
                             alt="Signature" class="img-fluid signature-img border-1" />
                         </div>
                       </div>
+                      
                     </div>
                   </div>
                 </div>
@@ -381,7 +387,7 @@
                   <label class="font-13 ps-1 fw-medium" for="dept">Departments<span
                       class="text-danger ps-1">*</span></label>
 
-                  <VueMultiselect v-model="createEmployee.department" :options="departmentsList" :multiple="false"
+                  <VueMultiselect v-model="createEmployee.department" :options="departmentsList" :multiple="false" @update:modelValue="onDepartmentChange"
                     :close-on-select="true" :clear-on-select="false" :preserve-search="true"
                     placeholder="Select department" label="department_name" track-by="name" class="font-11 mb-3">
                     <template #selection="{ values, isOpen }">
@@ -390,6 +396,10 @@
                       </span>
                     </template>
                   </VueMultiselect>
+                  <div class="ms-1">
+                         <input type="checkbox" id="isHOD" true-value="1" false-value="0" v-model="createEmployee.is_hod" class="form-check-input mt-1 input-border" />
+                        <label class="font-13 ms-2 " for="isHOD">Is HOD</label>
+                      </div>
                 </div>
                 <div class="col">
                   <div class="position-relative mb-3">
@@ -516,7 +526,15 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            Are you sure you want to <span id="empActionText"></span> "<span id="empRowName"></span>"?
+           <div class="text-center fw-bolder">
+             Are you sure you want to <span id="empActionText"></span> "<span id="empRowName"></span>"?<br>
+           </div>
+
+            <div class="mt-4">
+              <label class="font-13 mb-1" for="emp_name">Remarks<span class="text-danger ps-1">*</span></label>
+              <textarea v-model="remarks" class="w-100 font-13 remarks"></textarea>
+            </div>
+
 
             <!-- <label for="name" class="font-13 mt-3">Attachments</label>
             <input type="file" @change="handleSingleAttach" class="form-control mb-3" :disabled="uploadedFields.length >= 4" />
@@ -549,7 +567,7 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="button" class="btn btn-dark" @click="confirmEmployeeToggle">Yes, Proceed</button>
+            <button type="button" class="btn btn-dark" :disabled="!remarks" @click="confirmEmployeeToggle">Yes, Proceed</button>
           </div>
         </div>
       </div>
@@ -604,6 +622,7 @@ const designations = ref([]);
 const reportingTo = ref([]);
 const reportingDesigination = ref([]);
 const departmentsList = ref([]);
+const remarks=ref("");
 // const newDesignation = ref(false);
 // const signaturePath = ref("");
 const phoneError = ref("");
@@ -1060,6 +1079,39 @@ function backtoEmployeeList() {
 //   }
 // };
 
+function onDepartmentChange(selectedDepartment) {
+  // console.log('Selected department:', selectedDepartment);
+  fetchingIsHod(selectedDepartment.name); // Call your API function here
+}
+ 
+function fetchingIsHod(department) {
+   const filters = [["company_field", "like", `%${newbusiness.value}%`],["enable","=","1"],
+  ["department", "like", `%${department}%`],["is_hod","=",1]];
+ 
+ 
+  const queryParams = {
+    fields: JSON.stringify(["*"]),
+    filters: JSON.stringify(filters),
+    limit_page_length: "none",
+    order_by: "`tabEzy Employee`.`enable` DESC,`tabEzy Employee`.`creation` DESC",
+  };
+  axiosInstance
+    .get(apis.resource + doctypes.EzyEmployeeList, { params: queryParams })
+    .then((res) => {
+    //  console.log(res);
+     createEmployee.value.reporting_to = res.data[0].name;
+     createEmployee.reporting_designation = res.data[0].designation;
+    //  console.log("res.name",res.data[0].name);
+    //  console.log("res.designation",res.data[0].designation);
+
+    })
+    .catch((error) => {
+      createEmployee.value.reporting_to = "";
+      createEmployee.reporting_designation = "";
+      console.error("Error fetching department data:", error);
+    });
+ 
+}
 
 
 const isMasked = ref(true);
@@ -1464,6 +1516,7 @@ function toggleFunction(rowData) {
 function confirmEmployeeToggle() {
   const isEnabled = selectedEmpRow.value.enable === '1' || selectedEmpRow.value.enable === 1;
   selectedEmpRow.value.enable = isEnabled ? 0 : 1;
+  selectedEmpRow.value.remarks=remarks.value
 
   if(selectedEmpRow.value.enable==0){
     // Get current date and time in "YYYY-MM-DD HH:mm:ss" format
@@ -1476,6 +1529,7 @@ function confirmEmployeeToggle() {
 
   // console.log("selectedEmpRow.value",selectedEmpRow.value.enable_on);
   }
+  // console.log("selectedEmpRow",selectedEmpRow.value);
 
   axiosInstance
     .put(`${apis.resource}${doctypes.EzyEmployeeList}/${selectedEmpRow.value.name}`, selectedEmpRow.value)
@@ -2409,4 +2463,8 @@ function SaveEditEmp() {
     transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
 }
 
+.remarks{
+  border: 1px solid #c5bdbd;
+  border-radius: 5px
+}
 </style>
