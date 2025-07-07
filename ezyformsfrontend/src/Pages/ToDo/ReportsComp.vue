@@ -91,7 +91,7 @@ const frappeBody = ref([]);
 const SelectedReportName = ref("");
 
 function viewPreview(data) {
-    console.log("data===", data);
+    // console.log("data===", data);
     SelectedReportName.value = data.name;
     viewReport.value = true;
 
@@ -200,7 +200,7 @@ function downloadPdf(data) {
   const reportName = SelectedReportName.value;
   const name = data.name || data.Name || data.id || data.report_name;
 
-  console.log(reportName, name,"ooooo", apis.getReportData,"lll");
+//   console.log(reportName, name,"ooooo", apis.getReportData,"lll");
   const url = apis.getReportData + `?doctype=${encodeURIComponent(reportName)}&name=${encodeURIComponent(name)}`;
 
   // Open the PDF in a new tab

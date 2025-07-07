@@ -424,8 +424,11 @@ const focusedFields = reactive({});
 
 function getDisplayText(key, value) {
   if (key === 'modified') return '-';
-  return value ? value.replace(/_/g, ' ') : '-';
+  if (value == null) return '-';
+  if (typeof value === 'object') return '-';
+  return String(value).replace(/_/g, ' ');
 }
+
 
 function getTooltipText(value) {
    
