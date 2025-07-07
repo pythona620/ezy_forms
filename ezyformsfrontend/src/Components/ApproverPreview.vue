@@ -4,7 +4,7 @@
     <div v-if="filteredBlocks.length" class="card p-3">
       <div v-for="(block, blockIndex) in filteredBlocks" :key="blockIndex" class="block-container rounded-2">
         <div v-if="blockIndex === 0"><label class=" fw-bold font-12 ps-2">Request ID: </label> <span class="font-13">
-            {{ selectedData.formname }}</span> </div>
+            {{ selectedData.formname.replace(/_/g, ' ') }}</span> </div>
         <div v-for="(section, sectionIndex) in block.sections" :key="'preview-' + sectionIndex"
           class="preview-section m-1">
           <div v-if="section.label" class="section-label">
@@ -22,9 +22,12 @@
                   <div v-for="(field, fieldIndex) in column.fields" :key="'field-preview-' + fieldIndex" :class="(props.readonlyFor === 'true' || blockIndex < currentLevel) && field.fieldtype !== 'Small Text' && field.fieldtype !== 'Text'
                     ? (field.label === 'Approved By' ? ' d-flex align-items-end' : 'align-items-start')
                     : ''">
-                    <div  :class="(props.readonlyFor === 'true' || blockIndex < currentLevel) && field.fieldtype !== 'Small Text' && field.fieldtype !== 'Text' || field.fieldtype === 'Check'
-                      ? 'd-flex ' + (field.fieldtype === 'Check' ? 'mt-1 flex-row-reverse justify-content-end gap-2 w-0 align-items-start ' : '') + (field.label === 'Approved By' ? 'align-items-start' : 'align-items-center')
-                      : ''">
+                    <div
+                          v-if="!( !field.value && ['Approver', 'Approved On', 'Approved By'].includes(field.label) )"
+                          :class="(props.readonlyFor === 'true' || blockIndex < currentLevel) && field.fieldtype !== 'Small Text' && field.fieldtype !== 'Text' || field.fieldtype === 'Check'
+                                    ? 'd-flex ' + (field.fieldtype === 'Check' ? 'mt-1 flex-row-reverse justify-content-end gap-2 w-0 align-items-start ' : '') + (field.label === 'Approved By' ? 'align-items-start' : 'align-items-center nowrap')
+                                    : ''" >
+
                       
 
 
@@ -38,6 +41,7 @@
                         </label>
                       </div>
                       <div v-if="field.fieldtype !== 'Table'" :class="field.fieldtype === 'Check' ? 'w-0' : 'w-100'">
+                        
                         <!-- field.fieldtype === 'Select' || -->
                         <!-- Field Type Select or Multiselect -->
                         <template v-if="field.fieldtype === 'multiselect'">
@@ -103,6 +107,7 @@
                         </template>
 
                         <template v-else-if="field.fieldtype == 'Check' && field.fieldname !== 'auto_calculations'">
+                          
                        
                           <input type="checkbox" :checked="field.value"
                             :disabled="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel"
@@ -286,7 +291,7 @@
                                   <img :src="file" alt="Enlarged Preview" style="width: 100%; border-radius: 5px;" />
                                 </div> -->
 
-                        <template v-else-if="field.fieldtype == 'Link' && field.fieldname !== 'department_name'">
+                        <template v-else-if="field.fieldtype == 'Link' && field.fieldname !== 'department_name' && field.fieldname !== 'designation'">
                           <div class="d-flex align-items-center gap-2">
                             <input type="text" :value="field.value"
                               :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'"
@@ -1200,7 +1205,7 @@ const filteredBlocks = computed(() => {
             //   logFieldValue({ target: { value: field.value } }, lastBlock, sectionIndex, rowIndex, columnIndex, fieldIndex);
             // }
           }
-          if (field.label === "Approved On") {
+          if (field.label === "Approved On" || field.label === 'Acknowledged On') {
             const localTime = new Date().toLocaleString("en-CA", {
               timeZone: "Asia/Kolkata", // Change this to your target timezone
               year: "numeric",

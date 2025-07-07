@@ -1545,6 +1545,8 @@ function toggleFunction(rowData) {
 function confirmEmployeeToggle() {
   const isEnabled = selectedEmpRow.value.enable === '1' || selectedEmpRow.value.enable === 1;
   selectedEmpRow.value.enable = isEnabled ? 0 : 1;
+  selectedEmpRow.value.is_web_form = 0;
+
 
   axiosInstance
     .put(`${apis.resource}${doctypes.EzyEmployeeList}/${selectedEmpRow.value.name}`, selectedEmpRow.value)
