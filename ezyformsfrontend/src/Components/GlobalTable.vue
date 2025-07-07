@@ -431,9 +431,10 @@ function getDisplayText(key, value) {
 
 
 function getTooltipText(value) {
-   
-  return value ? value.replace(/_/g, ' ') : '-';
+  if (value == null || typeof value === 'object') return '-';
+  return String(value).replace(/_/g, ' ');
 }
+
 const allCheck = ref(false);
 // function formatDate(dateString) {
 //   if (!dateString) return "-"; // Handle empty or null values
