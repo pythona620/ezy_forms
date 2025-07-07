@@ -13,7 +13,9 @@
   "company_field",
   "emp_code",
   "is_web_form",
+  "is_hod",
   "emp_name",
+  "remarks",
   "emp_phone",
   "emp_mail_id",
   "department",
@@ -26,9 +28,9 @@
   "reporting_designation",
   "signature",
   "attachment_one",
-"attachment_two",
-"attachment_three",
-"attachment_four" 
+  "attachment_two",
+  "attachment_three",
+  "attachment_four"
  ],
  "fields": [
   {
@@ -98,22 +100,25 @@
    "label": "Signature"
   },
   {
-    "fieldname": "attachment_four",
-    "fieldtype": "Attach",
-    "label": "Attachment Four"
-   },  {
-    "fieldname": "attachment_one",
-    "fieldtype": "Attach",
-    "label": "Attachment One"
-   },  {
-    "fieldname": "attachment_three",
-    "fieldtype": "Attach",
-    "label": "Attachment Three"
-   },  {
-    "fieldname": "attachment_two",
-    "fieldtype": "Attach",
-    "label": "Attachment Two"
-   },
+   "fieldname": "attachment_four",
+   "fieldtype": "Attach",
+   "label": "Attachment Four"
+  },
+  {
+   "fieldname": "attachment_one",
+   "fieldtype": "Attach",
+   "label": "Attachment One"
+  },
+  {
+   "fieldname": "attachment_three",
+   "fieldtype": "Attach",
+   "label": "Attachment Three"
+  },
+  {
+   "fieldname": "attachment_two",
+   "fieldtype": "Attach",
+   "label": "Attachment Two"
+  },
   {
    "fieldname": "emp_phone",
    "fieldtype": "Data",
@@ -146,17 +151,40 @@
    "fieldtype": "Link",
    "label": "Acknowledgement",
    "options": "Acknowledgement"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_hod",
+   "fieldtype": "Check",
+   "label": "Is HOD"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Data",
+   "label": "Remarks"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-02 11:49:44.984614",
+ "modified": "2025-07-07 13:26:59.375662",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
  "name": "Ezy Employee",
  "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Hd",
+   "share": 1,
+   "write": 1
+  },
   {
    "create": 1,
    "delete": 1,
@@ -178,6 +206,18 @@
    "read": 1,
    "report": 1,
    "role": "DOF",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "IT Manager",
    "share": 1,
    "write": 1
   },
