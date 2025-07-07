@@ -144,30 +144,22 @@ template_str = """
    <style>
       body {
             font-family: Arial, sans-serif;
-            
-   
-              /* height: 100vh;*/
         }
-          .main-body{
-              margin: 5px;
-               border: 1px solid #000;
-               padding: 15px;
-               border-radius: 5px;
-          }
-         .row {
+        .main-body{
+            margin: 5px;
+            border: 1px solid #000;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .row {
             display: flex;
             flex-wrap: wrap;
             margin-bottom: 5px;
         }
-
         .column {
             flex: 1;
             padding:0px 15px;
-          
-            
         }
-       
- 
         .section h3 {
             margin: 5px 0;
             font-size:13px;
@@ -177,10 +169,7 @@ template_str = """
             font-size:13px;
         }
         .section {
-            /*margin: 5px;*/
             border: 0px solid #ccc;
-            /*border-bottom: 1px solid #000;*/
-            /*padding: 15px;*/
             border-radius:3px;
         }
         .section h3 {
@@ -188,16 +177,15 @@ template_str = """
             font-size: 15px;
             font-weight:700;
         }
-         .column .columnlabel {
+        .column .columnlabel {
             margin: 5px 0;
             font-size:14px;
             padding: 0px 4px;
-             font-weight:600;
+            font-weight:600;
         }
         .field {
             display: flex;
-            
-            padding: 4px 0px;
+            padding: 2px 0px;
             margin: 5px 5px;
         }
         .field label {
@@ -215,39 +203,32 @@ template_str = """
             padding-left: 4px ;
             background: transparent;
             flex: 1;
-            
             font-weight:500;
             color:#000;
             font-size: 13px;
-            
-            
         }
-        
         .block_input{
-              border: none;
+            border: none;
             outline: none;
             padding: 0px 5px;
-               padding-left: 50px ;
+            padding-left: 50px ;
             background: transparent;
             flex: 1;
-            
             font-weight:600;
         }
         .field select, .field textarea {
-            
             outline: none;
             padding: 0px 5px;
             background: transparent;
             flex: 1;
         }
-          .field textarea {
+        .field textarea {
             padding: 0px 5px;
             background: transparent;
             flex: 1;
-            
-            resize: none; /* Disable manual resizing */
-            overflow-y: hidden; /* Hide scrollbar */ /* Allows users to resize the textarea */
-}
+            resize: none;
+            overflow-y: hidden;
+        }
         .field input[type="checkbox"], .field input[type="radio"] {
             flex: 0;
             width: 16px;
@@ -256,144 +237,117 @@ template_str = """
             border: 1px solid #000;
         }
         .field-textarea {
-                display: block;
-               
-            }
-          .header-container{
+            display: block;
+        }
+        .header-container{
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid #000;
-           
-            
-          }
-            /* Flex container to arrange checkboxes */
-            .checkbox-container {
-                display: flex;
-                justify-content: flex-start;
-                flex-wrap: wrap;   /* Allow items to wrap into new lines */
-                gap: 10px;         /* Space between checkboxes */
-                width: 100%;       /* Ensure the container uses full available width */
-            }
-
-
-            .checkbox-container > .checkbox-gap {
-                flex: 1 0 calc(33.33% - 20px);  /* 3 per row, considering gap */
-                box-sizing: border-box; 
-                display: flex;
-                gap: 15px; /* Space between checkbox and text */
-                margin-top: 10px;  /* Space above */
-                margin-bottom: 10px; /* Space below */
-                min-width: 150px;  /* Prevent shrinking */
-                
-            }
-            /* Checkbox design */
-            .custom-checkbox {
-                display: inline-block;
-                width: 20px !important;
-                height: 20px !important;
-                border: 2px solid #007bff;  /* Blue border */
-                border-radius: 4px;
-                background-color: #007bff; /* Blue background */
-                position: relative;
-                margin:3px;
-                margin-bottom:0px;
-                
-                flex-shrink: 0; 
-            }
-
-            /* White checkmark */
-            .custom-checkbox::before {
-                content: '✔'; 
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                font-size: 16px;
-                color: white;  /* White checkmark */
-                font-weight: bold;
-            }
-
-            /* Disabled effect */
-            .custom-checkbox.disabled {
-                opacity: 0.6;
-                cursor: not-allowed;
-            }
-            .custom-checkbox.checked {
-                background-color: #007bff; /* Blue for checked */
-                border-color: #007bff;
-            }
-
-            .custom-checkbox.unchecked {
-                background-color: #fff; /* Gray for unchecked */
-                border-color: #ccc;
-            }
-
-
+        }
+        .checkbox-container {
+            display: flex;
+            justify-content: flex-start;
+            flex-wrap: wrap;
+            gap: 10px;
+            width: 100%;
+        }
+        .checkbox-container > .checkbox-gap {
+            flex: 1 0 calc(33.33% - 20px);
+            box-sizing: border-box;
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            min-width: 150px;
+        }
+        .custom-checkbox {
+            display: inline-block;
+            width: 20px !important;
+            height: 20px !important;
+            border: 2px solid #007bff;
+            border-radius: 4px;
+            background-color: #007bff;
+            position: relative;
+            margin:3px;
+            margin-bottom:0px;
+            flex-shrink: 0;
+        }
+        .custom-checkbox::before {
+            content: '✔';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 16px;
+            color: white;
+            font-weight: bold;
+        }
+        .custom-checkbox.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .custom-checkbox.checked {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .custom-checkbox.unchecked {
+            background-color: #fff;
+            border-color: #ccc;
+        }
         .footer-container{
-             display: flex;
-             justify-content: center;
-             padding: 10px;
+            display: flex;
+            justify-content: center;
+            padding: 10px;
             margin: 0px 10px;
             positon: fixed;
             bottom: 0px;
-               left: 0px;
-               width: 100%;
-               right: 0px;
+            left: 0px;
+            width: 100%;
+            right: 0px;
         }
-        
-          .footer-container span{
-              margin: 0px;
-              padding: 0px;
-              font-weight: bold;
-          }
-          .header-container h4{
-              font-size: 25px;
-              font-weight: bold;
-              margin: 0px;
-      
-          }
-          .signature-Imge{
-              min-width: 40px;
-              max-width: 40px;
-
-              
-              
-          }
-          .childtablename{
-              font-size:13px;
-              font-weight:600 !important;
-              margin-bottom: 3px !important;
-          }
- 
-        /* .logo-div{*/
-           /*  max-width: 250px;*/
-           /*    min-width: 200px !important;*/
-       /*  }*/
-         .Form_name_div{
+        .footer-container span{
+            margin: 0px;
+            padding: 0px;
+            font-weight: bold;
+        }
+        .header-container h4{
+            font-size: 25px;
+            font-weight: bold;
+            margin: 0px;
+        }
+        .signature-Imge{
+            min-width: 40px;
+            max-width: 40px;
+        }
+        .childtablename{
+            font-size:13px;
+            font-weight:600 !important;
+            margin-bottom: 3px !important;
+        }
+        .Form_name_div{
             display: flex;
-            justify-content: center; /* center the h4 block */
-            text-align: center;      /* center the text inside h4 */
+            justify-content: center;
+            text-align: center;
             margin: 0px 10px;
-            }
-
-            .form-title {
+        }
+        .form-title {
             font-size: 20px;
-            max-width: 600px;        /* optional, keeps it nicely readable */
+            max-width: 600px;
             word-wrap: break-word;
-            }
-         .header-right{
-             min-width: 280px;
-         }
-         .description-block{
-             font-size:12px;
-         }
+        }
+        .header-right{
+            min-width: 280px;
+        }
+        .description-block{
+            font-size:12px;
+        }
         .watermark {
             position: fixed;
             top: 50%;
             left: 30%;
             font-size: 80px;
-            color: rgba(0, 0, 0, 0.1); /* Light gray with transparency */
+            color: rgba(0, 0, 0, 0.1);
             transform: rotate(-30deg);
             z-index: 0;
             pointer-events: none;
@@ -401,63 +355,163 @@ template_str = """
             white-space: nowrap;
         }
         .requestId{
-             display: flex;
-              justify-content: start;
-              align-items: center;
-              padding-top:5px;
-              padding-bottom:5px;
-              padding-left:4px;
-              
-              
+            display: flex;
+            justify-content: start;
+            align-items: center;
+            padding-top:5px;
+            padding-bottom:5px;
+            padding-left:4px;
         }
-         .requestId strong {
-            margin-right: 8px;  /* adds space between the label and the ID */
+        .requestId strong {
+            margin-right: 8px;
         }
         .rounded-table {
-        width: 100%;
-        margin-bottom: 5px;
-        border-collapse: separate;
-        border-spacing: 0;
-        border-radius: 3px;
-        overflow: hidden;
-    }
-    .attachments {
-    max-width: 100%;        /* Make sure images don't overflow their container */
-    height: auto;           /* Maintain aspect ratio */
-    display: block;         /* Remove inline spacing */
-    margin: 10px auto;      /* Center the image horizontally with vertical spacing */
-    border: 1px solid #ccc; /* Light border around the images */
-    border-radius: 4px;     /* Slightly rounded corners */
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1); /* Subtle shadow for depth */
-    object-fit: contain;    /* Ensure the entire image fits inside without distortion */
-    background-color: #f9f9f9; /* Light background behind transparent images */
-}  
-
+            width: 100%;
+            margin-bottom: 5px;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .attachments {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 10px auto;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            object-fit: contain;
+            background-color: #f9f9f9;
+        }
         @media print {
-            .table, .table th, .table td {
-                border: 1px solid black !important;
-                font-size: 13px;
+            body {
+                background: #fff !important;
+                color: #000 !important; 
+                font-family: Arial, sans-serif;
             }
-            .table{
-                width: 100% !important;
-                margin:0px 3px;
+            .main-body {
+                border: 1px solid #000 !important;
+                box-shadow: none !important;
+                margin: 0 !important;
+                padding: 10px !important;
             }
-            textarea {
-                border: none;
-                resize: none;
-                white-space: pre-wrap;
+            .header-container {
+                border-bottom: 1px solid #000 !important;
+                padding-bottom: 8px !important;
+                margin-bottom: 10px !important;
+            }
+            .form-title, .header-container h4 {
+                font-size: 22px !important;
+                font-weight: bold !important;
+                color: #000 !important;
+            }
+            .section {
+                border: 0px solid #ccc !important;
+                border-radius: 3px !important;
+                margin-bottom: 10px !important;
+                page-break-inside: avoid;
+            }
+            .section h3, .columnlabel, .childtablename {
+                color: #000 !important;
+                font-weight: 700 !important;
+                font-size: 15px !important;
+                margin-bottom: 6px !important;
+            }
+            .rounded-table, .rounded-table th, .rounded-table td {
+                border: 1px solid #ccc !important;
+                font-size: 13px !important;
+                color: #000 !important;
+            }
+            .rounded-table th {
+                background: #f2f2f2 !important;
+                font-weight: bold !important;
+            }
+            .rounded-table td {
+                background: #fff !important;
+            }
+            .field label {
+                color: #000 !important;
+                font-weight: bold !important;
+                font-size: 13px !important;
+            }
+            .field input, .field textarea, .field select {
+                color: #000 !important;
+                background: transparent !important;
+                border: none !important;
+                font-size: 13px !important;
+            }
+            .custom-checkbox.checked {
+                background-color: #007bff !important;
+                border-color: #007bff !important;
+            }
+            .custom-checkbox.unchecked {
+                background-color: #fff !important;
+                border-color: #ccc !important;
+            }
+            .custom-checkbox::before {
+                color: #fff !important;
+            }
+            .checkbox-gap {
+                margin: 10px 0px !important;
+            }
+            .attachments {
+                border: 1px solid #ccc !important;
+                border-radius: 4px !important;
+                background: #f9f9f9 !important;
+                box-shadow: none !important;
             }
             .watermark {
-             display: block;
+                display: block !important;
+                color: rgba(0, 0, 0, 0.1) !important;
             }
-            .checkbox-gap{
-                margin:10px 0px;
+            .footer-container {
+                border-top: 1px solid #000 !important;
+                margin-top: 10px !important;
+                padding-top: 8px !important;
+                background: none !important;
             }
-            
+            .description-block {
+                color: #000 !important;
+                font-size: 12px !important;
+            }
+            .requestId {
+                color: #000 !important;
+                font-size: 13px !important;
+                font-weight: bold !important;
+            }
+            .logo-div img {
+                height: 45px !important;
+                margin-bottom: 0px !important;
+            }
+            .signature-Imge {
+                min-width: 40px !important;
+                max-width: 40px !important;
+            }
+            .column {
+                padding: 0px 0px !important;
+            }
+            .row {
+                margin-bottom: 5px !important;
+            }
+            .field {
+               
+                padding: 4px 0px !important;
+            }
+            .Form_name_div {
+                margin: 0px 10px !important;
+            }
+            .header-right {
+                min-width: 200px !important;
+            }
+            .childtablename {
+                font-size: 13px !important;
+                font-weight: 600 !important;
+            }
+            .rounded-table th, .rounded-table td {
+                page-break-inside: avoid !important;
+            }
         }
-        
-   
-       
     </style>
     </head>
 <body>
@@ -829,7 +883,7 @@ template_str = """
                                         {% endif %}
                                         
                                     </div>
-                                         {% if field.description != 'Field' and field.fieldname != 'auto_calculations' %}
+                                         {% if field.description != 'Field' and field.fieldname != 'auto_calculations' and field.description != 'Disable' %}
                                             <div class="w-100 description-block mt-1">
                                                
                                                 <span>{{ field.description | replace('\n', '<br>') | safe }}</span>
