@@ -2,6 +2,13 @@
   <section>
 
     <div v-if="filteredBlocks.length" class="card p-3">
+      <div>
+
+      <!-- <button type="button" class="btn btn-dark btn-
+                  " @click="toggleEdit">
+              {{ isEditable ? 'Cancel' : 'Edit' }}
+            </button> -->
+      </div>
       <div v-for="(block, blockIndex) in filteredBlocks" :key="blockIndex" class="block-container rounded-2">
         <div v-if="blockIndex === 0"><label class=" fw-bold font-12 ps-2">Request ID: </label> <span class="font-13">
             {{ selectedData.formname.replace(/_/g, ' ') }}</span> </div>
@@ -23,12 +30,12 @@
                     ? (field.label === 'Approved By' ? ' d-flex align-items-end' : 'align-items-start')
                     : ''">
                     <div
-                          v-if="!(blockIndex !== 0 && !field.value && ['Approver', 'Approved On', 'Approved By'].includes(field.label) )"
-                          :class="(props.readonlyFor === 'true' || blockIndex < currentLevel) && field.fieldtype !== 'Small Text' && field.fieldtype !== 'Text' || field.fieldtype === 'Check'
-                                    ? 'd-flex ' + (field.fieldtype === 'Check' ? 'mt-1 flex-row-reverse justify-content-end gap-2 w-0 align-items-start ' : '') + (field.label === 'Approved By' ? 'align-items-start' : 'align-items-center nowrap')
+                          v-if="!(blockIndex !== 0 && !field.value && ['Approver', 'Approved On', 'Approved By','Acknowledged By'].includes(field.label) )"
+                      :class="(props.readonlyFor === 'true' || blockIndex < currentLevel) && field.fieldtype !== 'Small Text' && field.fieldtype !== 'Text' || field.fieldtype === 'Check'
+                                    ? 'd-flex ' + (field.fieldtype === 'Check' ? 'mt-1 flex-row-reverse justify-content-end gap-2 w-0 align-items-start ' : '') + (field.label === 'Approved By' ? 'align-items-start' : 'align-items-start nowrap')
                                     : ''" >
 
-                      
+
 
 
                       <div v-if="field.label && field.fieldtype !== 'Table' && field.fieldname !== 'auto_calculations'">
@@ -41,7 +48,7 @@
                         </label>
                       </div>
                       <div v-if="field.fieldtype !== 'Table'" :class="field.fieldtype === 'Check' ? 'w-0' : 'w-100'">
-                        
+
                         <!-- field.fieldtype === 'Select' || -->
                         <!-- Field Type Select or Multiselect -->
                         <template v-if="field.fieldtype === 'multiselect'">
@@ -188,7 +195,7 @@
 
                         <!-- @click="openInNewWindow(field.value)" -->
                         <template v-else-if="field.fieldtype == 'Attach'">
-                         
+
                           <div v-if="field.value " class="d-flex gap-2 align-items-center flex-wrap">
                             <div v-for="(file, i) in getFileArray(field.value)" :key="i"
                               class="position-relative d-inline-block"
@@ -204,7 +211,7 @@
 
                               <!-- Image block -->
                               <template v-else-if="isImageFile(file)">
-                                
+
                                 <template v-if="blockIndex === 0 && field.fieldname !== 'requestor_signature'">
                                   <span class="cursor-pointer text-decoration-underline font-12 d-flex"
                                     @click="openFileModal(file)">
@@ -212,7 +219,7 @@
                                   </span>
                                 </template>
                                 <template v-else>
-                                  <img :src="file" class="img-thumbnail cursor-pointer border-0 border-bottom-0"
+                                  <img :src="file" class="img-thumbnail cursor-pointer imge_top border-0 border-bottom-0"
                                     @click="openFile(file)" style="max-width: 80px; max-height: 80px" />
                                 </template>
                               </template>
@@ -233,50 +240,50 @@
                             :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
                             class="form-control previewInputHeight font-10" multiple
                             @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
-                        <div class="modal fade" id="fileModal" tabindex="-1" aria-labelledby="fileModalLabel"
-  aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
+                          <div class="modal fade" id="fileModal" tabindex="-1" aria-labelledby="fileModalLabel"
+                            aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                              <div class="modal-content">
 
-      <div class="modal-header">
-        <h5 class="modal-title font-14" id="fileModalLabel">Attachment</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"
-          aria-label="Close"></button>
-      </div>
+                                <div class="modal-header">
+                                  <h5 class="modal-title font-14" id="fileModalLabel">Attachment</h5>
+                                  <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                                </div>
 
-      <div class="modal-body d-flex flex-column gap-3">
-        <div class="d-flex justify-content-between align-items-center">
-          <span class="font-13">{{ selectedFileName }}</span>
-          <div class="d-flex gap-2 align-items-center">
-            <!-- ✅ Toggle Button -->
-            <button type="button" class="btn btn-light btn-sm"
-              @click="showPreview = !showPreview">
-              {{ showPreview ? 'Hide' : 'Show' }}
-            </button>
+                                <div class="modal-body d-flex flex-column gap-3">
+                                  <div class="d-flex justify-content-between align-items-center">
+                                    <span class="font-13">{{ selectedFileName }}</span>
+                                    <div class="d-flex gap-2 align-items-center">
+                                      <!-- ✅ Toggle Button -->
+                                      <button type="button" class="btn btn-light btn-sm"
+                                        @click="showPreview = !showPreview">
+                                        {{ showPreview ? 'Hide' : 'Show' }}
+                                      </button>
 
-            <!-- Download Button -->
-            <a :href="selectedFileUrl" download class="btn btn-light btn-sm">Download</a>
-          </div>
-        </div>
+                                      <!-- Download Button -->
+                                      <a :href="selectedFileUrl" download class="btn btn-light btn-sm">Download</a>
+                                    </div>
+                                  </div>
 
-        <!-- ✅ Preview Area -->
-        <div v-if="showPreview" class="preview-area mt-2">
-          <!-- Image Preview -->
-          <img v-if="isImageFile(selectedFileUrl)" :src="selectedFileUrl"
-            class="img-fluid border rounded" style="max-width: 100%;" />
+                                  <!-- ✅ Preview Area -->
+                                  <div v-if="showPreview" class="preview-area mt-2">
+                                    <!-- Image Preview -->
+                                    <img v-if="isImageFile(selectedFileUrl)" :src="selectedFileUrl"
+                                      class="img-fluid border rounded" style="max-width: 100%;" />
 
-          <!-- PDF Preview -->
+                                    <!-- PDF Preview -->
           <iframe v-else-if="isPdfFile(selectedFileUrl)"
     :src="selectedFileUrl"
     width="100%" height="500px"
     style="border:1px solid #ccc;">
-  </iframe>
-        </div>
-      </div>
+                                    </iframe>
+                                  </div>
+                                </div>
 
-    </div>
-  </div>
-</div>
+                              </div>
+                            </div>
+                          </div>
 
                         </template>
 
@@ -371,14 +378,14 @@
                           <template v-else>
                             <component
                               v-if="blockIndex !== 0 && field.fieldtype !== 'Int' && field.fieldtype !== 'Text' && field.fieldtype !== 'Select' && field.fieldname !== 'auto_calculations'"
-                              :style="{
+                               :style="{
                                 width: Math.min(100 + (field.value?.length * 2), 600) + 'px'
                               }" :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'"
                               :is="getFieldComponent(field.fieldtype)" :class="props.readonlyFor === 'true' || blockIndex < currentLevel
                                 ? 'border-0  w-50 bg-transparent'
                                 : ''" :value="field.fieldtype === 'Time' ? formatTime(field.value) : field.value"
-                              :type="field.fieldtype"
-                              :readOnly="blockIndex < currentLevel || props.readonlyFor === 'true'"
+:type="field.fieldtype"
+:readOnly="blockIndex < currentLevel || props.readonlyFor === 'true'"
                               :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex" @blur="
                                 (event) =>
                                   logFieldValue(
@@ -833,7 +840,12 @@ const textAreaRefs = reactive({});
 const replaceInputIndexes = ref([]);
 const previewUrl = ref('')
 const showModal = ref(false)
+// const isEditable = ref(false);
 
+// // Example function to toggle edit mode
+// function toggleEdit() {
+//   isEditable.value = !isEditable.value;
+// } 
 const openPreview = (url) => {
   previewUrl.value = url
   showModal.value = true
@@ -1194,7 +1206,7 @@ const filteredBlocks = computed(() => {
               emit("updateField", field);
             }
           }
-          if (field.label === "Approved By") {
+          if (field.label === "Approved By" || field.label === 'Acknowledged By') {
             if (emp_data.value.signature) {
 
               field.value = emp_data.value.signature;
@@ -1548,12 +1560,15 @@ const isPdfFile = (url) => {
 </script>
 
 <style lang="scss" scoped>
+.imge_top{
+      position: absolute; top: -10px;
+}
 .btn-close {
   background: transparent;
   border: none;
-  font-size: 18px;
+  font-size: 18px;                                                                                                                                                                                                                
   cursor: pointer;
-}
+}                                                                                   
 
 .overTable {
   overflow: auto;

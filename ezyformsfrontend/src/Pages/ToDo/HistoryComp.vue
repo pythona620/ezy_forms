@@ -129,6 +129,7 @@ const tableheaders = ref([
   // { th: "Owner of form", td_key: "owner" },
   { th: "Requested By", td_key: "requested_by" },
   { th: "Linked Form", td_key: "is_linked_form" },
+  { th: "Linked ID", td_key: "linked_form_id" },
 
   { th: "Requested Department", td_key: "role" },
   // { th: "Property", td_key: "property" },
