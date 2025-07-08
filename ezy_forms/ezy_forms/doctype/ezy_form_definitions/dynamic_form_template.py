@@ -812,7 +812,7 @@ template_str = """
                                             {% endif %}
                                         {% elif field.fieldtype == 'Attach' %}
     {% if field['values'] %}
-        {% if field.fieldtype == 'Attach' and ('approved_by' in field.fieldname or 'requestor_signature' in field.fieldname) %}
+        {% if field.fieldtype == 'Attach' and (field.fieldname.startswith('approved_by') or field.fieldname.startswith('requestor')) %}
             <img  
                 id="{{ field.fieldname }}" 
                 src="{{ site_url + field['values'] or '' }}" 
