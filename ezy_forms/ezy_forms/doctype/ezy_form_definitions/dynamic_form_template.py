@@ -1286,7 +1286,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
             site_url = get_url()
             new_file = f"{site_url}/files/{pdf_filename}"
             zip_filename = None
-            if len(mail_attachment) > 1:
+            if len(mail_attachment) > 0:
                 folder_path = get_site_path("public", "files", "Attachment folder")
                 os.makedirs(folder_path, exist_ok=True)
                 # Add PDF file to attachments (for zipping)
