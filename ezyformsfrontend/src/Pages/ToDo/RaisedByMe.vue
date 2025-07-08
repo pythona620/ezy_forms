@@ -219,6 +219,8 @@ const tableheaders = ref([
   { th: "Request ID", td_key: "name" }, 
   { th: "Form Name", td_key: "doctype_name" },
   { th: "Linked Form", td_key: "is_linked_form" },
+  { th: "Linked ID", td_key: "linked_form_id" },
+
   // { th: "Business Unit", td_key: "property" },
   // { th: "Form category", td_key: "doctype_name" },
   // { th: "Role", td_key: "role" },
@@ -236,7 +238,8 @@ const actions = ref([
   // { name: 'Edit Form', icon: 'fa-solid fa-edit' },
 ]);
 
-function viewPreview(data,idex,type) {
+function viewPreview(data,index,type) {
+  console.log(data,";;;",type);
   if(type === 'view'){
 
     router.push({
@@ -253,6 +256,21 @@ function viewPreview(data,idex,type) {
       },
     });
   }
+  // if(type === 'td_key'){
+  //    router.push({
+  //     name: "ApproveRequest",
+  //     query: {
+  //       routepath: route.path,
+  //       name: data.linked_form_id,
+  //       doctype_name: 'Test Returnble Form',
+  //       business_unit:data.property,
+  //       status:data.status,
+  //       type: "myforms",
+  //       readOnly: 'true'
+        
+  //     },
+  //   });
+  // }
   // if(type === 'raiseRequest'){
   //   router.push({
   //     name: "RaiseRequest",
