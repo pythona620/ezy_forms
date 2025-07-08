@@ -812,7 +812,7 @@ template_str = """
                                             {% endif %}
                                         {% elif field.fieldtype == 'Attach' %}
     {% if field['values'] %}
-        {% if field.fieldtype == 'Attach' and ('approved_by' in field.fieldname or 'requestor' in field.fieldname) %}
+        {% if field.fieldtype == 'Attach' and ('approved_by' in field.fieldname or 'requestor_signature' in field.fieldname) %}
             <img  
                 id="{{ field.fieldname }}" 
                 src="{{ site_url + field['values'] or '' }}" 
@@ -1232,7 +1232,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                             "label": 'Form Attachments',
                             "file_url": iteration["value"]
                         }
-                        if iteration.get("fieldname") and "approved_by" not in iteration.get("fieldname").lower() and   "requestor" not in iteration.get("fieldname").lower():
+                        if iteration.get("fieldname") and not iteration.get("fieldname").lower().startswith(("approved_by", "requestor")):
                             mail_attachment.append(attachment_info)
                     # Handle Table fields (child tables)
                     if iteration.get("fieldtype") == "Table":
@@ -1279,7 +1279,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
             random_number = randint(111, 999)
     
             pdf_filename = f"{form_short_name}_{name}mailfiles.pdf"
-            pdf_path = f"public/files/Attachment folder/{pdf_filename}"
+            pdf_path = f"public/files/{pdf_filename}"
             absolute_pdf_path = os.path.join(get_bench_path(), "sites", cstr(frappe.local.site), pdf_path)
             opts={"orientation":"Landscape"if is_landscape else"Portrait"}
             convert_html_to_pdf(html_content=html_view,pdf_path=absolute_pdf_path,options=opts)
