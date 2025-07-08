@@ -66,10 +66,10 @@
 								@change="selectedCheckList(row, rowIndex)" />
 						</td> -->
             <td class="">{{ rowIndex + 1 }}</td>
-                       
+
             <!-- v-tooltip.top="row[column.td_key] ? row[column.td_key].toString() : '-'" -->
-            <td v-for="(column, colIndex) in tHeaders"
-              :class="column.td_key === 'form_status' ? 'text-center' : ''" :key="colIndex">
+            <td v-for="(column, colIndex) in tHeaders" :class="column.td_key === 'form_status' ? 'text-center' : ''"
+              :key="colIndex">
 
               <!-- <span :class="{'accessible-departments': column.td_key === 'accessible_departments'}" v-if="column.td_key === 'accessible_departments'">
                 
@@ -131,27 +131,26 @@
                   <i class="bi bi-x-lg fw-bolder text-danger"></i>
                 </span>
               </span>
-              <span  v-else-if="column.td_key === 'assigned_to_users'">
+              <span v-else-if="column.td_key === 'assigned_to_users'">
                 <div>
-                  <span
-                      v-tooltip.top="getAssignedToUsers(row, column)"
-                      
-                    >
-                      <div>
-                        <span>{{ getAssignedToUsers(row, column) }}</span>
-                      </div>
-                    </span>
+                  <span v-tooltip.top="getAssignedToUsers(row, column)">
+                    <div>
+                      <span>{{ getAssignedToUsers(row, column) }}</span>
+                    </div>
+                  </span>
 
                 </div>
               </span>
-              <span class="text-center fixed-column" v-else-if="column.td_key === 'enable' || column.td_key === 'activate'">
+              <span class="text-center fixed-column"
+                v-else-if="column.td_key === 'enable' || column.td_key === 'activate'">
                 <div class="d-flex justify-content-center align-items-center gap-2">
-                  <span :class="row.enable || row.activate  == 0 ? 'text-secondary font-11' : ''">
-                    {{ row.enable || row.activate  == '1' ? '' : 'Disabled' }}
+                  <span :class="row.enable || row.activate == 0 ? 'text-secondary font-11' : ''">
+                    {{ row.enable || row.activate == '1' ? '' : 'Disabled' }}
                   </span>
                   <div class="form-check d-flex justify-content-center form-switch text-end">
                     <input class="form-check-input shadow-none" type="checkbox" role="switch"
-                      :checked="row.enable == '0' || row.activate === 0" @click.prevent="handleToggle(row, index, $event)" />
+                      :checked="row.enable == '0' || row.activate === 0"
+                      @click.prevent="handleToggle(row, index, $event)" />
                   </div>
                 </div>
               </span>
@@ -164,11 +163,19 @@
               <!-- <span v-else>
                 {{ row[column.td_key].replace(/_/g, " ") || "-" }}
               </span> -->
-                            <!-- <span v-else class="tooltip-text" :title="row[column.td_key] || '-'"> -->
+              <!-- <span v-else class="tooltip-text" :title="row[column.td_key] || '-'"> -->
 
               <span v-else class="tooltip-text" v-tooltip.top="getTooltipText(row[column.td_key])">
-  {{ getDisplayText(column.td_key, row[column.td_key]) }}
-</span>
+                <!-- <span v-if="column.td_key === 'linked_form_id'">
+                  <span @click="handleCellClick(row, rowIndex, 'td_key')" class="text-decoration-underline">
+                    {{ getDisplayText(column.td_key, row[column.td_key]) }}
+                  </span>
+                </span> -->
+                <!-- <span > -->
+
+                  {{ getDisplayText(column.td_key, row[column.td_key]) }}
+                <!-- </span> -->
+              </span>
 
             </td>
             <!-- <td
@@ -198,22 +205,24 @@
             </td> -->
             <!-- <td > -->
 
-              <div v-if="isAction == 'true' && viewType === 'viewPdf'" class="text-center align-middle">
-                <span v-if="raiseRequest === 'true'" class="px-4">
-                  <i v-tooltip.top="'Raise Request'" class="bi bi-send eye-cursor mx-1" @click="handleCellClick(row, rowIndex, 'raiseRequest')"></i>
-                </span>
-                <span class="px-2">
-                  <i v-tooltip.top="'View'" @click="handleCellClick(row, rowIndex, 'view')" class="ri-eye-line eye-cursor"></i>
-                </span>
-                <span v-if="download === 'true'">
-                  <i class="bi bi-download eye-cursor" @click="handleCellClick(row, rowIndex, 'download')"></i>
-                </span>
-              </div>
+            <div v-if="isAction == 'true' && viewType === 'viewPdf'" class="text-center align-middle">
+              <span v-if="raiseRequest === 'true'" class="px-4">
+                <i v-tooltip.top="'Raise Request'" class="bi bi-send eye-cursor mx-1"
+                  @click="handleCellClick(row, rowIndex, 'raiseRequest')"></i>
+              </span>
+              <span class="px-2">
+                <i v-tooltip.top="'View'" @click="handleCellClick(row, rowIndex, 'view')"
+                  class="ri-eye-line eye-cursor"></i>
+              </span>
+              <span v-if="download === 'true'">
+                <i class="bi bi-download eye-cursor" @click="handleCellClick(row, rowIndex, 'download')"></i>
+              </span>
+            </div>
             <!-- </td> -->
             <td v-if="actionType === 'dropdown'" class="text-center fixed-column position-relative">
               <div class="dropdown">
                 <p @click="actionDropDown(row)" class="p-0 actions" data-bs-toggle="dropdown" aria-expanded="false">
-                  <span >...</span>
+                  <span>...</span>
                 </p>
                 <ul class="dropdown-menu actionsdropdown">
                   <li class="py-1" @click="selectedAction(row, action)" v-for="(action, index) in actions" :key="index">
@@ -978,6 +987,4 @@ th:first-child {
   background: white !important;
 
 }
-
-
 </style>

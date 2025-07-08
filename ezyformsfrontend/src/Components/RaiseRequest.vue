@@ -143,8 +143,11 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <input type="checkbox" v-model="acknowledge" class="me-1 mt-1 form-check-input shadow-none" />
+            <input type="checkbox" v-model="acknowledge" id="Acknowledgement" value="Acknowledgement" class="me-1 mt-1 form-check-input shadow-none" />
+            <label for="Acknowledgement">
+
             I acknowledge that the information provided is correct.
+            </label>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-outline-secondary font-12" data-bs-dismiss="modal">Cancel</button>
@@ -410,6 +413,7 @@ function updateChildRecords(childTables, child_id_name) {
       console.error(`Error updating records:`, error);
     });
 }
+
 
 // function EditRequestUpdate() {
 //   const validTables = tableName.value.filter((table) => {
@@ -1278,11 +1282,14 @@ function request_raising_fn(item) {
   };
   axiosInstance.post(apis.raising_request, data_obj).then((resp) => {
     if (resp?.message?.success === true) {
+      if(selectedData.value.main_form_Id){
+        linked_id_adding_method(item.name)
+      }
       const modal = bootstrap.Modal.getInstance(
         document.getElementById("ExportEmployeeModal")
       );
       modal.hide();
-      saveloading.value = false;
+      // saveloading.value = false;
 
       toast.success("Request Raised", {
         autoClose: 1000,
@@ -1292,7 +1299,30 @@ function request_raising_fn(item) {
         },
       });
     }
-  });
+  })
+   .catch((error) => {
+      console.error("Error raising request:", error);
+      toast.error("Error raising request");
+    })
+    .finally(() => {
+      saveloading.value = false;
+    });
+}
+function linked_id_adding_method(name) {
+  
+  let data_obj = {
+   request_id: selectedData.value.main_form_Id,
+   linked_form: name,
+  };
+  axiosInstance.post(apis.linked_form_id_update, data_obj).then((resp) => {
+    if (resp?.message) {
+      console.log(resp);
+     
+    }
+  })
+   .catch((error) => {
+      console.error("Error updating linked form ID:", error);
+    });
 }
 
 
