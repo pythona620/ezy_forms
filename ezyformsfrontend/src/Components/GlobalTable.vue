@@ -148,7 +148,7 @@
                     {{ row.enable || row.activate == '1' ? '' : 'Disabled' }}
                   </span>
                   <div class="form-check d-flex justify-content-center form-switch text-end">
-                    <input class="form-check-input shadow-none" type="checkbox" role="switch"
+                    <input class="form-check-input shadow-none " type="checkbox" role="switch"
                       :checked="row.enable == '0' || row.activate === 0"
                       @click.prevent="handleToggle(row, index, $event)" />
                   </div>
@@ -166,15 +166,17 @@
               <!-- <span v-else class="tooltip-text" :title="row[column.td_key] || '-'"> -->
 
               <span v-else class="tooltip-text" v-tooltip.top="getTooltipText(row[column.td_key])">
-                <!-- <span v-if="column.td_key === 'linked_form_id'">
-                  <span @click="handleCellClick(row, rowIndex, 'td_key')" class="text-decoration-underline">
+                <span v-if="column.td_key === 'linked_form_id'">
+                  <span @click="handleCellClick(row, rowIndex, 'td_key')" :class="[
+                      row[column.td_key] ? 'text-decoration-underline linked-id-redirect font-11 text-primary' : 'text-decoration-none linke-not-allow '
+                    ]">
                     {{ getDisplayText(column.td_key, row[column.td_key]) }}
                   </span>
-                </span> -->
-                <!-- <span > -->
+                </span>
+                <span v-else >
 
                   {{ getDisplayText(column.td_key, row[column.td_key]) }}
-                <!-- </span> -->
+                </span>
               </span>
 
             </td>
@@ -986,5 +988,11 @@ th:first-child {
   right: 0 !important;
   background: white !important;
 
+}
+.linke-not-allow{
+  cursor: none;
+}
+.linked-id-redirect{
+  cursor: pointer;
 }
 </style>

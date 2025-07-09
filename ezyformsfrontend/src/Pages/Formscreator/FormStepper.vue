@@ -1289,29 +1289,25 @@
                 </select>
               </div>
             </div>
-            <div v-if="selectedBlockIndex !== 0" class="p-3 approval-border-bottom ">
+            <div v-if="selectedBlockIndex !== 0" class="p-3 approval-border-bottom d-flex justify-content-start gap-5 ">
 
               <div class="form-check ps-0" v-if="selectedBlockIndex !== 0">
                 <div>
                   <input type="checkbox" id="ViewOnlyReportee" v-model="ViewOnlyReportee"
                     class="me-2  mt-0 form-check-input designationCheckBox" />
-                  <label for="ViewOnlyReportee " class="SelectallDesignation fw-bold mt-1 form-check-label">View Only
-                    Reportee</label>
+                  <label for="ViewOnlyReportee" class="SelectallDesignation text-nowrap fw-bold mt-1 form-check-label">View Only
+                    Reportee</label>  
                 </div>
               </div>
-            </div>
-            <div v-if="selectedBlockIndex !== 0" class="p-3 approval-border-bottom ">
-
+              
               <div class="form-check ps-0" v-if="selectedBlockIndex !== 0">
                 <div>
                   <input type="checkbox" id="all_approvals_required" v-model="all_approvals_required"
                     class="me-2  mt-0 form-check-input designationCheckBox" />
-                  <label for="all_approvals_required " class="SelectallDesignation fw-bold mt-1 form-check-label">All Approvers Required</label>
+                  <label for="all_approvals_required" class="SelectallDesignation text-nowrap fw-bold mt-1 form-check-label">All Approvers Required</label>
                 </div>
               </div>
-              
             </div>
-
           </div>
 
         </div>
@@ -1332,7 +1328,10 @@
           <!-- <div v-if="designationValue.length" class="d-flex flex-wrap gap-2 mt-3">
             <span v-for="(selected, i) in designationValue" :key="i"
               class="badge bg-secondary d-flex align-items-center">
+              <label for="" class="font-12">
+
               {{ selected }}
+              </label> 
               <button type="button" class="btn-close btn-close-white ms-2" aria-label="Remove"
                 @click="removeDesignation(selected)" style="font-size: 0.6rem;"></button>
             </span>

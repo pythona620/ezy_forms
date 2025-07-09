@@ -47,10 +47,10 @@
                     ({{ item.role }}) has
                     <strong class="strong-content">{{
                       formatAction(item.action)
-                      }}</strong>
+                    }}</strong>
                     the request<span v-if="index !== 0 && item.reason">with the comments:</span>
                     <strong v-if="index !== 0 && item.reason" class="strong-content">{{ item.reason || "N/A"
-                    }}</strong>
+                      }}</strong>
                   </p>
                 </div>
               </div>
@@ -139,16 +139,13 @@ const emittedFormData = ref([]);
 const selectedcurrentLevel = ref("");
 const activityData = ref([]);
 const responseData = ref([]);
-const ViewOnlyReportee =  ref(false);
+const ViewOnlyReportee = ref(false);
 const tableheaders = ref([
   { th: "Request ID", td_key: "name" },
-  // { th: "Form name", td_key: "name" },
-  // { th: "Form category", td_key: "doctype_name" },
-  // { th: "Owner of form", td_key: "owner" },
   { th: "Requested By", td_key: "requested_by" },
+  { th: "Linked ID", td_key: "linked_form_id" },
   { th: "Requested on", td_key: "requested_on" },
   { th: "Requested Department", td_key: "role" },
-  // { th: "Property", td_key: "property" },
   { th: "Approval Status", td_key: "status" },
   { th: "Pending With", td_key: "assigned_to_users" },
 
@@ -176,11 +173,11 @@ onMounted(() => {
   getClientIP()
   const storedData = localStorage.getItem("employeeData");
   employeeData.value = JSON.parse(storedData);
-  
+
 });
 
 const viewlist = ref([])
-function ViewOnlyReport(){
+function ViewOnlyReport() {
 
   // console.log(ViewOnlyReportee.value); 
   axiosInstance
@@ -190,22 +187,22 @@ function ViewOnlyReport(){
       viewlist.value = response.message;
 
       // const filters = [ "name","in", viewlist.value];
-    //    if (route.query.status) {
-    //   filterObj.value.filters = [
-    //     ["name", "in", viewlist.value],
-    //     ["status", "=", route.query.status],
-    //   ];
-        
-      
-    //   // filterObj.value.filters.push(["status", "=", route.query.status]);
-    // }
+      //    if (route.query.status) {
+      //   filterObj.value.filters = [
+      //     ["name", "in", viewlist.value],
+      //     ["status", "=", route.query.status],
+      //   ];
+
+
+      //   // filterObj.value.filters.push(["status", "=", route.query.status]);
+      // }
       receivedForMe(filterObj.value.filters);
 
     })
     .catch((error) => {
       console.log(error);
-      });
-   
+    });
+
 
 }
 function actionCreated(rowData, actionEvent) {
@@ -298,19 +295,38 @@ function actionCreated(rowData, actionEvent) {
   }
 }
 
-function viewPreview(data) {
+function viewPreview(data, index, type) {
   // console.log(data);
-  router.push({
-    name: "ApproveRequest",
-    query: {
-      routepath: route.path,
-      name: data.name,
-      doctype_name: data.doctype_name,
-      type: "mytasks",
-      designation: employeeData.value
+  if (type === 'view') {
 
-    },
-  });
+    router.push({
+      name: "ApproveRequest",
+      query: {
+        routepath: route.path,
+        name: data.name,
+        doctype_name: data.doctype_name,
+        type: "mytasks",
+        designation: employeeData.value
+
+      },
+    });
+  }
+  if (type === 'td_key') {
+    if (data.linked_form_id) {
+      router.push({
+        name: "ApproveRequest",
+        query: {
+          routepath: route.path,
+          name: data.linked_form_id,
+          business_unit: data.property,
+          type: "linkedForm",
+          readOnly: 'true'
+
+        },
+      });
+    }
+  }
+
 }
 
 // Computed property to determine if any action is cancelled
@@ -420,7 +436,7 @@ function ApproverFormSubmission(dataObj, type) {
 
 }
 const ip_address = ref(null)
- 
+
 const getClientIP = async () => {
   try {
     const response = await fetch('https://api.ipify.org?format=json')
@@ -635,8 +651,8 @@ function receivedForMe(data) {
     ["assigned_to_users", "like", `%${EmpRequestdesignation?.designation}%`],
     ["property", "like", `%${newBusinessUnit.value.business_unit}%`],
     ["status", "!=", "Request Cancelled"],
-    
-    ["name","in", viewlist.value],
+
+    ["name", "in", viewlist.value],
     ["status", "!=", "Completed"]
   ];
   if (data) {
@@ -703,7 +719,7 @@ const fieldMapping = computed(() => ({
   role: { type: "input" },
 
 
-  status: { type: "select", options:["Request Raised","In Progress"] },
+  status: { type: "select", options: ["Request Raised", "In Progress"] },
 
 }));
 

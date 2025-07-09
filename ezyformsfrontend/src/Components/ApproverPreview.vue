@@ -18,7 +18,7 @@
             <h5 class="m-0 fw-bold font-13">{{ section.label }}</h5>
           </div>
           <div class="container-fluid">
-            <div class="row" v-for="(row, rowIndex) in section.rows" :key="rowIndex">
+            <div class="row align-items-center" v-for="(row, rowIndex) in section.rows" :key="rowIndex">
               <div v-for="(column, columnIndex) in row.columns" :key="'column-preview-' + columnIndex"
                 :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 bg-transparent' : 'border-0 bg-transparent'"
                 class="col dynamicColumn">
@@ -32,7 +32,7 @@
                     <div
                           v-if="!(blockIndex !== 0 && !field.value && ['Approver', 'Approved On', 'Approved By','Acknowledged By'].includes(field.label) )"
                       :class="(props.readonlyFor === 'true' || blockIndex < currentLevel) && field.fieldtype !== 'Small Text' && field.fieldtype !== 'Text' || field.fieldtype === 'Check'
-                                    ? 'd-flex ' + (field.fieldtype === 'Check' ? 'mt-1 flex-row-reverse justify-content-end gap-2 w-0 align-items-start ' : '') + (field.label === 'Approved By' ? 'align-items-start' : 'align-items-start nowrap')
+                                    ? 'd-flex ' + (field.fieldtype === 'Check' ? 'mt-1 flex-row-reverse justify-content-end gap-2 w-0 align-items-start ' : '') + (field.label === 'Approved By' ? 'align-items-center' : 'align-items-start nowrap')
                                     : ''" >
 
 
@@ -69,7 +69,7 @@
                         <template v-if="
                           field.fieldtype === 'Select'
                         ">
-                          <div class="my-2">
+                          <div class="">
 
                             <div v-if="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel">
                               <span class=" font-12">{{ field.value }}</span>
@@ -314,9 +314,9 @@
                                   fieldIndex
                                 )" class="form-control font-12 " />
 
-                            <button v-if="field.value && field.label !== 'Department'"
+                            <!-- <button v-if="field.value && field.label !== 'Department'"
                               class="btn btn-dark text-dark bg-white  p-1" @click="ClickLink(field)"> <i
-                                class="bi bi-link-45deg font-15"></i></button>
+                                class="bi bi-link-45deg font-15"></i></button> -->
 
                             <!-- <button type="button" class="btn btn-outline-secondary pb-0 btn-sm" data-bs-toggle="modal"
                               :data-bs-target="`#modal-${field.fieldname}`">

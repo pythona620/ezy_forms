@@ -411,14 +411,14 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch, computed } from "vue";
+import {ref, watch, computed } from "vue";
 import ApproverPreview from "./ApproverPreview.vue";
 import { useRoute, useRouter } from "vue-router";
 import axiosInstance from "../shared/services/interceptor";
 import { apis, doctypes, domain } from "../shared/apiurls";
 import { EzyBusinessUnit } from "../shared/services/business_unit";
 import { rebuildToStructuredArray } from "../shared/services/field_format";
-import ButtonComp from "./ButtonComp.vue";
+// import ButtonComp from "./ButtonComp.vue";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 const route = useRoute();
@@ -1010,7 +1010,7 @@ function receivedForMe(data) {
   if (data) {
     filters.push(data);
   }
-  if (selectedData.value.type !== 'myteam' && selectedData.value.type !== 'myapprovals') {
+  if (selectedData.value.type !== 'myteam' && selectedData.value.type !== 'myapprovals' && selectedData.value.type !== 'linkedForm') {
     if (selectedData.value.type == "myforms") {
       filters.push(["requested_by", "like", EmpRequestdesignation.emp_mail_id]);
     } else {
@@ -1058,6 +1058,7 @@ function receivedForMe(data) {
 
       selectedcurrentLevel.value = tableData.value?.current_level;
       selectedtotalLevels.value = tableData.value?.total_levels;
+      selectedData.value.doctype_name = tableData.value?.doctype_name
       // console.log(selectedcurrentLevel.value, " current_level");
       //  console.log(tableData.value.is_linked_form, "is_linked_form==========");
 

@@ -1833,9 +1833,9 @@ const logFieldValue = (
             : [];
 
         const totalFiles = existingFiles.length + files.length;
-        if (totalFiles > 5) {
-            alert("You can upload a maximum of 5 files.");
-            files = files.slice(0, 5 - existingFiles.length); // Only allow up to 5 total
+        if (totalFiles > 10) {
+            alert("You can upload a maximum of 10 files.");
+            files = files.slice(0, 10 - existingFiles.length); // Only allow up to 5 total
         }
 
         files.forEach((file) => uploadFile(file, field));
