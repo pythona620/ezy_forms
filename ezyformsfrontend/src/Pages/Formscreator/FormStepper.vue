@@ -2497,31 +2497,11 @@ const fieldTypes = [
     type: "Data",
   },
   {
-    label: "Table",
-    type: "Table",
-  },
-  {
-    label: "Number",
-    type: "Int",
-  },
-  {
-    label: "Attach",
-    type: "Attach",
-  },
-  {
-    label: "Phone",
-    type: "Phone",
-  },
-  {
     label: "Time",
     type: "Time",
   },
-  // {
-  //   label: "Table",
-  //   type: "Table",
-  // },
   {
-    label: "TextArea",
+    label: "Text Area",
     type: "Text",
   },
   {
@@ -2533,13 +2513,22 @@ const fieldTypes = [
     type: "Datetime",
   },
   {
+    label: "Attach",
+    type: "Attach",
+  },
+  {
+    label: "Phone",
+    type: "Data",
+  },
+  {
     label: "Check",
     type: "Check",
   },
-  // {
-  //     label: "Radio",
-  //     type: "radio",
-  // },
+   {
+    label: "Number",
+    type: "Int",
+  },
+ 
   {
     label: "Select",
     type: "Select",
@@ -2555,6 +2544,14 @@ const fieldTypes = [
   // {
   //     label: "Signature",
   //     type: "Signature",
+  // },
+   // {
+  //     label: "Radio",
+  //     type: "radio",
+  // },
+    // {
+  //   label: "Table",
+  //   type: "Table",
   // },
 ];
 const SELECT_ALL = "Select All"; // Special option for "Select All"
