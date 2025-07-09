@@ -131,6 +131,7 @@
 
 
                                            <template v-else-if="field.fieldtype == 'Attach'">
+                                            
   <!-- File Input -->
                                                 <input 
                                                 v-if="(field.fieldname !== 'requestor_signature' && field.label !== 'Requestor Signature') || !field.value"
@@ -1911,6 +1912,7 @@ const logFieldValue = (
         field["value"] = inputValue;
         // console.log(inputValue);
     }
+   if (field.fieldtype !== 'Attach') {
     validateField(
         field,
         blockIndex,
@@ -1919,6 +1921,7 @@ const logFieldValue = (
         columnIndex,
         fieldIndex
     );
+}
     emit("updateField", field);
 };
 
@@ -2011,7 +2014,7 @@ const generateRandomNumber = () => {
 };
 
 
-const uploadFile = (file, field) => {
+const uploadFile = (file, field, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) => {
     const randomNumber = generateRandomNumber();
     let fileName = `mailfiles-${props.formName}${randomNumber}-@${file.name}`;
 
@@ -2029,7 +2032,19 @@ const uploadFile = (file, field) => {
                 } else {
                     field["value"] = res.message.file_url;
                 }
+
+                // ✅ Emit updated value
                 emit("updateField", field);
+
+                // ✅ Validate after upload completes
+                validateField(
+                    field,
+                    blockIndex,
+                    sectionIndex,
+                    rowIndex,
+                    columnIndex,
+                    fieldIndex
+                );
             } else {
                 console.error("file_url not found in the response.");
             }
@@ -2038,6 +2053,7 @@ const uploadFile = (file, field) => {
             console.error("Upload error:", error);
         });
 };
+
 
  const flatFieldList = computed(() => {
   return (props.blockArr || []).flatMap((block) =>

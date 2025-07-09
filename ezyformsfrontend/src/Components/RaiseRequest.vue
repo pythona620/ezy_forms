@@ -151,14 +151,17 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-outline-secondary font-12" data-bs-dismiss="modal">Cancel</button>
-            <button type="button" class="btn btn-dark" :disabled="!acknowledge || saveloading"
-              @click="raiseRequestSubmission">
-              <span v-if="saveloading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-              <span v-if="!saveloading">
-                <span class="font-12 fw-bold">Yes, Proceed</span>
-              </span>
+           <button
+  type="button"
+  class="btn btn-dark"
+  style="min-width: 120px;"  
+  :disabled="!acknowledge || saveloading"
+  @click="raiseRequestSubmission"
+>
+  <span v-if="saveloading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+  <span v-else class="font-12 fw-bold">Yes, Proceed</span>
+</button>
 
-            </button>
           </div>
         </div>
       </div>
@@ -846,21 +849,29 @@ const linkedId = ref("");
 const childRef = ref(null)
 
 function toRaiseReqBtn() {
-  const hasError = childRef.value?.errorStatus ?? false
+  const hasError = childRef.value?.errorStatus ?? false;
+
   if (hasError) {
-    toast.error('Please fix errors before submitting.')
-  } else {
-    const modal = new bootstrap.Modal(document.getElementById('ExportEmployeeModal'))
-    modal.show()
+    toast.error('Please fix errors before submitting.');
+    return;
   }
-}
 
-
-async function raiseRequestSubmission() {
   if (!isFormValid.value) {
     toast.error("Please Fill All Mandatory Fields");
     return;
   }
+
+  const modal = new bootstrap.Modal(document.getElementById('ExportEmployeeModal'));
+  modal.show();
+}
+
+
+
+async function raiseRequestSubmission() {
+  // if (!isFormValid.value) {
+  //   toast.error("Please Fill All Mandatory Fields");
+  //   return;
+  // }
 
   const childEntries = Object.entries(childtablesData.value);
 
