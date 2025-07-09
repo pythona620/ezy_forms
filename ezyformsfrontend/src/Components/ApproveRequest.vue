@@ -213,7 +213,7 @@
               </div>
               <div class="activity_height">
                 <!-- Tabs -->
-                <div class="d-flex mb-2">
+                <div class="d-flex mb-2 tabs_list">
                   <button class="btn btn-light tab_btn"
                     :class="{ active: activeTab === 'activity', 'border-0': !tableData.is_linked_form }"
                     @click="activeTab = 'activity'">
@@ -583,18 +583,18 @@ function openModal(item) {
     .catch((error) => {
       console.error(`Error fetching data for :`, error);
     });
-  axiosInstance
-    .get(`${apis.resource}${doctypes.WFActivityLog}/${'CRR_TEST_RETURN_FORM-0000008'}`)
-    .then((res) => {
-      if (res.data) {
-        // console.log(res.data);
-        linkedActivity.value = res.data.reason;
-        // activityData.value = res.data.reason || []; // Ensure it's always an array
-      }
-    })
-    .catch((error) => {
-      console.log(error)
-    });
+  // axiosInstance
+  //   .get(`${apis.resource}${doctypes.WFActivityLog}/${item.link_form_id}`)
+  //   .then((res) => {
+  //     if (res.data) {
+  //       // console.log(res.data);
+  //       linkedActivity.value = res.data.reason;
+  //       // activityData.value = res.data.reason || []; // Ensure it's always an array
+  //     }
+  //   })
+  //   .catch((error) => {
+  //     console.log(error)
+  //   });
 
 
 
@@ -1508,6 +1508,13 @@ watch(activityData, (newVal) => {
 .activity_height {
   height: 80vh;
   overflow-y: scroll;
+  position: relative;
+}
+.tabs_list{
+    position: sticky;
+    top: 0;
+    background-color: #fff;
+    padding-bottom: 5px;
 }
 
 .pending {

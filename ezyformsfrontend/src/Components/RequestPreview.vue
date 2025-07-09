@@ -296,7 +296,10 @@
     <input
       type="text"
       v-model="field.value"
-      @focus="field.showDropdown = true"
+       @focus="() => {
+    fetchDoctypeList(field.options, field.value, field);
+    field.showDropdown = true;
+  }"
       @blur="() => field.showDropdown = false"
       @input="() => fetchDoctypeList(field.options, field.value, field)"
       @change="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
@@ -741,7 +744,7 @@
     <!-- For calculated fields -->
     <input
         v-if="field.description && /[+\-*/]/.test(field.description)"
-        type="number"
+        type="number" 
         class="form-control font-12"
         :value="calculateFieldExpression(row, field.description, table)"
         readonly
@@ -2704,4 +2707,5 @@ input:focus{
     border: 1px solid #000;
 
 }
+
 </style>
