@@ -1493,6 +1493,7 @@ const fieldMapping = ref({
   emp_code: { type: "input" },
   emp_name: { type: "input" },
   designation: { type: "input" },
+  department: { type: "input" },
 });
 // const filtersBeforeApplyingCount = computed(() => {
 //     return [filterOnModal.designation, filterOnModal.emp_code, filterOnModal.department, filterOnModal.emp_mail_id, filterOnModal.emp_name, filterOnModal.reporting_designation, filterOnModal.reporting_to].filter(
