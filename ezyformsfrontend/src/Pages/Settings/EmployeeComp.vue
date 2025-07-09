@@ -560,7 +560,7 @@
 
             <div class="mt-4">
               <label class="font-13 mb-1" for="emp_name">Remarks<span class="text-danger ps-1">*</span></label>
-              <textarea v-model="remarks" class="w-100 font-13 remarks"></textarea>
+              <textarea v-model.trim="remarks" class="w-100 font-13 remarks"></textarea>
             </div>
 
 
@@ -1657,6 +1657,7 @@ const fieldMapping = ref({
   emp_code: { type: "input" },
   emp_name: { type: "input" },
   designation: { type: "input" },
+  department: { type: "input" },
 });
 // const filtersBeforeApplyingCount = computed(() => {
 //     return [filterOnModal.designation, filterOnModal.emp_code, filterOnModal.department, filterOnModal.emp_mail_id, filterOnModal.emp_name, filterOnModal.reporting_designation, filterOnModal.reporting_to].filter(
@@ -2573,6 +2574,6 @@ function SaveEditEmp() {
 
 .remarks{
   border: 1px solid #c5bdbd;
-  border-radius: 5px
+  border-radius: 5px;
 }
 </style>
