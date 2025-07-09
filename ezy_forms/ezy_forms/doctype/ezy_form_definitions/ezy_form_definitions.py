@@ -292,6 +292,8 @@ from ezy_forms.ezy_custom_forms.custom_script.v1.sign_up import email_template_c
 def activating_perms_for_all_roles_in_wf_roadmap():
 
     unique_roles_from_all_roles = frappe.db.get_list("WF Roles",pluck="name")
+    template_create=email_template_create()
+    doctype_permission=ezy_doctype_permission()
     
     child_entries = frappe.get_all(
             "Doctype Permissions",
@@ -318,7 +320,6 @@ def activating_perms_for_all_roles_in_wf_roadmap():
     frappe.db.commit()
     # Check if the path exists
     folder_path = get_site_path("public", "files", "Attachment folder")
-    email_template_create()
 
     delete = lambda path: os.unlink(path) if os.path.isfile(path) or os.path.islink(path) else shutil.rmtree(path)
 
@@ -526,3 +527,46 @@ def delete_roles_for_approver_roles(role:list|None,level:int|None,short_name:str
 		"updated_workflow": filtered_workflow,
 		"updated_roadmaps": updated_roadmaps
 	}
+ 
+@frappe.whitelist()
+def ezy_doctype_permission():
+    """
+    api = api/method/ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions.ezy_doctype_permission
+    This function updates the Ezy Doctype Permissions if any missing values are found.
+    """
+    try:
+        # Hardcoded default permissions
+        employee_doctypes_permi = ['DocType', 'User', 'Role', 'Data Import', 'Data Export','System Settings','Website Settings','Email Account']
+        guest_permi = ['Ezy Departments', 'WF Roles', 'Notification Settings','Acknowledgement']
+
+        # Fetch custom doctypes from specified modules
+        custom_doctypes = frappe.get_all("DocType", filters={'module': ["in", ["Ezy Flow", "Ezy Forms",'ezy_forms']]})
+        custom_doctype_names = [doc.name for doc in custom_doctypes]
+
+        # Extend employee permission list
+        employee_doctypes_permi.extend(custom_doctype_names)
+
+        # Get the doc
+        ezy_permissions = frappe.get_doc("Ezy Doctype Permissions", "Ezy Doctype Permissions")
+
+        # Existing entries in the multiselect table fields
+        existing_employee_perms = [d.doctype_names for d in ezy_permissions.document_type]
+        existing_guest_perms = [d.doctype_names for d in ezy_permissions.guest_permissions]
+
+        # Find and add new entries if not already present
+        for perm in employee_doctypes_permi:
+            if perm not in existing_employee_perms:
+                ezy_permissions.append("document_type", {"doctype_names": perm})
+
+        for perm in guest_permi:
+            if perm not in existing_guest_perms:
+                ezy_permissions.append("guest_permissions", {"doctype_names": perm})
+
+        # Save changes
+        ezy_permissions.save(ignore_permissions=True)
+        frappe.db.commit()
+        return {"status": "success", "message": "Permissions updated successfully"}
+
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "Error in ezy_doctype_permissions")
+        return {"error": str(e)}
