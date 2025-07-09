@@ -153,7 +153,7 @@ template_str = """
         }
         .row {
             display: flex;
-            flex-wrap: wrap;
+              align-items: start;
             margin-bottom: 5px;
         }
         .column {
@@ -691,7 +691,7 @@ template_str = """
 
                     
 
-                    <div class="row" style="display: flex; flex-wrap: wrap;">
+                    <div class="row" style="display: flex;">
                         {% for column in row.columns %}
                        
                             <div class="column">
@@ -700,15 +700,22 @@ template_str = """
                                 {% endif %}
                                 {% for field in column.fields %}
                                     
-                                    <div class="field field-textarea">
+                                    <div class="field {% if field.fieldtype == 'Text' or field.fieldtype == 'Small Text' %}field-textarea{% endif %}">
                                     
-                                  
-                                        {% if field.fieldname != 'auto_calculations' %}
+                                     {% if field.fieldtype == 'Check' and field.fieldname != 'auto_calculations' %}
+                                            <div class="checkbox-gap" style="display: flex; align-items: start; gap: 8px;">
+                                                <!-- Checkbox -->
+                                                <span class="custom-checkbox {% if field['values'] %}checked{% else %}unchecked{% endif %}" style="margin-top:-10px;"></span>
+                                                <!-- Label -->
+                                                <label style="margin-top:-7px;" for="{{ field.fieldname }}">
+                                                    {{ field.label }} <span style="padding-left:2px; font-size: 13px;"></span>
+                                                </label>
+                                            </div>
+                                        {% elif field.fieldname != 'auto_calculations' %}
                                             <label for="{{ field.fieldname }}">
                                                 {{ field.label }} <span style="padding-left:2px; font-size: 13px;">:</span>
                                             </label>
                                         {% endif %}
-
                                         {% if field.fieldtype in ['radio'] %}
                                             <div class="container-fluid">
                                                 <div class="row">
@@ -722,6 +729,7 @@ template_str = """
                                                             <div>
                                                             
                                                                 {% if field.fieldtype == 'Check'  %}
+                                                                 {{option}}
                                                                     <input
                                                                         type="checkbox"
                                                                         class="form-check-input"
@@ -752,10 +760,7 @@ template_str = """
                                                     {% endfor %}
                                                 </div>
                                             </div>
-                                        {% elif field.fieldtype == 'Check' and field.fieldname != 'auto_calculations' %}
-                                            <div class="checkbox-gap" style="display: flex; align-items: center; gap: 8px;">
-                                                <span class="custom-checkbox {% if field['values'] %}checked{% else %}unchecked{% endif %}"></span>
-                                            </div>
+                                     
 
                                         {% elif field.fieldtype == 'Data' or field.fieldtype == 'Int' or field.fieldtype =='Link' and field.fieldname != 'auto_calculations' %}
                                             <span id="{{ field.fieldname }}"
@@ -796,7 +801,7 @@ template_str = """
                                                     {% for value in selected_values_list if value %}
                                                         <div class="checkbox-gap">
                                                             <span class="custom-checkbox checked"></span>
-                                                            <span >{{ value }}</span>
+                                                            <span style="margin-left:3px; margin-top:3px;" >{{ value }}</span>
                                                         </div>
                                                     {% endfor %}
                                                 </div>
@@ -812,17 +817,17 @@ template_str = """
                                             {% endif %}
                                         {% elif field.fieldtype == 'Attach' %}
     {% if field['values'] %}
-        {% if field.fieldtype == 'Attach' and (field.fieldname.startswith('approved_by') or field.fieldname.startswith('requestor')) %}
+        {% if field.fieldtype == 'Attach' and (field.fieldname.startswith('approved_by') or field.fieldname.startswith('requestor')or field.fieldname.startswith('acknowle')) %}
             <img  
                 id="{{ field.fieldname }}" 
                 src="{{ site_url + field['values'] or '' }}" 
-                style="width: 80px; height: 80px; object-fit: contain; display: block; margin-left: 119px; margin-top: -51px;"  
+                style="width: 80px; height: 40px; object-fit: contain;margin-top:-25px;"  
                 name="{{ field.fieldname }}"
             >
         {% else %}
             <ul style="padding-left: 20px; margin: 5px 0;">
                 {% for file in field['values'].split(',') %}
-                    <li>
+                    <li style="font-size:12px;">
                         {{ file.strip().split('@')[-1] if '@' in file else file.strip().split('/')[-1] }}
                     </li>
                 {% endfor %}
@@ -1232,7 +1237,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                             "label": 'Form Attachments',
                             "file_url": iteration["value"]
                         }
-                        if iteration.get("fieldname") and not iteration.get("fieldname").lower().startswith(("approved_by", "requestor")):
+                        if iteration.get("fieldname") and not iteration.get("fieldname").lower().startswith(("approved_by", "requestor","acknowle")):
                             mail_attachment.append(attachment_info)
                     # Handle Table fields (child tables)
                     if iteration.get("fieldtype") == "Table":
