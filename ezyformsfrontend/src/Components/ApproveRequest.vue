@@ -583,18 +583,18 @@ function openModal(item) {
     .catch((error) => {
       console.error(`Error fetching data for :`, error);
     });
-  axiosInstance
-    .get(`${apis.resource}${doctypes.WFActivityLog}/${'CRR_TEST_RETURN_FORM-0000008'}`)
-    .then((res) => {
-      if (res.data) {
-        // console.log(res.data);
-        linkedActivity.value = res.data.reason;
-        // activityData.value = res.data.reason || []; // Ensure it's always an array
-      }
-    })
-    .catch((error) => {
-      console.log(error)
-    });
+  // axiosInstance
+  //   .get(`${apis.resource}${doctypes.WFActivityLog}/${item.link_form_id}`)
+  //   .then((res) => {
+  //     if (res.data) {
+  //       // console.log(res.data);
+  //       linkedActivity.value = res.data.reason;
+  //       // activityData.value = res.data.reason || []; // Ensure it's always an array
+  //     }
+  //   })
+  //   .catch((error) => {
+  //     console.log(error)
+  //   });
 
 
 

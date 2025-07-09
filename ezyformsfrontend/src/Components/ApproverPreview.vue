@@ -1,13 +1,13 @@
 <template>
-  <section>
-
-    <div v-if="filteredBlocks.length" class="card p-3">
-      <div>
 
       <!-- <button type="button" class="btn btn-dark btn-
                   " @click="toggleEdit">
               {{ isEditable ? 'Cancel' : 'Edit' }}
             </button> -->
+  <section>
+
+    <div v-if="filteredBlocks.length" class="card p-3">
+      <div>
       </div>
       <div v-for="(block, blockIndex) in filteredBlocks" :key="blockIndex" class="block-container rounded-2">
         <div v-if="blockIndex === 0"><label class=" fw-bold font-12 ps-2">Request ID: </label> <span class="font-13">
@@ -1560,9 +1560,9 @@ const isPdfFile = (url) => {
 </script>
 
 <style lang="scss" scoped>
-.imge_top{
-      position: absolute; top: -10px;
-}
+// .imge_top{
+//       position: absolute; top: -4px;
+// }
 .btn-close {
   background: transparent;
   border: none;
@@ -1858,4 +1858,5 @@ td {
   background-color: #eeeeee !important;
   color: #000 !important;
 }
+
 </style>

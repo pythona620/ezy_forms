@@ -296,7 +296,10 @@
     <input
       type="text"
       v-model="field.value"
-      @focus="field.showDropdown = true"
+       @focus="() => {
+    fetchDoctypeList(field.options, field.value, field);
+    field.showDropdown = true;
+  }"
       @blur="() => field.showDropdown = false"
       @input="() => fetchDoctypeList(field.options, field.value, field)"
       @change="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
@@ -2704,4 +2707,5 @@ input:focus{
     border: 1px solid #000;
 
 }
+
 </style>
