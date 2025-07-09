@@ -1300,6 +1300,18 @@
                 </div>
               </div>
             </div>
+            <div v-if="selectedBlockIndex !== 0" class="p-3 approval-border-bottom ">
+
+              <div class="form-check ps-0" v-if="selectedBlockIndex !== 0">
+                <div>
+                  <input type="checkbox" id="all_approvals_required" v-model="all_approvals_required"
+                    class="me-2  mt-0 form-check-input designationCheckBox" />
+                  <label for="all_approvals_required " class="SelectallDesignation fw-bold mt-1 form-check-label">All Approvers Required</label>
+                </div>
+              </div>
+              
+            </div>
+
           </div>
 
         </div>
@@ -1397,6 +1409,7 @@ const selectedBlockIndex = ref("");
 let workflowSetup = reactive([]);
 const searchDesignation = ref("");
 const ViewOnlyReportee = ref(false);
+const all_approvals_required = ref(false)
 const OnRejection = ref('');
 const wrkAfterGetData = ref([]);
 // const hasWorkflowToastShown = ref(false);
@@ -2484,31 +2497,11 @@ const fieldTypes = [
     type: "Data",
   },
   {
-    label: "Table",
-    type: "Table",
-  },
-  {
-    label: "Number",
-    type: "Int",
-  },
-  {
-    label: "Attach",
-    type: "Attach",
-  },
-  {
-    label: "Phone",
-    type: "Phone",
-  },
-  {
     label: "Time",
     type: "Time",
   },
-  // {
-  //   label: "Table",
-  //   type: "Table",
-  // },
   {
-    label: "TextArea",
+    label: "Text Area",
     type: "Text",
   },
   {
@@ -2520,13 +2513,22 @@ const fieldTypes = [
     type: "Datetime",
   },
   {
+    label: "Attach",
+    type: "Attach",
+  },
+  {
+    label: "Phone",
+    type: "Data",
+  },
+  {
     label: "Check",
     type: "Check",
   },
-  // {
-  //     label: "Radio",
-  //     type: "radio",
-  // },
+   {
+    label: "Number",
+    type: "Int",
+  },
+ 
   {
     label: "Select",
     type: "Select",
@@ -2542,6 +2544,14 @@ const fieldTypes = [
   // {
   //     label: "Signature",
   //     type: "Signature",
+  // },
+   // {
+  //     label: "Radio",
+  //     type: "radio",
+  // },
+    // {
+  //   label: "Table",
+  //   type: "Table",
   // },
 ];
 const SELECT_ALL = "Select All"; // Special option for "Select All"
@@ -2654,10 +2664,10 @@ function addDesignationBtn() {
   // workflowSetup.push(xyz)
   if (selectedBlockIndex.value !== 0) {
     xyz.view_only_reportee = ViewOnlyReportee.value === true ? 1 : 0;
-  }
-  if (selectedBlockIndex.value !== 0) {
     xyz.on_rejection = OnRejection.value ? OnRejection.value : 0;
+    xyz.all_approvals_required = all_approvals_required.value === true ? 1 : 0;
   }
+ 
 
 
   const existingIndex = workflowSetup.findIndex((item) => item.idx === xyz.idx);
@@ -2688,6 +2698,7 @@ function initializeDesignationValue(blockIndex) {
   // Check for view_only_reportee flag
   ViewOnlyReportee.value = currentSetup.view_only_reportee === 1;
   OnRejection.value = currentSetup.on_rejection
+  all_approvals_required.value = currentSetup.all_approvals_required === 1;
 }
 
 // Initialize `designationValue` based on the roles for the given block index
@@ -2720,6 +2731,7 @@ function initializeDesignationValue(blockIndex) {
 const AddDesignCanvas = (idx) => {
   searchDesignation.value = ''
   ViewOnlyReportee.value = false;
+  all_approvals_required.value = false;
   OnRejection.value = '';
   // console.log(idx, "---clicked idex", selectedBlockIndex.value);
   if (filterObj.value.accessible_departments.length) {
