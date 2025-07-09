@@ -213,7 +213,7 @@
               </div>
               <div class="activity_height">
                 <!-- Tabs -->
-                <div class="d-flex mb-2">
+                <div class="d-flex mb-2 tabs_list">
                   <button class="btn btn-light tab_btn"
                     :class="{ active: activeTab === 'activity', 'border-0': !tableData.is_linked_form }"
                     @click="activeTab = 'activity'">
@@ -1508,6 +1508,13 @@ watch(activityData, (newVal) => {
 .activity_height {
   height: 80vh;
   overflow-y: scroll;
+  position: relative;
+}
+.tabs_list{
+    position: sticky;
+    top: 0;
+    background-color: #fff;
+    padding-bottom: 5px;
 }
 
 .pending {

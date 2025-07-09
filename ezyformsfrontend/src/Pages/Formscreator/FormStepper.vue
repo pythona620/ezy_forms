@@ -2701,7 +2701,7 @@ function initializeDesignationValue(blockIndex) {
   // Check for view_only_reportee flag
   ViewOnlyReportee.value = currentSetup.view_only_reportee === 1;
   OnRejection.value = currentSetup.on_rejection
-  all_approvals_required = currentSetup.all_approvals_required === 1;
+  all_approvals_required.value = currentSetup.all_approvals_required === 1;
 }
 
 // Initialize `designationValue` based on the roles for the given block index

@@ -744,7 +744,7 @@
     <!-- For calculated fields -->
     <input
         v-if="field.description && /[+\-*/]/.test(field.description)"
-        type="number"
+        type="number" 
         class="form-control font-12"
         :value="calculateFieldExpression(row, field.description, table)"
         readonly
