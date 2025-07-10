@@ -2,11 +2,13 @@
     <div class="main-div">
         <div class="py-2">
             <div class="card card-div border-0">
-                <label for="fileInput" class="cursor-pointer w-25">
-                    <img title="Upload Image" :src="userData?.profile_image ? userData.profile_image : defaultImage"
-                        class="img-fluid profile-img" />
-                </label>
-                <input type="file" id="fileInput" @change="uploadImage" accept="image/*" hidden />
+                <div class="position-relative d-inline-block">
+                    <img :src="userData?.profile_image ? userData.profile_image : defaultImage"
+                        title="Upload Profile Image" class="img-fluid profile-img border"
+                        @click="triggerFileInput('profile')" style="cursor: pointer;" />
+                    <i class="bi bi-pencil edit-profile-icon m-2"
+                        @click="triggerFileInput('profile')" style="cursor: pointer;"></i>
+                </div>
 
                 <div class="d-flex justify-content-between align-items-end mt-2 ms-1">
                     <div>
@@ -16,6 +18,20 @@
                     <span><i class="bi bi-envelope-open-fill me-2"></i>{{ userData.emp_mail_id }}</span>
                     <span class="text-secondary">Designation: <strong>{{ userData.designation }}</strong></span>
                     <span class="text-secondary">Department: <strong>{{ userData.department }}</strong></span>
+                    <span class="text-secondary d-flex"><p class="mt-4 m-0 me-2">Signiture:</p>
+                        <div class="position-relative d-inline-block">
+                            <img :src="userData?.signature ? userData.signature : defaultImage" title="Upload Signature"
+                                class="img-fluid profile-img signiture-image border" @click="triggerFileInput('signature')"
+                                style="cursor: pointer;" />
+                            <i class="bi bi-pencil edit-image m-2"
+                                @click="triggerFileInput('signature')" style="cursor: pointer;"></i>
+                        </div>
+
+                        <!-- Hidden File Input -->
+                        <input type="file" ref="fileInput" @change="uploadImage" accept="image/*" hidden />
+
+                    </span>
+
                 </div>
             </div>
         </div>
@@ -34,17 +50,15 @@ import defaultImage from "@/assets/UploadProfile.jpg";
 const employeeData = ref({});
 const email = ref("");
 const userData = ref([])
-// const defaultImage = "../../assets/UploadProfile.jpg"; // Default profile image
+// const defaultImage = "../../assets/UploadProfile.jpg"; // Default profile image 
 
-function userDetails(empEmail) {
-    axiosInstance
-        .get(`${apis.resource}${doctypes.EzyEmployeeList}/${empEmail}`)
-        .then((res) => {
-            userData.value = res.data
-        })
-        .catch((error) => {
-            console.error("Error fetching user data:", error);
-        });
+const fileInput = ref(null);
+const uploadType = ref('');
+
+
+function triggerFileInput(type) {
+    uploadType.value = type; // 'profile' or 'signature'
+    fileInput.value.click();
 }
 
 function uploadImage(event) {
@@ -58,22 +72,34 @@ function uploadImage(event) {
         .post(apis.uploadfile, formData)
         .then((res) => {
             const imageUrl = res.message.file_url;
+            const payload = uploadType.value === 'profile'
+                ? { profile_image: imageUrl }
+                : { signature: imageUrl };
 
             return axiosInstance.put(
                 `${apis.resource}${doctypes.EzyEmployeeList}/${userData.value.name}`,
-                { profile_image: imageUrl }
+                payload
             );
         })
         .then(() => {
             userDetails(userData.value.name);
-            toast.success('Profile Updated Successfully', { autoClose: 300 });
+            toast.success(`${uploadType.value === 'profile' ? 'Profile' : 'Signature'} Image Updated Successfully`, { autoClose: 300 });
         })
         .catch((error) => {
             console.error("Error uploading image:", error);
         });
 }
 
-
+function userDetails(empEmail) {
+    axiosInstance
+        .get(`${apis.resource}${doctypes.EzyEmployeeList}/${empEmail}`)
+        .then((res) => {
+            userData.value = res.data
+        })
+        .catch((error) => {
+            console.error("Error fetching user data:", error);
+        });
+}
 
 onMounted(() => {
     employeeData.value = JSON.parse(localStorage.getItem('employeeData')) || {};
@@ -103,11 +129,46 @@ onMounted(() => {
     padding: 5px;
     border-radius: 7px;
 }
+.signiture-image{
+    height: 50px;
+}
+
+.edit-image{
+    position: absolute;
+    top: -18px;
+    left: 58px;
+    background: black;
+    border-radius: 13px;
+    color: white;
+    padding: 4px;
+    font-size: 13px;
+    height: 24px;
+}
+.edit-profile-icon{
+    position: absolute;
+    top: -15px;
+    left: 58px;
+    background: black;
+    border-radius: 13px;
+    color: white;
+    padding: 4px;
+    font-size: 13px;
+    height: 25px;
+}
 
 span {
     font-size: 14px;
     font-weight: 500;
     line-height: 19.5px;
 
+}
+
+.signature-upload {
+    max-width: 300px;
+}
+
+.preview-section img {
+    max-width: 100%;
+    height: auto;
 }
 </style>
