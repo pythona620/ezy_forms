@@ -125,10 +125,10 @@ const ViewOnlyReportee = ref(false);
 const tableheaders = ref([
   { th: "Request ID", td_key: "name" },
   { th: "Requested By", td_key: "requested_by" },
-  { th: "Linked ID", td_key: "linked_form_id" },
   { th: "Requested Department", td_key: "role" },
   { th: "Approval Status", td_key: "status" },
   { th: "Workflow Status", td_key: "assigned_to_users" },
+  { th: "Linked ID", td_key: "linked_form_id" },
 
 ]);
 
