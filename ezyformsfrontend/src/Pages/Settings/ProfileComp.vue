@@ -18,8 +18,9 @@
                     <span><i class="bi bi-envelope-open-fill me-2"></i>{{ userData.emp_mail_id }}</span>
                     <span class="text-secondary">Designation: <strong>{{ userData.designation }}</strong></span>
                     <span class="text-secondary">Department: <strong>{{ userData.department }}</strong></span>
-                    <span class="text-secondary d-flex"><p class="mt-4 m-0 me-2">Signiture:</p>
-                        <div class="position-relative d-inline-block">
+                    <span class="text-secondary">Acknowledged On: <strong>{{ userData.enable_on }}</strong></span>
+                    <span class="text-secondary d-flex"><p class="mt-5 m-0 me-2">Signiture:</p>
+                        <div class="position-relative d-inline-block " style="top:12px">
                             <img :src="userData?.signature ? userData.signature : defaultImage" title="Upload Signature"
                                 class="img-fluid profile-img signiture-image border" @click="triggerFileInput('signature')"
                                 style="cursor: pointer;" />
