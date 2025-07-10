@@ -23,7 +23,7 @@
           <td class="p-1" v-for="(column, index) in tHeaders" :key="index">
             <template v-if="fieldMapping[column.td_key]">
               <!-- Text input -->
-              <div v-if="fieldMapping[column.td_key].type === 'input'" class="input-group border-none-input">
+              <div v-if="fieldMapping[column.td_key].type === 'input'" class="input-group border-none-input z-0">
                 <span v-show="!focusedFields[column.td_key]" class="input-group-text font-12" id="basic-addon1">
                   <i class="bi bi-search"></i>
                 </span>
@@ -76,12 +76,13 @@
               </span> -->
               <!-- Condition for Action Column -->
               <span v-if="column.td_key === 'status'">
+                
                 <i class="bi bi-circle-fill status-circle font-10 text-center pe-2" :class="{
                   'text-warning fw-medium': row[column.td_key] === 'Request Raised',
                   'textcompleted fw-medium': row[column.td_key] === 'Completed',
                   'text-primary fw-medium': row[column.td_key] === 'In Progress',
                   'textcancel fw-medium': row[column.td_key] === 'Cancelled',
-                  'text-danger fw-medium': row[column.td_key] === 'Request Cancelled',
+                  'RequestCancelled fw-medium': row[column.td_key] === 'Request Cancelled',
                   'text-success fw-medium': row[column.td_key] === 'Success',
                   'text-danger fw-medium': row[column.td_key] === 'Failed',
                 }"></i>
@@ -174,8 +175,9 @@
                   </span>
                 </span>
                 <span v-else >
+                  {{ row[column.td_key] }}
 
-                  {{ getDisplayText(column.td_key, row[column.td_key]) }}
+                  <!-- {{ getDisplayText(column.td_key, row[column.td_key]) }} -->
                 </span>
               </span>
 
@@ -915,6 +917,9 @@ th:first-child {
 
 .textcancel {
   color: #17a2b8;
+}
+.RequestCancelled{
+  color: red;
 }
 
 /* Default border style */

@@ -168,7 +168,7 @@
                                                         <div
                                                         v-else-if="isPdfFile(fileUrl)"
                                                         class="d-flex align-items-center justify-content-center border mt-2"
-                                                        style="width: 100px; height: 100px; background: #f9f9f9"
+                                                        style="width: 60px; height: 70px; background: #f9f9f9"
                                                         >
                                                         <i class="bi bi-file-earmark-pdf fs-1 text-danger"></i>
                                                         </div>
@@ -196,8 +196,8 @@
                                                     <button
                                                         v-if="hovered === index"
                                                         @click="removeFile(index, field)"
-                                                        class="btn btn-sm btn-light position-absolute"
-                                                        style="top: 2px; right: 5px; border-radius: 50%; padding: 0 5px"
+                                                        class="btn btn-sm btn-light  border-0 position-absolute"
+                                                        style="top: 5px; right: -5px; border-radius: 50%; padding: 0 5px;height:27px;"
                                                     >
                                                         <i class="bi bi-x fs-6"></i>
                                                     </button>
@@ -573,6 +573,12 @@
                                                                                             >
                                                                                             <i class="bi bi-file-earmark fs-1"></i>
                                                                                             </div>
+                                                                                           <button v-if="hovered === index"
+                                                                                        @click="removechildFile(index, fieldItem, row)"
+                                                                                        class="btn btn-sm btn-light position-absolute"
+                                                                                        style="top: 5px; right: -5px; border-radius: 50%; padding: 0 5px;height:27px;">
+                                                                                        <i class="bi bi-x fs-6"></i>
+                                                                                    </button>
                                                                                 </div>
                                                                             </div>
                                                                         </div>
@@ -742,31 +748,31 @@
                                                                         </template>
 
                                                                        <template v-else-if="field.fieldtype === 'Int'">
-    <!-- For calculated fields -->
-    <input
-        v-if="field.description && /[+\-*/]/.test(field.description)"
-        type="number" 
-        class="form-control font-12"
-        :value="calculateFieldExpression(row, field.description, table)"
-        readonly
-    />
+                                                                            <!-- For calculated fields -->
+                                                                            <input
+                                                                                v-if="field.description && /[+\-*/]/.test(field.description)"
+                                                                                type="number" 
+                                                                                class="form-control font-12"
+                                                                                :value="calculateFieldExpression(row, field.description, table)"
+                                                                                readonly
+                                                                            />
 
-    <!-- For normal fields with dynamic validation -->
-    <div v-else>
-        <input
-            type="number"
-            class="form-control font-12"
-            :class="{ 'border-danger': hasFieldError(row, field) }"
-            v-model.number="row[field.fieldname]"
-            :disabled="(field.label === 'Qty' && route.query.main_form) || field.description === 'Disable'"
-            @input="validateFields(row, table)"
-        />
-        <!-- Error message display -->
-        <div v-if="hasFieldError(row, field)" class="text-danger py-1 font-10">
-            {{ getFieldError(row, field) }}
-        </div>
-    </div>
-</template>
+                                                                            <!-- For normal fields with dynamic validation -->
+                                                                            <div v-else>
+                                                                                <input
+                                                                                    type="number"
+                                                                                    class="form-control font-12"
+                                                                                    :class="{ 'border-danger': hasFieldError(row, field) }"
+                                                                                    v-model.number="row[field.fieldname]"
+                                                                                    :disabled="(field.label === 'Qty' && route.query.main_form) || field.description === 'Disable'"
+                                                                                    @input="validateFields(row, table)"
+                                                                                />
+                                                                                <!-- Error message display -->
+                                                                                <div v-if="hasFieldError(row, field)" class="text-danger py-1 font-10">
+                                                                                    {{ getFieldError(row, field) }}
+                                                                                </div>
+                                                                            </div>
+                                                                        </template>
   
                                                                         
 
@@ -809,7 +815,7 @@
                                                                                          <div
                                                                                             v-else-if="isPdfFile(fileUrl)"
                                                                                             class="d-flex align-items-center justify-content-center border mt-2"
-                                                                                            style="width: 100px; height: 100px; background: #f9f9f9"
+                                                                                            style="width: 60px; height: 70px; background: #f9f9f9"
                                                                                             >
                                                                                             <i class="bi bi-file-earmark-pdf fs-1 text-danger"></i>
                                                                                             </div>
@@ -837,7 +843,7 @@
                                                                                     <button v-if="hovered === index"
                                                                                         @click="removechildFile(index, field, row)"
                                                                                         class="btn btn-sm btn-light position-absolute"
-                                                                                        style="top: 2px; right: 5px; border-radius: 50%; padding: 0 5px">
+                                                                                        style="top: 5px; right: -5px; border-radius: 50%; padding: 0 5px;height:27px;">
                                                                                         <i class="bi bi-x fs-6"></i>
                                                                                     </button>
                                                                                 </div>
