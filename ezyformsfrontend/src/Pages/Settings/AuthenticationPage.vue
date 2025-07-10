@@ -197,7 +197,7 @@ function BussinesUnit() {
 
     const queryParams = {
         fields: JSON.stringify(["*"]),
-        filters: JSON.stringify([["bu_name", "=", Bussines_unit.value]]) // Apply filter based on buData
+        filters: JSON.stringify([["name", "=", Bussines_unit.value]]) // Apply filter based on buData
     };
 
     axiosInstance

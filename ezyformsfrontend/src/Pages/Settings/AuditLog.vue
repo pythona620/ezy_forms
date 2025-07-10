@@ -26,52 +26,75 @@
         <div class="offcanvas offcanvas-end" data-bs-backdrop="static" tabindex="-1" id="staticBackdrop"
             aria-labelledby="staticBackdropLabel">
             <div class="offcanvas-header">
-                <h5 class="offcanvas-title" id="staticBackdropLabel" :title="viewLogs.docname">{{ viewLogs.docname }}</h5>
-                <button type="button" class="btn-close shadow-none" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                <h5 class="offcanvas-title" id="staticBackdropLabel" :title="viewLogs.docname">{{ viewLogs.docname }}
+                </h5>
+                <button type="button" class="btn-close shadow-none" data-bs-dismiss="offcanvas"
+                    aria-label="Close"></button>
             </div>
-            <div class="offcanvas-body">
-                <!-- <div v-if="changedLogs.length">
-                    <ul>
-                        <li v-for="(item, index) in changedLogs" :key="index">
-                            <p class="text-nowrap m-0 font-13"><strong>Field Name =</strong> {{ item[0] }}</p>
-                            <p class="text-nowrap m-0 font-13"><strong>Old Value =</strong> {{ item[1] }}</p>
-                            <p class="text-nowrap m-0 font-13"><strong>New Value =</strong> {{ item[2] }}</p>
+
+            <div class="offcanvas-body p-3">
+                <!-- Added Logs -->
+                <div v-if="addedLogs.length" class="mb-2">
+                    <h6 class="text-muted fw-bold mb-3">➕ Added</h6>
+                    <ul class="ps-0 list-unstyled">
+                        <li v-for="(item, index) in addedLogs" :key="'added-' + index" class="px-3 rounded"
+                            style="background-color: #f9fafb; color: #333;">
+                            <!-- Field Name -->
+                            <p class="m-0 mb-1" style="font-weight: 500; color: #4b5563;">
+                                {{ item[0] }} added with:
+                            </p>
+
+                            <!-- Added Values -->
+                            <div v-if="typeof item[1] === 'object' && item[1] !== null" class="ps-2">
+                                <div v-for="(val, key) in item[1]" :key="key" class="mb-1"
+                                    style="font-size: 13px; color: #6b7280;">
+                                    <span class="text-muted">{{ key }}:</span>
+                                    <span
+                                        style="background-color: #e0e7ff; padding: 2px 6px; border-radius: 4px; color: #4338ca; margin-left: 5px; word-wrap: break-word; ">
+                                        {{ val }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div v-else style="font-size: 13px; color: #6b7280;">
+                                <span>Value:</span>
+                                <span style="background-color: #dbeafe; padding: 2px 6px; border-radius: 4px; color: #1e3a8a; margin-left: 5px; word-wrap: break-word; ">
+                                    {{ item[1] }}
+                                </span>
+                            </div>
                         </li>
                     </ul>
-                </div> -->
-                <!-- Added Logs -->
-                <div class="offcanvas-div" v-if="addedLogs.length">
-                <h6 class="font-9">Added</h6>
-                <ul>
-                    <li v-for="(item, index) in addedLogs" class="mb-2" :key="'added-' + index">
-                    <p class="m-0 font-13"><strong>Field Name =</strong> {{ item[0] }}</p>
-                    <template v-if="typeof item[1] === 'object' && item[1] !== null">
-                        <div v-for="(val, key) in item[1]" :key="key">
-                        <p class="m-0 font-13"><strong>{{ key }}:</strong> {{ val }}</p>
-                        </div>
-                    </template>
-                    <p class="m-0 font-13" v-else>
-                        <strong>Value =</strong> {{ item[1] }}
-                    </p>
-                    </li>
-                </ul>
                 </div>
 
                 <!-- Changed Logs -->
-                <div class="offcanvas-div" v-if="changedLogs.length">
-                <h6 class="font-9">Changes</h6>
-                <ul>
-                    <li v-for="(item, index) in changedLogs" class="mb-2" :key="'changed-' + index">
-                    <!-- Field Name = {{ item[0] }}, Old Value = {{ item[1] }}, New Value = {{ item[2] }} -->
-                        <p class="m-0 font-13"><strong>Field Name =</strong> {{ item[0] }}</p>
-                        <p class="m-0 font-13"><strong>Old Value =</strong> {{ item[1] }}</p>
-                        <p class="m-0 font-13"><strong>New Value =</strong> {{ item[2] }}</p>
-                    </li>
-                </ul>
+                <div v-if="changedLogs.length">
+                    <h6 class="text-muted fw-bold mb-3">🔄 Changes</h6>
+                    <ul class="list-unstyled ps-0">
+                        <li v-for="(item, index) in changedLogs" :key="'changed-' + index"
+                            class="mb-2 px-3 py-2 rounded" style="background-color: #f9fafb; color: #333;">
+                            <!-- Field Name -->
+                            <p class="m-0 mb-1" style="font-weight: 500; font-size:12px; color: #4b5563;">
+                               {{ item[0].replace(/_/g, ' ') }}
+                            </p>
+
+                            <!-- Change Summary -->
+                            <p class="m-0" style="font-size: 11px; color: #6b7280; line-height: 20px;">
+                                Changed from
+                                <span style="background-color: #e0e7ff; padding: 2px 6px; border-radius: 4px; color: #4338ca; word-wrap: break-word;">
+                                    {{ item[1] }}
+                                </span>
+                                to
+                                <span style="background-color: #d1fae5; padding: 2px 6px; border-radius: 4px; color: #065f46;">
+                                    {{ item[2] }}
+                                </span>
+                            </p>
+                        </li>
+                    </ul>
                 </div>
 
-                <div v-if="!addedLogs.length && !changedLogs.length">
-                No added or changed data.
+                <!-- No data -->
+                <div v-if="!addedLogs.length && !changedLogs.length" class="text-center text-muted mt-4">
+                    <i class="bi bi-info-circle me-2"></i>No added or changed data.
                 </div>
             </div>
         </div>
@@ -185,7 +208,7 @@ watch(
     businessUnit,
     (newVal) => {
         CreateDepartments.value.business_unit = newVal;
-        console.log("teDepartments",CreateDepartments.value.business_unit);
+        // console.log("teDepartments",CreateDepartments.value.business_unit);
         if (newVal.length) {
 
             activitylog()
