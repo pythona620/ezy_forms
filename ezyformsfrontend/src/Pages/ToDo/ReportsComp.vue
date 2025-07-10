@@ -191,20 +191,44 @@ function exportReport(type) {
     // Trigger the file download
     window.open(url, '_blank');
 }
-function downloadPdf(data) {
-  if (!data?.name || !SelectedReportName?.value) {
-    console.error("Missing required data for PDF download");
-    return;
-  }
 
-  const reportName = SelectedReportName.value;
-  const name = data.name || data.Name || data.id || data.report_name;
+function downloadPdf(data, index, type) {
+    if (type === "download") {
+        if (!data?.name || !SelectedReportName?.value) {
+            console.error("Missing required data for PDF download");
+            return;
+        }
 
-//   console.log(reportName, name,"ooooo", apis.getReportData,"lll");
-  const url = apis.getReportData + `?doctype=${encodeURIComponent(reportName)}&name=${encodeURIComponent(name)}`;
+        const reportName = SelectedReportName.value;
+        const name = data.name || data.Name || data.id || data.report_name;
 
-  // Open the PDF in a new tab
-  window.open(url, "_blank");
+        //   console.log(reportName, name,"ooooo", apis.getReportData,"lll");
+        const url = apis.getReportData + `?doctype=${encodeURIComponent(reportName)}&name=${encodeURIComponent(name)}`;
+
+        // Open the PDF in a new tab
+        window.open(url, "_blank");
+    }
+
+    if (type === "mail") {
+        // console.log("data", data); 
+        const payload = {
+            docname: data.name,
+            doctype:SelectedReportName.value
+        }
+        console.log("payload",payload);
+
+        axiosInstance
+            .post(apis.reportMailSend, payload)
+            .then((res) => {
+                if (res) {
+                    const response=res;
+                    toast.success("Mail send successfully")
+                }
+            })
+            .catch((error) => {
+                console.error("Upload error:", error);
+            });
+    }
 }
 
 

@@ -6,7 +6,7 @@
                     <img :src="userData?.profile_image ? userData.profile_image : defaultImage"
                         title="Upload Profile Image" class="img-fluid profile-img border"
                         @click="triggerFileInput('profile')" style="cursor: pointer;" />
-                    <i class="bi bi-pencil edit-profile-icon m-2"
+                    <i v-if="userData.profile_image" class="bi bi-pencil edit-profile-icon m-2"
                         @click="triggerFileInput('profile')" style="cursor: pointer;"></i>
                 </div>
 
@@ -21,10 +21,10 @@
                     <span class="text-secondary">Acknowledged On: <strong>{{ userData.enable_on }}</strong></span>
                     <span class="text-secondary d-flex"><p class="mt-5 m-0 me-2">Signiture:</p>
                         <div class="position-relative d-inline-block " style="top:12px">
-                            <img :src="userData?.signature ? userData.signature : defaultImage" title="Upload Signature"
+                            <img :src="userData?.signature ? userData.signature : defaultSign" title="Upload Signature"
                                 class="img-fluid profile-img signiture-image border" @click="triggerFileInput('signature')"
                                 style="cursor: pointer;" />
-                            <i class="bi bi-pencil edit-image m-2"
+                            <i v-if="userData?.signature" class="bi bi-pencil edit-image m-2"
                                 @click="triggerFileInput('signature')" style="cursor: pointer;"></i>
                         </div>
 
@@ -46,6 +46,7 @@ import { onMounted, ref } from "vue";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import defaultImage from "@/assets/UploadProfile.jpg";
+import defaultSign from "@/assets/Sign.png";
 
 
 const employeeData = ref({});

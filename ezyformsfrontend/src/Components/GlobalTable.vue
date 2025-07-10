@@ -243,7 +243,10 @@
 
             <td v-if="download === 'true'" class="text-center fixed-action position-relative">
               <span>
-                <i class="bi bi-download eye-cursor" @click="handleCellClick(row, rowIndex, 'download')"></i>
+                <i class="bi bi-download me-3 eye-cursor" @click="handleCellClick(row, rowIndex, 'download')"></i>
+              </span>
+              <span>
+                <i class="bi bi-envelope eye-cursor" @click="handleCellClick(row, rowIndex, 'mail')"></i>
               </span>
             </td>
 

@@ -674,7 +674,7 @@ const tableheaders = ref([
   { th: "Department", td_key: "department" },
   { th: "Signature", td_key: "signature" },
 
-  { th: "Reports To", td_key: "reporting_to" },
+  { th: "Reports Designation", td_key: "reporting_designation" },
   { th: "Creation Date", td_key: "creation" },
   { th: "last Login", td_key: "last_login" },
   { th: "last Login IP", td_key: "last_ip" },
@@ -1633,6 +1633,7 @@ const fieldMapping = ref({
   emp_name: { type: "input" },
   designation: { type: "input" },
   department: { type: "input" },
+  reporting_designation:{ type: "input" },
 });
 // const filtersBeforeApplyingCount = computed(() => {
 //     return [filterOnModal.designation, filterOnModal.emp_code, filterOnModal.department, filterOnModal.emp_mail_id, filterOnModal.emp_name, filterOnModal.reporting_designation, filterOnModal.reporting_to].filter(

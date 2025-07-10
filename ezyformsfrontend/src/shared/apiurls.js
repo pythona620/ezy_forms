@@ -88,6 +88,8 @@ export const apis = {
   DepartmentNames: domain + `/method/ezy_forms.ezy_forms.doctype.ezy_departments.ezy_departments.side_nav_department_and_forms`,
   linked_doc_list: domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.linked_form_list`,
   linked_form_id_update: domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.linked_form_id_update`,
+  forgotPassword:domain +`/method/frappe.core.doctype.user.user.reset_password`,
+  reportMailSend:domain+`/method/ezy_forms.ezy_custom_forms.custom_script.mail.email_reports_send`,
 
   
   // getReportData: domain + `/api/method/frappe.utils.print_format.download_pdf`
