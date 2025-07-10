@@ -91,7 +91,7 @@
                   On
                   <strong class="strong-content">{{
                     formatDate(item.creation)
-                  }}</strong>,
+                    }}</strong>,
                   <strong class="strong-content">
                     <!-- {{ item.user_name }} -->
                     you
@@ -99,11 +99,11 @@
                   ({{ item.role }})
                   <strong class="strong-content">{{
                     formatAction(item.action)
-                  }}</strong>
+                    }}</strong>
                   the request with the comments:
                   <strong class="strong-content">{{
                     item.reason || "N/A"
-                  }}</strong>.
+                    }}</strong>.
                 </p>
               </div>
             </div>
@@ -212,15 +212,11 @@ const responseData = ref([]);
 const tableheaders = ref([
   { th: "Request ID", td_key: "name" },
   { th: "Form Name", td_key: "doctype_name" },
-  { th: "Linked Form", td_key: "is_linked_form" },
-  { th: "Linked ID", td_key: "linked_form_id" },
-
-  // { th: "Form category", td_key: "doctype_name" },
   { th: "Owner of form", td_key: "role" },
   { th: "Requested on", td_key: "requested_on" },
-  // { th: "Total Levels", td_key: "total_levels" },
   { th: "Approval Status", td_key: "status" },
   { th: "Workflow Status", td_key: "assigned_to_users" },
+  { th: "Linked ID", td_key: "linked_form_id" },
 
 ]);
 const fieldMapping = ref({
@@ -419,37 +415,38 @@ function actionCreated(rowData, actionEvent) {
 }
 
 
-function viewPreview(data,index,type) {
-   if(type === 'view'){
+function viewPreview(data, index, type) {
+  if (type === 'view') {
 
-     router.push({
-       name: "ApproveRequest",
-       query: {
-         routepath: route.path,
-         name: data.name,
-         doctype_name: data.doctype_name,
-         type: 'myteam',
-         readOnly: 'true'
+    router.push({
+      name: "ApproveRequest",
+      query: {
+        routepath: route.path,
+        name: data.name,
+        doctype_name: data.doctype_name,
+        type: 'myteam',
+        readOnly: 'true'
+      },
+    });
+  }
+
+
+  if (type === 'td_key') {
+    if (data.linked_form_id) {
+      router.push({
+        name: "ApproveRequest",
+        query: {
+          routepath: route.path,
+          name: data.linked_form_id,
+          business_unit: data.property,
+          type: "linkedForm",
+          readOnly: 'true'
+
         },
       });
     }
 
-
-  // if(type === 'td_key'){
-  //    router.push({
-  //     name: "ApproveRequest",
-  //     query: {
-  //       routepath: route.path,
-  //       name: data.linked_form_id,
-  //       doctype_name: 'Test Returnble Form',
-  //       business_unit:data.property,
-  //       status:data.status,
-  //       type: "myforms",
-  //       readOnly: 'true'
-        
-  //     },
-  //   });
-  // }
+  }
 }
 
 function closemodal() {
@@ -549,30 +546,30 @@ const PaginationLimitStart = ([itemsPerPage, start]) => {
 const timeout = ref(null);
 
 function inLineFiltersData(searchedData) {
-    // Clear the previous timeout to prevent multiple API calls while typing
-    clearTimeout(timeout.value);
+  // Clear the previous timeout to prevent multiple API calls while typing
+  clearTimeout(timeout.value);
 
-    // Set a new timeout to delay the API call
-    timeout.value = setTimeout(() => {
-        // Initialize filters array
-        const filters = [];
+  // Set a new timeout to delay the API call
+  timeout.value = setTimeout(() => {
+    // Initialize filters array
+    const filters = [];
 
-        // Loop through the table headers and build dynamic filters
-        tableheaders.value.forEach((header) => {
-            const key = header.td_key;
+    // Loop through the table headers and build dynamic filters
+    tableheaders.value.forEach((header) => {
+      const key = header.td_key;
 
-            if (searchedData[key]) {
-                filters.push([key, "like", `%${searchedData[key]}%`]);
-            }
-        });
+      if (searchedData[key]) {
+        filters.push([key, "like", `%${searchedData[key]}%`]);
+      }
+    });
 
-        // Call receivedForMe with or without filters
-        if (filters.length) {
-            receivedForMe(filters);
-        } else {
-            receivedForMe();
-        }
-    }, 500); // Adjust debounce delay as needed (e.g., 500ms)
+    // Call receivedForMe with or without filters
+    if (filters.length) {
+      receivedForMe(filters);
+    } else {
+      receivedForMe();
+    }
+  }, 500); // Adjust debounce delay as needed (e.g., 500ms)
 }
 
 function receivedForMe(data) {
@@ -621,7 +618,7 @@ function receivedForMe(data) {
     })
     .then((res) => {
       const newData = res.data;
-      if(filterObj.value.limit_start === 0){
+      if (filterObj.value.limit_start === 0) {
         tableData.value = newData;
 
         idDta.value = [...new Set(res.data.map((id) => id.name))];
@@ -632,7 +629,7 @@ function receivedForMe(data) {
           ...new Set(res.data.map((status) => status.status)),
         ];
       }
-      else{
+      else {
         tableData.value = tableData.value.concat(newData)
       }
     })

@@ -447,7 +447,7 @@ function updateCharts() {
 
 
 .dashboard-table{
-    height: 50dvh;
+    height: 40dvh !important;
     overflow: auto;
 }
 .main-div {

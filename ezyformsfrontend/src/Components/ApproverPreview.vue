@@ -18,7 +18,7 @@
             <h5 class="m-0 fw-bold font-13">{{ section.label }}</h5>
           </div>
           <div class="container-fluid">
-            <div class="row" v-for="(row, rowIndex) in section.rows" :key="rowIndex">
+            <div class="row align-items-center" v-for="(row, rowIndex) in section.rows" :key="rowIndex">
               <div v-for="(column, columnIndex) in row.columns" :key="'column-preview-' + columnIndex"
                 :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 bg-transparent' : 'border-0 bg-transparent'"
                 class="col dynamicColumn">
@@ -32,7 +32,7 @@
                     <div
                           v-if="!(blockIndex !== 0 && !field.value && ['Approver', 'Approved On', 'Approved By','Acknowledged By'].includes(field.label) )"
                       :class="(props.readonlyFor === 'true' || blockIndex < currentLevel) && field.fieldtype !== 'Small Text' && field.fieldtype !== 'Text' || field.fieldtype === 'Check'
-                                    ? 'd-flex ' + (field.fieldtype === 'Check' ? 'mt-1 flex-row-reverse justify-content-end gap-2 w-0 align-items-start ' : '') + (field.label === 'Approved By' ? 'align-items-start' : 'align-items-start nowrap')
+                                    ? 'd-flex mb-2 ' + (field.fieldtype === 'Check' ? 'mt-1 flex-row-reverse justify-content-end gap-2 w-0 align-items-start ' : '') + (field.label === 'Approved By' ? 'align-items-center' : 'align-items-start nowrap')
                                     : ''" >
 
 
@@ -69,7 +69,7 @@
                         <template v-if="
                           field.fieldtype === 'Select'
                         ">
-                          <div class="my-2">
+                          <div class="">
 
                             <div v-if="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel">
                               <span class=" font-12">{{ field.value }}</span>
@@ -194,98 +194,137 @@
 
 
                         <!-- @click="openInNewWindow(field.value)" -->
-                        <template v-else-if="field.fieldtype == 'Attach'">
+                       <template v-else-if="field.fieldtype == 'Attach'">
+                        
 
-                          <div v-if="field.value " class="d-flex gap-2 align-items-center flex-wrap">
-                            <div v-for="(file, i) in getFileArray(field.value)" :key="i"
-                              class="position-relative d-inline-block"
-                              :class="{ 'border-bottom-0': props.readonlyFor === 'true' }"
->
+  <!-- File Input (if no value or for specific cases) -->
+  <input
+    v-if="(field.fieldname !== 'requestor_signature' && field.label !== 'Requestor Signature' && blockIndex !== 0 && !field.label.includes('Approved By')) && (!field.value && blockIndex !==0) "
+    :disabled="props.readonlyFor === 'true'"
+    type="file"
+    accept=".jpeg,.jpg,.png,.pdf,.xlsx,.xls"
+    :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+    class="form-control previewInputHeight font-10 mt-2"
+    multiple
+    @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+  />
 
-                              <!-- Show file input if flagged for replacement -->
-                              <div v-if="replaceInputIndexes.includes(i)">
-                                <input type="file" accept="image/jpeg,image/png,application/pdf"
-                                  class="form-control previewInputHeight font-10"
-                                  @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
-                              </div>
+  <!-- File Previews -->
+  <div v-if="field.value" class="d-flex gap-2 align-items-center flex-wrap">
+    <div
+      v-for="(fileUrl, index) in field.value.split(',').map(f => f.trim())"
+      :key="index"
+      class="position-relative d-inline-block"
+      @mouseover="hovered = index"
+      @mouseleave="hovered = null"
+      :class="{ 'border-bottom-0': props.readonlyFor === 'true' }"
+    >
 
-                              <!-- Image block -->
-                              <template v-else-if="isImageFile(file)">
+      <!-- Image File -->
+      <template v-if="isImageFile(fileUrl)">
+        <template v-if="blockIndex === 0 && field.fieldname !== 'requestor_signature'">
+          <span
+            class="cursor-pointer text-decoration-underline font-12 d-flex"
+            @click="openPreview(fileUrl)"
+          >
+            <i class="bi bi-file-earmark-image fs-2"></i>
+          </span>
+        </template>
+        <template v-else>
+          <img
+            :src="fileUrl"
+            class="img-thumbnail cursor-pointer imge_top border-0 border-bottom-0"
+            @click="openPreview(fileUrl)"
+            style="max-width: 100px; max-height: 80px"
+          />
+        </template>
+      </template>
 
-                                <template v-if="blockIndex === 0 && field.fieldname !== 'requestor_signature'">
-                                  <span class="cursor-pointer text-decoration-underline font-12 d-flex"
-                                    @click="openFileModal(file)">
-                                    <i class="bi bi-file-earmark-image fs-4"></i>
-                                  </span>
-                                </template>
-                                <template v-else>
-                                  <img :src="file" class="img-thumbnail cursor-pointer imge_top border-0 border-bottom-0"
-                                    @click="openFile(file)" style="max-width: 80px; max-height: 80px" />
-                                </template>
-                              </template>
+      <!-- PDF File -->
+      <a
+        v-else-if="isPdfFile(fileUrl)"
+        :href="fileUrl"
+        target="_blank"
+        class="d-flex align-items-center justify-content-center border rounded bg-light"
+        style="width: 25px; height: 25px; text-decoration: none;"
+      >
+        <i class="bi bi-file-earmark-pdf text-danger fs-4"></i>
+      </a>
 
-                              <!-- PDF block -->
-                              <a v-else :href="file" target="_blank"
-                                class="d-flex align-items-center justify-content-center border rounded bg-light"
-                                style="width: 20px; height: 20px; text-decoration: none;">
-                                <img src="../assets/attach.png" alt="" width="25px">
-                              </a>
-                            </div>
-                          </div>
+      <!-- Excel File -->
+      <a
+        v-else-if="isExcelFile(fileUrl)"
+        :href="fileUrl"
+        target="_blank"
+        class="d-flex align-items-center justify-content-center border rounded bg-light"
+        style="width: 25px; height: 25px; text-decoration: none;"
+      >
+        <i class="bi bi-file-earmark-spreadsheet text-success fs-4"></i>
+      </a>
 
-                          <!-- Fallback input when there's no file yet -->
-                          <input v-else :disabled="props.readonlyFor === 'true' || blockIndex < currentLevel"
-                            type="file" accept="image/jpeg,image/png,application/pdf"
-                            :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'd-none' : ''"
-                            :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
-                            class="form-control previewInputHeight font-10" multiple
-                            @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
-                          <div class="modal fade" id="fileModal" tabindex="-1" aria-labelledby="fileModalLabel"
-                            aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered">
-                              <div class="modal-content">
+      <!-- Other Files -->
+      <a
+        v-else
+        :href="fileUrl"
+        target="_blank"
+        class="d-flex align-items-center justify-content-center border rounded bg-light"
+        style="width: 25px; height: 25px; text-decoration: none;"
+      >
+        <i class="bi bi-file-earmark fs-4"></i>
+      </a>
 
-                                <div class="modal-header">
-                                  <h5 class="modal-title font-14" id="fileModalLabel">Attachment</h5>
-                                  <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                    aria-label="Close"></button>
-                                </div>
+      <!-- Remove Button -->
+      <!-- <button v-if="hovered === index"
 
-                                <div class="modal-body d-flex flex-column gap-3">
-                                  <div class="d-flex justify-content-between align-items-center">
-                                    <span class="font-13">{{ selectedFileName }}</span>
-                                    <div class="d-flex gap-2 align-items-center">
-                                      <!-- ✅ Toggle Button -->
-                                      <button type="button" class="btn btn-light btn-sm"
-                                        @click="showPreview = !showPreview">
-                                        {{ showPreview ? 'Hide' : 'Show' }}
-                                      </button>
+        @click="removeFile(index, field)"
+        class="btn btn-sm btn-light border-0 position-absolute"
+        style="top: 5px; right: -5px; border-radius: 50%; padding: 0 5px; height: 27px;"
+      >
+        <i class="bi bi-x fs-6"></i>
+      </button> -->
+    </div>
+  </div>
 
-                                      <!-- Download Button -->
-                                      <a :href="selectedFileUrl" download class="btn btn-light btn-sm">Download</a>
-                                    </div>
-                                  </div>
+  <!-- Modal Preview -->
+  <div
+    v-if="showModal"
+    class="modal fade show"
+    style="display: block; background: rgba(0,0,0,0.5); position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1050;"
+  >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
 
-                                  <!-- ✅ Preview Area -->
-                                  <div v-if="showPreview" class="preview-area mt-2">
-                                    <!-- Image Preview -->
-                                    <img v-if="isImageFile(selectedFileUrl)" :src="selectedFileUrl"
-                                      class="img-fluid border rounded" style="max-width: 100%;" />
+        <div class="modal-header">
+          <h5 class="modal-title font-14">Attachment</h5>
+          <button type="button" class=" "  style="position: absolute; top: 10px; right: 10px; border: none; background: transparent; font-size: 20px;" @click="closePreview"> &times;</button>
+        </div>
 
-                                    <!-- PDF Preview -->
-          <iframe v-else-if="isPdfFile(selectedFileUrl)"
-    :src="selectedFileUrl"
-    width="100%" height="500px"
-    style="border:1px solid #ccc;">
-                                    </iframe>
-                                  </div>
-                                </div>
+        <div class="modal-body d-flex flex-column gap-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="font-13">{{ previewUrl.split('/').pop() }}</span>
+            <div class="d-flex gap-2 align-items-center">
+              <button type="button" class="btn btn-light btn-sm" @click="showPreview = !showPreview">
+                {{ showPreview ? 'Hide' : 'Show' }}
+              </button>
+              <a :href="previewUrl" download class="btn btn-light btn-sm">Download</a>
+            </div>
+          </div>
 
-                              </div>
-                            </div>
-                          </div>
+          <div v-if="showPreview" class="preview-area mt-2">
+            <img v-if="isImageFile(previewUrl)" :src="previewUrl" class="img-fluid border rounded" style="max-width: 100%;" />
+            <iframe v-else-if="isPdfFile(previewUrl)" :src="previewUrl" width="100%" height="500px" style="border:1px solid #ccc;"></iframe>
+            <div v-else class="text-center">
+              <p>Preview not available for this file type. <a :href="previewUrl" target="_blank">Download</a></p>
+            </div>
+          </div>
+        </div>
 
-                        </template>
+      </div>
+    </div>
+  </div>
+
+</template>
+
 
                         <!-- Modal -->
 
@@ -314,9 +353,9 @@
                                   fieldIndex
                                 )" class="form-control font-12 " />
 
-                            <button v-if="field.value && field.label !== 'Department'"
+                            <!-- <button v-if="field.value && field.label !== 'Department'"
                               class="btn btn-dark text-dark bg-white  p-1" @click="ClickLink(field)"> <i
-                                class="bi bi-link-45deg font-15"></i></button>
+                                class="bi bi-link-45deg font-15"></i></button> -->
 
                             <!-- <button type="button" class="btn btn-outline-secondary pb-0 btn-sm" data-bs-toggle="modal"
                               :data-bs-target="`#modal-${field.fieldname}`">
@@ -840,6 +879,7 @@ const textAreaRefs = reactive({});
 const replaceInputIndexes = ref([]);
 const previewUrl = ref('')
 const showModal = ref(false)
+// const hovered = ref(null) 
 // const isEditable = ref(false);
 
 // // Example function to toggle edit mode
@@ -1412,11 +1452,23 @@ const logFieldValue = (
     ].fields[fieldIndex];
 
   if (eve.target.files && eve.target.files.length > 0) {
-    const files = eve.target.files;
-    field["value"] = "";
-    for (let i = 0; i < files.length; i++) {
-      uploadFile(files[i], field);
-    }
+        let files = Array.from(eve.target.files); // Convert FileList to an array
+
+        // Normalize existing files into an array
+        let existingFiles = field["value"]
+            ? field["value"].split(',').map(f => f.trim())
+            : [];
+
+        const totalFiles = existingFiles.length + files.length;
+        if (totalFiles > 10) {
+            alert("You can upload a maximum of 10 files.");
+            files = files.slice(0, 10 - existingFiles.length); // Only allow up to 5 total
+        }
+
+        files.forEach((file) => uploadFile(file, field));
+
+        // ✅ Reset file input to allow same file re-selection
+        eve.target.value = null;
     // emit('updateField', field);
   } else if (eve.target.type === "checkbox") {
     if (field.fieldtype === "Check") {

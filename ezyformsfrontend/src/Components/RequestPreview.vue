@@ -131,6 +131,7 @@
 
 
                                            <template v-else-if="field.fieldtype == 'Attach'">
+                                            
   <!-- File Input -->
                                                 <input 
                                                 v-if="(field.fieldname !== 'requestor_signature' && field.label !== 'Requestor Signature') || !field.value"
@@ -167,7 +168,7 @@
                                                         <div
                                                         v-else-if="isPdfFile(fileUrl)"
                                                         class="d-flex align-items-center justify-content-center border mt-2"
-                                                        style="width: 100px; height: 100px; background: #f9f9f9"
+                                                        style="width: 60px; height: 70px; background: #f9f9f9"
                                                         >
                                                         <i class="bi bi-file-earmark-pdf fs-1 text-danger"></i>
                                                         </div>
@@ -195,8 +196,8 @@
                                                     <button
                                                         v-if="hovered === index"
                                                         @click="removeFile(index, field)"
-                                                        class="btn btn-sm btn-light position-absolute"
-                                                        style="top: 2px; right: 5px; border-radius: 50%; padding: 0 5px"
+                                                        class="btn btn-sm btn-light  border-0 position-absolute"
+                                                        style="top: 5px; right: -5px; border-radius: 50%; padding: 0 5px;height:27px;"
                                                     >
                                                         <i class="bi bi-x fs-6"></i>
                                                     </button>
@@ -572,6 +573,12 @@
                                                                                             >
                                                                                             <i class="bi bi-file-earmark fs-1"></i>
                                                                                             </div>
+                                                                                           <button v-if="hovered === index"
+                                                                                        @click="removechildFile(index, fieldItem, row)"
+                                                                                        class="btn btn-sm btn-light position-absolute"
+                                                                                        style="top: 5px; right: -5px; border-radius: 50%; padding: 0 5px;height:27px;">
+                                                                                        <i class="bi bi-x fs-6"></i>
+                                                                                    </button>
                                                                                 </div>
                                                                             </div>
                                                                         </div>
@@ -741,31 +748,31 @@
                                                                         </template>
 
                                                                        <template v-else-if="field.fieldtype === 'Int'">
-    <!-- For calculated fields -->
-    <input
-        v-if="field.description && /[+\-*/]/.test(field.description)"
-        type="number" 
-        class="form-control font-12"
-        :value="calculateFieldExpression(row, field.description, table)"
-        readonly
-    />
+                                                                            <!-- For calculated fields -->
+                                                                            <input
+                                                                                v-if="field.description && /[+\-*/]/.test(field.description)"
+                                                                                type="number" 
+                                                                                class="form-control font-12"
+                                                                                :value="calculateFieldExpression(row, field.description, table)"
+                                                                                readonly
+                                                                            />
 
-    <!-- For normal fields with dynamic validation -->
-    <div v-else>
-        <input
-            type="number"
-            class="form-control font-12"
-            :class="{ 'border-danger': hasFieldError(row, field) }"
-            v-model.number="row[field.fieldname]"
-            :disabled="(field.label === 'Qty' && route.query.main_form) || field.description === 'Disable'"
-            @input="validateFields(row, table)"
-        />
-        <!-- Error message display -->
-        <div v-if="hasFieldError(row, field)" class="text-danger py-1 font-10">
-            {{ getFieldError(row, field) }}
-        </div>
-    </div>
-</template>
+                                                                            <!-- For normal fields with dynamic validation -->
+                                                                            <div v-else>
+                                                                                <input
+                                                                                    type="number"
+                                                                                    class="form-control font-12"
+                                                                                    :class="{ 'border-danger': hasFieldError(row, field) }"
+                                                                                    v-model.number="row[field.fieldname]"
+                                                                                    :disabled="(field.label === 'Qty' && route.query.main_form) || field.description === 'Disable'"
+                                                                                    @input="validateFields(row, table)"
+                                                                                />
+                                                                                <!-- Error message display -->
+                                                                                <div v-if="hasFieldError(row, field)" class="text-danger py-1 font-10">
+                                                                                    {{ getFieldError(row, field) }}
+                                                                                </div>
+                                                                            </div>
+                                                                        </template>
   
                                                                         
 
@@ -808,7 +815,7 @@
                                                                                          <div
                                                                                             v-else-if="isPdfFile(fileUrl)"
                                                                                             class="d-flex align-items-center justify-content-center border mt-2"
-                                                                                            style="width: 100px; height: 100px; background: #f9f9f9"
+                                                                                            style="width: 60px; height: 70px; background: #f9f9f9"
                                                                                             >
                                                                                             <i class="bi bi-file-earmark-pdf fs-1 text-danger"></i>
                                                                                             </div>
@@ -836,7 +843,7 @@
                                                                                     <button v-if="hovered === index"
                                                                                         @click="removechildFile(index, field, row)"
                                                                                         class="btn btn-sm btn-light position-absolute"
-                                                                                        style="top: 2px; right: 5px; border-radius: 50%; padding: 0 5px">
+                                                                                        style="top: 5px; right: -5px; border-radius: 50%; padding: 0 5px;height:27px;">
                                                                                         <i class="bi bi-x fs-6"></i>
                                                                                     </button>
                                                                                 </div>
@@ -1832,9 +1839,9 @@ const logFieldValue = (
             : [];
 
         const totalFiles = existingFiles.length + files.length;
-        if (totalFiles > 5) {
-            alert("You can upload a maximum of 5 files.");
-            files = files.slice(0, 5 - existingFiles.length); // Only allow up to 5 total
+        if (totalFiles > 10) {
+            alert("You can upload a maximum of 10 files.");
+            files = files.slice(0, 10 - existingFiles.length); // Only allow up to 5 total
         }
 
         files.forEach((file) => uploadFile(file, field));
@@ -1911,6 +1918,7 @@ const logFieldValue = (
         field["value"] = inputValue;
         // console.log(inputValue);
     }
+   if (field.fieldtype !== 'Attach') {
     validateField(
         field,
         blockIndex,
@@ -1919,6 +1927,7 @@ const logFieldValue = (
         columnIndex,
         fieldIndex
     );
+}
     emit("updateField", field);
 };
 
@@ -2011,7 +2020,7 @@ const generateRandomNumber = () => {
 };
 
 
-const uploadFile = (file, field) => {
+const uploadFile = (file, field, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) => {
     const randomNumber = generateRandomNumber();
     let fileName = `mailfiles-${props.formName}${randomNumber}-@${file.name}`;
 
@@ -2029,7 +2038,19 @@ const uploadFile = (file, field) => {
                 } else {
                     field["value"] = res.message.file_url;
                 }
+
+                // ✅ Emit updated value
                 emit("updateField", field);
+
+                // ✅ Validate after upload completes
+                validateField(
+                    field,
+                    blockIndex,
+                    sectionIndex,
+                    rowIndex,
+                    columnIndex,
+                    fieldIndex
+                );
             } else {
                 console.error("file_url not found in the response.");
             }
@@ -2038,6 +2059,7 @@ const uploadFile = (file, field) => {
             console.error("Upload error:", error);
         });
 };
+
 
  const flatFieldList = computed(() => {
   return (props.blockArr || []).flatMap((block) =>
