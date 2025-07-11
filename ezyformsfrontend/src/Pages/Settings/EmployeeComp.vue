@@ -699,7 +699,6 @@ watch(
       const matchedEmployee = employeeEmails.find(emp => emp.emp_mail_id === newVal);
       if (matchedEmployee) {
         createEmployee.reporting_designation = matchedEmployee.designation || '';
-        // console.log(createEmployee.reporting_designation,newVal,createEmployee.reporting_to);
       } else {
         createEmployee.reporting_designation = '';
       }
@@ -1138,7 +1137,6 @@ function backtoEmployeeList() {
 // };
 
 function onDepartmentChange(selectedDepartment) {
-  // console.log('Selected department:', selectedDepartment);
   fetchingIsHod(selectedDepartment.name); // Call your API function here
 }
 
@@ -1155,11 +1153,8 @@ function fetchingIsHod(department) {
   axiosInstance
     .get(apis.resource + doctypes.EzyEmployeeList, { params: queryParams })
     .then((res) => {
-      //  console.log(res);
       createEmployee.value.reporting_to = res.data[0].name;
       createEmployee.reporting_designation = res.data[0].designation;
-      //  console.log("res.name",res.data[0].name);
-      //  console.log("res.designation",res.data[0].designation);
 
     })
     .catch((error) => {
@@ -1636,7 +1631,6 @@ function actionCreated(rowData, actionEvent) {
           if(res){
             const messages = JSON.parse(res._server_messages);
             const messageObj = JSON.parse(messages[0]);
-            // console.log("messageObj.message",messageObj.message);
             if(messageObj.message){
               toast.success("Password reset instructions have been sent to the user email.");
               const modal = bootstrap.Modal.getInstance(document.getElementById('ForgotPasswordModal'));
@@ -1695,9 +1689,7 @@ function confirmEmployeeToggle() {
     // Add current_date to the payload
     selectedEmpRow.value.enable_on = currentDateTime;
 
-    // console.log("selectedEmpRow.value",selectedEmpRow.value.enable_on);
   }
-  // console.log("selectedEmpRow",selectedEmpRow.value);
 
   axiosInstance
     .put(`${apis.resource}${doctypes.EzyEmployeeList}/${selectedEmpRow.value.name}`, selectedEmpRow.value)
@@ -1841,8 +1833,6 @@ const uploadFile = (file, field) => {
         }
         selectedEmpRow.value[field] = res.message.file_url;
         uploadedFields.value.push(field);
-        // console.log(`Uploaded ${field}:`, res.message.file_url);
-        // console.log("Uploaded file URL:", res.message.file_url);
       } else {
         console.error("file_url not found in the response.");
       }
@@ -1964,7 +1954,7 @@ function employeeData(data) {
     filters: JSON.stringify(filters),
     limit_page_length: filterObj.value.limitPageLength,
     limit_start: filterObj.value.limit_start,
-    order_by: "`tabEzy Employee`.`enable` DESC,`tabEzy Employee`.`creation` DESC",
+    order_by: "`tabEzy Employee`.`enable` DESC,`tabEzy Employee`.`modified` DESC",
   };
   const queryParamsCount = {
     fields: JSON.stringify(["count(name) AS total_count"]),
@@ -2022,7 +2012,7 @@ function employeeOptions() {
     fields: JSON.stringify(["*"]),
     limit_page_length: "None",
     filters: JSON.stringify([["company_field", "like", `%${newbusiness.value}%`]]),
-    order_by: "`tabEzy Employee`.`creation` desc",
+    order_by: "`tabEzy Employee`.`modified` desc",
   };
   axiosInstance
     .get(apis.resource + doctypes.EzyEmployeeList, { params: queryParams })
@@ -2032,7 +2022,6 @@ function employeeOptions() {
         if (filterObj.value.limit_start === 0) {
 
           employeeEmails.value = newData;
-          // console.log("employeeEmails",employeeEmails.value);
           // designations.value = [...new Set(res.data.map((designation) => designation.designation))];
           reportingTo.value = [
             ...new Set(res.data.map((reporting) => reporting.reporting_to)),
@@ -2123,7 +2112,6 @@ function createEmpl() {
     department: createEmployee.value.department?.name || "", // ✅ only send name
     doctype: doctypes.EzyEmployeeList,
   };
-  // console.log(dataObj);
   loading.value = true;
 
   axiosInstance

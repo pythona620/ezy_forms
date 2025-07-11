@@ -603,7 +603,6 @@ watch(
       const matchedEmployee = employeeEmails.find(emp => emp.emp_mail_id === newVal);
       if (matchedEmployee) {
         createEmployee.reporting_designation = matchedEmployee.designation || '';
-        console.log(createEmployee.reporting_designation,newVal,createEmployee.reporting_to);
       } else {
         createEmployee.reporting_designation = '';
       }
@@ -1423,7 +1422,6 @@ function actionCreated(rowData, actionEvent) {
 // );
 
 function onDepartmentChange(selectedDepartment) {
-  // console.log('Selected department:', selectedDepartment);
   fetchingIsHod(selectedDepartment.name); // Call your API function here
 }
  
@@ -1441,11 +1439,8 @@ function fetchingIsHod(department) {
   axiosInstance
     .get(apis.resource + doctypes.EzyEmployeeList, { params: queryParams })
     .then((res) => {
-    //  console.log(res);
      createEmployee.value.reporting_to = res.data[0].name;
      createEmployee.reporting_designation = res.data[0].designation;
-    //  console.log("res.name",res.data[0].name);
-    //  console.log("res.designation",res.data[0].designation);
 
     })
     .catch((error) => {
@@ -1583,7 +1578,6 @@ const uploadFile = (file, field) => {
         if (field === "signature") {
           createEmployee.value.signature = res.message.file_url;
         }
-        // console.log("Uploaded file URL:", res.message.file_url);
       } else {
         console.error("file_url not found in the response.");
       }
@@ -1704,7 +1698,7 @@ function employeeData(data) {
     filters: JSON.stringify(filters),
     limit_page_length: filterObj.value.limitPageLength,
     limit_start: filterObj.value.limit_start,
-    order_by: "`tabEzy Employee`.`enable` DESC,`tabEzy Employee`.`creation` DESC",
+    order_by: "`tabEzy Employee`.`enable` DESC,`tabEzy Employee`.`modified` DESC",
   };
   const queryParamsCount = {
     fields: JSON.stringify(["count(name) AS total_count"]),
@@ -1862,7 +1856,6 @@ function createEmpl() {
     department: createEmployee.value.department?.name || "", // ✅ only send name
     doctype: doctypes.EzyEmployeeList,
   };
-  console.log(dataObj);
   loading.value = true;
 
   axiosInstance
