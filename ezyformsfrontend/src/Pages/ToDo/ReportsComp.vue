@@ -91,7 +91,6 @@ const frappeBody = ref([]);
 const SelectedReportName = ref("");
 
 function viewPreview(data) {
-    // console.log("data===", data);
     SelectedReportName.value = data.name;
     viewReport.value = true;
 
@@ -136,7 +135,6 @@ function viewPreview(data) {
                         obj["td_key"] = item?.fieldname;
                         return obj;
                     });
-                    // console.log(listDataheaders.value, listData.value);
 
                     // new DataTable(document.getElementById("datatable"), {
                     //     columns: frappeTH.value,
@@ -202,7 +200,6 @@ function downloadPdf(data, index, type) {
         const reportName = SelectedReportName.value;
         const name = data.name || data.Name || data.id || data.report_name;
 
-        //   console.log(reportName, name,"ooooo", apis.getReportData,"lll");
         const url = apis.getReportData + `?doctype=${encodeURIComponent(reportName)}&name=${encodeURIComponent(name)}`;
 
         // Open the PDF in a new tab
@@ -210,12 +207,10 @@ function downloadPdf(data, index, type) {
     }
 
     if (type === "mail") {
-        // console.log("data", data); 
         const payload = {
             docname: data.name,
             doctype:SelectedReportName.value
         }
-        console.log("payload",payload);
 
         axiosInstance
             .post(apis.reportMailSend, payload)
@@ -233,7 +228,6 @@ function downloadPdf(data, index, type) {
 
 
 // function downloadPdf(data) {
-//   console.log("data", data);
 
 //   const doctype = encodeURIComponent(SelectedReportName.value);
 //   const name = encodeURIComponent(data.name);
@@ -267,7 +261,6 @@ function downloadPdf(data, index, type) {
 
 
 // function downloadPdf(data) {
-//     console.log("data",data);
 //   const name = data.name;
 //   const doctype = SelectedReportName.value;
 
@@ -277,7 +270,6 @@ function downloadPdf(data, index, type) {
 //   }
 
 //   const pdfUrl = `${domain}/printview?doctype=${doctype}&name=${name}`;
-//   console.log(pdfUrl);
 
 //   // Trigger download
 //   const link = document.createElement("a");
@@ -291,7 +283,6 @@ function downloadPdf(data, index, type) {
 
 
 onMounted(() => {
-    // console.log(domain,process.env.BASE_URL);
     ReportsData();
     // simulateCtrlF();
     document.addEventListener("keydown", handleCtrlF);
