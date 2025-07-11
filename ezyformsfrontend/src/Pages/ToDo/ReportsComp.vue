@@ -91,7 +91,6 @@ const frappeBody = ref([]);
 const SelectedReportName = ref("");
 
 function viewPreview(data) {
-    // console.log("data===", data);
     SelectedReportName.value = data.name;
     viewReport.value = true;
 
@@ -136,7 +135,6 @@ function viewPreview(data) {
                         obj["td_key"] = item?.fieldname;
                         return obj;
                     });
-                    // console.log(listDataheaders.value, listData.value);
 
                     // new DataTable(document.getElementById("datatable"), {
                     //     columns: frappeTH.value,
@@ -191,25 +189,45 @@ function exportReport(type) {
     // Trigger the file download
     window.open(url, '_blank');
 }
-function downloadPdf(data) {
-  if (!data?.name || !SelectedReportName?.value) {
-    console.error("Missing required data for PDF download");
-    return;
-  }
 
-  const reportName = SelectedReportName.value;
-  const name = data.name || data.Name || data.id || data.report_name;
+function downloadPdf(data, index, type) {
+    if (type === "download") {
+        if (!data?.name || !SelectedReportName?.value) {
+            console.error("Missing required data for PDF download");
+            return;
+        }
 
-//   console.log(reportName, name,"ooooo", apis.getReportData,"lll");
-  const url = apis.getReportData + `?doctype=${encodeURIComponent(reportName)}&name=${encodeURIComponent(name)}`;
+        const reportName = SelectedReportName.value;
+        const name = data.name || data.Name || data.id || data.report_name;
 
-  // Open the PDF in a new tab
-  window.open(url, "_blank");
+        const url = apis.getReportData + `?doctype=${encodeURIComponent(reportName)}&name=${encodeURIComponent(name)}`;
+
+        // Open the PDF in a new tab
+        window.open(url, "_blank");
+    }
+
+    if (type === "mail") {
+        const payload = {
+            docname: data.name,
+            doctype:SelectedReportName.value
+        }
+
+        axiosInstance
+            .post(apis.reportMailSend, payload)
+            .then((res) => {
+                if (res) {
+                    const response=res;
+                    toast.success("Mail send successfully")
+                }
+            })
+            .catch((error) => {
+                console.error("Upload error:", error);
+            });
+    }
 }
 
 
 // function downloadPdf(data) {
-//   console.log("data", data);
 
 //   const doctype = encodeURIComponent(SelectedReportName.value);
 //   const name = encodeURIComponent(data.name);
@@ -243,7 +261,6 @@ function downloadPdf(data) {
 
 
 // function downloadPdf(data) {
-//     console.log("data",data);
 //   const name = data.name;
 //   const doctype = SelectedReportName.value;
 
@@ -253,7 +270,6 @@ function downloadPdf(data) {
 //   }
 
 //   const pdfUrl = `${domain}/printview?doctype=${doctype}&name=${name}`;
-//   console.log(pdfUrl);
 
 //   // Trigger download
 //   const link = document.createElement("a");
@@ -267,7 +283,6 @@ function downloadPdf(data) {
 
 
 onMounted(() => {
-    // console.log(domain,process.env.BASE_URL);
     ReportsData();
     // simulateCtrlF();
     document.addEventListener("keydown", handleCtrlF);
