@@ -74,9 +74,10 @@
                       <!-- <FormFields tag="select" placeholder="Select Department" class="mb-3"
                                             name="dept" v-model="createEmployee.department" id="dept" :Required="false"
                                             :options="departmentsList" /> -->
-                      <VueMultiselect v-model="createEmployee.department" :options="departmentsList" :multiple="false" @update:modelValue="onDepartmentChange"
-                        :close-on-select="true" :clear-on-select="false" :preserve-search="true"
-                        placeholder="Select department" label="department_name" track-by="name" class="font-11 mb-3">
+                      <VueMultiselect v-model="createEmployee.department" :options="departmentsList" :multiple="false"
+                        @update:modelValue="onDepartmentChange" :close-on-select="true" :clear-on-select="false"
+                        :preserve-search="true" placeholder="Select department" label="department_name" track-by="name"
+                        class="font-11 mb-3">
                         <template #selection="{ values, isOpen }">
                           <span class="multiselect__single font-10" v-if="values.length" v-show="!isOpen">
                             {{values.map(v => v.department_name).join(", ")}}
@@ -85,7 +86,8 @@
                       </VueMultiselect>
 
                       <div class="ms-1">
-                         <input type="checkbox" id="isHOD" true-value="1" false-value="0" v-model="createEmployee.is_hod" class="form-check-input mt-1 input-border" />
+                        <input type="checkbox" id="isHOD" true-value="1" false-value="0" v-model="createEmployee.is_hod"
+                          class="form-check-input mt-1 input-border" />
                         <label class="font-13 ms-2 " for="isHOD">Is HOD</label>
                       </div>
 
@@ -230,7 +232,7 @@
                             alt="Signature" class="img-fluid signature-img border-1" />
                         </div>
                       </div>
-                      
+
                     </div>
                   </div>
                 </div>
@@ -372,29 +374,21 @@
                       {{ phoneError }}
                     </p>
                   </div> -->
-                  
-<div class="mb-3">
-  <label class="font-13 ps-1" for="emp_phone">Emp Phone</label>
-  <div class="input-container">
-    <input
-      type="text"
-      name="emp_phone"
-      id="emp_phone"
-      maxlength="13"
-      class="w-100 font-12  form-control"
-      :readonly="isMasked"
-      :value="isMasked ? maskNumber(createEmployee.emp_phone) : createEmployee.emp_phone"
-      @input="handleInput"
-      @blur="formatPhoneNumber"
-      placeholder="Enter Phone Number"
-    />
-    <i :class="eyeIcon" class="eye-icon" @click="toggleMask"></i>
-  </div>
 
-  <p v-if="phoneError" class="text-danger font-11 ps-1">
-    {{ phoneError }}
-  </p>
-</div>
+                  <div class="mb-3">
+                    <label class="font-13 ps-1" for="emp_phone">Emp Phone</label>
+                    <div class="input-container">
+                      <input type="text" name="emp_phone" id="emp_phone" maxlength="13"
+                        class="w-100 font-12  form-control" :readonly="isMasked"
+                        :value="isMasked ? maskNumber(createEmployee.emp_phone) : createEmployee.emp_phone"
+                        @input="handleInput" @blur="formatPhoneNumber" placeholder="Enter Phone Number" />
+                      <i :class="eyeIcon" class="eye-icon" @click="toggleMask"></i>
+                    </div>
+
+                    <p v-if="phoneError" class="text-danger font-11 ps-1">
+                      {{ phoneError }}
+                    </p>
+                  </div>
 
 
                  
@@ -414,9 +408,10 @@
                   <label class="font-13 ps-1 fw-medium" for="dept">Departments<span
                       class="text-danger ps-1">*</span></label>
 
-                  <VueMultiselect v-model="createEmployee.department" :options="departmentsList" :multiple="false" @update:modelValue="onDepartmentChange"
-                    :close-on-select="true" :clear-on-select="false" :preserve-search="true"
-                    placeholder="Select department" label="department_name" track-by="name" class="font-11 mb-3">
+                  <VueMultiselect v-model="createEmployee.department" :options="departmentsList" :multiple="false"
+                    @update:modelValue="onDepartmentChange" :close-on-select="true" :clear-on-select="false"
+                    :preserve-search="true" placeholder="Select department" label="department_name" track-by="name"
+                    class="font-11 mb-3">
                     <template #selection="{ values, isOpen }">
                       <span class="multiselect__single font-10" v-if="values.length" v-show="!isOpen">
                         {{values.map(v => v.department_name).join(", ")}}
@@ -424,9 +419,10 @@
                     </template>
                   </VueMultiselect>
                   <div class="ms-1">
-                         <input type="checkbox" id="isHOD" true-value="1" false-value="0" v-model="createEmployee.is_hod" class="form-check-input mt-1 input-border" />
-                        <label class="font-13 ms-2 " for="isHOD">Is HOD</label>
-                      </div>
+                    <input type="checkbox" id="isHOD" true-value="1" false-value="0" v-model="createEmployee.is_hod"
+                      class="form-check-input mt-1 input-border" />
+                    <label class="font-13 ms-2 " for="isHOD">Is HOD</label>
+                  </div>
                 </div>
                 <div class="col">
                   <div class="position-relative mb-3">
@@ -506,11 +502,11 @@
                       </span>
                     </template>
                   </VueMultiselect>
-                   <div class="mb-3">
+                  <div class="mb-3">
                     <label class="font-13 ps-1" for="reporting_to">Acknowledge On</label><br>
-                    <input class="mb-3 date-time " tag="input" type="datetime-local" name="acknowledge_on" id="acknowledge_on"
-                      placeholder="Enter department code" :value="trimMilliseconds(createEmployee.acknowledge_on)"
-                      readonly />
+                    <input class="mb-3 date-time " tag="input" type="datetime-local" name="acknowledge_on"
+                      id="acknowledge_on" placeholder="Enter department code"
+                      :value="trimMilliseconds(createEmployee.acknowledge_on)" readonly />
                   </div>
                   <div class="mb-3 font-11">
                     <label for="signatureInput" class="form-label mb-0 font-13 ps-1">
@@ -554,9 +550,9 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-           <div class="text-center fw-bolder">
-             Are you sure you want to <span id="empActionText"></span> "<span id="empRowName"></span>"?<br>
-           </div>
+            <div class="text-center fw-bolder">
+              Are you sure you want to <span id="empActionText"></span> "<span id="empRowName"></span>"?<br>
+            </div>
 
             <div class="mt-4">
               <label class="font-13 mb-1" for="emp_name">Remarks<span class="text-danger ps-1">*</span></label>
@@ -595,7 +591,8 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="button" class="btn btn-dark" :disabled="!remarks" @click="confirmEmployeeToggle">Yes, Proceed</button>
+            <button type="button" class="btn btn-dark" :disabled="!remarks" @click="confirmEmployeeToggle">Yes,
+              Proceed</button>
           </div>
         </div>
       </div>
@@ -614,6 +611,32 @@
           <div class="modal-footer">
             <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
             <button type="button" class="btn btn-dark" @click="exportEmployeesToExcel">Yes, Proceed</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="ForgotPasswordModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Confirm Reset Password</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="text-center">
+              Are you sure you want to reset "{{ forgotData.emp_name }}" password?<br>
+            </div>
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-dark" :disabled="saveloading" @click="forgotpassword()">
+              <span v-if="saveloading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              <span v-if="!saveloading">
+                <span class="font-12 fw-bold">Yes, Proceed</span>
+              </span>
+            </button>
           </div>
         </div>
       </div>
@@ -651,6 +674,7 @@ const reportingTo = ref([]);
 const reportingDesigination = ref([]);
 const departmentsList = ref([]);
 const remarks=ref("");
+const saveloading = ref(false)
 // const newDesignation = ref(false);
 // const signaturePath = ref("");
 const phoneError = ref("");
@@ -675,7 +699,6 @@ watch(
       const matchedEmployee = employeeEmails.find(emp => emp.emp_mail_id === newVal);
       if (matchedEmployee) {
         createEmployee.reporting_designation = matchedEmployee.designation || '';
-        // console.log(createEmployee.reporting_designation,newVal,createEmployee.reporting_to);
       } else {
         createEmployee.reporting_designation = '';
       }
@@ -684,6 +707,12 @@ watch(
     }
   }
 );
+onMounted(() => {
+  const url = window.location.href;
+  if (url.includes('ncomr')) {
+    createEmployee.value.emp_code = 'NICO-';
+  }
+})
 
 const selectedEmpRow = ref(null);
 const empActionText = ref('');
@@ -701,7 +730,7 @@ const tableheaders = ref([
   { th: "Department", td_key: "department" },
   { th: "Signature", td_key: "signature" },
 
-  { th: "Reports To", td_key: "reporting_to" },
+  { th: "Reports Designation", td_key: "reporting_designation" },
   { th: "Creation Date", td_key: "creation" },
   { th: "last Login", td_key: "last_login" },
   { th: "last Login IP", td_key: "last_ip" },
@@ -1108,14 +1137,12 @@ function backtoEmployeeList() {
 // };
 
 function onDepartmentChange(selectedDepartment) {
-  // console.log('Selected department:', selectedDepartment);
   fetchingIsHod(selectedDepartment.name); // Call your API function here
 }
- 
+
 function fetchingIsHod(department) {
-   const filters = [["company_field", "like", `%${newbusiness.value}%`],["enable","=","1"],
-  ["department", "like", `%${department}%`],["is_hod","=",1]];
- 
+  const filters = [["company_field", "like", `%${newbusiness.value}%`], ["enable", "=", "1"],
+  ["department", "like", `%${department}%`], ["is_hod", "=", 1]];
  
   const queryParams = {
     fields: JSON.stringify(["*"]),
@@ -1126,11 +1153,8 @@ function fetchingIsHod(department) {
   axiosInstance
     .get(apis.resource + doctypes.EzyEmployeeList, { params: queryParams })
     .then((res) => {
-    //  console.log(res);
-     createEmployee.value.reporting_to = res.data[0].name;
-     createEmployee.reporting_designation = res.data[0].designation;
-    //  console.log("res.name",res.data[0].name);
-    //  console.log("res.designation",res.data[0].designation);
+      createEmployee.value.reporting_to = res.data[0].name;
+      createEmployee.reporting_designation = res.data[0].designation;
 
     })
     .catch((error) => {
@@ -1505,7 +1529,7 @@ watch(
 // function addnewDesignation() {
 //     newDesignation.value = !newDesignation.value
 // }
-const actions = ref([{ name: "Edit Employee", icon: "fa-solid fa-eye" }]);
+const actions = ref([{ name: "Edit Employee", icon: "fa-solid fa-eye" }, { name: "Reset Password", icon: "fa fa-lock" }]);
 const isFormFilled = computed(() => {
   return [
     createEmployee.value.emp_code,
@@ -1535,6 +1559,8 @@ function createEmplBtn() {
   designationData();
   employeeOptions();
 }
+
+const forgotData=ref("")
 
 function actionCreated(rowData, actionEvent) {
   if (actionEvent?.name === 'Edit Employee') {
@@ -1587,9 +1613,39 @@ function actionCreated(rowData, actionEvent) {
       formCreation(rowData);
     }
   }
-
-  // Handle other actions like enabling here if needed
+  if (actionEvent?.name === 'Reset Password') {
+      forgotData.value=rowData;
+      const modal = new bootstrap.Modal(document.getElementById('ForgotPasswordModal'), {});
+      modal.show();
+  } 
 }
+
+ function forgotpassword() {
+  saveloading.value = true;
+    const payload={
+        cmd: "frappe.core.doctype.user.user.reset_password",
+        user: forgotData.value.name,
+    }
+      axiosInstance.post(apis.forgotPassword,payload )
+        .then((res) => {
+          if(res){
+            const messages = JSON.parse(res._server_messages);
+            const messageObj = JSON.parse(messages[0]);
+            if(messageObj.message){
+              toast.success("Password reset instructions have been sent to the user email.");
+              const modal = bootstrap.Modal.getInstance(document.getElementById('ForgotPasswordModal'));
+              modal.hide();
+            }
+          }
+        })
+        .catch((error) => {
+          console.error("Upload error:", error);
+        })
+        .finally(()=>{
+          saveloading.value = false;
+
+        })
+    };
 
 
 // watch(
@@ -1622,7 +1678,7 @@ function toggleFunction(rowData) {
 function confirmEmployeeToggle() {
   const isEnabled = selectedEmpRow.value.enable === '1' || selectedEmpRow.value.enable === 1;
   selectedEmpRow.value.enable = isEnabled ? 0 : 1;
-  selectedEmpRow.value.remarks=remarks.value
+  selectedEmpRow.value.remarks = remarks.value
 
   if (selectedEmpRow.value.enable == 0) {
     // Get current date and time in "YYYY-MM-DD HH:mm:ss" format
@@ -1633,9 +1689,7 @@ function confirmEmployeeToggle() {
     // Add current_date to the payload
     selectedEmpRow.value.enable_on = currentDateTime;
 
-  // console.log("selectedEmpRow.value",selectedEmpRow.value.enable_on);
   }
-  // console.log("selectedEmpRow",selectedEmpRow.value);
 
   axiosInstance
     .put(`${apis.resource}${doctypes.EzyEmployeeList}/${selectedEmpRow.value.name}`, selectedEmpRow.value)
@@ -1658,6 +1712,7 @@ const fieldMapping = ref({
   emp_name: { type: "input" },
   designation: { type: "input" },
   department: { type: "input" },
+  reporting_designation: { type: "input" },
 });
 // const filtersBeforeApplyingCount = computed(() => {
 //     return [filterOnModal.designation, filterOnModal.emp_code, filterOnModal.department, filterOnModal.emp_mail_id, filterOnModal.emp_name, filterOnModal.reporting_designation, filterOnModal.reporting_to].filter(
@@ -1680,6 +1735,10 @@ function cancelCreate() {
   const fileInput = document.getElementById("signatureInput");
   if (fileInput) {
     fileInput.value = "";
+  }
+  const url = window.location.href;
+  if (url.includes('ncomr')) {
+    createEmployee.value.emp_code = 'NICO-';
   }
 }
 
@@ -1774,8 +1833,6 @@ const uploadFile = (file, field) => {
         }
         selectedEmpRow.value[field] = res.message.file_url;
         uploadedFields.value.push(field);
-        // console.log(`Uploaded ${field}:`, res.message.file_url);
-        // console.log("Uploaded file URL:", res.message.file_url);
       } else {
         console.error("file_url not found in the response.");
       }
@@ -1887,7 +1944,7 @@ function inLineFiltersData(searchedData) {
 }
 
 function employeeData(data) {
-  const filters = [["company_field", "like", `%${newbusiness.value}%`],["enable","=","1"]];
+  const filters = [["company_field", "like", `%${newbusiness.value}%`], ["enable", "=", "1"]];
   if (data) {
     filters.push(...data);
   }
@@ -1897,7 +1954,7 @@ function employeeData(data) {
     filters: JSON.stringify(filters),
     limit_page_length: filterObj.value.limitPageLength,
     limit_start: filterObj.value.limit_start,
-    order_by: "`tabEzy Employee`.`enable` DESC,`tabEzy Employee`.`creation` DESC",
+    order_by: "`tabEzy Employee`.`enable` DESC,`tabEzy Employee`.`modified` DESC",
   };
   const queryParamsCount = {
     fields: JSON.stringify(["count(name) AS total_count"]),
@@ -1955,7 +2012,7 @@ function employeeOptions() {
     fields: JSON.stringify(["*"]),
     limit_page_length: "None",
     filters: JSON.stringify([["company_field", "like", `%${newbusiness.value}%`]]),
-    order_by: "`tabEzy Employee`.`creation` desc",
+    order_by: "`tabEzy Employee`.`modified` desc",
   };
   axiosInstance
     .get(apis.resource + doctypes.EzyEmployeeList, { params: queryParams })
@@ -1965,7 +2022,6 @@ function employeeOptions() {
         if (filterObj.value.limit_start === 0) {
 
           employeeEmails.value = newData;
-          // console.log("employeeEmails",employeeEmails.value);
           // designations.value = [...new Set(res.data.map((designation) => designation.designation))];
           reportingTo.value = [
             ...new Set(res.data.map((reporting) => reporting.reporting_to)),
@@ -2056,7 +2112,6 @@ function createEmpl() {
     department: createEmployee.value.department?.name || "", // ✅ only send name
     doctype: doctypes.EzyEmployeeList,
   };
-  // console.log(dataObj);
   loading.value = true;
 
   axiosInstance
@@ -2554,25 +2609,25 @@ function SaveEditEmp() {
   right: 10px;
   cursor: pointer;
 }
-.date-time{
+.date-time {
   display: block;
-    width: 100%;
-    padding: .375rem .75rem;
-    font-size: 13px;
-    font-weight: 400;
-    line-height: 1.5;
-    color: var(--bs-body-color);
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    background-color: var(--bs-body-bg);
-    background-clip: padding-box;
-    border: var(--bs-border-width) solid var(--bs-border-color);
-    border-radius: var(--bs-border-radius);
-    transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+  width: 100%;
+  padding: .375rem .75rem;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--bs-body-color);
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-color: var(--bs-body-bg);
+  background-clip: padding-box;
+  border: var(--bs-border-width) solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+  transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
 }
 
-.remarks{
+.remarks {
   border: 1px solid #c5bdbd;
   border-radius: 5px;
 }
