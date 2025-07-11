@@ -655,7 +655,7 @@
 
 
                                                                 <tr
-                                                                    v-if="!tableRows[tableIndex.toLowerCase()] || tableRows[tableIndex.toLowerCase()].length === 0">
+                                                                    v-if="!tableRows[tableIndex] || tableRows[tableIndex].length === 0">
                                                                     <td :colspan="table.length + 2"
                                                                         class="text-center text-muted">
                                                                         <div
@@ -666,7 +666,7 @@
                                                                         </div>
                                                                     </td>
                                                                 </tr>
-                                                                <tr v-for="(row, rowIndex) in tableRows[tableIndex.toLowerCase()]"
+                                                                <tr v-for="(row, rowIndex) in tableRows[tableIndex]"
                                                                     :key="rowIndex">
                                                                     <!-- <td style="text-align: center;" class="font-12">
                                                                         {{
