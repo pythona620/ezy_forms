@@ -9,6 +9,7 @@ from frappe.utils import get_bench_path, cstr
 from frappe.utils import get_bench_path, cstr, get_url
 # from frappe.frappe import get_print
 import pdfkit
+import shutil
 
 def email_pdf_send(doc,method=None):
 	try:
@@ -32,10 +33,32 @@ def email_pdf_send(doc,method=None):
 	except Exception as e:
 		frappe.log_error("email_pdf_send",e)
   
-  
+@frappe.whitelist(allow_guest=True) 
+def email_reports_send(doctype, docname):
+	try:
+		doc = frappe.get_doc(doctype, docname)
+		pdf_file = frappe.attach_print(
+			doctype=doctype,
+			name=docname,
+		)
+		
+		sender = frappe.db.get_list("Email Account", {"enable_outgoing": 1, "default_outgoing": 1}, ["email_id"], ignore_permissions=True)
+		mail = frappe.db.get_single_value("Notifications Mail", "mail_id")
+		frappe.sendmail(
+			recipients=mail,
+			sender=sender[0]['email_id'],
+			message=f"Dear Team, {doctype} {docname} has been submitted.",
+			subject=f"{doctype} Form",
+			now=True,
+			attachments=[pdf_file],
+		)
+		return {"message": "Email sent successfully."}
+		
+	except Exception as e:
+		frappe.log_error(f"Error in email_reports_send for {doctype} {docname}: {str(e)}", "email_reports_send Error")
+		return {"message": f"Failed to send email: {str(e)}"}
 
 
-import shutil
  
 def make_file_public_after_insert(doc, method=None):
     if doc.is_private:
