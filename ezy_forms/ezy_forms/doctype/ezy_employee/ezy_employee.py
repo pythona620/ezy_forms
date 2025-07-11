@@ -9,6 +9,8 @@ import socket as so
 from ezy_forms.ezy_forms.doctype.login_check.login_check import after_insert_user
 
 class EzyEmployee(Document):
+	def on_update(self):
+		after_insert_user(self)
 	def after_insert(self):
 		is_email_account_set = frappe.db.exists("Email Account", {
 			"enable_outgoing": 1,

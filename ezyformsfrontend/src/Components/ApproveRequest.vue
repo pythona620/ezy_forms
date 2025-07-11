@@ -51,7 +51,7 @@
                 </div>
 
                 <div
-                  v-if="selectedData.type == 'myforms' && tableData.status == 'Request Raised' && selectedData.type !== 'myapprovals'"
+                  v-if="selectedData?.type == 'myforms' && tableData?.status == 'Request Raised' || tableData?.status == 'Request Cancelled' && selectedData?.type !== 'myapprovals'"
                   class="d-flex justify-content-end approveBtns">
                   <button type="submit" class="btn Edit_btn" @click.prevent="EditformSubmission()">
                     <span v-if="loading" class="spinner-border spinner-border-sm" role="status"
@@ -181,8 +181,9 @@
                 </div> -->
                 <div class="col-xl-12 col-lg-12 col-md-12">
                   <div class=" d-flex justify-content-between gap-2">
+                    
                     <div>
-                      <button v-if="(selectedData.type === 'myforms' || selectedData.type === 'myteam' || selectedData.type === 'myapprovals') &&
+                      <button v-if="(selectedData.type === 'myforms' || selectedData.type === 'myteam' || selectedData.type === 'myapprovals' || selectedData.type === 'linkedForm') &&
                         linked_status !== 'Completed' &&
                         tableData?.status === 'Completed' &&
                         tableData?.is_linked_form &&
@@ -190,7 +191,7 @@
                         Object.keys(tableData.is_linked_form).length > 0" type="button"
                         class="btn btn-light font-14 nowrap h-auto fw-bold border border-dark CreateDepartments"
                         data-bs-target="#pdfView" @click="toLinkedForm">
-                        Raise Link <i class="bi bi-arrow-right px-2"></i>
+                        Raise Inbound <i class="bi bi-arrow-right px-2"></i>
                       </button>
 
 
@@ -221,7 +222,7 @@
                   </button>
                   <button v-if="tableData.is_linked_form" class="btn btn-light tab_btn"
                     :class="{ active: activeTab === 'linked' }" @click="linked_list_btn">
-                    Linked Forms
+                    Inbound Forms
                   </button>
                 </div>
 
@@ -1304,11 +1305,11 @@ function toLinkedForm() {
         routepath: route.path,
         linkedForm: tableData.value.is_linked_form,
         has_workflow: 'Yes',
-        type: 'myforms',
+        type: selectedData.value.type,
         main_form: selectedData.value.doctype_name,
         business_unit: selectedData.value.business_unit,
         main_form_Id: selectedData.value.formname,
-        selectedFormStatus: selectedData.value.type,
+        
       },
     });
   } else {

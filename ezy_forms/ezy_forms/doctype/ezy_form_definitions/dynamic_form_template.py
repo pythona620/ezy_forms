@@ -10,7 +10,7 @@ from frappe.utils import get_bench_path, cstr,get_url,now_datetime,get_site_path
 from pdf2image import convert_from_path
 import zipfile
 from frappe.utils.file_manager import get_file_path
-
+import shutil
 
 
 def rebuild_to_structured_array(flat_array):
@@ -975,7 +975,68 @@ template_str = """
 </html>
  
 """
-    
+activate_log_table = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Activity Log</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2rem;
+      background-color: #f9f9f9;
+    }
+    h1 {
+      margin-bottom: 1rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    th, td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    th {
+      background-color: #f0f0f0;
+    }
+    tr:nth-child(even) {
+      background-color: #fcfcfc;
+    }
+  </style>
+</head>
+<body>
+  <h1>Activity Log</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Designation</th>
+        <th>Employee</th>
+        <th>Action</th>
+        <th>Time</th>
+        <th>Comments</th>
+      </tr> 
+    </thead>
+    <tbody>
+      {% for entry in filtered_reasons %}
+      <tr>
+        <td>{{ entry.role }}</td>
+        <td>{{ entry.user_name }}</td>
+        <td>{{ entry.action }}</td>
+        <td>{{ entry.time }}</td>
+        <td>{{ entry.reason }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+</html>"""
+
 def convert_html_to_pdf(html_content, pdf_path,options=None):
 
     try:
@@ -1125,18 +1186,35 @@ def add_file_to_zip(item, file_url, zipf):
     try:
         full_path = get_file_path(file_url)
         if os.path.exists(full_path):
-            arcname = f"{item.get('label', 'Attachments')}/{os.path.basename(full_path)}"
+            arcname = f"{item.get('label', 'Attachment folder')}/{os.path.basename(full_path)}"
             zipf.write(full_path, arcname)
         else:
             frappe.log_error(f"File does not exist: {full_path}", f"ZIP Creation Warning: {file_url[:100]}")
     except Exception as e:
         frappe.log_error(f"Error processing file_url: {file_url}\nException: {str(e)}", f"ZIP Creation Error: {file_url[:100]}")
 
+
+def add_file_to_zip(item, zipf, zip_folder_name="Attachments"):
+    """Add file to zip under a folder if file_path exists."""
+    if os.path.exists(item["file_path"]):
+        zipf.write(
+            item["file_path"],
+            arcname=os.path.join(zip_folder_name, os.path.basename(item["file_path"]))
+        )
+    else:
+        frappe.log_error(f"File not found: {item['file_path']}", "ZIP File Creation Error")
+        
+        
 @frappe.whitelist()
 def download_filled_form(form_short_name: str, name: str|None,business_unit=None,from_raise_request=None):
     """Generates a PDF for the dynamic form with filled data"""
     try:
-        
+        folder_path = get_site_path("public", "files", "Attachment folder")
+
+        delete = lambda path: os.unlink(path) if os.path.isfile(path) or os.path.islink(path) else shutil.rmtree(path)
+
+        if os.path.exists(folder_path) and os.path.isdir(folder_path):
+            [delete(os.path.join(folder_path, f)) for f in os.listdir(folder_path)]
         attachment_info =None
         is_landscape = frappe.db.get_value("Ezy Form Definitions", form_short_name, "is_landscape")
         if name is None:
@@ -1212,6 +1290,24 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
             print_format = frappe.db.get_value("Ezy Form Definitions", form_short_name, "print_format")
             
             wf_generated_request_id = frappe.get_value(form_short_name,name,"wf_generated_request_id")
+          
+            activate_log = frappe.get_doc('WF Activity Log',wf_generated_request_id,).as_dict()
+            filtered_reasons = [
+                            {
+                                'level': entry['level'],
+                                'role': entry['role'],
+                                'user': entry['user'],
+                                'user_name': entry['user_name'],
+                                'reason': entry['reason'],
+                                'action': entry['action'],
+                                'time': entry['time'],
+                                'random_string': entry['random_string']
+                            }
+                            for entry in activate_log.get('reason', [])
+                        ]
+            if filtered_reasons:
+                html_table_output = Template(activate_log_table).render(filtered_reasons=filtered_reasons)
+            
             if print_format:
                 html_view_ = get_html_file_data(form_short_name,name,print_format)
                 html_view = html_view_['html']
@@ -1277,46 +1373,69 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                             for record in child_table_records
                         ]
             #########################
+
                 json_object = list(filter(lambda dict :False if (('value' in dict) and not(dict.get('value')) and (dict.get('fieldname').startswith('approved') or dict.get('fieldname').startswith('approver'))) else True,json_object))
                 form_name = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_name")
                 html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_name,child_data=data_list,child_table_data=None,business_unit=business_unit,wf_generated_request_id=wf_generated_request_id,mail_attachment=mail_attachment)
                 
             random_number = randint(111, 999)
-    
-            pdf_filename = f"{form_short_name}_{name}mailfiles.pdf"
-            pdf_path = f"public/files/{pdf_filename}"
-            absolute_pdf_path = os.path.join(get_bench_path(), "sites", cstr(frappe.local.site), pdf_path)
+
+            # … inside your handler, after generating both PDFs …
+
+            # Paths to the two PDFs we want in the ZIP:
+            bench_path         = get_bench_path()
+            site               = frappe.local.site
+            public_files_folder = os.path.join(bench_path, "sites", site, "public", "files",'Attachment folder')
+            os.makedirs(public_files_folder, exist_ok=True)
+            # main form pdf
+            pdf_filename       = f"{form_short_name}.pdf"
+            absolute_pdf_path  = os.path.join(public_files_folder, pdf_filename)
+
+            # activate log pdf
+            activate_pdf_name  = "activate_log.pdf"
+            activate_pdf_path  = os.path.join(public_files_folder, activate_pdf_name)
+
+            # Build attachment list, including both URLs (for email) and FS paths (for zipping)
+            
+
+            # … (your existing logic that appends other Attach field URLs) …
             opts={"orientation":"Landscape"if is_landscape else"Portrait"}
             convert_html_to_pdf(html_content=html_view,pdf_path=absolute_pdf_path,options=opts)
-            site_url = get_url()
-            new_file = f"{site_url}/files/{pdf_filename}"
-            zip_filename = None
-            if len(mail_attachment) > 0:
-                folder_path = get_site_path("public", "files", "Attachment folder")
-                os.makedirs(folder_path, exist_ok=True)
-                # Add PDF file to attachments (for zipping)
-                mail_attachment.append({
-                    "label": "Form Attachments",
-                    "file_url": f"/files/{pdf_filename}"  # Relative path
-                })
-                # Prepare ZIP path
-                zip_filename = f"{name}.zip"
-                zip_path = os.path.join(folder_path, zip_filename)
+            
+            convert_html_to_pdf(html_content=html_table_output,pdf_path=activate_pdf_path)
+            # Append the activate_log.pdf
+            mail_attachment.append({
+                "label":     "Attachment folder",
+                "file_url":  f"/files/{activate_pdf_name}",
+                "file_path": activate_pdf_path
+            })
 
-                # Create ZIP file
-                clean_file_urls = lambda item: [
-                    '/' + u.split('/', 3)[3] if u.startswith("http") and len(u.split('/', 3)) > 3 else u.strip()
-                    for u in item.get('file_url', '').split(',') if u.strip()
-                ]
-                # Create ZIP file
-                with zipfile.ZipFile(zip_path, 'w') as zipf:
-                    [add_file_to_zip(item, file_url, zipf) for item in mail_attachment for file_url in clean_file_urls(item)]
+            # Append the main form PDF
+            mail_attachment.append({
+                "label":     "Attachment folder",
+                "file_url":  f"/files/{pdf_filename}",
+                "file_path": absolute_pdf_path
+            })
 
-                relative_zip_path = f"/files/Attachment folder/{zip_filename}"
-                full_download_url = f"{site_url}{relative_zip_path}"
+            # Ensure the zip folder exists
+            attachment_folder = frappe.get_site_path("public", "files", "Attachment folder")
+            os.makedirs(attachment_folder, exist_ok=True)
 
-            file_url= get_url(full_download_url if zip_filename else new_file)
-            return file_url
+            # Create and populate ZIP
+            zip_folder_name = "Attachments"
+            zip_filename = f"{name}.zip"
+            zip_path     = os.path.join(attachment_folder, zip_filename)
+
+            with zipfile.ZipFile(zip_path, 'w') as zipf:
+                for item in mail_attachment:
+                    add_file_to_zip(item, zipf,zip_folder_name=zip_folder_name)
+
+            # Build the download URL for the user
+            site_url        = get_url()
+            relative_zip    = f"/files/Attachment folder/{zip_filename}"
+            full_download_url = f"{site_url}{relative_zip}"
+
+            return full_download_url
 
 
     except Exception as e:

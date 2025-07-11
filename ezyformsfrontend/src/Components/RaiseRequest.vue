@@ -118,14 +118,19 @@
               @click="raiseRequestSubmission">
               {{ selectedData.hasWorkflow == 'No' ? 'Save' : 'Raise Request' }}
             </button> -->
-            <button v-if="selectedData.selectedFormId && $route.query.selectedFormStatus == 'Request Cancelled'"
+            <!-- <button v-if="selectedData.selectedFormId && $route.query.selectedFormStatus == 'Request Cancelled'"
               @click="RequestUpdate" class="btn btn-dark font-12" type="submit">
               Update Request
-            </button>
-            <button v-if="$route.query.selectedFormStatus && $route.query.selectedFormStatus == 'Request Raised'"
-              @click="EditRequestUpdate" class="btn btn-dark font-12" type="submit">
-              Update Request
-            </button>
+            </button> -->
+           <button
+  v-if="$route.query.selectedFormStatus && ($route.query.selectedFormStatus == 'Request Raised' || $route.query.selectedFormStatus == 'Request Cancelled')"
+  @click="EditRequestUpdate"
+  class="btn btn-dark font-12"
+  type="submit"
+>
+  Update Request
+</button>
+
 
           </div>
         </div>
@@ -226,6 +231,7 @@ const filterObj = ref({
   limit_start: 0,
   limitPageLength: 100,
 });
+const newMainId = ref('')
 const checkingIs_linked = ref([]);
 const is_linked_form = ref("");
 const LinkedChildTableData = ref([]);
@@ -499,6 +505,8 @@ function EditRequestUpdate() {
   const data_obj = {
     form_id: route.query.selectedFormId,
     updated_fields: form,
+    //  status: route.query.selectedFormStatus === 'Request Cancelled' ? 'Request Raised' : null,
+    // current_level:route.query.selectedFormStatus === 'Request Cancelled' ? 1 : null
   };
   axiosInstance.post(apis.edit_form_before_approve, data_obj).then((resp) => {
     if (resp?.message?.success) {

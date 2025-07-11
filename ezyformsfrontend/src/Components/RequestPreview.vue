@@ -655,7 +655,7 @@
 
 
                                                                 <tr
-                                                                    v-if="!tableRows[tableIndex.toLowerCase()] || tableRows[tableIndex.toLowerCase()].length === 0">
+                                                                    v-if="!tableRows[tableIndex] || tableRows[tableIndex].length === 0">
                                                                     <td :colspan="table.length + 2"
                                                                         class="text-center text-muted">
                                                                         <div
@@ -666,7 +666,7 @@
                                                                         </div>
                                                                     </td>
                                                                 </tr>
-                                                                <tr v-for="(row, rowIndex) in tableRows[tableIndex.toLowerCase()]"
+                                                                <tr v-for="(row, rowIndex) in tableRows[tableIndex]"
                                                                     :key="rowIndex">
                                                                     <!-- <td style="text-align: center;" class="font-12">
                                                                         {{
@@ -748,6 +748,7 @@
                                                                         </template>
 
                                                                        <template v-else-if="field.fieldtype === 'Int'">
+                                                                       
                                                                             <!-- For calculated fields -->
                                                                             <input
                                                                                 v-if="field.description && /[+\-*/]/.test(field.description)"
@@ -764,7 +765,7 @@
                                                                                     class="form-control font-12"
                                                                                     :class="{ 'border-danger': hasFieldError(row, field) }"
                                                                                     v-model.number="row[field.fieldname]"
-                                                                                    :disabled="(field.label === 'Qty' && route.query.main_form) || field.description === 'Disable'"
+                                                                                    :disabled="(field.label === 'Qty'  && route.query.main_form) || field.description === 'Disable' || (field.label === 'Received Qty' && !route.query.main_form ) "
                                                                                     @input="validateFields(row, table)"
                                                                                 />
                                                                                 <!-- Error message display -->

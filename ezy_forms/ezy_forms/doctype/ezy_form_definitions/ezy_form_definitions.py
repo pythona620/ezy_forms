@@ -318,13 +318,6 @@ def activating_perms_for_all_roles_in_wf_roadmap():
                 form_perms.delete = 1
                 form_perms.insert(ignore_permissions=True)
     frappe.db.commit()
-    # Check if the path exists
-    folder_path = get_site_path("public", "files", "Attachment folder")
-
-    delete = lambda path: os.unlink(path) if os.path.isfile(path) or os.path.islink(path) else shutil.rmtree(path)
-
-    if os.path.exists(folder_path) and os.path.isdir(folder_path):
-        [delete(os.path.join(folder_path, f)) for f in os.listdir(folder_path)]
         
 
 def sanitize_fieldname(name):
@@ -536,7 +529,7 @@ def ezy_doctype_permission():
     """
     try:
         # Hardcoded default permissions
-        employee_doctypes_permi = ['DocType', 'User', 'Role', 'Data Import', 'Data Export','System Settings','Website Settings','Email Account']
+        employee_doctypes_permi = ['DocType', 'User', 'Role', 'Data Import', 'Data Export','System Settings','Website Settings','Email Account','Version','Activity Log']
         guest_permi = ['Ezy Departments', 'WF Roles', 'Notification Settings','Acknowledgement']
 
         # Fetch custom doctypes from specified modules

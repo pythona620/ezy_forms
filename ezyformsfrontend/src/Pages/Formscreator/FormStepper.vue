@@ -79,7 +79,7 @@
                                 <!-- || route.query.form_name   -->
                                 <FormFields :disabled="selectedData.formId && selectedData.formId.length > 0"
                                   labeltext="Form Name" class="formHeight" type="text" tag="input" name="Value"
-                                  id="formName" validationStar="true" placeholder="Untitled Form"
+                                  id="formName" validationStar="true" placeholder="Untitled Form" 
                                   @change="(event) => handleInputChange(event, 'form_name')" v-model="formNameModel" />
                                 <span v-if="formNameError" class="text-danger ErrorMsg ms-2">
                                   {{ formNameError }}</span>
@@ -1331,7 +1331,9 @@
                 </select>
               </div>
             </div>
-            <div v-if="selectedBlockIndex !== 0" class="p-3 approval-border-bottom d-flex justify-content-start gap-5 ">
+            <div v-if="selectedBlockIndex !== 0" class="p-3 approval-border-bottom  ">
+              <div class=" d-flex justify-content-start gap-5 mb-3 ">
+
 
               <div class="form-check ps-0" v-if="selectedBlockIndex !== 0">
                 <div>
@@ -1347,6 +1349,14 @@
                   <input type="checkbox" id="all_approvals_required" v-model="all_approvals_required"
                     class="me-2  mt-0 form-check-input designationCheckBox" />
                   <label for="all_approvals_required" class="SelectallDesignation text-nowrap fw-bold mt-1 form-check-label">All Approvers Required</label>
+                </div>
+              </div>
+              </div>
+            <div class="form-check ps-0" v-if="selectedBlockIndex !== 0">
+                <div>
+                  <input type="checkbox" id="requester_as_a_approver" v-model="requester_as_a_approver"
+                    class="me-2  mt-0 form-check-input designationCheckBox" />
+                  <label for="requester_as_a_approver" class="SelectallDesignation text-nowrap fw-bold mt-1 form-check-label">Requested Only</label>
                 </div>
               </div>
             </div>
@@ -1450,7 +1460,8 @@ const selectedBlockIndex = ref("");
 let workflowSetup = reactive([]);
 const searchDesignation = ref("");
 const ViewOnlyReportee = ref(false);
-const all_approvals_required = ref(false)
+const all_approvals_required = ref(false);
+const requester_as_a_approver = ref(false);
 const OnRejection = ref('');
 const wrkAfterGetData = ref([]);
 // const hasWorkflowToastShown = ref(false);
@@ -2726,6 +2737,7 @@ function addDesignationBtn() {
     xyz.view_only_reportee = ViewOnlyReportee.value === true ? 1 : 0;
     xyz.on_rejection = OnRejection.value ? OnRejection.value : 0;
     xyz.all_approvals_required = all_approvals_required.value === true ? 1 : 0;
+    xyz.requester_as_a_approver = requester_as_a_approver.value === true ? 1 : 0;
   }
  
 
@@ -2759,6 +2771,7 @@ function initializeDesignationValue(blockIndex) {
   ViewOnlyReportee.value = currentSetup.view_only_reportee === 1;
   OnRejection.value = currentSetup.on_rejection
   all_approvals_required.value = currentSetup.all_approvals_required === 1;
+  requester_as_a_approver.value = currentSetup.requester_as_a_approver === 1;
 }
 
 // Initialize `designationValue` based on the roles for the given block index
@@ -2792,6 +2805,7 @@ const AddDesignCanvas = (idx) => {
   searchDesignation.value = ''
   ViewOnlyReportee.value = false;
   all_approvals_required.value = false;
+  requester_as_a_approver.value = false;
   OnRejection.value = '';
   // console.log(idx, "---clicked idex", selectedBlockIndex.value);
   if (filterObj.value.accessible_departments.length) {
@@ -3206,7 +3220,7 @@ const addBlock = () => {
                 label: `row_0_0_${blockIndex}`,
                 columns: [
                   {
-                    label: "", // First column with "Approver" & "Approved By"
+                    label: "", // First column with "Approver" "
                     fields: [
                       {
                         label: "Approver",
@@ -3214,12 +3228,7 @@ const addBlock = () => {
                         options: "",
                         reqd: false,
                       },
-                      {
-                        label: "Approved By",
-                        fieldtype: "Attach",
-                        options: "",
-                        reqd: false,
-                      },
+                      
                     ],
                   },
                   {
@@ -3228,6 +3237,17 @@ const addBlock = () => {
                       {
                         label: "Approved On",
                         fieldtype: "Datetime",
+                        options: "",
+                        reqd: false,
+                      },
+                    ],
+                  },
+                  {
+                    label: "", // third column with "Approved By"
+                    fields: [
+                      {
+                        label: "Approved By",
+                        fieldtype: "Attach",
                         options: "",
                         reqd: false,
                       },
@@ -3658,11 +3678,11 @@ function handleInputChange(event, fieldType) {
 
   // Set filter based on fieldType
   const filters = [
-    [fieldType, "=", `%${inputValue}%`],
+    [fieldType, "=", `${inputValue}`],
     ["business_unit", "like", `%${filterObj.value.business_unit}%`],
   ];
   const queryParams = {
-    fields: JSON.stringify(["*"]),
+    fields: JSON.stringify(['form_name','form_short_name']),
     filters: JSON.stringify(filters),
   };
 
