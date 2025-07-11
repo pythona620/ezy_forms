@@ -1396,7 +1396,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
             activate_pdf_path  = os.path.join(public_files_folder, activate_pdf_name)
 
             # Build attachment list, including both URLs (for email) and FS paths (for zipping)
-            mail_attachment = []
+            
 
             # … (your existing logic that appends other Attach field URLs) …
             opts={"orientation":"Landscape"if is_landscape else"Portrait"}
