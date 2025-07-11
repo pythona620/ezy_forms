@@ -1,40 +1,64 @@
 <template>
     <div class="main-div">
         <div class="py-2">
-            <div class="card card-div border-0">
-                <div class="position-relative d-inline-block">
-                    <img :src="userData?.profile_image ? userData.profile_image : defaultImage"
-                        title="Upload Profile Image" class="img-fluid profile-img border"
-                        @click="triggerFileInput('profile')" style="cursor: pointer;" />
-                    <i v-if="userData.profile_image" class="bi bi-pencil edit-profile-icon m-2"
-                        @click="triggerFileInput('profile')" style="cursor: pointer;"></i>
-                </div>
-
-                <div class="d-flex justify-content-between align-items-end mt-2 ms-1">
-                    <div>
-                        <h6 class="mb-3 font-15">{{ userData.emp_name }}</h6>
-                        <span><i class="bi bi-person-fill me-2"></i>{{ userData.emp_code }}</span>
+            <div class="card card-div border-0 mt-4">
+                <div class="d-flex ">
+                    <!-- Profile Image & Edit -->
+                    <div class="position-relative d-inline-block">
+                        <img :src="userData?.profile_image ? userData.profile_image : defaultImage"
+                            title="Upload Profile Image" class="img-fluid profile-img border"
+                            @click="triggerFileInput('profile')"
+                            style="cursor: pointer; width: 150px; height: 205px; object-fit: cover; border-radius: 15px;" />
+                        <i v-if="userData.profile_image"
+                            class="bi bi-pencil edit-profile-icon position-absolute top-0 end-0 "
+                            @click="triggerFileInput('profile')" style="cursor: pointer;"></i>
                     </div>
-                    <span><i class="bi bi-envelope-open-fill me-2"></i>{{ userData.emp_mail_id }}</span>
-                    <span class="text-secondary">Designation: <strong>{{ userData.designation }}</strong></span>
-                    <span class="text-secondary">Department: <strong>{{ userData.department }}</strong></span>
-                    <span class="text-secondary">Acknowledged On: <strong>{{ userData.enable_on }}</strong></span>
-                    <span class="text-secondary d-flex"><p class="mt-5 m-0 me-2">Signiture:</p>
-                        <div class="position-relative d-inline-block " style="top:12px">
-                            <img :src="userData?.signature ? userData.signature : defaultSign" title="Upload Signature"
-                                class="img-fluid profile-img signiture-image border" @click="triggerFileInput('signature')"
-                                style="cursor: pointer;" />
-                            <i v-if="userData?.signature" class="bi bi-pencil edit-image m-2"
-                                @click="triggerFileInput('signature')" style="cursor: pointer;"></i>
+
+                    <!-- Employee Details -->
+                    <div class="ms-3 flex-grow-1">
+                        <h6 class="mb-3 mt-2">{{ userData.emp_name }}</h6>
+                        <div class="d-flex flex-wrap align-items-center gap-5 role-details">
+                            <span><i class="bi bi-person-badge-fill me-1"></i>{{ userData.emp_code || "Emp Code Not Found" }}</span>
+                            <span><i class="bi bi-envelope-fill me-1"></i>{{ userData.emp_mail_id || "null" }}</span>
+                            <span><i class="bi bi-telephone-fill me-1"></i>{{ userData.emp_phone || "Number Not Found" }}</span>
+                            <span style="font-size:13px"><i class="bi bi-briefcase-fill me-1"></i>{{ userData.designation || "designation not found" }}</span>
                         </div>
 
-                        <!-- Hidden File Input -->
-                        <input type="file" ref="fileInput" @change="uploadImage" accept="image/*" hidden />
+                        <!-- Bottom Info -->
+                        <div class="mt-3 d-flex flex-wrap gap-4">
+                            <span class="text-secondary font-11">
+                                Department: <strong>{{ userData.department || "Not Assign" }}</strong>
+                            </span>
+                            <span class="text-secondary font-11">
+                                Reporting Manager:
+                                <strong>{{ userData.reporting_to || "Not Assign" }}</strong>
+                            </span>
+                            <span class="text-secondary font-11">Acknowledged On:
+                                <strong>{{ userData.enable_on || "Not Found" }}</strong>
+                            </span>
+                        </div>
+                        <div class="mt-3">
+                            <span class="text-secondary d-flex text-center align-items-center">
+                                <p class="mt-3 m-0 me-2">Signiture:</p>
+                                <div class="position-relative d-inline-block " style="top:12px">
+                                    <img v-if="userData?.signature" :src="userData?.signature ? userData.signature : defaultSign"
+                                        title="Upload Signature" class="img-fluid profile-img signiture-image border"
+                                        @click="triggerFileInput('signature')" style="cursor: pointer;" />
+                                    <i v-if="userData?.signature" class="bi bi-pencil edit-image m-2"
+                                        @click="triggerFileInput('signature')" style="cursor: pointer;"></i>
+                                    
+                                    <button class="uploas-sign-btn" v-if="!userData?.signature" @click="triggerFileInput('signature')">Upload signiture</button>
+                                </div>
 
-                    </span>
+                                <!-- Hidden File Input -->
+                                <input type="file" ref="fileInput" @change="uploadImage" accept="image/*" hidden />
 
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </div>
+
         </div>
     </div>
 </template>
@@ -85,7 +109,7 @@ function uploadImage(event) {
         })
         .then(() => {
             userDetails(userData.value.name);
-            toast.success(`${uploadType.value === 'profile' ? 'Profile' : 'Signature'} Image Updated Successfully`, { autoClose: 300 });
+            toast.success(`${uploadType.value === 'profile' ? 'Profile' : 'Signature'} Updated Successfully`, { autoClose: 300 });
         })
         .catch((error) => {
             console.error("Error uploading image:", error);
@@ -126,19 +150,21 @@ onMounted(() => {
 }
 
 .profile-img {
-    width: 80px;
+    width: 11vw;
     border: 1px solid #c9c9c9;
     padding: 5px;
     border-radius: 7px;
 }
-.signiture-image{
-    height: 50px;
+
+.signiture-image {
+    height: 60px;
+    width: 100px;
 }
 
-.edit-image{
+.edit-image {
     position: absolute;
-    top: -18px;
-    left: 58px;
+    top: -15px;
+    left: 79px;
     background: black;
     border-radius: 13px;
     color: white;
@@ -146,10 +172,11 @@ onMounted(() => {
     font-size: 13px;
     height: 24px;
 }
-.edit-profile-icon{
-    position: absolute;
+
+.edit-profile-icon {
+    /* position: absolute;
     top: -15px;
-    left: 58px;
+    left: 133px; */
     background: black;
     border-radius: 13px;
     color: white;
@@ -159,8 +186,7 @@ onMounted(() => {
 }
 
 span {
-    font-size: 14px;
-    font-weight: 500;
+    font-size: 13px;
     line-height: 19.5px;
 
 }
@@ -172,5 +198,18 @@ span {
 .preview-section img {
     max-width: 100%;
     height: auto;
+}
+
+.role-details {
+    border-bottom: 1px solid #c5baba9c;
+    padding-bottom: 17px;
+}
+.uploas-sign-btn{
+  border: 1px solid #cccccc;
+  font-size: 13px;
+  border-radius: 4px;
+  color: #0e0b0b;
+  padding: 5px;
+  width: 100%;
 }
 </style>
