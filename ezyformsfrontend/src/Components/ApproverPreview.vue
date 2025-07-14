@@ -32,7 +32,7 @@
                     <div
                           v-if="!(blockIndex !== 0 && !field.value && ['Approver', 'Approved On', 'Approved By','Acknowledged By'].includes(field.label) )"
                       :class="(props.readonlyFor === 'true' || blockIndex < currentLevel) && field.fieldtype !== 'Small Text' && field.fieldtype !== 'Text' || field.fieldtype === 'Check'
-                                    ? 'd-flex mb-2 ' + (field.fieldtype === 'Check' ? 'mt-1 flex-row-reverse justify-content-end gap-2 w-0 align-items-start ' : '') + (field.label === 'Approved By' ? 'align-items-center' : 'align-items-start nowrap')
+                                    ? 'd-flex mb-2 ' + (field.fieldtype === 'Check' ? 'mt-1 flex-row-reverse justify-content-end gap-2 w-0 align-items-start ' : '') + (field.label === 'Approved By' ? 'align-items-center' : '  align-items-start nowrap')
                                     : ''" >
 
 
@@ -204,7 +204,7 @@
                                 type="file"
                                 accept=".jpeg,.jpg,.png,.pdf,.xlsx,.xls"
                                 :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
-                                class="form-control previewInputHeight font-10 mt-2"
+                                class="form-control previewInputHeight font-10 mb-2 mt-2"
                                 multiple
                                 @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
                               />
@@ -222,21 +222,21 @@
 
                                   <!-- Image File -->
                                   <template v-if="isImageFile(fileUrl)">
-                                    <template v-if="blockIndex === 0 && field.fieldname !== 'requestor_signature'">
-                                      <span
-                                        class="cursor-pointer text-decoration-underline font-12 d-flex"
-                                        @click="openPreview(fileUrl)"
-                                      >
-                                        <i class="bi bi-file-earmark-image fs-2"></i>
-                                      </span>
-                                    </template>
-                                    <template v-else>
+                                    <template v-if="field.fieldname === 'requestor_signature' || field.label.includes('Approved By') || field.label.includes('Acknowledged by')">
                                       <img
                                         :src="fileUrl"
                                         class="img-thumbnail cursor-pointer imge_top border-0 border-bottom-0"
                                         @click="openPreview(fileUrl)"
                                         style="max-width: 100px; max-height: 80px"
-                                      />
+                                      /> 
+                                    </template>
+                                    <template  v-else>
+                                      <span
+                                        class="cursor-pointer text-decoration-underline font-12 d-flex"
+                                        @click="openPreview(fileUrl)"
+                                      >
+                                        <i class="bi bi-file-earmark-image text-secondary fs-4"></i>
+                                      </span>
                                     </template>
                                   </template>
 
@@ -246,7 +246,7 @@
                                     :href="fileUrl"
                                     target="_blank"
                                     class="d-flex align-items-center justify-content-center border rounded bg-light"
-                                    style="width: 25px; height: 25px; text-decoration: none;"
+                                    style="width: 30px; height: 32px; text-decoration: none;"
                                   >
                                     <i class="bi bi-file-earmark-pdf text-danger fs-4"></i>
                                   </a>
@@ -371,7 +371,17 @@
 
 
 
-                        <template v-else-if="field.fieldtype == 'Datetime' && props.readonlyFor !== 'true'">
+                        <template v-else-if="field.fieldtype == 'Datetime' ">
+                          <template
+                            v-if="props.readonlyFor === 'true' ">
+                            <span style="font-size: 12px;"
+                              :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0  w-50 bg-transparent' : ''"
+                              :value="field.value" :type="field.fieldtype">
+                              {{ field.fieldtype === 'Time' ? formatTime(field.value) : field.value }}
+                            </span>
+                          </template>
+                          <template v-else>
+
                           <input type="datetime-local" v-model="field.value"
                             :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 bg-white  pb-0 bg-transparent ' : ' '"
                             :disabled="blockIndex" :readOnly="blockIndex < currentLevel || props.readonlyFor === 'true'
@@ -382,6 +392,7 @@
                                 '-' +
                                 fieldIndex
                                 " class="form-control p-1 previewInputHeight" />
+                          </template>
                         </template>
 
                         <!-- Field Type Default -->

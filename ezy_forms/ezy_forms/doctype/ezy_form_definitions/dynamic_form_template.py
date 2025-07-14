@@ -1325,13 +1325,17 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
 
                     # Main form attachments
                     if iteration.get("fieldtype") == "Attach" and iteration.get("value"):
-                        file_url = iteration["value"]
-                        if file_url:
+                        # Split by comma and strip whitespace
+                        file_urls = [url.strip() for url in iteration["value"].split(",") if url.strip()]
+                        
+                        for file_url in file_urls:
+                            
                             attachment_info = {
                                 "label": 'Form Attachments',
                                 "file_url": file_url,
                                 "file_path": os.path.join(public_files_folder, file_url.replace("/files/", ""))
                             }
+
                             if iteration.get("fieldname") and not iteration.get("fieldname").lower().startswith(
                                     ("approved_by", "requestor", "acknowle")):
                                 mail_attachment.append(attachment_info)
@@ -1344,8 +1348,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                             filters={"parent": name},
                             fields=["*"],
                             order_by="idx asc"
-                        )
-
+                        ) 
                         meta_fields = frappe.get_meta(iteration["options"]).fields
                         field_names = [df.fieldname for df in meta_fields]
                         field_labels = {df.fieldname: df.label for df in meta_fields}
@@ -1363,6 +1366,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                                             "file_url": file_url,
                                             "file_path": os.path.join(public_files_folder, file_url.replace("/files/", ""))
                                         })
+                                        
 
                         data_list[child_table_name] = [
                             {field_labels.get(field, field): record.get(field) for field in field_names}
