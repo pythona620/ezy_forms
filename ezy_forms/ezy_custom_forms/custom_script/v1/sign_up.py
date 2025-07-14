@@ -36,6 +36,9 @@ def sign_up(email: str, full_name: str,designation:str|None,emp_phone:str|None,e
 					'send_welcome_email': 0,
 					"new_password": generate_hash(length=10),
 					"user_type": "Website User",
+					"roles": [
+						{
+							"role": designation}]
 				}
 			)
 		user.flags.ignore_permissions = True
