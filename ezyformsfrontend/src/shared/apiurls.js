@@ -28,6 +28,7 @@ export const doctypes = {
   version:'Version',
   websiteSettings:'Website Settings',
   acknowledgement:'Acknowledgement',
+  emailTemplate:'Email Template',
   
   
 
