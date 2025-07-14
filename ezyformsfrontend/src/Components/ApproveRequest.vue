@@ -1515,8 +1515,9 @@ watch(activityData, (newVal) => {
 .tabs_list{
     position: sticky;
     top: 0;
-    background-color: #fff;
+    background-color: #fff !important;
     padding-bottom: 5px;
+    z-index: 1;
 }
 
 .pending {
