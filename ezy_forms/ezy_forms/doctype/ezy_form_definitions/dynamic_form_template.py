@@ -1181,17 +1181,6 @@ def preview_dynamic_form(form_short_name: str, business_unit=None, name=None):
  
  
  
- 
-def add_file_to_zip(item, file_url, zipf):
-    try:
-        full_path = get_file_path(file_url)
-        if os.path.exists(full_path):
-            arcname = f"{item.get('label', 'Attachment folder')}/{os.path.basename(full_path)}"
-            zipf.write(full_path, arcname)
-        else:
-            frappe.log_error(f"File does not exist: {full_path}", f"ZIP Creation Warning: {file_url[:100]}")
-    except Exception as e:
-        frappe.log_error(f"Error processing file_url: {file_url}\nException: {str(e)}", f"ZIP Creation Error: {file_url[:100]}")
 
 
 def add_file_to_zip(item, zipf, zip_folder_name="Attachments"):
@@ -1202,13 +1191,16 @@ def add_file_to_zip(item, zipf, zip_folder_name="Attachments"):
             arcname=os.path.join(zip_folder_name, os.path.basename(item["file_path"]))
         )
     else:
-        frappe.log_error(f"File not found: {item['file_path']}", "ZIP File Creation Error")
+        frappe.log_error(f"File not found: {item['file_path']}")
+
         
         
 @frappe.whitelist()
 def download_filled_form(form_short_name: str, name: str|None,business_unit=None,from_raise_request=None):
     """Generates a PDF for the dynamic form with filled data"""
     try:
+        bench_path         = get_bench_path()
+        site               = frappe.local.site
         folder_path = get_site_path("public", "files", "Attachment folder")
 
         delete = lambda path: os.unlink(path) if os.path.isfile(path) or os.path.islink(path) else shutil.rmtree(path)
@@ -1287,161 +1279,164 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
             return file_url
         if name:
             
+            site = frappe.local.site
+            bench_path = frappe.utils.get_bench_path()
+            public_files_folder = os.path.join(bench_path, "sites", site, "public", "files")
+            attachment_folder = os.path.join(public_files_folder, "Attachment_folder")
+            os.makedirs(attachment_folder, exist_ok=True)
+
             print_format = frappe.db.get_value("Ezy Form Definitions", form_short_name, "print_format")
-            
-            wf_generated_request_id = frappe.get_value(form_short_name,name,"wf_generated_request_id")
-          
-            activate_log = frappe.get_doc('WF Activity Log',wf_generated_request_id,).as_dict()
+            wf_generated_request_id = frappe.get_value(form_short_name, name, "wf_generated_request_id")
+            activate_log = frappe.get_doc('WF Activity Log', wf_generated_request_id).as_dict()
+
             filtered_reasons = [
-                            {
-                                'level': entry['level'],
-                                'role': entry['role'],
-                                'user': entry['user'],
-                                'user_name': entry['user_name'],
-                                'reason': entry['reason'],
-                                'action': entry['action'],
-                                'time': entry['time'],
-                                'random_string': entry['random_string']
-                            }
-                            for entry in activate_log.get('reason', [])
-                        ]
+                {
+                    'level': entry['level'],
+                    'role': entry['role'],
+                    'user': entry['user'],
+                    'user_name': entry['user_name'],
+                    'reason': entry['reason'],
+                    'action': entry['action'],
+                    'time': entry['time'],
+                    'random_string': entry['random_string']
+                }
+                for entry in activate_log.get('reason', [])
+            ]
+
+            html_table_output = ""
             if filtered_reasons:
                 html_table_output = Template(activate_log_table).render(filtered_reasons=filtered_reasons)
-            
+
+            mail_attachment = []
+            html_view = ""
+
             if print_format:
-                html_view_ = get_html_file_data(form_short_name,name,print_format)
+                html_view_ = get_html_file_data(form_short_name, name, print_format)
                 html_view = html_view_['html']
             else:
                 json_object = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_json")
- 
                 json_object = literal_eval(json_object)["fields"]
-                json_object = [ field for field in json_object]
                 user_doc = frappe.get_doc(form_short_name, name).as_dict()
-                data_list ={}
-                mail_attachment = []
+                data_list = {}
+
                 for iteration in json_object:
                     if "value" in iteration:
                         iteration["value"] = user_doc.get(iteration["fieldname"], "")
- 
-                    # Collect attachments except those with fieldname like "approved_by"
- 
-                    if iteration.get("fieldtype") == "Attach" and iteration.get("value"):                                              
-                        iteration["value"] =   iteration["value"]     
-                        # Construct a display name using the label or fallback to fieldname
-                        field_label = iteration.get("label") or iteration.get("fieldname")
-                        attachment_info = {
-                            "label": 'Form Attachments',
-                            "file_url": iteration["value"]
-                        }
-                        if iteration.get("fieldname") and not iteration.get("fieldname").lower().startswith(("approved_by", "requestor","acknowle")):
-                            mail_attachment.append(attachment_info)
-                    # Handle Table fields (child tables)
+
+                    # Main form attachments
+                    if iteration.get("fieldtype") == "Attach" and iteration.get("value"):
+                        file_url = iteration["value"]
+                        if file_url:
+                            attachment_info = {
+                                "label": 'Form Attachments',
+                                "file_url": file_url,
+                                "file_path": os.path.join(public_files_folder, file_url.replace("/files/", ""))
+                            }
+                            if iteration.get("fieldname") and not iteration.get("fieldname").lower().startswith(
+                                    ("approved_by", "requestor", "acknowle")):
+                                mail_attachment.append(attachment_info)
+
+                    # Child table attachments
                     if iteration.get("fieldtype") == "Table":
                         child_table_name = str(iteration["fieldname"])
-                        child_table_records = frappe.get_all( iteration["options"],  filters={"parent": name},   fields=["*"],  order_by="idx asc", )
+                        child_table_records = frappe.get_all(
+                            iteration["options"],
+                            filters={"parent": name},
+                            fields=["*"],
+                            order_by="idx asc"
+                        )
 
-                       # Get field names and labels dynamically
-                        field_names = [df.fieldname for df in frappe.get_meta(iteration["options"]).fields]
-                        field_labels = {df.fieldname: df.label for df in frappe.get_meta(iteration["options"]).fields}
-                        # Store child table data properly
-                        # Get field metadata
                         meta_fields = frappe.get_meta(iteration["options"]).fields
+                        field_names = [df.fieldname for df in meta_fields]
+                        field_labels = {df.fieldname: df.label for df in meta_fields}
                         field_types = {df.fieldname: df.fieldtype for df in meta_fields}
-                        processed_child_records = []
+
                         for record in child_table_records:
                             for field in field_names:
                                 value = record.get(field)
                                 fieldtype = field_types.get(field)
-
                                 if fieldtype == "Attach" and value:
-                                    # Split the comma-separated file URLs
                                     file_urls = [url.strip() for url in value.split(',') if url.strip()]
-                                    
                                     for file_url in file_urls:
-                                        # Add to mail_attachment
                                         mail_attachment.append({
                                             "label": "Form Attachments",
-                                            "file_url": file_url
+                                            "file_url": file_url,
+                                            "file_path": os.path.join(public_files_folder, file_url.replace("/files/", ""))
                                         })
 
-                                        # Also store each file as a separate record in data_list
-                                        processed_child_records.append({
-                                            field_labels.get(field, field): file_url
-                                        })
                         data_list[child_table_name] = [
                             {field_labels.get(field, field): record.get(field) for field in field_names}
                             for record in child_table_records
                         ]
-            #########################
 
-                json_object = list(filter(lambda dict :False if (('value' in dict) and not(dict.get('value')) and (dict.get('fieldname').startswith('approved') or dict.get('fieldname').startswith('approver'))) else True,json_object))
-                form_name = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_name")
-                html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_name,child_data=data_list,child_table_data=None,business_unit=business_unit,wf_generated_request_id=wf_generated_request_id,mail_attachment=mail_attachment)
-                
-            random_number = randint(111, 999)
+                # Remove empty "approved"/"approver" fields
+                json_object = list(filter(lambda d: not (
+                    ('value' in d and not d.get('value')) and
+                    (d.get('fieldname').startswith('approved') or d.get('fieldname').startswith('approver'))
+                ), json_object))
 
-            # … inside your handler, after generating both PDFs …
+                form_name = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_name") or "Form"
+                html_view = json_structure_call_for_html_view(
+                    json_obj=json_object,
+                    form_name=form_name,
+                    child_data=data_list,
+                    child_table_data=None,
+                    business_unit=business_unit,
+                    wf_generated_request_id=wf_generated_request_id,
+                    mail_attachment=mail_attachment
+                )
 
-            # Paths to the two PDFs we want in the ZIP:
-            bench_path         = get_bench_path()
-            site               = frappe.local.site
-            public_files_folder = os.path.join(bench_path, "sites", site, "public", "files",'Attachment folder')
-            os.makedirs(public_files_folder, exist_ok=True)
-            # main form pdf
-            pdf_filename       = f"{form_short_name}.pdf"
-            absolute_pdf_path  = os.path.join(public_files_folder, pdf_filename)
+            # Generate PDFs
+            pdf_filename = f"{form_short_name or 'form'}.pdf"
+            absolute_pdf_path = os.path.join(attachment_folder, pdf_filename)
 
-            # activate log pdf
-            activate_pdf_name  = "activate_log.pdf"
-            activate_pdf_path  = os.path.join(public_files_folder, activate_pdf_name)
+            activate_pdf_name = "activate_log.pdf"
+            activate_pdf_path = os.path.join(attachment_folder, activate_pdf_name)
 
-            # Build attachment list, including both URLs (for email) and FS paths (for zipping)
-            
+            is_landscape = False  # Set this according to your use case
+            opts = {"orientation": "Landscape" if is_landscape else "Portrait"}
 
-            # … (your existing logic that appends other Attach field URLs) …
-            opts={"orientation":"Landscape"if is_landscape else"Portrait"}
-            convert_html_to_pdf(html_content=html_view,pdf_path=absolute_pdf_path,options=opts)
-            
-            convert_html_to_pdf(html_content=html_table_output,pdf_path=activate_pdf_path)
-            # Append the activate_log.pdf
+            convert_html_to_pdf(html_content=html_view, pdf_path=absolute_pdf_path, options=opts)
+            convert_html_to_pdf(html_content=html_table_output, pdf_path=activate_pdf_path)
+
+            # Add generated PDFs to attachments
             mail_attachment.append({
-                "label":     "Attachment folder",
-                "file_url":  f"/files/{activate_pdf_name}",
+                "label": "Attachment_folder",
+                "file_url": f"/files/Attachment_folder/{activate_pdf_name}",
                 "file_path": activate_pdf_path
             })
-
-            # Append the main form PDF
             mail_attachment.append({
-                "label":     "Attachment folder",
-                "file_url":  f"/files/{pdf_filename}",
+                "label": "Attachment_folder",
+                "file_url": f"/files/Attachment_folder/{pdf_filename}",
                 "file_path": absolute_pdf_path
             })
 
-            # Ensure the zip folder exists
-            attachment_folder = frappe.get_site_path("public", "files", "Attachment folder")
-            os.makedirs(attachment_folder, exist_ok=True)
+            # Remove any files that do not exist
+            mail_attachment = [item for item in mail_attachment if os.path.exists(item["file_path"])]
 
-            # Create and populate ZIP
+            # Create ZIP
             zip_folder_name = "Attachments"
-            zip_filename = f"{name}.zip"
-            zip_path     = os.path.join(attachment_folder, zip_filename)
+            zip_filename = f"{name or 'form'}.zip"
+            zip_path = os.path.join(attachment_folder, zip_filename)
 
             with zipfile.ZipFile(zip_path, 'w') as zipf:
                 for item in mail_attachment:
-                    add_file_to_zip(item, zipf,zip_folder_name=zip_folder_name)
+                    add_file_to_zip(item, zipf, zip_folder_name=zip_folder_name)
 
-            # Build the download URL for the user
-            site_url        = get_url()
-            relative_zip    = f"/files/Attachment folder/{zip_filename}"
-            full_download_url = f"{site_url}{relative_zip}"
-
+            site_url = get_url()
+            full_download_url = f"{site_url}/files/Attachment_folder/{zip_filename}"
             return full_download_url
+
+
+
 
 
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         frappe.log_error("Error Downloading File", f"line No:{exc_tb.tb_lineno}\n{traceback.format_exc()}")
         frappe.throw(str(e))
+        
+
 from frappe.www.printview import get_html_and_style
 
 def get_html_file_data(doc=None,data=None,print_format=None):
