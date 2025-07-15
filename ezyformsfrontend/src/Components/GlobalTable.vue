@@ -542,7 +542,7 @@ function getAssignedToUsers(row, column) {
       return "-";
     }
 
-    return Array.isArray(value) ? `Pending at- ${value.join(", ")}` : `Pending at- ${value}`;
+    return Array.isArray(value) ? `${value.join(", ")}` : `${value}`;
   } catch (error) {
     return row[column.td_key] || "User not assigned";
   }
