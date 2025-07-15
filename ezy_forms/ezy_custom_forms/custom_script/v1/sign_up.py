@@ -116,6 +116,7 @@ def employee_update_notification(emp_mail):
 	if not emp_mail:
 		frappe.throw("Employee email is required.")
 
+	sender = frappe.get_value("Email Account",{"enable_outgoing":1,"default_outgoing":1},"email_id")
 	# Get employee name using the email as the 'name' field in Ezy Employee
 	emp_mail, emp_name = frappe.db.get_value(
 		"Ezy Employee", {"name": emp_mail}, ["name", "emp_name"]
@@ -155,7 +156,7 @@ def employee_update_notification(emp_mail):
 	frappe.sendmail(
 		recipients=[emp_mail],
 		subject=subject,
-		subject= subject,
+		sender=sender,
 		message=message,
 		now=True
 	)
@@ -225,54 +226,54 @@ def email_template_create():
 <p>A new request has been generated in the system with the following details:</p>
 
 <table border="1" cellpadding="10" cellspacing="0">
-    <tr>
-        <th>Form</th>
-        <th>Form Details</th>
-    </tr>
-    <tr>
-        <td><strong>Form Name</strong></td>
-        <td>doctypename</td>
-    </tr>
-    <tr>
-        <td><strong>Requested Form ID</strong></td>
-        <td>generated_request_id</td>
-    </tr>
-    <tr>
-        <td><strong>Form Submitted By</strong></td>
-        <td>--action_by--</td>
-    </tr>
-    <tr>
-        <td><strong>Form Submitted On</strong></td>
-        <td>current_date_and_time</td>
-    </tr>
-    <tr>
-        <td><strong>Form Current Status</strong></td>
-        <td>--current_status--</td>
-    </tr>
+	<tr>
+		<th>Form</th>
+		<th>Form Details</th>
+	</tr>
+	<tr>
+		<td><strong>Form Name</strong></td>
+		<td>doctypename</td>
+	</tr>
+	<tr>
+		<td><strong>Requested Form ID</strong></td>
+		<td>generated_request_id</td>
+	</tr>
+	<tr>
+		<td><strong>Form Submitted By</strong></td>
+		<td>--action_by--</td>
+	</tr>
+	<tr>
+		<td><strong>Form Submitted On</strong></td>
+		<td>current_date_and_time</td>
+	</tr>
+	<tr>
+		<td><strong>Form Current Status</strong></td>
+		<td>--current_status--</td>
+	</tr>
 </table>
 
 
 <p>The reason provided after this action is:</p>
 <blockquote style="background-color: #f9f9f9; padding: 10px; border-left: 4px solid #ccc;">
-    <em>reason_after_action</em>
+	<em>reason_after_action</em>
 </blockquote>
 
 <p>For more details, you can access the request using the following link:</p>
 
 
-      <p>
-    <a href="---url---" style="
-        background-color: #fff;
-        color: Blue;
-        border:1px solid Blue;
-        padding: 10px 20px;
-        text-align: center;
-        text-decoration: none;
-        display: inline-block;
-        border-radius: 5px;
-        font-weight: bold;">
-        Actions
-    </a>
+	  <p>
+	<a href="---url---" style="
+		background-color: #fff;
+		color: Blue;
+		border:1px solid Blue;
+		padding: 10px 20px;
+		text-align: center;
+		text-decoration: none;
+		display: inline-block;
+		border-radius: 5px;
+		font-weight: bold;">
+		Actions
+	</a>
 </p>
 
 <p>Best Regards,<br>EzyForms</p>
