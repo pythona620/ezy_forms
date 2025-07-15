@@ -251,7 +251,7 @@ const userFormSideBarData = [
 const filteredSideBarData = computed(() => {
     return todoSideBarData.filter(item => {  
         if (item.name === "My Team") {
-            return userDesigination.value.includes("IT") || userDesigination.value.includes("HOD");
+            return is_admin.value == 1;
         }
         return true;
     });
@@ -288,7 +288,7 @@ const firstSettingsGroup = computed(() => settingsSideBarData.slice(0, 1)); // F
 // const forthSettingsGroup = computed(() => settingsSideBarData.slice(3));
 
 const filteredSettingsGroups = computed(() => {
-    return userDesigination.value.toLowerCase().includes('it')
+    return is_admin.value == 1
         ? {
             thirdSettingsGroup: settingsSideBarData.slice(1, 3),
             forthSettingsGroup: settingsSideBarData.slice(3, 6),
@@ -332,7 +332,7 @@ const baseRoute = computed(() => {
 const deptartmentData = ref([])
 const username = ref('');
 const userAdmin = ref('');
-const userDesigination = ref('');
+const is_admin = ref('');
 
 onMounted(() => {
     // gettingDepartmentNames()
@@ -353,7 +353,8 @@ onMounted(() => {
             userAdmin.value = userName.full_name;
             // userInitial.value = userData.emp_name.charAt(0).toUpperCase() || userData.full_name.charAt(0).toUpperCase();
             // userEmail.value = userData.name;
-            userDesigination.value = userData.designation || '';
+            is_admin.value = userData.is_admin || '';
+            
 
         }
     } else {

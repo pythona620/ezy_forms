@@ -1546,7 +1546,7 @@ watch(activityData, (newVal) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1;
+  z-index: 0;
   margin-top: 3px;
 }
 

@@ -90,6 +90,7 @@ body {
   border-radius: 4px !important;
   padding: 8px 12px !important;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+  
 }
 
 /* Optional: Customize tooltip arrow */
@@ -100,6 +101,8 @@ body {
 /* Optional: Text inside the tooltip */
 .p-tooltip-text {
   font-weight: 500 !important;
+  // white-space: nowrap !important;
+  max-width: 300px;
 }
 .buttoncomp {
   background-color: var(--darkbtn);

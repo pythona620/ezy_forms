@@ -7,8 +7,7 @@
   <section>
 
     <div v-if="filteredBlocks.length" class="card p-3">
-      <div>
-      </div>
+      
       <div v-for="(block, blockIndex) in filteredBlocks" :key="blockIndex" class="block-container rounded-2">
         <div v-if="blockIndex === 0"><label class=" fw-bold font-12 ps-2">Request ID: </label> <span class="font-13">
             {{ selectedData.formname.replace(/_/g, ' ') }}</span> </div>
@@ -32,12 +31,8 @@
                     <div
                           v-if="!(blockIndex !== 0 && !field.value && ['Approver', 'Approved On', 'Approved By','Acknowledged By'].includes(field.label) )"
                       :class="(props.readonlyFor === 'true' || blockIndex < currentLevel) && field.fieldtype !== 'Small Text' && field.fieldtype !== 'Text' || field.fieldtype === 'Check'
-                                    ? 'd-flex mb-2 ' + (field.fieldtype === 'Check' ? 'mt-1 flex-row-reverse justify-content-end gap-2 w-0 align-items-start ' : '') + (field.label === 'Approved By' ? 'align-items-center' : '  align-items-start nowrap')
+                                    ? 'd-flex mb-2 ' + (field.fieldtype === 'Check' ? 'mt-1 flex-row-reverse justify-content-end gap-2 w-0 align-items-start ' : '') + (field.label === 'Approved By' || field.label === 'Acknowledged By' || field.label === 'Requestor Signature' ? 'align-items-center' : '  align-items-start ')
                                     : ''" >
-
-
-
-
                       <div v-if="field.label && field.fieldtype !== 'Table' && field.fieldname !== 'auto_calculations'">
                         <label :for="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
                           class=" label-text  whitespace-nowrap">
@@ -199,8 +194,8 @@
 
                               <!-- File Input (if no value or for specific cases) -->
                               <input
-                                v-if="(field.fieldname !== 'requestor_signature' && field.label !== 'Requestor Signature' && blockIndex !== 0 && !field.label.includes('Approved By') && props.readonlyFor !== 'true') && (field.value && blockIndex !==0) || !field.value  && props.readonlyFor !== 'true' "
-                                :disabled="props.readonlyFor === 'true'"
+                                v-if="(field.fieldname !== 'requestor_signature' && field.label !== 'Requestor Signature' && blockIndex !== 0 && !field.label.includes('Approved By') && !field.label.includes('Acknowledged By') && props.readonlyFor !== 'true') && (field.value && blockIndex !==0) || !field.value  && props.readonlyFor !== 'true' && blockIndex !== 0 "
+                                :disabled="props.readonlyFor === 'true' || blockIndex === 0"
                                 type="file"
                                 accept=".jpeg,.jpg,.png,.pdf,.xlsx,.xls"
                                 :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
@@ -215,14 +210,14 @@
                                   v-for="(fileUrl, index) in field.value.split(',').map(f => f.trim())"
                                   :key="index"
                                   class="position-relative d-inline-block"
-                                  @mouseover="hovered = index"
-                                  @mouseleave="hovered = null"
+                                 @mouseover="hovered[`${field.fieldname}-${index}`] = true"
+  @mouseleave="hovered[`${field.fieldname}-${index}`] = false"
                                   :class="{ 'border-bottom-0': props.readonlyFor === 'true' }"
                                 >
 
                                   <!-- Image File -->
                                   <template v-if="isImageFile(fileUrl)">
-                                    <template v-if="field.fieldname === 'requestor_signature' || field.label.includes('Approved By') || field.label.includes('Acknowledged by')">
+                                    <template v-if="field.fieldname === 'requestor_signature' || field.label.includes('Approved By') || field.label.includes('Acknowledged By')">
                                       <img
                                         :src="fileUrl"
                                         class="img-thumbnail cursor-pointer imge_top border-0 border-bottom-0"
@@ -257,7 +252,7 @@
                                     :href="fileUrl"
                                     target="_blank"
                                     class="d-flex align-items-center justify-content-center border rounded bg-light"
-                                    style="width: 25px; height: 25px; text-decoration: none;"
+                                    style="width: 30px; height: 32px; text-decoration: none;"
                                   >
                                     <i class="bi bi-file-earmark-spreadsheet text-success fs-4"></i>
                                   </a>
@@ -274,14 +269,15 @@
                                   </a>
 
                                   <!-- Remove Button -->
-                                  <!-- <button v-if="hovered === index"
+                                  <button v-if="hovered[`${field.fieldname}-${index}`] && props.readonlyFor !== 'true' && blockIndex !== 0"
 
-                                    @click="removeFile(index, field)"
+                                    @click="removeFile(index, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+
                                     class="btn btn-sm btn-light border-0 position-absolute"
-                                    style="top: 5px; right: -5px; border-radius: 50%; padding: 0 5px; height: 27px;"
+                                    style="top: -15px; right: -10px; border-radius: 50%; padding: 0 5px; height: 27px;"
                                   >
                                     <i class="bi bi-x fs-6"></i>
-                                  </button> -->
+                                  </button>
                                 </div>
                               </div>
 
@@ -337,9 +333,9 @@
                                   <img :src="file" alt="Enlarged Preview" style="width: 100%; border-radius: 5px;" />
                                 </div> -->
 
-                        <template v-else-if="field.fieldtype == 'Link' && field.fieldname !== 'department_name' && field.fieldname !== 'designation'">
-                          <div class="d-flex align-items-center gap-2">
-                            <input type="text" :value="field.value"
+                        <template v-else-if="field.fieldtype === 'Link' && field.fieldname !== 'department_name' && field.fieldname !== 'designation'">
+                          
+                            <input v-if="readonlyFor !== 'true'" type="text" :value="field.value"
                               :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'"
                               @input="(e) => onInputChange(e.target.value, field)"
                               :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0  w-50 pb-0 bg-transparent' : ''"
@@ -352,7 +348,9 @@
                                   columnIndex,
                                   fieldIndex
                                 )" class="form-control font-12 " />
-
+<span class=" font-12 m-0">
+  {{ field.value }}
+</span>
                             <!-- <button v-if="field.value && field.label !== 'Department'"
                               class="btn btn-dark text-dark bg-white  p-1" @click="ClickLink(field)"> <i
                                 class="bi bi-link-45deg font-15"></i></button> -->
@@ -361,7 +359,7 @@
                               :data-bs-target="`#modal-${field.fieldname}`">
                               <i class="bi bi-link-45deg font-13"></i>
                             </button> -->
-                          </div>
+                          
 
                           <!-- Bootstrap Modal -->
                           <!-- Bootstrap Modal -->
@@ -418,7 +416,7 @@
                             @input="adjustHeight(sectionIndex, columnIndex, fieldIndex)" />
 
                           <template
-                            v-if="blockIndex === 0 && field.fieldtype !== 'Int' && field.fieldtype !== 'Text' && field.fieldtype !== 'Select' && field.fieldname !== 'auto_calculations' ">
+                            v-if="blockIndex === 0 && field.fieldtype !== 'Int' && field.fieldtype !== 'Text' && field.fieldtype !== 'Select' && field.fieldname !== 'auto_calculations' || props.readonlyFor === 'true' ">
                             <span style="font-size: 12px;"
                               :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0  w-50 bg-transparent' : ''"
                               :value="field.value" :type="field.fieldtype">
@@ -719,17 +717,17 @@
                                           </span>
                                         </template>
                                         <template v-if="field.fieldtype === 'Text'">
-                                          <textarea type="text"
+                                          <textarea v-if="props.readonlyFor !== 'true' && blockIndex !== 0 && blockIndex == currentLevel" type="text"
                                             :class="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel ? 'bg-white border-0' : null"
                                             :disabled="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel"
                                             class="form-control form-control-sm font-12 text-center"
                                             v-model="row[field.fieldname]"
                                             :ref="el => setRef(el, sectionIndex, columnIndex, fieldIndex)"
                                             @input="adjustHeight(sectionIndex, columnIndex, fieldIndex)" />
-                                          <!-- <span v-else>
+                                          <span v-else>
                                             {{ row[field.fieldname] }}
 
-                                          </span> -->
+                                          </span>
                                         </template>
                                         <template v-if="field.fieldtype === 'Int'">
                                           <!-- Expression based field -->
@@ -922,7 +920,7 @@ const textAreaRefs = reactive({});
 const replaceInputIndexes = ref([]);
 const previewUrl = ref('')
 const showModal = ref(false)
-// const hovered = ref(null) 
+const hovered = reactive({});
 // const isEditable = ref(false);
 
 // // Example function to toggle edit mode
@@ -1430,12 +1428,27 @@ function openFileModal(fileUrl) {
 // function isPdfFile(fileUrl) {
 //   return /\.pdf$/i.test(fileUrl)
 // }
-const removeFile = (index, field) => {
-    const files = field.value.split(',').map(f => f.trim())
-    files.splice(index, 1)
-    field.value = files.join(', ')
-    emit('updateField', field)
-}
+const removeFile = (
+  fileIndex,
+  blockIndex,
+  sectionIndex,
+  rowIndex,
+  columnIndex,
+  fieldIndex
+) => {
+  const field =
+    props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
+      columnIndex
+    ].fields[fieldIndex];
+
+  const files = field.value ? field.value.split(',').map(f => f.trim()) : [];
+  files.splice(fileIndex, 1); // Remove the selected file
+
+  field.value = files.join(','); // ✅ Important: update the value first
+
+  emit('updateField', field); // ✅ Now emit the updated field
+};
+
 
 
 const isExcelFile = (url) => {

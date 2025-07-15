@@ -197,7 +197,7 @@
             <h5 class="modal-title font-14 fw-bold" id="changePasswordLabel">
               Set New Password
             </h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @click="NewPasswordClose"></button>
           </div>
           <div class="modal-body">
             <!-- <FormFields tag="select" placeholder="Category" class="mb-3" name="roles" id="roles"
@@ -326,6 +326,10 @@ export default {
     };
   },
   methods: {
+    NewPasswordClose(){
+      this.formdata.usr = "";
+
+    },
     validatename() {
       if (!this.formdata.usr) {
         this.errors.usr = "Please Enter Valid Email Address *";
@@ -727,6 +731,7 @@ export default {
                   department: employeeData.department,
                   emp_code: employeeData.emp_code,
                   emp_signature: employeeData.signature,
+                  is_admin: employeeData.is_admin
                   // department: employeeData.department,
                 };
 

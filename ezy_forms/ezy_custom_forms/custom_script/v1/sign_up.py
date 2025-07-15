@@ -49,22 +49,23 @@ def sign_up(email: str, full_name: str,designation:str|None,emp_phone:str|None,e
 		if not frappe.db.exists("Ezy Employee", {"emp_mail_id": user.email}):
 			doc = frappe.new_doc("Ezy Employee")
 			doc.update({
-				"emp_name": user.username.replace('_'," ") if user.username else user.first_name,
+				"emp_name": user.username.replace('_', " ").upper() if user.username else user.first_name.upper(),
 				"emp_mail_id": user.email,
-				"company_field":company,
-				"enable":0,
-				"is_web_form":1,
-				"designation":designation,
-				"signature":signature,
-				"acknowledgement":acknowledgement,
-				'emp_phone':emp_phone,
-				"department":dept if dept else None,
+				"company_field": company,
+				"enable": 0,
+				"is_web_form": 1,
+				"designation": designation,
+				"signature": signature,
+				"acknowledgement": acknowledgement,
+				"emp_phone": emp_phone,
+				"department": dept if dept else None,
 				"acknowledge_on": acknowledge_on if acknowledge_on else frappe.utils.now(),
-				"emp_code":emp_code
+				"emp_code": emp_code
 			})
 			doc.insert(ignore_permissions=True)
 			frappe.db.commit()
-			send_mail_when_user_signup(emp_name = full_name,emp_mail_id=email)
+			send_mail_when_user_signup(emp_name=full_name, emp_mail_id=email)
+
 		# set default signup role as per Portal Set	tings
 		default_role = frappe.db.get_single_value("Portal Settings", "default_role")
 		if default_role:
@@ -95,7 +96,7 @@ def send_mail_when_user_signup(emp_name:str|None,emp_mail_id:str|None):
 	IT Team
 	"""
 	if  recipction_mail:
-		email_template = frappe.get_doc("Email Template", "Account Activation")
+		email_template = frappe.get_doc("Email Template", "Employee sign-up")
 		if email_template and email_template.use_html:
 			subject = email_template.subject or subject
 			message = frappe.render_template(email_template.response_html, {
@@ -111,7 +112,7 @@ def send_mail_when_user_signup(emp_name:str|None,emp_mail_id:str|None):
 		)
 from frappe.utils import get_url
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 def employee_update_notification(emp_mail):
 	if not emp_mail:
 		frappe.throw("Employee email is required.")
