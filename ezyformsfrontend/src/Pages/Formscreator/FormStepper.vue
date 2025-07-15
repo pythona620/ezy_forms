@@ -4,9 +4,9 @@
       <div class="">
         <div class="d-flex justify-content-between align-items-center CancelNdSave my-2 py-2">
           <div class="ps-1 my-2 d-flex align-items-center" @click="cancelForm()">
-            <h1 class="font-13 ms-3">
+            <button class="btn font-13 ms-3">
               <i class="bi bi-arrow-left"></i><span class="ms-2">Back</span>
-            </h1>
+            </button>
           </div>
           <div>
             <!-- <ButtonComp class="font-13 rounded-2" name="Save as Draft"></ButtonComp> -->
@@ -1337,7 +1337,7 @@
 
               <div class="form-check ps-0" v-if="selectedBlockIndex !== 0">
                 <div>
-                  <input type="checkbox" id="ViewOnlyReportee" v-model="ViewOnlyReportee"
+                  <input type="checkbox" id="ViewOnlyReportee" v-model="ViewOnlyReportee" :disabled="requester_as_a_approver || all_approvals_required "
                     class="me-2  mt-0 form-check-input designationCheckBox" />
                   <label for="ViewOnlyReportee" class="SelectallDesignation text-nowrap fw-bold mt-1 form-check-label">View Only
                     Reportee</label>  
@@ -1346,7 +1346,7 @@
               
               <div class="form-check ps-0" v-if="selectedBlockIndex !== 0">
                 <div>
-                  <input type="checkbox" id="all_approvals_required" v-model="all_approvals_required"
+                  <input type="checkbox" id="all_approvals_required" v-model="all_approvals_required" :disabled="ViewOnlyReportee ||  requester_as_a_approver "
                     class="me-2  mt-0 form-check-input designationCheckBox" />
                   <label for="all_approvals_required" class="SelectallDesignation text-nowrap fw-bold mt-1 form-check-label">All Approvers Required</label>
                 </div>
@@ -1354,7 +1354,7 @@
               </div>
             <div class="form-check ps-0" v-if="selectedBlockIndex !== 0">
                 <div>
-                  <input type="checkbox" id="requester_as_a_approver" v-model="requester_as_a_approver"
+                  <input type="checkbox" id="requester_as_a_approver" v-model="requester_as_a_approver" :disabled="ViewOnlyReportee ||  all_approvals_required"
                     class="me-2  mt-0 form-check-input designationCheckBox" />
                   <label for="requester_as_a_approver" class="SelectallDesignation text-nowrap fw-bold mt-1 form-check-label">Requested Only</label>
                 </div>
