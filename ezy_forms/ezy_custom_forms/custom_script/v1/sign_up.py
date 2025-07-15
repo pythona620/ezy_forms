@@ -95,7 +95,7 @@ def send_mail_when_user_signup(emp_name:str|None,emp_mail_id:str|None):
 	IT Team
 	"""
 	if  recipction_mail:
-		email_template = frappe.get_doc("Email Template", "Account Activation")
+		email_template = frappe.get_doc("Email Template", "Employee sign-up")
 		if email_template and email_template.use_html:
 			subject = email_template.subject or subject
 			message = frappe.render_template(email_template.response_html, {
