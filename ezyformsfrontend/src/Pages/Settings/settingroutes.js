@@ -18,7 +18,8 @@ const ActivityLog=()=>import("./ActivityLog.vue")
 const CreateForm=()=>import("./CreateForm.vue")
 const AuditLog=()=>import("./AuditLog.vue");
 const AcknowledgementComp=()=>import("./AcknowledgementComp.vue");
-const PreDefineForms=()=>import("./PreDefineForms.vue")
+const PreDefineForms=()=>import("./PreDefineForms.vue");
+const EmailTemplate=()=>import("./EmailTemplate.vue");
 
 const settingRoutes = [
   {
@@ -117,7 +118,12 @@ const settingRoutes = [
         path: "predefinedforms",
         component: PreDefineForms,
         name: "PredefinedForms",
-      }
+      },
+      {
+        path: "emailtemplate",
+        component: EmailTemplate,
+        name: "emailtemplate",
+      },
     ],
   },
 ];

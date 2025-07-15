@@ -155,7 +155,7 @@ option, index
 
 
                                                 <div v-for="(table, tableName) in childtableHeaders" :key="tableName">
-                                                    <div v-if=" tableName === field.fieldname"> 
+                                                    <div v-if=" tableName === field.fieldname || tableName === field.options"> 
                                                     <!-- Table Title -->
                                                     <div >
                                                         <span class="tablename text-secondary font-13 fw-bold ps-1">

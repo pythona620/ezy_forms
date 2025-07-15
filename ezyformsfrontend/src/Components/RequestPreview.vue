@@ -755,7 +755,7 @@
                                                                                 type="number" 
                                                                                 class="form-control font-12"
                                                                                 :value="calculateFieldExpression(row, field.description, table)"
-                                                                                readonly
+                                                                                
                                                                             />
 
                                                                             <!-- For normal fields with dynamic validation -->
@@ -868,12 +868,12 @@
 
                                                             </tbody>
                                                             <tfoot>
-                                                                <tr v-if="table.some(field =>
-                                                                    field.fieldtype === 'Int' &&
-                                                                    field.description &&
-                                                                    /[+\-*/]/.test(field.description) &&
-                                                                    (field.label.toLowerCase().includes('total') || field.label.toLowerCase().includes('amount'))
-                                                                )" class="bg-light">
+                                                               <tr v-if="table.some(field =>
+  field.fieldtype === 'Int' &&
+  (field.label.toLowerCase().includes('total') || field.label.toLowerCase().includes('amount'))
+)"
+ class="bg-light">
+
                                                                     <td v-for="(field, index) in table"
                                                                         :key="field.fieldname"
                                                                         class="text-center font-12">
@@ -883,12 +883,12 @@
 
                                                                         </template>
                                                                         <!-- ✅ Other columns show totals conditionally -->
-                                                                        <template v-else-if="
-                                                                            field.fieldtype === 'Int' &&
-                                                                            field.description &&
-                                                                            /[+\-*/]/.test(field.description) &&
-                                                                            (field.label.toLowerCase().includes('total') || field.label.toLowerCase().includes('amount'))
-                                                                        ">
+                                                                      <template v-else-if="
+  field.fieldtype === 'Int' &&
+  (field.label.toLowerCase().includes('total') || field.label.toLowerCase().includes('amount'))
+">
+
+
 
                                                                             {{
                                                                                 tableTotals[tableIndex]?.[field.fieldname]
@@ -1261,44 +1261,43 @@ function calculateFieldExpression(row, expression, fields) {
 
 
 const tableTotals = computed(() => {
-    const totals = {};
+  const totals = {};
 
-    for (const [tableIndex, rows] of Object.entries(tableRows)) {
-        totals[tableIndex] = {};
+  for (const [tableIndex, rows] of Object.entries(tableRows)) {
+    totals[tableIndex] = {};
 
-        const fields = props.tableHeaders[tableIndex] || [];
-        fields.forEach((field) => {
-            if (
-                field.fieldtype === 'Int' &&
-                field.description &&
-                /[+\-*/]/.test(field.description) &&
-                (field.label.toLowerCase().includes('total') || field.label.toLowerCase().includes('amount'))
-            ) {
-                let sum = 0;
+    const fields = props.tableHeaders[tableIndex] || [];
+    fields.forEach((field) => {
+      if (
+        field.fieldtype === 'Int' &&
+        (field.label.toLowerCase().includes('total') || field.label.toLowerCase().includes('amount'))
+      ) {
+        let sum = 0;
 
-                rows.forEach((row) => {
-                    if (
-                        field.description &&
-                        /[+\-*/]/.test(field.description) &&
-                        (field.label.toLowerCase().includes('total') || field.label.toLowerCase().includes('amount'))
-                    ) {
-                        // Calculate expression dynamically using labels and row data
-                        sum += Number(calculateFieldExpression(row, field.description, fields));
-                    }
-                    else {
-                        // Sum raw values
-                        const val = parseFloat(row[field.fieldname]);
-                        sum += isNaN(val) ? 0 : val;
-                    }
-                });
+        rows.forEach((row) => {
+          let result = 0;
 
-                totals[tableIndex][field.fieldname] = sum;
-            }
+          try {
+            // try formula
+            result = calculateFieldExpression(row, field.description, fields);
+            if (typeof result !== 'number' || isNaN(result)) throw new Error();
+          } catch {
+            // fallback to raw value
+            result = parseFloat(row[field.fieldname]) || 0;
+          }
+
+          sum += result;
         });
-    }
 
-    return totals;
+        totals[tableIndex][field.fieldname] = sum;
+      }
+    });
+  }
+
+  return totals;
 });
+
+
 watchEffect(() => {
     for (const [tableIndex, rows] of Object.entries(tableRows)) {
         const fields = props.tableHeaders[tableIndex] || [];
