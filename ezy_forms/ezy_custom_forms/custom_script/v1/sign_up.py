@@ -112,7 +112,7 @@ def send_mail_when_user_signup(emp_name:str|None,emp_mail_id:str|None):
 		)
 from frappe.utils import get_url
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 def employee_update_notification(emp_mail):
 	if not emp_mail:
 		frappe.throw("Employee email is required.")

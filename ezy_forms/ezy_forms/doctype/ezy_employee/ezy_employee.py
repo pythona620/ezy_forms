@@ -7,11 +7,19 @@ import sys
 from ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions import activating_perms, bench_migrating_from_code
 import socket as so
 from ezy_forms.ezy_forms.doctype.login_check.login_check import after_insert_user
- 
+from ezy_forms.ezy_custom_forms.custom_script.v1.sign_up import employee_update_notification
 class EzyEmployee(Document):
 	def on_update(self):
-		if not frappe.db.exists("Login Check", {"user_id": self.emp_mail_id}):
+		prev_doc = self.get_doc_before_save()
+		if (
+			not frappe.db.exists("Login Check", {"user_id": self.emp_mail_id}) 
+			and self.enable 
+			and prev_doc 
+			and getattr(prev_doc, "enable", 0) != 1
+		):
+
 			after_insert_user(self)
+			employee_update_notification(emp_mail=self.emp_mail_id)
  
 	def after_insert(self):
 		self.create_user_if_not_exists()
@@ -39,7 +47,7 @@ class EzyEmployee(Document):
 			"username": self.emp_name,
 			"email": self.emp_mail_id,
 			"first_name": self.emp_name.split(" ")[0],
-			"send_welcome_email": 1 if is_email_account_set else 0
+			"send_welcome_email":  0
 		})
 	
 		if self.designation:
@@ -87,7 +95,7 @@ class EzyEmployee(Document):
  
 	def save(self):
 		super().save(self.name)
-		self.wf_role_matrix_update()
+		wf_role_matrix_update(self)
  
  
 @frappe.whitelist()
