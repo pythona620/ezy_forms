@@ -18,27 +18,27 @@
                     <div class="ms-3 flex-grow-1">
                         <h6 class="mb-3 mt-2">{{ userData.emp_name }}</h6>
                         <div class="d-flex flex-wrap align-items-center gap-5 role-details">
-                            <span><i class="bi bi-person-badge-fill me-1"></i>{{ userData.emp_code || "Emp Code Not Found" }}</span>
-                            <span><i class="bi bi-envelope-fill me-1"></i>{{ userData.emp_mail_id || "null" }}</span>
-                            <span><i class="bi bi-telephone-fill me-1"></i>{{ userData.emp_phone || "Number Not Found" }}</span>
-                            <span style="font-size:13px"><i class="bi bi-briefcase-fill me-1"></i>{{ userData.designation || "designation not found" }}</span>
+                            <span><i class="bi bi-person-badge-fill me-1"></i>{{ userData.emp_code || "-" }}</span>
+                            <span><i class="bi bi-envelope-fill me-1"></i>{{ userData.emp_mail_id || "-" }}</span>
+                            <span><i class="bi bi-telephone-fill me-1"></i>{{ userData.emp_phone || "-" }}</span>
+                            <span style="font-size:13px"><i class="bi bi-briefcase-fill me-1"></i>{{ userData.designation || "-" }}</span>
                         </div>
 
                         <!-- Bottom Info -->
                         <div class="mt-3 d-flex flex-wrap gap-4">
-                            <span class="text-secondary font-11">
-                                Department: <strong>{{ userData.department || "Not Assign" }}</strong>
+                            <span class=" font-11">
+                                Department  : {{ userData.department || "-" }}
                             </span>
-                            <span class="text-secondary font-11">
-                                Reporting Manager:
-                                <strong>{{ userData.reporting_to || "Not Assign" }}</strong>
+                            <span class=" font-11">
+                                Reporting Manager : 
+                                {{ userData.reporting_to || "-" }}
                             </span>
-                            <span class="text-secondary font-11">Acknowledged On:
-                                <strong>{{ userData.enable_on || "Not Found" }}</strong>
+                            <span class=" font-11">Acknowledged On :
+                                {{ userData.acknowledge_on || "-" }}
                             </span>
                         </div>
                         <div class="mt-3">
-                            <span class="text-secondary d-flex text-center align-items-center">
+                            <span class=" d-flex text-center align-items-center">
                                 <p class="mt-3 m-0 me-2">Signiture:</p>
                                 <div class="position-relative d-inline-block " style="top:12px">
                                     <img v-if="userData?.signature" :src="userData?.signature ? userData.signature : defaultSign"
