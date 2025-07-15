@@ -134,6 +134,7 @@ function createEmailTemplate() {
                     document.getElementById("EmailTemplateModal")
                 );
                 modal.hide();
+                toast.success(`Email Template Create successfully`, { autoClose: 700 });
                 isSubmitBtn.value = false;
                 activitylog()
             }
@@ -150,7 +151,7 @@ function UpdateEmailTemplate(){
         .put(`${apis.resource}${doctypes.emailTemplate}/${templateData.value.name}`, updatedData)
         .then((response) => {
             if (response.data) {
-                toast.success(`acknowledgement Updated successfully`, { autoClose: 700 });
+                toast.success(`Email Template Updated successfully`, { autoClose: 700 });
                 activitylog()
                 const modal = bootstrap.Modal.getInstance(
                     document.getElementById("EmailTemplateModal")
