@@ -143,7 +143,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <input type="checkbox" v-model="acknowledge" id="Acknowledgement" value="Acknowledgement" class="me-1 mt-1 form-check-input shadow-none" />
+            <input type="checkbox" v-model="acknowledge" id="Acknowledgement" value="Acknowledgement" class="me-2 mt-1 form-check-input Acknowledgement-check " />
             <label for="Acknowledgement">
 
             I acknowledge that the information provided is correct.
@@ -1279,6 +1279,8 @@ function request_raising_fn(item) {
     property: business_unit.value,
     ip_address: ip_address.value,
     employee_id: employeeData.value.emp_code,
+    be_half_of:item.requester_name,
+    request_for:item.request_for,
   };
   axiosInstance.post(apis.raising_request, data_obj).then((resp) => {
     if (resp?.message?.success === true) {
@@ -1397,6 +1399,10 @@ function linked_id_adding_method(name) {
   align-items: center;
   font-size: 15px;
   font-weight: 500;
+}
+.Acknowledgement-check{
+  border: 1px solid rgb(64, 62, 62);
+  box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
 }
 
 table {
