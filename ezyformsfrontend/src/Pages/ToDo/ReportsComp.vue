@@ -42,6 +42,36 @@
                 <!-- <div id="datatable" tabindex="0" border="1" style="border-collapse: collapse; width: 100%;"></div> -->
                 <GlobalTable class=" newtable" :tHeaders="listDataheaders" :tData="listData" @cell-click="downloadPdf"
                     isAction="true" download="true" />
+
+                <div class="modal fade" id="SendMailModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Send Mail</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                Are you sure you want to send the mail?
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-outline-secondary"
+                                    data-bs-dismiss="modal">Cancel</button>
+                                <!-- <button type="button" class="btn btn-dark" @click="sendMail()">Yes,
+                                    Proceed</button> -->
+                                <button type="button" class="btn btn-dark" :disabled="saveloading"
+                                    @click="sendMail()">
+                                    <span v-if="saveloading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    <span v-if="!saveloading">
+                                        <span class="font-12 fw-bold">Yes, Proceed</span>
+                                    </span>
+
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </section>
         </template>
     </section>
@@ -59,7 +89,7 @@ import ButtonComp from "../../Components/ButtonComp.vue";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 
-
+const saveloading = ref(false)
 // const totalRecords = ref(0);
 const viewReport = ref(false);
 const tableData = ref([]);
@@ -189,8 +219,10 @@ function exportReport(type) {
     // Trigger the file download
     window.open(url, '_blank');
 }
+const reportsData = ref("");
 
 function downloadPdf(data, index, type) {
+    reportsData.value = data;
     if (type === "download") {
         if (!data?.name || !SelectedReportName?.value) {
             console.error("Missing required data for PDF download");
@@ -207,23 +239,40 @@ function downloadPdf(data, index, type) {
     }
 
     if (type === "mail") {
-        const payload = {
-            docname: data.name,
-            doctype:SelectedReportName.value
-        }
-
-        axiosInstance
-            .post(apis.reportMailSend, payload)
-            .then((res) => {
-                if (res) {
-                    const response=res;
-                    toast.success("Mail send successfully")
-                }
-            })
-            .catch((error) => {
-                console.error("Upload error:", error);
-            });
+        const modal = new bootstrap.Modal(document.getElementById('SendMailModal'));
+        modal.show();
     }
+}
+
+function sendMail() {
+  saveloading.value = true;
+
+    const payload = {
+        docname: reportsData.value.name,
+        doctype: SelectedReportName.value,
+    }
+
+    axiosInstance
+        .post(apis.reportMailSend, payload)
+        .then((res) => {
+            if (res) {
+                const response = res;
+                toast.success("Mail send successfully")
+                const modal = bootstrap.Modal.getInstance(
+                    document.getElementById("SendMailModal")
+                );
+                modal.hide();
+                saveloading.value = false;
+
+            }
+        })
+        .catch((error) => {
+            console.error("Upload error:", error);
+        })
+        .finally(()=>{
+            saveloading.value = false;
+        })
+
 }
 
 
