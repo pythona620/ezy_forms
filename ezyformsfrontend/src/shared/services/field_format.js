@@ -22,25 +22,48 @@ export function extractFieldsWithBreaks(data) {
             //   });
             // }
 
-            let generatedFieldname = convertLabelToFieldName(field?.label);
-
-            // Ensure unique fieldname
+             let generatedFieldname = convertLabelToFieldName(field?.label);
             generatedFieldname = getUniqueFieldname(generatedFieldname, fieldnameTracker);
+
+            // Handle and clean options
+            let cleanedOptions;
+            if (
+              ["Select", "Table MultiSelect", "Check", "Small Text"].includes(field.fieldtype) &&
+              field.options
+            ) {
+              const rawOptions = field.options
+                .split("\n")
+                .map((opt) => opt.trim())
+                .filter((opt) => opt);
+
+              const uniqueOptions = [];
+              const seen = new Set();
+
+              rawOptions.forEach((opt) => {
+                const lower = opt.toLowerCase();
+                if (!seen.has(lower)) {
+                  seen.add(lower);
+                  uniqueOptions.push(opt); // Retain original casing of first instance
+                }
+              });
+
+              cleanedOptions = "\n" + uniqueOptions.join("\n");
+            } else if (
+              (field.fieldtype === "Link" || field.fieldtype === "Table") &&
+              field.options
+            ) {
+              cleanedOptions = field.options.trim();
+            }
 
             result.push({
               description: convertDescriptionIntoNormal(field.description ? field.description : "Field"),
               fieldname: generatedFieldname,
               fieldtype: field.fieldtype,
-              idx: index++, // Assign index
+              idx: index++,
               label: field.label,
               reqd: field.reqd ? 1 : 0,
-              value: field.value ? field.value : "",
-              ...(["Select", "Table MultiSelect", "Check", "Small Text"].includes(field.fieldtype) && field.options
-                ? { options: field.options.startsWith("\n") ? field.options : `\n${field.options}` }
-                : (field.fieldtype === "Link" || field.fieldtype === 'Table' && field.options
-                  ? { options: field.options } : {})),
-
-
+              value: field.value || "",
+              ...(cleanedOptions ? { options: cleanedOptions } : {}),
             });
 
             previousFieldname = generatedFieldname;

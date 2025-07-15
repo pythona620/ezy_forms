@@ -84,11 +84,19 @@
                           </span>
                         </template>
                       </VueMultiselect>
+                      <div class=" d-flex gap-3">
 
-                      <div class="ms-1">
-                        <input type="checkbox" id="isHOD" true-value="1" false-value="0" v-model="createEmployee.is_hod"
-                          class="form-check-input mt-1 input-border" />
-                        <label class="font-13 ms-2 " for="isHOD">Is HOD</label>
+
+                        <div class="ms-1">
+                          <input type="checkbox" id="isHOD" :true-value='1' :false-value='0'
+                            v-model="createEmployee.is_hod" class="form-check-input mt-1 input-border border-1" />
+                          <label class="font-13 ms-2 " for="isHOD">Is HOD</label>
+                        </div>
+                        <div class="ms-1">
+                          <input type="checkbox" id="is_admin" :true-value='1' :false-value='0'
+                            v-model="createEmployee.is_admin" class="form-check-input mt-1 input-border" />
+                          <label class="font-13 ms-2 " for="is_admin">Is Admin</label>
+                        </div>
                       </div>
 
                     </div>
@@ -391,7 +399,7 @@
                   </div>
 
 
-                 
+
                   <div class="mb-3">
                     <label class="font-13 ps-1" for="emp_mail_id">Emp Mail ID<span
                         class="text-danger ps-1">*</span></label>
@@ -418,11 +426,22 @@
                       </span>
                     </template>
                   </VueMultiselect>
-                  <div class="ms-1">
-                    <input type="checkbox" id="isHOD" true-value="1" false-value="0" v-model="createEmployee.is_hod"
-                      class="form-check-input mt-1 input-border" />
-                    <label class="font-13 ms-2 " for="isHOD">Is HOD</label>
+                  <div class=" d-flex gap-3">
+
+
+                    <div class="ms-1">
+                      <input type="checkbox" id="isHOD" :true-value="1" :false-value="0" v-model="createEmployee.is_hod"
+                        class="form-check-input mt-1 input-border border-1" />
+                      <label class="font-13 ms-2 " for="isHOD">Is HOD</label>
+                    </div>
+                    <div class="ms-1">
+                      <input type="checkbox" id="is_admin" :true-value='1' :false-value='0'
+                        v-model="createEmployee.is_admin" class="form-check-input mt-1 input-border" />
+                      <label class="font-13 ms-2 " for="is_admin">Is Admin</label>
+                    </div>
                   </div>
+
+                  
                 </div>
                 <div class="col">
                   <div class="position-relative mb-3">
@@ -504,7 +523,7 @@
                   </VueMultiselect>
                   <div class="mb-3">
                     <label class="font-13 ps-1" for="reporting_to">Acknowledge On</label><br>
-                    <input class="mb-3 date-time " tag="input" type="datetime-local" name="acknowledge_on"
+                    <input class="mb-3 date-time form-control font-12 " tag="input" type="datetime-local" name="acknowledge_on"
                       id="acknowledge_on" placeholder="Enter department code"
                       :value="trimMilliseconds(createEmployee.acknowledge_on)" readonly />
                   </div>
@@ -673,7 +692,7 @@ const designations = ref([]);
 const reportingTo = ref([]);
 const reportingDesigination = ref([]);
 const departmentsList = ref([]);
-const remarks=ref("");
+const remarks = ref("");
 const saveloading = ref(false)
 // const newDesignation = ref(false);
 // const signaturePath = ref("");
@@ -723,18 +742,19 @@ const filteredDesignations = ref([])
 const bulkdata = ref([])
 
 const tableheaders = ref([
-  { th: "Emp ID", td_key: "emp_code" },
-  { th: "Emp Name", td_key: "emp_name" },
+  { th: "Employee ID", td_key: "emp_code" },
+  { th: "Employee Name", td_key: "emp_name" },
   // { th: "Mail", td_key: "emp_mail_id" },
   { th: "Designation", td_key: "designation" },
   { th: "Department", td_key: "department" },
+  { th: "Reporting Designation", td_key: "reporting_designation" },
   { th: "Signature", td_key: "signature" },
-
-  { th: "Reports Designation", td_key: "reporting_designation" },
-  { th: "Creation Date", td_key: "creation" },
-  { th: "last Login", td_key: "last_login" },
-  { th: "last Login IP", td_key: "last_ip" },
-  { th: "Emp Status", td_key: "enable" },
+  { th: 'Hod' , td_key: 'is_hod'},
+  { th: 'Admin' , td_key: 'is_admin'},
+  { th: "Status", td_key: "enable" },
+  // { th: "last Login", td_key: "last_login" },
+  // { th: "Creation Date", td_key: "creation" },
+  // { th: "last Login IP", td_key: "last_ip" }, 
 
   // { th: "Reporting Designation", td_key: "reporting_designation" },
 ]);
@@ -1143,7 +1163,7 @@ function onDepartmentChange(selectedDepartment) {
 function fetchingIsHod(department) {
   const filters = [["company_field", "like", `%${newbusiness.value}%`], ["enable", "=", "1"],
   ["department", "like", `%${department}%`], ["is_hod", "=", 1]];
- 
+
   const queryParams = {
     fields: JSON.stringify(["*"]),
     filters: JSON.stringify(filters),
@@ -1162,7 +1182,7 @@ function fetchingIsHod(department) {
       createEmployee.reporting_designation = "";
       console.error("Error fetching department data:", error);
     });
- 
+
 }
 
 
@@ -1560,7 +1580,7 @@ function createEmplBtn() {
   employeeOptions();
 }
 
-const forgotData=ref("")
+const forgotData = ref("")
 
 function actionCreated(rowData, actionEvent) {
   if (actionEvent?.name === 'Edit Employee') {
@@ -1614,38 +1634,38 @@ function actionCreated(rowData, actionEvent) {
     }
   }
   if (actionEvent?.name === 'Reset Password') {
-      forgotData.value=rowData;
-      const modal = new bootstrap.Modal(document.getElementById('ForgotPasswordModal'), {});
-      modal.show();
-  } 
+    forgotData.value = rowData;
+    const modal = new bootstrap.Modal(document.getElementById('ForgotPasswordModal'), {});
+    modal.show();
+  }
 }
 
- function forgotpassword() {
+function forgotpassword() {
   saveloading.value = true;
-    const payload={
-        cmd: "frappe.core.doctype.user.user.reset_password",
-        user: forgotData.value.name,
-    }
-      axiosInstance.post(apis.forgotPassword,payload )
-        .then((res) => {
-          if(res){
-            const messages = JSON.parse(res._server_messages);
-            const messageObj = JSON.parse(messages[0]);
-            if(messageObj.message){
-              toast.success("Password reset instructions have been sent to the user email.");
-              const modal = bootstrap.Modal.getInstance(document.getElementById('ForgotPasswordModal'));
-              modal.hide();
-            }
-          }
-        })
-        .catch((error) => {
-          console.error("Upload error:", error);
-        })
-        .finally(()=>{
-          saveloading.value = false;
+  const payload = {
+    cmd: "frappe.core.doctype.user.user.reset_password",
+    user: forgotData.value.name,
+  }
+  axiosInstance.post(apis.forgotPassword, payload)
+    .then((res) => {
+      if (res) {
+        const messages = JSON.parse(res._server_messages);
+        const messageObj = JSON.parse(messages[0]);
+        if (messageObj.message) {
+          toast.success("Password reset instructions have been sent to the user email.");
+          const modal = bootstrap.Modal.getInstance(document.getElementById('ForgotPasswordModal'));
+          modal.hide();
+        }
+      }
+    })
+    .catch((error) => {
+      console.error("Upload error:", error);
+    })
+    .finally(() => {
+      saveloading.value = false;
 
-        })
-    };
+    })
+};
 
 
 // watch(
@@ -2128,7 +2148,8 @@ function createEmpl() {
         );
         modal.hide();
 
-        cancelCreate();
+        // cancelCreate();
+        createEmployee.value = {}
         const fileInput = document.getElementById("signatureInput");
         if (fileInput) {
           fileInput.value = "";
@@ -2176,6 +2197,7 @@ function SaveEditEmp() {
       if (response.data) {
         toast.success("Changes Saved", { autoClose: 500, transition: "zoom" });
         employeeData(); // refresh list
+        createEmployee.value = {}; // clear form
       }
     })
     .catch((error) => {
@@ -2208,7 +2230,8 @@ function SaveEditEmp() {
   display: block;
   background: rgba(0, 0, 0, 0.6);
 }
-.remove-btn{
+
+.remove-btn {
   padding: 6px;
   position: relative;
   top: 36px;
@@ -2609,6 +2632,7 @@ function SaveEditEmp() {
   right: 10px;
   cursor: pointer;
 }
+
 .date-time {
   display: block;
   width: 100%;
