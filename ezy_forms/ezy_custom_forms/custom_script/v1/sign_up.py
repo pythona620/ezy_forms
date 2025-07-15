@@ -105,6 +105,7 @@ def send_mail_when_user_signup(emp_name:str|None,emp_mail_id:str|None):
 		frappe.sendmail(
 			recipients=[recipction_mail],
 			subject= subject,
+			sender=sender,
 			message=message,
 			now = True
 		)
@@ -154,6 +155,7 @@ def employee_update_notification(emp_mail):
 	frappe.sendmail(
 		recipients=[emp_mail],
 		subject=subject,
+		subject= subject,
 		message=message,
 		now=True
 	)
