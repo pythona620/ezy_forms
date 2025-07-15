@@ -79,31 +79,35 @@ def sign_up(email: str, full_name: str,designation:str|None,emp_phone:str|None,e
 @frappe.whitelist()
 def send_mail_when_user_signup(emp_name:str|None,emp_mail_id:str|None):
 	sender = frappe.get_value("Email Account",{"enable_outgoing":1,"default_outgoing":1},"email_id")
-	if sender:
-		recipction_mail = frappe.get_value("Notifications Mail","Notifications Mail",'sign_up_approver')
-		if recipction_mail:
-			
-			subject = "Employee sign-up Attempt – Access Enablement Required"
-			message = f"""
-			Dear IT Team,<br><br>
-			An employee has submitted a sign-up request for the site. Please find the details below:<br><br>
-			<ul>
-				<li><strong>Email ID:</strong> {emp_mail_id}</li>
-				<li><strong>Employee Name:</strong> {emp_name}</li>
-			</ul>
-			<br>
-			Kindly initiate the necessary steps to enable their access.<br><br>
-			Thank you for your support.<br>
-			Best regards,<br>
-			IT Team
-			"""
-			frappe.sendmail(
-				recipients=[recipction_mail],
-				subject=subject,
-				message=message,
-				now = True
-			)
-
+	recipction_mail = frappe.get_value("Notifications Mail","Notifications Mail",'sign_up_approver')
+	subject = "Employee sign-up Attempt – Access Enablement Required"
+	message = f"""
+	Dear IT Team,<br><br>
+	An employee has submitted a sign-up request for the site. Please find the details below:<br><br>
+	<ul>
+		<li><strong>Email ID:</strong> {emp_mail_id}</li>
+		<li><strong>Employee Name:</strong> {emp_name}</li>
+	</ul>
+	<br>
+	Kindly initiate the necessary steps to enable their access.<br><br>
+	Thank you for your support.<br>
+	Best regards,<br>
+	IT Team
+	"""
+	if  recipction_mail:
+		email_template = frappe.get_doc("Email Template", "Account Activation")
+		if email_template and email_template.use_html:
+			subject = email_template.subject or subject
+			message = frappe.render_template(email_template.response_html, {
+				"emp_name": emp_name,
+				"emp_mail_id": emp_mail_id,
+			})
+		frappe.sendmail(
+			recipients=[recipction_mail],
+			subject= subject,
+			message=message,
+			now = True
+		)
 from frappe.utils import get_url
 
 @frappe.whitelist(allow_guest=True)
@@ -167,25 +171,115 @@ def get_signup_value():
 
 
 def email_template_create():
-	message = '''
+	def create_template(name, subject, message):
+		if not frappe.db.exists("Email Template", name):
+			template = frappe.new_doc("Email Template")
+			template.update({
+				"name": name,
+				"subject": subject,
+				"use_html": 1,
+				"response_html": message
+			})
+			template.insert(ignore_permissions=True)
+			frappe.db.commit()
+
+	# Template 1: Account Activation
+	activation_message = '''
 		Hi {{emp_name}},<br>
 		Your user account in Ezy Forms has been successfully activated by the IT team.<br>
-		You can now log in and start using the system. If you haven’t received your login details or need help accessing your account, please contact IT support. {% if mail_id %}- Email: {{mail_id}}{% endif %} <br> 
+		You can now log in and start using the system. If you haven’t received your login details or need help accessing your account, please contact IT support.<br> 
 		Login Link: <a href="{{site_url}}">View Page</a><br>
 		Let us know if you have any questions.
 	'''
-	if not frappe.db.exists("Email Template", "Account Activation"):
-		template = frappe.new_doc("Email Template")
-		template.update({
-			"name": "Account Activation",
-			"subject": "Your Ezy Forms Profile is Now Active",
-			"use_html": 1,
-			"response_html": message
-		})
-		template.insert(ignore_permissions=True)
-		frappe.db.commit()
-		return "Email Template Created"
-	
+	create_template(
+		name="Account Activation",
+		subject="Your Ezy Forms Profile is Now Active",
+		message=activation_message
+	)
+
+	# Template 2: Employee Sign-Up Notification
+	signup_message = '''
+		Dear IT Team,<br><br>
+		An employee has submitted a sign-up request for the site. Please find the details below:<br><br>
+		<ul>
+			<li><strong>Email ID:</strong> {{emp_mail_id}}</li>
+			<li><strong>Employee Name:</strong> {{emp_name}}</li>
+		</ul>
+		<br>
+		Kindly initiate the necessary steps to enable their access.<br><br>
+		Thank you for your support.<br>
+		Best regards,<br>
+		IT Team
+	'''
+	create_template(
+		name="Employee sign-up",
+		subject="Employee sign-up Attempt – Access Enablement Required",
+		message=signup_message
+	)
+ 
+	ezy_flow_notification = '''
+ <p>Dear Sir/Madam,</p>
+
+<p>A new request has been generated in the system with the following details:</p>
+
+<table border="1" cellpadding="10" cellspacing="0">
+    <tr>
+        <th>Form</th>
+        <th>Form Details</th>
+    </tr>
+    <tr>
+        <td><strong>Form Name</strong></td>
+        <td>doctypename</td>
+    </tr>
+    <tr>
+        <td><strong>Requested Form ID</strong></td>
+        <td>generated_request_id</td>
+    </tr>
+    <tr>
+        <td><strong>Form Submitted By</strong></td>
+        <td>--action_by--</td>
+    </tr>
+    <tr>
+        <td><strong>Form Submitted On</strong></td>
+        <td>current_date_and_time</td>
+    </tr>
+    <tr>
+        <td><strong>Form Current Status</strong></td>
+        <td>--current_status--</td>
+    </tr>
+</table>
+
+
+<p>The reason provided after this action is:</p>
+<blockquote style="background-color: #f9f9f9; padding: 10px; border-left: 4px solid #ccc;">
+    <em>reason_after_action</em>
+</blockquote>
+
+<p>For more details, you can access the request using the following link:</p>
+
+
+      <p>
+    <a href="---url---" style="
+        background-color: #fff;
+        color: Blue;
+        border:1px solid Blue;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        border-radius: 5px;
+        font-weight: bold;">
+        Actions
+    </a>
+</p>
+
+<p>Best Regards,<br>EzyForms</p>
+'''
+	create_template(
+		name="Ezy Flow Notification",
+		subject="Ezy Flow Notification",
+		message=ezy_flow_notification
+	)
 
 	child_entries = frappe.get_all(
 			"Doctype Permissions",
