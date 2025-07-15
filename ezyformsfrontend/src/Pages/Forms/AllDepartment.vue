@@ -10,11 +10,7 @@
             {{ totalRecords }} Forms Available
           </p>
         </div>
-        <!-- <div v-if="userDesigination.includes('IT')" class="d-flex align-items-center gap-2">
-          <div class="d-flex align-items-center">
-            <ButtonComp class="buttoncomp" @click="formCreation()" name="Create Form"></ButtonComp>
-          </div>
-        </div>  -->
+     
 
       </div>
       <div class="mt-1">
@@ -139,7 +135,7 @@ const route = useRoute();
 const pdfPreview = ref('')
 
 const childtableHeaders = ref([]);
-const userDesigination = ref('');
+const is_admin = ref('');
 const isEnable = ref("");
 
 
@@ -153,9 +149,6 @@ const actions = computed(() => {
     { name: 'Raise Request', icon: 'fa fa-file-text' },
   ]
 
-  // if (userDesigination.value.includes('IT')) {
-  //   baseActions.push({ name: 'Edit Form', icon: 'fa-solid fa-edit' },)
-  // }
 
   return baseActions
 })
@@ -565,10 +558,10 @@ onMounted(() => {
   localStorage.removeItem('routepath')
 
   const userData = JSON.parse(localStorage.getItem('employeeData'));
-  userDesigination.value = userData.designation || '';
-  // console.log(userDesigination.value,"///");
+  is_admin.value = userData.is_admin || '';
+  // console.log(is_admin.value,"///");
 
-  if (userDesigination.value.includes("IT")) {
+  if (is_admin.value == 1) {
     isEnable.value = "true";
   }
   if (route.path === "/forms/department/allforms" || route.path === "/forms/department/Allforms") {

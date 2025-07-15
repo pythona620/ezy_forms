@@ -123,13 +123,13 @@
                 v-else-if="column.td_key === 'modified' && row.status !== 'Request Raised'">
                 {{ formatDate(row[column.td_key]) }}
               </span>
-              <span v-else-if="column.td_key === 'signature'">
+              <span v-else-if="column.td_key === 'signature' || column.td_key === 'is_hod' || column.td_key === 'is_admin'">
                 <div v-if="row[column.td_key]">
-                  <i class="bi bi-check2 fw-bolder font-13 text-success"></i>
+                  <i class="bi bi-check2 fw-bolder fw-bold font-13 text-success"></i>
                   <!-- <img :src="row[column.td_key]" alt="Signature" class="img-fluid"> -->
                 </div>
                 <span v-else>
-                  <i class="bi bi-x-lg fw-bolder text-danger"></i>
+                  <i class="bi bi-x-lg fw-bold fw-bolder text-danger"></i>
                 </span>
               </span>
               <span v-else-if="column.td_key === 'assigned_to_users'">
@@ -223,7 +223,7 @@
               </span>
             </div>
             <!-- </td> -->
-            <td v-if="actionType === 'dropdown'" class="text-center fixed-column position-relative">
+            <td v-if="actionType === 'dropdown'" class="text-center fixed-column ">
               <div class="dropdown">
                 <p @click="actionDropDown(row)" class="p-0 actions" data-bs-toggle="dropdown" aria-expanded="false">
                   <span>...</span>
@@ -995,6 +995,7 @@ th:first-child {
   position: sticky !important;
   right: 0 !important;
   background: white !important;
+  // z-index: 1;
 
 }
 .linke-not-allow{
