@@ -199,7 +199,7 @@
 
                               <!-- File Input (if no value or for specific cases) -->
                               <input
-                                v-if="(field.fieldname !== 'requestor_signature' && field.label !== 'Requestor Signature' && blockIndex !== 0 && !field.label.includes('Approved By') && props.readonlyFor !== 'true') && (field.value && blockIndex !==0) || !field.value  && props.readonlyFor !== 'true' "
+                                v-if="(field.fieldname !== 'requestor_signature' && field.label !== 'Requestor Signature' && blockIndex !== 0 && !field.label.includes('Approved By') && !field.label.includes('Acknowledged By') && props.readonlyFor !== 'true') && (field.value && blockIndex !==0) || !field.value  && props.readonlyFor !== 'true' "
                                 :disabled="props.readonlyFor === 'true'"
                                 type="file"
                                 accept=".jpeg,.jpg,.png,.pdf,.xlsx,.xls"
@@ -222,7 +222,7 @@
 
                                   <!-- Image File -->
                                   <template v-if="isImageFile(fileUrl)">
-                                    <template v-if="field.fieldname === 'requestor_signature' || field.label.includes('Approved By') || field.label.includes('Acknowledged by')">
+                                    <template v-if="field.fieldname === 'requestor_signature' || field.label.includes('Approved By') || field.label.includes('Acknowledged By')">
                                       <img
                                         :src="fileUrl"
                                         class="img-thumbnail cursor-pointer imge_top border-0 border-bottom-0"
