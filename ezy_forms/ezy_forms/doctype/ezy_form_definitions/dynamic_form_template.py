@@ -11,6 +11,7 @@ from pdf2image import convert_from_path
 import zipfile
 from frappe.utils.file_manager import get_file_path
 import shutil
+from datetime import date, datetime
 
 
 def rebuild_to_structured_array(flat_array):
@@ -1358,6 +1359,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                             for field in field_names:
                                 value = record.get(field)
                                 fieldtype = field_types.get(field)
+                                # if fieldtype =='int':
                                 if fieldtype == "Attach" and value:
                                     file_urls = [url.strip() for url in value.split(',') if url.strip()]
                                     for file_url in file_urls:
@@ -1369,9 +1371,22 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                                         
 
                         data_list[child_table_name] = [
-                            {field_labels.get(field, field): record.get(field) for field in field_names}
-                            for record in child_table_records
-                        ]
+                                        {field_labels.get(field, field): record.get(field) for field in field_names}
+                                        for record in child_table_records
+                                    ]
+                        data_list[child_table_name] = [
+                            {
+                                k: (
+                                    v.isoformat() if isinstance(v, (date, datetime)) 
+                                    else str(v) if isinstance(v, int) 
+                                    else v
+                                )
+                                for k, v in item.items()
+                            }
+                            for item in data_list[child_table_name]
+]
+                        ######
+                        
 
                 # Remove empty "approved"/"approver" fields
                 json_object = list(filter(lambda d: not (
@@ -1394,7 +1409,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
             pdf_filename = f"{form_short_name or 'form'}.pdf"
             absolute_pdf_path = os.path.join(attachment_folder, pdf_filename)
 
-            activate_pdf_name = "activate_log.pdf"
+            activate_pdf_name = "Activity Log .pdf"
             activate_pdf_path = os.path.join(attachment_folder, activate_pdf_name)
 
             is_landscape = False  # Set this according to your use case
