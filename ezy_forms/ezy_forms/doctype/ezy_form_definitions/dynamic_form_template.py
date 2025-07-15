@@ -1358,6 +1358,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                             for field in field_names:
                                 value = record.get(field)
                                 fieldtype = field_types.get(field)
+                                # if fieldtype =='int':
                                 if fieldtype == "Attach" and value:
                                     file_urls = [url.strip() for url in value.split(',') if url.strip()]
                                     for file_url in file_urls:
@@ -1368,10 +1369,13 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                                         })
                                         
 
-                        data_list[child_table_name] = [
+                        data_list['child_tablr_form_details'] = [
                             {field_labels.get(field, field): record.get(field) for field in field_names}
                             for record in child_table_records
                         ]
+                        data_list['child_tablr_form_details'] =[{k: str(v) if isinstance(v, int) else v for k, v in item.items()}  for item in data_list['child_tablr_form_details']]
+                        ######
+                        
 
                 # Remove empty "approved"/"approver" fields
                 json_object = list(filter(lambda d: not (
