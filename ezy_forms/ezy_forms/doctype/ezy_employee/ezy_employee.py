@@ -7,7 +7,7 @@ import sys
 from ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions import activating_perms, bench_migrating_from_code
 import socket as so
 from ezy_forms.ezy_forms.doctype.login_check.login_check import after_insert_user
-
+from ezy_forms.ezy_custom_forms.custom_script.v1.sign_up import employee_update_notification
 class EzyEmployee(Document):
 	def on_update(self):
 		after_insert_user(self)
@@ -23,7 +23,7 @@ class EzyEmployee(Document):
 			user_doc.username = self.emp_name
 			user_doc.email = self.emp_mail_id
 			user_doc.first_name = self.emp_name.split(" ")[0]
-			user_doc.send_welcome_email = 1 if is_email_account_set else 0
+			user_doc.send_welcome_email =  0
 			user_doc.insert(ignore_permissions=True)
 
 			# Create Role and WF Role if designation is provided
@@ -44,7 +44,8 @@ class EzyEmployee(Document):
 				# Assign role to user
 				user_doc.append("roles", {"role": self.designation})
 				user_doc.save(ignore_permissions=True)
-
+				if is_email_account_set and user_doc:
+					employee_update_notification(emp_mail = user_doc.email)
 		# Create reporting designation role if not exists
 		if self.reporting_designation:
 			if not frappe.db.exists("Role", {"role_name": self.reporting_designation}):
