@@ -1398,7 +1398,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
             pdf_filename = f"{form_short_name or 'form'}.pdf"
             absolute_pdf_path = os.path.join(attachment_folder, pdf_filename)
 
-            activate_pdf_name = "activate_log.pdf"
+            activate_pdf_name = "Activity Log .pdf"
             activate_pdf_path = os.path.join(attachment_folder, activate_pdf_name)
 
             is_landscape = False  # Set this according to your use case
