@@ -11,6 +11,7 @@ from pdf2image import convert_from_path
 import zipfile
 from frappe.utils.file_manager import get_file_path
 import shutil
+from datetime import date, datetime
 
 
 def rebuild_to_structured_array(flat_array):
@@ -1370,10 +1371,20 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                                         
 
                         data_list[child_table_name] = [
-                            {field_labels.get(field, field): record.get(field) for field in field_names}
-                            for record in child_table_records
-                        ]
-                        data_list[child_table_name] =[{k: str(v) if isinstance(v, int) else v for k, v in item.items()}  for item in data_list[child_table_name]]
+                                        {field_labels.get(field, field): record.get(field) for field in field_names}
+                                        for record in child_table_records
+                                    ]
+                        data_list[child_table_name] = [
+                            {
+                                k: (
+                                    v.isoformat() if isinstance(v, (date, datetime)) 
+                                    else str(v) if isinstance(v, int) 
+                                    else v
+                                )
+                                for k, v in item.items()
+                            }
+                            for item in data_list[child_table_name]
+]
                         ######
                         
 
