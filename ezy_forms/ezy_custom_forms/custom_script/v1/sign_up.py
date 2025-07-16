@@ -14,7 +14,7 @@ def sign_up(email: str, full_name: str,designation:str|None,emp_phone:str|None,e
 		if user.enabled:
 			return  _("Already Registered")
 		else:
-			return  _("Registered but disabled")
+			return  _("Already registered but currently disabled")
 	else:
 		if frappe.db.get_creation_count("User", 60) > 300:
 			frappe.respond_as_web_page(
@@ -64,7 +64,7 @@ def sign_up(email: str, full_name: str,designation:str|None,emp_phone:str|None,e
 			})
 			doc.insert(ignore_permissions=True)
 			frappe.db.commit()
-			send_mail_when_user_signup(emp_name=full_name, emp_mail_id=email)
+			send_mail_when_user_signup(emp_name=doc.emp_name, emp_mail_id=email,designation=designation,department=doc.department)
 
 		# set default signup role as per Portal Set	tings
 		default_role = frappe.db.get_single_value("Portal Settings", "default_role")
@@ -78,7 +78,7 @@ def sign_up(email: str, full_name: str,designation:str|None,emp_phone:str|None,e
 
 
 @frappe.whitelist()
-def send_mail_when_user_signup(emp_name:str|None,emp_mail_id:str|None):
+def send_mail_when_user_signup(emp_name:str|None,emp_mail_id:str|None,designation:str|None,department:str|None):
 	sender = frappe.get_value("Email Account",{"enable_outgoing":1,"default_outgoing":1},"email_id")
 	recipction_mail = frappe.get_value("Notifications Mail","Notifications Mail",'sign_up_approver')
 	subject = "Employee sign-up Attempt – Access Enablement Required"
@@ -88,6 +88,8 @@ def send_mail_when_user_signup(emp_name:str|None,emp_mail_id:str|None):
 	<ul>
 		<li><strong>Email ID:</strong> {emp_mail_id}</li>
 		<li><strong>Employee Name:</strong> {emp_name}</li>
+  		<li><strong>Employee designation:</strong> {designation if designation else 'Not Provided'}</li>
+		<li><strong>Department:</strong> {department if department else "Not Provided"}</li>
 	</ul>
 	<br>
 	Kindly initiate the necessary steps to enable their access.<br><br>
@@ -100,8 +102,10 @@ def send_mail_when_user_signup(emp_name:str|None,emp_mail_id:str|None):
 		if email_template and email_template.use_html:
 			subject = email_template.subject or subject
 			message = frappe.render_template(email_template.response_html, {
-				"emp_name": emp_name,
+				"emp_name": emp_name.upper(),
 				"emp_mail_id": emp_mail_id,
+				"designation":designation if designation else "Not Provided",
+				"department": department if department else "Not Provided"
 			})
 		frappe.sendmail(
 			recipients=[recipction_mail],
@@ -208,6 +212,8 @@ def email_template_create():
 		<ul>
 			<li><strong>Email ID:</strong> {{emp_mail_id}}</li>
 			<li><strong>Employee Name:</strong> {{emp_name}}</li>
+			<li><strong>Employee Designation:</strong> {{designation}}</li>
+			<li><strong>Employee Department:</strong> {{department}}</li>
 		</ul>
 		<br>
 		Kindly initiate the necessary steps to enable their access.<br><br>
