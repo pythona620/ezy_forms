@@ -296,7 +296,6 @@
   <div style="position: relative;">
     <input
       type="text"
-      :disabled="field.fieldname === 'requester_name' && isBehalfOf === false"
       v-model="field.value"
        @focus="() => {
     fetchDoctypeList(field.options, field.value, field);
