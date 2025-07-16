@@ -869,7 +869,7 @@
                                                             </tbody>
                                                             <tfoot>
                                                                <tr v-if="table.some(field =>
-  field.fieldtype === 'Int' &&
+  field.fieldtype === 'Int' && field.description &&
   (field.label.toLowerCase().includes('total') || field.label.toLowerCase().includes('amount'))
 )"
  class="bg-light">
@@ -884,7 +884,7 @@
                                                                         </template>
                                                                         <!-- ✅ Other columns show totals conditionally -->
                                                                       <template v-else-if="
-  field.fieldtype === 'Int' &&
+  field.fieldtype === 'Int' && field.description &&
   (field.label.toLowerCase().includes('total') || field.label.toLowerCase().includes('amount'))
 ">
 
@@ -1082,7 +1082,7 @@ const removeFile = (index, field) => {
 watch(
   () => tableRows,
   () => {
-    updateFirstRowName();
+    // updateFirstRowName();
     const finalData = {};
 
     for (const [tableIndex, rows] of Object.entries(tableRows)) {
@@ -1144,21 +1144,21 @@ const addRow = (tableIndex) => {
 const removeRow = (tableIndex, rowIndex) => {
     tableRows[tableIndex].splice(rowIndex, 1);
 };
-function updateFirstRowName() {
-    for (const tableIndex in tableRows) {
-        const rows = tableRows[tableIndex];
-        const headers = props.tableHeaders[tableIndex];
+// function updateFirstRowName() {
+//     for (const tableIndex in tableRows) {
+//         const rows = tableRows[tableIndex];
+//         const headers = props.tableHeaders[tableIndex];
 
-        if (rows && rows.length > 0 && headers?.length > 0) {
-            const firstFieldName = headers[0].fieldname;
+//         if (rows && rows.length > 0 && headers?.length > 0) {
+//             const firstFieldName = headers[0].fieldname;
 
-            // ✅ Use includes instead of exact match
-            if (firstFieldName && firstFieldName.toLowerCase().includes('details')) {
-                rows[0][firstFieldName] = 'Name';
-            }
-        }
-    }
-}
+//             // ✅ Use includes instead of exact match
+//             if (firstFieldName && firstFieldName.toLowerCase().includes('details')) {
+//                 rows[0][firstFieldName] = 'Name';
+//             }
+//         }
+//     }
+// }
 
 
 
