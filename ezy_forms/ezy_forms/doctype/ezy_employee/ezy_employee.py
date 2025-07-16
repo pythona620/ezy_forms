@@ -7,7 +7,7 @@ import sys
 from ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions import activating_perms, bench_migrating_from_code
 import socket as so
 from ezy_forms.ezy_forms.doctype.login_check.login_check import after_insert_user
-from ezy_forms.ezy_custom_forms.custom_script.v1.sign_up import employee_update_notification
+
 class EzyEmployee(Document):
 	def on_update(self):
 		prev_doc = self.get_doc_before_save()
@@ -19,7 +19,7 @@ class EzyEmployee(Document):
 		):
 
 			after_insert_user(self)
-			employee_update_notification(emp_mail=self.emp_mail_id)
+
  
 	def after_insert(self):
 		self.create_user_if_not_exists()
