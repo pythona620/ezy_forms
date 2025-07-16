@@ -336,7 +336,7 @@
                                   rowIndex,
                                   columnIndex,
                                   fieldIndex
-                                )" class="form-control text-danger font-12 " />
+                                )" class="form-control font-12 " />
                           </div>
 
                           <!-- <button v-if="field.value && field.label !== 'Department'"
