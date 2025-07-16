@@ -1414,6 +1414,8 @@ const isImageChildFile = (fileUrl) => {
     return /\.(jpg|jpeg|png)$/i.test(fileUrl);
 };
 
+const isBehalfOf=ref(false);
+
 const handleSelectChange = (
     value,
     blockIndex,
@@ -1430,7 +1432,23 @@ const handleSelectChange = (
     field.value = value;
 
     const mockEvent = { target: { value: field.value } };
-    // console.log(mockEvent, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex);
+
+    if(field.fieldname=='request_for' && field.value=='Others'){
+        isBehalfOf.value=true;
+    }
+    if (field.fieldname === 'request_for' && field.value === 'Self' || field.value === null) {
+            isBehalfOf.value = false;
+
+            // Clear 'requester_name' field and emit empty value
+            const requesterField = props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns
+                .flatMap(col => col.fields)
+                .find(f => f.fieldname === 'requester_name');
+
+            if (requesterField) {
+                requesterField.value = '';
+                emit('updateField', requesterField); // emit cleared field
+            }
+        }
 
     logFieldValue(mockEvent, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex);
 };
@@ -1507,6 +1525,8 @@ function selectDoctype(result, field, b, s, r, c, f) {
     const event = { target: { value: result.name } };
     logFieldValue(event, b, s, r, c, f);
     field.linkSearchResults = [];
+
+   
     
 } 
 
@@ -1879,6 +1899,16 @@ const logFieldValue = (
         field["value"] = inputValue;
         emit("updateField", field.value);
     }
+    else if (field.fieldtype === "Link") {
+    field["value"] = eve.target.value; // Capture textarea value
+
+    if (isBehalfOf == false && field.fieldname === 'requester_name') {
+        field["value"] = "";
+        emit("updateField", "");
+    } else {
+        emit("updateField", field.value);
+    }
+    }
 
     else {
         // field['value'] = eve.target.value;
@@ -1896,7 +1926,7 @@ const logFieldValue = (
         }
 
         field["value"] = inputValue;
-        // console.log(inputValue);
+        // console.log("inputValue",inputValue); 
     }
    if (field.fieldtype !== 'Attach') {
     validateField(

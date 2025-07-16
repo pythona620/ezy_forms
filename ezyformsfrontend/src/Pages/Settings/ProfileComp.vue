@@ -4,11 +4,12 @@
             <div class="card card-div border-0 mt-4">
                 <div class="d-flex ">
                     <!-- Profile Image & Edit -->
-                    <div class="position-relative d-inline-block">
+                    <div class="position-relative d-inline-block image-div">
                         <img :src="userData?.profile_image ? userData.profile_image : defaultImage"
-                            title="Upload Profile Image" class="img-fluid profile-img border"
+                            title="Upload Profile Image" class="img-fluid" 
+                            :class="userData?.profile_image ? 'profile-img' : 'default-image'"
                             @click="triggerFileInput('profile')"
-                            style="cursor: pointer; width: 150px; height: 205px; object-fit: cover; border-radius: 15px;" />
+                            style="object-fit: cover;" />
                         <i v-if="userData.profile_image"
                             class="bi bi-pencil edit-profile-icon position-absolute top-0 end-0 "
                             @click="triggerFileInput('profile')" style="cursor: pointer;"></i>
@@ -42,7 +43,7 @@
                                 <p class="mt-3 m-0 me-2">Signiture:</p>
                                 <div class="position-relative d-inline-block " style="top:12px">
                                     <img v-if="userData?.signature" :src="userData?.signature ? userData.signature : defaultSign"
-                                        title="Upload Signature" class="img-fluid profile-img signiture-image border"
+                                        title="Upload Signature" class="img-fluid signiture-image border"
                                         @click="triggerFileInput('signature')" style="cursor: pointer;" />
                                     <i v-if="userData?.signature" class="bi bi-pencil edit-image m-2"
                                         @click="triggerFileInput('signature')" style="cursor: pointer;"></i>
@@ -150,10 +151,23 @@ onMounted(() => {
 }
 
 .profile-img {
-    width: 11vw;
+    /* border-radius: 7px; */
+    cursor: pointer;
+    width: 150px !important;
+    height: 193px !important;
+}
+.image-div{
     border: 1px solid #c9c9c9;
     padding: 5px;
     border-radius: 7px;
+    cursor: pointer;
+    height: 205px !important;
+}
+
+.default-image {
+    border-radius: 7px;
+    height: 150px;
+    width: 150px !important;
 }
 
 .signiture-image {
