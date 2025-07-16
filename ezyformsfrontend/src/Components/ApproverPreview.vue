@@ -344,10 +344,6 @@
                               class="btn btn-dark text-dark bg-white  p-1" @click="ClickLink(field)"> <i
                                 class="bi bi-link-45deg font-15"></i></button> -->
 
-                          <!-- <button type="button" class="btn btn-outline-secondary pb-0 btn-sm" data-bs-toggle="modal"
-                              :data-bs-target="`#modal-${field.fieldname}`">
-                              <i class="bi bi-link-45deg font-13"></i>
-                            </button> -->
 
                         </template>
                         <template v-else-if="field.fieldtype == 'Datetime'">
