@@ -35,7 +35,7 @@
                                 {{ userData.reporting_to || "-" }}
                             </span>
                             <span class=" font-11">Acknowledged On :
-                                {{ userData.acknowledge_on || "-" }}
+                                {{ formatDateTime(userData.acknowledge_on) || "-" }}
                             </span>
                         </div>
                         <div class="mt-3">
@@ -86,6 +86,19 @@ const uploadType = ref('');
 function triggerFileInput(type) {
     uploadType.value = type; // 'profile' or 'signature'
     fileInput.value.click();
+}
+
+function formatDateTime(datetime) {
+  if (!datetime) return "-";
+  const options = {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  };
+  return new Date(datetime).toLocaleString(undefined, options);
 }
 
 function uploadImage(event) {
