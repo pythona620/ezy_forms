@@ -1,11 +1,8 @@
 <template>
-  <div class="bg-img">
+  <div class="bg-img p-0">
     <div v-if="ShowLoginPage" class="input-div p-5">
       <div class="d-flex gap-2 p-2 justify-content-center align-items-center">
         <div><img class="imgmix" src="../assets/Final-logo-ezyforms-removebg-preview.png" /></div>
-        <!-- <div class="m-0">
-          <p class="fontimgtext fw-medium m-0">EZY | Forms</p>
-        </div> -->
       </div>
 
       <div>
@@ -97,7 +94,7 @@
       </div>
     </div>
 
-    <div v-if="ShowSignUpPage" class="input-div1 px-5 py-3">
+    <div v-if="ShowSignUpPage" class="input-div1 px-lg-5 py-3">
       <div class="d-flex gap-2 p-2 justify-content-center align-items-center">
         <div><img class="imgmix" src="../assets/Final-logo-ezyforms-removebg-preview.png" /></div>
       </div>
@@ -144,16 +141,19 @@
             <label class="font-13" for="emp_code">Department</label>
             <Vue3Select v-model="SignUpdata.dept" :options="this.deptDetails" placeholder="Select Department" />
           </div>
-          <div class="mt-2 col-lg-12 col-md-12 col-sm-12">
-
-            <span class="me-4">
-              <input type="radio" id="digital" value="digital" v-model="selectedOption" class="form-check-input mt-1 input-border" />
+        </div>
+        <div class="mt-2 row">
+            <div class="col-lg-4 col-md-6 col-sm-12 mb-2">
+              <input type="radio" id="digital" value="digital" v-model="selectedOption"
+                class="form-check-input mt-1 input-border" />
               <label class="font-13 ms-2" for="digital">Digital Signature</label>
-            </span>
-            <span class="">
-              <input type="radio" id="upload" value="upload" v-model="selectedOption" class="form-check-input m-1 input-border" />
-              <label class="font-13 ms-2" for="upload">Upload Signature:</label>
-            </span>
+            </div>
+
+            <div class="col-lg-4 col-md-6 col-sm-12 mb-2">
+              <input type="radio" id="upload" value="upload" v-model="selectedOption"
+                class="form-check-input mt-1 input-border" />
+              <label class="font-13 ms-2" for="upload">Upload Signature</label>
+            </div>
 
             <div v-if="selectedOption === 'digital'">
               <DigitalSignature ref="digitalSignature" class="mt-3" @signature-saved="onSignatureSaved"
@@ -165,7 +165,7 @@
               <input type="file" ref="signatureInputRef" class="form-control mt-3" id="signatureInput"
                 @change="selectedSignature" aria-describedby="fileHelpId" accept="image/png, image/jpeg" />
 
-              <div v-if="SignUpdata.signature " class="mt-2">
+              <div v-if="SignUpdata.signature" class="mt-2">
                 <label class="font-13" for="emp_code">Uploaded Signature:</label><br>
                 <img :src="SignUpdata.signature" alt="Signature" class="img-thumbnail mt-1" style="max-width: 100px;" />
               </div>
@@ -173,7 +173,6 @@
             </div>
 
           </div>
-        </div>
 
       </div>
 
@@ -1139,6 +1138,7 @@ export default {
   z-index: 1;
   position: relative;
   width: 50% !important;
+  padding: 20px;
 }
 
 .label {
@@ -1263,6 +1263,9 @@ input:focus {
     font-size: 12px;
     color: var(--bs-danger-text);
   }
+}
+.invalid-feedback {
+  color: #dc3545;
 }
 
 .nico-text {
