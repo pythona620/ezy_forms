@@ -82,29 +82,33 @@
 
 
                         </template>
-                        <template v-if="field.fieldtype === 'Small Text'">
+                         <template v-if="field.fieldtype === 'Small Text'">
                           <div class="container-fluid">
                             <div class="row">
-                              <div class="form-check col-4 mb-1"
-                                v-for="(option, index) in field.options?.split('\n').filter(o => o.trim())"
-                                :key="index">
+                              <div class="form-check col-4 mb-1" v-for="(option, index) in field?.options?.split('\n')"
+                                :key="index"
+                                :class="{ 'd-none': !(JSON.parse(field.value || '[]') || []).includes(option) }">
+
                                 <div>
                                   <input class="form-check-input" type="checkbox"
-                                    :disabled="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel"
+                                    :disabled="blockIndex === 0 || props.readonlyFor === 'true'"
                                     :checked="(JSON.parse(field.value || '[]') || []).includes(option)" :value="option"
                                     :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
                                     :id="`${option}-${index}`"
                                     @change="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
                                 </div>
+
                                 <div>
                                   <label class="form-check-label font-12 m-0" :for="`${option}-${index}`">
                                     {{ option }}
                                   </label>
                                 </div>
+
                               </div>
                             </div>
                           </div>
                         </template>
+
 
 
                         <template v-else-if="field.fieldtype == 'Check' && field.fieldname !== 'auto_calculations'">
