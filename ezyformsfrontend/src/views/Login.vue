@@ -143,36 +143,36 @@
           </div>
         </div>
         <div class="mt-2 row">
-            <div class="col-lg-4 col-md-6 col-sm-12 mb-2">
-              <input type="radio" id="digital" value="digital" v-model="selectedOption"
-                class="form-check-input mt-1 input-border" />
-              <label class="font-13 ms-2" for="digital">Digital Signature</label>
-            </div>
+          <div class="col-lg-4 col-md-6 col-sm-12 mb-2">
+            <input type="radio" id="digital" value="digital" v-model="selectedOption"
+              class="form-check-input mt-1 input-border" />
+            <label class="font-13 ms-2" for="digital">Digital Signature</label>
+          </div>
 
-            <div class="col-lg-4 col-md-6 col-sm-12 mb-2">
-              <input type="radio" id="upload" value="upload" v-model="selectedOption"
-                class="form-check-input mt-1 input-border" />
-              <label class="font-13 ms-2" for="upload">Upload Signature</label>
-            </div>
+          <div class="col-lg-4 col-md-6 col-sm-12 mb-2">
+            <input type="radio" id="upload" value="upload" v-model="selectedOption"
+              class="form-check-input mt-1 input-border" />
+            <label class="font-13 ms-2" for="upload">Upload Signature</label>
+          </div>
 
-            <div v-if="selectedOption === 'digital'">
-              <DigitalSignature ref="digitalSignature" class="mt-3" @signature-saved="onSignatureSaved"
-                @signature-cleared="onSignatureCleared" @signature-removed="onSignatureRemoved"
-                @signature-uploaded="onSignatureUploaded" />
-            </div>
+          <div v-if="selectedOption === 'digital'">
+            <DigitalSignature ref="digitalSignature" class="mt-3" @signature-saved="onSignatureSaved"
+              @signature-cleared="onSignatureCleared" @signature-removed="onSignatureRemoved"
+              @signature-uploaded="onSignatureUploaded" />
+          </div>
 
-            <div v-if="selectedOption === 'upload'">
-              <input type="file" ref="signatureInputRef" class="form-control mt-3" id="signatureInput"
-                @change="selectedSignature" aria-describedby="fileHelpId" accept="image/png, image/jpeg" />
+          <div v-if="selectedOption === 'upload'">
+            <input type="file" ref="signatureInputRef" class="form-control mt-3" id="signatureInput"
+              @change="selectedSignature" aria-describedby="fileHelpId" accept="image/png, image/jpeg" />
 
-              <div v-if="SignUpdata.signature" class="mt-2">
-                <label class="font-13" for="emp_code">Uploaded Signature:</label><br>
-                <img :src="SignUpdata.signature" alt="Signature" class="img-thumbnail mt-1" style="max-width: 100px;" />
-              </div>
-
+            <div v-if="SignUpdata.signature" class="mt-2">
+              <label class="font-13" for="emp_code">Uploaded Signature:</label><br>
+              <img :src="SignUpdata.signature" alt="Signature" class="img-thumbnail mt-1" style="max-width: 100px;" />
             </div>
 
           </div>
+
+        </div>
 
       </div>
 
@@ -242,12 +242,42 @@
             <div class="ql-editor read-mode" v-html="acknowledgementHtml"></div>
             <div class="mt-4">
               <input type="checkbox" v-model="acknowledge" class="me-1 mt-1" />
-              I acknowledge that the information provided is correct.
+              <label for="">I acknowledge that the information provided is correct.</label>
             </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="button" @click="SignUp" :disabled="!acknowledge" class="btn btn-dark">Yes, Proceed</button>
+            <button type="button" @click="SignUp" :disabled="!acknowledge || saveloading" class="btn btn-dark"
+              style="min-width:120px;">
+              <span v-if="saveloading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              <span v-if="!saveloading" class="font-13 text-white">Yes, Proceed</span>
+            </button>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="EmployeeAcknowledgementModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered ">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Acknowledgement</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body font-11">
+            <div class="ql-editor read-mode" v-html="acknowledgementHtml"></div>
+            <div class="mt-4">
+              <input type="checkbox" v-model="acknowledge" class="me-1 mt-1" />
+              <label for="">I acknowledge that the information provided is correct.</label>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" @click="employeeAcknowledge" :disabled="!acknowledge" class="btn btn-dark"
+              style="min-width:120px;">
+              Yes, Proceed
+            </button>
 
           </div>
         </div>
@@ -319,6 +349,8 @@ export default {
       isDigital: false,
       isUploadImage: false,
       selectedOption: "",
+      saveloading: false,
+      isAcknowledge: "",
       // timeLeft: 60,
       // timer: null,
       // resentMessage: "",
@@ -448,7 +480,6 @@ export default {
       this.ShowSignUpPage = true;
       this.deptData()
       this.designationData()
-      this.acknowledgeData()
     },
     OpenLogin() {
       this.ShowLoginPage = true;
@@ -493,6 +524,7 @@ export default {
       this.validatePhone()
       this.validateEmpCode()
       if (!this.errors.email && !this.errors.emp_phone && !this.errors.emp_code) {
+        this.saveloading = true;
         axiosInstance
           .post(apis.signUp, this.SignUpdata)
           .then((res) => {
@@ -506,21 +538,65 @@ export default {
                 this.ShowLoginPage = true;
                 this.showOtpPage = false;
                 this.ShowSignUpPage = false;
+
+                this.SignUpdata.email = "";
+                this.SignUpdata.full_name = "";
+                this.SignUpdata.emp_code = "";
+                this.SignUpdata.emp_phone = "";
+                this.SignUpdata.designation = null;
+                this.SignUpdata.dept = null;
+                this.SignUpdata.signature = null;
+                this.selectedOption = null;
+                this.signatureInputRef = null;
+              }
+              else if (res.message == 'Already registered but currently disabled') {
+                toast.error(res.message)
               }
               else {
-                toast.success(res.message)
+                toast.error(res.message)
               }
               const modal = bootstrap.Modal.getInstance(
                 document.getElementById("EmployeeToggleModal")
               );
               modal.hide();
+               
             }
 
           })
           .catch((error) => {
             console.error("Login error: ", error);
           })
+          .finally(() => {
+            this.saveloading = false;
+          })
       }
+    },
+
+    employeeAcknowledge() {
+      // if (this.isAcknowledge === 0) {
+      const payload = {
+        user_id: this.formdata.usr,
+        acknowledgement: this.SignUpdata.acknowledgement,
+
+      };
+      axiosInstance
+        .post(apis.loginCheckmethod, payload)
+        .then((res) => {
+          toast.success(res.message);
+          const modal = bootstrap.Modal.getInstance(
+            document.getElementById("EmployeeAcknowledgementModal")
+          );
+          modal.hide();
+
+        })
+        .catch((error) => {
+          console.error("Login error: ", error);
+        })
+        .finally(() => {
+          this.saveloading = false;
+        })
+      // }
+
     },
 
     checkSignUpPage() {
@@ -638,6 +714,8 @@ export default {
             this.twoFactorAuth = res.message.enable_two_factor_auth
             this.user_id_name = res.message.name;
             this.enableCheck = res.message.enable_check
+            this.isAcknowledge = res.message.is_acknowledge
+
             if (this.isFirstLogin === 0 && this.enableCheck === 1) {
               const modal = new bootstrap.Modal(
                 document.getElementById("changePassword")
@@ -659,7 +737,12 @@ export default {
               });
 
               // console.log("User is logging in for the first time.");
-            } else {
+            }
+            if (this.isAcknowledge === 0) {
+              const modal = new bootstrap.Modal(document.getElementById('EmployeeAcknowledgementModal'));
+              modal.show();
+            }
+            else {
               console.log("User has logged in before.");
             }
           } else {
@@ -992,6 +1075,8 @@ export default {
   },
   mounted() {
     this.checkSignUpPage();
+    this.acknowledgeData();
+
     const url = window.location.href;
     if (url.includes('ncomr')) {
       this.SignUpdata.emp_code = 'NICO-';
@@ -1017,12 +1102,15 @@ export default {
 .loginpageheight {
   height: 100vh;
 }
-.checkbox-input{
+
+.checkbox-input {
   width: 50px;
 }
-.input-border{
+
+.input-border {
   border: 1px solid black;
 }
+
 .Message-div {
   background-color: #DEFDE9;
   padding: 20px 50px;
@@ -1264,6 +1352,7 @@ input:focus {
     color: var(--bs-danger-text);
   }
 }
+
 .invalid-feedback {
   color: #dc3545;
 }
