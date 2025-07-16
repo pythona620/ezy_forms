@@ -19,6 +19,7 @@ import FormPreviewComp from "./Components/FormPreviewComp.vue";
 import PdfPreview from "./Components/PdfPreview.vue";
 import EmailApprove from "./Components/EmailApprove.vue";
 import LinkPreviewComp from "./Components/LinkPreviewComp.vue";
+import WorkOrderDetailes from "./Components/WorkOrderDetailes.vue";
 
 const routes = [
   {
@@ -68,6 +69,12 @@ const routes = [
     component: PdfPreview,
     name: 'PdfPreview'
   },
+  {
+    path:'/WorkOrderDetails',
+    component:WorkOrderDetailes,
+    name:'WorkOrderDetails'
+  },
+
   { path: "/:pathMatch(.*)*", name: "NotFound", component: NotFound },
 ];
 

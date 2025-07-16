@@ -4,7 +4,7 @@
 import frappe
 from frappe.model.document import Document
 import json
-
+from frappe.utils import now_datetime
 
 class LoginCheck(Document):
 	pass
@@ -42,19 +42,27 @@ def update_is_first_value(user_id_name,company=None):
              
         
 @frappe.whitelist(allow_guest=True)
-def check_is_first_time_or_not(user_id,company=None):
+def check_is_first_time_or_not(user_id,acknowledgement=None):
     try:
-        login_doc = frappe.get_doc("Login Check", {"user_id": user_id}, ['*'])
-        login_dict = login_doc.as_dict()
-        
-        enable_two_factor_auth = frappe.db.get_value("System Settings", "System Settings", "enable_two_factor_auth")
-        enable_check = frappe.get_value('User',{"email":user_id},'enabled')
-        login_dict["enable_check"] = 1 if enable_check else 0
-        login_dict["enable_two_factor_auth"] = enable_two_factor_auth
-        
+        if acknowledgement and user_id:
+            frappe.db.set_value('Ezy Employee',user_id,'acknowledgement',acknowledgement)
+            frappe.db.set_value('Ezy Employee',user_id,'acknowledge_on',now_datetime())
+            frappe.db.commit()
+            return "Acknowledgement Updated"
+        else:
+            login_doc = frappe.get_doc("Login Check", {"user_id": user_id}, ['*']).as_dict()
+            login_dict = login_doc
+            
+            enable_two_factor_auth = frappe.db.get_value("System Settings", "System Settings", "enable_two_factor_auth")
+            enable_check = frappe.get_value('User',{"email":user_id},'enabled')
+            login_dict["enable_check"] = 1 if enable_check else 0
+            login_dict["enable_two_factor_auth"] = enable_two_factor_auth
+            is_acknowledge = frappe.get_value('Ezy Employee',user_id,'acknowledgement')
+            login_dict["is_acknowledge"] = 1 if is_acknowledge else 0
+            
         
         return login_dict
-    
+     
     except Exception as e:
         frappe.log_error(f"Error In User Not exit for:", {str(e)})
          
