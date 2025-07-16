@@ -868,11 +868,13 @@
 
                                                             </tbody>
                                                             <tfoot>
-                                                               <tr v-if="table.some(field =>
-  field.fieldtype === 'Int' && field.description &&
-  (field.label.toLowerCase().includes('total') || field.label.toLowerCase().includes('amount'))
-)"
- class="bg-light">
+                                                               <tr
+  v-if="table.some(field =>
+    field.fieldtype === 'Int' &&
+    (field.label?.toLowerCase().includes('total') || field.label?.toLowerCase().includes('amount'))
+  ) && table.some(field => field.description)"
+  class="bg-light"
+>
 
                                                                     <td v-for="(field, index) in table"
                                                                         :key="field.fieldname"
@@ -995,29 +997,7 @@ const pad = (n) => n.toString().padStart(2, '0');
 
 const today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
 
-const formQuestions = ref([
-    "The Porch & Main Gate is manned and lighting is sufficient.",
-    "Reception area is clean & all brand standards in place.",
-    "Public Areas are clean, All furniture's in place, Kids corner is well organised, Music and lighting is right",
-    "The Bar & Restaurant area clean and in order. Music level Normal.",
-    "Meeting rooms area is clean and well maintained. If no Meetings then lights are off.",
-    "Heart of the house areas are well maintained.",
-    "Food at Staff dinning was served on time, Menu is as per the day. Taste of the Food to be checked and incorporate in MOD report.",
-    "GYM is well maintained, fresh towels and water available.",
-    "Pool area is well maintained. Guard is present.",
-    "The surrounding and back of the house areas are well maintained.",
-    "Check on General upkeep of Staff locker. Clean and pest free.",
-    "Quality and condition of water bottling plant.",
-    "Spa cleanliness and upkeep is inline with hotel standards.",
-    "Pest Free in the hotel.",
-    "Dishwasher area clean in main kitchen ibis / novotel",
-    "Main kitchen Clean and Neat novotel / ibis",
-    "Garbage Area neat and clean",
-    "IRD Clean and Neat novotel / ibis.",
-    "Square Restaurant and Bar",
-    "Ibis Restaurant and Bar",
-    "Any operation Hazzard for safety. (IF YES NEED DETAIL)",
-]);
+
 
 const getMaxLength = (field) => {
     const label = field.label?.toLowerCase() || '';
@@ -1269,7 +1249,7 @@ const tableTotals = computed(() => {
     const fields = props.tableHeaders[tableIndex] || [];
     fields.forEach((field) => {
       if (
-        field.fieldtype === 'Int' &&
+        field.fieldtype === 'Int' &&  field.description &&
         (field.label.toLowerCase().includes('total') || field.label.toLowerCase().includes('amount'))
       ) {
         let sum = 0;
