@@ -1591,34 +1591,34 @@ function confirmEmployeeToggle() {
         document.getElementById("EmployeeToggleModal")
       );
       modal.hide();
-      if (selectedEmpRow.value.enable === 1) {
-        EmpUnableMail()
-      }
-      else {
+      // if (selectedEmpRow.value.enable === 1) {
+      //   EmpUnableMail()
+      // }
+      // else {
         employeeData()
-      }
+      // }
     })
     .catch((err) => {
       console.error('Toggle employee error:', err);
     });
 }
 
-function EmpUnableMail() {
-  const payload = {
-    emp_mail: selectedEmpRow.value.emp_mail_id,
-  }
+// function EmpUnableMail() {
+//   const payload = {
+//     emp_mail: selectedEmpRow.value.emp_mail_id,
+//   }
 
-  axiosInstance
-    .post(apis.unablUpdateEmail, payload)
-    .then((res) => {
-      if (res) {
-        employeeData()
-      }
-    })
-    .catch((error) => {
-      console.error("Upload error:", error);
-    });
-}
+//   axiosInstance
+//     .post(apis.unablUpdateEmail, payload)
+//     .then((res) => {
+//       if (res) {
+//         employeeData()
+//       }
+//     })
+//     .catch((error) => {
+//       console.error("Upload error:", error);
+//     });
+// }
 
 
 const fieldMapping = ref({
