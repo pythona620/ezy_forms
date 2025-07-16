@@ -5,7 +5,7 @@ import frappe
 from frappe.model.document import Document
 import json
 from frappe.utils import now_datetime
-
+from ezy_forms.ezy_custom_forms.custom_script.v1.sign_up import employee_update_notification
 class LoginCheck(Document):
 	pass
 
@@ -20,6 +20,7 @@ def after_insert_user(self, method=None):
                 new_doc.user_id = self.emp_mail_id
                 new_doc.insert(ignore_permissions=True)
                 frappe.db.commit()
+                employee_update_notification(emp_mail=self.emp_mail_id)
                 
  
     except Exception as e:
