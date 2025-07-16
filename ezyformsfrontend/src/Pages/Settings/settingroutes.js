@@ -19,6 +19,7 @@ const CreateForm=()=>import("./CreateForm.vue")
 const AuditLog=()=>import("./AuditLog.vue");
 const AcknowledgementComp=()=>import("./AcknowledgementComp.vue");
 const PreDefineForms=()=>import("./PreDefineForms.vue")
+const WorkOrder = ()=>import("./WorkOrder.vue")
 
 const settingRoutes = [
   {
@@ -117,7 +118,13 @@ const settingRoutes = [
         path: "predefinedforms",
         component: PreDefineForms,
         name: "PredefinedForms",
-      }
+      },
+      {
+        path:"workorder",
+        component:WorkOrder,
+        name:"workorder",
+      },
+      
     ],
   },
 ];
