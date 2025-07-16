@@ -51,8 +51,11 @@
                 </div>
 
                 <div
-                  v-if="selectedData?.type == 'myforms' && tableData?.status == 'Request Raised' || tableData?.status == 'Request Cancelled' && selectedData?.type !== 'myapprovals'"
-                  class="d-flex justify-content-end approveBtns">
+                      v-if="selectedData?.type === 'myforms' &&
+                            (tableData?.status === 'Request Raised' || tableData?.status === 'Request Cancelled') &&
+                            selectedData?.type !== 'myapprovals'"
+                      class="d-flex justify-content-end approveBtns">
+
                   <button type="submit" class="btn Edit_btn" @click.prevent="EditformSubmission()">
                     <span v-if="loading" class="spinner-border spinner-border-sm" role="status"
                       aria-hidden="true"></span>
