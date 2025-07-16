@@ -21,6 +21,8 @@ const AcknowledgementComp=()=>import("./AcknowledgementComp.vue");
 const PreDefineForms=()=>import("./PreDefineForms.vue")
 const WorkOrder = ()=>import("./WorkOrder.vue")
 
+const EmailTemplate=()=>import("./EmailTemplate.vue");
+
 const settingRoutes = [
   {
     path: "/settings",
@@ -124,7 +126,12 @@ const settingRoutes = [
         component:WorkOrder,
         name:"workorder",
       },
+      {
       
+        path: "emailtemplate",
+        component: EmailTemplate,
+        name: "emailtemplate",
+      },
     ],
   },
 ];

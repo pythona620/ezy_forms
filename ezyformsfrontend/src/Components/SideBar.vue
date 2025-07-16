@@ -108,6 +108,19 @@
                         </router-link>
                     </ul>
 
+                    <h2 v-if="filteredSettingsGroups.ninthGroup" class="font-10 m-0 text-muted ps-2">{{
+                        ninthSettingsTitle }}</h2>
+                    <ul class="list-unstyled" v-if="filteredSettingsGroups.ninthGroup">
+                        <router-link v-for="(list, index) in filteredSettingsGroups.ninthGroup" :key="index"
+                            :to="`${baseRoute}/${list.route.toLowerCase()}`" class="text-decoration-none text-black"
+                            active-class="active-link">
+                            <li :title="list.name">
+                                <i :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
+                                {{ list.name }}
+                            </li>
+                        </router-link>
+                    </ul>
+
                 </template>
                 <template v-if="isMasterRoute">
                     <ul class="list-unstyled">
@@ -196,7 +209,7 @@ const settingsSideBarData = [
     { name: 'Form Creation' , icon: 'bi bi-file-earmark-text', route: 'CreateForm' },
     // { name: 'Predefined Forms', icon: 'bi bi-file-earmark-text', route: 'predefinedforms' },
     { name: 'Acknowledgement' , icon: 'bi bi-file-earmark-text', route: 'acknowledgement' },
-    // { name: 'Work order', icon: 'bi bi-tags', route: 'workorder'}
+    { name: 'Email Template' , icon: 'bi bi-file-earmark-text', route: 'emailtemplate' },
 
     // {name: 'Roles',icon:' bi bi-people', route:'role'},
     // { name: 'Workflow Settings', icon: 'bi bi-gear', route: 'WorkflowSettings'}
@@ -214,6 +227,7 @@ const fifthSettingsTitle = 'System Settings';
 const sixthTitle = 'Audits';
 const seventhSettingsTitle = 'Form Creation';
 const eightSettingsTitle = 'Acknowledgement';
+const ninthSettingsTitle = 'Email Template';
 
 
 
@@ -281,7 +295,9 @@ const filteredSettingsGroups = computed(() => {
             fifthSettingsGroup: settingsSideBarData.slice(6,7),
             sixthGroup: settingsSideBarData.slice(7,9),
             seventhGroup: settingsSideBarData.slice(9,10),
-            eightGroup: settingsSideBarData.slice(10),
+            eightGroup: settingsSideBarData.slice(10,11),
+            ninthGroup: settingsSideBarData.slice(11),
+
 
         }
         : { thirdSettingsGroup: [], forthSettingsGroup: []};
