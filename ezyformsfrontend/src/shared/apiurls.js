@@ -91,6 +91,7 @@ export const apis = {
   linked_form_id_update: domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.linked_form_id_update`,
   forgotPassword:domain +`/method/frappe.core.doctype.user.user.reset_password`,
   reportMailSend:domain+`/method/ezy_forms.ezy_custom_forms.custom_script.mail.email_reports_send`,
+  employeedisable:domain+`/method/ezy_forms.api.enable_employee.employee_update`,
 
   
   // getReportData: domain + `/api/method/frappe.utils.print_format.download_pdf`
