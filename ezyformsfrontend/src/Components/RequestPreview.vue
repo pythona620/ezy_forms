@@ -381,7 +381,7 @@
                                                 <component v-if="
                                                     field.fieldtype !== 'Datetime' && field.fieldtype !== 'Text' && field.fieldname !== 'auto_calculations'
                                                 " :is="getFieldComponent(field.fieldtype)" :value="field.value" :disabled="field.description === 'Disable'"
-                                                    :min="past" @click="forceOpenCalendar"
+                                                    @click="forceOpenCalendar"
                                                     :maxlength="getMaxLength(field)"
                                                     :type="getInputType(field.fieldtype)" :name="'field-' +
                                                         sectionIndex +
@@ -1923,15 +1923,15 @@ const logFieldValue = (
         let inputValue = eve.target.value;
 
         // Ensure only numbers are stored and +91 is prefixed
-        if (field.fieldtype === "Phone" || field.label.includes('phone' || 'telephone' || 'mobile')) {
-            inputValue = inputValue.replace(/\D/g, ""); // Remove non-numeric characters
+        // if (field.fieldtype === "Phone" || field.label.includes('phone' || 'telephone' || 'mobile')) {
+        //     inputValue = inputValue.replace(/\D/g, ""); // Remove non-numeric characters
 
-            if (inputValue.length > 10) {
-                inputValue = inputValue.slice(-10); // Keep only last 10 digits
-            }
+        //     if (inputValue.length > 10) {
+        //         inputValue = inputValue.slice(-10); // Keep only last 10 digits
+        //     }
 
-            inputValue = "+91" + inputValue; // Add +91 prefix
-        }
+        //     inputValue = "+91" + inputValue; // Add +91 prefix
+        // }
 
         field["value"] = inputValue;
         // console.log("inputValue",inputValue); 
