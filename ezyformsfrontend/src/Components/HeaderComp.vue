@@ -186,7 +186,7 @@
                         <div class="mb-2">
                            <div class="position-relative">
                              <label class="raise-label" for="changepass">New Password</label>
-                            <input class="form-control m-0 shadow-none font-13" v-model="new_password"
+                            <input class="form-control m-0 shadow-none font-13" v-model.trim="new_password"
                                 placeholder="Enter New Password" :type="showNewPassword ? 'text' : 'password'"
                                 id="changepass" @input="validatePassword" />
                             <span v-if="new_password" class="new-pwd-toggle-icon" @click="toggleNewPwdVisibility">
@@ -199,7 +199,7 @@
                         <div class="mb-2">
                             <div class="position-relative">
                                 <label class="raise-label" for="confirmpass">Confirm Password</label>
-                            <input class="form-control m-0 shadow-none font-13" v-model="confirm_password"
+                            <input class="form-control m-0 shadow-none font-13" v-model.trim="confirm_password"
                                 placeholder="Enter Confirm Password" :type="showConfPwdPassword ? 'text' : 'password'"
                                 id="confirmpass" @input="checkPasswordsMatch" />
                             <span v-if="confirm_password" class="cnf-pwd-toggle-icon" @click="toggleConfPwdVisibility">

@@ -190,7 +190,7 @@
 
     <div class="modal fade" id="changePassword" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
       aria-labelledby="changePasswordLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="modal-dialog modal-dialog-centered modal-md">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title font-14 fw-bold" id="changePasswordLabel">
@@ -199,31 +199,42 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <!-- <FormFields tag="select" placeholder="Category" class="mb-3" name="roles" id="roles"
-                            @change="changingCategory" :Required="false" :options="categoryOptions"
-                            v-model="selectedData.selectedCategory" /> -->
-            <div class="mb-3">
-              <label class="raise-label" for="changepass">New Password</label>
-              <FormFields class="mb-1" tag="input" type="text" name="changepass" id="changepass"
-                placeholder="Enter New Password" v-model="new_password" @change="validateNewPassword" />
-
-              <p v-if="passwordError" class="text-danger font-11 m-0 ps-2">
-                {{ passwordError }}
-              </p>
-            </div>
+            <!-- New Password Field -->
             <div class="mb-2">
-              <label class="raise-label" for="confirmpass">Confirm Password</label>
-              <FormFields class="" tag="input" type="text" name="confirmpass" id="confirmpass"
-                placeholder="Enter Confirm Password" v-model="confirm_password" @keydown.enter="passwordChange" />
-              <span v-if="passwordsMismatch" class="text-danger font-11 m-0 ps-2">Passwords do not match.</span>
+              <div class="position-relative">
+                <label class="raise-label font-13" for="changepass">New Password</label>
+                <input class="form-control m-0 shadow-none font-13" v-model.trim="new_password"
+                  placeholder="Enter New Password" :type="showNewPassword ? 'text' : 'password'"
+                  @input="validatePassword" />
+                <span v-if="new_password" class="new-pwd-toggle-icon" @click="toggleNewPwdVisibility">
+                  <i :class="showNewPassword ? 'bi bi-eye' : 'bi bi-eye-slash'"></i>
+                </span>
+              </div>
+              <span v-if="passwordError" class="text-danger font-10 m-0 ps-2">
+                {{ passwordError }}
+              </span>
             </div>
-            <!-- <FormFields tag="select" placeholder="Form" class="mb-3" name="roles" id="roles"
-                            :Required="false" :options="formList" v-model="selectedData.selectedform" /> -->
+
+            <!-- Confirm Password Field -->
+            <div class="mb-2">
+              <div class="position-relative">
+                <label class="raise-label font-13" for="confirmpass">Confirm Password</label>
+                <input class="form-control m-0 shadow-none font-13" v-model.trim="confirm_password"
+                  placeholder="Enter Confirm Password" :type="showConfPwdPassword ? 'text' : 'password'"
+                  @input="checkPasswordsMatch" />
+                <span v-if="confirm_password" class="cnf-pwd-toggle-icon" @click="toggleConfPwdVisibility">
+                  <i :class="showConfPwdPassword ? 'bi bi-eye' : 'bi bi-eye-slash'"></i>
+                </span>
+              </div>
+              <span v-if="passwordsMismatch" class="text-danger font-10 m-0 ps-2">Passwords do not match.</span>
+            </div>
+
           </div>
           <div>
             <div class="d-flex justify-content-center align-items-center p-3">
-              <button :disabled="!isFormValid" class="btn btn-dark font-12 w-100" type="submit" @click="passwordChange">
-                Create New Password
+              <button class="btn btn-dark font-12 w-100 mt-3" type="submit" @click="passwordChange"
+                :disabled="isButtonDisabled">
+                Confirm New Password
               </button>
             </div>
           </div>
@@ -241,7 +252,7 @@
           </div>
           <div class="modal-body font-11">
             <div class="ql-editor read-mode" v-html="acknowledgementHtml"></div>
-            <div class="mt-4 d-flex">
+            <div class="mt-4 d-flex align-items-center">
               <input type="checkbox" id="acknowledge" v-model="acknowledge" class="me-1 m-0" />
               <label for="acknowledge">I acknowledge that the information provided is correct.</label>
             </div>
@@ -270,7 +281,7 @@
           </div>
           <div class="modal-body font-11">
             <div class="ql-editor read-mode" v-html="acknowledgementHtml"></div>
-            <div class="mt-4 ">
+            <div class="mt-4 d-flex align-items-center">
               <input type="checkbox" id="acknowledge" v-model="acknowledge" class="me-1 m-0" />
               <label for="acknowledge">I acknowledge that the information provided is correct.</label>
             </div>
@@ -326,14 +337,17 @@ export default {
       errors: {},
       email: "",
       showPassword: false,
-      new_password: "",
-      confirm_password: "",
+      new_password: '',
+      confirm_password: '',
+      showNewPassword: false,
+      showConfPwdPassword: false,
+      passwordError: '',
+      passwordsMismatch: false,
       showPwdField: false,
       user_id_name: "",
       //   passwordsMismatch: false,
-      passwordError: "",
       loading: false,
-      isAcknloading:false,
+      isAcknloading: false,
       showOtpPage: false,
       ShowLoginPage: true,
       ShowSignUpPage: false,
@@ -382,15 +396,27 @@ export default {
       this.showPassword = !this.showPassword;
     },
 
-    validateNewPassword() {
-      if (!this.new_password) {
-        this.passwordError = "Password is required.";
-      } else if (this.new_password.length < 6) {
-        this.passwordError = "Password must be at least 6 characters long.";
-      } else {
-        this.passwordError = "";
-      }
+    toggleNewPwdVisibility() {
+      this.showNewPassword = !this.showNewPassword;
     },
+    toggleConfPwdVisibility() {
+      this.showConfPwdPassword = !this.showConfPwdPassword;
+    },
+    validatePassword() {
+      if (!this.isPasswordValid) {
+        this.passwordError =
+          'Password must be at least 12 characters with letters, numbers & symbols.';
+      } else {
+        this.passwordError = '';
+      }
+
+      this.checkPasswordsMatch();
+    },
+    checkPasswordsMatch() {
+      this.passwordsMismatch =
+        this.new_password && this.confirm_password && this.new_password !== this.confirm_password;
+    },
+
     validateEmail() {
       const email = this.SignUpdata.email;
       const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -605,7 +631,7 @@ export default {
 
     employeeAcknowledge() {
       // if (this.isAcknowledge === 0) {
-      this.isAcknloading=true;
+      this.isAcknloading = true;
       const payload = {
         user_id: this.formdata.usr,
         acknowledgement: this.SignUpdata.acknowledgement,
@@ -614,8 +640,8 @@ export default {
       axiosInstance
         .post(apis.loginCheckmethod, payload)
         .then((res) => {
-         if(res.message){
-           toast.success(res.message);
+          if (res.message) {
+            toast.success(res.message);
             const modal = bootstrap.Modal.getInstance(
               document.getElementById("EmployeeAcknowledgementModal")
             );
@@ -790,36 +816,36 @@ export default {
       this.validatename();
       this.validatepassword();
       if (!this.errors.usr && !this.errors.pwd) {
-          this.loading = true;
-          axiosInstance
-            .post(apis.login, this.formdata)
-            .then((res) => {
-              if (res) {
-                this.storeData = res;
-                if (this.twoFactorAuth === "1") {
-                  this.ShowLoginPage = false;
-                  this.showOtpPage = true;
+        this.loading = true;
+        axiosInstance
+          .post(apis.login, this.formdata)
+          .then((res) => {
+            if (res) {
+              this.storeData = res;
+              if (this.twoFactorAuth === "1") {
+                this.ShowLoginPage = false;
+                this.showOtpPage = true;
+              }
+              else {
+                this.showOtpPage = false;
+                this.ShowLoginPage = true;
+                this.otp = ["", "", "", "", "", ""];
+                if (this.isAcknowledge == 0) {
+                  const modal = new bootstrap.Modal(document.getElementById('EmployeeAcknowledgementModal'));
+                  modal.show();
                 }
                 else {
-                  this.showOtpPage = false;
-                  this.ShowLoginPage = true;
-                  this.otp = ["", "", "", "", "", ""];
-                  if (this.isAcknowledge == 0) {
-                    const modal = new bootstrap.Modal(document.getElementById('EmployeeAcknowledgementModal'));
-                    modal.show();
-                  }
-                  else{
-                    this.userData(this.formdata.usr);
-                  }
+                  this.userData(this.formdata.usr);
                 }
               }
-            })
-            .catch((error) => {
-              console.error("Login error: ", error);
-            })
-            .finally(() => {
-              this.loading = false;
-            });
+            }
+          })
+          .catch((error) => {
+            console.error("Login error: ", error);
+          })
+          .finally(() => {
+            this.loading = false;
+          });
 
       }
     },
@@ -1120,15 +1146,17 @@ export default {
   },
 
   computed: {
-    passwordsMismatch() {
+    isPasswordValid() {
+      const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$/;
+      return regex.test(this.new_password);
+    },
+    isButtonDisabled() {
       return (
-        this.new_password &&
-        this.confirm_password &&
+        !this.new_password ||
+        !this.confirm_password ||
+        !this.isPasswordValid ||
         this.new_password !== this.confirm_password
       );
-    },
-    isFormValid() {
-      return this.new_password.length >= 6 && this.new_password === this.confirm_password;
     },
   },
 };
@@ -1418,5 +1446,21 @@ input:focus {
   box-sizing: border-box;
   font-size: 13px !important;
   // background-color: white;
+}
+
+.new-pwd-toggle-icon {
+  position: absolute;
+  top: 73%;
+  right: 20px;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+.cnf-pwd-toggle-icon {
+  position: absolute;
+  top: 73%;
+  right: 20px;
+  transform: translateY(-50%);
+  cursor: pointer;
 }
 </style>
