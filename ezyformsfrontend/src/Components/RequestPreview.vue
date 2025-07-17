@@ -61,12 +61,19 @@
                                                     </option>
                                                 </select> -->
                                                 
-                                                <Multiselect :multiple="field.fieldtype === 'Table MultiSelect' " :disabled="field.description === 'Disable'"
+                                                <!-- <Multiselect :multiple="field.fieldtype === 'Table MultiSelect' " :disabled="field.description === 'Disable'"
                                                     :maxlength="getMaxLength(field)"
                                                     :options="field.options?.split('\n').filter(opt => opt.trim() !== '') || []"
                                                     :modelValue="field.value" placeholder="Select"
                                                     @update:modelValue="(val) => handleSelectChange(val, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
-                                                    class="font-11 multiselect" />
+                                                    class="font-11 multiselect" /> -->
+
+                                                    <Vue3Select v-tooltip.top="row[field.fieldname]"  class="font-11" style="min-width: 200px;" :append-to-body="true"
+                                                                                   :multiple="field.fieldtype === 'Table MultiSelect' " :disabled="field.description === 'Disable'"
+                                                    :maxlength="getMaxLength(field)"
+                                                    :options="field.options?.split('\n').filter(opt => opt.trim() !== '') || []"
+                                                    :modelValue="field.value" placeholder="Select"
+                                                    @update:modelValue="(val) => handleSelectChange(val, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
 
 
                                             </template>
@@ -672,33 +679,17 @@
                                                                         {{
                                                                             rowIndex + 1 }}
                                                                     </td> -->
-                                                                    <td v-for="field in table" :key="field.fieldname" class=" position-relative" 
-                                                                         :style="field.label !== 'Type of Manpower'
-                                                                            ? {
-                                                                                width: row[field.fieldname] ? Math.max(row[field.fieldname].length * 10, 100) + 'px' : 'auto',
-                                                                                maxWidth: '300px',
-                                                                                textOverflow: 'ellipsis',
-                                                                                whiteSpace: 'nowrap'
-                                                                            }
-                                                                            : {}">
+                                                                    <td
+  v-for="field in table"
+  :key="field.fieldname"
+  class="position-relative"
+  :style="getCellStyle(row[field.fieldname], focusedField === `${rowIndex}-${field.fieldname}`)"
+  @focusin="focusedField = `${rowIndex}-${field.fieldname}`"
+  @focusout="focusedField = null"
+>
 
 
-                                                                        <!-- <template v-if="rowIndex === 0 && fieldIndex === 0 && field.label === ' field 1'">
-                                                                            <span class="font-12 d-inline-block text-truncate text-center" :title="row[field.fieldname]" :style="{ maxWidth: '100%' }">
-                                                                                {{ row[field.fieldname] || 'Name' }}
-                                                                            </span>
-                                                                            </template> -->
-                                                                        <!-- <template
-                                                                            v-if="field.label === 'Details' && field.fieldname == 'field_0'  && rowIndex === 0 && fieldIndex === 0">
-                                                                            <span
-                                                                                class="font-12 d-inline-block text-truncate"
-                                                                                :style="{ maxWidth: '100%' }"
-                                                                                :title="row[field.fieldname]">
-                                                                                {{ row[field.fieldname] }}
-                                                                            </span>
-                                                                        </template> -->
-                                                                        <!-- :disabled="rowIndex === 0 && fieldIndex === 0 && field.label !== 'Details' && field.fieldname == 'field_0'" -->
-                                                                        <!-- :class="field.label === 'Details' && field.fieldname === 'field_0' && rowIndex === 0 && fieldIndex === 0 ? 'bg-white border-0' : 'border-1'" -->
+                                                                      
                                                                         <template
                                                                             v-if="field.fieldtype === 'Data' && field.label !== 'Type of Manpower'">
                                                                             <input
@@ -707,16 +698,7 @@
                                                                                 class="form-control font-12"
                                                                                 v-model="row[field.fieldname]"
                                                                                 />
-                                                                                <!-- @focus="focusedField = { rowIndex, fieldname: field.fieldname }"
-                                                                                @blur="focusedField = { rowIndex: null, fieldname: null }" -->
-
-                                                                                <!-- Show popup only if this specific field in this specific row is focused -->
-                                                                                <!-- <div
-                                                                                v-if="focusedField.rowIndex === rowIndex && focusedField.fieldname === field.fieldname"
-                                                                                class="custom-popup"
-                                                                                >
-                                                                                {{ row[field.fieldname] }}
-                                                                                </div> -->
+                                                                                
 
                                                                         </template>
                                                                         <template v-if="field.fieldtype === 'Text'">
@@ -728,13 +710,20 @@
                                                                         <template
                                                                             v-else-if="field.fieldtype === 'Select'">
                                                                             <div>
-                                                                                <Multiselect v-tooltip.top="row[field.fieldname]"
+                                                                                <!-- <Multiselect v-tooltip.top="row[field.fieldname]" :append-to-body="true"
                                                                                     :multiple="field.fieldtype === 'Table MultiSelect'"
                                                                                     :options="field.options?.split('\n').filter(opt => opt.trim() !== '') || []"
                                                                                     :model-value="row[field.fieldname]"
                                                                                     placeholder="Select"
                                                                                     @update:model-value="val => row[field.fieldname] = val"
-                                                                                    class="font-11 multiselect" />
+                                                                                    class="font-11 multiselect" /> -->
+
+                                                                                    <Vue3Select v-tooltip.top="row[field.fieldname]"  class="font-11" style="min-width: 200px;" :append-to-body="true"
+                                                                                    :multiple="field.fieldtype === 'Table MultiSelect'"
+                                                                                    :options="field.options?.split('\n').filter(opt => opt.trim() !== '') || []"
+                                                                                    :model-value="row[field.fieldname]"
+                                                                                    placeholder="Select"
+                                                                                    @update:model-value="val => row[field.fieldname] = val" />
                                                                             </div>
                                                                         </template>
                                                                         <template v-if="field.fieldtype === 'Date'">
@@ -751,7 +740,7 @@
                                                                        
                                                                             <!-- For calculated fields -->
                                                                             <input
-                                                                                v-if="field.description && /[+\-*/]/.test(field.description)"
+                                                                                v-if="field.description && /[+\-*/]/.test(field.description)" v-tooltip.top="row[field.fieldname]"
                                                                                 type="number" 
                                                                                 class="form-control font-12"
                                                                                 :value="calculateFieldExpression(row, field.description, table)"
@@ -760,7 +749,7 @@
 
                                                                             <!-- For normal fields with dynamic validation -->
                                                                             <div v-else>
-                                                                                <input
+                                                                                <input v-tooltip.top="row[field.fieldname]"
                                                                                     type="number"
                                                                                     class="form-control font-12"
                                                                                     :class="{ 'border-danger': hasFieldError(row, field) }"
@@ -869,12 +858,12 @@
                                                             </tbody>
                                                             <tfoot>
                                                                <tr
-  v-if="table.some(field =>
-    field.fieldtype === 'Int' &&
-    (field.label?.toLowerCase().includes('total') || field.label?.toLowerCase().includes('amount'))
-  ) && table.some(field => field.description)"
-  class="bg-light"
->
+                                                                    v-if="table.some(field =>
+                                                                        field.fieldtype === 'Int' &&
+                                                                        (field.label?.toLowerCase().includes('total') || field.label?.toLowerCase().includes('amount'))
+                                                                    ) && table.some(field => field.description)"
+                                                                    class="bg-light"
+                                                                    >
 
                                                                     <td v-for="(field, index) in table"
                                                                         :key="field.fieldname"
@@ -886,9 +875,9 @@
                                                                         </template>
                                                                         <!-- ✅ Other columns show totals conditionally -->
                                                                       <template v-else-if="
-  field.fieldtype === 'Int' && field.description &&
-  (field.label.toLowerCase().includes('total') || field.label.toLowerCase().includes('amount'))
-">
+                                                                            field.fieldtype === 'Int' && field.description &&
+                                                                            (field.label.toLowerCase().includes('total') || field.label.toLowerCase().includes('amount'))
+                                                                            ">
 
 
 
@@ -944,7 +933,8 @@ import Multiselect from "vue-multiselect";
 import "@vueform/multiselect/themes/default.css";
 import { watchEffect } from "vue";
 import { useRoute } from "vue-router";
-
+import Vue3Select from 'vue3-select'
+import 'vue3-select/dist/vue3-select.css';
 const props = defineProps({
     blockArr: {
         type: [Array, null],
@@ -1029,7 +1019,25 @@ const closePreview = () => {
   showModal.value = false;
   previewUrl.value = '';
 };
+// const focusedField = ref(null) 
 
+function getCellStyle( value, isFocused) {
+//   if (field.label === 'Type of Manpower') return {}
+
+  const baseWidth = 200
+  const contentLength = value?.length || 0
+  const dynamicWidth = Math.max(contentLength * 10, baseWidth)
+
+  return {
+    width: isFocused ? dynamicWidth + 'px' : baseWidth + 'px',
+    maxWidth: '400px',
+    minWidth: baseWidth + 'px',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    transition: 'width 0.2s ease'
+  }
+}
 // const isImageFile = (url) => {
 //   return url.match(/\.(jpeg|jpg|png)$/i);
 // };
@@ -2450,9 +2458,10 @@ function getFieldError(row, field) {
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 
 <style lang="scss" scoped>
-// .overTable {
-//     overflow-x: auto;
-// }
+.overTable {
+    overflow-x: scroll;
+    
+}  
 .removeRowTd {
     width: 20px;
 }
@@ -2739,5 +2748,27 @@ input:focus{
     border: 1px solid #000;
 
 }
+.vs__selected-options {
+  font-size: 12px !important;
+  
+}
+
+.v-select * {
+  box-sizing: border-box;
+  font-size: 12px !important;
+  height: 32px !important;
+  // background-color: white;
+}
+
+.rounded-table {
+  border-radius: 6px;
+  overflow: hidden;
+  border-spacing: 0; /* remove gaps */
+}
+/* Header background color */
+.rounded-table thead th {
+  background-color: #f5f5f5;
+}
+
 
 </style>
