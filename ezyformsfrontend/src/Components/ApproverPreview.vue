@@ -93,7 +93,7 @@
                             <div v-if="props.readonlyFor === 'true' || blockIndex < currentLevel">
                               <div class="container-fluid">
                                 <div class="row">
-                                  <div class="form-check col-4 mb-1"
+                                  <div class="form-check col mb-1"
                                     v-for="(option, index) in field?.options?.split('\n')" :key="index"
                                     :class="{ 'd-none': !(JSON.parse(field.value || '[]') || []).includes(option) }">
 
