@@ -58,7 +58,7 @@ const tableData = ref([
     { title: "Two Factor Authentication", checked: false },
     { title: "Send Form as an Attachment Via an E-Mail ", checked: false },
     { title: "Welcome E-Mail Configuration", checked: false },
-    { title: "Sign Up", checked: false },
+    { title: "Enable Sign Up in Login Page", checked: false },
 ]);
 
 const default_mail = ref(false);

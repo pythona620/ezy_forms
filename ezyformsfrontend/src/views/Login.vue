@@ -110,7 +110,7 @@
           </div>
           <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
             <label class="font-13" for="full_name">User Name</label>
-            <input type="text" class="form-control m-0 bg-white" id="name" v-model="SignUpdata.full_name"
+            <input type="text" class="form-control m-0 bg-white text-uppercase" id="name" v-model="SignUpdata.full_name"
               @blur="validateFullName" :class="{ 'is-invalid': errors.full_name }" />
             <div class="invalid-feedback font-11 mt-1" v-if="errors.full_name">
               {{ errors.full_name }}
@@ -236,17 +236,17 @@
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">Acknowledgement</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" class="btn-close" @click="acknowledge=''" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body font-11">
             <div class="ql-editor read-mode" v-html="acknowledgementHtml"></div>
-            <div class="mt-4">
-              <input type="checkbox" v-model="acknowledge" class="me-1 mt-1" />
-              <label for="">I acknowledge that the information provided is correct.</label>
+            <div class="mt-4 d-flex">
+              <input type="checkbox" id="acknowledge" v-model="acknowledge" class="me-1 m-0" />
+              <label for="acknowledge">I acknowledge that the information provided is correct.</label>
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-outline-secondary" @click="acknowledge=''" data-bs-dismiss="modal">Cancel</button>
             <button type="button" @click="SignUp" :disabled="!acknowledge || saveloading" class="btn btn-dark"
               style="min-width:120px;">
               <span v-if="saveloading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
@@ -261,19 +261,19 @@
     <div class="modal fade" id="EmployeeAcknowledgementModal" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-lg modal-dialog-centered ">
         <div class="modal-content">
-          <div class="modal-header">
+          <div class="modal-header"> 
             <h5 class="modal-title">Acknowledgement</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" @click="acknowledge=''" aria-label="Close"></button>
           </div>
           <div class="modal-body font-11">
             <div class="ql-editor read-mode" v-html="acknowledgementHtml"></div>
-            <div class="mt-4">
-              <input type="checkbox" v-model="acknowledge" class="me-1 mt-1" />
-              <label for="">I acknowledge that the information provided is correct.</label>
+            <div class="mt-4 ">
+              <input type="checkbox" id="acknowledge" v-model="acknowledge" class="me-1 m-0" />
+              <label for="acknowledge">I acknowledge that the information provided is correct.</label>
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-outline-secondary" @click="acknowledge=''" data-bs-dismiss="modal">Cancel</button>
             <button type="button" @click="employeeAcknowledge" :disabled="!acknowledge" class="btn btn-dark"
               style="min-width:120px;">
               Yes, Proceed
@@ -432,7 +432,7 @@ export default {
 
 
     validateFullName() {
-      this.SignUpdata.full_name = this.SignUpdata.full_name.trim();
+      this.SignUpdata.full_name = this.SignUpdata.full_name.trim().toUpperCase();
       if (!this.SignUpdata.full_name) {
         this.errors.full_name = "User Name is required *";
       }
@@ -484,11 +484,34 @@ export default {
       this.ShowSignUpPage = true;
       this.deptData()
       this.designationData()
+
+    //  const formdata= {
+    //     usr: "",
+    //     pwd: "",
+    //   },
+    this.formdata.usr=""
+    this.formdata.pwd=""
+    this.errors.usr=""
+    this.errors.pwd=""
+    this.acknowledge=""
+
     },
     OpenLogin() {
       this.ShowLoginPage = true;
       this.showOtpPage = false;
       this.ShowSignUpPage = false;
+
+       this.SignUpdata.email = "";
+      this.SignUpdata.full_name = "";
+      this.SignUpdata.emp_code = "";
+      this.SignUpdata.emp_phone = "";
+      this.SignUpdata.designation = null;
+      this.SignUpdata.dept = null;
+      this.SignUpdata.signature = null;
+      this.selectedOption = null;
+      this.signatureInputRef = null;
+      this.acknowledge=""
+
     },
     // validateOtp() {
     //   const otpValue = this.otp.join("");
@@ -552,6 +575,7 @@ export default {
                 this.SignUpdata.signature = null;
                 this.selectedOption = null;
                 this.signatureInputRef = null;
+                this.acknowledge=""
               }
               else if (res.message == 'Already registered but currently disabled') {
                 toast.error(res.message)
@@ -563,7 +587,7 @@ export default {
                 document.getElementById("EmployeeToggleModal")
               );
               modal.hide();
-               
+
             }
 
           })
