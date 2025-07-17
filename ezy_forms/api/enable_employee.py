@@ -1,6 +1,6 @@
 import frappe
 from frappe.utils import get_url
-
+from ezy_forms.ezy_forms.doctype.login_check.login_check import after_insert_user
 @frappe.whitelist()
 def employee_update(emp_mail):
     try:
@@ -20,7 +20,7 @@ def employee_update(emp_mail):
         message = frappe.render_template(email_template.response_html, {
             "emp_name": emp_name.upper(),
             "emp_mail_id": emp_mail,
-            "site_url": site_url
+            "site_url": f"{site_url}/ezyformsfrontend#/"
         })
 
         frappe.sendmail(
@@ -33,6 +33,11 @@ def employee_update(emp_mail):
 
         frappe.db.set_value("Ezy Employee", emp_mail, {"enable": 1, "is_web_form": 1})
         frappe.db.set_value("User", emp_mail, "enabled", 1)
+        if not frappe.db.exists("Login Check", {"user_id": emp_mail}): # Ensure user is created in Login Check
+            new_doc = frappe.new_doc("Login Check")
+            new_doc.user_id = emp_mail
+            new_doc.insert(ignore_permissions=True)
+            
         frappe.db.commit()
 
         return f"Activation email has been sent successfully to employee {emp_name}."
