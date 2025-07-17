@@ -62,7 +62,7 @@
                       <div class="mb-3">
                         <label class="font-13 ps-1" for="emp_mail_id">Emp Mail ID<span
                             class="text-danger ps-1">*</span></label>
-                        <FormFields class="mb-1" tag="input" type="email" name="emp_mail_id" @change="validateEmail"
+                        <FormFields class="mb-1" tag="input" type="email" name="emp_mail_id" @input="validateEmail"
                           :required="true" id="emp_mail_id" placeholder="Enter Email"
                           v-model="createEmployee.emp_mail_id" />
                         <p v-if="emailError" class="text-danger font-11 ps-1">
@@ -1123,6 +1123,12 @@ const emailError = ref("");
 
 const validateEmail = () => {
   const email = (originalEmail.value || createEmployee.value.emp_mail_id)?.trim().toLowerCase();
+  
+  if (!email) {
+    emailError.value = "Email is required";
+    return;
+  }
+
   const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
   if (!emailPattern.test(email)) {
@@ -1746,12 +1752,14 @@ function cancelCreate() {
     emp_phone: "",
     emp_mail_id: "",
     department: "",
+    searchText:"",
     designation: "",
     reporting_to: "",
     reporting_designation: "",
     signature: null,
     company_field: businessUnit.value,
   };
+  emailError.value='';
   const fileInput = document.getElementById("signatureInput");
   if (fileInput) {
     fileInput.value = "";
