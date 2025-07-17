@@ -629,7 +629,7 @@ template_str = """
                                                         {% endfor %}
                                                     </tr>
                                                 </thead>
-                                               {% set keywords = ['total', 'amount', 'total cost', 'sub total'] %}
+                                               
 
                                                 <tbody>
                                                     {% for child in child_data[table_name] %}
@@ -822,7 +822,7 @@ template_str = """
             <img  
                 id="{{ field.fieldname }}" 
                 src="{{ site_url + field['values'] or '' }}" 
-                style="width: 80px; height: 40px; object-fit: contain;margin-top:-25px;"  
+                style="width: 80px; height: 40px; object-fit: contain;margin-top:-20px;"  
                 name="{{ field.fieldname }}"
             >
         {% else %}
@@ -1412,7 +1412,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
             activate_pdf_name = "Activity Log .pdf"
             activate_pdf_path = os.path.join(attachment_folder, activate_pdf_name)
 
-            is_landscape = False  # Set this according to your use case
+            is_landscape = frappe.db.get_value("Ezy Form Definitions", form_short_name, "is_landscape")  # Set this according to your use case
             opts = {"orientation": "Landscape" if is_landscape else "Portrait"}
 
             convert_html_to_pdf(html_content=html_view, pdf_path=absolute_pdf_path, options=opts)
