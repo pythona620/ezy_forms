@@ -1427,7 +1427,7 @@ const isImageChildFile = (fileUrl) => {
     return /\.(jpg|jpeg|png)$/i.test(fileUrl);
 };
 
-const isBehalfOf=ref(false);
+// const isBehalfOf=ref(false);
 
 const handleSelectChange = (
     value,
@@ -1446,22 +1446,22 @@ const handleSelectChange = (
 
     const mockEvent = { target: { value: field.value } };
 
-    if(field.fieldname=='request_for' && field.value=='Others'){
-        isBehalfOf.value=true;
-    }
-    if (field.fieldname === 'request_for' && field.value === 'Self' || field.value === null) {
-            isBehalfOf.value = false;
+    // if(field.fieldname=='request_for' && field.value=='Others'){
+    //     isBehalfOf.value=true;
+    // }
+    // if (field.fieldname === 'request_for' && field.value === 'Self' || field.value === null) {
+    //         isBehalfOf.value = false;
 
-            // Clear 'requester_name' field and emit empty value
-            const requesterField = props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns
-                .flatMap(col => col.fields)
-                .find(f => f.fieldname === 'requester_name');
+    //         // Clear 'requester_name' field and emit empty value
+    //         const requesterField = props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns
+    //             .flatMap(col => col.fields)
+    //             .find(f => f.fieldname === 'requester_name');
 
-            if (requesterField) {
-                requesterField.value = '';
-                emit('updateField', requesterField); // emit cleared field
-            }
-        }
+    //         if (requesterField) {
+    //             requesterField.value = '';
+    //             emit('updateField', requesterField); // emit cleared field
+    //         }
+    //     }
 
     logFieldValue(mockEvent, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex);
 };
@@ -1914,13 +1914,8 @@ const logFieldValue = (
     }
     else if (field.fieldtype === "Link") {
     field["value"] = eve.target.value; // Capture textarea value
-
-    if (isBehalfOf == false && field.fieldname === 'requester_name') {
-        field["value"] = "";
-        emit("updateField", "");
-    } else {
         emit("updateField", field.value);
-    }
+
     }
 
     else {
