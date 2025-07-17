@@ -101,7 +101,7 @@
       <div class="container">
         <div class="row">
           <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
-            <label class="font-13" for="email">Email</label>
+            <label class="font-13" for="email">Email<span class="text-danger ps-1">*</span></label>
             <input class="form-control m-0" type="email" id="email" v-model="SignUpdata.email" @blur="validateEmail"
               :class="{ 'is-invalid': errors.email }" />
             <div class="invalid-feedback font-11 mt-1" v-if="errors.email">
@@ -109,7 +109,7 @@
             </div>
           </div>
           <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
-            <label class="font-13" for="full_name">User Name</label>
+            <label class="font-13" for="full_name">User Name<span class="text-danger ps-1">*</span></label>
             <input type="text" class="form-control m-0 bg-white text-uppercase" id="name" v-model="SignUpdata.full_name"
               @blur="validateFullName" :class="{ 'is-invalid': errors.full_name }" />
             <div class="invalid-feedback font-11 mt-1" v-if="errors.full_name">
@@ -117,7 +117,7 @@
             </div>
           </div>
           <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
-            <label class="font-13" for="emp_code">Employee Id</label>
+            <label class="font-13" for="emp_code">Employee Id<span class="text-danger ps-1">*</span></label>
             <input type="text" class="form-control  m-0 bg-white" id="emp_code" v-model="SignUpdata.emp_code"
               @input="validateEmpCode" :class="{ 'is-invalid': errors.emp_code }" />
             <div class="invalid-feedback font-11 mt-1" v-if="errors.emp_code">
@@ -125,7 +125,7 @@
             </div>
           </div>
           <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
-            <label class="font-13" for="emp_phone">Phone Number</label>
+            <label class="font-13" for="emp_phone">Phone Number<span class="text-danger ps-1">*</span></label>
             <input type="text" class="form-control m-0 bg-white" id="emp_phone" v-model="SignUpdata.emp_phone"
               @input="filterPhoneInput" @blur="validatePhone" :class="{ 'is-invalid': errors.emp_phone }" />
             <div class="invalid-feedback font-11 mt-1" v-if="errors.emp_phone">
@@ -133,12 +133,12 @@
             </div>
           </div>
           <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
-            <label class="font-13" for="emp_code">Designation</label>
+            <label class="font-13" for="emp_code">Designation<span class="text-danger ps-1">*</span></label>
             <Vue3Select v-model="SignUpdata.designation" :options="this.disignationDetails"
               placeholder="Select Designation" />
           </div>
           <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
-            <label class="font-13" for="emp_code">Department</label>
+            <label class="font-13" for="emp_code">Department<span class="text-danger ps-1">*</span></label>
             <Vue3Select v-model="SignUpdata.dept" :options="this.deptDetails" placeholder="Select Department" />
           </div>
         </div>
@@ -178,7 +178,7 @@
 
       <div>
         <button
-          :disabled="!SignUpdata.email || !SignUpdata.full_name || !SignUpdata.emp_code || !SignUpdata.emp_phone || !SignUpdata.dept"
+          :disabled="!SignUpdata.email || !SignUpdata.full_name || !SignUpdata.emp_code || !SignUpdata.emp_phone || !SignUpdata.dept || !SignUpdata.designation"
           type="submit" @click="handleSignUp"
           class="border-0 btn btn-dark button w-100 mb-4 py-2 font-13 text-white rounded-1">
           Sign Up
@@ -236,7 +236,8 @@
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">Acknowledgement</h5>
-            <button type="button" class="btn-close" @click="acknowledge=''" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" class="btn-close" @click="acknowledge = ''" data-bs-dismiss="modal"
+              aria-label="Close"></button>
           </div>
           <div class="modal-body font-11">
             <div class="ql-editor read-mode" v-html="acknowledgementHtml"></div>
@@ -246,7 +247,8 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" @click="acknowledge=''" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-outline-secondary" @click="acknowledge = ''"
+              data-bs-dismiss="modal">Cancel</button>
             <button type="button" @click="SignUp" :disabled="!acknowledge || saveloading" class="btn btn-dark"
               style="min-width:120px;">
               <span v-if="saveloading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
@@ -261,9 +263,10 @@
     <div class="modal fade" id="EmployeeAcknowledgementModal" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-lg modal-dialog-centered ">
         <div class="modal-content">
-          <div class="modal-header"> 
+          <div class="modal-header">
             <h5 class="modal-title">Acknowledgement</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" @click="acknowledge=''" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" @click="acknowledge = ''"
+              aria-label="Close"></button>
           </div>
           <div class="modal-body font-11">
             <div class="ql-editor read-mode" v-html="acknowledgementHtml"></div>
@@ -273,10 +276,12 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" @click="acknowledge=''" data-bs-dismiss="modal">Cancel</button>
-            <button type="button" @click="employeeAcknowledge" :disabled="!acknowledge" class="btn btn-dark"
+            <button type="button" class="btn btn-outline-secondary" @click="acknowledge = ''"
+              data-bs-dismiss="modal">Cancel</button>
+            <button type="button" @click="employeeAcknowledge" :disabled="!acknowledge || isAcknloading" class="btn btn-dark"
               style="min-width:120px;">
-              Yes, Proceed
+              <span v-if="isAcknloading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              <span v-if="!isAcknloading" class="font-13 text-white">Yes, Proceed</span>
             </button>
 
           </div>
@@ -327,6 +332,7 @@ export default {
       //   passwordsMismatch: false,
       passwordError: "",
       loading: false,
+      isAcknloading:false,
       showOtpPage: false,
       ShowLoginPage: true,
       ShowSignUpPage: false,
@@ -485,15 +491,15 @@ export default {
       this.deptData()
       this.designationData()
 
-    //  const formdata= {
-    //     usr: "",
-    //     pwd: "",
-    //   },
-    this.formdata.usr=""
-    this.formdata.pwd=""
-    this.errors.usr=""
-    this.errors.pwd=""
-    this.acknowledge=""
+      //  const formdata= {
+      //     usr: "",
+      //     pwd: "",
+      //   },
+      this.formdata.usr = ""
+      this.formdata.pwd = ""
+      this.errors.usr = ""
+      this.errors.pwd = ""
+      this.acknowledge = ""
 
     },
     OpenLogin() {
@@ -501,7 +507,7 @@ export default {
       this.showOtpPage = false;
       this.ShowSignUpPage = false;
 
-       this.SignUpdata.email = "";
+      this.SignUpdata.email = "";
       this.SignUpdata.full_name = "";
       this.SignUpdata.emp_code = "";
       this.SignUpdata.emp_phone = "";
@@ -510,7 +516,7 @@ export default {
       this.SignUpdata.signature = null;
       this.selectedOption = null;
       this.signatureInputRef = null;
-      this.acknowledge=""
+      this.acknowledge = ""
 
     },
     // validateOtp() {
@@ -575,7 +581,7 @@ export default {
                 this.SignUpdata.signature = null;
                 this.selectedOption = null;
                 this.signatureInputRef = null;
-                this.acknowledge=""
+                this.acknowledge = ""
               }
               else if (res.message == 'Already registered but currently disabled') {
                 toast.error(res.message)
@@ -602,6 +608,7 @@ export default {
 
     employeeAcknowledge() {
       // if (this.isAcknowledge === 0) {
+      this.isAcknloading=true;
       const payload = {
         user_id: this.formdata.usr,
         acknowledgement: this.SignUpdata.acknowledgement,
@@ -610,18 +617,20 @@ export default {
       axiosInstance
         .post(apis.loginCheckmethod, payload)
         .then((res) => {
-          toast.success(res.message);
-          const modal = bootstrap.Modal.getInstance(
-            document.getElementById("EmployeeAcknowledgementModal")
-          );
-          modal.hide();
-
+         if(res.message){
+           toast.success(res.message);
+            const modal = bootstrap.Modal.getInstance(
+              document.getElementById("EmployeeAcknowledgementModal")
+            );
+            modal.hide();
+            this.Login()
+         }
         })
         .catch((error) => {
           console.error("Login error: ", error);
         })
         .finally(() => {
-          this.saveloading = false;
+          this.isAcknloading = false;
         })
       // }
 
@@ -766,10 +775,6 @@ export default {
 
               // console.log("User is logging in for the first time.");
             }
-            if (this.isAcknowledge === 0) {
-              const modal = new bootstrap.Modal(document.getElementById('EmployeeAcknowledgementModal'));
-              modal.show();
-            }
             else {
               console.log("User has logged in before.");
             }
@@ -791,28 +796,28 @@ export default {
 
         axiosInstance
           .post(apis.login, this.formdata)
-          .then((res) => {
-            if (res) {
-              this.storeData = res;
-              if (this.twoFactorAuth === "1") {
-                this.ShowLoginPage = false;
-                this.showOtpPage = true;
+            .then((res) => {
+              if (res) {
+                this.storeData = res;
+                if (this.twoFactorAuth === "1") {
+                  this.ShowLoginPage = false;
+                  this.showOtpPage = true;
+                }
+                else {
+                  this.showOtpPage = false;
+                  this.ShowLoginPage = true;
+                  this.otp = ["", "", "", "", "", ""];
+                  // localStorage.setItem("UserName", JSON.stringify(this.storeData));
+                  this.userData(this.formdata.usr);
+                }
               }
-              else {
-                this.showOtpPage = false;
-                this.ShowLoginPage = true;
-                this.otp = ["", "", "", "", "", ""];
-                // localStorage.setItem("UserName", JSON.stringify(this.storeData));
-                this.userData(this.formdata.usr);
-              }
-            }
-          })
-          .catch((error) => {
-            console.error("Login error: ", error);
-          })
-          .finally(() => {
-            this.loading = false;
-          });
+            })
+            .catch((error) => {
+              console.error("Login error: ", error);
+            })
+            .finally(() => {
+              this.loading = false;
+            });
       }
     },
 
@@ -840,22 +845,29 @@ export default {
                   is_admin: employeeData.is_admin
                   // department: employeeData.department,
                 };
+                // this.isAcknowledge === 0
+                if (employeeData.acknowledgement=="") {
+                  const modal = new bootstrap.Modal(document.getElementById('EmployeeAcknowledgementModal'));
+                  modal.show();
+                }
+                else{
+                    // Store required data only
+                  localStorage.setItem("UserName", JSON.stringify(this.storeData));
+                  sessionStorage.setItem("UserName", JSON.stringify(this.storeData));
 
-                // Store required data only
-                localStorage.setItem("UserName", JSON.stringify(this.storeData));
-                sessionStorage.setItem("UserName", JSON.stringify(this.storeData));
+                  localStorage.setItem("employeeData", JSON.stringify(filteredEmployeeData));
+                  sessionStorage.setItem("employeeData", JSON.stringify(filteredEmployeeData));
 
-                localStorage.setItem("employeeData", JSON.stringify(filteredEmployeeData));
-                sessionStorage.setItem("employeeData", JSON.stringify(filteredEmployeeData));
+                  localStorage.setItem("USERROLE", JSON.stringify(filteredEmployeeData.designation));
+                  sessionStorage.setItem("USERROLE", JSON.stringify(filteredEmployeeData.designation));
 
-                localStorage.setItem("USERROLE", JSON.stringify(filteredEmployeeData.designation));
-                sessionStorage.setItem("USERROLE", JSON.stringify(filteredEmployeeData.designation));
+                  toast.success("Login successfull", { autoClose: 2000 });
 
-                toast.success("Login successfull", { autoClose: 2000 });
-
-                setTimeout(() => {
-                  this.$router.push({ path: "/dashboard/maindash" });
-                }, 500);
+                  setTimeout(() => {
+                    this.$router.push({ path: "/dashboard/maindash" });
+                  }, 500);
+                }
+                
               })
               .catch((error) => {
                 console.error("Error fetching employee data:", error);
