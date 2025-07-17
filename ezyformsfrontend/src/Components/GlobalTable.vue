@@ -120,7 +120,7 @@
 
               <!-- Show unformatted date for 'modified' when status === 'Request Raised' -->
               <span class="tooltip-text" v-tooltip.top="formatDate(row[column.td_key])"
-                v-else-if="column.td_key === 'modified' && row.status !== 'Request Raised'">
+                v-else-if="column.td_key === 'modified' ">
                 {{ formatDate(row[column.td_key]) }}
               </span>
               <span v-else-if="column.td_key === 'signature' || column.td_key === 'is_hod' || column.td_key === 'is_admin'">
