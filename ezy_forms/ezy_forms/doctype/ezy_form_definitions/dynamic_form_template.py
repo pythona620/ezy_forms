@@ -420,7 +420,7 @@ template_str = """
                 margin-bottom: 6px !important;
             }
             .rounded-table, .rounded-table th, .rounded-table td {
-                border: 1px solid #ccc !important;
+                
                 font-size: 13px !important;
                 color: #000 !important;
             }
