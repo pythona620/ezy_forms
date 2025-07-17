@@ -278,9 +278,10 @@
           <div class="modal-footer">
             <button type="button" class="btn btn-outline-secondary" @click="acknowledge = ''"
               data-bs-dismiss="modal">Cancel</button>
-            <button type="button" @click="employeeAcknowledge" :disabled="!acknowledge || isAcknloading" class="btn btn-dark"
-              style="min-width:120px;">
-              <span v-if="isAcknloading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            <button type="button" @click="employeeAcknowledge" :disabled="!acknowledge || isAcknloading"
+              class="btn btn-dark" style="min-width:120px;">
+              <span v-if="isAcknloading" class="spinner-border spinner-border-sm" role="status"
+                aria-hidden="true"></span>
               <span v-if="!isAcknloading" class="font-13 text-white">Yes, Proceed</span>
             </button>
 
@@ -619,8 +620,9 @@ export default {
               document.getElementById("EmployeeAcknowledgementModal")
             );
             modal.hide();
+            this.isAcknowledge = 1;
             this.Login()
-         }
+          }
         })
         .catch((error) => {
           console.error("Login error: ", error);
@@ -788,10 +790,9 @@ export default {
       this.validatename();
       this.validatepassword();
       if (!this.errors.usr && !this.errors.pwd) {
-        this.loading = true;
-
-        axiosInstance
-          .post(apis.login, this.formdata)
+          this.loading = true;
+          axiosInstance
+            .post(apis.login, this.formdata)
             .then((res) => {
               if (res) {
                 this.storeData = res;
@@ -803,8 +804,13 @@ export default {
                   this.showOtpPage = false;
                   this.ShowLoginPage = true;
                   this.otp = ["", "", "", "", "", ""];
-                  // localStorage.setItem("UserName", JSON.stringify(this.storeData));
-                  this.userData(this.formdata.usr);
+                  if (this.isAcknowledge == 0) {
+                    const modal = new bootstrap.Modal(document.getElementById('EmployeeAcknowledgementModal'));
+                    modal.show();
+                  }
+                  else{
+                    this.userData(this.formdata.usr);
+                  }
                 }
               }
             })
@@ -814,6 +820,7 @@ export default {
             .finally(() => {
               this.loading = false;
             });
+
       }
     },
 
@@ -840,29 +847,22 @@ export default {
                   emp_signature: employeeData.signature,
                   // department: employeeData.department,
                 };
-                // this.isAcknowledge === 0
-                if (employeeData.acknowledgement=="") {
-                  const modal = new bootstrap.Modal(document.getElementById('EmployeeAcknowledgementModal'));
-                  modal.show();
-                }
-                else{
-                    // Store required data only
-                  localStorage.setItem("UserName", JSON.stringify(this.storeData));
-                  sessionStorage.setItem("UserName", JSON.stringify(this.storeData));
-
-                  localStorage.setItem("employeeData", JSON.stringify(filteredEmployeeData));
-                  sessionStorage.setItem("employeeData", JSON.stringify(filteredEmployeeData));
-
-                  localStorage.setItem("USERROLE", JSON.stringify(filteredEmployeeData.designation));
-                  sessionStorage.setItem("USERROLE", JSON.stringify(filteredEmployeeData.designation));
-
-                  toast.success("Login successfull", { autoClose: 2000 });
-
-                  setTimeout(() => {
-                    this.$router.push({ path: "/dashboard/maindash" });
-                  }, 500);
-                }
                 
+                localStorage.setItem("UserName", JSON.stringify(this.storeData));
+                sessionStorage.setItem("UserName", JSON.stringify(this.storeData));
+
+                localStorage.setItem("employeeData", JSON.stringify(filteredEmployeeData));
+                sessionStorage.setItem("employeeData", JSON.stringify(filteredEmployeeData));
+
+                localStorage.setItem("USERROLE", JSON.stringify(filteredEmployeeData.designation));
+                sessionStorage.setItem("USERROLE", JSON.stringify(filteredEmployeeData.designation));
+
+                toast.success("Login successfull", { autoClose: 2000 });
+
+                setTimeout(() => {
+                  this.$router.push({ path: "/dashboard/maindash" });
+                }, 500);
+
               })
               .catch((error) => {
                 console.error("Error fetching employee data:", error);
