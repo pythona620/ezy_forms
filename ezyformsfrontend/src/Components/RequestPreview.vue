@@ -647,7 +647,7 @@
                                                                 field.label.replace(/_/g, " ")
                                                             }}</span>
                                                         </div>
-                                                        <table class="table  rounded-table" border="1" width="100%">
+                                                        <table class="table  rounded-table" border="1" width="100%" >
                                                             <thead>
                                                                 <tr class=" font-12 fw-lighter">
                                                                     <!-- <th class="fw-medium text-center">#</th> -->
@@ -741,7 +741,7 @@
                                                                             <!-- For calculated fields -->
                                                                             <input
                                                                                 v-if="field.description && /[+\-*/]/.test(field.description)" v-tooltip.top="row[field.fieldname]"
-                                                                                type="number" 
+                                                                                type="number" :disabled="field.label.includes('Total Cost')"
                                                                                 class="form-control font-12"
                                                                                 :value="calculateFieldExpression(row, field.description, table)"
                                                                                 
@@ -874,9 +874,10 @@
 
                                                                         </template>
                                                                         <!-- ✅ Other columns show totals conditionally -->
+                                                                        <!-- &&
+                                                                            (field.label.toLowerCase().includes('total') || field.label.toLowerCase().includes('amount')) -->
                                                                       <template v-else-if="
-                                                                            field.fieldtype === 'Int' && field.description &&
-                                                                            (field.label.toLowerCase().includes('total') || field.label.toLowerCase().includes('amount'))
+                                                                            field.fieldtype === 'Int' && field.description 
                                                                             ">
 
 
@@ -1257,8 +1258,7 @@ const tableTotals = computed(() => {
     const fields = props.tableHeaders[tableIndex] || [];
     fields.forEach((field) => {
       if (
-        field.fieldtype === 'Int' &&  field.description &&
-        (field.label.toLowerCase().includes('total') || field.label.toLowerCase().includes('amount'))
+        field.fieldtype === 'Int' &&  field.description
       ) {
         let sum = 0;
 
