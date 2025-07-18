@@ -432,10 +432,18 @@
 
                     </div>
                   </div>
-                  <div class="ms-1">
+                  <div class="d-flex gap-3">
+                    <div class="ms-1">
                          <input type="checkbox" id="isHOD" true-value="1" false-value="0" v-model="createEmployee.is_hod" class="form-check-input mt-1 input-border" />
                         <label class="font-13 ms-2 " for="isHOD">Is HOD</label>
                   </div>
+                  <div class="ms-1">
+                      <input type="checkbox" id="is_admin" :true-value='1' :false-value='0'
+                        v-model="createEmployee.is_admin" class="form-check-input mt-1 input-border" />
+                      <label class="font-13 ms-2 " for="is_admin">Is Admin</label>
+                  </div>
+                  </div>
+
 
                 </div>
                 <div class="col">

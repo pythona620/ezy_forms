@@ -101,7 +101,7 @@
       <div class="container">
         <div class="row">
           <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
-            <label class="font-13" for="email">Email</label>
+            <label class="font-13" for="email">Email<span class="text-danger ps-1">*</span></label>
             <input class="form-control m-0" type="email" id="email" v-model="SignUpdata.email" @blur="validateEmail"
               :class="{ 'is-invalid': errors.email }" />
             <div class="invalid-feedback font-11 mt-1" v-if="errors.email">
@@ -109,7 +109,7 @@
             </div>
           </div>
           <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
-            <label class="font-13" for="full_name">User Name</label>
+            <label class="font-13" for="full_name">User Name<span class="text-danger ps-1">*</span></label>
             <input type="text" class="form-control m-0 bg-white text-uppercase" id="name" v-model="SignUpdata.full_name"
               @blur="validateFullName" :class="{ 'is-invalid': errors.full_name }" />
             <div class="invalid-feedback font-11 mt-1" v-if="errors.full_name">
@@ -117,7 +117,7 @@
             </div>
           </div>
           <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
-            <label class="font-13" for="emp_code">Employee Id</label>
+            <label class="font-13" for="emp_code">Employee Id<span class="text-danger ps-1">*</span></label>
             <input type="text" class="form-control  m-0 bg-white" id="emp_code" v-model="SignUpdata.emp_code"
               @input="validateEmpCode" :class="{ 'is-invalid': errors.emp_code }" />
             <div class="invalid-feedback font-11 mt-1" v-if="errors.emp_code">
@@ -125,7 +125,7 @@
             </div>
           </div>
           <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
-            <label class="font-13" for="emp_phone">Phone Number</label>
+            <label class="font-13" for="emp_phone">Phone Number<span class="text-danger ps-1">*</span></label>
             <input type="text" class="form-control m-0 bg-white" id="emp_phone" v-model="SignUpdata.emp_phone"
               @input="filterPhoneInput" @blur="validatePhone" :class="{ 'is-invalid': errors.emp_phone }" />
             <div class="invalid-feedback font-11 mt-1" v-if="errors.emp_phone">
@@ -133,12 +133,12 @@
             </div>
           </div>
           <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
-            <label class="font-13" for="emp_code">Designation</label>
+            <label class="font-13" for="emp_code">Designation<span class="text-danger ps-1">*</span></label>
             <Vue3Select v-model="SignUpdata.designation" :options="this.disignationDetails"
               placeholder="Select Designation" />
           </div>
           <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
-            <label class="font-13" for="emp_code">Department</label>
+            <label class="font-13" for="emp_code">Department<span class="text-danger ps-1">*</span></label>
             <Vue3Select v-model="SignUpdata.dept" :options="this.deptDetails" placeholder="Select Department" />
           </div>
         </div>
@@ -178,7 +178,7 @@
 
       <div>
         <button
-          :disabled="!SignUpdata.email || !SignUpdata.full_name || !SignUpdata.emp_code || !SignUpdata.emp_phone || !SignUpdata.dept"
+          :disabled="!SignUpdata.email || !SignUpdata.full_name || !SignUpdata.emp_code || !SignUpdata.emp_phone || !SignUpdata.dept || !SignUpdata.designation"
           type="submit" @click="handleSignUp"
           class="border-0 btn btn-dark button w-100 mb-4 py-2 font-13 text-white rounded-1">
           Sign Up
@@ -190,7 +190,7 @@
 
     <div class="modal fade" id="changePassword" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
       aria-labelledby="changePasswordLabel" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="modal-dialog modal-dialog-centered modal-md">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title font-14 fw-bold" id="changePasswordLabel">
@@ -199,31 +199,42 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @click="NewPasswordClose"></button>
           </div>
           <div class="modal-body">
-            <!-- <FormFields tag="select" placeholder="Category" class="mb-3" name="roles" id="roles"
-                            @change="changingCategory" :Required="false" :options="categoryOptions"
-                            v-model="selectedData.selectedCategory" /> -->
-            <div class="mb-3">
-              <label class="raise-label" for="changepass">New Password</label>
-              <FormFields class="mb-1" tag="input" type="text" name="changepass" id="changepass"
-                placeholder="Enter New Password" v-model="new_password" @change="validateNewPassword" />
-
-              <p v-if="passwordError" class="text-danger font-11 m-0 ps-2">
-                {{ passwordError }}
-              </p>
-            </div>
+            <!-- New Password Field -->
             <div class="mb-2">
-              <label class="raise-label" for="confirmpass">Confirm Password</label>
-              <FormFields class="" tag="input" type="text" name="confirmpass" id="confirmpass"
-                placeholder="Enter Confirm Password" v-model="confirm_password" @keydown.enter="passwordChange" />
-              <span v-if="passwordsMismatch" class="text-danger font-11 m-0 ps-2">Passwords do not match.</span>
+              <div class="position-relative">
+                <label class="raise-label font-13" for="changepass">New Password</label>
+                <input class="form-control m-0 shadow-none font-13" v-model.trim="new_password"
+                  placeholder="Enter New Password" :type="showNewPassword ? 'text' : 'password'"
+                  @input="validatePassword" />
+                <span v-if="new_password" class="new-pwd-toggle-icon" @click="toggleNewPwdVisibility">
+                  <i :class="showNewPassword ? 'bi bi-eye' : 'bi bi-eye-slash'"></i>
+                </span>
+              </div>
+              <span v-if="passwordError" class="text-danger font-10 m-0 ps-2">
+                {{ passwordError }}
+              </span>
             </div>
-            <!-- <FormFields tag="select" placeholder="Form" class="mb-3" name="roles" id="roles"
-                            :Required="false" :options="formList" v-model="selectedData.selectedform" /> -->
+
+            <!-- Confirm Password Field -->
+            <div class="mb-2">
+              <div class="position-relative">
+                <label class="raise-label font-13" for="confirmpass">Confirm Password</label>
+                <input class="form-control m-0 shadow-none font-13" v-model.trim="confirm_password"
+                  placeholder="Enter Confirm Password" :type="showConfPwdPassword ? 'text' : 'password'"
+                  @input="checkPasswordsMatch" />
+                <span v-if="confirm_password" class="cnf-pwd-toggle-icon" @click="toggleConfPwdVisibility">
+                  <i :class="showConfPwdPassword ? 'bi bi-eye' : 'bi bi-eye-slash'"></i>
+                </span>
+              </div>
+              <span v-if="passwordsMismatch" class="text-danger font-10 m-0 ps-2">Passwords do not match.</span>
+            </div>
+
           </div>
           <div>
             <div class="d-flex justify-content-center align-items-center p-3">
-              <button :disabled="!isFormValid" class="btn btn-dark font-12 w-100" type="submit" @click="passwordChange">
-                Create New Password
+              <button class="btn btn-dark font-12 w-100 mt-3" type="submit" @click="passwordChange"
+                :disabled="isButtonDisabled">
+                Confirm New Password
               </button>
             </div>
           </div>
@@ -236,17 +247,19 @@
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">Acknowledgement</h5>
-            <button type="button" class="btn-close" @click="acknowledge=''" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" class="btn-close" @click="acknowledge = ''" data-bs-dismiss="modal"
+              aria-label="Close"></button>
           </div>
           <div class="modal-body font-11">
             <div class="ql-editor read-mode" v-html="acknowledgementHtml"></div>
-            <div class="mt-4 d-flex">
+            <div class="mt-4 d-flex align-items-center">
               <input type="checkbox" id="acknowledge" v-model="acknowledge" class="me-1 m-0" />
               <label for="acknowledge">I acknowledge that the information provided is correct.</label>
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" @click="acknowledge=''" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-outline-secondary" @click="acknowledge = ''"
+              data-bs-dismiss="modal">Cancel</button>
             <button type="button" @click="SignUp" :disabled="!acknowledge || saveloading" class="btn btn-dark"
               style="min-width:120px;">
               <span v-if="saveloading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
@@ -261,22 +274,26 @@
     <div class="modal fade" id="EmployeeAcknowledgementModal" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-lg modal-dialog-centered ">
         <div class="modal-content">
-          <div class="modal-header"> 
+          <div class="modal-header">
             <h5 class="modal-title">Acknowledgement</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" @click="acknowledge=''" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" @click="acknowledge = ''"
+              aria-label="Close"></button>
           </div>
           <div class="modal-body font-11">
             <div class="ql-editor read-mode" v-html="acknowledgementHtml"></div>
-            <div class="mt-4 ">
+            <div class="mt-4 d-flex align-items-center">
               <input type="checkbox" id="acknowledge" v-model="acknowledge" class="me-1 m-0" />
               <label for="acknowledge">I acknowledge that the information provided is correct.</label>
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" @click="acknowledge=''" data-bs-dismiss="modal">Cancel</button>
-            <button type="button" @click="employeeAcknowledge" :disabled="!acknowledge" class="btn btn-dark"
-              style="min-width:120px;">
-              Yes, Proceed
+            <button type="button" class="btn btn-outline-secondary" @click="acknowledge = ''"
+              data-bs-dismiss="modal">Cancel</button>
+            <button type="button" @click="employeeAcknowledge" :disabled="!acknowledge || isAcknloading"
+              class="btn btn-dark" style="min-width:120px;">
+              <span v-if="isAcknloading" class="spinner-border spinner-border-sm" role="status"
+                aria-hidden="true"></span>
+              <span v-if="!isAcknloading" class="font-13 text-white">Yes, Proceed</span>
             </button>
 
           </div>
@@ -320,13 +337,17 @@ export default {
       errors: {},
       email: "",
       showPassword: false,
-      new_password: "",
-      confirm_password: "",
+      new_password: '',
+      confirm_password: '',
+      showNewPassword: false,
+      showConfPwdPassword: false,
+      passwordError: '',
+      passwordsMismatch: false,
       showPwdField: false,
       user_id_name: "",
       //   passwordsMismatch: false,
-      passwordError: "",
       loading: false,
+      isAcknloading: false,
       showOtpPage: false,
       ShowLoginPage: true,
       ShowSignUpPage: false,
@@ -379,15 +400,27 @@ export default {
       this.showPassword = !this.showPassword;
     },
 
-    validateNewPassword() {
-      if (!this.new_password) {
-        this.passwordError = "Password is required.";
-      } else if (this.new_password.length < 6) {
-        this.passwordError = "Password must be at least 6 characters long.";
-      } else {
-        this.passwordError = "";
-      }
+    toggleNewPwdVisibility() {
+      this.showNewPassword = !this.showNewPassword;
     },
+    toggleConfPwdVisibility() {
+      this.showConfPwdPassword = !this.showConfPwdPassword;
+    },
+    validatePassword() {
+      if (!this.isPasswordValid) {
+        this.passwordError =
+          'Password must be at least 12 characters with letters, numbers & symbols.';
+      } else {
+        this.passwordError = '';
+      }
+
+      this.checkPasswordsMatch();
+    },
+    checkPasswordsMatch() {
+      this.passwordsMismatch =
+        this.new_password && this.confirm_password && this.new_password !== this.confirm_password;
+    },
+
     validateEmail() {
       const email = this.SignUpdata.email;
       const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -485,15 +518,15 @@ export default {
       this.deptData()
       this.designationData()
 
-    //  const formdata= {
-    //     usr: "",
-    //     pwd: "",
-    //   },
-    this.formdata.usr=""
-    this.formdata.pwd=""
-    this.errors.usr=""
-    this.errors.pwd=""
-    this.acknowledge=""
+      //  const formdata= {
+      //     usr: "",
+      //     pwd: "",
+      //   },
+      this.formdata.usr = ""
+      this.formdata.pwd = ""
+      this.errors.usr = ""
+      this.errors.pwd = ""
+      this.acknowledge = ""
 
     },
     OpenLogin() {
@@ -501,7 +534,7 @@ export default {
       this.showOtpPage = false;
       this.ShowSignUpPage = false;
 
-       this.SignUpdata.email = "";
+      this.SignUpdata.email = "";
       this.SignUpdata.full_name = "";
       this.SignUpdata.emp_code = "";
       this.SignUpdata.emp_phone = "";
@@ -510,7 +543,7 @@ export default {
       this.SignUpdata.signature = null;
       this.selectedOption = null;
       this.signatureInputRef = null;
-      this.acknowledge=""
+      this.acknowledge = ""
 
     },
     // validateOtp() {
@@ -575,7 +608,7 @@ export default {
                 this.SignUpdata.signature = null;
                 this.selectedOption = null;
                 this.signatureInputRef = null;
-                this.acknowledge=""
+                this.acknowledge = ""
               }
               else if (res.message == 'Already registered but currently disabled') {
                 toast.error(res.message)
@@ -602,6 +635,7 @@ export default {
 
     employeeAcknowledge() {
       // if (this.isAcknowledge === 0) {
+      this.isAcknloading = true;
       const payload = {
         user_id: this.formdata.usr,
         acknowledgement: this.SignUpdata.acknowledgement,
@@ -610,18 +644,21 @@ export default {
       axiosInstance
         .post(apis.loginCheckmethod, payload)
         .then((res) => {
-          toast.success(res.message);
-          const modal = bootstrap.Modal.getInstance(
-            document.getElementById("EmployeeAcknowledgementModal")
-          );
-          modal.hide();
-
+          if (res.message) {
+            toast.success(res.message);
+            const modal = bootstrap.Modal.getInstance(
+              document.getElementById("EmployeeAcknowledgementModal")
+            );
+            modal.hide();
+            this.isAcknowledge = 1;
+            this.Login()
+          }
         })
         .catch((error) => {
           console.error("Login error: ", error);
         })
         .finally(() => {
-          this.saveloading = false;
+          this.isAcknloading = false;
         })
       // }
 
@@ -766,10 +803,6 @@ export default {
 
               // console.log("User is logging in for the first time.");
             }
-            if (this.isAcknowledge === 0) {
-              const modal = new bootstrap.Modal(document.getElementById('EmployeeAcknowledgementModal'));
-              modal.show();
-            }
             else {
               console.log("User has logged in before.");
             }
@@ -788,7 +821,6 @@ export default {
       this.validatepassword();
       if (!this.errors.usr && !this.errors.pwd) {
         this.loading = true;
-
         axiosInstance
           .post(apis.login, this.formdata)
           .then((res) => {
@@ -802,8 +834,13 @@ export default {
                 this.showOtpPage = false;
                 this.ShowLoginPage = true;
                 this.otp = ["", "", "", "", "", ""];
-                // localStorage.setItem("UserName", JSON.stringify(this.storeData));
-                this.userData(this.formdata.usr);
+                if (this.isAcknowledge == 0) {
+                  const modal = new bootstrap.Modal(document.getElementById('EmployeeAcknowledgementModal'));
+                  modal.show();
+                }
+                else {
+                  this.userData(this.formdata.usr);
+                }
               }
             }
           })
@@ -813,6 +850,7 @@ export default {
           .finally(() => {
             this.loading = false;
           });
+
       }
     },
 
@@ -840,8 +878,7 @@ export default {
                   is_admin: employeeData.is_admin
                   // department: employeeData.department,
                 };
-
-                // Store required data only
+                
                 localStorage.setItem("UserName", JSON.stringify(this.storeData));
                 sessionStorage.setItem("UserName", JSON.stringify(this.storeData));
 
@@ -856,6 +893,7 @@ export default {
                 setTimeout(() => {
                   this.$router.push({ path: "/dashboard/maindash" });
                 }, 500);
+
               })
               .catch((error) => {
                 console.error("Error fetching employee data:", error);
@@ -1113,15 +1151,17 @@ export default {
   },
 
   computed: {
-    passwordsMismatch() {
+    isPasswordValid() {
+      const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$/;
+      return regex.test(this.new_password);
+    },
+    isButtonDisabled() {
       return (
-        this.new_password &&
-        this.confirm_password &&
+        !this.new_password ||
+        !this.confirm_password ||
+        !this.isPasswordValid ||
         this.new_password !== this.confirm_password
       );
-    },
-    isFormValid() {
-      return this.new_password.length >= 6 && this.new_password === this.confirm_password;
     },
   },
 };
@@ -1411,5 +1451,21 @@ input:focus {
   box-sizing: border-box;
   font-size: 13px !important;
   // background-color: white;
+}
+
+.new-pwd-toggle-icon {
+  position: absolute;
+  top: 73%;
+  right: 20px;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+.cnf-pwd-toggle-icon {
+  position: absolute;
+  top: 73%;
+  right: 20px;
+  transform: translateY(-50%);
+  cursor: pointer;
 }
 </style>

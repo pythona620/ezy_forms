@@ -2,7 +2,7 @@
   <div>
     <div class="d-flex justify-content-between align-items-center py-2">
       <div>
-        <h1 class="m-0 font-13">My Team</h1>
+        <h1 class="m-0 font-13">My Team Requests </h1>
         <p class="m-0 font-11 pt-1">{{ totalRecords }} request</p>
       </div>
     </div>
@@ -215,7 +215,7 @@ const tableheaders = ref([
   { th: "Owner of form", td_key: "role" },
   { th: "Requested on", td_key: "requested_on" },
   { th: "Approval Status", td_key: "status" },
-  { th: "Workflow Status", td_key: "assigned_to_users" },
+  { th: "Pending With", td_key: "assigned_to_users" },
   { th: "Linked ID", td_key: "linked_form_id" },
 
 ]);

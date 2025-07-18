@@ -127,7 +127,7 @@ const tableheaders = ref([
   { th: "Requested By", td_key: "requested_by" },
   { th: "Requested Department", td_key: "role" },
   { th: "Approval Status", td_key: "status" },
-  { th: "Workflow Status", td_key: "assigned_to_users" },
+  { th: "Pending With", td_key: "assigned_to_users" },
   { th: "Linked ID", td_key: "linked_form_id" },
 
 ]);
