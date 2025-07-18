@@ -90,33 +90,35 @@
                         </template>
                         <template v-if="field.fieldtype === 'Small Text'">
                           <div>
-                            <div v-if="props.readonlyFor === 'true' || blockIndex < currentLevel">
-                              <div class="container-fluid">
-                                <div class="row">
-                                  <div class="form-check col mb-1"
-                                    v-for="(option, index) in field?.options?.split('\n')" :key="index"
-                                    :class="{ 'd-none': !(JSON.parse(field.value || '[]') || []).includes(option) }">
+                          <div v-if="props.readonlyFor === 'true' || blockIndex < currentLevel">
+  <div class="row">
+    <template v-for="(option, index) in field?.options?.split('\n')">
+      <div
+        v-if="(JSON.parse(field.value || '[]') || []).includes(option)"
+        :key="index"
+        class="col-4  mb-2"
+      >
+        <div class="form-check">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            :checked="true"
+            :disabled="true"
+            :id="`${option}-${index}`"
+          />
+          <label
+            class="form-check-label font-12 m-0 text-dark"  
+            :for="`${option}-${index}`"
+          >
+            {{ option }}
+          </label>
+        </div>
+      </div>
+    </template>
+  </div>
+</div>
 
-                                    <div>
-                                      <input class="form-check-input" type="checkbox"
-                                        :disabled="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel"
-                                        :checked="(JSON.parse(field.value || '[]') || []).includes(option)"
-                                        :value="option"
-                                        :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
-                                        :id="`${option}-${index}`"
-                                        @change="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
-                                    </div>
 
-                                    <div>
-                                      <label class="form-check-label font-12 m-0" :for="`${option}-${index}`">
-                                        {{ option }}
-                                      </label>
-                                    </div>
-
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
                             <div v-else>
                               <div class="container-fluid">
                                 <div class="row">
@@ -2105,5 +2107,10 @@ td {
   font-size: 12px !important;
   height: 32px !important;
   // background-color: white;
+}
+.form-check-label {
+  color: #212529 !important; /* Bootstrap's default text color */
+  cursor: default;
+  opacity: 1 !important; /* Remove greyed-out appearance */
 }
 </style>
