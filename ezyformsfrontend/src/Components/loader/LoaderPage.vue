@@ -27,7 +27,7 @@ export default {
     background-color: #00000041;
     opacity: 0.9;
     position: absolute;
-    z-index: 1007;
+    z-index: 2000;
 }
 
 .loader-circles {
