@@ -58,7 +58,7 @@
                                 </div>
                                 <div class="">
 
-                                    <FormFields tag="select" placeholder="" class="" name="roles" id="roles"
+                                    <FormFields tag="select" placeholder="" class="font-12" name="roles" id="roles"
                                         :Required="false" v-model="business_unit" :options="EzyFormsCompanys" />
                                 </div>
                                 <div class="logooutbtn m-0">
@@ -322,9 +322,8 @@ const SocketList = ref([])
 //IF THE USER DESIGNATION INCLUDES (IT) THEN ONLY FORM CREATION WILL APPREAR IN HEADER ""
 
 const filteredTabsData = computed(() => {
-    return userDesigination.value.toLowerCase().includes('it')
-        ? tabsData.value
-        : tabsData.value.filter(tab => tab.name !== 'Form Creation');
+    return tabsData.value
+       
 });
 function logout() {
     // localStorage.removeItem('UserName');

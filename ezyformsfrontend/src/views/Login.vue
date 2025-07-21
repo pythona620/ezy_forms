@@ -379,6 +379,10 @@ export default {
     };
   },
   methods: {
+    NewPasswordClose(){
+      this.formdata.usr = "";
+
+    },
     validatename() {
       if (!this.formdata.usr) {
         this.errors.usr = "Please Enter Valid Email Address *";
@@ -878,6 +882,7 @@ export default {
                   department: employeeData.department,
                   emp_code: employeeData.emp_code,
                   emp_signature: employeeData.signature,
+                  is_admin: employeeData.is_admin
                   // department: employeeData.department,
                 };
                 

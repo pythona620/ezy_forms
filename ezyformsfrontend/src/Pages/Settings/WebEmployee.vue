@@ -551,7 +551,10 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="button" class="btn btn-dark" @click="confirmEmployeeToggle">Yes, Proceed</button>
+            <button type="button" class="btn btn-dark" :disabled="saveloading" @click="confirmEmployeeToggle" style="min-width:120px;">
+              <span v-if="saveloading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              <span v-if="!saveloading" class="font-13 text-white">Yes, Proceed</span>  
+            </button>
           </div>
         </div>
       </div>
@@ -656,7 +659,7 @@ watch(
     }
   }
 );
-
+const saveloading=ref(false);
 const selectedEmpRow = ref(null);
 const empActionText = ref('');
 const searchText = ref('')
@@ -1563,6 +1566,7 @@ function fetchingIsHod(department) {
 
 function toggleFunction(rowData) {
   selectedEmpRow.value = rowData;
+  // console.log("Selected Employee Row:", selectedEmpRow.value);
   const isEnabled = rowData.enable === '1' || rowData.enable === 1;
   empActionText.value = isEnabled ? 'Disable' : 'Enable';
 
@@ -1577,48 +1581,68 @@ function confirmEmployeeToggle() {
   const isEnabled = selectedEmpRow.value.enable === '1' || selectedEmpRow.value.enable === 1;
   selectedEmpRow.value.enable = isEnabled ? 0 : 1;
   selectedEmpRow.value.is_web_form = 0;
-
-
-  axiosInstance
-    .put(`${apis.resource}${doctypes.EzyEmployeeList}/${selectedEmpRow.value.name}`, selectedEmpRow.value)
-    .then(() => {
-      const userData = { enabled: selectedEmpRow.value.enable };
-      return axiosInstance.put(`${apis.resource}${doctypes.users}/${selectedEmpRow.value.name}`, userData);
-    })
-    .then(() => {
-      toast.success(`Employee ${empActionText.value}d successfully`);
-      const modal = bootstrap.Modal.getInstance(
-        document.getElementById("EmployeeToggleModal")
-      );
-      modal.hide();
-      if (selectedEmpRow.value.enable === 1) {
-        EmpUnableMail()
-      }
-      else {
-        employeeData()
-      }
-    })
-    .catch((err) => {
-      console.error('Toggle employee error:', err);
-    });
+  saveloading.value = true;
+  const dataObj = {
+        emp_mail: selectedEmpRow.value.name,
+    }
+    axiosInstance.post(apis.employeedisable, dataObj)
+        .then((res) => {
+            if (res) {
+                const modal = bootstrap.Modal.getInstance(
+                    document.getElementById("EmployeeToggleModal")
+                );
+                modal.hide();
+                toast.success(res.message, { autoClose: 700 });
+                // isSubmitBtn.value = false;
+                employeeData()()
+            }
+        })
+        .catch((error) => {
+            console.error("Error toggling employee status:", error);
+        })
+        .finally(() => {
+            saveloading.value = false;
+        });
+  // axiosInstance
+  //   .put(`${apis.resource}${doctypes.EzyEmployeeList}/${selectedEmpRow.value.name}`, selectedEmpRow.value)
+  //   .then(() => {
+  //     const userData = { enabled: selectedEmpRow.value.enable };
+  //     return axiosInstance.put(`${apis.resource}${doctypes.users}/${selectedEmpRow.value.name}`, userData);
+  //   })
+  //   .then(() => {
+  //     toast.success(`Employee ${empActionText.value}d successfully`);
+  //     const modal = bootstrap.Modal.getInstance(
+  //       document.getElementById("EmployeeToggleModal")
+  //     );
+  //     modal.hide();
+  //     // if (selectedEmpRow.value.enable === 1) {
+  //     //   EmpUnableMail()
+  //     // }
+  //     // else {
+  //       employeeData()
+  //     // }
+  //   })
+  //   .catch((err) => {
+  //     console.error('Toggle employee error:', err);
+  //   });
 }
 
-function EmpUnableMail() {
-  const payload = {
-    emp_mail: selectedEmpRow.value.emp_mail_id,
-  }
+// function EmpUnableMail() {
+//   const payload = {
+//     emp_mail: selectedEmpRow.value.emp_mail_id,
+//   }
 
-  axiosInstance
-    .post(apis.unablUpdateEmail, payload)
-    .then((res) => {
-      if (res) {
-        employeeData()
-      }
-    })
-    .catch((error) => {
-      console.error("Upload error:", error);
-    });
-}
+//   axiosInstance
+//     .post(apis.unablUpdateEmail, payload)
+//     .then((res) => {
+//       if (res) {
+//         employeeData()
+//       }
+//     })
+//     .catch((error) => {
+//       console.error("Upload error:", error);
+//     });
+// }
 
 
 const fieldMapping = ref({

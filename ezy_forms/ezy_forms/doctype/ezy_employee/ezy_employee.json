@@ -21,6 +21,7 @@
   "department",
   "acknowledgement",
   "acknowledge_on",
+  "is_admin",
   "designation",
   "last_login",
   "last_ip",
@@ -130,6 +131,11 @@
    "fieldtype": "Check",
    "label": "enable"
   },
+  {
+    "fieldname": "is_admin",
+    "fieldtype": "Check",
+    "label": "Is Admin"
+   },
   {
    "default": "0",
    "fieldname": "is_web_form",

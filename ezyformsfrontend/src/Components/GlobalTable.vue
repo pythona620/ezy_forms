@@ -23,7 +23,7 @@
           <td class="p-1" v-for="(column, index) in tHeaders" :key="index">
             <template v-if="fieldMapping[column.td_key]">
               <!-- Text input -->
-              <div v-if="fieldMapping[column.td_key].type === 'input'" class="input-group border-none-input">
+              <div v-if="fieldMapping[column.td_key].type === 'input'" class="input-group border-none-input z-0">
                 <span v-show="!focusedFields[column.td_key]" class="input-group-text font-12" id="basic-addon1">
                   <i class="bi bi-search"></i>
                 </span>
@@ -76,12 +76,13 @@
               </span> -->
               <!-- Condition for Action Column -->
               <span v-if="column.td_key === 'status'">
+                
                 <i class="bi bi-circle-fill status-circle font-10 text-center pe-2" :class="{
                   'text-warning fw-medium': row[column.td_key] === 'Request Raised',
                   'textcompleted fw-medium': row[column.td_key] === 'Completed',
                   'text-primary fw-medium': row[column.td_key] === 'In Progress',
                   'textcancel fw-medium': row[column.td_key] === 'Cancelled',
-                  'text-danger fw-medium': row[column.td_key] === 'Request Cancelled',
+                  'RequestCancelled fw-medium': row[column.td_key] === 'Request Cancelled',
                   'text-success fw-medium': row[column.td_key] === 'Success',
                   'text-danger fw-medium': row[column.td_key] === 'Failed',
                 }"></i>
@@ -119,16 +120,16 @@
 
               <!-- Show unformatted date for 'modified' when status === 'Request Raised' -->
               <span class="tooltip-text" v-tooltip.top="formatDate(row[column.td_key])"
-                v-else-if="column.td_key === 'modified' && row.status !== 'Request Raised'">
+                v-else-if="column.td_key === 'modified' ">
                 {{ formatDate(row[column.td_key]) }}
               </span>
-              <span v-else-if="column.td_key === 'signature'">
+              <span v-else-if="column.td_key === 'signature' || column.td_key === 'is_hod' || column.td_key === 'is_admin'">
                 <div v-if="row[column.td_key]">
-                  <i class="bi bi-check2 fw-bolder font-13 text-success"></i>
+                  <i class="bi bi-check2 fw-bolder fw-bold font-13 text-success"></i>
                   <!-- <img :src="row[column.td_key]" alt="Signature" class="img-fluid"> -->
                 </div>
                 <span v-else>
-                  <i class="bi bi-x-lg fw-bolder text-danger"></i>
+                  <i class="bi bi-x-lg fw-bold fw-bolder text-danger"></i>
                 </span>
               </span>
               <span v-else-if="column.td_key === 'assigned_to_users'">
@@ -148,7 +149,7 @@
                     {{ row.enable || row.activate == '1' ? '' : 'Disabled' }}
                   </span>
                   <div class="form-check d-flex justify-content-center form-switch text-end">
-                    <input class="form-check-input shadow-none" type="checkbox" role="switch"
+                    <input class="form-check-input shadow-none " type="checkbox" role="switch"
                       :checked="row.enable == '0' || row.activate === 0"
                       @click.prevent="handleToggle(row, index, $event)" />
                   </div>
@@ -166,15 +167,18 @@
               <!-- <span v-else class="tooltip-text" :title="row[column.td_key] || '-'"> -->
 
               <span v-else class="tooltip-text" v-tooltip.top="getTooltipText(row[column.td_key])">
-                <!-- <span v-if="column.td_key === 'linked_form_id'">
-                  <span @click="handleCellClick(row, rowIndex, 'td_key')" class="text-decoration-underline">
+                <span v-if="column.td_key === 'linked_form_id'">
+                  <span @click="handleCellClick(row, rowIndex, 'td_key')" :class="[
+                      row[column.td_key] ? 'text-decoration-underline linked-id-redirect font-11 text-primary' : 'text-decoration-none linke-not-allow '
+                    ]">
                     {{ getDisplayText(column.td_key, row[column.td_key]) }}
                   </span>
-                </span> -->
-                <!-- <span > -->
+                </span>
+                <span v-else >
+                  {{ row[column.td_key] }}
 
-                  {{ getDisplayText(column.td_key, row[column.td_key]) }}
-                <!-- </span> -->
+                  <!-- {{ getDisplayText(column.td_key, row[column.td_key]) }} -->
+                </span>
               </span>
 
             </td>
@@ -219,7 +223,7 @@
               </span>
             </div>
             <!-- </td> -->
-            <td v-if="actionType === 'dropdown'" class="text-center fixed-column position-relative">
+            <td v-if="actionType === 'dropdown'" class="text-center fixed-column ">
               <div class="dropdown">
                 <p @click="actionDropDown(row)" class="p-0 actions" data-bs-toggle="dropdown" aria-expanded="false">
                   <span>...</span>
@@ -538,7 +542,7 @@ function getAssignedToUsers(row, column) {
       return "-";
     }
 
-    return Array.isArray(value) ? `Pending at- ${value.join(", ")}` : `Pending at- ${value}`;
+    return Array.isArray(value) ? `${value.join(", ")}` : `${value}`;
   } catch (error) {
     return row[column.td_key] || "User not assigned";
   }
@@ -917,6 +921,9 @@ th:first-child {
 .textcancel {
   color: #17a2b8;
 }
+.RequestCancelled{
+  color: red;
+}
 
 /* Default border style */
 .border-none-input {
@@ -988,6 +995,13 @@ th:first-child {
   position: sticky !important;
   right: 0 !important;
   background: white !important;
+  // z-index: 1;
 
+}
+.linke-not-allow{
+  cursor: none;
+}
+.linked-id-redirect{
+  cursor: pointer;
 }
 </style>

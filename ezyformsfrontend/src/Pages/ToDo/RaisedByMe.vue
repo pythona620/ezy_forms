@@ -9,7 +9,7 @@
     <div class="mt-2">
       <!-- actionType="dropdown" -->
       <!-- raiseRequest="true" -->
-      <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" isCheckbox="true" viewType="viewPdf" 
+      <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" isCheckbox="true" viewType="viewPdf"
         @cell-click="viewPreview" :actions="actions" @actionClicked="actionCreated" isFiltersoption="true"
         :field-mapping="fieldMapping" @updateFilters="inLineFiltersData" />
       <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
@@ -92,7 +92,7 @@
                   On
                   <strong class="strong-content">{{
                     formatDate(item.creation)
-                  }}</strong>,
+                    }}</strong>,
                   <strong class="strong-content">
                     <span v-if="index == 0">you</span>
                     <span v-else>
@@ -103,11 +103,11 @@
                   ({{ item.role }})
                   <strong class="strong-content">{{
                     formatAction(item.action)
-                  }}</strong>
+                    }}</strong>
                   the request with the comments:
                   <strong class="strong-content">{{
                     item.reason || "N/A"
-                  }}</strong>.
+                    }}</strong>.
                 </p>
               </div>
             </div>
@@ -193,7 +193,7 @@ const router = useRouter();
 
 const newBusinessUnit = ref({ business_unit: "" });
 
-const filterObj = ref({ limitPageLength: 20, limit_start: 0, filters:[] });
+const filterObj = ref({ limitPageLength: 20, limit_start: 0, filters: [] });
 const totalRecords = ref(0);
 const selectedRequest = ref({});
 const showRequest = ref(null);
@@ -216,18 +216,18 @@ const route = useRoute();
 const loading = ref(false);
 
 const tableheaders = ref([
-  { th: "Request ID", td_key: "name" }, 
+  { th: "Request ID", td_key: "name" },
   { th: "Form Name", td_key: "doctype_name" },
-  { th: "Linked Form", td_key: "is_linked_form" },
-  { th: "Linked ID", td_key: "linked_form_id" },
-
+  // { th: "Linked Form", td_key: "is_linked_form" },
+  
   // { th: "Business Unit", td_key: "property" },
   // { th: "Form category", td_key: "doctype_name" },
   // { th: "Role", td_key: "role" },
   { th: "Requested on", td_key: "requested_on" },
   { th: "Approval Status", td_key: "status" },
-  { th: "Workflow Status", td_key: "assigned_to_users" },
-  { th: "Last Approved Date", td_key: "modified" }
+  { th: "Pending With", td_key: "assigned_to_users" },
+  { th: "Last Action On", td_key: "modified" },
+  { th: "Linked ID", td_key: "linked_form_id" },
 ]);
 
 const actions = ref([
@@ -238,9 +238,9 @@ const actions = ref([
   // { name: 'Edit Form', icon: 'fa-solid fa-edit' },
 ]);
 
-function viewPreview(data,index,type) {
-  console.log(data,";;;",type);
-  if(type === 'view'){
+function viewPreview(data, index, type) {
+  console.log(data, ";;;", type);
+  if (type === 'view') {
 
     router.push({
       name: "ApproveRequest",
@@ -248,29 +248,29 @@ function viewPreview(data,index,type) {
         routepath: route.path,
         name: data.name,
         doctype_name: data.doctype_name,
-        business_unit:data.property,
-        status:data.status,
+        business_unit: data.property,
+        status: data.status,
         type: "myforms",
         readOnly: 'true'
-        
+
       },
     });
   }
-  // if(type === 'td_key'){
-  //    router.push({
-  //     name: "ApproveRequest",
-  //     query: {
-  //       routepath: route.path,
-  //       name: data.linked_form_id,
-  //       doctype_name: 'Test Returnble Form',
-  //       business_unit:data.property,
-  //       status:data.status,
-  //       type: "myforms",
-  //       readOnly: 'true'
-        
-  //     },
-  //   });
-  // }
+  if (type === 'td_key') {
+    if (data.linked_form_id) {
+      router.push({
+        name: "ApproveRequest",
+        query: {
+          routepath: route.path,
+          name: data.linked_form_id,
+          business_unit: data.property,
+          type: "linkedForm",
+          readOnly: 'true'
+
+        },
+      });
+    }
+  }
   // if(type === 'raiseRequest'){
   //   router.push({
   //     name: "RaiseRequest",
@@ -577,7 +577,7 @@ const PaginationUpdateValue = (itemsPerPage) => {
   filterObj.value.limit_start = 0;
   if (filterObj.value.filters.length) {
     receivedForMe(filterObj.value.filters);
-  } 
+  }
   else {
     receivedForMe();
   }
@@ -589,7 +589,7 @@ const PaginationLimitStart = ([itemsPerPage, start]) => {
   if (filterObj.value.filters.length) {
     receivedForMe(filterObj.value.filters);
   }
-   else {
+  else {
     receivedForMe();
   }
 };
@@ -598,33 +598,33 @@ const timeout = ref(null);
 
 function inLineFiltersData(searchedData) {
   console.log(searchedData);
-    clearTimeout(timeout.value); // Clear previous timeout
+  clearTimeout(timeout.value); // Clear previous timeout
 
-    timeout.value = setTimeout(() => {
-        // Initialize filters array
-        filterObj.value.filters = [];
+  timeout.value = setTimeout(() => {
+    // Initialize filters array
+    filterObj.value.filters = [];
 
-        // Loop through the table headers and build dynamic filters
-        tableheaders.value.forEach((header) => {
-            const key = header.td_key;
+    // Loop through the table headers and build dynamic filters
+    tableheaders.value.forEach((header) => {
+      const key = header.td_key;
 
-            if (searchedData[key]) {
-              filterObj.value.filters.push([key, "like", `%${searchedData[key]}%`]);
+      if (searchedData[key]) {
+        filterObj.value.filters.push([key, "like", `%${searchedData[key]}%`]);
 
-            }
-        });
+      }
+    });
 
-        // Call receivedForMe with or without filters
-        if (filterObj.value.filters.length) {
-          filterObj.value.limit_start = 0;
+    // Call receivedForMe with or without filters
+    if (filterObj.value.filters.length) {
+      filterObj.value.limit_start = 0;
       receivedForMe(filterObj.value.filters);
     } else {
       receivedForMe();
     }
 
-        // Optionally call fetchTotalRecords
-        // fetchTotalRecords(filters);
-    }, 500); // Adjust debounce delay as needed
+    // Optionally call fetchTotalRecords
+    // fetchTotalRecords(filters);
+  }, 500); // Adjust debounce delay as needed
 }
 
 function receivedForMe(data) {
@@ -684,7 +684,7 @@ function receivedForMe(data) {
           ...new Set(newData.map((status) => status.status)),
         ];
       }
-      else{
+      else {
         tableData.value = tableData.value.concat(newData)
       }
 

@@ -41,7 +41,7 @@
         </button>
         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
           <li v-for="(item, index) in options" :key="index">
-            <a class="dropdown-item" href="#" @click.prevent="selectOption(item)">
+            <a class="dropdown-item font-12" href="#" @click.prevent="selectOption(item)">
               {{ item }}
             </a>
           </li>
