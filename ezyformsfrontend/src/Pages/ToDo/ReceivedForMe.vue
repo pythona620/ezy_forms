@@ -170,7 +170,7 @@ const loading = ref(false)
 const Rejectloading = ref(false)
 
 onMounted(() => {
-  getClientIP()
+  // getClientIP()
   const storedData = localStorage.getItem("employeeData");
   employeeData.value = JSON.parse(storedData);
 
@@ -435,18 +435,18 @@ function ApproverFormSubmission(dataObj, type) {
     })
 
 }
-const ip_address = ref(null)
+// const ip_address = ref(null)
 
-const getClientIP = async () => {
-  try {
-    const response = await fetch('https://api.ipify.org?format=json')
-    const data = await response.json()
-    ip_address.value = data.ip
+// const getClientIP = async () => {
+//   try {
+//     const response = await fetch('https://api.ipify.org?format=json')
+//     const data = await response.json()
+//     ip_address.value = data.ip
 
-  } catch (error) {
-    console.error('Error fetching IP:', error)
-  }
-}
+//   } catch (error) {
+//     console.error('Error fetching IP:', error)
+//   }
+// }
 
 function approvalStatusFn(dataObj, type) {
 

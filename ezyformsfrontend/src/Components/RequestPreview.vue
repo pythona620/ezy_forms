@@ -140,16 +140,39 @@
                                            <template v-else-if="field.fieldtype == 'Attach'">
                                             
   <!-- File Input -->
+                                                <!-- <input 
+                                                v-if="(field.fieldname !== 'requestor_signature' && field.label !== 'Requestor Signature') || !field.value"
+                                                :disabled="props.readonlyFor === 'true'"
+                                                type="file"
+                                                accept=".jpeg,.jpg,.png,.pdf,.xlsx,.xls"
+                                                :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex" :style="{ minWidth: '100px', maxWidth: '400px' }"
+                                                class="form-control previewInputHeight font-10 mt-2"
+                                                multiple
+                                                @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+                                                /> -->
+                                                <!-- Hidden file input -->
                                                 <input 
                                                 v-if="(field.fieldname !== 'requestor_signature' && field.label !== 'Requestor Signature') || !field.value"
                                                 :disabled="props.readonlyFor === 'true'"
                                                 type="file"
                                                 accept=".jpeg,.jpg,.png,.pdf,.xlsx,.xls"
                                                 :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                                                style="display: none"
                                                 class="form-control previewInputHeight font-10 mt-2"
                                                 multiple
                                                 @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
                                                 />
+
+                                                <!-- Custom label that acts as the file button -->
+                                                <label
+                                                v-if="(field.fieldname !== 'requestor_signature' && field.label !== 'Requestor Signature') || !field.value"
+                                                :for="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                                                class="btn btn-sm btn-light attchaInputLabel font-10 mt-2"
+                                                :class="{ 'disabled': props.readonlyFor === 'true' }"
+                                                >
+                                                <i class="bi bi-paperclip me-1"></i> Attach
+                                                </label>
+
 
 
                                                 <!-- Preview Section -->
@@ -175,7 +198,7 @@
                                                         <div
                                                         v-else-if="isPdfFile(fileUrl)"
                                                         class="d-flex align-items-center justify-content-center border mt-2"
-                                                        style="width: 60px; height: 70px; background: #f9f9f9"
+                                                        style="width: 45px; height: 60px; background: #f9f9f9"
                                                         >
                                                         <i class="bi bi-file-earmark-pdf fs-1 text-danger"></i>
                                                         </div>
@@ -184,7 +207,7 @@
                                                         <div
                                                         v-else-if="isExcelFile(fileUrl)"
                                                         class="d-flex align-items-center justify-content-center border mt-2"
-                                                        style="width: 100px; height: 100px; background: #f9f9f9"
+                                                        style="width: 45px; height: 60px; background: #f9f9f9"
                                                         >
                                                         <i class="bi bi-file-earmark-spreadsheet fs-1 text-success"></i>
                                                         </div>
@@ -680,13 +703,13 @@
                                                                             rowIndex + 1 }}
                                                                     </td> -->
                                                                     <td
-  v-for="field in table"
-  :key="field.fieldname"
-  class="position-relative"
-  :style="getCellStyle(row[field.fieldname], focusedField === `${rowIndex}-${field.fieldname}`)"
-  @focusin="focusedField = `${rowIndex}-${field.fieldname}`"
-  @focusout="focusedField = null"
->
+                                                                            v-for="field in table"
+                                                                            :key="field.fieldname"
+                                                                            class="position-relative"
+                                                                            :style="getCellStyle(row[field.fieldname], focusedField === `${rowIndex}-${field.fieldname}`)"
+                                                                            @focusin="focusedField = `${rowIndex}-${field.fieldname}`"
+                                                                            @focusout="focusedField = null"
+                                                                            >
 
 
                                                                       
@@ -2765,5 +2788,7 @@ input:focus{
   background-color: #f5f5f5;
 }
 
-
+.attchaInputLabel{
+    border: 1px solid #e2e2e2;
+}
 </style>

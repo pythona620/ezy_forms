@@ -207,10 +207,10 @@
                         @click="downloadPdf"><i class="bi bi-download px-2 fw-bold"></i>Download
                       </button>
                     </div>
-                    <!-- <button type="button" class="btn btn-outline-light font-12  CreateDepartments "
+                    <button type="button" class="btn btn-outline-light font-12  CreateDepartments "
                       data-bs-toggle="modal" data-bs-target="#pdfView" @click="viewasPdfView">
                       Preview
-                    </button> -->
+                    </button>
 
                   </div>
                 </div>
@@ -530,11 +530,11 @@ watch(
     business_unit.value = local
     if (newVal) {
       // console.log(business_unit.value, newVal, "ll");
-      if (selectedData.value.type === "mytasks") {
-        ViewOnlyRe();
-      } else {
+      // if (selectedData.value.type === "mytasks") {
+      //   ViewOnlyRe();
+      // } else {
         receivedForMe()
-      }
+      // }
     }
   },
   { immediate: true }
@@ -825,79 +825,79 @@ function DynamicCalculateMethod() {
       console.error("Error fetching data:", error);
     });
 }
-async function SaveDocWithoutApprove(request_id) {
-  saveloading.value = true;
-  let form = {
-    ...childtablesData.value
-  };
-  if (Array.isArray(emittedFormData.value) && emittedFormData.value.length) {
-    emittedFormData.value.forEach((each) => {
-      form[each.fieldname] = each.value;
-    });
-  }
-  // try {
-  //   // ✅ Submit child table data first
-  //   await ChildTableData();
-  // } catch (error) {
-  //   toast.error("❌ Child table submission failed");
-  //   loading.value = false;
-  //   return;
-  // }
-  // console.log(loading.value, dataObj, type, form);
+// async function SaveDocWithoutApprove(request_id) {
+//   saveloading.value = true;
+//   let form = {
+//     ...childtablesData.value
+//   };
+//   if (Array.isArray(emittedFormData.value) && emittedFormData.value.length) {
+//     emittedFormData.value.forEach((each) => {
+//       form[each.fieldname] = each.value;
+//     });
+//   }
+//   // try {
+//   //   // ✅ Submit child table data first
+//   //   await ChildTableData();
+//   // } catch (error) {
+//   //   toast.error("❌ Child table submission failed");
+//   //   loading.value = false;
+//   //   return;
+//   // }
+//   // console.log(loading.value, dataObj, type, form);
 
-  axiosInstance
-    .put(`${apis.resource}${selectedData.value.doctype_name}/${doctypeForm.value.name}`, form)
-    .then((response) => {
-      if (response?.data) {
+//   axiosInstance
+//     .put(`${apis.resource}${selectedData.value.doctype_name}/${doctypeForm.value.name}`, form)
+//     .then((response) => {
+//       if (response?.data) {
 
-        const EmpRequestdesignation = JSON.parse(
-          localStorage.getItem("employeeData")
-        );
-        // console.log(EmpRequestdesignation,"emp data");
+//         const EmpRequestdesignation = JSON.parse(
+//           localStorage.getItem("employeeData")
+//         );
+//         // console.log(EmpRequestdesignation,"emp data");
 
-        let data = {
-          request_id: request_id,
-          reason: ApproverReason.value ? ApproverReason.value : "Approved",
-          current_level: selectedcurrentLevel.value,
-          user: EmpRequestdesignation.emp_mail_id,
-          role: EmpRequestdesignation.designation
-        };
+//         let data = {
+//           request_id: request_id,
+//           reason: ApproverReason.value ? ApproverReason.value : "Approved",
+//           current_level: selectedcurrentLevel.value,
+//           user: EmpRequestdesignation.emp_mail_id,
+//           role: EmpRequestdesignation.designation
+//         };
 
-        axiosInstance
-          .post(apis.ActivitySaveComment, data)
-          .then((response) => {
-            if (response?.message?.success === true) {
-              ApproverReason.value = ""; // Clear reason after success
-              saveloading.value = false
-              window.location.reload()
-              // receivedForMe()
+//         axiosInstance
+//           .post(apis.ActivitySaveComment, data)
+//           .then((response) => {
+//             if (response?.message?.success === true) {
+//               ApproverReason.value = ""; // Clear reason after success
+//               saveloading.value = false
+//               window.location.reload()
+//               // receivedForMe()
 
-            } else {
-              toast.error(`Failed to request`, { autoClose: 1000, transition: "zoom" });
-            }
-          })
-          .catch((error) => {
-            console.error("Error processing request:", error);
-            toast.error("An error occurred while processing your request.", { autoClose: 1000, transition: "zoom" });
-          })
+//             } else {
+//               toast.error(`Failed to request`, { autoClose: 1000, transition: "zoom" });
+//             }
+//           })
+//           .catch((error) => {
+//             console.error("Error processing request:", error);
+//             toast.error("An error occurred while processing your request.", { autoClose: 1000, transition: "zoom" });
+//           })
 
 
 
-      } else {
-        loading.value = false; // Stop loader on failure
-        toast.error("Failed to submit form", { autoClose: 1000, transition: "zoom" });
-      }
-    })
-    .catch((error) => {
-      console.error("Error submitting form:", error);
-      loading.value = false; // Stop loader on error
-      toast.error("An error occurred while submitting the form.", { autoClose: 1000, transition: "zoom" });
-    });
-  // console.log(request_id,"data");
-  // console.log(selectedcurrentLevel.value,"current level");
-  // console.log(ApproverReason.value,"reason");
+//       } else {
+//         loading.value = false; // Stop loader on failure
+//         toast.error("Failed to submit form", { autoClose: 1000, transition: "zoom" });
+//       }
+//     })
+//     .catch((error) => {
+//       console.error("Error submitting form:", error);
+//       loading.value = false; // Stop loader on error
+//       toast.error("An error occurred while submitting the form.", { autoClose: 1000, transition: "zoom" });
+//     });
+//   // console.log(request_id,"data");
+//   // console.log(selectedcurrentLevel.value,"current level");
+//   // console.log(ApproverReason.value,"reason");
 
-}
+// }
 
 
 function ApproverCancelSubmission(dataObj, type) {
@@ -1008,7 +1008,7 @@ function receivedForMe(data) {
     localStorage.getItem("employeeData")
   );
   const filters = [
-    ["property", "like", `%${selectedData.value.business_unit}%`],
+    ["property", "like", `%${businessUnit.value}%`],
     ["name", "like", `%${selectedData.value.formname}%`],
   ];
   if (data) {
@@ -1028,10 +1028,7 @@ function receivedForMe(data) {
 
   const queryParams = {
     fields: JSON.stringify(["*"]),
-    limit_page_length: filterObj.value.limitPageLength,
-    limit_start: filterObj.value.limit_start,
     filters: JSON.stringify(filters),
-    order_by: "`tabWF Workflow Requests`.`creation` desc",
   };
 
   // const queryParamsCount = {
@@ -1170,31 +1167,31 @@ function getdata(formname) {
       console.error("Error fetching categories data:", error);
     });
 }
-function ViewOnlyRe() {
-  const queryParams = {
-    fields: JSON.stringify(["*"]),
-    limit_page_length: "None",
-    limit_start: 0,
+// function ViewOnlyRe() {
+//   const queryParams = {
+//     fields: JSON.stringify(["*"]),
+//     limit_page_length: "None",
+//     limit_start: 0,
 
-  };
+//   };
 
-  axiosInstance
-    .post(apis.view_only_reportee, {
-      params: queryParams,
-    })
-    .then((response) => {
+//   axiosInstance
+//     .post(apis.view_only_reportee, {
+//       params: queryParams,
+//     })
+//     .then((response) => {
 
-      viewlist.value = response.message;
+//       viewlist.value = response.message;
 
-      canApprove.value = viewlist.value.includes(selectedData.value.formname);
-      receivedForMe()
+//       canApprove.value = viewlist.value.includes(selectedData.value.formname);
+//       receivedForMe()
 
-    })
-    .catch((error) => {
-      console.log(error);
-    });
+//     })
+//     .catch((error) => {
+//       console.log(error);
+//     });
 
-}
+// }
 function viewasPdfView() {
 
   ApprovePDF.value = !ApprovePDF.value;
@@ -1290,15 +1287,28 @@ function Wfactivitylog(formname) {
   axiosInstance
     .get(`${apis.resource}${doctypes.WFActivityLog}/${formname}`)
     .then((res) => {
-      if (res.data) {
-        // console.log("Activity Data:", res.data);
-        activityData.value = res.data.reason || []; // Ensure it's always an array
+      if (res.data && Array.isArray(res.data.reason)) {
+        const sortedReasons = res.data.reason.sort((a, b) => {
+          const parseTime = (str) => {
+            const [datePart, timePart] = str.split(' ');
+            const [year, month, day] = datePart.split('/').map(Number);
+            const [hour, minute, second, millisecond = 0] = timePart.split(':').map(Number);
+            return new Date(year, month - 1, day, hour, minute, second, millisecond);
+          };
+
+          return parseTime(a.time) - parseTime(b.time); // ascending order
+        });
+
+        activityData.value = sortedReasons;
+      } else {
+        activityData.value = [];
       }
     })
     .catch((error) => {
       console.error("Error fetching activity data:", error);
     });
 }
+
 
 function toLinkedForm() {
   if (tableData.value.is_linked_form && linked_status.value !== 'Completed') {
