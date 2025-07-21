@@ -10,7 +10,8 @@ from frappe.utils import get_bench_path, cstr,get_url,now_datetime,get_site_path
 from pdf2image import convert_from_path
 import zipfile
 from frappe.utils.file_manager import get_file_path
-
+import shutil
+from datetime import date, datetime
 
 
 def rebuild_to_structured_array(flat_array):
@@ -153,7 +154,7 @@ template_str = """
         }
         .row {
             display: flex;
-            flex-wrap: wrap;
+              align-items: start;
             margin-bottom: 5px;
         }
         .column {
@@ -171,6 +172,8 @@ template_str = """
         .section {
             border: 0px solid #ccc;
             border-radius:3px;
+            margin-bottom:3px;
+            margin-top: 5px;
         }
         .section h3 {
             margin-bottom: 10px;
@@ -186,7 +189,7 @@ template_str = """
         .field {
             display: flex;
             padding: 2px 0px;
-            margin: 5px 5px;
+            margin: 8px 4px;
         }
         .field label {
             font-weight: bold;
@@ -419,7 +422,7 @@ template_str = """
                 margin-bottom: 6px !important;
             }
             .rounded-table, .rounded-table th, .rounded-table td {
-                border: 1px solid #ccc !important;
+                
                 font-size: 13px !important;
                 color: #000 !important;
             }
@@ -511,6 +514,7 @@ template_str = """
             .rounded-table th, .rounded-table td {
                 page-break-inside: avoid !important;
             }
+            
         }
     </style>
     </head>
@@ -628,25 +632,31 @@ template_str = """
                                                         {% endfor %}
                                                     </tr>
                                                 </thead>
-                                               {% set keywords = ['total', 'amount', 'total cost', 'sub total'] %}
-
+                                               
+                                                {% set keywords = ['total', 'amount', 'total cost', 'sub total'] %}
                                                 <tbody>
                                                     {% for child in child_data[table_name] %}
                                                         {% set is_summary_row = child.values() | select('string') | map('lower') | select('in', keywords) | list | length > 0 %}
                                                         <tr>
                                                             {% for value in child.values() %}
-                                                                <td style="
-                                                                    {{ 'border: none;' if is_summary_row else 'border: 1px solid #ccc;' }}
-                                                                    text-align:center;
+                                                                 <td style="
+                                                                    {% if is_summary_row %}
+                                                                        border-bottom: 1px solid #ccc;
+                                                                        {% if loop.first %}border-left: 1px solid #ccc;{% endif %}
+                                                                        {% if loop.last %}border-right: 1px solid #ccc;{% endif %}
+                                                                    {% else %}
+                                                                        border: 1px solid #ccc;
+                                                                    {% endif %}
+                                                                    text-align: center;
                                                                     padding: 8px;
                                                                     word-break: break-word;
                                                                     font-size: 13px;
                                                                 ">
                                                                     {% if value %}
-                                                                        {% if  "/" in value %}
-                                                                            {{ value.replace('/files/', '')}}
+                                                                        {% if "/" in value %}
+                                                                            {{ value.replace('/files/', '') }}
                                                                         {% else %}
-                                                                            {{ value if value else ' ' }}
+                                                                            {{ value }}
                                                                         {% endif %}
                                                                     {% else %}
                                                                         {{ ' ' }}
@@ -691,7 +701,7 @@ template_str = """
 
                     
 
-                    <div class="row" style="display: flex; flex-wrap: wrap;">
+                    <div class="row" style="display: flex;">
                         {% for column in row.columns %}
                        
                             <div class="column">
@@ -700,15 +710,22 @@ template_str = """
                                 {% endif %}
                                 {% for field in column.fields %}
                                     
-                                    <div class="field field-textarea">
+                                    <div class="field {% if field.fieldtype == 'Text' or field.fieldtype == 'Small Text' %}field-textarea{% endif %}">
                                     
-                                  
-                                        {% if field.fieldname != 'auto_calculations' %}
+                                     {% if field.fieldtype == 'Check' and field.fieldname != 'auto_calculations' %}
+                                            <div class="checkbox-gap" style="display: flex; align-items: start; gap: 8px;">
+                                                <!-- Checkbox -->
+                                                <span class="custom-checkbox {% if field['values'] %}checked{% else %}unchecked{% endif %}" style="margin-top:-10px;"></span>
+                                                <!-- Label -->
+                                                <label style="margin-top:-7px;" for="{{ field.fieldname }}">
+                                                    {{ field.label }} <span style="padding-left:2px; font-size: 13px;"></span>
+                                                </label>
+                                            </div>
+                                        {% elif field.fieldname != 'auto_calculations' %}
                                             <label for="{{ field.fieldname }}">
                                                 {{ field.label }} <span style="padding-left:2px; font-size: 13px;">:</span>
                                             </label>
                                         {% endif %}
-
                                         {% if field.fieldtype in ['radio'] %}
                                             <div class="container-fluid">
                                                 <div class="row">
@@ -722,6 +739,7 @@ template_str = """
                                                             <div>
                                                             
                                                                 {% if field.fieldtype == 'Check'  %}
+                                                                 {{option}}
                                                                     <input
                                                                         type="checkbox"
                                                                         class="form-check-input"
@@ -752,10 +770,7 @@ template_str = """
                                                     {% endfor %}
                                                 </div>
                                             </div>
-                                        {% elif field.fieldtype == 'Check' and field.fieldname != 'auto_calculations' %}
-                                            <div class="checkbox-gap" style="display: flex; align-items: center; gap: 8px;">
-                                                <span class="custom-checkbox {% if field['values'] %}checked{% else %}unchecked{% endif %}"></span>
-                                            </div>
+                                     
 
                                         {% elif field.fieldtype == 'Data' or field.fieldtype == 'Int' or field.fieldtype =='Link' and field.fieldname != 'auto_calculations' %}
                                             <span id="{{ field.fieldname }}"
@@ -796,7 +811,7 @@ template_str = """
                                                     {% for value in selected_values_list if value %}
                                                         <div class="checkbox-gap">
                                                             <span class="custom-checkbox checked"></span>
-                                                            <span >{{ value }}</span>
+                                                            <span style="margin-left:3px; margin-top:3px;" >{{ value }}</span>
                                                         </div>
                                                     {% endfor %}
                                                 </div>
@@ -812,17 +827,17 @@ template_str = """
                                             {% endif %}
                                         {% elif field.fieldtype == 'Attach' %}
     {% if field['values'] %}
-        {% if field.fieldtype == 'Attach' and (field.fieldname.startswith('approved_by') or field.fieldname.startswith('requestor')) %}
+        {% if field.fieldtype == 'Attach' and (field.fieldname.startswith('approved_by') or field.fieldname.startswith('requestor')or field.fieldname.startswith('acknowle')) %}
             <img  
                 id="{{ field.fieldname }}" 
                 src="{{ site_url + field['values'] or '' }}" 
-                style="width: 80px; height: 80px; object-fit: contain; display: block; margin-left: 119px; margin-top: -51px;"  
+                style="width: 80px; height: 40px; object-fit: contain;margin-top:-20px;"  
                 name="{{ field.fieldname }}"
             >
         {% else %}
             <ul style="padding-left: 20px; margin: 5px 0;">
                 {% for file in field['values'].split(',') %}
-                    <li>
+                    <li style="font-size:12px;">
                         {{ file.strip().split('@')[-1] if '@' in file else file.strip().split('/')[-1] }}
                     </li>
                 {% endfor %}
@@ -970,7 +985,68 @@ template_str = """
 </html>
  
 """
-    
+activate_log_table = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Activity Log</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 2rem;
+      background-color: #f9f9f9;
+    }
+    h1 {
+      margin-bottom: 1rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    th, td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    th {
+      background-color: #f0f0f0;
+    }
+    tr:nth-child(even) {
+      background-color: #fcfcfc;
+    }
+  </style>
+</head>
+<body>
+  <h1>Activity Log</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Designation</th>
+        <th>Employee</th>
+        <th>Action</th>
+        <th>Time</th>
+        <th>Comments</th>
+      </tr> 
+    </thead>
+    <tbody>
+      {% for entry in filtered_reasons %}
+      <tr>
+        <td>{{ entry.role }}</td>
+        <td>{{ entry.user_name }}</td>
+        <td>{{ entry.action }}</td>
+        <td>{{ entry.time }}</td>
+        <td>{{ entry.reason }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+</html>"""
+
 def convert_html_to_pdf(html_content, pdf_path,options=None):
 
     try:
@@ -1080,29 +1156,122 @@ def preview_dynamic_form(form_short_name: str, business_unit=None, name=None):
         return html_view
 
     if name:
-        user_doc = frappe.get_doc(form_short_name, name).as_dict()
+        
+        site = frappe.local.site
+        bench_path = frappe.utils.get_bench_path()
+        public_files_folder = os.path.join(bench_path, "sites", site, "public", "files")
+        attachment_folder = os.path.join(public_files_folder, "Attachment_folder")
+        os.makedirs(attachment_folder, exist_ok=True)
 
-        for iteration in json_object:
-            if "value" in iteration:
-                iteration["value"] = user_doc.get(iteration["fieldname"], "")
+        print_format = frappe.db.get_value("Ezy Form Definitions", form_short_name, "print_format")
+        wf_generated_request_id = frappe.get_value(form_short_name, name, "wf_generated_request_id")
+        activate_log = frappe.get_doc('WF Activity Log', wf_generated_request_id).as_dict()
 
-            # Handling child table fields
-            if iteration.get("fieldtype") == "Table":
-                child_table_name = str(iteration["fieldname"])
-                child_table_records = frappe.get_all(iteration["options"], filters={"parent": name}, fields=["*"],order_by="idx asc",)
-                
-                # Get field names and labels dynamically
-                field_names = [df.fieldname for df in frappe.get_meta(iteration["options"]).fields]
-                field_labels = {df.fieldname: df.label for df in frappe.get_meta(iteration["options"]).fields}
+        filtered_reasons = [
+            {
+                'level': entry['level'],
+                'role': entry['role'],
+                'user': entry['user'],
+                'user_name': entry['user_name'],
+                'reason': entry['reason'],
+                'action': entry['action'],
+                'time': entry['time'],
+                'random_string': entry['random_string']
+            }
+            for entry in activate_log.get('reason', [])
+        ]
 
-                # Store child table data properly
-                data_list[child_table_name] = [
-                    {field_labels.get(field, field): record.get(field) for field in field_names}
-                    for record in child_table_records
-                ]
+        html_table_output = ""
+        if filtered_reasons:
+            html_table_output = Template(activate_log_table).render(filtered_reasons=filtered_reasons)
 
+        mail_attachment = []
+        html_view = ""
 
+        if print_format:
+            html_view_ = get_html_file_data(form_short_name, name, print_format)
+            html_view = html_view_['html']
+        else:
+            json_object = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_json")
+            json_object = literal_eval(json_object)["fields"]
+            user_doc = frappe.get_doc(form_short_name, name).as_dict()
+            data_list = {}
 
+            for iteration in json_object:
+                if "value" in iteration:
+                    iteration["value"] = user_doc.get(iteration["fieldname"], "")
+
+                # Main form attachments
+                if iteration.get("fieldtype") == "Attach" and iteration.get("value"):
+                    # Split by comma and strip whitespace
+                    file_urls = [url.strip() for url in iteration["value"].split(",") if url.strip()]
+                    
+                    for file_url in file_urls:
+                        
+                        attachment_info = {
+                            "label": 'Form Attachments',
+                            "file_url": file_url,
+                            "file_path": os.path.join(public_files_folder, file_url.replace("/files/", ""))
+                        }
+
+                        if iteration.get("fieldname") and not iteration.get("fieldname").lower().startswith(
+                                ("approved_by", "requestor", "acknowle")):
+                            mail_attachment.append(attachment_info)
+
+                # Child table attachments
+                if iteration.get("fieldtype") == "Table":
+                    child_table_name = str(iteration["fieldname"])
+                    child_table_records = frappe.get_all(
+                        iteration["options"],
+                        filters={"parent": name},
+                        fields=["*"],
+                        order_by="idx asc"
+                    ) 
+                    meta_fields = frappe.get_meta(iteration["options"]).fields
+                    field_names = [df.fieldname for df in meta_fields]
+                    field_labels = {df.fieldname: df.label for df in meta_fields}
+                    field_types = {df.fieldname: df.fieldtype for df in meta_fields}
+
+                    for record in child_table_records:
+                        for field in field_names:
+                            value = record.get(field)
+                            fieldtype = field_types.get(field)
+                            # if fieldtype =='int':
+                            if fieldtype == "Attach" and value:
+                                file_urls = [url.strip() for url in value.split(',') if url.strip()]
+                                for file_url in file_urls:
+                                    mail_attachment.append({
+                                        "label": "Form Attachments",
+                                        "file_url": file_url,
+                                        "file_path": os.path.join(public_files_folder, file_url.replace("/files/", ""))
+                                    })
+                                    
+
+                    data_list[child_table_name] = [
+                                    {field_labels.get(field, field): record.get(field) for field in field_names}
+                                    for record in child_table_records
+                                ]
+                    data_list[child_table_name] = [
+                        {
+                            k: (
+                                v.isoformat() if isinstance(v, (date, datetime)) 
+                                else str(v) if isinstance(v, int) 
+                                else v
+                            )
+                            for k, v in item.items()
+                        }
+                        for item in data_list[child_table_name]
+]
+                    ######
+                    
+
+            # Remove empty "approved"/"approver" fields
+            json_object = list(filter(lambda d: not (
+                ('value' in d and not d.get('value')) and
+                (d.get('fieldname').startswith('approved') or d.get('fieldname').startswith('approver'))
+            ), json_object))
+
+            form_name = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_name") or "Form"
     html_view = json_structure_call_for_html_view(
         json_obj=json_object,
         form_name=form_name,
@@ -1115,23 +1284,32 @@ def preview_dynamic_form(form_short_name: str, business_unit=None, name=None):
  
  
  
- 
-def add_file_to_zip(item, file_url, zipf):
-    try:
-        full_path = get_file_path(file_url)
-        if os.path.exists(full_path):
-            arcname = f"{item.get('label', 'Attachments')}/{os.path.basename(full_path)}"
-            zipf.write(full_path, arcname)
-        else:
-            frappe.log_error(f"File does not exist: {full_path}", f"ZIP Creation Warning: {file_url[:100]}")
-    except Exception as e:
-        frappe.log_error(f"Error processing file_url: {file_url}\nException: {str(e)}", f"ZIP Creation Error: {file_url[:100]}")
 
+
+def add_file_to_zip(item, zipf, zip_folder_name="Attachments"):
+    """Add file to zip under a folder if file_path exists."""
+    if os.path.exists(item["file_path"]):
+        zipf.write(
+            item["file_path"],
+            arcname=os.path.join(zip_folder_name, os.path.basename(item["file_path"]))
+        )
+    else:
+        frappe.log_error(f"File not found: {item['file_path']}")
+
+        
+        
 @frappe.whitelist()
 def download_filled_form(form_short_name: str, name: str|None,business_unit=None,from_raise_request=None):
     """Generates a PDF for the dynamic form with filled data"""
     try:
-        
+        bench_path         = get_bench_path()
+        site               = frappe.local.site
+        folder_path = get_site_path("public", "files", "Attachment folder")
+
+        delete = lambda path: os.unlink(path) if os.path.isfile(path) or os.path.islink(path) else shutil.rmtree(path)
+
+        if os.path.exists(folder_path) and os.path.isdir(folder_path):
+            [delete(os.path.join(folder_path, f)) for f in os.listdir(folder_path)]
         attachment_info =None
         is_landscape = frappe.db.get_value("Ezy Form Definitions", form_short_name, "is_landscape")
         if name is None:
@@ -1204,120 +1382,182 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
             return file_url
         if name:
             
+            site = frappe.local.site
+            bench_path = frappe.utils.get_bench_path()
+            public_files_folder = os.path.join(bench_path, "sites", site, "public", "files")
+            attachment_folder = os.path.join(public_files_folder, "Attachment_folder")
+            os.makedirs(attachment_folder, exist_ok=True)
+
             print_format = frappe.db.get_value("Ezy Form Definitions", form_short_name, "print_format")
-            
-            wf_generated_request_id = frappe.get_value(form_short_name,name,"wf_generated_request_id")
+            wf_generated_request_id = frappe.get_value(form_short_name, name, "wf_generated_request_id")
+            activate_log = frappe.get_doc('WF Activity Log', wf_generated_request_id).as_dict()
+
+            filtered_reasons = [
+                {
+                    'level': entry['level'],
+                    'role': entry['role'],
+                    'user': entry['user'],
+                    'user_name': entry['user_name'],
+                    'reason': entry['reason'],
+                    'action': entry['action'],
+                    'time': entry['time'],
+                    'random_string': entry['random_string']
+                }
+                for entry in activate_log.get('reason', [])
+            ]
+
+            html_table_output = ""
+            if filtered_reasons:
+                html_table_output = Template(activate_log_table).render(filtered_reasons=filtered_reasons)
+
+            mail_attachment = []
+            html_view = ""
+
             if print_format:
-                html_view_ = get_html_file_data(form_short_name,name,print_format)
+                html_view_ = get_html_file_data(form_short_name, name, print_format)
                 html_view = html_view_['html']
             else:
                 json_object = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_json")
- 
                 json_object = literal_eval(json_object)["fields"]
-                json_object = [ field for field in json_object]
                 user_doc = frappe.get_doc(form_short_name, name).as_dict()
-                data_list ={}
-                mail_attachment = []
+                data_list = {}
+
                 for iteration in json_object:
                     if "value" in iteration:
                         iteration["value"] = user_doc.get(iteration["fieldname"], "")
- 
-                    # Collect attachments except those with fieldname like "approved_by"
- 
-                    if iteration.get("fieldtype") == "Attach" and iteration.get("value"):                                              
-                        iteration["value"] =   iteration["value"]     
-                        # Construct a display name using the label or fallback to fieldname
-                        field_label = iteration.get("label") or iteration.get("fieldname")
-                        attachment_info = {
-                            "label": 'Form Attachments',
-                            "file_url": iteration["value"]
-                        }
-                        if iteration.get("fieldname") and not iteration.get("fieldname").lower().startswith(("approved_by", "requestor")):
-                            mail_attachment.append(attachment_info)
-                    # Handle Table fields (child tables)
+
+                    # Main form attachments
+                    if iteration.get("fieldtype") == "Attach" and iteration.get("value"):
+                        # Split by comma and strip whitespace
+                        file_urls = [url.strip() for url in iteration["value"].split(",") if url.strip()]
+                        
+                        for file_url in file_urls:
+                            
+                            attachment_info = {
+                                "label": 'Form Attachments',
+                                "file_url": file_url,
+                                "file_path": os.path.join(public_files_folder, file_url.replace("/files/", ""))
+                            }
+
+                            if iteration.get("fieldname") and not iteration.get("fieldname").lower().startswith(
+                                    ("approved_by", "requestor", "acknowle")):
+                                mail_attachment.append(attachment_info)
+
+                    # Child table attachments
                     if iteration.get("fieldtype") == "Table":
                         child_table_name = str(iteration["fieldname"])
-                        child_table_records = frappe.get_all( iteration["options"],  filters={"parent": name},   fields=["*"],  order_by="idx asc", )
-
-                       # Get field names and labels dynamically
-                        field_names = [df.fieldname for df in frappe.get_meta(iteration["options"]).fields]
-                        field_labels = {df.fieldname: df.label for df in frappe.get_meta(iteration["options"]).fields}
-                        # Store child table data properly
-                        # Get field metadata
+                        child_table_records = frappe.get_all(
+                            iteration["options"],
+                            filters={"parent": name},
+                            fields=["*"],
+                            order_by="idx asc"
+                        ) 
                         meta_fields = frappe.get_meta(iteration["options"]).fields
+                        field_names = [df.fieldname for df in meta_fields]
+                        field_labels = {df.fieldname: df.label for df in meta_fields}
                         field_types = {df.fieldname: df.fieldtype for df in meta_fields}
-                        processed_child_records = []
+
                         for record in child_table_records:
                             for field in field_names:
                                 value = record.get(field)
                                 fieldtype = field_types.get(field)
-
+                                # if fieldtype =='int':
                                 if fieldtype == "Attach" and value:
-                                    # Split the comma-separated file URLs
                                     file_urls = [url.strip() for url in value.split(',') if url.strip()]
-                                    
                                     for file_url in file_urls:
-                                        # Add to mail_attachment
                                         mail_attachment.append({
                                             "label": "Form Attachments",
-                                            "file_url": file_url
+                                            "file_url": file_url,
+                                            "file_path": os.path.join(public_files_folder, file_url.replace("/files/", ""))
                                         })
+                                        
 
-                                        # Also store each file as a separate record in data_list
-                                        processed_child_records.append({
-                                            field_labels.get(field, field): file_url
-                                        })
                         data_list[child_table_name] = [
-                            {field_labels.get(field, field): record.get(field) for field in field_names}
-                            for record in child_table_records
-                        ]
-            #########################
-                json_object = list(filter(lambda dict :False if (('value' in dict) and not(dict.get('value')) and (dict.get('fieldname').startswith('approved') or dict.get('fieldname').startswith('approver'))) else True,json_object))
-                form_name = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_name")
-                html_view = json_structure_call_for_html_view(json_obj=json_object, form_name=form_name,child_data=data_list,child_table_data=None,business_unit=business_unit,wf_generated_request_id=wf_generated_request_id,mail_attachment=mail_attachment)
-                
-            random_number = randint(111, 999)
-    
-            pdf_filename = f"{form_short_name}_{name}mailfiles.pdf"
-            pdf_path = f"public/files/{pdf_filename}"
-            absolute_pdf_path = os.path.join(get_bench_path(), "sites", cstr(frappe.local.site), pdf_path)
-            opts={"orientation":"Landscape"if is_landscape else"Portrait"}
-            convert_html_to_pdf(html_content=html_view,pdf_path=absolute_pdf_path,options=opts)
+                                        {field_labels.get(field, field): record.get(field) for field in field_names}
+                                        for record in child_table_records
+                                    ]
+                        data_list[child_table_name] = [
+                            {
+                                k: (
+                                    v.isoformat() if isinstance(v, (date, datetime)) 
+                                    else str(v) if isinstance(v, int) 
+                                    else v
+                                )
+                                for k, v in item.items()
+                            }
+                            for item in data_list[child_table_name]
+]
+                        ######
+                        
+
+                # Remove empty "approved"/"approver" fields
+                json_object = list(filter(lambda d: not (
+                    ('value' in d and not d.get('value')) and
+                    (d.get('fieldname').startswith('approved') or d.get('fieldname').startswith('approver'))
+                ), json_object))
+
+                form_name = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_name") or "Form"
+                html_view = json_structure_call_for_html_view(
+                    json_obj=json_object,
+                    form_name=form_name,
+                    child_data=data_list,
+                    child_table_data=None,
+                    business_unit=business_unit,
+                    wf_generated_request_id=wf_generated_request_id,
+                    mail_attachment=mail_attachment
+                )
+
+            # Generate PDFs
+            pdf_filename = f"{form_short_name or 'form'}.pdf"
+            absolute_pdf_path = os.path.join(attachment_folder, pdf_filename)
+
+            activate_pdf_name = "Activity Log .pdf"
+            activate_pdf_path = os.path.join(attachment_folder, activate_pdf_name)
+
+            is_landscape = frappe.db.get_value("Ezy Form Definitions", form_short_name, "is_landscape")  # Set this according to your use case
+            opts = {"orientation": "Landscape" if is_landscape else "Portrait"}
+
+            convert_html_to_pdf(html_content=html_view, pdf_path=absolute_pdf_path, options=opts)
+            convert_html_to_pdf(html_content=html_table_output, pdf_path=activate_pdf_path)
+
+            # Add generated PDFs to attachments
+            mail_attachment.append({
+                "label": "Attachment_folder",
+                "file_url": f"/files/Attachment_folder/{activate_pdf_name}",
+                "file_path": activate_pdf_path
+            })
+            mail_attachment.append({
+                "label": "Attachment_folder",
+                "file_url": f"/files/Attachment_folder/{pdf_filename}",
+                "file_path": absolute_pdf_path
+            })
+
+            # Remove any files that do not exist
+            mail_attachment = [item for item in mail_attachment if os.path.exists(item["file_path"])]
+
+            # Create ZIP
+            zip_folder_name = "Attachments"
+            zip_filename = f"{form_name or 'form'}.zip"
+            zip_path = os.path.join(attachment_folder, zip_filename)
+
+            with zipfile.ZipFile(zip_path, 'w') as zipf:
+                for item in mail_attachment:
+                    add_file_to_zip(item, zipf, zip_folder_name=zip_folder_name)
+
             site_url = get_url()
-            new_file = f"{site_url}/files/{pdf_filename}"
-            zip_filename = None
-            if len(mail_attachment) > 0:
-                folder_path = get_site_path("public", "files", "Attachment folder")
-                os.makedirs(folder_path, exist_ok=True)
-                # Add PDF file to attachments (for zipping)
-                mail_attachment.append({
-                    "label": "Form Attachments",
-                    "file_url": f"/files/{pdf_filename}"  # Relative path
-                })
-                # Prepare ZIP path
-                zip_filename = f"{name}.zip"
-                zip_path = os.path.join(folder_path, zip_filename)
+            full_download_url = f"{site_url}/files/Attachment_folder/{zip_filename}"
+            return full_download_url
 
-                # Create ZIP file
-                clean_file_urls = lambda item: [
-                    '/' + u.split('/', 3)[3] if u.startswith("http") and len(u.split('/', 3)) > 3 else u.strip()
-                    for u in item.get('file_url', '').split(',') if u.strip()
-                ]
-                # Create ZIP file
-                with zipfile.ZipFile(zip_path, 'w') as zipf:
-                    [add_file_to_zip(item, file_url, zipf) for item in mail_attachment for file_url in clean_file_urls(item)]
 
-                relative_zip_path = f"/files/Attachment folder/{zip_filename}"
-                full_download_url = f"{site_url}{relative_zip_path}"
 
-            file_url= get_url(full_download_url if zip_filename else new_file)
-            return file_url
 
 
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         frappe.log_error("Error Downloading File", f"line No:{exc_tb.tb_lineno}\n{traceback.format_exc()}")
         frappe.throw(str(e))
+        
+
 from frappe.www.printview import get_html_and_style
 
 def get_html_file_data(doc=None,data=None,print_format=None):

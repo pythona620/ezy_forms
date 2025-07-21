@@ -423,6 +423,7 @@ export default {
       this.confirm_password=""
       this.passwordsMismatch=""
       this.passwordError=""
+      this.formdata.usr = "";
     },
     validateEmail() {
       const email = this.SignUpdata.email;
@@ -878,6 +879,7 @@ export default {
                   department: employeeData.department,
                   emp_code: employeeData.emp_code,
                   emp_signature: employeeData.signature,
+                  is_admin: employeeData.is_admin
                   // department: employeeData.department,
                 };
                 

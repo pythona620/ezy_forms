@@ -4,7 +4,7 @@
         <div class="container-fluid">
             <div class="row">
                 <div :class="['p-0', isCollapsed ? 'col-auto' : 'col-2']">
-                    <SideBar :collapsed="isCollapsed" />
+                    <SideBar :collapsed="isCollapsed" @toggleSidebar="toggleSidebar" />
                 </div>
 
 

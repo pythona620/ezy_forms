@@ -4,9 +4,9 @@
       <div class="">
         <div class="d-flex justify-content-between align-items-center CancelNdSave my-2 py-2">
           <div class="ps-1 my-2 d-flex align-items-center" @click="cancelForm()">
-            <h1 class="font-13 ms-3">
+            <button class="btn font-13 ms-3">
               <i class="bi bi-arrow-left"></i><span class="ms-2">Back</span>
-            </h1>
+            </button>
           </div>
           <div>
             <!-- <ButtonComp class="font-13 rounded-2" name="Save as Draft"></ButtonComp> -->
@@ -79,7 +79,7 @@
                                 <!-- || route.query.form_name   -->
                                 <FormFields :disabled="selectedData.formId && selectedData.formId.length > 0"
                                   labeltext="Form Name" class="formHeight" type="text" tag="input" name="Value"
-                                  id="formName" validationStar="true" placeholder="Untitled Form"
+                                  id="formName" validationStar="true" placeholder="Untitled Form" 
                                   @change="(event) => handleInputChange(event, 'form_name')" v-model="formNameModel" />
                                 <span v-if="formNameError" class="text-danger ErrorMsg ms-2">
                                   {{ formNameError }}</span>
@@ -611,8 +611,81 @@
                                               </small>
                                             </div>
                                             <div v-if="field.fieldtype === 'Link'">
-                                              <label class="font-12 fw-light" for="link-search">Search Doctype:</label>
-                                              <input id="link-search" type="text" v-model="linkSearchQuery"
+                                             
+  <label class="font-11 fw-light" :for="'link-search-' + getFieldKey(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
+    Search Doctype:
+  </label>
+
+  <!-- Single Search + Select Input -->
+  <input
+    :id="'link-search-' + getFieldKey(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+    type="text"
+    v-model="blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex].options"
+    @input="fetchDoctypeList(blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex].options, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+    @focus="showDropdown(getFieldKey(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex))"
+    class="form-control font-12 mb-1"
+    placeholder="Type to search..."
+  />
+
+  <!-- Search Results Dropdown -->
+  <ul
+    v-if="linkSearchResults[getFieldKey(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)]?.length && dropdownVisible[getFieldKey(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)]"
+    class="list-group mt-1"
+    style="max-height: 200px; overflow-y: auto;"
+  >
+    <li
+      v-for="(result, index) in linkSearchResults[getFieldKey(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)]"
+      :key="index"
+      @click="selectDoctype(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex, result.name)"
+      class="list-group-item list-group-item-action"
+    >
+      {{ result.name }}
+    </li>
+  </ul>
+</div>
+
+  <!-- <label class="font-12 fw-light" :for="'link-search-' + getFieldKey(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
+    Search Doctype:
+  </label>
+
+  
+  <input
+    :id="'link-search-' + getFieldKey(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+    type="text"
+    v-model="linkSearchQueries[getFieldKey(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)]"
+    @input="fetchDoctypeList(linkSearchQueries[getFieldKey(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)], blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+    @focus="showDropdown(getFieldKey(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex))"
+    class="form-control font-12 mb-1"
+    placeholder="Type to search..."
+  />
+
+  
+  <ul
+    v-if="linkSearchResults[getFieldKey(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)]?.length && dropdownVisible[getFieldKey(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)]"
+    class="list-group mt-1"
+    style="max-height: 200px; overflow-y: auto;"
+  >
+    <li
+      v-for="(result, index) in linkSearchResults[getFieldKey(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)]"
+      :key="index"
+      @click="selectDoctype(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex, result.name)"
+      class="list-group-item list-group-item-action"
+    >
+      {{ result.name }}
+    </li>
+  </ul>
+
+  
+  <input
+    type="text"
+    v-model="blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex].options"
+    class="form-control font-12 mb-1"
+    placeholder="Selected doctype will appear here"
+    readonly
+  />
+</div> -->
+
+                                              <!-- <input id="link-search" type="text" v-model="linkSearchQuery"
                                                 @input="fetchDoctypeList(linkSearchQuery)"
                                                 @focus="dropdownVisible = true" class="form-control font-12 mb-1"
                                                 placeholder="Type to search..." />
@@ -624,7 +697,7 @@
                                                   class="list-group-item list-group-item-action">
                                                   {{ result.name }}
                                                 </li>
-                                              </ul>
+                                              </ul> -->
 
 
                                               <!-- <input type="text"
@@ -648,37 +721,6 @@
                                                   {{ result.name }}
                                                 </li>
                                               </ul> -->
-
-
-                                              <input type="text"
-                                                v-model="blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[columnIndex].fields[fieldIndex].options"
-                                                class="form-control font-12 mb-1"
-                                                :placeholder="linkSearchQuery ? 'Select from list' : 'Selected doctype will appear here'"
-                                                readonly />
-                                            </div>
-                                            <!-- <div v-if="field.fieldtype === 'Link'">
-                                              <span class="font-11 fw-light">Search Doctype:</span>
-
-                                              <input type="text" v-model="activeSearch.query"
-                                                @input="(e) => fetchDoctypeList(e.target.value)"
-                                                :placeholder="field.options || 'Type to search...'"
-                                                class="form-control font-12 mb-1"
-                                                @focus="setActiveField(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
-
-                                              <ul
-                                                v-if="isActiveField(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) && linkSearchResults.length"
-                                                class="list-group mt-1" style="max-height: 200px; overflow-y: auto;">
-                                                <li v-for="(result, index) in linkSearchResults" :key="index"
-                                                  @click="selectDoctype(blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex, result.name)"
-                                                  class="list-group-item list-group-item-action">
-                                                  {{ result.name }}
-                                                </li>
-                                              </ul>
-                                            </div> -->
-
-
-
-
 
 
                                             <div class="d-flex  align-items-center justify-content-between">
@@ -1289,29 +1331,35 @@
                 </select>
               </div>
             </div>
-            <div v-if="selectedBlockIndex !== 0" class="p-3 approval-border-bottom ">
+            <div v-if="selectedBlockIndex !== 0" class="p-3 approval-border-bottom  ">
+              <div class=" d-flex justify-content-start gap-5 mb-3 ">
+
 
               <div class="form-check ps-0" v-if="selectedBlockIndex !== 0">
                 <div>
-                  <input type="checkbox" id="ViewOnlyReportee" v-model="ViewOnlyReportee"
+                  <input type="checkbox" id="ViewOnlyReportee" v-model="ViewOnlyReportee" :disabled="requester_as_a_approver || all_approvals_required "
                     class="me-2  mt-0 form-check-input designationCheckBox" />
-                  <label for="ViewOnlyReportee " class="SelectallDesignation fw-bold mt-1 form-check-label">View Only
-                    Reportee</label>
-                </div>
-              </div>
-            </div>
-            <div v-if="selectedBlockIndex !== 0" class="p-3 approval-border-bottom ">
-
-              <div class="form-check ps-0" v-if="selectedBlockIndex !== 0">
-                <div>
-                  <input type="checkbox" id="all_approvals_required" v-model="all_approvals_required"
-                    class="me-2  mt-0 form-check-input designationCheckBox" />
-                  <label for="all_approvals_required " class="SelectallDesignation fw-bold mt-1 form-check-label">All Approvers Required</label>
+                  <label for="ViewOnlyReportee" class="SelectallDesignation text-nowrap fw-bold mt-1 form-check-label">View Only
+                    Reportee</label>  
                 </div>
               </div>
               
+              <div class="form-check ps-0" v-if="selectedBlockIndex !== 0">
+                <div>
+                  <input type="checkbox" id="all_approvals_required" v-model="all_approvals_required" :disabled="ViewOnlyReportee ||  requester_as_a_approver "
+                    class="me-2  mt-0 form-check-input designationCheckBox" />
+                  <label for="all_approvals_required" class="SelectallDesignation text-nowrap fw-bold mt-1 form-check-label">All Approvers Required</label>
+                </div>
+              </div>
+              </div>
+            <div class="form-check ps-0" v-if="selectedBlockIndex !== 0">
+                <div>
+                  <input type="checkbox" id="requester_as_a_approver" v-model="requester_as_a_approver" :disabled="ViewOnlyReportee ||  all_approvals_required"
+                    class="me-2  mt-0 form-check-input designationCheckBox" />
+                  <label for="requester_as_a_approver" class="SelectallDesignation text-nowrap fw-bold mt-1 form-check-label">Requested Only</label>
+                </div>
+              </div>
             </div>
-
           </div>
 
         </div>
@@ -1332,7 +1380,10 @@
           <!-- <div v-if="designationValue.length" class="d-flex flex-wrap gap-2 mt-3">
             <span v-for="(selected, i) in designationValue" :key="i"
               class="badge bg-secondary d-flex align-items-center">
+              <label for="" class="font-12">
+
               {{ selected }}
+              </label> 
               <button type="button" class="btn-close btn-close-white ms-2" aria-label="Remove"
                 @click="removeDesignation(selected)" style="font-size: 0.6rem;"></button>
             </span>
@@ -1409,7 +1460,8 @@ const selectedBlockIndex = ref("");
 let workflowSetup = reactive([]);
 const searchDesignation = ref("");
 const ViewOnlyReportee = ref(false);
-const all_approvals_required = ref(false)
+const all_approvals_required = ref(false);
+const requester_as_a_approver = ref(false);
 const OnRejection = ref('');
 const wrkAfterGetData = ref([]);
 // const hasWorkflowToastShown = ref(false);
@@ -1749,7 +1801,7 @@ function hideSuggestions() {
 // };
 
 
-const linkSearchResults = ref([]);
+// const linkSearchResults = ref([]);
 const activeSearch = reactive({
   query: '',
   key: '', // A unique key to match the field
@@ -1759,21 +1811,20 @@ const activeSearch = reactive({
 function getFieldKey(b, s, r, c, f) {
   return `${b}-${s}-${r}-${c}-${f}`;
 }
+const linkSearchQueries = reactive({});
+const linkSearchResults = reactive({});
+const dropdownVisible = reactive({});
 
-function setActiveField(b, s, r, c, f) {
-  activeSearch.key = getFieldKey(b, s, r, c, f);
+// Update dropdown visible state
+function showDropdown(fieldKey) {
+  dropdownVisible[fieldKey] = true;
 }
 
-function isActiveField(b, s, r, c, f) {
-  return activeSearch.key === getFieldKey(b, s, r, c, f);
-}
-// ['module', 'in', ['User Forms']],
-function fetchDoctypeList(searchText) {
-  const filters = [
+// Fetch Doctype List specific to fieldKey
+function fetchDoctypeList(searchText, b, s, r, c, f) {
+  const fieldKey = getFieldKey(b, s, r, c, f);
 
-    ['istable', '=', 0]
-  ];
-
+  const filters = [['istable', '=', 0]];
   if (searchText?.trim()) {
     filters.push(['name', 'like', `%${searchText}%`]);
   }
@@ -1787,10 +1838,11 @@ function fetchDoctypeList(searchText) {
   axiosInstance
     .get(apis.resource + doctypes.doctypesList, { params: queryParams })
     .then((res) => {
-      linkSearchResults.value = res.data || [];
+      linkSearchResults[fieldKey] = res.data || [];
     })
     .catch((error) => {
       console.error('Error fetching doctype list:', error);
+      linkSearchResults[fieldKey] = [];
     });
 }
 function fetchChildDoctypeList(searchText) {
@@ -1817,12 +1869,31 @@ function fetchChildDoctypeList(searchText) {
       console.error('Error fetching doctype list:', error);
     });
 }
-function selectDoctype(b, s, r, c, f, name) {
-  blockArr[b].sections[s].rows[r].columns[c].fields[f].options = name;
-  linkSearchResults.value = [];
-  activeSearch.query = '';
-  activeSearch.key = ''; // deactivate
+
+function selectDoctype(b, s, r, c, f, selectedName) {
+  blockArr[b].sections[s].rows[r].columns[c].fields[f].options = selectedName;
+
+  // Close dropdown & clear search results
+  const fieldKey = getFieldKey(b, s, r, c, f);
+  linkSearchResults[fieldKey] = [];
+  dropdownVisible[fieldKey] = false;
 }
+
+// function selectDoctype(b, s, r, c, f, selectedName) {
+//   blockArr[b].sections[s].rows[r].columns[c].fields[f].options = selectedName;
+
+//   // Clear search results & close dropdown
+//   const fieldKey = getFieldKey(b, s, r, c, f);
+//   linkSearchQueries[fieldKey] = '';
+//   linkSearchResults[fieldKey] = [];
+//   dropdownVisible[fieldKey] = false;
+// }
+// function selectDoctype(b, s, r, c, f, name) {
+//   blockArr[b].sections[s].rows[r].columns[c].fields[f].options = name;
+//   linkSearchResults.value = [];
+//   activeSearch.query = '';
+//   activeSearch.key = ''; // deactivate
+// }
 const lowerApproverLevels = computed(() => {
   if (!blockArr?.length) return []
 
@@ -2666,6 +2737,7 @@ function addDesignationBtn() {
     xyz.view_only_reportee = ViewOnlyReportee.value === true ? 1 : 0;
     xyz.on_rejection = OnRejection.value ? OnRejection.value : 0;
     xyz.all_approvals_required = all_approvals_required.value === true ? 1 : 0;
+    xyz.requester_as_a_approver = requester_as_a_approver.value === true ? 1 : 0;
   }
  
 
@@ -2699,6 +2771,7 @@ function initializeDesignationValue(blockIndex) {
   ViewOnlyReportee.value = currentSetup.view_only_reportee === 1;
   OnRejection.value = currentSetup.on_rejection
   all_approvals_required.value = currentSetup.all_approvals_required === 1;
+  requester_as_a_approver.value = currentSetup.requester_as_a_approver === 1;
 }
 
 // Initialize `designationValue` based on the roles for the given block index
@@ -2732,6 +2805,7 @@ const AddDesignCanvas = (idx) => {
   searchDesignation.value = ''
   ViewOnlyReportee.value = false;
   all_approvals_required.value = false;
+  requester_as_a_approver.value = false;
   OnRejection.value = '';
   // console.log(idx, "---clicked idex", selectedBlockIndex.value);
   if (filterObj.value.accessible_departments.length) {
@@ -3146,7 +3220,7 @@ const addBlock = () => {
                 label: `row_0_0_${blockIndex}`,
                 columns: [
                   {
-                    label: "", // First column with "Approver" & "Approved By"
+                    label: "", // First column with "Approver" "
                     fields: [
                       {
                         label: "Approver",
@@ -3154,12 +3228,7 @@ const addBlock = () => {
                         options: "",
                         reqd: false,
                       },
-                      {
-                        label: "Approved By",
-                        fieldtype: "Attach",
-                        options: "",
-                        reqd: false,
-                      },
+                      
                     ],
                   },
                   {
@@ -3168,6 +3237,17 @@ const addBlock = () => {
                       {
                         label: "Approved On",
                         fieldtype: "Datetime",
+                        options: "",
+                        reqd: false,
+                      },
+                    ],
+                  },
+                  {
+                    label: "", // third column with "Approved By"
+                    fields: [
+                      {
+                        label: "Approved By",
+                        fieldtype: "Attach",
                         options: "",
                         reqd: false,
                       },
@@ -3598,11 +3678,11 @@ function handleInputChange(event, fieldType) {
 
   // Set filter based on fieldType
   const filters = [
-    [fieldType, "=", `%${inputValue}%`],
+    [fieldType, "=", `${inputValue}`],
     ["business_unit", "like", `%${filterObj.value.business_unit}%`],
   ];
   const queryParams = {
-    fields: JSON.stringify(["*"]),
+    fields: JSON.stringify(['form_name','form_short_name']),
     filters: JSON.stringify(filters),
   };
 

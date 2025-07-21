@@ -118,14 +118,19 @@
               @click="raiseRequestSubmission">
               {{ selectedData.hasWorkflow == 'No' ? 'Save' : 'Raise Request' }}
             </button> -->
-            <button v-if="selectedData.selectedFormId && $route.query.selectedFormStatus == 'Request Cancelled'"
+            <!-- <button v-if="selectedData.selectedFormId && $route.query.selectedFormStatus == 'Request Cancelled'"
               @click="RequestUpdate" class="btn btn-dark font-12" type="submit">
               Update Request
-            </button>
-            <button v-if="$route.query.selectedFormStatus && $route.query.selectedFormStatus == 'Request Raised'"
-              @click="EditRequestUpdate" class="btn btn-dark font-12" type="submit">
-              Update Request
-            </button>
+            </button> -->
+           <button
+  v-if="$route.query.selectedFormStatus && ($route.query.selectedFormStatus == 'Request Raised' || $route.query.selectedFormStatus == 'Request Cancelled')"
+  @click="EditRequestUpdate"
+  class="btn btn-dark font-12"
+  type="submit"
+>
+  Update Request
+</button>
+
 
           </div>
         </div>
@@ -151,14 +156,17 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-outline-secondary font-12" data-bs-dismiss="modal">Cancel</button>
-            <button type="button" class="btn btn-dark" :disabled="!acknowledge || saveloading"
-              @click="raiseRequestSubmission">
-              <span v-if="saveloading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-              <span v-if="!saveloading">
-                <span class="font-12 fw-bold">Yes, Proceed</span>
-              </span>
+           <button
+  type="button"
+  class="btn btn-dark"
+  style="min-width: 120px;"  
+  :disabled="!acknowledge || saveloading"
+  @click="raiseRequestSubmission"
+>
+  <span v-if="saveloading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+  <span v-else class="font-12 fw-bold">Yes, Proceed</span>
+</button>
 
-            </button>
           </div>
         </div>
       </div>
@@ -223,6 +231,7 @@ const filterObj = ref({
   limit_start: 0,
   limitPageLength: 100,
 });
+const newMainId = ref('')
 const checkingIs_linked = ref([]);
 const is_linked_form = ref("");
 const LinkedChildTableData = ref([]);
@@ -496,6 +505,8 @@ function EditRequestUpdate() {
   const data_obj = {
     form_id: route.query.selectedFormId,
     updated_fields: form,
+    //  status: route.query.selectedFormStatus === 'Request Cancelled' ? 'Request Raised' : null,
+    // current_level:route.query.selectedFormStatus === 'Request Cancelled' ? 1 : null
   };
   axiosInstance.post(apis.edit_form_before_approve, data_obj).then((resp) => {
     if (resp?.message?.success) {
@@ -846,21 +857,29 @@ const linkedId = ref("");
 const childRef = ref(null)
 
 function toRaiseReqBtn() {
-  const hasError = childRef.value?.errorStatus ?? false
+  const hasError = childRef.value?.errorStatus ?? false;
+
   if (hasError) {
-    toast.error('Please fix errors before submitting.')
-  } else {
-    const modal = new bootstrap.Modal(document.getElementById('ExportEmployeeModal'))
-    modal.show()
+    toast.error('Please fix errors before submitting.');
+    return;
   }
-}
 
-
-async function raiseRequestSubmission() {
   if (!isFormValid.value) {
     toast.error("Please Fill All Mandatory Fields");
     return;
   }
+
+  const modal = new bootstrap.Modal(document.getElementById('ExportEmployeeModal'));
+  modal.show();
+}
+
+
+
+async function raiseRequestSubmission() {
+  // if (!isFormValid.value) {
+  //   toast.error("Please Fill All Mandatory Fields");
+  //   return;
+  // }
 
   const childEntries = Object.entries(childtablesData.value);
 

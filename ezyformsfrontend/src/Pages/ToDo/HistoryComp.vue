@@ -124,26 +124,17 @@ const responseData = ref([]);
 const ViewOnlyReportee = ref(false);
 const tableheaders = ref([
   { th: "Request ID", td_key: "name" },
-  // { th: "Form name", td_key: "name" },
-  // { th: "Form category", td_key: "doctype_name" },
-  // { th: "Owner of form", td_key: "owner" },
   { th: "Requested By", td_key: "requested_by" },
-  { th: "Linked Form", td_key: "is_linked_form" },
-  { th: "Linked ID", td_key: "linked_form_id" },
-
   { th: "Requested Department", td_key: "role" },
-  // { th: "Property", td_key: "property" },
   { th: "Approval Status", td_key: "status" },
-  { th: "Workflow Status", td_key: "assigned_to_users" },
+  { th: "Pending With", td_key: "assigned_to_users" },
+  { th: "Linked ID", td_key: "linked_form_id" },
 
 ]);
 
 const actions = ref([
   { name: "View Request", icon: "fa-solid fa-eye" },
 
-  // { name: 'Share this form', icon: 'fa-solid fa-share-alt' },
-  // { name: 'Download Form', icon: 'fa-solid fa-download' },
-  // { name: 'Edit Form', icon: 'fa-solid fa-edit' },
 ]);
 const tableData = ref([]);
 const selectedRequest = ref({});
@@ -279,18 +270,36 @@ function actionCreated(rowData, actionEvent) {
   }
 }
 
-function viewPreview(data) {
+function viewPreview(data, index, type) {
   // console.log(data);
-  router.push({
-    name: "ApproveRequest",
-    query: {
-      routepath: route.path,
-      name: data.name,
-      doctype_name: data.doctype_name,
-      type:'myapprovals',
-      readOnly:'true'
-    },
-  });
+  if (type === 'view') {
+    router.push({
+      name: "ApproveRequest",
+      query: {
+        routepath: route.path,
+        name: data.name,
+        doctype_name: data.doctype_name,
+        type: 'myapprovals',
+        readOnly: 'true'
+      },
+    });
+  }
+
+  if (type === 'td_key') {
+    if (data.linked_form_id) {
+      router.push({
+        name: "ApproveRequest",
+        query: {
+          routepath: route.path,
+          name: data.linked_form_id,
+          business_unit: data.property,
+          type: "linkedForm",
+          readOnly: 'true'
+
+        },
+      });
+    }
+  }
 }
 
 // Computed property to determine if any action is cancelled
@@ -581,7 +590,7 @@ function inLineFiltersData(searchedData) {
 
     // Call receivedForMe with or without filters
     if (filterObj.value.filters.length) {
-          filterObj.value.limit_start = 0;
+      filterObj.value.limit_start = 0;
 
       receivedForMe(filterObj.value.filters);
     } else {
@@ -663,7 +672,7 @@ const fieldMapping = computed(() => ({
   role: { type: "input" },
 
 
-  status: { type: "select", options: [ "In Progress","Completed","Request Cancelled"] },
+  status: { type: "select", options: ["In Progress", "Completed", "Request Cancelled"] },
 
 }));
 

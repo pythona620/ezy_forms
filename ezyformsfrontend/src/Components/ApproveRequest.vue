@@ -51,8 +51,11 @@
                 </div>
 
                 <div
-                  v-if="selectedData.type == 'myforms' && tableData.status == 'Request Raised' && selectedData.type !== 'myapprovals'"
-                  class="d-flex justify-content-end approveBtns">
+                      v-if="selectedData?.type === 'myforms' &&
+                            (tableData?.status === 'Request Raised' || tableData?.status === 'Request Cancelled') &&
+                            selectedData?.type !== 'myapprovals'"
+                      class="d-flex justify-content-end approveBtns">
+
                   <button type="submit" class="btn Edit_btn" @click.prevent="EditformSubmission()">
                     <span v-if="loading" class="spinner-border spinner-border-sm" role="status"
                       aria-hidden="true"></span>
@@ -181,8 +184,9 @@
                 </div> -->
                 <div class="col-xl-12 col-lg-12 col-md-12">
                   <div class=" d-flex justify-content-between gap-2">
+                    
                     <div>
-                      <button v-if="(selectedData.type === 'myforms' || selectedData.type === 'myteam' || selectedData.type === 'myapprovals') &&
+                      <button v-if="(selectedData.type === 'myforms' || selectedData.type === 'myteam' || selectedData.type === 'myapprovals' || selectedData.type === 'linkedForm') &&
                         linked_status !== 'Completed' &&
                         tableData?.status === 'Completed' &&
                         tableData?.is_linked_form &&
@@ -190,7 +194,7 @@
                         Object.keys(tableData.is_linked_form).length > 0" type="button"
                         class="btn btn-light font-14 nowrap h-auto fw-bold border border-dark CreateDepartments"
                         data-bs-target="#pdfView" @click="toLinkedForm">
-                        Raise Link <i class="bi bi-arrow-right px-2"></i>
+                        Raise Inbound <i class="bi bi-arrow-right px-2"></i>
                       </button>
 
 
@@ -221,7 +225,7 @@
                   </button>
                   <button v-if="tableData.is_linked_form" class="btn btn-light tab_btn"
                     :class="{ active: activeTab === 'linked' }" @click="linked_list_btn">
-                    Linked Forms
+                    Inbound Forms
                   </button>
                 </div>
 
@@ -411,14 +415,14 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch, computed } from "vue";
+import {ref, watch, computed } from "vue";
 import ApproverPreview from "./ApproverPreview.vue";
 import { useRoute, useRouter } from "vue-router";
 import axiosInstance from "../shared/services/interceptor";
 import { apis, doctypes, domain } from "../shared/apiurls";
 import { EzyBusinessUnit } from "../shared/services/business_unit";
 import { rebuildToStructuredArray } from "../shared/services/field_format";
-import ButtonComp from "./ButtonComp.vue";
+// import ButtonComp from "./ButtonComp.vue";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 const route = useRoute();
@@ -1010,7 +1014,7 @@ function receivedForMe(data) {
   if (data) {
     filters.push(data);
   }
-  if (selectedData.value.type !== 'myteam' && selectedData.value.type !== 'myapprovals') {
+  if (selectedData.value.type !== 'myteam' && selectedData.value.type !== 'myapprovals' && selectedData.value.type !== 'linkedForm') {
     if (selectedData.value.type == "myforms") {
       filters.push(["requested_by", "like", EmpRequestdesignation.emp_mail_id]);
     } else {
@@ -1058,6 +1062,7 @@ function receivedForMe(data) {
 
       selectedcurrentLevel.value = tableData.value?.current_level;
       selectedtotalLevels.value = tableData.value?.total_levels;
+      selectedData.value.doctype_name = tableData.value?.doctype_name
       // console.log(selectedcurrentLevel.value, " current_level");
       //  console.log(tableData.value.is_linked_form, "is_linked_form==========");
 
@@ -1303,11 +1308,11 @@ function toLinkedForm() {
         routepath: route.path,
         linkedForm: tableData.value.is_linked_form,
         has_workflow: 'Yes',
-        type: 'myforms',
+        type: selectedData.value.type,
         main_form: selectedData.value.doctype_name,
         business_unit: selectedData.value.business_unit,
         main_form_Id: selectedData.value.formname,
-        selectedFormStatus: selectedData.value.type,
+        
       },
     });
   } else {
@@ -1513,8 +1518,9 @@ watch(activityData, (newVal) => {
 .tabs_list{
     position: sticky;
     top: 0;
-    background-color: #fff;
+    background-color: #fff !important;
     padding-bottom: 5px;
+    z-index: 1;
 }
 
 .pending {
@@ -1543,7 +1549,7 @@ watch(activityData, (newVal) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1;
+  z-index: 0;
   margin-top: 3px;
 }
 

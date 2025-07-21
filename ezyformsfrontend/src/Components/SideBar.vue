@@ -2,7 +2,14 @@
     <div class="">
         <div :class="['sidebar', { collapsed: props.collapsed }]">
             <!-- Title for the overall sidebar -->
-            <h1 class="font-12 m-0 text-muted ps-2" v-if="!collapsed">{{ sidebarTitle }}</h1>
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="font-12 m-0 text-muted ps-2" v-if="!collapsed">{{ sidebarTitle }} 
+            </h1>
+               <button class="btn border me-3 ms-2 toggle-btn" type="button" @click="toggleSidebar">
+                    <i v-if="!collapsed" class="bi bi-chevron-left fs-5"></i>
+                    <i v-if="collapsed" class="bi bi-chevron-right fs-5"></i>
+                </button>
+            </div>
 
             <aside class="mt-1">
                 <!-- Settings section title for first group -->
@@ -191,11 +198,14 @@ const filterObj = ref({
 });
 
 const props = defineProps({
-  collapsed: {
-    type: Boolean,
-    default: false
-  }
-});
+  collapsed: Boolean
+})
+
+const emit = defineEmits(['toggleSidebar'])
+
+const toggleSidebar = () => {
+  emit('toggleSidebar')
+}
 
 const formSideBarData = ref([])
 const settingsSideBarData = [
@@ -214,7 +224,7 @@ const settingsSideBarData = [
     { name: 'Activity Log', icon: 'bi bi-clock-history', route: 'activitylog' },
     { name: 'Audit Log', icon: 'bi bi-clock', route: 'auditlog' },
     { name: 'Form Creation' , icon: 'bi bi-file-earmark-text', route: 'CreateForm' },
-    // { name: 'Predefined Forms', icon: 'bi bi-file-earmark-text', route: 'predefinedforms' },
+    { name: 'Form Template', icon: 'bi bi-file-earmark-text', route: 'predefinedforms' },
     { name: 'Acknowledgement' , icon: 'bi bi-file-earmark-text', route: 'acknowledgement' },
     { name: 'Email Template' , icon: 'bi bi-file-earmark-text', route: 'emailtemplate' },
 
@@ -258,7 +268,7 @@ const userFormSideBarData = [
 const filteredSideBarData = computed(() => {
     return todoSideBarData.filter(item => {  
         if (item.name === "My Team") {
-            return userDesigination.value.includes("IT") || userDesigination.value.includes("HOD");
+            return is_admin.value == 1;
         }
         return true;
     });
@@ -295,15 +305,15 @@ const firstSettingsGroup = computed(() => settingsSideBarData.slice(0, 1)); // F
 // const forthSettingsGroup = computed(() => settingsSideBarData.slice(3));
 
 const filteredSettingsGroups = computed(() => {
-    return userDesigination.value.toLowerCase().includes('it')
+    return is_admin.value == 1
         ? {
             thirdSettingsGroup: settingsSideBarData.slice(1, 3),
             forthSettingsGroup: settingsSideBarData.slice(3, 6),
             fifthSettingsGroup: settingsSideBarData.slice(6,7),
             sixthGroup: settingsSideBarData.slice(7,9),
-            seventhGroup: settingsSideBarData.slice(9,10),
-            eightGroup: settingsSideBarData.slice(10,11),
-            ninthGroup: settingsSideBarData.slice(11),
+            seventhGroup: settingsSideBarData.slice(9,11),
+            eightGroup: settingsSideBarData.slice(11,12),
+            ninthGroup: settingsSideBarData.slice(12),
 
 
         }
@@ -318,6 +328,8 @@ const sidebarTitle = computed(() => {
         return 'Requests';
     } else if (isUserFormsRoute.value) {
         return 'Forms';
+    }else if (isSettingsRoute.value) {
+        return 'Settings';
     }
     return '';
 });
@@ -339,7 +351,7 @@ const baseRoute = computed(() => {
 const deptartmentData = ref([])
 const username = ref('');
 const userAdmin = ref('');
-const userDesigination = ref('');
+const is_admin = ref('');
 
 onMounted(() => {
     // gettingDepartmentNames()
@@ -360,7 +372,8 @@ onMounted(() => {
             userAdmin.value = userName.full_name;
             // userInitial.value = userData.emp_name.charAt(0).toUpperCase() || userData.full_name.charAt(0).toUpperCase();
             // userEmail.value = userData.name;
-            userDesigination.value = userData.designation || '';
+            is_admin.value = userData.is_admin || '';
+            
 
         }
     } else {
@@ -494,11 +507,12 @@ li:hover {
 }
 
 .sidebar {
-    height: 89.5dvh;
+    height: 90dvh;
     background-color: var(--sidebar-color);
     padding-top: 12px;
     border-radius: 10px;
     overflow-y: auto;
+    overflow-x: hidden;
     /* box-shadow: 4px 0 4px -2px #00000040; */
 
 }
@@ -549,5 +563,9 @@ li:hover {
 .sidebar li i {
   width: 24px;
 }
-
+.toggle-btn{
+    padding: 0px 4px;
+    border-radius: 10px;
+    
+}
 </style>

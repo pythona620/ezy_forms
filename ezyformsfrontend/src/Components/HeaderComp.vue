@@ -6,18 +6,16 @@
                 <div class="headerbackgound py-1">
                     <div class="row">
                         <div class="col-2">
-                            <div class="d-flex gap-2 align-items-center">
+                            <!-- <div class="d-flex gap-2 align-items-center">
                                 <div class="d-flex align-items-center">
                                     <button class="btn p-0 border-0" type="button" @click="toggleSidebar">
-                                        <i class="bi bi-list fs-3 ms-2"></i> <!-- Bootstrap hamburger icon -->
+                                        <i class="bi bi-list fs-3 ms-2"></i> 
                                     </button>
-                                    <img @click="logoClick" class="imgmix img-fluid"
-                                        src="../assets/Final-logo-ezyforms-removebg-preview.png" />
+                                    
                                 </div>
-                                <!-- <div class="m-0">
-                                    <p class="font-13 m-0">EZY | Forms</p>
-                                </div> -->
-                            </div>
+                            </div> -->
+                            <img  @click="logoClick" class="imgmix img-fluid"
+                                        src="../assets/Final-logo-ezyforms-removebg-preview.png" />
                         </div>
                         <div class="col-7">
                             <div class="mt-2 ms-2">
@@ -58,7 +56,7 @@
                                 </div>
                                 <div class="">
 
-                                    <FormFields tag="select" placeholder="" class="" name="roles" id="roles"
+                                    <FormFields tag="select" placeholder="" class="font-12" name="roles" id="roles"
                                         :Required="false" v-model="business_unit" :options="EzyFormsCompanys" />
                                 </div>
                                 <div class="logooutbtn m-0">
@@ -272,9 +270,11 @@ import { ref, onMounted, watch, computed, onUnmounted } from 'vue';
 const router = useRouter(); // Initialize router
 
 const emit = defineEmits(['toggleSidebar'])
+const isImageVisible = ref(true)
 
 function toggleSidebar() {
-  emit('toggleSidebar')
+  isImageVisible.value = !isImageVisible.value // Toggle image visibility
+  emit('toggleSidebar') // Emit event to parent if needed
 }
 
 // Define reactive variables
@@ -322,9 +322,8 @@ const SocketList = ref([])
 //IF THE USER DESIGNATION INCLUDES (IT) THEN ONLY FORM CREATION WILL APPREAR IN HEADER ""
 
 const filteredTabsData = computed(() => {
-    return userDesigination.value.toLowerCase().includes('it')
-        ? tabsData.value
-        : tabsData.value.filter(tab => tab.name !== 'Form Creation');
+    return tabsData.value
+       
 });
 function logout() {
     // localStorage.removeItem('UserName');
