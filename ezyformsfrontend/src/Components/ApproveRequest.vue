@@ -68,18 +68,18 @@
 
                   <!-- v-if="!requestcancelled" -->
                   <div class="approveBtns pb-2 mb-2 mt-3 flex-column px-0 pe-4">
-                    <div v-if="!canApprove & view_only_reportee === 1" class=" d-flex align-items-center gap-1">
+                    <!-- <div v-if="!canApprove & view_only_reportee === 1" class=" d-flex align-items-center gap-1">
 
                       <span class=" font-12 text-danger">
                         Note:
                       </span>
                       <span class=" fw-bold font-12">You don’t have permission to
                         Approve</span>
-                    </div>
+                    </div> -->
 
                     <div class="form-floating mb-2 p-1">
                       <!-- :disabled="view_only_reportee === 1" -->
-                      <textarea :disabled="!canApprove & view_only_reportee === 1" class="form-control font-12"
+                      <textarea  class="form-control font-12"
                         placeholder="Leave a comment here" id="floatingTextarea" @input="resetCommentsValidation"
                         :class="{ 'is-invalid': !isCommentsValid }" v-model="ApproverReason"></textarea>
                       <label class="font-11" for="floatingTextarea">Comments..</label>
@@ -87,7 +87,7 @@
                     </div>
                     <div class=" d-flex justify-content-between ">
                       <div>
-                        <button :disabled="rejectLoad || (!canApprove & view_only_reportee === 1)"
+                        <button :disabled="rejectLoad "
                           class="btn btn-outline-danger font-10 py-0 rejectbtn" type="button"
                           @click="ApproverCancelSubmission(formData, 'Reject')">
                           <span v-if="rejectLoad" class="spinner-border spinner-border-sm" role="status"
@@ -112,7 +112,7 @@
 
                         </div> -->
                         <div>
-                          <button :disabled="loading || (!canApprove & view_only_reportee === 1)" type="submit"
+                          <button :disabled="loading " type="submit"
                             class="btn btn-success approvebtn"
                             @click.prevent="ApproverFormSubmission(emittedFormData, 'Approve')">
                             <span v-if="loading" class="spinner-border spinner-border-sm" role="status"
@@ -241,11 +241,13 @@
                       : 'activityRedDot'"></div>
                     <div class="activity-log-content">
                       <p class="font-12 mb-1">
+                        
                         <span class="strong-content">{{ formatAction(item.action) }} on </span>
-                        <span class="strong-content">{{ formatCreation(item.creation) }}</span><br />
+                        <span class="strong-content">{{ formatCreation( item.time) }}</span><br />
                         <span class="strong-content">{{ item.user_name }}</span><br />
                         <span>{{ item.role }}</span><br />
                         <span class="font-12 text-secondary">{{ item.reason || "N/A" }}</span>.
+                        
                       </p>
                     </div>
                   </div>
@@ -464,10 +466,9 @@ const tableName = ref("");
 const responseData = ref([]);
 const employeeData = ref([]);
 const viewlist = ref([])
-const view_only_reportee = ref(0);
+// const view_only_reportee = ref(0);
 const linkedNew_Id = ref([]);
 const mainStandardForm = ref('')
-const canApprove = ref(false);
 const activeTab = ref("activity");
 const linkedActivity = ref([]);
 
@@ -478,8 +479,25 @@ const resetCommentsValidation = () => {
   }
 };
 function formatCreation(dateStr) {
-  return dateStr.slice(0, 16);
+  const [datePart, timePart] = dateStr.split(' ');
+  const [year, month, day] = datePart.split('/');
+  const [hour = '00', minute = '00', second = '00'] = timePart.split(':');
+
+  const formattedDate = [
+    day.padStart(2, '0'),
+    month.padStart(2, '0'),
+    year
+  ].join('-');
+
+  const formattedTime = [
+    hour.padStart(2, '0'),
+    minute.padStart(2, '0'),
+    second.padStart(2, '0')
+  ].join(':');
+
+  return `${formattedDate} ${formattedTime}`;
 }
+
 
 const ApprovePDF = ref(true)
 
@@ -1069,7 +1087,7 @@ function receivedForMe(data) {
       // console.log(JSON.parse(
       //   tableData.value?.json_columns
       // ).workflow, "workflow");
-      view_only_reportee.value = JSON.parse(tableData.value?.json_columns)?.workflow[selectedcurrentLevel.value]?.view_only_reportee;
+      // view_only_reportee.value = JSON.parse(tableData.value?.json_columns)?.workflow[selectedcurrentLevel.value]?.view_only_reportee;
       // console.log(" wrk === =>", view_only_reportee.value);
       tableHeaders.value = JSON.parse(
         tableData.value?.json_columns
@@ -1283,6 +1301,32 @@ function downloadPdf() {
 //     });
 // }
 
+// function Wfactivitylog(formname) {
+//   axiosInstance
+//     .get(`${apis.resource}${doctypes.WFActivityLog}/${formname}`)
+//     .then((res) => {
+//       if (res.data && Array.isArray(res.data.reason)) {
+//         const sortedReasons = res.data.reason.sort((a, b) => {
+//           const parseTime = (str) => {
+//             const [datePart, timePart] = str.split(' ');
+//             const [year, month, day] = datePart.split('/').map(Number);
+//             const [hour, minute, second, millisecond = 0] = timePart.split(':').map(Number);
+//             return new Date(year, month - 1, day, hour, minute, second, millisecond);
+//           };
+
+//           return parseTime(a.time) - parseTime(b.time); // ascending order
+//         });
+
+//         activityData.value = sortedReasons;
+//       } else {
+//         activityData.value = [];
+//       }
+//     })
+//     .catch((error) => {
+//       console.error("Error fetching activity data:", error);
+//     });
+// }
+
 function Wfactivitylog(formname) {
   axiosInstance
     .get(`${apis.resource}${doctypes.WFActivityLog}/${formname}`)
@@ -1290,13 +1334,20 @@ function Wfactivitylog(formname) {
       if (res.data && Array.isArray(res.data.reason)) {
         const sortedReasons = res.data.reason.sort((a, b) => {
           const parseTime = (str) => {
+            // str = "2025/7/16 12:9:56:795919"
             const [datePart, timePart] = str.split(' ');
             const [year, month, day] = datePart.split('/').map(Number);
-            const [hour, minute, second, millisecond = 0] = timePart.split(':').map(Number);
+
+            const timeParts = timePart.split(':').map(Number);
+            const hour = timeParts[0] || 0;
+            const minute = timeParts[1] || 0;
+            const second = timeParts[2] || 0;
+            const millisecond = timeParts[3] || 0;
+
             return new Date(year, month - 1, day, hour, minute, second, millisecond);
           };
 
-          return parseTime(a.time) - parseTime(b.time); // ascending order
+          return parseTime(a.time) - parseTime(b.time); // Sort in ascending order
         });
 
         activityData.value = sortedReasons;
@@ -1308,7 +1359,6 @@ function Wfactivitylog(formname) {
       console.error("Error fetching activity data:", error);
     });
 }
-
 
 function toLinkedForm() {
   if (tableData.value.is_linked_form && linked_status.value !== 'Completed') {
