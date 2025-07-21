@@ -826,31 +826,31 @@ template_str = """
                                                 </div>
                                             {% endif %}
                                         {% elif field.fieldtype == 'Attach' %}
-    {% if field['values'] %}
-        {% if field.fieldtype == 'Attach' and (field.fieldname.startswith('approved_by') or field.fieldname.startswith('requestor')or field.fieldname.startswith('acknowle')) %}
-            <img  
-                id="{{ field.fieldname }}" 
-                src="{{ site_url + field['values'] or '' }}" 
-                style="width: 80px; height: 40px; object-fit: contain;margin-top:-20px;"  
-                name="{{ field.fieldname }}"
-            >
-        {% else %}
-            <ul style="padding-left: 20px; margin: 5px 0;">
-                {% for file in field['values'].split(',') %}
-                    <li style="font-size:12px;">
-                        {{ file.strip().split('@')[-1] if '@' in file else file.strip().split('/')[-1] }}
-                    </li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    {% else %}
-        <input 
-            type="text" 
-            id="{{ field.fieldname }}" 
-            value="{{ field['values'] }}" 
-            name="{{ field.fieldname }}"
-        >
-    {% endif %}
+                                            {% if field['values'] %}
+                                                {% if field.fieldtype == 'Attach' and (field.fieldname.startswith('approved_by') or field.fieldname.startswith('requestor')or field.fieldname.startswith('acknowle')) %}
+                                                    <img  
+                                                        id="{{ field.fieldname }}" 
+                                                        src="{{ site_url + field['values'] or '' }}" 
+                                                        style="max-width: 60px; max-height: 50px; object-fit: contain;margin-top:-10px;"  
+                                                        name="{{ field.fieldname }}"
+                                                    >
+                                                {% else %}
+                                                    <ul style="padding-left: 20px; margin: 0px 0;">
+                                                        {% for file in field['values'].split(',') %}
+                                                            <li style="font-size:12px;">
+                                                                {{ file.strip().split('@')[-1] if '@' in file else file.strip().split('/')[-1] }}
+                                                            </li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                {% endif %}
+                                            {% else %}
+                                                <input 
+                                                    type="text" 
+                                                    id="{{ field.fieldname }}" 
+                                                    value="{{ field['values'] }}" 
+                                                    name="{{ field.fieldname }}"
+                                                >
+                                            {% endif %}
 
                                         {% elif field.fieldtype == 'Phone' %}
                                              <span id="{{ field.fieldname }}" style="font-size:13px; font-weight:500;" name="{{ field.fieldname }}" class="date-span">

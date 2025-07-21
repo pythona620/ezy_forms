@@ -7,7 +7,7 @@
 						<input type="checkbox" class="checkbox form-check-input" @change="SelectedAll()" />
 					</th> -->
           <th>#</th>
-          <th v-for="(column, index) in tHeaders" :key="index"
+          <th v-for="(column, index) in tHeaders" :key="index" class="resizable-th"
             :class="{ 'text-center': column.th === 'Users' || column.th === 'Status' || column.th === 'Enable/Disable' }">
             {{ column.th }}
           </th>
@@ -1003,5 +1003,12 @@ th:first-child {
 }
 .linked-id-redirect{
   cursor: pointer;
+}
+.resizable-th {
+  resize: horizontal;
+  overflow: auto;
+  min-width: 100px;
+  max-width: 500px;
+  white-space: nowrap;
 }
 </style>
