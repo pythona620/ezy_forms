@@ -196,7 +196,7 @@
             <h5 class="modal-title font-14 fw-bold" id="changePasswordLabel">
               Set New Password
             </h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" class="btn-close" @click="clearPassword()" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
             <!-- New Password Field -->
@@ -372,6 +372,7 @@ export default {
       selectedOption: "",
       saveloading: false,
       isAcknowledge: "",
+      ShowAcknowledgement:""
       // timeLeft: 60,
       // timer: null,
       // resentMessage: "",
@@ -417,6 +418,12 @@ export default {
         this.new_password && this.confirm_password && this.new_password !== this.confirm_password;
     },
 
+    clearPassword(){
+      this.new_password=""
+      this.confirm_password=""
+      this.passwordsMismatch=""
+      this.passwordError=""
+    },
     validateEmail() {
       const email = this.SignUpdata.email;
       const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -591,6 +598,17 @@ export default {
               }
               else if (res.message == 'Please contact your IT Manager to verify your sign-up') {
                 toast.success(res.message)
+              }
+              else if (res.message == 'Already registered but currently disabled') {
+                toast.error(res.message)
+              }
+              else {
+                toast.error(res.message)
+              }
+              const modal = bootstrap.Modal.getInstance(
+                document.getElementById("EmployeeToggleModal")
+              );
+              modal.hide();
                 this.ShowLoginPage = true;
                 this.showOtpPage = false;
                 this.ShowSignUpPage = false;
@@ -605,18 +623,6 @@ export default {
                 this.selectedOption = null;
                 this.signatureInputRef = null;
                 this.acknowledge = ""
-              }
-              else if (res.message == 'Already registered but currently disabled') {
-                toast.error(res.message)
-              }
-              else {
-                toast.error(res.message)
-              }
-              const modal = bootstrap.Modal.getInstance(
-                document.getElementById("EmployeeToggleModal")
-              );
-              modal.hide();
-
             }
 
           })
@@ -776,6 +782,7 @@ export default {
             this.user_id_name = res.message.name;
             this.enableCheck = res.message.enable_check
             this.isAcknowledge = res.message.is_acknowledge
+            this.ShowAcknowledgement=res.message.show_acknowledgement
 
             if (this.isFirstLogin === 0 && this.enableCheck === 1) {
               const modal = new bootstrap.Modal(
