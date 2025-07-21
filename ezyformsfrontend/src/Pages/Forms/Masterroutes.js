@@ -11,7 +11,7 @@ const Masterroutes = [
   {
     path: "/forms",
     component: MasterPage,
-    redirect: "/forms/department/Allforms",
+    redirect: "/forms/department/allforms",
     children: [
       {
         path: 'department/:id',

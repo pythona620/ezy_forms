@@ -441,14 +441,14 @@ watch(
 const PaginationUpdateValue = (itemsPerPage) => {
   filterObj.value.limitPageLength = itemsPerPage;
   filterObj.value.limit_start = 0;
-  fetchDepartmentDetails();
+    fetchDepartmentDetails(); 
 
 };
 // Handle updating the limit start
 const PaginationLimitStart = ([itemsPerPage, start]) => {
   filterObj.value.limitPageLength = itemsPerPage;
   filterObj.value.limit_start = start;
-  fetchDepartmentDetails();
+    fetchDepartmentDetails(); 
 
 };
 
@@ -505,7 +505,7 @@ function fetchDepartmentDetails(id, data) {
     ["form_status", "like", "created"],
 
   ];
-  if (props.id && props.id !== "Allforms" && props.id !== "allforms") {
+  if (props.id && props.id !== "allforms" && props.id !== "allforms") {
     console.log(props.id);
     filters.push(["owner_of_the_form", "=", props.id]);
   }
@@ -564,7 +564,7 @@ onMounted(() => {
   if (is_admin.value == 1) {
     isEnable.value = "true";
   }
-  if (route.path === "/forms/department/allforms" || route.path === "/forms/department/Allforms") {
+  if (route.path === "/forms/department/allforms" || route.path === "/forms/department/allforms") {
     router.replace("/forms/department/allforms");
   }
 

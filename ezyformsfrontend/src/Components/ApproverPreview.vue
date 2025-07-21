@@ -276,13 +276,13 @@
                           <!-- ✅ View Attachments Label for All Other Fields -->
                           <template v-else-if="field.value && field.value.length">
                              <span
-                                  class="cursor-pointer font-12 d-inline-flex align-items-center gap-1"
+                                  class="cursor-pointer font-12 d-inline-flex align-items-center mt-1 gap-1"
                                   @click="openAttachmentList(field.value)"
                                 >
-                                  <span class="text-dark text-decoration-underline">View</span>
+                                  <span class="text-dark text-decoration-underline font-12 ">View</span>
                                   <span>({{ field.value.split(',').filter(f => f.trim()).length }})</span>
                                   <i
-                                    class="bi bi-paperclip text-secondary"
+                                    class="bi bi-paperclip text-secondary "
                                     style="transform: rotate(-20deg) translateY(-1px); display: inline-block;"
                                   ></i>
                                 </span>
