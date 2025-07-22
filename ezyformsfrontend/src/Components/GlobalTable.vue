@@ -111,6 +111,17 @@
                 <i class="bi bi-circle-fill status-circle font-10 text-center pe-2"></i>
                 {{ row[column.td_key] === 'Created' ? 'Active' : 'Retired' }}
               </span>
+
+              <span v-else-if="column.td_key === 'installed'">
+                <i class="bi bi-circle-fill status-circle font-10 text-center pe-2" :class="{
+                  'text-success fw-medium': row[column.td_key] === 'Yes',
+                  'text-danger fw-medium': row[column.td_key] === 'No',
+                }"></i>
+                <span  class="tooltip-text" v-tooltip.top="row[column.td_key]">
+                  {{ row[column.td_key]  === 'Yes' ? 'Yes' : 'No' }} 
+                </span>
+              </span>
+
               <!-- Default Column Rendering -->
               <span class="tooltip-text" v-tooltip.top="formatDate(row[column.td_key])"
                 v-else-if="
@@ -124,15 +135,6 @@
                 {{ formatDate(row[column.td_key]) }}
               </span>
 
-              <span v-if="column.td_key === 'installed'">
-                <i class="bi bi-circle-fill status-circle font-10 text-center pe-2" :class="{
-                  'text-success fw-medium': row[column.td_key] === 'Yes',
-                  'text-danger fw-medium': row[column.td_key] === 'No',
-                }"></i>
-                <span class="tooltip-text" v-tooltip.top="row[column.td_key]">
-                  {{ row[column.td_key] }}
-                </span>
-              </span>
 
 
               <span
