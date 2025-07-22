@@ -1325,7 +1325,34 @@ function downloadPdf() {
 //     .catch((error) => {
 //       console.error("Error fetching activity data:", error);
 //     });
+// }  
+// function Wfactivitylog(formname) {
+//   axiosInstance
+//     .get(`${apis.resource}${doctypes.WFActivityLog}/${formname}`)
+//     .then((res) => {
+//       if (res.data && Array.isArray(res.data.reason)) {
+//         const parseTime = (str) => {
+//           const [datePart, timePart] = str.split(' ');
+//           const [year, month, day] = datePart.split('/').map(Number);
+//           const [hour, minute, second, ms] = timePart.split(':').map(Number);
+//           return new Date(year, month - 1, day, hour || 0, minute || 0, second || 0, ms || 0);
+//         };
+
+//         // Sort oldest first (ascending)
+//         res.data.reason.sort((a, b) => parseTime(a.time) - parseTime(b.time));
+
+//         activityData.value = res.data.reason;
+//       } else {
+//         activityData.value = [];
+//       }
+//     })
+//     .catch((error) => {
+//       console.error("Error fetching activity data:", error);
+//     });
 // }
+
+
+
 
 function Wfactivitylog(formname) {
   axiosInstance

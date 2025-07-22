@@ -12,7 +12,8 @@
           </p>
         </div>
         <div v-if="is_admin == 1" class="d-flex align-items-center gap-2">
-          <div class="d-flex align-items-center">
+          <div class="d-flex align-items-center gap-2">
+            <!-- <button class="btn btn-dark font-12 h-auto" @click="toWorkOrder">Work order</button> -->
             <ButtonComp class="buttoncomp" @click="formCreation()" name="Create Form"></ButtonComp>
           </div>
         </div>
@@ -187,7 +188,12 @@ function formCreation(item = null) {
   localStorage.setItem('routepath', route.path)
 }
 
-
+// function toWorkOrder (){
+//   router.push({
+//     name: "WorkOrderDetails",
+ 
+//       });
+// } 
 function viewPreview(data, index, type) {
   // console.log(route.path);
   if (type === "view") {
@@ -557,7 +563,7 @@ function fetchDepartmentDetails(id, data) {
 
   ];
   filterObj.value.filters.push(...filters);
-  if (props.id && props.id !== "Allforms" && props.id !== "allforms") {
+  if (props.id && props.id !== "allforms" && props.id !== "allforms") {
     filters.push(["owner_of_the_form", "=", props.id]);
   }
   if (data) {
@@ -613,7 +619,7 @@ onMounted(() => {
   if (is_admin.value == 1) {
     isEnable.value = "true";
   }
-  if (route.path === "/forms/department/allforms" || route.path === "/forms/department/Allforms") {
+  if (route.path === "/forms/department/allforms" || route.path === "/forms/department/allforms") {
     router.replace("/forms/department/allforms");
   }
 
