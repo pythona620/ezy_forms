@@ -247,11 +247,11 @@ function fetchTable(data) {
 
 
     const queryParams = {
-        fields: JSON.stringify(["*"]),
+        fields: JSON.stringify(["form_name", "installed"]),
         filters: JSON.stringify(filters),
         limit_page_length: "None",
         limit_start: filterObj.value.limit_start,
-        order_by: "`tabPredefined Doctype`.`installed` DESC",
+        order_by: "`installed` DESC",
 
     };
     const queryParamsCount = {
