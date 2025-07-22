@@ -256,7 +256,8 @@ const todoSideBarData = [
     { name: 'My Requests', icon: 'bi bi-send', route: 'raisedbyme' },
     { name: 'My Team Requests', icon: 'bi bi-people', route: 'myteam' },
     { name: 'My Approvals', icon: 'bi bi-clock-history', route: 'history' },
-    { name: 'Reports', icon: 'bi bi-gear', route: 'reports'}
+    { name: 'Reports', icon: 'bi bi-gear', route: 'reports'},
+    { name: 'insights', icon: 'bi-graph-up', route: 'insights'},
 
 ];
 const userFormSideBarData = [
