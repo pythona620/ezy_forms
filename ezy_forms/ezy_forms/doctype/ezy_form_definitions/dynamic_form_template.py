@@ -1392,19 +1392,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
             wf_generated_request_id = frappe.get_value(form_short_name, name, "wf_generated_request_id")
             activate_log = frappe.get_doc('WF Activity Log', wf_generated_request_id).as_dict()
 
-            filtered_reasons = [
-                {
-                    'level': entry['level'],
-                    'role': entry['role'],
-                    'user': entry['user'],
-                    'user_name': entry['user_name'],
-                    'reason': entry['reason'],
-                    'action': entry['action'],
-                    'time': entry['time'],
-                    'random_string': entry['random_string']
-                }
-                for entry in activate_log.get('reason', [])
-            ]
+            filtered_reasons = sorted([{ 'level': entry['level'],'role': entry['role'], 'user': entry['user'], 'user_name': entry['user_name'], 'reason': entry['reason'], 'action': entry['action'], 'time': entry['time'], 'random_string': entry['random_string']  }  for entry in activate_log.get('reason', [])  ],   key=lambda x: x['time'] )
 
             html_table_output = ""
             if filtered_reasons:
@@ -1514,7 +1502,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
             activate_pdf_name = "Activity Log .pdf"
             activate_pdf_path = os.path.join(attachment_folder, activate_pdf_name)
 
-            is_landscape = frappe.db.get_value("Ezy Form Definitions", form_short_name, "is_landscape")  # Set this according to your use case
+           
             opts = {"orientation": "Landscape" if is_landscape else "Portrait"}
 
             convert_html_to_pdf(html_content=html_view, pdf_path=absolute_pdf_path, options=opts)
@@ -1565,3 +1553,32 @@ def get_html_file_data(doc=None,data=None,print_format=None):
     html_file = get_html_and_style(doc,name=data,print_format=print_format,no_letterhead=None,letterhead=None,trigger_print=False,style=None,settings=None)
  
     return html_file
+
+
+
+
+frappe.whitelist()
+def get_wf_activate_log(wf_generated_request_id):
+    """Fetches the activity log for a given workflow request ID."""
+    try:
+        activate_log = frappe.get_doc('WF Activity Log', wf_generated_request_id).as_dict()
+        filtered_reasons = sorted(
+            [
+                {
+                    'level': entry['level'],
+                    'role': entry['role'],
+                    'user': entry['user'],
+                    'user_name': entry['user_name'],
+                    'reason': entry['reason'],
+                    'action': entry['action'],
+                    'time': entry['time'],
+                    'random_string': entry['random_string']
+                }
+                for entry in activate_log.get('reason', [])
+            ],
+            key=lambda x: x['time']
+        )
+        return filtered_reasons
+    except Exception as e:
+        frappe.log_error(f"Error fetching activity log: {e}")
+        return []

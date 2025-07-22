@@ -102,7 +102,7 @@
         <div class="row">
           <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
             <label class="font-13" for="email">Email<span class="text-danger ps-1">*</span></label>
-            <input class="form-control m-0" type="email" id="email" v-model="SignUpdata.email" @blur="validateEmail"
+            <input class="form-control m-0" type="email" id="email" v-model="SignUpdata.email" @blur="validateEmail" 
               :class="{ 'is-invalid': errors.email }" />
             <div class="invalid-feedback font-11 mt-1" v-if="errors.email">
               {{ errors.email }}
@@ -427,11 +427,34 @@ export default {
 
       if (!email) {
         this.errors.email = "Email is required *";
+        
       } else if (!regex.test(email)) {
         this.errors.email = "Please enter a valid email address *";
-      } else {
+      } 
+       else {
         delete this.errors.email;
       }
+ axiosInstance
+    .get(`${apis.loginCheckmethod}`, {
+      params: { user_id: this.SignUpdata.email },
+    })
+    .then((res) => {
+      // Case: User not found – clear error
+      if (res.message === "User not found") {
+        this.errors.email = '';
+      } 
+      // Case: res.message is an object (user exists) – show error
+      else if (typeof res.message === 'object' && res.message.user_id) {
+        this.errors.email = "Already Registered User";
+      }
+    })
+    .catch((error) => {
+      console.error("Login error: ", error);
+      this.errors.email = "Error checking email";
+    });
+
+
+
     },
     validatePhone() {
       const phone = this.SignUpdata.emp_phone;
@@ -544,6 +567,7 @@ export default {
       this.selectedOption = null;
       this.signatureInputRef = null;
       this.acknowledge = ""
+      this.errors = {};
 
     },
     // validateOtp() {

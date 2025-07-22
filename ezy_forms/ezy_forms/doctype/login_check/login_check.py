@@ -45,6 +45,8 @@ def update_is_first_value(user_id_name,company=None):
 @frappe.whitelist(allow_guest=True)
 def check_is_first_time_or_not(user_id,acknowledgement=None):
     try:
+        if not frappe.db.exists("Login Check", {"user_id": user_id}):
+            return "User not Found"
         if acknowledgement and user_id:
             frappe.db.set_value('Ezy Employee',user_id,'acknowledgement',acknowledgement)
             frappe.db.set_value('Ezy Employee',user_id,'acknowledge_on',now_datetime())

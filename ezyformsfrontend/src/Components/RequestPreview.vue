@@ -1394,7 +1394,7 @@ const handleFileUpload = async (event, row, fieldname) => {
 const tableFileUpload = (file, row, fieldname) => {
     return new Promise((resolve, reject) => {
         const randomNumber = generateRandomNumber();
-        const fileName = `mailfiles-${randomNumber}-@${file.name}`;
+        const fileName = `${randomNumber}-@${file.name}`;
 
         const formData = new FormData();
         formData.append("file", file, fileName);
@@ -2058,7 +2058,7 @@ const generateRandomNumber = () => {
 
 const uploadFile = (file, field, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) => {
     const randomNumber = generateRandomNumber();
-    let fileName = `mailfiles-${props.formName}${randomNumber}-@${file.name}`;
+    let fileName = `${props.formName}${randomNumber}-@${file.name}`;
 
     const formData = new FormData();
     formData.append("file", file, fileName);
