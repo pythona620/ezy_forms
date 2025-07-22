@@ -68,18 +68,18 @@
 
                   <!-- v-if="!requestcancelled" -->
                   <div class="approveBtns pb-2 mb-2 mt-3 flex-column px-0 pe-4">
-                    <div v-if="!canApprove & view_only_reportee === 1" class=" d-flex align-items-center gap-1">
+                    <!-- <div v-if="!canApprove & view_only_reportee === 1" class=" d-flex align-items-center gap-1">
 
                       <span class=" font-12 text-danger">
                         Note:
                       </span>
                       <span class=" fw-bold font-12">You don’t have permission to
                         Approve</span>
-                    </div>
+                    </div> -->
 
                     <div class="form-floating mb-2 p-1">
                       <!-- :disabled="view_only_reportee === 1" -->
-                      <textarea :disabled="!canApprove & view_only_reportee === 1" class="form-control font-12"
+                      <textarea  class="form-control font-12"
                         placeholder="Leave a comment here" id="floatingTextarea" @input="resetCommentsValidation"
                         :class="{ 'is-invalid': !isCommentsValid }" v-model="ApproverReason"></textarea>
                       <label class="font-11" for="floatingTextarea">Comments..</label>
@@ -87,7 +87,7 @@
                     </div>
                     <div class=" d-flex justify-content-between ">
                       <div>
-                        <button :disabled="rejectLoad || (!canApprove & view_only_reportee === 1)"
+                        <button :disabled="rejectLoad "
                           class="btn btn-outline-danger font-10 py-0 rejectbtn" type="button"
                           @click="ApproverCancelSubmission(formData, 'Reject')">
                           <span v-if="rejectLoad" class="spinner-border spinner-border-sm" role="status"
@@ -112,7 +112,7 @@
 
                         </div> -->
                         <div>
-                          <button :disabled="loading || (!canApprove & view_only_reportee === 1)" type="submit"
+                          <button :disabled="loading " type="submit"
                             class="btn btn-success approvebtn"
                             @click.prevent="ApproverFormSubmission(emittedFormData, 'Approve')">
                             <span v-if="loading" class="spinner-border spinner-border-sm" role="status"
@@ -241,11 +241,13 @@
                       : 'activityRedDot'"></div>
                     <div class="activity-log-content">
                       <p class="font-12 mb-1">
+                        
                         <span class="strong-content">{{ formatAction(item.action) }} on </span>
-                        <span class="strong-content">{{ formatCreation(item.creation) }}</span><br />
+                        <span class="strong-content">{{ formatCreation( item.time) }}</span><br />
                         <span class="strong-content">{{ item.user_name }}</span><br />
                         <span>{{ item.role }}</span><br />
                         <span class="font-12 text-secondary">{{ item.reason || "N/A" }}</span>.
+                        
                       </p>
                     </div>
                   </div>
@@ -464,10 +466,9 @@ const tableName = ref("");
 const responseData = ref([]);
 const employeeData = ref([]);
 const viewlist = ref([])
-const view_only_reportee = ref(0);
+// const view_only_reportee = ref(0);
 const linkedNew_Id = ref([]);
 const mainStandardForm = ref('')
-const canApprove = ref(false);
 const activeTab = ref("activity");
 const linkedActivity = ref([]);
 
@@ -478,8 +479,25 @@ const resetCommentsValidation = () => {
   }
 };
 function formatCreation(dateStr) {
-  return dateStr.slice(0, 16);
+  const [datePart, timePart] = dateStr.split(' ');
+  const [year, month, day] = datePart.split('/');
+  const [hour = '00', minute = '00', second = '00'] = timePart.split(':');
+
+  const formattedDate = [
+    day.padStart(2, '0'),
+    month.padStart(2, '0'),
+    year
+  ].join('-');
+
+  const formattedTime = [
+    hour.padStart(2, '0'),
+    minute.padStart(2, '0'),
+    second.padStart(2, '0')
+  ].join(':');
+
+  return `${formattedDate} ${formattedTime}`;
 }
+
 
 const ApprovePDF = ref(true)
 
@@ -530,11 +548,11 @@ watch(
     business_unit.value = local
     if (newVal) {
       // console.log(business_unit.value, newVal, "ll");
-      if (selectedData.value.type === "mytasks") {
-        ViewOnlyRe();
-      } else {
+      // if (selectedData.value.type === "mytasks") {
+      //   ViewOnlyRe();
+      // } else {
         receivedForMe()
-      }
+      // }
     }
   },
   { immediate: true }
@@ -825,79 +843,79 @@ function DynamicCalculateMethod() {
       console.error("Error fetching data:", error);
     });
 }
-async function SaveDocWithoutApprove(request_id) {
-  saveloading.value = true;
-  let form = {
-    ...childtablesData.value
-  };
-  if (Array.isArray(emittedFormData.value) && emittedFormData.value.length) {
-    emittedFormData.value.forEach((each) => {
-      form[each.fieldname] = each.value;
-    });
-  }
-  // try {
-  //   // ✅ Submit child table data first
-  //   await ChildTableData();
-  // } catch (error) {
-  //   toast.error("❌ Child table submission failed");
-  //   loading.value = false;
-  //   return;
-  // }
-  // console.log(loading.value, dataObj, type, form);
+// async function SaveDocWithoutApprove(request_id) {
+//   saveloading.value = true;
+//   let form = {
+//     ...childtablesData.value
+//   };
+//   if (Array.isArray(emittedFormData.value) && emittedFormData.value.length) {
+//     emittedFormData.value.forEach((each) => {
+//       form[each.fieldname] = each.value;
+//     });
+//   }
+//   // try {
+//   //   // ✅ Submit child table data first
+//   //   await ChildTableData();
+//   // } catch (error) {
+//   //   toast.error("❌ Child table submission failed");
+//   //   loading.value = false;
+//   //   return;
+//   // }
+//   // console.log(loading.value, dataObj, type, form);
 
-  axiosInstance
-    .put(`${apis.resource}${selectedData.value.doctype_name}/${doctypeForm.value.name}`, form)
-    .then((response) => {
-      if (response?.data) {
+//   axiosInstance
+//     .put(`${apis.resource}${selectedData.value.doctype_name}/${doctypeForm.value.name}`, form)
+//     .then((response) => {
+//       if (response?.data) {
 
-        const EmpRequestdesignation = JSON.parse(
-          localStorage.getItem("employeeData")
-        );
-        // console.log(EmpRequestdesignation,"emp data");
+//         const EmpRequestdesignation = JSON.parse(
+//           localStorage.getItem("employeeData")
+//         );
+//         // console.log(EmpRequestdesignation,"emp data");
 
-        let data = {
-          request_id: request_id,
-          reason: ApproverReason.value ? ApproverReason.value : "Approved",
-          current_level: selectedcurrentLevel.value,
-          user: EmpRequestdesignation.emp_mail_id,
-          role: EmpRequestdesignation.designation
-        };
+//         let data = {
+//           request_id: request_id,
+//           reason: ApproverReason.value ? ApproverReason.value : "Approved",
+//           current_level: selectedcurrentLevel.value,
+//           user: EmpRequestdesignation.emp_mail_id,
+//           role: EmpRequestdesignation.designation
+//         };
 
-        axiosInstance
-          .post(apis.ActivitySaveComment, data)
-          .then((response) => {
-            if (response?.message?.success === true) {
-              ApproverReason.value = ""; // Clear reason after success
-              saveloading.value = false
-              window.location.reload()
-              // receivedForMe()
+//         axiosInstance
+//           .post(apis.ActivitySaveComment, data)
+//           .then((response) => {
+//             if (response?.message?.success === true) {
+//               ApproverReason.value = ""; // Clear reason after success
+//               saveloading.value = false
+//               window.location.reload()
+//               // receivedForMe()
 
-            } else {
-              toast.error(`Failed to request`, { autoClose: 1000, transition: "zoom" });
-            }
-          })
-          .catch((error) => {
-            console.error("Error processing request:", error);
-            toast.error("An error occurred while processing your request.", { autoClose: 1000, transition: "zoom" });
-          })
+//             } else {
+//               toast.error(`Failed to request`, { autoClose: 1000, transition: "zoom" });
+//             }
+//           })
+//           .catch((error) => {
+//             console.error("Error processing request:", error);
+//             toast.error("An error occurred while processing your request.", { autoClose: 1000, transition: "zoom" });
+//           })
 
 
 
-      } else {
-        loading.value = false; // Stop loader on failure
-        toast.error("Failed to submit form", { autoClose: 1000, transition: "zoom" });
-      }
-    })
-    .catch((error) => {
-      console.error("Error submitting form:", error);
-      loading.value = false; // Stop loader on error
-      toast.error("An error occurred while submitting the form.", { autoClose: 1000, transition: "zoom" });
-    });
-  // console.log(request_id,"data");
-  // console.log(selectedcurrentLevel.value,"current level");
-  // console.log(ApproverReason.value,"reason");
+//       } else {
+//         loading.value = false; // Stop loader on failure
+//         toast.error("Failed to submit form", { autoClose: 1000, transition: "zoom" });
+//       }
+//     })
+//     .catch((error) => {
+//       console.error("Error submitting form:", error);
+//       loading.value = false; // Stop loader on error
+//       toast.error("An error occurred while submitting the form.", { autoClose: 1000, transition: "zoom" });
+//     });
+//   // console.log(request_id,"data");
+//   // console.log(selectedcurrentLevel.value,"current level");
+//   // console.log(ApproverReason.value,"reason");
 
-}
+// }
 
 
 function ApproverCancelSubmission(dataObj, type) {
@@ -1008,7 +1026,7 @@ function receivedForMe(data) {
     localStorage.getItem("employeeData")
   );
   const filters = [
-    ["property", "like", `%${selectedData.value.business_unit}%`],
+    ["property", "like", `%${businessUnit.value}%`],
     ["name", "like", `%${selectedData.value.formname}%`],
   ];
   if (data) {
@@ -1028,10 +1046,7 @@ function receivedForMe(data) {
 
   const queryParams = {
     fields: JSON.stringify(["*"]),
-    limit_page_length: filterObj.value.limitPageLength,
-    limit_start: filterObj.value.limit_start,
     filters: JSON.stringify(filters),
-    order_by: "`tabWF Workflow Requests`.`creation` desc",
   };
 
   // const queryParamsCount = {
@@ -1072,7 +1087,7 @@ function receivedForMe(data) {
       // console.log(JSON.parse(
       //   tableData.value?.json_columns
       // ).workflow, "workflow");
-      view_only_reportee.value = JSON.parse(tableData.value?.json_columns)?.workflow[selectedcurrentLevel.value]?.view_only_reportee;
+      // view_only_reportee.value = JSON.parse(tableData.value?.json_columns)?.workflow[selectedcurrentLevel.value]?.view_only_reportee;
       // console.log(" wrk === =>", view_only_reportee.value);
       tableHeaders.value = JSON.parse(
         tableData.value?.json_columns
@@ -1170,31 +1185,31 @@ function getdata(formname) {
       console.error("Error fetching categories data:", error);
     });
 }
-function ViewOnlyRe() {
-  const queryParams = {
-    fields: JSON.stringify(["*"]),
-    limit_page_length: "None",
-    limit_start: 0,
+// function ViewOnlyRe() {
+//   const queryParams = {
+//     fields: JSON.stringify(["*"]),
+//     limit_page_length: "None",
+//     limit_start: 0,
 
-  };
+//   };
 
-  axiosInstance
-    .post(apis.view_only_reportee, {
-      params: queryParams,
-    })
-    .then((response) => {
+//   axiosInstance
+//     .post(apis.view_only_reportee, {
+//       params: queryParams,
+//     })
+//     .then((response) => {
 
-      viewlist.value = response.message;
+//       viewlist.value = response.message;
 
-      canApprove.value = viewlist.value.includes(selectedData.value.formname);
-      receivedForMe()
+//       canApprove.value = viewlist.value.includes(selectedData.value.formname);
+//       receivedForMe()
 
-    })
-    .catch((error) => {
-      console.log(error);
-    });
+//     })
+//     .catch((error) => {
+//       console.log(error);
+//     });
 
-}
+// }
 function viewasPdfView() {
 
   ApprovePDF.value = !ApprovePDF.value;
@@ -1286,13 +1301,58 @@ function downloadPdf() {
 //     });
 // }
 
+// function Wfactivitylog(formname) {
+//   axiosInstance
+//     .get(`${apis.resource}${doctypes.WFActivityLog}/${formname}`)
+//     .then((res) => {
+//       if (res.data && Array.isArray(res.data.reason)) {
+//         const sortedReasons = res.data.reason.sort((a, b) => {
+//           const parseTime = (str) => {
+//             const [datePart, timePart] = str.split(' ');
+//             const [year, month, day] = datePart.split('/').map(Number);
+//             const [hour, minute, second, millisecond = 0] = timePart.split(':').map(Number);
+//             return new Date(year, month - 1, day, hour, minute, second, millisecond);
+//           };
+
+//           return parseTime(a.time) - parseTime(b.time); // ascending order
+//         });
+
+//         activityData.value = sortedReasons;
+//       } else {
+//         activityData.value = [];
+//       }
+//     })
+//     .catch((error) => {
+//       console.error("Error fetching activity data:", error);
+//     });
+// }
+
 function Wfactivitylog(formname) {
   axiosInstance
     .get(`${apis.resource}${doctypes.WFActivityLog}/${formname}`)
     .then((res) => {
-      if (res.data) {
-        // console.log("Activity Data:", res.data);
-        activityData.value = res.data.reason || []; // Ensure it's always an array
+      if (res.data && Array.isArray(res.data.reason)) {
+        const sortedReasons = res.data.reason.sort((a, b) => {
+          const parseTime = (str) => {
+            // str = "2025/7/16 12:9:56:795919"
+            const [datePart, timePart] = str.split(' ');
+            const [year, month, day] = datePart.split('/').map(Number);
+
+            const timeParts = timePart.split(':').map(Number);
+            const hour = timeParts[0] || 0;
+            const minute = timeParts[1] || 0;
+            const second = timeParts[2] || 0;
+            const millisecond = timeParts[3] || 0;
+
+            return new Date(year, month - 1, day, hour, minute, second, millisecond);
+          };
+
+          return parseTime(a.time) - parseTime(b.time); // Sort in ascending order
+        });
+
+        activityData.value = sortedReasons;
+      } else {
+        activityData.value = [];
       }
     })
     .catch((error) => {

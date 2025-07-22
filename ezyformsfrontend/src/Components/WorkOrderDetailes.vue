@@ -1,15 +1,16 @@
 <template>
   <div class="container-fluid">
     <div class=" p-3">
-      
+
       <div class="d-flex justify-content-between align-items-center back_div mb-2">
-                <div><button class="font-12 m-0 btn" @click="router.back()"> <i class="bi bi-chevron-left"></i> Back</button></div>
-                <div>
-                  <button class="btn btn-outline-secondary btn-sm me-2" @click="previewComparison">Preview
-                    comparison</button>
-                  <button class="btn btn-secondary btn-sm" @click="submitComparison">Submit comparison</button>
-                </div>
-              </div>
+        <div><button class="font-12 m-0 btn" @click="router.back()"> <i class="bi bi-chevron-left"></i> Back</button>
+        </div>
+        <div>
+          <button class="btn btn-outline-secondary btn-sm me-2" @click="previewComparison">Preview
+            comparison</button>
+          <button class="btn btn-secondary btn-sm" @click="submitComparison">Submit comparison</button>
+        </div>
+      </div>
 
       <div class="accordion " id="accordionExample">
         <!-- Item Details Accordion -->
@@ -22,7 +23,7 @@
           </h2>
           <div id="collapseItems" class="accordion-collapse collapse show">
             <div class="accordion-body">
-              
+
               <table class="table table-bordered shadow rounded-table">
                 <thead class="table-light  ">
                   <tr>
@@ -36,7 +37,7 @@
                 <tbody>
                   <tr v-for="(item, index) in itemDetails" :key="index">
                     <td width="3%"><input type="checkbox" v-model="item.selected"></td>
-                    <td>
+                    <td @click="editItem(index)">
                       <template v-if="editingIndex === index">
                         <input v-model="item.name" class="form-control form-control-sm">
                       </template>
@@ -44,7 +45,7 @@
                         {{ item.name }}
                       </template>
                     </td>
-                    <td>
+                    <td @click="editItem(index)">
                       <template v-if="editingIndex === index">
                         <input v-model="item.unit" class="form-control form-control-sm">
                       </template>
@@ -52,7 +53,7 @@
                         {{ item.unit }}
                       </template>
                     </td>
-                    <td>
+                    <td @click="editItem(index)">
                       <template v-if="editingIndex === index">
                         <input v-model="item.quantity" type="number" class="form-control form-control-sm">
                       </template>
@@ -75,7 +76,8 @@
               </table>
 
               <div>
-                <button  class="btn btn-danger btn-sm" @click="deleteSelectedItems"><i class="bi bi-trash"></i> Delete Item</button>
+                <button class="btn btn-danger btn-sm" @click="deleteSelectedItems"><i class="bi bi-trash"></i> Delete
+                  Item</button>
                 <button class="btn btn-outline-secondary btn-sm ms-2" @click="addItem">+ Add Item</button>
               </div>
             </div>
@@ -92,7 +94,7 @@
           </h2>
           <div id="collapseVendors" class="accordion-collapse collapse">
             <div class="accordion-body">
-             
+
 
               <table class="table table-bordered shadow rounded-table">
                 <thead class="table-light">
@@ -124,7 +126,8 @@
               </table>
 
               <div>
-                <button class="btn btn-danger btn-sm" @click="deleteSelectedVendors"><i class="bi bi-trash"></i> Delete Vendor</button>
+                <button class="btn btn-danger btn-sm" @click="deleteSelectedVendors"><i class="bi bi-trash"></i> Delete
+                  Vendor</button>
                 <button class="btn btn-outline-secondary btn-sm ms-2" @click="addVendorModal">+ Add Vendor</button>
               </div>
             </div>
@@ -140,7 +143,8 @@
               <h6 class="fw-bold">Editing Row #{{ editingVendorIndex + 1 }}</h6>
               <div>
                 <button class="btn btn-outline-danger btn-sm me-2" data-bs-dismiss="modal">Close</button>
-                <button class="btn btn-primary save_vendor btn-sm" @click="saveVendorDetails">Save Vendor details</button>
+                <button class="btn btn-primary save_vendor btn-sm" @click="saveVendorDetails">Save Vendor
+                  details</button>
               </div>
             </div>
 
@@ -165,10 +169,10 @@
               </div>
 
 
-            <div class="col-md-6">
-              <label class="form-label">Attachments</label>
-              <input type="file" multiple class="form-control form-control-sm">
-            </div>
+              <div class="col-md-6">
+                <label class="form-label">Attachments</label>
+                <input type="file" multiple class="form-control form-control-sm">
+              </div>
             </div>
 
             <div class="mb-3">
@@ -188,23 +192,19 @@
                   <tr v-for="(item, index) in vendorForm.items" :key="index">
                     <td width="3%"><input type="checkbox" v-model="item.selected"></td>
                     <td>
-                      
-                        {{ item.name }}
-                      
+
+                      {{ item.name }}
+
                     </td>
                     <td>
-                     
-                        {{ item.quantity }}
-                    
+
+                      {{ item.quantity }}
+
                     </td>
-                   <td @click="editItemInModal(index)">
+                    <td @click="editItemInModal(index)">
                       <template v-if="editingItemIndex === index">
-                        <input @blur="saveEditedItem" @focus="editItemInModal(index)"
-                          v-model.number="item.unitPrice"
-                          @change="updateTotalPrice(item)"
-                          type="number"
-                          class="form-control form-control-sm"
-                        >
+                        <input @blur="saveEditedItem" @focus="editItemInModal(index)" v-model.number="item.unitPrice"
+                          @change="updateTotalPrice(item)" type="number" class="form-control form-control-sm">
                       </template>
                       <template v-else>
                         ₹ {{ item.unitPrice }}
@@ -240,7 +240,7 @@
                   <option>Paid delivery</option>
                 </select>
               </div>
-             
+
               <div class="col-md-3">
                 <label class="form-label">Bidder rank</label>
                 <select v-model="vendorForm.rank" class="form-select form-select-sm">
@@ -255,7 +255,7 @@
               </div>
             </div>
             <div class="row g-2">
-               <div class="col-md-3">
+              <div class="col-md-3">
                 <label class="form-label">Delivery time (in days)</label>
                 <input v-model="vendorForm.deliveryTime" class="form-control form-control-sm">
               </div>
@@ -267,7 +267,8 @@
 
             <div class="mt-3">
               <label class="form-label">Remark</label>
-              <input v-model="vendorForm.remark" class="form-control form-control-sm">
+              <textarea v-model="vendorForm.remark" name="remarks" class=" form-control" id=""></textarea>
+              <!-- <input v-model="vendorForm.remark" class="form-control form-control-sm"> -->
             </div>
 
           </div>
@@ -275,73 +276,127 @@
       </div>
     </div>
     <!-- Comparison Modal -->
-<div class="modal fade" id="comparisonModal" tabindex="-1">
-  <div class="modal-dialog modal-xl">
-    <div class="modal-content p-4">
-      <div class="d-flex justify-content-between mb-3">
-        <h6 class="fw-bold">Preview Comparison</h6>
-        <button class="btn btn-outline-danger btn-sm" data-bs-dismiss="modal">Close</button>
+    <div class="modal fade" id="comparisonModal" tabindex="-1">
+      <div class="modal-dialog modal-xl">
+        <div class="modal-content p-4">
+          <div class="d-flex justify-content-between mb-3">
+            <h6 class="fw-bold">Preview Comparison</h6>
+            <button class="btn btn-outline-danger btn-sm" data-bs-dismiss="modal">Close</button>
+          </div>
+
+          <!-- Dynamic Comparison Table -->
+          <table class="table table-bordered">
+            <thead class="table-light">
+              <tr>
+                <th>Item name</th>
+                <th v-for="vendor in vendorDetails" :key="vendor.name">
+                  {{ vendor.name }} <span class="text-muted">(rate/unit)</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="item in itemDetails" :key="item.name">
+                <td>
+                  {{ item.name }} <span class="badge bg-secondary">{{ item.quantity }} {{ item.unit }}</span>
+                </td>
+                <td v-for="vendor in vendorDetails" :key="vendor.name">
+                  ₹ {{ getVendorItemPrice(vendor, item.name) }}
+                </td>
+              </tr>
+              <tr>
+                <td>Total</td>
+                <td v-for="vendor in vendorDetails" :key="vendor.name">
+                  <b>₹ {{ getVendorTotal(vendor) }}</b> /total qty
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Company Details -->
+          <h6 class="mt-4">Company Details</h6>
+          <table class="table table-bordered">
+            <thead class="table-light">
+              <tr>
+                <th>Vendor Name</th>
+                <th v-for="vendor in vendorDetails" :key="vendor.name">
+                  {{ vendor.name }}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Payment terms</td>
+                <td v-for="vendor in vendorDetails" :key="vendor.name">
+                  {{ vendor.paymentTerms || '-' }}
+                </td>
+              </tr>
+              <tr>
+                <td>GST</td>
+                <td v-for="vendor in vendorDetails" :key="vendor.name">
+                  {{ vendor.gst || '-' }}
+                </td>
+              </tr>
+              <tr>
+                <td>Delivery</td>
+                <td v-for="vendor in vendorDetails" :key="vendor.name">
+                  {{ vendor.deliveryTime || '-' }}
+                </td>
+              </tr>
+              <tr>
+                <td>Bid Rank</td>
+                <td v-for="vendor in vendorDetails" :key="vendor.name">
+                  {{ vendor.rank }}
+                </td>
+              </tr>
+              <tr>
+                <td>Transport charges</td>
+                <td v-for="vendor in vendorDetails" :key="vendor.name">
+                  {{ vendor.transport || '-' }}
+                </td>
+              </tr>
+              <tr>
+                <td>Attachments</td>
+                <td v-for="vendor in vendorDetails" :key="vendor.name">
+                  <span class="text-primary" style="cursor: pointer" @click="openPreview(vendor.attachmentUrl)">
+                    Preview attachment
+                  </span>
+                </td>
+              </tr>
+
+              <tr>
+                <td>Comments</td>
+                <td v-for="vendor in vendorDetails" :key="vendor.name">
+                  {{ vendor.remark || '-' }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+        </div>
       </div>
-
-      <!-- Dynamic Comparison Table -->
-      <table class="table table-bordered">
-        <thead class="table-light">
-          <tr>
-            <th>Item name</th>
-            <th v-for="vendor in vendorDetails" :key="vendor.name">
-              {{ vendor.name }} <span class="text-muted">(rate/unit)</span>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="item in itemDetails" :key="item.name">
-            <td>
-              {{ item.name }} <span class="badge bg-secondary">{{ item.quantity }} {{ item.unit }}</span>
-            </td>
-            <td v-for="vendor in vendorDetails" :key="vendor.name">
-              ₹ {{ getVendorItemPrice(vendor, item.name) }}
-            </td>
-          </tr>
-          <tr>
-            <td>Total</td>
-            <td v-for="vendor in vendorDetails" :key="vendor.name">
-              <b>₹ {{ getVendorTotal(vendor) }}</b> /total qty
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      <!-- Company Details -->
-      <h6 class="mt-4">Company Details</h6>
-      <table class="table table-bordered">
-        <thead class="table-light">
-          <tr>
-            <th>Vendor name</th>
-            <th>Payment terms</th>
-            <th>GST</th>
-            <th>Delivery</th>
-            <th>Biddle rank</th>
-            <th>Transport charges</th>
-            <th>Attachments</th>
-            <th>Comments</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="vendor in vendorDetails" :key="vendor.name">
-            <td>{{ vendor.name }}</td>
-            <td>{{ vendor.paymentTerms || '-' }}</td>
-            <td>{{ vendor.gst || '-' }}</td>
-            <td>{{ vendor.deliveryTime || '-' }}</td>
-            <td>{{ vendor.rank }}</td>
-            <td>{{ vendor.transport || '-' }}</td>
-            <td><span class="text-primary">Preview attachment</span></td>
-            <td>{{ vendor.remark || '-' }}</td>
-          </tr>
-        </tbody>
-      </table>
+    </div>
+    <!-- Preview Modal -->
+<div class="modal fade" id="filePreviewModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Attachment Preview</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <!-- File preview -->
+        <iframe
+          v-if="previewUrl"
+          :src="previewUrl"
+          style="width: 100%; height: 600px;"
+          frameborder="0"
+        ></iframe>
+        <p v-else>No preview available.</p>
+      </div>
     </div>
   </div>
 </div>
+
 
   </div>
 </template>
@@ -349,7 +404,7 @@
 <script setup>
 import { watch } from 'vue';
 import { ref } from 'vue';
-import { useRoute, useRouter} from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 
 const route = useRoute();
 const router = useRouter()
@@ -367,9 +422,15 @@ const vendorDetails = ref([
   { rank: 4, name: 'Robert Wilson Pvt Ltd', gst: '330293878240', contact: '9032873873', email: 'Mail1989@gmail.com', totalValue: '', selected: false },
   { rank: 1, name: 'Sophia Martin Pvt Ltd', gst: '1NH762587654', contact: '9819675625', email: 'Badoi197@gmail.com', totalValue: '', selected: false }
 ]);
- 
+const previewUrl = ref(null)
 
-const editingIndex = ref(null); 
+function openPreview(url) {
+  previewUrl.value = url
+  const modal = new bootstrap.Modal(document.getElementById('filePreviewModal'))
+  modal.show()
+}
+
+const editingIndex = ref(null);
 function addVendorModal() {
   vendorForm.value = {
     name: '',
@@ -381,7 +442,7 @@ function addVendorModal() {
     paymentTerms: '',
     rank: 'L1',
     remark: '',
-    totalValue:'',
+    totalValue: '',
     items: JSON.parse(JSON.stringify(itemDetails.value))  // copy the main itemDetails
   };
 
@@ -517,7 +578,7 @@ function saveEditedItem() {
 
 // Cancel the editing and restore the backup
 function cancelEditItem() {
-  
+
   if (editingItemIndex.value !== null) {
     vendorForm.value.items[editingItemIndex.value] = { ...backupItem.value };
   }
@@ -562,31 +623,30 @@ function previewComparison() {
 </script>
 
 <style lang="scss" scoped>
-
 /* Add rounded corners to the entire table */
 .table {
   // border-collapse: separate;
   // border-spacing: 0;
-  border-radius: 8px;
+  border-radius: 2px;
   overflow: hidden;
 }
 
 /* Optional: Add rounded corners to the top header row */
 .table thead tr:first-child th:first-child {
-  border-top-left-radius: 8px;
+  border-top-left-radius: 2px;
 }
 
 .table thead tr:first-child th:last-child {
-  border-top-right-radius: 8px;
+  border-top-right-radius: 2px;
 }
 
 /* Optional: Add rounded corners to the bottom row */
 .table tbody tr:last-child td:first-child {
-  border-bottom-left-radius: 8px;
+  border-bottom-left-radius: 2px;
 }
 
 .table tbody tr:last-child td:last-child {
-  border-bottom-right-radius: 8px;
+  border-bottom-right-radius: 2px;
 }
 
 /* Optional: Add a subtle box shadow */
@@ -605,71 +665,90 @@ function previewComparison() {
   font-weight: 500;
   font-size: 13px;
 }
-.table td{
+
+.table td {
   color: #000000;
   font-weight: 500;
   font-size: 13px;
 }
-.btn-danger{
-  border-radius:6px ;
+
+.btn-danger {
+  border-radius: 6px;
   font-size: 11px;
 }
+
 .accordion-button.collapsed {
   background-color: #fff;
-  box-shadow: none; /* Optional: remove the default shadow */
+  box-shadow: none;
+  /* Optional: remove the default shadow */
   font-size: 14px;
   color: #000;
 }
+
 .accordion-button {
-  background-color: #fff; /* light background when expanded, adjust as needed */
+  background-color: #fff;
+  /* light background when expanded, adjust as needed */
   height: 50px;
 }
-.accordion-button:focus{
+
+.accordion-button:focus {
   box-shadow: none;
 
 }
+
 .accordion-button:not(.collapsed) {
-  background-color: #fff; /* or any color you prefer */
-  color: #333333;            /* optional: adjust text color */
+  background-color: #fff;
+  /* or any color you prefer */
+  color: #333333;
+  /* optional: adjust text color */
 }
 
 /* Collapsed state */
 .accordion-button.collapsed {
   background-color: #fff !important;
-  color: #666666;            /* optional: adjust text color when collapsed */
-  box-shadow: none;          /* optional: remove the Bootstrap box-shadow */
+  color: #666666;
+  /* optional: adjust text color when collapsed */
+  box-shadow: none;
+  /* optional: remove the Bootstrap box-shadow */
 }
+
 /* Adjust spacing, if required */
-.bi-pencil-square{
+.bi-pencil-square {
   font-size: 12px;
   cursor: pointer;
 }
-.form-control{
+
+.form-control {
   border-radius: 10px;
   font-size: 12px;
 }
-.form-label{
-font-size: 12px;
-}
-.save_vendor{
-  background-color: #1B14DF !important;
-}
-.form-select{
-    border-radius: 10px;
+
+.form-label {
   font-size: 12px;
 }
-.btn-outline-secondary{
+
+.save_vendor {
+  background-color: #1B14DF !important;
+}
+
+.form-select {
+  border-radius: 10px;
+  font-size: 12px;
+}
+
+.btn-outline-secondary {
   font-size: 12px !important;
 }
-.accordion{
+
+.accordion {
   box-shadow: 2px 3px 4px 0px #0000000D;
-box-shadow: -2px -3px 14px 0px #0000000D;
+  box-shadow: -2px -3px 14px 0px #0000000D;
 
 }
-.back_div{
+
+.back_div {
   background-color: #FAFAFA;
   padding: 5px;
   border-radius: 6px;
 }
-
 </style>
