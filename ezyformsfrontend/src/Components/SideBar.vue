@@ -1,20 +1,27 @@
 <template>
     <div class="">
-        <div class="sidebar pt-2">
+        <div :class="['sidebar', { collapsed: props.collapsed }]">
             <!-- Title for the overall sidebar -->
-            <h1 class="font-12 m-0 text-muted ps-2">{{ sidebarTitle }}</h1>
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="font-12 m-0 text-muted ps-2" v-if="!collapsed">{{ sidebarTitle }} 
+            </h1>
+               <button class="btn border me-3 ms-2 toggle-btn" type="button" @click="toggleSidebar">
+                    <i v-if="!collapsed" class="bi bi-chevron-left fs-5"></i>
+                    <i v-if="collapsed" class="bi bi-chevron-right fs-5"></i>
+                </button>
+            </div>
 
             <aside class="mt-1">
                 <!-- Settings section title for first group -->
                 <template v-if="isSettingsRoute">
-                    <h2 class="font-10 m-0 text-muted ps-2">{{ firstSettingsTitle }}</h2>
+                    <h2 class="font-10 m-0 text-muted ps-2" v-if="!collapsed">{{ firstSettingsTitle }}</h2>
                     <ul class="list-unstyled">
                         <router-link v-for="(list, index) in firstSettingsGroup" :key="index"
                             :to="`${baseRoute}/${list.route.toLowerCase()}`" class="text-decoration-none text-black"
                             active-class="active-link">
-                            <li :title="list.name">
+                            <li v-tooltip.right="list.name">
                                 <i :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
-                                {{ list.name }}
+                                <span v-if="!collapsed">{{ list.name }}</span>
                             </li>
                         </router-link>
                     </ul>
@@ -27,96 +34,96 @@
                             active-class="active-link">
                             <li :title="list.name">
                                 <i :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
-                                {{ list.name }}
+                                <span v-if="!collapsed">{{ list.name }}</span>
                             </li>
                         </router-link>
                     </ul> -->
-                    <h2 v-if="filteredSettingsGroups.thirdSettingsGroup.length" class="font-10 m-0 text-muted ps-2">{{
+                    <h2 v-if="filteredSettingsGroups.thirdSettingsGroup.length && !collapsed" class="font-10 m-0 text-muted ps-2">{{
                         thirdSettingsTitle }}</h2>
                     <ul class="list-unstyled" v-if="filteredSettingsGroups.thirdSettingsGroup.length">
                         <router-link v-for="(list, index) in filteredSettingsGroups.thirdSettingsGroup" :key="index"
                             :to="`${baseRoute}/${list.route.toLowerCase()}`" class="text-decoration-none text-black"
                             active-class="active-link">
-                            <li :title="list.name">
+                            <li v-tooltip.right="list.name">
                                 <i :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
-                                {{ list.name }}
+                                <span v-if="!collapsed">{{ list.name }}</span>
                             </li>
                         </router-link>
                     </ul>
-                    <h2 v-if="filteredSettingsGroups.forthSettingsGroup.length" class="font-10 m-0 text-muted ps-2">{{
+                    <h2 v-if="filteredSettingsGroups.forthSettingsGroup.length && !collapsed" class="font-10 m-0 text-muted ps-2">{{
                         forthSettingsTitle }}</h2>
                     <ul class="list-unstyled" v-if="filteredSettingsGroups.forthSettingsGroup.length">
                         <router-link v-for="(list, index) in filteredSettingsGroups.forthSettingsGroup" :key="index"
                             :to="`${baseRoute}/${list.route.toLowerCase()}`" class="text-decoration-none text-black"
                             active-class="active-link">
-                            <li :title="list.name">
+                            <li v-tooltip.right="list.name">
                                 <i :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
-                                {{ list.name }}
+                                <span v-if="!collapsed">{{ list.name }}</span>
                             </li>
                         </router-link>
                     </ul>
 
-                    <h2 v-if="filteredSettingsGroups.fifthSettingsGroup" class="font-10 m-0 text-muted ps-2">{{
+                    <h2 v-if="filteredSettingsGroups.fifthSettingsGroup && !collapsed" class="font-10 m-0 text-muted ps-2">{{
                         fifthSettingsTitle }}</h2>
                     <ul class="list-unstyled" v-if="filteredSettingsGroups.fifthSettingsGroup">
                         <router-link v-for="(list, index) in filteredSettingsGroups.fifthSettingsGroup" :key="index"
                             :to="`${baseRoute}/${list.route.toLowerCase()}`" class="text-decoration-none text-black"
                             active-class="active-link">
-                            <li :title="list.name">
+                            <li v-tooltip.right="list.name">
                                 <i :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
-                                {{ list.name }}
+                                <span v-if="!collapsed">{{ list.name }}</span>
                             </li>
                         </router-link>
                     </ul>
 
-                    <h2 v-if="filteredSettingsGroups.sixthGroup" class="font-10 m-0 text-muted ps-2">{{
+                    <h2 v-if="filteredSettingsGroups.sixthGroup && !collapsed" class="font-10 m-0 text-muted ps-2">{{
                         sixthTitle }}</h2>
                     <ul class="list-unstyled" v-if="filteredSettingsGroups.sixthGroup">
                         <router-link v-for="(list, index) in filteredSettingsGroups.sixthGroup" :key="index"
                             :to="`${baseRoute}/${list.route.toLowerCase()}`" class="text-decoration-none text-black"
                             active-class="active-link">
-                            <li :title="list.name">
+                            <li v-tooltip.right="list.name">
                                 <i :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
-                                {{ list.name }}
+                                <span v-if="!collapsed">{{ list.name }}</span>
                             </li>
                         </router-link>
                     </ul>
                     
-                    <h2 v-if="filteredSettingsGroups.seventhGroup" class="font-10 m-0 text-muted ps-2">{{
+                    <h2 v-if="filteredSettingsGroups.seventhGroup && !collapsed" class="font-10 m-0 text-muted ps-2">{{
                         seventhSettingsTitle }}</h2>
                     <ul class="list-unstyled" v-if="filteredSettingsGroups.seventhGroup">
                         <router-link v-for="(list, index) in filteredSettingsGroups.seventhGroup" :key="index"
                             :to="`${baseRoute}/${list.route.toLowerCase()}`" class="text-decoration-none text-black"
                             active-class="active-link">
-                            <li :title="list.name">
+                            <li v-tooltip.right="list.name">
                                 <i :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
-                                {{ list.name }}
+                                <span v-if="!collapsed">{{ list.name }}</span>
                             </li>
                         </router-link>
                     </ul>
 
-                    <h2 v-if="filteredSettingsGroups.eightGroup" class="font-10 m-0 text-muted ps-2">{{
+                    <h2 v-if="filteredSettingsGroups.eightGroup && !collapsed" class="font-10 m-0 text-muted ps-2">{{
                         eightSettingsTitle }}</h2>
                     <ul class="list-unstyled" v-if="filteredSettingsGroups.eightGroup">
                         <router-link v-for="(list, index) in filteredSettingsGroups.eightGroup" :key="index"
                             :to="`${baseRoute}/${list.route.toLowerCase()}`" class="text-decoration-none text-black"
                             active-class="active-link">
-                            <li :title="list.name">
+                            <li v-tooltip.right="list.name">
                                 <i :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
-                                {{ list.name }}
+                               <span v-if="!collapsed">{{ list.name }}</span>
                             </li>
                         </router-link>
                     </ul>
 
-                    <h2 v-if="filteredSettingsGroups.ninthGroup" class="font-10 m-0 text-muted ps-2">{{
+                    <h2 v-if="filteredSettingsGroups.ninthGroup && !collapsed" class="font-10 m-0 text-muted ps-2">{{
                         ninthSettingsTitle }}</h2>
                     <ul class="list-unstyled" v-if="filteredSettingsGroups.ninthGroup">
                         <router-link v-for="(list, index) in filteredSettingsGroups.ninthGroup" :key="index"
                             :to="`${baseRoute}/${list.route.toLowerCase()}`" class="text-decoration-none text-black"
                             active-class="active-link">
-                            <li :title="list.name">
+                            <li v-tooltip.right="list.name">
                                 <i :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
-                                {{ list.name }}
+                                <span v-if="!collapsed">{{ list.name }}</span>
                             </li>
                         </router-link>
                     </ul>
@@ -132,7 +139,7 @@
                             :to="`/forms/department/${department.route}`" class="text-decoration-none text-black"
                             active-class="active-link">
 
-                            <li>
+                            <li v-tooltip.right="department.name">
 
                                 <!-- <i :class="`bi-icon ps-1 bg-transparent ${department.icon} me-3`"></i> -->
                                 <i :class="[
@@ -158,9 +165,9 @@
                             :to="`${baseRoute}/${list.route ? list.route.toLowerCase() : ''}`"
                             class="text-decoration-none text-black"
                             active-class="active-link">
-                            <li :title="list.name">
+                            <li v-tooltip.right="list.name">
                                 <i :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
-                                {{ list.name }}
+                                <span v-if="!collapsed">{{ list.name }}</span>
                             </li>
                         </router-link>
                     </ul>
@@ -190,6 +197,16 @@ const filterObj = ref({
     limitstart: 0
 });
 
+const props = defineProps({
+  collapsed: Boolean
+})
+
+const emit = defineEmits(['toggleSidebar'])
+
+const toggleSidebar = () => {
+  emit('toggleSidebar')
+}
+
 const formSideBarData = ref([])
 const settingsSideBarData = [
     { name: 'Profile', icon: 'bi bi-person-circle', route: 'profile' },
@@ -207,7 +224,7 @@ const settingsSideBarData = [
     { name: 'Activity Log', icon: 'bi bi-clock-history', route: 'activitylog' },
     { name: 'Audit Log', icon: 'bi bi-clock', route: 'auditlog' },
     { name: 'Form Creation' , icon: 'bi bi-file-earmark-text', route: 'CreateForm' },
-    // { name: 'Predefined Forms', icon: 'bi bi-file-earmark-text', route: 'predefinedforms' },
+    { name: 'Form Templates', icon: 'bi bi-file-earmark-text', route: 'predefinedforms' },
     { name: 'Acknowledgement' , icon: 'bi bi-file-earmark-text', route: 'acknowledgement' },
     { name: 'Email Template' , icon: 'bi bi-file-earmark-text', route: 'emailtemplate' },
 
@@ -294,9 +311,9 @@ const filteredSettingsGroups = computed(() => {
             forthSettingsGroup: settingsSideBarData.slice(3, 6),
             fifthSettingsGroup: settingsSideBarData.slice(6,7),
             sixthGroup: settingsSideBarData.slice(7,9),
-            seventhGroup: settingsSideBarData.slice(9,10),
-            eightGroup: settingsSideBarData.slice(10,11),
-            ninthGroup: settingsSideBarData.slice(11),
+            seventhGroup: settingsSideBarData.slice(9,11),
+            eightGroup: settingsSideBarData.slice(11,12),
+            ninthGroup: settingsSideBarData.slice(12),
 
 
         }
@@ -311,6 +328,8 @@ const sidebarTitle = computed(() => {
         return 'Requests';
     } else if (isUserFormsRoute.value) {
         return 'Forms';
+    }else if (isSettingsRoute.value) {
+        return 'Settings';
     }
     return '';
 });
@@ -455,7 +474,7 @@ watch(
 </script>
 
 <style scoped>
-li {
+.sidebar li {
     font-size: var(--twelve);
     font-weight: var(--font-weight-normal);
     color: var(--text-color);
@@ -488,12 +507,12 @@ li:hover {
 }
 
 .sidebar {
-    height: 93.5dvh;
+    height: 90dvh;
     background-color: var(--sidebar-color);
     padding-top: 12px;
     border-radius: 10px;
-    margin-top: 10px;
     overflow-y: auto;
+    overflow-x: hidden;
     /* box-shadow: 4px 0 4px -2px #00000040; */
 
 }
@@ -523,5 +542,30 @@ li:hover {
     line-height: 26px;
     text-align: left;
     border-radius: 4px;
+}
+
+.sidebar {
+  transition: all 0.3s ease;
+}
+
+.sidebar.collapsed {
+  width: 44px;
+}
+.sidebar.collapsed li {
+  overflow: visible;
+  text-overflow: unset !important;
+}
+
+.sidebar li {
+  white-space: nowrap;
+}
+
+.sidebar li i {
+  width: 24px;
+}
+.toggle-btn{
+    padding: 0px 4px;
+    border-radius: 10px;
+    
 }
 </style>
