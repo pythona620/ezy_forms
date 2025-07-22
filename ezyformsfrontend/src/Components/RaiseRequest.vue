@@ -1298,8 +1298,8 @@ function request_raising_fn(item) {
     property: business_unit.value,
     ip_address: ip_address.value,
     employee_id: employeeData.value.emp_code,
-    // be_half_of:item.requester_name,
-    // request_for:item.request_for,
+    be_half_of:item.employee_name,
+    request_for:item.request_for,
   };
   axiosInstance.post(apis.raising_request, data_obj).then((resp) => {
     if (resp?.message?.success === true) {
