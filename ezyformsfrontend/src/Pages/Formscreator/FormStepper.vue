@@ -77,7 +77,7 @@
 
                                 <!-- || route.query.form_name -->
                                 <!-- || route.query.form_name   -->
-                                <FormFields :disabled="selectedData.formId && selectedData.formId.length > 0"
+                                <FormFields :disabled="selectedData.formId && selectedData.formId.length > 0 || route.query.form_name"
                                   labeltext="Form Name" class="formHeight" type="text" tag="input" name="Value"
                                   id="formName" validationStar="true" placeholder="Untitled Form" 
                                   @change="(event) => handleInputChange(event, 'form_name')" v-model="formNameModel" />
@@ -87,7 +87,7 @@
                             </div>
                             <div class="mt-3">
                               <div class="">
-                                <FormFields :disabled="selectedData.formId && selectedData.formId.length > 0"
+                                <FormFields :disabled="selectedData.formId && selectedData.formId.length > 0 || route.query.form_name"
                                   labeltext="Form Short Code" class="formHeight" type="text" tag="input" name="Value"
                                   id="formShortCode" validationStar="true" placeholder="Untitled Form" @change="
                                     (event) => handleInputChange(event, 'form_short_name')
