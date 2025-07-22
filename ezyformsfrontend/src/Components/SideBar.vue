@@ -224,7 +224,7 @@ const settingsSideBarData = [
     { name: 'Activity Log', icon: 'bi bi-clock-history', route: 'activitylog' },
     { name: 'Audit Log', icon: 'bi bi-clock', route: 'auditlog' },
     { name: 'Form Creation' , icon: 'bi bi-file-earmark-text', route: 'CreateForm' },
-    { name: 'Form Template', icon: 'bi bi-file-earmark-text', route: 'predefinedforms' },
+    { name: 'Form Templates', icon: 'bi bi-file-earmark-text', route: 'predefinedforms' },
     { name: 'Acknowledgement' , icon: 'bi bi-file-earmark-text', route: 'acknowledgement' },
     { name: 'Email Template' , icon: 'bi bi-file-earmark-text', route: 'emailtemplate' },
 

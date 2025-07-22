@@ -247,7 +247,7 @@ function fetchTable(data) {
 
 
     const queryParams = {
-        fields: JSON.stringify(["form_name", "installed"]),
+        fields: JSON.stringify(["form_name", "installed","form_json","name"]),
         filters: JSON.stringify(filters),
         limit_page_length: "None",
         limit_start: filterObj.value.limit_start,
