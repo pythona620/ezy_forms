@@ -19,8 +19,8 @@
                         <router-link v-for="(list, index) in firstSettingsGroup" :key="index"
                             :to="`${baseRoute}/${list.route.toLowerCase()}`" class="text-decoration-none text-black"
                             active-class="active-link">
-                            <li v-tooltip.right="list.name">
-                                <i :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
+                            <li>
+                                <i v-tooltip.right="list.name" :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
                                 <span v-if="!collapsed">{{ list.name }}</span>
                             </li>
                         </router-link>
@@ -44,8 +44,8 @@
                         <router-link v-for="(list, index) in filteredSettingsGroups.thirdSettingsGroup" :key="index"
                             :to="`${baseRoute}/${list.route.toLowerCase()}`" class="text-decoration-none text-black"
                             active-class="active-link">
-                            <li v-tooltip.right="list.name">
-                                <i :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
+                            <li>
+                                <i v-tooltip.right="list.name" :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
                                 <span v-if="!collapsed">{{ list.name }}</span>
                             </li>
                         </router-link>
@@ -56,8 +56,8 @@
                         <router-link v-for="(list, index) in filteredSettingsGroups.forthSettingsGroup" :key="index"
                             :to="`${baseRoute}/${list.route.toLowerCase()}`" class="text-decoration-none text-black"
                             active-class="active-link">
-                            <li v-tooltip.right="list.name">
-                                <i :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
+                            <li>
+                                <i v-tooltip.right="list.name" :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
                                 <span v-if="!collapsed">{{ list.name }}</span>
                             </li>
                         </router-link>
@@ -69,8 +69,8 @@
                         <router-link v-for="(list, index) in filteredSettingsGroups.fifthSettingsGroup" :key="index"
                             :to="`${baseRoute}/${list.route.toLowerCase()}`" class="text-decoration-none text-black"
                             active-class="active-link">
-                            <li v-tooltip.right="list.name">
-                                <i :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
+                            <li>
+                                <i v-tooltip.right="list.name" :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
                                 <span v-if="!collapsed">{{ list.name }}</span>
                             </li>
                         </router-link>
@@ -82,8 +82,8 @@
                         <router-link v-for="(list, index) in filteredSettingsGroups.sixthGroup" :key="index"
                             :to="`${baseRoute}/${list.route.toLowerCase()}`" class="text-decoration-none text-black"
                             active-class="active-link">
-                            <li v-tooltip.right="list.name">
-                                <i :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
+                            <li>
+                                <i v-tooltip.right="list.name" :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
                                 <span v-if="!collapsed">{{ list.name }}</span>
                             </li>
                         </router-link>
@@ -95,8 +95,8 @@
                         <router-link v-for="(list, index) in filteredSettingsGroups.seventhGroup" :key="index"
                             :to="`${baseRoute}/${list.route.toLowerCase()}`" class="text-decoration-none text-black"
                             active-class="active-link">
-                            <li v-tooltip.right="list.name">
-                                <i :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
+                            <li>
+                                <i v-tooltip.right="list.name" :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
                                 <span v-if="!collapsed">{{ list.name }}</span>
                             </li>
                         </router-link>
@@ -108,8 +108,8 @@
                         <router-link v-for="(list, index) in filteredSettingsGroups.eightGroup" :key="index"
                             :to="`${baseRoute}/${list.route.toLowerCase()}`" class="text-decoration-none text-black"
                             active-class="active-link">
-                            <li v-tooltip.right="list.name">
-                                <i :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
+                            <li>
+                                <i v-tooltip.right="list.name" :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
                                <span v-if="!collapsed">{{ list.name }}</span>
                             </li>
                         </router-link>
@@ -121,8 +121,8 @@
                         <router-link v-for="(list, index) in filteredSettingsGroups.ninthGroup" :key="index"
                             :to="`${baseRoute}/${list.route.toLowerCase()}`" class="text-decoration-none text-black"
                             active-class="active-link">
-                            <li v-tooltip.right="list.name">
-                                <i :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
+                            <li>
+                                <i v-tooltip.right="list.name" :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
                                 <span v-if="!collapsed">{{ list.name }}</span>
                             </li>
                         </router-link>
@@ -133,16 +133,16 @@
                     <ul class="list-unstyled">
                         <router-link :to="'/forms/department/allforms' ? '/forms/department/allforms' : '/forms/department/allforms'" class="text-decoration-none text-black"
                             active-class="active-link">
-                            <li><i class="bi-icon fs-6 bi bi-file-earmark-richtext me-3"></i>All Forms</li>
+                            <li><i v-tooltip.right="'All Forms'" class="bi-icon fs-6 bi bi-file-earmark-richtext me-3"></i>All Forms</li>
                         </router-link>
                         <router-link v-for="(department, index) in formSideBarData" :key="department.route"
                             :to="`/forms/department/${department.route}`" class="text-decoration-none text-black"
                             active-class="active-link">
 
-                            <li v-tooltip.right="department.name">
+                            <li>
 
                                 <!-- <i :class="`bi-icon ps-1 bg-transparent ${department.icon} me-3`"></i> -->
-                                <i :class="[
+                                <i v-tooltip.right="department.name" :class="[
                                     'bi-icon',
                                     'fs-6',
                                     'bg-transparent',
@@ -165,8 +165,8 @@
                             :to="`${baseRoute}/${list.route ? list.route.toLowerCase() : ''}`"
                             class="text-decoration-none text-black"
                             active-class="active-link">
-                            <li v-tooltip.right="list.name">
-                                <i :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
+                            <li>
+                                <i v-tooltip.right="list.name" :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
                                 <span v-if="!collapsed">{{ list.name }}</span>
                             </li>
                         </router-link>
