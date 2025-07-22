@@ -6,13 +6,16 @@
                 <div class="headerbackgound py-1">
                     <div class="row">
                         <div class="col-2">
-                            <div class="d-flex gap-2 align-items-center">
-                                <div><img @click="logoClick" class="imgmix img-fluid"
-                                        src="../assets/Final-logo-ezyforms-removebg-preview.png" /></div>
-                                <!-- <div class="m-0">
-                                    <p class="font-13 m-0">EZY | Forms</p>
-                                </div> -->
-                            </div>
+                            <!-- <div class="d-flex gap-2 align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <button class="btn p-0 border-0" type="button" @click="toggleSidebar">
+                                        <i class="bi bi-list fs-3 ms-2"></i> 
+                                    </button>
+                                    
+                                </div>
+                            </div> -->
+                            <img  @click="logoClick" class="imgmix img-fluid"
+                                        src="../assets/Final-logo-ezyforms-removebg-preview.png" />
                         </div>
                         <div class="col-7">
                             <div class="mt-2 ms-2">
@@ -20,7 +23,7 @@
                             </div>
                         </div>
                         <div class="col-3 d-flex justify-content-end align-items-center pe-1">
-                            <div class="d-flex gap-3 justify-content-end align-items-center m-0 me-2">
+                            <div class="d-flex gap-3 justify-content-end align-items-center m-0 me-3">
                                 <!-- <button class="btn btn-outline-danger" type="button" data-bs-toggle="offcanvas"
                                     data-bs-target="#offcanvasRight" aria-controls="offcanvasRight"><i
                                         class="bi bi-bell-fill"></i></button> -->
@@ -81,7 +84,7 @@
                                                         <div v-if="userDesigination" class=" ">
 
                                                             <span class="fw-medium font-11">{{ userDesigination
-                                                            }}</span>
+                                                                }}</span>
                                                         </div>
                                                     </li>
                                                 </div>
@@ -180,31 +183,34 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title font-14 fw-bold" id="changePasswordLabel">Change Password</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" @click="clearPassword()" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <div class="mb-2">
-                           <div class="position-relative">
-                             <label class="raise-label" for="changepass">New Password</label>
-                            <input class="form-control m-0 shadow-none font-13" v-model.trim="new_password"
-                                placeholder="Enter New Password" :type="showNewPassword ? 'text' : 'password'"
-                                id="changepass" @input="validatePassword" />
-                            <span v-if="new_password" class="new-pwd-toggle-icon" @click="toggleNewPwdVisibility">
-                                <i :class="showNewPassword ? 'bi bi-eye' : 'bi bi-eye-slash'"></i>
-                            </span>
-                           </div>
+                            <div class="position-relative">
+                                <label class="raise-label" for="changepass">New Password</label>
+                                <input class="form-control m-0 shadow-none font-13" v-model.trim="new_password"
+                                    placeholder="Enter New Password" :type="showNewPassword ? 'text' : 'password'"
+                                    id="changepass" @input="validatePassword" />
+                                <span v-if="new_password" class="new-pwd-toggle-icon" @click="toggleNewPwdVisibility">
+                                    <i :class="showNewPassword ? 'bi bi-eye' : 'bi bi-eye-slash'"></i>
+                                </span>
+                            </div>
                             <span v-if="passwordError" class="text-danger font-10 m-0 ps-2">{{ passwordError }}</span>
                         </div>
 
                         <div class="mb-2">
                             <div class="position-relative">
                                 <label class="raise-label" for="confirmpass">Confirm Password</label>
-                            <input class="form-control m-0 shadow-none font-13" v-model.trim="confirm_password"
-                                placeholder="Enter Confirm Password" :type="showConfPwdPassword ? 'text' : 'password'"
-                                id="confirmpass" @input="checkPasswordsMatch" />
-                            <span v-if="confirm_password" class="cnf-pwd-toggle-icon" @click="toggleConfPwdVisibility">
-                                <i :class="showConfPwdPassword ? 'bi bi-eye' : 'bi bi-eye-slash'"></i>
-                            </span>
+                                <input class="form-control m-0 shadow-none font-13" v-model.trim="confirm_password"
+                                    placeholder="Enter Confirm Password"
+                                    :type="showConfPwdPassword ? 'text' : 'password'" id="confirmpass"
+                                    @input="checkPasswordsMatch" />
+                                <span v-if="confirm_password" class="cnf-pwd-toggle-icon"
+                                    @click="toggleConfPwdVisibility">
+                                    <i :class="showConfPwdPassword ? 'bi bi-eye' : 'bi bi-eye-slash'"></i>
+                                </span>
                             </div>
                             <span v-if="passwordsMismatch" class="text-danger font-10 m-0 ps-2">Passwords do not
                                 match.</span>
@@ -217,7 +223,8 @@
 
                     <div>
                         <div class=" d-flex justify-content-center align-items-center p-3">
-                            <button :disabled="isButtonDisabled" class="btn btn-dark font-12 w-100" type="submit" @click="passwordChange()">
+                            <button :disabled="isButtonDisabled" class="btn btn-dark font-12 w-100" type="submit"
+                                @click="passwordChange()">
                                 Confirm New Password</button>
                         </div>
                     </div>
@@ -225,6 +232,9 @@
                 </div>
             </div>
         </div>
+
+
+
     </div>
 
 </template>
@@ -258,6 +268,14 @@ import { ref, onMounted, watch, computed, onUnmounted } from 'vue';
 // function handleCustomEvent(data) {
 // }
 const router = useRouter(); // Initialize router
+
+const emit = defineEmits(['toggleSidebar'])
+const isImageVisible = ref(true)
+
+function toggleSidebar() {
+  isImageVisible.value = !isImageVisible.value // Toggle image visibility
+  emit('toggleSidebar') // Emit event to parent if needed
+}
 
 // Define reactive variables
 const tabsData = ref([
@@ -360,6 +378,13 @@ onMounted(() => {
     }
 });
 
+function clearPassword() {
+    this.new_password = ""
+    this.confirm_password = ""
+    this.passwordError = ""
+    this.passwordsMismatch = ""
+}
+
 // const new_password = ref("");
 // const confirm_password = ref("");
 const showNewPassword = ref(false);
@@ -397,17 +422,17 @@ const checkPasswordsMatch = () => {
 
 
 const isPasswordValid = computed(() => {
-  const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$/;
-  return regex.test(new_password.value);
+    const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$/;
+    return regex.test(new_password.value);
 });
 
 const isButtonDisabled = computed(() => {
-  return (
-    !new_password.value ||                  // New password is empty
-    !confirm_password.value ||              // Confirm password is empty
-    !isPasswordValid.value ||               // Password does not meet the regex
-    new_password.value !== confirm_password.value // Passwords do not match
-  );
+    return (
+        !new_password.value ||                  // New password is empty
+        !confirm_password.value ||              // Confirm password is empty
+        !isPasswordValid.value ||               // Password does not meet the regex
+        new_password.value !== confirm_password.value // Passwords do not match
+    );
 });
 
 
@@ -757,6 +782,7 @@ const handleBuChange = (tab) => {
 
 .imgmix {
     cursor: pointer;
+    max-width: 93%;
 }
 
 .logout {

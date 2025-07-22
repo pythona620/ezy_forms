@@ -76,7 +76,7 @@
               </span> -->
               <!-- Condition for Action Column -->
               <span v-if="column.td_key === 'status'">
-                
+
                 <i class="bi bi-circle-fill status-circle font-10 text-center pe-2" :class="{
                   'text-warning fw-medium': row[column.td_key] === 'Request Raised',
                   'textcompleted fw-medium': row[column.td_key] === 'Completed',
@@ -120,10 +120,23 @@
 
               <!-- Show unformatted date for 'modified' when status === 'Request Raised' -->
               <span class="tooltip-text" v-tooltip.top="formatDate(row[column.td_key])"
-                v-else-if="column.td_key === 'modified' ">
+                v-else-if="column.td_key === 'modified'">
                 {{ formatDate(row[column.td_key]) }}
               </span>
-              <span v-else-if="column.td_key === 'signature' || column.td_key === 'is_hod' || column.td_key === 'is_admin'">
+
+              <span v-if="column.td_key === 'installed'">
+                <i class="bi bi-circle-fill status-circle font-10 text-center pe-2" :class="{
+                  'text-success fw-medium': row[column.td_key] === 'Yes',
+                  'text-danger fw-medium': row[column.td_key] === 'No',
+                }"></i>
+                <span class="tooltip-text" v-tooltip.top="row[column.td_key]">
+                  {{ row[column.td_key] }}
+                </span>
+              </span>
+
+
+              <span
+                v-else-if="column.td_key === 'signature' || column.td_key === 'is_hod' || column.td_key === 'is_admin'">
                 <div v-if="row[column.td_key]">
                   <i class="bi bi-check2 fw-bolder fw-bold font-13 text-success"></i>
                   <!-- <img :src="row[column.td_key]" alt="Signature" class="img-fluid"> -->
@@ -142,6 +155,7 @@
 
                 </div>
               </span>
+
               <span class="text-center fixed-column"
                 v-else-if="column.td_key === 'enable' || column.td_key === 'activate'">
                 <div class="d-flex justify-content-center align-items-center gap-2">
@@ -169,12 +183,12 @@
               <span v-else class="tooltip-text" v-tooltip.top="getTooltipText(row[column.td_key])">
                 <span v-if="column.td_key === 'linked_form_id'">
                   <span @click="handleCellClick(row, rowIndex, 'td_key')" :class="[
-                      row[column.td_key] ? 'text-decoration-underline linked-id-redirect font-11 text-primary' : 'text-decoration-none linke-not-allow '
-                    ]">
+                    row[column.td_key] ? 'text-decoration-underline linked-id-redirect font-11 text-primary' : 'text-decoration-none linke-not-allow '
+                  ]">
                     {{ getDisplayText(column.td_key, row[column.td_key]) }}
                   </span>
                 </span>
-                <span v-else >
+                <span v-else>
                   {{ row[column.td_key] }}
 
                   <!-- {{ getDisplayText(column.td_key, row[column.td_key]) }} -->
@@ -266,6 +280,12 @@
             <td v-if="isAction === 'true' && view === 'viewPreview'" class="text-center fixed-column position-relative">
               <span class=" font-13 view-text" @click="handleCellClick(row, rowIndex, 'view')">
                 View <i class="ri-eye-line eye-cursor ms-1"></i>
+              </span>
+            </td>
+            <td v-if="isAction === 'true' && view === 'edit'" class="text-center fixed-column position-relative">
+              <span v-if="row.installed == 'No'" v-tooltip.top="'Setup form'" class=" font-13 view-text"
+                @click="handleCellClick(row, rowIndex, 'edit')">
+                <i class="bi-gear-wide-connected eye-cursor"></i>
               </span>
             </td>
 
@@ -921,7 +941,8 @@ th:first-child {
 .textcancel {
   color: #17a2b8;
 }
-.RequestCancelled{
+
+.RequestCancelled {
   color: red;
 }
 
@@ -998,10 +1019,12 @@ th:first-child {
   // z-index: 1;
 
 }
-.linke-not-allow{
+
+.linke-not-allow {
   cursor: none;
 }
-.linked-id-redirect{
+
+.linked-id-redirect {
   cursor: pointer;
 }
 .resizable-th {
