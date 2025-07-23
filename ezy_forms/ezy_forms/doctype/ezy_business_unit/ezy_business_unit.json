@@ -12,6 +12,7 @@
   "send_form_as_a_attach_through_mail",
   "welcome_mail_to_employee",
   "water_mark",
+  "send_daily_alerts",
   "letter_head"
  ],
  "fields": [
@@ -36,6 +37,12 @@
    "fieldname": "send_form_as_a_attach_through_mail",
    "fieldtype": "Check",
    "label": "Send form as a attach through mail"
+  },
+    {
+   "default": "0",
+   "fieldname": "send_daily_alerts",
+   "fieldtype": "Check",
+   "label": "Send Daily Alerts"
   },
   {
    "default": "0",
