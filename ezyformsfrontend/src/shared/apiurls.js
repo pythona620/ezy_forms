@@ -29,6 +29,7 @@ export const doctypes = {
   websiteSettings:'Website Settings',
   acknowledgement:'Acknowledgement',
   emailTemplate:'Email Template',
+  EzyInsights:"Ezy Insights",
   
   
 
