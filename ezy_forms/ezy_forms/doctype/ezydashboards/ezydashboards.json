@@ -1,0 +1,55 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "hash",
+ "creation": "2025-07-22 18:32:05.062114",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "status",
+  "is_main_dashboard",
+  "report_name",
+  "link"
+ ],
+ "fields": [
+  {
+   "default": "0",
+   "fieldname": "status",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Enable"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_main_dashboard",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Main Dashboard "
+  },
+  {
+   "fieldname": "report_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Report Name"
+  },
+  {
+   "fieldname": "link",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Link"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-07-23 11:00:37.139143",
+ "modified_by": "Administrator",
+ "module": "ezy_forms",
+ "name": "ezyDashboards",
+ "naming_rule": "Random",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

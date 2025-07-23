@@ -59,6 +59,7 @@ const tableData = ref([
     { title: "Send Form as an Attachment Via an E-Mail ", checked: false },
     { title: "Welcome E-Mail Configuration", checked: false },
     { title: "Enable Sign Up in Login Page", checked: false },
+    { title: "Send Daily E-mail Alerts", checked: false },
 ]);
 
 const default_mail = ref(false);
@@ -101,6 +102,10 @@ const handleToggle = (index) => {
         confirmMessage.value = isChecked
             ? "Are you sure you want to enable Sign up?"
             : "Are you sure you want to disable Sign up?";
+    } else if (index === 4) {
+        confirmMessage.value = isChecked
+            ? "Are you sure you want to enable daily email alerts?"
+            : "Are you sure you want to disable daily email alerts?";
     }
 
     // Show the modal
@@ -116,7 +121,6 @@ const closeModal = () => {
 const confirmAction = () => {
     const index = selectedRowData.value;
     const isChecked = selectedCheckedState.value === false ? 1 : 0;
-    console.log(selectedCheckedState.value);
     const newStatus = isChecked ? 1 : 0;
     const webSiteStatus = isChecked ? 0 :1;
 
@@ -187,6 +191,20 @@ const confirmAction = () => {
             .catch(() => {
                 toast.error("Failed to update Sign up!");
             });
+    } else if (index === 4) {
+        axiosInstance
+            .put(`${apis.resource}${doctypes.wfSettingEzyForms}/${encodeURIComponent(docName)}`, {
+                send_daily_alerts: newStatus,
+            })
+            .then(() => {
+                toast.success(`daily email alerts ${newStatus === 0 ? "Disabled" : "Enabled"} Successfully!`, { autoClose: 700 });
+                const modal = bootstrap.Modal.getInstance(document.getElementById('EnableDisable'));
+                    modal.hide();
+                    BussinesUnit()
+            })
+            .catch(() => {
+                toast.error("Failed to update E-Mail Send Daily Alerts");
+            });
     }
 };
 
@@ -208,6 +226,8 @@ function BussinesUnit() {
                 tableData.value[1].checked = status == 1; // Check if 0, uncheck if 1
                 const welcome_mail = res.data[0].welcome_mail_to_employee;
                 tableData.value[2].checked = welcome_mail == 1; // Check if 0
+                const send_daily_alerts = res.data[0].send_daily_alerts;
+                tableData.value[4].checked = send_daily_alerts == 1; // Check if
             }
         })
         .catch((error) => {
