@@ -7,7 +7,7 @@ import sys
 from ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions import activating_perms, bench_migrating_from_code
 import socket as so
 from ezy_forms.ezy_forms.doctype.login_check.login_check import after_insert_user
-
+import time
 class EzyEmployee(Document):
 	def on_update(self):
 		prev_doc = self.get_doc_before_save()
@@ -22,18 +22,19 @@ class EzyEmployee(Document):
 
  
 	def after_insert(self):
-		self.create_user_if_not_exists()
 		self.ensure_reporting_designation_role()
+		self.create_user_if_not_exists()
 		self.update_wf_role_matrix()
+		after_insert_user(self)
  
 	def create_user_if_not_exists(self):
 		if frappe.db.exists("User", self.emp_mail_id):
 			return "User already exists"
-	
+
 		# Create Role and WF Role if designation is provided
 		if self.designation:
 			self.create_role_and_wf_role(self.designation)
-			bench_migrating_from_code()
+			# bench_migrating_from_code()
 	
 		# Check for outgoing email account
 		is_email_account_set = frappe.db.exists("Email Account", {
@@ -49,10 +50,10 @@ class EzyEmployee(Document):
 			"first_name": self.emp_name.split(" ")[0],
 			"send_welcome_email":  0
 		})
-	
 		if self.designation:
 			user_doc.append("roles", {"role": self.designation})
-	
+		time.sleep(2) 
+		frappe.flags.in_import=True 
 		user_doc.insert(ignore_permissions=True)
  
 	   
