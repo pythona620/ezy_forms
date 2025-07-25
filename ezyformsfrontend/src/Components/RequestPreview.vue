@@ -765,7 +765,7 @@
                                                                             <!-- For calculated fields -->
                                                                             <input
                                                                                 v-if="field.description && /[+\-*/]/.test(field.description)" v-tooltip.top="row[field.fieldname]"
-                                                                                type="number" :disabled="field.label.includes('Total Cost')"
+                                                                                type="number" :disabled="field.label.includes('Total Cost') || field.description === 'Disable'"
                                                                                 class="form-control font-12"
                                                                                 :value="calculateFieldExpression(row, field.description, table)"
                                                                                 
