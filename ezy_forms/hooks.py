@@ -20,6 +20,7 @@ app_license = "mit"
 # 		"has_permission": "ezy_forms.api.permission.has_app_permission"
 # 	}
 # ]
+after_install = "ezy_forms.api.v1.default_mail_templates.email_template_create"
 after_migrate = ["ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions.activating_perms_for_all_roles_in_wf_roadmap"]
 # Includes in <head>
 # ------------------
@@ -150,13 +151,13 @@ doc_events = {
         "after_insert":"ezy_forms.ezy_forms.doctype.ezy_employee.ezy_employee.set_reporting_to_and_designation"
     },
 "NICO MOD REPORT":{
-    "after_insert":"ezy_forms.ezy_custom_forms.custom_script.mail.email_pdf_send"
+    "after_insert":"ezy_forms.api.v1.send_doctype_as_mail.email_pdf_send"
     },
 "NICO ROOM CHECK LIST":{
-    "after_insert":"ezy_forms.ezy_custom_forms.custom_script.mail.email_pdf_send"
+    "after_insert":"ezy_forms.api.v1.send_doctype_as_mail.email_pdf_send"
     },
 "File":{
-    "after_insert":"ezy_forms.ezy_custom_forms.custom_script.mail.make_file_public_after_insert"
+    "after_insert":"ezy_forms.api.v1.send_doctype_as_mail.make_file_public_after_insert"
 }
 }
 
@@ -191,7 +192,7 @@ doc_events = {
 #
 override_whitelisted_methods = {
     # "frappe.desk.doctype.event.event.get_events": "ezy_forms.event.get_events"
-"frappe.core.doctype.user.user.sign_up":"ezy_forms.ezy_custom_forms.custom_script.v1.sign_up.sign_up"
+"frappe.core.doctype.user.user.sign_up":"ezy_forms.api.v1.sign_up.sign_up"
 }
 #
 # each overriding function accepts a `data` argument;

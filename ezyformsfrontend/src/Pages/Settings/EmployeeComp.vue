@@ -461,10 +461,10 @@
                       </li>
 
                       <!-- Create Role option as part of the dropdown -->
-                      <li v-if="searchText && filteredDesignations.length === 0"
+                      <li
                         class="list-group-item list-group-item-action font-12 text-primary" style="cursor: pointer"
                         @click="showModal = true">
-                        ➕ Create role "<strong>{{ searchText }}</strong>"
+                        <i class="bi bi-plus-lg"></i> Create role "<strong>{{ searchText }}</strong>"
                       </li>
 
                     </ul>

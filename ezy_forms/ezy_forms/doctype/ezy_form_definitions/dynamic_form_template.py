@@ -1502,7 +1502,6 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
             activate_pdf_name = "Activity Log .pdf"
             activate_pdf_path = os.path.join(attachment_folder, activate_pdf_name)
 
-           
             opts = {"orientation": "Landscape" if is_landscape else "Portrait"}
 
             convert_html_to_pdf(html_content=html_view, pdf_path=absolute_pdf_path, options=opts)

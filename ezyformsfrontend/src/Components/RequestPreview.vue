@@ -325,6 +325,7 @@
                                             <template v-else-if="field.fieldtype === 'Link'">
   <div style="position: relative;">
     <input
+    :disabled="field.fieldname === 'employee_name' && (!isBehalfOf || request_for === 'Self' || request_for === null)"
       type="text"
       v-model="field.value"
        @focus="() => {
@@ -1316,7 +1317,7 @@ const tableTotals = computed(() => {
 
     const fields = props.tableHeaders[tableIndex] || [];
     fields.forEach((field) => {
-      if (
+     if (
         field.fieldtype === 'Int' && field.description  && (field.label?.toLowerCase().includes('total') || field.label?.toLowerCase().includes('amount') || /[+\-*/]/.test(field.description)) || field.description === field.label
       ) {
         let sum = 0;
@@ -1481,7 +1482,7 @@ const isImageChildFile = (fileUrl) => {
     return /\.(jpg|jpeg|png)$/i.test(fileUrl);
 };
 
-// const isBehalfOf=ref(false);
+const isBehalfOf=ref(false);
 
 const handleSelectChange = (
     value,
@@ -1500,22 +1501,21 @@ const handleSelectChange = (
 
     const mockEvent = { target: { value: field.value } };
 
-    // if(field.fieldname=='request_for' && field.value=='Others'){
-    //     isBehalfOf.value=true;
-    // }
-    // if (field.fieldname === 'request_for' && field.value === 'Self' || field.value === null) {
-    //         isBehalfOf.value = false;
+    if(field.fieldname=='request_for' && field.value=='Others'){
+        isBehalfOf.value=true;
+    }
+    if (field.fieldname === 'request_for' && field.value === 'Self' || field.value === null) {
+            isBehalfOf.value = false;
 
-    //         // Clear 'requester_name' field and emit empty value
-    //         const requesterField = props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns
-    //             .flatMap(col => col.fields)
-    //             .find(f => f.fieldname === 'requester_name');
+            const requesterField = props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns
+                .flatMap(col => col.fields)
+                .find(f => f.fieldname === 'employee_name');
 
-    //         if (requesterField) {
-    //             requesterField.value = '';
-    //             emit('updateField', requesterField); // emit cleared field
-    //         }
-    //     }
+            if (requesterField) {
+                requesterField.value = null;
+                emit('updateField', requesterField); // emit cleared field
+            }
+        }
 
     logFieldValue(mockEvent, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex);
 };

@@ -6,6 +6,8 @@ const RaisedByMe = () => import("./RaisedByMe.vue");
 const HistoryComp = () => import("./HistoryComp.vue");
 const ReceivedForMe = () => import("./ReceivedForMe.vue");
 const ReportsComp = () => import("./ReportsComp.vue");
+const InsightsComp = () => import("./InsightsComp.vue");
+
 const todoroutes = [
   {
     path: "/todo",
@@ -41,7 +43,12 @@ const todoroutes = [
         path: "reports",
         component: ReportsComp,
         name: "ReportsComp",
-      }
+      },
+      {
+        path: "insights",
+        component: InsightsComp,
+        name: "InsightsComp",
+      },
     ],
   },
 ];

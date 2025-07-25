@@ -5,7 +5,7 @@ import frappe
 from frappe.model.document import Document
 import json
 from frappe.utils import now_datetime
-from ezy_forms.ezy_custom_forms.custom_script.v1.sign_up import employee_update_notification
+from ezy_forms.api.v1.sign_up import employee_update_notification
 class LoginCheck(Document):
 	pass
 

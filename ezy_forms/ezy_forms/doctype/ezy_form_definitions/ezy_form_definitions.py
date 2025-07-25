@@ -288,11 +288,10 @@ def activating_perms(doctype,role):
         perm_doc.role=role
         perm_doc.insert(ignore_permissions=True)
         frappe.db.commit()
-from ezy_forms.ezy_custom_forms.custom_script.v1.sign_up import email_template_create
+
 def activating_perms_for_all_roles_in_wf_roadmap():
 
     unique_roles_from_all_roles = frappe.db.get_list("WF Roles",pluck="name")
-    template_create=email_template_create()
     doctype_permission=ezy_doctype_permission()
     
     child_entries = frappe.get_all(
