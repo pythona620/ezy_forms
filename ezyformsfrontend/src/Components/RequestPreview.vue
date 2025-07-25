@@ -1239,6 +1239,9 @@ const removeRow = (tableIndex, rowIndex) => {
 //     }
 // } 
 function calculateFieldExpression(row, expression, fields) {
+        if (!expression || /disable/i.test(expression)) {
+        return 0; // Skip evaluation if expression contains "Disable"
+    }
     const labelToValue = {};
 
     // Step 1: Map label -> value
@@ -1281,8 +1284,8 @@ const tableTotals = computed(() => {
 
     const fields = props.tableHeaders[tableIndex] || [];
     fields.forEach((field) => {
-      if (
-        field.fieldtype === 'Int' &&  field.description
+     if (
+        field.fieldtype === 'Int' && field.description  && (field.label?.toLowerCase().includes('total') || field.label?.toLowerCase().includes('amount') || /[+\-*/]/.test(field.description)) || field.description === field.label
       ) {
         let sum = 0;
 
