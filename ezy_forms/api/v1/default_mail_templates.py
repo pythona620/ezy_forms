@@ -114,49 +114,49 @@ def email_template_create():
 		subject="ezyForms Notification",
 		message=ezy_flow_notification
 	)
-    approval_remainder = '''
+	approval_remainder = '''
  
 <p>Dear Sir/Madam,</p>
  
 <p>The following form approval is pending:</p>
  
 <table border="1" cellpadding="10" cellspacing="0">
-    <tr>
-        <th>Form</th>
-        <th>Form Details</th>
-    </tr>
-    <tr>
-        <td><strong>Form Name</strong></td>
-        <td>{{doctypename}}</td>
-    </tr>
-    <tr>
-        <td><strong>Requested Form ID</strong></td>
-        <td>{{generated_request_id}}</td>
-    </tr>
-    <tr>
-        <td><strong>Form Requested By</strong></td>
-        <td>{{action_by}}</td>
-    </tr>
-    <tr>
-        <td><strong>Form Requested On</strong></td>
-        <td>{{current_date_and_time}}</td>
-    </tr>
-    <tr>
-        <td><strong>Form Current Status</strong></td>
-        <td>{{current_status}}</td>
-    </tr>
+	<tr>
+		<th>Form</th>
+		<th>Form Details</th>
+	</tr>
+	<tr>
+		<td><strong>Form Name</strong></td>
+		<td>{{doctypename}}</td>
+	</tr>
+	<tr>
+		<td><strong>Requested Form ID</strong></td>
+		<td>{{generated_request_id}}</td>
+	</tr>
+	<tr>
+		<td><strong>Form Requested By</strong></td>
+		<td>{{action_by}}</td>
+	</tr>
+	<tr>
+		<td><strong>Form Requested On</strong></td>
+		<td>{{current_date_and_time}}</td>
+	</tr>
+	<tr>
+		<td><strong>Form Current Status</strong></td>
+		<td>{{current_status}}</td>
+	</tr>
 </table>
  
  
 <p>Kindly take the necessary action at your earliest convenience.</p>
 <p>Best Regards,<br>ezyForms</p>
 '''
-    create_template(
-        name="Approval Remainder",
-        subject="ezyForms Approval Remainder",
-        message=approval_remainder
-    )
+	create_template(
+		name="Approval Remainder",
+		subject="ezyForms Approval Remainder",
+		message=approval_remainder
+	)
  
-    frappe.db.commit()
-    
+	frappe.db.commit()
+	
   

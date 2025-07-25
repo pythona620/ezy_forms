@@ -1038,7 +1038,7 @@ activate_log_table = """
         <td>{{ entry.role }}</td>
         <td>{{ entry.user_name }}</td>
         <td>{{ entry.action }}</td>
-        <td>{{ entry.time }}</td>
+        <td>{{ entry.time.rsplit(':', 1)[0] }}</td>
         <td>{{ entry.reason }}</td>
       </tr>
       {% endfor %}
