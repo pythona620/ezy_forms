@@ -1304,7 +1304,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
     try:
         bench_path         = get_bench_path()
         site               = frappe.local.site
-        folder_path = get_site_path("public", "files", "Attachment folder")
+        folder_path = get_site_path("public", "files", "Attachment_folder")
 
         delete = lambda path: os.unlink(path) if os.path.isfile(path) or os.path.islink(path) else shutil.rmtree(path)
 
