@@ -8,7 +8,7 @@
         <div>
           <button class="btn btn-outline-secondary btn-sm me-2" @click="previewComparison">Preview
             comparison</button>
-          <button class="btn btn-secondary btn-sm" @click="submitComparison">Submit comparison</button>
+          <button class="btn btn-dark btn-sm" :class="{'bg-dark' : itemDetails.length && vendorMasterList.length }" @click="submitComparison">Submit comparison</button>
         </div>
       </div>
 
@@ -37,23 +37,23 @@
                 <tbody>
                   <tr v-for="(item, index) in itemDetails" :key="index">
                     <td width="3%"><input type="checkbox" v-model="item.selected"></td>
-                    <td @click="editItem(index)">
+                    <td class="editable-row" @click="editItem(index)">
                       <template v-if="editingIndex === index">
-                        <input v-model="item.name" class="form-control form-control-sm">
+                        <input v-model="item.item_name" class="form-control form-control-sm">
                       </template>
                       <template v-else>
-                        {{ item.name }}
-                      </template>
+                        {{ item.item_name }}
+                      </template> 
                     </td>
-                    <td @click="editItem(index)">
+                    <td class="editable-row" @click="editItem(index)">
                       <template v-if="editingIndex === index">
-                        <input v-model="item.unit" class="form-control form-control-sm">
+                        <input v-model="item.unit_of_measure" class="form-control form-control-sm">
                       </template>
                       <template v-else>
-                        {{ item.unit }}
-                      </template>
+                        {{ item.unit_of_measure }}
+                      </template> 
                     </td>
-                    <td @click="editItem(index)">
+                    <td class="editable-row" @click="editItem(index)">
                       <template v-if="editingIndex === index">
                         <input v-model="item.quantity" type="number" class="form-control form-control-sm">
                       </template>
@@ -76,13 +76,65 @@
               </table>
 
               <div>
-                <button class="btn btn-danger btn-sm" @click="deleteSelectedItems"><i class="bi bi-trash"></i> Delete
-                  Item</button>
-                <button class="btn btn-outline-secondary btn-sm ms-2" @click="addItem">+ Add Item</button>
+                <button v-if="hasSelectedItems" class="btn btn-danger btn-sm" @click="deleteSelectedItems"><i
+                    class="bi bi-trash"></i>
+                  Delete Item</button>
+                <button class="btn btn-outline-dark btn-sm ms-2" @click="openItemModal">+ Add Item</button>
+                <!-- <button v-if="itemDetails.length" class="btn btn-success btn-sm ms-2" @click="saveItems">Save
+                  Items</button> -->
+              </div>
+
+            </div>
+          </div>
+        </div>
+        <!-- Add Item Modal -->
+        <div class="modal fade" id="itemModal" tabindex="-1" aria-labelledby="itemModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Select Items</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <!-- Search Input -->
+                <input type="text" class="form-control mb-3" placeholder="Search items..." v-model="searchItem" />
+
+                <!-- Add New Item -->
+                <div class="d-flex gap-2 mb-3">
+                  <input type="text" class="form-control" placeholder="Item name" v-model="newItem.name" />
+                  <input type="text" class="form-control" placeholder="Unit" v-model="newItem.unit" />
+                  <button class="btn btn-sm btn-dark" @click="addNewItem">Add</button>
+                </div>
+
+                <!-- Item Table -->
+                <div style="max-height: 300px; overflow-y: auto;">
+                  <table class="table table-sm table-hover">
+                    <thead>
+                      <tr>
+                        <th><input type="checkbox" @change="toggleSelectAll($event)" /></th>
+                        <th>Item Name</th>
+                        <th>Unit of Measure</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="(item, index) in filteredItems" :key="index">
+                        <td><input type="checkbox" v-model="item.selected" /></td>
+                        <td @click="toggleItemSelection(item)">{{ item.item_name }}</td>
+                        <td @click="toggleItemSelection(item)">{{ item.unit_of_measure }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="modal-footer">
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-dark" @click="confirmItemSelection">Add Selected Items</button>
               </div>
             </div>
           </div>
         </div>
+
 
         <!-- Vendor Details Accordion (unchanged) -->
         <div class="accordion-item">
@@ -112,12 +164,12 @@
                 <tbody>
                   <tr v-for="(vendor, index) in vendorDetails" :key="index">
                     <td width="3%"><input type="checkbox" v-model="vendor.selected"></td>
-                    <td>{{ vendor.rank }}</td>
-                    <td>{{ vendor.name }}</td>
-                    <td>{{ vendor.gst }}</td>
-                    <td>{{ vendor.contact }}</td>
-                    <td>{{ vendor.email }}</td>
-                    <td>{{ vendor.totalValue }}</td>
+                    <td class="d-flex justify-content-between">{{ vendor.rank }} <span v-if="vendor.rank === 1" class="badge font-12 "> <i class=" text-success bi bi-check-circle-fill"></i></span></td>
+                    <td>{{ vendor.vendor_name }}</td>
+                    <td>{{ vendor.gst_number }}</td>
+                    <td>{{ vendor.phone_number }}</td>
+                    <td>{{ vendor.mail_id }}</td>
+                    <td>{{ vendor.total_value }}</td>
                     <td>
                       <i class="bi bi-pencil-square" @click="openVendorModal(index)"></i>
                     </td>
@@ -126,9 +178,10 @@
               </table>
 
               <div>
-                <button class="btn btn-danger btn-sm" @click="deleteSelectedVendors"><i class="bi bi-trash"></i> Delete
+                <button v-if="hasSelectedVendor" class="btn btn-danger btn-sm" @click="deleteSelectedVendors"><i
+                    class="bi bi-trash"></i> Delete
                   Vendor</button>
-                <button class="btn btn-outline-secondary btn-sm ms-2" @click="addVendorModal">+ Add Vendor</button>
+                <button class="btn btn-outline-dark btn-sm ms-2" @click="addVendorModal">+ Add Vendor</button>
               </div>
             </div>
           </div>
@@ -136,42 +189,69 @@
       </div>
 
       <!-- Vendor Edit Modal -->
-      <div class="modal fade" id="vendorModal" tabindex="-1">
+      <div class="modal fade" id="vendorModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" >
         <div class="modal-dialog modal-xl">
           <div class="modal-content p-4">
             <div class="d-flex justify-content-between mb-3">
               <h6 class="fw-bold">Editing Row #{{ editingVendorIndex + 1 }}</h6>
               <div>
                 <button class="btn btn-outline-danger btn-sm me-2" data-bs-dismiss="modal">Close</button>
-                <button class="btn btn-primary save_vendor btn-sm" @click="saveVendorDetails">Save Vendor
+                <button  class="btn btn-dark  btn-sm" @click="saveVendorDetails">Save Vendor
                   details</button>
               </div>
             </div>
+           
+
 
             <div class="row g-2 mb-3">
               <div class="col-md-3">
-                <label class="form-label">Vendor name</label>
-                <input v-model="vendorForm.name" class="form-control form-control-sm">
+                 
+            <label class="form-label">Vendor Name</label>
+            <input
+              type="text"
+              class="form-control form-control-sm"
+              placeholder="Type vendor name..."
+              v-model="vendorForm.vendor_name"
+              @input="filterVendors"
+            />
+            <div v-if="filteredVendorOptions.length" class="border rounded mt-1 p-2 bg-light">
+              <div
+                v-for="vendor in filteredVendorOptions"
+                :key="vendor.vendor_name"
+                class="py-1 px-2 hover:bg-secondary-subtle rounded"
+                style="cursor: pointer;"
+                @click="selectVendor(vendor)"
+              >
+                {{ vendor.vendor_name }}
+              </div>
+            </div>
+
+                <!-- <label class="form-label">Vendor name</label>
+                <input v-model="vendorForm.vendor_name" class="form-control form-control-sm"> -->
               </div>
               <div class="col-md-3">
                 <label class="form-label">GST number</label>
-                <input v-model="vendorForm.gst" class="form-control form-control-sm">
+                <input v-model="vendorForm.gst_number" class="form-control form-control-sm">
               </div>
               <div class="col-md-3">
                 <label class="form-label">Phone number</label>
-                <input v-model="vendorForm.contact" class="form-control form-control-sm">
+                <input v-model="vendorForm.phone_number" class="form-control form-control-sm">
               </div>
             </div>
             <div class=" row g-2 mb-3">
               <div class="col-md-6">
                 <label class="form-label">Email ID</label>
-                <input v-model="vendorForm.email" class="form-control form-control-sm">
+                <input v-model="vendorForm.mail_id" class="form-control form-control-sm">
               </div>
 
 
               <div class="col-md-6">
                 <label class="form-label">Attachments</label>
-                <input type="file" multiple class="form-control form-control-sm">
+                <input type="file" multiple accept=".jpeg,.jpg,.png,.pdf,.xlsx,.xls" class="form-control form-control-sm" @change="handleFileUpload"> 
+              </div>
+              <div class=" col-md-3">
+                <label class="form-label">Address</label>
+                <textarea v-model="vendorForm.address" class="form-control form-control-sm"></textarea>
               </div>
             </div>
 
@@ -189,11 +269,11 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(item, index) in vendorForm.items" :key="index">
+                  <tr v-for="(item, index) in vendorForm.ezy_item_details" :key="index">
                     <td width="3%"><input type="checkbox" v-model="item.selected"></td>
                     <td>
 
-                      {{ item.name }}
+                      {{ item.item_name }}
 
                     </td>
                     <td>
@@ -251,7 +331,7 @@
               </div>
               <div class="col-md-3">
                 <label class="form-label">Total price</label>
-                <input v-model="vendorForm.totalValue" class="form-control form-control-sm" readonly>
+                <input v-model="vendorForm.total_value" class="form-control form-control-sm" readonly>
               </div>
             </div>
             <div class="row g-2">
@@ -277,121 +357,141 @@
     </div>
     <!-- Comparison Modal -->
     <div class="modal fade" id="comparisonModal" tabindex="-1">
-      <div class="modal-dialog modal-xl">
+      <div class="modal-dialog modal-dialog-centered modal-xl">
         <div class="modal-content p-4">
           <div class="d-flex justify-content-between mb-3">
             <h6 class="fw-bold">Preview Comparison</h6>
             <button class="btn btn-outline-danger btn-sm" data-bs-dismiss="modal">Close</button>
           </div>
-
-          <!-- Dynamic Comparison Table -->
           <table class="table table-bordered">
             <thead class="table-light">
               <tr>
                 <th>Item name</th>
-                <th v-for="vendor in vendorDetails" :key="vendor.name">
-                  {{ vendor.name }} <span class="text-muted">(rate/unit)</span>
+                <th v-for="vendor in vendorDetails" :key="vendor.vendor_name">
+                  {{ vendor.vendor_name }} <span class="text-muted">(rate/unit)</span>
                 </th>
               </tr>
             </thead>
+
             <tbody>
+              <!-- Item rows -->
               <tr v-for="item in itemDetails" :key="item.name">
                 <td>
-                  {{ item.name }} <span class="badge bg-secondary">{{ item.quantity }} {{ item.unit }}</span>
+                  {{ item.item_name }}
+                  <span class="badge bg-secondary">{{ item.quantity }} {{ item.unit_of_measure }}</span>
                 </td>
-                <td v-for="vendor in vendorDetails" :key="vendor.name">
+                <td v-for="vendor in vendorDetails" :key="vendor.vendor_name">
                   ₹ {{ getVendorItemPrice(vendor, item.name) }}
                 </td>
               </tr>
+
+              <!-- Total row -->
               <tr>
                 <td>Total</td>
-                <td v-for="vendor in vendorDetails" :key="vendor.name">
+                <td v-for="vendor in vendorDetails" :key="vendor.vendor_name">
                   <b>₹ {{ getVendorTotal(vendor) }}</b> /total qty
                 </td>
               </tr>
-            </tbody>
-          </table>
 
-          <!-- Company Details -->
-          <h6 class="mt-4">Company Details</h6>
-          <table class="table table-bordered">
-            <thead class="table-light">
+              <!-- Separator row -->
               <tr>
-                <th>Vendor Name</th>
-                <th v-for="vendor in vendorDetails" :key="vendor.name">
-                  {{ vendor.name }}
-                </th>
+                <td :colspan="vendorDetails.length + 1" class="text-muted text-center ">
+                 Additional Information
+                </td>
               </tr>
-            </thead>
-            <tbody>
+
+              <!-- Company detail rows -->
               <tr>
-                <td>Payment terms</td>
-                <td v-for="vendor in vendorDetails" :key="vendor.name">
+                <td>Payment Terms</td>
+                <td v-for="vendor in vendorDetails" :key="vendor.vendor_name">
                   {{ vendor.paymentTerms || '-' }}
                 </td>
               </tr>
               <tr>
                 <td>GST</td>
-                <td v-for="vendor in vendorDetails" :key="vendor.name">
-                  {{ vendor.gst || '-' }}
+                <td v-for="vendor in vendorDetails" :key="vendor.vendor_name">
+                  {{ vendor.gst_number || '-' }}
                 </td>
               </tr>
               <tr>
                 <td>Delivery</td>
-                <td v-for="vendor in vendorDetails" :key="vendor.name">
+                <td v-for="vendor in vendorDetails" :key="vendor.vendor_name">
                   {{ vendor.deliveryTime || '-' }}
                 </td>
               </tr>
               <tr>
                 <td>Bid Rank</td>
-                <td v-for="vendor in vendorDetails" :key="vendor.name">
+                <td v-for="vendor in vendorDetails" :key="vendor.vendor_name">
                   {{ vendor.rank }}
                 </td>
               </tr>
               <tr>
-                <td>Transport charges</td>
-                <td v-for="vendor in vendorDetails" :key="vendor.name">
+                <td>Transport Charges</td>
+                <td v-for="vendor in vendorDetails" :key="vendor.vendor_name">
                   {{ vendor.transport || '-' }}
                 </td>
               </tr>
               <tr>
-                <td>Attachments</td>
-                <td v-for="vendor in vendorDetails" :key="vendor.name">
-                  <span class="text-primary" style="cursor: pointer" @click="openPreview(vendor.attachmentUrl)">
+                <td>
+                
+                  Attachments</td>
+                
+                <td v-for="vendor in vendorDetails" :key="vendor.vendor_name">
+                  <span class="text-primary" style="cursor: pointer" @click="openPreview(vendor.attachments)">
                     Preview attachment
                   </span>
                 </td>
               </tr>
-
               <tr>
                 <td>Comments</td>
-                <td v-for="vendor in vendorDetails" :key="vendor.name">
+                <td v-for="vendor in vendorDetails" :key="vendor.vendor_name">
                   {{ vendor.remark || '-' }}
                 </td>
               </tr>
             </tbody>
           </table>
 
+
+
+         
         </div>
       </div>
     </div>
     <!-- Preview Modal -->
-<div class="modal fade" id="filePreviewModal" tabindex="-1" aria-hidden="true">
+  <div class="modal fade" id="filePreviewModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Attachment Preview</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body">
-        <!-- File preview -->
-        <iframe
-          v-if="previewUrl"
-          :src="previewUrl"
-          style="width: 100%; height: 600px;"
-          frameborder="0"
-        ></iframe>
-        <p v-else>No preview available.</p>
+      <div class="modal-body d-flex">
+        <!-- Left panel: file list -->
+        <div class="me-3" style="min-width: 200px;">
+          <ul class="list-group">
+            <li 
+              class="list-group-item" 
+              v-for="(url, index) in vendorForm.attachments"  :class="{ 'selected-file': previewUrl === url }"
+
+              :key="index"
+              @click="previewUrl = url"
+              style="cursor: pointer;"
+            >
+              {{ url.split('/').pop() }}
+            </li>
+          </ul>
+        </div>
+
+        <!-- Right panel: preview -->
+        <div style="flex-grow: 1;">
+          <iframe 
+            v-if="previewUrl" 
+            :src="previewUrl" 
+            style="width: 100%; height: 600px;" 
+            frameborder="0"
+          ></iframe>
+          <p v-else>No preview available.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -403,58 +503,272 @@
 
 <script setup>
 import { watch } from 'vue';
+import { onMounted } from 'vue';
+import { onBeforeUnmount } from 'vue';
+import { computed } from 'vue';
 import { ref } from 'vue';
 import { useRoute, useRouter } from "vue-router";
+import { apis, doctypes } from '../shared/apiurls';
+import axiosInstance from '../shared/services/interceptor';
+import { toast } from 'vue3-toastify';
+
 
 const route = useRoute();
 const router = useRouter()
-
+const searchItem = ref('');
+const selectedItems = ref([]);
+const vendorSearch = ref('')
+const filteredVendorOptions = ref([])
 const itemDetails = ref([
-  { name: 'Computer', unit: 'Unit', quantity: 4, selected: false },
-  { name: 'CPU', unit: 'Unit', quantity: 5, selected: false },
-  { name: 'Mouse', unit: 'Unit', quantity: 2, selected: false },
-  { name: 'Molds', unit: 'Kilogram', quantity: 6, selected: false }
+
 ]);
 
 const vendorDetails = ref([
-  { rank: 3, name: 'Daniel White Pvt Ltd', gst: '32434567546554', contact: '8697237439', email: 'srinkhasu@gmail.com', totalValue: '', selected: false },
-  { rank: 2, name: 'Jane Johnson Pvt Ltd', gst: '2746345345656', contact: '9954354323', email: 'venkat198@gmail.com', totalValue: '', selected: false },
-  { rank: 4, name: 'Robert Wilson Pvt Ltd', gst: '330293878240', contact: '9032873873', email: 'Mail1989@gmail.com', totalValue: '', selected: false },
-  { rank: 1, name: 'Sophia Martin Pvt Ltd', gst: '1NH762587654', contact: '9819675625', email: 'Badoi197@gmail.com', totalValue: '', selected: false }
+
 ]);
+const availableItems = ref([
+  // { item_name: 'Computer', unit_of_measure: 'Unit' },
+  // { item_name: 'CPU', unit_of_measure: 'Unit' },
+  // { item_name: 'Mouse', unit_of_measure: 'Unit' },
+  // { item_name: 'Molds', unit_of_measure: 'Kilogram' },
+  // { item_name: 'Keyboard', unit_of_measure: 'Unit' },
+  // { item_name: 'Monitor', unit_of_measure: 'Unit' },
+  // { item_name: 'RAM', unit_of_measure: 'GB' },
+  // { item_name: 'SSD', unit_of_measure: 'GB' },
+  // { item_name: 'Printer', unit_of_measure: 'Unit' },
+  // { item_name: 'Scanner', unit_of_measure: 'Unit' },
+  // { item_name: 'Router', unit_of_measure: 'Unit' },
+  // { item_name: 'Cable', unit_of_measure: 'Meter' },
+  // { item_name: 'Switch', unit_of_measure: 'Unit' },
+  // { item_name: 'Hard Drive', unit_of_measure: 'TB' },
+
+]);
+const vendorMasterList = ref([
+  // { rank: 3, name: 'Daniel White Pvt Ltd', gst: '32434567546554', contact: '8697237439', email: 'srinkhasu@gmail.com', total_value: '', selected: false },
+  // { rank: 2, name: 'Jane Johnson Pvt Ltd', gst: '2746345345656', contact: '9954354323', email: 'venkat198@gmail.com', total_value: '', selected: false },
+  // { rank: 4, name: 'Robert Wilson Pvt Ltd', gst: '330293878240', contact: '9032873873', email: 'Mail1989@gmail.com', total_value: '', selected: false },
+  // { rank: 1, name: 'Sophia Martin Pvt Ltd', gst: '1NH762587654', contact: '9819675625', email: 'Badoi197@gmail.com', total_value: '', selected: false },
+  // {
+  //   name: 'ABC Traders',
+  //   gst: '27ABCDE1234F1Z5',
+  //   contact: '9876543210',
+  //   email: 'abc@traders.com',
+  //   rank: 'L1',
+  //   total_value: '',
+  //   transport: 'Free delivery',
+  //   deliveryTime: '5',
+  //   paymentTerms: '30',
+  //   remark: 'Preferred vendor',
+  //   address: '123 Main St, City, State, 123456'
+  // },
+  // {
+  //   name: 'XYZ Supplies',
+  //   gst: '29XYZAB1234C1Z9',
+  //   contact: '9123456789',
+  //   email: 'xyz@supplies.com',
+  //   rank: 'L2',
+  //   total_value: '25000',
+  //   transport: 'Paid delivery',
+  //   deliveryTime: '7',
+  //   paymentTerms: '45',
+  //   remark: '',
+  //   address: '456 Elm St, City, State, 123456'
+  // },
+  // Add more vendor entries here...
+])
+
 const previewUrl = ref(null)
 
 function openPreview(url) {
-  previewUrl.value = url
-  const modal = new bootstrap.Modal(document.getElementById('filePreviewModal'))
-  modal.show()
+  if (vendorForm.value.attachments.length > 0) {
+    previewUrl.value = vendorForm.value.attachments[0];
+  } else {
+    previewUrl.value = '';
+  }
+  const modal = new bootstrap.Modal(document.getElementById('filePreviewModal'));
+  modal.show();
 }
 
 const editingIndex = ref(null);
 function addVendorModal() {
   vendorForm.value = {
-    name: '',
-    gst: '',
-    contact: '',
-    email: '',
-    transport: 'Free delivery',
+    vendor_name: '',
+    gst_number: '',
+    phone_number: '',
+    mail_id: '',
+    transport: '',
     deliveryTime: '',
     paymentTerms: '',
-    rank: 'L1',
+    rank: '',
     remark: '',
-    totalValue: '',
-    items: JSON.parse(JSON.stringify(itemDetails.value))  // copy the main itemDetails
+    total_value: '',
+    address: '',
+    ezy_item_details: JSON.parse(JSON.stringify(itemDetails.value)),  // copy the main itemDetails
+    attachments:[]
   };
+
+let queryParams ={
+  fields: JSON.stringify(['vendor_name', 'mail_id', 'contact_number', 'gst_number', 'address']),
+}
+
+  axiosInstance.get(apis.resource + doctypes.ezyVendors, { params: queryParams })
+    .then(response => {
+      console.log(response.data);
+      vendorMasterList.value = response.data.map(vendor => ({
+        vendor_name: vendor.vendor_name,
+        gst_number: vendor.gst_number,
+        phone_number: vendor.contact_number,
+        mail_id: vendor.mail_id,
+        address: vendor.address,
+        selected: false
+      }));
+      
+     
+    })
+    .catch(error => {
+      console.error('Error fetching items:', error);
+      toast.error('Failed to fetch items.');
+    });
 
   editingVendorIndex.value = null;  // because it's a new vendor
   new bootstrap.Modal(document.getElementById('vendorModal')).show();
 }
 
-const submitComparison = () => alert('Submit comparison clicked');
-const addItem = () => itemDetails.value.push({ name: 'New Item', unit: 'Unit', quantity: 1, selected: false });
+// const submitComparison = () => {
+//   const vendor_details = vendorDetails.value.map(vendor => {
+//     return {
+//       vendor_name: vendor.vendor_name,
+//       gst_number: vendor.gst_number,
+//       phone_number: vendor.phone_number,
+//       mail_id: vendor.mail_id,
+//       rank: vendor.rank,
+//       transportation_charges: vendor.transport,
+//       delivery_time: vendor.deliveryTime,
+//       paymentTerms: vendor.paymentTerms,
+//       remark: vendor.remark,
+//       total_value: vendor.total_value,
+//       address: vendor.address,
+//       pricing_details: JSON.stringify(vendor.ezy_item_details)
+//     };
+//   });
+
+//   const ezy_item_details = vendorDetails.value[0].ezy_item_details.map(item => ({
+//     item_name: item.item_name,
+//     item_unit_of_measure: item.unit_of_measure,
+//     item_quantity: item.quantity
+//   }));
+
+//   const finalPayload = {
+//     vendor_details,
+//     ezy_item_details
+//   };
+
+//   console.log(finalPayload);
+
+//   axiosInstance.post(apis.resource + doctypes.ezyContracts, finalPayload)
+//     .then(response => {
+//       console.log('Comparison submitted successfully:', response.data);
+//       toast.success('Comparison submitted successfully!');
+//       request_raising_fn(response.data);
+//     })
+//     .catch(error => {
+//       console.error('Error submitting comparison:', error);
+//       toast.error('Failed to submit comparison.');
+//     });
+// };
+const submitComparison = async () => {
+  const vendor_details = vendorDetails.value.map(vendor => ({
+    vendor_name: vendor.vendor_name,
+    gst_number: vendor.gst_number,
+    phone_number: vendor.phone_number,
+    mail_id: vendor.mail_id,
+    biddle_rank: vendor.rank,
+    transportation_charges: vendor.transport,
+    delivery_time: vendor.deliveryTime,
+    payment_terms: vendor.paymentTerms,
+    remark: vendor.remark,
+    total_value: vendor.total_value,
+    address: vendor.address,
+    attachments: vendor.attachments ,
+    pricing_details: JSON.stringify(vendor.ezy_item_details)
+  }));
+
+  const ezy_item_details = vendorDetails.value[0].ezy_item_details.map(item => ({
+    item_name: item.item_name,
+    item_unit_of_measure: item.unit_of_measure,
+    item_quantity: item.quantity
+  }));
+
+  // Your main document to save (e.g., Ezy Contract or any other DocType)
+  const form = {
+    doctype: "CTO", // Replace with your actual DocType name
+    vendor_details,
+    ezy_item_details
+  };
+
+  const formData = new FormData();
+  formData.append("doc", JSON.stringify(form));
+  formData.append("action", "Save");
+
+  try {
+    const response = await axiosInstance.post(apis.savedocs, formData);
+    console.log("Comparison saved successfully:", response);
+    toast.success("Comparison saved successfully!");
+    request_raising_fn(response.docs[0]);
+  } catch (error) {
+    console.error("Error saving comparison:", error);
+    toast.error("Failed to save comparison.");
+  }
+};
+
+function request_raising_fn(item) {
+  // saveloading.value = true;
+  // console.log(filepaths.value, "---filepaths");
+  // const filesArray = filepaths.value
+  //   ? filepaths.value.split(",").map((filePath) => filePath.trim())
+  //   : [];
+  let data_obj = {
+    module_name: "Ezy Forms",
+    doctype_name: 'CTO',
+    ids: [item.name],
+    reason: "Request Raised",
+    url_for_request_id: "",
+    files: [],
+    property: 'CRR',
+    ip_address: '',
+    employee_id: '11111',
+    // be_half_of:item.requester_name,
+    // request_for:item.request_for,
+  };
+  axiosInstance.post(apis.raising_request, data_obj).then((resp) => {
+    if (resp?.message?.success === true) {
+     
+
+      toast.success("Request Raised", {
+        autoClose: 1000,
+        transition: "zoom",
+        
+      });
+    }
+  })
+   .catch((error) => {
+      console.error("Error raising request:", error);
+      toast.error("Error raising request");
+    })
+  // .finally(() => {
+  //   saveloading.value = false;
+  // });
+}
+
+// const addItem = () => itemDetails.value.push({ item_name: 'New Item', unit_of_measure: 'Unit', quantity: 1, selected: false });
 const deleteItem = index => itemDetails.value.splice(index, 1);
 const deleteSelectedItems = () => itemDetails.value = itemDetails.value.filter(item => !item.selected);
-
+const hasSelectedItems = computed(() =>
+  itemDetails.value.some(item => item.selected)
+);
+const hasSelectedVendor = computed(() =>
+  vendorDetails.value.some(vendor => vendor.selected)
+);
 const editItem = index => {
   editingIndex.value = index;
 };
@@ -462,7 +776,6 @@ const editItem = index => {
 const saveItem = () => {
   editingIndex.value = null;
 };
-
 const cancelEdit = () => {
   editingIndex.value = null;
 };
@@ -475,70 +788,200 @@ function updateTotalPrice(item) {
 
 const deleteSelectedVendors = () => vendorDetails.value = vendorDetails.value.filter(vendor => !vendor.selected);
 
+const openItemModal = () => {
+  // Reset all selections
+  fetchingItemsList()
+  availableItems.value.forEach(item => item.selected = false);
+  const modal = new bootstrap.Modal(document.getElementById('itemModal'));
+  modal.show();
+};
 
+const filteredItems = computed(() => {
+  return availableItems.value.filter(item =>
+    item.item_name.toLowerCase().includes(searchItem.value.toLowerCase())
+  );
+});
+
+const toggleSelectAll = (event) => {
+  const isChecked = event.target.checked;
+  filteredItems.value.forEach(item => item.selected = isChecked);
+};
+const toggleItemSelection = (item) => {
+  item.selected = !item.selected;
+};
+const confirmItemSelection = () => {
+  const newItems = availableItems.value
+    .filter(item => item.selected)
+    .map(item => ({
+      item_name: item.item_name,
+      unit_of_measure: item.unit_of_measure,
+      quantity: 0, // default quantity
+      selected: false
+    }));
+
+  // Avoid duplicates (based on name)
+  newItems.forEach(newItem => {
+    if (!itemDetails.value.some(existing => existing.item_name === newItem.item_name)) {
+      itemDetails.value.push(newItem);
+    }
+  });
+
+  bootstrap.Modal.getInstance(document.getElementById('itemModal')).hide();
+};
+
+// const saveItems = () => {
+//   console.log('Saved Items:', JSON.stringify(itemDetails.value, null, 2));
+  
+// };
+
+
+const handleClickOutside = (e) => {
+  // If the click is not inside any td or input of editing row, exit edit mode
+  if (!e.target.closest('.editable-row')) {
+    editingIndex.value = null;
+  }
+};
+
+onMounted(() => {
+  window.addEventListener('click', handleClickOutside);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('click', handleClickOutside);
+});
+const newItem = ref({
+  name: '',
+  unit: ''
+})
+
+const addNewItem = () => {
+  if (!newItem.value.name || !newItem.value.unit) return;
+
+  let newItemObj = {
+    item_name: newItem.value.name,
+    unit_of_measure: newItem.value.unit,
+  };
+  axiosInstance.post(apis.resource + doctypes.ezyItems, newItemObj)
+    .then(response => {
+
+      toast.success('New item added successfully!');
+      console.log('New item added:', response.data);
+      fetchingItemsList()
+      // Optionally, you can refresh the items list or show a success message
+    })
+    .catch(error => {
+      console.error('Error adding new item:', error);
+    });
+  
+
+  // Clear input fields
+  newItem.value.item_name = '';
+  newItem.value.unit_of_measure = '';
+};
 const editingVendorIndex = ref(null);
 const vendorForm = ref({
-  name: '', gst: '', contact: '', email: '',
-  items: [
+  vendor_name: '', gst_number: '', phone_number: '', mail_id: '',
+  ezy_item_details: [
     { ...itemDetails }
   ],
-  transport: 'Free delivery', deliveryTime: '', paymentTerms: '', rank: 'L1', remark: ''
+  transport: 'Free delivery', deliveryTime: '', paymentTerms: '', rank: 'L1', remark: '',address:'', attachments:[]
 });
 
 function openVendorModal(index) {
   const vendor = vendorDetails.value[index];
 
   vendorForm.value = {
-    name: vendor.name,
-    gst: vendor.gst,
-    contact: vendor.contact,
-    email: vendor.email,
+    vendor_name: vendor.vendor_name,
+    gst_number: vendor.gst_number,
+    phone_number: vendor.phone_number,
+    mail_id: vendor.mail_id,
     transport: vendor.transport || 'Free delivery',
     deliveryTime: vendor.deliveryTime || '',
     paymentTerms: vendor.paymentTerms || '',
-    rank: vendor.rank || 'L1',
+    rank: vendor.rank || '',
     remark: vendor.remark || '',
-    totalValue: vendor.totalValue,
+    total_value: vendor.total_value,
+    address:vendor.address || '',
+    attachments: vendor.attachments || [], // Ensure attachments is always an array
     // Load the vendor's own items (if any), else empty array
-    items: vendor.items ? JSON.parse(JSON.stringify(vendor.items)) : JSON.parse(JSON.stringify(itemDetails.value))
+    ezy_item_details: vendor.ezy_item_details ? JSON.parse(JSON.stringify(vendor.ezy_item_details)) : JSON.parse(JSON.stringify(itemDetails.value))
   };
 
   editingVendorIndex.value = index;
   new bootstrap.Modal(document.getElementById('vendorModal')).show();
 }
-watch(() => vendorForm.value.items, () => {
+watch(() => vendorForm.value.ezy_item_details, () => {
   calculateVendorTotal();
 }, { deep: true });
-watch(() => vendorForm.value.items, () => {
+watch(() => vendorForm.value.ezy_item_details, () => {
   calculateVendorTotal();
 
   if (editingVendorIndex.value !== null) {
-    vendorDetails.value[editingVendorIndex.value].totalValue = vendorForm.value.totalValue;
+    vendorDetails.value[editingVendorIndex.value].total_value = vendorForm.value.total_value;
   }
 }, { deep: true });
 
 function calculateVendorTotal() {
-  const total = vendorForm.value.items.reduce((sum, item) => {
+  const total = vendorForm.value.ezy_item_details.reduce((sum, item) => {
     return sum + parseFloat(item.totalPrice || 0);
   }, 0);
-  vendorForm.value.totalValue = total.toLocaleString('en-IN');
+  vendorForm.value.total_value = total.toLocaleString('en-IN');
 }
+function handleFileUpload(event) {
+  const files = event.target.files;
+  if (files.length > 0) {
+    Array.from(files).forEach((file) => {
+      uploadFile(file).then((fileUrl) => {
+        if (fileUrl) {
+          if (!Array.isArray(vendorForm.value.attachments)) {
+            vendorForm.value.attachments = [];
+          }
+          vendorForm.value.attachments.push(fileUrl);
+        }
+      });
+    });
+  }
+}
+
+
+const uploadFile = async (file) => {
+  const formData = new FormData();
+  formData.append("file", file, file.name);
+  formData.append("is_private", "0");
+  formData.append("folder", "Home");
+
+  try {
+    const res = await axiosInstance.post(apis.uploadfile, formData);
+    if (res?.message?.file_url) {
+      console.log(res.message.file_url, "File uploaded successfully");
+      return res.message.file_url;
+    } else {
+      console.warn("No file_url found in response:", res);
+      return null;
+    }
+  } catch (err) {
+    console.error("Upload error:", err);
+    return null;
+  }
+};
+
 function saveVendorDetails() {
-  calculateVendorTotal(); // Update vendorForm.value.totalValue first
+  calculateVendorTotal(); // Update vendorForm.value.total_value first
 
   const vendorData = {
-    name: vendorForm.value.name,
-    gst: vendorForm.value.gst,
-    contact: vendorForm.value.contact,
-    email: vendorForm.value.email,
+    vendor_name: vendorForm.value.vendor_name,
+    gst_number: vendorForm.value.gst_number,
+    phone_number: vendorForm.value.phone_number,
+    mail_id: vendorForm.value.mail_id,
     rank: vendorForm.value.rank,
     transport: vendorForm.value.transport,
     deliveryTime: vendorForm.value.deliveryTime,
     paymentTerms: vendorForm.value.paymentTerms,
     remark: vendorForm.value.remark,
-    items: JSON.parse(JSON.stringify(vendorForm.value.items)),
-    totalValue: vendorForm.value.totalValue, // <--- the calculated total value
-    selected: false
+    ezy_item_details: JSON.parse(JSON.stringify(vendorForm.value.ezy_item_details)),
+    total_value: vendorForm.value.total_value, 
+    address:vendorForm.value.address,
+    attachments: vendorForm.value.attachments  // Ensure attachments is always an array
   };
 
   if (editingVendorIndex.value !== null) {
@@ -553,7 +996,30 @@ function saveVendorDetails() {
     vendorDetails.value.push(vendorData);
   }
 
+  if (!vendorMasterList.value.some(vendor => vendor.vendor_name === vendorForm.value.vendor_name)) {
+
+     let MasterVendor = {
+    vendor_name: vendorForm.value.vendor_name,
+    mail_id: vendorForm.value.mail_id,
+    contact_number: vendorForm.value.phone_number,
+    gst_number: vendorForm.value.gst_number,
+    address: vendorForm.value.address,
+  }
+  console.log(MasterVendor,"api");
+  axiosInstance.post(apis.resource + doctypes.ezyVendors, MasterVendor)
+    .then(response => {
+      console.log('Vendor saved successfully:', response.data);
+      toast.success('Vendor details saved successfully!');
+    })
+    .catch(error => {
+      console.error('Error saving vendor:', error);
+      toast.error('Failed to save vendor details.');
+    });
+  }
+
+
   bootstrap.Modal.getInstance(document.getElementById('vendorModal')).hide();
+  vendorSearch.value = ''; // Clear search input after saving
 }
 
 
@@ -565,7 +1031,7 @@ const backupItem = ref({});
 function editItemInModal(index) {
   editingItemIndex.value = index;
   // Backup the current data
-  backupItem.value = { ...vendorForm.value.items[index] };
+  backupItem.value = { ...vendorForm.value.ezy_item_details[index] };
 }
 
 // Save the changes
@@ -587,7 +1053,7 @@ function cancelEditItem() {
 }
 
 function addChildItem() {
-  vendorForm.value.items.push({
+  vendorForm.value.ezy_item_details.push({
     name: 'New Item',
     quantity: 1,
     unitPrice: '0.00',
@@ -597,29 +1063,87 @@ function addChildItem() {
 }
 
 function deleteChildItem(index) {
-  vendorForm.value.items.splice(index, 1);
+  vendorForm.value.ezy_item_details.splice(index, 1);
 }
 
 function deleteSelectedChildItems() {
-  vendorForm.value.items = vendorForm.value.items.filter(item => !item.selected);
+  vendorForm.value.ezy_item_details = vendorForm.value.ezy_item_details.filter(item => !item.selected);
 }
 
 
 function getVendorItemPrice(vendor, itemName) {
-  const item = vendor.items?.find(i => i.name === itemName);
+  const item = vendor.ezy_item_details?.find(i => i.name === itemName);
   return item ? item.unitPrice : '0.00';
 }
 
 function getVendorTotal(vendor) {
-  const total = vendor.items?.reduce((sum, item) => sum + parseFloat(item.totalPrice || 0), 0);
+  const total = vendor.ezy_item_details?.reduce((sum, item) => sum + parseFloat(item.totalPrice || 0), 0);
   return total ? total.toLocaleString('en-IN') : '0.00';
 }
 
 
 function previewComparison() {
+  console.log(`object`, vendorDetails.value);
   new bootstrap.Modal(document.getElementById('comparisonModal')).show();
 }
 
+
+const filterVendors = () => {
+  const search = vendorForm.value.vendor_name.toLowerCase();
+
+  if (search.length === 0) {
+    filteredVendorOptions.value = [];
+
+    // Reset all fields in vendorForm when vendor_name is cleared
+    vendorForm.value = {
+      vendor_name: '',
+      gst_number: '',
+      phone_number: '',
+      mail_id: '',
+      address: '',
+      // If you have ezy_item_details or other fields, include them here too
+      ezy_item_details: [],
+      selected: false,
+    };
+
+    return;
+  }
+
+  filteredVendorOptions.value = vendorMasterList.value.filter(vendor =>
+    vendor.vendor_name.toLowerCase().includes(search)
+  );
+};
+
+
+
+const selectVendor = (vendor) => {
+  vendorForm.value = {
+    ...vendor,
+    ezy_item_details: JSON.parse(JSON.stringify(vendorForm.value.ezy_item_details)),
+    selected: false,
+  }
+  filteredVendorOptions.value = []
+  
+}
+
+
+
+function fetchingItemsList(){
+  let queryParams = {
+    fields: JSON.stringify(['item_name','unit_of_measure']),
+  }
+  axiosInstance.get(apis.resource +doctypes.ezyItems, { params: queryParams })
+    .then(response => {
+      availableItems.value = response.data.map(item => ({
+        item_name: item.item_name,
+        unit_of_measure: item.unit_of_measure,
+        selected: false
+      }));
+    })
+    .catch(error => {
+      console.error('Error fetching items:', error);
+    });
+}
 </script>
 
 <style lang="scss" scoped>
@@ -688,7 +1212,8 @@ function previewComparison() {
 .accordion-button {
   background-color: #fff;
   /* light background when expanded, adjust as needed */
-  height: 50px;
+  // height: 50px; 
+  padding: 30px 20px;
 }
 
 .accordion-button:focus {
@@ -727,9 +1252,7 @@ function previewComparison() {
   font-size: 12px;
 }
 
-.save_vendor {
-  background-color: #1B14DF !important;
-}
+
 
 .form-select {
   border-radius: 10px;
@@ -751,4 +1274,9 @@ function previewComparison() {
   padding: 5px;
   border-radius: 6px;
 }
+.selected-file {
+  background-color: #e6f2ff;
+  font-weight: bold;
+}
+
 </style>

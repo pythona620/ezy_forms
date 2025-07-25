@@ -29,6 +29,12 @@ export const doctypes = {
   websiteSettings:'Website Settings',
   acknowledgement:'Acknowledgement',
   emailTemplate:'Email Template',
+
+
+  ezyItems: "Ezy Items",
+  ezyVendors :'Ezy Vendor Details',
+  // ezyContracts: 'Contract',
+  ezyContracts: 'CTO',
   
   
 

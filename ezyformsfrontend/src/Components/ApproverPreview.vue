@@ -19,7 +19,7 @@
           <div class="container-fluid">
             <div class="row " v-for="(row, rowIndex) in section.rows" :key="rowIndex">
               <div v-for="(column, columnIndex) in row.columns" :key="'column-preview-' + columnIndex"
-                :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 bg-transparent' : 'border-0 bg-transparent align-middle'" 
+                :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 bg-transparent' : 'border-0 bg-transparent align-middle'"
                 class="col dynamicColumn ">
                 <div v-if="column.label" class="p-1 border-bottom">
                   <h6 class="m-0 font-12">{{ column.label }}</h6>
@@ -29,7 +29,7 @@
                     ? (field.label === 'Approved By' ? ' d-flex align-items-end ' : 'd-flex align-items-start')
                     : ''">
                     <div
-                      v-if="!(blockIndex !== 0 && !field.value && ['Approver', 'Approved On', 'Approved By', 'Acknowledged By'].includes(field.label))" 
+                      v-if="!(blockIndex !== 0 && !field.value && ['Approver', 'Approved On', 'Approved By', 'Acknowledged By'].includes(field.label))"
                       :class="(props.readonlyFor === 'true' || blockIndex < currentLevel) && field.fieldtype !== 'Small Text' && field.fieldtype !== 'Text' || field.fieldtype === 'Check'
                         ? 'd-flex mb-1 ' + (field.fieldtype === 'Check' ? 'mt-1 flex-row-reverse justify-content-end gap-2 w-0 align-items-start ' : '') + (field.label === 'Approved By' || field.label === 'Acknowledged By' || field.label === 'Requestor Signature' ? 'align-items-start' : '  align-items-start ')
                         : ''">
@@ -43,7 +43,8 @@
                             v-if="field.fieldtype !== 'Check' && (props.readonlyFor === 'true' || blockIndex < currentLevel)">:</span>
                         </label>
                       </div>
-                      <div v-if="field.fieldtype !== 'Table'" class="field-width" :class="field.fieldtype === 'Check' ? '' : ''">
+                      <div v-if="field.fieldtype !== 'Table'" class="field-width"
+                        :class="field.fieldtype === 'Check' ? '' : ''">
 
                         <!-- field.fieldtype === 'Select' || -->
                         <!-- Field Type Select or Multiselect -->
@@ -222,13 +223,13 @@
 
 
                         <!-- @click="openInNewWindow(field.value)" -->
-                        <template v-else-if="field.fieldtype == 'Attach'" >
+                        <template v-else-if="field.fieldtype == 'Attach'">
                           <div class=" d-flex gap-1">
-                          
 
 
-                          <!-- File Input (if no value or for specific cases) -->
-                          <!-- <input
+
+                            <!-- File Input (if no value or for specific cases) -->
+                            <!-- <input
                             v-if="(field.fieldname !== 'requestor_signature' && field.label !== 'Requestor Signature' && blockIndex !== 0 && !field.label.includes('Approved By') && !field.label.includes('Acknowledged By') && props.readonlyFor !== 'true') && (field.value && blockIndex !== 0) || !field.value && props.readonlyFor !== 'true' && blockIndex !== 0"
                             :disabled="props.readonlyFor === 'true' || blockIndex === 0 || blockIndex < currentLevel"
                             type="file" :class="blockIndex < currentLevel ? 'd-none' : ''"
@@ -236,58 +237,50 @@
                             :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"  :style="{ minWidth: '100px', maxWidth: '200px' }"
                             class="form-control previewInputHeight  font-10 mb-1 mt-1" multiple
                             @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" /> -->
-                            
-                          <input
-                            v-if="(field.fieldname !== 'requestor_signature' && field.label !== 'Requestor Signature' && blockIndex !== 0 && !field.label.includes('Approved By') && !field.label.includes('Acknowledged By') && props.readonlyFor !== 'true') && (field.value && blockIndex !== 0) || !field.value && props.readonlyFor !== 'true' && blockIndex !== 0"
-                            :disabled="props.readonlyFor === 'true' || blockIndex === 0 || blockIndex < currentLevel"
-                            type="file"
-                            :class="blockIndex < currentLevel ? 'd-none' : ''"
-                            accept=".jpeg,.jpg,.png,.pdf,.xlsx,.xls"
-                            :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
-                            style="display: none"
-                            class="form-control previewInputHeight font-10 mb-1 mt-1"
-                            multiple
-                            @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
-                          />
 
-                          <!-- Custom file input label (acts as button) -->
-                          <label
-                            v-if="(field.fieldname !== 'requestor_signature' && field.label !== 'Requestor Signature' && blockIndex !== 0 && !field.label.includes('Approved By') && !field.label.includes('Acknowledged By') && props.readonlyFor !== 'true') && (field.value && blockIndex !== 0) || !field.value && props.readonlyFor !== 'true' && blockIndex !== 0"
-                            :for="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
-                            class="btn btn-sm btn-light font-10 mb-1 mt-1"
-                            :class="{ 'disabled': props.readonlyFor === 'true' || blockIndex === 0 || blockIndex < currentLevel }"
-                          >
-                            <i class="bi bi-paperclip me-1"></i> Attach
-                          </label>
-                          <!-- View Attachments Label -->
-                          <!-- ✅ Direct Image Preview for Specific Fields -->
-                           <template v-if="field.value && (
-                            field.fieldname === 'requestor_signature' ||
-                            field.label.includes('Approved By') ||
-                            field.label.includes('Acknowledged By')
-                          )">
-                            <div class="d-flex gap-2 flex-wrap ">
-                              <img v-for="(fileUrl, index) in field.value.split(',').map(f => f.trim())" :key="index" 
-                                :src="fileUrl" class="img-thumbnail cursor-pointer imge_top border-0 p-0 border-bottom-0"
-                                style="max-width: 80px; max-height: 25px" @click="previewAttachment(fileUrl)" />
-                            </div>
-                          </template>
+                            <input
+                              v-if="(field.fieldname !== 'requestor_signature' && field.label !== 'Requestor Signature' && blockIndex !== 0 && !field.label.includes('Approved By') && !field.label.includes('Acknowledged By') && props.readonlyFor !== 'true') && (field.value && blockIndex !== 0) || !field.value && props.readonlyFor !== 'true' && blockIndex !== 0"
+                              :disabled="props.readonlyFor === 'true' || blockIndex === 0 || blockIndex < currentLevel"
+                              type="file" :class="blockIndex < currentLevel ? 'd-none' : ''"
+                              accept=".jpeg,.jpg,.png,.pdf,.xlsx,.xls"
+                              :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex" style="display: none"
+                              class="form-control previewInputHeight font-10 mb-1 mt-1" multiple
+                              @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
 
-                          <!-- ✅ View Attachments Label for All Other Fields -->
-                          <template v-else-if="field.value && field.value.length">
-                             <span
-                                  class="cursor-pointer font-12 d-inline-flex align-items-center mt-1 gap-1"
-                                  @click="openAttachmentList(field.value)"
-                                >
-                                  <span class="text-dark text-decoration-underline font-12 ">View</span>
-                                  <span>({{ field.value.split(',').filter(f => f.trim()).length }})</span>
-                                  <i
-                                    class="bi bi-paperclip text-secondary "
-                                    style="transform: rotate(-20deg) translateY(-1px); display: inline-block;"
-                                  ></i>
-                                </span>
-                          </template>
-</div>
+                            <!-- Custom file input label (acts as button) -->
+                            <label
+                              v-if="(field.fieldname !== 'requestor_signature' && field.label !== 'Requestor Signature' && blockIndex !== 0 && !field.label.includes('Approved By') && !field.label.includes('Acknowledged By') && props.readonlyFor !== 'true') && (field.value && blockIndex !== 0) || !field.value && props.readonlyFor !== 'true' && blockIndex !== 0"
+                              :for="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                              class="btn btn-sm btn-light font-10 mb-1 mt-1"
+                              :class="{ 'disabled': props.readonlyFor === 'true' || blockIndex === 0 || blockIndex < currentLevel }">
+                              <i class="bi bi-paperclip me-1"></i> Attach
+                            </label>
+                            <!-- View Attachments Label -->
+                            <!-- ✅ Direct Image Preview for Specific Fields -->
+                            <template v-if="field.value && (
+                              field.fieldname === 'requestor_signature' ||
+                              field.label.includes('Approved By') ||
+                              field.label.includes('Acknowledged By')
+                            )">
+                              <div class="d-flex gap-2 flex-wrap ">
+                                <img v-for="(fileUrl, index) in field.value.split(',').map(f => f.trim())" :key="index"
+                                  :src="fileUrl"
+                                  class="img-thumbnail cursor-pointer imge_top border-0 p-0 border-bottom-0"
+                                  style="max-width: 80px; max-height: 25px" @click="previewAttachment(fileUrl)" />
+                              </div>
+                            </template>
+
+                            <!-- ✅ View Attachments Label for All Other Fields -->
+                            <template v-else-if="field.value && field.value.length">
+                              <span class="cursor-pointer font-12 d-inline-flex align-items-center mt-1 gap-1"
+                                @click="openAttachmentList(field.value)">
+                                <span class="text-dark text-decoration-underline font-12 ">View</span>
+                                <span>({{field.value.split(',').filter(f => f.trim()).length}})</span>
+                                <i class="bi bi-paperclip text-secondary "
+                                  style="transform: rotate(-20deg) translateY(-1px); display: inline-block;"></i>
+                              </span>
+                            </template>
+                          </div>
                           <!-- ✅ View Attachments Label for All Other Fields -->
                           <!-- <template v-else-if="field.value && field.value.length"> 
                             <template v-if=" 
@@ -325,16 +318,16 @@
 
                                 <div class="modal-body">
                                   <ul class="list-group font-13">
-                                    <li v-for="(url, i) in attachmentList" :key="i" 
+                                    <li v-for="(url, i) in attachmentList" :key="i"
                                       class="list-group-item d-flex justify-content-between align-items-center">
-                                       <!-- <button
+                                      <!-- <button
                                 v-if="hovered[`${field.fieldname}-${i}`] "
                                 @click="removeFile(i, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
                                 class="btn btn-sm btn-light border-0 position-absolute"
                                 style="top: -15px; right: -10px; border-radius: 50%; padding: 0 5px; height: 27px;">
                                 <i class="bi bi-x fs-6"></i>
                               </button> -->
-                              <!-- && props.readonlyFor !== 'true' && blockIndex !== 0 -->
+                                      <!-- && props.readonlyFor !== 'true' && blockIndex !== 0 -->
                                       <span class="d-flex align-items-center gap-2">
                                         <!-- File Type Icon -->
                                         <i v-if="isImageFile(url)"
@@ -352,13 +345,12 @@
                                         <button class="btn btn-sm font-13 btn-light"
                                           @click="previewAttachment(url)">Show</button>
                                         <a :href="url" class="btn font-13 btn-light" download>Download</a>
-                                        
-                                       <button v-if="props.readonlyFor !== 'true' || blockIndex < currentLevel"
-                                                class="btn btn-sm btn-outline-dark rounded-circle"
-                                                @click="removeFile(i, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
-                                              >
-                                                <i class="bi bi-x fs-6"></i>
-                                              </button>
+
+                                        <button v-if="props.readonlyFor !== 'true' || blockIndex < currentLevel"
+                                          class="btn btn-sm btn-outline-dark rounded-circle"
+                                          @click="removeFile(i, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
+                                          <i class="bi bi-x fs-6"></i>
+                                        </button>
                                       </div>
                                     </li>
                                   </ul>
@@ -567,26 +559,11 @@
                       <span v-html="field.description.replace(/\n/g, '<br>')"></span>
                     </div>
 
-                    <div v-if="field.fieldtype === 'Table'" class="field-width">
+                    <div v-if="field.fieldtype === 'Table' && field.options !== 'Ezy Item Details'" class="field-width">
                       <div v-if="props.childHeaders && Object.keys(props.childHeaders).length">
                         <div v-for="(headers, tableName) in props.childHeaders" :key="tableName">
                           <!-- || tableName === field.options -->
                           <div v-if="field.fieldname === tableName || tableName === field.options" class="overTable">
-                            <div class=" d-flex justify-content-between align-items-center">
-                              <span class="font-13 fw-bold tablename">{{ field.label.replace(/_/g, " ") }}</span>
-                              <div v-if="selectedData.formStatus !== 'Completed'">
-
-                                <!-- <button class="btn btn-sm btn-light"
-                                  @click="editableTables[tableName] = !editableTables[tableName]">
-                                  {{ editableTables[tableName] ? 'Cancel' : 'Edit' }}
-                                </button> -->
-                              </div>
-                            </div>
-
-                            <!-- Add Row Button -->
-
-
-                            <!-- 2-column layout -->
                             <div v-if="field.description === 'true'">
 
                               <div v-for="(row, index) in props.childData[tableName]" :key="index"
@@ -731,24 +708,137 @@
 
                             <!-- Table layout -->
                             <div v-else class=" ">
+                              <div v-if="tableName === 'Vendor Details'">
+                                <div>
+                                  <div class=" d-flex justify-content-between align-items-center">
+                                    <span class="font-13 fw-bold tablename">{{ field.label.replace(/_/g, " ") }}</span>
 
-                              <table class="table table-rounded tableborder-child mb-0">
-                                <thead>
-                                  <tr>
-                                    <th v-for="field in headers" :key="field.fieldname" class="text-center">
-                                      {{ field.label }}
-                                    </th>
-                                    <th v-if="blockIndex !== 0 || props.readonlyFor === 'true'" width="3%"></th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  <!-- .toLowerCase() -->
-                                  <tr v-for="(row, index) in props.childData[tableName.toLowerCase()]" :key="index">
-                                    <td v-for="field in headers" :key="field.fieldname"
-                                      :style="getTdStyle(field, row[field.fieldname])" class="text-center align-middle">
+                                  </div>
+
+                                  <table class="table table-bordered">
+
+                                    <thead class="table-light">
+                                      <tr>
+                                        <th>Item name</th>
+                                        <th v-for="vendor in props.childData.vendor_details" :key="vendor.name">
+                                          {{ vendor.vendor_name }} <span class="text-muted fw-normal">(rate/unit)</span>
+                                        </th>
+                                      </tr>
+                                    </thead>
+
+                                    <tbody>
+                                      <!-- Item rows -->
+                                      <tr v-for="item in props.childData.ezy_item_details" :key="item.name">
+                                        <td>
+                                          {{ item.item_name }}
+                                          <span class="badge bg-secondary">{{ item.item_quantity }} {{
+                                            item.item_unit_of_measure }}</span>
+                                        </td>
+                                        <td v-for="vendor in props.childData.vendor_details" :key="vendor.name">
+                                          ₹ {{
+                                            JSON.parse(vendor.pricing_details).find(p => p.item_name ===
+                                              item.item_name)?.unitPrice || '-'
+                                          }}
+                                        </td>
+                                      </tr>
+
+                                      <!-- Total row -->
+                                      <tr>
+                                        <td><strong>Total</strong></td>
+                                        <td v-for="vendor in props.childData.vendor_details" :key="vendor.name">
+                                          <strong>
+                                            ₹ {{
+                                              JSON.parse(vendor.pricing_details)
+                                                .reduce((sum, i) => sum + parseFloat(i.totalPrice), 0)
+                                                .toFixed(2)
+                                            }}
+                                          </strong>
+                                        </td>
+                                      </tr>
+
+                                      <!-- Separator -->
+                                      <tr>
+                                        <td colspan="100%" class="bg-light  text-start text-muted">Additional Information</td>
+                                      </tr>
+
+                                      <!-- Company Info -->
+                                      <tr>
+                                        <td>Payment Terms</td>
+                                        <td v-for="vendor in props.childData.vendor_details" :key="vendor.name">
+                                          {{ vendor.payment_terms || '-' }}
+                                        </td>
+                                      </tr>
+                                      <tr>
+                                        <td>GST</td>
+                                        <td v-for="vendor in props.childData.vendor_details" :key="vendor.name">
+                                          {{ vendor.gst_number || '-' }}
+                                        </td>
+                                      </tr>
+                                      <tr>
+                                        <td>Delivery</td>
+                                        <td v-for="vendor in props.childData.vendor_details" :key="vendor.name">
+                                          {{ vendor.delivery_time || '-' }}
+                                        </td>
+                                      </tr>
+                                      <tr>
+                                        <td>Biddle rank</td>
+                                        <td v-for="vendor in props.childData.vendor_details" :key="vendor.name">
+                                          {{ vendor.biddle_rank || '-' }}<span v-if="vendor.biddle_rank  === 1" class="badge bg-success font-12 "> <i class=" bi bi-check-circle-fill"></i></span>
+                                        </td>
+                                      </tr>
+                                      <tr>
+                                        <td>Transport Charges</td>
+                                        <td v-for="vendor in props.childData.vendor_details" :key="vendor.name">
+                                          {{ vendor.transportation_charges || '-' }}
+                                        </td>
+                                      </tr>
+                                      <tr>
+                                        <td>Attachments</td>
+                                        <td v-for="vendor in props.childData.vendor_details" :key="vendor.name">
+                                          <span v-if="vendor.attachmentUrl" class="text-primary"
+                                            style="cursor: pointer">
+                                            Preview attachment
+                                          </span>
+                                        </td>
+                                      </tr>
+                                      <tr>
+                                        <td>Comments</td>
+                                        <td v-for="vendor in props.childData.vendor_details" :key="vendor.name">
+                                          {{ vendor.remark || '-' }}
+                                        </td>
+                                      </tr>
+                                    </tbody>
+                                  </table>
+                                </div>
 
 
-                                      <!-- <template v-if="field.fieldtype === 'Attach'">
+
+                              </div>
+                              <div v-else>
+                                <div class=" d-flex justify-content-between align-items-center">
+                                  <span class="font-13 fw-bold tablename">{{ field.label.replace(/_/g, " ") }}</span>
+                                </div>
+                                <table class="table table-rounded tableborder-child mb-0">
+                                  <thead>
+                                    <tr>
+                                      <th v-for="field in headers" :key="field.fieldname" class="text-center">
+                                        {{ field.label }}
+                                      </th>
+                                      <th v-if="blockIndex !== 0 || props.readonlyFor === 'true'" width="3%"></th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    <!-- .toLowerCase() -->
+                                    <tr
+                                      v-for="(row, index) in props.childData[tableName.toLowerCase().replace(/ /g, '_')]"
+                                      :key="index">
+                                      <td v-for="field in headers" :key="field.fieldname"
+                                        :style="getTdStyle(field, row[field.fieldname])"
+                                        class="text-center align-middle">
+
+
+
+                                        <!-- <template v-if="field.fieldtype === 'Attach'">
                                        
                                         <input
                                           v-if="props.readonlyFor !== 'true' && blockIndex !== 0 && blockIndex === currentLevel"
@@ -776,218 +866,232 @@
                                           </div>
                                         </div>
                                       </template> -->
-                                      <template v-if="field.fieldtype === 'Attach'">
-  <!-- File Input (unchanged) -->
-<input
-  v-if="props.readonlyFor !== 'true' && blockIndex !== 0 && blockIndex === currentLevel"
-  type="file"
-  accept=".jpeg,.jpg,.png,.pdf,.xlsx,.xls"
-  multiple
-  class="form-control font-12"
-  style="display: none"
-  :id="'upload-field-' + blockIndex + '-' + sectionIndex + '-' + columnIndex + '-' + rowIndex"
-  @change="handleFileUpload($event, row, field.fieldname)"
-/>
+                                        <template v-if="field.fieldtype === 'Attach'">
+                                          <!-- File Input (unchanged) -->
+                                          <input
+                                            v-if="props.readonlyFor !== 'true' && blockIndex !== 0 && blockIndex === currentLevel"
+                                            type="file" accept=".jpeg,.jpg,.png,.pdf,.xlsx,.xls" multiple
+                                            class="form-control font-12" style="display: none"
+                                            :id="'upload-field-' + blockIndex + '-' + sectionIndex + '-' + columnIndex + '-' + rowIndex"
+                                            @change="handleFileUpload($event, row, field.fieldname)" />
 
-<!-- Custom Label Button -->
-<label
-  v-if="props.readonlyFor !== 'true' && blockIndex !== 0 && blockIndex === currentLevel"
-  :for="'upload-field-' + blockIndex + '-' + sectionIndex + '-' + columnIndex + '-' + rowIndex"
-  class="btn btn-sm btn-light font-10 mb-1 mt-1"
->
-  <i class="bi bi-paperclip me-1"></i> Attach
-</label>
+                                          <!-- Custom Label Button -->
+                                          <label
+                                            v-if="props.readonlyFor !== 'true' && blockIndex !== 0 && blockIndex === currentLevel"
+                                            :for="'upload-field-' + blockIndex + '-' + sectionIndex + '-' + columnIndex + '-' + rowIndex"
+                                            class="btn btn-sm btn-light font-10 mb-1 mt-1">
+                                            <i class="bi bi-paperclip me-1"></i> Attach
+                                          </label>
 
-  <!-- View Attachments Label -->
-  <div v-if="row[field.fieldname]" class="mt-2">
-    <span class="cursor-pointer text-decoration-underline"
-      @click="openAttachmentsList(row[field.fieldname])">
-      View <i class="bi bi-paperclip"></i>
-    </span>
-  </div>
+                                          <!-- View Attachments Label -->
+                                          <div v-if="row[field.fieldname]" class="mt-2">
+                                            <span class="cursor-pointer text-decoration-underline"
+                                              @click="openAttachmentsList(row[field.fieldname])">
+                                              View <i class="bi bi-paperclip"></i>
+                                            </span>
+                                          </div>
 
-  <!-- Attachments List Modal -->
-  <div class="modal fade" id="attachmentsListModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Attachments</h5>
-          <button type="button"  data-bs-dismiss="modal" class="btn position-absolute"
-                                    style="right: 10px; top: 10px;"> &times;</button>
-        </div>
-        <div class="modal-body">
-          <ul class="list-group">
-            <li class="list-group-item d-flex justify-content-between align-items-center"
-              v-for="(file, index) in attachmentFiles" :key="index">
-              <span class="d-flex align-items-center gap-2">
-                                        <!-- File Type Icon -->
-                                        <i v-if="isImageFile(file)"
-                                          class="bi bi-file-earmark-image text-secondary fs-5"></i>
-                                        <i v-else-if="isPdfFile(file)"
-                                          class="bi bi-file-earmark-pdf text-danger fs-5"></i>
-                                        <i v-else-if="isExcelFile(file)"
-                                          class="bi bi-file-earmark-spreadsheet text-success fs-5"></i>
-                                        <i v-else class="bi bi-file-earmark fs-5"></i>
+                                          <!-- Attachments List Modal -->
+                                          <div class="modal fade" id="attachmentsListModal" tabindex="-1">
+                                            <div class="modal-dialog modal-dialog-centered modal-lg">
+                                              <div class="modal-content">
+                                                <div class="modal-header">
+                                                  <h5 class="modal-title">Attachments</h5>
+                                                  <button type="button" data-bs-dismiss="modal"
+                                                    class="btn position-absolute" style="right: 10px; top: 10px;">
+                                                    &times;</button>
+                                                </div>
+                                                <div class="modal-body">
+                                                  <ul class="list-group">
+                                                    <li
+                                                      class="list-group-item d-flex justify-content-between align-items-center"
+                                                      v-for="(file, index) in attachmentFiles" :key="index">
+                                                      <span class="d-flex align-items-center gap-2">
+                                                        <!-- File Type Icon -->
+                                                        <i v-if="isImageFile(file)"
+                                                          class="bi bi-file-earmark-image text-secondary fs-5"></i>
+                                                        <i v-else-if="isPdfFile(file)"
+                                                          class="bi bi-file-earmark-pdf text-danger fs-5"></i>
+                                                        <i v-else-if="isExcelFile(file)"
+                                                          class="bi bi-file-earmark-spreadsheet text-success fs-5"></i>
+                                                        <i v-else class="bi bi-file-earmark fs-5"></i>
 
-                                        <!-- File Name -->
-                                        {{ getFilename(file) }}
-                                      </span>
-              <div>
-                <button class="btn btn-sm btn-light me-2" @click="ChildpreviewFile(file)">Show</button>
-                <a :href="file" target="_blank" download class="btn btn-sm btn-light">Download</a>
-              </div>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
-  </div>
+                                                        <!-- File Name -->
+                                                        {{ getFilename(file) }}
+                                                      </span>
+                                                      <div>
+                                                        <button class="btn btn-sm btn-light me-2"
+                                                          @click="ChildpreviewFile(file)">Show</button>
+                                                        <a :href="file" target="_blank" download
+                                                          class="btn btn-sm btn-light">Download</a>
+                                                      </div>
+                                                    </li>
+                                                  </ul>
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </div>
 
-  <!-- Preview Modal -->
-  <div class="modal fade" id="filePreviewModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered modal-xl">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Preview</h5>
-          <button type="button"  data-bs-dismiss="modal"  class="btn position-absolute"
-                                    style="right: 10px; top: 10px;"> &times; </button>
-        </div>
-        <div class="modal-body text-center">
-          <template v-if="isImage(previewUrl)">
-            <img :src="previewUrl" alt="Preview" class="img-fluid" />
-          </template>
-          <template v-else-if="isPDF(previewUrl)">
-            <iframe :src="previewUrl" class="w-100" style="height: 600px;" />
-          </template>
-          <template v-else>
-            <p>No preview available for this file type.<a :href="previewUrl"
-                                        download>Download</a></p>
-          </template>
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
-
-
-                                      <template v-if="field.fieldtype === 'Data'">
-                                        <input
-                                          v-if="props.readonlyFor !== 'true' && blockIndex !== 0 && blockIndex == currentLevel"
-                                          type="text"
-                                          :class="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel ? 'bg-white border-0' : null"
-                                          :disabled="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel"
-                                          class="form-control form-control-sm font-12 text-center"
-                                          v-model="row[field.fieldname]" />
-                                        <span v-else>
-                                          {{ row[field.fieldname] }}
-
-                                        </span>
-                                      </template>
+                                          <!-- Preview Modal -->
+                                          <div class="modal fade" id="filePreviewModal" tabindex="-1">
+                                            <div class="modal-dialog modal-dialog-centered modal-xl">
+                                              <div class="modal-content">
+                                                <div class="modal-header">
+                                                  <h5 class="modal-title">Preview</h5>
+                                                  <button type="button" data-bs-dismiss="modal"
+                                                    class="btn position-absolute" style="right: 10px; top: 10px;">
+                                                    &times; </button>
+                                                </div>
+                                                <div class="modal-body text-center">
+                                                  <template v-if="isImage(previewUrl)">
+                                                    <img :src="previewUrl" alt="Preview" class="img-fluid" />
+                                                  </template>
+                                                  <template v-else-if="isPDF(previewUrl)">
+                                                    <iframe :src="previewUrl" class="w-100" style="height: 600px;" />
+                                                  </template>
+                                                  <template v-else>
+                                                    <p>No preview available for this file type.<a :href="previewUrl"
+                                                        download>Download</a></p>
+                                                  </template>
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </template>
 
 
+                                        <template v-if="field.fieldtype === 'Data'">
+                                          <input
+                                            v-if="props.readonlyFor !== 'true' && blockIndex !== 0 && blockIndex == currentLevel"
+                                            type="text"
+                                            :class="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel ? 'bg-white border-0' : null"
+                                            :disabled="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel"
+                                            class="form-control form-control-sm font-12 text-center"
+                                            v-model="row[field.fieldname]" />
+                                          <span v-else>
+                                            {{ row[field.fieldname] }}
 
-                                      <template v-if="field.fieldtype === 'Datetime'">
-                                        <input
-                                          v-if="props.readonlyFor !== 'true' && blockIndex !== 0 && blockIndex == currentLevel"
-                                          type="datetime-local"
-                                          :class="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel ? 'bg-white border-0' : null"
-                                          :disabled="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel"
-                                          class="form-control form-control-sm font-12 text-center"
-                                          v-model="row[field.fieldname]" />
-                                        <span v-else>
-                                          {{ row[field.fieldname] }}
+                                          </span>
+                                        </template>
+                                        <template v-if="field.fieldtype === 'Link'">
+                                          <input
+                                            v-if="props.readonlyFor !== 'true' && blockIndex !== 0 && blockIndex == currentLevel"
+                                            type="text"
+                                            :class="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel ? 'bg-white border-0' : null"
+                                            :disabled="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel"
+                                            class="form-control form-control-sm font-12 text-center"
+                                            v-model="row[field.fieldname]" />
+                                          <span v-else>
+                                            {{ row[field.fieldname] }}
 
-                                        </span>
-                                      </template>
-                                      <template v-if="field.fieldtype === 'Text'">
-                                        <textarea
-                                          v-if="props.readonlyFor !== 'true' && blockIndex !== 0 && blockIndex == currentLevel"
-                                          type="text"
-                                          :class="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel ? 'bg-white border-0' : null"
-                                          :disabled="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel"
-                                          class="form-control form-control-sm font-12 text-center"
-                                          v-model="row[field.fieldname]"
-                                          :ref="el => setRef(el, sectionIndex, columnIndex, fieldIndex)"
-                                          @input="adjustHeight(sectionIndex, columnIndex, fieldIndex)" />
-                                        <span v-else>
-                                          {{ row[field.fieldname] }}
+                                          </span>
+                                        </template>
 
-                                        </span>
-                                      </template>
-                                      <template v-if="field.fieldtype === 'Int'">
-                                        <!-- Expression based field -->
-                                        <!-- <template v-if="field.description && /[+\-*/]/.test(field.description)">
+
+
+                                        <template v-if="field.fieldtype === 'Datetime'">
+                                          <input
+                                            v-if="props.readonlyFor !== 'true' && blockIndex !== 0 && blockIndex == currentLevel"
+                                            type="datetime-local"
+                                            :class="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel ? 'bg-white border-0' : null"
+                                            :disabled="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel"
+                                            class="form-control form-control-sm font-12 text-center"
+                                            v-model="row[field.fieldname]" />
+                                          <span v-else>
+                                            {{ row[field.fieldname] }}
+
+                                          </span>
+                                        </template>
+                                        <template v-if="field.fieldtype === 'Text'">
+                                          <textarea
+                                            v-if="props.readonlyFor !== 'true' && blockIndex !== 0 && blockIndex == currentLevel"
+                                            type="text"
+                                            :class="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel ? 'bg-white border-0' : null"
+                                            :disabled="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel"
+                                            class="form-control form-control-sm font-12 text-center"
+                                            v-model="row[field.fieldname]"
+                                            :ref="el => setRef(el, sectionIndex, columnIndex, fieldIndex)"
+                                            @input="adjustHeight(sectionIndex, columnIndex, fieldIndex)" />
+                                          <span v-else>
+                                            {{ row[field.fieldname] }}
+
+                                          </span>
+                                        </template>
+                                        <template v-if="field.fieldtype === 'Int'">
+                                          <!-- Expression based field -->
+                                          <!-- <template v-if="field.description && /[+\-*/]/.test(field.description)">
                                           <input disabled type="number" class="form-control text-center font-12"
                                             :class="blockIndex === 0 || props.readonlyFor === 'true' ? 'bg-white border-0' : null"
                                             :value="calculateFieldExpression(row, field.description, headers)"
                                             readonly />
                                         </template> -->
 
-                                        <!-- Editable input -->
-                                        <template v-if="!(blockIndex === 0 || props.readonlyFor === 'true')">
-                                          <input type="number" class="form-control text-center font-12"
-                                            :class="blockIndex === 0 || props.readonlyFor === 'true' ? 'bg-white border-0' : null"
-                                            v-model.number="row[field.fieldname]" />
+                                          <!-- Editable input -->
+                                          <template v-if="!(blockIndex === 0 || props.readonlyFor === 'true')">
+                                            <input type="number" class="form-control text-center font-12"
+                                              :class="blockIndex === 0 || props.readonlyFor === 'true' ? 'bg-white border-0' : null"
+                                              v-model.number="row[field.fieldname]" />
+                                          </template>
+
+                                          <!-- Read-only display -->
+                                          <!-- v-else-if="(blockIndex === 0 || props.readonlyFor === 'true')" -->
+                                          <template v-else-if="(blockIndex === 0 || props.readonlyFor === 'true')">
+                                            <span>
+                                              {{ row[field.fieldname] ? row[field.fieldname] : '' }}
+                                            </span>
+                                          </template>
                                         </template>
 
-                                        <!-- Read-only display -->
-                                        <!-- v-else-if="(blockIndex === 0 || props.readonlyFor === 'true')" -->
-                                        <template v-else-if="(blockIndex === 0 || props.readonlyFor === 'true')">
-                                          <span>
-                                            {{ row[field.fieldname] ? row[field.fieldname] : '' }}
+
+                                        <template v-if="field.fieldtype === 'Date'">
+                                          <input
+                                            v-if="props.readonlyFor !== 'true' && blockIndex !== 0 && blockIndex == currentLevel"
+                                            type="date" class="form-control form-control-sm font-12 text-center"
+                                            :class="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel ? 'bg-white border-0' : null"
+                                            :disabled="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel"
+                                            :max="field.fieldname === 'RetrunDate' ? today : null"
+                                            :min="field.fieldname === 'RetrunDate' ? oneWeekAgo : null"
+                                            v-model="row[field.fieldname]" />
+                                          <span v-else>
+                                            {{ row[field.fieldname] }}
+
                                           </span>
                                         </template>
-                                      </template>
 
 
-                                      <template v-if="field.fieldtype === 'Date'">
-                                        <input
-                                          v-if="props.readonlyFor !== 'true' && blockIndex !== 0 && blockIndex == currentLevel"
-                                          type="date" class="form-control form-control-sm font-12 text-center"
-                                          :class="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel ? 'bg-white border-0' : null"
-                                          :disabled="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel"
-                                          :max="field.fieldname === 'RetrunDate' ? today : null"
-                                          :min="field.fieldname === 'RetrunDate' ? oneWeekAgo : null"
-                                          v-model="row[field.fieldname]" />
-                                        <span v-else>
-                                          {{ row[field.fieldname] }}
 
+                                        <template v-else-if="field.fieldtype === 'Select'">
+
+                                          <div
+                                            v-if="props.readonlyFor !== 'true' && blockIndex !== 0 && blockIndex == currentLevel">
+                                            <Multiselect :multiple="field.fieldtype === 'Table MultiSelect'"
+                                              :options="field.options?.split('\n').filter(opt => opt.trim() !== '') || []"
+                                              :model-value="row[field.fieldname]" placeholder="Select"
+                                              @update:model-value="val => row[field.fieldname] = val"
+                                              class="font-11 multiselect" />
+                                          </div>
+                                          <span v-else>
+                                            {{ row[field.fieldname] }}
+
+                                          </span>
+                                        </template>
+
+
+
+                                      </td>
+                                      <td v-if="blockIndex !== 0 || props.readonlyFor === 'true'"
+                                        class="d-table-cell text-center align-middle removeRowTd">
+
+                                        <span v-if="props.readonlyFor !== 'true'" class="tableRowRemoveBtn "
+                                          :class="blockIndex !== 0 && blockIndex < currentLevel ? 'd-none' : null"
+                                          @click="removeRow(tableName, index)">
+                                          <i class="bi bi-x-lg "></i>
                                         </span>
-                                      </template>
-
-
-
-                                      <template v-else-if="field.fieldtype === 'Select'">
-
-                                        <div
-                                          v-if="props.readonlyFor !== 'true' && blockIndex !== 0 && blockIndex == currentLevel">
-                                          <Multiselect :multiple="field.fieldtype === 'Table MultiSelect'"
-                                            :options="field.options?.split('\n').filter(opt => opt.trim() !== '') || []"
-                                            :model-value="row[field.fieldname]" placeholder="Select"
-                                            @update:model-value="val => row[field.fieldname] = val"
-                                            class="font-11 multiselect" />
-                                        </div>
-                                        <span v-else>
-                                          {{ row[field.fieldname] }}
-
-                                        </span>
-                                      </template>
-
-
-
-                                    </td>
-                                    <td v-if="blockIndex !== 0 || props.readonlyFor === 'true'"
-                                      class="d-table-cell text-center align-middle removeRowTd">
-
-                                      <span v-if="props.readonlyFor !== 'true'" class="tableRowRemoveBtn "
-                                        :class="blockIndex !== 0 && blockIndex < currentLevel ? 'd-none' : null"
-                                        @click="removeRow(tableName, index)">
-                                        <i class="bi bi-x-lg "></i>
-                                      </span>
-                                    </td>
-                                  </tr>
-                                </tbody>
-                              </table>
+                                      </td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                              </div>
                               <!-- File Preview Modal -->
                               <div class="modal fade" id="filePreviewModal" tabindex="-1" aria-hidden="true">
                                 <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -1998,7 +2102,7 @@ const removeFile = (
 
   files.splice(fileIndex, 1); // Remove from field value
   attachmentList.value.splice(fileIndex, 1); // ✅ Remove from visible list
-  if(attachmentList.value.length === 0) {
+  if (attachmentList.value.length === 0) {
     showListModal.value = false; // Close modal if no files left
   }
 
@@ -2376,6 +2480,7 @@ td {
   opacity: 1 !important;
   /* Remove greyed-out appearance */
 }
+
 /* Base font size (desktop) */
 .Request_ID {
   font-size: 12px;
@@ -2401,7 +2506,8 @@ td {
     font-size: 9px;
   }
 }
-.field-width{
-  width: 100% ;
+
+.field-width {
+  width: 100%;
 }
 </style>

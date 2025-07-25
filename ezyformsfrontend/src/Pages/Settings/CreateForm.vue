@@ -13,7 +13,7 @@
         </div>
         <div v-if="is_admin == 1" class="d-flex align-items-center gap-2">
           <div class="d-flex align-items-center gap-2">
-            <!-- <button class="btn btn-dark font-12 h-auto" @click="toWorkOrder">Work order</button> -->
+            <button class="btn btn-dark font-12 h-auto" @click="toWorkOrder">Work order</button>
             <ButtonComp class="buttoncomp" @click="formCreation()" name="Create Form"></ButtonComp>
           </div>
         </div>
@@ -188,12 +188,12 @@ function formCreation(item = null) {
   localStorage.setItem('routepath', route.path)
 }
 
-// function toWorkOrder (){
-//   router.push({
-//     name: "WorkOrderDetails",
+function toWorkOrder (){
+  router.push({
+    name: "WorkOrderDetails",
  
-//       });
-// } 
+      });
+} 
 function viewPreview(data, index, type) {
   // console.log(route.path);
   if (type === "view") {
@@ -358,17 +358,25 @@ function actionCreated(rowData, actionEvent) {
       // console.log(route.path, "sadasda");
 
       if (hasAccess && rowData.enable === 1) {
-        router.push({
-          name: "RaiseRequest",
-          query: {
-            routepath: route.path,
-            selectedForm: rowData.form_short_name,
-            business_unit: rowData.business_unit,
-            has_workflow: rowData.has_workflow
+        if(rowData.form_name === 'Contract One'){
+            router.push({
+    name: "WorkOrderDetails",
+ 
+      });
 
-
-          },
-        });
+        } else{
+          router.push({
+            name: "RaiseRequest",
+            query: {
+              routepath: route.path,
+              selectedForm: rowData.form_short_name,
+              business_unit: rowData.business_unit,
+              has_workflow: rowData.has_workflow
+              
+              
+            },
+          });
+        }
       } else if (rowData.enable === 0) {
         toast.info("This form is currently disabled.", { autoClose: 500 });
       } else {

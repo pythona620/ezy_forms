@@ -764,7 +764,7 @@
                                                                             <!-- For calculated fields -->
                                                                             <input
                                                                                 v-if="field.description && /[+\-*/]/.test(field.description)" v-tooltip.top="row[field.fieldname]"
-                                                                                type="number" :disabled="field.label.includes('Total Cost')"
+                                                                                type="number" :disabled="field.label.includes('Total Cost') || field.description === 'Disable' "
                                                                                 class="form-control font-12"
                                                                                 :value="calculateFieldExpression(row, field.description, table)"
                                                                                 
@@ -927,7 +927,7 @@
                                                         </table>
 
                                                         <span
-                                                            v-if="field.description !== tableIndex && field.description !== 'True' && field.description !== 'false' && field.description !== 'Field' "
+                                                            v-if="field.description !== tableIndex && field.description !== 'True' && field.description !== 'false' && field.description !== 'Field' && field.fieldtype !== 'Table' "
                                                             class="font-11"><span class="fw-semibold">
                                                             </span>{{
                                                                 field.description }}</span>
@@ -1237,7 +1237,44 @@ const removeRow = (tableIndex, rowIndex) => {
 //         return 0;
 //     }
 // } 
+// function calculateFieldExpression(row, expression, fields) {
+//     const labelToValue = {};
+
+//     // Step 1: Map label -> value
+//     fields.forEach(f => {
+//         const value = parseFloat(row[f.fieldname]);
+//         labelToValue[f.label] = isNaN(value) ? 0 : value;
+//     });
+
+//     // Step 2: Convert "Label%" to "(Label / 100)"
+//     expression = expression.replace(/([a-zA-Z\s]+)%/g, (_, label) => {
+//         return `(${label.trim()} / 100)`;
+//     });
+
+//     // Step 3: Replace labels with actual numeric values
+//     const sortedLabels = Object.keys(labelToValue).sort((a, b) => b.length - a.length);
+//     let formula = expression;
+
+//     for (const label of sortedLabels) {
+//         const safeLabel = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // escape regex special chars
+//         const regex = new RegExp(`\\b${safeLabel}\\b`, 'g');
+//         formula = formula.replace(regex, labelToValue[label]);
+//     }
+
+//     // Step 4: Safely evaluate formula
+//     try {
+//         return new Function(`return ${formula}`)();
+//     } catch (e) {
+//         console.error('Error evaluating formula:', formula, e);
+//         return 0;
+//     }
+// }
+
 function calculateFieldExpression(row, expression, fields) {
+    if (!expression || /disable/i.test(expression)) {
+        return 0; // Skip evaluation if expression contains "Disable"
+    }
+
     const labelToValue = {};
 
     // Step 1: Map label -> value
@@ -1271,7 +1308,6 @@ function calculateFieldExpression(row, expression, fields) {
 }
 
 
-
 const tableTotals = computed(() => {
   const totals = {};
 
@@ -1281,7 +1317,7 @@ const tableTotals = computed(() => {
     const fields = props.tableHeaders[tableIndex] || [];
     fields.forEach((field) => {
       if (
-        field.fieldtype === 'Int' &&  field.description
+        field.fieldtype === 'Int' && field.description  && (field.label?.toLowerCase().includes('total') || field.label?.toLowerCase().includes('amount') || /[+\-*/]/.test(field.description)) || field.description === field.label
       ) {
         let sum = 0;
 

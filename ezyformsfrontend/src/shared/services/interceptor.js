@@ -40,7 +40,14 @@ axiosInstance.interceptors.response.use(
         toast.error(`${error.response.data.message}`, { transition: "zoom" });
       } else if (error.response.status === 403) {
         // Forbidden:
-        toast.error(` ${error.response.data.exc_type}`, { transition: "zoom" });
+       if (error.response.data.exc_type === 'CSRFTokenError') {
+    toast.error('Session expired. Reloading...', { transition: "zoom" });
+    setTimeout(() => {
+      window.location.reload(); // Refresh the page to reinit session
+    }, 2000);
+  } else {
+    toast.error(`${error.response.data.exc_type}`, { transition: "zoom" });
+  }
       } else if (error.response.status === 404) {
         toast.error(`${statusText}`, { transition: "zoom" });
       } else if (error.response.status === 500) {

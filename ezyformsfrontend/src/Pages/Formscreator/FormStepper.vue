@@ -773,16 +773,26 @@
                                                       <div
                                                         v-if="editMode[tableName] && tableName === currentEditingTable"
                                                         class=" d-flex align-items-center gap-2">
-                                                        <div class="d-flex align-items-center">
+                                                        <!-- <div class="d-flex align-items-center">
 
                                                           <input class="font-12" v-model="field.description"
-                                                            true-value="true" false-value="fasle"
-                                                            placeholder="Field Name" type="checkbox" />
+                                                            true-value="true" false-value="fasle" id="field-description"
+                                                            placeholder="Field Name" type="text" />
                                                         </div>
                                                         <div>
-                                                          <label for="mandatory" class="font-12 m-0 fw-light">Show as
+                                                          <label  class="font-12 m-0 fw-light">Show as
                                                             Blocks</label>
-                                                        </div>
+                                                        </div> -->
+                                                        <div class="d-flex align-items-center">
+                                                <input v-if="field.showDescription" v-model="field.description"
+                                                  class="form-control font-12 " placeholder="Enter field description" />
+                                                <button class="btn btn-sm text-nowrap font-12"
+                                                  @click="field.showDescription = !field.showDescription">
+                                                  {{ field.showDescription ? 'Hide Description' : (field.description ?
+                                                    'Edit Description'
+                                                    : 'Add Description') }}
+                                                </button>
+                                            </div>
                                                       </div>
                                                       <table
                                                         v-if="tableName === field.options || tableName === field.fieldname"
@@ -964,15 +974,25 @@
                                     class="childTable dynamicColumn m-0 p-2 ">
                                     <h5 class="font-13">{{ table.tableName }}</h5>
                                     <div v-if="editMode[table.tableName]" class=" d-flex align-items-center gap-2">
-                                      <div class="d-flex align-items-center">
+                                      <!-- <div class="d-flex align-items-center">
 
-                                        <input class="font-12" v-model="table.description" true-value="true"
-                                          false-value="fasle" placeholder="Field Name" type="checkbox" />
+                                        <input class="font-12" v-model="table.description" true-value="true" 
+                                          false-value="fasle" placeholder="Field Name" type="text" />
                                       </div>
                                       <div>
-                                        <label for="mandatory" class="font-12 m-0 fw-light">Show as
+                                        <label class="font-12 m-0 fw-light">Show as
                                           Blocks</label>
-                                      </div>
+                                      </div> -->
+                                       <div class="d-flex align-items-center">
+                                                <input v-if="table.showDescription" v-model="table.description"
+                                                  class="form-control font-12 " placeholder="Enter field description" />
+                                                <button class="btn btn-sm text-nowrap font-12"
+                                                  @click="table.showDescription = !table.showDescription">
+                                                  {{ table.showDescription ? 'Hide Description' : (table.description ?
+                                                    'Edit Description'
+                                                    : 'Add Description') }}
+                                                </button>
+                                            </div>
                                     </div>
 
                                     <table class="table table-bordered rounded-table">
@@ -1080,12 +1100,18 @@
                                           </div>
                                           <div class=" d-flex align-items-center gap-2">
                                             <div class="d-flex align-items-center">
-                                              <input class="font-12" v-model="table.as_a_block" :true-value="1"
-                                                :false-value="0" placeholder="Field Name" type="checkbox" />
+                                                <input v-if="table.showDescription" v-model="table.as_a_block"
+                                                  class="form-control font-12 " placeholder="Enter field description" />
+                                                <button class="btn btn-sm text-nowrap font-12"
+                                                  @click="table.showDescription = !table.showDescription">
+                                                  {{ table.showDescription ? 'Hide Description' : (table.description ?
+                                                    'Edit Description'
+                                                    : 'Add Description') }}
+                                                </button>
                                             </div>
-                                            <div>
-                                              <label for="mandatory" class="font-12 m-0 fw-light">Show as Blocks</label>
-                                            </div>
+                                            <!-- <div>
+                                              <label class="font-12 m-0 fw-light">Show as Blocks</label>
+                                            </div> -->
                                           </div>
                                         </div>
                                         <button class="btn btn-light bg-transparent border-0 font-13 deleteSection"
@@ -2233,7 +2259,7 @@ const processFields = (blockIndex, sectionIndex, tableIndex) => {
     form_short_name: formatTableName(table.tableName),
     fields: table.columns,
     idx: table.idx,
-    as_a_block: table.as_a_block === 1 ? 'true' : 'false',
+    as_a_block: table.as_a_block  ? table.as_a_block : 'false',
   };
 
   // console.log(data); 
