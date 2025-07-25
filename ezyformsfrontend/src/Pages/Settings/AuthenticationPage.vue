@@ -59,7 +59,7 @@ const tableData = ref([
     { title: "Send Form as an Attachment Via an E-Mail ", checked: false },
     { title: "Welcome E-Mail Configuration", checked: false },
     { title: "Enable Sign Up in Login Page", checked: false },
-    { title: "Send Daily E-mail Alerts", checked: false },
+    { title: "Send Daily E-mail reminders", checked: false },
 ]);
 
 const default_mail = ref(false);
@@ -104,8 +104,8 @@ const handleToggle = (index) => {
             : "Are you sure you want to disable Sign up?";
     } else if (index === 4) {
         confirmMessage.value = isChecked
-            ? "Are you sure you want to enable daily email alerts?"
-            : "Are you sure you want to disable daily email alerts?";
+            ? "Are you sure you want to enable daily email reminders?"
+            : "Are you sure you want to disable daily email reminders?";
     }
 
     // Show the modal
@@ -197,13 +197,13 @@ const confirmAction = () => {
                 send_daily_alerts: newStatus,
             })
             .then(() => {
-                toast.success(`daily email alerts ${newStatus === 0 ? "Disabled" : "Enabled"} Successfully!`, { autoClose: 700 });
+                toast.success(`daily email reminders ${newStatus === 0 ? "Disabled" : "Enabled"} Successfully!`, { autoClose: 700 });
                 const modal = bootstrap.Modal.getInstance(document.getElementById('EnableDisable'));
                     modal.hide();
                     BussinesUnit()
             })
             .catch(() => {
-                toast.error("Failed to update E-Mail Send Daily Alerts");
+                toast.error("Failed to update E-Mail Send Daily reminders");
             });
     }
 };
