@@ -158,6 +158,9 @@ doc_events = {
     },
 "File":{
     "after_insert":"ezy_forms.api.v1.send_doctype_as_mail.make_file_public_after_insert"
+    },
+"Role":{
+    "after_insert":"ezy_forms.ezy_forms.doctype.ezy_doctype_permissions.ezy_doctype_permissions.activating_perms_for_new_role"
 }
 }
 

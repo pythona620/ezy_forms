@@ -25,7 +25,8 @@ class EzyEmployee(Document):
 		self.ensure_reporting_designation_role()
 		self.create_user_if_not_exists()
 		self.update_wf_role_matrix()
-		after_insert_user(self)
+		if self.enable:
+			after_insert_user(self)
  
 	def create_user_if_not_exists(self):
 		if frappe.db.exists("User", self.emp_mail_id):

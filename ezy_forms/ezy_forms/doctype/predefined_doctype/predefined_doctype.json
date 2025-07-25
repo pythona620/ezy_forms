@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:form_name",
  "creation": "2025-06-23 12:10:50.892623",
@@ -53,7 +54,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-03 11:37:20.703513",
+ "modified": "2025-07-21 12:10:56.435524",
  "modified_by": "Administrator",
  "module": "ezy_forms",
  "name": "Predefined Doctype",
@@ -77,6 +78,3 @@
  "sort_order": "DESC",
  "states": []
 }
-
-
-
