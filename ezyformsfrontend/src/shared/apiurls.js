@@ -93,6 +93,7 @@ export const apis = {
   forgotPassword:domain +`/method/frappe.core.doctype.user.user.reset_password`,
   reportMailSend:domain+`/method/ezy_forms.api.v1.send_doctype_as_mail.email_reports_send`,
   employeedisable:domain+`/method/ezy_forms.api.v1.enable_employee.employee_update`,
+  get_approved_by_me: domain + `/method/ezy_flow.api.v1.approved_by_me.get_approved_by_me`,
 
   
   // getReportData: domain + `/api/method/frappe.utils.print_format.download_pdf`
