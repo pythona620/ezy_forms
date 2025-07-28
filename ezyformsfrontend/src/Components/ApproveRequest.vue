@@ -527,19 +527,23 @@ const ApprovePDF = ref(true)
 
 
 function EditformSubmission() {
-  // Navigate to the new route
+  const query = {
+    routepath: '/todo/raisedbyme',
+    business_unit: route.query.property,
+    selectedForm: route.query.doctype_name,
+    selectedFormId: route.query.name,
+    selectedFormStatus: route.query.status,
+    ...(tableData.value.linked_form_id && { main_form_Id: tableData.value.linked_form_id }),
+    ...(doctypeForm.value.return_gate_pass_name && { main_form: doctypeForm.value.return_gate_pass_name })
+  };
+
   router.push({
     name: "RaiseRequest",
-    query: {
-      routepath: '/todo/raisedbyme',
-      business_unit: route.query.property,
-      selectedForm: route.query.doctype_name,
-      selectedFormId: route.query.name,
-      selectedFormStatus: route.query.status,
-    },
+    query
   });
-  // console.log("emittedFormData", emittedFormData.value);
 }
+
+// console.log("emittedFormData", emittedFormData.value);
 watch(
   businessUnit,
   (newVal) => {
