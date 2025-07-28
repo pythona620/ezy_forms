@@ -18,14 +18,14 @@ def email_template_create():
 	# Template 1: Account Activation
 	activation_message = '''
 		Hi {{emp_name}},<br>
-		Your user account in Ezy Forms has been successfully activated by the IT team.<br>
+		Your user account in ezyForms has been successfully activated by the IT team.<br>
 		You can now log in and start using the system. If you haven’t received your login details or need help accessing your account, please contact IT support.<br> 
 		Login Link: <a href="{{site_url}}">View Page</a><br>
 		Let us know if you have any questions.
 	'''
 	create_template(
 		name="Account Activation",
-		subject="Your Ezy Forms Profile is Now Active",
+		subject="Your ezyForms Profile is Now Active",
 		message=activation_message
 	)
 
@@ -70,11 +70,11 @@ def email_template_create():
 		<td>generated_request_id</td>
 	</tr>
 	<tr>
-		<td><strong>Form Submitted By</strong></td>
+		<td><strong>Form Requested By</strong></td>
 		<td>--action_by--</td>
 	</tr>
 	<tr>
-		<td><strong>Form Submitted On</strong></td>
+		<td><strong>Form Requested On</strong></td>
 		<td>current_date_and_time</td>
 	</tr>
 	<tr>
@@ -107,31 +107,56 @@ def email_template_create():
 	</a>
 </p>
 
-<p>Best Regards,<br>EzyForms</p>
+<p>Best Regards,<br>ezyForms</p>
 '''
 	create_template(
-		name="Ezy Flow Notification",
-		subject="Ezy Flow Notification",
+		name="ezyForms Notification",
+		subject="ezyForms Notification",
 		message=ezy_flow_notification
 	)
-
-	child_entries = frappe.get_all(
-			"Doctype Permissions",
-			filters={"parent": "Ezy Doctype Permissions", "parenttype": "Ezy Doctype Permissions", "parentfield": "guest_permissions"},
-			fields=["doctype_names"]
-		)
-	document_type_list = [entry["doctype_names"] for entry in child_entries]
-	if document_type_list:
-		for doc in document_type_list:
-			form_perms = frappe.new_doc("Custom DocPerm")
-			form_perms.parent = doc
-			form_perms.role ="Guest"
-			form_perms.read = 1
-			form_perms.insert(ignore_permissions=True)
-		frappe.db.commit()
-  
-  
-  
-  
-  
+	approval_remainder = '''
+ 
+<p>Dear Sir/Madam,</p>
+ 
+<p>The following form approval is pending:</p>
+ 
+<table border="1" cellpadding="10" cellspacing="0">
+	<tr>
+		<th>Form</th>
+		<th>Form Details</th>
+	</tr>
+	<tr>
+		<td><strong>Form Name</strong></td>
+		<td>{{doctypename}}</td>
+	</tr>
+	<tr>
+		<td><strong>Requested Form ID</strong></td>
+		<td>{{generated_request_id}}</td>
+	</tr>
+	<tr>
+		<td><strong>Form Requested By</strong></td>
+		<td>{{action_by}}</td>
+	</tr>
+	<tr>
+		<td><strong>Form Requested On</strong></td>
+		<td>{{current_date_and_time}}</td>
+	</tr>
+	<tr>
+		<td><strong>Form Current Status</strong></td>
+		<td>{{current_status}}</td>
+	</tr>
+</table>
+ 
+ 
+<p>Kindly take the necessary action at your earliest convenience.</p>
+<p>Best Regards,<br>ezyForms</p>
+'''
+	create_template(
+		name="Approval Remainder",
+		subject="ezyForms Approval Remainder",
+		message=approval_remainder
+	)
+ 
+	frappe.db.commit()
+	
   

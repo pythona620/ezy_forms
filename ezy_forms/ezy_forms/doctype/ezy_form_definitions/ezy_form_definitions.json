@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:form_short_name",
  "creation": "2024-10-01 15:45:04.495503",
@@ -152,7 +153,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-02 18:22:56.462796",
+ "modified": "2025-07-21 11:15:28.746877",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
  "name": "Ezy Form Definitions",
