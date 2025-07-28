@@ -182,6 +182,7 @@ function clearModalData() {
         ezy_departments_items: []
     });
     categoriesDataEdit.value.ezy_departments_items = [];
+    newCategory.value = "";
 }
 
 const tableheaders = ref([
@@ -462,6 +463,7 @@ function createDepart() {
                     department_name: "",
                     ezy_departments_items: [],
                 }
+                newCategory.value = "";
                 const modal = bootstrap.Modal.getInstance(document.getElementById('viewCategory'));
                 modal.hide();
             }
@@ -517,6 +519,7 @@ function UpdateDeprtment() {
                         department_name: '',
                         ezy_departments_items: []
                     };
+                    newCategory.value = "";
                     const modal = bootstrap.Modal.getInstance(document.getElementById('viewCategory'));
                     modal.hide();
                 }
