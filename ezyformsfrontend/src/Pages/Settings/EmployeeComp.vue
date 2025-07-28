@@ -135,16 +135,17 @@
                             <div class="modal-content">
                               <div class="modal-header">
                                 <h5 class="modal-title">Create New Role</h5>
-                                <button type="button" class="btn-close" @click="showModal = false"></button>
+                                <button type="button" class="btn-close" @click="closedesignmodal"></button>
                               </div>
                               <div class="modal-body">
-                                <label for="" class="font-12 fw-bold">Designation</label>
-                                <input type="text" class="form-control font-12" v-model="newRole"
-                                  placeholder="Enter role name" />
+                                <label for="" class="font-13 fw-bold">Designation<span class="text-danger ps-1">*</span></label>
+                                <input type="text" class="form-control font-12 shadow-none" v-model="newRole" @input="validateRole"
+                                  placeholder="Enter role name" :class="{ 'is-invalid': roleError }" />
+                                  <span v-if="roleError" class="text-danger font-12 mt-2">{{ roleError }}</span>
                               </div>
                               <div class="modal-footer">
-                                <button class="btn btn-secondary" @click="showModal = false">Cancel</button>
-                                <button class="btn btn-dark" @click="createRole">Save Role</button>
+                                <button class="btn btn-secondary" @click="closedesignmodal">Cancel</button>
+                                <button class="btn btn-dark" :disabled="!!roleError" @click="createRole">Save Role</button>
                               </div>
                             </div>
                           </div>
@@ -783,6 +784,24 @@ const progress = ref(0);
 const uploading = ref(false);
 const bulkfileUrl = ref("");
 
+
+const roleError = ref('');
+
+function validateRole() {
+  if (newRole.value.trim() === '') {
+    roleError.value = 'Designation is required';
+  } else if (!/^[a-zA-Z0-9 ]*$/.test(newRole.value)) {
+    roleError.value = 'Special characters are not allowed';
+  } else {
+    roleError.value = '';
+  }
+}
+
+function closedesignmodal(){
+  showModal.value = false
+  newRole.value = ''
+  roleError.value = ''
+}
 
 const triggerFileInput = () => {
   fileInput.value.click();

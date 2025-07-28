@@ -5,9 +5,9 @@
             <div class="d-flex justify-content-between align-items-center">
                 <h1 class="font-12 m-0 text-muted ps-2" v-if="!collapsed">{{ sidebarTitle }} 
             </h1>
-               <button class="btn border me-3 ms-2 toggle-btn" type="button" @click="toggleSidebar">
-                    <i v-if="!collapsed" class="bi bi-chevron-left fs-5"></i>
-                    <i v-if="collapsed" class="bi bi-chevron-right fs-5"></i>
+               <button class="btn border me-2 ms-2 toggle-btn" type="button" @click="toggleSidebar">
+                    <i v-if="!collapsed" class="bi bi-chevron-double-left fs-6"></i>
+                    <i v-if="collapsed" class="bi bi-chevron-double-right fs-6"></i>
                 </button>
             </div>
 
@@ -565,8 +565,10 @@ li:hover {
   width: 24px;
 }
 .toggle-btn{
-    padding: 0px 4px;
-    border-radius: 10px;
-    
+  padding: 0px 4px;
+  border-radius: 15px;
+  color: black !important;
+  font-weight: bold !important;
+  height: 33px;
 }
 </style>

@@ -42,9 +42,29 @@ axiosInstance.interceptors.response.use(
         // Forbidden:
         toast.error(` ${error.response.data.exc_type}`, { transition: "zoom" });
       } else if (error.response.status === 404) {
-        toast.error(`${statusText}`, { transition: "zoom" });
+        // toast.error(`${statusText}`, { transition: "zoom" });
+        const serverMessages = JSON.parse(error.response.data._server_messages);
+                if (Array.isArray(serverMessages)) {
+                    serverMessages.forEach((msg) => {
+                    const parsedMessage = JSON.parse(msg);
+                      let parsedErrorMessage = parsedMessage.message;
+                          parsedErrorMessage = parsedErrorMessage.replace(/\s*\(.*?\)\s*/g, "").trim();
+                            toast.error(parsedErrorMessage,{ transition: "zoom" });
+                            });
+                        }
+
       } else if (error.response.status === 500) {
         toast.error(`${statusText}`, { transition: "zoom" });
+       }else if (error.response.status === 417) {
+         const serverMessages = JSON.parse(error.response.data._server_messages);
+                if (Array.isArray(serverMessages)) {
+                    serverMessages.forEach((msg) => {
+                    const parsedMessage = JSON.parse(msg);
+                      let parsedErrorMessage = parsedMessage.message;
+                          parsedErrorMessage = parsedErrorMessage.replace(/\s*\(.*?\)\s*/g, "").trim();
+                            toast.error(parsedErrorMessage,{ transition: "zoom" });
+                            });
+                        }
       } else {
         toast.error(`${error.response.status}: ${statusText}`, { transition: "zoom" });
       }
