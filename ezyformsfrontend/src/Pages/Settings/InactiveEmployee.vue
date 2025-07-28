@@ -54,7 +54,7 @@
                         <label class="font-13 ps-1" for="emp_mail_id">Emp Mail ID<span
                             class="text-danger ps-1">*</span></label>
                         <FormFields class="mb-1" tag="input" type="email" name="emp_mail_id" @change="validateEmail"
-                          :required="true" id="emp_mail_id" placeholder="Enter Email"
+                          :required="true" id="emp_mail_id" placeholder="Enter Email" 
                           v-model="createEmployee.emp_mail_id" />
                         <p v-if="emailError" class="text-danger font-11 ps-1">
                           {{ emailError }}
@@ -362,7 +362,7 @@
                         class="text-danger ps-1">*</span></label>
                     <div class="input-container">
                       <FormFields class="mb-1 w-100" tag="input" type="email" name="emp_mail_id" id="emp_mail_id"
-                        placeholder="Enter Email" v-model="createEmployee.emp_mail_id" @input="maskEmail"
+                        placeholder="Enter Email" v-model="createEmployee.emp_mail_id" @input="maskEmail" :disabled="createEmployee.emp_mail_id"
                         @change="validateEmail" :required="true" />
                       <i :class="eyeIconEmail" class="eye-icon" @click="toggleEmailMask"></i>
                     </div>
@@ -514,7 +514,7 @@
             <ButtonComp type="button" class="cancelfilter border-1 text-nowrap font-10" name="Cancel"
               @click="cancelCreate" data-bs-dismiss="modal" />
 
-            <ButtonComp type="button" class="btn btn-dark font-11" name="Save Employee" data-bs-dismiss="modal"
+            <ButtonComp type="button" class="btn btn-dark font-11" name="Save Employee" 
               @click="SaveEditEmp" />
           </div>
         </div>
@@ -1898,6 +1898,13 @@ function createEmpl() {
 }
 
 function SaveEditEmp() {
+   if (!isFormFilled.value || searchText.value.trim() === "") {
+    toast.error("Please fill all required fields", {
+      autoClose: 1000,
+      transition: "zoom",
+    });
+    return;
+  }
   if (!createEmployee.value.designation && searchText.value) {
     createEmployee.value.designation = searchText.value;
   }
@@ -1927,6 +1934,11 @@ function SaveEditEmp() {
     .then((response) => {
       if (response.data) {
         toast.success("Changes Saved", { autoClose: 500, transition: "zoom" });
+        const modal = bootstrap.Modal.getInstance(
+          document.getElementById("exampleModal")
+        );
+        modal.hide();
+        // exampleModal
         employeeData(); // refresh list
       }
     })
