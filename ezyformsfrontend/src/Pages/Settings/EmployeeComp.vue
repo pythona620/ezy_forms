@@ -2141,7 +2141,7 @@ watch(
   { immediate: true }
 );
 function createEmpl() {
-  if (!isFormFilled.value) {
+  if (!isFormFilled.value || searchText.value.trim()=== "") {
     toast.error("Please fill all required fields", {
       autoClose: 1000,
       transition: "zoom",
@@ -2200,7 +2200,7 @@ function createEmpl() {
 const asfv = ref(false)
 
 function SaveEditEmp() {
-  if (!isFormFilled.value) {
+  if (!isFormFilled.value || searchText.value.trim()=== "") {
     toast.error("Please fill all required fields", {
       autoClose: 1000,
       transition: "zoom",
