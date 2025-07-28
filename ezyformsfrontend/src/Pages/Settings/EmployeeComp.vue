@@ -62,11 +62,11 @@
                       <div class="mb-3">
                         <label class="font-13 ps-1" for="emp_mail_id">Emp Mail ID<span
                             class="text-danger ps-1">*</span></label>
-                        <FormFields class="mb-1" tag="input" type="email" name="emp_mail_id" @input="validateEmail"
-                          :required="true" id="emp_mail_id" placeholder="Enter Email"
-                          v-model="createEmployee.emp_mail_id" />
-                        <p v-if="emailError" class="text-danger font-11 ps-1">
-                          {{ emailError }}
+                        <FormFields class="mb-1" tag="input" type="email" name="emp_mail_id"
+                          v-model="createEmployee.emp_mail_id" @input="validateCreateUserEmail" :required="true"
+                          id="emp_mail_id" placeholder="Enter Email Id" />
+                        <p v-if="createEmailError" class="text-danger font-11 ps-1">
+                          {{ createEmailError }}
                         </p>
                       </div>
                       <label class="font-13 ps-1 fw-medium" for="dept">Departments<span
@@ -344,7 +344,8 @@
         </div>
       </div>
     </div>
-    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal fade" id="exampleModal" data-bs-backdrop="static" tabindex="-1"
+      aria-labelledby="exampleModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <div class="modal-header">
@@ -358,10 +359,10 @@
                 <div class="col">
                   <label class="font-13 ps-1" for="emp_name">Emp Name<span class="text-danger ps-1">*</span></label>
                   <FormFields class="mb-3" tag="input" type="text" name="emp_name" id="emp_name"
-                    placeholder="Enter department code" v-model="createEmployee.emp_name" />
+                    placeholder="Enter Emp Name" v-model="createEmployee.emp_name" />
                   <label class="font-13 ps-1" for="emp_code">Emp ID<span class="text-danger ps-1">*</span></label>
                   <FormFields class="mb-3" tag="input" type="text" name="emp_code" id="emp_code"
-                    placeholder="Enter department code" v-model="createEmployee.emp_code" />
+                    placeholder="Enter Emp Id" v-model="createEmployee.emp_code" />
                   <!-- <div class="mb-3">
                         <label class="font-13 ps-1" for="emp_phone">Emp Phone</label>
                         <FormFields tag="input" type="text" name="emp_phone" id="emp_phone" maxlength="10"
@@ -405,13 +406,14 @@
                         class="text-danger ps-1">*</span></label>
                     <div class="input-container">
                       <FormFields class="mb-1 w-100" tag="input" type="email" name="emp_mail_id" id="emp_mail_id"
-                        placeholder="Enter Email" v-model="createEmployee.emp_mail_id" @input="maskEmail"
-                        @change="validateEmail" :required="true" />
+                        placeholder="Enter Email" v-model="createEmployee.emp_mail_id" @input="maskEmail" :disabled="maskEmail"
+                        @change="validateEditUserEmail" :required="true" />
                       <i :class="eyeIconEmail" class="eye-icon" @click="toggleEmailMask"></i>
                     </div>
-                    <p v-if="emailError" class="text-danger font-11 ps-1">
-                      {{ emailError }}
-                    </p>
+                   <p v-if="editEmailError" class="text-danger font-11 ps-1">
+                      {{ editEmailError }}
+                   </p>
+
                   </div>
                   <label class="font-13 ps-1 fw-medium" for="dept">Departments<span
                       class="text-danger ps-1">*</span></label>
@@ -441,7 +443,7 @@
                     </div>
                   </div>
 
-                  
+
                 </div>
                 <div class="col">
                   <div class="position-relative mb-3">
@@ -461,8 +463,7 @@
                       </li>
 
                       <!-- Create Role option as part of the dropdown -->
-                      <li
-                        class="list-group-item list-group-item-action font-12 text-primary" style="cursor: pointer"
+                      <li class="list-group-item list-group-item-action font-12 text-primary" style="cursor: pointer"
                         @click="showModal = true">
                         <i class="bi bi-plus-lg"></i> Create role "<strong>{{ searchText }}</strong>"
                       </li>
@@ -523,8 +524,8 @@
                   </VueMultiselect>
                   <div class="mb-3">
                     <label class="font-13 ps-1" for="reporting_to">Acknowledge On</label><br>
-                    <input class="mb-3 date-time form-control font-12 " tag="input" type="datetime-local" name="acknowledge_on"
-                      id="acknowledge_on" placeholder="Enter department code"
+                    <input class="mb-3 date-time form-control font-12 " tag="input" type="datetime-local"
+                      name="acknowledge_on" id="acknowledge_on" placeholder="Enter department code"
                       :value="trimMilliseconds(createEmployee.acknowledge_on)" readonly />
                   </div>
                   <div class="mb-3 font-11">
@@ -555,8 +556,7 @@
             <ButtonComp type="button" class="cancelfilter border-1 text-nowrap font-10" name="Cancel"
               @click="cancelCreate" data-bs-dismiss="modal" />
 
-            <ButtonComp type="button" class="btn btn-dark font-11" name="Save Employee" data-bs-dismiss="modal"
-              @click="SaveEditEmp" />
+            <ButtonComp type="button" class="btn btn-dark font-11" name="Save Employee" @click="SaveEditEmp" />
           </div>
         </div>
       </div>
@@ -749,8 +749,8 @@ const tableheaders = ref([
   { th: "Department", td_key: "department" },
   { th: "Reporting Designation", td_key: "reporting_designation" },
   { th: "Signature", td_key: "signature" },
-  { th: 'Hod' , td_key: 'is_hod'},
-  { th: 'Admin' , td_key: 'is_admin'},
+  { th: 'Hod', td_key: 'is_hod' },
+  { th: 'Admin', td_key: 'is_admin' },
   { th: "Status", td_key: "enable" },
   // { th: "last Login", td_key: "last_login" },
   // { th: "Creation Date", td_key: "creation" },
@@ -1099,6 +1099,8 @@ const downloadTemplate = async () => {
 };
 
 const emailError = ref("");
+const editEmailError = ref("");
+const createEmailError = ref("");
 
 // const validateEmail = () => {
 //   const email = createEmployee.value.emp_mail_id;
@@ -1121,30 +1123,50 @@ const emailError = ref("");
 //   }
 // };
 
-const validateEmail = () => {
-  const email = (originalEmail.value || createEmployee.value.emp_mail_id)?.trim().toLowerCase();
-  
+// Edit Employee Email Validation
+function validateEditUserEmail() {
+  const email = (originalEmail.value || "").trim().toLowerCase();
+
   if (!email) {
-    emailError.value = "Email is required";
+    editEmailError.value = "Email is required";
     return;
   }
 
   const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-
   if (!emailPattern.test(email)) {
-    emailError.value = "Invalid email address";
-  } else {
-    const emailAlreadyExists = employeeEmails.value.some(
-      emp => emp.emp_mail_id?.toLowerCase() === email
-    );
-
-    if (emailAlreadyExists) {
-      emailError.value = "Email already exists";
-    } else {
-      emailError.value = "";
-    }
+    editEmailError.value = "Invalid email address";
+    return;
   }
-};
+
+  const exists = employeeEmails.value.some(
+    (emp) => emp.emp_mail_id?.toLowerCase() === email
+  );
+
+  editEmailError.value = exists ? "Email already exists" : "";
+}
+
+// Create Employee Email Validation
+function validateCreateUserEmail() {
+  const email = (createEmployee.value.emp_mail_id || "").trim().toLowerCase();
+
+  if (!email) {
+    createEmailError.value = "Email is required";
+    return;
+  }
+
+  const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  if (!emailPattern.test(email)) {
+    createEmailError.value = "Invalid email address";
+    return;
+  }
+
+  const exists = employeeEmails.value.some(
+    (emp) => emp.emp_mail_id?.toLowerCase() === email
+  );
+  
+
+  createEmailError.value = exists ? "Email already exists" : "";
+}
 
 
 function bulkEmp() {
@@ -1752,14 +1774,15 @@ function cancelCreate() {
     emp_phone: "",
     emp_mail_id: "",
     department: "",
-    searchText:"",
+    searchText: "",
     designation: "",
     reporting_to: "",
     reporting_designation: "",
     signature: null,
     company_field: businessUnit.value,
   };
-  emailError.value='';
+  searchText.value=""
+  createEmailError.value = '';
   const fileInput = document.getElementById("signatureInput");
   if (fileInput) {
     fileInput.value = "";
@@ -2174,7 +2197,17 @@ function createEmpl() {
     });
 }
 
+const asfv = ref(false)
+
 function SaveEditEmp() {
+  if (!isFormFilled.value) {
+    toast.error("Please fill all required fields", {
+      autoClose: 1000,
+      transition: "zoom",
+    });
+    return;
+  }
+
   if (!createEmployee.value.designation && searchText.value) {
     createEmployee.value.designation = searchText.value;
   }
@@ -2205,7 +2238,10 @@ function SaveEditEmp() {
       if (response.data) {
         toast.success("Changes Saved", { autoClose: 500, transition: "zoom" });
         employeeData(); // refresh list
+        const modal = bootstrap.Modal.getInstance(document.getElementById('exampleModal'));
+        modal.hide();
         createEmployee.value = {}; // clear form
+        searchText.value=""
       }
     })
     .catch((error) => {
