@@ -35,7 +35,7 @@
 
               <!-- Date input -->
               <input v-else-if="fieldMapping[column.td_key].type === 'date'" type="date"
-                class="form-control font-12 input-search py-1 px-2" v-model="filters[column.td_key]"
+                class="form-control font-12 input-search py-1 px-2 shadow-none" v-model="filters[column.td_key]"
                 @input="handleFilterChange" />
 
               <!-- Select dropdown -->
@@ -279,16 +279,29 @@
             </td>
 
             <!-- Action Column -->
-            <td v-if="isAction === 'true' && view === 'viewPreview'" class="text-center fixed-column position-relative">
-              <span class=" font-13 view-text" @click="handleCellClick(row, rowIndex, 'view')">
-                View <i class="ri-eye-line eye-cursor ms-1"></i>
-              </span>
-            </td>
             <td v-if="isAction === 'true' && view === 'edit'" class="text-center fixed-column position-relative">
-              <span v-if="row.installed == 'No'" v-tooltip.top="'Setup form'" class=" font-13 view-text"
-                @click="handleCellClick(row, rowIndex, 'edit')">
-                <i class="bi-gear-wide-connected eye-cursor"></i>
-              </span>
+              <!-- Show both Setup Form and View if not installed -->
+              <template v-if="row.installed == 'No'">
+                <span v-tooltip.top="'View'" class="font-13 view-text ms-4"
+                      @click="handleCellClick(row, rowIndex, 'FormPreview')">
+                  <i class="ri-eye-line eye-cursor ms-1"></i>
+                </span>
+
+                <span v-tooltip.top="'Setup form'" class="font-13 view-text ms-3"
+                      @click="handleCellClick(row, rowIndex, 'edit')">
+                  <i class="bi-gear-fill eye-cursor"></i>
+                </span>
+
+              </template>
+
+              <!-- Show only View if already installed -->
+              <template v-if="row.installed =='Yes'">
+                <span v-tooltip.top="'View'" class="font-13 view-text"
+                      @click="handleCellClick(row, rowIndex, 'FormPreview')">
+                  <i class="ri-eye-line eye-cursor"></i>
+                </span>
+              </template>
+
             </td>
 
 
@@ -490,13 +503,75 @@ const allCheck = ref(false);
 //     "0"
 //   )}.${year} @ ${hours}:${minutes}:${seconds.slice(0, 2)}`;
 // }
+
+
+// function formatDate(dateString) {
+//   if (!dateString) return "-";
+
+//   try {
+//     let date;
+
+//     // Format: YYYY/MM/DD HH:MM:SS:ms (colon-separated with optional ms)
+//     if (dateString.includes("/") && dateString.includes(" ")) {
+//       const [datePart, timePart] = dateString.split(" ");
+//       const [year, month, day] = datePart.split("/");
+
+//       let timeSegments = timePart.split(":");
+//       let hours = timeSegments[0]?.padStart(2, "0") || "00";
+//       let minutes = timeSegments[1]?.padStart(2, "0") || "00";
+//       let seconds = timeSegments[2]?.padStart(2, "0") || "00";
+
+//       if (timeSegments.length === 4) {
+//         const milliseconds = timeSegments[3];
+//         date = new Date(
+//           `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}T${hours}:${minutes}:${seconds}.${milliseconds}`
+//         );
+//       } else {
+//         date = new Date(
+//           `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}T${hours}:${minutes}:${seconds}`
+//         );
+//       }
+//     }
+
+//     // Format: YYYY-MM-DD HH:MM:SS.milliseconds
+//     else if (dateString.includes("-")) {
+//       const [datePart, timePart] = dateString.split(" ");
+//       const [year, month, day] = datePart.split("-");
+//       const [timeRaw, milliseconds = ""] = timePart.split(".");
+//       const [hours = "00", minutes = "00", seconds = "00"] = timeRaw
+//         .split(":")
+//         .map((t) => t.padStart(2, "0"));
+
+//       const timeString = `${hours}:${minutes}:${seconds}`;
+//       date = new Date(
+//         `${year}-${month}-${day}T${timeString}${milliseconds ? "." + milliseconds : ""}`
+//       );
+//     } else {
+//       return "-";
+//     }
+
+//     if (isNaN(date.getTime())) return "-";
+
+//     const day = String(date.getDate()).padStart(2, "0");
+//     const month = String(date.getMonth() + 1).padStart(2, "0");
+//     const year = date.getFullYear();
+//     const hours = String(date.getHours()).padStart(2, "0");
+//     const minutes = String(date.getMinutes()).padStart(2, "0");
+//     const seconds = String(date.getSeconds()).padStart(2, "0");
+
+//     return `${day}.${month}.${year} @ ${hours}:${minutes}:${seconds}`;
+//   } catch (err) {
+//     return "-";
+//   }
+// }
+
 function formatDate(dateString) {
   if (!dateString) return "-";
 
   try {
     let date;
 
-    // Format: YYYY/MM/DD HH:MM:SS:ms (colon-separated with optional ms)
+    // Format: YYYY/MM/DD HH:MM:SS:ms
     if (dateString.includes("/") && dateString.includes(" ")) {
       const [datePart, timePart] = dateString.split(" ");
       const [year, month, day] = datePart.split("/");
@@ -538,17 +613,23 @@ function formatDate(dateString) {
     if (isNaN(date.getTime())) return "-";
 
     const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+                        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const month = monthNames[date.getMonth()];
     const year = date.getFullYear();
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-    const seconds = String(date.getSeconds()).padStart(2, "0");
 
-    return `${day}.${month}.${year} @ ${hours}:${minutes}:${seconds}`;
+    let hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const ampm = hours >= 12 ? "pm" : "am";
+    hours = hours % 12;
+    hours = hours ? hours : 12; // 0 should be 12
+
+    return `${day} ${month} ${year}, ${String(hours).padStart(2, "0")}:${minutes} ${ampm}`;
   } catch (err) {
     return "-";
   }
 }
+
 function getAssignedToUsers(row, column) {
   try {
     let value = JSON.parse(row[column.td_key].replace(/'/g, '"'));
@@ -597,13 +678,37 @@ const filters = ref(
   }, {})
 );
 // Handle filter change
+// function handleFilterChange() {
+//   const activeFilters = Object.fromEntries(
+//     Object.entries(filters.value).filter(([key, value]) => value.trim() !== "")
+//   );
+//   emits("updateFilters", activeFilters); // Emit only non-empty filters
+//   // console.log(activeFilters, "========");
+// }
+
 function handleFilterChange() {
   const activeFilters = Object.fromEntries(
-    Object.entries(filters.value).filter(([key, value]) => value.trim() !== "")
+    Object.entries(filters.value).filter(([key, value]) => value !== "")
   );
-  emits("updateFilters", activeFilters); // Emit only non-empty filters
-  // console.log(activeFilters, "========");
+
+  // Format only 'requested_on' differently
+  for (const key in activeFilters) {
+    const fieldType = props.fieldMapping[key]?.type;
+
+    if (fieldType === "date" && activeFilters[key]) {
+      if (key === "requested_on") {
+        // Convert to YYYY/M/D format (no leading zeros)
+        const [year, month, day] = activeFilters[key].split("-");
+        activeFilters[key] = `${year}/${parseInt(month)}/${parseInt(day)}`;
+      } else {
+        // Keep as YYYY-MM-DD (do nothing)
+      }
+    }
+  }
+
+  emits("updateFilters", activeFilters);
 }
+
 watch(
   () => props.tData.map((row) => row.isSelected),
   (newVal) => {

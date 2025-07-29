@@ -717,6 +717,7 @@ const fieldMapping = computed(() => ({
   name: { type: "input" },
   requested_by: { type: "input" },
   role: { type: "input" },
+  requested_on: { type: "date" },
 
 
   status: { type: "select", options: ["Request Raised", "In Progress"] },
