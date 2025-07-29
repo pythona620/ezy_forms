@@ -52,11 +52,11 @@
                        <div class="mb-3">
                     <label class="font-13 ps-1" for="create_emp_phone">Emp Phone</label>
                     <div class="input-container">
-                      <input type="text" name="create_emp_phone" id="create_emp_phone" maxlength="13"
+                      <input type="text" name="create_emp_phone" id="create_emp_phone" maxlength="13" :readonly="isMasked"
                         class="w-100 font-12  form-control" 
                         :value="isMasked ? maskNumber(createEmployee.emp_phone) : createEmployee.emp_phone"
                         @input="handleInput" @blur="formatPhoneNumber " placeholder="Enter Phone Number" />
-                      <!-- <i :class="eyeIcon" class="eye-icon" @click="toggleMask"></i> -->
+                      <i :class="eyeIcon" class="eye-icon" @click="toggleMask"></i>
                     </div>
 
                     <p v-if="phoneError" class="text-danger font-11 ps-1">
@@ -112,7 +112,7 @@
                         </label>
 
                         <input type="text" v-model="searchText" @input="() => { filterDesignations(); validateInput(); }"
-                        :class="['form-control font-12', errorMessage ? 'border-danger' : '']" class="form-control border-dark shadow-none font-12"
+                        :class="['form-control font-12', errorMessage ? 'border-danger' : '']" class="form-control shadow-none font-12"
                                                 placeholder="Search or type new role" />
                                                 <p v-if="errorMessage" class="text-danger font-11 ps-1">
                                             {{ errorMessage }}
