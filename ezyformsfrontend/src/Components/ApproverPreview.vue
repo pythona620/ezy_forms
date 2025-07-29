@@ -527,19 +527,25 @@
 
                           <template
                             v-if="field.fieldtype !== 'Text' && field.fieldtype !== 'Int' && field.fieldtype !== 'Select' && (blockIndex === 0 || props.readonlyFor === 'true')">
-                            <span style="font-size: 12px;"
-                              :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0  w-50 bg-transparent' : ''"
-                              :value="field.value" :type="field.fieldtype">
+                            <span
+                              style="font-size: 12px;"
+                              :class="[
+                                props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0  bg-transparent' : '',
+                                field.value && field.value.length > 10 ? 'wrap-text' : ''
+                              ]"
+                              :value="field.value"
+                              :type="field.fieldtype">
                               {{ field.fieldtype === 'Time' ? formatTime(field.value) : field.value }}
                             </span>
                           </template>
+
 
                           <template v-else>
                             <component
                               v-if="field.fieldtype !== 'Text' && field.fieldtype !== 'Int' && field.fieldtype !== 'Select' && blockIndex !== 0"
                               :style="{
                                 width: Math.min(100 + (field.value?.length * 2), 600) + 'px'
-                              }" :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'"
+                              }" :disabled="blockIndex < currentLevel || props.readonlyFor === 'true' || field.label === 'Approver'"
                               :is="getFieldComponent(field.fieldtype)" :class="props.readonlyFor === 'true' || blockIndex < currentLevel
                                 ? 'border-0  w-50 bg-transparent'
                                 : ''" :value="field.fieldtype === 'Time' ? formatTime(field.value) : field.value"
@@ -1172,8 +1178,8 @@ function getTdStyle(field, value) {
     minWidth: '120px',
     maxWidth: '400px',
     textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-    overflow: 'hidden'
+    // whiteSpace: 'nowrap',
+    // overflow: 'hidden' 
   };
 }
 
@@ -2375,5 +2381,10 @@ td {
   opacity: 1 !important;
   /* Remove greyed-out appearance */
 }
-
+.wrap-text {
+  display: inline-block;
+  white-space: normal !important;
+  word-break: break-word;
+  max-width: 100%;
+}
 </style>

@@ -43,28 +43,33 @@
                 <div class="container-fluid">
                   <div class="row">
                     <div class="col">
-                      <label class="font-13 ps-1" for="emp_name">Emp Name<span class="text-danger ps-1">*</span></label>
-                      <FormFields class="mb-3" tag="input" type="text" name="emp_name" id="emp_name"
+                      <label class="font-13 ps-1" for="create_emp_name">Emp Name<span class="text-danger ps-1">*</span></label>
+                      <FormFields class="mb-3" tag="input" type="text" name="create_emp_name" id="create_emp_name"
                         placeholder="Enter Emp Name" v-model="createEmployee.emp_name" />
-                      <label class="font-13 ps-1" for="emp_code">Emp ID<span class="text-danger ps-1">*</span></label>
-                      <FormFields class="mb-3" tag="input" type="text" name="emp_code" id="emp_code"
+                      <label class="font-13 ps-1" for="create_emp_code">Emp ID<span class="text-danger ps-1">*</span></label>
+                      <FormFields class="mb-3" tag="input" type="text" name="create_emp_code" id="create_emp_code"
                         placeholder="Enter Emp ID" v-model="createEmployee.emp_code" />
-                      <div class="mb-3">
-                        <label class="font-13 ps-1" for="emp_phone">Emp Phone</label>
-                        <FormFields tag="input" type="text" name="emp_phone" id="emp_phone" maxlength="13"
-                          @input="formatPhoneNumber" @change="validatephonenew" placeholder="Enter Phone Number"
-                          v-model="createEmployee.emp_phone" />
-                        <p v-if="phoneError" class="text-danger font-11 ps-1">
-                          {{ phoneError }}
-                        </p>
-                      </div>
+                       <div class="mb-3">
+                    <label class="font-13 ps-1" for="create_emp_phone">Emp Phone</label>
+                    <div class="input-container">
+                      <input type="text" name="create_emp_phone" id="create_emp_phone" maxlength="13"
+                        class="w-100 font-12  form-control" 
+                        :value="isMasked ? maskNumber(createEmployee.emp_phone) : createEmployee.emp_phone"
+                        @input="handleInput" @blur="formatPhoneNumber " placeholder="Enter Phone Number" />
+                      <!-- <i :class="eyeIcon" class="eye-icon" @click="toggleMask"></i> -->
+                    </div>
+
+                    <p v-if="phoneError" class="text-danger font-11 ps-1">
+                      {{ phoneError }}
+                    </p>
+                  </div>
 
                       <div class="mb-3">
-                        <label class="font-13 ps-1" for="emp_mail_id">Emp Mail ID<span
+                        <label class="font-13 ps-1" for="create_emp_mail_id">Emp Mail ID<span
                             class="text-danger ps-1">*</span></label>
-                        <FormFields class="mb-1" tag="input" type="email" name="emp_mail_id"
+                        <FormFields class="mb-1" tag="input" type="email" name="create_emp_mail_id"
                           v-model="createEmployee.emp_mail_id" @input="validateCreateUserEmail" :required="true"
-                          id="emp_mail_id" placeholder="Enter Email Id" />
+                          id="create_emp_mail_id" placeholder="Enter Email Id" />
                         <p v-if="createEmailError" class="text-danger font-11 ps-1">
                           {{ createEmailError }}
                         </p>
@@ -106,29 +111,25 @@
                           Designation<span class="text-danger ps-1">*</span>
                         </label>
 
-                        <input type="text" v-model="searchText" @input="filterDesignations" class="form-control font-12"
-                          placeholder="Search or type new role" />
-
+                        <input type="text" v-model="searchText" @input="() => { filterDesignations(); validateInput(); }"
+                        :class="['form-control font-12', errorMessage ? 'border-danger' : '']" class="form-control border-dark shadow-none font-12"
+                                                placeholder="Search or type new role" />
+                                                <p v-if="errorMessage" class="text-danger font-11 ps-1">
+                                            {{ errorMessage }}
+                                          </p>
                         <ul class="list-group position-absolute w-100 zindex-dropdown"
-                          v-if="searchText && (filteredDesignations.length || showCreateButton)">
+                          v-if="searchText && (filteredDesignations.length || showCreateButton) && !errorMessage">
                           <li v-for="(role, index) in filteredDesignations" :key="index"
                             class="list-group-item list-group-item-action font-12" @click="selectDesignation(role)"
                             style="cursor: pointer">
                             {{ role }}
                           </li>
-
-                          <!-- Create Role option as part of the dropdown -->
-                          <li v-if="searchText && filteredDesignations.length === 0"
+                          <li v-if="searchText "
                             class="list-group-item list-group-item-action font-12 text-primary" style="cursor: pointer"
                             @click="showModal = true">
                             ➕ Create role "<strong>{{ searchText }}</strong>"
                           </li>
-
                         </ul>
-
-
-
-
                         <!-- Modal -->
                         <div class="modal fade" :class="{ show: showModal }" style="display: block;" v-if="showModal">
                           <div class="modal-dialog">
@@ -451,11 +452,13 @@
                       Designation<span class="text-danger ps-1">*</span>
                     </label>
 
-                    <input type="text" v-model="searchText" @input="filterDesignations" class="form-control font-12"
-                      placeholder="Search or type new role" />
-
+                    <input type="text" v-model="searchText" @input="() => { filterDesignations(); validateInput(); }" class="form-control font-12"
+                      :class="['form-control font-12', errorMessage ? 'border-danger' : '']" placeholder="Search or type new role" />
+                      <p v-if="errorMessage" class="text-danger font-11 ps-1">
+                                            {{ errorMessage }}
+                                          </p>
                     <ul class="list-group position-absolute w-100 zindex-dropdown"
-                      v-if="searchText && (filteredDesignations.length || showCreateButton)">
+                      v-if="searchText && (filteredDesignations.length || showCreateButton) && !errorMessage">
                       <li v-for="(role, index) in filteredDesignations" :key="index"
                         class="list-group-item list-group-item-action font-12" @click="selectDesignation(role)"
                         style="cursor: pointer">
@@ -1359,9 +1362,24 @@ function handleInput(e) {
 }
 
 // ✅ Format to +91xxxxxxxxxx on blur
+// function formatPhoneNumber() {
+//   let value = createEmployee.value.emp_phone.replace(/\D/g, '');
+
+//   if (value.startsWith('91') && value.length > 10) {
+//     value = value.slice(2);
+//   }
+
+//   if (value.length === 10) {
+//     createEmployee.value.emp_phone = '+91' + value;
+//     phoneError.value = '';
+//   } else {
+//     phoneError.value = 'Phone number must be 10 digits.';
+//   }
+// }
 function formatPhoneNumber() {
   let value = createEmployee.value.emp_phone.replace(/\D/g, '');
 
+  // Remove country code if included
   if (value.startsWith('91') && value.length > 10) {
     value = value.slice(2);
   }
@@ -1370,12 +1388,24 @@ function formatPhoneNumber() {
     createEmployee.value.emp_phone = '+91' + value;
     phoneError.value = '';
   } else {
-    phoneError.value = 'Phone number must be 10 digits.';
+    // Keep the raw digits
+    createEmployee.value.emp_phone = value;
+
+    // Show error only if user has entered something (not empty)
+    if (value.length > 0) {
+      phoneError.value = 'Phone number must be 10 digits.';
+    } else {
+      phoneError.value = '';
+    }
   }
 }
 
 // ✅ Toggle mask & readonly
 function toggleMask() {
+    if (isMasked.value) {
+    const confirmView = window.confirm("Are you sure you want to see the phone number?");
+    if (!confirmView) return;
+  }
   isMasked.value = !isMasked.value;
   eyeIcon.value = isMasked.value ? 'bi-eye' : 'bi-eye-slash';
 }
@@ -1505,7 +1535,16 @@ const newRole = ref('')
 watch(showModal, (visible) => {
   if (visible) newRole.value = searchText.value
 })
+const errorMessage = ref('')
 
+const validateInput = () => {
+  const pattern = /[^a-zA-Z0-9 ]/
+  if (pattern.test(searchText.value)) {
+    errorMessage.value = 'Special characters are not allowed in the role name.'
+  } else {
+    errorMessage.value = ''
+  }
+}
 const filterDesignations = () => {
   const search = searchText.value.toLowerCase().trim()
   filteredDesignations.value = designations.value.filter((role) =>
@@ -2148,8 +2187,23 @@ function createEmpl() {
     });
     return;
   }
+  if(!searchText.value){
+    toast.error("Please select or enter a designation", {
+      autoClose: 1000,
+      transition: "zoom",
+    });
+    return;
+
+  }
   if (emailError.value) {
     toast.error("Employee Email Id already exists", {
+      autoClose: 1000,
+      transition: "zoom",
+    });
+    return;
+  }
+  if(phoneError.value) {
+    toast.error("Invalid phone number", {
       autoClose: 1000,
       transition: "zoom",
     });
@@ -2163,6 +2217,7 @@ function createEmpl() {
     department: createEmployee.value.department?.name || "", // ✅ only send name
     doctype: doctypes.EzyEmployeeList,
   };
+  // console.log(dataObj);
   loading.value = true;
 
   axiosInstance
@@ -2202,6 +2257,20 @@ const asfv = ref(false)
 function SaveEditEmp() {
   if (!isFormFilled.value) {
     toast.error("Please fill all required fields", {
+      autoClose: 1000,
+      transition: "zoom",
+    });
+    return;
+  }
+  if(phoneError.value) {
+    toast.error("Invalid phone number", {
+      autoClose: 1000,
+      transition: "zoom",
+    });
+    return;
+  }
+  if(!searchText.value){
+      toast.error("Please select or enter a designation", {
       autoClose: 1000,
       transition: "zoom",
     });

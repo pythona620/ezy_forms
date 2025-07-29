@@ -94,6 +94,9 @@ export const apis = {
   reportMailSend:domain+`/method/ezy_forms.api.v1.send_doctype_as_mail.email_reports_send`,
   employeedisable:domain+`/method/ezy_forms.api.v1.enable_employee.employee_update`,
   get_approved_by_me: domain + `/method/ezy_flow.api.v1.approved_by_me.get_approved_by_me`,
+  get_wf_activate_log: domain + `/method/ezy_flow.ezy_flow.doctype.wf_activity_log.wf_activity_log.get_wf_activate_log`,
+
+  
 
   
   // getReportData: domain + `/api/method/frappe.utils.print_format.download_pdf`
