@@ -1333,7 +1333,7 @@ function downloadPdf() {
 // }
 
 function Wfactivitylog(name) {
-  console.log(route.query.name, "wf_generated_request_id");
+  // console.log(route.query.name, "wf_generated_request_id"); 
  let FormId = {
   wf_generated_request_id : name,
  }
