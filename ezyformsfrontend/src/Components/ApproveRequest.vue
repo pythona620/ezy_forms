@@ -201,8 +201,9 @@
 
                     </div>
                     <div>
-                      <button
-                        v-if="tableData.status === 'Completed' && linked_status !== 'Completed' || linked_status === 'Completed'"
+                      <button 
+                      v-if="tableData.status === 'Completed' && linked_status !== 'Completed' || linked_status === 'Completed'"
+                        
                         class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto " type="button"
                         @click="downloadPdf"><i class="bi bi-download px-2 fw-bold"></i>Download
                       </button>
@@ -1331,37 +1332,51 @@ function downloadPdf() {
 //     });
 // }
 
-function Wfactivitylog(formname) {
+function Wfactivitylog(name) {
+  // console.log(route.query.name, "wf_generated_request_id"); 
+ let FormId = {
+  wf_generated_request_id : name,
+ }
   axiosInstance
-    .get(`${apis.resource}${doctypes.WFActivityLog}/${formname}`)
-    .then((res) => {
-      if (res.data && Array.isArray(res.data.reason)) {
-        const sortedReasons = res.data.reason.sort((a, b) => {
-          const parseTime = (str) => {
-            // str = "2025/7/16 12:9:56:795919"
-            const [datePart, timePart] = str.split(' ');
-            const [year, month, day] = datePart.split('/').map(Number);
+  .post(apis.get_wf_activate_log, FormId)
+  .then((responce)=>{
+    console.log(responce, "activity log data");
+    activityData.value = responce.message || []; // Ensure it's always an array
 
-            const timeParts = timePart.split(':').map(Number);
-            const hour = timeParts[0] || 0;
-            const minute = timeParts[1] || 0;
-            const second = timeParts[2] || 0;
-            const millisecond = timeParts[3] || 0;
-
-            return new Date(year, month - 1, day, hour, minute, second, millisecond);
-          };
-
-          return parseTime(a.time) - parseTime(b.time); // Sort in ascending order
-        });
-
-        activityData.value = sortedReasons;
-      } else {
-        activityData.value = [];
-      }
-    })
-    .catch((error) => {
-      console.error("Error fetching activity data:", error);
+  })
+   .catch((error) => {
+      console.error("Error fetching data:", error);
     });
+  // axiosInstance
+  //   .get(`${apis.resource}${doctypes.WFActivityLog}/${formname}`)
+  //   .then((res) => {
+  //     if (res.data && Array.isArray(res.data.reason)) {
+  //       const sortedReasons = res.data.reason.sort((a, b) => {
+  //         const parseTime = (str) => {
+  //           // str = "2025/7/16 12:9:56:795919"
+  //           const [datePart, timePart] = str.split(' ');
+  //           const [year, month, day] = datePart.split('/').map(Number);
+
+  //           const timeParts = timePart.split(':').map(Number);
+  //           const hour = timeParts[0] || 0;
+  //           const minute = timeParts[1] || 0;
+  //           const second = timeParts[2] || 0;
+  //           const millisecond = timeParts[3] || 0;
+
+  //           return new Date(year, month - 1, day, hour, minute, second, millisecond);
+  //         };
+
+  //         return parseTime(a.time) - parseTime(b.time); // Sort in ascending order
+  //       });
+
+  //       activityData.value = sortedReasons;
+  //     } else {
+  //       activityData.value = [];
+  //     }
+  //   })
+  //   .catch((error) => {
+  //     console.error("Error fetching activity data:", error);
+  //   });
 }
 
 function toLinkedForm() {

@@ -157,15 +157,15 @@
           <div class="modal-footer">
             <button type="button" class="btn btn-outline-secondary font-12" data-bs-dismiss="modal">Cancel</button>
            <button
-  type="button"
-  class="btn btn-dark"
-  style="min-width: 120px;"  
-  :disabled="!acknowledge || saveloading"
-  @click="raiseRequestSubmission"
->
-  <span v-if="saveloading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-  <span v-else class="font-12 fw-bold">Yes, Proceed</span>
-</button>
+              type="button"
+              class="btn btn-dark"
+              style="min-width: 120px;"  
+              :disabled="!acknowledge || saveloading"
+              @click="raiseRequestSubmission"
+            >
+              <span v-if="saveloading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              <span v-else class="font-12 fw-bold">Yes, Proceed</span>
+            </button>
 
           </div>
         </div>
@@ -423,6 +423,10 @@ function updateChildRecords(childTables, child_id_name) {
     });
 }
 
+function handleTableData(data) {
+  childtablesData.value = data;
+  console.log('Updated Table Data:', childtablesData.value);
+}
 
 // function EditRequestUpdate() {
 //   const validTables = tableName.value.filter((table) => {
@@ -496,7 +500,7 @@ function EditRequestUpdate() {
   }
 
   // Dynamically include all child tables
-  for (const [childTableKey, childRows] of Object.entries(tableRows.value)) {
+  for (const [childTableKey, childRows] of Object.entries(childtablesData.value)) {
     if (Array.isArray(childRows) && childRows.length) {
       form[childTableKey] = childRows.map(row => ({ ...row }));
     }
@@ -508,14 +512,21 @@ function EditRequestUpdate() {
     //  status: route.query.selectedFormStatus === 'Request Cancelled' ? 'Request Raised' : null,
     // current_level:route.query.selectedFormStatus === 'Request Cancelled' ? 1 : null
   };
+  // console.log(data_obj, "data_obj for EditRequestUpdate");
   axiosInstance.post(apis.edit_form_before_approve, data_obj).then((resp) => {
-    if (resp?.message?.success) {
-      toast.success("Request Raised", {
+    if (resp?.message?.success === true) {
+    console.log(resp, "EditRequestUpdate response");
+      toast.success(resp.message.message, {
         autoClose: 2000,
         transition: "zoom",
         onClose: () => {
           router.push({ path: "/todo/raisedbyme" });
         },
+      });
+    }else {
+      toast.error(resp.message.message || "Failed to update request", {
+        autoClose: 2000,
+        transition: "zoom",
       });
     }
   });
@@ -694,10 +705,28 @@ function formDefinations() {
       childTableName.value = tableName.value[0]?.options.replace(/_/g, " ");
 
       // console.log(childTableName.value, "child====");
+// const lowerCaseChildTableFields = {};
+// for (const key in parsedFormJson.child_table_fields) {
+//   lowerCaseChildTableFields[key] = parsedFormJson.child_table_fields[key].map((field) => ({
+//     ...field,
+//     label: field.label?.toLowerCase() || "",
+//   }));
+// }
 
-      tableHeaders.value = parsedFormJson.child_table_fields;
+// tableHeaders.value = lowerCaseChildTableFields;
+const originalChildTableFields = parsedFormJson.child_table_fields;
+const transformedChildTableFields = {};
+
+for (const key in originalChildTableFields) {
+  const lowerKey = key.toLowerCase();
+  transformedChildTableFields[lowerKey] = originalChildTableFields[key];
+}
+
+tableHeaders.value = transformedChildTableFields;
+
+      // tableHeaders.value = parsedFormJson.child_table_fields; 
       initializeTableRows();
-      // console.log(tableHeaders.value, "table fields");
+      console.log(tableHeaders.value, "table fields"); 
     })
     .catch((error) => {
       console.error("Error fetching ezyForms data:", error);
@@ -814,10 +843,6 @@ const handleFieldUpdate = (field) => {
 
 
 
-function handleTableData(data) {
-  childtablesData.value = data;
-  // console.log('Updated Table Data:', childtablesData.value);
-}
 
 const ChildTableData = async () => {
   const childEntries = Object.entries(childtablesData.value);
@@ -1312,7 +1337,7 @@ function request_raising_fn(item) {
       modal.hide();
       // saveloading.value = false;
 
-      toast.success("Request Raised", {
+      toast.success(resp?.message?.message, {
         autoClose: 1000,
         transition: "zoom",
         onClose: () => {

@@ -1392,8 +1392,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
             wf_generated_request_id = frappe.get_value(form_short_name, name, "wf_generated_request_id")
             activate_log = frappe.get_doc('WF Activity Log', wf_generated_request_id).as_dict()
 
-            filtered_reasons = sorted([{ 'level': entry['level'],'role': entry['role'], 'user': entry['user'], 'user_name': entry['user_name'], 'reason': entry['reason'], 'action': entry['action'], 'time': entry['time'], 'random_string': entry['random_string']  }  for entry in activate_log.get('reason', [])  ],   key=lambda x: x['time'] )
-
+            filtered_reasons = sorted([{ 'level': entry['level'],'role': entry['role'], 'user': entry['user'], 'user_name': entry['user_name'], 'reason': entry['reason'], 'action': entry['action'], 'time': entry['time'], 'random_string': entry['random_string']  }  for entry in activate_log.get('reason', [])  ],key=lambda x: datetime.strptime(x['time'], "%Y/%m/%d %H:%M:%S:%f") if x.get('time') else datetime.min )
             html_table_output = ""
             if filtered_reasons:
                 html_table_output = Template(activate_log_table).render(filtered_reasons=filtered_reasons)

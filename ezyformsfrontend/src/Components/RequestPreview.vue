@@ -724,11 +724,16 @@
                                                                                 
 
                                                                         </template>
-                                                                        <template v-if="field.fieldtype === 'Text'">
-                                                                            <textarea class="form-control font-12"
-                                                                                rows="3" v-model="row[field.fieldname]"
-                                                                                :title="row[field.fieldname]"></textarea>
-                                                                        </template>
+                                                                       <template v-if="field.fieldtype === 'Text'">
+                                                                            <textarea v-tooltip.top="row[field.fieldname]" 
+                                                                                class="form-control font-12"
+                                                                                style="height: 20px;"
+                                                                                rows="3"
+                                                                                v-model="row[field.fieldname]"
+                                                                                >
+                                                                            </textarea>
+                                                                            </template>
+
 
                                                                         <template
                                                                             v-else-if="field.fieldtype === 'Select'">
