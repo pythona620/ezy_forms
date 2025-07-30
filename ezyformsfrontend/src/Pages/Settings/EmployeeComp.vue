@@ -2193,14 +2193,8 @@ watch(
   { immediate: true }
 );
 function createEmpl() {
-    if(filterDesignations.value !== searchText.value) {
-     toast.error("Please create the role before creating an employee.", {
-      autoClose: 1000,
-      transition: "zoom",
-    });
-    return;
-  }
-  if (!isFormFilled.value || searchText.value.trim()=== "") {
+
+  if (!isFormFilled.value || searchText.value.trim() === "") {
     toast.error("Please fill all required fields", {
       autoClose: 1000,
       transition: "zoom",
@@ -2233,6 +2227,13 @@ function createEmpl() {
     toast.error("Please enter a valid phone number.", {
       autoClose: 1000,
       transition: "zoom",                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
+    });
+    return;
+  }
+  if(createEmployee.value.designation !== searchText.value.trim()) {
+     toast.error("Please create the role before creating an employee.", {
+      autoClose: 1000,
+      transition: "zoom",
     });
     return;
   }
@@ -2283,13 +2284,7 @@ function createEmpl() {
 const asfv = ref(false)
 
 function SaveEditEmp() {
-   if(filterDesignations.value !== searchText.value) {
-     toast.error("Please create the role before creating an employee.", {
-      autoClose: 1000,
-      transition: "zoom",
-    });
-    return;
-  }
+  
   if (!isFormFilled.value || searchText.value.trim()=== "") {
     toast.error("Please fill all required fields", {
       autoClose: 1000,
@@ -2306,6 +2301,13 @@ function SaveEditEmp() {
   }
   if(!searchText.value){
       toast.error("Please select or enter a designation", {
+      autoClose: 1000,
+      transition: "zoom",
+    });
+    return;
+  }
+   if(createEmployee.value.designation !== searchText.value) {
+     toast.error("Please create the role before updating employee.", {
       autoClose: 1000,
       transition: "zoom",
     });
