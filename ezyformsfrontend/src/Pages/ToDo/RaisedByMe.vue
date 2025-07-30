@@ -239,7 +239,7 @@ const actions = ref([
 ]);
 
 function viewPreview(data, index, type) {
-  console.log(data, ";;;", type);
+  // console.log(data, ";;;", type);
   if (type === 'view') {
 
     router.push({

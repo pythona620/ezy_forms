@@ -193,7 +193,7 @@ def enqueued_add_customized_fields_for_dynamic_doc(fields: list[dict], doctype: 
 			sorted_fields = sorted(fields_in_child_doctype, key=lambda x: x["idx"])
  
 			# Store the sorted results in the dictionary
-			child_table_fields["child_table_fields"][table_name.lower()] = sorted_fields
+			child_table_fields["child_table_fields"][table_name] = sorted_fields
 			
 		# Sort the dictionary keys before returning
 		child_table_fields["child_table_fields"] = dict(sorted(child_table_fields["child_table_fields"].items()));print("Child Table Fields:", child_table_fields,"-"*100)
