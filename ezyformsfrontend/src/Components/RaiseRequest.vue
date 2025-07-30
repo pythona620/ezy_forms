@@ -145,7 +145,7 @@
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">Acknowledgement</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" @click="acknowledgeCancel" aria-label="Close"></button>
           </div>
           <div class="modal-body">
             <input type="checkbox" v-model="acknowledge" id="Acknowledgement" value="Acknowledgement" class="me-2 mt-1 form-check-input Acknowledgement-check " />
@@ -155,7 +155,7 @@
             </label>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary font-12" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-outline-secondary font-12" @click="acknowledgeCancel" data-bs-dismiss="modal">Cancel</button>
            <button
               type="button"
               class="btn btn-dark"
@@ -425,7 +425,7 @@ function updateChildRecords(childTables, child_id_name) {
 
 function handleTableData(data) {
   childtablesData.value = data;
-  console.log('Updated Table Data:', childtablesData.value);
+  // console.log('Updated Table Data:', childtablesData.value);
 }
 
 // function EditRequestUpdate() {
@@ -515,7 +515,7 @@ function EditRequestUpdate() {
   // console.log(data_obj, "data_obj for EditRequestUpdate");
   axiosInstance.post(apis.edit_form_before_approve, data_obj).then((resp) => {
     if (resp?.message?.success === true) {
-    console.log(resp, "EditRequestUpdate response");
+    // console.log(resp, "EditRequestUpdate response");
       toast.success(resp.message.message, {
         autoClose: 2000,
         transition: "zoom",
@@ -726,7 +726,7 @@ tableHeaders.value = transformedChildTableFields;
 
       // tableHeaders.value = parsedFormJson.child_table_fields; 
       initializeTableRows();
-      console.log(tableHeaders.value, "table fields"); 
+      // console.log(tableHeaders.value, "table fields"); 
     })
     .catch((error) => {
       console.error("Error fetching ezyForms data:", error);
@@ -897,7 +897,14 @@ function toRaiseReqBtn() {
   const modal = new bootstrap.Modal(document.getElementById('ExportEmployeeModal'));
   modal.show();
 }
-
+function acknowledgeCancel() {
+  acknowledge.value = false
+  saveloading.value = false
+  const modal = bootstrap.Modal.getInstance(document.getElementById('ExportEmployeeModal'));
+  if (modal) {
+    modal.hide();
+  }
+}
 
 
 async function raiseRequestSubmission() {

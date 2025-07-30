@@ -17,7 +17,7 @@
             <h5 class="m-0 fw-bold font-13">{{ section.label }}</h5>
           </div>
           <div class="container-fluid">
-            <div class="row align-items-center" v-for="(row, rowIndex) in section.rows" :key="rowIndex">
+            <div class="row " v-for="(row, rowIndex) in section.rows" :key="rowIndex">
               <div v-for="(column, columnIndex) in row.columns" :key="'column-preview-' + columnIndex"
                 :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 bg-transparent' : 'border-0 bg-transparent'"
                 class="col dynamicColumn">
@@ -29,10 +29,23 @@
                     ? (field.label === 'Approved By' ? ' d-flex align-items-end ' : 'align-items-start')
                     : ''">
                     <div
-                      v-if="!(blockIndex !== 0 && !field.value && ['Approver', 'Approved On', 'Approved By', 'Acknowledged By'].includes(field.label))" 
-                      :class="(props.readonlyFor === 'true' || blockIndex < currentLevel) && field.fieldtype !== 'Small Text' && field.fieldtype !== 'Text' || field.fieldtype === 'Check'
-                        ? 'd-flex mb-2 ' + (field.fieldtype === 'Check' ? 'mt-1 flex-row-reverse justify-content-end gap-2 w-0 align-items-start ' : '') + (field.label === 'Approved By' || field.label === 'Acknowledged By' || field.label === 'Requestor Signature' ? 'align-items-center' : '  align-items-start ')
-                        : ''">
+                          v-if="!(blockIndex !== 0 && !field.value && ['Approver', 'Approved On', 'Approved By', 'Acknowledged By'].includes(field.label))"
+                          :class="[
+                            ((props.readonlyFor === 'true' || blockIndex < currentLevel) &&
+                              field.value &&
+                              (field.value.length <= 20 || field.fieldtype === 'Attach'))
+                              ? 'd-flex'
+                              : '',
+                            field.fieldtype === 'Check'
+                              ? 'mt-1 d-flex flex-row-reverse justify-content-end gap-2 w-0 align-items-start'
+                              : '',
+                            ['Approved By', 'Acknowledged By', 'Requestor Signature'].includes(field.label)
+                              ? 'align-items-start'
+                              : 'align-items-start',
+                            'mb-2'
+                          ]"
+                        >
+
                       <div v-if="field.label && field.fieldtype !== 'Table' && field.fieldname !== 'auto_calculations'">
 
                         <label :for="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
@@ -268,8 +281,8 @@
                           )">
                             <div class="d-flex gap-2 flex-wrap ">
                               <img v-for="(fileUrl, index) in field.value.split(',').map(f => f.trim())" :key="index" 
-                                :src="fileUrl" class="img-thumbnail cursor-pointer imge_top border-0 border-bottom-0"
-                                style="max-width: 80px; max-height: 60px" @click="previewAttachment(fileUrl)" />
+                                :src="fileUrl" class="img-thumbnail cursor-pointer imge_top border-0 p-0 border-bottom-0"
+                                style="max-width: 60px; max-height: 50px" @click="previewAttachment(fileUrl)" />
                             </div>
                           </template>
 

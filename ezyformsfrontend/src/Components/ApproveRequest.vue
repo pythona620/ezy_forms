@@ -40,7 +40,7 @@
                         class="bi rejected-icon bi-x-circle"></i></span> -->
                   </div>
                 </div>
-              </div>
+              </div>                                                                                                                                                 
               <div class="position-relative ">
                 <div class="requestPreviewDiv pb-5">
 
@@ -131,7 +131,7 @@
             </div>
           </div>
           <div class="col-3">
-            <div class="activity-log-container px-4 ">
+            <div class="activity-log-container px-1">
               <!-- <div class=" w-100  mb-2">
               <div class=" py-2 px-3">
 
@@ -1340,7 +1340,7 @@ function Wfactivitylog(name) {
   axiosInstance
   .post(apis.get_wf_activate_log, FormId)
   .then((responce)=>{
-    console.log(responce, "activity log data");
+    // console.log(responce, "activity log data"); 
     activityData.value = responce.message || []; // Ensure it's always an array
 
   })
