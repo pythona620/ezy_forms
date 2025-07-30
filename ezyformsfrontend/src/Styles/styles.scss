@@ -304,3 +304,12 @@ body {
     height: 80vh;
   }
 }
+
+.Toastify__toast--error {
+  font-size: 13px !important; /* or any size you want */
+  padding: 0px !important;
+}
+.Toastify__toast--success {
+  font-size: 14px !important; /* or any size you want */
+  padding: 5px !important;
+}

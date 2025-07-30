@@ -140,12 +140,12 @@
       </div>
     </div>
     <!-- :class="{'z-1':saveloading}" -->
-    <div class="modal fade " id="ExportEmployeeModal" tabindex="-1" aria-hidden="true" >
+    <div class="modal fade " id="ExportEmployeeModal" data-bs-backdrop="static"  tabindex="-1" aria-hidden="true" >
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">Acknowledgement</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" @click="acknowledgeCancel" aria-label="Close"></button>
+            <button type="button" class="btn-close" @click="acknowledge=''" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
             <input type="checkbox" v-model="acknowledge" id="Acknowledgement" value="Acknowledgement" class="me-2 mt-1 form-check-input Acknowledgement-check " />
@@ -155,7 +155,7 @@
             </label>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary font-12" @click="acknowledgeCancel" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" @click="acknowledge=''" class="btn btn-outline-secondary font-12" data-bs-dismiss="modal">Cancel</button>
            <button
               type="button"
               class="btn btn-dark"
@@ -897,14 +897,14 @@ function toRaiseReqBtn() {
   const modal = new bootstrap.Modal(document.getElementById('ExportEmployeeModal'));
   modal.show();
 }
-function acknowledgeCancel() {
-  acknowledge.value = false
-  saveloading.value = false
-  const modal = bootstrap.Modal.getInstance(document.getElementById('ExportEmployeeModal'));
-  if (modal) {
-    modal.hide();
-  }
-}
+// function acknowledgeCancel() {
+//   acknowledge.value = false
+//   saveloading.value = false
+//   const modal = bootstrap.Modal.getInstance(document.getElementById('ExportEmployeeModal'));
+//   if (modal) {
+//     modal.hide();
+//   }
+// }
 
 
 async function raiseRequestSubmission() {
