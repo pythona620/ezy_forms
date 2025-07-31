@@ -2,27 +2,55 @@
     <div>
         <div class="d-flex align-items-center justify-content-between py-2">
             <div>
-                <h1 class="m-0 font-13">
-                    Designations
-                </h1>
-                <!-- <p class="m-0 font-11 pt-1">
-                374 users
-            </p> -->
+                <h1 class="m-0 font-13">Designations</h1>
             </div>
             <div class="d-flex align-items-center gap-2">
-
                 <div>
-                    <FormFields labeltext="" class="my-1" tag="input" type="search" placeholder="Search Designation"
-                        name="Value" id="Value" v-model="filterObj.search" @input="designationData()" />
-                </div>
+                    <!-- <FormFields labeltext="" class="my-1" tag="input" type="search" placeholder="Search Designation"
+                        name="Value" id="Value" v-model="filterObj.search" @input="designationData()" /> -->
 
+                    <button type="button" class="btn btn-dark  CreateDepartments " data-bs-toggle="modal"
+                        data-bs-target="#CreateDesignationModal" @click="checkDesignation">
+                        Create Designation
+                    </button>
+                </div>
             </div>
         </div>
+        <FormFields labeltext="" class="my-1 w-25" tag="input" type="search" placeholder="Search Designation"
+            name="Value" id="Value" v-model="filterObj.search" @input="designationData()" />
+
         <div class="mt-2">
             <GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" />
             <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
                 @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
         </div>
+
+        <div class="modal fade" id="CreateDesignationModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Create Designation</h5>
+                        <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" @click="resetDesignation"
+                            aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <label class="font-12 fw-bold">Designation<span class="text-danger ps-1">*</span></label>
+                        <input type="text" class="form-control shadow-none font-12" v-model.trim="Designation"
+                            @input="validateDesignation" :class="{ 'is-invalid': errorMessage }"
+                            placeholder="Enter Designation" />
+
+                        <div v-if="errorMessage" class="text-danger mt-1 font-11">{{ errorMessage }}</div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" @click="resetDesignation"
+                            data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-dark" :disabled="errorMessage || !Designation"
+                            @click="SubmitDesignation">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </template>
 <script setup>
@@ -33,6 +61,8 @@ import axiosInstance from '../../shared/services/interceptor';
 import { apis, doctypes } from '../../shared/apiurls';
 import { onMounted, ref, computed, watch } from 'vue';
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
+import { toast } from 'vue3-toastify';
+
 const businessUnit = computed(() => {
     return EzyBusinessUnit.value;
 });
@@ -41,12 +71,20 @@ onMounted(() => {
 
 })
 const totalRecords = ref(0);
+const Designation = ref("");
+const checkDesignationData = ref("");
+const errorMessage = ref('');
 
 const tableData = ref([]);
 const tableheaders = ref([
     { th: "Designation", td_key: "role" },
-
 ])
+
+function resetDesignation() {
+    Designation.value = '';
+    errorMessage.value = '';
+}
+
 const createDesignation = ref({
     ezy_business_unit: "",
 });
@@ -55,37 +93,28 @@ const filterObj = ref({
     limit_start: 0,
     search: ""
 });
-// Handle updating the current value
+
 const PaginationUpdateValue = (itemsPerPage) => {
     filterObj.value.limitPageLength = itemsPerPage;
     filterObj.value.limit_start = 0;
     designationData();
-
 };
-// Handle updating the limit start
+
 const PaginationLimitStart = ([itemsPerPage, start]) => {
     filterObj.value.limitPageLength = itemsPerPage;
     filterObj.value.limit_start = start;
     designationData();
-
 };
 watch(
     businessUnit,
     (newVal) => {
         createDesignation.value.ezy_business_unit = newVal;
-
-        // if (newVal) {
-        //     console.log(newVal, "new value of business unit");
-
-        // }
     },
     { immediate: true }
 );
 
 function designationData() {
-    const filters = [
-
-    ];
+    const filters = [];
     if (filterObj.value.search.trim()) {
         filters.push(["name", "like", `%${filterObj.value.search}%`]);
     }
@@ -119,7 +148,7 @@ function designationData() {
                 if (filterObj.value.limit_start === 0) {
                     tableData.value = newData;
 
-                }else {
+                } else {
                     tableData.value = tableData.value.concat(newData)
                 }
 
@@ -130,7 +159,63 @@ function designationData() {
         });
 }
 
+function checkDesignation() {
+    const queryParams = {
+        fields: JSON.stringify(["role"]),
+        limit_page_length: "none",
+        order_by: "`tabWF Roles`.`creation` desc"
+    };
+    axiosInstance.get(apis.resource + doctypes.designations, { params: queryParams })
+        .then((res) => {
+            if (res.data) {
+                checkDesignationData.value = res.data;
+            }
+        })
+        .catch((error) => {
+            console.error("Error fetching designations data:", error);
+        });
+}
 
+function validateDesignation() {
+  const invalidCharRegex = /[^a-zA-Z .]/;
+
+  if (!Designation.value.trim()) {
+    errorMessage.value = 'Designation is required';
+  } else if (invalidCharRegex.test(Designation.value)) {
+    errorMessage.value = 'Only letters, spaces, and dot (.) are allowed';
+  } else if (
+    checkDesignationData.value.some(
+      item => item.role?.toLowerCase() === Designation.value.trim().toLowerCase()
+    )
+  ) {
+    errorMessage.value = 'This designation already exists';
+  } else {
+    errorMessage.value = '';
+  }
+}
+
+function SubmitDesignation() {
+    if (!errorMessage.value && Designation.value.trim()) {
+        const payload = {
+            role_name: Designation.value.trim(),
+        }
+        axiosInstance
+            .post(apis.resource + doctypes.roles, payload)
+            .then((response) => {
+                if (response) {
+                    console.log(response);
+                    designationData();
+                    resetDesignation();
+                    toast.success("Designation Created Successfully",{ autoClose: 1000 });
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('CreateDesignationModal'));
+                    modal.hide();
+                }
+            })
+            .catch((err) => {
+                console.error('Error creating role:', err)
+            })
+    }
+}
 
 
 </script>
@@ -152,8 +237,8 @@ function designationData() {
 }
 
 .CreateDepartments {
-    width: 100% !important;
     padding: 5px 10px !important;
+    font-size: 13px;
 }
 
 .cancelfilter {
@@ -169,8 +254,6 @@ function designationData() {
     width: 150px;
     height: 34px;
     border-radius: 6px;
-    /* background-color: #f1f1f1; */
-    /* color: #111111; */
     padding: 8px 20px;
 }
 </style>
