@@ -542,7 +542,7 @@
 
                           <template v-else>
                             <component
-                              v-if="field.fieldtype !== 'Text' && field.fieldtype !== 'Int' && field.fieldtype !== 'Select' && blockIndex !== 0"
+                              v-if="field.fieldtype !== 'Text' && field.fieldtype !== 'Int' && field.fieldtype !== 'Select' && blockIndex !== 0"  :maxlength="field.fieldtype === 'Phone' ? '10' : '140'"
                               :style="{
                                 width: Math.min(100 + (field.value?.length * 2), 600) + 'px'
                               }" :disabled="blockIndex < currentLevel || props.readonlyFor === 'true' || field.label === 'Approver'"
@@ -1270,6 +1270,17 @@ const handleFileUpload = async (event, row, fieldname) => {
   event.target.value = null;
 };
 
+// const getMaxLength = (field) => {
+//     if (field.fieldtype?.toLowerCase() === 'phone') return 10;
+
+//     return 140;
+// };
+
+
+const getMaxLength = (field) => {
+    if (field.fieldtype?.toLowerCase() === 'phone') return 10;
+    return 140;
+};
 
 
 const tableFileUpload = (file, row, fieldname) => {

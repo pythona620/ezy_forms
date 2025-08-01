@@ -106,7 +106,7 @@
         <!-- @formValidation="isFormValid = $event" -->
         <div class="raiserequestBtnDiv">
           <div class="d-flex justify-content-end align-items-center gap-2 p-3">
-            <button class="btn btn-white font-13" @click="clearFrom">
+            <button v-if="!selectedData.selectedFormId" class="btn btn-white font-13" @click="clearFrom">
               <span> <i class="bi bi-x"></i></span>Clear form
             </button>
             <!-- :disabled="!isFormValid" -->
@@ -515,7 +515,7 @@ function EditRequestUpdate() {
   // console.log(data_obj, "data_obj for EditRequestUpdate");
   axiosInstance.post(apis.edit_form_before_approve, data_obj).then((resp) => {
     if (resp?.message?.success === true) {
-    console.log(resp, "EditRequestUpdate response");
+    // console.log(resp, "EditRequestUpdate response");
       toast.success(resp.message.message, {
         autoClose: 2000,
         transition: "zoom",
