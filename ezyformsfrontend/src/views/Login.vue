@@ -743,7 +743,7 @@ export default {
     employeeAcknowledge() {
       const payload = {
         user_id: this.formdata.usr,
-        acknowledgement: this.SignUpdata.acknowledgement,
+        ...(this.isAcknowledge === 0 && { acknowledgement: this.SignUpdata.acknowledgement }),
         ...(this.isAcknowledgeSign === 0 && { is_signature: this.acknowledge_signature })
       };
       axiosInstance

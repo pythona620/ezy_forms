@@ -31,7 +31,7 @@ def employee_update(emp_mail):
             now=True
         )
 
-        frappe.db.set_value("Ezy Employee", emp_mail, {"enable": 1, "is_web_form": 1})
+        frappe.db.set_value("Ezy Employee", emp_mail, {"enable": 1, "is_web_form": 0})
         frappe.db.set_value("User", emp_mail, "enabled", 1)
         if not frappe.db.exists("Login Check", {"user_id": emp_mail}): # Ensure user is created in Login Check
             new_doc = frappe.new_doc("Login Check")

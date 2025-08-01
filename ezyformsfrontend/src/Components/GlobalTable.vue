@@ -182,7 +182,7 @@
               </span> -->
               <!-- <span v-else class="tooltip-text" :title="row[column.td_key] || '-'"> -->
 
-              <span v-else class="tooltip-text" v-tooltip.top="getTooltipText(row[column.td_key])">
+              <span v-else class="tooltip-text" v-tooltip.right="getTooltipText(row[column.td_key])">
                 <span v-if="column.td_key === 'linked_form_id'">
                   <span @click="handleCellClick(row, rowIndex, 'td_key')" :class="[
                     row[column.td_key] ? 'text-decoration-underline linked-id-redirect font-11 text-primary' : 'text-decoration-none linke-not-allow '
