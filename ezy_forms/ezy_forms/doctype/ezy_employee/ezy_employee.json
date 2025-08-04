@@ -37,7 +37,8 @@
   {
    "fieldname": "emp_code",
    "fieldtype": "Data",
-   "label": "Emp code"
+   "label": "Emp code",
+   "unique": 1
   },
   {
    "fieldname": "emp_name",

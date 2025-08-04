@@ -239,7 +239,7 @@ const actions = ref([
 ]);
 
 function viewPreview(data, index, type) {
-  console.log(data, ";;;", type);
+  // console.log(data, ";;;", type);
   if (type === 'view') {
 
     router.push({
@@ -709,8 +709,9 @@ const fieldMapping = computed(() => ({
   },
   name: { type: "input" },
   doctype_name: { type: "input" },
-  // requested_on: { type: "date" },
+  requested_on: { type: "date" },
   role: { type: "input" },
+  modified:{type:"date"},
 
 }))
 

@@ -1074,7 +1074,7 @@
                               <div>
                                 <div>
 
-                                  <button class="btn btn-light addRow mb-3 mt-4"
+                                  <button  class="btn btn-light addRow mb-3 mt-4"
                                     @click="addChildTable(blockIndex, sectionIndex)">
                                     Add New Table
                                   </button>
@@ -1335,29 +1335,42 @@
       <div class="offcanvas-body p-0">
         <div class="">
           <div class="">
+           
+
 
 
             <div v-if="selectedBlockIndex !== 0"
-              class="p-3 py-4 approval-border-bottom d-flex align-items-center gap-3">
-              <div>
+              class=" p-3 approval-border-bottom ">
+               <div v-if="selectedBlockIndex !== 0" class=" p-2">
+              <label class="fw-bold font-12 mb-2">Approver Type</label>
+              <select v-model="selectedApproverType" class="form-select shadow-none font-12 ">
+                <option value="">Send To Selected Approvers</option>
+                <option value="ViewOnlyReportee">View Only Reportee</option>
+                <option value="all_approvals_required">All Approvers Required</option>
+                <option value="requester_as_a_approver">Requested Only</option>
+              </select>
+            </div>
+
+              <!-- <div>
                 <div class=" form-control" aria-disabled="">
 
                   <span class=" font-12">Approver Level {{ selectedBlockIndex }}</span>
                 </div>
-              </div>
+              </div> -->
+              <div class="p-2">
               <div>
                 <label for="" class="fw-bold font-12 ">On Rejection</label>
               </div>
-              <div class="ms-2">
-                <select v-model.number="OnRejection" class="form-select font-12 mt-1 me-2">
+                <select v-model.number="OnRejection" class="form-select shadow-none font-12 mt-1  me-2">
                   <option disabled value="">Select Lower Level</option>
                   <option v-for="level in lowerApproverLevels" :key="level" :value="level">
-                    {{ level === 0 ? 'Requester' : 'Approver Level ' + level }}
-                  </option>
+                    {{ level === 0 ? 'Requestor' : 'Approver Level ' + level }}
+                  </option> 
                 </select>
               </div>
             </div>
-            <div v-if="selectedBlockIndex !== 0" class="p-3 approval-border-bottom  ">
+            
+            <!-- <div v-if="selectedBlockIndex !== 0" class="p-3 approval-border-bottom  ">
               <div class=" d-flex justify-content-start gap-5 mb-3 ">
 
 
@@ -1385,7 +1398,7 @@
                   <label for="requester_as_a_approver" class="SelectallDesignation text-nowrap fw-bold mt-1 form-check-label">Requested Only</label>
                 </div>
               </div>
-            </div>
+            </div> -->
           </div>
 
         </div>
@@ -2105,6 +2118,34 @@ onMounted(() => {
 });
 
 
+const draggingIndex = ref(null);
+const invalidFields = ref({});
+const currentEditingTable = ref(null);
+
+const onDragStart = (index) => {
+  draggingIndex.value = index;
+};
+
+const onDragEnd = () => {
+  draggingIndex.value = null;
+};
+
+const onDragOver = (event) => {
+  event.preventDefault();
+};
+
+const onDrop = (event, table) => {
+  const targetRow = event.target.closest("tr");
+  if (!targetRow) return;
+
+  const targetIndex = Array.from(targetRow.parentNode.children).indexOf(targetRow);
+  if (targetIndex !== draggingIndex.value) {
+    const draggingRow = table[draggingIndex.value];
+    table.splice(draggingIndex.value, 1);
+    table.splice(targetIndex, 0, draggingRow);
+    draggingIndex.value = targetIndex;
+  }
+};
 
 // Store multiple child tables
 // const formatTableName = (tableIndex, event) => {
@@ -2120,6 +2161,37 @@ const childTables = ref([]);
 function generateFieldname(label) {
   return label.toLowerCase().replace(/\s+/g, '_').replace(/[^\w_]/g, '');
 }
+const cleanFieldOptions = (field) => {
+  if (
+    ["Select", "Table MultiSelect", "Check", "Small Text"].includes(field.fieldtype) &&
+    field.options
+  ) {
+    const rawOptions = field.options
+      .split("\n")
+      .map((opt) => opt.trim())
+      .filter((opt) => opt); // Remove empty lines
+
+    const uniqueOptions = [];
+    const seen = new Set();
+
+    rawOptions.forEach((opt) => {
+      const lower = opt.toLowerCase();
+      if (!seen.has(lower)) {
+        seen.add(lower);
+        uniqueOptions.push(opt); // Retain original case
+      }
+    });
+
+    return "\n" + uniqueOptions.join("\n");
+  } else if (
+    ["Link", "Table"].includes(field.fieldtype) &&
+    field.options
+  ) {
+    return field.options.trim();
+  }
+
+  return field.options;
+};
 
 const addChildTable = (blockIndex, sectionIndex) => {
   const section = blockArr[blockIndex].sections[sectionIndex];
@@ -2253,7 +2325,11 @@ const processFields = (blockIndex, sectionIndex, tableIndex) => {
 
   const table = blockArr[blockIndex].sections[sectionIndex].childTables[tableIndex];
   const section = blockArr[blockIndex].sections[sectionIndex];
-
+  table.columns = table.columns.map((field, index) => ({
+    ...field,
+    idx: index,
+    options: cleanFieldOptions(field),
+  }));
   table.newTable = false
   const data = {
     form_short_name: formatTableName(table.tableName),
@@ -2365,10 +2441,12 @@ const afterImmediateEdit = (blockIndex, sectionIndex, tableName) => {
 
     if (!isValid) return;
 
-    const allFields = table.columns.map(({ isNew, ...rest }, index) => ({
-      ...rest,
-      idx: index + 1,
-    }));
+   const allFields = table.columns.map(({ isNew, ...rest }, index) => ({
+  ...rest,
+  idx: index + 1,
+  options: cleanFieldOptions(rest),
+}));
+
 
     const formData = {
       form_short_name: formatTableName(tableName),
@@ -2421,34 +2499,6 @@ const deleteRow = (tableName, index) => {
   }
 };
 
-const draggingIndex = ref(null);
-const invalidFields = ref({});
-const currentEditingTable = ref(null);
-
-const onDragStart = (index) => {
-  draggingIndex.value = index;
-};
-
-const onDragEnd = () => {
-  draggingIndex.value = null;
-};
-
-const onDragOver = (event) => {
-  event.preventDefault();
-};
-
-const onDrop = (event, table) => {
-  const targetRow = event.target.closest("tr");
-  if (!targetRow) return;
-
-  const targetIndex = Array.from(targetRow.parentNode.children).indexOf(targetRow);
-  if (targetIndex !== draggingIndex.value) {
-    const draggingRow = table[draggingIndex.value];
-    table.splice(draggingIndex.value, 1);
-    table.splice(targetIndex, 0, draggingRow);
-    draggingIndex.value = targetIndex;
-  }
-};
 const toggleEdit = (tableName, description) => {
   if (editMode[tableName]) {
 
@@ -2475,9 +2525,10 @@ const toggleEdit = (tableName, description) => {
 
     // Process all fields (both old and new)
     let allFields = childtableHeaders.value[tableName].map(({ isNew, ...rest }, index) => ({
-      ...rest,
-      idx: index, // Ensure `idx` is correctly set in sequential order
-    }));
+        ...rest,
+        idx: index,
+        options: cleanFieldOptions(rest),
+      }));
 
     // ✅ Single API request to save both old and new fields
     const formData = {
@@ -2742,7 +2793,7 @@ function handleSingleSelect() {
     // console.log("Selected only one designation:", designationValue.value[0]);
   }
 }
-
+const selectedApproverType = ref('');
 function addDesignationBtn() {
   const block = blockArr[selectedBlockIndex.value];
 
@@ -2759,13 +2810,19 @@ function addDesignationBtn() {
   };
 
   // workflowSetup.push(xyz)
-  if (selectedBlockIndex.value !== 0) {
-    xyz.view_only_reportee = ViewOnlyReportee.value === true ? 1 : 0;
-    xyz.on_rejection = OnRejection.value ? OnRejection.value : 0;
-    xyz.all_approvals_required = all_approvals_required.value === true ? 1 : 0;
-    xyz.requester_as_a_approver = requester_as_a_approver.value === true ? 1 : 0;
-  }
+  // if (selectedBlockIndex.value !== 0) {
+  //   xyz.view_only_reportee = ViewOnlyReportee.value === true ? 1 : 0;
+  //   xyz.on_rejection = OnRejection.value ? OnRejection.value : 0;
+  //   xyz.all_approvals_required = all_approvals_required.value === true ? 1 : 0;
+  //   xyz.requester_as_a_approver = requester_as_a_approver.value === true ? 1 : 0;
+  // }
  
+  if (selectedBlockIndex.value !== 0) {
+    xyz.view_only_reportee = selectedApproverType.value === 'ViewOnlyReportee' ? 1 : 0;
+    xyz.all_approvals_required = selectedApproverType.value === 'all_approvals_required' ? 1 : 0;
+    xyz.requester_as_a_approver = selectedApproverType.value === 'requester_as_a_approver' ? 1 : 0;
+    xyz.on_rejection = OnRejection.value ? OnRejection.value : 0;
+  }
 
 
   const existingIndex = workflowSetup.findIndex((item) => item.idx === xyz.idx);
@@ -2793,11 +2850,23 @@ function initializeDesignationValue(blockIndex) {
   const rolesForBlock = currentSetup.roles || [];
   designationValue.value = [...rolesForBlock];
 
+  OnRejection.value = currentSetup.on_rejection;
   // Check for view_only_reportee flag
-  ViewOnlyReportee.value = currentSetup.view_only_reportee === 1;
-  OnRejection.value = currentSetup.on_rejection
-  all_approvals_required.value = currentSetup.all_approvals_required === 1;
-  requester_as_a_approver.value = currentSetup.requester_as_a_approver === 1;
+  // ViewOnlyReportee.value = currentSetup.view_only_reportee === 1;
+  // OnRejection.value = currentSetup.on_rejection
+  // all_approvals_required.value = currentSetup.all_approvals_required === 1;
+  // requester_as_a_approver.value = currentSetup.requester_as_a_approver === 1;
+
+  // Set dropdown value based on which flag is 1
+  if (currentSetup.view_only_reportee === 1) {
+    selectedApproverType.value = 'ViewOnlyReportee';
+  } else if (currentSetup.all_approvals_required === 1) {
+    selectedApproverType.value = 'all_approvals_required';
+  } else if (currentSetup.requester_as_a_approver === 1) {
+    selectedApproverType.value = 'requester_as_a_approver';
+  } else {
+    selectedApproverType.value = '';
+  }
 }
 
 // Initialize `designationValue` based on the roles for the given block index
@@ -2829,9 +2898,10 @@ function initializeDesignationValue(blockIndex) {
 
 const AddDesignCanvas = (idx) => {
   searchDesignation.value = ''
-  ViewOnlyReportee.value = false;
-  all_approvals_required.value = false;
-  requester_as_a_approver.value = false;
+  selectedApproverType.value = ''; 
+  // ViewOnlyReportee.value = false;
+  // all_approvals_required.value = false;
+  // requester_as_a_approver.value = false;
   OnRejection.value = '';
   // console.log(idx, "---clicked idex", selectedBlockIndex.value);
   if (filterObj.value.accessible_departments.length) {

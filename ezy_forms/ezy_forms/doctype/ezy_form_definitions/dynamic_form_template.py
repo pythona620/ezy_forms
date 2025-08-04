@@ -1038,7 +1038,7 @@ activate_log_table = """
         <td>{{ entry.role }}</td>
         <td>{{ entry.user_name }}</td>
         <td>{{ entry.action }}</td>
-        <td>{{ entry.time }}</td>
+        <td>{{ entry.time.rsplit(':', 1)[0] }}</td>
         <td>{{ entry.reason }}</td>
       </tr>
       {% endfor %}
@@ -1304,7 +1304,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
     try:
         bench_path         = get_bench_path()
         site               = frappe.local.site
-        folder_path = get_site_path("public", "files", "Attachment folder")
+        folder_path = get_site_path("public", "files", "Attachment_folder")
 
         delete = lambda path: os.unlink(path) if os.path.isfile(path) or os.path.islink(path) else shutil.rmtree(path)
 
@@ -1392,8 +1392,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
             wf_generated_request_id = frappe.get_value(form_short_name, name, "wf_generated_request_id")
             activate_log = frappe.get_doc('WF Activity Log', wf_generated_request_id).as_dict()
 
-            filtered_reasons = sorted([{ 'level': entry['level'],'role': entry['role'], 'user': entry['user'], 'user_name': entry['user_name'], 'reason': entry['reason'], 'action': entry['action'], 'time': entry['time'], 'random_string': entry['random_string']  }  for entry in activate_log.get('reason', [])  ],   key=lambda x: x['time'] )
-
+            filtered_reasons = sorted([{ 'level': entry['level'],'role': entry['role'], 'user': entry['user'], 'user_name': entry['user_name'], 'reason': entry['reason'], 'action': entry['action'], 'time': entry['time'], 'random_string': entry['random_string']  }  for entry in activate_log.get('reason', [])  ],key=lambda x: datetime.strptime(x['time'], "%Y/%m/%d %H:%M:%S:%f") if x.get('time') else datetime.min )
             html_table_output = ""
             if filtered_reasons:
                 html_table_output = Template(activate_log_table).render(filtered_reasons=filtered_reasons)

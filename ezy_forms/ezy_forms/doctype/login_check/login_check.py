@@ -44,6 +44,8 @@ def update_is_first_value(user_id_name,company=None):
         
 @frappe.whitelist(allow_guest=True)
 def check_is_first_time_or_not(user_id,acknowledgement=None):
+    if not frappe.db.exists("Ezy Employee", {"emp_mail_id": user_id}):
+        return  "User does not exist"
     try:
         if not frappe.db.exists("Login Check", {"user_id": user_id}):
             return "User not Found"
@@ -55,7 +57,7 @@ def check_is_first_time_or_not(user_id,acknowledgement=None):
         else:
             login_doc = frappe.get_doc("Login Check", {"user_id": user_id}, ['*']).as_dict()
             login_dict = login_doc
-            
+            login_dict["is_signature"] = 1 if frappe.get_value('Ezy Employee', user_id, 'signature') else 0
             enable_two_factor_auth = frappe.db.get_value("System Settings", "System Settings", "enable_two_factor_auth")
             enable_check = frappe.get_value('User',{"email":user_id},'enabled')
             login_dict["enable_check"] = 1 if enable_check else 0

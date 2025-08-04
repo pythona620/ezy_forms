@@ -29,10 +29,23 @@
                     ? (field.label === 'Approved By' ? ' d-flex align-items-end ' : 'd-flex align-items-start')
                     : ''">
                     <div
-                      v-if="!(blockIndex !== 0 && !field.value && ['Approver', 'Approved On', 'Approved By', 'Acknowledged By'].includes(field.label))"
-                      :class="(props.readonlyFor === 'true' || blockIndex < currentLevel) && field.fieldtype !== 'Small Text' && field.fieldtype !== 'Text' || field.fieldtype === 'Check'
-                        ? 'd-flex mb-1 ' + (field.fieldtype === 'Check' ? 'mt-1 flex-row-reverse justify-content-end gap-2 w-0 align-items-start ' : '') + (field.label === 'Approved By' || field.label === 'Acknowledged By' || field.label === 'Requestor Signature' ? 'align-items-start' : '  align-items-start ')
-                        : ''">
+                          v-if="!(blockIndex !== 0 && !field.value && ['Approver', 'Approved On', 'Approved By', 'Acknowledged By'].includes(field.label))"
+                          :class="[
+                            ((props.readonlyFor === 'true' || blockIndex < currentLevel) &&
+                              field.value &&
+                              (field.value.length <= 20 || field.fieldtype === 'Attach'))
+                              ? 'd-flex'
+                              : '',
+                            field.fieldtype === 'Check'
+                              ? 'mt-1 d-flex flex-row-reverse justify-content-end gap-2 w-0 align-items-start'
+                              : '',
+                            ['Approved By', 'Acknowledged By', 'Requestor Signature'].includes(field.label)
+                              ? 'align-items-start'
+                              : 'align-items-start',
+                            'mb-2'
+                          ]"
+                        >
+
                       <div v-if="field.label && field.fieldtype !== 'Table' && field.fieldname !== 'auto_calculations'">
 
                         <label :for="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
@@ -238,14 +251,28 @@
                             class="form-control previewInputHeight  font-10 mb-1 mt-1" multiple
                             @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" /> -->
 
-                            <input
-                              v-if="(field.fieldname !== 'requestor_signature' && field.label !== 'Requestor Signature' && blockIndex !== 0 && !field.label.includes('Approved By') && !field.label.includes('Acknowledged By') && props.readonlyFor !== 'true') && (field.value && blockIndex !== 0) || !field.value && props.readonlyFor !== 'true' && blockIndex !== 0"
-                              :disabled="props.readonlyFor === 'true' || blockIndex === 0 || blockIndex < currentLevel"
-                              type="file" :class="blockIndex < currentLevel ? 'd-none' : ''"
-                              accept=".jpeg,.jpg,.png,.pdf,.xlsx,.xls"
-                              :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex" style="display: none"
-                              class="form-control previewInputHeight font-10 mb-1 mt-1" multiple
-                              @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
+                          <!-- Custom file input label (acts as button) -->
+                          <label
+                            v-if="(field.fieldname !== 'requestor_signature' && field.label !== 'Requestor Signature' && blockIndex !== 0 && !field.label.includes('Approved By') && !field.label.includes('Acknowledged By') && props.readonlyFor !== 'true') && (field.value && blockIndex !== 0) || !field.value && props.readonlyFor !== 'true' && blockIndex !== 0"
+                            :for="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                            class="btn btn-sm btn-light font-10 mb-1 mt-1"
+                            :class="{ 'disabled': props.readonlyFor === 'true' || blockIndex === 0 || blockIndex < currentLevel }"
+                          >
+                            <i class="bi bi-paperclip me-1"></i> Attach
+                          </label>
+                          <!-- View Attachments Label -->
+                          <!-- ✅ Direct Image Preview for Specific Fields -->
+                           <template v-if="field.value && (
+                            field.fieldname === 'requestor_signature' ||
+                            field.label.includes('Approved By') ||
+                            field.label.includes('Acknowledged By')
+                          )">
+                            <div class="d-flex gap-2 flex-wrap ">
+                              <img v-for="(fileUrl, index) in field.value.split(',').map(f => f.trim())" :key="index" 
+                                :src="fileUrl" class="img-thumbnail cursor-pointer imge_top border-0 p-0 border-bottom-0"
+                                style="max-width: 60px; max-height: 50px" @click="previewAttachment(fileUrl)" />
+                            </div>
+                          </template>
 
                             <!-- Custom file input label (acts as button) -->
                             <label
@@ -519,19 +546,25 @@
 
                           <template
                             v-if="field.fieldtype !== 'Text' && field.fieldtype !== 'Int' && field.fieldtype !== 'Select' && (blockIndex === 0 || props.readonlyFor === 'true')">
-                            <span style="font-size: 12px;"
-                              :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0  w-50 bg-transparent' : ''"
-                              :value="field.value" :type="field.fieldtype">
+                            <span
+                              style="font-size: 12px;"
+                              :class="[
+                                props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0  bg-transparent' : '',
+                                field.value && field.value.length > 10 ? 'wrap-text' : ''
+                              ]"
+                              :value="field.value"
+                              :type="field.fieldtype">
                               {{ field.fieldtype === 'Time' ? formatTime(field.value) : field.value }}
                             </span>
                           </template>
+
 
                           <template v-else>
                             <component
                               v-if="field.fieldtype !== 'Text' && field.fieldtype !== 'Int' && field.fieldtype !== 'Select' && blockIndex !== 0"
                               :style="{
                                 width: Math.min(100 + (field.value?.length * 2), 600) + 'px'
-                              }" :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'"
+                              }" :disabled="blockIndex < currentLevel || props.readonlyFor === 'true' || field.label === 'Approver'"
                               :is="getFieldComponent(field.fieldtype)" :class="props.readonlyFor === 'true' || blockIndex < currentLevel
                                 ? 'border-0  w-50 bg-transparent'
                                 : ''" :value="field.fieldtype === 'Time' ? formatTime(field.value) : field.value"
@@ -1276,8 +1309,8 @@ function getTdStyle(field, value) {
     minWidth: '120px',
     maxWidth: '400px',
     textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap',
-    overflow: 'hidden'
+    // whiteSpace: 'nowrap',
+    // overflow: 'hidden' 
   };
 }
 
@@ -2509,5 +2542,11 @@ td {
 
 .field-width {
   width: 100%;
+}
+.wrap-text {
+  display: inline-block;
+  white-space: normal !important;
+  word-break: break-word;
+  max-width: 100%;
 }
 </style>

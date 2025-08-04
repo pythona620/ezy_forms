@@ -34,15 +34,15 @@
                 <div class="container-fluid">
                   <div class="row">
                     <div class="col">
-                      <label class="font-13 ps-1" for="emp_name">Emp Name<span class="text-danger ps-1">*</span></label>
-                      <FormFields class="mb-3" tag="input" type="text" name="emp_name" id="emp_name"
+                      <label class="font-13 ps-1" for="create_emp_name">Emp Name<span class="text-danger ps-1">*</span></label>
+                      <FormFields class="mb-3" tag="input" type="text" name="create_emp_name" id="create_emp_name"
                         placeholder="Enter Emp Name" v-model="createEmployee.emp_name" />
-                      <label class="font-13 ps-1" for="emp_code">Emp ID<span class="text-danger ps-1">*</span></label>
-                      <FormFields class="mb-3" tag="input" type="text" name="emp_code" id="emp_code"
+                      <label class="font-13 ps-1" for="create_emp_code">Emp ID<span class="text-danger ps-1">*</span></label>
+                      <FormFields class="mb-3" tag="input" type="text" name="create_emp_code" id="create_emp_code"
                         placeholder="Enter Emp ID" v-model="createEmployee.emp_code" />
                       <div class="mb-3">
-                        <label class="font-13 ps-1" for="emp_phone">Emp Phone</label>
-                        <FormFields tag="input" type="text" name="emp_phone" id="emp_phone" maxlength="13"
+                        <label class="font-13 ps-1" for="create_emp_phone">Emp Phone</label>
+                        <FormFields tag="input" type="text" name="create_emp_phone" id="create_emp_phone" maxlength="13"
                           @input="formatPhoneNumber" @change="validatephonenew" placeholder="Enter Phone Number"
                           v-model="createEmployee.emp_phone" />
                         <p v-if="phoneError" class="text-danger font-11 ps-1">
@@ -51,10 +51,10 @@
                       </div>
 
                       <div class="mb-3">
-                        <label class="font-13 ps-1" for="emp_mail_id">Emp Mail ID<span
+                        <label class="font-13 ps-1" for="create_emp_mail_id">Emp Mail ID<span
                             class="text-danger ps-1">*</span></label>
-                        <FormFields class="mb-1" tag="input" type="email" name="emp_mail_id" @change="validateEmail"
-                          :required="true" id="emp_mail_id" placeholder="Enter Email"
+                        <FormFields class="mb-1" tag="input" type="email" name="create_emp_mail_id" @change="validateEmail"
+                          :required="true" id="create_emp_mail_id" placeholder="Enter Email" 
                           v-model="createEmployee.emp_mail_id" />
                         <p v-if="emailError" class="text-danger font-11 ps-1">
                           {{ emailError }}
@@ -348,11 +348,13 @@
                   <div class="mb-3">
                     <label class="font-13 ps-1" for="emp_phone">Emp Phone</label>
                     <div class="input-container">
-                      <FormFields tag="input" type="text" name="emp_phone" id="emp_phone" maxlength="10" class="w-100"
-                        :readonly="true" placeholder="Enter Phone Number" v-model="createEmployee.emp_phone"
-                        @input="maskPhoneNumber" @change="validatePhone" />
+                      <input type="text" name="emp_phone" id="emp_phone" maxlength="13"
+                        class="w-100 font-12  form-control" :readonly="isMasked"
+                        :value="isMasked ? maskNumber(createEmployee.emp_phone) : createEmployee.emp_phone"
+                        @input="handleInput" @blur="formatPhoneNumber " placeholder="Enter Phone Number" />
                       <i :class="eyeIcon" class="eye-icon" @click="toggleMask"></i>
                     </div>
+
                     <p v-if="phoneError" class="text-danger font-11 ps-1">
                       {{ phoneError }}
                     </p>
@@ -362,7 +364,7 @@
                         class="text-danger ps-1">*</span></label>
                     <div class="input-container">
                       <FormFields class="mb-1 w-100" tag="input" type="email" name="emp_mail_id" id="emp_mail_id"
-                        placeholder="Enter Email" v-model="createEmployee.emp_mail_id" @input="maskEmail"
+                        placeholder="Enter Email" v-model="createEmployee.emp_mail_id" @input="maskEmail" :disabled="createEmployee.emp_mail_id"
                         @change="validateEmail" :required="true" />
                       <i :class="eyeIconEmail" class="eye-icon" @click="toggleEmailMask"></i>
                     </div>
@@ -388,11 +390,13 @@
                       Designation<span class="text-danger ps-1">*</span>
                     </label>
 
-                    <input type="text" v-model="searchText" @input="filterDesignations" class="form-control font-12"
+                    <input type="text" v-model="searchText" @input="() => { filterDesignations(); validateInput(); }" class="form-control font-12"
                       placeholder="Search or type new role" />
-
+                    <p v-if="errorMessage" class="text-danger font-11 ps-1">
+                                            {{ errorMessage }}
+                                          </p>
                     <ul class="list-group position-absolute w-100 zindex-dropdown"
-                      v-if="searchText && (filteredDesignations.length || showCreateButton)">
+                      v-if="searchText && (filteredDesignations.length || showCreateButton) && !errorMessage">
                       <li v-for="(role, index) in filteredDesignations" :key="index"
                         class="list-group-item list-group-item-action font-12" @click="selectDesignation(role)"
                         style="cursor: pointer">
@@ -514,7 +518,7 @@
             <ButtonComp type="button" class="cancelfilter border-1 text-nowrap font-10" name="Cancel"
               @click="cancelCreate" data-bs-dismiss="modal" />
 
-            <ButtonComp type="button" class="btn btn-dark font-11" name="Save Employee" data-bs-dismiss="modal"
+            <ButtonComp type="button" class="btn btn-dark font-11" name="Save Employee" 
               @click="SaveEditEmp" />
           </div>
         </div>
@@ -1078,50 +1082,116 @@ watch(
   { immediate: true } // Run immediately to set +91 on initial load
 );
 
-// Mask phone number
-const maskPhoneNumber = () => {
-  let phone = createEmployee.value.emp_phone || "";
-  phone = existformatPhoneNumber(phone);
-
-  if (!/^\+91\d{10}$/.test(phone)) {
-    phoneError.value = "Phone number must start with +91 and have 10 digits.";
-    return;
-  } else {
-    phoneError.value = "";
+const validatephonenew = () => {
+  if (createEmployee.value.emp_phone) {
+    const phone = createEmployee.value.emp_phone.replace("+91", ""); // Remove +91 for validation
+    const phonePattern = /^\d{10}$/;
+    phoneError.value = phonePattern.test(phone) ? "" : "Invalid phone number.";
   }
-
-  originalPhone.value = phone;
-
-  // Mask the number when required
-  createEmployee.value.emp_phone = isMasked.value
-    ? "+91 ******" + phone.slice(-4)
-    : phone;
 };
 
-// Toggle between masked and unmasked
-const toggleMask = () => {
-  if (!originalPhone.value) return;
+function maskNumber(phone) {
+  if (!phone || phone.length < 13) return phone;
+  return '+91 ******' + phone.slice(-4);
+}
 
+// ✅ Allow input when unmasked
+function handleInput(e) {
+  createEmployee.value.emp_phone = e.target.value;
+}
+
+// ✅ Format to +91xxxxxxxxxx on blur
+// function formatPhoneNumber() {
+//   let value = createEmployee.value.emp_phone.replace(/\D/g, '');
+
+//   if (value.startsWith('91') && value.length > 10) {
+//     value = value.slice(2);
+//   }
+
+//   if (value.length === 10) {
+//     createEmployee.value.emp_phone = '+91' + value;
+//     phoneError.value = '';
+//   } else {
+//     phoneError.value = 'Phone number must be 10 digits.';
+//   }
+// }
+function formatPhoneNumber() {
+  let value = createEmployee.value.emp_phone.replace(/\D/g, '');
+
+  // Remove country code if included
+  if (value.startsWith('91') && value.length > 10) {
+    value = value.slice(2);
+  }
+
+  if (value.length === 10) {
+    createEmployee.value.emp_phone = '+91' + value;
+    phoneError.value = '';
+  } else {
+    // Keep the raw digits
+    createEmployee.value.emp_phone = value;
+
+    // Show error only if user has entered something (not empty)
+    if (value.length > 0) {
+      phoneError.value = 'Phone number must be 10 digits.';
+    } else {
+      phoneError.value = '';
+    }
+  }
+}
+
+// ✅ Toggle mask & readonly
+function toggleMask() {
   if (isMasked.value) {
     const confirmView = window.confirm("Are you sure you want to see the phone number?");
     if (!confirmView) return;
   }
-
   isMasked.value = !isMasked.value;
-  createEmployee.value.emp_phone = isMasked.value
-    ? "+91 ******" + originalPhone.value.slice(-4)
-    : originalPhone.value;
-};
+  eyeIcon.value = isMasked.value ? 'bi-eye' : 'bi-eye-slash';
+} 
+// // Mask phone number
+// const maskPhoneNumber = () => {
+//   let phone = createEmployee.value.emp_phone || "";
+//   phone = existformatPhoneNumber(phone);
 
-// Validate phone number
-const validatePhone = () => {
-  let phone = originalPhone.value.replace("+91", ""); // Remove +91 for validation
-  if (!/^\d{10}$/.test(phone)) {
-    phoneError.value = "Phone number must be 10 digits.";
-  } else {
-    phoneError.value = "";
-  }
-};
+//   if (!/^\+91\d{10}$/.test(phone)) {
+//     phoneError.value = "Phone number must start with +91 and have 10 digits.";
+//     return;
+//   } else {
+//     phoneError.value = "";
+//   }
+
+//   originalPhone.value = phone;
+
+//   // Mask the number when required
+//   createEmployee.value.emp_phone = isMasked.value
+//     ? "+91 ******" + phone.slice(-4)
+//     : phone;
+// };
+
+// // Toggle between masked and unmasked
+// const toggleMask = () => {
+//   if (!originalPhone.value) return;
+
+//   if (isMasked.value) {
+//     const confirmView = window.confirm("Are you sure you want to see the phone number?");
+//     if (!confirmView) return;
+//   }
+
+//   isMasked.value = !isMasked.value;
+//   createEmployee.value.emp_phone = isMasked.value
+//     ? "+91 ******" + originalPhone.value.slice(-4)
+//     : originalPhone.value;
+// };
+
+// // Validate phone number
+// const validatePhone = () => {
+//   let phone = originalPhone.value.replace("+91", ""); // Remove +91 for validation
+//   if (!/^\d{10}$/.test(phone)) {
+//     phoneError.value = "Phone number must be 10 digits.";
+//   } else {
+//     phoneError.value = "";
+//   }
+// };
 
 
 // const validatephone = () => {
@@ -1179,33 +1249,33 @@ const maskEmailFormat = (email) => {
   return localPart.length > 3 ? localPart.slice(0, 3) + "***@" + domain : email;
 };
 // Ensure +91 is always prefixed
-const formatPhoneNumber = (event) => {
-  let value = event.target.value;
+// const formatPhoneNumber = (event) => {
+//   let value = event.target.value;
 
-  // Remove non-numeric characters except '+'
-  value = value.replace(/[^0-9+]/g, "");
+//   // Remove non-numeric characters except '+'
+//   value = value.replace(/[^0-9+]/g, "");
 
-  // Ensure +91 is always at the start
-  if (!value.startsWith("+91")) {
-    value = "+91" + value.replace(/^91/, ""); // Remove leading '91' if entered without '+'
-  }
+//   // Ensure +91 is always at the start
+//   if (!value.startsWith("+91")) {
+//     value = "+91" + value.replace(/^91/, ""); // Remove leading '91' if entered without '+'
+//   }
 
-  // Limit total length to 13 characters
-  if (value.length > 13) {
-    value = value.slice(0, 13);
-  }
+//   // Limit total length to 13 characters
+//   if (value.length > 13) {
+//     value = value.slice(0, 13);
+//   }
 
-  createEmployee.value.emp_phone = value;
-};
+//   createEmployee.value.emp_phone = value;
+// };
 
-// Validate phone number
-const validatephonenew = () => {
-  if (createEmployee.value.emp_phone) {
-    const phone = createEmployee.value.emp_phone.replace("+91", ""); // Remove +91 for validation
-    const phonePattern = /^\d{10}$/;
-    phoneError.value = phonePattern.test(phone) ? "" : "Invalid phone number.";
-  }
-};
+// // Validate phone number
+// const validatephonenew = () => {
+//   if (createEmployee.value.emp_phone) {
+//     const phone = createEmployee.value.emp_phone.replace("+91", ""); // Remove +91 for validation
+//     const phonePattern = /^\d{10}$/;
+//     phoneError.value = phonePattern.test(phone) ? "" : "Invalid phone number.";
+//   }
+// };
 
 
 const filterObj = ref({
@@ -1258,7 +1328,16 @@ const newRole = ref('')
 watch(showModal, (visible) => {
   if (visible) newRole.value = searchText.value
 })
+const errorMessage = ref('')
 
+const validateInput = () => {
+  const pattern = /[^a-zA-Z0-9 ]/
+  if (pattern.test(searchText.value)) {
+    errorMessage.value = 'Special characters are not allowed in the role name.'
+  } else {
+    errorMessage.value = ''
+  }
+}
 const filterDesignations = () => {
   const search = searchText.value.toLowerCase().trim()
   filteredDesignations.value = designations.value.filter((role) =>
@@ -1402,7 +1481,7 @@ function actionCreated(rowData, actionEvent) {
       // Mask phone/email and show modal
       isMasked.value = true;
       isEmailMasked.value = true;
-      maskPhoneNumber();
+      // maskPhoneNumber();
       maskEmail();
 
       const modal = new bootstrap.Modal(document.getElementById('exampleModal'), {});
@@ -1898,6 +1977,27 @@ function createEmpl() {
 }
 
 function SaveEditEmp() {
+   if (!isFormFilled.value ) {
+    toast.error("Please fill all required fields", {
+      autoClose: 1000,
+      transition: "zoom",
+    });
+    return;
+  }
+    if(phoneError.value) {
+    toast.error("Invalid phone number", {
+      autoClose: 1000,
+      transition: "zoom",
+    });
+    return;
+  }
+    if(!searchText.value){
+      toast.error("Please select or enter a designation", {
+      autoClose: 1000,
+      transition: "zoom",
+    });
+    return;
+  }
   if (!createEmployee.value.designation && searchText.value) {
     createEmployee.value.designation = searchText.value;
   }
@@ -1927,6 +2027,11 @@ function SaveEditEmp() {
     .then((response) => {
       if (response.data) {
         toast.success("Changes Saved", { autoClose: 500, transition: "zoom" });
+        const modal = bootstrap.Modal.getInstance(
+          document.getElementById("exampleModal")
+        );
+        modal.hide();
+        // exampleModal
         employeeData(); // refresh list
       }
     })

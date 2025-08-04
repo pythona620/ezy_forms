@@ -232,7 +232,7 @@ const fieldMapping = ref({
   },
   role: { type: "input" },
   doctype_name: { type: "input" },
-  // requested_on: { type: "date" },
+  requested_on: { type: "date" },
 });
 
 const actions = ref([

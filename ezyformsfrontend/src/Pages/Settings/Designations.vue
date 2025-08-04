@@ -12,7 +12,7 @@
             <div class="d-flex align-items-center gap-2">
 
                 <div>
-                    <FormFields labeltext="" class="my-1" tag="input" type="search" placeholder="Search Name"
+                    <FormFields labeltext="" class="my-1" tag="input" type="search" placeholder="Search Designation"
                         name="Value" id="Value" v-model="filterObj.search" @input="designationData()" />
                 </div>
 
@@ -44,7 +44,7 @@ const totalRecords = ref(0);
 
 const tableData = ref([]);
 const tableheaders = ref([
-    { th: "Name", td_key: "role" },
+    { th: "Designation", td_key: "role" },
 
 ])
 const createDesignation = ref({

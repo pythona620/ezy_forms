@@ -10,9 +10,8 @@
         <div class="mt-2">
 
             <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" view="edit"
-                enableDisable="true" @cell-click="viewPreview"  @toggle-click="toggleFunction"
-                isFiltersoption="true" :field-mapping="fieldMapping"
-                :actions="actions" @updateFilters="inLineFiltersData" isCheckbox="true" />
+                @cell-click="viewPreview" isFiltersoption="true" :field-mapping="fieldMapping" :actions="actions"
+                @updateFilters="inLineFiltersData" isCheckbox="true" />
             <!-- <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
                 @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" /> -->
         </div>
@@ -94,6 +93,9 @@ import "vue3-toastify/dist/index.css";
 const totalRecords = ref(0);
 const pdfPreview = ref('');
 const formData = ref("");
+const formCategory = ref([]);
+const accessibleDepartments = ref([]);
+const ownerForms = ref([])
 
 const formDescriptions = ref({})
 const tableData = ref([]);
@@ -133,7 +135,6 @@ watch(
 
         if (newVal.length) {
             newChngedValue.value = newVal
-            // console.log(newVal, "new value of business unit");
             // localStorage.setItem("Bu", filterObj.value.business_unit)
             tableData.value = []
             fetchTable()
@@ -142,18 +143,31 @@ watch(
     { immediate: true }
 );
 
-function viewPreview(rowData) {
-    formData.value = rowData;
-    if (formData.value.installed === 'No') {
-        const modal = new bootstrap.Modal(document.getElementById('FormSetupModal'), {});
-        modal.show();
-    }
+function viewPreview(rowData, rowIndex, type) {
+  formData.value = rowData;
+
+  if (type === 'edit' && formData.value.installed === 'No') {
+    const modal = new bootstrap.Modal(document.getElementById('FormSetupModal'), {});
+    modal.show();
+  }
+
+  if (type === 'FormPreview') {
+    router.push({
+      name: "FormPreviewComp",
+      query: {
+        routepath: route.path,
+        form_short_name: rowData.form_name,
+        business_unit: businessUnit.value,
+      },
+    });
+  }
 }
+
 
 function SetupForm() {
     const modal = bootstrap.Modal.getInstance(document.getElementById('FormSetupModal'));
     modal.hide();
-    
+
     router.push({
         name: "FormStepper",
         query: {
@@ -231,11 +245,6 @@ const PaginationLimitStart = ([itemsPerPage, start]) => {
     fetchTable();
 
 };
-
-
-const formCategory = ref([]);
-const accessibleDepartments = ref([]);
-const ownerForms = ref([])
 
 function fetchTable(data) {
     const filters = [

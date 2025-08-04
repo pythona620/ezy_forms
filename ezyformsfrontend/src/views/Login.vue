@@ -16,7 +16,7 @@
           </div>
         </div>
 
-        <div class="inputbox mt-3">
+        <div class="inputbox mt-3 mb-2">
           <label for="password" class="font-13">Password</label><br />
           <!-- <span class="icon"><i class="bi bi-lock-fill"></i></span> -->
           <input :disabled="!showPwdField" class="form-control m-0" :type="showPassword ? 'text' : 'password'"
@@ -32,8 +32,10 @@
           </div>
         </div>
 
+          <div class="text-end">
+            <span @click="openForgotpassword" class="font-12 p-0 text-end forgot-password">forgot password?</span><br />
+          </div>
 
-        <br />
         <button :disabled="!showPwdField" @click="Login" type="submit"
           class="border-0 btn btn-dark button w-100 py-2 mb-4 font-13 text-white rounded-1">
           <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
@@ -188,6 +190,34 @@
           In</span></div>
     </div>
 
+    <div v-if="ShowForgotPassword" class="input-div p-5">
+      <div class="d-flex gap-2 p-2 justify-content-center align-items-center">
+        <div><img class="imgmix" src="../assets/Final-logo-ezyforms-removebg-preview.png" /></div>
+      </div>
+
+      <div>
+        <div class="mt-3">
+          <label for="name" class="font-13">User Name</label><br />
+          <input type="text" class="form-control m-0 bg-white" id="name" v-model="forgotPasswordMail"
+            @input="validateForgotPassword" :class="{ 'is-invalid': errors.forgotPasswordMail }" />
+
+          <div class="invalid-feedback font-11 mt-1" v-if="errors.forgotPasswordMail">
+            {{ errors.forgotPasswordMail }}
+          </div>
+        </div>
+
+        <br />
+        <button @click="ForgotPassword" type="submit"
+          class="border-0 btn btn-dark button w-100 py-2 mb-4 font-13 text-white rounded-1">
+          Reset Password
+        </button>
+
+      </div>
+      <div class="font-13 m-0 cursor-pointer text-center" @click="OpenLogin">
+        <span class="sign">Back to Log In</span>
+      </div>
+    </div>
+
     <div class="modal fade" id="changePassword" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
       aria-labelledby="changePasswordLabel" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-md">
@@ -196,7 +226,8 @@
             <h5 class="modal-title font-14 fw-bold" id="changePasswordLabel">
               Set New Password
             </h5>
-            <button type="button" class="btn-close" @click="clearPassword()" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" class="btn-close" @click="clearPassword()" data-bs-dismiss="modal"
+              aria-label="Close"></button>
           </div>
           <div class="modal-body">
             <!-- New Password Field -->
@@ -333,6 +364,7 @@ export default {
         redirect_to: '/app/website-settings/Website Settings',
         acknowledge_on: null,
       },
+      forgotPasswordMail: "",
       storeData: [],
       errors: {},
       email: "",
@@ -350,6 +382,7 @@ export default {
       isAcknloading: false,
       showOtpPage: false,
       ShowLoginPage: true,
+      ShowForgotPassword: false,
       ShowSignUpPage: false,
       otp: ["", "", "", "", "", ""],
       errorMessage: "",
@@ -391,6 +424,18 @@ export default {
         this.errors.pwd = "Please Enter Password *";
       } else {
         delete this.errors.pwd;
+      }
+    },
+    validateForgotPassword() {
+      const email = this.forgotPasswordMail?.trim().toLowerCase();
+      const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+      if (!email) {
+        this.errors.forgotPasswordMail = "Email is required *";
+      } else if (!emailPattern.test(email)) {
+        this.errors.forgotPasswordMail = "Please enter a valid email address *";
+      } else {
+        delete this.errors.forgotPasswordMail;
       }
     },
     togglePasswordVisibility() {
@@ -542,6 +587,7 @@ export default {
       this.ShowLoginPage = false;
       this.showOtpPage = false;
       this.ShowSignUpPage = true;
+      this.ShowForgotPassword = false;
       this.deptData()
       this.designationData()
 
@@ -560,6 +606,7 @@ export default {
       this.ShowLoginPage = true;
       this.showOtpPage = false;
       this.ShowSignUpPage = false;
+      this.ShowForgotPassword = false;
 
       this.SignUpdata.email = "";
       this.SignUpdata.full_name = "";
@@ -572,7 +619,22 @@ export default {
       this.signatureInputRef = null;
       this.acknowledge = ""
       this.errors = {};
+      this.forgotPasswordMail="";
+      this.errors.forgotPasswordMail="";
 
+    },
+
+    openForgotpassword(){
+      this.ShowLoginPage = false;
+      this.showOtpPage = false;
+      this.ShowSignUpPage = false;
+      this.ShowForgotPassword = true;
+      this.showPwdField=false;
+      this.formdata.usr = ""
+      this.formdata.pwd = ""
+      this.errors.usr = ""
+      this.errors.pwd = ""
+      this.acknowledge = ""
     },
     // validateOtp() {
     //   const otpValue = this.otp.join("");
@@ -606,7 +668,33 @@ export default {
     //   this.resentMessage = "Resent OTP successfully!";
     //   this.startCountdown();
     // },
-
+    ForgotPassword() {
+      this.validateForgotPassword()
+      if(!this.errors.forgotPasswordMail){
+        const payload = {
+        cmd: "frappe.core.doctype.user.user.reset_password",
+        user: this.forgotPasswordMail,
+      }
+      axiosInstance.post(apis.forgotPassword, payload)
+        .then((res) => {
+          if (res) {
+            const messages = JSON.parse(res._server_messages);
+            const messageObj = JSON.parse(messages[0]);
+            if (messageObj.message) {
+              toast.success(messageObj.message);
+              this.forgotPasswordMail="";
+              this.ShowLoginPage = true;
+              this.showOtpPage = false;
+              this.ShowSignUpPage = false;
+              this.ShowForgotPassword=false;
+            }
+          }
+        })
+        .catch((error) => {
+          console.error("Upload error:", error);
+        })
+      }
+    },
     SignUp() {
       this.validateEmail()
       this.validatePhone()
@@ -634,20 +722,20 @@ export default {
                 document.getElementById("EmployeeToggleModal")
               );
               modal.hide();
-                this.ShowLoginPage = true;
-                this.showOtpPage = false;
-                this.ShowSignUpPage = false;
+              this.ShowLoginPage = true;
+              this.showOtpPage = false;
+              this.ShowSignUpPage = false;
 
-                this.SignUpdata.email = "";
-                this.SignUpdata.full_name = "";
-                this.SignUpdata.emp_code = "";
-                this.SignUpdata.emp_phone = "";
-                this.SignUpdata.designation = null;
-                this.SignUpdata.dept = null;
-                this.SignUpdata.signature = null;
-                this.selectedOption = null;
-                this.signatureInputRef = null;
-                this.acknowledge = ""
+              this.SignUpdata.email = "";
+              this.SignUpdata.full_name = "";
+              this.SignUpdata.emp_code = "";
+              this.SignUpdata.emp_phone = "";
+              this.SignUpdata.designation = null;
+              this.SignUpdata.dept = null;
+              this.SignUpdata.signature = null;
+              this.selectedOption = null;
+              this.signatureInputRef = null;
+              this.acknowledge = ""
             }
 
           })
@@ -906,7 +994,7 @@ export default {
                   is_admin: employeeData.is_admin
                   // department: employeeData.department,
                 };
-                
+
                 localStorage.setItem("UserName", JSON.stringify(this.storeData));
                 sessionStorage.setItem("UserName", JSON.stringify(this.storeData));
 
@@ -1351,7 +1439,10 @@ button {
 
   font-size: 13px;
 }
-
+.forgot-password:hover{
+  text-decoration: underline;
+  transition: all 0.3s ease;
+}
 .toggle-icon {
   position: absolute;
   top: 77%;
