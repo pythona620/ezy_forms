@@ -774,7 +774,7 @@ template_str = """
 
                                         {% elif field.fieldtype == 'Data' or field.fieldtype == 'Int' or field.fieldtype =='Link' and field.fieldname != 'auto_calculations' %}
                                             <span id="{{ field.fieldname }}"
-                                                style="font-size:13px; font-weight:500;">
+                                                style="font-size:13px; font-weight:500; word-break: break-all;">
                                                 {{ field['values'] }}
                                             </span>
                                         {% elif field.fieldtype == 'Select' %}
