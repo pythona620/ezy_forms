@@ -509,6 +509,8 @@ function EditRequestUpdate() {
   const data_obj = {
     form_id: route.query.selectedFormId,
     updated_fields: form,
+   document_type :route.query.selectedForm,
+   property: business_unit.value,
     //  status: route.query.selectedFormStatus === 'Request Cancelled' ? 'Request Raised' : null,
     // current_level:route.query.selectedFormStatus === 'Request Cancelled' ? 1 : null
   };
