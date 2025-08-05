@@ -256,7 +256,7 @@
                             type="file"
                             :class="blockIndex < currentLevel ? 'd-none' : ''"
                             accept=".jpeg,.jpg,.png,.pdf,.xlsx,.xls"
-                            :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                            :id="'field-' + blockIndex + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
                             style="display: none"
                             class="form-control previewInputHeight font-10 mb-1 mt-1"
                             multiple
@@ -266,9 +266,9 @@
                           <!-- Custom file input label (acts as button) -->
                           <label
                             v-if="(field.fieldname !== 'requestor_signature' && field.label !== 'Requestor Signature' && blockIndex !== 0 && !field.label.includes('Approved By') && !field.label.includes('Acknowledged By') && props.readonlyFor !== 'true') && (field.value && blockIndex !== 0) || !field.value && props.readonlyFor !== 'true' && blockIndex !== 0"
-                            :for="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                            :for="'field-' + blockIndex + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
                             class="btn btn-sm btn-light font-10 mb-1 mt-1"
-                            :class="{ 'disabled': props.readonlyFor === 'true' || blockIndex === 0 || blockIndex < currentLevel }"
+                            :class="{ 'disabled d-none': props.readonlyFor === 'true' || blockIndex === 0 || blockIndex < currentLevel }"
                           >
                             <i class="bi bi-paperclip me-1"></i> Attach
                           </label>
@@ -290,7 +290,7 @@
                           <template v-else-if="field.value && field.value.length">
                              <span
                                   class="cursor-pointer font-12 d-inline-flex align-items-center mt-1 gap-1"
-                                  @click="openAttachmentList(field.value)"
+                                  @click="openAttachmentList(field.value,blockIndex)"
                                 >
                                   <span class="text-dark text-decoration-underline font-12 ">View</span>
                                   <span>({{ field.value.split(',').filter(f => f.trim()).length }})</span>
@@ -366,10 +366,8 @@
                                           @click="previewAttachment(url)">Show</button>
                                         <a :href="url" class="btn font-13 btn-light" download>Download</a>
                                         
-                                       <button v-if="props.readonlyFor !== 'true' || blockIndex < currentLevel"
-                                                class="btn btn-sm btn-outline-dark rounded-circle"
-                                                @click="removeFile(i, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
-                                              >
+                                       <button v-if="props.readonlyFor === 'true' || currentBlockIndex !== 0 || currentBlockIndex < currentLevel" :class="{ 'disabled d-none': props.readonlyFor === 'true' || currentBlockIndex === 0 || currentBlockIndex < currentLevel }"
+                                  class="btn btn-sm btn-outline-dark rounded-circle" @click="removeFile(i, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
                                                 <i class="bi bi-x fs-6"></i>
                                               </button>
                                       </div>
@@ -1953,14 +1951,17 @@ const showListModal = ref(false)
 const showPreviewModal = ref(false)
 
 const attachmentList = ref([])
+const currentBlockIndex = ref(null);
 
-function openAttachmentList(value) {
+function openAttachmentList(value ,blockIndex) {
   attachmentList.value = value.split(',').map(f => f.trim())
-  showListModal.value = true
+  showListModal.value = true;
+  currentBlockIndex.value = blockIndex;
 }
 
 function closeAttachmentList() {
-  showListModal.value = false
+  showListModal.value = false;
+  currentBlockIndex.value = null;
 }
 
 function previewAttachment(url) {
