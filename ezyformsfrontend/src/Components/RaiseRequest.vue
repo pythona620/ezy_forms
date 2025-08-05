@@ -51,7 +51,7 @@
             </div>
           </div>
           <RequestPreview :blockArr="blockArr" :formName="selectedData.selectedform" :tableHeaders="tableHeaders"  ref="childRef"
-            :linked_id="linkedId" :LinkedChildTableData="LinkedChildTableData" @updateField="handleFieldUpdate"
+            :linked_id="linkedId" :LinkedChildTableData="LinkedChildTableData" @updateField="handleFieldUpdate" @updateRemovedFiles="handleRemovedFiles"
             :tableRowsdata="tableRows" @formValidation="isFormValid = $event" @updateTableData="handleTableData" />
           <!-- @formValidation="isFormValid = $event" -->
 
@@ -726,7 +726,7 @@ tableHeaders.value = transformedChildTableFields;
 
       // tableHeaders.value = parsedFormJson.child_table_fields; 
       initializeTableRows();
-      console.log(tableHeaders.value, "table fields"); 
+      //console.log(tableHeaders.value, "table fields"); 
     })
     .catch((error) => {
       console.error("Error fetching ezyForms data:", error);
@@ -841,6 +841,12 @@ const handleFieldUpdate = (field) => {
   }
 };
 
+const removeAttachFiles = ref([])
+
+const handleRemovedFiles = (removedFiles) => {
+  removeAttachFiles.value = removedFiles;
+}
+
 
 
 
@@ -942,8 +948,6 @@ async function raiseRequestSubmission() {
   if (linkedId.value) {
     form.returnable_gate_pass_id = linkedId.value;
   }
-
-  // console.log(form, "✅ Final Form Data to Submit");
 
   const formData = new FormData();
   formData.append("doc", JSON.stringify(form));
@@ -1325,6 +1329,7 @@ function request_raising_fn(item) {
     employee_id: employeeData.value.emp_code,
     be_half_of:item.employee_name,
     request_for:item.request_for,
+    unwanted_files: removeAttachFiles.value
   };
   axiosInstance.post(apis.raising_request, data_obj).then((resp) => {
     if (resp?.message?.success === true) {
