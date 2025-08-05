@@ -52,11 +52,11 @@
                        <div class="mb-3">
                     <label class="font-13 ps-1" for="create_emp_phone">Emp Phone</label>
                     <div class="input-container">
-                      <input type="text" name="create_emp_phone" id="create_emp_phone" maxlength="13" :readonly="isMasked"
+                      <input type="text" name="create_emp_phone" id="create_emp_phone" maxlength="13" 
                         class="w-100 font-12  form-control" 
                         :value="isMasked ? maskNumber(createEmployee.emp_phone) : createEmployee.emp_phone"
                         @input="handleInput" @blur="formatPhoneNumber " placeholder="Enter Phone Number" />
-                      <i :class="eyeIcon" class="eye-icon" @click="toggleMask"></i>
+                      <!-- <i :class="eyeIcon" class="eye-icon" @click="toggleMask"></i> -->
                     </div>
 
                     <p v-if="phoneError" class="text-danger font-11 ps-1">
@@ -124,10 +124,10 @@
                             style="cursor: pointer">
                             {{ role }}
                           </li>
-                          <li v-if="searchText "
+                          <li v-if="searchText"
                             class="list-group-item list-group-item-action font-12 text-primary" style="cursor: pointer"
                             @click="showModal = true">
-                            ➕ Create role "<strong>{{ searchText }}</strong>"
+                            <i class="bi bi-plus-lg"></i> Create role "<strong>{{ searchText }}</strong>"
                           </li>
                         </ul>
                         <!-- Modal -->
@@ -408,7 +408,7 @@
                         class="text-danger ps-1">*</span></label>
                     <div class="input-container">
                       <FormFields class="mb-1 w-100" tag="input" type="email" name="emp_mail_id" id="emp_mail_id"
-                        placeholder="Enter Email" v-model="createEmployee.emp_mail_id" @input="maskEmail" :disabled="maskEmail"
+                        placeholder="Enter Email" v-model="createEmployee.emp_mail_id" @input="maskEmail" :disabled="true"
                         @change="validateEditUserEmail" :required="true" />
                       <i :class="eyeIconEmail" class="eye-icon" @click="toggleEmailMask"></i>
                     </div>
@@ -467,7 +467,7 @@
                       </li>
 
                       <!-- Create Role option as part of the dropdown -->
-                      <li class="list-group-item list-group-item-action font-12 text-primary" style="cursor: pointer"
+                      <li v-if="searchText" class="list-group-item list-group-item-action font-12 text-primary" style="cursor: pointer"
                         @click="showModal = true">
                         <i class="bi bi-plus-lg"></i> Create role "<strong>{{ searchText }}</strong>"
                       </li>
@@ -715,21 +715,7 @@ const createEmployee = ref({
   company_field: "",
   signature: "",
 });
-watch(
-  () => createEmployee.reporting_to,
-  (newVal) => {
-    if (newVal) {
-      const matchedEmployee = employeeEmails.find(emp => emp.emp_mail_id === newVal);
-      if (matchedEmployee) {
-        createEmployee.reporting_designation = matchedEmployee.designation || '';
-      } else {
-        createEmployee.reporting_designation = '';
-      }
-    } else {
-      createEmployee.reporting_designation = '';
-    }
-  }
-);
+
 onMounted(() => {
   const url = window.location.href;
   if (url.includes('ncomr')) {
@@ -1618,20 +1604,20 @@ const removeSignature = () => {
   }
 };
 
-watch(
-  () => createEmployee.value.reporting_to,
-  (newValue) => {
-    if (newValue) {
-      const selectedEmployee = tableData.value.find(
-        (emp) => emp.emp_mail_id === newValue
-      );
-      if (selectedEmployee) {
-        createEmployee.value.reporting_designation = selectedEmployee.designation;
-      }
-    }
-  },
-  { immediate: true } // <-- this will trigger the watcher on setup
-);
+// watch(
+//   () => createEmployee.value.reporting_to,
+//   (newValue) => {
+//     if (newValue) {
+//       const selectedEmployee = tableData.value.find(
+//         (emp) => emp.emp_mail_id === newValue
+//       );
+//       if (selectedEmployee) {
+//         createEmployee.value.reporting_designation = selectedEmployee.designation;
+//       }
+//     }
+//   },
+//   { immediate: true } // <-- this will trigger the watcher on setup
+// );
 // function addnewDesignation() {
 //     newDesignation.value = !newDesignation.value
 // }
@@ -1670,8 +1656,11 @@ const forgotData = ref("")
 
 function actionCreated(rowData, actionEvent) {
   if (actionEvent?.name === 'Edit Employee') {
+    searchText.value = '';
+    filteredDesignations.value = [];
     if (rowData) {
-      // Reset errors
+      designationData();
+      employeeOptions();
       phoneError.value = "";
       emailError.value = "";
 
@@ -1684,32 +1673,18 @@ function actionCreated(rowData, actionEvent) {
 
       // Set searchText to current designation
       searchText.value = rowData.designation || ''
-      // Load departments and set matching department object
+      
       deptData(() => {
         const matchedDept = departmentsList.value.find(
           (dept) => dept.name === rowData.department
         );
         createEmployee.value.department = matchedDept || "";
       });
+      
 
-      // Load designation and employee options
-      designationData();
-      employeeOptions();
-
-      // Set reporting_designation if reporting_to is present
-      // if (rowData.reporting_to) {
-      //   const selectedEmployee = tableData.value.find(
-      //     (emp) => emp.emp_mail_id === rowData.reporting_to
-      //   );
-      //   // if (selectedEmployee) {
-      //   //   createEmployee.value.reporting_designation = selectedEmployee.designation;
-      //   // }
-      // }
-
-      // Mask phone/email and show modal
+     
       isMasked.value = true;
       isEmailMasked.value = true;
-      // maskPhoneNumber();
       maskEmail();
 
       const modal = new bootstrap.Modal(document.getElementById('exampleModal'), {});
@@ -1753,6 +1728,24 @@ function forgotpassword() {
     })
 };
 
+
+watch(
+  () => createEmployee.value.reporting_to,
+  (newValue) => {
+    if (newValue) {
+      const selectedEmployee = employeeEmails.value.find(
+        (emp) => emp.emp_mail_id === newValue
+      );
+      if (selectedEmployee) {
+        createEmployee.value.reporting_designation = selectedEmployee.designation;
+      }
+    } else {
+      // ✅ Clear reporting_designation if reporting_to is cleared
+      createEmployee.value.reporting_designation = "";
+    }
+  },
+  { immediate: true }
+);
 
 // watch(
 //   () => createEmployee.reporting_to,
@@ -1840,6 +1833,7 @@ function cancelCreate() {
     company_field: businessUnit.value,
   };
   searchText.value=""
+  filterDesignations.value = [];
   createEmailError.value = '';
   const fileInput = document.getElementById("signatureInput");
   if (fileInput) {
@@ -2154,16 +2148,16 @@ function employeeOptions() {
       console.error("Error fetching department data:", error);
     });
 }
-watch(
-  () => createEmployee.value.reporting_to,
-  (newValue) => {
-    const selected = employeeEmails.value.find(
-      (emp) => emp.emp_mail_id === newValue
-    );
-    createEmployee.value.reporting_designation = selected?.designation;
-  },
-  { immediate: true } // ✅ if editing existing record
-);
+// watch(
+//   () => createEmployee.value.reporting_to,
+//   (newValue) => {
+//     const selected = employeeEmails.value.find(
+//       (emp) => emp.emp_mail_id === newValue
+//     );
+//     createEmployee.value.reporting_designation = selected?.designation;
+//   },
+//   { immediate: true } // ✅ if editing existing record
+// );
 function designationData() {
   const filters = [];
   const queryParams = {
@@ -2199,7 +2193,8 @@ watch(
   { immediate: true }
 );
 function createEmpl() {
-  if (!isFormFilled.value || searchText.value.trim()=== "") {
+
+  if (!isFormFilled.value || searchText.value.trim() === "") {
     toast.error("Please fill all required fields", {
       autoClose: 1000,
       transition: "zoom",
@@ -2214,6 +2209,13 @@ function createEmpl() {
     return;
 
   }
+  if(errorMessage.value) {
+    toast.error(errorMessage.value, {
+      autoClose: 1000,
+      transition: "zoom",
+    });
+    return;
+  }
   if (emailError.value) {
     toast.error("Employee Email Id already exists", {
       autoClose: 1000,
@@ -2222,12 +2224,20 @@ function createEmpl() {
     return;
   }
   if(phoneError.value) {
-    toast.error("Invalid phone number", {
+    toast.error("Please enter a valid phone number.", {
+      autoClose: 1000,
+      transition: "zoom",                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
+    });
+    return;
+  }
+  if(createEmployee.value.designation !== searchText.value.trim()) {
+     toast.error("Please create the role before creating an employee.", {
       autoClose: 1000,
       transition: "zoom",
     });
     return;
   }
+
 
   createEmployee.value.company_field = businessUnit.value;
 
@@ -2274,6 +2284,7 @@ function createEmpl() {
 const asfv = ref(false)
 
 function SaveEditEmp() {
+  
   if (!isFormFilled.value || searchText.value.trim()=== "") {
     toast.error("Please fill all required fields", {
       autoClose: 1000,
@@ -2290,6 +2301,13 @@ function SaveEditEmp() {
   }
   if(!searchText.value){
       toast.error("Please select or enter a designation", {
+      autoClose: 1000,
+      transition: "zoom",
+    });
+    return;
+  }
+   if(createEmployee.value.designation !== searchText.value) {
+     toast.error("Please create the role before updating employee.", {
       autoClose: 1000,
       transition: "zoom",
     });

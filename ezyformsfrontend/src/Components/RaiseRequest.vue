@@ -425,7 +425,7 @@ function updateChildRecords(childTables, child_id_name) {
 
 function handleTableData(data) {
   childtablesData.value = data;
-  console.log('Updated Table Data:', childtablesData.value);
+  // console.log('Updated Table Data:', childtablesData.value);
 }
 
 // function EditRequestUpdate() {
@@ -726,7 +726,7 @@ tableHeaders.value = transformedChildTableFields;
 
       // tableHeaders.value = parsedFormJson.child_table_fields; 
       initializeTableRows();
-      //console.log(tableHeaders.value, "table fields"); 
+      // console.log(tableHeaders.value, "table fields"); 
     })
     .catch((error) => {
       console.error("Error fetching ezyForms data:", error);
@@ -903,7 +903,14 @@ function toRaiseReqBtn() {
   const modal = new bootstrap.Modal(document.getElementById('ExportEmployeeModal'));
   modal.show();
 }
-
+// function acknowledgeCancel() {
+//   acknowledge.value = false
+//   saveloading.value = false
+//   const modal = bootstrap.Modal.getInstance(document.getElementById('ExportEmployeeModal'));
+//   if (modal) {
+//     modal.hide();
+//   }
+// }
 
 
 async function raiseRequestSubmission() {
