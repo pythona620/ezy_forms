@@ -2092,6 +2092,34 @@ onMounted(() => {
 });
 
 
+const draggingIndex = ref(null);
+const invalidFields = ref({});
+const currentEditingTable = ref(null);
+
+const onDragStart = (index) => {
+  draggingIndex.value = index;
+};
+
+const onDragEnd = () => {
+  draggingIndex.value = null;
+};
+
+const onDragOver = (event) => {
+  event.preventDefault();
+};
+
+const onDrop = (event, table) => {
+  const targetRow = event.target.closest("tr");
+  if (!targetRow) return;
+
+  const targetIndex = Array.from(targetRow.parentNode.children).indexOf(targetRow);
+  if (targetIndex !== draggingIndex.value) {
+    const draggingRow = table[draggingIndex.value];
+    table.splice(draggingIndex.value, 1);
+    table.splice(targetIndex, 0, draggingRow);
+    draggingIndex.value = targetIndex;
+  }
+};
 
 // Store multiple child tables
 // const formatTableName = (tableIndex, event) => {
@@ -2107,6 +2135,37 @@ const childTables = ref([]);
 function generateFieldname(label) {
   return label.toLowerCase().replace(/\s+/g, '_').replace(/[^\w_]/g, '');
 }
+const cleanFieldOptions = (field) => {
+  if (
+    ["Select", "Table MultiSelect", "Check", "Small Text"].includes(field.fieldtype) &&
+    field.options
+  ) {
+    const rawOptions = field.options
+      .split("\n")
+      .map((opt) => opt.trim())
+      .filter((opt) => opt); // Remove empty lines
+
+    const uniqueOptions = [];
+    const seen = new Set();
+
+    rawOptions.forEach((opt) => {
+      const lower = opt.toLowerCase();
+      if (!seen.has(lower)) {
+        seen.add(lower);
+        uniqueOptions.push(opt); // Retain original case
+      }
+    });
+
+    return "\n" + uniqueOptions.join("\n");
+  } else if (
+    ["Link", "Table"].includes(field.fieldtype) &&
+    field.options
+  ) {
+    return field.options.trim();
+  }
+
+  return field.options;
+};
 
 const addChildTable = (blockIndex, sectionIndex) => {
   const section = blockArr[blockIndex].sections[sectionIndex];
@@ -2240,7 +2299,11 @@ const processFields = (blockIndex, sectionIndex, tableIndex) => {
 
   const table = blockArr[blockIndex].sections[sectionIndex].childTables[tableIndex];
   const section = blockArr[blockIndex].sections[sectionIndex];
-
+  table.columns = table.columns.map((field, index) => ({
+    ...field,
+    idx: index,
+    options: cleanFieldOptions(field),
+  }));
   table.newTable = false
   const data = {
     form_short_name: formatTableName(table.tableName),
@@ -2352,10 +2415,12 @@ const afterImmediateEdit = (blockIndex, sectionIndex, tableName) => {
 
     if (!isValid) return;
 
-    const allFields = table.columns.map(({ isNew, ...rest }, index) => ({
-      ...rest,
-      idx: index + 1,
-    }));
+   const allFields = table.columns.map(({ isNew, ...rest }, index) => ({
+  ...rest,
+  idx: index + 1,
+  options: cleanFieldOptions(rest),
+}));
+
 
     const formData = {
       form_short_name: formatTableName(tableName),
@@ -2408,34 +2473,6 @@ const deleteRow = (tableName, index) => {
   }
 };
 
-const draggingIndex = ref(null);
-const invalidFields = ref({});
-const currentEditingTable = ref(null);
-
-const onDragStart = (index) => {
-  draggingIndex.value = index;
-};
-
-const onDragEnd = () => {
-  draggingIndex.value = null;
-};
-
-const onDragOver = (event) => {
-  event.preventDefault();
-};
-
-const onDrop = (event, table) => {
-  const targetRow = event.target.closest("tr");
-  if (!targetRow) return;
-
-  const targetIndex = Array.from(targetRow.parentNode.children).indexOf(targetRow);
-  if (targetIndex !== draggingIndex.value) {
-    const draggingRow = table[draggingIndex.value];
-    table.splice(draggingIndex.value, 1);
-    table.splice(targetIndex, 0, draggingRow);
-    draggingIndex.value = targetIndex;
-  }
-};
 const toggleEdit = (tableName, description) => {
   if (editMode[tableName]) {
 
@@ -2462,9 +2499,10 @@ const toggleEdit = (tableName, description) => {
 
     // Process all fields (both old and new)
     let allFields = childtableHeaders.value[tableName].map(({ isNew, ...rest }, index) => ({
-      ...rest,
-      idx: index, // Ensure `idx` is correctly set in sequential order
-    }));
+        ...rest,
+        idx: index,
+        options: cleanFieldOptions(rest),
+      }));
 
     // ✅ Single API request to save both old and new fields
     const formData = {
