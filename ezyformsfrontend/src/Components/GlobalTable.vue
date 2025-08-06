@@ -68,7 +68,7 @@
             <td class="">{{ rowIndex + 1 }}</td>
 
             <!-- v-tooltip.top="row[column.td_key] ? row[column.td_key].toString() : '-'" -->
-            <td v-for="(column, colIndex) in tHeaders" :class="column.td_key === 'form_status' ? 'text-center' : ''"
+            <td v-for="(column, colIndex) in tHeaders" :class="column.td_key === 'form_status' ? 'text-center' : ''" v-tooltip.top ="column.td_key === 'accessible_departments' ? row[column.td_key] : ''"
               :key="colIndex">
 
               <!-- <span :class="{'accessible-departments': column.td_key === 'accessible_departments'}" v-if="column.td_key === 'accessible_departments'">
@@ -182,7 +182,7 @@
               </span> -->
               <!-- <span v-else class="tooltip-text" :title="row[column.td_key] || '-'"> -->
 
-              <span v-else class="tooltip-text" v-tooltip.right="getTooltipText(row[column.td_key])">
+              <span v-else class="tooltip-text" v-tooltip.top="column.td_key !== 'accessible_departments' ? getTooltipText(row[column.td_key]):''">
                 <span v-if="column.td_key === 'linked_form_id'">
                   <span @click="handleCellClick(row, rowIndex, 'td_key')" :class="[
                     row[column.td_key] ? 'text-decoration-underline linked-id-redirect font-11 text-primary' : 'text-decoration-none linke-not-allow '
