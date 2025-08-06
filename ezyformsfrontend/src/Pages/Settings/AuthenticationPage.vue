@@ -60,7 +60,7 @@ const tableData = ref([
     { title: "Welcome E-Mail Configuration", checked: false },
     { title: "Enable Sign Up in Login Page", checked: false },
     { title: "Send Daily E-mail reminders", checked: false },
-    { title: "Enable Acknowledgement in Login Page", checked: false },
+    { title: "Take Acknowledgement and Signiture while Login", checked: false },
 ]);
 
 const default_mail = ref(false);
