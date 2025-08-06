@@ -60,6 +60,7 @@ const tableData = ref([
     { title: "Welcome E-Mail Configuration", checked: false },
     { title: "Enable Sign Up in Login Page", checked: false },
     { title: "Send Daily E-mail reminders", checked: false },
+    { title: "Enable Acknowledgement in Login Page", checked: false },
 ]);
 
 const default_mail = ref(false);
@@ -106,6 +107,10 @@ const handleToggle = (index) => {
         confirmMessage.value = isChecked
             ? "Are you sure you want to enable daily email reminders?"
             : "Are you sure you want to disable daily email reminders?";
+    } else if (index === 5) {
+        confirmMessage.value = isChecked
+            ? "Are you sure you want to enable Acknowledgement on the Login Page?"
+            : "Are you sure you want to disable Acknowledgement on the Login Page?";
     }
 
     // Show the modal
@@ -205,17 +210,29 @@ const confirmAction = () => {
             .catch(() => {
                 toast.error("Failed to update E-Mail Send Daily reminders");
             });
+    } else if (index === 5) {
+        axiosInstance
+            .put(`${apis.resource}${doctypes.wfSettingEzyForms}/${encodeURIComponent(docName)}`, {
+                is_acknowledge: newStatus,
+            })
+            .then(() => {
+                toast.success(`acknowledgement ${newStatus === 0 ? "Disabled" : "Enabled"} Successfully!`, { autoClose: 700 });
+                const modal = bootstrap.Modal.getInstance(document.getElementById('EnableDisable'));
+                    modal.hide();
+                    BussinesUnit()
+            })
+            .catch(() => {
+                toast.error("Failed to update acknowledgement");
+            });
     }
 };
 
 
 
 function BussinesUnit() {
-    // const buData = localStorage.getItem('Bu') || ''; // Ensure buData is parsed correctly
-
     const queryParams = {
         fields: JSON.stringify(["*"]),
-        filters: JSON.stringify([["name", "=", Bussines_unit.value]]) // Apply filter based on buData
+        filters: JSON.stringify([["name", "=", Bussines_unit.value]])
     };
 
     axiosInstance
@@ -223,11 +240,13 @@ function BussinesUnit() {
         .then((res) => {
             if (res.data.length > 0) {
                 const status = res.data[0].send_form_as_a_attach_through_mail;
-                tableData.value[1].checked = status == 1; // Check if 0, uncheck if 1
+                tableData.value[1].checked = status == 1;
                 const welcome_mail = res.data[0].welcome_mail_to_employee;
-                tableData.value[2].checked = welcome_mail == 1; // Check if 0
+                tableData.value[2].checked = welcome_mail == 1;
                 const send_daily_alerts = res.data[0].send_daily_alerts;
-                tableData.value[4].checked = send_daily_alerts == 1; // Check if
+                tableData.value[4].checked = send_daily_alerts == 1;
+                const is_acknowledge = res.data[0].is_acknowledge;
+                tableData.value[5].checked = is_acknowledge == 1;
             }
         })
         .catch((error) => {
@@ -236,7 +255,7 @@ function BussinesUnit() {
 };
 
 const enable_two_factor = () => {
-    const docName = "System Settings"; // Document name
+    const docName = "System Settings";
     const queryParams = {
         fields: JSON.stringify(["*"]),
     };

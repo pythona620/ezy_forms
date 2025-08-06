@@ -414,6 +414,7 @@ export default {
       ShowAcknowledgement: "",
       acknowledge_signature:null,
       isAcknowledgeSign:"",
+      LoginAcknowledge:"",
       signatureInput:null,
       // timeLeft: 60,
       // timer: null,
@@ -880,6 +881,7 @@ export default {
             this.isAcknowledge = res.message.is_acknowledge
             this.ShowAcknowledgement=res.message.show_acknowledgement
             this.isAcknowledgeSign=res.message.is_signature;
+            this.LoginAcknowledge=res.message.login_acknowledge;
 
             if (this.isFirstLogin === 0 && this.enableCheck === 1) {
               const modal = new bootstrap.Modal(
@@ -934,13 +936,13 @@ export default {
                 this.showOtpPage = false;
                 this.ShowLoginPage = true;
                 this.otp = ["", "", "", "", "", ""];
-                if (this.isAcknowledge == 0 || this.isAcknowledgeSign == 0) {
-                  const modal = new bootstrap.Modal(document.getElementById('EmployeeAcknowledgementModal'));
-                  modal.show();
-                }
-                else {
-                  this.userData(this.formdata.usr);
-                }
+                  if ( this.LoginAcknowledge === 1 && (this.isAcknowledge == 0 || this.isAcknowledgeSign == 0)) {
+                    const modal = new bootstrap.Modal(document.getElementById('EmployeeAcknowledgementModal'));
+                    modal.show();
+                  }
+                  else {
+                    this.userData(this.formdata.usr);
+                  }
               }
             }
           })
