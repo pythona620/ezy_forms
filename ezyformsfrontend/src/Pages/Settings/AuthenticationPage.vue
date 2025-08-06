@@ -109,8 +109,8 @@ const handleToggle = (index) => {
             : "Are you sure you want to disable daily email reminders?";
     } else if (index === 5) {
         confirmMessage.value = isChecked
-            ? "Are you sure you want to enable Acknowledgement on the Login Page?"
-            : "Are you sure you want to disable Acknowledgement on the Login Page?";
+            ? "Are you sure you want to enable Acknowledgement and Signiture while Login?"
+            : "Are you sure you want to disable Acknowledgement and Signiture while Login?";
     }
 
     // Show the modal
@@ -216,7 +216,7 @@ const confirmAction = () => {
                 is_acknowledge: newStatus,
             })
             .then(() => {
-                toast.success(`acknowledgement ${newStatus === 0 ? "Disabled" : "Enabled"} Successfully!`, { autoClose: 700 });
+                toast.success(`acknowledgement and Signiture ${newStatus === 0 ? "Disabled" : "Enabled"} Successfully!`, { autoClose: 700 });
                 const modal = bootstrap.Modal.getInstance(document.getElementById('EnableDisable'));
                     modal.hide();
                     BussinesUnit()
