@@ -50,7 +50,7 @@
    "default": "0",
    "fieldname": "send_form_in_email",
    "fieldtype": "Check",
-   "label": "Send form in email"
+   "label": "Send Form in Mail Messageg Body"
   },
     {
    "default": "0",
