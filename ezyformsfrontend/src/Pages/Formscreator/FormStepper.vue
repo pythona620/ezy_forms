@@ -2,7 +2,7 @@
   <div>
     <div class="">
       <div class="">
-        <div class="d-flex justify-content-between align-items-center CancelNdSave my-2 py-2">
+        <div class="d-flex justify-content-between align-items-center CancelNdSave">
           <div class="ps-1 my-2 d-flex align-items-center" @click="cancelForm()">
             <button class="btn font-13 ms-3">
               <i class="bi bi-arrow-left"></i><span class="ms-2">Back</span>
@@ -1074,7 +1074,7 @@
                               <div>
                                 <div>
 
-                                  <button  class="btn btn-light addRow mb-3 mt-4"
+                                  <button v-if="blockIndex==0" class="btn btn-light addRow mb-3 mt-4"
                                     @click="addChildTable(blockIndex, sectionIndex)">
                                     Add New Table
                                   </button>

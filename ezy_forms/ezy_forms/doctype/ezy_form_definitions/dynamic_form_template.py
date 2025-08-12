@@ -774,7 +774,7 @@ template_str = """
 
                                         {% elif field.fieldtype == 'Data' or field.fieldtype == 'Int' or field.fieldtype =='Link' and field.fieldname != 'auto_calculations' %}
                                             <span id="{{ field.fieldname }}"
-                                                style="font-size:13px; font-weight:500;">
+                                                style="font-size:13px; font-weight:500; word-break: break-all;">
                                                 {{ field['values'] }}
                                             </span>
                                         {% elif field.fieldtype == 'Select' %}
@@ -1272,13 +1272,13 @@ def preview_dynamic_form(form_short_name: str, business_unit=None, name=None):
             ), json_object))
 
             form_name = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_name") or "Form"
-    html_view = json_structure_call_for_html_view(
-        json_obj=json_object,
-        form_name=form_name,
-        child_data=data_list,
-        child_table_data=None,
-        business_unit=business_unit
-    )
+            html_view = json_structure_call_for_html_view(
+                json_obj=json_object,
+                form_name=form_name,
+                child_data=data_list,
+                child_table_data=None,
+                business_unit=business_unit
+            )
     
     return html_view
  
@@ -1305,7 +1305,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
         bench_path         = get_bench_path()
         site               = frappe.local.site
         folder_path = get_site_path("public", "files", "Attachment_folder")
-
+        form_name = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_name")
         delete = lambda path: os.unlink(path) if os.path.isfile(path) or os.path.islink(path) else shutil.rmtree(path)
 
         if os.path.exists(folder_path) and os.path.isdir(folder_path):

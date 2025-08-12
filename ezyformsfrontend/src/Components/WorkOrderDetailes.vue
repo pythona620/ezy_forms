@@ -50,14 +50,12 @@
 
     <div class="d-flex flex-column justify-content-between" style="min-height: 300px">
       <!-- Main Content Area Based on Step -->
-      <div class="flex-grow-1">
+      <div class="flex-grow-1 ">
         <div v-if="currentStep === 0">
           <!-- Step 1: Vendor & Item Details -->
           <!-- <h5>Step 1: Vendor & Item Details</h5> -->
           <!-- Put Item & Vendor Accordions Here -->
-          <div class="">
-
-            <div class="d-flex justify-content-between align-items-center back_div mb-2">
+            <div class="d-flex justify-content-between align-items-center back_di mb-2">
               <div><button class="font-12 m-0 btn" @click="router.back()"> <i class="bi bi-chevron-left"></i>
                   Back</button>
               </div>
@@ -68,12 +66,17 @@
             @click="submitComparison">Submit comparison</button> -->
               </div>
             </div>
+          <div class=" container-fluid p-3 ">
 
-            <div class="accordion container-fluid " id="accordionExample">
+            <div class="main-accordion  m-4">
+
+           
+
+            <div class="accordion  " id="accordionExample">
               <!-- Item Details Accordion -->
               <div class="accordion-item">
                 <h2 class="accordion-header">
-                  <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                  <button class="accordion-button " type="button" data-bs-toggle="collapse"
                     data-bs-target="#collapseItems" aria-expanded="true">
                     Item details
                   </button>
@@ -81,7 +84,7 @@
                 <div id="collapseItems" class="accordion-collapse collapse show">
                   <div class="accordion-body">
 
-                    <table class="table shadow-sm  rounded-table">
+                    <table class="table shadow-sm item-table  rounded-table">
                       <thead class="table-light  ">
                         <tr>
                           <th scope="col"><input type="checkbox"></th>
@@ -105,7 +108,7 @@
                                 @input="activeDropdown = index"
                                 @blur="closeDropdown(index)"
                                 placeholder="Search item"
-                                ref="itemInputs"
+                                 :ref="el => setItemInputRef(el, index)"
                               />
                              
                               <ul v-if="activeDropdown === index"
@@ -237,7 +240,7 @@
                   <div class="accordion-body">
 
 
-                    <table class="table table-bordered shadow-sm rounded-table">
+                    <table class="table vendor-table shadow-sm rounded-table">
                       <thead class="table-light">
                         <tr>
                           <th scope="col"><input type="checkbox"></th>
@@ -253,7 +256,6 @@
                       <tbody>
                         <tr v-for="(vendor, index) in vendorDetails" :key="index">
                           <td width="3%"><input type="checkbox" v-model="vendor.selected"></td>
-
                           <td class="d-flex justify-content-between">{{ vendor.rank }} <span v-if="vendor.rank === 'L1'"
                               class="badge font-12 "> <i class=" text-success bi bi-check-circle-fill"></i></span></td>
                           <td>{{ vendor.vendor_name }}</td>
@@ -280,7 +282,7 @@
                 </div>
               </div>
             </div>
-
+          </div>
             <!-- Vendor Edit Modal -->
             <div class="modal fade" id="vendorModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
               <div class="modal-dialog modal-xl">
@@ -415,6 +417,7 @@
                         <option>L1</option>
                         <option>L2</option>
                         <option>L3</option>
+                        <option>L4</option>
                       </select>
                     </div>
                     <div class="col-md-3">
@@ -458,94 +461,118 @@
           </div>
           <!-- Step 2: Preview Comparison -->
           <!-- <h5>Step 2: Preview Comparison</h5> -->
-          <div class="container">
-            <table v-if="vendorDetails.length" class="table table-bordered">
-              <thead class="table-light">
-                <tr>
-                  <th>Item name</th>
-                  <th v-for="vendor in vendorDetails" :key="vendor.vendor_name">
-                    {{ vendor.vendor_name }} <span class="text-muted">(rate/unit)</span>
-                  </th>
-                </tr>
-              </thead>
+          <div class="container pt-3">
+            <!-- v-if="vendorDetails.length" -->
+           <table 
+       style="width: 100%;   margin-top: 5px; font-size: 12px; background-color: white;font-family: Poppins, sans-serif;" class="preview_table">
+  <thead>
+    <!-- Row 1: Item name + vendor names -->
+    <tr style="background-color: #fff7d6;">
+      <th style="padding: 10px;">Item Name</th>
+      <th style="padding: 10px;">UOM</th>
+      <th style="padding: 10px;">Qty</th>
+      <th v-for="vendor in vendorDetails"
+          :key="vendor.vendor_name"
+          colspan="2"
+          style=" padding: 10px; text-align: center;">
+        {{ vendor.vendor_name }}
+      </th>
+    </tr>
 
-              <tbody>
-                <!-- Item rows -->
-                <tr v-for="item in itemDetails" :key="item.name">
-                  <td>
-                    {{ item.item_name }}
-                    <span class="badge bg-secondary">{{ item.quantity }} {{ item.unit_of_measure }}</span>
-                  </td>
-                  <td v-for="vendor in vendorDetails" :key="vendor.vendor_name">
-                    ₹ {{ getVendorItemPrice(vendor, item.name) }}
-                  </td>
-                </tr>
+    <!-- Row 2: Rate + Total labels -->
+    <tr style="background-color: #fff7d6;">
+      <th colspan="3" style=" padding: 10px;"></th>
+      <template v-for="vendor in vendorDetails" :key="'vendor-labels-' + vendor.vendor_name">
+        <th style=" padding: 10px; text-align: center;">Rate</th>
+        <th style=" padding: 10px; text-align: center;">Total</th>
+      </template>
+    </tr>
+  </thead>
 
-                <!-- Total row -->
-                <tr>
-                  <td>Total</td>
-                  <td v-for="vendor in vendorDetails" :key="vendor.vendor_name">
-                    <b>₹ {{ getVendorTotal(vendor) }}</b> /total qty
-                  </td>
-                </tr>
+  <tbody>
+    <!-- Item rows -->
+    <tr v-for="item in itemDetails" :key="item.name">
+      <td style=" padding: 10px;">{{ item.item_name }}</td>
+      <td style=" padding: 10px; text-align: center;">{{ item.unit_of_measure }}</td>
+      <td style=" padding: 10px; text-align: center;">{{ item.quantity }}</td>
 
-                <!-- Separator row -->
-                <tr>
-                  <td :colspan="vendorDetails.length + 1" class="text-muted text-center ">
-                    Additional Information
-                  </td>
-                </tr>
+      <template v-for="vendor in vendorDetails" :key="vendor.vendor_name + '-' + item.item_name">
+        <td style=" padding: 10px; text-align: right;">
+          <i class="bi bi-currency-rupee"></i> {{ getVendorItemPrice(vendor, item.item_name) }}
+        </td>
+        <td style=" padding: 10px; text-align: right;">
+          <i class="bi bi-currency-rupee"></i> {{ getVendorItemTotal(vendor, item.item_name) }}
+        </td>
+      </template>
+    </tr>
 
-                <!-- Company detail rows -->
-                <tr>
-                  <td>Payment Terms</td>
-                  <td v-for="vendor in vendorDetails" :key="vendor.vendor_name">
-                    {{ vendor.paymentTerms || '-' }}
-                  </td>
-                </tr>
-                <tr>
-                  <td>GST</td>
-                  <td v-for="vendor in vendorDetails" :key="vendor.vendor_name">
-                    {{ vendor.gst_number || '-' }}
-                  </td>
-                </tr>
-                <tr>
-                  <td>Delivery</td>
-                  <td v-for="vendor in vendorDetails" :key="vendor.vendor_name">
-                    {{ vendor.deliveryTime || '-' }}
-                  </td>
-                </tr>
-                <tr>
-                  <td>Bid Rank</td>
-                  <td v-for="vendor in vendorDetails" :key="vendor.vendor_name">
-                    {{ vendor.rank }}
-                  </td>
-                </tr>
-                <tr>
-                  <td>Transport Charges</td>
-                  <td v-for="vendor in vendorDetails" :key="vendor.vendor_name">
-                    {{ vendor.transport || '-' }}
-                  </td>
-                </tr>
-                <tr>
-                  <td>
+    <!-- Total row -->
+    <tr>
+      <td colspan="3" style=" padding: 10px;"><b>Total</b></td>
+      <td v-for="vendor in vendorDetails"
+          :key="'total-' + vendor.vendor_name"
+          colspan="2"
+          style=" padding: 10px; text-align: right;">
+        <i class="bi bi-currency-rupee"></i> {{ vendor.total_value }}
+      </td>
+    </tr>
 
-                    Attachments</td>
+    <!-- Additional Info Heading -->
+    <tr>
+      <td colspan="100%" style=" padding: 10px; background-color: #f0f0f0; text-align: center;">
+        Additional Information
+      </td>
+    </tr>
 
-                  <td v-for="vendor in vendorDetails" :key="vendor.vendor_name">
-                    <span class="text-primary" style="cursor: pointer" @click="openPreview(vendor.attachments)">
-                      Preview attachment
-                    </span>
-                  </td>
-                </tr>
-                <tr>
-                  <td>Comments</td>
-                  <td v-for="vendor in vendorDetails" :key="vendor.vendor_name">
-                    {{ vendor.remark || '-' }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+    <!-- Info rows -->
+    <tr>
+      <td colspan="3" style=" padding: 10px;">Payment Terms</td>
+      <td v-for="vendor in vendorDetails" :key="'pay-' + vendor.vendor_name" colspan="2" style=" padding: 10px;">
+        {{ vendor.paymentTerms || '-' }}
+      </td>
+    </tr>
+    <tr>
+      <td colspan="3" style=" padding: 10px;">GST</td>
+      <td v-for="vendor in vendorDetails" :key="'gst-' + vendor.vendor_name" colspan="2" style=" padding: 10px;">
+        {{ vendor.gst_number || '-' }}
+      </td>
+    </tr>
+    <tr>
+      <td colspan="3" style=" padding: 10px;">Delivery</td>
+      <td v-for="vendor in vendorDetails" :key="'delivery-' + vendor.vendor_name" colspan="2" style=" padding: 10px;">
+        {{ vendor.deliveryTime || '-' }}
+      </td>
+    </tr>
+    <tr>
+      <td colspan="3" style=" padding: 10px;">Bid Rank</td>
+      <td v-for="vendor in vendorDetails" :key="'rank-' + vendor.vendor_name" colspan="2" style=" padding: 10px;">
+        {{ vendor.rank }}
+        <span v-if="vendor.rank === 'L1'" style="color: green; font-weight: bold; margin-left: 4px;">
+          <i class="bi bi-check-circle-fill"></i>
+        </span>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="3" style=" padding: 10px;">Transport Charges</td>
+      <td v-for="vendor in vendorDetails" :key="'transport-' + vendor.vendor_name" colspan="2" style=" padding: 10px;">
+        {{ vendor.transport || '-' }}
+      </td>
+    </tr>
+    <tr>
+      <td colspan="3" style=" padding: 10px;">Attachments</td>
+      <td v-for="vendor in vendorDetails" :key="'att-' + vendor.vendor_name" colspan="2" style=" padding: 10px;">
+        <span class="text-primary" style="cursor: pointer" @click="openPreview(vendor.attachments)">Preview attachment</span>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="3" style=" padding: 10px;">Comments</td>
+      <td v-for="vendor in vendorDetails" :key="'remark-' + vendor.vendor_name" colspan="2" style=" padding: 10px;">
+        {{ vendor.remark || '-' }}
+      </td>
+    </tr>
+  </tbody>
+</table>
+
 
           </div>
         </div>
@@ -561,7 +588,7 @@
             </div>
           </div>
 
-          <div>
+          <div class="container-fluid ">
             <!-- Workflow Table -->
             <div class="container-fluid mt-4">
               <div class="workflow-container">
@@ -580,7 +607,7 @@
                     <div class="workflow-row ">
                       <div>
                         <i class="bi bi-grip-vertical drag-handle fs-6 me-2"></i>
-                        Level {{ index + 1 }}
+                        Level {{ element.level }}
                       </div>
 
                       <div>
@@ -606,13 +633,13 @@
                       </div>
 
                       <div>
-                        <button class="btn  me-1" @click="editWorkflowRow(index)" v-if="workflowEditIndex !== index">
+                        <button disabled class="btn border-0 not-allowed me-1" @click="editWorkflowRow(index)" v-if="workflowEditIndex !== index">
                           <i class="bi bi-pencil font-13"></i>
                         </button>
-                        <button class="btn btn-sm me-1" v-if="workflowEditIndex === index" @click="stopWorkflowEditing">
+                        <button disabled class="btn btn-sm not-allowed me-1" v-if="workflowEditIndex === index" @click="stopWorkflowEditing">
                           <i class="bi bi-check fs-5"></i>
                         </button>
-                        <button class="btn btn-sm" @click="removeWorkflowRow(index)">
+                        <button disabled class="btn border-0 not-allowed btn-sm" @click="removeWorkflowRow(index)">
                           <i class="bi bi-trash"></i>
                         </button>
                       </div>
@@ -621,11 +648,12 @@
                 </draggable>
 
                 <div class="workflow-footer">
-                  <button class="btn border-0  " @click="addWorkflowRow">
+                  <button class="btn border-0" @click="addWorkflowRow">
                     <i class="bi bi-plus-circle"></i> Add Approver
                   </button>
                 </div>
               </div>
+             
 
 
 
@@ -678,6 +706,7 @@ import draggable from "vuedraggable";
 import Vue3Select from 'vue3-select'
 import 'vue3-select/dist/vue3-select.css';
 
+
 const route = useRoute();
 const router = useRouter()
 const searchItem = ref('');
@@ -686,9 +715,12 @@ const vendorSearch = ref('')
 const filteredVendorOptions = ref([])
 const itemDetails = ref([
 
+  // { id: 1, item_name: 'Cable',quantity: 10,unit_of_measure:'Nos'},
+  // { id: 1, item_name: 'Desktop',quantity: 10,unit_of_measure:'Nos'}  
+
 ]);
 const editingIndex = ref(null);
-
+const employeeData = ref([])
 const vendorDetails = ref([
 
 ]);
@@ -749,21 +781,37 @@ const steps = [
   { label: 'Workflow', icon: 'bi bi-diagram-3' },
 ]
 
+
+onMounted(() => {
+  employeeData.value = JSON.parse(localStorage.getItem('employeeData') || '{}');
+  
+  console.log(employeeData.value,"[[[[[[[[[[[[]]]]]]]]]]]]");
+  fetchingItemsList()
+  window.addEventListener('click', handleClickOutside);
+  fetchingWork()
+
+});
 const currentStep = ref(0)
 
 const goToStep = (index) => {
   currentStep.value = index
 }
 
+// const nextStep = () => {
+//   if (currentStep.value < steps.length - 1) {
+//     currentStep.value++
+//   } else {
+//     // Reset after last step
+//     currentStep.value = 0
+//   }
+// }
 const nextStep = () => {
   if (currentStep.value < steps.length - 1) {
     currentStep.value++
   } else {
-    // Reset after last step
-    currentStep.value = 0
+    submitComparison() // Call your final submit function
   }
 }
-
 const prevStep = () => {
   if (currentStep.value > 0) {
     currentStep.value--
@@ -773,7 +821,7 @@ const previewUrl = ref(null)
 
 function openPreview(url) {
   if (vendorForm.value.attachments.length > 0) {
-    previewUrl.value = vendorForm.value.attachments[0];
+    previewUrl.value = vendorForm.value.attachments;
   } else {
     previewUrl.value = '';
   }
@@ -867,7 +915,60 @@ function addVendorModal() {
 //       toast.error('Failed to submit comparison.');
 //     });
 // };
+// const submitComparison = async () => {
+//   const vendor_details = vendorDetails.value.map(vendor => ({
+//     vendor_name: vendor.vendor_name,
+//     gst_number: vendor.gst_number,
+//     phone_number: vendor.phone_number,
+//     mail_id: vendor.mail_id,
+//     biddle_rank: vendor.rank,
+//     transportation_charges: vendor.transport,
+//     delivery_time: vendor.deliveryTime,
+//     payment_terms: vendor.paymentTerms,
+//     remark: vendor.remark,
+//     total_value: vendor.total_value,
+//     address: vendor.address,
+//     attachments: JSON.stringify(vendor.attachments),
+//     pricing_details: JSON.stringify(vendor.ezy_item_details),
+   
+//   }));
+
+//   const ezy_item_details = vendorDetails.value[0].ezy_item_details.map(item => ({
+//     item_name: item.item_name,
+//     item_unit_of_measure: item.unit_of_measure,
+//     item_quantity: item.quantity
+//   }));
+
+//   // Your main document to save (e.g., Ezy Contract or any other DocType)
+//   const form = {
+//     doctype: "CTO", // Replace with your actual DocType name
+//     vendor_details,
+//     ezy_item_details
+//   };
+
+//   const formData = new FormData();
+//   formData.append("doc", JSON.stringify(form));
+//   formData.append("action", "Save");
+//   console.log(form);
+
+//   try {
+//     const response = await axiosInstance.post(apis.savedocs, formData);
+//     console.log("Comparison saved successfully:", response);
+//     toast.success("Comparison saved successfully!");
+//     request_raising_fn(response.docs[0]);
+//   } catch (error) {
+//     console.error("Error saving comparison:", error);
+//     toast.error("Failed to save comparison.");
+//   }
+// };
 const submitComparison = async () => {
+  // Format: "2025-08-06 17:28"
+  const now = new Date();
+  const requestedOn = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+  const employeeData = JSON.parse(localStorage.getItem('employeeData') || '{}');
+  const requestedBy = employeeData.emp_name || 'Unknown';
+
   const vendor_details = vendorDetails.value.map(vendor => ({
     vendor_name: vendor.vendor_name,
     gst_number: vendor.gst_number,
@@ -880,8 +981,9 @@ const submitComparison = async () => {
     remark: vendor.remark,
     total_value: vendor.total_value,
     address: vendor.address,
-    attachments: vendor.attachments,
-    pricing_details: JSON.stringify(vendor.ezy_item_details)
+    attachments: JSON.stringify(vendor.attachments),
+    pricing_details: JSON.stringify(vendor.ezy_item_details),
+   
   }));
 
   const ezy_item_details = vendorDetails.value[0].ezy_item_details.map(item => ({
@@ -890,16 +992,19 @@ const submitComparison = async () => {
     item_quantity: item.quantity
   }));
 
-  // Your main document to save (e.g., Ezy Contract or any other DocType)
   const form = {
-    doctype: "CTO", // Replace with your actual DocType name
+    doctype: "CTO",
     vendor_details,
-    ezy_item_details
+    ezy_item_details,
+    requested_by: requestedBy,
+    requested_on: requestedOn
   };
 
   const formData = new FormData();
   formData.append("doc", JSON.stringify(form));
   formData.append("action", "Save");
+
+  console.log(form);
 
   try {
     const response = await axiosInstance.post(apis.savedocs, formData);
@@ -925,9 +1030,9 @@ function request_raising_fn(item) {
     reason: "Request Raised",
     url_for_request_id: "",
     files: [],
-    property: 'CRR',
+    property: employeeData.value.company_field,
     ip_address: '',
-    employee_id: '11111',
+    employee_id: employeeData.value.emp_code,
     // be_half_of:item.requester_name,
     // request_for:item.request_for,
   };
@@ -963,8 +1068,21 @@ function updateTotalPrice(item) {
 
 
 
-const editItem = index => {
+// const editItem = index => {
+//   editingIndex.value = index;
+// };
+const itemInputRefs = ref({});
+
+const setItemInputRef = (el, index) => {
+  if (el) {
+    itemInputRefs.value[index] = el;
+  }
+};
+const editItem = async (index) => {
   editingIndex.value = index;
+  // await nextTick();
+  // const input = document.getElementById(`item-name-${index}`);
+  // if (input) input.focus();
 };
 
 const saveItem = () => {
@@ -984,17 +1102,42 @@ const deleteSelectedItems = () => {
 const hasSelectedItems = computed(() =>
   itemDetails.value.some(item => item.selected)
 );
-
-const openItemModal = () => {
+const openItemModal = async () => {
+  // Add the new blank item
   itemDetails.value.push({
-  item_name: "",
-  unit_of_measure: "",
-  quantity: 0,
-  selected: false,
-});
+    item_name: "",
+    unit_of_measure: "",
+    quantity: 0,
+    selected: false,
+  });
 
+  const newIndex = itemDetails.value.length - 1;
 
+  // Trigger edit mode for new row
+  editingIndex.value = newIndex;
+
+  // Wait for DOM to render the new row + input
+  await nextTick();
+
+  // Manually call editItem so input shows
+  // or directly focus the input
+  const input = document.getElementById(`item-name-${newIndex}`);
+  if (input) input.focus();
+
+  // fetchingItemsList();
 };
+
+// const openItemModal = () => {
+//   itemDetails.value.push({
+//   item_name: "",
+//   unit_of_measure: "",
+//   quantity: 0,
+//   selected: false,
+// });
+
+
+// };
+
 // availableItems.value.forEach(item => item.selected = false);
 // const modal = new bootstrap.Modal(document.getElementById('itemModal'));
 // modal.show(); 
@@ -1123,12 +1266,7 @@ const handleClickOutside = (e) => {
   }
 };
 
-onMounted(() => {
-  fetchingItemsList()
-  window.addEventListener('click', handleClickOutside);
-  fetchingWork()
 
-});
 
 onBeforeUnmount(() => {
   window.removeEventListener('click', handleClickOutside);
@@ -1168,7 +1306,7 @@ const vendorForm = ref({
   ezy_item_details: [
     { ...itemDetails }
   ],
-  transport: 'Free delivery', deliveryTime: '', paymentTerms: '', rank: 'L1', remark: '', address: '', attachments: []
+  transport: 'Free delivery', deliveryTime: '', paymentTerms: '', rank: '', remark: '', address: '', attachments: '', total_value:''
 });
 
 function openVendorModal(index) {
@@ -1186,7 +1324,7 @@ function openVendorModal(index) {
     remark: vendor.remark || '',
     total_value: vendor.total_value,
     address: vendor.address || '',
-    attachments: vendor.attachments || [], // Ensure attachments is always an array
+    attachments: vendor.attachments, // Ensure attachments is always an array
     // Load the vendor's own items (if any), else empty array
     ezy_item_details: vendor.ezy_item_details ? JSON.parse(JSON.stringify(vendor.ezy_item_details)) : JSON.parse(JSON.stringify(itemDetails.value))
   };
@@ -1250,7 +1388,8 @@ const uploadFile = async (file) => {
 };
 
 function saveVendorDetails() {
-  calculateVendorTotal(); // Update vendorForm.value.total_value first
+  calculateVendorTotal(); // Update vendorForm.value.total first
+  console.log(vendorForm.value,"[[[]]]");
 
   const vendorData = {
     vendor_name: vendorForm.value.vendor_name,
@@ -1276,7 +1415,7 @@ function saveVendorDetails() {
     };
   } else {
     // New vendor
-    vendorData.rank = vendorDetails.value.length + 1;
+    // vendorData.rank = vendorDetails.value.length + 1;
     vendorDetails.value.push(vendorData);
   }
 
@@ -1354,9 +1493,14 @@ function deleteSelectedChildItems() {
   vendorForm.value.ezy_item_details = vendorForm.value.ezy_item_details.filter(item => !item.selected);
 }
 
+function getVendorItemTotal(vendor, itemName) {
+  const item = vendor.ezy_item_details?.find(i => i.item_name === itemName);
+  return item ? item.totalPrice : '0.00';
+}
 
 function getVendorItemPrice(vendor, itemName) {
-  const item = vendor.ezy_item_details?.find(i => i.name === itemName);
+  console.log(vendor.ezy_item_details);
+  const item = vendor.ezy_item_details?.find(i => i.item_name === itemName);
   return item ? item.unitPrice : '0.00';
 }
 
@@ -1568,8 +1712,9 @@ const getRejectLabel = (designation) => {
 };
 
 function fetchingWork() {
+
   axiosInstance
-    .get(apis.resource + doctypes.wfRoadmap + '/CRR_CTO')
+    .get(apis.resource + doctypes.wfRoadmap + `/${employeeData.value.company_field}_${'CTO'}`)
     .then((response) => {
       WfroleMatrix()
       const wfData = response.data;
@@ -1583,6 +1728,7 @@ function fetchingWork() {
         originalIndex: index,
         on_rejection: level.on_rejection || 0,
         onReject: '', // we'll fill this next
+        level: level.level || 0,
       }));
 
       // Step 2: Resolve onReject using index-based matching
@@ -1595,10 +1741,11 @@ function fetchingWork() {
       });
 
       // Step 3: Final shape expected by your v-model (cleaned structure)
-      workflowApprovalLevels.value = tempLevels.map(({ id, designation, onReject }) => ({
+      workflowApprovalLevels.value = tempLevels.map(({ id, designation, onReject,level }) => ({
         id,
         designation,
         onReject,
+        level
       }));
     })
     .catch((error) => {
@@ -1609,7 +1756,7 @@ function fetchingWork() {
 function WfroleMatrix() {
 
   axiosInstance
-    .get(apis.resource + doctypes.WFRoleMatrix + `/CRR`)
+    .get(apis.resource + doctypes.WFRoleMatrix + `/${employeeData.value.company_field}`)
     .then((res) => {
       if (res.data) {
         designationOptions.value = [
@@ -1637,23 +1784,82 @@ function WfroleMatrix() {
 // }
 
 
-// .table thead tr:first-child th:first-child {
-//   border-top-left-radius: 2px;
-// }
+.item-table thead tr:first-child th:first-child {
+  border-top-left-radius: 2px;
+  border: 1px solid #EEEEEE
+}
 
-// .table thead tr:first-child th:last-child {
-//   border-top-right-radius: 2px;
-// }
+.item-table thead tr:first-child th:last-child {
+  border-top-right-radius: 2px;
+  border: 1px solid #EEEEEE
+}
 
 
-// .table tbody tr:last-child td:first-child {
-//   border-bottom-left-radius: 2px;
-// }
+.item-table tbody tr:last-child td:first-child {
+  border-bottom-left-radius: 2px;
+  border: 1px solid #EEEEEE
+}
 
-// .table tbody tr:last-child td:last-child {
-//   border-bottom-right-radius: 2px;
-// }
+.item-table tbody tr:last-child td:last-child {
+  border-bottom-right-radius: 2px;
+  border: 1px solid #EEEEEE
+}
 
+.vendor-table thead tr:first-child th:first-child {
+  border-top-left-radius: 2px;
+  border: 1px solid #EEEEEE
+}
+
+.vendor-table thead tr:first-child th:last-child {
+  border-top-right-radius: 2px;
+  border: 1px solid #EEEEEE
+}
+
+
+.vendor-table tbody tr:last-child td:first-child {
+  border-bottom-left-radius: 2px;
+  border: 1px solid #EEEEEE
+}
+
+.vendor-table tbody tr:last-child td:last-child {
+  border-bottom-right-radius: 2px;
+  border: 1px solid #EEEEEE
+}
+.vendor-table{
+border: 1px solid #EEEEEE;
+  
+}
+
+.preview_table {
+  border-collapse: separate !important;
+  border-spacing: 0;
+  border-radius: 5px;
+  overflow: hidden;
+  border: 1px solid rgb(197, 197, 197); /* Outer border only */
+}
+
+.preview_table th,
+.preview_table td {
+  border: none; /* Remove double borders */
+  border-right: 1px solid rgb(197, 197, 197);
+  border-bottom: 1px solid rgb(197, 197, 197);
+}
+
+/* Remove the last right/bottom borders so it doesn't double the outer border */
+.preview_table tr th:last-child,
+.preview_table tr td:last-child {
+  border-right: none;
+}
+
+.preview_table tbody tr:last-child td {
+  border-bottom: none;
+}
+.main-accordion{
+  box-shadow: 2px 3px 4px 0px #0000000D;
+
+box-shadow: -2px -3px 14px 0px #0000000D;
+
+}
 /* Optional: Add a subtle box shadow */
 // .table {
 //   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
@@ -1665,11 +1871,47 @@ function WfroleMatrix() {
 //   border-radius: 8px;
 //   overflow: hidden;
 // }
+.item-table{
+border: 1px solid #EEEEEE;
+}
+.item-table thead tr th{
+  background-color: #F7F7F7;
+  border: 1px solid #EEEEEE;
+  padding: 10px;
+  text-align: left;
+  vertical-align: middle;
+  border-top: none;
+  border-bottom: none;
+  }
+  .item-table tbody tr td{
 
+    border: 1px solid #EEEEEE;
+    padding: 10px;
+    text-align: left;
+    vertical-align: middle;
+
+    }
 .main-div{
   height: 80vh;
 
 }
+.vendor-table thead tr th{
+  background-color: #F7F7F7;
+  border: 1px solid #EEEEEE;
+  padding: 10px;
+  text-align: left;
+  vertical-align: middle;
+  border-top: none;
+  border-bottom: none;
+  }
+  .vendor-table tbody tr td{
+
+    border: 1px solid #EEEEEE;
+    padding: 10px;
+    text-align: left;
+    vertical-align: middle;
+
+    }
 .table th {
   color: #666666;
   font-weight: 500;
@@ -1708,6 +1950,7 @@ function WfroleMatrix() {
   /* light background when expanded, adjust as needed */
   // height: 50px; 
   padding: 30px 20px;
+  font-size:14px;
 }
 
 .accordion-button:focus {
@@ -1935,5 +2178,8 @@ function WfroleMatrix() {
   font-size: 14px;
   padding: 8px 16px;
   border-radius: 10px;
+}
+.not-allowed{
+  cursor: not-allowed;
 }
 </style>

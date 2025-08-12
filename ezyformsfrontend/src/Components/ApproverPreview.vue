@@ -236,13 +236,13 @@
 
 
                         <!-- @click="openInNewWindow(field.value)" -->
-                        <template v-else-if="field.fieldtype == 'Attach'">
+                                          <template v-else-if="field.fieldtype == 'Attach'" >
                           <div class=" d-flex gap-1">
+                          
 
 
-
-                            <!-- File Input (if no value or for specific cases) -->
-                            <!-- <input
+                          <!-- File Input (if no value or for specific cases) -->
+                          <!-- <input
                             v-if="(field.fieldname !== 'requestor_signature' && field.label !== 'Requestor Signature' && blockIndex !== 0 && !field.label.includes('Approved By') && !field.label.includes('Acknowledged By') && props.readonlyFor !== 'true') && (field.value && blockIndex !== 0) || !field.value && props.readonlyFor !== 'true' && blockIndex !== 0"
                             :disabled="props.readonlyFor === 'true' || blockIndex === 0 || blockIndex < currentLevel"
                             type="file" :class="blockIndex < currentLevel ? 'd-none' : ''"
@@ -250,16 +250,30 @@
                             :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"  :style="{ minWidth: '100px', maxWidth: '200px' }"
                             class="form-control previewInputHeight  font-10 mb-1 mt-1" multiple
                             @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" /> -->
+                            
+                          <input
+                            v-if="(field.fieldname !== 'requestor_signature' && field.label !== 'Requestor Signature' && blockIndex !== 0 && !field.label.includes('Approved By') && !field.label.includes('Acknowledged By') && props.readonlyFor !== 'true') && (field.value && blockIndex !== 0) || !field.value && props.readonlyFor !== 'true' && blockIndex !== 0"
+                            :disabled="props.readonlyFor === 'true' "
+                            type="file"
+                            :class="blockIndex < currentLevel ? 'd-none' : ''"
+                            accept=".jpeg,.jpg,.png,.pdf,.xlsx,.xls"
+                            :id="'field-' + blockIndex + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                            style="display: none"
+                            class="form-control previewInputHeight font-10 mb-1 mt-1"
+                            multiple
+                            @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+                          />
 
                           <!-- Custom file input label (acts as button) -->
                           <label
                             v-if="(field.fieldname !== 'requestor_signature' && field.label !== 'Requestor Signature' && blockIndex !== 0 && !field.label.includes('Approved By') && !field.label.includes('Acknowledged By') && props.readonlyFor !== 'true') && (field.value && blockIndex !== 0) || !field.value && props.readonlyFor !== 'true' && blockIndex !== 0"
-                            :for="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                            :for="'field-' + blockIndex + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
                             class="btn btn-sm btn-light font-10 mb-1 mt-1"
-                            :class="{ 'disabled': props.readonlyFor === 'true' || blockIndex === 0 || blockIndex < currentLevel }"
+                            :class="{ 'disabled d-none': props.readonlyFor === 'true' || blockIndex === 0 || blockIndex < currentLevel }"
                           >
                             <i class="bi bi-paperclip me-1"></i> Attach
                           </label>
+                          
                           <!-- View Attachments Label -->
                           <!-- ✅ Direct Image Preview for Specific Fields -->
                            <template v-if="field.value && (
@@ -274,40 +288,21 @@
                             </div>
                           </template>
 
-                            <!-- Custom file input label (acts as button) -->
-                            <label
-                              v-if="(field.fieldname !== 'requestor_signature' && field.label !== 'Requestor Signature' && blockIndex !== 0 && !field.label.includes('Approved By') && !field.label.includes('Acknowledged By') && props.readonlyFor !== 'true') && (field.value && blockIndex !== 0) || !field.value && props.readonlyFor !== 'true' && blockIndex !== 0"
-                              :for="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
-                              class="btn btn-sm btn-light font-10 mb-1 mt-1"
-                              :class="{ 'disabled': props.readonlyFor === 'true' || blockIndex === 0 || blockIndex < currentLevel }">
-                              <i class="bi bi-paperclip me-1"></i> Attach
-                            </label>
-                            <!-- View Attachments Label -->
-                            <!-- ✅ Direct Image Preview for Specific Fields -->
-                            <template v-if="field.value && (
-                              field.fieldname === 'requestor_signature' ||
-                              field.label.includes('Approved By') ||
-                              field.label.includes('Acknowledged By')
-                            )">
-                              <div class="d-flex gap-2 flex-wrap ">
-                                <img v-for="(fileUrl, index) in field.value.split(',').map(f => f.trim())" :key="index"
-                                  :src="fileUrl"
-                                  class="img-thumbnail cursor-pointer imge_top border-0 p-0 border-bottom-0"
-                                  style="max-width: 80px; max-height: 25px" @click="previewAttachment(fileUrl)" />
-                              </div>
-                            </template>
-
-                            <!-- ✅ View Attachments Label for All Other Fields -->
-                            <template v-else-if="field.value && field.value.length">
-                              <span class="cursor-pointer font-12 d-inline-flex align-items-center mt-1 gap-1"
-                                @click="openAttachmentList(field.value)">
-                                <span class="text-dark text-decoration-underline font-12 ">View</span>
-                                <span>({{field.value.split(',').filter(f => f.trim()).length}})</span>
-                                <i class="bi bi-paperclip text-secondary "
-                                  style="transform: rotate(-20deg) translateY(-1px); display: inline-block;"></i>
-                              </span>
-                            </template>
-                          </div>
+                          <!-- ✅ View Attachments Label for All Other Fields -->
+                          <template v-else-if="field.value && field.value.length">
+                             <span
+                                  class="cursor-pointer font-12 d-inline-flex align-items-center mt-1 gap-1"
+                                  @click="openAttachmentList(field.value)"
+                                >
+                                  <span class="text-dark text-decoration-underline font-12 ">View</span>
+                                  <span>({{ field.value.split(',').filter(f => f.trim()).length }})</span>
+                                  <i
+                                    class="bi bi-paperclip text-secondary "
+                                    style="transform: rotate(-20deg) translateY(-1px); display: inline-block;"
+                                  ></i>
+                                </span>
+                          </template>
+</div>
                           <!-- ✅ View Attachments Label for All Other Fields -->
                           <!-- <template v-else-if="field.value && field.value.length"> 
                             <template v-if=" 
@@ -345,16 +340,16 @@
 
                                 <div class="modal-body">
                                   <ul class="list-group font-13">
-                                    <li v-for="(url, i) in attachmentList" :key="i"
+                                    <li v-for="(url, i) in attachmentList" :key="i" 
                                       class="list-group-item d-flex justify-content-between align-items-center">
-                                      <!-- <button
+                                       <!-- <button
                                 v-if="hovered[`${field.fieldname}-${i}`] "
                                 @click="removeFile(i, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
                                 class="btn btn-sm btn-light border-0 position-absolute"
                                 style="top: -15px; right: -10px; border-radius: 50%; padding: 0 5px; height: 27px;">
                                 <i class="bi bi-x fs-6"></i>
                               </button> -->
-                                      <!-- && props.readonlyFor !== 'true' && blockIndex !== 0 -->
+                              <!-- && props.readonlyFor !== 'true' && blockIndex !== 0 -->
                                       <span class="d-flex align-items-center gap-2">
                                         <!-- File Type Icon -->
                                         <i v-if="isImageFile(url)"
@@ -372,12 +367,13 @@
                                         <button class="btn btn-sm font-13 btn-light"
                                           @click="previewAttachment(url)">Show</button>
                                         <a :href="url" class="btn font-13 btn-light" download>Download</a>
-
-                                        <button v-if="props.readonlyFor !== 'true' || blockIndex < currentLevel"
-                                          class="btn btn-sm btn-outline-dark rounded-circle"
-                                          @click="removeFile(i, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
-                                          <i class="bi bi-x fs-6"></i>
-                                        </button>
+                                       
+                                       <button v-if="props.readonlyFor !== 'true'  && blockIndex !== 0 && blockIndex <= currentLevel"
+                                                class="btn btn-sm btn-outline-dark rounded-circle"
+                                                @click="removeFile(i, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+                                              >
+                                                <i class="bi bi-x fs-6"></i>
+                                              </button>
                                       </div>
                                     </li>
                                   </ul>
@@ -416,6 +412,7 @@
 
 
                         </template>
+
 
 
                         <!-- Modal -->
@@ -561,7 +558,7 @@
 
                           <template v-else>
                             <component
-                              v-if="field.fieldtype !== 'Text' && field.fieldtype !== 'Int' && field.fieldtype !== 'Select' && blockIndex !== 0"
+                              v-if="field.fieldtype !== 'Text' && field.fieldtype !== 'Int' && field.fieldtype !== 'Select' && blockIndex !== 0"  :maxlength="field.fieldtype === 'Phone' ? '10' : '140'"
                               :style="{
                                 width: Math.min(100 + (field.value?.length * 2), 600) + 'px'
                               }" :disabled="blockIndex < currentLevel || props.readonlyFor === 'true' || field.label === 'Approver'"
@@ -592,7 +589,7 @@
                       <span v-html="field.description.replace(/\n/g, '<br>')"></span>
                     </div>
 
-                    <div v-if="field.fieldtype === 'Table' && field.options !== 'Ezy Item Details'" class="field-width">
+                    <div v-if="field.fieldtype === 'Table' && field.options !== 'Ezy Item Details' && field.options !== 'ezy item details'" class="field-width">
                       <div v-if="props.childHeaders && Object.keys(props.childHeaders).length">
                         <div v-for="(headers, tableName) in props.childHeaders" :key="tableName">
                           <!-- || tableName === field.options -->
@@ -741,109 +738,226 @@
 
                             <!-- Table layout -->
                             <div v-else class=" ">
-                              <div v-if="tableName === 'Vendor Details'">
+                              
+                              <div  v-if="tableName === 'vendor details' || tableName === 'Vendor Details'">
                                 <div>
                                   <div class=" d-flex justify-content-between align-items-center">
                                     <span class="font-13 fw-bold tablename">{{ field.label.replace(/_/g, " ") }}</span>
 
                                   </div>
+                                  <table class="bg-white" style="width: 100%; border-collapse: collapse; border: 1px solid black; margin-top: 5px;">
+    <!-- HEADERS -->
+    <thead class="tr_background ">
+      <tr style="background-color: #fff7d6;">
+        <th style="border: 1px solid black; padding: 8px;">Sr</th>
+        <th style="border: 1px solid black; padding: 8px;">Item Name</th>
+        <th style="border: 1px solid black; padding: 8px;">UOM</th>
+        <th style="border: 1px solid black; padding: 8px;">Qty</th>
+        <th
+          v-for="vendor in props.childData.vendor_details"
+          :key="'vendor-head-' + vendor.name"
+          colspan="2"
+          style="border: 1px solid black; padding: 8px; text-align: center;"
+        >
+          {{ vendor.vendor_name }}
+        </th>
+      </tr>
+      <tr style="background-color: #fff7d6;">
+        <th colspan="4" style="border: 1px solid black; padding: 8px;"></th>
+        <template v-for="vendor in props.childData.vendor_details" :key="'vendor-labels-' + vendor.name">
+          <th style="border: 1px solid black; padding: 8px; text-align: center;">Rate</th>
+          <th style="border: 1px solid black; padding: 8px; text-align: center;">Total</th>
+        </template>
+      </tr>
+    </thead>
 
-                                  <table class="table table-bordered">
+    <!-- BODY -->
+    <tbody>
+      <!-- ITEM ROWS -->
+      <tr v-for="(item, index) in props.childData.ezy_item_details" :key="'item-' + item.name">
+        <td style="border: 1px solid black; padding: 8px; text-align: center;">{{ index + 1 }}</td>
+        <td style="border: 1px solid black; padding: 8px;">{{ item.item_name }}</td>
+        <td style="border: 1px solid black; padding: 8px; text-align: center;">{{ item.item_unit_of_measure }}</td>
+        <td style="border: 1px solid black; padding: 8px; text-align: center;">{{ item.item_quantity }}</td>
 
-                                    <thead class="table-light">
-                                      <tr>
-                                        <th>Item name</th>
-                                        <th v-for="vendor in props.childData.vendor_details" :key="vendor.name">
-                                          {{ vendor.vendor_name }} <span class="text-muted fw-normal">(rate/unit)</span>
-                                        </th>
-                                      </tr>
-                                    </thead>
+        <template v-for="vendor in props.childData.vendor_details" :key="'pricing-' + vendor.name + '-' + item.item_name">
+          <td style="border: 1px solid black; padding: 8px; text-align: right;">
+            <i class="bi bi-currency-rupee"></i>{{ getPricing(vendor, item.item_name)?.unitPrice ?  getPricing(vendor, item.item_name).unitPrice : 'N/A' }}
+          </td>
+          <td style="border: 1px solid black; padding: 8px; text-align: right;">
+            <i class="bi bi-currency-rupee"></i>{{ getPricing(vendor, item.item_name)?.totalPrice ?  getPricing(vendor, item.item_name).totalPrice : 'N/A' }}
+          </td>
+        </template>
+      </tr>
 
-                                    <tbody>
-                                      <!-- Item rows -->
-                                      <tr v-for="item in props.childData.ezy_item_details" :key="item.name">
-                                        <td>
-                                          {{ item.item_name }}
-                                          <span class="badge bg-secondary">{{ item.item_quantity }} {{
-                                            item.item_unit_of_measure }}</span>
-                                        </td>
-                                        <td v-for="vendor in props.childData.vendor_details" :key="vendor.name">
-                                          ₹ {{
-                                            JSON.parse(vendor.pricing_details).find(p => p.item_name ===
-                                              item.item_name)?.unitPrice || '-'
-                                          }}
-                                        </td>
-                                      </tr>
+      <!-- TOTAL ROW -->
+      <tr>
+        <td colspan="4" style="border: 1px solid black; padding: 8px;"><strong>Total</strong></td>
+        <td
+          v-for="vendor in props.childData.vendor_details"
+          :key="'total-' + vendor.name"
+          colspan="2"
+          style="border: 1px solid black; padding: 8px; text-align: right;"
+        >
+          <i class="bi bi-currency-rupee"></i>{{ vendor.total_value || '-' }}
+        </td>
+      </tr>
 
-                                      <!-- Total row -->
-                                      <tr>
-                                        <td><strong>Total</strong></td>
-                                        <td v-for="vendor in props.childData.vendor_details" :key="vendor.name">
-                                          <strong>
-                                            ₹ {{
-                                              JSON.parse(vendor.pricing_details)
-                                                .reduce((sum, i) => sum + parseFloat(i.totalPrice), 0)
-                                                .toFixed(2)
-                                            }}
-                                          </strong>
-                                        </td>
-                                      </tr>
+      <!-- ADDITIONAL INFO HEAD -->
+      <tr>
+        <td colspan="100%" style="border: 1px solid black; padding: 8px; background-color: #f0f0f0;">
+          <strong>Additional Information</strong>
+        </td>
+      </tr>
 
-                                      <!-- Separator -->
-                                      <tr>
-                                        <td colspan="100%" class="bg-light  text-start text-muted">Additional Information</td>
-                                      </tr>
-
-                                      <!-- Company Info -->
-                                      <tr>
-                                        <td>Payment Terms</td>
-                                        <td v-for="vendor in props.childData.vendor_details" :key="vendor.name">
-                                          {{ vendor.payment_terms || '-' }}
-                                        </td>
-                                      </tr>
-                                      <tr>
-                                        <td>GST</td>
-                                        <td v-for="vendor in props.childData.vendor_details" :key="vendor.name">
-                                          {{ vendor.gst_number || '-' }}
-                                        </td>
-                                      </tr>
-                                      <tr>
-                                        <td>Delivery</td>
-                                        <td v-for="vendor in props.childData.vendor_details" :key="vendor.name">
-                                          {{ vendor.delivery_time || '-' }}
-                                        </td>
-                                      </tr>
-                                      <tr>
-                                        <td>Biddle rank</td>
-                                        <td v-for="vendor in props.childData.vendor_details" :key="vendor.name">
-                                          {{ vendor.biddle_rank || '-' }}<span v-if="vendor.biddle_rank  === 1" class="badge bg-success font-12 "> <i class=" bi bi-check-circle-fill"></i></span>
-                                        </td>
-                                      </tr>
-                                      <tr>
-                                        <td>Transport Charges</td>
-                                        <td v-for="vendor in props.childData.vendor_details" :key="vendor.name">
-                                          {{ vendor.transportation_charges || '-' }}
-                                        </td>
-                                      </tr>
-                                      <tr>
-                                        <td>Attachments</td>
-                                        <td v-for="vendor in props.childData.vendor_details" :key="vendor.name">
-                                          <span v-if="vendor.attachmentUrl" class="text-primary"
-                                            style="cursor: pointer">
-                                            Preview attachment
-                                          </span>
-                                        </td>
-                                      </tr>
-                                      <tr>
-                                        <td>Comments</td>
-                                        <td v-for="vendor in props.childData.vendor_details" :key="vendor.name">
-                                          {{ vendor.remark || '-' }}
-                                        </td>
-                                      </tr>
-                                    </tbody>
-                                  </table>
+      <!-- TERMS -->
+      <tr>
+        <td colspan="4" style="border: 1px solid black; padding: 8px;">GST</td>
+        <td
+          v-for="vendor in props.childData.vendor_details"
+          :key="'gst-' + vendor.name"
+          colspan="2"
+          style="border: 1px solid black; padding: 8px; text-align:center;"
+        >
+          {{ vendor.gst_number || '-' }}
+        </td>
+      </tr>
+      <tr>
+        <td colspan="4" style="border: 1px solid black; padding: 8px;">Delivery</td>
+        <td
+          v-for="vendor in props.childData.vendor_details"
+          :key="'delivery-' + vendor.name"
+          colspan="2"
+          style="border: 1px solid black; padding: 8px; text-align:center;"
+        >
+          {{ vendor.delivery_time || '-' }}
+        </td>
+      </tr>
+      <tr>
+        <td colspan="4" style="border: 1px solid black; padding: 8px;">Payment Terms</td>
+        <td
+          v-for="vendor in props.childData.vendor_details"
+          :key="'payment-' + vendor.name"
+          colspan="2"
+          style="border: 1px solid black; padding: 8px; text-align:center;"
+        >
+          {{ vendor.payment_terms || '-' }}
+        </td>
+      </tr>
+      <tr>
+        <td colspan="4" style="border: 1px solid black; padding: 8px;">Bidder Rank</td>
+        <td
+          v-for="vendor in props.childData.vendor_details"
+          :key="'rank-' + vendor.name"
+          colspan="2"
+          style="border: 1px solid black; padding: 8px; text-align:center;"
+        >
+          {{ vendor.biddle_rank || '-' }}
+          <!-- <span v-if="vendor.biddle_rank === 'L1'" style="color: green; font-weight: bold; margin-left: 4px;">
+            ✔
+          </span> -->
+          <span v-if="vendor.biddle_rank === 'L1'" style="color: green; font-weight: bold; margin-left: 4px;">
+            <i class=" bi bi-check-circle-fill"></i>
+          </span>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="4" style="border: 1px solid black; padding: 8px;">Transport Charges</td>
+        <td
+          v-for="vendor in props.childData.vendor_details"
+          :key="'transport-' + vendor.name"
+          colspan="2"
+          style="border: 1px solid black; padding: 8px; text-align:center;"
+        >
+          {{ vendor.transportation_charges || '-' }}
+        </td>
+      </tr>
+      <tr>
+        <td colspan="4" style="border: 1px solid black; padding: 8px;">Attachments</td>
+        <td
+          v-for="(vendor, index) in props.childData.vendor_details"
+          :key="'attachments-' + vendor.name"
+          colspan="2"
+          style="border: 1px solid black; padding: 8px; text-align:center;"
+        >
+          <span
+            v-if="vendor.attachments"
+            class="text-primary"
+            style="cursor: pointer;"
+            @click="openAttachmentModal(vendor.attachments, index)"
+          >
+            Preview attachment
+          </span>
+          <span v-else>No attachments</span>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="4" style="border: 1px solid black; padding: 8px;">Comments</td>
+        <td
+          v-for="vendor in props.childData.vendor_details"
+          :key="'remark-' + vendor.name"
+          colspan="2"
+          style="border: 1px solid black; padding: 8px; text-align:center;"
+        >
+          {{ vendor.remark || '-' }}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+                                   
                                 </div>
 
+                                  <!-- Attachment List Modal -->
+                                  <div class="modal fade" id="attachmentModal" tabindex="-1" aria-labelledby="attachmentModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-lg">
+                                      <div class="modal-content">
+                                        <div class="modal-header">
+                                          <h5 class="modal-title">Attachments</h5>
+                                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">&times;</button>
+                                        </div>
+                                        <div class="modal-body">
+                                          <ul class="list-group">
+                                            <li v-for="(file, index) in selectedAttachments" :key="index" class="list-group-item font-12 d-flex justify-content-between align-items-center">
+                                              <span class="d-flex align-items-center gap-2">
+                                                                          <!-- File Type Icon -->
+                                                                          <i v-if="isImageFile(file)"
+                                                                            class="bi bi-file-earmark-image text-secondary fs-5"></i>
+                                                                          <i v-else-if="isPdfFile(file)"
+                                                                            class="bi bi-file-earmark-pdf text-danger fs-5"></i>
+                                                                          <i v-else-if="isExcelFile(file)"
+                                                                            class="bi bi-file-earmark-spreadsheet text-success fs-5"></i>
+                                                                          <i v-else class="bi bi-file-earmark fs-5"></i>
+
+                                                                          <!-- File Name -->
+                                                                          {{ getFilename(file) }}
+                                                                        </span>
+                                              
+                                              <div>
+                                                <button class="btn btn-sm btn-light me-2" @click="viewAttachment(file)">View</button>
+                                                <a :href="file" download class="btn btn-sm btn-light">Download</a>
+                                              </div>
+                                            </li>
+                                          </ul>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <!-- Preview Modal -->
+                                  <div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-xl">
+                                      <div class="modal-content">
+                                        <div class="modal-header">
+                                          <h5 class="modal-title">Attachment Preview</h5>
+                                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">&times;</button>
+                                        </div>
+                                        <div class="modal-body text-center">
+                                          <img :src="previewUrl" class="img-fluid" alt="Preview" v-if="isImageVendor(previewUrl)" />
+                                          <iframe :src="previewUrl" width="100%" height="600px" v-else></iframe>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
 
 
                               </div>
@@ -1401,6 +1515,17 @@ const handleFileUpload = async (event, row, fieldname) => {
   event.target.value = null;
 };
 
+// const getMaxLength = (field) => {
+//     if (field.fieldtype?.toLowerCase() === 'phone') return 10;
+
+//     return 140;
+// };
+
+
+const getMaxLength = (field) => {
+    if (field.fieldtype?.toLowerCase() === 'phone') return 10;
+    return 140;
+};
 
 
 const tableFileUpload = (file, row, fieldname) => {
@@ -1482,7 +1607,14 @@ function setModalRef(el, field) {
     });
   }
 }
-
+function getPricing(vendor, itemName) {
+  try {
+    const parsed = JSON.parse(vendor.pricing_details || '[]');
+    return parsed.find(p => p.item_name === itemName);
+  } catch (e) {
+    return null;
+  }
+}
 
 const ModalData = ref([])
 function getData(selectedFieldValue, selectedfieldOption) {
@@ -2175,12 +2307,72 @@ const ChildpreviewFile = (fileUrl) => {
 const isImage = (url) => /\.(jpeg|jpg|png)$/i.test(url)
 const isPDF = (url) => /\.pdf$/i.test(url)
 
+const selectedAttachments = ref([])
+
+
+const openAttachmentModal = (attachmentsStr, index) => {
+  try {
+    const parsed = JSON.parse(attachmentsStr)
+    selectedAttachments.value = parsed
+    const modal = new bootstrap.Modal(document.getElementById('attachmentModal'))
+    modal.show()
+  } catch (err) {
+    console.error('Invalid attachments JSON:', err)
+  }
+}
+
+const viewAttachment = (file) => {
+  previewUrl.value = file
+  const preview = new bootstrap.Modal(document.getElementById('previewModal'))
+  preview.show()
+}
+
+const isImageVendor = (url) => {
+  return /\.(jpeg|jpg|gif|png|svg|webp)$/i.test(url)
+}
 </script>
 
 <style lang="scss" scoped>
 // .imge_top{
 //       position: absolute; top: -4px;
 // }
+.tr_background th{
+background-color: #fff7d6 !important;
+}
+.vendor_table thead tr:first-child th:first-child {
+  border-top-left-radius: 2px !important;
+  border: 1px solid #EEEEEE !important;
+}
+
+.vendor_table thead tr:first-child th:last-child {
+  border-top-right-radius: 2px !important;
+  border: 1px solid #EEEEEE !important;
+}
+
+
+.vendor_table tbody tr:last-child td:first-child {
+  border-bottom-left-radius: 2px !important;
+  border: 1px solid #EEEEEE !important;
+}
+
+.vendor_table tbody tr:last-child td:last-child {
+  border-bottom-right-radius: 2px !important;
+  border: 1px solid #EEEEEE !important;
+}
+.vendor_table {
+border: 1px solid #EEEEEE !important;
+  
+}
+.vendor_table th{
+  font-weight: 500;
+}
+.item_badge{
+  background-color: #e3e3e3;
+  color: #000;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 15px;
+}
 .btn-close {
   background: transparent;
   border: none;
@@ -2273,7 +2465,7 @@ table {
 }
 
 th {
-  background-color: #f2f2f2 !important;
+  background-color: #f2f2f2;
   text-align: left;
   color: #999999;
   font-size: 12px;

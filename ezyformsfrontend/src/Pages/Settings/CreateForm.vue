@@ -13,7 +13,7 @@
         </div>
         <div v-if="is_admin == 1" class="d-flex align-items-center gap-2">
           <div class="d-flex align-items-center gap-2">
-            <button class="btn btn-dark font-12 h-auto" @click="toWorkOrder">Work order</button>
+            <!-- <button class="btn btn-dark font-12 h-auto" @click="toWorkOrder">Work order</button>  -->
             <ButtonComp class="buttoncomp" @click="formCreation()" name="Create Form"></ButtonComp>
           </div>
         </div>
@@ -190,7 +190,7 @@ function formCreation(item = null) {
 
 function toWorkOrder (){
   router.push({
-    name: "WorkOrderDetails",
+    name: "vendorcomparison",
  
       });
 } 
@@ -360,9 +360,9 @@ function actionCreated(rowData, actionEvent) {
       if (hasAccess && rowData.enable === 1) {
         if(rowData.form_name === 'Contract One'){
             router.push({
-    name: "WorkOrderDetails",
+          name: "vendorcomparison",
  
-      });
+          });
 
         } else{
           router.push({

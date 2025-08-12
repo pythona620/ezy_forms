@@ -208,10 +208,10 @@
                         @click="downloadPdf"><i class="bi bi-download px-2 fw-bold"></i>Download
                       </button>
                     </div>
-                    <!-- <button type="button" class="btn btn-outline-light font-12  CreateDepartments "
+                    <button type="button" class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto "
                       data-bs-toggle="modal" data-bs-target="#pdfView" @click="viewasPdfView">
                       Preview
-                    </button> -->
+                    </button> 
 
                   </div>
                 </div>
@@ -1706,7 +1706,7 @@ watch(activityData, (newVal) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1;
+  z-index: 0;
   margin-top: 3px;
 }
 
