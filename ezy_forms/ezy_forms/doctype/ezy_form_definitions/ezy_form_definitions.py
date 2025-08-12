@@ -528,7 +528,7 @@ def ezy_doctype_permission():
 	"""
 	try:
 		# Hardcoded default permissions
-		employee_doctypes_permi = ['DocType', 'User', 'Role', 'Data Import', 'Data Export','System Settings','Website Settings','Email Account','Version','Activity Log']
+		employee_doctypes_permi = ['DocType', 'User', 'Role', 'Data Import', 'Data Export','System Settings','Website Settings','Email Account','Version','Activity Log','Notification Settings']
 		guest_permi = ['Ezy Departments', 'WF Roles', 'Notification Settings','Acknowledgement']
 
 		# Fetch custom doctypes from specified modules

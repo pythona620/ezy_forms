@@ -11,6 +11,7 @@
   "enable_on",
   "profile_image",
   "company_field",
+  "responsible_units",
   "emp_code",
   "is_web_form",
   "is_hod",
@@ -133,10 +134,11 @@
    "label": "enable"
   },
   {
-    "fieldname": "is_admin",
-    "fieldtype": "Check",
-    "label": "Is Admin"
-   },
+   "default": "0",
+   "fieldname": "is_admin",
+   "fieldtype": "Check",
+   "label": "Is Admin"
+  },
   {
    "default": "0",
    "fieldname": "is_web_form",
@@ -169,6 +171,12 @@
    "fieldname": "remarks",
    "fieldtype": "Data",
    "label": "Remarks"
+  },
+  {
+   "fieldname": "responsible_units",
+   "fieldtype": "Table MultiSelect",
+   "label": "Responsible Units",
+   "options": "Responsible Unit"
   }
  ],
  "index_web_pages_for_search": 1,
@@ -180,7 +188,7 @@
  "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
- {
+  {
    "create": 1,
    "delete": 1,
    "email": 1,
