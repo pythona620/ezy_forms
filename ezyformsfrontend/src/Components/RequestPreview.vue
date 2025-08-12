@@ -31,7 +31,7 @@
                                                     fieldIndex
                                                     ">
                                                     <span class="font-12"
-                                                        :class="field.fieldtype === 'Small Text' ? 'fw-bold' : ''">{{
+                                                        >{{
                                                             field.label }}</span>
                                                     <span class="ms-1 text-danger">{{
                                                         field.reqd === 1 ? "*" : ""
@@ -1079,20 +1079,25 @@ const isExcelFile = (url) => {
   return url.match(/\.(xlsx|xls)$/i);
 };
 
-// const removeFile = (index, field) => {
-//   const files = field.value.split(',').map(f => f.trim());
-//   files.splice(index, 1);
-//   field.value = files.join(',');
-// };
 const isImageFile = (url) => {
     return /\.(jpg|jpeg|png|gif|png)$/i.test(url)
 }
+const removeAttach=ref([]);
 
 const removeFile = (index, field) => {
     const files = field.value.split(',').map(f => f.trim())
-    files.splice(index, 1)
-    field.value = files.join(', ')
-    emit('updateField', field)
+  const removedUrl = files.splice(index, 1)[0] // removed file URL
+
+  // Find the matching file from uploadedFiles based on removed file_url
+  const match = uploadedFiles.value.find(
+    file => file.respone?.file_url === removedUrl
+  )
+  if (match && match.respone?.name) {
+    removeAttach.value.push(match.respone.name)
+  }
+  field.value = files.join(', ')
+  emit('updateField', field)
+  emit("updateRemovedFiles",removeAttach.value);
 }
 // console.log(tableRows);
 // Format as 'YYYY-MM-DDTHH:MM'
@@ -2080,6 +2085,7 @@ watch(
 const generateRandomNumber = () => {
     return Math.floor(Math.random() * 1000000);
 };
+const uploadedFiles = ref([]);
 
 
 const uploadFile = (file, field, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) => {
@@ -2095,11 +2101,13 @@ const uploadFile = (file, field, blockIndex, sectionIndex, rowIndex, columnIndex
         .post(apis.uploadfile, formData)
         .then((res) => {
             if (res.message && res.message.file_url) {
+                const respone=res.message;
                 if (field["value"]) {
                     field["value"] += `, ${res.message.file_url}`;
                 } else {
                     field["value"] = res.message.file_url;
                 }
+                uploadedFiles.value.push({respone});
 
                 // ✅ Emit updated value
                 emit("updateField", field);

@@ -292,7 +292,7 @@
                           <template v-else-if="field.value && field.value.length">
                              <span
                                   class="cursor-pointer font-12 d-inline-flex align-items-center mt-1 gap-1"
-                                  @click="openAttachmentList(field.value)"
+                                  @click="openAttachmentList(field.value,blockIndex)"
                                 >
                                   <span class="text-dark text-decoration-underline font-12 ">View</span>
                                   <span>({{ field.value.split(',').filter(f => f.trim()).length }})</span>
@@ -367,11 +367,9 @@
                                         <button class="btn btn-sm font-13 btn-light"
                                           @click="previewAttachment(url)">Show</button>
                                         <a :href="url" class="btn font-13 btn-light" download>Download</a>
-                                       
-                                       <button v-if="props.readonlyFor !== 'true'  && blockIndex !== 0 && blockIndex <= currentLevel"
-                                                class="btn btn-sm btn-outline-dark rounded-circle"
-                                                @click="removeFile(i, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
-                                              >
+                                        
+                                       <button v-if="props.readonlyFor === 'true' || currentBlockIndex !== 0 || currentBlockIndex < currentLevel" :class="{ 'disabled d-none': props.readonlyFor === 'true' || currentBlockIndex === 0 || currentBlockIndex < currentLevel }"
+                                  class="btn btn-sm btn-outline-dark rounded-circle" @click="removeFile(i, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
                                                 <i class="bi bi-x fs-6"></i>
                                               </button>
                                       </div>
@@ -2192,14 +2190,17 @@ const showListModal = ref(false)
 const showPreviewModal = ref(false)
 
 const attachmentList = ref([])
+const currentBlockIndex = ref(null);
 
-function openAttachmentList(value) {
+function openAttachmentList(value ,blockIndex) {
   attachmentList.value = value.split(',').map(f => f.trim())
-  showListModal.value = true
+  showListModal.value = true;
+  currentBlockIndex.value = blockIndex;
 }
 
 function closeAttachmentList() {
-  showListModal.value = false
+  showListModal.value = false;
+  currentBlockIndex.value = null;
 }
 
 function previewAttachment(url) {
