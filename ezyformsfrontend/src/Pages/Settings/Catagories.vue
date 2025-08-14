@@ -379,7 +379,7 @@ function inLineFiltersData(searchedData) {
 
 function deptData(data) {
     const filters = [
-        // ["business_unit", "like", `%${CreateDepartments.value.business_unit}%`]
+        // ["business_unit", "=", `${CreateDepartments.value.business_unit}`]
     ];
     if (data) {
         filters.push(data)

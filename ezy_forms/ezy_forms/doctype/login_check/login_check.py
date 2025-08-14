@@ -70,6 +70,7 @@ def check_is_first_time_or_not(user_id, acknowledgement=None, is_signature=None)
         login_doc["is_signature"] = 1 if frappe.get_value("Ezy Employee", user_id, "signature") else 0
         login_doc["login_acknowledge"] = frappe.get_value("Ezy Business Unit",frappe.get_value("Ezy Employee", user_id, "company_field"),"is_acknowledge")
         login_doc["is_acknowledge"] = 1 if frappe.get_value("Ezy Employee", user_id, "acknowledgement") else 0
+        login_doc["subscription_end_date"] = frappe.get_value("Ezy Business Unit",frappe.get_value("Ezy Employee", user_id, "company_field"),"subscription_end_date")
         login_doc["enable_check"] = 1 if frappe.get_value("User", {"email": user_id}, "enabled") else 0
         login_doc["enable_two_factor_auth"] = frappe.db.get_value("System Settings", "System Settings", "enable_two_factor_auth")
 

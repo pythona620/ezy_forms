@@ -328,14 +328,9 @@ function logout() {
     // localStorage.removeItem('employeeData');
     axiosInstance.post(apis.logout)
         .then((response) => {
-            localStorage.removeItem('UserName');
-            localStorage.removeItem('employeeData');
-            localStorage.removeItem('Bu');
-            localStorage.removeItem('USERROLE');
-            sessionStorage.removeItem('UserName');
-            sessionStorage.removeItem('employeeData');
-            sessionStorage.removeItem('Bu');
-            sessionStorage.removeItem('USERROLE');
+            const res=response;
+            sessionStorage.clear();
+            localStorage.clear();
             router.push({ path: '/' }).then(() => {
             });
         })
@@ -466,7 +461,7 @@ function passwordChange() {
 }
 const ezyForms = () => {
     const queryParams = {
-        fields: JSON.stringify(["*"]),
+        fields: JSON.stringify(["name","bu_code"]),
     };
 
     axiosInstance.get(apis.resource + doctypes.wfSettingEzyForms, {
@@ -524,7 +519,7 @@ function gettingDepartmentNames() {
 
 function deptData(value = null) {
     const filters = [
-        ["business_unit", "like", `%${business_unit.value}%`]
+        ["business_unit", "=", `${business_unit.value}`]
     ];
     const queryParams = {
         fields: JSON.stringify(["*"]),

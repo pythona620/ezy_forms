@@ -23,6 +23,7 @@
                             <span><i class="bi bi-envelope-fill me-1"></i>{{ userData.emp_mail_id || "-" }}</span>
                             <span><i class="bi bi-telephone-fill me-1"></i>{{ userData.emp_phone || "-" }}</span>
                             <span style="font-size:13px"><i class="bi bi-briefcase-fill me-1"></i>{{ userData.designation || "-" }}</span>
+                            <span style="font-size:13px"><i class="bi bi-building-fill me-1"></i>{{ userData.company_field || "-" }}</span>
                         </div>
 
                         <!-- Bottom Info -->

@@ -579,7 +579,7 @@ function clearFrom() {
 
 }
 function deptData(value = null) {
-  const filters = [["business_unit", "like", `%${business_unit.value}%`]];
+  const filters = [["business_unit", "=", `${business_unit.value}`]];
   const queryParams = {
     fields: JSON.stringify(["*"]),
     filters: JSON.stringify(filters),

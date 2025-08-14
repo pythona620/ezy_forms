@@ -116,9 +116,6 @@ import "@vueform/multiselect/themes/default.css";
 const businessUnit = computed(() => {
     return EzyBusinessUnit.value;
 });
-// onMounted(() => {
-//     ezyForms();
-// })
 const totalRecords = ref(0);
 
 const tableData = ref([]);
@@ -211,7 +208,7 @@ watch(
         // console.log("teDepartments",CreateDepartments.value.business_unit);
         if (newVal.length) {
 
-            activitylog()
+            activityData()
         }
     },
     { immediate: true }
@@ -241,6 +238,28 @@ function inLineFiltersData(searchedData) {
             activitylog();
         }
     }, 500); // Adjust debounce delay as needed (e.g., 500ms)
+}
+
+const activityDoctypes=ref([])
+
+function activityData() {
+    const queryParams = {
+        fields: JSON.stringify(["*"]),
+        limit_page_length: "none"
+    };
+
+    axiosInstance
+        .get(apis.resource + doctypes.EzyActivityLog, { params: queryParams })
+        .then((res) => {
+            if (res?.data?.length) {
+                activityDoctypes.value = res.data[0].activate_log
+                console.log(activityDoctypes.value);
+                activitylog();
+            }
+        })
+        .catch((error) => {
+            console.error("Error fetching department data:", error);
+        });
 }
 
 
@@ -274,7 +293,7 @@ function activitylog(data) {
     if (data) {
         filterObj.value.filters.push(...data)
     }
-    filterObj.value.filters.push(["ref_doctype", "in", ["Ezy Employee", "Ezy Departments","WF Roles"]]);
+    filterObj.value.filters.push(["ref_doctype", "in", activityDoctypes.value]);
 
     const queryParams = {
         fields: JSON.stringify(["*"]),

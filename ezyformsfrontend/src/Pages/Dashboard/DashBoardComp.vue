@@ -1,6 +1,11 @@
 <template>
     <div class="container-fluid">
         <div class="row mt-3">
+            <div v-if="showSubscriptionAlert" class="subscription-div font-13 col-12">
+                    <i class="bi bi-exclamation-triangle text-danger me-2 fs-5"></i> <span class="d-flex mt-1">
+                        Your subscription will expire in <span class="text-danger mx-2 text-underline">{{ remainingDaysCount }}</span>
+                            days, on <span class="text-danger mx-2 text-underline">{{ subscriptionEndDateStr }}</span></span>
+            </div>
             <!-- Loop over the dynamic chartsData array -->
             <div v-for="(chart, index) in chartsData" :key="index" class="col-6">
                 <div class="chart-wrapper">
@@ -73,6 +78,10 @@ const filterObj = ref({ limitPageLength: 20, limit_start: 0, filters: [] });
 const docTypeName = ref([]);
 const totalRecords = ref(0);
 const statusOptions = ref([]);
+const subEndDate=ref("");
+const remainingDaysCount = ref(0);
+const subscriptionEndDateStr = ref("");
+const showSubscriptionAlert = ref(false);
 
 const tableheaders = ref([
   { th: "Request ID", td_key: "name" },
@@ -204,6 +213,22 @@ async function fetchData() {
 // Google Charts loader
 onMounted(() => {
     fetchData()
+    subEndDate.value = (localStorage.getItem("subEndDate"));
+    if (subEndDate.value) {
+    const today = new Date();
+    const endDate = new Date(subEndDate.value);
+
+    const diffTime = endDate - today;
+    remainingDaysCount.value = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    subscriptionEndDateStr.value = subEndDate.value;
+
+    // Show alert only if subscription ends in 30 days or less
+    if (remainingDaysCount.value <= 30 && remainingDaysCount.value > 0) {
+      showSubscriptionAlert.value = true;
+    }
+  }
+
     // Load Google Charts script
     // const script = document.createElement('script')
     // script.src = 'https://www.gstatic.com/charts/loader.js'
@@ -286,7 +311,7 @@ function receivedForMe(data) {
   const filters = [
     // assigned_to_users
     ["assigned_to_users", "like", `%${EmpRequestdesignation?.designation}%`],
-    ["property", "like", `%${newBusinessUnit.value.business_unit}%`],
+    ["property", "=", `${newBusinessUnit.value.business_unit}`],
     ["status", "!=", "Request Cancelled"],
     
     ["name","in", viewlist.value],
@@ -542,5 +567,14 @@ h3 {
 .label {
     font-size: 13px;
     color: #333;
+}
+.subscription-div {
+    background-color: #f3ea6b;
+    padding: 8px 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
 }
 </style>

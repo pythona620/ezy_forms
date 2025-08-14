@@ -30,7 +30,7 @@ export const doctypes = {
   acknowledgement:'Acknowledgement',
   emailTemplate:'Email Template',
   EzyInsights:"Ezy Insights",
-  
+  EzyActivityLog:"Ezy Dynamic Activate Log"
   
 
 };

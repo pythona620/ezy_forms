@@ -212,7 +212,7 @@ const responseData = ref([]);
 const tableheaders = ref([
   { th: "Request ID", td_key: "name" },
   { th: "Form Name", td_key: "doctype_name" },
-  { th: "Owner of form", td_key: "role" },
+  { th: "Owner of form", td_key: "department_name" },
   { th: "Requested on", td_key: "requested_on" },
   { th: "Approval Status", td_key: "status" },
   { th: "Pending With", td_key: "assigned_to_users" },
@@ -230,7 +230,7 @@ const fieldMapping = ref({
       "Request Cancelled",
     ],
   },
-  role: { type: "input" },
+  department_name: { type: "input" },
   doctype_name: { type: "input" },
   requested_on: { type: "date" },
 });
@@ -576,7 +576,7 @@ function receivedForMe(data) {
   // Initialize filters array for building dynamic query parameters
   // const EmpRequestMail = JSON.parse(localStorage.getItem("employeeData"));
   const filters = [
-    ["property", "like", `%${newBusinessUnit.value.business_unit}%`],
+    ["property", "=", `${newBusinessUnit.value.business_unit}`],
   ];
   // ["requested_by", "like", EmpRequestMail.emp_mail_id],
 

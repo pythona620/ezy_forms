@@ -1733,7 +1733,7 @@ function searchForm() {
   clearTimeout(debounceTimeout);
   debounceTimeout = setTimeout(() => {
     const filters = [
-      ["business_unit", "like", `%${businessUnit.value.value}%`],
+      ["business_unit", "=", `${businessUnit.value.value}`],
       ["name", "like", `%${searchValue}%`]
     ];
 
@@ -3749,7 +3749,7 @@ function handleInputChange(event, fieldType) {
   // Set filter based on fieldType
   const filters = [
     [fieldType, "=", `${inputValue}`],
-    ["business_unit", "like", `%${filterObj.value.business_unit}%`],
+    ["business_unit", "=", `${filterObj.value.business_unit}`],
   ];
   const queryParams = {
     fields: JSON.stringify(['form_name','form_short_name']),

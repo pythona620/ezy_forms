@@ -6,17 +6,33 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "subscription_start_date",
+  "column_break_cpva",
+  "subscription_end_date",
+  "section_break_cxwy",
   "bu_name",
   "bu_code",
   "bu_logo",
+  "column_break_fphq",
   "is_acknowledge",
   "send_form_as_a_attach_through_mail",
   "welcome_mail_to_employee",
   "water_mark",
   "send_daily_alerts",
+  "section_break_ftig",
   "letter_head"
  ],
  "fields": [
+  {
+   "fieldname": "subscription_start_date",
+   "fieldtype": "Date",
+   "label": "Subscription Start Date"
+  },
+  {
+   "fieldname": "subscription_end_date",
+   "fieldtype": "Date",
+   "label": "Subscription End Date"
+  },
   {
    "fieldname": "bu_name",
    "fieldtype": "Data",
@@ -67,6 +83,22 @@
    "fieldname": "water_mark",
    "fieldtype": "Check",
    "label": "Water Mark"
+  },
+  {
+   "fieldname": "column_break_cpva",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_cxwy",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_fphq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_ftig",
+   "fieldtype": "Section Break"
   }
  ],
  "index_web_pages_for_search": 1,
