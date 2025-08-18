@@ -1336,7 +1336,7 @@ function request_raising_fn(item) {
     property: business_unit.value,
     ip_address: ip_address.value,
     employee_id: employeeData.value.emp_code,
-    be_half_of:item.employee_name,
+    be_half_of: item.request_for === 'Others ' ?  item.employee_name : '',
     request_for:item.request_for,
     unwanted_files: removeAttachFiles.value
   };
