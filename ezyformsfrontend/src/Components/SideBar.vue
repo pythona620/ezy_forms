@@ -384,7 +384,7 @@ onMounted(() => {
 
 // function deptData() {
 //     const filters = [
-//         ["business_unit", "like", `%${newBusinessUnit.value.business_unit}%`]
+//         ["business_unit", "=", `${newBusinessUnit.value.business_unit}`]
 //     ];
 //     const queryParams = {
 //         fields: JSON.stringify(["*"]),

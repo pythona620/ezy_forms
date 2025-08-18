@@ -120,7 +120,7 @@ function designationData() {
     }
 
     const queryParams = {
-        fields: JSON.stringify(["*"]),
+        fields: JSON.stringify(["role"]),
         filters: JSON.stringify(filters),
         limit_page_length: filterObj.value.limitPageLength,
         limit_start: filterObj.value.limit_start,
@@ -203,7 +203,7 @@ function SubmitDesignation() {
             .post(apis.resource + doctypes.roles, payload)
             .then((response) => {
                 if (response) {
-                    console.log(response);
+                    //console.log(response);
                     designationData();
                     resetDesignation();
                     toast.success("Designation Created Successfully",{ autoClose: 1000 });

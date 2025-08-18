@@ -333,10 +333,10 @@
                 <div class="col">
                   <label class="font-13 ps-1" for="emp_name">Emp Name<span class="text-danger ps-1">*</span></label>
                   <FormFields class="mb-3" tag="input" type="text" name="emp_name" id="emp_name"
-                    placeholder="Enter department code" v-model="createEmployee.emp_name" />
+                    placeholder="Enter Emp Name" v-model="createEmployee.emp_name" @input="validateEmpName" />
                   <label class="font-13 ps-1" for="emp_code">Emp ID<span class="text-danger ps-1">*</span></label>
                   <FormFields class="mb-3" tag="input" type="text" name="emp_code" id="emp_code"
-                    placeholder="Enter department code" v-model="createEmployee.emp_code" />
+                    placeholder="Enter Emp ID" v-model="createEmployee.emp_code" />
                   <!-- <div class="mb-3">
                         <label class="font-13 ps-1" for="emp_phone">Emp Phone</label>
                         <FormFields tag="input" type="text" name="emp_phone" id="emp_phone" maxlength="10"
@@ -689,6 +689,9 @@ const handleFileChange = (event) => {
   }
 };
 
+function validateEmpName() {
+  createEmployee.value.emp_name = createEmployee.value.emp_name.trim().toUpperCase();
+}
 
 const generateRandomNumber = () => {
   return Math.floor(Math.random() * 1000000);
@@ -1513,7 +1516,7 @@ function onDepartmentChange(selectedDepartment) {
 }
  
 function fetchingIsHod(department) {
-   const filters = [["company_field", "like", `%${newbusiness.value}%`],["enable","=","1"],
+   const filters = [["company_field", "=", `${newbusiness.value}`],["enable","=","1"],
   ["department", "like", `%${department}%`],["is_hod","=",1]];
  
  
@@ -1614,7 +1617,7 @@ function selectedSignature(event) {
 // };
 
 const exportEmployeesToExcel = async () => {
-  const filters = [["company_field", "like", `%${newbusiness.value}%`],["is_web_form","=","0"],["enable","=","0"]];
+  const filters = [["company_field", "=", `${newbusiness.value}`],["is_web_form","=","0"],["enable","=","0"]];
   const queryParams = {
     fields: JSON.stringify(["*"]),
     limit_start: 0,
@@ -1775,7 +1778,7 @@ function inLineFiltersData(searchedData) {
 }
 
 function employeeData(data) {
-  const filters = [["company_field", "like", `%${newbusiness.value}%`],["is_web_form", "=", "0"],["enable","=","0"]];
+  const filters = [["company_field", "=", `${newbusiness.value}`],["is_web_form", "=", "0"],["enable","=","0"]];
   if (data) {
     filters.push(...data);
   }
@@ -1842,7 +1845,7 @@ function employeeOptions() {
   const queryParams = {
     fields: JSON.stringify(["*"]),
     limit_page_length: "None",
-    filters: JSON.stringify([["company_field", "like", `%${newbusiness.value}%`]]),
+    filters: JSON.stringify([["company_field", "=", `${newbusiness.value}`]]),
     order_by: "`tabEzy Employee`.`creation` desc",
   };
   axiosInstance

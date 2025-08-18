@@ -501,7 +501,7 @@ function inLineFiltersData(searchedData) {
 function fetchDepartmentDetails(id, data) {
 
   const filters = [
-    ["business_unit", "like", `%${newBusinessUnit.value.business_unit}%`],
+    ["business_unit", "=", `${newBusinessUnit.value.business_unit}`],
     ["form_status", "like", "created"],
 
   ];

@@ -1031,7 +1031,7 @@ function receivedForMe(data) {
     localStorage.getItem("employeeData")
   );
   const filters = [
-    ["property", "like", `%${businessUnit.value}%`],
+    ["property", "=", `${businessUnit.value}`],
     ["name", "like", `%${selectedData.value.formname}%`],
   ];
   if (data) {

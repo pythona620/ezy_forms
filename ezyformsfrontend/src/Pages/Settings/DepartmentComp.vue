@@ -371,11 +371,11 @@ function CreateDeprtModal() {
     categoriesDataEdit.value.ezy_departments_items = [];
 
     const filters = [
-        ["business_unit", "like", `%${CreateDepartments.value.business_unit}%`]
+        ["business_unit", "=", `${CreateDepartments.value.business_unit}`]
     ];
 
     const queryParams = {
-        fields: JSON.stringify(["department_name", "department_code"]),
+        fields: JSON.stringify(["name","department_name", "department_code","business_unit"]),
         filters: JSON.stringify(filters),
         limit_page_length: 'None',
         limit_start: filterObj.value.limit_start,
@@ -396,13 +396,13 @@ function CreateDeprtModal() {
 
 function deptData(data) {
     const filters = [
-        ["business_unit", "like", `%${CreateDepartments.value.business_unit}%`]
+        ["business_unit", "=", `${CreateDepartments.value.business_unit}`]
     ];
     if (data) {
         filters.push(...data)
     }
     const queryParams = {
-        fields: JSON.stringify(["*"]),
+        fields: JSON.stringify(["name","department_code","department_name","business_unit"]),
         filters: JSON.stringify(filters),
         limit_page_length: filterObj.value.limitPageLength,
         limit_start: filterObj.value.limit_start,

@@ -632,7 +632,7 @@ function receivedForMe(data) {
   const EmpRequestMail = JSON.parse(localStorage.getItem("employeeData"));
   const filters = [
     ["requested_by", "like", EmpRequestMail.emp_mail_id],
-    ["property", "like", `%${newBusinessUnit.value.business_unit}%`],
+    ["property", "=", `${newBusinessUnit.value.business_unit}`],
   ];
 
   if (data) {

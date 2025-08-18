@@ -432,7 +432,7 @@ const accessibleDepartments = ref([]);
 const ownerForms = ref([])
 function fetchTable(data) {
     const filters = [
-        ["business_unit", "like", `%${filterObj.value.business_unit}%`],
+        ["business_unit", "=", `${filterObj.value.business_unit}`],
         ["form_status", "=", "Created"]
     ];
     if (data) {
