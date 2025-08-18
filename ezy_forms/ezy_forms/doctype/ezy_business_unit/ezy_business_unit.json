@@ -18,6 +18,7 @@
   "send_form_as_a_attach_through_mail",
   "welcome_mail_to_employee",
   "water_mark",
+  "send_form_in_email",
   "send_daily_alerts",
   "section_break_ftig",
   "letter_head"
@@ -60,6 +61,12 @@
    "fieldname": "is_acknowledge",
    "fieldtype": "Check",
    "label": "Acknowledge Required"
+  },
+      {
+   "default": "0",
+   "fieldname": "send_form_in_email",
+   "fieldtype": "Check",
+   "label": "Send Form in Mail Messageg Body"
   },
     {
    "default": "0",
