@@ -135,6 +135,7 @@
                             active-class="active-link">
                             <li><i v-tooltip.right="'All Forms'" class="bi-icon fs-6 bi bi-file-earmark-richtext me-3"></i>All Forms</li>
                         </router-link>
+                       
                         <router-link v-for="(department, index) in formSideBarData" :key="department.route"
                             :to="`/forms/department/${department.route}`" class="text-decoration-none text-black"
                             active-class="active-link">
@@ -154,6 +155,10 @@
 
                                 {{ department.name }}
                             </li>
+                        </router-link>
+                         <router-link to="/settings/vendorcomparison" class="text-decoration-none text-black">
+                            <li><i v-tooltip.right="'Vendor'" class="bi-icon fs-6 bi bi-file-earmark-richtext me-3"></i>Vendor Comparison</li>
+                        
                         </router-link>
 
                     </ul>

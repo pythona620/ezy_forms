@@ -821,7 +821,7 @@
         </td>
       </tr>
       <tr>
-        <td colspan="4" style="border: 1px solid black; padding: 8px;">Delivery</td>
+        <td colspan="4" style="border: 1px solid black; padding: 8px;">Delivery time (in days)</td>
         <td
           v-for="vendor in props.childData.vendor_details"
           :key="'delivery-' + vendor.name"

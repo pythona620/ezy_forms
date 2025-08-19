@@ -537,11 +537,20 @@ function EditformSubmission() {
     ...(tableData.value.linked_form_id && { main_form_Id: tableData.value.linked_form_id }),
     ...(doctypeForm.value.return_gate_pass_name && { main_form: doctypeForm.value.return_gate_pass_name })
   };
+  if(route.query.doctype_name === 'CTO'){
+      router.push({
+          name: "vendorcomparison",
+          query
+ 
+          });
+  }
+  else{ 
 
-  router.push({
-    name: "RaiseRequest",
-    query
-  });
+    router.push({
+      name: "RaiseRequest",
+      query
+    });
+  }
 }
 
 // console.log("emittedFormData", emittedFormData.value);
@@ -1031,7 +1040,7 @@ function receivedForMe(data) {
     localStorage.getItem("employeeData")
   );
   const filters = [
-    ["property", "like", `%${businessUnit.value}%`],
+    ["property", "like", `%${route.query.business_unit}%`],
     ["name", "like", `%${selectedData.value.formname}%`],
   ];
   if (data) {

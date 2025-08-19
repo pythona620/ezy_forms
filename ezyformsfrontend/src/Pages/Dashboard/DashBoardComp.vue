@@ -129,8 +129,12 @@ const chartRefs = [];
 
 // API call that fetches the data and processes it
 async function fetchData() {
+    const queryParams = {
+        property : businessUnit.value
+        };
+
     try {
-        const response = await axiosInstance.get(`${apis.dashboard}`);
+        const response = await axiosInstance.get(`${apis.dashboard}`, { params: queryParams });
         if (response.message) {
             // Extract the two datasets from the API response
             const receivedByUser = response.message.data.received_by_user;
@@ -203,7 +207,7 @@ async function fetchData() {
 }
 // Google Charts loader
 onMounted(() => {
-    fetchData()
+    // fetchData()
     // Load Google Charts script
     // const script = document.createElement('script')
     // script.src = 'https://www.gstatic.com/charts/loader.js'
@@ -225,6 +229,7 @@ function ViewOnlyReport(){
 
       // const filters = [ "name","in", viewlist.value];
       receivedForMe()
+      fetchData()
 
     })
     .catch((error) => {
@@ -274,6 +279,7 @@ function inLineFiltersData(searchedData) {
             receivedForMe(filterObj.value.filters);
         } else {
             receivedForMe();
+            
         }
     }, 500); // Adjust debounce delay as needed
 }
