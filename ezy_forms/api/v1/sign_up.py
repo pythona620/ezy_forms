@@ -71,7 +71,7 @@ def sign_up(email: str, full_name: str,designation:str|None,emp_phone:str|None,e
 		if default_role:
 			user.add_roles(default_role)
 		if redirect_to:
-			frappe.cache.hset("redirect_after_login", user.name, redirect_to)
+			frappe.cache().hset("redirect_after_login", user.name, redirect_to)
 	return  _("Please contact your IT Manager to verify your sign-up")
 
 
@@ -126,7 +126,8 @@ def employee_update_notification(emp_mail):
 	emp_mail, emp_name = frappe.db.get_value(
 		"Ezy Employee", {"name": emp_mail}, ["name", "emp_name"]
 	)
-
+	if not sender:
+		return "No outgoing email account is configured."
 	if not emp_mail or not emp_name:
 		frappe.throw("Employee not found.")
 
