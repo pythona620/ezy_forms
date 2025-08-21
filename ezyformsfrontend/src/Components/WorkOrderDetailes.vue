@@ -79,6 +79,26 @@
         <div class="d-flex flex-column justify-content-between" style="min-height: 300px">
           <!-- Main Content Area Based on Step -->
           <div class="flex-grow-1 ">
+            <div class="card mb-3">
+              <div class="p-3">
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" :value="1"
+                    v-model="comparisonType" />
+                  <label class="form-check-label font-13" for="inlineRadio1">
+                    Work Order
+                  </label>
+                </div>
+
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" :value="0"
+                    v-model="comparisonType" />
+                  <label class="form-check-label font-13" for="inlineRadio2">
+                    Purchase Order
+                  </label>
+                </div>
+              </div>
+            </div>
+
             <transition name="fade-slide" mode="out-in">
 
               <div v-if="currentStep === 0">
@@ -310,9 +330,9 @@
                                 <button v-if="hasSelectedVendor" class="btn btn-danger btn-sm"
                                   @click="deleteSelectedVendors"><i class="bi bi-trash"></i> Delete
                                   Vendor</button>
-                                  <!-- :disabled="!itemDetails.length" -->
-                                <button class="btn  add_vendor_btn btn-sm ms-2" 
-                                  @click="addVendorModal"><i class="bi bi-plus"></i>
+                                <!-- :disabled="!itemDetails.length" -->
+                                <button class="btn  add_vendor_btn btn-sm ms-2" @click="addVendorModal"><i
+                                    class="bi bi-plus"></i>
                                   Add
                                   Vendor</button>
                               </div>
@@ -326,171 +346,267 @@
                   <div class="modal fade" id="vendorModal" data-bs-backdrop="static" data-bs-keyboard="false"
                     tabindex="-1">
                     <div class="modal-dialog modal-xl">
-                      <div class="modal-content p-4">
-                        <div class="d-flex justify-content-between mb-3">
-                          <h6 class="fw-bold">Editing Row #{{ vendorDetails.length + 1 }}</h6>
-                          <div>
-                            <button class="btn btn-outline-danger btn-sm me-2" @click="clearVendorForm"
-                              data-bs-dismiss="modal">Close</button>
-                            <button class="btn btn-dark  btn-sm"  @click="saveVendorDetails">Save Vendor
-                              details</button>
+                      <div class="modal-content p-4 position-relative">
+                        <div class="vendor-details pt-0 ">
+
+                          <div class="d-flex justify-content-between mb-3"
+                            style="position: sticky; top: 0; background: white;">
+                            <h6 class="fw-bold">#{{ vendorDetails.length + 1 }} Vendor </h6>
+                            <div>
+                              <button class="btn btn-outline-danger btn-sm me-2" @click="clearVendorForm"
+                                data-bs-dismiss="modal">Close</button>
+                              <button class="btn btn-dark  btn-sm" @click="saveVendorDetails">Save Vendor
+                                details</button>
+                            </div>
                           </div>
-                        </div>
 
 
 
-                        <div class="row g-2 mb-3">
-                          <div class="col-md-3">
+                          <div class="row g-2 mb-2">
+                            <div class="col-md-3">
 
-                            <label class="form-label">GST Number</label>
-                            <input type="text" class="form-control form-control-sm" placeholder="Type GST no..."
-                              v-model="vendorForm.gst_number" @input="filterVendors" />
-                            <div v-if="filteredVendorOptions.length" class="border rounded mt-1 bg-light"
-                              style="max-height: 150px; overflow-y: auto;z-index: 1000;">
-                              <div v-for="vendor in filteredVendorOptions" :key="vendor.gst_number"
-                                class="py-2 px-2  border-1   font-12"
-                                style="cursor: pointer; border-bottom: 1px solid #ccc;" @click="selectVendor(vendor)">
-                                {{ vendor.gst_number }}
+                              <label class="form-label">GST Number</label>
+                              <input type="text" class="form-control form-control-sm" placeholder="Type GST no..."
+                                v-model="vendorForm.gst_number" @input="filterVendors" />
+                              <div v-if="filteredVendorOptions.length" class="border rounded mt-1 bg-light"
+                                style="max-height: 150px; overflow-y: auto;z-index: 1000;">
+                                <div v-for="vendor in filteredVendorOptions" :key="vendor.gst_number"
+                                  class="py-2 px-2  border-1   font-12"
+                                  style="cursor: pointer; border-bottom: 1px solid #ccc;" @click="selectVendor(vendor)">
+                                  {{ vendor.gst_number }}
+                                </div>
                               </div>
+
+                              <!-- <label class="form-label">Vendor name</label>
+                        <input v-model="vendorForm.vendor_name" class="form-control form-control-sm"> -->
+                            </div>
+                            <div class="col-md-3">
+                              <label class="form-label">Vendor Name</label>
+                              <input v-model="vendorForm.vendor_name" class="form-control form-control-sm">
+                            </div>
+                            <div class="col-md-3">
+                              <label class="form-label">Phone number</label>
+                              <input v-model="vendorForm.phone_number" class="form-control form-control-sm">
+                            </div>
+                          </div>
+                          <div class=" row g-2 mb-3">
+                            <div class="col-md-6">
+                              <label class="form-label">Email ID</label>
+                              <input v-model="vendorForm.mail_id" class="form-control form-control-sm">
                             </div>
 
-                            <!-- <label class="form-label">Vendor name</label>
-                <input v-model="vendorForm.vendor_name" class="form-control form-control-sm"> -->
-                          </div>
-                          <div class="col-md-3">
-                            <label class="form-label">Vendor Name</label>
-                            <input v-model="vendorForm.vendor_name" class="form-control form-control-sm">
-                          </div>
-                          <div class="col-md-3">
-                            <label class="form-label">Phone number</label>
-                            <input v-model="vendorForm.phone_number" class="form-control form-control-sm">
-                          </div>
-                        </div>
-                        <div class=" row g-2 mb-3">
-                          <div class="col-md-6">
-                            <label class="form-label">Email ID</label>
-                            <input v-model="vendorForm.mail_id" class="form-control form-control-sm">
+
+                            <div class="col-md-6">
+                              <label class="form-label">Attachments</label>
+                              <input type="file" multiple accept=".jpeg,.jpg,.png,.pdf,.xlsx,.xls"
+                                class="form-control form-control-sm" @change="handleFileUpload">
+                            </div>
+                            <div class=" col-md-3">
+                              <label class="form-label">Address</label>
+                              <textarea v-model="vendorForm.address" class="form-control form-control-sm"></textarea>
+                            </div>
                           </div>
 
+                          <div class="mb-3">
+                            <h6 class="fw-bold">Pricing details</h6>
+                            <table class="table table-bordered ">
+                              <thead class="table-light">
+                                <tr>
+                                  <th scope="col"><input type="checkbox"></th>
+                                  <th>Item name</th>
+                                  <th>Quantity</th>
+                                  <th>Price / unit</th>
+                                  <th>Price / total Qty</th>
+                                  <th>Action</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                <tr v-for="(item, index) in vendorForm.ezy_item_details" :key="index">
+                                  <td width="3%"><input type="checkbox" v-model="item.selected"></td>
+                                  <td>
 
-                          <div class="col-md-6">
-                            <label class="form-label">Attachments</label>
-                            <input type="file" multiple accept=".jpeg,.jpg,.png,.pdf,.xlsx,.xls"
-                              class="form-control form-control-sm" @change="handleFileUpload">
-                          </div>
-                          <div class=" col-md-3">
-                            <label class="form-label">Address</label>
-                            <textarea v-model="vendorForm.address" class="form-control form-control-sm"></textarea>
-                          </div>
-                        </div>
+                                    {{ item.item_name }}
 
-                        <div class="mb-3">
-                          <h6 class="fw-bold">Pricing details</h6>
-                          <table class="table table-bordered ">
-                            <thead class="table-light">
-                              <tr>
-                                <th scope="col"><input type="checkbox"></th>
-                                <th>Item name</th>
-                                <th>Quantity</th>
-                                <th>Price / unit</th>
-                                <th>Price / total Qty</th>
-                                <th>Action</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              <tr v-for="(item, index) in vendorForm.ezy_item_details" :key="index">
-                                <td width="3%"><input type="checkbox" v-model="item.selected"></td>
-                                <td>
-
-                                  {{ item.item_name }}
-
-                                </td>
-                                <td @click="editItemInModal(index)">
-                                  <template v-if="editingItemIndex === index">
-                                    <input type="number" v-model="item.item_quantity" class="form-control form-control-sm">
-                                  </template>
-                                  <template v-else>
+                                  </td>
+                                  <td @click="editItemInModal(index)">
+                                    <template v-if="editingItemIndex === index">
+                                      <input type="number" v-model="item.item_quantity"
+                                        class="form-control form-control-sm">
+                                    </template>
+                                    <template v-else>
 
 
-                                    {{ item.item_quantity }}
-                                  </template>
+                                      {{ item.item_quantity }}
+                                    </template>
 
-                                </td>
-                                <td @click="editItemInModal(index)">
-                                  <template v-if="editingItemIndex === index">
-                                    <input @blur="saveEditedItem" @focus="editItemInModal(index)"
-                                      v-model.number="item.unitPrice" @change="updateTotalPrice(item)" type="number"
-                                      class="form-control form-control-sm">
-                                  </template>
-                                  <template v-else>
-                                    <i class="bi bi-currency-rupee"></i> {{ item.unitPrice }}
-                                  </template>
-                                </td>
-                                <td>
-                                  <i class="bi bi-currency-rupee"></i>{{ item.totalPrice }}
-                                </td>
+                                  </td>
+                                  <td @click="editItemInModal(index)">
+                                    <template v-if="editingItemIndex === index">
+                                      <input @blur="saveEditedItem" @focus="editItemInModal(index)"
+                                        v-model.number="item.unitPrice" @change="updateTotalPrice(item)" type="number"
+                                        class="form-control form-control-sm">
+                                    </template>
+                                    <template v-else>
+                                      <i class="bi bi-currency-rupee"></i> {{ item.unitPrice }}
+                                    </template>
+                                  </td>
+                                  <td>
+                                    <i class="bi bi-currency-rupee"></i>{{ item.totalPrice }}
+                                  </td>
 
-                                <td>
-                                  <template v-if="editingItemIndex === index">
-                                    <i class="bi bi-check-lg text-success me-2" @click="saveEditedItem"></i>
-                                    <i class="bi bi-x-lg text-danger" @click="cancelEditItem"></i>
-                                  </template>
-                                  <template v-else>
-                                    <i class="bi bi-pencil-square" @click="editItemInModal(index)"></i>
-                                    <i class="bi bi-trash text-danger ms-2" @click="deleteChildItem(index)"></i>
-                                  </template>
-                                </td>
-                              </tr>
-                            </tbody>
-                          </table>
+                                  <td>
+                                    <template v-if="editingItemIndex === index">
+                                      <i class="bi bi-check-lg text-success me-2" @click="saveEditedItem"></i>
+                                      <i class="bi bi-x-lg text-danger" @click="cancelEditItem"></i>
+                                    </template>
+                                    <template v-else>
+                                      <i class="bi bi-pencil-square" @click="editItemInModal(index)"></i>
+                                      <i class="bi bi-trash text-danger ms-2" @click="deleteChildItem(index)"></i>
+                                    </template>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
 
-                          <!-- <button class="btn btn-danger btn-sm" @click="deleteSelectedChildItems">Delete Item</button>
+                            <!-- <button class="btn btn-danger btn-sm" @click="deleteSelectedChildItems">Delete Item</button>
               <button class="btn btn-outline-secondary btn-sm ms-2" @click="addChildItem">+ Add Item</button> -->
-                        </div>
-
-                        <div class="row g-2">
-
-
-                          <div class="col-md-3">
-                            <label class="form-label">Selected Vendor</label>
-                            <select v-model="vendorForm.rank" class="form-select form-select-sm">
-                              <option value="">Select Vendor</option>
-                              <option>L1</option>
-                              <option>L2</option>
-                              <option>L3</option>
-                              <option>L4</option>
-                            </select>
                           </div>
-                          <div class="col-md-3">
-                            <label class="form-label">Total price</label>
-                            <input v-model="vendorForm.total_value" class="form-control form-control-sm" readonly>
-                          </div>
-                        </div>
-                        <div class="row g-2">
-                          <div class="col-md-3">
-                            <label class="form-label">Transportation charges</label>
-                            <input v-model="vendorForm.transport" class="form-control form-control-sm">
+                          <div class="row">
+                            <div class="col">
+                              <div class="">
+                                <label class="form-label">Selected Vendor</label>
+                                <select v-model="vendorForm.rank" class="form-select form-select-sm">
+                                  <option value="">Select Vendor</option>
+                                  <option>L1</option>
+                                  <option>L2</option>
+                                  <option>L3</option>
+                                  <option>L4</option>
+                                </select>
+                              </div>
 
-                            <!-- <select v-model="vendorForm.transport" class="form-select form-select-sm">
-                          <option value="">Select</option>
-                          <option>Free delivery</option>
-                          <option>Paid delivery</option>
-                        </select> -->
-                          </div>
-                          <div class="col-md-3">
-                            <label class="form-label">Delivery time (in days)</label>
-                            <input v-model="vendorForm.delivery_time" class="form-control form-control-sm">
-                          </div>
-                          <div class="col-md-3">
-                            <label class="form-label">Payment terms</label>
-                            <input v-model="vendorForm.payment_terms" class="form-control form-control-sm">
-                          </div>
-                        </div>
+                              <div class="">
+                                <label class="form-label">Delivery time (in days)</label>
+                                <input v-model="vendorForm.delivery_time" class="form-control form-control-sm">
+                              </div>
+                              <div class="">
+                                <label class="form-label">Payment terms</label>
+                                <input v-model="vendorForm.payment_terms" class="form-control form-control-sm">
+                              </div>
+                              <div class="mt-3">
+                                <label class="form-label">Remark</label>
+                                <textarea v-model="vendorForm.remark" name="remarks" class=" form-control"
+                                  id=""></textarea>
 
-                        <div class="mt-3">
-                          <label class="form-label">Remark</label>
-                          <textarea v-model="vendorForm.remark" name="remarks" class=" form-control" id=""></textarea>
-                          <!-- <input v-model="vendorForm.remark" class="form-control form-control-sm"> -->
+                              </div>
+                              <div class="mt-2">
+                                <label class="form-label">Additional Charges</label>
+                                <input type="number" v-model.number="vendorForm.additional_charges"
+                                  class="form-control form-control-sm" @input="calculateTaxes" />
+                              </div>
+
+
+                            </div>
+                            <div class="col">
+
+
+                              <div class="">
+                                <label class="form-label">Total price</label>
+                                <input v-model="vendorForm.total_value" class="form-control form-control-sm" readonly>
+                              </div>
+                              <div class="row">
+                                <div class="col">
+                                  <label class="form-label">CGST %</label>
+                                  <input type="number" v-model.number="vendorForm.cgst_percent"
+                                    class="form-control form-control-sm" @input="calculateTaxes" />
+                                  <small class=" font-13">Amount: <i class="bi bi-currency-rupee"></i> {{
+                                    vendorForm.cgst_amount
+                                    }}</small>
+                                </div>
+
+                                <div class="col">
+                                  <label class="form-label">UTGST %</label>
+                                  <input type="number" v-model.number="vendorForm.utgst_percent"
+                                    class="form-control form-control-sm" @input="calculateTaxes" />
+                                  <small class=" font-13">Amount: <i class="bi bi-currency-rupee"></i> {{
+                                    vendorForm.utgst_amount
+                                    }}</small>
+                                </div>
+
+                                <div class="col">
+                                  <label class="form-label">IGST %</label>
+                                  <select v-model.number="vendorForm.igst_percent" class="form-select form-select-sm"
+                                    @change="calculateTaxes">
+                                    <option value="">Select IGST %</option>
+                                    <option :value="0">0%</option>
+                                    <option :value="5">5%</option>
+                                    <option :value="12">12%</option>
+                                    <option :value="18">18%</option>
+                                    <option :value="28">28%</option>
+                                  </select>
+                                  <small class=" font-13">Amount: <i class="bi bi-currency-rupee"></i> {{
+                                    vendorForm.igst_amount
+                                    }}</small>
+                                </div>
+                              </div>
+
+
+                              <div class="row">
+
+
+                                <div class="col">
+                                  <label class="form-label">Transport CGST %</label>
+                                  <input type="number" v-model.number="vendorForm.transportation_cgst_percent"
+                                    class="form-control form-control-sm" @input="calculateTaxes" />
+                                  <small class="font-13">Amt: <i class="bi bi-currency-rupee"></i> {{
+                                    vendorForm.transportation_cgst_amount }}</small>
+                                </div>
+
+                                <div class="col">
+                                  <label class="form-label">Transport UTGST %</label>
+                                  <input type="number" v-model.number="vendorForm.transportation_utgst_percent"
+                                    class="form-control form-control-sm" @input="calculateTaxes" />
+                                  <small class="font-13">Amt:<i class="bi bi-currency-rupee"></i>{{
+                                    vendorForm.transportation_utgst_amount
+                                  }}</small>
+                                </div>
+
+                                <div class="col">
+                                  <label class="form-label">Transport IGST %</label>
+                                  <select v-model.number="vendorForm.transportation_igst_percent"
+                                    class="form-select form-select-sm" @change="calculateTaxes">
+                                    <option :value="0">0%</option>
+                                    <option :value="5">5%</option>
+                                    <option :value="12">12%</option>
+                                    <option :value="18">18%</option>
+                                    <option :value="28">28%</option>
+                                  </select>
+                                  <small class="font-13">Amt: <i class="bi bi-currency-rupee"></i> {{
+                                    vendorForm.transportation_igst_amount }}</small>
+                                </div>
+                              </div>
+                              <div class="row">
+                                <div class="col">
+                                  <label class="form-label">Transportation Charges</label>
+                                  <input type="number" v-model.number="vendorForm.transportation_charges"
+                                    class="form-control form-control-sm" @input="calculateTaxes" />
+                                </div>
+                                <div class="col">
+                                  <label class="form-label">Transport Total</label>
+                                  <input class="form-control form-control-sm" type="text"
+                                    v-model="vendorForm.transportation_total_amount" readonly />
+
+                                </div>
+                              </div>
+
+
+                              <div class="">
+                                <label class="form-label fw-bold">Grand Total</label>
+                                <input v-model="vendorForm.grand_total" class="form-control form-control-sm fw-bold"
+                                  readonly />
+                              </div>
+
+                            </div>
+                          </div>
                         </div>
 
                       </div>
@@ -581,14 +697,18 @@
                         </td>
                       </tr>
                       <tr>
-                        <td colspan="3" style=" font-weight:bold; padding: 10px;">GST</td>
+                        <td colspan="3" style=" font-weight:bold; padding: 10px;">GST %
+                          <div>
+                            <span class=" font-11">(CGST/UTGST/IGST)</span>
+                          </div>
+                        </td>
                         <td v-for="vendor in sortedVendors" :key="'gst-' + vendor.vendor_name" colspan="2"
                           style=" padding: 10px;">
-                          {{ vendor.gst_number || '-' }}
+                            {{ (Number(vendor.cgst_percent) || 0) + (Number(vendor.utgst_percent) || 0) + (Number(vendor.igst_percent) || 0) }}%
                         </td>
                       </tr>
                       <tr>
-                        <td colspan="3" style=" font-weight:bold; padding: 10px;">Delivery</td>
+                        <td colspan="3" style=" font-weight:bold; padding: 10px;">Delivery(in days)</td>
                         <td v-for="vendor in sortedVendors" :key="'delivery-' + vendor.vendor_name" colspan="2"
                           style=" padding: 10px;">
                           {{ vendor.delivery_time || '-' }}
@@ -608,7 +728,7 @@
                         <td colspan="3" style=" font-weight:bold; padding: 10px;">Transport Charges</td>
                         <td v-for="vendor in sortedVendors" :key="'transport-' + vendor.vendor_name" colspan="2"
                           style=" padding: 10px;">
-                          {{ vendor.transport || '-' }}
+                          {{ vendor.transportation_total_amount || '-' }}
                         </td>
                       </tr>
                       <tr>
@@ -634,42 +754,7 @@
 
                 </div>
               </div>
-             <div v-else-if="currentStep === 2">
-  <h5 class="mb-3">Work Order</h5>
-
-  <div v-if="sortedVendors.length">
-    <h6 class="text-success fw-bold mb-3">L1 Vendor Details</h6>
-
-    <div class="container border rounded p-3" style="background: #f9f9f9;">
-      <div v-for="(field, idx) in l1Fields" :key="idx" class="row mb-2">
-        <div class="col-6 fw-bold">{{ field.label }}</div>
-        <div class="col-6">
-          <template v-if="field.key === 'total_value'">
-            <i class="bi bi-currency-rupee"></i> {{ l1Vendor[field.key] || '0' }}
-          </template>
-          <template v-else-if="field.key === 'attachments'">
-            <span v-if="l1Vendor.attachments"
-                  class="text-primary text-decoration-underline"
-                  style="cursor: pointer"
-                  @click="openPreview(l1Vendor.attachments)">
-              Preview attachment
-            </span>
-            <span v-else>-</span>
-          </template>
-          <template v-else>
-            {{ l1Vendor[field.key] || '-' }}
-          </template>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div v-else>
-    <p class="text-danger">No vendors available.</p>
-  </div>
-</div>
-              <div v-else-if="currentStep === 3">
-
-
+              <div v-else-if="currentStep === 2">
                 <div class="">
                   <!-- Workflow Table -->
                   <div class="">
@@ -746,6 +831,119 @@
 
                   </div>
                 </div>
+              </div>
+              <div v-else-if="currentStep === 3">
+
+                
+
+                <div v-if="sortedVendors.length">
+                    <h6 class="text-success fw-bold mb-3">Vendor Details</h6>
+
+    <!-- Vendor Info -->
+    <div class="container border rounded p-3" >
+      <table class="table table-borderless">
+        <tr>
+          <td>Vendor Name:</td>
+          <td><div class="value">{{ vendor.vendor_name }}</div></td>
+          <td>GST Number:</td>
+          <td><div class="value">{{ vendor.gst_number }}</div></td>
+        </tr>
+        <tr>
+          <td>Vendor Address:</td>
+          <td><div class="value">{{ vendor.address }}</div></td>
+          <td>Phone:</td>
+          <td><div class="value">{{ vendor.phone_number }}</div></td>
+        </tr>
+        <tr>
+          <td>Mail ID:</td>
+          <td><div class="value">{{ vendor.mail_id }}</div></td>
+          <td>Bid Rank:</td>
+          <td><div class="value">{{ vendor.biddle_rank }}</div></td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Pricing Details -->
+    <div class="details-table mt-3">
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>ITEM NAME</th>
+            <th>UNIT</th>
+            <th>QUANTITY</th>
+            <th>UNIT PRICE</th>
+            <th>TOTAL PRICE</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(item, i) in vendor.ezy_item_details" :key="i">
+            <td>{{ item.item_name }}</td>
+            <td>{{ item.item_unit_of_measure }}</td>
+            <td style="text-align: center;">{{ item.item_quantity }}</td>
+            <td style="text-align: center;">{{ item.unitPrice }}</td>
+            <td style="text-align: center;">{{ item.totalPrice }}</td>
+          </tr>
+          <tr>
+            <td colspan="4" style="text-align: right; font-weight: bold;">TOTAL:</td>
+            <td style="text-align: center;">{{ vendor.total_value }}/-</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Footer (Taxes + Charges) -->
+    <div class="footer mt-3">
+      <table class="table table-borderless">
+        <tr>
+          <td>Delivery Time:</td>
+          <td><div class="value">{{ vendor.delivery_time }}</div></td>
+          <td>CGST ({{ vendor.cgst_percent }}%):</td>
+          <td><div class="value">{{ vendor.cgst_amount }}</div></td>
+        </tr>
+        <tr>
+          <td>Payment Terms:</td>
+          <td><div class="value">{{ vendor.payment_terms }}</div></td>
+          <td>UTGST ({{ vendor.utgst_percent }}%):</td>
+          <td><div class="value">{{ vendor.utgst_amount }}</div></td>
+        </tr>
+        <tr>
+          <td colspan="2" rowspan="4">
+            <small>
+              Note: At Hyatt, we view our suppliers as business partners who are committed to legal compliance
+              and ethical conduct. By executing this Work Order, you acknowledge that your company abides by
+              Hyatt's Supplier Code of Conduct, available at Hyatt.com/supplier-code-of-conduct.
+              Please contact your point person should you require this Code in your language.
+            </small>
+          </td>
+          <td>IGST ({{ vendor.igst_percent }}%):</td>
+          <td><div class="value">{{ vendor.igst_amount }}</div></td>
+        </tr>
+        <tr>
+          <td>Freight:<br>
+            <span style="font-size: smaller;">(Transportation/Shipping)</span>
+          </td>
+          <td>
+            <div class="value">
+              {{ vendor.transportation_cgst_amount }} + {{ vendor.transportation_utgst_amount }}
+              (GST on {{ vendor.transportation_charges }})
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>Additional Charges:</td>
+          <td><div class="value">{{ vendor.additional_charges }}/-</div></td>
+        </tr>
+        <tr>
+          <td style="font-weight: bold;">Grand Total:</td>
+          <td><div class="value">{{ vendor.grand_total }}/-</div></td>
+        </tr>
+      </table>
+    </div>
+                </div>
+                <div v-else>
+                  <p class="text-danger">No vendors available.</p>
+                </div>
+
               </div>
             </transition>
           </div>
@@ -839,18 +1037,51 @@ const vendorMasterList = ref([
   // },
   // Add more vendor entries here...
 ])
+
 const vendorForm = ref({
   vendor_name: '', gst_number: '', phone_number: '', mail_id: '',
   ezy_item_details: [
     { ...itemDetails }
   ],
-  transport: 'Free delivery', delivery_time: '', payment_terms: '', rank: '', remark: '', address: '', attachments: [], total_value: ''
+  transport: '',
+  delivery_time: '',
+  payment_terms: '',
+  rank: '',
+  remark: '',
+  address: '',
+  attachments: [],
+  total_value: '',
+  // taxes
+  cgst_percent: 0,
+  utgst_percent: 0,
+  igst_percent: 0,
+
+  // freight fields
+  transportation_charges: 0,
+  transportation_cgst_percent: 0,
+  transportation_cgst_amount: 0,
+  transportation_utgst_percent: 0,
+  transportation_utgst_amount: 0,
+  transportation_igst_percent: 0,
+  transportation_igst_amount: 0,
+  transportation_total_amount: 0,
+
+  // additional charges
+  additional_charges: 0,
+
+  // computed amounts
+  cgst_amount: 0,
+  utgst_amount: 0,
+  igst_amount: 0,
+  transportation_gst_amount: 0,
+
+  grand_total: 0
 });
 const steps = [
   { label: 'Vendor & Item Details', icon: 'bi bi-box-seam' },
   { label: 'Preview Comparison', icon: 'bi bi-eye' },
-  { label: 'Work Order', icon: 'bi bi-file-earmark-text' },
   { label: 'Workflow', icon: 'bi bi-diagram-3' },
+  { label: 'Work Order', icon: 'bi bi-file-earmark-text' },
 ]
 const sortedVendors = computed(() => {
   return [...vendorDetails.value].sort((a, b) => {
@@ -860,7 +1091,7 @@ const sortedVendors = computed(() => {
     return rankA - rankB;
   });
 });
-const l1Vendor = computed(() => {
+const vendor = computed(() => {
   return sortedVendors.value.find(v => v.rank === 'L1') || {};
 });
 
@@ -872,7 +1103,7 @@ const l1Fields = [
   { label: 'Total Value', key: 'total_value' },
   { label: 'Payment Terms', key: 'payment_terms' },
   { label: 'Delivery Time', key: 'delivery_time' },
-  { label: 'Transport Charges', key: 'transport' },
+  { label: 'Transport Charges', key: 'transportation_total_amount' },
   { label: 'Remark', key: 'remark' },
   { label: 'Address', key: 'address' },
   { label: 'Attachments', key: 'attachments' }
@@ -884,10 +1115,16 @@ onMounted(() => {
   fetchingItemsList()
   window.addEventListener('click', handleClickOutside);
   fetchingWork()
-  if(route.query.selectedFormId){
-    getWorkflowRequest ()
+  if (route.query.selectedFormId) {
+    getWorkflowRequest()
   }
 
+});
+const comparisonType = ref(1); // ✅ default Vendor Comparison
+
+// Watcher if you want to react to changes
+watch(comparisonType, (newVal) => {
+  console.log("Selected Comparison Type:", newVal);
 });
 const currentStep = ref(0)
 
@@ -906,7 +1143,7 @@ const nextStep = () => {
   //   toast.info("Please add vendor and item details before previewing.")
   //   return
   // }
-  
+
   if (currentStep.value < steps.length - 1) {
     currentStep.value++
   } else {
@@ -947,7 +1184,25 @@ function addVendorModal() {
     total_value: '',
     address: '',
     ezy_item_details: JSON.parse(JSON.stringify(itemDetails.value)),  // copy the main itemDetails
-    attachments: []
+    attachments: [],
+    cgst_percent: 0,
+    utgst_percent: 0,
+    igst_percent: 0,
+    transportation_charges: 0,
+    transportation_cgst_percent: 0,
+    transportation_cgst_amount: '',
+    transportation_utgst_percent: 0,
+    transportation_utgst_amount: '',
+    transportation_igst_percent: 0,
+    transportation_igst_amount: '',
+    transportation_total_amount: 0,
+    additional_charges: 0,
+    cgst_amount: '',
+    utgst_amount: '',
+    igst_amount: '',
+    grand_total: ''
+
+
   };
 
   let queryParams = {
@@ -1089,7 +1344,6 @@ const submitComparison = async () => {
     phone_number: vendor.phone_number,
     mail_id: vendor.mail_id,
     biddle_rank: vendor.rank,
-    transportation_charges: vendor.transport,
     delivery_time: vendor.delivery_time,
     payment_terms: vendor.payment_terms,
     remark: vendor.remark,
@@ -1097,6 +1351,22 @@ const submitComparison = async () => {
     address: vendor.address,
     attachments: JSON.stringify(vendor.attachments),
     pricing_details: JSON.stringify(vendor.ezy_item_details),
+    cgst_percent: vendor.cgst_percent,
+    utgst_percent: vendor.utgst_percent,
+    igst_percent: vendor.igst_percent,
+    transportation_charges: vendor.transportation_charges,
+    transportation_cgst_percent: vendor.transportation_cgst_percent,
+    transportation_utgst_percent: vendor.transportation_utgst_percent,
+    transportation_igst_percent: vendor.transportation_igst_percent,
+    transportation_cgst_amount: vendor.transportation_cgst_amount,
+    transportation_utgst_amount: vendor.transportation_utgst_amount,
+    transportation_igst_amount: vendor.transportation_igst_amount,
+    transportation_total_amount: vendor.transportation_total_amount,
+    cgst_amount: vendor.cgst_amount,
+    utgst_amount: vendor.utgst_amount,
+    igst_amount: vendor.igst_amount,
+    additional_charges: vendor.additional_charges,
+    grand_total: vendor.grand_total,
 
   }));
 
@@ -1111,7 +1381,9 @@ const submitComparison = async () => {
     vendor_details,
     ezy_item_details,
     requested_by: requestedBy,
-    requested_on: requestedOn
+    requested_on: requestedOn,
+    work_order: comparisonType.value === 1 ? 1 : 0,
+    purchase_order: comparisonType.value === 0 ? 1 : 0,
   };
 
   const formData = new FormData();
@@ -1190,23 +1462,100 @@ const hasSelectedVendor = computed(() =>
 //     maximumFractionDigits: 2
 //   });
 // }
+// function updateTotalPrice(item) {
+//   const qty = parseFloat(item.item_quantity || 0);
+//   const price = parseFloat((item.unitPrice || "0").toString().replace(/,/g, "")); // remove commas before calc
+//   const total = qty * price;
+
+//   // Format unit price
+//   item.unitPrice = price.toLocaleString('en-IN', {
+//     minimumFractionDigits: 2,
+//     maximumFractionDigits: 2
+//   });
+
+//   // Format total price
+//   item.totalPrice = total.toLocaleString('en-IN', {
+//     minimumFractionDigits: 2,
+//     maximumFractionDigits: 2
+//   });
+// }
 function updateTotalPrice(item) {
   const qty = parseFloat(item.item_quantity || 0);
-  const price = parseFloat((item.unitPrice || "0").toString().replace(/,/g, "")); // remove commas before calc
+  const price = parseFloat((item.unitPrice || "0").toString().replace(/,/g, ""));
   const total = qty * price;
 
-  // Format unit price
-  item.unitPrice = price.toLocaleString('en-IN', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  });
+  item.unitPrice = price.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  item.totalPrice = total.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-  // Format total price
-  item.totalPrice = total.toLocaleString('en-IN', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  });
+  // update vendorForm total_value
+  vendorForm.value.total_value = vendorForm.value.ezy_item_details.reduce((sum, i) => {
+    const val = parseFloat((i.totalPrice || "0").toString().replace(/,/g, "")) || 0;
+    return sum + val;
+  }, 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  calculateTaxes(); // ✅ include taxes in grand total
 }
+function calculateTaxes() {
+  const baseTotal = parseFloat((vendorForm.value.total_value || "0").toString().replace(/,/g, "")) || 0;
+
+  // item GST
+  const cgst = (baseTotal * (vendorForm.value.cgst_percent || 0)) / 100;
+  const utgst = (baseTotal * (vendorForm.value.utgst_percent || 0)) / 100;
+  const igst = (baseTotal * (vendorForm.value.igst_percent || 0)) / 100;
+
+  // transport
+  const transportCharges = parseFloat(vendorForm.value.transportation_charges || 0);
+  const t_cgst = (transportCharges * (vendorForm.value.transportation_cgst_percent || 0)) / 100;
+  const t_utgst = (transportCharges * (vendorForm.value.transportation_utgst_percent || 0)) / 100;
+  const t_igst = (transportCharges * (vendorForm.value.transportation_igst_percent || 0)) / 100;
+
+  // additional
+  const additionalCharges = parseFloat(vendorForm.value.additional_charges || 0);
+
+  // store amounts
+  vendorForm.value.cgst_amount = cgst.toFixed(2);
+  vendorForm.value.utgst_amount = utgst.toFixed(2);
+  vendorForm.value.igst_amount = igst.toFixed(2);
+
+  vendorForm.value.transportation_cgst_amount = t_cgst.toFixed(2);
+  vendorForm.value.transportation_utgst_amount = t_utgst.toFixed(2);
+  vendorForm.value.transportation_igst_amount = t_igst.toFixed(2);
+
+  //  Transportation total (readonly field)
+  const transportationTotal = transportCharges + t_cgst + t_utgst + t_igst;
+  vendorForm.value.transportation_total_amount = transportationTotal.toFixed(2);
+
+  // final grand total
+  vendorForm.value.grand_total = (
+    baseTotal + cgst + utgst + igst +
+    transportationTotal +
+    additionalCharges
+  ).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+
+
+
+// function calculateTaxes() {
+//   const baseTotal = parseFloat((vendorForm.value.total_value || "0").toString().replace(/,/g, "")) || 0;
+
+//   const cgst = (baseTotal * (vendorForm.value.cgst_percent || 0)) / 100;
+//   const utgst = (baseTotal * (vendorForm.value.utgst_percent || 0)) / 100;
+//   const igst = (baseTotal * (vendorForm.value.igst_percent || 0)) / 100;
+//   const freight = parseFloat(vendorForm.value.freight || 0);
+//   // const transportation_charges = parseFloat(vendorForm.value.transportation_charges || 0);
+
+//   vendorForm.value.cgst_amount = cgst.toFixed(2);
+//   vendorForm.value.utgst_amount = utgst.toFixed(2);
+//   vendorForm.value.igst_amount = igst.toFixed(2);
+// // + transportation_charges
+
+//   vendorForm.value.grand_total = (baseTotal + cgst + utgst + igst + freight ).toLocaleString('en-IN', {
+//     minimumFractionDigits: 2,
+//     maximumFractionDigits: 2
+//   });
+// }
+
 
 
 // const addItem = () => itemDetails.value.push({ item_name: 'New Item', item_unit_of_measure: 'Unit', quantity: 1, selected: false });
@@ -1464,6 +1813,22 @@ function openVendorModal(index) {
     total_value: vendor.total_value,
     address: vendor.address || '',
     attachments: vendor.attachments, // Ensure attachments is always an array
+    cgst_percent: vendor.cgst_percent || 0,
+    cgst_amount: vendor.cgst_amount || 0,
+    utgst_percent: vendor.utgst_percent || 0,
+    utgst_amount: vendor.utgst_amount || 0,
+    igst_percent: vendor.igst_percent || 0,
+    igst_amount: vendor.igst_amount || 0,
+    transportation_charges: vendor.transportation_charges || 0,
+    transportation_cgst_percent: vendor.transportation_cgst_percent || 0,
+    transportation_cgst_amount: vendor.transportation_cgst_amount || 0,
+    transportation_utgst_percent: vendor.transportation_utgst_percent || 0,
+    transportation_utgst_amount: vendor.transportation_utgst_amount || 0,
+    transportation_igst_percent: vendor.transportation_igst_percent || 0,
+    transportation_igst_amount: vendor.transportation_igst_amount || 0,
+    transportation_total_amount: vendor.transportation_total_amount || 0,
+    additional_charges: vendor.additional_charges || 0,
+    grand_total: vendor.grand_total || 0,
     // Load the vendor's own items (if any), else empty array
     ezy_item_details: vendor.ezy_item_details ? JSON.parse(JSON.stringify(vendor.ezy_item_details)) : JSON.parse(JSON.stringify(itemDetails.value))
   };
@@ -1599,14 +1964,32 @@ function saveVendorDetails() {
     phone_number: vendorForm.value.phone_number,
     mail_id: vendorForm.value.mail_id,
     rank: vendorForm.value.rank,
-    transport: vendorForm.value.transport,
+    // transport: vendorForm.value.transport,
     delivery_time: vendorForm.value.delivery_time,
     payment_terms: vendorForm.value.payment_terms,
     remark: vendorForm.value.remark,
     ezy_item_details: JSON.parse(JSON.stringify(vendorForm.value.ezy_item_details)),
     total_value: vendorForm.value.total_value,
     address: vendorForm.value.address,
-    attachments: vendorForm.value.attachments  // Ensure attachments is always an array
+    attachments: vendorForm.value.attachments,  // Ensure attachments is always an array
+    cgst_percent: vendorForm.value.cgst_percent,
+    cgst_amount: vendorForm.value.cgst_amount,
+    utgst_percent: vendorForm.value.utgst_percent,
+    utgst_amount: vendorForm.value.utgst_amount,
+    igst_percent: vendorForm.value.igst_percent ? vendorForm.value.igst_percent : "0",
+    igst_amount: vendorForm.value.igst_amount,
+    transportation_charges: vendorForm.value.transportation_charges,
+    transportation_cgst_percent: vendorForm.value.transportation_cgst_percent,
+    transportation_cgst_amount: vendorForm.value.transportation_cgst_amount,
+    transportation_utgst_percent: vendorForm.value.transportation_utgst_percent,
+    transportation_utgst_amount: vendorForm.value.transportation_utgst_amount,
+    transportation_igst_percent: vendorForm.value.transportation_igst_percent,
+    transportation_igst_amount: vendorForm.value.transportation_igst_amount,
+    transportation_total_amount: vendorForm.value.transportation_total_amount,
+    additional_charges: vendorForm.value.additional_charges,
+
+    grand_total: vendorForm.value.grand_total,
+
   };
 
   if (editingVendorIndex.value !== null) {
@@ -1996,32 +2379,32 @@ function WfroleMatrix() {
 }
 
 
-function getWorkflowRequest (){
+function getWorkflowRequest() {
   axiosInstance
-  .get(apis.resource + doctypes.WFWorkflowRequests + `/${route.query.selectedFormId}`)
-  .then((res) => {
-    if (res.data) {
-      console.log(res.data.reference_id[0].doctype_name_wf);
-      axiosInstance
-      .get(apis.resource + `${res.data.doctype_name}` + `/${res.data.reference_id[0].doctype_name_wf}`)
-      .then((res) => {
-        if (res.data) {
-          console.log(res.data);
-          itemDetails.value = res.data.ezy_item_details;
-          vendorDetails.value = res.data.vendor_details;
-          console.log(res.data.vendor_details);
-          // const paresedData = JSON.parse(res.data.vendor_details.pricing_details);
-          // console.log(paresedData);
-        }
-        })
-        .catch((error) => {
-          console.error("Error fetching workflow request data:", error);
+    .get(apis.resource + doctypes.WFWorkflowRequests + `/${route.query.selectedFormId}`)
+    .then((res) => {
+      if (res.data) {
+        console.log(res.data.reference_id[0].doctype_name_wf);
+        axiosInstance
+          .get(apis.resource + `${res.data.doctype_name}` + `/${res.data.reference_id[0].doctype_name_wf}`)
+          .then((res) => {
+            if (res.data) {
+              console.log(res.data);
+              itemDetails.value = res.data.ezy_item_details;
+              vendorDetails.value = res.data.vendor_details;
+              console.log(res.data.vendor_details);
+              // const paresedData = JSON.parse(res.data.vendor_details.pricing_details);
+              // console.log(paresedData);
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching workflow request data:", error);
           });
-        }
-        })
-.catch((error) => {
-  console.error("Error fetching workflow request data:", error);
-})
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching workflow request data:", error);
+    })
 }
 
 
@@ -2036,6 +2419,12 @@ function getWorkflowRequest (){
 // overflow: hidden; 
 // }
 
+.vendor-details {
+  max-height: 80vh;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  padding: 5px;
+}
 
 .item-table thead tr:first-child th:first-child {
   border-top-left-radius: 2px;
@@ -2269,6 +2658,8 @@ function getWorkflowRequest (){
 
 .form-label {
   font-size: 12px;
+  margin-bottom: 2px;
+
 }
 
 
@@ -2537,7 +2928,17 @@ function getWorkflowRequest (){
   opacity: 0;
   transform: translateY(-10px);
 }
+// /* Change dropdown selected item background */
+// :deep(.vs__dropdown-option--selected) {
+//   background-color: #ffefc1 !important; /* light yellow background */
+//   color: #333 !important; /* text color */
+// }
 
+// /* Also change hover color for better UX */
+// :deep(.vs__dropdown-option--highlight) {
+//   background-color: #ffe18a !important; /* hover background */
+//   color: #000 !important;
+// } 
 :deep(.vs__selected) {
   background: #f1f3f5;
   border: 1px solid #dee2e6;
@@ -2571,14 +2972,5 @@ function getWorkflowRequest (){
   color: #000;
 }
 
-// /* Change dropdown selected item background */
-// :deep(.vs__dropdown-option--selected) {
-//   background-color: #ffefc1 !important; /* light yellow background */
-//   color: #333 !important; /* text color */
-// }
 
-// /* Also change hover color for better UX */
-// :deep(.vs__dropdown-option--highlight) {
-//   background-color: #ffe18a !important; /* hover background */
-//   color: #000 !important;
-// }</style>
+</style>

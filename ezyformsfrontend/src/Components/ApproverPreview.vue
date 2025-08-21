@@ -748,14 +748,14 @@
     <thead class="tr_background ">
       <tr style="background-color: #fff7d6;">
         <th style="border: 1px solid black; padding: 8px;">Sr</th>
-        <th style="border: 1px solid black; padding: 8px;">Item Name</th>
+        <th style="border: 1px solid black; padding: 8px; white-space:nowrap ;">Item Name</th>
         <th style="border: 1px solid black; padding: 8px;">UOM</th>
         <th style="border: 1px solid black; padding: 8px;">Qty</th>
         <th
           v-for="vendor in props.childData.vendor_details"
           :key="'vendor-head-' + vendor.name"
           colspan="2"
-          style="border: 1px solid black; padding: 8px; text-align: center;"
+          style="border: 1px solid black; padding: 8px; text-align: center; white-space:nowrap ;"
         >
           {{ vendor.vendor_name }}
         </th>
@@ -774,15 +774,15 @@
       <!-- ITEM ROWS -->
       <tr v-for="(item, index) in props.childData.ezy_item_details" :key="'item-' + item.name">
         <td style="border: 1px solid black; padding: 8px; text-align: center;">{{ index + 1 }}</td>
-        <td style="border: 1px solid black; padding: 8px;">{{ item.item_name }}</td>
+        <td style="border: 1px solid black; padding: 8px; white-space:nowrap ;">{{ item.item_name }}</td>
         <td style="border: 1px solid black; padding: 8px; text-align: center;">{{ item.item_unit_of_measure }}</td>
         <td style="border: 1px solid black; padding: 8px; text-align: center;">{{ item.item_quantity }}</td>
 
         <template v-for="vendor in props.childData.vendor_details" :key="'pricing-' + vendor.name + '-' + item.item_name">
-          <td style="border: 1px solid black; padding: 8px; text-align: right;">
+          <td style="border: 1px solid black; padding: 8px; text-align: right; white-space:nowrap ;">
             <i class="bi bi-currency-rupee"></i>{{ getPricing(vendor, item.item_name)?.unitPrice ?  getPricing(vendor, item.item_name).unitPrice : 'N/A' }}
           </td>
-          <td style="border: 1px solid black; padding: 8px; text-align: right;">
+          <td style="border: 1px solid black; padding: 8px; text-align: right; white-space:nowrap ;">
             <i class="bi bi-currency-rupee"></i>{{ getPricing(vendor, item.item_name)?.totalPrice ?  getPricing(vendor, item.item_name).totalPrice : 'N/A' }}
           </td>
         </template>
@@ -797,7 +797,7 @@
           colspan="2"
           style="border: 1px solid black; padding: 8px; text-align: right;"
         >
-          <i class="bi bi-currency-rupee"></i>{{ vendor.total_value || '-' }}
+          <i class="bi bi-currency-rupee"></i>{{ vendor.total_value || '-' }} /-
         </td>
       </tr>
 
@@ -810,14 +810,33 @@
 
       <!-- TERMS -->
       <tr>
-        <td colspan="4" style="border: 1px solid black; padding: 8px;">GST</td>
+        <td colspan="4" style="border: 1px solid black; padding: 8px;">GST%
+          <div>
+            <span class=" font-11">(CGST/UTGST/IGST)</span>
+          </div>
+        </td>
         <td
           v-for="vendor in props.childData.vendor_details"
           :key="'gst-' + vendor.name"
           colspan="2"
           style="border: 1px solid black; padding: 8px; text-align:center;"
         >
-          {{ vendor.gst_number || '-' }}
+          
+          <div>
+        {{ (Number(vendor.cgst_percent) || 0) + (Number(vendor.utgst_percent) || 0) + (Number(vendor.igst_percent) || 0) }}%
+          </div>
+        </td>
+      </tr>
+       <tr>
+        <td colspan="4" style="border: 1px solid black; padding: 8px;">Transport Charges</td>
+        <td
+          v-for="vendor in props.childData.vendor_details"
+          :key="'transport-' + vendor.name"
+          colspan="2"
+          style="border: 1px solid black; padding: 8px; text-align:center;"
+        >
+        
+          {{ vendor.transportation_total_amount || '-' }}
         </td>
       </tr>
       <tr>
@@ -859,17 +878,7 @@
           </span>
         </td>
       </tr>
-      <tr>
-        <td colspan="4" style="border: 1px solid black; padding: 8px;">Transport Charges</td>
-        <td
-          v-for="vendor in props.childData.vendor_details"
-          :key="'transport-' + vendor.name"
-          colspan="2"
-          style="border: 1px solid black; padding: 8px; text-align:center;"
-        >
-          {{ vendor.transportation_charges || '-' }}
-        </td>
-      </tr>
+     
       <tr>
         <td colspan="4" style="border: 1px solid black; padding: 8px;">Attachments</td>
         <td
