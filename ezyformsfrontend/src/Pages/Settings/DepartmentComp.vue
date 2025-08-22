@@ -131,9 +131,6 @@ import "@vueform/multiselect/themes/default.css";
 const businessUnit = computed(() => {
     return EzyBusinessUnit.value;
 });
-// onMounted(() => {
-//     ezyForms();
-// })
 const totalRecords = ref(0);
 
 const tableData = ref([]);
@@ -369,9 +366,10 @@ function CreateDeprtModal() {
     // openCreateModal()
     isEditMode.value = false;
     categoriesDataEdit.value.ezy_departments_items = [];
+    CreateDepartments.value.business_unit = localStorage.getItem("Bu")
 
     const filters = [
-        ["business_unit", "=", `${CreateDepartments.value.business_unit}`]
+        ["business_unit", "=", `${businessUnit.value}`]
     ];
 
     const queryParams = {
