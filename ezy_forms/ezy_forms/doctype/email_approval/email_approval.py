@@ -62,9 +62,9 @@ def update_token_status(action,wf_request_id,document_id,current_level,status=No
     if action == "Approve" or action == "Request Cancelled":
         
         if status == "In Progress":
-            previous_level = current_level - 1
+            previous_level = int(current_level) - 1
         else:
-            previous_level = current_level
+            previous_level = int(current_level)
             
         frappe.db.set_value(
                 "Email Approval",
