@@ -11,22 +11,35 @@ import time
 class EzyEmployee(Document):
 	def on_update(self):
 		prev_doc = self.get_doc_before_save()
-		if (
-			not frappe.db.exists("Login Check", {"user_id": self.emp_mail_id}) 
-			and self.enable 
-			and prev_doc 
-			and getattr(prev_doc, "enable", 0) != 1
-		):
-
+  
+		if prev_doc and self.enable != prev_doc.enable and self.enable:
+			self.update_wf_role_matrix()
+   
+		if (not frappe.db.exists("Login Check", {"user_id": self.emp_mail_id}) 	and self.enable and prev_doc and getattr(prev_doc, "enable", 0) != 1):
 			after_insert_user(self)
 
- 
+		if prev_doc and self.is_admin != prev_doc.is_admin:
+			user = frappe.get_doc("User", self.emp_mail_id)
+
+			if self.is_admin:
+				# Add System Manager role if not already assigned
+				if not frappe.db.exists("Has Role", {"parent": self.emp_mail_id, "role": "System Manager"}):
+					user.append("roles", {"role": "System Manager"})
+					user.save(ignore_permissions=True)
+			else:
+				# Remove System Manager role if it exists
+				user.roles = [r for r in user.roles if r.role != "System Manager"]
+				user.save(ignore_permissions=True)
+
+			frappe.db.commit()
+     
 	def after_insert(self):
 		self.ensure_reporting_designation_role()
 		self.create_user_if_not_exists()
-		self.update_wf_role_matrix()
+
 		if self.enable:
 			after_insert_user(self)
+			self.update_wf_role_matrix()
  
 	def create_user_if_not_exists(self):
 		if frappe.db.exists("User", self.emp_mail_id):
@@ -37,12 +50,7 @@ class EzyEmployee(Document):
 			self.create_role_and_wf_role(self.designation)
 			# bench_migrating_from_code()
 	
-		# Check for outgoing email account
-		is_email_account_set = frappe.db.exists("Email Account", {
-			"enable_outgoing": 1,
-			"default_outgoing": 1
-		})
-	
+
 		# Create User document
 		user_doc = frappe.new_doc("User")
 		user_doc.update({
