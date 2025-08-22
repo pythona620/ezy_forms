@@ -53,3 +53,50 @@ def delete_form_and_related(form_short_name=None):
     frappe.db.commit()
     return f"Deleted all records and DocType related to: {form_short_name}"
     
+    
+    
+@frappe.whitelist()
+def delete_workflow_request(from_date, to_date, form_short_name):
+    """
+    Delete Workflow Requests, related Activity Logs, 
+    and the corresponding document records created between given dates.
+    
+    """
+    
+    # Fetch Workflow Request names for the given DocType and date range
+    list_workflow_requests = frappe.db.get_all(
+        "WF Workflow Requests",
+        filters={"doctype_name": form_short_name, "creation": ["Between", from_date, to_date]},
+        pluck="name"
+    )
+    
+    # Fetch related Activity Log entries linked to the above Workflow Requests
+    list_activity_logs = frappe.db.get_all(
+        "WF Activity Log",
+        filters={"name": ["in", list_workflow_requests]},
+        pluck="name"
+    )
+    
+    # Fetch actual DocType records created in the same date range
+    list_docrecords = frappe.db.get_all(
+        form_short_name,
+        filters={"creation": ["Between", from_date, to_date]},
+        pluck="name"
+    )
+
+    '''
+    
+    delete all in one-liners using map + lambda
+    
+    '''
+    # Delete corresponding Activity Logs
+    list(map(lambda name: frappe.delete_doc("WF Activity Log", name, force=1), list_activity_logs))
+    
+    # Delete Workflow Requests
+    list(map(lambda name: frappe.delete_doc("WF Workflow Requests", name, force=1), list_workflow_requests))
+    
+    # Delete actual DocType records
+    list(map(lambda name: frappe.delete_doc(form_short_name, name, force=1), list_docrecords))
+    
+    frappe.db.commit()
+    return {"deleted_requests": list_workflow_requests, "deleted_logs": list_activity_logs, "deleted_docs": list_docrecords}
