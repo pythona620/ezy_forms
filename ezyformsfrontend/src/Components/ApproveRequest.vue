@@ -1031,7 +1031,7 @@ function receivedForMe(data) {
     localStorage.getItem("employeeData")
   );
   const filters = [
-    ["property", "=", `${businessUnit.value}`],
+    // ["property", "=", `${route.query.business_unit}`], 
     ["name", "like", `%${selectedData.value.formname}%`],
   ];
   if (data) {
