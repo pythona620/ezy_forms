@@ -347,7 +347,7 @@ function raiseRequstClearForm() {
 const SystemSettingData = () => {
     const docName = "System Settings";
     const queryParams = {
-        fields: JSON.stringify(["*"]),
+        fields: JSON.stringify(["minimum_password_score"]),
     };
 
     axiosInstance
