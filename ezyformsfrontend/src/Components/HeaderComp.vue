@@ -91,7 +91,7 @@
 
                                             <li class="mt-2">
                                                 <div class="d-flex justify-content-center align-items-center">
-                                                    <ButtonComp class="changepass rounded-2 text-left" icon="lock"
+                                                    <ButtonComp @click="SystemSettingData" class="changepass rounded-2 text-left" icon="lock"
                                                         data-bs-toggle="modal" data-bs-target="#changePassword"
                                                         name="Change Password"></ButtonComp>
                                                 </div>
@@ -195,7 +195,7 @@
                                     <i :class="showNewPassword ? 'bi bi-eye' : 'bi bi-eye-slash'"></i>
                                 </span>
                             </div>
-                            <span v-if="passwordError" class="text-danger font-10 m-0 ps-2">{{ passwordError }}</span>
+                            <p v-if="passwordError" class="text-danger font-10 m-0 ps-1 mt-1">{{ passwordError }}</p>
                         </div>
 
                         <div class="mb-2">
@@ -215,7 +215,7 @@
                         </div>
 
                         <label class="font-12">
-                            Note : Password must be at least 12 characters with letters, numbers & symbols
+                            Note : {{ getPasswordRule(selectedScore).message }}
                         </label>
                     </div>
 
@@ -315,6 +315,9 @@ const filterObj = ref({
     limitPageLength: 100,
 });
 
+const EmpCompony=ref([]);
+const selectedScore = ref("");
+const responsibleUnits=ref([])
 const SocketList = ref([])
 
 //IF THE USER DESIGNATION INCLUDES (IT) THEN ONLY FORM CREATION WILL APPREAR IN HEADER ""
@@ -340,6 +343,50 @@ function raiseRequstClearForm() {
         selectedData.value.selectedform = '',
         blockArr.value = []
 }
+
+const SystemSettingData = () => {
+    const docName = "System Settings";
+    const queryParams = {
+        fields: JSON.stringify(["*"]),
+    };
+
+    axiosInstance
+        .get(`${apis.resource}${doctypes.SystemSettings}/${encodeURIComponent(docName)}`, { params: queryParams })
+        .then((res) => {
+            if (res.data) {
+                selectedScore.value=res.data.minimum_password_score;
+            }
+        })
+        .catch((error) => {
+            console.error("Error fetching system settings:", error);
+        });
+};
+
+function getPasswordRule(score) {
+  if (score == 2) {
+    return {
+      regex: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/,
+      message: "Password must be at least 8 characters with at least one uppercase, lowercase, number, and special character."
+    };
+  } 
+  else if (score == 3) {
+    return {
+      regex: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{10,}$/,
+      message: "Password must be at least 10 characters and fully mixed (uppercase, lowercase, numbers, special characters)."
+    };
+  } 
+  else if (score == 4) {
+    return {
+      regex: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{14,}$/,
+      message: "Password must be at least 14+ characters with a random mix of all character types."
+    };
+  }
+  return {
+    regex: /.*/,
+    message: "Password must meet the system's security requirements."
+  };
+}
+
 const props = defineProps(['id']);
 onMounted(() => {
 
@@ -349,6 +396,10 @@ onMounted(() => {
     // Retrieve data from localStorage
     const userData = JSON.parse(localStorage.getItem('employeeData'));
     const userName = JSON.parse(localStorage.getItem('UserName'));
+
+    EmpCompony.value=userData.company_field;
+    responsibleUnits.value = userData.responsible_units.map(unit => unit.company);
+
     // const syetemmanger = JSON.parse(localStorage.getItem('systemManager'))
     if (userName) {
         // Set the username based on the UserName data, which is used to check if the user is Admin
@@ -394,13 +445,9 @@ const toggleConfPwdVisibility = () => {
 };
 
 const validatePassword = () => {
-    const pwd = new_password.value;
-
-    const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$/;
-
-    if (!regex.test(pwd)) {
-        passwordError.value =
-            "Password must be at least 12 characters with letters, numbers & symbols.";
+  const { regex, message } = getPasswordRule(selectedScore.value);
+  if (!regex.test(new_password.value)) {
+    passwordError.value = message;
     } else {
         passwordError.value = "";
     }
@@ -415,16 +462,16 @@ const checkPasswordsMatch = () => {
 
 
 const isPasswordValid = computed(() => {
-    const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$/;
+    const { regex } = getPasswordRule(selectedScore.value);
     return regex.test(new_password.value);
 });
 
 const isButtonDisabled = computed(() => {
     return (
-        !new_password.value ||                  // New password is empty
-        !confirm_password.value ||              // Confirm password is empty
-        !isPasswordValid.value ||               // Password does not meet the regex
-        new_password.value !== confirm_password.value // Passwords do not match
+    !new_password.value ||
+    !confirm_password.value ||
+    !isPasswordValid.value ||
+    new_password.value !== confirm_password.value
     );
 });
 
@@ -477,6 +524,42 @@ const ezyForms = () => {
         console.error("Error fetching ezyForms data:", error);
     });
 };
+
+// const ezyForms = () => {
+//     const queryParams = {
+//         fields: JSON.stringify(["name","bu_code"]),
+//     };
+
+//     axiosInstance.get(apis.resource + doctypes.wfSettingEzyForms, {
+//         params: queryParams,
+//     }).then((res) => {
+//         if (res?.data?.length) {
+//             let allUnits = res.data.map((company) => company.bu_code);
+
+//             if (!responsibleUnits.value.length) {
+//                 // responsibleUnits is empty → only show EmpCompony
+//                 EzyFormsCompanys.value = [EmpCompony.value];
+//                 business_unit.value = EmpCompony.value;
+//             } else {
+//                 // filter with responsibleUnits
+//                 const commonUnits = allUnits.filter(unit =>
+//                     responsibleUnits.value.includes(unit)
+//                 );
+
+//                 EzyFormsCompanys.value = commonUnits;
+
+//                 if (commonUnits.length === 1) {
+//                     business_unit.value = commonUnits[0];
+//                 } else if (commonUnits.length && !business_unit.value.length) {
+//                     business_unit.value = commonUnits[0];
+//                 }
+//             }
+//         }
+//     }).catch((error) => {
+//         console.error("Error fetching ezyForms data:", error);
+//     });
+// };
+
 watch(business_unit, (newBu, oldBu) => {
     EzyBusinessUnit.value = newBu;
     localStorage.setItem("Bu", EzyBusinessUnit.value)
