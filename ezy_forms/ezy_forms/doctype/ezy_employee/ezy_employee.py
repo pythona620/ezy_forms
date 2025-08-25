@@ -32,7 +32,28 @@ class EzyEmployee(Document):
 				user.save(ignore_permissions=True)
 
 			frappe.db.commit()
-     
+    
+		if (prev_doc  and self.get("company_field") != prev_doc.get("company_field") 	) or (prev_doc and [d.as_dict().get("company") for d in self.responsible_units]	!= [d.as_dict().get("company") for d in prev_doc.get("responsible_units")]		):
+			# checking the permission for the user
+			current_permissions = frappe.get_all("User Permission",	filters={"user": self.emp_mail_id, "allow": "Ezy Business Unit"},fields=["name", "for_value"],	ignore_permissions=True,)
+			existing_units = {perm["for_value"]: perm["name"] for perm in current_permissions}
+			custom_list = [comp.as_dict().get("company") for comp in self.responsible_units]
+			custom_list.append(self.company_field)
+
+			existing_set = set(existing_units.keys())
+			custom_set = set(custom_list)
+
+			# Permissions to update
+			to_update = existing_set - custom_set
+			list( map(  lambda unit: frappe.db.set_value( "User Permission", existing_units[unit], {"apply_to_all_doctypes": 0, "applicable_for": "WF Workflow Requests",   }, update_modified=False ), to_update ) )
+
+			# Permissions to add
+			to_add = custom_set - existing_set
+			list(map(lambda unit: frappe.get_doc({	"doctype": "User Permission","for_value": unit,	"allow": "Ezy Business Unit",	"user": self.emp_mail_id}).insert(ignore_permissions=True), to_add))
+
+			frappe.db.commit()
+			
+			
 	def after_insert(self):
 		self.ensure_reporting_designation_role()
 		self.create_user_if_not_exists()
@@ -145,8 +166,11 @@ def wf_role_matrix_update(self):
 		user = frappe.get_doc("User",self.emp_mail_id)
 		
 		user.roles = []
-		
-		user.append("roles", {"role": self.designation})
+		if self.is_admin:
+			user.append("roles", {"role": self.designation})
+			user.append("roles", {"role": "System Manager"})
+		else:
+			user.append("roles", {"role": self.designation})
 		user.save(ignore_permissions=True)
 		frappe.db.commit()
 		
