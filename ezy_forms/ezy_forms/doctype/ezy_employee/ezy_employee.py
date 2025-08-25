@@ -43,9 +43,9 @@ class EzyEmployee(Document):
 			existing_set = set(existing_units.keys())
 			custom_set = set(custom_list)
 
-			# Permissions to delete
-			to_delete = existing_set - custom_set
-			list(map(lambda unit: frappe.delete_doc("User Permission", existing_units[unit], ignore_permissions=True), to_delete))
+			# Permissions to update
+			to_update = existing_set - custom_set
+			list( map(  lambda unit: frappe.db.set_value( "User Permission", existing_units[unit], {"apply_to_all_doctypes": 0, "applicable_for": "WF Workflow Requests",   }, update_modified=False ), to_update ) )
 
 			# Permissions to add
 			to_add = custom_set - existing_set
