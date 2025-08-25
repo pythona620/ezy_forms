@@ -248,9 +248,9 @@
                   <i :class="showNewPassword ? 'bi bi-eye' : 'bi bi-eye-slash'"></i>
                 </span>
               </div>
-              <span v-if="passwordError" class="text-danger font-10 m-0 ps-2">
+              <p v-if="passwordError" class="text-danger font-10 m-0 ps-2">
                 {{ passwordError }}
-              </span>
+              </p>
             </div>
 
             <!-- Confirm Password Field -->
@@ -440,6 +440,7 @@ export default {
       signatureInput:null,
       subEndDate:"",
       today:"",
+      selectedScore:""
       // timeLeft: 60,
       // timer: null,
       // resentMessage: "",
@@ -483,9 +484,8 @@ export default {
       this.showConfPwdPassword = !this.showConfPwdPassword;
     },
     validatePassword() {
-      if (!this.isPasswordValid) {
-        this.passwordError =
-          'Password must be at least 12 characters with letters, numbers & symbols.';
+      if (!this.passwordRule.regex.test(this.new_password)) {
+        this.passwordError = this.passwordRule.message;
       } else {
         this.passwordError = '';
       }
@@ -494,7 +494,7 @@ export default {
     },
     checkPasswordsMatch() {
       this.passwordsMismatch =
-        this.new_password && this.confirm_password && this.new_password !== this.confirm_password;
+        this.confirm_password && this.new_password !== this.confirm_password;
     },
 
     clearPassword(){
@@ -916,6 +916,7 @@ export default {
             this.isAcknowledgeSign=res.message.is_signature;
             this.LoginAcknowledge=res.message.login_acknowledge;
             this.subEndDate=res.message.subscription_end_date;
+            this.selectedScore=res.message.minimum_password_score;
 
             if (this.isFirstLogin === 0 && this.enableCheck === 1) {
               const modal = new bootstrap.Modal(
@@ -1018,7 +1019,8 @@ export default {
                   department: employeeData.department,
                   emp_code: employeeData.emp_code,
                   emp_signature: employeeData.signature,
-                  is_admin: employeeData.is_admin
+                  is_admin: employeeData.is_admin,
+                  responsible_units:employeeData.responsible_units,
                   // department: employeeData.department,
                 };
                 localStorage.setItem("subEndDate", this.subEndDate)
@@ -1308,9 +1310,33 @@ export default {
   },
 
   computed: {
+    passwordRule() {
+      if (this.selectedScore == 2) {
+        return {
+          regex: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/,
+          message:
+            "Password must be at least 8 characters with at least one uppercase, lowercase, number, and special character.",
+        };
+      } else if (this.selectedScore == 3) {
+        return {
+          regex: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{10,}$/,
+          message:
+            "Password must be at least 10 characters and fully mixed (uppercase, lowercase, numbers, special characters).",
+        };
+      } else if (this.selectedScore == 4) {
+        return {
+          regex: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{14,}$/,
+          message:
+            "Password must be at least 14 characters with a random mix of all character types.",
+        };
+      }
+      return {
+        regex: /.*/,
+        message: "Password must meet the system's security requirements.",
+      };
+    },
     isPasswordValid() {
-      const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$/;
-      return regex.test(this.new_password);
+      return this.passwordRule.regex.test(this.new_password);
     },
     isButtonDisabled() {
       return (
