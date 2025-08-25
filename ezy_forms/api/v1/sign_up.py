@@ -126,8 +126,7 @@ def employee_update_notification(emp_mail):
 	emp_mail, emp_name = frappe.db.get_value(
 		"Ezy Employee", {"name": emp_mail}, ["name", "emp_name"]
 	)
-	if not sender:
-		return "No outgoing email account is configured."
+
 	if not emp_mail or not emp_name:
 		frappe.throw("Employee not found.")
 
@@ -159,13 +158,14 @@ def employee_update_notification(emp_mail):
 		})
 
 	# Send the email
-	frappe.sendmail(
-		recipients=[emp_mail],
-		subject=subject,
-		sender=sender,
-		message=message,
-		now=True
-	)
+	if sender:
+		frappe.sendmail(
+			recipients=[emp_mail],
+			subject=subject,
+			sender=sender,
+			message=message,
+			now=True
+		)
 
 	return "Notification sent successfully"
 
