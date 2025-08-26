@@ -216,9 +216,6 @@ async function fetchData() {
 }
 // Google Charts loader
 onMounted(() => {
-<<<<<<< HEAD
-    // fetchData()
-=======
     fetchData()
     subEndDate.value = (localStorage.getItem("subEndDate"));
     if (subEndDate.value) {
@@ -236,7 +233,6 @@ onMounted(() => {
     }
   }
 
->>>>>>> 3e9331cb2264a1e4e7b1ee98283ee192554b03f7
     // Load Google Charts script
     // const script = document.createElement('script')
     // script.src = 'https://www.gstatic.com/charts/loader.js'
