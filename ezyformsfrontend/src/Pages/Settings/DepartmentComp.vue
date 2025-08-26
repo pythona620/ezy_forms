@@ -461,6 +461,7 @@ function createDepart() {
                     department_name: "",
                     ezy_departments_items: [],
                 }
+                CreateDepartments.value.business_unit = businessUnit.value
                 newCategory.value = "";
                 const modal = bootstrap.Modal.getInstance(document.getElementById('viewCategory'));
                 modal.hide();

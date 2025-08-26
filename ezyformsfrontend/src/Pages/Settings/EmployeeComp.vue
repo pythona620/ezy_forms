@@ -2266,8 +2266,10 @@ function createEmpl() {
         );
         modal.hide();
 
-        // cancelCreate();
+        cancelCreate();
         createEmployee.value = {}
+        newRole.value = ''
+        searchText.value = ''
         const fileInput = document.getElementById("signatureInput");
         if (fileInput) {
           fileInput.value = "";
