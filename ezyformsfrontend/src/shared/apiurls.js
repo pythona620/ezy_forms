@@ -40,6 +40,8 @@ export const doctypes = {
   ExpenseCodes: 'Expense Code',
   CostCenter: 'Cost Center',
 
+  EzyActivityLog:"Ezy Dynamic Activate Log"
+  
 
 };
 

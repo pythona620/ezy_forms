@@ -9,7 +9,7 @@
         <div class="mt-3">
           <label for="name" class="font-13">User Name</label><br />
           <input type="text" class="form-control m-0 bg-white" id="name" v-model="formdata.usr" @input="validatename"
-            @change="checkUserMail" :class="{ 'is-invalid': errors.usr }" />
+            @change="checkUserMail" @keydown.enter="checkUserMail" :class="{ 'is-invalid': errors.usr }" />
 
           <div class="invalid-feedback font-11 mt-1" v-if="errors.usr">
             {{ errors.usr }}
@@ -43,6 +43,7 @@
         </button>
 
       </div>
+      <!-- && today !== today -->
       <div v-if="isSignup == 0" class="font-13 m-0 cursor-pointer text-center" @click="OpenSignUp"><span
           class="sign">Not
           a user? Sign
@@ -104,7 +105,11 @@
         <div class="row">
           <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
             <label class="font-13" for="email">Email<span class="text-danger ps-1">*</span></label>
+<<<<<<< HEAD
             <input class="form-control m-0" type="email" id="email" v-model="SignUpdata.email" @blur="validateEmail" 
+=======
+            <input class="form-control m-0 bg-transparent" type="email" id="email" v-model="SignUpdata.email" @blur="validateEmail"
+>>>>>>> 3e9331cb2264a1e4e7b1ee98283ee192554b03f7
               :class="{ 'is-invalid': errors.email }" />
             <div class="invalid-feedback font-11 mt-1" v-if="errors.email">
               {{ errors.email }}
@@ -112,7 +117,7 @@
           </div>
           <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
             <label class="font-13" for="full_name">User Name<span class="text-danger ps-1">*</span></label>
-            <input type="text" class="form-control m-0 bg-white text-uppercase" id="name" v-model="SignUpdata.full_name"
+            <input type="text" class="form-control m-0 bg-transparent text-uppercase" id="name" v-model="SignUpdata.full_name"
               @blur="validateFullName" :class="{ 'is-invalid': errors.full_name }" />
             <div class="invalid-feedback font-11 mt-1" v-if="errors.full_name">
               {{ errors.full_name }}
@@ -120,7 +125,7 @@
           </div>
           <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
             <label class="font-13" for="emp_code">Employee Id<span class="text-danger ps-1">*</span></label>
-            <input type="text" class="form-control  m-0 bg-white" id="emp_code" v-model="SignUpdata.emp_code"
+            <input type="text" class="form-control  m-0 bg-transparent" id="emp_code" v-model="SignUpdata.emp_code"
               @input="validateEmpCode" :class="{ 'is-invalid': errors.emp_code }" />
             <div class="invalid-feedback font-11 mt-1" v-if="errors.emp_code">
               {{ errors.emp_code }}
@@ -128,7 +133,7 @@
           </div>
           <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
             <label class="font-13" for="emp_phone">Phone Number<span class="text-danger ps-1">*</span></label>
-            <input type="text" class="form-control m-0 bg-white" id="emp_phone" v-model="SignUpdata.emp_phone"
+            <input type="text" class="form-control m-0 bg-transparent" id="emp_phone" v-model="SignUpdata.emp_phone"
               @input="filterPhoneInput" @blur="validatePhone" :class="{ 'is-invalid': errors.emp_phone }" />
             <div class="invalid-feedback font-11 mt-1" v-if="errors.emp_phone">
               {{ errors.emp_phone }}
@@ -142,6 +147,11 @@
           <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
             <label class="font-13" for="emp_code">Department<span class="text-danger ps-1">*</span></label>
             <Vue3Select v-model="SignUpdata.dept" :reduce="dept => dept.value" :options="this.deptDetails" placeholder="Select Department" />
+          </div>
+           <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
+            <label class="font-13" for="emp_code">Property Name<span class="text-danger ps-1">*</span></label>
+            <Vue3Select v-model="SignUpdata.business_unit" :options="this.propertyDetails"
+              placeholder="Select Property" />
           </div>
         </div>
         <div class="mt-2 row">
@@ -180,7 +190,7 @@
 
       <div>
         <button
-          :disabled="!SignUpdata.email || !SignUpdata.full_name || !SignUpdata.emp_code || !SignUpdata.emp_phone || !SignUpdata.dept || !SignUpdata.designation"
+          :disabled="!SignUpdata.email || !SignUpdata.full_name || !SignUpdata.emp_code || !SignUpdata.emp_phone || !SignUpdata.dept || !SignUpdata.designation || !SignUpdata.business_unit"
           type="submit" @click="handleSignUp"
           class="border-0 btn btn-dark button w-100 mb-4 py-2 font-13 text-white rounded-1">
           Sign Up
@@ -242,9 +252,9 @@
                   <i :class="showNewPassword ? 'bi bi-eye' : 'bi bi-eye-slash'"></i>
                 </span>
               </div>
-              <span v-if="passwordError" class="text-danger font-10 m-0 ps-2">
+              <p v-if="passwordError" class="text-danger font-10 m-0 ps-2">
                 {{ passwordError }}
-              </span>
+              </p>
             </div>
 
             <!-- Confirm Password Field -->
@@ -338,6 +348,21 @@
         </div>
       </div>
     </div>
+
+    <div class="modal fade" id="subscriptionModal" data-bs-backdrop="static" tabindex="-1"
+      aria-labelledby="subscriptionLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-body text-black text-center fw-bold font-15" id="modal-body-content">
+            <i class="bi text-dark fs-1 bi-exclamation-octagon"></i><br>
+            Your subscription has expired. <br>Please contact our sales team at +91 7386295558
+          </div>
+          <div class="modal-footer">
+            <button type="button" data-bs-dismiss="modal" class="btn subBtn">Ok</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -395,6 +420,7 @@ export default {
       storeData: [],
       deptDetails: [],
       disignationDetails: [],
+      propertyDetails:[],
       isFirstLogin: "",
       twoFactorAuth: "",
       enable_check: "",
@@ -416,6 +442,9 @@ export default {
       isAcknowledgeSign:"",
       LoginAcknowledge:"",
       signatureInput:null,
+      subEndDate:"",
+      today:"",
+      selectedScore:""
       // timeLeft: 60,
       // timer: null,
       // resentMessage: "",
@@ -459,9 +488,8 @@ export default {
       this.showConfPwdPassword = !this.showConfPwdPassword;
     },
     validatePassword() {
-      if (!this.isPasswordValid) {
-        this.passwordError =
-          'Password must be at least 12 characters with letters, numbers & symbols.';
+      if (!this.passwordRule.regex.test(this.new_password)) {
+        this.passwordError = this.passwordRule.message;
       } else {
         this.passwordError = '';
       }
@@ -470,7 +498,7 @@ export default {
     },
     checkPasswordsMatch() {
       this.passwordsMismatch =
-        this.new_password && this.confirm_password && this.new_password !== this.confirm_password;
+        this.confirm_password && this.new_password !== this.confirm_password;
     },
 
     clearPassword(){
@@ -598,8 +626,8 @@ export default {
       this.showOtpPage = false;
       this.ShowSignUpPage = true;
       this.ShowForgotPassword = false;
-      this.deptData()
-      this.designationData()
+      // this.deptData()
+      // this.designationData()
 
       //  const formdata= {
       //     usr: "",
@@ -796,36 +824,45 @@ export default {
         .then((res) => {
           if (res.message) {
             this.isSignup = res.message.is_signup;
-          }
-        })
-        .catch((error) => {
-          console.error("error: ", error);
-        });
-    },
-
-    acknowledgeData() {
-      const queryParams = {
-        fields: JSON.stringify(["*"]),
-        limit_page_length: "none"
-      };
-
-      axiosInstance
-        .get(apis.resource + doctypes.acknowledgement, { params: queryParams })
-        .then((res) => {
-          if (res?.data?.length) {
-            const active = res.data.filter(item => item.enable == 1);
-            if (active.length > 0) {
+            this.propertyDetails=res.message.business_unit.map((prty) => prty.name);
+            this.disignationDetails = res.message.designation.map((disg) => disg.name);
+            this.deptDetails = res.message.department.map((dept) => ({
+              label: dept.department_name,
+              value: dept.name,
+            }));
+            const active = res.message.acknowledgement;
               const firstActive = active[0];
               this.acknowledgementHtml = firstActive.acknowledgement;
               this.SignUpdata.acknowledgement = firstActive.name;
-            }
           }
         })
         .catch((error) => {
-          console.error("Error fetching acknowledgement data:", error);
+          console.error("error:", error);
         });
     },
 
+    // acknowledgeData() {
+    //   const queryParams = {
+    //     fields: JSON.stringify(["*"]),
+    //     limit_page_length: "none"
+    //   };
+
+    //   axiosInstance
+    //     .get(apis.resource + doctypes.acknowledgement, { params: queryParams })
+    //     .then((res) => {
+    //       if (res?.data?.length) {
+    //         const active = res.data.filter(item => item.enable == 1);
+    //         if (active.length > 0) {
+    //           const firstActive = active[0];
+    //           this.acknowledgementHtml = firstActive.acknowledgement;
+    //           this.SignUpdata.acknowledgement = firstActive.name;
+    //         }
+    //       }
+    //     })
+    //     .catch((error) => {
+    //       console.error("Error fetching acknowledgement data:", error);
+    //     });
+    // },
 
 
     //  getFormattedDateTime() {
@@ -906,6 +943,8 @@ export default {
             this.ShowAcknowledgement=res.message.show_acknowledgement
             this.isAcknowledgeSign=res.message.is_signature;
             this.LoginAcknowledge=res.message.login_acknowledge;
+            this.subEndDate=res.message.subscription_end_date;
+            this.selectedScore=res.message.minimum_password_score;
 
             if (this.isFirstLogin === 0 && this.enableCheck === 1) {
               const modal = new bootstrap.Modal(
@@ -928,6 +967,13 @@ export default {
               });
 
               // console.log("User is logging in for the first time.");
+            }
+            if(this.subEndDate===this.today){
+              const modal = new bootstrap.Modal(
+                document.getElementById("subscriptionModal")
+              );
+              modal.show();
+              this.showPwdField=false;
             }
             else {
               console.log("User has logged in before.");
@@ -1001,10 +1047,11 @@ export default {
                   department: employeeData.department,
                   emp_code: employeeData.emp_code,
                   emp_signature: employeeData.signature,
-                  is_admin: employeeData.is_admin
+                  is_admin: employeeData.is_admin,
+                  responsible_units:employeeData.responsible_units,
                   // department: employeeData.department,
                 };
-
+                localStorage.setItem("subEndDate", this.subEndDate)
                 localStorage.setItem("UserName", JSON.stringify(this.storeData));
                 sessionStorage.setItem("UserName", JSON.stringify(this.storeData));
 
@@ -1066,44 +1113,44 @@ export default {
           });
       }
     },
-    deptData() {
-      const queryParams = {
-        fields: JSON.stringify(["name","department_name"]),
-        limit_page_length: "none"
-      };
+    // deptData() {
+    //   const queryParams = {
+    //     fields: JSON.stringify(["name", "department_name"]),
+    //     limit_page_length: "none"
+    //   };
 
-      axiosInstance
-        .get(apis.resource + doctypes.departments, { params: queryParams })
-        .then((res) => {
-          if (res?.data?.length) {
-            this.deptDetails = res.data.map((dept) => ({
-              label: dept.department_name,
-              value: dept.name,
-          }));
-          }
-        })
-        .catch((error) => {
-          console.error("Error fetching department data:", error);
-        });
-    },
-    designationData() {
-      const queryParams = {
-        fields: JSON.stringify(["name"]),
-        limit_page_length: "none"
-      };
+    //   axiosInstance
+    //     .get(apis.resource + doctypes.departments, { params: queryParams })
+    //     .then((res) => {
+    //       if (res?.data?.length) {
+    //         this.deptDetails = res.data.map((dept) => ({
+    //           label: dept.department_name,
+    //           value: dept.name,
+    //         }));
+    //       }
+    //     })
+    //     .catch((error) => {
+    //       console.error("Error fetching department data:", error);
+    //     });
+    // },
+    // designationData() {
+    //   const queryParams = {
+    //     fields: JSON.stringify(["name"]),
+    //     limit_page_length: "none"
+    //   };
 
-      axiosInstance
-        .get(apis.resource + doctypes.designations, { params: queryParams })
-        .then((res) => {
-          if (res?.data?.length) {
-            this.disignationDetails = res.data.map((disg) => disg.name);
-            // console.log(this.disignationDetails);
-          }
-        })
-        .catch((error) => {
-          console.error("Error fetching department data:", error);
-        });
-    },
+    //   axiosInstance
+    //     .get(apis.resource + doctypes.designations, { params: queryParams })
+    //     .then((res) => {
+    //       if (res?.data?.length) {
+    //         this.disignationDetails = res.data.map((disg) => disg.name);
+    //         // console.log(this.disignationDetails);
+    //       }
+    //     })
+    //     .catch((error) => {
+    //       console.error("Error fetching department data:", error);
+    //     });
+    // },
 
     onSignatureSaved(signatureData) {
       const base64 = signatureData.dataUrl;
@@ -1131,22 +1178,24 @@ export default {
       const signatureComponent = this.$refs.digitalSignature;
       if (signatureComponent && signatureComponent.getSignatureData) {
         const signatureData = signatureComponent.getSignatureData();
-        if (signatureData) {
           this.onSignatureSaved(signatureData);
-          const modal = new bootstrap.Modal(document.getElementById('EmployeeToggleModal'));
-          modal.show();
-        } else {
-          console.log("No signature data available");
-        }
+      //   if (signatureData) {
+      //     this.onSignatureSaved(signatureData);
+      //     const modal = new bootstrap.Modal(document.getElementById('EmployeeToggleModal'));
+      //     modal.show();
+      //   } else {
+      //     console.log("No signature data available");
+      //   }
+      // }
+      // else if (this.SignUpdata.signature) {
+        // const modal = new bootstrap.Modal(document.getElementById('EmployeeToggleModal'));
+        // modal.show();
+      // }
+      // else {
+      //   toast.error("signature Not Added")
       }
-      else if (this.SignUpdata.signature) {
-        // Show modal manually
         const modal = new bootstrap.Modal(document.getElementById('EmployeeToggleModal'));
         modal.show();
-      }
-      else {
-        toast.error("signature Not Added")
-      }
     },
     openDigitakSignature() {
       this.isDigital = true;
@@ -1279,7 +1328,8 @@ export default {
   },
   mounted() {
     this.checkSignUpPage();
-    this.acknowledgeData();
+    //this.acknowledgeData();
+    this.today = new Date().toISOString().split("T")[0];
 
     const url = window.location.href;
     if (url.includes('ncomr')) {
@@ -1288,9 +1338,33 @@ export default {
   },
 
   computed: {
+    passwordRule() {
+      if (this.selectedScore == 2) {
+        return {
+          regex: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/,
+          message:
+            "Password must be at least 8 characters with at least one uppercase, lowercase, number, and special character.",
+        };
+      } else if (this.selectedScore == 3) {
+        return {
+          regex: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{10,}$/,
+          message:
+            "Password must be at least 10 characters and fully mixed (uppercase, lowercase, numbers, special characters).",
+        };
+      } else if (this.selectedScore == 4) {
+        return {
+          regex: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{14,}$/,
+          message:
+            "Password must be at least 14 characters with a random mix of all character types.",
+        };
+      }
+      return {
+        regex: /.*/,
+        message: "Password must meet the system's security requirements.",
+      };
+    },
     isPasswordValid() {
-      const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$/;
-      return regex.test(this.new_password);
+      return this.passwordRule.regex.test(this.new_password);
     },
     isButtonDisabled() {
       return (
@@ -1607,5 +1681,9 @@ input:focus {
   right: 20px;
   transform: translateY(-50%);
   cursor: pointer;
+}
+.subBtn{
+  background-color: #212529;
+  color: white;
 }
 </style>

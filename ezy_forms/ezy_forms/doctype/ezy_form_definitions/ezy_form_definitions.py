@@ -129,7 +129,7 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
 			cleaned_series = re.sub(r'[^a-zA-Z0-9#\-/\.]', '', series or '') if series else None
 
 			# Apply logic
-			form_defs.series = None if not cleaned_series else (
+			form_defs.series =  f"{business_unit}_{doctype}".upper()+"-.####" if not cleaned_series else (
 			cleaned_series.upper() + "-.####" if not re.search(r'[-/]\.#+$', cleaned_series.upper()) else cleaned_series.upper()
 		)
 			form_defs.business_unit = business_unit
@@ -334,7 +334,7 @@ def add_child_doctype(form_short_name: str, as_a_block: str, fields: list[dict],
 	try:
 		if not idx:
 			idx = 0
-
+		doc = None
 		# Ensure all fields have a valid idx (1-based)
 		for i, field in enumerate(fields, start=1):
 			field['idx'] = i
@@ -528,7 +528,7 @@ def ezy_doctype_permission():
 	"""
 	try:
 		# Hardcoded default permissions
-		employee_doctypes_permi = ['DocType', 'User', 'Role', 'Data Import', 'Data Export','System Settings','Website Settings','Email Account','Version','Activity Log']
+		employee_doctypes_permi = ['DocType', 'User', 'Role', 'Data Import', 'Data Export','System Settings','Website Settings','Email Account','Version','Activity Log','Notification Settings']
 		guest_permi = ['Ezy Departments', 'WF Roles', 'Notification Settings','Acknowledgement']
 
 		# Fetch custom doctypes from specified modules

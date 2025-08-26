@@ -127,7 +127,7 @@ const tableData = ref([]);
 function rolesData() {
     const filters = [
 
-        // ["business_unit", "like", `%${filterObj.value.business_unit}%`]
+        // ["business_unit", "=", `${filterObj.value.business_unit}`]
     ];
    
 

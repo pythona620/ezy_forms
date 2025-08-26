@@ -17,6 +17,9 @@
 
           <!-- Adjust column size based on route -->
           <!-- :class="[(isFormStepsRoute || isArchivedRoute) ? 'col-12' : 'col-10']" -->
+            <div v-if="!isOnline" class="network-warning">
+                No internet connection. <i class="bi bi-wifi-off"></i>
+            </div>
 
           <RouterView></RouterView>
 
@@ -39,6 +42,7 @@ import { onMounted } from 'vue';
 // import { onBeforeUnmount } from 'vue';
 // import axiosInstance from './shared/services/interceptor';
 // import { apis } from './shared/apiurls';
+import { onBeforeUnmount } from 'vue';
 // Get current route
 const route = useRoute();
 // let inactivityTimer
@@ -116,8 +120,21 @@ function clearLocalStorage() {
 // Set the initial value on component mount
 onMounted(() => {
     user_id.value = getUserIdFromCookies();
+      window.addEventListener('online', updateOnlineStatus)
+  window.addEventListener('offline', updateOnlineStatus)
 });
+const isOnline = ref(navigator.onLine)
 
+function updateOnlineStatus() {
+  isOnline.value = navigator.onLine
+}
+
+
+
+onBeforeUnmount(() => {
+  window.removeEventListener('online', updateOnlineStatus)
+  window.removeEventListener('offline', updateOnlineStatus)
+})
 // Watch for changes in `sessionStorage` UserName
 watchEffect(() => {
     const userName = sessionStorage.getItem("UserName");
@@ -146,5 +163,12 @@ watchEffect(() => {
 
 .app-div {
   overflow-x: hidden;
+}
+.network-warning {
+  background: #ffd6d6;
+  color: #a94442;
+  padding: 1em;
+  text-align: center;
+  font-size: 14px;
 }
 </style>

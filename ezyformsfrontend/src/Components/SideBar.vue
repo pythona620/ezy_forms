@@ -128,6 +128,19 @@
                         </router-link>
                     </ul>
 
+                    <h2 v-if="filteredSettingsGroups.tenthGroup && !collapsed" class="font-10 m-0 text-muted ps-2">{{
+                        tenthSettingsTitle }}</h2>
+                    <ul class="list-unstyled" v-if="filteredSettingsGroups.tenthGroup">
+                        <router-link v-for="(list, index) in filteredSettingsGroups.tenthGroup" :key="index"
+                            :to="`${baseRoute}/${list.route.toLowerCase()}`" class="text-decoration-none text-black"
+                            active-class="active-link">
+                            <li>
+                                <i v-tooltip.right="list.name" :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
+                                <span v-if="!collapsed">{{ list.name }}</span>
+                            </li>
+                        </router-link>
+                    </ul>
+
                 </template>
                 <template v-if="isMasterRoute">
                     <ul class="list-unstyled">
@@ -233,6 +246,7 @@ const settingsSideBarData = [
     { name: 'Vendor Comparison', icon: 'bi bi-file-earmark-text', route: 'vendorcomparison' },
     { name: 'Acknowledgement' , icon: 'bi bi-file-earmark-text', route: 'acknowledgement' },
     { name: 'Email Template' , icon: 'bi bi-file-earmark-text', route: 'emailtemplate' },
+    { name: 'Password Policy' , icon: 'bi bi-lock', route: 'passwordpolicy' },
 
     // {name: 'Roles',icon:' bi bi-people', route:'role'},
     // { name: 'Workflow Settings', icon: 'bi bi-gear', route: 'WorkflowSettings'}
@@ -251,6 +265,7 @@ const sixthTitle = 'Audits';
 const seventhSettingsTitle = 'Form Creation';
 const eightSettingsTitle = 'Acknowledgement';
 const ninthSettingsTitle = 'Email Template';
+const tenthSettingsTitle = 'Password Policy';
 
 
 
@@ -318,9 +333,10 @@ const filteredSettingsGroups = computed(() => {
             forthSettingsGroup: settingsSideBarData.slice(3, 6),
             fifthSettingsGroup: settingsSideBarData.slice(6,7),
             sixthGroup: settingsSideBarData.slice(7,9),
-            seventhGroup: settingsSideBarData.slice(9,12),
-            eightGroup: settingsSideBarData.slice(12,13),
-            ninthGroup: settingsSideBarData.slice(13),
+            seventhGroup: settingsSideBarData.slice(9,11),
+            eightGroup: settingsSideBarData.slice(11,12),
+            ninthGroup: settingsSideBarData.slice(12,13),
+            tenthGroup: settingsSideBarData.slice(13),
 
 
         }
@@ -390,7 +406,7 @@ onMounted(() => {
 
 // function deptData() {
 //     const filters = [
-//         ["business_unit", "like", `%${newBusinessUnit.value.business_unit}%`]
+//         ["business_unit", "=", `${newBusinessUnit.value.business_unit}`]
 //     ];
 //     const queryParams = {
 //         fields: JSON.stringify(["*"]),

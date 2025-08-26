@@ -4,7 +4,7 @@ from frappe.utils import escape_html
 from frappe import _
 
 @frappe.whitelist(allow_guest=True)
-def sign_up(email: str, full_name: str,designation:str|None,emp_phone:str|None,emp_code:str|None,dept:str|None, redirect_to: str|None,acknowledge_on=None,signature=None,acknowledgement=None) -> tuple[int, str]:
+def sign_up(email: str, full_name: str,designation:str|None,emp_phone:str|None,emp_code:str|None,dept:str|None, redirect_to: str|None,acknowledge_on=None,signature=None,acknowledgement=None,business_unit=None) -> tuple[int, str]:
 	
 	if is_signup_disabled():
 		return _("Sign Up is disabled")
@@ -51,7 +51,7 @@ def sign_up(email: str, full_name: str,designation:str|None,emp_phone:str|None,e
 			doc.update({
 				"emp_name": user.username.replace('_', " ").upper() if user.username else user.first_name.upper(),
 				"emp_mail_id": user.email,
-				"company_field": company,
+				"company_field": business_unit if business_unit else company,
 				"enable": 0,
 				"is_web_form": 1,
 				"designation": designation,
@@ -71,7 +71,7 @@ def sign_up(email: str, full_name: str,designation:str|None,emp_phone:str|None,e
 		if default_role:
 			user.add_roles(default_role)
 		if redirect_to:
-			frappe.cache.hset("redirect_after_login", user.name, redirect_to)
+			frappe.cache().hset("redirect_after_login", user.name, redirect_to)
 	return  _("Please contact your IT Manager to verify your sign-up")
 
 
@@ -158,13 +158,14 @@ def employee_update_notification(emp_mail):
 		})
 
 	# Send the email
-	frappe.sendmail(
-		recipients=[emp_mail],
-		subject=subject,
-		sender=sender,
-		message=message,
-		now=True
-	)
+	if sender:
+		frappe.sendmail(
+			recipients=[emp_mail],
+			subject=subject,
+			sender=sender,
+			message=message,
+			now=True
+		)
 
 	return "Notification sent successfully"
 
@@ -173,6 +174,10 @@ def employee_update_notification(emp_mail):
 def get_signup_value():
 	return_value = {}
 	web_signup_value =  frappe.get_value("Website Settings", "Website Settings", "disable_signup") or 0
+	return_value["acknowledgement"] = frappe.get_all("Acknowledgement", fields=["name","acknowledgement"],filters={"enable":1}, order_by="name")
+	return_value["business_unit"] = frappe.get_all("Ezy Business Unit", fields=["name","bu_name"], order_by="name")
+	return_value["designation"] = frappe.get_all("WF Roles", fields=["name"],  order_by="role")
+	return_value["department"] = frappe.get_all("Ezy Departments", fields=["name","department_name"], order_by="name")
 	return_value["is_signup"] = web_signup_value
 	return return_value
 

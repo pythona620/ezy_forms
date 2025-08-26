@@ -45,7 +45,7 @@
                     <div class="col">
                       <label class="font-13 ps-1" for="create_emp_name">Emp Name<span class="text-danger ps-1">*</span></label>
                       <FormFields class="mb-3" tag="input" type="text" name="create_emp_name" id="create_emp_name"
-                        placeholder="Enter Emp Name" v-model="createEmployee.emp_name" />
+                        placeholder="Enter Emp Name" v-model.trim="createEmployee.emp_name" @input="validateEmpName" />
                       <label class="font-13 ps-1" for="create_emp_code">Emp ID<span class="text-danger ps-1">*</span></label>
                       <FormFields class="mb-3" tag="input" type="text" name="create_emp_code" id="create_emp_code"
                         placeholder="Enter Emp ID" v-model="createEmployee.emp_code" />
@@ -361,7 +361,7 @@
                 <div class="col">
                   <label class="font-13 ps-1" for="emp_name">Emp Name<span class="text-danger ps-1">*</span></label>
                   <FormFields class="mb-3" tag="input" type="text" name="emp_name" id="emp_name"
-                    placeholder="Enter Emp Name" v-model="createEmployee.emp_name" />
+                    placeholder="Enter Emp Name" v-model.trim="createEmployee.emp_name" @input="validateEmpName" />
                   <label class="font-13 ps-1" for="emp_code">Emp ID<span class="text-danger ps-1">*</span></label>
                   <FormFields class="mb-3" tag="input" type="text" name="emp_code" id="emp_code"
                     placeholder="Enter Emp Id" v-model="createEmployee.emp_code" />
@@ -806,6 +806,9 @@ const handleFileChange = (event) => {
   }
 };
 
+function validateEmpName() {
+  createEmployee.value.emp_name = createEmployee.value.emp_name.trim().toUpperCase();
+}
 
 const generateRandomNumber = () => {
   return Math.floor(Math.random() * 1000000);
@@ -1197,7 +1200,7 @@ function onDepartmentChange(selectedDepartment) {
 }
 
 function fetchingIsHod(department) {
-  const filters = [["company_field", "like", `%${newbusiness.value}%`], ["enable", "=", "1"],
+  const filters = [["company_field", "=", `${newbusiness.value}`], ["enable", "=", "1"],
   ["department", "like", `%${department}%`], ["is_hod", "=", 1]];
 
   const queryParams = {
@@ -1854,7 +1857,7 @@ function selectedSignature(event) {
 
 // Export function
 const exportEmployeesToExcel = async () => {
-  const filters = [["company_field", "like", `%${newbusiness.value}%`], ["is_web_form", "=", "0"], ["enable", "=", "1"]];
+  const filters = [["company_field", "=", `${newbusiness.value}`], ["is_web_form", "=", "0"], ["enable", "=", "1"]];
   const queryParams = {
     fields: JSON.stringify(["*"]),
     limit_start: 0,
@@ -2047,7 +2050,7 @@ function inLineFiltersData(searchedData) {
 }
 
 function employeeData(data) {
-  const filters = [["company_field", "like", `%${newbusiness.value}%`], ["enable", "=", "1"]];
+  const filters = [["company_field", "=", `${newbusiness.value}`], ["enable", "=", "1"]];
   if (data) {
     filters.push(...data);
   }
@@ -2114,7 +2117,7 @@ function employeeOptions() {
   const queryParams = {
     fields: JSON.stringify(["*"]),
     limit_page_length: "None",
-    filters: JSON.stringify([["company_field", "like", `%${newbusiness.value}%`]]),
+    filters: JSON.stringify([["company_field", "=", `${newbusiness.value}`]]),
     order_by: "`tabEzy Employee`.`modified` desc",
   };
   axiosInstance
@@ -2264,8 +2267,14 @@ function createEmpl() {
         );
         modal.hide();
 
+<<<<<<< HEAD
         // // cancelCreate();
+=======
+        cancelCreate();
+>>>>>>> 3e9331cb2264a1e4e7b1ee98283ee192554b03f7
         createEmployee.value = {}
+        newRole.value = ''
+        searchText.value = ''
         const fileInput = document.getElementById("signatureInput");
         if (fileInput) {
           fileInput.value = "";
