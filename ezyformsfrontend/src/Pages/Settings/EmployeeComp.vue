@@ -2257,13 +2257,14 @@ function createEmpl() {
           autoClose: 500,
           transition: "zoom",
         });
-
+        newRole.value = ''
+        searchText.value = ''
         const modal = bootstrap.Modal.getInstance(
           document.getElementById("createDepartments")
         );
         modal.hide();
 
-        // cancelCreate();
+        // // cancelCreate();
         createEmployee.value = {}
         const fileInput = document.getElementById("signatureInput");
         if (fileInput) {

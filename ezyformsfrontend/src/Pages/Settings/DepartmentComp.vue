@@ -466,6 +466,7 @@ function createDepart() {
                 newCategory.value = "";
                 const modal = bootstrap.Modal.getInstance(document.getElementById('viewCategory'));
                 modal.hide();
+                CreateDepartments.value.business_unit = businessUnit.value;
             }
 
         })

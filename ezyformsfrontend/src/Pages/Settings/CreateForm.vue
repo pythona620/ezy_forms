@@ -360,7 +360,7 @@ function actionCreated(rowData, actionEvent) {
       // console.log(route.path, "sadasda");
 
       if (hasAccess && rowData.enable === 1) {
-        if(rowData.form_name === 'Contract One'){
+        if(rowData.form_name === 'VENDOR COMPARISON'){
             router.push({
           name: "vendorcomparison",
  

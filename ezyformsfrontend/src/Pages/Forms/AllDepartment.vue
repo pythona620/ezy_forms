@@ -232,7 +232,7 @@ function viewPreview(data, index, type) {
       // console.log(route.path, "sadasda");
 
       if (hasAccess) {
-         if(data.form_name === 'Contract One'){
+         if(data.form_name === 'VENDOR COMPARISON'){
             router.push({
           name: "vendorcomparison",
  

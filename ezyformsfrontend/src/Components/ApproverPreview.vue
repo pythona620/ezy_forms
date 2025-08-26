@@ -26,7 +26,7 @@
                 </div>
                 <div class=" m-1">
                   <div v-for="(field, fieldIndex) in column.fields" :key="'field-preview-' + fieldIndex" :class="(props.readonlyFor === 'true' || blockIndex < currentLevel) && field.fieldtype !== 'Small Text' && field.fieldtype !== 'Text'
-                    ? (field.label === 'Approved By' ? ' d-flex align-items-end ' : 'd-flex align-items-start')
+                    ? (field.label === 'Approved By' ? ' d-flex align-items-end ' : 'd-flex align-items-start justify-content-start')
                     : ''">
                     <div
                           v-if="!(blockIndex !== 0 && !field.value && ['Approver', 'Approved On', 'Approved By', 'Acknowledged By'].includes(field.label))"
@@ -37,7 +37,7 @@
                               ? 'd-flex'
                               : '',
                             field.fieldtype === 'Check'
-                              ? 'mt-1 d-flex flex-row-reverse justify-content-end gap-2 w-0 align-items-start'
+                              ? 'mt-1 d-flex flex-row-reverse justify-content-start gap-2 w-0 align-items-start'
                               : '',
                             ['Approved By', 'Acknowledged By', 'Requestor Signature'].includes(field.label)
                               ? 'align-items-start'
@@ -747,24 +747,26 @@
     <!-- HEADERS -->
     <thead class="tr_background ">
       <tr style="background-color: #fff7d6;">
-        <th style="border: 1px solid black; padding: 8px;">Sr</th>
-        <th style="border: 1px solid black; padding: 8px; white-space:nowrap ;">Item Name</th>
-        <th style="border: 1px solid black; padding: 8px;">UOM</th>
-        <th style="border: 1px solid black; padding: 8px;">Qty</th>
+        <th style="border: 1px solid black;color:dark; padding: 8px;">Sr</th>
+        <th style="border: 1px solid black;color:dark; padding: 8px; white-space:nowrap ;">Item Name</th>
+        <th style="border: 1px solid black;color:dark; padding: 8px;">UOM</th>
+        <th style="border: 1px solid black;color:dark; padding: 8px;">Qty</th>
         <th
           v-for="vendor in props.childData.vendor_details"
           :key="'vendor-head-' + vendor.name"
-          colspan="2"
-          style="border: 1px solid black; padding: 8px; text-align: center; white-space:nowrap ;"
+          colspan="3"
+          style="border: 1px solid black;color:dark; padding: 8px; text-align: center; white-space:nowrap ;"
         >
           {{ vendor.vendor_name }}
         </th>
       </tr>
       <tr style="background-color: #fff7d6;">
-        <th colspan="4" style="border: 1px solid black; padding: 8px;"></th>
+        <th colspan="4" style="border: 1px solid black;color:dark; padding: 8px;"></th>
         <template v-for="vendor in props.childData.vendor_details" :key="'vendor-labels-' + vendor.name">
-          <th style="border: 1px solid black; padding: 8px; text-align: center;">Rate</th>
-          <th style="border: 1px solid black; padding: 8px; text-align: center;">Total</th>
+          <th style="border: 1px solid black;color:dark; padding: 8px; text-align: center;">Rate</th>
+          <th style="border: 1px solid black;color:dark; padding: 8px; text-align: center;">GST%</th>
+
+          <th style="border: 1px solid black;color:dark; padding: 8px; text-align: center;">Total</th>
         </template>
       </tr>
     </thead>
@@ -782,6 +784,9 @@
           <td style="border: 1px solid black; padding: 8px; text-align: right; white-space:nowrap ;">
             <i class="bi bi-currency-rupee"></i>{{ getPricing(vendor, item.item_name)?.unitPrice ?  getPricing(vendor, item.item_name).unitPrice : 'N/A' }}
           </td>
+           <td style="border: 1px solid black; padding: 8px; text-align: center; white-space:nowrap ;">
+            {{ getPricing(vendor, item.item_name)?.item_gst ?  getPricing(vendor, item.item_name).item_gst : 'N/A' }}<i class="bi bi-percent"></i>
+          </td>
           <td style="border: 1px solid black; padding: 8px; text-align: right; white-space:nowrap ;">
             <i class="bi bi-currency-rupee"></i>{{ getPricing(vendor, item.item_name)?.totalPrice ?  getPricing(vendor, item.item_name).totalPrice : 'N/A' }}
           </td>
@@ -794,7 +799,7 @@
         <td
           v-for="vendor in props.childData.vendor_details"
           :key="'total-' + vendor.name"
-          colspan="2"
+          colspan="3"
           style="border: 1px solid black; padding: 8px; text-align: right;"
         >
           <i class="bi bi-currency-rupee"></i>{{ vendor.total_value || '-' }} /-
@@ -811,19 +816,17 @@
       <!-- TERMS -->
       <tr>
         <td colspan="4" style="border: 1px solid black; padding: 8px;">GST%
-          <div>
-            <span class=" font-11">(CGST/UTGST/IGST)</span>
-          </div>
+          
         </td>
         <td
           v-for="vendor in props.childData.vendor_details"
           :key="'gst-' + vendor.name"
-          colspan="2"
+          colspan="3"
           style="border: 1px solid black; padding: 8px; text-align:center;"
         >
           
           <div>
-        {{ (Number(vendor.cgst_percent) || 0) + (Number(vendor.utgst_percent) || 0) + (Number(vendor.igst_percent) || 0) }}%
+        {{ (Number(vendor.transportation_cgst_percent) || 0) + (Number(vendor.transportation_utgst_percent) || 0) + (Number(vendor.transportation_igst_percent) || 0) }}%
           </div>
         </td>
       </tr>
@@ -832,11 +835,35 @@
         <td
           v-for="vendor in props.childData.vendor_details"
           :key="'transport-' + vendor.name"
-          colspan="2"
+          colspan="3"
           style="border: 1px solid black; padding: 8px; text-align:center;"
         >
         
           {{ vendor.transportation_total_amount || '-' }}
+        </td>
+      </tr>
+        <tr>
+        <td colspan="4" style="border: 1px solid black; padding: 8px;">Additional Charges</td>
+        <td
+          v-for="vendor in props.childData.vendor_details"
+          :key="'transport-' + vendor.name"
+          colspan="3"
+          style="border: 1px solid black; padding: 8px; text-align:center;"
+        >
+
+          {{ vendor.additional_charges || '-' }}/-
+        </td>
+      </tr>
+       <tr>
+        <td colspan="4" style="border: 1px solid black; padding: 8px;">Grand Total</td>
+        <td
+          v-for="vendor in props.childData.vendor_details"
+          :key="'transport-' + vendor.name"
+          colspan="3"
+          style="border: 1px solid black; padding: 8px; text-align:center;"
+        >
+
+          {{ vendor.grand_total || '-' }}
         </td>
       </tr>
       <tr>
@@ -844,7 +871,7 @@
         <td
           v-for="vendor in props.childData.vendor_details"
           :key="'delivery-' + vendor.name"
-          colspan="2"
+          colspan="3"
           style="border: 1px solid black; padding: 8px; text-align:center;"
         >
           {{ vendor.delivery_time || '-' }}
@@ -855,7 +882,7 @@
         <td
           v-for="vendor in props.childData.vendor_details"
           :key="'payment-' + vendor.name"
-          colspan="2"
+          colspan="3"
           style="border: 1px solid black; padding: 8px; text-align:center;"
         >
           {{ vendor.payment_terms || '-' }}
@@ -866,7 +893,7 @@
         <td
           v-for="vendor in props.childData.vendor_details"
           :key="'rank-' + vendor.name"
-          colspan="2"
+          colspan="3"
           style="border: 1px solid black; padding: 8px; text-align:center;"
         >
           {{ vendor.biddle_rank || '-' }}
@@ -884,7 +911,7 @@
         <td
           v-for="(vendor, index) in props.childData.vendor_details"
           :key="'attachments-' + vendor.name"
-          colspan="2"
+          colspan="3"
           style="border: 1px solid black; padding: 8px; text-align:center;"
         >
           <span
@@ -903,7 +930,7 @@
         <td
           v-for="vendor in props.childData.vendor_details"
           :key="'remark-' + vendor.name"
-          colspan="2"
+          colspan="3"
           style="border: 1px solid black; padding: 8px; text-align:center;"
         >
           {{ vendor.remark || '-' }}
@@ -2348,6 +2375,8 @@ const isImageVendor = (url) => {
 // }
 .tr_background th{
 background-color: #fff7d6 !important;
+color: #000 !important;
+font-weight: 500;
 }
 .vendor_table thead tr:first-child th:first-child {
   border-top-left-radius: 2px !important;

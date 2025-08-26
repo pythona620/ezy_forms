@@ -197,20 +197,69 @@
 
 
                     </div>
-                    <div>
+                    <!-- Case 1: Both PDF + Workorder available -->
+                      <div v-if="((tableData.status === 'Completed' && linked_status !== 'Completed') || linked_status === 'Completed') 
+                                && doctypeForm.work_order == 1"
+                          class="dropdown">
+                        <button 
+                          class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto dropdown-toggle"
+                          type="button"
+                          data-bs-toggle="dropdown"
+                          aria-expanded="false"
+                        >
+                          <i class="bi bi-download px-2 fw-bold"></i> Download
+                        </button>
+
+                        <ul class="dropdown-menu font-12">
+                          <li>
+                            <a class="dropdown-item" href="javascript:void(0)" @click="downloadPdf">
+                              <i class="bi bi-file-earmark-pdf me-2"></i> Download PDF
+                            </a>
+                          </li>
+                          <li>
+                            <a class="dropdown-item" href="javascript:void(0)" @click="DownloadWorkorder">
+                              <i class="bi bi-file-earmark-text me-2"></i> Download Workorder
+                            </a>
+                          </li>
+                        </ul>
+                      </div>
+
+                      <!-- Case 2: Only PDF -->
+                      <button 
+                        v-else-if="(tableData.status === 'Completed' && linked_status !== 'Completed') || linked_status === 'Completed'"
+                        class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto"
+                        type="button"
+                        @click="downloadPdf"
+                      >
+                        <i class="bi bi-download px-2 fw-bold"></i> Download
+                      </button>
+
+
+
+
+
+                    <!-- <div>
                       <button
                         v-if="tableData.status === 'Completed' && linked_status !== 'Completed' || linked_status === 'Completed'"
                         class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto " type="button"
                         @click="downloadPdf"><i class="bi bi-download px-2 fw-bold"></i>Download
                       </button>
-                    </div>
-                    <!-- data-bs-toggle="modal"
-                      data-bs-target="#pdfView" -->
-                    <button v-if="doctypeForm.work_order == 1" type="button" 
+                    <button v-if="doctypeForm.work_order == 1" type="button" data-bs-toggle="modal"
+                      data-bs-target="#pdfView"
                       class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto "
                       @click="DownloadWorkorder">
                       Download Workorder
                     </button>
+                    </div> -->
+                    <!-- data-bs-toggle="modal"
+                      data-bs-target="#pdfView" -->
+                      <!-- <button v-if="doctypeForm.work_order == 1" type="button" data-bs-toggle="modal"
+                      data-bs-target="#pdfView"
+                      class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto "
+                      @click="DownloadWorkorder">
+                      Download Workorder
+                    </button>  -->
+                      
                     <!-- <button type="button" class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto "
                       data-bs-toggle="modal" data-bs-target="#pdfView" @click="viewasPdfView">
                       Preview
@@ -1256,14 +1305,14 @@ function DownloadWorkorder() {
   const dataObj = {
     form_id: doctypeForm.value.name,
     doctype_name: tableData.value.doctype_name,
+    business_unit: business_unit.value,
+    total_levels: tableData.value.total_levels,
   };
   axiosInstance
     .post(apis.download_workorder, dataObj)
     .then((response) => {
-      // pdfPreview.value = response.message;
-      // if (response.message) {
+      // pdfPreview.value = response.message; 
 
-      // }
       if (!response || !response.message) {
         console.error("Invalid response:", response);
         return;
@@ -1516,7 +1565,7 @@ function mapFormFieldsToRequest(doctypeData, showRequestData) {
       });
     });
   });
-}
+} 
 
 const requestcancelled = computed(() => {
   if (activityData.value.length === 0) return false;
