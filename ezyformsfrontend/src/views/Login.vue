@@ -105,11 +105,7 @@
         <div class="row">
           <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
             <label class="font-13" for="email">Email<span class="text-danger ps-1">*</span></label>
-<<<<<<< HEAD
-            <input class="form-control m-0" type="email" id="email" v-model="SignUpdata.email" @blur="validateEmail" 
-=======
             <input class="form-control m-0 bg-transparent" type="email" id="email" v-model="SignUpdata.email" @blur="validateEmail"
->>>>>>> 3e9331cb2264a1e4e7b1ee98283ee192554b03f7
               :class="{ 'is-invalid': errors.email }" />
             <div class="invalid-feedback font-11 mt-1" v-if="errors.email">
               {{ errors.email }}
