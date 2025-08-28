@@ -145,8 +145,9 @@ const isEnable = ref("");
 
 
 // Business unit and filter object
-const businessUnit = computed(() => EzyBusinessUnit.value);
-const newBusinessUnit = ref({ business_unit: '' });
+const businessUnit = computed(() => {
+  return EzyBusinessUnit.value});
+const newBusinessUnit = ref('');
 const filterObj = ref({ limitPageLength: 20, limit_start: 0, filters: [] });
 
 
@@ -476,17 +477,28 @@ function confirmAction() {
 
 // Watch business unit and department ID changes
 watch(
-  [() => businessUnit.value, () => props.id],
-  ([newBusinessUnitVal, newId]) => {
-    newBusinessUnit.value.business_unit = newBusinessUnitVal;
-    // if (newBusinessUnitVal.length && newId && props.id !== ':id') {
-    //   filterObj.value.limit_start = 0;
-    //   filterObj.value.filters = [];
+  businessUnit,
+  (newVal) => {
+    if (newVal && newVal.length) {
+      newBusinessUnit.value = newVal;
     fetchDepartmentDetails();
-    // }
+    }
   },
   { immediate: true }
 );
+
+// watch(
+//   [() => businessUnit.value, () => props.id],
+//   ([newBusinessUnitVal, newId]) => {
+//     newBusinessUnit.value.business_unit = newBusinessUnitVal;
+//     // if (newBusinessUnitVal.length && newId && props.id !== ':id') {
+//     //   filterObj.value.limit_start = 0;
+//     //   filterObj.value.filters = [];
+//     fetchDepartmentDetails();
+//     // }
+//   },
+//   { immediate: true }
+// );
 
 // Handle updating the current value
 const PaginationUpdateValue = (itemsPerPage) => {
@@ -552,7 +564,7 @@ function inLineFiltersData(searchedData) {
 function fetchDepartmentDetails(id, data) {
 
   const filters = [
-    ["business_unit", "=", `${newBusinessUnit.value.business_unit}`],
+    ["business_unit", "=", `${businessUnit.value}`],
 
 
   ];
