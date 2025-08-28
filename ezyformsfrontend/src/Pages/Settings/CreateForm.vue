@@ -12,7 +12,8 @@
           </p>
         </div>
         <div v-if="is_admin == 1" class="d-flex align-items-center gap-2">
-          <div class="d-flex align-items-center">
+          <div class="d-flex align-items-center gap-2">
+            <!-- <button class="btn btn-dark font-12 h-auto" @click="toWorkOrder">Work order</button>  -->
             <ButtonComp class="buttoncomp" @click="formCreation()" name="Create Form"></ButtonComp>
           </div>
         </div>
@@ -188,7 +189,12 @@ function formCreation(item = null) {
   localStorage.setItem('routepath', route.path)
 }
 
-
+function toWorkOrder (){
+  router.push({
+    name: "vendorcomparison",
+ 
+      });
+} 
 function viewPreview(data, index, type) {
   // console.log(route.path);
   if (type === "view") {
@@ -353,17 +359,25 @@ function actionCreated(rowData, actionEvent) {
       // console.log(route.path, "sadasda");
 
       if (hasAccess && rowData.enable === 1) {
-        router.push({
-          name: "RaiseRequest",
-          query: {
-            routepath: route.path,
-            selectedForm: rowData.form_short_name,
-            business_unit: rowData.business_unit,
-            has_workflow: rowData.has_workflow
+        if(rowData.form_name === 'VENDOR COMPARISON'){
+            router.push({
+          name: "vendorcomparison",
+ 
+          });
 
-
-          },
-        });
+        } else{
+          router.push({
+            name: "RaiseRequest",
+            query: {
+              routepath: route.path,
+              selectedForm: rowData.form_short_name,
+              business_unit: rowData.business_unit,
+              has_workflow: rowData.has_workflow
+              
+              
+            },
+          });
+        }
       } else if (rowData.enable === 0) {
         toast.info("This form is currently disabled.", { autoClose: 500 });
       } else {
@@ -476,6 +490,14 @@ function confirmAction() {
 
 
 // Watch business unit and department ID changes
+// watch(
+//   businessUnit.value,
+//   (newBusinessUnitVal) => {
+//     businessUnit.value = newBusinessUnitVal;
+//     fetchDepartmentDetails();
+//   },
+//   { immediate: true }
+// );
 watch(
   businessUnit,
   (newVal) => {
@@ -560,8 +582,8 @@ function inLineFiltersData(searchedData) {
     }
   }, 500); // Adjust debounce delay as needed
 }
-// Fetch department details function
-function fetchDepartmentDetails(id, data) {
+
+function fetchDepartmentDetails(data) {
 
   const filters = [
     ["business_unit", "=", `${businessUnit.value}`],
@@ -569,9 +591,7 @@ function fetchDepartmentDetails(id, data) {
 
   ];
   filterObj.value.filters.push(...filters);
-  if (props.id && props.id !== "Allforms" && props.id !== "allforms") {
-    filters.push(["owner_of_the_form", "=", props.id]);
-  }
+
   if (data) {
     filters.push(...data)
   }
@@ -625,7 +645,7 @@ onMounted(() => {
   if (is_admin.value == 1) {
     isEnable.value = "true";
   }
-  if (route.path === "/forms/department/allforms" || route.path === "/forms/department/Allforms") {
+  if (route.path === "/forms/department/allforms" || route.path === "/forms/department/allforms") {
     router.replace("/forms/department/allforms");
   }
 

@@ -70,9 +70,9 @@ const routes = [
     name: 'PdfPreview'
   },
   {
-    path:'/WorkOrderDetails',
+    path:'/settings/vendorcomparison',
     component:WorkOrderDetailes,
-    name:'WorkOrderDetails'
+    name:'vendorcomparison'
   },
 
   { path: "/:pathMatch(.*)*", name: "NotFound", component: NotFound },

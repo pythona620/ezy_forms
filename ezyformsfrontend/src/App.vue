@@ -39,10 +39,51 @@ import '@vueform/multiselect/themes/default.css';
 import { loadValue } from './Components/loader/loader'
 import { watch } from 'vue';
 import { onMounted } from 'vue';
+// import { onBeforeUnmount } from 'vue';
+// import axiosInstance from './shared/services/interceptor';
+// import { apis } from './shared/apiurls';
 import { onBeforeUnmount } from 'vue';
 // Get current route
 const route = useRoute();
+// let inactivityTimer
 
+// const logoutUser = async () => {
+//   try {
+//     await axiosInstance.post(apis.logout)
+    
+//     // Clear all cookies
+//     document.cookie.split(";").forEach(cookie => {
+//       document.cookie = cookie
+//         .replace(/^ +/, "")
+//         .replace(/=.*/, `=;expires=${new Date(0).toUTCString()};path=/`)
+//     })
+
+//     window.location.href = '/login' // Redirect to login page
+//   } catch (err) {
+//     console.error('Logout failed:', err)
+//   }
+// }
+// // const resetInactivityTimer = () => {
+// //   clearTimeout(inactivityTimer)
+// //   inactivityTimer = setTimeout(logoutUser, 20 * 1000) // ⏱️ 20 seconds for testing
+// // }
+// const resetInactivityTimer = () => {
+//   clearTimeout(inactivityTimer)
+//   inactivityTimer = setTimeout(logoutUser, 5 * 60 * 1000) // 5 minutes
+// }
+
+// onMounted(() => {
+//   window.addEventListener('mousemove', resetInactivityTimer)
+//   window.addEventListener('keydown', resetInactivityTimer)
+
+//   resetInactivityTimer() // Start the initial timer
+// })
+
+// onBeforeUnmount(() => {
+//   window.removeEventListener('mousemove', resetInactivityTimer)
+//   window.removeEventListener('keydown', resetInactivityTimer)
+//   clearTimeout(inactivityTimer)
+// })
 // Check if the current route is '/archived'
 const isArchivedRoute = computed(() => route.path.startsWith('/archived'));
 

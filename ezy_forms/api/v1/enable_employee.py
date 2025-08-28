@@ -5,8 +5,7 @@ from ezy_forms.ezy_forms.doctype.login_check.login_check import after_insert_use
 def employee_update(emp_mail):
     try:
         sender = frappe.get_value("Email Account", {"enable_outgoing": 1, "default_outgoing": 1}, "email_id")
-        if not sender:
-            return "No outgoing email account is configured."
+
 
         employee = frappe.db.get_value("Ezy Employee", {"name": emp_mail}, ["name", "emp_name"])
         if not employee:
@@ -22,17 +21,20 @@ def employee_update(emp_mail):
             "emp_mail_id": emp_mail,
             "site_url": f"{site_url}/ezyformsfrontend#/"
         })
-
-        frappe.sendmail(
-            recipients=[emp_mail],
-            subject=subject,
-            sender=sender,
-            message=message,
-            now=True
-        )
+        if sender:
+            frappe.sendmail(
+                recipients=[emp_mail],
+                subject=subject,
+                sender=sender,
+                message=message,
+                now=True
+            )
 
         frappe.db.set_value("Ezy Employee", emp_mail, {"enable": 1, "is_web_form": 0})
         frappe.db.set_value("User", emp_mail, "enabled", 1)
+        employee = frappe.get_doc("Ezy Employee", emp_mail)
+        emp = employee.update_wf_role_matrix()
+
         if not frappe.db.exists("Login Check", {"user_id": emp_mail}): # Ensure user is created in Login Check
             new_doc = frappe.new_doc("Login Check")
             new_doc.user_id = emp_mail

@@ -71,7 +71,7 @@ def sign_up(email: str, full_name: str,designation:str|None,emp_phone:str|None,e
 		if default_role:
 			user.add_roles(default_role)
 		if redirect_to:
-			frappe.cache.hset("redirect_after_login", user.name, redirect_to)
+			frappe.cache().hset("redirect_after_login", user.name, redirect_to)
 	return  _("Please contact your IT Manager to verify your sign-up")
 
 
@@ -158,13 +158,14 @@ def employee_update_notification(emp_mail):
 		})
 
 	# Send the email
-	frappe.sendmail(
-		recipients=[emp_mail],
-		subject=subject,
-		sender=sender,
-		message=message,
-		now=True
-	)
+	if sender:
+		frappe.sendmail(
+			recipients=[emp_mail],
+			subject=subject,
+			sender=sender,
+			message=message,
+			now=True
+		)
 
 	return "Notification sent successfully"
 
