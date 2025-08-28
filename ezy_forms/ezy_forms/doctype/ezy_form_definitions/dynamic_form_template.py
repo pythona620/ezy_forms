@@ -1272,13 +1272,13 @@ def preview_dynamic_form(form_short_name: str, business_unit=None, name=None):
             ), json_object))
 
             form_name = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_name") or "Form"
-    html_view = json_structure_call_for_html_view(
-        json_obj=json_object,
-        form_name=form_name,
-        child_data=data_list,
-        child_table_data=None,
-        business_unit=business_unit
-    )
+            html_view = json_structure_call_for_html_view(
+                json_obj=json_object,
+                form_name=form_name,
+                child_data=data_list,
+                child_table_data=None,
+                business_unit=business_unit
+            )
     
     return html_view
  
@@ -1305,7 +1305,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
         bench_path         = get_bench_path()
         site               = frappe.local.site
         folder_path = get_site_path("public", "files", "Attachment_folder")
-
+        form_name = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_name")
         delete = lambda path: os.unlink(path) if os.path.isfile(path) or os.path.islink(path) else shutil.rmtree(path)
 
         if os.path.exists(folder_path) and os.path.isdir(folder_path):
@@ -1551,3 +1551,32 @@ def get_html_file_data(doc=None,data=None,print_format=None):
     html_file = get_html_and_style(doc,name=data,print_format=print_format,no_letterhead=None,letterhead=None,trigger_print=False,style=None,settings=None)
  
     return html_file
+
+
+
+
+frappe.whitelist()
+def get_wf_activate_log(wf_generated_request_id):
+    """Fetches the activity log for a given workflow request ID."""
+    try:
+        activate_log = frappe.get_doc('WF Activity Log', wf_generated_request_id).as_dict()
+        filtered_reasons = sorted(
+            [
+                {
+                    'level': entry['level'],
+                    'role': entry['role'],
+                    'user': entry['user'],
+                    'user_name': entry['user_name'],
+                    'reason': entry['reason'],
+                    'action': entry['action'],
+                    'time': entry['time'],
+                    'random_string': entry['random_string']
+                }
+                for entry in activate_log.get('reason', [])
+            ],
+            key=lambda x: x['time']
+        )
+        return filtered_reasons
+    except Exception as e:
+        frappe.log_error(f"Error fetching activity log: {e}")
+        return []

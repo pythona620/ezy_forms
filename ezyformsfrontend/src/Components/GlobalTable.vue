@@ -190,7 +190,7 @@
                     {{ getDisplayText(column.td_key, row[column.td_key]) }}
                   </span>
                 </span>
-                <span v-else>
+                <span  v-else>
                   {{ row[column.td_key] }}
 
                   <!-- {{ getDisplayText(column.td_key, row[column.td_key]) }} -->

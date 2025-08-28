@@ -148,6 +148,7 @@
                             active-class="active-link">
                             <li><i v-tooltip.right="'All Forms'" class="bi-icon fs-6 bi bi-file-earmark-richtext me-3"></i>All Forms</li>
                         </router-link>
+                       
                         <router-link v-for="(department, index) in formSideBarData" :key="department.route"
                             :to="`/forms/department/${department.route}`" class="text-decoration-none text-black"
                             active-class="active-link">
@@ -167,6 +168,10 @@
 
                                 {{ department.name }}
                             </li>
+                        </router-link>
+                         <router-link to="/settings/vendorcomparison" class="text-decoration-none text-black">
+                            <li><i v-tooltip.right="'Vendor'" class="bi-icon fs-6 bi bi-file-earmark-richtext me-3"></i>Vendor Comparison</li>
+                        
                         </router-link>
 
                     </ul>
@@ -238,6 +243,7 @@ const settingsSideBarData = [
     { name: 'Audit Log', icon: 'bi bi-clock', route: 'auditlog' },
     { name: 'Form Creation' , icon: 'bi bi-file-earmark-text', route: 'CreateForm' },
     { name: 'Form Templates', icon: 'bi bi-file-earmark-text', route: 'predefinedforms' },
+    { name: 'Vendor Comparison', icon: 'bi bi-file-earmark-text', route: 'vendorcomparison' },
     { name: 'Acknowledgement' , icon: 'bi bi-file-earmark-text', route: 'acknowledgement' },
     { name: 'Email Template' , icon: 'bi bi-file-earmark-text', route: 'emailtemplate' },
     { name: 'Password Policy' , icon: 'bi bi-lock', route: 'passwordpolicy' },

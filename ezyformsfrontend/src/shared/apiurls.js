@@ -29,7 +29,17 @@ export const doctypes = {
   websiteSettings:'Website Settings',
   acknowledgement:'Acknowledgement',
   emailTemplate:'Email Template',
+
+
+  ezyItems: "Ezy Items",
+  ezyVendors :'Ezy Vendor Details',
+  // ezyContracts: 'Contract',
+  ezyContracts: 'CTO',
   EzyInsights:"Ezy Insights",
+  wfRoadmap: 'WF Roadmap',
+  ExpenseCodes: 'Expense Code',
+  CostCenter: 'Cost Center',
+
   EzyActivityLog:"Ezy Dynamic Activate Log"
   
 
@@ -95,6 +105,7 @@ export const apis = {
   employeedisable:domain+`/method/ezy_forms.api.v1.enable_employee.employee_update`,
   get_approved_by_me: domain + `/method/ezy_flow.api.v1.approved_by_me.get_approved_by_me`,
   get_wf_activate_log: domain + `/method/ezy_flow.ezy_flow.doctype.wf_activity_log.wf_activity_log.get_wf_activate_log`,
+  download_workorder: domain + `/method/forms_templates.api.v1.vendor_comparision.vendor_comparision_api`,
 
   
 

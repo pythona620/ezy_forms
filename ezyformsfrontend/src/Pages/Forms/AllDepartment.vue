@@ -232,6 +232,14 @@ function viewPreview(data, index, type) {
       // console.log(route.path, "sadasda");
 
       if (hasAccess) {
+         if(data.form_name === 'VENDOR COMPARISON'){
+            router.push({
+          name: "vendorcomparison",
+ 
+          });
+
+        } else{
+
         router.push({
           name: "RaiseRequest",
           query: {
@@ -242,6 +250,8 @@ function viewPreview(data, index, type) {
 
           },
         });
+        }
+
       } else {
         toast.info("You do not have permission to access this Form.");
       }
@@ -308,6 +318,7 @@ function actionCreated(rowData, actionEvent) {
       // console.log(route.path, "sadasda");
 
       if (hasAccess && rowData.enable === 1) {
+        
         router.push({
           name: "RaiseRequest",
           query: {

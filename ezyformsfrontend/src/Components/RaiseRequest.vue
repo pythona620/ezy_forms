@@ -1336,10 +1336,15 @@ function request_raising_fn(item) {
     property: business_unit.value,
     ip_address: ip_address.value,
     employee_id: employeeData.value.emp_code,
-    be_half_of: item.request_for === 'Others ' ?  item.employee_name : '',
+    be_half_of: item.request_for === 'Others' ? item.employee_name : '',
     request_for:item.request_for,
     unwanted_files: removeAttachFiles.value
   };
+  // if(item.request_for === 'Others'){
+  //   be_half_of:item.employee_name,
+  // }
+
+
   axiosInstance.post(apis.raising_request, data_obj).then((resp) => {
     if (resp?.message?.success === true) {
       if(selectedData.value.main_form_Id){

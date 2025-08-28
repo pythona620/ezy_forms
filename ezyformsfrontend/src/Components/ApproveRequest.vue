@@ -40,7 +40,7 @@
                         class="bi rejected-icon bi-x-circle"></i></span> -->
                   </div>
                 </div>
-              </div>                                                                                                                                                 
+              </div>
               <div class="position-relative ">
                 <div class="requestPreviewDiv pb-5">
 
@@ -50,11 +50,9 @@
 
                 </div>
 
-                <div
-                      v-if="selectedData?.type === 'myforms' &&
-                            (tableData?.status === 'Request Raised' || tableData?.status === 'Request Cancelled') &&
-                            selectedData?.type !== 'myapprovals'"
-                      class="d-flex justify-content-end approveBtns">
+                <div v-if="selectedData?.type === 'myforms' &&
+                  (tableData?.status === 'Request Raised' || tableData?.status === 'Request Cancelled') &&
+                  selectedData?.type !== 'myapprovals'" class="d-flex justify-content-end approveBtns">
 
                   <button type="submit" class="btn Edit_btn" @click.prevent="EditformSubmission()">
                     <span v-if="loading" class="spinner-border spinner-border-sm" role="status"
@@ -79,17 +77,16 @@
 
                     <div class="form-floating mb-2 p-1">
                       <!-- :disabled="view_only_reportee === 1" -->
-                      <textarea  class="form-control font-12"
-                        placeholder="Leave a comment here" id="floatingTextarea" @input="resetCommentsValidation"
-                        :class="{ 'is-invalid': !isCommentsValid }" v-model="ApproverReason"></textarea>
+                      <textarea class="form-control font-12" placeholder="Leave a comment here" id="floatingTextarea"
+                        @input="resetCommentsValidation" :class="{ 'is-invalid': !isCommentsValid }"
+                        v-model="ApproverReason"></textarea>
                       <label class="font-11" for="floatingTextarea">Comments..</label>
                       <span v-if="!isCommentsValid" class="font-11 text-danger ps-1">Please enter comments**</span>
                     </div>
                     <div class=" d-flex justify-content-between ">
                       <div>
-                        <button :disabled="rejectLoad "
-                          class="btn btn-outline-danger font-10 py-0 rejectbtn" type="button"
-                          @click="ApproverCancelSubmission(formData, 'Reject')">
+                        <button :disabled="rejectLoad" class="btn btn-outline-danger font-10 py-0 rejectbtn"
+                          type="button" @click="ApproverCancelSubmission(formData, 'Reject')">
                           <span v-if="rejectLoad" class="spinner-border spinner-border-sm" role="status"
                             aria-hidden="true"></span>
                           <span v-if="!rejectLoad"><i class="bi bi-x-lg fw-bolder font-12 me-2"></i><span
@@ -112,8 +109,7 @@
 
                         </div> -->
                         <div>
-                          <button :disabled="loading " type="submit"
-                            class="btn btn-success approvebtn"
+                          <button :disabled="loading" type="submit" class="btn btn-success approvebtn"
                             @click.prevent="ApproverFormSubmission(emittedFormData, 'Approve')">
                             <span v-if="loading" class="spinner-border spinner-border-sm" role="status"
                               aria-hidden="true"></span>
@@ -182,9 +178,10 @@
 
 
                 </div> -->
+                
                 <div class="col-xl-12 col-lg-12 col-md-12">
                   <div class=" d-flex justify-content-between gap-2">
-                    
+
                     <div>
                       <button v-if="(selectedData.type === 'myforms' || selectedData.type === 'myteam' || selectedData.type === 'myapprovals' || selectedData.type === 'linkedForm') &&
                         linked_status !== 'Completed' &&
@@ -200,15 +197,70 @@
 
 
                     </div>
-                    <div>
+                    <!-- Case 1: Both PDF + Workorder available -->
+                      <div v-if="((tableData.status === 'Completed' && linked_status !== 'Completed') || linked_status === 'Completed') 
+                                && doctypeForm.work_order == 1"
+                          class="dropdown">
+                        <button 
+                          class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto dropdown-toggle"
+                          type="button"
+                          data-bs-toggle="dropdown"
+                          aria-expanded="false"
+                        >
+                          <i class="bi bi-download px-2 fw-bold"></i> Download
+                        </button>
+
+                        <ul class="dropdown-menu font-12">
+                          <li>
+                            <a class="dropdown-item" href="javascript:void(0)" @click="downloadPdf">
+                              <i class="bi bi-file-earmark-pdf me-2"></i> Download PDF
+                            </a>
+                          </li>
+                          <li>
+                            <a class="dropdown-item" href="javascript:void(0)" @click="DownloadWorkorder">
+                              <i class="bi bi-file-earmark-text me-2"></i> Download Workorder
+                            </a>
+                          </li>
+                        </ul>
+                      </div>
+
+                      <!-- Case 2: Only PDF -->
                       <button 
-                      v-if="tableData.status === 'Completed' && linked_status !== 'Completed' || linked_status === 'Completed'"
-                        
+                        v-else-if="(tableData.status === 'Completed' && linked_status !== 'Completed') || linked_status === 'Completed'"
+                        class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto"
+                        type="button"
+                        @click="downloadPdf"
+                      >
+                        <i class="bi bi-download px-2 fw-bold"></i> Download
+                      </button>
+
+
+
+
+
+                    <!-- <div>
+                      <button
+                        v-if="tableData.status === 'Completed' && linked_status !== 'Completed' || linked_status === 'Completed'"
                         class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto " type="button"
                         @click="downloadPdf"><i class="bi bi-download px-2 fw-bold"></i>Download
                       </button>
-                    </div>
-                    <!-- <button type="button" class="btn btn-outline-light font-12  CreateDepartments "
+                    <button v-if="doctypeForm.work_order == 1" type="button" data-bs-toggle="modal"
+                      data-bs-target="#pdfView"
+                      class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto "
+                      @click="DownloadWorkorder">
+                      Download Workorder
+                    </button>
+                    </div> -->
+                    <!-- data-bs-toggle="modal"
+                      data-bs-target="#pdfView" -->
+                      <!-- <button v-if="doctypeForm.work_order == 1" type="button" data-bs-toggle="modal"
+                      data-bs-target="#pdfView"
+                      class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto "
+                      @click="DownloadWorkorder">
+                      Download Workorder
+                    </button>  -->
+                      
+                    <!-- <button type="button" class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto "
                       data-bs-toggle="modal" data-bs-target="#pdfView" @click="viewasPdfView">
                       Preview
                     </button> -->
@@ -242,13 +294,13 @@
                       : 'activityRedDot'"></div>
                     <div class="activity-log-content">
                       <p class="font-12 mb-1">
-                        
+
                         <span class="strong-content">{{ formatAction(item.action) }} on </span>
-                        <span class="strong-content">{{ formatCreation( item.time) }}</span><br />
+                        <span class="strong-content">{{ formatCreation(item.time) }}</span><br />
                         <span class="strong-content">{{ item.user_name }}</span><br />
                         <span>{{ item.role }}</span><br />
                         <span class="font-12 text-secondary">{{ item.reason || "N/A" }}</span>.
-                        
+
                       </p>
                     </div>
                   </div>
@@ -339,7 +391,7 @@
 
 
 
-                      <!-- 🔥 Array Fields -->
+                      <!--  Array Fields -->
                       <div v-for="(arrayItem, key) in arrayFields" :key="key" class="mb-3 overflow-auto">
                         <strong class="font-12">{{ formatKey(key) }}</strong>
                         <table class="table table-bordered table-sm">
@@ -418,7 +470,7 @@
 </template>
 
 <script setup>
-import {ref, watch, computed } from "vue";
+import { ref, watch, computed } from "vue";
 import ApproverPreview from "./ApproverPreview.vue";
 import { useRoute, useRouter } from "vue-router";
 import axiosInstance from "../shared/services/interceptor";
@@ -537,11 +589,20 @@ function EditformSubmission() {
     ...(tableData.value.linked_form_id && { main_form_Id: tableData.value.linked_form_id }),
     ...(doctypeForm.value.return_gate_pass_name && { main_form: doctypeForm.value.return_gate_pass_name })
   };
+  if (route.query.doctype_name === 'CTO') {
+    router.push({
+      name: "vendorcomparison",
+      query
 
-  router.push({
-    name: "RaiseRequest",
-    query
-  });
+    });
+  }
+  else {
+
+    router.push({
+      name: "RaiseRequest",
+      query
+    });
+  }
 }
 
 // console.log("emittedFormData", emittedFormData.value);
@@ -556,7 +617,7 @@ watch(
       // if (selectedData.value.type === "mytasks") {
       //   ViewOnlyRe();
       // } else {
-        receivedForMe()
+      receivedForMe()
       // }
     }
   },
@@ -1240,7 +1301,46 @@ function viewasPdfView() {
       console.error("Error fetching data:", error);
     });
 }
+function DownloadWorkorder() {
+  const dataObj = {
+    form_id: doctypeForm.value.name,
+    doctype_name: tableData.value.doctype_name,
+    business_unit: business_unit.value,
+    total_levels: tableData.value.total_levels,
+  };
+  axiosInstance
+    .post(apis.download_workorder, dataObj)
+    .then((response) => {
+      // pdfPreview.value = response.message; 
 
+      if (!response || !response.message) {
+        console.error("Invalid response:", response);
+        return;
+      }
+
+      let pdfUrl = domain + response.message;
+
+      // Remove '/api' from the URL if present
+      pdfUrl = pdfUrl.replace("/api", "");
+
+      // Extract filename safely
+      const fileName = response.message.includes("/")
+        ? response.message.split("/").pop()
+        : "download.pdf";
+
+      // Create and trigger download
+      const link = document.createElement("a");
+      link.href = pdfUrl;
+      link.download = fileName;
+      link.target = "_blank"; // Helps with some browser restrictions
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link); 
+    })
+    .catch((error) => {
+      console.error("Error downloading PDF:", error);
+    });
+}
 
 function downloadPdf() {
   const dataObj = {
@@ -1330,21 +1430,45 @@ function downloadPdf() {
 //     .catch((error) => {
 //       console.error("Error fetching activity data:", error);
 //     });
+// }  
+// function Wfactivitylog(formname) {
+//   axiosInstance
+//     .get(`${apis.resource}${doctypes.WFActivityLog}/${formname}`)
+//     .then((res) => {
+//       if (res.data && Array.isArray(res.data.reason)) {
+//         const parseTime = (str) => {
+//           const [datePart, timePart] = str.split(' ');
+//           const [year, month, day] = datePart.split('/').map(Number);
+//           const [hour, minute, second, ms] = timePart.split(':').map(Number);
+//           return new Date(year, month - 1, day, hour || 0, minute || 0, second || 0, ms || 0);
+//         };
+
+//         // Sort oldest first (ascending)
+//         res.data.reason.sort((a, b) => parseTime(a.time) - parseTime(b.time));
+
+//         activityData.value = res.data.reason;
+//       } else {
+//         activityData.value = [];
+//       }
+//     })
+//     .catch((error) => {
+//       console.error("Error fetching activity data:", error);
+//     });
 // }
 
 function Wfactivitylog(name) {
   // console.log(route.query.name, "wf_generated_request_id"); 
- let FormId = {
-  wf_generated_request_id : name,
- }
+  let FormId = {
+    wf_generated_request_id: name,
+  }
   axiosInstance
-  .post(apis.get_wf_activate_log, FormId)
-  .then((responce)=>{
-    // console.log(responce, "activity log data"); 
-    activityData.value = responce.message || []; // Ensure it's always an array
+    .post(apis.get_wf_activate_log, FormId)
+    .then((responce) => {
+      // console.log(responce, "activity log data"); 
+      activityData.value = responce.message || []; // Ensure it's always an array
 
-  })
-   .catch((error) => {
+    })
+    .catch((error) => {
       console.error("Error fetching data:", error);
     });
   // axiosInstance
@@ -1391,7 +1515,7 @@ function toLinkedForm() {
         main_form: selectedData.value.doctype_name,
         business_unit: selectedData.value.business_unit,
         main_form_Id: selectedData.value.formname,
-        
+
       },
     });
   } else {
@@ -1441,7 +1565,7 @@ function mapFormFieldsToRequest(doctypeData, showRequestData) {
       });
     });
   });
-}
+} 
 
 const requestcancelled = computed(() => {
   if (activityData.value.length === 0) return false;
@@ -1594,12 +1718,13 @@ watch(activityData, (newVal) => {
   overflow-y: scroll;
   position: relative;
 }
-.tabs_list{
-    position: sticky;
-    top: 0;
-    background-color: #fff !important;
-    padding-bottom: 5px;
-    z-index: 1;
+
+.tabs_list {
+  position: sticky;
+  top: 0;
+  background-color: #fff !important;
+  padding-bottom: 5px;
+  z-index: 1;
 }
 
 .pending {

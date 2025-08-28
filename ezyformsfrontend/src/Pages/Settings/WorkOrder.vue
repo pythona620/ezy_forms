@@ -111,7 +111,7 @@ const childtableHeaders = ref([]);
 function toWorkOrder(){
 
     router.push({
-        name: "WorkOrderDetails",
+        name: "vendorcomparison",
         query: {
             routepath: route.path,
             business_unit: businessUnit.value,

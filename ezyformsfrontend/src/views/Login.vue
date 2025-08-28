@@ -510,11 +510,34 @@ export default {
 
       if (!email) {
         this.errors.email = "Email is required *";
+        
       } else if (!regex.test(email)) {
         this.errors.email = "Please enter a valid email address *";
-      } else {
+      } 
+       else {
         delete this.errors.email;
       }
+ axiosInstance
+    .get(`${apis.loginCheckmethod}`, {
+      params: { user_id: this.SignUpdata.email },
+    })
+    .then((res) => {
+      // Case: User not found – clear error
+      if (res.message === "User not found") {
+        this.errors.email = '';
+      } 
+      // Case: res.message is an object (user exists) – show error
+      else if (typeof res.message === 'object' && res.message.user_id) {
+        this.errors.email = "Already Registered User";
+      }
+    })
+    .catch((error) => {
+      console.error("Login error: ", error);
+      this.errors.email = "Error checking email";
+    });
+
+
+
     },
     validatePhone() {
       const phone = this.SignUpdata.emp_phone;
@@ -629,6 +652,7 @@ export default {
       this.selectedOption = null;
       this.signatureInputRef = null;
       this.acknowledge = ""
+      this.errors = {};
       this.forgotPasswordMail="";
       this.errors.forgotPasswordMail="";
 
