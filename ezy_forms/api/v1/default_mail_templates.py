@@ -1,8 +1,11 @@
 import frappe
 from frappe.utils import get_url
 from frappe import _
+from ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions import ezy_doctype_permission
+from ezy_forms.ezy_forms.doctype.ezy_dynamic_activate_log.ezy_dynamic_activate_log import create_default_activation_log
 
 def email_template_create():
+    
 	def create_template(name, subject, message):
 		if not frappe.db.exists("Email Template", name):
 			template = frappe.new_doc("Email Template")
@@ -159,4 +162,5 @@ def email_template_create():
  
 	frappe.db.commit()
 	
-  
+	ezy_doctype_permission()
+	create_default_activation_log()
