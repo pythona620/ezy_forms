@@ -163,3 +163,4 @@ def email_template_create():
 	frappe.db.commit()
 	
 	ezy_doctype_permission()
+	create_default_activation_log()
