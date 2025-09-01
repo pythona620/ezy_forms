@@ -105,16 +105,16 @@
         <div class="row">
           <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
             <label class="font-13" for="email">Email<span class="text-danger ps-1">*</span></label>
-            <input class="form-control m-0 bg-transparent" type="email" id="email" v-model="SignUpdata.email" @blur="validateEmail"
-              :class="{ 'is-invalid': errors.email }" />
+            <input class="form-control m-0 bg-transparent" type="email" id="email" v-model="SignUpdata.email"
+              @blur="validateEmail" :class="{ 'is-invalid': errors.email }" />
             <div class="invalid-feedback font-11 mt-1" v-if="errors.email">
               {{ errors.email }}
             </div>
           </div>
           <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
             <label class="font-13" for="full_name">User Name<span class="text-danger ps-1">*</span></label>
-            <input type="text" class="form-control m-0 bg-transparent text-uppercase" id="name" v-model="SignUpdata.full_name"
-              @blur="validateFullName" :class="{ 'is-invalid': errors.full_name }" />
+            <input type="text" class="form-control m-0 bg-transparent text-uppercase" id="name"
+              v-model="SignUpdata.full_name" @blur="validateFullName" :class="{ 'is-invalid': errors.full_name }" />
             <div class="invalid-feedback font-11 mt-1" v-if="errors.full_name">
               {{ errors.full_name }}
             </div>
@@ -142,9 +142,10 @@
           </div>
           <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
             <label class="font-13" for="emp_code">Department<span class="text-danger ps-1">*</span></label>
-            <Vue3Select v-model="SignUpdata.dept" :reduce="dept => dept.value" :options="this.deptDetails" placeholder="Select Department" />
+            <Vue3Select v-model="SignUpdata.dept" :reduce="dept => dept.value" :options="this.deptDetails"
+              placeholder="Select Department" />
           </div>
-           <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
+          <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
             <label class="font-13" for="emp_code">Property Name<span class="text-danger ps-1">*</span></label>
             <Vue3Select v-model="SignUpdata.business_unit" :options="this.propertyDetails"
               placeholder="Select Property" />
@@ -309,7 +310,8 @@
       </div>
     </div>
 
-    <div class="modal fade" id="EmployeeAcknowledgementModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="EmployeeAcknowledgementModal" data-bs-backdrop="static" tabindex="-1"
+      aria-hidden="true">
       <div class="modal-dialog modal-lg modal-dialog-centered ">
         <div class="modal-content">
           <div class="modal-header">
@@ -319,9 +321,10 @@
           </div>
           <div class="modal-body font-11">
             <div v-if="this.isAcknowledge == 0" class="ql-editor read-mode" v-html="acknowledgementHtml"></div>
-            <div v-if="this.isAcknowledgeSign==0" class="mt-3">
+            <div v-if="this.isAcknowledgeSign == 0" class="mt-3">
               <label class="font-13">Upload Signature</label>
-              <input type="file" ref="signatureInput" class="form-control shadow-none mt-1 p-1" @change="handleSignatureUpload" />
+              <input type="file" ref="signatureInput" class="form-control shadow-none mt-1 p-1"
+                @change="handleSignatureUpload" />
 
               <div v-if="acknowledge_signature" class="mt-2">
                 <img :src="acknowledge_signature" alt="Signature" style="max-height: 100px;" />
@@ -335,8 +338,9 @@
           <div class="modal-footer">
             <button type="button" class="btn btn-outline-secondary" @click="ClearAcknowledge"
               data-bs-dismiss="modal">Cancel</button>
-            <button type="button" @click="employeeAcknowledge" :disabled="!acknowledge || (isAcknowledgeSign == 0 && !acknowledge_signature)"
-              class="btn btn-dark" style="min-width:120px;">
+            <button type="button" @click="employeeAcknowledge"
+              :disabled="!acknowledge || (isAcknowledgeSign == 0 && !acknowledge_signature)" class="btn btn-dark"
+              style="min-width:120px;">
               Yes, Proceed
             </button>
 
@@ -434,13 +438,13 @@ export default {
       saveloading: false,
       isAcknowledge: "",
       ShowAcknowledgement: "",
-      acknowledge_signature:null,
-      isAcknowledgeSign:"",
-      LoginAcknowledge:"",
-      signatureInput:null,
-      subEndDate:"",
-      today:"",
-      selectedScore:""
+      acknowledge_signature: null,
+      isAcknowledgeSign: "",
+      LoginAcknowledge: "",
+      signatureInput: null,
+      subEndDate: "",
+      today: "",
+      selectedScore: ""
       // timeLeft: 60,
       // timer: null,
       // resentMessage: "",
@@ -497,11 +501,11 @@ export default {
         this.confirm_password && this.new_password !== this.confirm_password;
     },
 
-    clearPassword(){
-      this.new_password=""
-      this.confirm_password=""
-      this.passwordsMismatch=""
-      this.passwordError=""
+    clearPassword() {
+      this.new_password = ""
+      this.confirm_password = ""
+      this.passwordsMismatch = ""
+      this.passwordError = ""
       this.formdata.usr = "";
     },
     validateEmail() {
@@ -510,31 +514,31 @@ export default {
 
       if (!email) {
         this.errors.email = "Email is required *";
-        
+
       } else if (!regex.test(email)) {
         this.errors.email = "Please enter a valid email address *";
-      } 
-       else {
+      }
+      else {
         delete this.errors.email;
       }
- axiosInstance
-    .get(`${apis.loginCheckmethod}`, {
-      params: { user_id: this.SignUpdata.email },
-    })
-    .then((res) => {
-      // Case: User not found – clear error
-      if (res.message === "User not found") {
-        this.errors.email = '';
-      } 
-      // Case: res.message is an object (user exists) – show error
-      else if (typeof res.message === 'object' && res.message.user_id) {
-        this.errors.email = "Already Registered User";
-      }
-    })
-    .catch((error) => {
-      console.error("Login error: ", error);
-      this.errors.email = "Error checking email";
-    });
+      axiosInstance
+        .get(`${apis.loginCheckmethod}`, {
+          params: { user_id: this.SignUpdata.email },
+        })
+        .then((res) => {
+          // Case: User not found – clear error
+          if (res.message === "User not found") {
+            this.errors.email = '';
+          }
+          // Case: res.message is an object (user exists) – show error
+          else if (typeof res.message === 'object' && res.message.user_id) {
+            this.errors.email = "Already Registered User";
+          }
+        })
+        .catch((error) => {
+          console.error("Login error: ", error);
+          this.errors.email = "Error checking email";
+        });
 
 
 
@@ -653,26 +657,26 @@ export default {
       this.signatureInputRef = null;
       this.acknowledge = ""
       this.errors = {};
-      this.forgotPasswordMail="";
-      this.errors.forgotPasswordMail="";
+      this.forgotPasswordMail = "";
+      this.errors.forgotPasswordMail = "";
 
     },
 
-    openForgotpassword(){
+    openForgotpassword() {
       this.ShowLoginPage = false;
       this.showOtpPage = false;
       this.ShowSignUpPage = false;
       this.ShowForgotPassword = true;
-      this.showPwdField=false;
+      this.showPwdField = false;
       this.formdata.usr = ""
       this.formdata.pwd = ""
       this.errors.usr = ""
       this.errors.pwd = ""
       this.acknowledge = ""
     },
-    ClearAcknowledge(){
+    ClearAcknowledge() {
       this.acknowledge = "",
-      this.acknowledge_signature=""
+        this.acknowledge_signature = ""
       if (this.$refs.signatureInput) {
         this.$refs.signatureInput.value = null; // Clear file input
       }
@@ -711,29 +715,29 @@ export default {
     // },
     ForgotPassword() {
       this.validateForgotPassword()
-      if(!this.errors.forgotPasswordMail){
+      if (!this.errors.forgotPasswordMail) {
         const payload = {
-        cmd: "frappe.core.doctype.user.user.reset_password",
-        user: this.forgotPasswordMail,
-      }
-      axiosInstance.post(apis.forgotPassword, payload)
-        .then((res) => {
-          if (res) {
-            const messages = JSON.parse(res._server_messages);
-            const messageObj = JSON.parse(messages[0]);
-            if (messageObj.message) {
-              toast.success(messageObj.message);
-              this.forgotPasswordMail="";
-              this.ShowLoginPage = true;
-              this.showOtpPage = false;
-              this.ShowSignUpPage = false;
-              this.ShowForgotPassword=false;
+          cmd: "frappe.core.doctype.user.user.reset_password",
+          user: this.forgotPasswordMail,
+        }
+        axiosInstance.post(apis.forgotPassword, payload)
+          .then((res) => {
+            if (res) {
+              const messages = JSON.parse(res._server_messages);
+              const messageObj = JSON.parse(messages[0]);
+              if (messageObj.message) {
+                toast.success(messageObj.message);
+                this.forgotPasswordMail = "";
+                this.ShowLoginPage = true;
+                this.showOtpPage = false;
+                this.ShowSignUpPage = false;
+                this.ShowForgotPassword = false;
+              }
             }
-          }
-        })
-        .catch((error) => {
-          console.error("Upload error:", error);
-        })
+          })
+          .catch((error) => {
+            console.error("Upload error:", error);
+          })
       }
     },
     SignUp() {
@@ -798,14 +802,14 @@ export default {
       axiosInstance
         .post(apis.loginCheckmethod, payload)
         .then((res) => {
-          if (res.message.success==true) {
+          if (res.message.success == true) {
             // toast.success("");
             const modal = bootstrap.Modal.getInstance(
               document.getElementById("EmployeeAcknowledgementModal")
             );
             modal.hide();
             this.isAcknowledge = 1;
-            this.isAcknowledgeSign=1
+            this.isAcknowledgeSign = 1
             this.Login()
           }
         })
@@ -820,16 +824,16 @@ export default {
         .then((res) => {
           if (res.message) {
             this.isSignup = res.message.is_signup;
-            this.propertyDetails=res.message.business_unit.map((prty) => prty.name);
+            this.propertyDetails = res.message.business_unit.map((prty) => prty.name);
             this.disignationDetails = res.message.designation.map((disg) => disg.name);
             this.deptDetails = res.message.department.map((dept) => ({
               label: dept.department_name,
               value: dept.name,
             }));
             const active = res.message.acknowledgement;
-              const firstActive = active[0];
-              this.acknowledgementHtml = firstActive.acknowledgement;
-              this.SignUpdata.acknowledgement = firstActive.name;
+            const firstActive = active[0];
+            this.acknowledgementHtml = firstActive.acknowledgement;
+            this.SignUpdata.acknowledgement = firstActive.name;
           }
         })
         .catch((error) => {
@@ -918,6 +922,13 @@ export default {
             modal.hide();
             this.checkboxChange();
           }
+          if (res._server_messages) {
+            const messages = JSON.parse(res._server_messages);
+            messages.forEach((msg) => {
+              const parsed = JSON.parse(msg);
+              toast.error(parsed.message, { autoClose: 2000 });
+            });
+          }
         })
         .catch((error) => {
           console.error("Error:", error);
@@ -936,11 +947,11 @@ export default {
             this.user_id_name = res.message.name;
             this.enableCheck = res.message.enable_check
             this.isAcknowledge = res.message.is_acknowledge
-            this.ShowAcknowledgement=res.message.show_acknowledgement
-            this.isAcknowledgeSign=res.message.is_signature;
-            this.LoginAcknowledge=res.message.login_acknowledge;
-            this.subEndDate=res.message.subscription_end_date;
-            this.selectedScore=res.message.minimum_password_score;
+            this.ShowAcknowledgement = res.message.show_acknowledgement
+            this.isAcknowledgeSign = res.message.is_signature;
+            this.LoginAcknowledge = res.message.login_acknowledge;
+            this.subEndDate = res.message.subscription_end_date;
+            this.selectedScore = res.message.minimum_password_score;
 
             if (this.isFirstLogin === 0 && this.enableCheck === 1) {
               const modal = new bootstrap.Modal(
@@ -964,12 +975,12 @@ export default {
 
               // console.log("User is logging in for the first time.");
             }
-            if(this.subEndDate===this.today){
+            if (this.subEndDate === this.today) {
               const modal = new bootstrap.Modal(
                 document.getElementById("subscriptionModal")
               );
               modal.show();
-              this.showPwdField=false;
+              this.showPwdField = false;
             }
             else {
               console.log("User has logged in before.");
@@ -1002,13 +1013,13 @@ export default {
                 this.showOtpPage = false;
                 this.ShowLoginPage = true;
                 this.otp = ["", "", "", "", "", ""];
-                  if ( this.LoginAcknowledge === 1 && (this.isAcknowledge == 0 || this.isAcknowledgeSign == 0)) {
-                    const modal = new bootstrap.Modal(document.getElementById('EmployeeAcknowledgementModal'));
-                    modal.show();
-                  }
-                  else {
-                    this.userData(this.formdata.usr);
-                  }
+                if (this.LoginAcknowledge === 1 && (this.isAcknowledge == 0 || this.isAcknowledgeSign == 0)) {
+                  const modal = new bootstrap.Modal(document.getElementById('EmployeeAcknowledgementModal'));
+                  modal.show();
+                }
+                else {
+                  this.userData(this.formdata.usr);
+                }
               }
             }
           })
@@ -1044,7 +1055,7 @@ export default {
                   emp_code: employeeData.emp_code,
                   emp_signature: employeeData.signature,
                   is_admin: employeeData.is_admin,
-                  responsible_units:employeeData.responsible_units,
+                  responsible_units: employeeData.responsible_units,
                   // department: employeeData.department,
                 };
                 localStorage.setItem("subEndDate", this.subEndDate)
@@ -1174,24 +1185,24 @@ export default {
       const signatureComponent = this.$refs.digitalSignature;
       if (signatureComponent && signatureComponent.getSignatureData) {
         const signatureData = signatureComponent.getSignatureData();
-          this.onSignatureSaved(signatureData);
-      //   if (signatureData) {
-      //     this.onSignatureSaved(signatureData);
-      //     const modal = new bootstrap.Modal(document.getElementById('EmployeeToggleModal'));
-      //     modal.show();
-      //   } else {
-      //     console.log("No signature data available");
-      //   }
-      // }
-      // else if (this.SignUpdata.signature) {
+        this.onSignatureSaved(signatureData);
+        //   if (signatureData) {
+        //     this.onSignatureSaved(signatureData);
+        //     const modal = new bootstrap.Modal(document.getElementById('EmployeeToggleModal'));
+        //     modal.show();
+        //   } else {
+        //     console.log("No signature data available");
+        //   }
+        // }
+        // else if (this.SignUpdata.signature) {
         // const modal = new bootstrap.Modal(document.getElementById('EmployeeToggleModal'));
         // modal.show();
-      // }
-      // else {
-      //   toast.error("signature Not Added")
+        // }
+        // else {
+        //   toast.error("signature Not Added")
       }
-        const modal = new bootstrap.Modal(document.getElementById('EmployeeToggleModal'));
-        modal.show();
+      const modal = new bootstrap.Modal(document.getElementById('EmployeeToggleModal'));
+      modal.show();
     },
     openDigitakSignature() {
       this.isDigital = true;
@@ -1209,11 +1220,11 @@ export default {
     },
 
     handleSignatureUpload(event) {
-    const file = event.target.files[0];
-    if (file) {
-      this.uploadFile(file, "acknowledge signature");
-    }
-  },
+      const file = event.target.files[0];
+      if (file) {
+        this.uploadFile(file, "acknowledge signature");
+      }
+    },
 
     uploadFile(file, field) {
       let fileName = `${file.name}`;
@@ -1230,7 +1241,7 @@ export default {
             if (field === "signature") {
               this.SignUpdata.signature = res.message.file_url;
             }
-            if(field === "acknowledge signature"){
+            if (field === "acknowledge signature") {
               this.acknowledge_signature = res.message.file_url;
             }
           } else {
@@ -1530,10 +1541,12 @@ button {
 
   font-size: 13px;
 }
-.forgot-password:hover{
+
+.forgot-password:hover {
   text-decoration: underline;
   transition: all 0.3s ease;
 }
+
 .toggle-icon {
   position: absolute;
   top: 77%;
@@ -1678,7 +1691,8 @@ input:focus {
   transform: translateY(-50%);
   cursor: pointer;
 }
-.subBtn{
+
+.subBtn {
   background-color: #212529;
   color: white;
 }
