@@ -8,26 +8,38 @@
 
     <div v-if="filteredBlocks.length" class="card p-2">
 
-      <div v-for="(block, blockIndex) in filteredBlocks" :key="blockIndex" class="block-container rounded-2">
-        <div v-if="blockIndex === 0"><label class=" fw-bold font-12 ps-2">Request ID: </label> <span class="Request_ID">
+      <div v-for="(block, blockIndex) in filteredBlocks" :key="blockIndex" class="block-container  rounded-2" :class="blockIndex < currentLevel ? 'my-2':''">
+        <div v-if="blockIndex === 0"><label class=" fw-bold Request_ID " :style="{ 'padding-left': '12px' }">Request ID: </label> <span class="Request_ID">
             {{ selectedData.formname.replace(/_/g, ' ') }}</span> </div>
+          <!-- <div><span class="font-12 ps-2 border-bottom"> {{
+                            blockIndex !== 0 
+                                ? `Approver ${blockIndex}` : ""}}</span></div>   -->
         <div v-for="(section, sectionIndex) in block.sections" :key="'preview-' + sectionIndex"
-          class="preview-section m-1">
+          class="preview-section ">
           <div v-if="section.label" class="section-label">
             <h5 class="m-0 fw-bold font-13">{{ section.label }}</h5>
           </div>
           <div class="container-fluid">
             <div class="row " v-for="(row, rowIndex) in section.rows" :key="rowIndex">
-              <div v-for="(column, columnIndex) in row.columns" :key="'column-preview-' + columnIndex"
-                :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0 bg-transparent' : 'border-0 bg-transparent align-middle'"
-                class="col dynamicColumn ">
+              <div v-for="(column, columnIndex) in filteredColumns(row)"
+                :key="'column-preview-' + columnIndex"
+                :class="[
+                  props.readonlyFor === 'true' || blockIndex < currentLevel
+                    ? 'border-0 bg-transparent'
+                    : 'border-0 bg-transparent align-middle',
+                  column.fields.some(f => f.fieldtype === 'Table')
+                    ? 'col-12'
+                    : `col-sm-12 col-md-${12 / filteredColumns(row).length} dynamicColumn`
+                ]">
                 <div v-if="column.label" class="p-1 border-bottom">
                   <h6 class="m-0 font-12">{{ column.label }}</h6>
                 </div>
-                <div class=" m-1">
+                <div class="">
                   <div v-for="(field, fieldIndex) in column.fields" :key="'field-preview-' + fieldIndex" :class="(props.readonlyFor === 'true' || blockIndex < currentLevel) && field.fieldtype !== 'Small Text' && field.fieldtype !== 'Text'
                     ? (field.label === 'Approved By' ? ' d-flex align-items-end ' : 'd-flex align-items-start justify-content-start')
-                    : ''">
+                    : ''" :style="['Approver', 'Approved On', 'Approved By'].includes(field.label) && blockIndex == currentLevel  
+                    ? { opacity: 0 } 
+                    : {}">
                     <div
                           v-if="!(blockIndex !== 0 && !field.value && ['Approver', 'Approved On', 'Approved By', 'Acknowledged By'].includes(field.label))"
                           :class="[
@@ -37,7 +49,7 @@
                               ? 'd-flex'
                               : '',
                             field.fieldtype === 'Check'
-                              ? 'mt-1 d-flex flex-row-reverse justify-content-start gap-2 w-0 align-items-start'
+                              ? 'mt-1 d-flex flex-row-reverse justify-content-end gap-2 w-0 align-items-start'
                               : '',
                             ['Approved By', 'Acknowledged By', 'Requestor Signature'].includes(field.label)
                               ? 'align-items-start'
@@ -49,14 +61,14 @@
                       <div v-if="field.label && field.fieldtype !== 'Table' && field.fieldname !== 'auto_calculations'">
 
                         <label :for="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
-                          class=" label-text  whitespace-nowrap">
-                          <span class="font-12 fw-medium">{{ field.label }}</span>
+                          class=" label-text  text-nowrap">
+                          <span class=" fw-medium">{{ field.label }}</span>
                           <span class="ms-1 text-danger">{{ field.reqd === 1 ? "*" : "" }}</span>
                           <span class="pe-2"
                             v-if="field.fieldtype !== 'Check' && (props.readonlyFor === 'true' || blockIndex < currentLevel)">:</span>
                         </label>
                       </div>
-                      <div v-if="field.fieldtype !== 'Table'" class="field-width"
+                      <div v-if="field.fieldtype !== 'Table'" class=""
                         :class="field.fieldtype === 'Check' ? '' : ''">
 
                         <!-- field.fieldtype === 'Select' || -->
@@ -294,7 +306,7 @@
                                   class="cursor-pointer font-12 d-inline-flex align-items-center mt-1 gap-1"
                                   @click="openAttachmentList(field.value,blockIndex)"
                                 >
-                                  <span class="text-dark text-decoration-underline font-12 ">View</span>
+                                  <span class="text-dark text-decoration-underline label-text ">View</span>
                                   <span>({{ field.value.split(',').filter(f => f.trim()).length }})</span>
                                   <i
                                     class="bi bi-paperclip text-secondary "
@@ -542,7 +554,7 @@
                           <template
                             v-if="field.fieldtype !== 'Text' && field.fieldtype !== 'Int' && field.fieldtype !== 'Select' && (blockIndex === 0 || props.readonlyFor === 'true')">
                             <span
-                              style="font-size: 12px;"
+                              class="responsive-text"
                               :class="[
                                 props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0  bg-transparent' : '',
                                 field.value && field.value.length > 10 ? 'wrap-text' : ''
@@ -733,6 +745,7 @@
                                 + Add Block
                               </button>
                             </div>
+                            <div v-else-if="field.description === 'hide'"></div>
 
                             <!-- Table layout -->
                             <div v-else class=" ">
@@ -1005,7 +1018,7 @@
                                       <th v-for="field in headers" :key="field.fieldname" class="text-center">
                                         {{ field.label }}
                                       </th>
-                                      <th v-if="blockIndex !== 0 || props.readonlyFor === 'true'" width="3%"></th>
+                                      <th v-if="blockIndex !== 0 || props.readonlyFor !== 'true'" width="3%"></th>
                                     </tr>
                                   </thead>
                                   <tbody>
@@ -1260,7 +1273,7 @@
 
 
                                       </td>
-                                      <td v-if="blockIndex !== 0 || props.readonlyFor === 'true'"
+                                      <td v-if="blockIndex !== 0 || props.readonlyFor !== 'true'"
                                         class="d-table-cell text-center align-middle removeRowTd">
 
                                         <span v-if="props.readonlyFor !== 'true'" class="tableRowRemoveBtn "
@@ -1407,6 +1420,11 @@ const showPreview = ref(false);
 // function toggleEdit() {
 //   isEditable.value = !isEditable.value;
 // } 
+
+
+const filteredColumns = (row) => {
+  return row.columns.filter(column => column.fields && column.fields.length);
+};
 const openPreview = (url) => {
   previewUrl.value = url
   showModal.value = true
@@ -2373,6 +2391,29 @@ const isImageVendor = (url) => {
 // .imge_top{
 //       position: absolute; top: -4px;
 // }
+
+
+.responsive-text {
+  font-size: 12px; /* default for mobile */
+}
+
+@media (min-width: 576px) {
+  .responsive-text {
+    font-size: 12px;
+  }
+}
+
+@media (min-width: 768px) {
+  .responsive-text {
+    font-size: 12px;
+  }
+}
+
+@media (min-width: 992px) {
+  .responsive-text {
+    font-size: 12px;
+  }
+}
 .tr_background th{
 background-color: #fff7d6 !important;
 color: #000 !important;
@@ -2435,7 +2476,21 @@ border: 1px solid #EEEEEE !important;
 .label-text {
   white-space: nowrap;
 }
+.label-text{
+  font-size: 12px !important; /* default mobile */
+}
 
+@media (min-width: 768px) {
+  .label-text{
+    font-size: 14px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .label-text{
+    font-size: 14px;
+  }
+}
 .image-border-bottom {
   border: none;
   padding-bottom: 0;
@@ -2454,10 +2509,11 @@ border: 1px solid #EEEEEE !important;
 .dynamicColumn {
   border: 1px solid #cccccc;
   border-radius: 7px;
-  margin: 1px 2px 1px 2px;
+  // margin: 1px 2px 1px 2px;
   background-color: #ffffff;
-  padding: 0;
-  padding-bottom: 1px;
+  // padding: 0;
+  // padding-bottom: 1px;
+  // padding: 1px 2px;
 
 }
 
@@ -2483,6 +2539,7 @@ border: 1px solid #EEEEEE !important;
 
 .block-container {
   background-color: #fff;
+  // border: 1px solid #e2e2e2; 
 }
 
 input::-webkit-input-placeholder {
@@ -2753,21 +2810,21 @@ td {
 /* Medium screens (tablet) */
 @media (max-width: 992px) {
   .Request_ID {
-    font-size: 11px;
+    font-size: 12px;
   }
 }
 
 /* Small screens (mobile) */
 @media (max-width: 768px) {
   .Request_ID {
-    font-size: 10px;
+    font-size: 12px;
   }
 }
 
 /* Extra small screens */
 @media (max-width: 480px) {
   .Request_ID {
-    font-size: 9px;
+    font-size: 10px;
   }
 }
 

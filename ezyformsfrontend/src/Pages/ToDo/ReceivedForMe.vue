@@ -13,9 +13,17 @@
       </div> -->
     </div>
     <div class="mt-2">
+      <div class=" d-none d-lg-block">
+
       <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" viewType="viewPdf" isCheckbox="true"
         @updateFilters="inLineFiltersData" :field-mapping="fieldMapping" @cell-click="viewPreview"
         isFiltersoption="true" :actions="actions" @actionClicked="actionCreated" />
+      </div>
+      <div class=" d-block d-lg-none">
+        <GlobalCard :tHeaders="tableheaders" :tData="tableData" isAction="true" viewType="viewPdf" isCheckbox="true"
+          @updateFilters="inLineFiltersData" :field-mapping="fieldMapping" @cell-click="viewPreview"
+          isFiltersoption="false" :actions="actions" @actionClicked="actionCreated" />
+      </div>
       <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
         @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
     </div>
@@ -112,6 +120,7 @@
 <script setup>
 import ButtonComp from "../../Components/ButtonComp.vue";
 import GlobalTable from "../../Components/GlobalTable.vue";
+import GlobalCard from "../../Components/GlobalCard.vue";
 import axiosInstance from "../../shared/services/interceptor";
 import { apis, doctypes } from "../../shared/apiurls";
 import { onMounted, ref, reactive, computed, watch } from "vue";

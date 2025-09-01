@@ -501,7 +501,10 @@ function receivedForMe() {
       } else {
         approvedform.value = true;
         tableData.value = res.message.message.doc_data;
+        selectedData.value.formname = res.message.message.doc_data.wf_generated_request_id;
+        route.query.name = res.message.message.doc_data.wf_generated_request_id;
         tableWFData.value = res.message.message.wf_data
+        selectedData.value.doctype_name = res.message.message.wf_data.doctype_name
 
         showRequest.value = rebuildToStructuredArray(
           JSON.parse(tableWFData.value?.json_columns).fields

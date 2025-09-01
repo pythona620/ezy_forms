@@ -2,10 +2,20 @@
   <div class="position-relative">
     <div class=" back-to-same">
 
-      <div class="container-fluid  p-0">
-        <div class="backtofromPage asset_request px-2 py-2">
-          <router-link :to="backTo" class="text-decoration-none text-dark font-13"><span> <i
-                class="bi bi-arrow-left px-2"></i></span>Back</router-link>
+      <div class="container-fluid   p-0 py-1">
+        <div class="d-flex justify-content-between asset_request">
+
+          <div class="backtofromPage  px-2 py-2">
+            <router-link :to="backTo" class="text-decoration-none text-dark font-13"><span> <i
+                  class="bi bi-arrow-left px-2"></i></span>Back</router-link>
+          </div>
+          <div>
+            <button class="btn btn-light font-12  me-2 d-xl-none " type="button"
+              data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight"><i
+                class="bi bi-clock font-14"></i> Activity</button>
+
+
+          </div>
         </div>
       </div>
     </div>
@@ -13,14 +23,14 @@
 
     <div class="approve_height">
       <div class="container-fluid">
-        <div class="row">
-          <div class="col-3"></div>
-          <div class="col-6">
+        <div class="row justify-content-center">
+          <div class="col-lg-3 d-none d-xl-block"></div>
+          <div class="col-md-12 col-xl-6 col-sm-12 ">
             <div class="mt-1">
               <div class="text-center">
                 <div class="card border-0 shadow-none">
                   <div class="card-body pb-2 d-flex gap-2 align-items-center justify-content-center">
-                    <h5 class="card-title">{{ selectedData.doctype_name }}</h5>
+                    <h5 class="card-title responsive-title">{{ selectedData.doctype_name }}</h5>
                     <div class="d-flex align-items-baseline gap-2 ps-1 ">
                       <span v-if="tableData?.status !== 'Completed' && tableData.status !== 'Request Cancelled'"
                         class="text-warning font-11 text-nowrap fw-bold">
@@ -52,7 +62,7 @@
 
                 <div v-if="selectedData?.type === 'myforms' &&
                   (tableData?.status === 'Request Raised' || tableData?.status === 'Request Cancelled') &&
-                  selectedData?.type !== 'myapprovals'" class="d-flex justify-content-end approveBtns">
+                  selectedData?.type !== 'myapprovals'" class="d-flex justify-content-end p-4 approveBtns">
 
                   <button type="submit" class="btn Edit_btn" @click.prevent="EditformSubmission()">
                     <span v-if="loading" class="spinner-border spinner-border-sm" role="status"
@@ -65,7 +75,7 @@
                 <div v-if="selectedData.type === 'mytasks'" class="">
 
                   <!-- v-if="!requestcancelled" -->
-                  <div class="approveBtns pb-2 mb-2 mt-3 flex-column px-0 pe-4">
+                  <div class="approveBtns pb-2 mb-2 mt-3 flex-column ">
                     <!-- <div v-if="!canApprove & view_only_reportee === 1" class=" d-flex align-items-center gap-1">
 
                       <span class=" font-12 text-danger">
@@ -126,7 +136,7 @@
               </div>
             </div>
           </div>
-          <div class="col-3">
+          <div class="col-lg-3 d-none d-lg-block">
             <div class="activity-log-container px-1">
               <!-- <div class=" w-100  mb-2">
               <div class=" py-2 px-3">
@@ -178,7 +188,7 @@
 
 
                 </div> -->
-                
+
                 <div class="col-xl-12 col-lg-12 col-md-12">
                   <div class=" d-flex justify-content-between gap-2">
 
@@ -189,50 +199,45 @@
                         tableData?.is_linked_form &&
 
                         Object.keys(tableData.is_linked_form).length > 0" type="button"
-                        class="btn btn-light font-14 nowrap h-auto fw-bold border border-dark CreateDepartments"
+                        class="btn btn-light font-14 nowrap h-auto fw-bold border border-dark text-nowrap CreateDepartments"
                         data-bs-target="#pdfView" @click="toLinkedForm">
-                        Raise Inbound <i class="bi bi-arrow-right px-2"></i>
+                        Raise Inbound
+
+                        <i class="bi bi-arrow-right px-2"></i>
                       </button>
 
 
 
                     </div>
                     <!-- Case 1: Both PDF + Workorder available -->
-                      <div v-if="((tableData.status === 'Completed' && linked_status !== 'Completed') || linked_status === 'Completed') 
-                                && doctypeForm.work_order == 1"
-                          class="dropdown">
-                        <button 
-                          class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto dropdown-toggle"
-                          type="button"
-                          data-bs-toggle="dropdown"
-                          aria-expanded="false"
-                        >
-                          <i class="bi bi-download px-2 fw-bold"></i> Download
-                        </button>
-
-                        <ul class="dropdown-menu font-12">
-                          <li>
-                            <a class="dropdown-item" href="javascript:void(0)" @click="downloadPdf">
-                              <i class="bi bi-file-earmark-pdf me-2"></i> Download PDF
-                            </a>
-                          </li>
-                          <li>
-                            <a class="dropdown-item" href="javascript:void(0)" @click="DownloadWorkorder">
-                              <i class="bi bi-file-earmark-text me-2"></i> Download Workorder
-                            </a>
-                          </li>
-                        </ul>
-                      </div>
-
-                      <!-- Case 2: Only PDF -->
-                      <button 
-                        v-else-if="(tableData.status === 'Completed' && linked_status !== 'Completed') || linked_status === 'Completed'"
-                        class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto"
-                        type="button"
-                        @click="downloadPdf"
-                      >
+                    <div v-if="((tableData.status === 'Completed' && linked_status !== 'Completed') || linked_status === 'Completed')
+                      && doctypeForm.work_order == 1" class="dropdown">
+                      <button class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto dropdown-toggle"
+                        type="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi bi-download px-2 fw-bold"></i> Download
                       </button>
+
+                      <ul class="dropdown-menu font-12">
+                        <li>
+                          <a class="dropdown-item" href="javascript:void(0)" @click="downloadPdf">
+                            <i class="bi bi-file-earmark-pdf me-2"></i> Download File
+                          </a>
+                        </li>
+                        <li>
+                          <a class="dropdown-item" href="javascript:void(0)" @click="DownloadWorkorder">
+                            <i class="bi bi-file-earmark-text me-2"></i> Download Workorder
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <!-- Case 2: Only PDF -->
+                    <button
+                      v-else-if="(tableData.status === 'Completed' && linked_status !== 'Completed') || linked_status === 'Completed'"
+                      class="btn btn-light font-14 fw-bold h-0 text-nowrap border border-dark h-auto" type="button"
+                      @click="downloadPdf">
+                      <i class="bi bi-download px-2 fw-bold"></i> Download
+                    </button>
 
 
 
@@ -253,13 +258,13 @@
                     </div> -->
                     <!-- data-bs-toggle="modal"
                       data-bs-target="#pdfView" -->
-                      <!-- <button v-if="doctypeForm.work_order == 1" type="button" data-bs-toggle="modal"
+                    <!-- <button v-if="doctypeForm.work_order == 1" type="button" data-bs-toggle="modal"
                       data-bs-target="#pdfView"
                       class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto "
                       @click="DownloadWorkorder">
                       Download Workorder
                     </button>  -->
-                      
+
                     <!-- <button type="button" class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto "
                       data-bs-toggle="modal" data-bs-target="#pdfView" @click="viewasPdfView">
                       Preview
@@ -341,83 +346,6 @@
               </div>
 
               <!-- Modal -->
-              <div class="modal fade" id="listofLinkedForms" tabindex="-1" aria-labelledby="exampleModalLabel"
-                aria-hidden="true">
-                <div class="modal-dialog modal-lg">
-                  <div class="modal-content">
-                    <div class="modal-header py-2">
-                      <h5 class="modal-title font-14">Linked Form Details</h5>
-                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body linkedformspreview p-4">
-                      <!-- Show key-value -->
-                      <!-- <table class="table table-bordered table-sm">
-                        <tbody>
-                          <tr v-for="(item, index) in normalFields" :key="index">
-                            <th class="font-12 text-nowrap">
-                              {{ formatKey(item.key) }}
-                            </th>
-                            <td class="font-12">{{ item.value }}</td>
-                          </tr>
-                        </tbody>
-                      </table> -->
-                      <div class="row">
-                        <div class=" col-md-12">
-                          <div class="row">
-                            <div class="col-md-6 mb-2 " v-for="(item, index) in normalFields" :key="index">
-                              <label class="fw-bold font-12">{{ formatKey(item.key) }}</label>
-                              <p class="font-12 mb-2">{{ item.value }}</p>
-                            </div>
-                          </div>
-                        </div>
-                        <!-- <div class=" col-md-6 ">
-                          <div v-for="(item, index) in linkedActivity" :key="index" class="activity-log-item"
-                            :class="{ 'last-item': index === linkedActivity.length - 1 }">
-                            <div :class="item.action === 'Approved' || item.action === 'Request Raised' || item.action === '' || item.action === 'Completed'
-                              ? 'activity-log-dot'
-                              : 'activityRedDot'"></div>
-                            <div class="activity-log-content">
-                              <p class="font-12 mb-1">
-                                <span class="strong-content">{{ formatAction(item.action) }} on </span>
-                                <span class="strong-content">{{ formatCreation(item.creation) }}</span><br />
-                                <span class="strong-content">{{ item.user_name }}</span><br />
-                                <span>{{ item.role }}</span><br />
-                                <span class="font-12 text-secondary">{{ item.reason || "N/A" }}</span>.
-                              </p>
-                            </div>
-                          </div>
-                        </div> -->
-                      </div>
-
-
-
-                      <!--  Array Fields -->
-                      <div v-for="(arrayItem, key) in arrayFields" :key="key" class="mb-3 overflow-auto">
-                        <strong class="font-12">{{ formatKey(key) }}</strong>
-                        <table class="table table-bordered table-sm">
-                          <thead class="table-light">
-                            <tr>
-                              <th v-for="header in getFilteredKeys(arrayItem)" :key="header" class="font-12">
-                                {{ formatKey(header) }}
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr v-for="(row, rowIndex) in arrayItem" :key="rowIndex">
-                              <td v-for="header in getFilteredKeys(arrayItem)" :key="header" class="font-12">
-                                {{ row[header] }}
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-
-
-
-                    </div>
-                  </div>
-                </div>
-              </div>
 
 
             </div>
@@ -461,6 +389,379 @@
             </div>
           </div> -->
           </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" id="listofLinkedForms" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header py-2">
+            <h5 class="modal-title font-14">Linked Form Details</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body linkedformspreview p-4">
+            <!-- Show key-value -->
+            <!-- <table class="table table-bordered table-sm">
+                        <tbody>
+                          <tr v-for="(item, index) in normalFields" :key="index">
+                            <th class="font-12 text-nowrap">
+                              {{ formatKey(item.key) }}
+                            </th>
+                            <td class="font-12">{{ item.value }}</td>
+                          </tr>
+                        </tbody>
+                      </table> -->
+            <div class="row">
+              <div class=" col-md-12">
+                <div class="row">
+                  <div class="col-md-6 mb-2 " v-for="(item, index) in normalFields" :key="index">
+                    <label class="fw-bold font-12">{{ formatKey(item.key) }}</label>
+                    <p class="font-12 mb-2">{{ item.value }}</p>
+                  </div>
+                </div>
+              </div>
+              <!-- <div class=" col-md-6 ">
+                          <div v-for="(item, index) in linkedActivity" :key="index" class="activity-log-item"
+                            :class="{ 'last-item': index === linkedActivity.length - 1 }">
+                            <div :class="item.action === 'Approved' || item.action === 'Request Raised' || item.action === '' || item.action === 'Completed'
+                              ? 'activity-log-dot'
+                              : 'activityRedDot'"></div>
+                            <div class="activity-log-content">
+                              <p class="font-12 mb-1">
+                                <span class="strong-content">{{ formatAction(item.action) }} on </span>
+                                <span class="strong-content">{{ formatCreation(item.creation) }}</span><br />
+                                <span class="strong-content">{{ item.user_name }}</span><br />
+                                <span>{{ item.role }}</span><br />
+                                <span class="font-12 text-secondary">{{ item.reason || "N/A" }}</span>.
+                              </p>
+                            </div>
+                          </div>
+                        </div> -->
+            </div>
+
+
+
+            <!--  Array Fields -->
+            <div v-for="(arrayItem, key) in arrayFields" :key="key" class="mb-3 overflow-auto">
+              <strong class="font-12">{{ formatKey(key) }}</strong>
+              <table class="table table-bordered table-sm">
+                <thead class="table-light">
+                  <tr>
+                    <th v-for="header in getFilteredKeys(arrayItem)" :key="header" class="font-12">
+                      {{ formatKey(header) }}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(row, rowIndex) in arrayItem" :key="rowIndex">
+                    <td v-for="header in getFilteredKeys(arrayItem)" :key="header" class="font-12">
+                      {{ row[header] }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasRightLabel">Activity Log</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">
+        <div class="activity-log-container mt-0 px-1">
+          <!-- <div class=" w-100  mb-2">
+              <div class=" py-2 px-3">
+
+                <h5 class="font-13 fw-bold">{{ selectedData.doctype_name }} form approval</h5>
+              </div>
+              <div class="py-2 px-3">
+                <span class="text-warning font-12  fw-bold">
+                  Pending ({{ tableData.current_level }} /
+                  {{ tableData.total_levels }})</span>
+              </div>
+            </div> -->
+          <!-- <div class="mt-5 mb-3 pt-2 d-flex justify-content-between align-items-center">
+              <h6 class="font-14 ps-3  mb-0">Activity log <span
+                  v-if="tableData?.status !== 'Completed' && tableData.status !== 'Request Cancelled'"
+                  class="text-warning font-12  fw-bold">
+                  Pending ({{ tableData.current_level }} /
+                  {{ tableData?.total_levels }})</span>
+                <span class=" font-11 status_completed" v-if="tableData?.status === 'Completed'">
+                  Completed
+                </span>
+                <span class=" font-11 requestRejected" v-if="tableData?.status === 'Request Cancelled'">
+                  Request Rejected
+                </span>
+              </h6>
+              <button v-if="tableData.status === 'Completed'"
+                class="btn btn-light font-12 fw-bold text-decoration-underline" type="button" @click="downloadPdf"><i
+                  class="bi bi-arrow-down-circle fw-bold px-1"></i>Download
+                PDF</button>
+            </div> -->
+          <div class="row mb-3">
+            <!-- <div class="col-xl-3 col-lg-12 col-md-12">
+                  <div class="d-flex  align-items-baseline  mt-2">
+                   
+                    <div class="d-flex align-items-baseline gap-2 ps-1 ">
+                      <span v-if="tableData?.status !== 'Completed' && tableData.status !== 'Request Cancelled'"
+                        class="text-warning font-11 text-nowrap fw-bold">
+                        Pending ({{ tableData.current_level }} /
+                        {{ tableData?.total_levels }})</span>
+                      <span class=" font-11 status_completed text-nowrap" v-if="tableData?.status === 'Completed'">
+                        Approved
+                      </span>
+                      <span class=" font-11 requestRejected text-nowrap"
+                        v-if="tableData?.status === 'Request Cancelled'">
+                        Request Rejected
+                      </span>
+                    </div>
+                  </div>
+
+
+                </div> -->
+
+            <div class="col-xl-12 col-lg-12 col-md-12">
+              <div class=" d-flex justify-content-between gap-2">
+
+                <div>
+                  <button v-if="(selectedData.type === 'myforms' || selectedData.type === 'myteam' || selectedData.type === 'myapprovals' || selectedData.type === 'linkedForm') &&
+                    linked_status !== 'Completed' &&
+                    tableData?.status === 'Completed' &&
+                    tableData?.is_linked_form &&
+
+                    Object.keys(tableData.is_linked_form).length > 0" type="button"
+                    class="btn btn-light font-14 nowrap h-auto fw-bold border border-dark CreateDepartments"
+                    data-bs-target="#pdfView" @click="toLinkedForm">
+                    Raise Inbound <i class="bi bi-arrow-right px-2"></i>
+                  </button>
+
+
+
+                </div>
+                <!-- Case 1: Both PDF + Workorder available -->
+                <div v-if="((tableData.status === 'Completed' && linked_status !== 'Completed') || linked_status === 'Completed')
+                  && doctypeForm.work_order == 1" class="dropdown">
+                  <button class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto dropdown-toggle"
+                    type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-download px-2 fw-bold"></i> Download
+                  </button>
+
+                  <ul class="dropdown-menu font-12">
+                    <li>
+                      <a class="dropdown-item" href="javascript:void(0)" @click="downloadPdf">
+                        <i class="bi bi-file-earmark-pdf me-2"></i> Download PDF
+                      </a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item" href="javascript:void(0)" @click="DownloadWorkorder">
+                        <i class="bi bi-file-earmark-text me-2"></i> Download Workorder
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+
+                <!-- Case 2: Only PDF -->
+                <button
+                  v-else-if="(tableData.status === 'Completed' && linked_status !== 'Completed') || linked_status === 'Completed'"
+                  class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto" type="button"
+                  @click="downloadPdf">
+                  <i class="bi bi-download px-2 fw-bold"></i> Download
+                </button>
+
+
+
+
+
+                <!-- <div>
+                      <button
+                        v-if="tableData.status === 'Completed' && linked_status !== 'Completed' || linked_status === 'Completed'"
+                        class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto " type="button"
+                        @click="downloadPdf"><i class="bi bi-download px-2 fw-bold"></i>Download
+                      </button>
+                    <button v-if="doctypeForm.work_order == 1" type="button" data-bs-toggle="modal"
+                      data-bs-target="#pdfView"
+                      class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto "
+                      @click="DownloadWorkorder">
+                      Download Workorder
+                    </button>
+                    </div> -->
+                <!-- data-bs-toggle="modal"
+                      data-bs-target="#pdfView" -->
+                <!-- <button v-if="doctypeForm.work_order == 1" type="button" data-bs-toggle="modal"
+                      data-bs-target="#pdfView"
+                      class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto "
+                      @click="DownloadWorkorder">
+                      Download Workorder
+                    </button>  -->
+
+                <!-- <button type="button" class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto "
+                      data-bs-toggle="modal" data-bs-target="#pdfView" @click="viewasPdfView">
+                      Preview
+                    </button> -->
+
+              </div>
+            </div>
+          </div>
+          <div class="activity_height">
+            <!-- Tabs -->
+            <div class="d-flex mb-2 tabs_list">
+              <button class="btn btn-light tab_btn"
+                :class="{ active: activeTab === 'activity', 'border-0': !tableData.is_linked_form }"
+                @click="activeTab = 'activity'">
+                Activity Log
+              </button>
+              <button v-if="tableData.is_linked_form" class="btn btn-light tab_btn"
+                :class="{ active: activeTab === 'linked' }" @click="linked_list_btn">
+                Inbound Forms
+              </button>
+            </div>
+
+            <!-- Activity Log -->
+            <div v-if="activeTab === 'activity'">
+              <!-- <div class="py-2">
+                    <span class="font-12 text-nowrap fw-bold mb-0">Activity Log</span>
+                  </div> -->
+              <div v-for="(item, index) in activityData" :key="index" class="activity-log-item"
+                :class="{ 'last-item': index === activityData.length - 1 }">
+                <div :class="item.action === 'Approved' || item.action === 'Request Raised' || item.action === '' || item.action === 'Completed'
+                  ? 'activity-log-dot'
+                  : 'activityRedDot'"></div>
+                <div class="activity-log-content">
+                  <p class="font-12 mb-1">
+
+                    <span class="strong-content">{{ formatAction(item.action) }} on </span>
+                    <span class="strong-content">{{ formatCreation(item.time) }}</span><br />
+                    <span class="strong-content">{{ item.user_name }}</span><br />
+                    <span>{{ item.role }}</span><br />
+                    <span class="font-12 text-secondary">{{ item.reason || "N/A" }}</span>.
+
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Linked Forms -->
+            <div v-else-if="activeTab === 'linked'">
+              <div v-if="linkedForms.length === 0" class="text-center py-3">
+                <p class="font-12 text-secondary">No linked forms available.</p>
+
+              </div>
+              <div v-else class="px-1">
+
+                <table class="table overflow-scroll  table-sm">
+                  <thead class="table-light">
+                    <tr>
+                      <th class="font-12">S.No</th>
+                      <th class="font-12">Request ID</th>
+                      <th class="font-12">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(item, index) in linkedForms" :key="index">
+                      <td class="font-12 align-middle text-center">{{ index + 1 }}</td>
+                      <td class="font-12 nowrap align-middle">{{ item.link_form_id.replace(/_/g, ' ') }}</td>
+                      <td>
+                        <button class="btn btn-light btn-sm font-14" data-bs-toggle="modal"
+                          data-bs-target="#listofLinkedForms" @click="openModal(item)">
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Modal -->
+          <div class="modal fade" id="listofLinkedForms" tabindex="-1" aria-labelledby="exampleModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+              <div class="modal-content">
+                <div class="modal-header py-2">
+                  <h5 class="modal-title font-14">Linked Form Details</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body linkedformspreview p-4">
+                  <!-- Show key-value -->
+                  <!-- <table class="table table-bordered table-sm">
+                        <tbody>
+                          <tr v-for="(item, index) in normalFields" :key="index">
+                            <th class="font-12 text-nowrap">
+                              {{ formatKey(item.key) }}
+                            </th>
+                            <td class="font-12">{{ item.value }}</td>
+                          </tr>
+                        </tbody>
+                      </table> -->
+                  <div class="row">
+                    <div class=" col-md-12">
+                      <div class="row">
+                        <div class="col-md-6 mb-2 " v-for="(item, index) in normalFields" :key="index">
+                          <label class="fw-bold font-12">{{ formatKey(item.key) }}</label>
+                          <p class="font-12 mb-2">{{ item.value }}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- <div class=" col-md-6 ">
+                          <div v-for="(item, index) in linkedActivity" :key="index" class="activity-log-item"
+                            :class="{ 'last-item': index === linkedActivity.length - 1 }">
+                            <div :class="item.action === 'Approved' || item.action === 'Request Raised' || item.action === '' || item.action === 'Completed'
+                              ? 'activity-log-dot'
+                              : 'activityRedDot'"></div>
+                            <div class="activity-log-content">
+                              <p class="font-12 mb-1">
+                                <span class="strong-content">{{ formatAction(item.action) }} on </span>
+                                <span class="strong-content">{{ formatCreation(item.creation) }}</span><br />
+                                <span class="strong-content">{{ item.user_name }}</span><br />
+                                <span>{{ item.role }}</span><br />
+                                <span class="font-12 text-secondary">{{ item.reason || "N/A" }}</span>.
+                              </p>
+                            </div>
+                          </div>
+                        </div> -->
+                  </div>
+
+
+
+                  <!--  Array Fields -->
+                  <div v-for="(arrayItem, key) in arrayFields" :key="key" class="mb-3 overflow-auto">
+                    <strong class="font-12">{{ formatKey(key) }}</strong>
+                    <table class="table table-bordered table-sm">
+                      <thead class="table-light">
+                        <tr>
+                          <th v-for="header in getFilteredKeys(arrayItem)" :key="header" class="font-12">
+                            {{ formatKey(header) }}
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="(row, rowIndex) in arrayItem" :key="rowIndex">
+                          <td v-for="header in getFilteredKeys(arrayItem)" :key="header" class="font-12">
+                            {{ row[header] }}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+
+
+                </div>
+              </div>
+            </div>
+          </div>
+
+
         </div>
       </div>
     </div>
@@ -1335,7 +1636,7 @@ function DownloadWorkorder() {
       link.target = "_blank"; // Helps with some browser restrictions
       document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link); 
+      document.body.removeChild(link);
     })
     .catch((error) => {
       console.error("Error downloading PDF:", error);
@@ -1565,7 +1866,7 @@ function mapFormFieldsToRequest(doctypeData, showRequestData) {
       });
     });
   });
-} 
+}
 
 const requestcancelled = computed(() => {
   if (activityData.value.length === 0) return false;
@@ -1590,6 +1891,7 @@ watch(activityData, (newVal) => {
 //   z-index: 1000 !important;
 
 // }
+
 .linkedformspreview {
   height: 700px;
   overflow: scroll;
@@ -1671,16 +1973,42 @@ watch(activityData, (newVal) => {
   z-index: 10;
   background-color: #fff;
 }
+.responsive-title {
+  font-size: 12px; /* default mobile */
+}
+
+@media (min-width: 768px) {
+  .responsive-title {
+    font-size: 14px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .responsive-title {
+    font-size: 18px;
+  }
+}
 
 .approveBtns {
   position: fixed !important;
   bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 10;
   background-color: #fff;
-  padding: 5px 10px;
+  padding: 5px ;
   display: flex;
   justify-content: space-between;
   width: 50%;
+  margin: 2px 5px;
+
+}
+@media (max-width: 768px) {
+  .approveBtns {
+    width: 100%;
+    left: 0;
+    transform: none;
+  }
 }
 
 .asset_request {
@@ -1920,5 +2248,26 @@ td {
 
 .tab_btn:hover {
   background-color: #f2f2f2;
+}
+
+.offcanvas-header {
+  box-shadow: 0px 2px 4px 0px #0000000D;
+}
+.offcanvas-end {
+  width: 400px;
+}
+
+/* Medium screens */
+@media (max-width: 992px) {
+  .offcanvas-end {
+    width: 50%;
+  }
+}
+
+/* Small screens */
+@media (max-width: 768px) {
+  .offcanvas-end {
+    width: 80%; /* full width on mobile */
+  }
 }
 </style>

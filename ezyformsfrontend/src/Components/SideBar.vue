@@ -2,10 +2,10 @@
     <div class="">
         <div :class="['sidebar', { collapsed: props.collapsed }]">
             <!-- Title for the overall sidebar -->
-            <div class="d-flex justify-content-between align-items-center">
-                <h1 class="font-12 m-0 text-muted ps-2" v-if="!collapsed">{{ sidebarTitle }} 
+            <div class="d-flex justify-content-between align-items-center ">
+                <h1 class="font-12 m-0 text-muted ps-2 d-none d-md-inline " v-if="!collapsed">{{ sidebarTitle }} 
             </h1>
-               <button class="btn border me-2 ms-2 toggle-btn" type="button" @click="toggleSidebar">
+               <button class="btn border me-2 ms-2 toggle-btn d-none d-md-inline" type="button" @click="toggleSidebar">
                     <i v-if="!collapsed" class="bi bi-chevron-double-left fs-6"></i>
                     <i v-if="collapsed" class="bi bi-chevron-double-right fs-6"></i>
                 </button>
@@ -21,7 +21,7 @@
                             active-class="active-link">
                             <li>
                                 <i v-tooltip.right="list.name" :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
-                                <span v-if="!collapsed">{{ list.name }}</span>
+                                <span v-if="!collapsed"  class="d-none d-md-inline">{{ list.name }}</span>
                             </li>
                         </router-link>
                     </ul>
@@ -34,7 +34,7 @@
                             active-class="active-link">
                             <li :title="list.name">
                                 <i :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
-                                <span v-if="!collapsed">{{ list.name }}</span>
+                                <span v-if="!collapsed"  class="d-none d-md-inline">{{ list.name }}</span>
                             </li>
                         </router-link>
                     </ul> -->
@@ -46,7 +46,7 @@
                             active-class="active-link">
                             <li>
                                 <i v-tooltip.right="list.name" :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
-                                <span v-if="!collapsed">{{ list.name }}</span>
+                                <span v-if="!collapsed"  class="d-none d-md-inline">{{ list.name }}</span>
                             </li>
                         </router-link>
                     </ul>
@@ -58,7 +58,7 @@
                             active-class="active-link">
                             <li>
                                 <i v-tooltip.right="list.name" :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
-                                <span v-if="!collapsed">{{ list.name }}</span>
+                                <span v-if="!collapsed"  class="d-none d-md-inline">{{ list.name }}</span>
                             </li>
                         </router-link>
                     </ul>
@@ -71,7 +71,7 @@
                             active-class="active-link">
                             <li>
                                 <i v-tooltip.right="list.name" :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
-                                <span v-if="!collapsed">{{ list.name }}</span>
+                                <span v-if="!collapsed"  class="d-none d-md-inline">{{ list.name }}</span>
                             </li>
                         </router-link>
                     </ul>
@@ -84,7 +84,7 @@
                             active-class="active-link">
                             <li>
                                 <i v-tooltip.right="list.name" :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
-                                <span v-if="!collapsed">{{ list.name }}</span>
+                                <span v-if="!collapsed"  class="d-none d-md-inline">{{ list.name }}</span>
                             </li>
                         </router-link>
                     </ul>
@@ -97,7 +97,7 @@
                             active-class="active-link">
                             <li>
                                 <i v-tooltip.right="list.name" :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
-                                <span v-if="!collapsed">{{ list.name }}</span>
+                                <span v-if="!collapsed"  class="d-none d-md-inline">{{ list.name }}</span>
                             </li>
                         </router-link>
                     </ul>
@@ -110,7 +110,7 @@
                             active-class="active-link">
                             <li>
                                 <i v-tooltip.right="list.name" :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
-                               <span v-if="!collapsed">{{ list.name }}</span>
+                               <span v-if="!collapsed"  class="d-none d-md-inline">{{ list.name }}</span>
                             </li>
                         </router-link>
                     </ul>
@@ -123,7 +123,7 @@
                             active-class="active-link">
                             <li>
                                 <i v-tooltip.right="list.name" :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
-                                <span v-if="!collapsed">{{ list.name }}</span>
+                                <span v-if="!collapsed"  class="d-none d-md-inline">{{ list.name }}</span>
                             </li>
                         </router-link>
                     </ul>
@@ -136,7 +136,7 @@
                             active-class="active-link">
                             <li>
                                 <i v-tooltip.right="list.name" :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
-                                <span v-if="!collapsed">{{ list.name }}</span>
+                                <span v-if="!collapsed"  class="d-none d-md-inline">{{ list.name }}</span>
                             </li>
                         </router-link>
                     </ul>
@@ -185,7 +185,7 @@
                             active-class="active-link">
                             <li>
                                 <i v-tooltip.right="list.name" :class="`bi-icon ps-1 bg-transparent bi ${list.icon} me-3`"></i>
-                                <span v-if="!collapsed">{{ list.name }}</span>
+                                <span v-if="!collapsed"  class="d-none d-md-inline">{{ list.name }}</span>
                             </li>
                         </router-link>
                     </ul>

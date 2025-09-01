@@ -1,68 +1,78 @@
 <template>
-    <div class="main-div">
-        <div class="py-2">
-            <div class="card card-div border-0 mt-4">
-                <div class="d-flex ">
-                    <!-- Profile Image & Edit -->
-                    <div class="position-relative d-inline-block image-div">
-                        <img :src="userData?.profile_image ? userData.profile_image : defaultImage"
-                            title="Upload Profile Image" class="img-fluid" 
-                            :class="userData?.profile_image ? 'profile-img' : 'default-image'"
-                            @click="triggerFileInput('profile')"
-                            style="object-fit: cover;" />
-                        <i v-if="userData.profile_image"
-                            class="bi bi-pencil edit-profile-icon position-absolute top-0 end-0 "
-                            @click="triggerFileInput('profile')" style="cursor: pointer;"></i>
-                    </div>
+  <div class="main-div">
+    <div class="py-2">
+      <div class="card card-div border-0 mt-4 p-3">
+        <div class="d-flex flex-column flex-md-row align-items-center align-items-md-start">
+          <!-- Profile Image & Edit -->
+          <div class="position-relative image-div mb-3 mb-md-0">
+            <img
+              :src="userData?.profile_image ? userData.profile_image : defaultImage"
+              title="Upload Profile Image"
+              class="img-fluid profile-pic"
+              :class="userData?.profile_image ? 'profile-img' : 'default-image'"
+              @click="triggerFileInput('profile')"
+            />
+            <i
+              v-if="userData.profile_image"
+              class="bi bi-pencil edit-profile-icon position-absolute top-0 end-0"
+              @click="triggerFileInput('profile')"
+              style="cursor: pointer;"
+            ></i>
+          </div>
 
-                    <!-- Employee Details -->
-                    <div class="ms-3 flex-grow-1">
-                        <h6 class="mb-3 mt-2">{{ userData.emp_name }}</h6>
-                        <div class="d-flex flex-wrap align-items-center gap-5 role-details">
-                            <span><i class="bi bi-person-badge-fill me-1"></i>{{ userData.emp_code || "-" }}</span>
-                            <span><i class="bi bi-envelope-fill me-1"></i>{{ userData.emp_mail_id || "-" }}</span>
-                            <span><i class="bi bi-telephone-fill me-1"></i>{{ userData.emp_phone || "-" }}</span>
-                            <span style="font-size:13px"><i class="bi bi-briefcase-fill me-1"></i>{{ userData.designation || "-" }}</span>
-                            <span style="font-size:13px"><i class="bi bi-building-fill me-1"></i>{{ userData.company_field || "-" }}</span>
-                        </div>
+          <!-- Employee Details -->
+          <div class="ms-md-3 flex-grow-1 text-center text-md-start">
+            <h6 class="mb-3 mt-2">{{ userData.emp_name }}</h6>
 
-                        <!-- Bottom Info -->
-                        <div class="mt-3 d-flex flex-wrap gap-4">
-                            <span class=" font-11">
-                                Department  : {{ userData.department || "-" }}
-                            </span>
-                            <span class=" font-11">
-                                Reporting Manager : 
-                                {{ userData.reporting_to || "-" }}
-                            </span>
-                            <span class=" font-11">Acknowledged On :
-                                {{ formatDateTime(userData.acknowledge_on) || "-" }}
-                            </span>
-                        </div>
-                        <div class="mt-3">
-                            <span class=" d-flex text-center align-items-center">
-                                <p class="mt-3 m-0 me-2">Signiture:</p>
-                                <div class="position-relative d-inline-block " style="top:12px">
-                                    <img v-if="userData?.signature" :src="userData?.signature ? userData.signature : defaultSign"
-                                        title="Upload Signature" class="img-fluid signiture-image border"
-                                        @click="triggerFileInput('signature')" style="cursor: pointer;" />
-                                    <i v-if="userData?.signature" class="bi bi-pencil edit-image m-2"
-                                        @click="triggerFileInput('signature')" style="cursor: pointer;"></i>
-                                    
-                                    <button class="uploas-sign-btn" v-if="!userData?.signature" @click="triggerFileInput('signature')">Upload signiture</button>
-                                </div>
-
-                                <!-- Hidden File Input -->
-                                <input type="file" ref="fileInput" @change="uploadImage" accept="image/*" hidden />
-
-                            </span>
-                        </div>
-                    </div>
-                </div>
+            <!-- Top details -->
+            <div class="d-flex flex-wrap justify-content-center justify-content-md-start gap-3 role-details">
+              <span><i class="bi bi-person-badge-fill me-1"></i>{{ userData.emp_code || "-" }}</span>
+              <span><i class="bi bi-envelope-fill me-1"></i>{{ userData.emp_mail_id || "-" }}</span>
+              <span><i class="bi bi-telephone-fill me-1"></i>{{ userData.emp_phone || "-" }}</span>
+              <span><i class="bi bi-briefcase-fill me-1"></i>{{ userData.designation || "-" }}</span>
+              <span><i class="bi bi-building-fill me-1"></i>{{ userData.company_field || "-" }}</span>
             </div>
 
+            <!-- Bottom info -->
+            <div class="mt-3 d-flex flex-wrap justify-content-center justify-content-md-start gap-3 font-11">
+              <span>Department: {{ userData.department || "-" }}</span>
+              <span>Reporting Manager: {{ userData.reporting_to || "-" }}</span>
+              <span>Acknowledged On: {{ formatDateTime(userData.acknowledge_on) || "-" }}</span>
+            </div>
+
+            <!-- Signature -->
+            <div class="mt-3 d-flex flex-column flex-sm-row align-items-center">
+              <p class="m-0 me-sm-2">Signature:</p>
+              <div class="position-relative d-inline-block mt-2 mt-sm-0">
+                <img
+                  v-if="userData?.signature"
+                  :src="userData.signature"
+                  class="img-fluid signiture-image border"
+                  @click="triggerFileInput('signature')"
+                  style="cursor: pointer;"
+                />
+                <i
+                  v-if="userData?.signature"
+                  class="bi bi-pencil edit-image m-2"
+                  @click="triggerFileInput('signature')"
+                  style="cursor: pointer;"
+                ></i>
+
+                <button
+                  v-if="!userData?.signature"
+                  class="upload-sign-btn"
+                  @click="triggerFileInput('signature')"
+                >
+                  Upload signature
+                </button>
+              </div>
+              <input type="file" ref="fileInput" @change="uploadImage" accept="image/*" hidden />
+            </div>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 </template>
 
 <script setup>
@@ -240,4 +250,36 @@ span {
   padding: 5px;
   width: 100%;
 }
+.profile-pic {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+@media (min-width: 768px) {
+  .profile-pic {
+    width: 120px;
+    height: 120px;
+  }
+}
+
+.role-details span,
+.font-11 {
+  font-size: 13px;
+}
+
+.upload-sign-btn {
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 12px;
+  background-color: #f8f9fa;
+  cursor: pointer;
+}
+
+.upload-sign-btn:hover {
+  background-color: #e9ecef;
+}
+
 </style>
