@@ -2267,11 +2267,7 @@ function createEmpl() {
         );
         modal.hide();
 
-<<<<<<< HEAD
-        // // cancelCreate();
-=======
         cancelCreate();
->>>>>>> 3e9331cb2264a1e4e7b1ee98283ee192554b03f7
         createEmployee.value = {}
         newRole.value = ''
         searchText.value = ''

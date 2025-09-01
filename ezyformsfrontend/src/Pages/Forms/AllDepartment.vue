@@ -14,10 +14,20 @@
 
       </div>
       <div class="mt-1">
+        <!-- d-none d-lg-block -->
+        <div class="d-none d-lg-block">
+
         <GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true" viewType="viewPdf"  raiseRequest="true"
           :enableDisable="isEnable" @cell-click="viewPreview" @actionClicked="actionCreated"
           @toggle-click="toggleFunction" :actions="actions" @updateFilters="inLineFiltersData"
           :field-mapping="fieldMapping" isFiltersoption="true" />
+        </div>
+         <div class=" d-block d-lg-none">
+        <GlobalCard :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true" viewType="viewPdf"  raiseRequest="true"
+          :enableDisable="isEnable" @cell-click="viewPreview" @actionClicked="actionCreated"
+          @toggle-click="toggleFunction" :actions="actions" @updateFilters="inLineFiltersData"
+          :field-mapping="fieldMapping" isFiltersoption="flase"  />
+      </div>
         <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
           @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
       </div>
@@ -115,6 +125,7 @@ import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import router from '../../router';
 import { useRoute } from 'vue-router';
+import GlobalCard from '../../Components/GlobalCard.vue';
 // import ButtonComp from '../../Components/ButtonComp.vue';
 const totalRecords = ref(0);
 const tableheaders = ref([

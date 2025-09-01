@@ -1,12 +1,82 @@
 <template>
-    <div>
+    <div class="">
+        <div class="d-md-none mobile_header_top ">
+            <div class=" d-flex justify-content-between align-content-center p-2 shadow-sm ">
+                <div>
+                    <img @click="logoClick" class="imgmix img-fluid"
+                        src="../assets/Final-logo-ezyforms-removebg-preview.png" />
+                </div>
+                <div class=" d-flex gap-3 justify-content-end align-items-center m-0 me-3">
+                    <div>
 
-        <div class="position-sticky top-0 stickyheader">
-            <div class="container-fluid p-0">
-                <div class="headerbackgound py-1">
-                    <div class="row">
-                        <div class="col-2">
-                            <!-- <div class="d-flex gap-2 align-items-center">
+                        <FormFields tag="select" placeholder="" class="font-12" name="roles" id="roles"
+                            :Required="false" v-model="business_unit" :options="EzyFormsCompanys" />
+                    </div>
+                    <div>
+                        <div class="logooutbtn m-0">
+                            <div class="btn-group dropdown navbar-nav ms-auto">
+                                <button type="button" class="btn border-0 p-0 me-2 mt-0" data-bs-toggle="dropdown"
+                                    aria-expanded="false">
+                                    <img src="../assets/Image.svg" />
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-start p-2">
+                                    <div class="d-flex gap-2 align-items-center">
+                                        <div v-if="userInitial">
+                                            <li class="d-flex justify-content-center align-items-center btn btn-dark">
+
+                                                {{ userInitial }}
+
+                                            </li>
+                                        </div>
+                                        <div>
+                                            <li>
+                                                <div v-if="userEmail" class=" ">
+                                                    <span class="fw-medium font-13 "> {{ userEmail }}</span>
+
+                                                </div>
+                                                <div v-if="userDesigination" class=" ">
+
+                                                    <span class="fw-medium font-11">{{ userDesigination
+                                                        }}</span>
+                                                </div>
+                                            </li>
+                                        </div>
+
+                                    </div>
+
+                                    <li class="mt-2">
+                                        <div class="d-flex justify-content-center align-items-center">
+                                            <ButtonComp @click="SystemSettingData"
+                                                class="changepass rounded-2 text-left" icon="lock"
+                                                data-bs-toggle="modal" data-bs-target="#changePassword"
+                                                name="Change Password"></ButtonComp>
+                                        </div>
+                                    </li>
+                                    <li class="mt-2">
+                                        <div class="d-flex justify-content-center align-items-center">
+                                            <ButtonComp class=" logout rounded-2 text-left" icon="box-arrow-right"
+                                                @click="logout()" name="Log Out">
+                                            </ButtonComp>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="d-none d-md-block">
+
+            <div class="position-sticky top-0 stickyheader">
+                <div class="container-fluid p-0">
+                    <div class="headerbackgound py-1">
+                        <div class="row">
+                            <div class="col-2">
+                                <!-- <div class="d-flex gap-2 align-items-center">
                                 <div class="d-flex align-items-center">
                                     <button class="btn p-0 border-0" type="button" @click="toggleSidebar">
                                         <i class="bi bi-list fs-3 ms-2"></i> 
@@ -14,105 +84,119 @@
                                     
                                 </div>
                             </div> -->
-                            <img  @click="logoClick" class="imgmix img-fluid"
-                                        src="../assets/Final-logo-ezyforms-removebg-preview.png" />
-                        </div>
-                        <div class="col-7">
-                            <div class="mt-2 ms-2">
-                                <TabsComp :tabs="filteredTabsData" @changeTab="handleTabChange" />
+                                <img @click="logoClick" class="imgmix img-fluid d-none d-md-block"
+                                    src="../assets/Final-logo-ezyforms-removebg-preview.png" />
+                                <div class="d-sm-block d-md-none p-2">
+                                    <div class="">
+
+                                        <FormFields tag="select" placeholder="" class="font-12" name="roles" id="roles"
+                                            :Required="false" v-model="business_unit" :options="EzyFormsCompanys" />
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="col-3 d-flex justify-content-end align-items-center pe-1">
-                            <div class="d-flex gap-3 justify-content-end align-items-center m-0 me-3">
-                                <!-- <button class="btn btn-outline-danger" type="button" data-bs-toggle="offcanvas"
+                            <div class="col-7">
+                                <div class="mt-2 ms-2">
+                                    <TabsComp :tabs="filteredTabsData" @changeTab="handleTabChange" />
+                                </div>
+                            </div>
+                            <div class="col-3 d-flex justify-content-end align-items-center pe-1">
+                                <div class="d-flex gap-3 justify-content-end align-items-center m-0 me-3">
+                                    <!-- <button class="btn btn-outline-danger" type="button" data-bs-toggle="offcanvas"
                                     data-bs-target="#offcanvasRight" aria-controls="offcanvasRight"><i
                                         class="bi bi-bell-fill"></i></button> -->
 
-                                <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight"
-                                    aria-labelledby="offcanvasRightLabel">
-                                    <div class="offcanvas-header">
-                                        <h5 id="offcanvasRightLabel">Notifications</h5>
-                                        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"
-                                            aria-label="Close"></button>
-                                    </div>
-                                    <div class="offcanvas-body">
-                                        <ul class="list-unstyled designation-scroll">
-                                            <li v-for="(item, index) in SocketList" :key="index"
-                                                class="designationList form-check">
-                                                {{ item
-                                                }}
-                                            </li>
-                                        </ul>
+                                    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight"
+                                        aria-labelledby="offcanvasRightLabel">
+                                        <div class="offcanvas-header">
+                                            <h5 id="offcanvasRightLabel">Notifications</h5>
+                                            <button type="button" class="btn-close text-reset"
+                                                data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                                        </div>
+                                        <div class="offcanvas-body">
+                                            <ul class="list-unstyled designation-scroll">
+                                                <li v-for="(item, index) in SocketList" :key="index"
+                                                    class="designationList form-check">
+                                                    {{ item
+                                                    }}
+                                                </li>
+                                            </ul>
 
+                                        </div>
                                     </div>
-                                </div>
-                                <!-- <div class="">
+                                    <!-- <div class="">
                                     <ButtonComp
                                         class="btn btn-danger raiseReqBtn d-flex justify-content-center align-items-center  m-0 text-nowrap font-10"
                                         name="Raise Request" data-bs-toggle="modal" @click="raiseRequest"
                                         data-bs-target="#riaseRequestModal" />
                                 </div> -->
-                                <div class="">
+                                    <div class=" d-none d-md-block">
 
-                                    <FormFields tag="select" placeholder="" class="font-12" name="roles" id="roles"
-                                        :Required="false" v-model="business_unit" :options="EzyFormsCompanys" />
-                                </div>
-                                <div class="logooutbtn m-0">
-                                    <div class="btn-group dropdown navbar-nav ms-auto">
-                                        <button type="button" class="btn border-0 p-0 me-2 mt-0"
-                                            data-bs-toggle="dropdown" aria-expanded="false">
-                                            <img src="../assets/Image.svg" />
-                                        </button>
-                                        <ul class="dropdown-menu dropdown-menu-start p-2">
-                                            <div class="d-flex gap-2 align-items-center">
-                                                <div v-if="userInitial">
-                                                    <li
-                                                        class="d-flex justify-content-center align-items-center btn btn-dark">
-
-                                                        {{ userInitial }}
-
-                                                    </li>
-                                                </div>
-                                                <div>
-                                                    <li>
-                                                        <div v-if="userEmail" class=" ">
-                                                            <span class="fw-medium font-13 "> {{ userEmail }}</span>
-
-                                                        </div>
-                                                        <div v-if="userDesigination" class=" ">
-
-                                                            <span class="fw-medium font-11">{{ userDesigination
-                                                                }}</span>
-                                                        </div>
-                                                    </li>
-                                                </div>
-
-                                            </div>
-
-                                            <li class="mt-2">
-                                                <div class="d-flex justify-content-center align-items-center">
-                                                    <ButtonComp @click="SystemSettingData" class="changepass rounded-2 text-left" icon="lock"
-                                                        data-bs-toggle="modal" data-bs-target="#changePassword"
-                                                        name="Change Password"></ButtonComp>
-                                                </div>
-                                            </li>
-                                            <li class="mt-2">
-                                                <div class="d-flex justify-content-center align-items-center">
-                                                    <ButtonComp class=" logout rounded-2 text-left"
-                                                        icon="box-arrow-right" @click="logout()" name="Log Out">
-                                                    </ButtonComp>
-                                                </div>
-                                            </li>
-                                        </ul>
+                                        <FormFields tag="select" placeholder="" class="font-12" name="roles" id="roles"
+                                            :Required="false" v-model="business_unit" :options="EzyFormsCompanys" />
                                     </div>
+                                    <div class="logooutbtn m-0">
+                                        <div class="btn-group dropdown navbar-nav ms-auto">
+                                            <button type="button" class="btn border-0 p-0 me-2 mt-0"
+                                                data-bs-toggle="dropdown" aria-expanded="false">
+                                                <img src="../assets/Image.svg" />
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-start p-2">
+                                                <div class="d-flex gap-2 align-items-center">
+                                                    <div v-if="userInitial">
+                                                        <li
+                                                            class="d-flex justify-content-center align-items-center btn btn-dark">
 
+                                                            {{ userInitial }}
+
+                                                        </li>
+                                                    </div>
+                                                    <div>
+                                                        <li>
+                                                            <div v-if="userEmail" class=" ">
+                                                                <span class="fw-medium font-13 "> {{ userEmail }}</span>
+
+                                                            </div>
+                                                            <div v-if="userDesigination" class=" ">
+
+                                                                <span class="fw-medium font-11">{{ userDesigination
+                                                                    }}</span>
+                                                            </div>
+                                                        </li>
+                                                    </div>
+
+                                                </div>
+
+                                                <li class="mt-2">
+                                                    <div class="d-flex justify-content-center align-items-center">
+                                                        <ButtonComp @click="SystemSettingData"
+                                                            class="changepass rounded-2 text-left" icon="lock"
+                                                            data-bs-toggle="modal" data-bs-target="#changePassword"
+                                                            name="Change Password"></ButtonComp>
+                                                    </div>
+                                                </li>
+                                                <li class="mt-2">
+                                                    <div class="d-flex justify-content-center align-items-center">
+                                                        <ButtonComp class=" logout rounded-2 text-left"
+                                                            icon="box-arrow-right" @click="logout()" name="Log Out">
+                                                        </ButtonComp>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </div>
+
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+                <!-- Modal -->
             </div>
-            <!-- Modal -->
+        </div>
+
+        <div class="d-md-none mobile-nav">
+            <TabsComp :tabs="filteredTabsData" @changeTab="handleTabChange" />
+
         </div>
         <div class="modal fade" id="riaseRequestModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
             aria-labelledby="riaseRequestModalLabel" aria-hidden="true">
@@ -271,8 +355,8 @@ const emit = defineEmits(['toggleSidebar'])
 const isImageVisible = ref(true)
 
 function toggleSidebar() {
-  isImageVisible.value = !isImageVisible.value // Toggle image visibility
-  emit('toggleSidebar') // Emit event to parent if needed
+    isImageVisible.value = !isImageVisible.value // Toggle image visibility
+    emit('toggleSidebar') // Emit event to parent if needed
 }
 
 // Define reactive variables
@@ -315,23 +399,23 @@ const filterObj = ref({
     limitPageLength: 100,
 });
 
-const EmpCompony=ref([]);
+const EmpCompony = ref([]);
 const selectedScore = ref("");
-const responsibleUnits=ref([])
+const responsibleUnits = ref([])
 const SocketList = ref([])
 
 //IF THE USER DESIGNATION INCLUDES (IT) THEN ONLY FORM CREATION WILL APPREAR IN HEADER ""
 
 const filteredTabsData = computed(() => {
     return tabsData.value
-       
+
 });
 function logout() {
     // localStorage.removeItem('UserName');
     // localStorage.removeItem('employeeData');
     axiosInstance.post(apis.logout)
         .then((response) => {
-            const res=response;
+            const res = response;
             sessionStorage.clear();
             localStorage.clear();
             router.push({ path: '/' }).then(() => {
@@ -354,7 +438,7 @@ const SystemSettingData = () => {
         .get(`${apis.resource}${doctypes.SystemSettings}/${encodeURIComponent(docName)}`, { params: queryParams })
         .then((res) => {
             if (res.data) {
-                selectedScore.value=res.data.minimum_password_score;
+                selectedScore.value = res.data.minimum_password_score;
             }
         })
         .catch((error) => {
@@ -363,28 +447,28 @@ const SystemSettingData = () => {
 };
 
 function getPasswordRule(score) {
-  if (score == 2) {
+    if (score == 2) {
+        return {
+            regex: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/,
+            message: "Password must be at least 8 characters with at least one uppercase, lowercase, number, and special character."
+        };
+    }
+    else if (score == 3) {
+        return {
+            regex: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{10,}$/,
+            message: "Password must be at least 10 characters and fully mixed (uppercase, lowercase, numbers, special characters)."
+        };
+    }
+    else if (score == 4) {
+        return {
+            regex: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{14,}$/,
+            message: "Password must be at least 14+ characters with a random mix of all character types."
+        };
+    }
     return {
-      regex: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/,
-      message: "Password must be at least 8 characters with at least one uppercase, lowercase, number, and special character."
+        regex: /.*/,
+        message: "Password must meet the system's security requirements."
     };
-  } 
-  else if (score == 3) {
-    return {
-      regex: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{10,}$/,
-      message: "Password must be at least 10 characters and fully mixed (uppercase, lowercase, numbers, special characters)."
-    };
-  } 
-  else if (score == 4) {
-    return {
-      regex: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{14,}$/,
-      message: "Password must be at least 14+ characters with a random mix of all character types."
-    };
-  }
-  return {
-    regex: /.*/,
-    message: "Password must meet the system's security requirements."
-  };
 }
 
 const props = defineProps(['id']);
@@ -397,7 +481,7 @@ onMounted(() => {
     const userData = JSON.parse(localStorage.getItem('employeeData'));
     const userName = JSON.parse(localStorage.getItem('UserName'));
 
-    EmpCompony.value=userData.company_field;
+    EmpCompony.value = userData.company_field;
     responsibleUnits.value = userData.responsible_units.map(unit => unit.company);
 
     // const syetemmanger = JSON.parse(localStorage.getItem('systemManager'))
@@ -445,9 +529,9 @@ const toggleConfPwdVisibility = () => {
 };
 
 const validatePassword = () => {
-  const { regex, message } = getPasswordRule(selectedScore.value);
-  if (!regex.test(new_password.value)) {
-    passwordError.value = message;
+    const { regex, message } = getPasswordRule(selectedScore.value);
+    if (!regex.test(new_password.value)) {
+        passwordError.value = message;
     } else {
         passwordError.value = "";
     }
@@ -468,10 +552,10 @@ const isPasswordValid = computed(() => {
 
 const isButtonDisabled = computed(() => {
     return (
-    !new_password.value ||
-    !confirm_password.value ||
-    !isPasswordValid.value ||
-    new_password.value !== confirm_password.value
+        !new_password.value ||
+        !confirm_password.value ||
+        !isPasswordValid.value ||
+        new_password.value !== confirm_password.value
     );
 });
 
@@ -508,7 +592,7 @@ function passwordChange() {
 }
 const ezyForms = () => {
     const queryParams = {
-        fields: JSON.stringify(["name","bu_code"]),
+        fields: JSON.stringify(["name", "bu_code"]),
     };
 
     axiosInstance.get(apis.resource + doctypes.wfSettingEzyForms, {
@@ -827,6 +911,25 @@ const handleBuChange = (tab) => {
 </script>
 
 <style lang="scss" scoped>
+.mobile_header_top{
+    z-index: 1020;
+    background: #fff;
+
+    position:fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+}
+.mobile-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #fff;
+    z-index: 1050;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+}
+
 .headerbackgound {
     height: 50px;
     background-color: var(--sidebar-color);
@@ -842,6 +945,7 @@ const handleBuChange = (tab) => {
     justify-content: center;
     align-items: center;
     margin-bottom: 7px;
+    border-radius: 20px;
 }
 
 .changepass {
@@ -899,6 +1003,7 @@ const handleBuChange = (tab) => {
     box-shadow: rgba(0, 0, 0, 0.1) 0px 3px 3px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
 
     // box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 1020;
 }
 
 .raise-label {

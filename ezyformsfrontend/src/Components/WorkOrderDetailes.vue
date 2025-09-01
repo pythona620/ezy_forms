@@ -1743,11 +1743,24 @@ const submitComparison = async () => {
     item_unit_of_measure: item.item_unit_of_measure,
     item_quantity: item.item_quantity
   }));
+    const pricing_details = vendorDetails.value.flatMap(vendor =>
+      vendor.ezy_item_details.map(item => ({
+        vendor_name: vendor.vendor_name,   // include vendor_name
+        item_name: item.item_name,
+        item_unit_of_measure: item.item_unit_of_measure,
+        item_quantity: item.item_quantity,
+        item_gst: item.item_gst,
+        unitprice: item.unitPrice,         // keep naming consistent
+        totalprice: item.totalPrice,
+        doctype: "Pricing Details"         // if required by backend
+      }))
+    );
 
   const form = {
     doctype: "VENDOR COMPARISON",
     vendor_details,
     ezy_item_details,
+    pricing_details,
     requested_by: requestedBy,
     requested_on: requestedOn,
     work_order: comparisonType.value === 1 ? 1 : 0,
@@ -2471,6 +2484,7 @@ function saveVendorDetails() {
     grand_total: vendorForm.value.grand_total,
 
   };
+  console.log(vendorData, "vendorData");
 
   if (editingVendorIndex.value !== null) {
     // Update the existing vendor at the correct index
