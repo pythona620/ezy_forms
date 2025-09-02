@@ -241,7 +241,7 @@
                             v-if="(field.fieldname !== 'requestor_signature' && field.label !== 'Requestor Signature' && blockIndex !== 0 && !field.label.includes('Approved By') && !field.label.includes('Acknowledged By') && props.readonlyFor !== 'true') && (field.value && blockIndex !== 0) || !field.value && props.readonlyFor !== 'true' && blockIndex !== 0"
                             :disabled="props.readonlyFor === 'true' || blockIndex === 0 || blockIndex < currentLevel"
                             type="file" :class="blockIndex < currentLevel ? 'd-none' : ''"
-                            accept=".jpeg,.jpg,.png,.pdf,.xlsx,.xls"
+                            
                             :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
                             class="form-control previewInputHeight font-10 mb-2 mt-2" multiple
                             @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
@@ -584,7 +584,7 @@
                                       <!-- File Input -->{{ field.value }}
                                       <input multiple type="file" class="form-control font-12"
                                         :disabled="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel"
-                                        accept="image/jpeg,image/png,application/pdf"
+                                        
                                         :class="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel ? 'bg-white d-none border-0' : null"
                                         @change="handleFileUpload($event, row, field.fieldname)" />
 
@@ -699,7 +699,7 @@
                                         <!-- File Input -->
                                         <input
                                           v-if="props.readonlyFor !== 'true' && blockIndex !== 0 && blockIndex === currentLevel"
-                                          type="file" accept=".jpeg,.jpg,.png,.pdf,.xlsx,.xls" multiple
+                                          type="file"  multiple
                                           class="form-control font-12"
                                           @change="handleFileUpload($event, row, field.fieldname)" />
 
@@ -1611,9 +1611,9 @@ const logFieldValue = (
       : [];
 
     const totalFiles = existingFiles.length + files.length;
-    if (totalFiles > 10) {
-      alert("You can upload a maximum of 10 files.");
-      files = files.slice(0, 10 - existingFiles.length); // Only allow up to 5 total
+    if (totalFiles > 20) {
+      alert("You can upload a maximum of 20 files.");
+      files = files.slice(0, 20 - existingFiles.length); // Only allow up to 20 total
     }
 
     files.forEach((file) => uploadFile(file, field));
