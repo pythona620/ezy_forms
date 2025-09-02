@@ -144,12 +144,13 @@
                                                 v-if="(field.fieldname !== 'requestor_signature' && field.label !== 'Requestor Signature') || !field.value"
                                                 :disabled="props.readonlyFor === 'true'"
                                                 type="file"
-                                                accept=".jpeg,.jpg,.png,.pdf,.xlsx,.xls"
+                                                
                                                 :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
                                                 class="form-control previewInputHeight font-10 mt-2"
                                                 multiple
                                                 @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
                                                 />
+                                                <!-- <span v-if="(field.fieldname !== 'requestor_signature' && field.label !== 'Requestor Signature') || !field.value" class="font-10 text-danger">Max 20 files can be uploaded**</span> -->
 
 
                                                 <!-- Preview Section -->
@@ -534,7 +535,7 @@
                                                                         <!-- File Input -->
                                                                         <input multiple type="file"
                                                                             class="form-control font-12"
-                                                                            accept="image/jpeg,image/png,application/pdf"
+                                                                            
                                                                             @change="handleFileUpload($event, row, fieldItem.fieldname)" />
 
                                                                         <!-- Preview Section -->
@@ -780,7 +781,7 @@
                                                                             v-else-if="field.fieldtype === 'Attach'">
                                                                             <!-- File Input -->
                                                                             <input type="file" multiple
-                                                                                accept="image/jpeg,image/png,application/pdf"
+                                                                               
                                                                                 class="form-control font-12"
                                                                                 @change="handleFileUpload($event, row, field.fieldname)" />
 
@@ -1847,9 +1848,9 @@ const logFieldValue = (
             : [];
 
         const totalFiles = existingFiles.length + files.length;
-        if (totalFiles > 10) {
-            alert("You can upload a maximum of 10 files.");
-            files = files.slice(0, 10 - existingFiles.length); // Only allow up to 5 total
+        if (totalFiles > 20) {
+            alert("You can upload a maximum of 20 files.");
+            files = files.slice(0, 20 - existingFiles.length); // Only allow up to 20 total
         }
 
         files.forEach((file) => uploadFile(file, field));
@@ -2677,7 +2678,7 @@ function getFieldError(row, field) {
 }
 
 .previewInputHeight {
-    margin-bottom: 5px;
+    margin-bottom: 2px;
 }
 
 .dynamicColumn {
