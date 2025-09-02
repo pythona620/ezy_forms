@@ -195,7 +195,9 @@ doc_events = {
 #
 override_whitelisted_methods = {
     # "frappe.desk.doctype.event.event.get_events": "ezy_forms.event.get_events"
-"frappe.core.doctype.user.user.sign_up":"ezy_forms.api.v1.sign_up.sign_up"
+"frappe.core.doctype.user.user.sign_up":"ezy_forms.api.v1.sign_up.sign_up",
+"frappe.handler.upload_file": "ezy_forms.api.v1.ezy_file_uploads.custom_upload_file",
+# "frappe.twofactor.confirm_otp_token":"ezy_forms.api.v1.forms_otp_verification.custome_confirm_otp_token"
 }
 #
 # each overriding function accepts a `data` argument;
