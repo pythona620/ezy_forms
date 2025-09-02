@@ -333,10 +333,10 @@ const filteredSettingsGroups = computed(() => {
             forthSettingsGroup: settingsSideBarData.slice(3, 6),
             fifthSettingsGroup: settingsSideBarData.slice(6,7),
             sixthGroup: settingsSideBarData.slice(7,9),
-            seventhGroup: settingsSideBarData.slice(9,11),
-            eightGroup: settingsSideBarData.slice(11,12),
-            ninthGroup: settingsSideBarData.slice(12,13),
-            tenthGroup: settingsSideBarData.slice(13),
+            seventhGroup: settingsSideBarData.slice(9,12),
+            eightGroup: settingsSideBarData.slice(12,13),
+            ninthGroup: settingsSideBarData.slice(13,14),
+            tenthGroup: settingsSideBarData.slice(14),
 
 
         }
