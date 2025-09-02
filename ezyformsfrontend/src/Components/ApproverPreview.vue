@@ -902,7 +902,7 @@
         </td>
       </tr>
       <tr>
-        <td colspan="4" style="border: 1px solid black; padding: 8px;">Bidder Rank</td>
+        <td colspan="4" style="border: 1px solid black; padding: 8px;">Selected Vendor</td>
         <td
           v-for="vendor in props.childData.vendor_details"
           :key="'rank-' + vendor.name"
@@ -2246,8 +2246,59 @@ const showPreviewModal = ref(false)
 const attachmentList = ref([])
 const currentBlockIndex = ref(null);
 
-function openAttachmentList(value ,blockIndex) {
-  attachmentList.value = value.split(',').map(f => f.trim())
+// // Store all files across the form
+// const allAttachments = ref([]);
+// // Store which ones have been previewed
+// const previewedAttachments = ref(new Set());
+
+// /**
+//  * Collect every attachment in the form
+//  */
+// function collectAllAttachments(blocks) {
+//   const attachments = [];
+
+//   (blocks || []).forEach((block) => {
+//     (block.sections || []).forEach((section) => {
+//       (section.rows || []).forEach((row) => {
+//         (row.columns || []).forEach((column) => {
+//           (column.fields || []).forEach((field) => {
+//             // ✅ Skip preview for specific labels
+//             if (
+//               field.fieldtype === "Attach" &&
+//               field.value &&
+//               !["Requestor Signature", "Approved By", "Acknowledged By"].includes(field.label)
+//             ) {
+//               field.value
+//                 .split(",")
+//                 .map((f) => f.trim())
+//                 .filter((f) => f)
+//                 .forEach((f) => attachments.push(f));
+//             }
+//           });
+//         });
+//       });
+//     });
+//   });
+
+//   allAttachments.value = attachments;
+// }
+
+// /**
+//  * Watch the incoming data
+//  */
+// watch(
+//   () => props.blockArr,
+//   (newVal) => {
+//     collectAllAttachments(newVal);
+//   },
+//   { deep: true, immediate: true }
+// );
+
+/**
+ * When opening the "View" list
+ */
+function openAttachmentList(value , blockIndex) {
+  attachmentList.value = value.split(",").map((f) => f.trim());
   showListModal.value = true;
   currentBlockIndex.value = blockIndex;
 }
@@ -2256,6 +2307,19 @@ function closeAttachmentList() {
   showListModal.value = false;
   currentBlockIndex.value = null;
 }
+
+
+// function previewAttachment(url) {
+//   previewedAttachments.value.add(url);
+//   previewUrl.value = url;
+//   showPreviewModal.value = true;
+
+//   // Check if ALL attachments across the form are previewed
+//   const allPreviewed = allAttachments.value.every((f) =>
+//     previewedAttachments.value.has(f)
+//   );
+//   emit("attachmentsReady", allPreviewed);
+// }
 
 function previewAttachment(url) {
   previewUrl.value = url

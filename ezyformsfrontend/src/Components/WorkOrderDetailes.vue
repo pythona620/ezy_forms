@@ -608,7 +608,7 @@
                               </div> -->
                                         <div class="row">
                                           <div class="col">
-                                            <label class="form-label">Transportation Charges</label>
+                                            <label class="form-label">Transportation/freight</label>
                                             <input type="number" v-model.number="vendorForm.transportation_charges"
                                               class="form-control form-control-sm" @input="calculateTaxes" />
                                           </div>
@@ -619,17 +619,17 @@
 
 
                                           <div class="col">
-                                            <label class="form-label">Transport CGST %</label>
-                                            <input type="number" v-model.number="vendorForm.transportation_cgst_percent"
+                                            <label class="form-label"> CGST %</label>
+                                            <input type="number" v-model.number="vendorForm.transportation_cgst_percent" :disabled="disableCGST_UTGST" 
                                               class="form-control form-control-sm" @input="calculateTaxes" />
                                             <small class="font-13">Amt: <i class="bi bi-currency-rupee"></i> {{
                                               vendorForm.transportation_cgst_amount }}</small>
                                           </div>
 
                                           <div class="col">
-                                            <label class="form-label">Transport UTGST %</label>
+                                            <label class="form-label"> UTGST %</label>
                                             <input type="number"
-                                              v-model.number="vendorForm.transportation_utgst_percent"
+                                              v-model.number="vendorForm.transportation_utgst_percent" :disabled="disableCGST_UTGST" 
                                               class="form-control form-control-sm" @input="calculateTaxes" />
                                             <small class="font-13">Amt:<i class="bi bi-currency-rupee"></i>{{
                                               vendorForm.transportation_utgst_amount
@@ -637,8 +637,8 @@
                                           </div>
 
                                           <div class="col">
-                                            <label class="form-label">Transport IGST %</label>
-                                            <select v-model.number="vendorForm.transportation_igst_percent"
+                                            <label class="form-label"> IGST %</label>
+                                            <select :disabled="disableIGST"  v-model.number="vendorForm.transportation_igst_percent"
                                               class="form-select form-select-sm" @change="calculateTaxes">
                                               <option :value="0">0%</option>
                                               <option :value="5">5%</option>
@@ -852,7 +852,7 @@
 
                                 <!-- Draggable List -->
 
-                                <draggable v-model="workflowApprovalLevels" item-key="id" handle=".drag-handle"
+                                <draggable :disabled="true" v-model="workflowApprovalLevels" item-key="id" handle=".drag-handle"
                                   :animation="150">
                                   <template #item="{ element, index }">
                                     <div class="workflow-row ">
@@ -886,7 +886,7 @@
                                         <span v-else>{{ getRejectLabel(element.onReject) }}</span>
                                       </div>
 
-                                      <div>
+                                      <div class="not-allowed">
                                         <button disabled class="btn border-0 not-allowed me-1"
                                           @click="editWorkflowRow(index)" v-if="workflowEditIndex !== index">
                                           <i class="bi bi-pencil font-13"></i>
@@ -1329,6 +1329,8 @@ const itemDetails = ref([
   // { id: 1, item_name: 'Desktop',quantity: 10,item_unit_of_measure:'Nos'}  
 
 ]);
+const disableIGST = ref(false);
+const disableCGST_UTGST = ref(false);
 const expenseCodeOptions = ref([]);
 const costCenterOptions = ref([]);
 const editingIndex = ref(null);
@@ -1693,12 +1695,13 @@ function fetchingVendorMasterData() {
 // function exportfile() {
 
 // }
-function sortVendors() {
-  // Sort vendors by total_value ascending
- sortedVendors.value.sort((a, b) => parseFloat(b.grand_total) - parseFloat(a.grand_total));
-}
+// function sortVendors() {
+//   // Sort vendors by total_value ascending (lowest first)
+//   sortedVendors.value.sort((a, b) => parseFloat(a.grand_total) - parseFloat(b.grand_total));
+// }
+
 const submitComparison = async () => {
-  sortVendors();
+  // sortVendors();
   // Format: "2025-08-06 17:28"
   const now = new Date();
   const requestedOn = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
@@ -2211,7 +2214,35 @@ const confirmItemSelection = () => {
   bootstrap.Modal.getInstance(document.getElementById("itemModal")).hide();
 };
 
+// Watch CGST & UTGST
+watch(
+  [() => vendorForm.value.transportation_cgst_percent, () => vendorForm.value.transportation_utgst_percent],
+  ([newCgst, newUtgst]) => {
+    if (newCgst > 0 || newUtgst > 0) {
+      disableIGST.value = true;
+      vendorForm.value.transportation_igst_percent = 0;
+      vendorForm.value.transportation_igst_amount = 0;
+    } else {
+      disableIGST.value = false;
+    }
+  }
+);
 
+// Watch IGST
+watch(
+  () => vendorForm.value.transportation_igst_percent,
+  (newIgst) => {
+    if (newIgst > 0) {
+      disableCGST_UTGST.value = true;
+      vendorForm.value.transportation_cgst_percent = 0;
+      vendorForm.value.transportation_cgst_amount = 0;
+      vendorForm.value.transportation_utgst_percent = 0;
+      vendorForm.value.transportation_utgst_amount = 0;
+    } else {
+      disableCGST_UTGST.value = false;
+    }
+  }
+);
 // const saveItems = () => {
 //   console.log('Saved Items:', JSON.stringify(itemDetails.value, null, 2));
 
