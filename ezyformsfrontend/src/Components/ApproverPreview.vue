@@ -37,9 +37,10 @@
                 <div class="">
                   <div v-for="(field, fieldIndex) in column.fields" :key="'field-preview-' + fieldIndex" :class="(props.readonlyFor === 'true' || blockIndex < currentLevel) && field.fieldtype !== 'Small Text' && field.fieldtype !== 'Text'
                     ? (field.label === 'Approved By' ? ' d-flex align-items-end ' : 'd-flex align-items-start justify-content-start')
-                    : ''" :style="['Approver', 'Approved On', 'Approved By'].includes(field.label) && blockIndex == currentLevel  
+                    : ''">
+                     <!-- :style="['Approver', 'Approved On', 'Approved By'].includes(field.label) && blockIndex == currentLevel  
                     ? { opacity: 0 } 
-                    : {}">
+                    : {}" -->
                     <div
                           v-if="!(blockIndex !== 0 && !field.value && ['Approver', 'Approved On', 'Approved By', 'Acknowledged By'].includes(field.label))"
                           :class="[
