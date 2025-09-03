@@ -248,7 +248,7 @@
 
                           <!-- File Previews -->
                           <div v-if="field.value" class="d-flex gap-2 align-items-center flex-wrap">
-                            <div v-for="(fileUrl, index) in field.value.split(',').map(f => f.trim())" :key="index"
+                            <div v-for="(fileUrl, index) in field.value.split('|').map(f => f.trim())" :key="index"
                               class="position-relative d-inline-block"
                               @mouseover="hovered[`${field.fieldname}-${index}`] = true"
                               @mouseleave="hovered[`${field.fieldname}-${index}`] = false"
@@ -273,22 +273,22 @@
                               <!-- PDF File -->
                               <a v-else-if="isPdfFile(fileUrl)" :href="fileUrl" target="_blank"
                                 class="d-flex align-items-center justify-content-center border rounded bg-light"
-                                style="width: 30px; height: 32px; text-decoration: none;">
+                                style="width: 32px; height: 35px; text-decoration: none;">
                                 <i class="bi bi-file-earmark-pdf text-danger fs-4"></i>
                               </a>
 
                               <!-- Excel File -->
                               <a v-else-if="isExcelFile(fileUrl)" :href="fileUrl" target="_blank"
                                 class="d-flex align-items-center justify-content-center border rounded bg-light"
-                                style="width: 30px; height: 32px; text-decoration: none;">
+                                style="width: 32px; height: 35px; text-decoration: none;">
                                 <i class="bi bi-file-earmark-spreadsheet text-success fs-4"></i>
                               </a>
 
                               <!-- Other Files -->
                               <a v-else :href="fileUrl" target="_blank"
                                 class="d-flex align-items-center justify-content-center border rounded bg-light"
-                                style="width: 25px; height: 25px; text-decoration: none;">
-                                <i class="bi bi-file-earmark fs-4"></i>
+                                style="width: 35px; height: 35px; text-decoration: none;">
+                                <i class="bi bi-file-earmark  fs-4"></i>
                               </a>
 
                               <!-- Remove Button -->
@@ -707,7 +707,7 @@
                                         <div v-if="row[field.fieldname]"
                                           class="d-flex flex-column align-items-center gap-1 mt-2">
                                           <div
-                                            v-for="(fileUrl, index) in row[field.fieldname].split(',').map(f => f.trim()).filter(f => f)"
+                                            v-for="(fileUrl, index) in row[field.fieldname].split('|').map(f => f.trim()).filter(f => f)"
                                             :key="index">
 
                                             <span class="cursor-pointer text-decoration-underline d-flex mb-1"
@@ -1091,7 +1091,7 @@ function calculateFieldExpression(row, expression, fields) {
 const normalizeFileList = (value) => {
   if (!value) return [];
   if (Array.isArray(value)) return value;
-  if (typeof value === 'string') return value.split(',').map(f => f.trim());
+  if (typeof value === 'string') return value.split('|').map(f => f.trim());
   return [];
 };
 const handleFileUpload = async (event, row, fieldname) => {
@@ -1100,12 +1100,12 @@ const handleFileUpload = async (event, row, fieldname) => {
 
   const existingFiles = normalizeFileList(row[fieldname]);
 
-  if (existingFiles.length >= 5) {
-    alert("Maximum 5 files are allowed.");
+  if (existingFiles.length >= 20) {
+    alert("Maximum 20 files are allowed.");
     return;
   }
 
-  const remainingSlots = 5 - existingFiles.length;
+  const remainingSlots = 20 - existingFiles.length;
   if (selectedFiles.length > remainingSlots) {
     alert(`Only ${remainingSlots} more file(s) can be uploaded.`);
     selectedFiles = selectedFiles.slice(0, remainingSlots);
@@ -1142,7 +1142,7 @@ const tableFileUpload = (file, row, fieldname) => {
           files.push(fileUrl);
 
           // Store back as comma-separated string
-          row[fieldname] = files.join(',');
+          row[fieldname] = files.join('|');
           resolve(); // ✅ done
         } else {
           console.error("file_url not found in the response.");
@@ -1414,7 +1414,7 @@ const getAllFieldsData = () => {
             fieldsData.push({ ...field });
             if (field.fieldtype === "Attach" && field.value) {
               filePaths.value = field.value
-                .split(",")
+                .split("|")
                 .map((path) => path.trim());
             }
           });
@@ -1507,10 +1507,10 @@ const removeFile = (
       columnIndex
     ].fields[fieldIndex];
 
-  const files = field.value ? field.value.split(',').map(f => f.trim()) : [];
+  const files = field.value ? field.value.split('|').map(f => f.trim()) : [];
   files.splice(fileIndex, 1); // Remove the selected file
 
-  field.value = files.join(','); // ✅ Important: update the value first
+  field.value = files.join('|'); // ✅ Important: update the value first
 
   emit('updateField', field); // ✅ Now emit the updated field
 };
@@ -1607,7 +1607,7 @@ const logFieldValue = (
 
     // Normalize existing files into an array
     let existingFiles = field["value"]
-      ? field["value"].split(',').map(f => f.trim())
+      ? field["value"].split('|').map(f => f.trim())
       : [];
 
     const totalFiles = existingFiles.length + files.length;
@@ -1731,7 +1731,7 @@ const uploadFile = (file, field) => {
       // console.log(res, res.message.file_url);
       if (res.message && res.message.file_url) {
         if (field["value"]) {
-          field["value"] += `, ${res.message.file_url}`;
+          field["value"] += `| ${res.message.file_url}`;
         } else {
           field["value"] = res.message.file_url;
         }
