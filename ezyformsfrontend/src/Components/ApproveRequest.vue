@@ -56,8 +56,8 @@
 
                   <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel"
                     @updateTableData="approvalChildData" :childData="responseData" :readonly-for="selectedData.readOnly"
-                    :childHeaders="tableHeaders" :employee-data="employeeData" @updateField="updateFormData" />
-
+                    :childHeaders="tableHeaders" :employee-data="employeeData" @updateField="updateFormData"  />
+                    <!-- @attachmentsReady="attachmentsReady = $event" -->
                 </div>
 
                 <div v-if="selectedData?.type === 'myforms' &&
@@ -119,8 +119,9 @@
 
                         </div> -->
                         <div>
-                          <button :disabled="loading" type="submit" class="btn btn-success approvebtn"
+                          <button :disabled="loading"  type="submit" class="btn btn-success approvebtn"
                             @click.prevent="ApproverFormSubmission(emittedFormData, 'Approve')">
+                            <!-- @click.prevent="handleApprove" -->
                             <span v-if="loading" class="spinner-border spinner-border-sm" role="status"
                               aria-hidden="true"></span>
                             <span v-if="!loading"><i class="bi bi-check-lg font-15 me-2"></i><span
@@ -855,6 +856,21 @@ function formatCreation(dateStr) {
 
 const ApprovePDF = ref(true)
 
+// const attachmentsReady = ref(false);
+
+// // Approve button click handler
+// const handleApprove = () => {
+//   if (!attachmentsReady.value) {
+//     toast.error("⚠️ Please preview all attachments before approving", { 
+//       autoClose: 1500, 
+//       transition: "zoom" 
+//     });
+//     return;
+//   }
+
+//   loading.value = true;
+//   ApproverFormSubmission(emittedFormData, "Approve");
+// }; 
 // Format the date for display
 // const formatDate = (dateString) => {
 //   if (!dateString) return "N/A";

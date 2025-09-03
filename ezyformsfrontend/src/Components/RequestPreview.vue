@@ -155,13 +155,14 @@
                                                 v-if="(field.fieldname !== 'requestor_signature' && field.label !== 'Requestor Signature') || !field.value"
                                                 :disabled="props.readonlyFor === 'true'"
                                                 type="file"
-                                                accept=".jpeg,.jpg,.png,.pdf,.xlsx,.xls"
+                                                
                                                 :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
                                                 style="display: none"
                                                 class="form-control previewInputHeight font-10 mt-2"
                                                 multiple
                                                 @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
                                                 />
+                                                <!-- <span v-if="(field.fieldname !== 'requestor_signature' && field.label !== 'Requestor Signature') || !field.value" class="font-10 text-danger">Max 20 files can be uploaded**</span> -->
 
                                                 <!-- Custom label that acts as the file button -->
                                                 <label
@@ -176,9 +177,11 @@
 
 
                                                 <!-- Preview Section -->
+                                                {{ field.value }}
+                                              
                                                 <div v-if="field.value" class="d-flex flex-wrap gap-2">
                                                     <div
-                                                    v-for="(fileUrl, index) in field.value.split(',').map(f => f.trim())"
+                                                    v-for="(fileUrl, index) in field.value.split('|').map(f => f.trim())"
                                                     :key="index"
                                                     class="position-relative d-inline-block"
                                                     @mouseover="hovered = index"
@@ -216,9 +219,9 @@
                                                         <div
                                                         v-else
                                                         class="d-flex align-items-center justify-content-center border mt-2"
-                                                        style="width: 100px; height: 100px; background: #f9f9f9"
+                                                        style="width: 45px; height: 60px; background: #f9f9f9"
                                                         >
-                                                        <i class="bi bi-file-earmark fs-1"></i>
+                                                        <i class="bi bi-file-earmark text-primary fs-1"></i>
                                                         </div>
                                                     </div>
 
@@ -557,7 +560,7 @@
                                                                         <!-- File Input -->
                                                                         <input multiple type="file"
                                                                             class="form-control font-12"
-                                                                            accept="image/jpeg,image/png,application/pdf"
+                                                                           
                                                                             @change="handleFileUpload($event, row, fieldItem.fieldname)" />
 
                                                                         <!-- Preview Section -->
@@ -808,7 +811,6 @@
                                                                             v-else-if="field.fieldtype === 'Attach'">
                                                                             <!-- File Input -->
                                                                             <input type="file" multiple
-                                                                                accept="image/jpeg,image/png,application/pdf"
                                                                                 class="form-control font-12"
                                                                                 @change="handleFileUpload($event, row, field.fieldname)" />
 
@@ -1085,7 +1087,7 @@ const isImageFile = (url) => {
 const removeAttach=ref([]);
 
 const removeFile = (index, field) => {
-    const files = field.value.split(',').map(f => f.trim())
+    const files = field.value.split('|').map(f => f.trim())
   const removedUrl = files.splice(index, 1)[0] // removed file URL
 
   // Find the matching file from uploadedFiles based on removed file_url
@@ -1095,7 +1097,7 @@ const removeFile = (index, field) => {
   if (match && match.respone?.name) {
     removeAttach.value.push(match.respone.name)
   }
-  field.value = files.join(', ')
+  field.value = files.join('| ')
   emit('updateField', field)
   emit("updateRemovedFiles",removeAttach.value);
 }
@@ -1416,12 +1418,12 @@ const handleFileUpload = async (event, row, fieldname) => {
 
     const existingFiles = normalizeFileList(row[fieldname]);
 
-    if (existingFiles.length >= 5) {
-        alert("Maximum 5 files are allowed.");
+    if (existingFiles.length >= 20) {
+        alert("Maximum 20 files are allowed.");
         return;
     }
 
-    const remainingSlots = 5 - existingFiles.length;
+    const remainingSlots = 20 - existingFiles.length;
     if (selectedFiles.length > remainingSlots) {
         alert(`Only ${remainingSlots} more file(s) can be uploaded.`);
         selectedFiles = selectedFiles.slice(0, remainingSlots);
@@ -1477,7 +1479,7 @@ const tableFileUpload = (file, row, fieldname) => {
 const normalizeFileList = (value) => {
     if (!value) return [];
     if (Array.isArray(value)) return value;
-    if (typeof value === 'string') return value.split(',').map(f => f.trim());
+    if (typeof value === 'string') return value.split('|').map(f => f.trim());
     return [];
 };
 
@@ -1897,13 +1899,13 @@ const logFieldValue = (
 
         // Normalize existing files into an array
         let existingFiles = field["value"]
-            ? field["value"].split(',').map(f => f.trim())
+            ? field["value"].split('|').map(f => f.trim())
             : [];
 
         const totalFiles = existingFiles.length + files.length;
-        if (totalFiles > 10) {
-            alert("You can upload a maximum of 10 files.");
-            files = files.slice(0, 10 - existingFiles.length); // Only allow up to 5 total
+        if (totalFiles > 20) {
+            alert("You can upload a maximum of 20 files.");
+            files = files.slice(0, 20 - existingFiles.length); // Only allow up to 20 total
         }
 
         files.forEach((file) => uploadFile(file, field));
@@ -2103,7 +2105,7 @@ const uploadFile = (file, field, blockIndex, sectionIndex, rowIndex, columnIndex
             if (res.message && res.message.file_url) {
                 const respone=res.message;
                 if (field["value"]) {
-                    field["value"] += `, ${res.message.file_url}`;
+                    field["value"] += `| ${res.message.file_url}`;
                 } else {
                     field["value"] = res.message.file_url;
                 }
@@ -2734,7 +2736,7 @@ function getFieldError(row, field) {
 }
 
 .previewInputHeight {
-    margin-bottom: 5px;
+    margin-bottom: 2px;
 }
 
 .dynamicColumn {

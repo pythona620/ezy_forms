@@ -258,7 +258,7 @@
                             v-if="(field.fieldname !== 'requestor_signature' && field.label !== 'Requestor Signature' && blockIndex !== 0 && !field.label.includes('Approved By') && !field.label.includes('Acknowledged By') && props.readonlyFor !== 'true') && (field.value && blockIndex !== 0) || !field.value && props.readonlyFor !== 'true' && blockIndex !== 0"
                             :disabled="props.readonlyFor === 'true' || blockIndex === 0 || blockIndex < currentLevel"
                             type="file" :class="blockIndex < currentLevel ? 'd-none' : ''"
-                            accept=".jpeg,.jpg,.png,.pdf,.xlsx,.xls"
+                            
                             :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"  :style="{ minWidth: '100px', maxWidth: '200px' }"
                             class="form-control previewInputHeight  font-10 mb-1 mt-1" multiple
                             @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" /> -->
@@ -268,7 +268,7 @@
                             :disabled="props.readonlyFor === 'true' "
                             type="file"
                             :class="blockIndex < currentLevel ? 'd-none' : ''"
-                            accept=".jpeg,.jpg,.png,.pdf,.xlsx,.xls"
+                            
                             :id="'field-' + blockIndex + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
                             style="display: none"
                             class="form-control previewInputHeight font-10 mb-1 mt-1"
@@ -294,7 +294,7 @@
                             field.label.includes('Acknowledged By')
                           )">
                             <div class="d-flex gap-2 flex-wrap ">
-                              <img v-for="(fileUrl, index) in field.value.split(',').map(f => f.trim())" :key="index" 
+                              <img v-for="(fileUrl, index) in field.value.split('|').map(f => f.trim())" :key="index" 
                                 :src="fileUrl" class="img-thumbnail cursor-pointer imge_top border-0 p-0 border-bottom-0"
                                 style="max-width: 60px; max-height: 50px" @click="previewAttachment(fileUrl)" />
                             </div>
@@ -307,7 +307,7 @@
                                   @click="openAttachmentList(field.value,blockIndex)"
                                 >
                                   <span class="text-dark text-decoration-underline label-text ">View</span>
-                                  <span>({{ field.value.split(',').filter(f => f.trim()).length }})</span>
+                                  <span>({{ field.value.split('|').filter(f => f.trim()).length }})</span>
                                   <i
                                     class="bi bi-paperclip text-secondary "
                                     style="transform: rotate(-20deg) translateY(-1px); display: inline-block;"
@@ -378,7 +378,10 @@
                                       <div class="d-flex gap-2">
                                         <button class="btn btn-sm font-13 btn-light"
                                           @click="previewAttachment(url)">Show</button>
-                                        <a :href="url" class="btn font-13 btn-light" download>Download</a>
+                                       <button class="btn btn-sm font-13 btn-light"
+  @click="downloadAttachment(url, getFilename(url))">
+  Download
+</button>
                                         
                                        <button v-if="props.readonlyFor === 'true' || currentBlockIndex !== 0 || currentBlockIndex < currentLevel" :class="{ 'disabled d-none': props.readonlyFor === 'true' || currentBlockIndex === 0 || currentBlockIndex < currentLevel }"
                                   class="btn btn-sm btn-outline-dark rounded-circle" @click="removeFile(i, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
@@ -411,8 +414,14 @@
                                   <iframe v-else-if="isPdfFile(previewUrl)" :src="previewUrl" width="100%"
                                     height="600px" style="border: none;"></iframe>
                                   <div v-else class="text-center font-12">
-                                    <p>Preview not available for this file type. <a :href="previewUrl"
-                                        download>Download</a></p>
+                                    <p>Preview not available for this file type.
+                                       <!-- <a :href="previewUrl"
+                                        download>Download</a> -->
+                                        <button class="btn btn-sm font-13 btn-light"
+  @click="downloadAttachment(url, previewUrl)">
+  Download
+</button>
+                                        </p>
                                   </div>
                                 </div>
 
@@ -654,7 +663,7 @@
                                       <!-- File Input -->{{ field.value }}
                                       <input multiple type="file" class="form-control font-12"
                                         :disabled="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel"
-                                        accept="image/jpeg,image/png,application/pdf"
+                                       
                                         :class="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel ? 'bg-white d-none border-0' : null"
                                         @change="handleFileUpload($event, row, field.fieldname)" />
 
@@ -981,6 +990,10 @@
                                               
                                               <div>
                                                 <button class="btn btn-sm btn-light me-2" @click="viewAttachment(file)">View</button>
+                                                <button class="btn btn-sm font-13 btn-light"
+  @click="downloadAttachment(file, getFilename(file))">
+  Download
+</button>
                                                 <a :href="file" download class="btn btn-sm btn-light">Download</a>
                                               </div>
                                             </li>
@@ -1036,7 +1049,7 @@
                                        
                                         <input
                                           v-if="props.readonlyFor !== 'true' && blockIndex !== 0 && blockIndex === currentLevel"
-                                          type="file" accept=".jpeg,.jpg,.png,.pdf,.xlsx,.xls" multiple
+                                          type="file"  multiple
                                           class="form-control font-12"
                                           @change="handleFileUpload($event, row, field.fieldname)" />
 
@@ -1044,7 +1057,7 @@
                                         <div v-if="row[field.fieldname]"
                                           class="d-flex flex-column align-items-center gap-1 mt-2">
                                           <div
-                                            v-for="(fileUrl, index) in row[field.fieldname].split(',').map(f => f.trim()).filter(f => f)"
+                                            v-for="(fileUrl, index) in row[field.fieldname].split('|').map(f => f.trim()).filter(f => f)"
                                             :key="index">
 
                                             <span class="cursor-pointer text-decoration-underline d-flex mb-1"
@@ -1064,7 +1077,7 @@
                                           <!-- File Input (unchanged) -->
                                           <input
                                             v-if="props.readonlyFor !== 'true' && blockIndex !== 0 && blockIndex === currentLevel"
-                                            type="file" accept=".jpeg,.jpg,.png,.pdf,.xlsx,.xls" multiple
+                                            type="file"  multiple
                                             class="form-control font-12" style="display: none"
                                             :id="'upload-field-' + blockIndex + '-' + sectionIndex + '-' + columnIndex + '-' + rowIndex"
                                             @change="handleFileUpload($event, row, field.fieldname)" />
@@ -1116,8 +1129,12 @@
                                                       <div>
                                                         <button class="btn btn-sm btn-light me-2"
                                                           @click="ChildpreviewFile(file)">Show</button>
-                                                        <a :href="file" target="_blank" download
-                                                          class="btn btn-sm btn-light">Download</a>
+                                                        <!-- <a :href="file" target="_blank" download
+                                                          class="btn btn-sm btn-light">Download</a> -->
+                                                          <button class="btn btn-sm font-13 btn-light"
+                                                          @click="downloadAttachment(url, file)">
+                                                          Download
+                                                        </button>
                                                       </div>
                                                     </li>
                                                   </ul>
@@ -1144,8 +1161,14 @@
                                                     <iframe :src="previewUrl" class="w-100" style="height: 600px;" />
                                                   </template>
                                                   <template v-else>
-                                                    <p>No preview available for this file type.<a :href="previewUrl"
-                                                        download>Download</a></p>
+                                                    <p>No preview available for this file type.
+                                                      <a :href="previewUrl"
+                                                        download>Download</a>
+                                                        <button class="btn btn-sm font-13 btn-light"
+                                                          @click="downloadAttachment(url, previewUrl)">
+                                                          Download
+                                                        </button>
+                                                        </p>
                                                   </template>
                                                 </div>
                                               </div>
@@ -1539,7 +1562,7 @@ function calculateFieldExpression(row, expression, fields) {
 const normalizeFileList = (value) => {
   if (!value) return [];
   if (Array.isArray(value)) return value;
-  if (typeof value === 'string') return value.split(',').map(f => f.trim());
+  if (typeof value === 'string') return value.split('|').map(f => f.trim());
   return [];
 };
 const handleFileUpload = async (event, row, fieldname) => {
@@ -1548,12 +1571,12 @@ const handleFileUpload = async (event, row, fieldname) => {
 
   const existingFiles = normalizeFileList(row[fieldname]);
 
-  if (existingFiles.length >= 5) {
-    alert("Maximum 5 files are allowed.");
+  if (existingFiles.length >= 20) {
+    alert("Maximum 20 files are allowed.");
     return;
   }
 
-  const remainingSlots = 5 - existingFiles.length;
+  const remainingSlots = 20 - existingFiles.length;
   if (selectedFiles.length > remainingSlots) {
     alert(`Only ${remainingSlots} more file(s) can be uploaded.`);
     selectedFiles = selectedFiles.slice(0, remainingSlots);
@@ -1601,7 +1624,7 @@ const tableFileUpload = (file, row, fieldname) => {
           files.push(fileUrl);
 
           // Store back as comma-separated string
-          row[fieldname] = files.join(',');
+          row[fieldname] = files.join('|');
           resolve(); // ✅ done
         } else {
           console.error("file_url not found in the response.");
@@ -1880,7 +1903,7 @@ const getAllFieldsData = () => {
             fieldsData.push({ ...field });
             if (field.fieldtype === "Attach" && field.value) {
               filePaths.value = field.value
-                .split(",")
+                .split("|")
                 .map((path) => path.trim());
             }
           });
@@ -2073,13 +2096,13 @@ const logFieldValue = (
 
     // Normalize existing files into an array
     let existingFiles = field["value"]
-      ? field["value"].split(',').map(f => f.trim())
+      ? field["value"].split('|').map(f => f.trim())
       : [];
 
     const totalFiles = existingFiles.length + files.length;
-    if (totalFiles > 10) {
-      alert("You can upload a maximum of 10 files.");
-      files = files.slice(0, 10 - existingFiles.length); // Only allow up to 5 total
+    if (totalFiles > 20) {
+      alert("You can upload a maximum of 20 files.");
+      files = files.slice(0, 20 - existingFiles.length); // Only allow up to 20 total
     }
 
     files.forEach((file) => uploadFile(file, field));
@@ -2197,7 +2220,7 @@ const uploadFile = (file, field) => {
       // console.log(res, res.message.file_url);
       if (res.message && res.message.file_url) {
         if (field["value"]) {
-          field["value"] += `, ${res.message.file_url}`;
+          field["value"] += `| ${res.message.file_url}`;
         } else {
           field["value"] = res.message.file_url;
         }
@@ -2298,7 +2321,7 @@ const currentBlockIndex = ref(null);
  * When opening the "View" list
  */
 function openAttachmentList(value , blockIndex) {
-  attachmentList.value = value.split(",").map((f) => f.trim());
+  attachmentList.value = value.split("|").map((f) => f.trim());
   showListModal.value = true;
   currentBlockIndex.value = blockIndex;
 }
@@ -2345,6 +2368,23 @@ function isPdfFile(file) {
 function isExcelFile(file) {
   return /\.(xls|xlsx)$/i.test(file)
 }
+
+async function downloadAttachment(url, filename) {
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("File not found");
+
+    const blob = await response.blob();
+    const link = document.createElement("a");
+    link.href = window.URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
+    window.URL.revokeObjectURL(link.href);
+  } catch (err) {
+    alert("Unable to download file: " + err.message);
+  }
+}
+
 // const removeFile = (
 //   fileIndex,
 //   blockIndex,
@@ -2382,7 +2422,7 @@ const removeFile = (
 
   console.log(field, "field in remove file");
 
-  const files = field.value ? field.value.split(',').map(f => f.trim()) : [];
+  const files = field.value ? field.value.split('|').map(f => f.trim()) : [];
 
   files.splice(fileIndex, 1); // Remove from field value
   attachmentList.value.splice(fileIndex, 1); // ✅ Remove from visible list
@@ -2407,7 +2447,7 @@ const getFileName = (path) => {
 // Open modal with list of attachments
 const openAttachmentsList = (fileString) => {
   attachmentFiles.value = fileString
-    .split(',')
+    .split('|')
     .map(f => f.trim())
     .filter(f => f)
 
