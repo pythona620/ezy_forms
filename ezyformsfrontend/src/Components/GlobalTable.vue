@@ -7,7 +7,7 @@
 						<input type="checkbox" class="checkbox form-check-input" @change="SelectedAll()" />
 					</th> -->
           <th>#</th>
-          <th v-for="(column, index) in tHeaders" :key="index"
+          <th v-for="(column, index) in tHeaders" :key="index" class="resizable-th"
             :class="{ 'text-center': column.th === 'Users' || column.th === 'Status' || column.th === 'Enable/Disable' }">
             {{ column.th }}
           </th>
@@ -35,7 +35,7 @@
 
               <!-- Date input -->
               <input v-else-if="fieldMapping[column.td_key].type === 'date'" type="date"
-                class="form-control font-12 input-search py-1 px-2" v-model="filters[column.td_key]"
+                class="form-control font-12 input-search py-1 px-2 shadow-none" v-model="filters[column.td_key]"
                 @input="handleFilterChange" />
 
               <!-- Select dropdown -->
@@ -68,7 +68,7 @@
             <td class="">{{ rowIndex + 1 }}</td>
 
             <!-- v-tooltip.top="row[column.td_key] ? row[column.td_key].toString() : '-'" -->
-            <td v-for="(column, colIndex) in tHeaders" :class="column.td_key === 'form_status' ? 'text-center' : ''"
+            <td v-for="(column, colIndex) in tHeaders" :class="column.td_key === 'form_status' ? 'text-center' : ''" v-tooltip.top ="column.td_key === 'accessible_departments' ? row[column.td_key] : ''"
               :key="colIndex">
 
               <!-- <span :class="{'accessible-departments': column.td_key === 'accessible_departments'}" v-if="column.td_key === 'accessible_departments'">
@@ -76,7 +76,7 @@
               </span> -->
               <!-- Condition for Action Column -->
               <span v-if="column.td_key === 'status'">
-                
+
                 <i class="bi bi-circle-fill status-circle font-10 text-center pe-2" :class="{
                   'text-warning fw-medium': row[column.td_key] === 'Request Raised',
                   'textcompleted fw-medium': row[column.td_key] === 'Completed',
@@ -111,6 +111,17 @@
                 <i class="bi bi-circle-fill status-circle font-10 text-center pe-2"></i>
                 {{ row[column.td_key] === 'Created' ? 'Active' : 'Retired' }}
               </span>
+
+              <span v-else-if="column.td_key === 'installed'">
+                <i class="bi bi-circle-fill status-circle font-10 text-center pe-2" :class="{
+                  'text-success fw-medium': row[column.td_key] === 'Yes',
+                  'text-danger fw-medium': row[column.td_key] === 'No',
+                }"></i>
+                <span  class="tooltip-text" v-tooltip.top="row[column.td_key]">
+                  {{ row[column.td_key]  === 'Yes' ? 'Yes' : 'No' }} 
+                </span>
+              </span>
+
               <!-- Default Column Rendering -->
               <span class="tooltip-text" v-tooltip.top="formatDate(row[column.td_key])"
                 v-else-if="
@@ -120,10 +131,14 @@
 
               <!-- Show unformatted date for 'modified' when status === 'Request Raised' -->
               <span class="tooltip-text" v-tooltip.top="formatDate(row[column.td_key])"
-                v-else-if="column.td_key === 'modified' ">
+                v-else-if="column.td_key === 'modified'">
                 {{ formatDate(row[column.td_key]) }}
               </span>
-              <span v-else-if="column.td_key === 'signature' || column.td_key === 'is_hod' || column.td_key === 'is_admin'">
+
+
+
+              <span
+                v-else-if="column.td_key === 'signature' || column.td_key === 'is_hod' || column.td_key === 'is_admin'">
                 <div v-if="row[column.td_key]">
                   <i class="bi bi-check2 fw-bolder fw-bold font-13 text-success"></i>
                   <!-- <img :src="row[column.td_key]" alt="Signature" class="img-fluid"> -->
@@ -142,6 +157,7 @@
 
                 </div>
               </span>
+
               <span class="text-center fixed-column"
                 v-else-if="column.td_key === 'enable' || column.td_key === 'activate'">
                 <div class="d-flex justify-content-center align-items-center gap-2">
@@ -150,7 +166,7 @@
                   </span>
                   <div class="form-check d-flex justify-content-center form-switch text-end">
                     <input class="form-check-input shadow-none " type="checkbox" role="switch"
-                      :checked="row.enable == '0' || row.activate === 0"
+                      :checked="row.enable == '1' || row.activate === 0"
                       @click.prevent="handleToggle(row, index, $event)" />
                   </div>
                 </div>
@@ -166,15 +182,15 @@
               </span> -->
               <!-- <span v-else class="tooltip-text" :title="row[column.td_key] || '-'"> -->
 
-              <span v-else class="tooltip-text" v-tooltip.top="getTooltipText(row[column.td_key])">
+              <span v-else class="tooltip-text" v-tooltip.top="column.td_key !== 'accessible_departments' ? getTooltipText(row[column.td_key]):''">
                 <span v-if="column.td_key === 'linked_form_id'">
                   <span @click="handleCellClick(row, rowIndex, 'td_key')" :class="[
-                      row[column.td_key] ? 'text-decoration-underline linked-id-redirect font-11 text-primary' : 'text-decoration-none linke-not-allow '
-                    ]">
+                    row[column.td_key] ? 'text-decoration-underline linked-id-redirect font-11 text-primary' : 'text-decoration-none linke-not-allow '
+                  ]">
                     {{ getDisplayText(column.td_key, row[column.td_key]) }}
                   </span>
                 </span>
-                <span v-else >
+                <span  v-else>
                   {{ row[column.td_key] }}
 
                   <!-- {{ getDisplayText(column.td_key, row[column.td_key]) }} -->
@@ -263,10 +279,29 @@
             </td>
 
             <!-- Action Column -->
-            <td v-if="isAction === 'true' && view === 'viewPreview'" class="text-center fixed-column position-relative">
-              <span class=" font-13 view-text" @click="handleCellClick(row, rowIndex, 'view')">
-                View <i class="ri-eye-line eye-cursor ms-1"></i>
-              </span>
+            <td v-if="isAction === 'true' && view === 'edit'" class="text-center fixed-column position-relative">
+              <!-- Show both Setup Form and View if not installed -->
+              <template v-if="row.installed == 'No'">
+                <span v-tooltip.top="'View'" class="font-13 view-text ms-4"
+                      @click="handleCellClick(row, rowIndex, 'FormPreview')">
+                  <i class="ri-eye-line eye-cursor ms-1"></i>
+                </span>
+
+                <span v-tooltip.top="'Setup form'" class="font-13 view-text ms-3"
+                      @click="handleCellClick(row, rowIndex, 'edit')">
+                  <i class="bi-gear-fill eye-cursor"></i>
+                </span>
+
+              </template>
+
+              <!-- Show only View if already installed -->
+              <template v-if="row.installed =='Yes'">
+                <span v-tooltip.top="'View'" class="font-13 view-text"
+                      @click="handleCellClick(row, rowIndex, 'FormPreview')">
+                  <i class="ri-eye-line eye-cursor"></i>
+                </span>
+              </template>
+
             </td>
 
 
@@ -468,13 +503,75 @@ const allCheck = ref(false);
 //     "0"
 //   )}.${year} @ ${hours}:${minutes}:${seconds.slice(0, 2)}`;
 // }
+
+
+// function formatDate(dateString) {
+//   if (!dateString) return "-";
+
+//   try {
+//     let date;
+
+//     // Format: YYYY/MM/DD HH:MM:SS:ms (colon-separated with optional ms)
+//     if (dateString.includes("/") && dateString.includes(" ")) {
+//       const [datePart, timePart] = dateString.split(" ");
+//       const [year, month, day] = datePart.split("/");
+
+//       let timeSegments = timePart.split(":");
+//       let hours = timeSegments[0]?.padStart(2, "0") || "00";
+//       let minutes = timeSegments[1]?.padStart(2, "0") || "00";
+//       let seconds = timeSegments[2]?.padStart(2, "0") || "00";
+
+//       if (timeSegments.length === 4) {
+//         const milliseconds = timeSegments[3];
+//         date = new Date(
+//           `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}T${hours}:${minutes}:${seconds}.${milliseconds}`
+//         );
+//       } else {
+//         date = new Date(
+//           `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}T${hours}:${minutes}:${seconds}`
+//         );
+//       }
+//     }
+
+//     // Format: YYYY-MM-DD HH:MM:SS.milliseconds
+//     else if (dateString.includes("-")) {
+//       const [datePart, timePart] = dateString.split(" ");
+//       const [year, month, day] = datePart.split("-");
+//       const [timeRaw, milliseconds = ""] = timePart.split(".");
+//       const [hours = "00", minutes = "00", seconds = "00"] = timeRaw
+//         .split(":")
+//         .map((t) => t.padStart(2, "0"));
+
+//       const timeString = `${hours}:${minutes}:${seconds}`;
+//       date = new Date(
+//         `${year}-${month}-${day}T${timeString}${milliseconds ? "." + milliseconds : ""}`
+//       );
+//     } else {
+//       return "-";
+//     }
+
+//     if (isNaN(date.getTime())) return "-";
+
+//     const day = String(date.getDate()).padStart(2, "0");
+//     const month = String(date.getMonth() + 1).padStart(2, "0");
+//     const year = date.getFullYear();
+//     const hours = String(date.getHours()).padStart(2, "0");
+//     const minutes = String(date.getMinutes()).padStart(2, "0");
+//     const seconds = String(date.getSeconds()).padStart(2, "0");
+
+//     return `${day}.${month}.${year} @ ${hours}:${minutes}:${seconds}`;
+//   } catch (err) {
+//     return "-";
+//   }
+// }
+
 function formatDate(dateString) {
   if (!dateString) return "-";
 
   try {
     let date;
 
-    // Format: YYYY/MM/DD HH:MM:SS:ms (colon-separated with optional ms)
+    // Format: YYYY/MM/DD HH:MM:SS:ms
     if (dateString.includes("/") && dateString.includes(" ")) {
       const [datePart, timePart] = dateString.split(" ");
       const [year, month, day] = datePart.split("/");
@@ -516,17 +613,23 @@ function formatDate(dateString) {
     if (isNaN(date.getTime())) return "-";
 
     const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+                        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const month = monthNames[date.getMonth()];
     const year = date.getFullYear();
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-    const seconds = String(date.getSeconds()).padStart(2, "0");
 
-    return `${day}.${month}.${year} @ ${hours}:${minutes}:${seconds}`;
+    let hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const ampm = hours >= 12 ? "pm" : "am";
+    hours = hours % 12;
+    hours = hours ? hours : 12; // 0 should be 12
+
+    return `${day} ${month} ${year}, ${String(hours).padStart(2, "0")}:${minutes} ${ampm}`;
   } catch (err) {
     return "-";
   }
 }
+
 function getAssignedToUsers(row, column) {
   try {
     let value = JSON.parse(row[column.td_key].replace(/'/g, '"'));
@@ -575,13 +678,37 @@ const filters = ref(
   }, {})
 );
 // Handle filter change
+// function handleFilterChange() {
+//   const activeFilters = Object.fromEntries(
+//     Object.entries(filters.value).filter(([key, value]) => value.trim() !== "")
+//   );
+//   emits("updateFilters", activeFilters); // Emit only non-empty filters
+//   // console.log(activeFilters, "========");
+// }
+
 function handleFilterChange() {
   const activeFilters = Object.fromEntries(
-    Object.entries(filters.value).filter(([key, value]) => value.trim() !== "")
+    Object.entries(filters.value).filter(([key, value]) => value !== "")
   );
-  emits("updateFilters", activeFilters); // Emit only non-empty filters
-  // console.log(activeFilters, "========");
+
+  // Format only 'requested_on' differently
+  for (const key in activeFilters) {
+    const fieldType = props.fieldMapping[key]?.type;
+
+    if (fieldType === "date" && activeFilters[key]) {
+      if (key === "requested_on") {
+        // Convert to YYYY/M/D format (no leading zeros)
+        const [year, month, day] = activeFilters[key].split("-");
+        activeFilters[key] = `${year}/${parseInt(month)}/${parseInt(day)}`;
+      } else {
+        // Keep as YYYY-MM-DD (do nothing)
+      }
+    }
+  }
+
+  emits("updateFilters", activeFilters);
 }
+
 watch(
   () => props.tData.map((row) => row.isSelected),
   (newVal) => {
@@ -680,7 +807,7 @@ function handleCellClick(check, index, type) {
 
 .form-switch .form-check-input:checked {
   background-position: right center;
-  background-color: #303030;
+  background-color: rgb(103, 216, 109);
   border: 0;
 }
 
@@ -921,7 +1048,8 @@ th:first-child {
 .textcancel {
   color: #17a2b8;
 }
-.RequestCancelled{
+
+.RequestCancelled {
   color: red;
 }
 
@@ -998,10 +1126,19 @@ th:first-child {
   // z-index: 1;
 
 }
-.linke-not-allow{
+
+.linke-not-allow {
   cursor: none;
 }
-.linked-id-redirect{
+
+.linked-id-redirect {
   cursor: pointer;
+}
+.resizable-th {
+  resize: horizontal;
+  overflow: auto;
+  min-width: 100px;
+  max-width: 500px;
+  white-space: nowrap;
 }
 </style>

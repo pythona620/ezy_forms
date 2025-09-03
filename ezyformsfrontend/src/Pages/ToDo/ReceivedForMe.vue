@@ -13,9 +13,17 @@
       </div> -->
     </div>
     <div class="mt-2">
+      <div class=" d-none d-lg-block">
+
       <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" viewType="viewPdf" isCheckbox="true"
         @updateFilters="inLineFiltersData" :field-mapping="fieldMapping" @cell-click="viewPreview"
         isFiltersoption="true" :actions="actions" @actionClicked="actionCreated" />
+      </div>
+      <div class=" d-block d-lg-none">
+        <GlobalCard :tHeaders="tableheaders" :tData="tableData" isAction="true" viewType="viewPdf" isCheckbox="true"
+          @updateFilters="inLineFiltersData" :field-mapping="fieldMapping" @cell-click="viewPreview"
+          isFiltersoption="false" :actions="actions" @actionClicked="actionCreated" />
+      </div>
       <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
         @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
     </div>
@@ -112,6 +120,7 @@
 <script setup>
 import ButtonComp from "../../Components/ButtonComp.vue";
 import GlobalTable from "../../Components/GlobalTable.vue";
+import GlobalCard from "../../Components/GlobalCard.vue";
 import axiosInstance from "../../shared/services/interceptor";
 import { apis, doctypes } from "../../shared/apiurls";
 import { onMounted, ref, reactive, computed, watch } from "vue";
@@ -170,7 +179,7 @@ const loading = ref(false)
 const Rejectloading = ref(false)
 
 onMounted(() => {
-  getClientIP()
+  // getClientIP()
   const storedData = localStorage.getItem("employeeData");
   employeeData.value = JSON.parse(storedData);
 
@@ -435,18 +444,18 @@ function ApproverFormSubmission(dataObj, type) {
     })
 
 }
-const ip_address = ref(null)
+// const ip_address = ref(null)
 
-const getClientIP = async () => {
-  try {
-    const response = await fetch('https://api.ipify.org?format=json')
-    const data = await response.json()
-    ip_address.value = data.ip
+// const getClientIP = async () => {
+//   try {
+//     const response = await fetch('https://api.ipify.org?format=json')
+//     const data = await response.json()
+//     ip_address.value = data.ip
 
-  } catch (error) {
-    console.error('Error fetching IP:', error)
-  }
-}
+//   } catch (error) {
+//     console.error('Error fetching IP:', error)
+//   }
+// }
 
 function approvalStatusFn(dataObj, type) {
 
@@ -717,6 +726,7 @@ const fieldMapping = computed(() => ({
   name: { type: "input" },
   requested_by: { type: "input" },
   role: { type: "input" },
+  requested_on: { type: "date" },
 
 
   status: { type: "select", options: ["Request Raised", "In Progress"] },

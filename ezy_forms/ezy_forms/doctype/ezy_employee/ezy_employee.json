@@ -11,6 +11,7 @@
   "enable_on",
   "profile_image",
   "company_field",
+  "responsible_units",
   "emp_code",
   "is_web_form",
   "is_hod",
@@ -37,7 +38,8 @@
   {
    "fieldname": "emp_code",
    "fieldtype": "Data",
-   "label": "Emp code"
+   "label": "Emp code",
+   "unique": 1
   },
   {
    "fieldname": "emp_name",
@@ -74,6 +76,10 @@
   {
    "fieldname": "designation",
    "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
    "label": "Designation",
    "options": "WF Roles",
    "search_index": 1
@@ -93,7 +99,8 @@
    "fieldname": "company_field",
    "fieldtype": "Link",
    "label": "Company Field",
-   "options": "Ezy Business Unit"
+   "options": "Ezy Business Unit",
+   "reqd": 1
   },
   {
    "fieldname": "signature",
@@ -132,10 +139,11 @@
    "label": "enable"
   },
   {
-    "fieldname": "is_admin",
-    "fieldtype": "Check",
-    "label": "Is Admin"
-   },
+   "default": "0",
+   "fieldname": "is_admin",
+   "fieldtype": "Check",
+   "label": "Is Admin"
+  },
   {
    "default": "0",
    "fieldname": "is_web_form",
@@ -168,6 +176,12 @@
    "fieldname": "remarks",
    "fieldtype": "Data",
    "label": "Remarks"
+  },
+  {
+   "fieldname": "responsible_units",
+   "fieldtype": "Table MultiSelect",
+   "label": "Responsible Units",
+   "options": "Responsible Unit"
   }
  ],
  "index_web_pages_for_search": 1,
@@ -187,84 +201,11 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Hd",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
    "role": "System Manager",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "DOF",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "IT Manager",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "IT",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "junior Consultant",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Tl",
    "share": 1,
    "write": 1
   }
  ],
- "row_format": "Dynamic",
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],

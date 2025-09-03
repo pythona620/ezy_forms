@@ -774,7 +774,7 @@ template_str = """
 
                                         {% elif field.fieldtype == 'Data' or field.fieldtype == 'Int' or field.fieldtype =='Link' and field.fieldname != 'auto_calculations' %}
                                             <span id="{{ field.fieldname }}"
-                                                style="font-size:13px; font-weight:500;">
+                                                style="font-size:13px; font-weight:500; word-break: break-all;">
                                                 {{ field['values'] }}
                                             </span>
                                         {% elif field.fieldtype == 'Select' %}
@@ -826,31 +826,31 @@ template_str = """
                                                 </div>
                                             {% endif %}
                                         {% elif field.fieldtype == 'Attach' %}
-    {% if field['values'] %}
-        {% if field.fieldtype == 'Attach' and (field.fieldname.startswith('approved_by') or field.fieldname.startswith('requestor')or field.fieldname.startswith('acknowle')) %}
-            <img  
-                id="{{ field.fieldname }}" 
-                src="{{ site_url + field['values'] or '' }}" 
-                style="width: 80px; height: 40px; object-fit: contain;margin-top:-20px;"  
-                name="{{ field.fieldname }}"
-            >
-        {% else %}
-            <ul style="padding-left: 20px; margin: 5px 0;">
-                {% for file in field['values'].split(',') %}
-                    <li style="font-size:12px;">
-                        {{ file.strip().split('@')[-1] if '@' in file else file.strip().split('/')[-1] }}
-                    </li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    {% else %}
-        <input 
-            type="text" 
-            id="{{ field.fieldname }}" 
-            value="{{ field['values'] }}" 
-            name="{{ field.fieldname }}"
-        >
-    {% endif %}
+                                            {% if field['values'] %}
+                                                {% if field.fieldtype == 'Attach' and (field.fieldname.startswith('approved_by') or field.fieldname.startswith('requestor')or field.fieldname.startswith('acknowle')) %}
+                                                    <img  
+                                                        id="{{ field.fieldname }}" 
+                                                        src="{{ site_url + field['values'] or '' }}" 
+                                                        style="max-width: 60px; max-height: 50px; object-fit: contain;margin-top:-10px;"  
+                                                        name="{{ field.fieldname }}"
+                                                    >
+                                                {% else %}
+                                                    <ul style="padding-left: 20px; margin: 0px 0;">
+                                                        {% for file in field['values'].split(',') %}
+                                                            <li style="font-size:12px;">
+                                                                {{ file.strip().split('@')[-1] if '@' in file else file.strip().split('/')[-1] }}
+                                                            </li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                {% endif %}
+                                            {% else %}
+                                                <input 
+                                                    type="text" 
+                                                    id="{{ field.fieldname }}" 
+                                                    value="{{ field['values'] }}" 
+                                                    name="{{ field.fieldname }}"
+                                                >
+                                            {% endif %}
 
                                         {% elif field.fieldtype == 'Phone' %}
                                              <span id="{{ field.fieldname }}" style="font-size:13px; font-weight:500;" name="{{ field.fieldname }}" class="date-span">
@@ -1038,7 +1038,7 @@ activate_log_table = """
         <td>{{ entry.role }}</td>
         <td>{{ entry.user_name }}</td>
         <td>{{ entry.action }}</td>
-        <td>{{ entry.time }}</td>
+        <td>{{ entry.time.rsplit(':', 1)[0] }}</td>
         <td>{{ entry.reason }}</td>
       </tr>
       {% endfor %}
@@ -1052,7 +1052,7 @@ def convert_html_to_pdf(html_content, pdf_path,options=None):
     try:
         pdfkit.from_string(html_content, pdf_path,options=options)
     except Exception as e:
-        frappe.log_error(f"PDF generation failed: {e}")
+        frappe.log_error(title="PDF Generation Failed", message=str(e))
  
 def json_structure_call_for_html_view(json_obj: list, form_name: str, child_data, child_table_data,business_unit,wf_generated_request_id=None,mail_attachment=None):
    
@@ -1272,13 +1272,13 @@ def preview_dynamic_form(form_short_name: str, business_unit=None, name=None):
             ), json_object))
 
             form_name = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_name") or "Form"
-    html_view = json_structure_call_for_html_view(
-        json_obj=json_object,
-        form_name=form_name,
-        child_data=data_list,
-        child_table_data=None,
-        business_unit=business_unit
-    )
+            html_view = json_structure_call_for_html_view(
+                json_obj=json_object,
+                form_name=form_name,
+                child_data=data_list,
+                child_table_data=None,
+                business_unit=business_unit
+            )
     
     return html_view
  
@@ -1304,8 +1304,8 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
     try:
         bench_path         = get_bench_path()
         site               = frappe.local.site
-        folder_path = get_site_path("public", "files", "Attachment folder")
-
+        folder_path = get_site_path("public", "files", "Attachment_folder")
+        form_name = frappe.db.get_value("Ezy Form Definitions", form_short_name, "form_name")
         delete = lambda path: os.unlink(path) if os.path.isfile(path) or os.path.islink(path) else shutil.rmtree(path)
 
         if os.path.exists(folder_path) and os.path.isdir(folder_path):
@@ -1392,20 +1392,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
             wf_generated_request_id = frappe.get_value(form_short_name, name, "wf_generated_request_id")
             activate_log = frappe.get_doc('WF Activity Log', wf_generated_request_id).as_dict()
 
-            filtered_reasons = [
-                {
-                    'level': entry['level'],
-                    'role': entry['role'],
-                    'user': entry['user'],
-                    'user_name': entry['user_name'],
-                    'reason': entry['reason'],
-                    'action': entry['action'],
-                    'time': entry['time'],
-                    'random_string': entry['random_string']
-                }
-                for entry in activate_log.get('reason', [])
-            ]
-
+            filtered_reasons = sorted([{ 'level': entry['level'],'role': entry['role'], 'user': entry['user'], 'user_name': entry['user_name'], 'reason': entry['reason'], 'action': entry['action'], 'time': entry['time'], 'random_string': entry['random_string']  }  for entry in activate_log.get('reason', [])  ],key=lambda x: datetime.strptime(x['time'], "%Y/%m/%d %H:%M:%S:%f") if x.get('time') else datetime.min )
             html_table_output = ""
             if filtered_reasons:
                 html_table_output = Template(activate_log_table).render(filtered_reasons=filtered_reasons)
@@ -1514,7 +1501,6 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
             activate_pdf_name = "Activity Log .pdf"
             activate_pdf_path = os.path.join(attachment_folder, activate_pdf_name)
 
-            is_landscape = frappe.db.get_value("Ezy Form Definitions", form_short_name, "is_landscape")  # Set this according to your use case
             opts = {"orientation": "Landscape" if is_landscape else "Portrait"}
 
             convert_html_to_pdf(html_content=html_view, pdf_path=absolute_pdf_path, options=opts)
@@ -1565,3 +1551,32 @@ def get_html_file_data(doc=None,data=None,print_format=None):
     html_file = get_html_and_style(doc,name=data,print_format=print_format,no_letterhead=None,letterhead=None,trigger_print=False,style=None,settings=None)
  
     return html_file
+
+
+
+
+frappe.whitelist()
+def get_wf_activate_log(wf_generated_request_id):
+    """Fetches the activity log for a given workflow request ID."""
+    try:
+        activate_log = frappe.get_doc('WF Activity Log', wf_generated_request_id).as_dict()
+        filtered_reasons = sorted(
+            [
+                {
+                    'level': entry['level'],
+                    'role': entry['role'],
+                    'user': entry['user'],
+                    'user_name': entry['user_name'],
+                    'reason': entry['reason'],
+                    'action': entry['action'],
+                    'time': entry['time'],
+                    'random_string': entry['random_string']
+                }
+                for entry in activate_log.get('reason', [])
+            ],
+            key=lambda x: x['time']
+        )
+        return filtered_reasons
+    except Exception as e:
+        frappe.log_error(f"Error fetching activity log: {e}")
+        return []

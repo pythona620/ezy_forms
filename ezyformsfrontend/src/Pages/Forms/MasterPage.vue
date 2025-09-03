@@ -1,14 +1,14 @@
 <template>
     <div>
-        <HeaderComp />
+        <HeaderComp @toggleSidebar="toggleSidebar" />
         <div class="container-fluid">
             <div class="row">
-                <div class="col-2 p-0">
-                    <SideBar />
+                <div :class="['p-0', isCollapsed ? 'col-auto' : 'col-2']">
+                    <SideBar :collapsed="isCollapsed" @toggleSidebar="toggleSidebar" />
                 </div>
 
 
-                <div class="col-10">
+                <div :class="isCollapsed ? 'col' : 'col-10'">
                     <RouterView></RouterView>
                     
                 </div>
@@ -22,6 +22,13 @@
 
 import HeaderComp from '../../Components/HeaderComp.vue'
 import SideBar from '../../Components/SideBar.vue'
+import { ref } from 'vue'
+
+const isCollapsed = ref(false)
+
+function toggleSidebar() {
+  isCollapsed.value = !isCollapsed.value
+}
 
 
 </script>

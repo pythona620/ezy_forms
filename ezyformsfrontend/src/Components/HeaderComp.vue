@@ -1,117 +1,202 @@
 <template>
-    <div>
+    <div class="">
+        <div class="d-md-none mobile_header_top ">
+            <div class=" d-flex justify-content-between align-content-center p-2 shadow-sm ">
+                <div>
+                    <img @click="logoClick" class="imgmix img-fluid"
+                        src="../assets/Final-logo-ezyforms-removebg-preview.png" />
+                </div>
+                <div class=" d-flex gap-3 justify-content-end align-items-center m-0 me-3">
+                    <div>
 
-        <div class="position-sticky top-0 stickyheader">
-            <div class="container-fluid p-0">
-                <div class="headerbackgound py-1">
-                    <div class="row">
-                        <div class="col-2">
-                            <div class="d-flex gap-2 align-items-center">
-                                <div><img @click="logoClick" class="imgmix img-fluid"
-                                        src="../assets/Final-logo-ezyforms-removebg-preview.png" /></div>
-                                <!-- <div class="m-0">
-                                    <p class="font-13 m-0">EZY | Forms</p>
-                                </div> -->
+                        <FormFields tag="select" placeholder="" class="font-12" name="roles" id="roles"
+                            :Required="false" v-model="business_unit" :options="EzyFormsCompanys" />
+                    </div>
+                    <div>
+                        <div class="logooutbtn m-0">
+                            <div class="btn-group dropdown navbar-nav ms-auto">
+                                <button type="button" class="btn border-0 p-0 me-2 mt-0" data-bs-toggle="dropdown"
+                                    aria-expanded="false">
+                                    <img src="../assets/Image.svg" />
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-start p-2">
+                                    <div class="d-flex gap-2 align-items-center">
+                                        <div v-if="userInitial">
+                                            <li class="d-flex justify-content-center align-items-center btn btn-dark">
+
+                                                {{ userInitial }}
+
+                                            </li>
+                                        </div>
+                                        <div>
+                                            <li>
+                                                <div v-if="userEmail" class=" ">
+                                                    <span class="fw-medium font-13 "> {{ userEmail }}</span>
+
+                                                </div>
+                                                <div v-if="userDesigination" class=" ">
+
+                                                    <span class="fw-medium font-11">{{ userDesigination
+                                                        }}</span>
+                                                </div>
+                                            </li>
+                                        </div>
+
+                                    </div>
+
+                                    <li class="mt-2">
+                                        <div class="d-flex justify-content-center align-items-center">
+                                            <ButtonComp @click="SystemSettingData"
+                                                class="changepass rounded-2 text-left" icon="lock"
+                                                data-bs-toggle="modal" data-bs-target="#changePassword"
+                                                name="Change Password"></ButtonComp>
+                                        </div>
+                                    </li>
+                                    <li class="mt-2">
+                                        <div class="d-flex justify-content-center align-items-center">
+                                            <ButtonComp class=" logout rounded-2 text-left" icon="box-arrow-right"
+                                                @click="logout()" name="Log Out">
+                                            </ButtonComp>
+                                        </div>
+                                    </li>
+                                </ul>
                             </div>
+
                         </div>
-                        <div class="col-7">
-                            <div class="mt-2 ms-2">
-                                <TabsComp :tabs="filteredTabsData" @changeTab="handleTabChange" />
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="d-none d-md-block">
+
+            <div class="position-sticky top-0 stickyheader">
+                <div class="container-fluid p-0">
+                    <div class="headerbackgound py-1">
+                        <div class="row">
+                            <div class="col-2">
+                                <!-- <div class="d-flex gap-2 align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <button class="btn p-0 border-0" type="button" @click="toggleSidebar">
+                                        <i class="bi bi-list fs-3 ms-2"></i> 
+                                    </button>
+                                    
+                                </div>
+                            </div> -->
+                                <img @click="logoClick" class="imgmix img-fluid d-none d-md-block"
+                                    src="../assets/Final-logo-ezyforms-removebg-preview.png" />
+                                <div class="d-sm-block d-md-none p-2">
+                                    <div class="">
+
+                                        <FormFields tag="select" placeholder="" class="font-12" name="roles" id="roles"
+                                            :Required="false" v-model="business_unit" :options="EzyFormsCompanys" />
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="col-3 d-flex justify-content-end align-items-center pe-1">
-                            <div class="d-flex gap-3 justify-content-end align-items-center m-0 me-2">
-                                <!-- <button class="btn btn-outline-danger" type="button" data-bs-toggle="offcanvas"
+                            <div class="col-7">
+                                <div class="mt-2 ms-2">
+                                    <TabsComp :tabs="filteredTabsData" @changeTab="handleTabChange" />
+                                </div>
+                            </div>
+                            <div class="col-3 d-flex justify-content-end align-items-center pe-1">
+                                <div class="d-flex gap-3 justify-content-end align-items-center m-0 me-3">
+                                    <!-- <button class="btn btn-outline-danger" type="button" data-bs-toggle="offcanvas"
                                     data-bs-target="#offcanvasRight" aria-controls="offcanvasRight"><i
                                         class="bi bi-bell-fill"></i></button> -->
 
-                                <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight"
-                                    aria-labelledby="offcanvasRightLabel">
-                                    <div class="offcanvas-header">
-                                        <h5 id="offcanvasRightLabel">Notifications</h5>
-                                        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"
-                                            aria-label="Close"></button>
-                                    </div>
-                                    <div class="offcanvas-body">
-                                        <ul class="list-unstyled designation-scroll">
-                                            <li v-for="(item, index) in SocketList" :key="index"
-                                                class="designationList form-check">
-                                                {{ item
-                                                }}
-                                            </li>
-                                        </ul>
+                                    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight"
+                                        aria-labelledby="offcanvasRightLabel">
+                                        <div class="offcanvas-header">
+                                            <h5 id="offcanvasRightLabel">Notifications</h5>
+                                            <button type="button" class="btn-close text-reset"
+                                                data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                                        </div>
+                                        <div class="offcanvas-body">
+                                            <ul class="list-unstyled designation-scroll">
+                                                <li v-for="(item, index) in SocketList" :key="index"
+                                                    class="designationList form-check">
+                                                    {{ item
+                                                    }}
+                                                </li>
+                                            </ul>
 
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="">
-                                    <!-- v-if="shouldShowButton" -->
+                                    <!-- <div class="">
                                     <ButtonComp
                                         class="btn btn-danger raiseReqBtn d-flex justify-content-center align-items-center  m-0 text-nowrap font-10"
                                         name="Raise Request" data-bs-toggle="modal" @click="raiseRequest"
                                         data-bs-target="#riaseRequestModal" />
-                                    <!-- @click="raiseRequest" -->
-                                </div>
-                                <div class="">
+                                </div> -->
+                                    <div class=" d-none d-md-block">
 
-                                    <FormFields tag="select" placeholder="" class="font-12" name="roles" id="roles"
-                                        :Required="false" v-model="business_unit" :options="EzyFormsCompanys" />
-                                </div>
-                                <div class="logooutbtn m-0">
-                                    <div class="btn-group dropdown navbar-nav ms-auto">
-                                        <button type="button" class="btn border-0 p-0 me-2 mt-0"
-                                            data-bs-toggle="dropdown" aria-expanded="false">
-                                            <img src="../assets/Image.svg" />
-                                        </button>
-                                        <ul class="dropdown-menu dropdown-menu-start p-2">
-                                            <div class="d-flex gap-2 align-items-center">
-                                                <div v-if="userInitial">
-                                                    <li
-                                                        class="d-flex justify-content-center align-items-center btn btn-dark">
-
-                                                        {{ userInitial }}
-
-                                                    </li>
-                                                </div>
-                                                <div>
-                                                    <li>
-                                                        <div v-if="userEmail" class=" ">
-                                                            <span class="fw-medium font-13 "> {{ userEmail }}</span>
-
-                                                        </div>
-                                                        <div v-if="userDesigination" class=" ">
-
-                                                            <span class="fw-medium font-11">{{ userDesigination
-                                                            }}</span>
-                                                        </div>
-                                                    </li>
-                                                </div>
-
-                                            </div>
-
-                                            <li class="mt-2">
-                                                <div class="d-flex justify-content-center align-items-center">
-                                                    <ButtonComp class="changepass rounded-2 text-left" icon="lock"
-                                                        data-bs-toggle="modal" data-bs-target="#changePassword"
-                                                        name="Change Password"></ButtonComp>
-                                                </div>
-                                            </li>
-                                            <li class="mt-2">
-                                                <div class="d-flex justify-content-center align-items-center">
-                                                    <ButtonComp class=" logout rounded-2 text-left"
-                                                        icon="box-arrow-right" @click="logout()" name="Log Out">
-                                                    </ButtonComp>
-                                                </div>
-                                            </li>
-                                        </ul>
+                                        <FormFields tag="select" placeholder="" class="font-12" name="roles" id="roles"
+                                            :Required="false" v-model="business_unit" :options="EzyFormsCompanys" />
                                     </div>
+                                    <div class="logooutbtn m-0">
+                                        <div class="btn-group dropdown navbar-nav ms-auto">
+                                            <button type="button" class="btn border-0 p-0 me-2 mt-0"
+                                                data-bs-toggle="dropdown" aria-expanded="false">
+                                                <img src="../assets/Image.svg" />
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-start p-2">
+                                                <div class="d-flex gap-2 align-items-center">
+                                                    <div v-if="userInitial">
+                                                        <li
+                                                            class="d-flex justify-content-center align-items-center btn btn-dark">
 
+                                                            {{ userInitial }}
+
+                                                        </li>
+                                                    </div>
+                                                    <div>
+                                                        <li>
+                                                            <div v-if="userEmail" class=" ">
+                                                                <span class="fw-medium font-13 "> {{ userEmail }}</span>
+
+                                                            </div>
+                                                            <div v-if="userDesigination" class=" ">
+
+                                                                <span class="fw-medium font-11">{{ userDesigination
+                                                                    }}</span>
+                                                            </div>
+                                                        </li>
+                                                    </div>
+
+                                                </div>
+
+                                                <li class="mt-2">
+                                                    <div class="d-flex justify-content-center align-items-center">
+                                                        <ButtonComp @click="SystemSettingData"
+                                                            class="changepass rounded-2 text-left" icon="lock"
+                                                            data-bs-toggle="modal" data-bs-target="#changePassword"
+                                                            name="Change Password"></ButtonComp>
+                                                    </div>
+                                                </li>
+                                                <li class="mt-2">
+                                                    <div class="d-flex justify-content-center align-items-center">
+                                                        <ButtonComp class=" logout rounded-2 text-left"
+                                                            icon="box-arrow-right" @click="logout()" name="Log Out">
+                                                        </ButtonComp>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </div>
+
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+                <!-- Modal -->
             </div>
-            <!-- Modal -->
+        </div>
+
+        <div class="d-md-none mobile-nav">
+            <TabsComp :tabs="filteredTabsData" @changeTab="handleTabChange" />
+
         </div>
         <div class="modal fade" id="riaseRequestModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
             aria-labelledby="riaseRequestModalLabel" aria-hidden="true">
@@ -180,44 +265,48 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title font-14 fw-bold" id="changePasswordLabel">Change Password</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" @click="clearPassword()" class="btn-close" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <div class="mb-2">
-                           <div class="position-relative">
-                             <label class="raise-label" for="changepass">New Password</label>
-                            <input class="form-control m-0 shadow-none font-13" v-model.trim="new_password"
-                                placeholder="Enter New Password" :type="showNewPassword ? 'text' : 'password'"
-                                id="changepass" @input="validatePassword" />
-                            <span v-if="new_password" class="new-pwd-toggle-icon" @click="toggleNewPwdVisibility">
-                                <i :class="showNewPassword ? 'bi bi-eye' : 'bi bi-eye-slash'"></i>
-                            </span>
-                           </div>
-                            <span v-if="passwordError" class="text-danger font-10 m-0 ps-2">{{ passwordError }}</span>
+                            <div class="position-relative">
+                                <label class="raise-label" for="changepass">New Password</label>
+                                <input class="form-control m-0 shadow-none font-13" v-model.trim="new_password"
+                                    placeholder="Enter New Password" :type="showNewPassword ? 'text' : 'password'"
+                                    id="changepass" @input="validatePassword" />
+                                <span v-if="new_password" class="new-pwd-toggle-icon" @click="toggleNewPwdVisibility">
+                                    <i :class="showNewPassword ? 'bi bi-eye' : 'bi bi-eye-slash'"></i>
+                                </span>
+                            </div>
+                            <p v-if="passwordError" class="text-danger font-10 m-0 ps-1 mt-1">{{ passwordError }}</p>
                         </div>
 
                         <div class="mb-2">
                             <div class="position-relative">
                                 <label class="raise-label" for="confirmpass">Confirm Password</label>
-                            <input class="form-control m-0 shadow-none font-13" v-model.trim="confirm_password"
-                                placeholder="Enter Confirm Password" :type="showConfPwdPassword ? 'text' : 'password'"
-                                id="confirmpass" @input="checkPasswordsMatch" />
-                            <span v-if="confirm_password" class="cnf-pwd-toggle-icon" @click="toggleConfPwdVisibility">
-                                <i :class="showConfPwdPassword ? 'bi bi-eye' : 'bi bi-eye-slash'"></i>
-                            </span>
+                                <input class="form-control m-0 shadow-none font-13" v-model.trim="confirm_password"
+                                    placeholder="Enter Confirm Password"
+                                    :type="showConfPwdPassword ? 'text' : 'password'" id="confirmpass"
+                                    @input="checkPasswordsMatch" />
+                                <span v-if="confirm_password" class="cnf-pwd-toggle-icon"
+                                    @click="toggleConfPwdVisibility">
+                                    <i :class="showConfPwdPassword ? 'bi bi-eye' : 'bi bi-eye-slash'"></i>
+                                </span>
                             </div>
                             <span v-if="passwordsMismatch" class="text-danger font-10 m-0 ps-2">Passwords do not
                                 match.</span>
                         </div>
 
                         <label class="font-12">
-                            Note : Password must be at least 12 characters with letters, numbers & symbols
+                            Note : {{ getPasswordRule(selectedScore).message }}
                         </label>
                     </div>
 
                     <div>
                         <div class=" d-flex justify-content-center align-items-center p-3">
-                            <button :disabled="isButtonDisabled" class="btn btn-dark font-12 w-100" type="submit" @click="passwordChange()">
+                            <button :disabled="isButtonDisabled" class="btn btn-dark font-12 w-100" type="submit"
+                                @click="passwordChange()">
                                 Confirm New Password</button>
                         </div>
                     </div>
@@ -225,6 +314,9 @@
                 </div>
             </div>
         </div>
+
+
+
     </div>
 
 </template>
@@ -258,6 +350,14 @@ import { ref, onMounted, watch, computed, onUnmounted } from 'vue';
 // function handleCustomEvent(data) {
 // }
 const router = useRouter(); // Initialize router
+
+const emit = defineEmits(['toggleSidebar'])
+const isImageVisible = ref(true)
+
+function toggleSidebar() {
+    isImageVisible.value = !isImageVisible.value // Toggle image visibility
+    emit('toggleSidebar') // Emit event to parent if needed
+}
 
 // Define reactive variables
 const tabsData = ref([
@@ -299,27 +399,25 @@ const filterObj = ref({
     limitPageLength: 100,
 });
 
+const EmpCompony = ref([]);
+const selectedScore = ref("");
+const responsibleUnits = ref([])
 const SocketList = ref([])
 
 //IF THE USER DESIGNATION INCLUDES (IT) THEN ONLY FORM CREATION WILL APPREAR IN HEADER ""
 
 const filteredTabsData = computed(() => {
     return tabsData.value
-       
+
 });
 function logout() {
     // localStorage.removeItem('UserName');
     // localStorage.removeItem('employeeData');
     axiosInstance.post(apis.logout)
         .then((response) => {
-            localStorage.removeItem('UserName');
-            localStorage.removeItem('employeeData');
-            localStorage.removeItem('Bu');
-            localStorage.removeItem('USERROLE');
-            sessionStorage.removeItem('UserName');
-            sessionStorage.removeItem('employeeData');
-            sessionStorage.removeItem('Bu');
-            sessionStorage.removeItem('USERROLE');
+            const res = response;
+            sessionStorage.clear();
+            localStorage.clear();
             router.push({ path: '/' }).then(() => {
             });
         })
@@ -329,6 +427,50 @@ function raiseRequstClearForm() {
         selectedData.value.selectedform = '',
         blockArr.value = []
 }
+
+const SystemSettingData = () => {
+    const docName = "System Settings";
+    const queryParams = {
+        fields: JSON.stringify(["minimum_password_score"]),
+    };
+
+    axiosInstance
+        .get(`${apis.resource}${doctypes.SystemSettings}/${encodeURIComponent(docName)}`, { params: queryParams })
+        .then((res) => {
+            if (res.data) {
+                selectedScore.value = res.data.minimum_password_score;
+            }
+        })
+        .catch((error) => {
+            console.error("Error fetching system settings:", error);
+        });
+};
+
+function getPasswordRule(score) {
+    if (score == 2) {
+        return {
+            regex: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/,
+            message: "Password must be at least 8 characters with at least one uppercase, lowercase, number, and special character."
+        };
+    }
+    else if (score == 3) {
+        return {
+            regex: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{10,}$/,
+            message: "Password must be at least 10 characters and fully mixed (uppercase, lowercase, numbers, special characters)."
+        };
+    }
+    else if (score == 4) {
+        return {
+            regex: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{14,}$/,
+            message: "Password must be at least 14+ characters with a random mix of all character types."
+        };
+    }
+    return {
+        regex: /.*/,
+        message: "Password must meet the system's security requirements."
+    };
+}
+
 const props = defineProps(['id']);
 onMounted(() => {
 
@@ -338,6 +480,10 @@ onMounted(() => {
     // Retrieve data from localStorage
     const userData = JSON.parse(localStorage.getItem('employeeData'));
     const userName = JSON.parse(localStorage.getItem('UserName'));
+
+    EmpCompony.value = userData.company_field;
+    responsibleUnits.value = userData.responsible_units.map(unit => unit.company);
+
     // const syetemmanger = JSON.parse(localStorage.getItem('systemManager'))
     if (userName) {
         // Set the username based on the UserName data, which is used to check if the user is Admin
@@ -360,12 +506,16 @@ onMounted(() => {
     }
 });
 
-// const new_password = ref("");
-// const confirm_password = ref("");
+function clearPassword() {
+    this.new_password = ""
+    this.confirm_password = ""
+    this.passwordError = ""
+    this.passwordsMismatch = ""
+}
+
 const showNewPassword = ref(false);
 const showConfPwdPassword = ref(false);
 const passwordError = ref("");
-// const passwordsMismatch = ref(false);
 
 const toggleNewPwdVisibility = () => {
     showNewPassword.value = !showNewPassword.value;
@@ -376,13 +526,9 @@ const toggleConfPwdVisibility = () => {
 };
 
 const validatePassword = () => {
-    const pwd = new_password.value;
-
-    const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$/;
-
-    if (!regex.test(pwd)) {
-        passwordError.value =
-            "Password must be at least 12 characters with letters, numbers & symbols.";
+    const { regex, message } = getPasswordRule(selectedScore.value);
+    if (!regex.test(new_password.value)) {
+        passwordError.value = message;
     } else {
         passwordError.value = "";
     }
@@ -397,17 +543,17 @@ const checkPasswordsMatch = () => {
 
 
 const isPasswordValid = computed(() => {
-  const regex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{12,}$/;
-  return regex.test(new_password.value);
+    const { regex } = getPasswordRule(selectedScore.value);
+    return regex.test(new_password.value);
 });
 
 const isButtonDisabled = computed(() => {
-  return (
-    !new_password.value ||                  // New password is empty
-    !confirm_password.value ||              // Confirm password is empty
-    !isPasswordValid.value ||               // Password does not meet the regex
-    new_password.value !== confirm_password.value // Passwords do not match
-  );
+    return (
+        !new_password.value ||
+        !confirm_password.value ||
+        !isPasswordValid.value ||
+        new_password.value !== confirm_password.value
+    );
 });
 
 
@@ -443,7 +589,7 @@ function passwordChange() {
 }
 const ezyForms = () => {
     const queryParams = {
-        fields: JSON.stringify(["*"]),
+        fields: JSON.stringify(["name", "bu_code"]),
     };
 
     axiosInstance.get(apis.resource + doctypes.wfSettingEzyForms, {
@@ -459,6 +605,42 @@ const ezyForms = () => {
         console.error("Error fetching ezyForms data:", error);
     });
 };
+
+// const ezyForms = () => {
+//     const queryParams = {
+//         fields: JSON.stringify(["name","bu_code"]),
+//     };
+
+//     axiosInstance.get(apis.resource + doctypes.wfSettingEzyForms, {
+//         params: queryParams,
+//     }).then((res) => {
+//         if (res?.data?.length) {
+//             let allUnits = res.data.map((company) => company.bu_code);
+
+//             if (!responsibleUnits.value.length) {
+//                 // responsibleUnits is empty → only show EmpCompony
+//                 EzyFormsCompanys.value = [EmpCompony.value];
+//                 business_unit.value = EmpCompony.value;
+//             } else {
+//                 // filter with responsibleUnits
+//                 const commonUnits = allUnits.filter(unit =>
+//                     responsibleUnits.value.includes(unit)
+//                 );
+
+//                 EzyFormsCompanys.value = commonUnits;
+
+//                 if (commonUnits.length === 1) {
+//                     business_unit.value = commonUnits[0];
+//                 } else if (commonUnits.length && !business_unit.value.length) {
+//                     business_unit.value = commonUnits[0];
+//                 }
+//             }
+//         }
+//     }).catch((error) => {
+//         console.error("Error fetching ezyForms data:", error);
+//     });
+// };
+
 watch(business_unit, (newBu, oldBu) => {
     EzyBusinessUnit.value = newBu;
     localStorage.setItem("Bu", EzyBusinessUnit.value)
@@ -501,7 +683,7 @@ function gettingDepartmentNames() {
 
 function deptData(value = null) {
     const filters = [
-        ["business_unit", "like", `%${business_unit.value}%`]
+        ["business_unit", "=", `${business_unit.value}`]
     ];
     const queryParams = {
         fields: JSON.stringify(["*"]),
@@ -726,6 +908,25 @@ const handleBuChange = (tab) => {
 </script>
 
 <style lang="scss" scoped>
+.mobile_header_top{
+    z-index: 1020;
+    background: #fff;
+
+    position:fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+}
+.mobile-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #fff;
+    z-index: 1050;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+}
+
 .headerbackgound {
     height: 50px;
     background-color: var(--sidebar-color);
@@ -741,6 +942,7 @@ const handleBuChange = (tab) => {
     justify-content: center;
     align-items: center;
     margin-bottom: 7px;
+    border-radius: 20px;
 }
 
 .changepass {
@@ -757,6 +959,7 @@ const handleBuChange = (tab) => {
 
 .imgmix {
     cursor: pointer;
+    max-width: 93%;
 }
 
 .logout {
@@ -797,6 +1000,7 @@ const handleBuChange = (tab) => {
     box-shadow: rgba(0, 0, 0, 0.1) 0px 3px 3px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
 
     // box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 1020;
 }
 
 .raise-label {

@@ -31,7 +31,7 @@
                                                     fieldIndex
                                                     ">
                                                     <span class="font-12"
-                                                        :class="field.fieldtype === 'Small Text' ? 'fw-bold' : ''">{{
+                                                        >{{
                                                             field.label }}</span>
                                                     <span class="ms-1 text-danger">{{
                                                         field.reqd === 1 ? "*" : ""
@@ -140,17 +140,40 @@
                                            <template v-else-if="field.fieldtype == 'Attach'">
                                             
   <!-- File Input -->
+                                                <!-- <input 
+                                                v-if="(field.fieldname !== 'requestor_signature' && field.label !== 'Requestor Signature') || !field.value"
+                                                :disabled="props.readonlyFor === 'true'"
+                                                type="file"
+                                                accept=".jpeg,.jpg,.png,.pdf,.xlsx,.xls"
+                                                :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex" :style="{ minWidth: '100px', maxWidth: '400px' }"
+                                                class="form-control previewInputHeight font-10 mt-2"
+                                                multiple
+                                                @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+                                                /> -->
+                                                <!-- Hidden file input -->
                                                 <input 
                                                 v-if="(field.fieldname !== 'requestor_signature' && field.label !== 'Requestor Signature') || !field.value"
                                                 :disabled="props.readonlyFor === 'true'"
                                                 type="file"
                                                 
                                                 :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                                                style="display: none"
                                                 class="form-control previewInputHeight font-10 mt-2"
                                                 multiple
                                                 @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
                                                 />
                                                 <!-- <span v-if="(field.fieldname !== 'requestor_signature' && field.label !== 'Requestor Signature') || !field.value" class="font-10 text-danger">Max 20 files can be uploaded**</span> -->
+
+                                                <!-- Custom label that acts as the file button -->
+                                                <label
+                                                v-if="(field.fieldname !== 'requestor_signature' && field.label !== 'Requestor Signature') || !field.value"
+                                                :for="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                                                class="btn btn-sm btn-light attchaInputLabel font-10 mt-2"
+                                                :class="{ 'disabled': props.readonlyFor === 'true' }"
+                                                >
+                                                <i class="bi bi-paperclip me-1"></i> Attach
+                                                </label>
+
 
 
                                                 <!-- Preview Section -->
@@ -178,7 +201,7 @@
                                                         <div
                                                         v-else-if="isPdfFile(fileUrl)"
                                                         class="d-flex align-items-center justify-content-center border mt-2"
-                                                        style="width: 60px; height: 70px; background: #f9f9f9"
+                                                        style="width: 45px; height: 60px; background: #f9f9f9"
                                                         >
                                                         <i class="bi bi-file-earmark-pdf fs-1 text-danger"></i>
                                                         </div>
@@ -187,7 +210,7 @@
                                                         <div
                                                         v-else-if="isExcelFile(fileUrl)"
                                                         class="d-flex align-items-center justify-content-center border mt-2"
-                                                        style="width: 100px; height: 100px; background: #f9f9f9"
+                                                        style="width: 45px; height: 60px; background: #f9f9f9"
                                                         >
                                                         <i class="bi bi-file-earmark-spreadsheet fs-1 text-success"></i>
                                                         </div>
@@ -196,9 +219,9 @@
                                                         <div
                                                         v-else
                                                         class="d-flex align-items-center justify-content-center border mt-2"
-                                                        style="width: 100px; height: 100px; background: #f9f9f9"
+                                                        style="width: 45px; height: 60px; background: #f9f9f9"
                                                         >
-                                                        <i class="bi bi-file-earmark fs-1"></i>
+                                                        <i class="bi bi-file-earmark text-primary fs-1"></i>
                                                         </div>
                                                     </div>
 
@@ -537,7 +560,7 @@
                                                                         <!-- File Input -->
                                                                         <input multiple type="file"
                                                                             class="form-control font-12"
-                                                                            
+                                                                           
                                                                             @change="handleFileUpload($event, row, fieldItem.fieldname)" />
 
                                                                         <!-- Preview Section -->
@@ -683,13 +706,13 @@
                                                                             rowIndex + 1 }}
                                                                     </td> -->
                                                                     <td
-  v-for="field in table"
-  :key="field.fieldname"
-  class="position-relative"
-  :style="getCellStyle(row[field.fieldname], focusedField === `${rowIndex}-${field.fieldname}`)"
-  @focusin="focusedField = `${rowIndex}-${field.fieldname}`"
-  @focusout="focusedField = null"
->
+                                                                            v-for="field in table"
+                                                                            :key="field.fieldname"
+                                                                            class="position-relative"
+                                                                            :style="getCellStyle(row[field.fieldname], focusedField === `${rowIndex}-${field.fieldname}`)"
+                                                                            @focusin="focusedField = `${rowIndex}-${field.fieldname}`"
+                                                                            @focusout="focusedField = null"
+                                                                            >
 
 
                                                                       
@@ -704,11 +727,16 @@
                                                                                 
 
                                                                         </template>
-                                                                        <template v-if="field.fieldtype === 'Text'">
-                                                                            <textarea class="form-control font-12"
-                                                                                rows="3" v-model="row[field.fieldname]"
-                                                                                :title="row[field.fieldname]"></textarea>
-                                                                        </template>
+                                                                       <template v-if="field.fieldtype === 'Text'">
+                                                                            <textarea v-tooltip.top="row[field.fieldname]" 
+                                                                                class="form-control font-12"
+                                                                                style="height: 20px;"
+                                                                                rows="3"
+                                                                                v-model="row[field.fieldname]"
+                                                                                >
+                                                                            </textarea>
+                                                                            </template>
+
 
                                                                         <template
                                                                             v-else-if="field.fieldtype === 'Select'">
@@ -744,7 +772,7 @@
                                                                             <!-- For calculated fields -->
                                                                             <input
                                                                                 v-if="field.description && /[+\-*/]/.test(field.description)" v-tooltip.top="row[field.fieldname]"
-                                                                                type="number" :disabled="field.label.includes('Total Cost')"
+                                                                                type="number" :disabled="field.label.includes('Total Cost') || field.description === 'Disable' "
                                                                                 class="form-control font-12"
                                                                                 :value="calculateFieldExpression(row, field.description, table)"
                                                                                 
@@ -783,7 +811,6 @@
                                                                             v-else-if="field.fieldtype === 'Attach'">
                                                                             <!-- File Input -->
                                                                             <input type="file" multiple
-                                                                               
                                                                                 class="form-control font-12"
                                                                                 @change="handleFileUpload($event, row, field.fieldname)" />
 
@@ -907,7 +934,7 @@
                                                         </table>
 
                                                         <span
-                                                            v-if="field.description !== tableIndex && field.description !== 'True' && field.description !== 'false' && field.description !== 'Field' "
+                                                            v-if="field.description !== tableIndex && field.description !== 'True' && field.description !== 'false' && field.description !== 'Field' && field.fieldtype !== 'Table' "
                                                             class="font-11"><span class="fw-semibold">
                                                             </span>{{
                                                                 field.description }}</span>
@@ -1054,20 +1081,25 @@ const isExcelFile = (url) => {
   return url.match(/\.(xlsx|xls)$/i);
 };
 
-// const removeFile = (index, field) => {
-//   const files = field.value.split(',').map(f => f.trim());
-//   files.splice(index, 1);
-//   field.value = files.join(',');
-// };
 const isImageFile = (url) => {
     return /\.(jpg|jpeg|png|gif|png)$/i.test(url)
 }
+const removeAttach=ref([]);
 
 const removeFile = (index, field) => {
     const files = field.value.split('|').map(f => f.trim())
-    files.splice(index, 1)
-    field.value = files.join('|')
-    emit('updateField', field)
+  const removedUrl = files.splice(index, 1)[0] // removed file URL
+
+  // Find the matching file from uploadedFiles based on removed file_url
+  const match = uploadedFiles.value.find(
+    file => file.respone?.file_url === removedUrl
+  )
+  if (match && match.respone?.name) {
+    removeAttach.value.push(match.respone.name)
+  }
+  field.value = files.join('| ')
+  emit('updateField', field)
+  emit("updateRemovedFiles",removeAttach.value);
 }
 // console.log(tableRows);
 // Format as 'YYYY-MM-DDTHH:MM'
@@ -1217,7 +1249,44 @@ const removeRow = (tableIndex, rowIndex) => {
 //         return 0;
 //     }
 // } 
+// function calculateFieldExpression(row, expression, fields) {
+//     const labelToValue = {};
+
+//     // Step 1: Map label -> value
+//     fields.forEach(f => {
+//         const value = parseFloat(row[f.fieldname]);
+//         labelToValue[f.label] = isNaN(value) ? 0 : value;
+//     });
+
+//     // Step 2: Convert "Label%" to "(Label / 100)"
+//     expression = expression.replace(/([a-zA-Z\s]+)%/g, (_, label) => {
+//         return `(${label.trim()} / 100)`;
+//     });
+
+//     // Step 3: Replace labels with actual numeric values
+//     const sortedLabels = Object.keys(labelToValue).sort((a, b) => b.length - a.length);
+//     let formula = expression;
+
+//     for (const label of sortedLabels) {
+//         const safeLabel = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // escape regex special chars
+//         const regex = new RegExp(`\\b${safeLabel}\\b`, 'g');
+//         formula = formula.replace(regex, labelToValue[label]);
+//     }
+
+//     // Step 4: Safely evaluate formula
+//     try {
+//         return new Function(`return ${formula}`)();
+//     } catch (e) {
+//         console.error('Error evaluating formula:', formula, e);
+//         return 0;
+//     }
+// }
+
 function calculateFieldExpression(row, expression, fields) {
+    if (!expression || /disable/i.test(expression)) {
+        return 0; // Skip evaluation if expression contains "Disable"
+    }
+
     const labelToValue = {};
 
     // Step 1: Map label -> value
@@ -1251,7 +1320,6 @@ function calculateFieldExpression(row, expression, fields) {
 }
 
 
-
 const tableTotals = computed(() => {
   const totals = {};
 
@@ -1260,8 +1328,8 @@ const tableTotals = computed(() => {
 
     const fields = props.tableHeaders[tableIndex] || [];
     fields.forEach((field) => {
-      if (
-        field.fieldtype === 'Int' &&  field.description
+     if (
+        field.fieldtype === 'Int' && field.description  && (field.label?.toLowerCase().includes('total') || field.label?.toLowerCase().includes('amount') || /[+\-*/]/.test(field.description)) || field.description === field.label
       ) {
         let sum = 0;
 
@@ -1350,12 +1418,12 @@ const handleFileUpload = async (event, row, fieldname) => {
 
     const existingFiles = normalizeFileList(row[fieldname]);
 
-    if (existingFiles.length >= 5) {
-        alert("Maximum 5 files are allowed.");
+    if (existingFiles.length >= 20) {
+        alert("Maximum 20 files are allowed.");
         return;
     }
 
-    const remainingSlots = 5 - existingFiles.length;
+    const remainingSlots = 20 - existingFiles.length;
     if (selectedFiles.length > remainingSlots) {
         alert(`Only ${remainingSlots} more file(s) can be uploaded.`);
         selectedFiles = selectedFiles.slice(0, remainingSlots);
@@ -1374,7 +1442,7 @@ const handleFileUpload = async (event, row, fieldname) => {
 const tableFileUpload = (file, row, fieldname) => {
     return new Promise((resolve, reject) => {
         const randomNumber = generateRandomNumber();
-        const fileName = `mailfiles-${randomNumber}-@${file.name}`;
+        const fileName = `${randomNumber}-@${file.name}`;
 
         const formData = new FormData();
         formData.append("file", file, fileName);
@@ -1444,22 +1512,7 @@ const handleSelectChange = (
 
     const mockEvent = { target: { value: field.value } };
 
-    // if(field.fieldname=='request_for' && field.value=='Others'){
-    //     isBehalfOf.value=true;
-    // }
-    // if (field.fieldname === 'request_for' && field.value === 'Self' || field.value === null) {
-    //         isBehalfOf.value = false;
 
-    //         // Clear 'requester_name' field and emit empty value
-    //         const requesterField = props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns
-    //             .flatMap(col => col.fields)
-    //             .find(f => f.fieldname === 'requester_name');
-
-    //         if (requesterField) {
-    //             requesterField.value = '';
-    //             emit('updateField', requesterField); // emit cleared field
-    //         }
-    //     }
 
     logFieldValue(mockEvent, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex);
 };
@@ -2034,11 +2087,12 @@ watch(
 const generateRandomNumber = () => {
     return Math.floor(Math.random() * 1000000);
 };
+const uploadedFiles = ref([]);
 
 
 const uploadFile = (file, field, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) => {
     const randomNumber = generateRandomNumber();
-    let fileName = `mailfiles-${props.formName}${randomNumber}-@${file.name}`;
+    let fileName = `${props.formName}${randomNumber}-@${file.name}`;
 
     const formData = new FormData();
     formData.append("file", file, fileName);
@@ -2049,11 +2103,13 @@ const uploadFile = (file, field, blockIndex, sectionIndex, rowIndex, columnIndex
         .post(apis.uploadfile, formData)
         .then((res) => {
             if (res.message && res.message.file_url) {
+                const respone=res.message;
                 if (field["value"]) {
                     field["value"] += `| ${res.message.file_url}`;
                 } else {
                     field["value"] = res.message.file_url;
                 }
+                uploadedFiles.value.push({respone});
 
                 // ✅ Emit updated value
                 emit("updateField", field);
@@ -2768,5 +2824,7 @@ input:focus{
   background-color: #f5f5f5;
 }
 
-
+.attchaInputLabel{
+    border: 1px solid #e2e2e2;
+}
 </style>

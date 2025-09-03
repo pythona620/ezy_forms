@@ -29,7 +29,18 @@ export const doctypes = {
   websiteSettings:'Website Settings',
   acknowledgement:'Acknowledgement',
   emailTemplate:'Email Template',
-  
+
+
+  ezyItems: "Ezy Items",
+  ezyVendors :'Ezy Vendor Details',
+  // ezyContracts: 'Contract',
+  ezyContracts: 'CTO',
+  EzyInsights:"Ezy Insights",
+  wfRoadmap: 'WF Roadmap',
+  ExpenseCodes: 'Expense Code',
+  CostCenter: 'Cost Center',
+
+  EzyActivityLog:"Ezy Dynamic Activate Log"
   
 
 };
@@ -69,29 +80,34 @@ export const apis = {
   dashboard: domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.dashboard_counts`,
   Update_raising_request: domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.rejected_form_updating`,
   edit_form_before_approve: domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.edit_the_form_before_approve`,
-  uploadbulkEmployeefile: domain + `/method/ezy_forms.ezy_custom_forms.custom_script.v1.bulk_import_data.import_bulk_data`,
+  uploadbulkEmployeefile: domain + `/method/ezy_forms.api.v1.bulk_import_data.import_bulk_data`,
   childFieldsUpdation: domain + `/method/ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions.update_field_properties`,
  view_only_reportee : domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.pick_view_only_reportee`,
  toMailApproval: domain + `/method/ezy_forms.ezy_forms.doctype.email_approval.custom_email_approval.email_approval`,
  deleteAssigneRoles:domain+`/method/ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions.delete_roles_for_approver_roles`,
  repostListData: domain + `/method/frappe.desk.query_report.run`,
-  ExportReport: domain + `/method/ezy_forms.ezy_custom_forms.custom_script.v1.export_report_api.export_report_data`,
+  ExportReport: domain + `/method/ezy_forms.api.v1.export_report.export_report_data`,
   approvedByMe:domain+`/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.approval_by_me`,
   ActivitySaveComment: domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.save_button_commite_update`,
   activityLogWithChild: domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.get_doc_changes`,
   gettingDataTo: domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.form_redict_gate_pass`,
   dynmic_calculations: domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.dynamic_calutae`,
   getReportData:  `/printview`,
-  signUp:domain+`/method/ezy_forms.ezy_custom_forms.custom_script.v1.sign_up.sign_up`,
-  GetsignUp:domain+`/method/ezy_forms.ezy_custom_forms.custom_script.v1.sign_up.get_signup_value`,
+  signUp:domain+`/method/ezy_forms.api.v1.sign_up.sign_up`,
+  GetsignUp:domain+`/method/ezy_forms.api.v1.sign_up.get_signup_value`,
   deleteEmployee:domain+`/method/ezy_forms.ezy_forms.doctype.ezy_employee.ezy_employee.employee_rejection`,
-  unablUpdateEmail:domain+`/method/ezy_forms.ezy_custom_forms.custom_script.v1.sign_up.employee_update_notification`,
+  unablUpdateEmail:domain+`/method/ezy_forms.api.v1.sign_up.employee_update_notification`,
   DepartmentNames: domain + `/method/ezy_forms.ezy_forms.doctype.ezy_departments.ezy_departments.side_nav_department_and_forms`,
   linked_doc_list: domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.linked_form_list`,
   linked_form_id_update: domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.linked_form_id_update`,
   forgotPassword:domain +`/method/frappe.core.doctype.user.user.reset_password`,
-  reportMailSend:domain+`/method/ezy_forms.ezy_custom_forms.custom_script.mail.email_reports_send`,
-  employeedisable:domain+`/method/ezy_forms.api.enable_employee.employee_update`,
+  reportMailSend:domain+`/method/ezy_forms.api.v1.send_doctype_as_mail.email_reports_send`,
+  employeedisable:domain+`/method/ezy_forms.api.v1.enable_employee.employee_update`,
+  get_approved_by_me: domain + `/method/ezy_flow.api.v1.approved_by_me.get_approved_by_me`,
+  get_wf_activate_log: domain + `/method/ezy_flow.ezy_flow.doctype.wf_activity_log.wf_activity_log.get_wf_activate_log`,
+  download_workorder: domain + `/method/forms_templates.api.v1.vendor_comparision.vendor_comparision_api`,
+
+  
 
   
   // getReportData: domain + `/api/method/frappe.utils.print_format.download_pdf`

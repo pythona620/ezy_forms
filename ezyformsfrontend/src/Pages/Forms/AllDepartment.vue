@@ -14,10 +14,20 @@
 
       </div>
       <div class="mt-1">
+        <!-- d-none d-lg-block -->
+        <div class="d-none d-lg-block">
+
         <GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true" viewType="viewPdf"  raiseRequest="true"
           :enableDisable="isEnable" @cell-click="viewPreview" @actionClicked="actionCreated"
           @toggle-click="toggleFunction" :actions="actions" @updateFilters="inLineFiltersData"
           :field-mapping="fieldMapping" isFiltersoption="true" />
+        </div>
+         <div class=" d-block d-lg-none">
+        <GlobalCard :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true" viewType="viewPdf"  raiseRequest="true"
+          :enableDisable="isEnable" @cell-click="viewPreview" @actionClicked="actionCreated"
+          @toggle-click="toggleFunction" :actions="actions" @updateFilters="inLineFiltersData"
+          :field-mapping="fieldMapping" isFiltersoption="flase"  />
+      </div>
         <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
           @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
       </div>
@@ -115,6 +125,7 @@ import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import router from '../../router';
 import { useRoute } from 'vue-router';
+import GlobalCard from '../../Components/GlobalCard.vue';
 // import ButtonComp from '../../Components/ButtonComp.vue';
 const totalRecords = ref(0);
 const tableheaders = ref([
@@ -137,6 +148,7 @@ const pdfPreview = ref('')
 const childtableHeaders = ref([]);
 const is_admin = ref('');
 const isEnable = ref("");
+const userDept=ref([]);
 
 
 // Business unit and filter object
@@ -232,6 +244,14 @@ function viewPreview(data, index, type) {
       // console.log(route.path, "sadasda");
 
       if (hasAccess) {
+         if(data.form_name === 'VENDOR COMPARISON'){
+            router.push({
+          name: "vendorcomparison",
+ 
+          });
+
+        } else{
+
         router.push({
           name: "RaiseRequest",
           query: {
@@ -242,6 +262,8 @@ function viewPreview(data, index, type) {
 
           },
         });
+        }
+
       } else {
         toast.info("You do not have permission to access this Form.");
       }
@@ -308,6 +330,7 @@ function actionCreated(rowData, actionEvent) {
       // console.log(route.path, "sadasda");
 
       if (hasAccess && rowData.enable === 1) {
+        
         router.push({
           name: "RaiseRequest",
           query: {
@@ -441,14 +464,14 @@ watch(
 const PaginationUpdateValue = (itemsPerPage) => {
   filterObj.value.limitPageLength = itemsPerPage;
   filterObj.value.limit_start = 0;
-  fetchDepartmentDetails();
+    fetchDepartmentDetails(); 
 
 };
 // Handle updating the limit start
 const PaginationLimitStart = ([itemsPerPage, start]) => {
   filterObj.value.limitPageLength = itemsPerPage;
   filterObj.value.limit_start = start;
-  fetchDepartmentDetails();
+    fetchDepartmentDetails(); 
 
 };
 
@@ -469,7 +492,7 @@ function inLineFiltersData(searchedData) {
     if (searchedData.form_status === 'Retired') {
       filterObj.value.filters.push(["form_status", "like", "Draft"]);
     }
-    console.log(searchedData.enable);
+    // console.log(searchedData.enable);
     if (searchedData.enable === 'Enabled') {
       filterObj.value.filters.push(["enable", "=", 1]);
     } else if (searchedData.enable === 'Disabled') {
@@ -501,12 +524,13 @@ function inLineFiltersData(searchedData) {
 function fetchDepartmentDetails(id, data) {
 
   const filters = [
-    ["business_unit", "like", `%${newBusinessUnit.value.business_unit}%`],
+    ["business_unit", "=", `${newBusinessUnit.value.business_unit}`],
     ["form_status", "like", "created"],
+    ["accessible_departments", "like", `%${userDept.value}%`]
 
   ];
-  if (props.id && props.id !== "Allforms" && props.id !== "allforms") {
-    console.log(props.id);
+  if (props.id && props.id !== "allforms" && props.id !== "allforms") {
+    // console.log(props.id); 
     filters.push(["owner_of_the_form", "=", props.id]);
   }
   if (data) {
@@ -559,12 +583,12 @@ onMounted(() => {
 
   const userData = JSON.parse(localStorage.getItem('employeeData'));
   is_admin.value = userData.is_admin || '';
-  // console.log(is_admin.value,"///");
+  userDept.value=userData.department;
 
   if (is_admin.value == 1) {
     isEnable.value = "true";
   }
-  if (route.path === "/forms/department/allforms" || route.path === "/forms/department/Allforms") {
+  if (route.path === "/forms/department/allforms" || route.path === "/forms/department/allforms") {
     router.replace("/forms/department/allforms");
   }
 

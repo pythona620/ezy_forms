@@ -20,6 +20,7 @@ const AuditLog=()=>import("./AuditLog.vue");
 const AcknowledgementComp=()=>import("./AcknowledgementComp.vue");
 const PreDefineForms=()=>import("./PreDefineForms.vue")
 const WorkOrder = ()=>import("./WorkOrder.vue")
+const PasswordPolicy=()=>import("./PasswordPolicy.vue");
 
 const EmailTemplate=()=>import("./EmailTemplate.vue");
 
@@ -131,6 +132,11 @@ const settingRoutes = [
         path: "emailtemplate",
         component: EmailTemplate,
         name: "emailtemplate",
+      },
+       {
+        path:"passwordpolicy",
+        component:PasswordPolicy,
+        name:"passwordpolicy",
       },
     ],
   },

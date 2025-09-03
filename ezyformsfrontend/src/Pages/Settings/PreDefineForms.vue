@@ -2,16 +2,15 @@
     <div>
         <div class="d-flex formsticky align-items-center justify-content-between py-2">
             <div>
-                <h1 class="m-0 font-13">Pre Defined Forms </h1>
+                <h1 class="m-0 font-13 py-2">Form Template</h1>
             </div>
 
         </div>
         <!-- v-if="tableForm" -->
         <div class="mt-2">
 
-            <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" actionType="dropdown"
-                enableDisable="true" @actionClicked="actionCreated" @toggle-click="toggleFunction"
-                isFiltersoption="true" :field-mapping="fieldMapping" :actions="actions"
+            <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" view="edit"
+                @cell-click="viewPreview" isFiltersoption="true" :field-mapping="fieldMapping" :actions="actions"
                 @updateFilters="inLineFiltersData" isCheckbox="true" />
             <!-- <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
                 @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" /> -->
@@ -48,6 +47,29 @@
             </div>
         </div>
 
+        <div class="modal fade" id="FormSetupModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Form Setup</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="text-center">
+                            Are you sure you want to set up the <strong>{{ formData.form_name }}</strong><br>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-dark" @click="SetupForm()">
+                            Yes, Proceed
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <FormPreview :blockArr="selectedForm" :formDescriptions="formDescriptions" :childHeaders="childtableHeaders" />
 
 
@@ -69,22 +91,25 @@ import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 
 const totalRecords = ref(0);
-const pdfPreview = ref('')
+const pdfPreview = ref('');
+const formData = ref("");
+const formCategory = ref([]);
+const accessibleDepartments = ref([]);
+const ownerForms = ref([])
 
 const formDescriptions = ref({})
 const tableData = ref([]);
 const route = useRoute();
+const newChngedValue = ref('')
+const router = useRouter();
+const selectedForm = ref(null);
+const childtableHeaders = ref([]);
+const actions = ref([]);
 const businessUnit = computed(() => {
     return EzyBusinessUnit.value;
 });
 const sections = reactive([]);
 
-
-onMounted(() => {
-    // fetchTable()
-    // fetchCategory()
-
-})
 
 const filterObj = ref({
     limit_start: 0,
@@ -97,7 +122,12 @@ const filterObj = ref({
     owner_of_the_form: "",
     search: "",
 });
-const newChngedValue = ref('')
+
+const tableheaders = ref([
+    { th: "Form name", td_key: "form_name" },
+    { th: "Installed", td_key: "installed" },
+]);
+
 watch(
     businessUnit,
     (newVal) => {
@@ -105,7 +135,6 @@ watch(
 
         if (newVal.length) {
             newChngedValue.value = newVal
-            // console.log(newVal, "new value of business unit");
             // localStorage.setItem("Bu", filterObj.value.business_unit)
             tableData.value = []
             fetchTable()
@@ -113,71 +142,47 @@ watch(
     },
     { immediate: true }
 );
-const tableheaders = ref([
-    { th: "Form name", td_key: "form_name" },
-    { th: "Installed", td_key: "installed" },
-    // { th: "Short Name", td_key: "form_short_name" },
-  
-    // { th: "Enable/Disable", td_key: "enable" },
 
-]);
+function viewPreview(rowData, rowIndex, type) {
+  formData.value = rowData;
 
-const router = useRouter();
+  if (type === 'edit' && formData.value.installed === 'No') {
+    const modal = new bootstrap.Modal(document.getElementById('FormSetupModal'), {});
+    modal.show();
+  }
 
-const selectedForm = ref(null);
-const actions = ref([
-    { name: 'Set up Form', icon: 'fa-solid fa-edit' },
-]);
-const childtableHeaders = ref([]);
-
-function actionCreated(rowData, actionEvent) {
-    // console.log(rowData, actionEvent,"ppp");
-    if (actionEvent.name === 'Set up Form') {
-            router.push({
-                name: "FormStepper",
-                query: {
-                    routepath: route.path,
-                    preId: 'PreDefine',
-                    business_unit: businessUnit.value,
-                    form_name: rowData.form_name,
-                    preName: rowData.name
-
-
-                },
-            });
-            localStorage.setItem("form_json", rowData.form_json)
-            localStorage.setItem("preName" , rowData.name)
-            localStorage.setItem("routepath", route.path)
-
-        
-    }
-
+  if (type === 'FormPreview') {
+    router.push({
+      name: "FormPreviewComp",
+      query: {
+        routepath: route.path,
+        form_short_name: rowData.form_name,
+        business_unit: businessUnit.value,
+      },
+    });
+  }
 }
 
-function toggleFunction(rowData, rowIndex, event) {
-    const isCurrentlyEnabled = rowData.enable == '1' || rowData.enable === 1;
-    const actionText = isCurrentlyEnabled ? 'Disable' : 'Enable';
 
-    if (confirm(`Are you sure you want to ${actionText} ${rowData.name} Form?`)) {
-        rowData.enable = isCurrentlyEnabled ? 0 : 1;
+function SetupForm() {
+    const modal = bootstrap.Modal.getInstance(document.getElementById('FormSetupModal'));
+    modal.hide();
 
-        axiosInstance
-            .put(`${apis.resource}${doctypes.EzyFormDefinitions}/${rowData.name}`, rowData)
-            .then((response) => {
-                toast.success(`Form ${actionText}d successfully`, { autoClose: 700 });
-                // setTimeout(() => {
-                //     fetchTable();
-                // }, 1000);
-                window.location.reload()
-            })
-            .catch((error) => {
-                console.error("Error updating toggle:", error);
-            });
-    }
-    // else {
-    //     console.log("Action cancelled. Toggle remains unchanged.");
-    // }
+    router.push({
+        name: "FormStepper",
+        query: {
+            routepath: route.path,
+            preId: 'PreDefine',
+            business_unit: businessUnit.value,
+            form_name: formData.value.form_name,
+            preName: formData.value.name
+        },
+    });
+    localStorage.setItem("form_json", formData.value.form_json)
+    localStorage.setItem("preName", formData.value.name)
+    localStorage.setItem("routepath", route.path)
 }
+
 
 function downloadPdf() {
 
@@ -206,27 +211,7 @@ function downloadPdf() {
         });
 }
 
-// Function to update the form status based on active/inactive
-function updateFormStatus(rowData, status) {
-    if (rowData) {
-        const formId = rowData.name;
-        const statusUpdate = { active: status };
 
-        axiosInstance.put(`${apis.resource}${doctypes.EzyFormDefinitions}/${formId}`, statusUpdate)
-            .then((res) => {
-
-                fetchTable();
-            })
-            .catch((error) => {
-                console.error("Error updating form status:", error);
-            });
-    }
-}
-
-const hideModal = () => {
-    const modal = bootstrap.Modal.getInstance(document.getElementById('formViewModal'));
-    modal.hide();
-};
 const timeout = ref(null);
 function inLineFiltersData(searchedData) {
     clearTimeout(timeout.value); // Clear previous timeout
@@ -246,8 +231,6 @@ function inLineFiltersData(searchedData) {
 }
 
 
-
-
 // Handle updating the current value
 const PaginationUpdateValue = (itemsPerPage) => {
     filterObj.value.limitPageLength = itemsPerPage;
@@ -263,57 +246,9 @@ const PaginationLimitStart = ([itemsPerPage, start]) => {
 
 };
 
-// async function fetchCategory() {
-//     try {
-//         // Fetch all department names
-//         const queryParams = { fields: JSON.stringify(["name"]) };
-//         const response = await axiosInstance.get(`${apis.resource}${doctypes.departments}`, { params: queryParams });
-
-//         if (response.data) {
-//             const departments = response.data;
-
-//             // Fetch full details of each department (including child table)
-//             const departmentDetailsPromises = departments.map(department =>
-//                 axiosInstance.get(`${apis.resource}${doctypes.departments}/${department.name}`)
-//             );
-
-//             // Resolve all department requests
-//             const detailedResponses = await Promise.all(departmentDetailsPromises);
-//             const detailedDepartments = detailedResponses.map(res => res.data);
-
-//             // Extract all category names from child tables
-//             const allCategories = [];
-//             detailedDepartments.forEach(department => {
-
-//                 if (department.ezy_departments_items) {
-//                     department.ezy_departments_items.forEach(child => {
-//                         if (child.category) {
-//                             allCategories.push(child.category);
-//                         }
-//                     });
-//                 } else {
-//                     console.log("No child table found for:", department.name);
-//                 }
-//             });
-
-
-//             // Remove duplicates and store in options
-//             fieldMapping.value.form_category.options = [...new Set(allCategories)];
-//             // console.log(fieldMapping.value.form_category.options, "======== Categories");
-//         }
-//     } catch (error) {
-//         console.error("Error fetching categories:", error);
-//     }
-// }
-
-
-
-const formCategory = ref([]);
-const accessibleDepartments = ref([]);
-const ownerForms = ref([])
 function fetchTable(data) {
     const filters = [
-       
+
     ];
     if (data) {
         filters.push(...data)
@@ -321,11 +256,12 @@ function fetchTable(data) {
 
 
     const queryParams = {
-        fields: JSON.stringify(["*"]),
+        fields: JSON.stringify(["form_name", "installed","form_json","name"]),
         filters: JSON.stringify(filters),
-        limit_page_length: 5,
+        limit_page_length: "None",
         limit_start: filterObj.value.limit_start,
-        
+        order_by: "`installed` DESC",
+
     };
     const queryParamsCount = {
         fields: JSON.stringify(["count(name) AS total_count"]),
@@ -349,7 +285,6 @@ function fetchTable(data) {
             if (filterObj.value.limit_start === 0) {
                 tableData.value = newData;
                 formCategory.value = [...new Set(newData.map((formCategory) => formCategory.form_category))];
-
                 ownerForms.value = [...new Set(newData.map((ownerForms) => ownerForms.owner_of_the_form))]
             } else {
                 tableData.value = tableData.value.concat(newData);
@@ -362,9 +297,7 @@ function fetchTable(data) {
 
 const fieldMapping = computed(() => ({
     form_name: { type: "input" },
-    form_short_name: { type: "input" },
-    form_category: { type: "input" },
-    owner_of_the_form: { type: "input" }
+    installed: { type: "input" },
 }));
 
 </script>

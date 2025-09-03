@@ -299,7 +299,7 @@ function inLineFiltersData(searchedData) {
 
 function fetchTable(data) {
     const filters = [
-        ["business_unit", "like", `%${filterObj.value.business_unit}%`],
+        ["business_unit", "=", `${filterObj.value.business_unit}`],
         ["enable", "=", 0]
     ];
     if (data) {

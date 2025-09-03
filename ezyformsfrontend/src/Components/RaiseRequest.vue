@@ -51,7 +51,7 @@
             </div>
           </div>
           <RequestPreview :blockArr="blockArr" :formName="selectedData.selectedform" :tableHeaders="tableHeaders"  ref="childRef"
-            :linked_id="linkedId" :LinkedChildTableData="LinkedChildTableData" @updateField="handleFieldUpdate"
+            :linked_id="linkedId" :LinkedChildTableData="LinkedChildTableData" @updateField="handleFieldUpdate" @updateRemovedFiles="handleRemovedFiles"
             :tableRowsdata="tableRows" @formValidation="isFormValid = $event" @updateTableData="handleTableData" />
           <!-- @formValidation="isFormValid = $event" -->
 
@@ -106,7 +106,7 @@
         <!-- @formValidation="isFormValid = $event" -->
         <div class="raiserequestBtnDiv">
           <div class="d-flex justify-content-end align-items-center gap-2 p-3">
-            <button class="btn btn-white font-13" @click="clearFrom">
+            <button v-if="!selectedData.selectedFormId" class="btn btn-white font-13" @click="clearFrom">
               <span> <i class="bi bi-x"></i></span>Clear form
             </button>
             <!-- :disabled="!isFormValid" -->
@@ -140,12 +140,12 @@
       </div>
     </div>
     <!-- :class="{'z-1':saveloading}" -->
-    <div class="modal fade " id="ExportEmployeeModal" tabindex="-1" aria-hidden="true" >
+    <div class="modal fade " id="ExportEmployeeModal" data-bs-backdrop="static"  tabindex="-1" aria-hidden="true" >
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">Acknowledgement</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" class="btn-close" @click="acknowledge=''" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
             <input type="checkbox" v-model="acknowledge" id="Acknowledgement" value="Acknowledgement" class="me-2 mt-1 form-check-input Acknowledgement-check " />
@@ -155,17 +155,17 @@
             </label>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary font-12" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" @click="acknowledge=''" class="btn btn-outline-secondary font-12" data-bs-dismiss="modal">Cancel</button>
            <button
-  type="button"
-  class="btn btn-dark"
-  style="min-width: 120px;"  
-  :disabled="!acknowledge || saveloading"
-  @click="raiseRequestSubmission"
->
-  <span v-if="saveloading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-  <span v-else class="font-12 fw-bold">Yes, Proceed</span>
-</button>
+              type="button"
+              class="btn btn-dark"
+              style="min-width: 120px;"  
+              :disabled="!acknowledge || saveloading"
+              @click="raiseRequestSubmission"
+            >
+              <span v-if="saveloading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              <span v-else class="font-12 fw-bold">Yes, Proceed</span>
+            </button>
 
           </div>
         </div>
@@ -423,6 +423,10 @@ function updateChildRecords(childTables, child_id_name) {
     });
 }
 
+function handleTableData(data) {
+  childtablesData.value = data;
+  // console.log('Updated Table Data:', childtablesData.value);
+}
 
 // function EditRequestUpdate() {
 //   const validTables = tableName.value.filter((table) => {
@@ -496,7 +500,7 @@ function EditRequestUpdate() {
   }
 
   // Dynamically include all child tables
-  for (const [childTableKey, childRows] of Object.entries(tableRows.value)) {
+  for (const [childTableKey, childRows] of Object.entries(childtablesData.value)) {
     if (Array.isArray(childRows) && childRows.length) {
       form[childTableKey] = childRows.map(row => ({ ...row }));
     }
@@ -505,17 +509,26 @@ function EditRequestUpdate() {
   const data_obj = {
     form_id: route.query.selectedFormId,
     updated_fields: form,
+    document_type :route.query.selectedForm,
+    property: business_unit.value,
     //  status: route.query.selectedFormStatus === 'Request Cancelled' ? 'Request Raised' : null,
     // current_level:route.query.selectedFormStatus === 'Request Cancelled' ? 1 : null
   };
+  // console.log(data_obj, "data_obj for EditRequestUpdate");
   axiosInstance.post(apis.edit_form_before_approve, data_obj).then((resp) => {
-    if (resp?.message?.success) {
-      toast.success("Request Raised", {
+    if (resp?.message?.success === true) {
+    // console.log(resp, "EditRequestUpdate response");
+      toast.success(resp.message.message, {
         autoClose: 2000,
         transition: "zoom",
         onClose: () => {
           router.push({ path: "/todo/raisedbyme" });
         },
+      });
+    }else {
+      toast.error(resp.message.message || "Failed to update request", {
+        autoClose: 2000,
+        transition: "zoom",
       });
     }
   });
@@ -566,7 +579,7 @@ function clearFrom() {
 
 }
 function deptData(value = null) {
-  const filters = [["business_unit", "like", `%${business_unit.value}%`]];
+  const filters = [["business_unit", "=", `${business_unit.value}`]];
   const queryParams = {
     fields: JSON.stringify(["*"]),
     filters: JSON.stringify(filters),
@@ -694,10 +707,28 @@ function formDefinations() {
       childTableName.value = tableName.value[0]?.options.replace(/_/g, " ");
 
       // console.log(childTableName.value, "child====");
+// const lowerCaseChildTableFields = {};
+// for (const key in parsedFormJson.child_table_fields) {
+//   lowerCaseChildTableFields[key] = parsedFormJson.child_table_fields[key].map((field) => ({
+//     ...field,
+//     label: field.label?.toLowerCase() || "",
+//   }));
+// }
 
-      tableHeaders.value = parsedFormJson.child_table_fields;
+// tableHeaders.value = lowerCaseChildTableFields;
+const originalChildTableFields = parsedFormJson.child_table_fields;
+const transformedChildTableFields = {};
+
+for (const key in originalChildTableFields) {
+  const lowerKey = key.toLowerCase();
+  transformedChildTableFields[lowerKey] = originalChildTableFields[key];
+}
+
+tableHeaders.value = transformedChildTableFields;
+
+      // tableHeaders.value = parsedFormJson.child_table_fields; 
       initializeTableRows();
-      // console.log(tableHeaders.value, "table fields");
+      // console.log(tableHeaders.value, "table fields"); 
     })
     .catch((error) => {
       console.error("Error fetching ezyForms data:", error);
@@ -812,12 +843,14 @@ const handleFieldUpdate = (field) => {
   }
 };
 
+const removeAttachFiles = ref([])
 
-
-function handleTableData(data) {
-  childtablesData.value = data;
-  // console.log('Updated Table Data:', childtablesData.value);
+const handleRemovedFiles = (removedFiles) => {
+  removeAttachFiles.value = removedFiles;
 }
+
+
+
 
 const ChildTableData = async () => {
   const childEntries = Object.entries(childtablesData.value);
@@ -872,7 +905,14 @@ function toRaiseReqBtn() {
   const modal = new bootstrap.Modal(document.getElementById('ExportEmployeeModal'));
   modal.show();
 }
-
+// function acknowledgeCancel() {
+//   acknowledge.value = false
+//   saveloading.value = false
+//   const modal = bootstrap.Modal.getInstance(document.getElementById('ExportEmployeeModal'));
+//   if (modal) {
+//     modal.hide();
+//   }
+// }
 
 
 async function raiseRequestSubmission() {
@@ -917,8 +957,6 @@ async function raiseRequestSubmission() {
   if (linkedId.value) {
     form.returnable_gate_pass_id = linkedId.value;
   }
-
-  // console.log(form, "✅ Final Form Data to Submit");
 
   const formData = new FormData();
   formData.append("doc", JSON.stringify(form));
@@ -1298,9 +1336,15 @@ function request_raising_fn(item) {
     property: business_unit.value,
     ip_address: ip_address.value,
     employee_id: employeeData.value.emp_code,
-    // be_half_of:item.requester_name,
-    // request_for:item.request_for,
+    be_half_of: item.request_for === 'Others' ? item.employee_name : '',
+    request_for:item.request_for,
+    unwanted_files: removeAttachFiles.value
   };
+  // if(item.request_for === 'Others'){
+  //   be_half_of:item.employee_name,
+  // }
+
+
   axiosInstance.post(apis.raising_request, data_obj).then((resp) => {
     if (resp?.message?.success === true) {
       if(selectedData.value.main_form_Id){
@@ -1312,7 +1356,7 @@ function request_raising_fn(item) {
       modal.hide();
       // saveloading.value = false;
 
-      toast.success("Request Raised", {
+      toast.success(resp?.message?.message, {
         autoClose: 1000,
         transition: "zoom",
         onClose: () => {

@@ -2,9 +2,13 @@
   <div class="tabs-div">
     <ul class="tab-list m-0 p-0">
       <li v-for="(tab, index) in tabs" :key="index" class="tab-item">
-        <router-link :to="tab.route" :class="['tab-link', isActiveTab(tab) ? 'active-link' : '']"
-          @click="passActiveTab(tab.name)">
-          <i :class="tab.icon"></i> {{ tab.name }}
+        <router-link
+          :to="tab.route"
+          :class="['tab-link', isActiveTab(tab) ? 'active-link' : '']"
+          @click="passActiveTab(tab.name)"
+        >
+          <i :class="tab.icon"></i>
+          <span class=" ms-1">{{ tab.name }}</span>
         </router-link>
       </li>
     </ul>
@@ -30,116 +34,87 @@ function passActiveTab(tab) {
 }
 
 function isActiveTab(tab) {
-  // Check for `Forms` tab and any route that starts with `/forms/department/`
-  if (tab.name === 'Forms') {
-    return route.path.startsWith('/forms/department/');
+  if (tab.name === "Forms") {
+    return route.path.startsWith("/forms/department/");
   }
-
-  // For all other tabs, check if the current route path starts with the tab route
   return route.path.startsWith(tab.route);
 }
 </script>
 
-
-
-
-
 <style scoped>
-a {
-  font-size: 13px;
-  color: var(--text-color);
-  font-weight: var(--font-weight-normal);
-  /* Default font weight */
-  cursor: pointer;
-  transition: all 0.1s ease-in-out;
-  position: relative;
-  display: flex;
-  align-items: center;
-  padding-bottom: 8px;
-  text-decoration: none;
-}
-
-.active-link>a {
-  background-color: var(--white-color);
-  color: var(--text-color);
-  font-size: var(--thirteen);
-  font-weight: var(--font-weight-normal);
-  border-bottom: 2px solid red;
-  padding: 5px 0px;
-  margin-top: 8px;
-
-
-}
-
-
-ul {
+/* Tab list container */
+ul.tab-list {
   display: flex;
   align-items: center;
   gap: 25px;
   list-style: none;
+  padding: 0;
+  margin: 0;
+  overflow-x: auto; /* allow horizontal scroll if many tabs */
 }
 
-li {
+/* Each tab */
+li.tab-item {
+  display: flex;
+  align-items: center;
+  text-align: center;
+}
+
+/* Tab link */
+.tab-link {
   font-size: 13px;
   color: var(--text-color);
   font-weight: var(--font-weight-normal);
-  /* Default font weight */
   cursor: pointer;
-  transition: all 0.1s ease-in-out;
+  transition: all 0.2s ease-in-out;
   position: relative;
   display: flex;
   align-items: center;
-  padding-bottom: 8px;
+  justify-content: center;
+  padding: 5px 0;
+  text-decoration: none;
+  white-space: nowrap;
 }
 
-li i {
-  margin-right: 8px;
-  /* Space between icon and text */
-}
-
-/* Active state for the tab */
-/* li.active {
-  color: var(--text-color);
-  font-weight: var(--font-weight-medium);
- 
-  border-bottom: 3px solid var(--text-color);
-
-} */
-
-/* Transition for the bottom border */
-li::after {
-  content: "";
-  width: 100%;
-  position: absolute;
-  height: 2px;
-  /* Default height */
-  bottom: 3px;
-  background: transparent;
-  left: 0;
-  transition: all 0.2s ease-in-out;
-}
-
-li.active::after {
-  content: "";
-  width: 100%;
-  position: absolute;
-  height: 4px;
-  bottom: 0;
-  color: var(--text-color);
-  font-weight: var(--font-weight-medium);
-  border-bottom: 3px solid var(--text-color);
-
-}
-
-ul li a.active-link {
-  border-bottom: 3px solid var(--text-color);
-  padding-bottom: 5px;
+/* Active tab */
+.tab-link.active-link {
   font-weight: 600;
-  
+  border-bottom: 3px solid var(--text-color);
+  color: var(--text-color);
 }
 
-ul li a.active-link i {
+.tab-link.active-link i {
   font-weight: 900;
   color: black;
 }
+
+/* Icon spacing */
+li i {
+  margin-right: 8px;
+}
+
+/* === Mobile-specific styles === */
+@media (max-width: 767px) {
+  ul.tab-list {
+    gap: 0;
+    padding: 0 10px; /* Add starting and ending padding */
+  }
+  li.tab-item {
+    flex: 1; /* each tab takes equal width */
+  }
+  li i {
+    margin: 0;
+  }
+  .tab-link {
+    flex-direction: column; /* icon on top */
+    padding: 10px;
+    margin-bottom: 5px;
+  }
+  .tab-link span {
+    /* display: none;  */
+    font-size: 11px;
+  }
+  
+}
+
 </style>

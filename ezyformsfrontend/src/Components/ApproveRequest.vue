@@ -2,10 +2,20 @@
   <div class="position-relative">
     <div class=" back-to-same">
 
-      <div class="container-fluid  p-0">
-        <div class="backtofromPage asset_request px-2 py-2">
-          <router-link :to="backTo" class="text-decoration-none text-dark font-13"><span> <i
-                class="bi bi-arrow-left px-2"></i></span>Back</router-link>
+      <div class="container-fluid   p-0 py-1">
+        <div class="d-flex justify-content-between asset_request">
+
+          <div class="backtofromPage  px-2 py-2">
+            <router-link :to="backTo" class="text-decoration-none text-dark font-13"><span> <i
+                  class="bi bi-arrow-left px-2"></i></span>Back</router-link>
+          </div>
+          <div>
+            <button class="btn btn-light font-12  me-2 d-xl-none " type="button"
+              data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight"><i
+                class="bi bi-clock font-14"></i> Activity</button>
+
+
+          </div>
         </div>
       </div>
     </div>
@@ -13,14 +23,14 @@
 
     <div class="approve_height">
       <div class="container-fluid">
-        <div class="row">
-          <div class="col-3"></div>
-          <div class="col-6">
+        <div class="row justify-content-center">
+          <div class="col-lg-3 d-none d-xl-block"></div>
+          <div class="col-md-12 col-xl-6 col-sm-12 ">
             <div class="mt-1">
               <div class="text-center">
                 <div class="card border-0 shadow-none">
                   <div class="card-body pb-2 d-flex gap-2 align-items-center justify-content-center">
-                    <h5 class="card-title">{{ selectedData.doctype_name }}</h5>
+                    <h5 class="card-title responsive-title">{{ selectedData.doctype_name }}</h5>
                     <div class="d-flex align-items-baseline gap-2 ps-1 ">
                       <span v-if="tableData?.status !== 'Completed' && tableData.status !== 'Request Cancelled'"
                         class="text-warning font-11 text-nowrap fw-bold">
@@ -46,15 +56,13 @@
 
                   <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel"
                     @updateTableData="approvalChildData" :childData="responseData" :readonly-for="selectedData.readOnly"
-                    :childHeaders="tableHeaders" :employee-data="employeeData" @updateField="updateFormData" />
-
+                    :childHeaders="tableHeaders" :employee-data="employeeData" @updateField="updateFormData"  />
+                    <!-- @attachmentsReady="attachmentsReady = $event" -->
                 </div>
 
-                <div
-                      v-if="selectedData?.type === 'myforms' &&
-                            (tableData?.status === 'Request Raised' || tableData?.status === 'Request Cancelled') &&
-                            selectedData?.type !== 'myapprovals'"
-                      class="d-flex justify-content-end approveBtns">
+                <div v-if="selectedData?.type === 'myforms' &&
+                  (tableData?.status === 'Request Raised' || tableData?.status === 'Request Cancelled') &&
+                  selectedData?.type !== 'myapprovals'" class="d-flex justify-content-end p-4 approveBtns">
 
                   <button type="submit" class="btn Edit_btn" @click.prevent="EditformSubmission()">
                     <span v-if="loading" class="spinner-border spinner-border-sm" role="status"
@@ -67,29 +75,28 @@
                 <div v-if="selectedData.type === 'mytasks'" class="">
 
                   <!-- v-if="!requestcancelled" -->
-                  <div class="approveBtns pb-2 mb-2 mt-3 flex-column px-0 pe-4">
-                    <div v-if="!canApprove & view_only_reportee === 1" class=" d-flex align-items-center gap-1">
+                  <div class="approveBtns pb-2 mb-2 mt-3 flex-column ">
+                    <!-- <div v-if="!canApprove & view_only_reportee === 1" class=" d-flex align-items-center gap-1">
 
                       <span class=" font-12 text-danger">
                         Note:
                       </span>
                       <span class=" fw-bold font-12">You don’t have permission to
                         Approve</span>
-                    </div>
+                    </div> -->
 
                     <div class="form-floating mb-2 p-1">
                       <!-- :disabled="view_only_reportee === 1" -->
-                      <textarea :disabled="!canApprove & view_only_reportee === 1" class="form-control font-12"
-                        placeholder="Leave a comment here" id="floatingTextarea" @input="resetCommentsValidation"
-                        :class="{ 'is-invalid': !isCommentsValid }" v-model="ApproverReason"></textarea>
+                      <textarea class="form-control font-12" placeholder="Leave a comment here" id="floatingTextarea"
+                        @input="resetCommentsValidation" :class="{ 'is-invalid': !isCommentsValid }"
+                        v-model="ApproverReason"></textarea>
                       <label class="font-11" for="floatingTextarea">Comments..</label>
                       <span v-if="!isCommentsValid" class="font-11 text-danger ps-1">Please enter comments**</span>
                     </div>
                     <div class=" d-flex justify-content-between ">
                       <div>
-                        <button :disabled="rejectLoad || (!canApprove & view_only_reportee === 1)"
-                          class="btn btn-outline-danger font-10 py-0 rejectbtn" type="button"
-                          @click="ApproverCancelSubmission(formData, 'Reject')">
+                        <button :disabled="rejectLoad" class="btn btn-outline-danger font-10 py-0 rejectbtn"
+                          type="button" @click="ApproverCancelSubmission(formData, 'Reject')">
                           <span v-if="rejectLoad" class="spinner-border spinner-border-sm" role="status"
                             aria-hidden="true"></span>
                           <span v-if="!rejectLoad"><i class="bi bi-x-lg fw-bolder font-12 me-2"></i><span
@@ -112,9 +119,9 @@
 
                         </div> -->
                         <div>
-                          <button :disabled="loading || (!canApprove & view_only_reportee === 1)" type="submit"
-                            class="btn btn-success approvebtn"
+                          <button :disabled="loading"  type="submit" class="btn btn-success approvebtn"
                             @click.prevent="ApproverFormSubmission(emittedFormData, 'Approve')">
+                            <!-- @click.prevent="handleApprove" -->
                             <span v-if="loading" class="spinner-border spinner-border-sm" role="status"
                               aria-hidden="true"></span>
                             <span v-if="!loading"><i class="bi bi-check-lg font-15 me-2"></i><span
@@ -130,8 +137,8 @@
               </div>
             </div>
           </div>
-          <div class="col-3">
-            <div class="activity-log-container px-4 ">
+          <div class="col-lg-3 d-none d-lg-block">
+            <div class="activity-log-container px-1">
               <!-- <div class=" w-100  mb-2">
               <div class=" py-2 px-3">
 
@@ -182,9 +189,10 @@
 
 
                 </div> -->
+
                 <div class="col-xl-12 col-lg-12 col-md-12">
                   <div class=" d-flex justify-content-between gap-2">
-                    
+
                     <div>
                       <button v-if="(selectedData.type === 'myforms' || selectedData.type === 'myteam' || selectedData.type === 'myapprovals' || selectedData.type === 'linkedForm') &&
                         linked_status !== 'Completed' &&
@@ -192,22 +200,73 @@
                         tableData?.is_linked_form &&
 
                         Object.keys(tableData.is_linked_form).length > 0" type="button"
-                        class="btn btn-light font-14 nowrap h-auto fw-bold border border-dark CreateDepartments"
+                        class="btn btn-light font-14 nowrap h-auto fw-bold border border-dark text-nowrap CreateDepartments"
                         data-bs-target="#pdfView" @click="toLinkedForm">
-                        Raise Inbound <i class="bi bi-arrow-right px-2"></i>
+                        Raise Inbound
+
+                        <i class="bi bi-arrow-right px-2"></i>
                       </button>
 
 
 
                     </div>
-                    <div>
+                    <!-- Case 1: Both PDF + Workorder available -->
+                    <div v-if="((tableData.status === 'Completed' && linked_status !== 'Completed') || linked_status === 'Completed')
+                      && doctypeForm.work_order == 1" class="dropdown">
+                      <button class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto dropdown-toggle"
+                        type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-download px-2 fw-bold"></i> Download
+                      </button>
+
+                      <ul class="dropdown-menu font-12">
+                        <li>
+                          <a class="dropdown-item" href="javascript:void(0)" @click="downloadPdf">
+                            <i class="bi bi-file-earmark-pdf me-2"></i> Download File
+                          </a>
+                        </li>
+                        <li>
+                          <a class="dropdown-item" href="javascript:void(0)" @click="DownloadWorkorder">
+                            <i class="bi bi-file-earmark-text me-2"></i> Download Workorder
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <!-- Case 2: Only PDF -->
+                    <button
+                      v-else-if="(tableData.status === 'Completed' && linked_status !== 'Completed') || linked_status === 'Completed'"
+                      class="btn btn-light font-14 fw-bold h-0 text-nowrap border border-dark h-auto" type="button"
+                      @click="downloadPdf">
+                      <i class="bi bi-download px-2 fw-bold"></i> Download
+                    </button>
+
+
+
+
+
+                    <!-- <div>
                       <button
                         v-if="tableData.status === 'Completed' && linked_status !== 'Completed' || linked_status === 'Completed'"
                         class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto " type="button"
                         @click="downloadPdf"><i class="bi bi-download px-2 fw-bold"></i>Download
                       </button>
-                    </div>
-                    <!-- <button type="button" class="btn btn-outline-light font-12  CreateDepartments "
+                    <button v-if="doctypeForm.work_order == 1" type="button" data-bs-toggle="modal"
+                      data-bs-target="#pdfView"
+                      class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto "
+                      @click="DownloadWorkorder">
+                      Download Workorder
+                    </button>
+                    </div> -->
+                    <!-- data-bs-toggle="modal"
+                      data-bs-target="#pdfView" -->
+                    <!-- <button v-if="doctypeForm.work_order == 1" type="button" data-bs-toggle="modal"
+                      data-bs-target="#pdfView"
+                      class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto "
+                      @click="DownloadWorkorder">
+                      Download Workorder
+                    </button>  -->
+
+                    <!-- <button type="button" class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto "
                       data-bs-toggle="modal" data-bs-target="#pdfView" @click="viewasPdfView">
                       Preview
                     </button> -->
@@ -241,11 +300,13 @@
                       : 'activityRedDot'"></div>
                     <div class="activity-log-content">
                       <p class="font-12 mb-1">
+
                         <span class="strong-content">{{ formatAction(item.action) }} on </span>
-                        <span class="strong-content">{{ formatCreation(item.creation) }}</span><br />
+                        <span class="strong-content">{{ formatCreation(item.time) }}</span><br />
                         <span class="strong-content">{{ item.user_name }}</span><br />
                         <span>{{ item.role }}</span><br />
                         <span class="font-12 text-secondary">{{ item.reason || "N/A" }}</span>.
+
                       </p>
                     </div>
                   </div>
@@ -286,83 +347,6 @@
               </div>
 
               <!-- Modal -->
-              <div class="modal fade" id="listofLinkedForms" tabindex="-1" aria-labelledby="exampleModalLabel"
-                aria-hidden="true">
-                <div class="modal-dialog modal-lg">
-                  <div class="modal-content">
-                    <div class="modal-header py-2">
-                      <h5 class="modal-title font-14">Linked Form Details</h5>
-                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body linkedformspreview p-4">
-                      <!-- Show key-value -->
-                      <!-- <table class="table table-bordered table-sm">
-                        <tbody>
-                          <tr v-for="(item, index) in normalFields" :key="index">
-                            <th class="font-12 text-nowrap">
-                              {{ formatKey(item.key) }}
-                            </th>
-                            <td class="font-12">{{ item.value }}</td>
-                          </tr>
-                        </tbody>
-                      </table> -->
-                      <div class="row">
-                        <div class=" col-md-12">
-                          <div class="row">
-                            <div class="col-md-6 mb-2 " v-for="(item, index) in normalFields" :key="index">
-                              <label class="fw-bold font-12">{{ formatKey(item.key) }}</label>
-                              <p class="font-12 mb-2">{{ item.value }}</p>
-                            </div>
-                          </div>
-                        </div>
-                        <!-- <div class=" col-md-6 ">
-                          <div v-for="(item, index) in linkedActivity" :key="index" class="activity-log-item"
-                            :class="{ 'last-item': index === linkedActivity.length - 1 }">
-                            <div :class="item.action === 'Approved' || item.action === 'Request Raised' || item.action === '' || item.action === 'Completed'
-                              ? 'activity-log-dot'
-                              : 'activityRedDot'"></div>
-                            <div class="activity-log-content">
-                              <p class="font-12 mb-1">
-                                <span class="strong-content">{{ formatAction(item.action) }} on </span>
-                                <span class="strong-content">{{ formatCreation(item.creation) }}</span><br />
-                                <span class="strong-content">{{ item.user_name }}</span><br />
-                                <span>{{ item.role }}</span><br />
-                                <span class="font-12 text-secondary">{{ item.reason || "N/A" }}</span>.
-                              </p>
-                            </div>
-                          </div>
-                        </div> -->
-                      </div>
-
-
-
-                      <!-- 🔥 Array Fields -->
-                      <div v-for="(arrayItem, key) in arrayFields" :key="key" class="mb-3 overflow-auto">
-                        <strong class="font-12">{{ formatKey(key) }}</strong>
-                        <table class="table table-bordered table-sm">
-                          <thead class="table-light">
-                            <tr>
-                              <th v-for="header in getFilteredKeys(arrayItem)" :key="header" class="font-12">
-                                {{ formatKey(header) }}
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            <tr v-for="(row, rowIndex) in arrayItem" :key="rowIndex">
-                              <td v-for="header in getFilteredKeys(arrayItem)" :key="header" class="font-12">
-                                {{ row[header] }}
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-
-
-
-                    </div>
-                  </div>
-                </div>
-              </div>
 
 
             </div>
@@ -409,13 +393,386 @@
         </div>
       </div>
     </div>
+    <div class="modal fade" id="listofLinkedForms" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header py-2">
+            <h5 class="modal-title font-14">Linked Form Details</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body linkedformspreview p-4">
+            <!-- Show key-value -->
+            <!-- <table class="table table-bordered table-sm">
+                        <tbody>
+                          <tr v-for="(item, index) in normalFields" :key="index">
+                            <th class="font-12 text-nowrap">
+                              {{ formatKey(item.key) }}
+                            </th>
+                            <td class="font-12">{{ item.value }}</td>
+                          </tr>
+                        </tbody>
+                      </table> -->
+            <div class="row">
+              <div class=" col-md-12">
+                <div class="row">
+                  <div class="col-md-6 mb-2 " v-for="(item, index) in normalFields" :key="index">
+                    <label class="fw-bold font-12">{{ formatKey(item.key) }}</label>
+                    <p class="font-12 mb-2">{{ item.value }}</p>
+                  </div>
+                </div>
+              </div>
+              <!-- <div class=" col-md-6 ">
+                          <div v-for="(item, index) in linkedActivity" :key="index" class="activity-log-item"
+                            :class="{ 'last-item': index === linkedActivity.length - 1 }">
+                            <div :class="item.action === 'Approved' || item.action === 'Request Raised' || item.action === '' || item.action === 'Completed'
+                              ? 'activity-log-dot'
+                              : 'activityRedDot'"></div>
+                            <div class="activity-log-content">
+                              <p class="font-12 mb-1">
+                                <span class="strong-content">{{ formatAction(item.action) }} on </span>
+                                <span class="strong-content">{{ formatCreation(item.creation) }}</span><br />
+                                <span class="strong-content">{{ item.user_name }}</span><br />
+                                <span>{{ item.role }}</span><br />
+                                <span class="font-12 text-secondary">{{ item.reason || "N/A" }}</span>.
+                              </p>
+                            </div>
+                          </div>
+                        </div> -->
+            </div>
+
+
+
+            <!--  Array Fields -->
+            <div v-for="(arrayItem, key) in arrayFields" :key="key" class="mb-3 overflow-auto">
+              <strong class="font-12">{{ formatKey(key) }}</strong>
+              <table class="table table-bordered table-sm">
+                <thead class="table-light">
+                  <tr>
+                    <th v-for="header in getFilteredKeys(arrayItem)" :key="header" class="font-12">
+                      {{ formatKey(header) }}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(row, rowIndex) in arrayItem" :key="rowIndex">
+                    <td v-for="header in getFilteredKeys(arrayItem)" :key="header" class="font-12">
+                      {{ row[header] }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+      <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasRightLabel">Activity Log</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">
+        <div class="activity-log-container mt-0 px-1">
+          <!-- <div class=" w-100  mb-2">
+              <div class=" py-2 px-3">
+
+                <h5 class="font-13 fw-bold">{{ selectedData.doctype_name }} form approval</h5>
+              </div>
+              <div class="py-2 px-3">
+                <span class="text-warning font-12  fw-bold">
+                  Pending ({{ tableData.current_level }} /
+                  {{ tableData.total_levels }})</span>
+              </div>
+            </div> -->
+          <!-- <div class="mt-5 mb-3 pt-2 d-flex justify-content-between align-items-center">
+              <h6 class="font-14 ps-3  mb-0">Activity log <span
+                  v-if="tableData?.status !== 'Completed' && tableData.status !== 'Request Cancelled'"
+                  class="text-warning font-12  fw-bold">
+                  Pending ({{ tableData.current_level }} /
+                  {{ tableData?.total_levels }})</span>
+                <span class=" font-11 status_completed" v-if="tableData?.status === 'Completed'">
+                  Completed
+                </span>
+                <span class=" font-11 requestRejected" v-if="tableData?.status === 'Request Cancelled'">
+                  Request Rejected
+                </span>
+              </h6>
+              <button v-if="tableData.status === 'Completed'"
+                class="btn btn-light font-12 fw-bold text-decoration-underline" type="button" @click="downloadPdf"><i
+                  class="bi bi-arrow-down-circle fw-bold px-1"></i>Download
+                PDF</button>
+            </div> -->
+          <div class="row mb-3">
+            <!-- <div class="col-xl-3 col-lg-12 col-md-12">
+                  <div class="d-flex  align-items-baseline  mt-2">
+                   
+                    <div class="d-flex align-items-baseline gap-2 ps-1 ">
+                      <span v-if="tableData?.status !== 'Completed' && tableData.status !== 'Request Cancelled'"
+                        class="text-warning font-11 text-nowrap fw-bold">
+                        Pending ({{ tableData.current_level }} /
+                        {{ tableData?.total_levels }})</span>
+                      <span class=" font-11 status_completed text-nowrap" v-if="tableData?.status === 'Completed'">
+                        Approved
+                      </span>
+                      <span class=" font-11 requestRejected text-nowrap"
+                        v-if="tableData?.status === 'Request Cancelled'">
+                        Request Rejected
+                      </span>
+                    </div>
+                  </div>
+
+
+                </div> -->
+
+            <div class="col-xl-12 col-lg-12 col-md-12">
+              <div class=" d-flex justify-content-between gap-2">
+
+                <div>
+                  <button v-if="(selectedData.type === 'myforms' || selectedData.type === 'myteam' || selectedData.type === 'myapprovals' || selectedData.type === 'linkedForm') &&
+                    linked_status !== 'Completed' &&
+                    tableData?.status === 'Completed' &&
+                    tableData?.is_linked_form &&
+
+                    Object.keys(tableData.is_linked_form).length > 0" type="button"
+                    class="btn btn-light font-14 nowrap h-auto fw-bold border border-dark CreateDepartments"
+                    data-bs-target="#pdfView" @click="toLinkedForm">
+                    Raise Inbound <i class="bi bi-arrow-right px-2"></i>
+                  </button>
+
+
+
+                </div>
+                <!-- Case 1: Both PDF + Workorder available -->
+                <div v-if="((tableData.status === 'Completed' && linked_status !== 'Completed') || linked_status === 'Completed')
+                  && doctypeForm.work_order == 1" class="dropdown">
+                  <button class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto dropdown-toggle"
+                    type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-download px-2 fw-bold"></i> Download
+                  </button>
+
+                  <ul class="dropdown-menu font-12">
+                    <li>
+                      <a class="dropdown-item" href="javascript:void(0)" @click="downloadPdf">
+                        <i class="bi bi-file-earmark-pdf me-2"></i> Download PDF
+                      </a>
+                    </li>
+                    <li>
+                      <a class="dropdown-item" href="javascript:void(0)" @click="DownloadWorkorder">
+                        <i class="bi bi-file-earmark-text me-2"></i> Download Workorder
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+
+                <!-- Case 2: Only PDF -->
+                <button
+                  v-else-if="(tableData.status === 'Completed' && linked_status !== 'Completed') || linked_status === 'Completed'"
+                  class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto" type="button"
+                  @click="downloadPdf">
+                  <i class="bi bi-download px-2 fw-bold"></i> Download
+                </button>
+
+
+
+
+
+                <!-- <div>
+                      <button
+                        v-if="tableData.status === 'Completed' && linked_status !== 'Completed' || linked_status === 'Completed'"
+                        class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto " type="button"
+                        @click="downloadPdf"><i class="bi bi-download px-2 fw-bold"></i>Download
+                      </button>
+                    <button v-if="doctypeForm.work_order == 1" type="button" data-bs-toggle="modal"
+                      data-bs-target="#pdfView"
+                      class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto "
+                      @click="DownloadWorkorder">
+                      Download Workorder
+                    </button>
+                    </div> -->
+                <!-- data-bs-toggle="modal"
+                      data-bs-target="#pdfView" -->
+                <!-- <button v-if="doctypeForm.work_order == 1" type="button" data-bs-toggle="modal"
+                      data-bs-target="#pdfView"
+                      class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto "
+                      @click="DownloadWorkorder">
+                      Download Workorder
+                    </button>  -->
+
+                <!-- <button type="button" class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto "
+                      data-bs-toggle="modal" data-bs-target="#pdfView" @click="viewasPdfView">
+                      Preview
+                    </button> -->
+
+              </div>
+            </div>
+          </div>
+          <div class="activity_height">
+            <!-- Tabs -->
+            <div class="d-flex mb-2 tabs_list">
+              <button class="btn btn-light tab_btn"
+                :class="{ active: activeTab === 'activity', 'border-0': !tableData.is_linked_form }"
+                @click="activeTab = 'activity'">
+                Activity Log
+              </button>
+              <button v-if="tableData.is_linked_form" class="btn btn-light tab_btn"
+                :class="{ active: activeTab === 'linked' }" @click="linked_list_btn">
+                Inbound Forms
+              </button>
+            </div>
+
+            <!-- Activity Log -->
+            <div v-if="activeTab === 'activity'">
+              <!-- <div class="py-2">
+                    <span class="font-12 text-nowrap fw-bold mb-0">Activity Log</span>
+                  </div> -->
+              <div v-for="(item, index) in activityData" :key="index" class="activity-log-item"
+                :class="{ 'last-item': index === activityData.length - 1 }">
+                <div :class="item.action === 'Approved' || item.action === 'Request Raised' || item.action === '' || item.action === 'Completed'
+                  ? 'activity-log-dot'
+                  : 'activityRedDot'"></div>
+                <div class="activity-log-content">
+                  <p class="font-12 mb-1">
+
+                    <span class="strong-content">{{ formatAction(item.action) }} on </span>
+                    <span class="strong-content">{{ formatCreation(item.time) }}</span><br />
+                    <span class="strong-content">{{ item.user_name }}</span><br />
+                    <span>{{ item.role }}</span><br />
+                    <span class="font-12 text-secondary">{{ item.reason || "N/A" }}</span>.
+
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Linked Forms -->
+            <div v-else-if="activeTab === 'linked'">
+              <div v-if="linkedForms.length === 0" class="text-center py-3">
+                <p class="font-12 text-secondary">No linked forms available.</p>
+
+              </div>
+              <div v-else class="px-1">
+
+                <table class="table overflow-scroll  table-sm">
+                  <thead class="table-light">
+                    <tr>
+                      <th class="font-12">S.No</th>
+                      <th class="font-12">Request ID</th>
+                      <th class="font-12">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(item, index) in linkedForms" :key="index">
+                      <td class="font-12 align-middle text-center">{{ index + 1 }}</td>
+                      <td class="font-12 nowrap align-middle">{{ item.link_form_id.replace(/_/g, ' ') }}</td>
+                      <td>
+                        <button class="btn btn-light btn-sm font-14" data-bs-toggle="modal"
+                          data-bs-target="#listofLinkedForms" @click="openModal(item)">
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Modal -->
+          <div class="modal fade" id="listofLinkedForms" tabindex="-1" aria-labelledby="exampleModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+              <div class="modal-content">
+                <div class="modal-header py-2">
+                  <h5 class="modal-title font-14">Linked Form Details</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body linkedformspreview p-4">
+                  <!-- Show key-value -->
+                  <!-- <table class="table table-bordered table-sm">
+                        <tbody>
+                          <tr v-for="(item, index) in normalFields" :key="index">
+                            <th class="font-12 text-nowrap">
+                              {{ formatKey(item.key) }}
+                            </th>
+                            <td class="font-12">{{ item.value }}</td>
+                          </tr>
+                        </tbody>
+                      </table> -->
+                  <div class="row">
+                    <div class=" col-md-12">
+                      <div class="row">
+                        <div class="col-md-6 mb-2 " v-for="(item, index) in normalFields" :key="index">
+                          <label class="fw-bold font-12">{{ formatKey(item.key) }}</label>
+                          <p class="font-12 mb-2">{{ item.value }}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- <div class=" col-md-6 ">
+                          <div v-for="(item, index) in linkedActivity" :key="index" class="activity-log-item"
+                            :class="{ 'last-item': index === linkedActivity.length - 1 }">
+                            <div :class="item.action === 'Approved' || item.action === 'Request Raised' || item.action === '' || item.action === 'Completed'
+                              ? 'activity-log-dot'
+                              : 'activityRedDot'"></div>
+                            <div class="activity-log-content">
+                              <p class="font-12 mb-1">
+                                <span class="strong-content">{{ formatAction(item.action) }} on </span>
+                                <span class="strong-content">{{ formatCreation(item.creation) }}</span><br />
+                                <span class="strong-content">{{ item.user_name }}</span><br />
+                                <span>{{ item.role }}</span><br />
+                                <span class="font-12 text-secondary">{{ item.reason || "N/A" }}</span>.
+                              </p>
+                            </div>
+                          </div>
+                        </div> -->
+                  </div>
+
+
+
+                  <!--  Array Fields -->
+                  <div v-for="(arrayItem, key) in arrayFields" :key="key" class="mb-3 overflow-auto">
+                    <strong class="font-12">{{ formatKey(key) }}</strong>
+                    <table class="table table-bordered table-sm">
+                      <thead class="table-light">
+                        <tr>
+                          <th v-for="header in getFilteredKeys(arrayItem)" :key="header" class="font-12">
+                            {{ formatKey(header) }}
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr v-for="(row, rowIndex) in arrayItem" :key="rowIndex">
+                          <td v-for="header in getFilteredKeys(arrayItem)" :key="header" class="font-12">
+                            {{ row[header] }}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+
+
+
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+        </div>
+      </div>
+    </div>
 
 
   </div>
 </template>
 
 <script setup>
-import {ref, watch, computed } from "vue";
+import { ref, watch, computed } from "vue";
 import ApproverPreview from "./ApproverPreview.vue";
 import { useRoute, useRouter } from "vue-router";
 import axiosInstance from "../shared/services/interceptor";
@@ -464,10 +821,9 @@ const tableName = ref("");
 const responseData = ref([]);
 const employeeData = ref([]);
 const viewlist = ref([])
-const view_only_reportee = ref(0);
+// const view_only_reportee = ref(0);
 const linkedNew_Id = ref([]);
 const mainStandardForm = ref('')
-const canApprove = ref(false);
 const activeTab = ref("activity");
 const linkedActivity = ref([]);
 
@@ -478,11 +834,43 @@ const resetCommentsValidation = () => {
   }
 };
 function formatCreation(dateStr) {
-  return dateStr.slice(0, 16);
+  const [datePart, timePart] = dateStr.split(' ');
+  const [year, month, day] = datePart.split('/');
+  const [hour = '00', minute = '00', second = '00'] = timePart.split(':');
+
+  const formattedDate = [
+    day.padStart(2, '0'),
+    month.padStart(2, '0'),
+    year
+  ].join('-');
+
+  const formattedTime = [
+    hour.padStart(2, '0'),
+    minute.padStart(2, '0'),
+    second.padStart(2, '0')
+  ].join(':');
+
+  return `${formattedDate} ${formattedTime}`;
 }
+
 
 const ApprovePDF = ref(true)
 
+// const attachmentsReady = ref(false);
+
+// // Approve button click handler
+// const handleApprove = () => {
+//   if (!attachmentsReady.value) {
+//     toast.error("⚠️ Please preview all attachments before approving", { 
+//       autoClose: 1500, 
+//       transition: "zoom" 
+//     });
+//     return;
+//   }
+
+//   loading.value = true;
+//   ApproverFormSubmission(emittedFormData, "Approve");
+// }; 
 // Format the date for display
 // const formatDate = (dateString) => {
 //   if (!dateString) return "N/A";
@@ -509,19 +897,32 @@ const ApprovePDF = ref(true)
 
 
 function EditformSubmission() {
-  // Navigate to the new route
-  router.push({
-    name: "RaiseRequest",
-    query: {
-      routepath: '/todo/raisedbyme',
-      business_unit: route.query.property,
-      selectedForm: route.query.doctype_name,
-      selectedFormId: route.query.name,
-      selectedFormStatus: route.query.status,
-    },
-  });
-  // console.log("emittedFormData", emittedFormData.value);
+  const query = {
+    routepath: '/todo/raisedbyme',
+    business_unit: route.query.property,
+    selectedForm: route.query.doctype_name,
+    selectedFormId: route.query.name,
+    selectedFormStatus: route.query.status,
+    ...(tableData.value.linked_form_id && { main_form_Id: tableData.value.linked_form_id }),
+    ...(doctypeForm.value.return_gate_pass_name && { main_form: doctypeForm.value.return_gate_pass_name })
+  };
+  if (route.query.doctype_name === 'CTO') {
+    router.push({
+      name: "vendorcomparison",
+      query
+
+    });
+  }
+  else {
+
+    router.push({
+      name: "RaiseRequest",
+      query
+    });
+  }
 }
+
+// console.log("emittedFormData", emittedFormData.value);
 watch(
   businessUnit,
   (newVal) => {
@@ -530,11 +931,11 @@ watch(
     business_unit.value = local
     if (newVal) {
       // console.log(business_unit.value, newVal, "ll");
-      if (selectedData.value.type === "mytasks") {
-        ViewOnlyRe();
-      } else {
-        receivedForMe()
-      }
+      // if (selectedData.value.type === "mytasks") {
+      //   ViewOnlyRe();
+      // } else {
+      receivedForMe()
+      // }
     }
   },
   { immediate: true }
@@ -825,79 +1226,79 @@ function DynamicCalculateMethod() {
       console.error("Error fetching data:", error);
     });
 }
-async function SaveDocWithoutApprove(request_id) {
-  saveloading.value = true;
-  let form = {
-    ...childtablesData.value
-  };
-  if (Array.isArray(emittedFormData.value) && emittedFormData.value.length) {
-    emittedFormData.value.forEach((each) => {
-      form[each.fieldname] = each.value;
-    });
-  }
-  // try {
-  //   // ✅ Submit child table data first
-  //   await ChildTableData();
-  // } catch (error) {
-  //   toast.error("❌ Child table submission failed");
-  //   loading.value = false;
-  //   return;
-  // }
-  // console.log(loading.value, dataObj, type, form);
+// async function SaveDocWithoutApprove(request_id) {
+//   saveloading.value = true;
+//   let form = {
+//     ...childtablesData.value
+//   };
+//   if (Array.isArray(emittedFormData.value) && emittedFormData.value.length) {
+//     emittedFormData.value.forEach((each) => {
+//       form[each.fieldname] = each.value;
+//     });
+//   }
+//   // try {
+//   //   // ✅ Submit child table data first
+//   //   await ChildTableData();
+//   // } catch (error) {
+//   //   toast.error("❌ Child table submission failed");
+//   //   loading.value = false;
+//   //   return;
+//   // }
+//   // console.log(loading.value, dataObj, type, form);
 
-  axiosInstance
-    .put(`${apis.resource}${selectedData.value.doctype_name}/${doctypeForm.value.name}`, form)
-    .then((response) => {
-      if (response?.data) {
+//   axiosInstance
+//     .put(`${apis.resource}${selectedData.value.doctype_name}/${doctypeForm.value.name}`, form)
+//     .then((response) => {
+//       if (response?.data) {
 
-        const EmpRequestdesignation = JSON.parse(
-          localStorage.getItem("employeeData")
-        );
-        // console.log(EmpRequestdesignation,"emp data");
+//         const EmpRequestdesignation = JSON.parse(
+//           localStorage.getItem("employeeData")
+//         );
+//         // console.log(EmpRequestdesignation,"emp data");
 
-        let data = {
-          request_id: request_id,
-          reason: ApproverReason.value ? ApproverReason.value : "Approved",
-          current_level: selectedcurrentLevel.value,
-          user: EmpRequestdesignation.emp_mail_id,
-          role: EmpRequestdesignation.designation
-        };
+//         let data = {
+//           request_id: request_id,
+//           reason: ApproverReason.value ? ApproverReason.value : "Approved",
+//           current_level: selectedcurrentLevel.value,
+//           user: EmpRequestdesignation.emp_mail_id,
+//           role: EmpRequestdesignation.designation
+//         };
 
-        axiosInstance
-          .post(apis.ActivitySaveComment, data)
-          .then((response) => {
-            if (response?.message?.success === true) {
-              ApproverReason.value = ""; // Clear reason after success
-              saveloading.value = false
-              window.location.reload()
-              // receivedForMe()
+//         axiosInstance
+//           .post(apis.ActivitySaveComment, data)
+//           .then((response) => {
+//             if (response?.message?.success === true) {
+//               ApproverReason.value = ""; // Clear reason after success
+//               saveloading.value = false
+//               window.location.reload()
+//               // receivedForMe()
 
-            } else {
-              toast.error(`Failed to request`, { autoClose: 1000, transition: "zoom" });
-            }
-          })
-          .catch((error) => {
-            console.error("Error processing request:", error);
-            toast.error("An error occurred while processing your request.", { autoClose: 1000, transition: "zoom" });
-          })
+//             } else {
+//               toast.error(`Failed to request`, { autoClose: 1000, transition: "zoom" });
+//             }
+//           })
+//           .catch((error) => {
+//             console.error("Error processing request:", error);
+//             toast.error("An error occurred while processing your request.", { autoClose: 1000, transition: "zoom" });
+//           })
 
 
 
-      } else {
-        loading.value = false; // Stop loader on failure
-        toast.error("Failed to submit form", { autoClose: 1000, transition: "zoom" });
-      }
-    })
-    .catch((error) => {
-      console.error("Error submitting form:", error);
-      loading.value = false; // Stop loader on error
-      toast.error("An error occurred while submitting the form.", { autoClose: 1000, transition: "zoom" });
-    });
-  // console.log(request_id,"data");
-  // console.log(selectedcurrentLevel.value,"current level");
-  // console.log(ApproverReason.value,"reason");
+//       } else {
+//         loading.value = false; // Stop loader on failure
+//         toast.error("Failed to submit form", { autoClose: 1000, transition: "zoom" });
+//       }
+//     })
+//     .catch((error) => {
+//       console.error("Error submitting form:", error);
+//       loading.value = false; // Stop loader on error
+//       toast.error("An error occurred while submitting the form.", { autoClose: 1000, transition: "zoom" });
+//     });
+//   // console.log(request_id,"data");
+//   // console.log(selectedcurrentLevel.value,"current level");
+//   // console.log(ApproverReason.value,"reason");
 
-}
+// }
 
 
 function ApproverCancelSubmission(dataObj, type) {
@@ -1008,7 +1409,7 @@ function receivedForMe(data) {
     localStorage.getItem("employeeData")
   );
   const filters = [
-    ["property", "like", `%${selectedData.value.business_unit}%`],
+    // ["property", "=", `${route.query.business_unit}`], 
     ["name", "like", `%${selectedData.value.formname}%`],
   ];
   if (data) {
@@ -1028,10 +1429,7 @@ function receivedForMe(data) {
 
   const queryParams = {
     fields: JSON.stringify(["*"]),
-    limit_page_length: filterObj.value.limitPageLength,
-    limit_start: filterObj.value.limit_start,
     filters: JSON.stringify(filters),
-    order_by: "`tabWF Workflow Requests`.`creation` desc",
   };
 
   // const queryParamsCount = {
@@ -1072,7 +1470,7 @@ function receivedForMe(data) {
       // console.log(JSON.parse(
       //   tableData.value?.json_columns
       // ).workflow, "workflow");
-      view_only_reportee.value = JSON.parse(tableData.value?.json_columns)?.workflow[selectedcurrentLevel.value]?.view_only_reportee;
+      // view_only_reportee.value = JSON.parse(tableData.value?.json_columns)?.workflow[selectedcurrentLevel.value]?.view_only_reportee;
       // console.log(" wrk === =>", view_only_reportee.value);
       tableHeaders.value = JSON.parse(
         tableData.value?.json_columns
@@ -1170,31 +1568,31 @@ function getdata(formname) {
       console.error("Error fetching categories data:", error);
     });
 }
-function ViewOnlyRe() {
-  const queryParams = {
-    fields: JSON.stringify(["*"]),
-    limit_page_length: "None",
-    limit_start: 0,
+// function ViewOnlyRe() {
+//   const queryParams = {
+//     fields: JSON.stringify(["*"]),
+//     limit_page_length: "None",
+//     limit_start: 0,
 
-  };
+//   };
 
-  axiosInstance
-    .post(apis.view_only_reportee, {
-      params: queryParams,
-    })
-    .then((response) => {
+//   axiosInstance
+//     .post(apis.view_only_reportee, {
+//       params: queryParams,
+//     })
+//     .then((response) => {
 
-      viewlist.value = response.message;
+//       viewlist.value = response.message;
 
-      canApprove.value = viewlist.value.includes(selectedData.value.formname);
-      receivedForMe()
+//       canApprove.value = viewlist.value.includes(selectedData.value.formname);
+//       receivedForMe()
 
-    })
-    .catch((error) => {
-      console.log(error);
-    });
+//     })
+//     .catch((error) => {
+//       console.log(error);
+//     });
 
-}
+// }
 function viewasPdfView() {
 
   ApprovePDF.value = !ApprovePDF.value;
@@ -1220,7 +1618,46 @@ function viewasPdfView() {
       console.error("Error fetching data:", error);
     });
 }
+function DownloadWorkorder() {
+  const dataObj = {
+    form_id: doctypeForm.value.name,
+    doctype_name: tableData.value.doctype_name,
+    business_unit: business_unit.value,
+    total_levels: tableData.value.total_levels,
+  };
+  axiosInstance
+    .post(apis.download_workorder, dataObj)
+    .then((response) => {
+      // pdfPreview.value = response.message; 
 
+      if (!response || !response.message) {
+        console.error("Invalid response:", response);
+        return;
+      }
+
+      let pdfUrl = domain + response.message;
+
+      // Remove '/api' from the URL if present
+      pdfUrl = pdfUrl.replace("/api", "");
+
+      // Extract filename safely
+      const fileName = response.message.includes("/")
+        ? response.message.split("/").pop()
+        : "download.pdf";
+
+      // Create and trigger download
+      const link = document.createElement("a");
+      link.href = pdfUrl;
+      link.download = fileName;
+      link.target = "_blank"; // Helps with some browser restrictions
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    })
+    .catch((error) => {
+      console.error("Error downloading PDF:", error);
+    });
+}
 
 function downloadPdf() {
   const dataObj = {
@@ -1286,18 +1723,101 @@ function downloadPdf() {
 //     });
 // }
 
-function Wfactivitylog(formname) {
+// function Wfactivitylog(formname) {
+//   axiosInstance
+//     .get(`${apis.resource}${doctypes.WFActivityLog}/${formname}`)
+//     .then((res) => {
+//       if (res.data && Array.isArray(res.data.reason)) {
+//         const sortedReasons = res.data.reason.sort((a, b) => {
+//           const parseTime = (str) => {
+//             const [datePart, timePart] = str.split(' ');
+//             const [year, month, day] = datePart.split('/').map(Number);
+//             const [hour, minute, second, millisecond = 0] = timePart.split(':').map(Number);
+//             return new Date(year, month - 1, day, hour, minute, second, millisecond);
+//           };
+
+//           return parseTime(a.time) - parseTime(b.time); // ascending order
+//         });
+
+//         activityData.value = sortedReasons;
+//       } else {
+//         activityData.value = [];
+//       }
+//     })
+//     .catch((error) => {
+//       console.error("Error fetching activity data:", error);
+//     });
+// }  
+// function Wfactivitylog(formname) {
+//   axiosInstance
+//     .get(`${apis.resource}${doctypes.WFActivityLog}/${formname}`)
+//     .then((res) => {
+//       if (res.data && Array.isArray(res.data.reason)) {
+//         const parseTime = (str) => {
+//           const [datePart, timePart] = str.split(' ');
+//           const [year, month, day] = datePart.split('/').map(Number);
+//           const [hour, minute, second, ms] = timePart.split(':').map(Number);
+//           return new Date(year, month - 1, day, hour || 0, minute || 0, second || 0, ms || 0);
+//         };
+
+//         // Sort oldest first (ascending)
+//         res.data.reason.sort((a, b) => parseTime(a.time) - parseTime(b.time));
+
+//         activityData.value = res.data.reason;
+//       } else {
+//         activityData.value = [];
+//       }
+//     })
+//     .catch((error) => {
+//       console.error("Error fetching activity data:", error);
+//     });
+// }
+
+function Wfactivitylog(name) {
+  // console.log(route.query.name, "wf_generated_request_id"); 
+  let FormId = {
+    wf_generated_request_id: name,
+  }
   axiosInstance
-    .get(`${apis.resource}${doctypes.WFActivityLog}/${formname}`)
-    .then((res) => {
-      if (res.data) {
-        // console.log("Activity Data:", res.data);
-        activityData.value = res.data.reason || []; // Ensure it's always an array
-      }
+    .post(apis.get_wf_activate_log, FormId)
+    .then((responce) => {
+      // console.log(responce, "activity log data"); 
+      activityData.value = responce.message || []; // Ensure it's always an array
+
     })
     .catch((error) => {
-      console.error("Error fetching activity data:", error);
+      console.error("Error fetching data:", error);
     });
+  // axiosInstance
+  //   .get(`${apis.resource}${doctypes.WFActivityLog}/${formname}`)
+  //   .then((res) => {
+  //     if (res.data && Array.isArray(res.data.reason)) {
+  //       const sortedReasons = res.data.reason.sort((a, b) => {
+  //         const parseTime = (str) => {
+  //           // str = "2025/7/16 12:9:56:795919"
+  //           const [datePart, timePart] = str.split(' ');
+  //           const [year, month, day] = datePart.split('/').map(Number);
+
+  //           const timeParts = timePart.split(':').map(Number);
+  //           const hour = timeParts[0] || 0;
+  //           const minute = timeParts[1] || 0;
+  //           const second = timeParts[2] || 0;
+  //           const millisecond = timeParts[3] || 0;
+
+  //           return new Date(year, month - 1, day, hour, minute, second, millisecond);
+  //         };
+
+  //         return parseTime(a.time) - parseTime(b.time); // Sort in ascending order
+  //       });
+
+  //       activityData.value = sortedReasons;
+  //     } else {
+  //       activityData.value = [];
+  //     }
+  //   })
+  //   .catch((error) => {
+  //     console.error("Error fetching activity data:", error);
+  //   });
 }
 
 function toLinkedForm() {
@@ -1312,7 +1832,7 @@ function toLinkedForm() {
         main_form: selectedData.value.doctype_name,
         business_unit: selectedData.value.business_unit,
         main_form_Id: selectedData.value.formname,
-        
+
       },
     });
   } else {
@@ -1387,6 +1907,7 @@ watch(activityData, (newVal) => {
 //   z-index: 1000 !important;
 
 // }
+
 .linkedformspreview {
   height: 700px;
   overflow: scroll;
@@ -1468,16 +1989,42 @@ watch(activityData, (newVal) => {
   z-index: 10;
   background-color: #fff;
 }
+.responsive-title {
+  font-size: 12px; /* default mobile */
+}
+
+@media (min-width: 768px) {
+  .responsive-title {
+    font-size: 14px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .responsive-title {
+    font-size: 18px;
+  }
+}
 
 .approveBtns {
   position: fixed !important;
   bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 10;
   background-color: #fff;
-  padding: 5px 10px;
+  padding: 5px ;
   display: flex;
   justify-content: space-between;
   width: 50%;
+  margin: 2px 5px;
+
+}
+@media (max-width: 768px) {
+  .approveBtns {
+    width: 100%;
+    left: 0;
+    transform: none;
+  }
 }
 
 .asset_request {
@@ -1515,12 +2062,13 @@ watch(activityData, (newVal) => {
   overflow-y: scroll;
   position: relative;
 }
-.tabs_list{
-    position: sticky;
-    top: 0;
-    background-color: #fff !important;
-    padding-bottom: 5px;
-    z-index: 1;
+
+.tabs_list {
+  position: sticky;
+  top: 0;
+  background-color: #fff !important;
+  padding-bottom: 5px;
+  z-index: 1;
 }
 
 .pending {
@@ -1603,7 +2151,7 @@ watch(activityData, (newVal) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1;
+  z-index: 0;
   margin-top: 3px;
 }
 
@@ -1716,5 +2264,26 @@ td {
 
 .tab_btn:hover {
   background-color: #f2f2f2;
+}
+
+.offcanvas-header {
+  box-shadow: 0px 2px 4px 0px #0000000D;
+}
+.offcanvas-end {
+  width: 400px;
+}
+
+/* Medium screens */
+@media (max-width: 992px) {
+  .offcanvas-end {
+    width: 50%;
+  }
+}
+
+/* Small screens */
+@media (max-width: 768px) {
+  .offcanvas-end {
+    width: 80%; /* full width on mobile */
+  }
 }
 </style>

@@ -53,6 +53,44 @@
   --transition-slow: 0.6s ease-in-out;
 }
 
+/* Medium screens (Tablets) */
+@media (max-width: 992px) {
+  :root {
+    --ten: 9px;
+    --eleven: 10px;
+    --twelve: 11px;
+    --thirteen: 12px;
+    --fourteen: 13px;
+    --sixteen: 15px;
+    --twenty: 18px;
+  }
+}
+
+/* Small screens (Mobile) */
+@media (max-width: 768px) {
+  :root {
+    --ten: 8px;
+    --eleven: 9px;
+    --twelve: 10px;
+    --thirteen: 11px;
+    --fourteen: 12px;
+    --sixteen: 14px;
+    --twenty: 16px;
+  }
+}
+
+/* Extra small screens (Very small devices) */
+@media (max-width: 480px) {
+  :root {
+    --ten: 7px;
+    --eleven: 8px;
+    --twelve: 9px;
+    --thirteen: 10px;
+    --fourteen: 11px;
+    --sixteen: 13px;
+    --twenty: 15px;
+  }
+}
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -303,4 +341,13 @@ body {
     width: 100% !important;
     height: 80vh;
   }
+}
+
+.Toastify__toast--error {
+  font-size: 13px !important; /* or any size you want */
+  padding: 0px !important;
+}
+.Toastify__toast--success {
+  font-size: 14px !important; /* or any size you want */
+  padding: 5px !important;
 }

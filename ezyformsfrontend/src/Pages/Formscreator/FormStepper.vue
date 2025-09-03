@@ -2,7 +2,7 @@
   <div>
     <div class="">
       <div class="">
-        <div class="d-flex justify-content-between align-items-center CancelNdSave my-2 py-2">
+        <div class="d-flex justify-content-between align-items-center CancelNdSave">
           <div class="ps-1 my-2 d-flex align-items-center" @click="cancelForm()">
             <button class="btn font-13 ms-3">
               <i class="bi bi-arrow-left"></i><span class="ms-2">Back</span>
@@ -77,7 +77,7 @@
 
                                 <!-- || route.query.form_name -->
                                 <!-- || route.query.form_name   -->
-                                <FormFields :disabled="selectedData.formId && selectedData.formId.length > 0"
+                                <FormFields :disabled="selectedData.formId && selectedData.formId.length > 0 || route.query.form_name"
                                   labeltext="Form Name" class="formHeight" type="text" tag="input" name="Value"
                                   id="formName" validationStar="true" placeholder="Untitled Form" 
                                   @change="(event) => handleInputChange(event, 'form_name')" v-model="formNameModel" />
@@ -87,7 +87,7 @@
                             </div>
                             <div class="mt-3">
                               <div class="">
-                                <FormFields :disabled="selectedData.formId && selectedData.formId.length > 0"
+                                <FormFields :disabled="selectedData.formId && selectedData.formId.length > 0 || route.query.form_name"
                                   labeltext="Form Short Code" class="formHeight" type="text" tag="input" name="Value"
                                   id="formShortCode" validationStar="true" placeholder="Untitled Form" @change="
                                     (event) => handleInputChange(event, 'form_short_name')
@@ -773,16 +773,26 @@
                                                       <div
                                                         v-if="editMode[tableName] && tableName === currentEditingTable"
                                                         class=" d-flex align-items-center gap-2">
-                                                        <div class="d-flex align-items-center">
+                                                        <!-- <div class="d-flex align-items-center">
 
                                                           <input class="font-12" v-model="field.description"
-                                                            true-value="true" false-value="fasle"
-                                                            placeholder="Field Name" type="checkbox" />
+                                                            true-value="true" false-value="fasle" id="field-description"
+                                                            placeholder="Field Name" type="text" />
                                                         </div>
                                                         <div>
-                                                          <label for="mandatory" class="font-12 m-0 fw-light">Show as
+                                                          <label  class="font-12 m-0 fw-light">Show as
                                                             Blocks</label>
-                                                        </div>
+                                                        </div> -->
+                                                        <div class="d-flex align-items-center">
+                                                <input v-if="field.showDescription" v-model="field.description"
+                                                  class="form-control font-12 " placeholder="Enter field description" />
+                                                <button class="btn btn-sm text-nowrap font-12"
+                                                  @click="field.showDescription = !field.showDescription">
+                                                  {{ field.showDescription ? 'Hide Description' : (field.description ?
+                                                    'Edit Description'
+                                                    : 'Add Description') }}
+                                                </button>
+                                            </div>
                                                       </div>
                                                       <table
                                                         v-if="tableName === field.options || tableName === field.fieldname"
@@ -964,15 +974,25 @@
                                     class="childTable dynamicColumn m-0 p-2 ">
                                     <h5 class="font-13">{{ table.tableName }}</h5>
                                     <div v-if="editMode[table.tableName]" class=" d-flex align-items-center gap-2">
-                                      <div class="d-flex align-items-center">
+                                      <!-- <div class="d-flex align-items-center">
 
-                                        <input class="font-12" v-model="table.description" true-value="true"
-                                          false-value="fasle" placeholder="Field Name" type="checkbox" />
+                                        <input class="font-12" v-model="table.description" true-value="true" 
+                                          false-value="fasle" placeholder="Field Name" type="text" />
                                       </div>
                                       <div>
-                                        <label for="mandatory" class="font-12 m-0 fw-light">Show as
+                                        <label class="font-12 m-0 fw-light">Show as
                                           Blocks</label>
-                                      </div>
+                                      </div> -->
+                                       <div class="d-flex align-items-center">
+                                                <input v-if="table.showDescription" v-model="table.description"
+                                                  class="form-control font-12 " placeholder="Enter field description" />
+                                                <button class="btn btn-sm text-nowrap font-12"
+                                                  @click="table.showDescription = !table.showDescription">
+                                                  {{ table.showDescription ? 'Hide Description' : (table.description ?
+                                                    'Edit Description'
+                                                    : 'Add Description') }}
+                                                </button>
+                                            </div>
                                     </div>
 
                                     <table class="table table-bordered rounded-table">
@@ -1054,7 +1074,7 @@
                               <div>
                                 <div>
 
-                                  <button class="btn btn-light addRow mb-3 mt-4"
+                                  <button v-if="blockIndex==0" class="btn btn-light addRow mb-3 mt-4"
                                     @click="addChildTable(blockIndex, sectionIndex)">
                                     Add New Table
                                   </button>
@@ -1080,12 +1100,18 @@
                                           </div>
                                           <div class=" d-flex align-items-center gap-2">
                                             <div class="d-flex align-items-center">
-                                              <input class="font-12" v-model="table.as_a_block" :true-value="1"
-                                                :false-value="0" placeholder="Field Name" type="checkbox" />
+                                                <input v-if="table.showDescription" v-model="table.as_a_block"
+                                                  class="form-control font-12 " placeholder="Enter field description" />
+                                                <button class="btn btn-sm text-nowrap font-12"
+                                                  @click="table.showDescription = !table.showDescription">
+                                                  {{ table.showDescription ? 'Hide Description' : (table.description ?
+                                                    'Edit Description'
+                                                    : 'Add Description') }}
+                                                </button>
                                             </div>
-                                            <div>
-                                              <label for="mandatory" class="font-12 m-0 fw-light">Show as Blocks</label>
-                                            </div>
+                                            <!-- <div>
+                                              <label class="font-12 m-0 fw-light">Show as Blocks</label>
+                                            </div> -->
                                           </div>
                                         </div>
                                         <button class="btn btn-light bg-transparent border-0 font-13 deleteSection"
@@ -1309,29 +1335,42 @@
       <div class="offcanvas-body p-0">
         <div class="">
           <div class="">
+           
+
 
 
             <div v-if="selectedBlockIndex !== 0"
-              class="p-3 py-4 approval-border-bottom d-flex align-items-center gap-3">
-              <div>
+              class=" p-3 approval-border-bottom ">
+               <div v-if="selectedBlockIndex !== 0" class=" p-2">
+              <label class="fw-bold font-12 mb-2">Approver Type</label>
+              <select v-model="selectedApproverType" class="form-select shadow-none font-12 ">
+                <option value="">Send To Selected Approvers</option>
+                <option value="ViewOnlyReportee">View Only Reportee</option>
+                <option value="all_approvals_required">All Approvers Required</option>
+                <option value="requester_as_a_approver">Requested Only</option>
+              </select>
+            </div>
+
+              <!-- <div>
                 <div class=" form-control" aria-disabled="">
 
                   <span class=" font-12">Approver Level {{ selectedBlockIndex }}</span>
                 </div>
-              </div>
+              </div> -->
+              <div class="p-2">
               <div>
                 <label for="" class="fw-bold font-12 ">On Rejection</label>
               </div>
-              <div class="ms-2">
-                <select v-model.number="OnRejection" class="form-select font-12 mt-1 me-2">
+                <select v-model.number="OnRejection" class="form-select shadow-none font-12 mt-1  me-2">
                   <option disabled value="">Select Lower Level</option>
                   <option v-for="level in lowerApproverLevels" :key="level" :value="level">
-                    {{ level === 0 ? 'Requester' : 'Approver Level ' + level }}
-                  </option>
+                    {{ level === 0 ? 'Requestor' : 'Approver Level ' + level }}
+                  </option> 
                 </select>
               </div>
             </div>
-            <div v-if="selectedBlockIndex !== 0" class="p-3 approval-border-bottom  ">
+            
+            <!-- <div v-if="selectedBlockIndex !== 0" class="p-3 approval-border-bottom  ">
               <div class=" d-flex justify-content-start gap-5 mb-3 ">
 
 
@@ -1359,7 +1398,7 @@
                   <label for="requester_as_a_approver" class="SelectallDesignation text-nowrap fw-bold mt-1 form-check-label">Requested Only</label>
                 </div>
               </div>
-            </div>
+            </div> -->
           </div>
 
         </div>
@@ -1720,7 +1759,7 @@ function searchForm() {
   clearTimeout(debounceTimeout);
   debounceTimeout = setTimeout(() => {
     const filters = [
-      ["business_unit", "like", `%${businessUnit.value.value}%`],
+      ["business_unit", "=", `${businessUnit.value.value}`],
       ["name", "like", `%${searchValue}%`]
     ];
 
@@ -2079,6 +2118,34 @@ onMounted(() => {
 });
 
 
+const draggingIndex = ref(null);
+const invalidFields = ref({});
+const currentEditingTable = ref(null);
+
+const onDragStart = (index) => {
+  draggingIndex.value = index;
+};
+
+const onDragEnd = () => {
+  draggingIndex.value = null;
+};
+
+const onDragOver = (event) => {
+  event.preventDefault();
+};
+
+const onDrop = (event, table) => {
+  const targetRow = event.target.closest("tr");
+  if (!targetRow) return;
+
+  const targetIndex = Array.from(targetRow.parentNode.children).indexOf(targetRow);
+  if (targetIndex !== draggingIndex.value) {
+    const draggingRow = table[draggingIndex.value];
+    table.splice(draggingIndex.value, 1);
+    table.splice(targetIndex, 0, draggingRow);
+    draggingIndex.value = targetIndex;
+  }
+};
 
 // Store multiple child tables
 // const formatTableName = (tableIndex, event) => {
@@ -2094,6 +2161,37 @@ const childTables = ref([]);
 function generateFieldname(label) {
   return label.toLowerCase().replace(/\s+/g, '_').replace(/[^\w_]/g, '');
 }
+const cleanFieldOptions = (field) => {
+  if (
+    ["Select", "Table MultiSelect", "Check", "Small Text"].includes(field.fieldtype) &&
+    field.options
+  ) {
+    const rawOptions = field.options
+      .split("\n")
+      .map((opt) => opt.trim())
+      .filter((opt) => opt); // Remove empty lines
+
+    const uniqueOptions = [];
+    const seen = new Set();
+
+    rawOptions.forEach((opt) => {
+      const lower = opt.toLowerCase();
+      if (!seen.has(lower)) {
+        seen.add(lower);
+        uniqueOptions.push(opt); // Retain original case
+      }
+    });
+
+    return "\n" + uniqueOptions.join("\n");
+  } else if (
+    ["Link", "Table"].includes(field.fieldtype) &&
+    field.options
+  ) {
+    return field.options.trim();
+  }
+
+  return field.options;
+};
 
 const addChildTable = (blockIndex, sectionIndex) => {
   const section = blockArr[blockIndex].sections[sectionIndex];
@@ -2227,13 +2325,17 @@ const processFields = (blockIndex, sectionIndex, tableIndex) => {
 
   const table = blockArr[blockIndex].sections[sectionIndex].childTables[tableIndex];
   const section = blockArr[blockIndex].sections[sectionIndex];
-
+  table.columns = table.columns.map((field, index) => ({
+    ...field,
+    idx: index,
+    options: cleanFieldOptions(field),
+  }));
   table.newTable = false
   const data = {
     form_short_name: formatTableName(table.tableName),
     fields: table.columns,
     idx: table.idx,
-    as_a_block: table.as_a_block === 1 ? 'true' : 'false',
+    as_a_block: table.as_a_block  ? table.as_a_block : 'false',
   };
 
   // console.log(data); 
@@ -2339,10 +2441,12 @@ const afterImmediateEdit = (blockIndex, sectionIndex, tableName) => {
 
     if (!isValid) return;
 
-    const allFields = table.columns.map(({ isNew, ...rest }, index) => ({
-      ...rest,
-      idx: index + 1,
-    }));
+   const allFields = table.columns.map(({ isNew, ...rest }, index) => ({
+  ...rest,
+  idx: index + 1,
+  options: cleanFieldOptions(rest),
+}));
+
 
     const formData = {
       form_short_name: formatTableName(tableName),
@@ -2395,34 +2499,6 @@ const deleteRow = (tableName, index) => {
   }
 };
 
-const draggingIndex = ref(null);
-const invalidFields = ref({});
-const currentEditingTable = ref(null);
-
-const onDragStart = (index) => {
-  draggingIndex.value = index;
-};
-
-const onDragEnd = () => {
-  draggingIndex.value = null;
-};
-
-const onDragOver = (event) => {
-  event.preventDefault();
-};
-
-const onDrop = (event, table) => {
-  const targetRow = event.target.closest("tr");
-  if (!targetRow) return;
-
-  const targetIndex = Array.from(targetRow.parentNode.children).indexOf(targetRow);
-  if (targetIndex !== draggingIndex.value) {
-    const draggingRow = table[draggingIndex.value];
-    table.splice(draggingIndex.value, 1);
-    table.splice(targetIndex, 0, draggingRow);
-    draggingIndex.value = targetIndex;
-  }
-};
 const toggleEdit = (tableName, description) => {
   if (editMode[tableName]) {
 
@@ -2449,9 +2525,10 @@ const toggleEdit = (tableName, description) => {
 
     // Process all fields (both old and new)
     let allFields = childtableHeaders.value[tableName].map(({ isNew, ...rest }, index) => ({
-      ...rest,
-      idx: index, // Ensure `idx` is correctly set in sequential order
-    }));
+        ...rest,
+        idx: index,
+        options: cleanFieldOptions(rest),
+      }));
 
     // ✅ Single API request to save both old and new fields
     const formData = {
@@ -2716,7 +2793,7 @@ function handleSingleSelect() {
     // console.log("Selected only one designation:", designationValue.value[0]);
   }
 }
-
+const selectedApproverType = ref('');
 function addDesignationBtn() {
   const block = blockArr[selectedBlockIndex.value];
 
@@ -2733,13 +2810,19 @@ function addDesignationBtn() {
   };
 
   // workflowSetup.push(xyz)
-  if (selectedBlockIndex.value !== 0) {
-    xyz.view_only_reportee = ViewOnlyReportee.value === true ? 1 : 0;
-    xyz.on_rejection = OnRejection.value ? OnRejection.value : 0;
-    xyz.all_approvals_required = all_approvals_required.value === true ? 1 : 0;
-    xyz.requester_as_a_approver = requester_as_a_approver.value === true ? 1 : 0;
-  }
+  // if (selectedBlockIndex.value !== 0) {
+  //   xyz.view_only_reportee = ViewOnlyReportee.value === true ? 1 : 0;
+  //   xyz.on_rejection = OnRejection.value ? OnRejection.value : 0;
+  //   xyz.all_approvals_required = all_approvals_required.value === true ? 1 : 0;
+  //   xyz.requester_as_a_approver = requester_as_a_approver.value === true ? 1 : 0;
+  // }
  
+  if (selectedBlockIndex.value !== 0) {
+    xyz.view_only_reportee = selectedApproverType.value === 'ViewOnlyReportee' ? 1 : 0;
+    xyz.all_approvals_required = selectedApproverType.value === 'all_approvals_required' ? 1 : 0;
+    xyz.requester_as_a_approver = selectedApproverType.value === 'requester_as_a_approver' ? 1 : 0;
+    xyz.on_rejection = OnRejection.value ? OnRejection.value : 0;
+  }
 
 
   const existingIndex = workflowSetup.findIndex((item) => item.idx === xyz.idx);
@@ -2767,11 +2850,23 @@ function initializeDesignationValue(blockIndex) {
   const rolesForBlock = currentSetup.roles || [];
   designationValue.value = [...rolesForBlock];
 
+  OnRejection.value = currentSetup.on_rejection;
   // Check for view_only_reportee flag
-  ViewOnlyReportee.value = currentSetup.view_only_reportee === 1;
-  OnRejection.value = currentSetup.on_rejection
-  all_approvals_required.value = currentSetup.all_approvals_required === 1;
-  requester_as_a_approver.value = currentSetup.requester_as_a_approver === 1;
+  // ViewOnlyReportee.value = currentSetup.view_only_reportee === 1;
+  // OnRejection.value = currentSetup.on_rejection
+  // all_approvals_required.value = currentSetup.all_approvals_required === 1;
+  // requester_as_a_approver.value = currentSetup.requester_as_a_approver === 1;
+
+  // Set dropdown value based on which flag is 1
+  if (currentSetup.view_only_reportee === 1) {
+    selectedApproverType.value = 'ViewOnlyReportee';
+  } else if (currentSetup.all_approvals_required === 1) {
+    selectedApproverType.value = 'all_approvals_required';
+  } else if (currentSetup.requester_as_a_approver === 1) {
+    selectedApproverType.value = 'requester_as_a_approver';
+  } else {
+    selectedApproverType.value = '';
+  }
 }
 
 // Initialize `designationValue` based on the roles for the given block index
@@ -2803,9 +2898,10 @@ function initializeDesignationValue(blockIndex) {
 
 const AddDesignCanvas = (idx) => {
   searchDesignation.value = ''
-  ViewOnlyReportee.value = false;
-  all_approvals_required.value = false;
-  requester_as_a_approver.value = false;
+  selectedApproverType.value = ''; 
+  // ViewOnlyReportee.value = false;
+  // all_approvals_required.value = false;
+  // requester_as_a_approver.value = false;
   OnRejection.value = '';
   // console.log(idx, "---clicked idex", selectedBlockIndex.value);
   if (filterObj.value.accessible_departments.length) {
@@ -3679,7 +3775,7 @@ function handleInputChange(event, fieldType) {
   // Set filter based on fieldType
   const filters = [
     [fieldType, "=", `${inputValue}`],
-    ["business_unit", "like", `%${filterObj.value.business_unit}%`],
+    ["business_unit", "=", `${filterObj.value.business_unit}`],
   ];
   const queryParams = {
     fields: JSON.stringify(['form_name','form_short_name']),

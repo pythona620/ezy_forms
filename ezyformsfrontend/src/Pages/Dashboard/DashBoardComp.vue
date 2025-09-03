@@ -1,23 +1,31 @@
 <template>
     <div class="container-fluid">
         <div class="row mt-3">
-            <!-- Loop over the dynamic chartsData array -->
-            <div v-for="(chart, index) in chartsData" :key="index" class="col-6">
-                <div class="chart-wrapper">
+            <div v-if="showSubscriptionAlert" class="subscription-div font-13 col-12">
+                <i class="bi bi-exclamation-triangle text-danger me-2 fs-5"></i> 
+                <span class="d-flex mt-1 flex-wrap">
+                    Your subscription will expire in 
+                    <span class="text-danger mx-2 text-underline">{{ remainingDaysCount }}</span>
+                    days, on 
+                    <span class="text-danger mx-2 text-underline">{{ subscriptionEndDateStr }}</span>
+                </span>
+            </div>
+
+            <!-- Dynamic charts -->
+            <div v-for="(chart, index) in chartsData" :key="index" class="col-lg-6 col-md-6 mb-3">
+                <div class="chart-wrapper flex-column flex-lg-row">
                     <div>
                         <h6 class="fw13 font-14 text-nowrap">
                             {{ chart.title }} (<b>{{ chart.data.total }}</b> requests)
                         </h6>
-                        <!-- Each chart container gets its own ref and a fixed height -->
                         <div class="chart-container" :ref="el => chartRefs[index] = el" style="height: 300px"></div>
                     </div>
-                    <div class="chart-info">
+                    <div class="chart-info mt-3 mt-md-0">
                         <div class="total-count">
                             <strong>{{ chart.data.total }}</strong>
-                            <span class="font-14">Total Forms</span>
+                            <span class=" responsive-title ">Total Forms</span>
                         </div>
                         <div>
-                            <!-- Loop over the keys to create dynamic legends -->
                             <div v-for="(key, i) in filteredKeys(chart.title)" :key="i" class="legend">
                                 <div class="legend-item">
                                     <span class="color-box" :style="{ backgroundColor: colorMapping[key] }"></span>
@@ -31,21 +39,30 @@
                 </div>
             </div>
         </div>
-        <div class="row mt-3">
-            <div>
-                <h6 class=" fw-bold">My Tasks</h6>
-            </div>
-            <div>
-                <GlobalTable class="dashboard-table" :tHeaders="tableheaders" :tData="tableData" isAction="true" viewType="viewPdf" isCheckbox="true"
-                        @updateFilters="inLineFiltersData" :field-mapping="fieldMapping" @cell-click="viewPreview"
-                        isFiltersoption="true" :actions="actions"  />
-            </div>
 
-           
+        <!-- Tasks Table -->
+        <div class="row mt-3">
+            <div class="col-12 mb-2">
+                <h6 class="fw-bold">My Tasks</h6>
+            </div>
+            <div class="col-12 table-responsive">
+                <GlobalTable
+                    class="dashboard-table"
+                    :tHeaders="tableheaders"
+                    :tData="tableData"
+                    isAction="true"
+                    viewType="viewPdf"
+                    isCheckbox="true"
+                    @updateFilters="inLineFiltersData"
+                    :field-mapping="fieldMapping"
+                    @cell-click="viewPreview"
+                    isFiltersoption="true"
+                    :actions="actions"
+                />
+            </div>
         </div>
     </div>
 </template>
-
 <script setup>
 import { ref, onMounted, nextTick } from 'vue';
 import * as echarts from 'echarts';
@@ -73,6 +90,10 @@ const filterObj = ref({ limitPageLength: 20, limit_start: 0, filters: [] });
 const docTypeName = ref([]);
 const totalRecords = ref(0);
 const statusOptions = ref([]);
+const subEndDate=ref("");
+const remainingDaysCount = ref(0);
+const subscriptionEndDateStr = ref("");
+const showSubscriptionAlert = ref(false);
 
 const tableheaders = ref([
   { th: "Request ID", td_key: "name" },
@@ -129,8 +150,12 @@ const chartRefs = [];
 
 // API call that fetches the data and processes it
 async function fetchData() {
+    const queryParams = {
+        property : businessUnit.value
+        };
+
     try {
-        const response = await axiosInstance.get(`${apis.dashboard}`);
+        const response = await axiosInstance.get(`${apis.dashboard}`, { params: queryParams });
         if (response.message) {
             // Extract the two datasets from the API response
             const receivedByUser = response.message.data.received_by_user;
@@ -204,6 +229,22 @@ async function fetchData() {
 // Google Charts loader
 onMounted(() => {
     fetchData()
+    subEndDate.value = (localStorage.getItem("subEndDate"));
+    if (subEndDate.value) {
+    const today = new Date();
+    const endDate = new Date(subEndDate.value);
+
+    const diffTime = endDate - today;
+    remainingDaysCount.value = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    subscriptionEndDateStr.value = subEndDate.value;
+
+    // Show alert only if subscription ends in 30 days or less
+    if (remainingDaysCount.value <= 30 && remainingDaysCount.value > 0) {
+      showSubscriptionAlert.value = true;
+    }
+  }
+
     // Load Google Charts script
     // const script = document.createElement('script')
     // script.src = 'https://www.gstatic.com/charts/loader.js'
@@ -225,6 +266,7 @@ function ViewOnlyReport(){
 
       // const filters = [ "name","in", viewlist.value];
       receivedForMe()
+      fetchData()
 
     })
     .catch((error) => {
@@ -274,6 +316,7 @@ function inLineFiltersData(searchedData) {
             receivedForMe(filterObj.value.filters);
         } else {
             receivedForMe();
+            
         }
     }, 500); // Adjust debounce delay as needed
 }
@@ -286,7 +329,7 @@ function receivedForMe(data) {
   const filters = [
     // assigned_to_users
     ["assigned_to_users", "like", `%${EmpRequestdesignation?.designation}%`],
-    ["property", "like", `%${newBusinessUnit.value.business_unit}%`],
+    ["property", "=", `${newBusinessUnit.value.business_unit}`],
     ["status", "!=", "Request Cancelled"],
     
     ["name","in", viewlist.value],
@@ -419,6 +462,35 @@ function updateCharts() {
                     }
                 }
             });
+//                        chartInstance.setOption({
+//     tooltip: {
+//         trigger: 'axis'
+//     },
+//     xAxis: {
+//         type: 'category',
+//         data: keys.map(key => displayMapping[key]), // legend names
+//         axisLabel: {
+//             rotate: 30
+//         }
+//     },
+//     yAxis: {
+//         type: 'value'
+//     },
+//     series: [{
+//         type: 'bar',
+//         data: keys.map(key => chartData.data[key] || 0),
+//         itemStyle: {
+//             color: (params) => {
+//                 const key = keys[params.dataIndex];
+//                 return colorMapping[key];
+//             }
+//         },
+//         label: {
+//             show: true,
+//             position: 'top'
+//         }
+//     }]
+// });
 
             // // Add click event for chart values
             // chartInstance.off('click'); // Remove previous listeners if any
@@ -485,6 +557,22 @@ h3 {
     font-weight: 400;
     margin-bottom: 15px;
 }
+.responsive-title {
+  font-size: 12px !important; /* default mobile */
+}
+
+@media (min-width: 768px) {
+  .responsive-title {
+    font-size: 14px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .responsive-title {
+    font-size: 14px;
+  }
+}
+
 
 .total-count strong {
     font-size: 13px;
@@ -542,5 +630,89 @@ h3 {
 .label {
     font-size: 13px;
     color: #333;
+}
+.subscription-div {
+    background-color: #f3ea6b;
+    padding: 8px 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+.dashboard-table {
+    max-height: 40dvh;
+    overflow-x: auto;
+}
+
+/* Charts */
+.chart-wrapper {
+    display: flex;
+    /* align-items: flex-start;
+    justify-content: space-between; */
+    padding: 20px;
+    border: 1px solid #EEEEEE;
+    border-radius: 4px;
+    box-shadow: 0px 2px 2px 0px #0000000D;
+    background-color: #f7f7f7;
+    flex-wrap: wrap;
+}
+
+.chart-container {
+    width: 100%;
+    max-width: 280px;
+    height: 280px;
+}
+
+.chart-info {
+    margin-left: 0;
+    margin-top: 20px;
+}
+
+@media (min-width: 768px) {
+    .chart-wrapper {
+        flex-wrap: nowrap;
+    }
+    .chart-info {
+        margin-left: 20px;
+        margin-top: 0;
+    }
+}
+
+/* Legends */
+.legend {
+    display: flex;
+    flex-direction: column;
+    line-height: 25px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.color-box {
+    width: 17px;
+    height: 15px;
+    margin-right: 10px;
+    border-radius: 3px;
+}
+
+/* Subscription alert */
+.subscription-div {
+    background-color: #f3ea6b;
+    padding: 8px 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* Table responsiveness */
+.table-responsive {
+    overflow-x: auto;
 }
 </style>
