@@ -177,7 +177,7 @@
 
 
                                                 <!-- Preview Section -->
-                                                {{ field.value }}
+                                                
                                               
                                                 <div v-if="field.value" class="d-flex flex-wrap gap-2">
                                                     <div
