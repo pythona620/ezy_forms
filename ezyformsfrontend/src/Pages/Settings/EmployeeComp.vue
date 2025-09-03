@@ -565,12 +565,12 @@
         </div>
       </div>
     </div>
-    <div class="modal fade" id="EmployeeToggleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="EmployeeToggleModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">Confirm Employee Status</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button type="button" class="btn-close" @click="remarks=''" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
             <div class="text-center fw-bolder">
@@ -579,41 +579,12 @@
 
             <div class="mt-4">
               <label class="font-13 mb-1" for="emp_name">Remarks<span class="text-danger ps-1">*</span></label>
-              <textarea v-model.trim="remarks" class="w-100 font-13 remarks"></textarea>
+              <textarea v-model.trim="remarks" class="w-100 form-control shadow-none font-13 remarks"></textarea>
             </div>
-
-
-            <!-- <label for="name" class="font-13 mt-3">Attachments</label>
-            <input type="file" @change="handleSingleAttach" class="form-control mb-3" :disabled="uploadedFields.length >= 4" />
-            <div v-if="uploadedFields.length >= 4" class="text-success mt-2">
-              All attachments uploaded.
-            </div>
-
-            <div class="row mt-3">
-              <div
-                v-for="(field, index) in uploadedFields"
-                :key="index"
-                class="col-3 mb-3 text-center"
-              >
-                <img
-                  :src="selectedEmpRow[field]"
-                  alt="Uploaded"
-                  class="img-thumbnail"
-                  style="height: 100px; object-fit: cover;"
-                />
-                <button
-                  @click="removeImage(field)"
-                  class="btn btn-sm btn-danger mt-2"
-                >
-                  Remove
-                </button>
-              </div>
-
-            </div> -->
 
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" @click="remarks=''" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
             <button type="button" class="btn btn-dark" :disabled="!remarks" @click="confirmEmployeeToggle">Yes,
               Proceed</button>
           </div>

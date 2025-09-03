@@ -243,17 +243,17 @@ function inLineFiltersData(searchedData) {
 const activityDoctypes=ref([])
 
 function activityData() {
+    const docName="Ezy Dynamic Activate Log"
     const queryParams = {
-        fields: JSON.stringify(["*"]),
+        fields: JSON.stringify(["activate_log"]),
         limit_page_length: "none"
     };
 
     axiosInstance
-        .get(apis.resource + doctypes.EzyActivityLog, { params: queryParams })
+        .get(`${apis.resource}${doctypes.EzyActivityLog}/${encodeURIComponent(docName)}`, { params: queryParams })
         .then((res) => {
-            if (res?.data?.length) {
-                activityDoctypes.value = res.data[0].activate_log
-                console.log(activityDoctypes.value);
+            if (res.data) {
+                activityDoctypes.value = res.data.activate_log;
                 activitylog();
             }
         })
