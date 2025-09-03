@@ -174,11 +174,6 @@
                                                 <i class="bi bi-paperclip me-1"></i> Attach
                                                 </label>
 
-
-
-                                                <!-- Preview Section -->
-                                                
-                                              
                                                 <div v-if="field.value" class="d-flex flex-wrap gap-2">
                                                     <div
                                                     v-for="(fileUrl, index) in field.value.split('|').map(f => f.trim())"
