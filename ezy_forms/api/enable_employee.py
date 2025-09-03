@@ -4,7 +4,7 @@ from ezy_forms.ezy_forms.doctype.login_check.login_check import after_insert_use
 @frappe.whitelist()
 def employee_update(emp_mail):
     try:
-        sender = frappe.get_value("Email Account", {"enable_outgoing": 1, "default_outgoing": 1}, "email_id")
+        sender = frappe.get_value("Email Account", {"enable_outgoing": 1, "default_outgoing": 0}, "email_id")
         if not sender:
             return "No outgoing email account is configured."
 
