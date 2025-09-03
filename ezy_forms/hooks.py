@@ -149,15 +149,15 @@ doc_events = {
 "Ezy Employee":{
         "after_insert":"ezy_forms.ezy_forms.doctype.ezy_employee.ezy_employee.set_reporting_to_and_designation"
     },
-"NICO MOD REPORT":{
-    "after_insert":"ezy_forms.ezy_custom_forms.custom_script.mail.email_pdf_send"
-    },
-"NICO ROOM CHECK LIST":{
-    "after_insert":"ezy_forms.ezy_custom_forms.custom_script.mail.email_pdf_send"
-    },
-"File":{
-    "after_insert":"ezy_forms.ezy_custom_forms.custom_script.mail.make_file_public_after_insert"
-}
+# "NICO MOD REPORT":{
+#     "after_insert":"ezy_forms.ezy_custom_forms.custom_script.mail.email_pdf_send"
+#     },
+# "NICO ROOM CHECK LIST":{
+#     "after_insert":"ezy_forms.ezy_custom_forms.custom_script.mail.email_pdf_send"
+#     },
+# "File":{
+#     "after_insert":"ezy_forms.ezy_custom_forms.custom_script.mail.make_file_public_after_insert"
+# }
 }
 
 # Scheduled Tasks
