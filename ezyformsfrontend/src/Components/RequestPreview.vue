@@ -154,9 +154,11 @@
 
 
                                                 <!-- Preview Section -->
+                                                {{ field.value }}
+                                              
                                                 <div v-if="field.value" class="d-flex flex-wrap gap-2">
                                                     <div
-                                                    v-for="(fileUrl, index) in field.value.split(',').map(f => f.trim())"
+                                                    v-for="(fileUrl, index) in field.value.split('|').map(f => f.trim())"
                                                     :key="index"
                                                     class="position-relative d-inline-block"
                                                     @mouseover="hovered = index"
@@ -1062,9 +1064,9 @@ const isImageFile = (url) => {
 }
 
 const removeFile = (index, field) => {
-    const files = field.value.split(',').map(f => f.trim())
+    const files = field.value.split('|').map(f => f.trim())
     files.splice(index, 1)
-    field.value = files.join(', ')
+    field.value = files.join('|')
     emit('updateField', field)
 }
 // console.log(tableRows);
@@ -1409,7 +1411,7 @@ const tableFileUpload = (file, row, fieldname) => {
 const normalizeFileList = (value) => {
     if (!value) return [];
     if (Array.isArray(value)) return value;
-    if (typeof value === 'string') return value.split(',').map(f => f.trim());
+    if (typeof value === 'string') return value.split('|').map(f => f.trim());
     return [];
 };
 
@@ -1844,7 +1846,7 @@ const logFieldValue = (
 
         // Normalize existing files into an array
         let existingFiles = field["value"]
-            ? field["value"].split(',').map(f => f.trim())
+            ? field["value"].split('|').map(f => f.trim())
             : [];
 
         const totalFiles = existingFiles.length + files.length;
@@ -2048,7 +2050,7 @@ const uploadFile = (file, field, blockIndex, sectionIndex, rowIndex, columnIndex
         .then((res) => {
             if (res.message && res.message.file_url) {
                 if (field["value"]) {
-                    field["value"] += `, ${res.message.file_url}`;
+                    field["value"] += `| ${res.message.file_url}`;
                 } else {
                     field["value"] = res.message.file_url;
                 }
