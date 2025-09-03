@@ -292,17 +292,41 @@ def activating_perms(doctype,role):
 def activating_perms_for_all_roles_in_wf_roadmap():
 
 	unique_roles_from_all_roles = frappe.db.get_list("WF Roles",pluck="name")
-	doctype_permission=ezy_doctype_permission()
 	
 	child_entries = frappe.get_all(
-			"Doctype Permissions",
-			filters={"parent": "Ezy Doctype Permissions", "parenttype": "Ezy Doctype Permissions", "parentfield": "document_type"},
-			fields=["doctype_names"]
-		)
-	document_type_list = [entry["doctype_names"] for entry in child_entries]
-	custom_feilds = frappe.get_all("DocType",filters={'module':["in",["User Forms","ezy_custom_forms"]]})
-	custom_feilds_list = [doc.name for doc in custom_feilds]
-	document_type_list.extend(custom_feilds_list)
+		"Doctype Permissions",
+		filters={
+			"parent": "Ezy Doctype Permissions",
+			"parenttype": "Ezy Doctype Permissions",
+			"parentfield": "document_type",
+		},
+		fields=["doctype_names"]
+	)
+
+	module_child_entries = frappe.get_all(
+		"Custom Modules Permissions",
+		filters={
+			"parent": "Ezy Doctype Permissions",
+			"parenttype": "Ezy Doctype Permissions",
+			"parentfield": "custom_modules",
+		},
+		fields=["custom_modules"]  # ✅ make sure fieldname is correct
+	)
+
+	document_type_list = [entry.get("doctype_names") for entry in child_entries if entry.get("doctype_names")]
+	modules_list = [entry.get("custom_modules") for entry in module_child_entries if entry.get("custom_modules")]
+
+	# fetch doctypes belonging to the given modules
+	custom_fields_list = frappe.get_all(
+		"DocType",
+		filters={"module": ["in", modules_list]},
+		pluck="name"
+	)
+
+	# merge lists
+	document_type_list.extend(custom_fields_list)
+
+ 
 	for doc in document_type_list:
 		for role in unique_roles_from_all_roles:
 			if not frappe.db.exists("Custom DocPerm",{"parent":doc,"role":role}):
@@ -527,50 +551,48 @@ def ezy_doctype_permission():
 	This function updates the Ezy Doctype Permissions if any missing values are found.
 	"""
 	try:
-		# Hardcoded default permissions
-		employee_doctypes_permi = ['DocType', 'User', 'Role', 'Data Import', 'Data Export','System Settings','Website Settings','Email Account','Version','Activity Log','Notification Settings']
-		guest_permi = ['Ezy Departments', 'WF Roles', 'Notification Settings','Acknowledgement']
+		# Default Frappe doctypes for employees
+		default_employee_doctypes = [
+			'DocType', 'User', 'Role', 'Data Import', 'Data Export',
+			'System Settings', 'Website Settings', 'Email Account',
+			'Version', 'Activity Log', 'Notification Settings'
+		]
+		frappe.db.commit()
+  
+		# Default modules to always include
+		default_modules = ["User Forms", "ezy_custom_forms", "Form Templates","Ezy Forms","Ezy Flow","ezy_forms"]
 
-		# Fetch custom doctypes from specified modules
-		custom_doctypes = frappe.get_all("DocType", filters={'module': ["in", ["Ezy Flow", "Ezy Forms",'ezy_forms']]})
-		custom_doctype_names = [doc.name for doc in custom_doctypes]
-
-		# Extend employee permission list
-		employee_doctypes_permi.extend(custom_doctype_names)
-
-		# Get the doc
+		# Get main Ezy Permissions Doc
 		ezy_permissions = frappe.get_doc("Ezy Doctype Permissions", "Ezy Doctype Permissions")
-
-		# Existing entries in the multiselect table fields
+  
+		# --- Ensure default employee doctypes exist in document_type ---
 		existing_employee_perms = [d.doctype_names for d in ezy_permissions.document_type]
-		existing_guest_perms = [d.doctype_names for d in ezy_permissions.guest_permissions]
-
-		# Find and add new entries if not already present
-		for perm in employee_doctypes_permi:
+		for perm in default_employee_doctypes:
 			if perm not in existing_employee_perms:
 				ezy_permissions.append("document_type", {"doctype_names": perm})
 
-		for perm in guest_permi:
-			if perm not in existing_guest_perms:
-				ezy_permissions.append("guest_permissions", {"doctype_names": perm})
-
-		# Save changes
+		# Save updates if anything new added
 		ezy_permissions.save(ignore_permissions=True)
-		child_entries = frappe.get_all(
-				"Doctype Permissions",
-				filters={"parent": "Ezy Doctype Permissions", "parenttype": "Ezy Doctype Permissions", "parentfield": "guest_permissions"},
-				fields=["doctype_names"]
-			)
-		document_type_list = [entry["doctype_names"] for entry in child_entries]
-		if document_type_list:
-			for doc in document_type_list:
-				form_perms = frappe.new_doc("Custom DocPerm")
-				form_perms.parent = doc
-				form_perms.role ="Guest"
-				form_perms.read = 1
-				form_perms.insert(ignore_permissions=True)        
+		# Ensure default modules exist in custom_modules
+		existing_modules = [d.custom_modules for d in ezy_permissions.custom_modules] if ezy_permissions.custom_modules else []
+		for mod in default_modules:
+			if mod not in existing_modules:
+				ezy_permissions.append("custom_modules", {"custom_modules": mod})
+
+
+		ezy_permissions.save(ignore_permissions=True)
+
 		frappe.db.commit()
-		return {"status": "success", "message": "Permissions updated successfully"}
+		# Now reload updated modules list
+		custom_modules = [d.custom_modules for d in ezy_permissions.custom_modules]
+
+		# Fetch doctypes from all custom modules
+		custom_doctypes = frappe.get_list("DocType", filters={'module': ["in", custom_modules]}, pluck="name")
+
+		# Merge all doctypes (default frappe + custom)
+		employee_doctypes_permi = list(set(default_employee_doctypes + custom_doctypes))
+
+		return employee_doctypes_permi
 
 	except Exception as e:
 		frappe.log_error(frappe.get_traceback(), "Error in ezy_doctype_permissions")

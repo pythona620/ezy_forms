@@ -148,6 +148,7 @@ const pdfPreview = ref('')
 const childtableHeaders = ref([]);
 const is_admin = ref('');
 const isEnable = ref("");
+const userDept=ref([]);
 
 
 // Business unit and filter object
@@ -491,7 +492,7 @@ function inLineFiltersData(searchedData) {
     if (searchedData.form_status === 'Retired') {
       filterObj.value.filters.push(["form_status", "like", "Draft"]);
     }
-    console.log(searchedData.enable);
+    // console.log(searchedData.enable);
     if (searchedData.enable === 'Enabled') {
       filterObj.value.filters.push(["enable", "=", 1]);
     } else if (searchedData.enable === 'Disabled') {
@@ -525,10 +526,11 @@ function fetchDepartmentDetails(id, data) {
   const filters = [
     ["business_unit", "=", `${newBusinessUnit.value.business_unit}`],
     ["form_status", "like", "created"],
+    ["accessible_departments", "like", `%${userDept.value}%`]
 
   ];
   if (props.id && props.id !== "allforms" && props.id !== "allforms") {
-    console.log(props.id);
+    // console.log(props.id); 
     filters.push(["owner_of_the_form", "=", props.id]);
   }
   if (data) {
@@ -581,7 +583,7 @@ onMounted(() => {
 
   const userData = JSON.parse(localStorage.getItem('employeeData'));
   is_admin.value = userData.is_admin || '';
-  // console.log(is_admin.value,"///");
+  userDept.value=userData.department;
 
   if (is_admin.value == 1) {
     isEnable.value = "true";

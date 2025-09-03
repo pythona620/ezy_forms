@@ -1052,7 +1052,7 @@ def convert_html_to_pdf(html_content, pdf_path,options=None):
     try:
         pdfkit.from_string(html_content, pdf_path,options=options)
     except Exception as e:
-        frappe.log_error(f"PDF generation failed: {e}")
+        frappe.log_error(title="PDF Generation Failed", message=str(e))
  
 def json_structure_call_for_html_view(json_obj: list, form_name: str, child_data, child_table_data,business_unit,wf_generated_request_id=None,mail_attachment=None):
    
