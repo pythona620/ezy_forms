@@ -513,12 +513,9 @@ function clearPassword() {
     this.passwordsMismatch = ""
 }
 
-// const new_password = ref("");
-// const confirm_password = ref("");
 const showNewPassword = ref(false);
 const showConfPwdPassword = ref(false);
 const passwordError = ref("");
-// const passwordsMismatch = ref(false);
 
 const toggleNewPwdVisibility = () => {
     showNewPassword.value = !showNewPassword.value;

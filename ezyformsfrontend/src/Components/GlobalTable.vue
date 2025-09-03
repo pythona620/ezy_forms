@@ -166,7 +166,7 @@
                   </span>
                   <div class="form-check d-flex justify-content-center form-switch text-end">
                     <input class="form-check-input shadow-none " type="checkbox" role="switch"
-                      :checked="row.enable == '0' || row.activate === 0"
+                      :checked="row.enable == '1' || row.activate === 0"
                       @click.prevent="handleToggle(row, index, $event)" />
                   </div>
                 </div>
@@ -807,7 +807,7 @@ function handleCellClick(check, index, type) {
 
 .form-switch .form-check-input:checked {
   background-position: right center;
-  background-color: #303030;
+  background-color: rgb(103, 216, 109);
   border: 0;
 }
 
