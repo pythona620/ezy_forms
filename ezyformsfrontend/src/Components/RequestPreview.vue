@@ -1413,12 +1413,12 @@ const handleFileUpload = async (event, row, fieldname) => {
 
     const existingFiles = normalizeFileList(row[fieldname]);
 
-    if (existingFiles.length >= 20) {
-        alert("Maximum 20 files are allowed.");
+    if (existingFiles.length >= 35) {
+        alert("Maximum 35 files are allowed.");
         return;
     }
 
-    const remainingSlots = 20 - existingFiles.length;
+    const remainingSlots = 35 - existingFiles.length;
     if (selectedFiles.length > remainingSlots) {
         alert(`Only ${remainingSlots} more file(s) can be uploaded.`);
         selectedFiles = selectedFiles.slice(0, remainingSlots);
@@ -1898,9 +1898,9 @@ const logFieldValue = (
             : [];
 
         const totalFiles = existingFiles.length + files.length;
-        if (totalFiles > 20) {
-            alert("You can upload a maximum of 20 files.");
-            files = files.slice(0, 20 - existingFiles.length); // Only allow up to 20 total
+        if (totalFiles > 35) {
+            alert("You can upload a maximum of 35 files.");
+            files = files.slice(0, 35 - existingFiles.length); // Only allow up to 35 total
         }
 
         files.forEach((file) => uploadFile(file, field));
