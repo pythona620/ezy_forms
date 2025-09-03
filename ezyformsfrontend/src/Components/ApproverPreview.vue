@@ -1049,7 +1049,7 @@
                                        
                                         <input
                                           v-if="props.readonlyFor !== 'true' && blockIndex !== 0 && blockIndex === currentLevel"
-                                          type="file" accept=".jpeg,.jpg,.png,.pdf,.xlsx,.xls" multiple
+                                          type="file"  multiple
                                           class="form-control font-12"
                                           @change="handleFileUpload($event, row, field.fieldname)" />
 
@@ -1057,7 +1057,7 @@
                                         <div v-if="row[field.fieldname]"
                                           class="d-flex flex-column align-items-center gap-1 mt-2">
                                           <div
-                                            v-for="(fileUrl, index) in row[field.fieldname].split(',').map(f => f.trim()).filter(f => f)"
+                                            v-for="(fileUrl, index) in row[field.fieldname].split('|').map(f => f.trim()).filter(f => f)"
                                             :key="index">
 
                                             <span class="cursor-pointer text-decoration-underline d-flex mb-1"
@@ -1562,7 +1562,7 @@ function calculateFieldExpression(row, expression, fields) {
 const normalizeFileList = (value) => {
   if (!value) return [];
   if (Array.isArray(value)) return value;
-  if (typeof value === 'string') return value.split(',').map(f => f.trim());
+  if (typeof value === 'string') return value.split('|').map(f => f.trim());
   return [];
 };
 const handleFileUpload = async (event, row, fieldname) => {
@@ -1571,12 +1571,12 @@ const handleFileUpload = async (event, row, fieldname) => {
 
   const existingFiles = normalizeFileList(row[fieldname]);
 
-  if (existingFiles.length >= 5) {
-    alert("Maximum 5 files are allowed.");
+  if (existingFiles.length >= 20) {
+    alert("Maximum 20 files are allowed.");
     return;
   }
 
-  const remainingSlots = 5 - existingFiles.length;
+  const remainingSlots = 20 - existingFiles.length;
   if (selectedFiles.length > remainingSlots) {
     alert(`Only ${remainingSlots} more file(s) can be uploaded.`);
     selectedFiles = selectedFiles.slice(0, remainingSlots);
@@ -1624,7 +1624,7 @@ const tableFileUpload = (file, row, fieldname) => {
           files.push(fileUrl);
 
           // Store back as comma-separated string
-          row[fieldname] = files.join(',');
+          row[fieldname] = files.join('|');
           resolve(); // ✅ done
         } else {
           console.error("file_url not found in the response.");
@@ -1903,7 +1903,7 @@ const getAllFieldsData = () => {
             fieldsData.push({ ...field });
             if (field.fieldtype === "Attach" && field.value) {
               filePaths.value = field.value
-                .split(",")
+                .split("|")
                 .map((path) => path.trim());
             }
           });

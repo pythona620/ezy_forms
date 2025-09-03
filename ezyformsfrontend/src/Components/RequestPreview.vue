@@ -162,6 +162,7 @@
                                                 multiple
                                                 @change="logFieldValue($event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
                                                 />
+                                                <!-- <span v-if="(field.fieldname !== 'requestor_signature' && field.label !== 'Requestor Signature') || !field.value" class="font-10 text-danger">Max 20 files can be uploaded**</span> -->
 
                                                 <!-- Custom label that acts as the file button -->
                                                 <label
@@ -176,6 +177,8 @@
 
 
                                                 <!-- Preview Section -->
+                                                {{ field.value }}
+                                              
                                                 <div v-if="field.value" class="d-flex flex-wrap gap-2">
                                                     <div
                                                     v-for="(fileUrl, index) in field.value.split('|').map(f => f.trim())"
@@ -2733,7 +2736,7 @@ function getFieldError(row, field) {
 }
 
 .previewInputHeight {
-    margin-bottom: 5px;
+    margin-bottom: 2px;
 }
 
 .dynamicColumn {
