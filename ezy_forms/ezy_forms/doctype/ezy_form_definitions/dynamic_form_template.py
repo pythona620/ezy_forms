@@ -798,7 +798,7 @@ template_str = """
                                         {% endif %}
 
                                         
-                                       {{field['values']}}
+                                       
                                        {% elif field.fieldtype == 'Small Text' %}
     {% if field.options %}
         {% set options = field.options.strip().split('\n') %}
@@ -836,6 +836,7 @@ template_str = """
 
                                         {% elif field.fieldtype == 'Attach' %}
                                             {% if field['values'] %}
+                                            
                                                 {% if field.fieldtype == 'Attach' and (field.fieldname.startswith('approved_by') or field.fieldname.startswith('requestor')or field.fieldname.startswith('acknowle')) %}
                                                     <img  
                                                         id="{{ field.fieldname }}" 
@@ -845,8 +846,9 @@ template_str = """
                                                     >
                                                 {% else %}
                                                     <ul style="padding-left: 20px; margin: 0px 0;">
-                                                        {% for file in field['values'].split(',') %}
+                                                        {% for file in field['values'].split('|') %}
                                                             <li style="font-size:12px;">
+                                                            
                                                                 {{ file.strip().split('@')[-1] if '@' in file else file.strip().split('/')[-1] }}
                                                             </li>
                                                         {% endfor %}
@@ -1213,7 +1215,7 @@ def preview_dynamic_form(form_short_name: str, business_unit=None, name=None):
                 # Main form attachments
                 if iteration.get("fieldtype") == "Attach" and iteration.get("value"):
                     # Split by comma and strip whitespace
-                    file_urls = [url.strip() for url in iteration["value"].split(",") if url.strip()]
+                    file_urls = [url.strip() for url in iteration["value"].split("|") if url.strip()]
                     
                     for file_url in file_urls:
                         
@@ -1247,7 +1249,7 @@ def preview_dynamic_form(form_short_name: str, business_unit=None, name=None):
                             fieldtype = field_types.get(field)
                             # if fieldtype =='int':
                             if fieldtype == "Attach" and value:
-                                file_urls = [url.strip() for url in value.split(',') if url.strip()]
+                                file_urls = [url.strip() for url in value.split('|') if url.strip()]
                                 for file_url in file_urls:
                                     mail_attachment.append({
                                         "label": "Form Attachments",
@@ -1293,18 +1295,23 @@ def preview_dynamic_form(form_short_name: str, business_unit=None, name=None):
  
  
  
+def clean_filename(filename: str) -> str:
+    """Keep only the part after '@' if present, otherwise return original filename."""
+    if "@" in filename:
+        return filename.split("@", 1)[1]  # take everything after the first '@'
+    return filename
 
 
 def add_file_to_zip(item, zipf, zip_folder_name="Attachments"):
     """Add file to zip under a folder if file_path exists."""
-    if os.path.exists(item["file_path"]):
-        zipf.write(
-            item["file_path"],
-            arcname=os.path.join(zip_folder_name, os.path.basename(item["file_path"]))
-        )
-    else:
-        frappe.log_error(f"File not found: {item['file_path']}")
+    original_filename = os.path.basename(item["file_path"])
+    safe_filename = clean_filename(original_filename)
 
+    # Preserve folder structure if needed
+    arcname = os.path.join(zip_folder_name, safe_filename)
+
+    # Add file to zip
+    zipf.write(item["file_path"], arcname)
         
         
 @frappe.whitelist()
@@ -1425,8 +1432,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                     # Main form attachments
                     if iteration.get("fieldtype") == "Attach" and iteration.get("value"):
                         # Split by comma and strip whitespace
-                        file_urls = [url.strip() for url in iteration["value"].split(",") if url.strip()]
-                        
+                        file_urls = [url.strip() for url in iteration["value"].split("|") if url.strip()]
                         for file_url in file_urls:
                             
                             attachment_info = {
@@ -1459,7 +1465,8 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                                 fieldtype = field_types.get(field)
                                 # if fieldtype =='int':
                                 if fieldtype == "Attach" and value:
-                                    file_urls = [url.strip() for url in value.split(',') if url.strip()]
+                                    file_urls = [url.strip() for url in value.split('|') if url.strip()]
+                                    
                                     for file_url in file_urls:
                                         mail_attachment.append({
                                             "label": "Form Attachments",
