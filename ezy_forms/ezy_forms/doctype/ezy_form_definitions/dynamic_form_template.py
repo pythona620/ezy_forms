@@ -798,33 +798,42 @@ template_str = """
                                         {% endif %}
 
                                         
+                                       {{field['values']}}
                                        {% elif field.fieldtype == 'Small Text' %}
-                                        {% if field.options %}
-                                            {% set options = field.options.strip().split('\n') %}
-                                        {% else %}
-                                            {% set options = field.options %}
-                                        {% endif %}
-                                            {% if field['values'] %}
-                                                {% set selected_values = field['values'] | replace('["', '') | replace('"]', '') | replace('","', ',') %}
-                                                {% set selected_values_list = selected_values.split(',') %}
-                                                <div class="checkbox-container">
-                                                    {% for value in selected_values_list if value %}
-                                                        <div class="checkbox-gap">
-                                                            <span class="custom-checkbox checked"></span>
-                                                            <span style="margin-left:3px; margin-top:3px;" >{{ value }}</span>
-                                                        </div>
-                                                    {% endfor %}
-                                                </div>
-                                            {% else %}
-                                                <div class="checkbox-container">
-                                                    {% for option in options if option %}
-                                                        <div class="checkbox-gap">
-                                                            <span class="custom-checkbox unchecked"></span>
-                                                           <span style="margin-top:4px; margin-left:4px;"> {{ option }}</span>
-                                                        </div>
-                                                    {% endfor %}
-                                                </div>
-                                            {% endif %}
+    {% if field.options %}
+        {% set options = field.options.strip().split('\n') %}
+    {% else %}
+        {% set options = field.options %}
+    {% endif %}
+    
+    {% if field['values'] %}
+        {# Clean JSON-like string into plain text list #}
+        {% set cleaned = field['values']
+            | replace('["', '')
+            | replace('"]', '')
+            | replace('","', '|') %}
+        {# Split only by "|" so comma inside a value is preserved #}
+        {% set selected_values_list = cleaned.split('|') %}
+
+        <div class="checkbox-container">
+            {% for value in selected_values_list if value %}
+                <div class="checkbox-gap">
+                    <span class="custom-checkbox checked"></span>
+                    <span style="margin-left:3px; margin-top:3px;">{{ value }}</span>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="checkbox-container">
+            {% for option in options if option %}
+                <div class="checkbox-gap">
+                    <span class="custom-checkbox unchecked"></span>
+                    <span style="margin-top:4px; margin-left:4px;">{{ option }}</span>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
                                         {% elif field.fieldtype == 'Attach' %}
                                             {% if field['values'] %}
                                                 {% if field.fieldtype == 'Attach' and (field.fieldname.startswith('approved_by') or field.fieldname.startswith('requestor')or field.fieldname.startswith('acknowle')) %}
