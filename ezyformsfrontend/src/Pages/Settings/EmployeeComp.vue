@@ -1676,17 +1676,14 @@ function actionCreated(rowData, actionEvent) {
 }
 
 function forgotpassword() {
-  saveloading.value = true;
   const payload = {
-    user: forgotData.value.name,
+    user_email: forgotData.value.name,
   }
-  axiosInstance.post(apis.resetPassword, payload)
+  axiosInstance.post(apis.forgotPassword, payload)
     .then((res) => {
       if (res) {
-        const messages = JSON.parse(res._server_messages);
-        const messageObj = JSON.parse(messages[0]);
-        if (messageObj.message) {
-          toast.success("Password reset instructions have been sent to the user email.");
+        if (res) {
+          toast.success(res.message.message);
           const modal = bootstrap.Modal.getInstance(document.getElementById('ForgotPasswordModal'));
           modal.hide();
         }
@@ -1694,10 +1691,6 @@ function forgotpassword() {
     })
     .catch((error) => {
       console.error("Upload error:", error);
-    })
-    .finally(() => {
-      saveloading.value = false;
-
     })
 };
 

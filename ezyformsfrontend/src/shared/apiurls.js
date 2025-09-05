@@ -102,7 +102,7 @@ export const apis = {
   linked_doc_list: domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.linked_form_list`,
   linked_form_id_update: domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.linked_form_id_update`,
   forgotPassword:domain +`/method/frappe.core.doctype.user.user.reset_password`,
-  resetPassword:domain + `/method/ezy_flow.api.reset_passward.reset_password`,
+  resetPassword:domain + `/method/ezy_forms.api.v1.reset_password.reset_password`,
   reportMailSend:domain+`/method/ezy_forms.api.v1.send_doctype_as_mail.email_reports_send`,
   employeedisable:domain+`/method/ezy_forms.api.v1.enable_employee.employee_update`,
   get_approved_by_me: domain + `/method/ezy_flow.api.v1.approved_by_me.get_approved_by_me`,
