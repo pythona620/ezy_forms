@@ -246,6 +246,7 @@ const settingsSideBarData = [
     { name: 'Vendor Comparison', icon: 'bi bi-file-earmark-text', route: 'vendorcomparison' },
     { name: 'Acknowledgement' , icon: 'bi bi-file-earmark-text', route: 'acknowledgement' },
     { name: 'Email Template' , icon: 'bi bi-file-earmark-text', route: 'emailtemplate' },
+    { name: 'Email Queue' , icon: 'bi bi-file-earmark-text', route: 'emailqueue' },
     { name: 'Password Policy' , icon: 'bi bi-lock', route: 'passwordpolicy' },
 
     // {name: 'Roles',icon:' bi bi-people', route:'role'},
@@ -335,8 +336,8 @@ const filteredSettingsGroups = computed(() => {
             sixthGroup: settingsSideBarData.slice(7,9),
             seventhGroup: settingsSideBarData.slice(9,12),
             eightGroup: settingsSideBarData.slice(12,13),
-            ninthGroup: settingsSideBarData.slice(13,14),
-            tenthGroup: settingsSideBarData.slice(14),
+            ninthGroup: settingsSideBarData.slice(13,15),
+            tenthGroup: settingsSideBarData.slice(15),
 
 
         }
