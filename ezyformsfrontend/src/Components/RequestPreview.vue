@@ -529,6 +529,7 @@
                                                                 <div class="col-6"
                                                                     v-for="fieldItem in table.slice((i - 1) * 2, i * 2)"
                                                                     :key="fieldItem.fieldname">
+                                                                    <div class="d-flex flex-column">
                                                                     <label v-if="fieldItem.label !== 'Form Name'"
                                                                         class="font-12 fw-medium">{{
                                                                             fieldItem.label
@@ -604,13 +605,26 @@
                                                                     <template
                                                                         v-else-if="fieldItem.fieldtype === 'Attach'">
                                                                         <!-- File Input -->
-                                                                        <label for="fileInput" class="btn btn-outline-primary btn-sm font-12">
+                                                                        <!-- <label for="fileInput" class="btn btn-outline-primary btn-sm font-12">
                                                                             Attach
                                                                             </label>
                                                                         <input multiple type="file" id="fileInput"
                                                                             class="form-control font-12"
                                                                            
-                                                                            @change="handleFileUpload($event, row, fieldItem.fieldname)" />
+                                                                            @change="handleFileUpload($event, row, fieldItem.fieldname)" /> -->
+                                                                                <label
+                                                                            :for="`fileInput-${row[fieldItem.fieldname]}-${field.fieldname}`"
+                                                                            class="btn btn-light attchaInputLabel btn-sm font-12"
+                                                                        >
+                                                                            <i class="bi bi-paperclip me-1"></i> Attach
+                                                                        </label>
+                                                                        <input
+                                                                            :id="`fileInput-${row[fieldItem.fieldname]}-${field.fieldname}`"
+                                                                            type="file"
+                                                                            multiple
+                                                                            class="form-control d-none font-12"
+                                                                            @change="handleFileUpload($event, row, fieldItem.fieldname)"
+                                                                        />
 
                                                                         <!-- Preview Section -->
                                                                         <div v-if="row[fieldItem.fieldname]"
@@ -693,7 +707,7 @@
 
                                                                 </div>
                                                             </div>
-
+</div>
                                                         </div>
 
                                                         <!-- Add Block Button -->
@@ -863,12 +877,19 @@
                                                                         <template
                                                                             v-else-if="field.fieldtype === 'Attach'">
                                                                             <!-- File Input -->
-                                                                            <label for="fileInput" class="btn btn-light attchaInputLabel btn-sm font-12">
-                                                                               <i class="bi bi-paperclip me-1"></i> Attach
-                                                                            </label>
-                                                                            <input id="fileInput" type="file" multiple
-                                                                                class="form-control d-none font-12"
-                                                                                @change="handleFileUpload($event, row, field.fieldname)" />
+                                                                            <label
+                                                                            :for="`fileInput-${row[field.fieldname]}-${field.fieldname}`"
+                                                                            class="btn btn-light attchaInputLabel btn-sm font-12"
+                                                                        >
+                                                                            <i class="bi bi-paperclip me-1"></i> Attach
+                                                                        </label>
+                                                                        <input
+                                                                            :id="`fileInput-${row[field.fieldname]}-${field.fieldname}`"
+                                                                            type="file"
+                                                                            multiple
+                                                                            class="form-control d-none font-12"
+                                                                            @change="handleFileUpload($event, row, field.fieldname)"
+                                                                        />
 
                                                                             <!-- Preview Section -->
                                                                             <div v-if="row[field.fieldname]"
