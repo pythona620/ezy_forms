@@ -232,11 +232,10 @@ function inLineFiltersData(searchedData) {
             }
         });
 
-        if (filterObj.value.filters.length) {
+         filterObj.value.limit_start = 0; // Reset pagination to the first page
+        filterObj.value.limitPageLength = 20; // Reset items per page to default
+    
             activitylog(filterObj.value.filters);
-        } else {
-            activitylog();
-        }
     }, 500); // Adjust debounce delay as needed (e.g., 500ms)
 }
 
@@ -267,31 +266,25 @@ function activityData() {
 const PaginationUpdateValue = (itemsPerPage) => {
     filterObj.value.limitPageLength = itemsPerPage;
     filterObj.value.limit_start = 0;
-    //   if(filterObj.value.filters){
-    //     activitylog(filterObj.value.filters)
-    //   }
-    //   else{
+    
 
-    activitylog();
-    // }
+    activitylog(filterObj.value.filters);
+
 };
 // Handle updating the limit start
 const PaginationLimitStart = ([itemsPerPage, start]) => {
     filterObj.value.limitPageLength = itemsPerPage;
     filterObj.value.limit_start = start;
-    //   if(filterObj.value.filters){
-    //     activitylog(filterObj.value.filters)
-    //   }
-    //   else{
+   
 
-    activitylog();
-    // }
+    activitylog(filterObj.value.filters);
+
 };
 
 function activitylog(data) {
 
     if (data) {
-        filterObj.value.filters.push(...data)
+        filterObj.value.filters = data;
     }
     filterObj.value.filters.push(["ref_doctype", "in", activityDoctypes.value]);
 
