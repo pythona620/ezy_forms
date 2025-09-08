@@ -266,10 +266,10 @@
                       Download Workorder
                     </button>  -->
 
-                    <!-- <button type="button" class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto "
+                    <button type="button" class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto "
                       data-bs-toggle="modal" data-bs-target="#pdfView" @click="viewasPdfView">
                       Preview
-                    </button> -->
+                    </button>
 
                   </div>
                 </div>

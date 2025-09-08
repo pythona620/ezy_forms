@@ -24,7 +24,7 @@
           @actionClickedDropDown="actionClickedDropDown" raiseRequest="true" :enableDisable="isEnable"
           @cell-click="viewPreview" @actionClicked="actionCreated" @toggle-click="toggleFunction" :actions="actions"
           @updateFilters="inLineFiltersData" :field-mapping="fieldMapping" isFiltersoption="true" />
-        <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
+        <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords" :items-per-page="filterObj.limitPageLength"
           @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
       </div>
 
@@ -526,15 +526,18 @@ watch(
 const PaginationUpdateValue = (itemsPerPage) => {
   filterObj.value.limitPageLength = itemsPerPage;
   filterObj.value.limit_start = 0;
-  fetchDepartmentDetails();
 
+  
+      fetchDepartmentDetails(filterObj.value.filters); 
+   
 };
 // Handle updating the limit start
 const PaginationLimitStart = ([itemsPerPage, start]) => {
   filterObj.value.limitPageLength = itemsPerPage;
   filterObj.value.limit_start = start;
-  fetchDepartmentDetails();
-
+  
+      fetchDepartmentDetails(filterObj.value.filters); 
+   
 };
 
 
@@ -575,25 +578,25 @@ function inLineFiltersData(searchedData) {
     });
 
     // Call fetchDepartmentDetails with or without filters
-    if (filterObj.value.filters.length) {
-      fetchDepartmentDetails(null, filterObj.value.filters);
-    } else {
-      fetchDepartmentDetails();
-    }
+    
+      filterObj.value.limit_start = 0; // Reset pagination
+      filterObj.value.limitPageLength = 20; // Reset pagination
+      fetchDepartmentDetails(filterObj.value.filters);
+    
   }, 500); // Adjust debounce delay as needed
 }
 
 function fetchDepartmentDetails(data) {
 
-  const filters = [
+  filterObj.value.filters = [
     ["business_unit", "=", `${businessUnit.value}`],
 
 
   ];
-  filterObj.value.filters.push(...filters);
-
+  
   if (data) {
-    filters.push(...data)
+    
+    filterObj.value.filters.push(...data);
   }
 
   const queryParams = {
