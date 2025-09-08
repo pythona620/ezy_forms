@@ -218,14 +218,14 @@ const loading = ref(false);
 const tableheaders = ref([
   { th: "Request ID", td_key: "name" },
   { th: "Form Name", td_key: "doctype_name" },
-  { th: "Requested By", td_key: "requested_by" },
+  { th: "Requester Name", td_key: "requester_name" },
   // { th: "Linked Form", td_key: "is_linked_form" },
   
   // { th: "Business Unit", td_key: "property" },
   // { th: "Form category", td_key: "doctype_name" },
   // { th: "Role", td_key: "role" },
   { th: "Requested on", td_key: "requested_on" },
-  { th: "Requested Department", td_key: "department_name" },
+  { th: "Requester Department", td_key: "department_name" },
   { th: "Approval Status", td_key: "status" },
   { th: "Pending With", td_key: "assigned_to_users" },
   { th: "Last Action On", td_key: "modified" },
@@ -714,7 +714,7 @@ const fieldMapping = computed(() => ({
   requested_on: { type: "date" },
   role: { type: "input" },
   modified:{type:"date"},
-  requested_by: { type: "input" },
+  requester_name: { type: "input" },
   department_name: { type: "input" },
 
 }))
