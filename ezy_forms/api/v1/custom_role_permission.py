@@ -3,22 +3,34 @@ from frappe.permissions import add_permission
 
 def assign_custom_permissions(doc, method):
     """
-    Assign CRUD + select permissions for all doctypes inside given modules
-    when a new Role is created
+    Enqueue the assignment of custom permissions when a Role is created
     """
-    role_name = doc.name
+    frappe.enqueue(
+        "ezy_forms.api.v1.custom_role_permission.assign_custom_permissions_job",
+        role_name=doc.name,
+        queue="default"
+    )
+    return f"Permission assignment enqueued for role: {doc.name}"
 
-    # ✅ List of modules you want to give permissions for
-    custom_modules = ["Urser Forms", "Ezy Flow", "Ezy Forms", "Form Templates"  ]
 
-    # ✅ Permissions to assign
+@frappe.whitelist()
+def assign_custom_permissions_job(role_name):
+    
+    """
+    Actual job that assigns CRUD + select permissions for all doctypes in custom modules
+    """
+    if not frappe.db.exists("WF Roles",role_name):
+        frappe.get_doc({ "doctype": "WF Roles",  "role": role_name}).insert(ignore_permissions=True)
+        frappe.db.commit()
+        
+    custom_modules = ["Urser Forms", "Ezy Flow", "Ezy Forms", "Form Templates"]
     permissions = ["select", "read", "write", "create", "delete"]
 
-    # ✅ Lambda to apply permissions
     grant_perms = lambda doctype: [add_permission(doctype, role_name, 0, p) for p in permissions]
 
     for module in custom_modules:
         doctypes = frappe.get_all("DocType", filters={"module": module}, pluck="name")
         [grant_perms(doctype) for doctype in doctypes]
 
-    return (f"Custom permissions assigned to role: {role_name}")
+    frappe.db.commit()
+    return f"Custom permissions assigned to role: {role_name}"
