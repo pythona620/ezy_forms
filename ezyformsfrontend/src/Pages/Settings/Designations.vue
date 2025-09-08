@@ -20,8 +20,8 @@
             name="Value" id="Value" v-model="filterObj.search" @input="designationData()" />
 
         <div class="mt-2">
-            <GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" />
-            <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
+            <GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox="true"  />
+            <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords" :items-per-page="filterObj.limitPageLength"
                 @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
         </div>
 

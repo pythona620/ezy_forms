@@ -17,7 +17,7 @@
             <GlobalTable :tHeaders="tableheaders" :tData="tableData" @actionClicked="actionCreated" isAction='true'
                 :actions="actions" actionType="dropdown" isCheckbox="true" isFiltersoption="true"
                 :field-mapping="fieldMapping" @updateFilters="inLineFiltersData" />
-            <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
+            <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords" :items-per-page="filterObj.limitPageLength"
                 @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
         </div>
 
@@ -352,6 +352,8 @@ function inLineFiltersData(searchedData) {
     //   console.log("Dynamic Filters:", filters);
 
     //   // Once the filters are built, pass them to fetchData function
+    filterObj.value.limit_start = 0; // Reset pagination to the first page
+    filterObj.value.limitPageLength = 20; // Reset items per page to default
     if (filters.length) {
         deptData(filters);
     }

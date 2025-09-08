@@ -466,7 +466,7 @@ def add_child_doctype(form_short_name: str, as_a_block: str, fields: list[dict],
 			{
 				"child_doc": {
 					"description": as_a_block,
-					"fieldname": child_doc_name,
+					"fieldname": child_doc_name.replace(" ","_").lower(),
 					"fieldtype": "Table",
 					"idx": idx or 0,
 					"label": child_doc_name,

@@ -16,7 +16,7 @@
       <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" viewType="viewPdf" isCheckbox="true"
         @updateFilters="inLineFiltersData" :field-mapping="fieldMapping" @cell-click="viewPreview"
         isFiltersoption="true" :actions="actions"  />
-      <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
+      <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords" :items-per-page="filterObj.limitPageLength"
         @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
     </div>
    

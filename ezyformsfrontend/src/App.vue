@@ -30,7 +30,7 @@
 </template>
 
 <script setup>
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { computed, ref, watchEffect } from 'vue';
 import HeaderComp from './Components/HeaderComp.vue';
 import LoaderPage from './Components/loader/LoaderPage.vue';
@@ -45,6 +45,8 @@ import { onMounted } from 'vue';
 import { onBeforeUnmount } from 'vue';
 // Get current route
 const route = useRoute();
+const router = useRouter()
+const isOnline = ref(navigator.onLine)
 // let inactivityTimer
 
 // const logoutUser = async () => {
@@ -100,50 +102,100 @@ function getUserIdFromCookies() {
         ?.split("=")[1] || null;
 }
 
-
-function removeUserIdCookie() {
-    document.cookie = "user_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
-    document.cookie = "full_name=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
-    user_id.value = ""; // Clear the reactive variable
-    // console.log("user_id cookie removed");
-}
-
-// Function to remove user-related localStorage data
-function clearLocalStorage() {
-    localStorage.removeItem("UserName");
-    localStorage.removeItem("employeeData");
-    localStorage.removeItem("Bu");
-    localStorage.removeItem("USERROLE");
-    // console.log("Local storage cleared");
-}
-
-// Set the initial value on component mount
-onMounted(() => {
-    user_id.value = getUserIdFromCookies();
-      window.addEventListener('online', updateOnlineStatus)
-  window.addEventListener('offline', updateOnlineStatus)
-});
-const isOnline = ref(navigator.onLine)
-
 function updateOnlineStatus() {
   isOnline.value = navigator.onLine
 }
 
+function removeUserIdCookie() {
+    document.cookie = "user_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+    document.cookie = "full_name=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+    user_id.value = ""; 
+}
+
+// Function to remove user-related localStorage data
+function clearLocalStorage() {
+    localStorage.clear();
+    // localStorage.removeItem("employeeData");
+    // localStorage.removeItem("Bu");
+    // localStorage.removeItem("USERROLE");
+    // console.log("Local storage cleared");
+}
+// Check credentials
+function checkCredentials() {
+  // ❌ Skip check if already on login page
+  if (router.currentRoute.value.path === "/") {
+    return;
+  }
+
+  const userNameRaw = sessionStorage.getItem("UserName");
+  const employeeDataRaw = localStorage.getItem("employeeData");
+
+  let userName = null;
+  let employeeData = null;
+
+  try {
+    if (userNameRaw) userName = JSON.parse(userNameRaw);
+  } catch {
+    userName = null;
+  }
+
+  try {
+    if (employeeDataRaw) employeeData = JSON.parse(employeeDataRaw);
+  } catch {
+    employeeData = null;
+  }
+
+  // 🔹 If employeeData missing
+  if (!employeeData) {
+    sessionStorage.removeItem("UserName");
+    localStorage.clear();
+    clearLocalStorage();
+    removeUserIdCookie();
+    router.push("/");
+  }
+  // 🔹 If only UserName missing
+  else if (!userName) {
+     localStorage.removeItem("employeeData");
+    localStorage.clear();
+    clearLocalStorage();
+    removeUserIdCookie();
+    router.push("/");
+  }
+}
+
+
+// Set the initial value on component mount
+onMounted(() => {
+  checkCredentials();
+    user_id.value = getUserIdFromCookies();
+    window.addEventListener("online", updateOnlineStatus);
+    window.addEventListener("offline", updateOnlineStatus);
+
+    // listen to user activity 
+    window.addEventListener("click", checkCredentials); 
+    window.addEventListener("keydown", checkCredentials); 
+    window.addEventListener("mousemove", checkCredentials); 
+    window.addEventListener("scroll", checkCredentials); 
+
+
+});
+
 
 
 onBeforeUnmount(() => {
-  window.removeEventListener('online', updateOnlineStatus)
-  window.removeEventListener('offline', updateOnlineStatus)
-})
-// Watch for changes in `sessionStorage` UserName
-watchEffect(() => {
-    const userName = sessionStorage.getItem("UserName");
+ window.removeEventListener("online", updateOnlineStatus);
+  window.removeEventListener("offline", updateOnlineStatus);
 
-    if (!userName) {
-        clearLocalStorage();
-        removeUserIdCookie();
-    }
+  window.removeEventListener("click", checkCredentials);
+  window.removeEventListener("keydown", checkCredentials);
+  window.removeEventListener("mousemove", checkCredentials);
+  window.removeEventListener("scroll", checkCredentials);
+})
+
+watchEffect(() => {
+  checkCredentials();
 });
+
 </script>
 
 <style>

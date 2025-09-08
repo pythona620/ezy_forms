@@ -124,11 +124,11 @@
                             style="cursor: pointer">
                             {{ role }}
                           </li>
-                          <li v-if="searchText"
+                          <!-- <li v-if="searchText"
                             class="list-group-item list-group-item-action font-12 text-primary" style="cursor: pointer"
                             @click="showModal = true">
                             <i class="bi bi-plus-lg"></i> Create role "<strong>{{ searchText }}</strong>"
-                          </li>
+                          </li> -->
                         </ul>
                         <!-- Modal -->
                         <div class="modal fade" :class="{ show: showModal }" style="display: block;" v-if="showModal">
@@ -269,7 +269,7 @@
         <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" :actions="actions" enableDisable="true"
           @actionClicked="actionCreated" @toggle-click="toggleFunction" actionType="dropdown" isCheckbox="true"
           isFiltersoption="true" :field-mapping="fieldMapping" @updateFilters="inLineFiltersData" />
-        <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
+        <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords" :items-per-page="filterObj.limitPageLength"
           @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
       </div>
       <div v-else>
@@ -2039,38 +2039,50 @@ function inLineFiltersData(searchedData) {
     });
 
     // Call receivedForMe with or without filters
-    if (filterObj.value.filters.length) {
+   
       filterObj.value.limit_start = 0;
+      filterObj.value.limitPageLength = 20; // Reset to first page on new search
 
       employeeData(filterObj.value.filters);
-    } else {
-      employeeData();
-    }
+   
   }, 500);
 }
-
 function employeeData(data) {
-  const filters = [["company_field", "=", `${newbusiness.value}`], ["enable", "=", "1"]];
+  const filters = [
+    ["company_field", "=", `${newbusiness.value}`],
+    ["enable", "=", "1"]
+  ];
+
   if (data) {
     filters.push(...data);
   }
 
+  // ✅ Deduplicate filters
+  const seen = new Set();
+  const uniqueFilters = filters.filter(f => {
+    const key = f.join("|");
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
   const queryParams = {
     fields: JSON.stringify(["*"]),
-    filters: JSON.stringify(filters),
+    filters: JSON.stringify(uniqueFilters),
     limit_page_length: filterObj.value.limitPageLength,
     limit_start: filterObj.value.limit_start,
-    order_by: "`tabEzy Employee`.`enable` DESC,`tabEzy Employee`.`modified` DESC",
+    order_by: "`tabEzy Employee`.`enable` DESC, `tabEzy Employee`.`modified` DESC",
   };
+
   const queryParamsCount = {
     fields: JSON.stringify(["count(name) AS total_count"]),
-    limitPageLength: "None",
-    filters: JSON.stringify(filters),
+    limit_page_length: "None", // ✅ corrected
+    filters: JSON.stringify(uniqueFilters),
   };
+
+  // Count API
   axiosInstance
-    .get(`${apis.resource}${doctypes.EzyEmployeeList}`, {
-      params: queryParamsCount,
-    })
+    .get(`${apis.resource}${doctypes.EzyEmployeeList}`, { params: queryParamsCount })
     .then((res) => {
       totalRecords.value = res.data[0].total_count;
     })
@@ -2078,30 +2090,16 @@ function employeeData(data) {
       console.error("Error fetching ezyForms data:", error);
     });
 
+  // Data API
   axiosInstance
     .get(apis.resource + doctypes.EzyEmployeeList, { params: queryParams })
     .then((res) => {
       if (res.data) {
-        const newData = res.data
+        const newData = res.data || [];
         if (filterObj.value.limit_start === 0) {
-
           tableData.value = newData;
-          // designations.value = [...new Set(res.data.map((designation) => designation.designation))];
-          // reportingTo.value = [
-          //   ...new Set(res.data.map((reporting) => reporting.reporting_to)),
-          // ];
-          // reportingDesigination.value = [
-          //   ...new Set(
-          //     res.data.map(
-          //       (reportingDesigination) =>
-          //         reportingDesigination.reporting_designation
-          //     )
-          //   ),
-          // ];
-          // createEmployee.value.company_field = businessUnit.value;
-        }
-        else {
-          tableData.value = tableData.value.concat(newData);
+        } else {
+          tableData.value = [...tableData.value, ...newData];
         }
       }
     })
@@ -2109,6 +2107,7 @@ function employeeData(data) {
       console.error("Error fetching department data:", error);
     });
 }
+
 
 const employeeEmails = ref([]);
 

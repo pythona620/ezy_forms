@@ -242,7 +242,7 @@
         <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" :actions="actions" enableDisable="true"
           @actionClicked="actionCreated" @toggle-click="toggleFunction" actionType="dropdown" isCheckbox="true"
           isFiltersoption="true" :field-mapping="fieldMapping" @updateFilters="inLineFiltersData" />
-        <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
+        <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords" :items-per-page="filterObj.limitPageLength"
           @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
       </div>
       <div v-else>

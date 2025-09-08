@@ -509,6 +509,9 @@ export default {
       this.formdata.usr = "";
     },
     validateEmail() {
+      if(this.SignUpdata.email){
+        this.SignUpdata.email = this.SignUpdata.email.trim().toLowerCase();
+      
       const email = this.SignUpdata.email;
       const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -523,7 +526,7 @@ export default {
       }
       axiosInstance
         .get(`${apis.loginCheckmethod}`, {
-          params: { user_id: this.SignUpdata.email },
+          params: { user_id: this.SignUpdata.email},
         })
         .then((res) => {
           // Case: User not found – clear error
@@ -539,6 +542,7 @@ export default {
           console.error("Login error: ", error);
           this.errors.email = "Error checking email";
         });
+        }
 
 
 
