@@ -619,9 +619,10 @@
                           <!-- || tableName === field.options -->
                           
                           <div v-if="field.fieldname === tableName || tableName === field.options" class="overTable">
+                            
                             <div v-if="field.description === 'true'">
 
-                              <div v-for="(row, index) in props.childData[tableName]" :key="index"
+                              <div v-for="(row, index) in props.childData[tableName.toLowerCase().replace(/ /g, '_')]" :key="index"
                                 class="border p-2 mb-3 rounded bg-light">
                                 <div class="mb-2 font-12 fw-bold">#{{ blockIndex + 1 }}</div>
                                 <div v-for="i in Math.ceil(headers.length / 2)" :key="i" class="row mb-2">
@@ -1000,9 +1001,9 @@
                                               <div>
                                                 <button class="btn btn-sm btn-light me-2" @click="viewAttachment(file)">View</button>
                                                 <button class="btn btn-sm font-13 btn-light"
-  @click="downloadAttachment(file, getFilename(file))">
-  Download
-</button>
+                                                @click="downloadAttachment(file, getFilename(file))">
+                                                Download
+                                              </button>
                                                 <a :href="file" download class="btn btn-sm btn-light">Download</a>
                                               </div>
                                             </li>
