@@ -1407,7 +1407,8 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
             print_format = frappe.db.get_value("Ezy Form Definitions", form_short_name, "print_format")
             wf_generated_request_id = frappe.get_value(form_short_name, name, "wf_generated_request_id")
             activate_log = frappe.get_doc('WF Activity Log', wf_generated_request_id).as_dict()
-
+            wf_work_flow_request = frappe.get_doc('WF Workflow Requests', wf_generated_request_id).as_dict()
+            employee_name = frappe.get_value("Ezy Employee",wf_work_flow_request['requested_by'],"emp_name")
             filtered_reasons = sorted([{ 'level': entry['level'],'role': entry['role'], 'user': entry['user'], 'user_name': entry['user_name'], 'reason': entry['reason'], 'action': entry['action'], 'time': entry['time'], 'random_string': entry['random_string']  }  for entry in activate_log.get('reason', [])  ],key=lambda x: datetime.strptime(x['time'], "%Y/%m/%d %H:%M:%S:%f") if x.get('time') else datetime.min )
             html_table_output = ""
             if filtered_reasons:
@@ -1511,7 +1512,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                 )
 
             # Generate PDFs
-            pdf_filename = f"{form_short_name or 'form'}.pdf"
+            pdf_filename = f"{form_name or 'form'}-{employee_name}.pdf"
             absolute_pdf_path = os.path.join(attachment_folder, pdf_filename)
 
             activate_pdf_name = "Activity Log .pdf"
@@ -1539,7 +1540,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
 
             # Create ZIP
             zip_folder_name = "Attachments"
-            zip_filename = f"{form_name or 'form'}.zip"
+            zip_filename = f"{form_name or 'form'}-{employee_name}.zip"
             zip_path = os.path.join(attachment_folder, zip_filename)
 
             with zipfile.ZipFile(zip_path, 'w') as zipf:
