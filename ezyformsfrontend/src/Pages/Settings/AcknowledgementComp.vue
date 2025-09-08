@@ -37,7 +37,7 @@
                     <div class="modal-body">
                         <label for="password" class="font-13">Acknowledgement Name</label><br />
                         <FormFields tag="input" type="text" name="acknowledgementName" id="acknowledgementName"
-                            placeholder="Enter Name" class="mb-4" v-model="acknowledgementName" />
+                            placeholder="Enter Name" class="mb-4" v-model.trim="acknowledgementName" />
 
                         <label for="password" class="font-13">Acknowledgement</label><br />
                         <QuillEditor v-model:content="content" contentType="html" theme="snow" style="height: 300px" />
@@ -46,11 +46,11 @@
                         <button @click="close" type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
                             Close
                         </button>
-                        <button v-if="isSubmitBtn" type="button" class="btn btn-dark" @click="createAcknowledgement">
+                        <button v-if="isSubmitBtn" type="button" class="btn btn-dark" :disabled="!acknowledgementName" @click="createAcknowledgement">
                             Submit
                         </button>
 
-                        <button v-else type="button" class="btn btn-dark" @click="UpdateAcknowledgement">
+                        <button v-else type="button" class="btn btn-dark" :disabled="!acknowledgementName" @click="UpdateAcknowledgement">
                             Update
                         </button>
                     </div>

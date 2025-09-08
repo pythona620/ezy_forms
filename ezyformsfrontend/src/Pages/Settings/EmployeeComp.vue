@@ -200,7 +200,7 @@
                       <VueMultiselect v-model="createEmployee.reporting_designation" :options="designations"
                         :allow-empty="true" :multiple="false" :close-on-select="true" :clear-on-select="false"
                         :preserve-search="true" placeholder="Select Reporting Designation" class="font-11 mb-3"
-                        :disabled="!!createEmployee.reporting_to">
+                        :disabled="true">
                         <!-- taggable
                                             @tag="addReportingDesignation"
                                             tag-placeholder="Press enter to add reporting designation" -->
@@ -517,7 +517,7 @@
                   <VueMultiselect v-model="createEmployee.reporting_designation" :options="designations"
                     :multiple="false" :close-on-select="true" :clear-on-select="false" :preserve-search="true"
                     placeholder="Select Reporting Designation" class="font-11 mb-3"
-                    :disabled="!!createEmployee.reporting_to">
+                    :disabled="true">
 
 
                     <template #selection="{ values, isOpen }">
@@ -1676,18 +1676,14 @@ function actionCreated(rowData, actionEvent) {
 }
 
 function forgotpassword() {
-  saveloading.value = true;
   const payload = {
-    cmd: "frappe.core.doctype.user.user.reset_password",
-    user: forgotData.value.name,
+    user_email: forgotData.value.name,
   }
   axiosInstance.post(apis.forgotPassword, payload)
     .then((res) => {
       if (res) {
-        const messages = JSON.parse(res._server_messages);
-        const messageObj = JSON.parse(messages[0]);
-        if (messageObj.message) {
-          toast.success("Password reset instructions have been sent to the user email.");
+        if (res) {
+          toast.success(res.message.message);
           const modal = bootstrap.Modal.getInstance(document.getElementById('ForgotPasswordModal'));
           modal.hide();
         }
@@ -1695,10 +1691,6 @@ function forgotpassword() {
     })
     .catch((error) => {
       console.error("Upload error:", error);
-    })
-    .finally(() => {
-      saveloading.value = false;
-
     })
 };
 
