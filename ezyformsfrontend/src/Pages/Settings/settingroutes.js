@@ -21,6 +21,7 @@ const AcknowledgementComp=()=>import("./AcknowledgementComp.vue");
 const PreDefineForms=()=>import("./PreDefineForms.vue")
 const WorkOrder = ()=>import("./WorkOrder.vue")
 const PasswordPolicy=()=>import("./PasswordPolicy.vue");
+const EmailQueue=()=>import("./EmailQueue.vue")
 
 const EmailTemplate=()=>import("./EmailTemplate.vue");
 
@@ -137,6 +138,11 @@ const settingRoutes = [
         path:"passwordpolicy",
         component:PasswordPolicy,
         name:"passwordpolicy",
+      },
+      {
+        path: "emailqueue",
+        component: EmailQueue,
+        name: "emailqueue",
       },
     ],
   },

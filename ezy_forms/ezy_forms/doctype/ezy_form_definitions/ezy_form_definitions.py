@@ -304,58 +304,40 @@ def activating_perms(doctype, role):
 		perm_doc.insert(ignore_permissions=True)
 		frappe.db.commit()
 
-# def activating_perms_for_all_roles_in_wf_roadmap():
+def activating_perms_for_all_roles_in_wf_roadmap():
 
-# 	unique_roles_from_all_roles = frappe.db.get_list("WF Roles",pluck="name")
+	unique_roles_from_all_roles = frappe.db.get_list("WF Roles",pluck="name")
 	
-# 	child_entries = frappe.get_all(
-# 		"Doctype Permissions",
-# 		filters={
-# 			"parent": "Ezy Doctype Permissions",
-# 			"parenttype": "Ezy Doctype Permissions",
-# 			"parentfield": "document_type",
-# 		},
-# 		fields=["doctype_names"]
-# 	)
+	child_entries = frappe.get_all(
+		"Doctype Permissions",
+		filters={
+			"parent": "Ezy Doctype Permissions",
+			"parenttype": "Ezy Doctype Permissions",
+			"parentfield": "document_type",
+		},
+		fields=["doctype_names"]
+	)
 
-# 	module_child_entries = frappe.get_all(
-# 		"Custom Modules Permissions",
-# 		filters={
-# 			"parent": "Ezy Doctype Permissions",
-# 			"parenttype": "Ezy Doctype Permissions",
-# 			"parentfield": "custom_modules",
-# 		},
-# 		fields=["custom_modules"]  # ✅ make sure fieldname is correct
-# 	)
+	document_type_list = [entry.get("doctype_names") for entry in child_entries if entry.get("doctype_names")]
 
-# 	document_type_list = [entry.get("doctype_names") for entry in child_entries if entry.get("doctype_names")]
-# 	modules_list = [entry.get("custom_modules") for entry in module_child_entries if entry.get("custom_modules")]
+	# fetch doctypes belonging to the given modules
 
-# 	# fetch doctypes belonging to the given modules
-# 	custom_fields_list = frappe.get_all(
-# 		"DocType",
-# 		filters={"module": ["in", modules_list]},
-# 		pluck="name"
-# 	)
-
-# 	# merge lists
-# 	document_type_list.extend(custom_fields_list)
 
  
-# 	for doc in document_type_list:
-# 		for role in unique_roles_from_all_roles:
-# 			if not frappe.db.exists("Custom DocPerm",{"parent":doc,"role":role}):
-# 				form_perms = frappe.new_doc("Custom DocPerm")
-# 				form_perms.parent = doc
-# 				form_perms.role = role
-# 				form_perms.delete = 1
-# 				form_perms.select = 1
-# 				form_perms.read = 1
-# 				form_perms.write = 1
-# 				form_perms.create = 1
-# 				form_perms.delete = 1
-# 				form_perms.insert(ignore_permissions=True)
-# 	frappe.db.commit()
+	for doc in document_type_list:
+		for role in unique_roles_from_all_roles:
+			if not frappe.db.exists("Custom DocPerm",{"parent":doc,"role":role}):
+				form_perms = frappe.new_doc("Custom DocPerm")
+				form_perms.parent = doc
+				form_perms.role = role
+				form_perms.delete = 1
+				form_perms.select = 1
+				form_perms.read = 1
+				form_perms.write = 1
+				form_perms.create = 1
+				form_perms.delete = 1
+				form_perms.insert(ignore_permissions=True)
+	frappe.db.commit()
 		
 
 def sanitize_fieldname(name):

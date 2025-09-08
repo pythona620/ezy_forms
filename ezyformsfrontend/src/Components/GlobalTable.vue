@@ -79,7 +79,7 @@
 
                 <i class="bi bi-circle-fill status-circle font-10 text-center pe-2" :class="{
                   'text-warning fw-medium': row[column.td_key] === 'Request Raised',
-                  'textcompleted fw-medium': row[column.td_key] === 'Completed',
+                  'textcompleted fw-medium': row[column.td_key] === 'Completed' || 'Sent',
                   'text-primary fw-medium': row[column.td_key] === 'In Progress',
                   'textcancel fw-medium': row[column.td_key] === 'Cancelled',
                   'RequestCancelled fw-medium': row[column.td_key] === 'Request Cancelled',
