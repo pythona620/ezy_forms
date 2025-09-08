@@ -470,7 +470,7 @@
                   <VueMultiselect v-model="createEmployee.reporting_designation" :options="designations"
                     :multiple="false" :close-on-select="true" :clear-on-select="false" :preserve-search="true"
                     placeholder="Select Reporting Designation" class="font-11 mb-3"
-                    :disabled="!!createEmployee.reporting_to">
+                    :disabled="true">
 
 
                     <template #selection="{ values, isOpen }">

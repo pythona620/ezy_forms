@@ -212,8 +212,9 @@ const responseData = ref([]);
 const tableheaders = ref([
   { th: "Request ID", td_key: "name" },
   { th: "Form Name", td_key: "doctype_name" },
-  { th: "Owner of form", td_key: "department_name" },
+  { th: "Requested By", td_key: "requested_by" },
   { th: "Requested on", td_key: "requested_on" },
+  { th: "Requested Department", td_key: "department_name" },
   { th: "Approval Status", td_key: "status" },
   { th: "Pending With", td_key: "assigned_to_users" },
   { th: "Linked ID", td_key: "linked_form_id" },
@@ -233,6 +234,7 @@ const fieldMapping = ref({
   department_name: { type: "input" },
   doctype_name: { type: "input" },
   requested_on: { type: "date" },
+  requested_by: { type: "input" },
 });
 
 const actions = ref([
