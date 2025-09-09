@@ -1679,7 +1679,7 @@ function forgotpassword() {
   const payload = {
     user_email: forgotData.value.name,
   }
-  axiosInstance.post(apis.forgotPassword, payload)
+  axiosInstance.post(apis.resetPassword, payload)
     .then((res) => {
       if (res) {
         if (res) {
