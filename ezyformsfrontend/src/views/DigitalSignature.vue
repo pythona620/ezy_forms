@@ -30,13 +30,14 @@
         >
           Clear
         </button>
-        <!-- <button
+        <button
           type="button"
           class="save-btn"
           @click="saveSignature"
+          v-if="showSaveButton"
         >
           Save Signature
-        </button> -->
+        </button>
         <!-- <button
           type="button"
           class="btn btn-outline-info btn-sm"
@@ -101,6 +102,11 @@
 <script>
 export default {
   name: 'DigitalSignature',
+  props: {
+    showSaveButton: {
+      type: Boolean,
+    }
+  },
   data() {
     return {
       isDrawing: false,
