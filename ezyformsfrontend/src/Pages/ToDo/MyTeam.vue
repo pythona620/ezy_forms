@@ -10,7 +10,7 @@
       <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" viewType="viewPdf" isCheckbox="true"
         :actions="actions" @actionClicked="actionCreated" isFiltersoption="true" :field-mapping="fieldMapping"
         @cell-click="viewPreview" @updateFilters="inLineFiltersData" />
-      <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
+      <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords" :items-per-page="filterObj.limitPageLength"
         @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
     </div>
     <div class="modal fade" id="viewRequest" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"

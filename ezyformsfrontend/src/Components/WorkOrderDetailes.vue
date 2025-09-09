@@ -2277,10 +2277,9 @@ const addNewItem = () => {
   axiosInstance.post(apis.resource + doctypes.ezyItems, newItemObj)
     .then(response => {
 
-      toast.success('New item added successfully!');
-      console.log('New item added:', response.data);
-      newItem.value.name = '';
-      newItem.value.unit = '';
+      toast.success('New item added successfully!' , { autoClose: 1000 });
+      // console.log('New item added:', response.data);
+      newItem.value = { name: '', unit: '' };
       fetchingItemsList()
       const modal = bootstrap.Modal.getInstance(document.getElementById('NewItemModalMaster'));
       modal.hide();
@@ -2291,9 +2290,6 @@ const addNewItem = () => {
     });
 
 
-  // Clear input fields
-  newItem.value.item_name = '';
-  newItem.value.item_unit_of_measure = '';
 };
 function AddNewVendor(){
   let MasterVendor = {

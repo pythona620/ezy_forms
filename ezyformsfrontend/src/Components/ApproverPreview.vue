@@ -374,7 +374,11 @@
                                         <i v-else class="bi bi-file-earmark fs-5"></i>
 
                                         <!-- File Name -->
+                                        <span style="max-width:500px;" class="nowrap">
+                                         
+
                                         {{ getFilename(url) }}
+                                        </span>
                                       </span>
                                       <div class="d-flex gap-2">
                                         <button class="btn btn-sm font-13 btn-light"
@@ -613,10 +617,12 @@
                       <div v-if="props.childHeaders && Object.keys(props.childHeaders).length">
                         <div v-for="(headers, tableName) in props.childHeaders" :key="tableName">
                           <!-- || tableName === field.options -->
+                          
                           <div v-if="field.fieldname === tableName || tableName === field.options" class="overTable">
+                            
                             <div v-if="field.description === 'true'">
 
-                              <div v-for="(row, index) in props.childData[tableName]" :key="index"
+                              <div v-for="(row, index) in props.childData[tableName.toLowerCase().replace(/ /g, '_')]" :key="index"
                                 class="border p-2 mb-3 rounded bg-light">
                                 <div class="mb-2 font-12 fw-bold">#{{ blockIndex + 1 }}</div>
                                 <div v-for="i in Math.ceil(headers.length / 2)" :key="i" class="row mb-2">
@@ -975,7 +981,7 @@
                                         <div class="modal-body">
                                           <ul class="list-group">
                                             <li v-for="(file, index) in selectedAttachments" :key="index" class="list-group-item font-12 d-flex justify-content-between align-items-center">
-                                              <span class="d-flex align-items-center gap-2">
+                                              <span style="max-width:200px;" class="d-flex align-items-center gap-2">
                                                                           <!-- File Type Icon -->
                                                                           <i v-if="isImageFile(file)"
                                                                             class="bi bi-file-earmark-image text-secondary fs-5"></i>
@@ -986,15 +992,18 @@
                                                                           <i v-else class="bi bi-file-earmark fs-5"></i>
 
                                                                           <!-- File Name -->
+                                                                          <span  class="nowrap">
+
                                                                           {{ getFilename(file) }}
+                                                                          </span>
                                                                         </span>
                                               
                                               <div>
                                                 <button class="btn btn-sm btn-light me-2" @click="viewAttachment(file)">View</button>
                                                 <button class="btn btn-sm font-13 btn-light"
-  @click="downloadAttachment(file, getFilename(file))">
-  Download
-</button>
+                                                @click="downloadAttachment(file, getFilename(file))">
+                                                Download
+                                              </button>
                                                 <a :href="file" download class="btn btn-sm btn-light">Download</a>
                                               </div>
                                             </li>
@@ -1023,6 +1032,7 @@
 
                               </div>
                               <div v-else>
+                                
                                 <div class=" d-flex justify-content-between align-items-center">
                                   <span class="font-13 fw-bold tablename">{{ field.label.replace(/_/g, " ") }}</span>
                                 </div>
@@ -1114,7 +1124,7 @@
                                                     <li
                                                       class="list-group-item d-flex justify-content-between align-items-center"
                                                       v-for="(file, index) in attachmentFiles" :key="index">
-                                                      <span class="d-flex align-items-center gap-2">
+                                                      <span style="max-width:500px;" class="d-flex align-items-center gap-2">
                                                         <!-- File Type Icon -->
                                                         <i v-if="isImageFile(file)"
                                                           class="bi bi-file-earmark-image text-secondary fs-5"></i>
@@ -1125,7 +1135,8 @@
                                                         <i v-else class="bi bi-file-earmark fs-5"></i>
 
                                                         <!-- File Name -->
-                                                        {{ getFilename(file) }}
+                                                        <span> {{ getFilename(file) }}</span>
+                                                        
                                                       </span>
                                                       <div>
                                                         <button class="btn btn-sm btn-light me-2"
@@ -2345,10 +2356,10 @@ function closeAttachmentList() {
 //   emit("attachmentsReady", allPreviewed);
 // }
 
-function previewAttachment(url) {
-  previewUrl.value = url
-  showPreviewModal.value = true
-}
+// function previewAttachment(url) {
+//   previewUrl.value = url
+//   showPreviewModal.value = true
+// }
 
 function closePreviewModal() {
   showPreviewModal.value = false
@@ -2566,9 +2577,17 @@ border: 1px solid #EEEEEE !important;
 }
 
 .overTable {
-  overflow: auto;
+  overflow-x: scroll;
+}
+/* Hide scrollbar but keep functionality */
+.overTable::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
 }
 
+.overTable {
+  -ms-overflow-style: none;  /* IE & Edge */
+  scrollbar-width: none;     /* Firefox */
+}
 .no-drag {
   user-select: none;
   /* Prevent text selection */

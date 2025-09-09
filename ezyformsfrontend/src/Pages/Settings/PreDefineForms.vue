@@ -12,8 +12,8 @@
             <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" view="edit"
                 @cell-click="viewPreview" isFiltersoption="true" :field-mapping="fieldMapping" :actions="actions"
                 @updateFilters="inLineFiltersData" isCheckbox="true" />
-            <!-- <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
-                @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" /> -->
+            <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords" :items-per-page="filterObj.limitPageLength"
+                @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
         </div>
 
         <div class="modal fade" id="pdfView" tabindex="-1" aria-labelledby="pdfViewLabel" aria-hidden="true">

@@ -20,7 +20,7 @@
             <GlobalTable :tHeaders="tableheaders" :tData="tableData"
                  isCheckbox="true" isFiltersoption="true"
                 :field-mapping="fieldMapping" @updateFilters="inLineFiltersData" />
-            <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
+            <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"  :items-per-page="filterObj.limitPageLength"
                 @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
         </div>
 
@@ -146,63 +146,71 @@ watch(
 
 const timeout = ref(null);
 
+// function inLineFiltersData(searchedData) {
+//     // Clear the previous timeout to prevent multiple API calls while typing
+//     clearTimeout(timeout.value);
+
+//     // Set a new timeout to delay the API call
+//     timeout.value = setTimeout(() => {
+//         // Initialize filters array
+//         filterObj.value.filters=[]
+
+//         // Loop through the table headers and build dynamic filters
+//         tableheaders.value.forEach((header) => {
+//             const key = header.td_key;
+
+//             if (searchedData[key]) {
+//                 filterObj.value.filters.push([key, "like", `%${searchedData[key]}%`]);
+//             }
+//         });
+
+//         if (filterObj.value.filters.length) {
+//             activitylog(filterObj.value.filters);
+//         } else {
+//             activitylog();
+//         }
+//     }, 500); // Adjust debounce delay as needed (e.g., 500ms)
+// }
+
 function inLineFiltersData(searchedData) {
-    // Clear the previous timeout to prevent multiple API calls while typing
     clearTimeout(timeout.value);
 
-    // Set a new timeout to delay the API call
     timeout.value = setTimeout(() => {
-        // Initialize filters array
-        filterObj.value.filters=[]
+        filterObj.value.filters = [];
 
-        // Loop through the table headers and build dynamic filters
         tableheaders.value.forEach((header) => {
             const key = header.td_key;
-
             if (searchedData[key]) {
                 filterObj.value.filters.push([key, "like", `%${searchedData[key]}%`]);
             }
         });
 
-        if (filterObj.value.filters.length) {
-            activitylog(filterObj.value.filters);
-        } else {
-            activitylog();
-        }
-    }, 500); // Adjust debounce delay as needed (e.g., 500ms)
-}
+        // Reset pagination whenever filters change
+        filterObj.value.limit_start = 0;
+        filterObj.value.limitPageLength = 20;
 
+        activitylog(filterObj.value.filters);
+    }, 500);
+}
 
 // Handle updating the current value
 const PaginationUpdateValue = (itemsPerPage) => {
   filterObj.value.limitPageLength = itemsPerPage;
   filterObj.value.limit_start = 0;
-//   if(filterObj.value.filters){
-//     activitylog(filterObj.value.filters)
-//   }
-//   else{
 
-      activitylog();
-    // }
+  activitylog(filterObj.value.filters);
 };
+
 // Handle updating the limit start
 const PaginationLimitStart = ([itemsPerPage, start]) => {
   filterObj.value.limitPageLength = itemsPerPage;
   filterObj.value.limit_start = start;
-//   if(filterObj.value.filters){
-//     activitylog(filterObj.value.filters)
-//   }
-//   else{
 
-      activitylog();
-    // }
+  activitylog(filterObj.value.filters);
 };
-
 function activitylog(data) {
-    
-
     if (data) {
-        filterObj.value.filters.push(...data)
+        filterObj.value.filters = data; // replace, not push
     }
 
     const queryParams = {
@@ -216,12 +224,11 @@ function activitylog(data) {
         fields: JSON.stringify(["count(name) AS total_count"]),
         limitPageLength: "None",
         filters: JSON.stringify(filterObj.value.filters),
-    }
+    };
+
     axiosInstance.get(`${apis.resource}${doctypes.ActivityLog}`, { params: queryParamsCount })
         .then((res) => {
-            // console.log(res.data[0].total_count);
-            totalRecords.value = res.data[0].total_count
-
+            totalRecords.value = res.data[0].total_count;
         })
         .catch((error) => {
             console.error("Error fetching ezyForms data:", error);
@@ -230,19 +237,19 @@ function activitylog(data) {
     axiosInstance.get(apis.resource + doctypes.ActivityLog, { params: queryParams })
         .then((res) => {
             if (res.data) {
-                const newData = res.data
+                const newData = res.data;
                 if (filterObj.value.limit_start === 0) {
-                tableData.value = newData;
+                    tableData.value = newData;
+                } else {
+                    tableData.value = tableData.value.concat(newData);
                 }
-                else {
-                tableData.value = tableData.value.concat(newData);
-                }
-      }
+            }
         })
         .catch((error) => {
             console.error("Error fetching department data:", error);
         });
 }
+
 
 
 </script>

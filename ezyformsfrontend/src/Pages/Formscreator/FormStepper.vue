@@ -310,7 +310,19 @@
                                   <!-- ${blockIndex++} -->
                                 </h6>
                               </div>
-                              <div class="d-flex">
+                              <div class="d-flex align-items-center">
+                                  <!-- <div class="text-center me-2 mt-1">
+                                    <div class="font-12 d-flex align-items-center">
+                                      <input type="checkbox" class="me-1 mt-1 mb-0" v-model="getWorkflowSetup(blockIndex).view_only_reportee"
+                                        :true-value="1" :false-value="0"  />
+                                        
+                                      <span>
+
+                                      {{getWorkflowSetup(blockIndex).view_only_reportee === 1 ? 'View Only Reportee' : ''}}
+                                      </span>
+                                      
+                                    </div>
+                                  </div> -->
                                 <div v-if="paramId && workflowSetup.length" class="role-container">
                                   <label class="role-text d-flex align-items-center"
                                     v-if="getWorkflowSetup(blockIndex)">
@@ -821,6 +833,10 @@
                                                                 :class="{ 'border-1 border-danger': invalidFields[tableName]?.includes(index) }" />
                                                               <span v-if="invalidFields[tableName]?.includes(index)"
                                                                 class="font-11 text-danger">Label required**</span>
+                                                                 <span v-else-if="restrictedLabels.includes(field.label?.toLowerCase().trim())"
+        class="font-11 text-danger">
+    This label is not allowed**
+  </span>
                                                             </td>
                                                             <td v-else>{{ field.label }}</td>
 
@@ -1008,12 +1024,19 @@
                                           <td>{{ index + 1 }}</td>
 
                                           <td v-if="editMode[table.tableName]">
-                                            <input v-model="field.label" placeholder="Field Label" class="form-control"
-                                              @blur="updateFieldname(field)"
+                                            <input v-model="field.label" placeholder="Field Label" class="form-control" 
+                                              @blur="() => { updateFieldname(field); validateFieldLabel(field, blockIndex, sectionIndex, tableIndex, index) }"
                                               :class="{ 'border-1 border-danger': invalidFields[table.tableName]?.includes(index) }" />
-                                            <span v-if="invalidFields[tableIndex]?.includes(index)"
-                                              class="font-11 text-danger">Label
-                                              required**</span>
+                                            <span v-if="!field.label && invalidFields[table.tableName]?.includes(index)"
+                                                  class="font-11 text-danger">
+                                              Label required**
+                                            </span>
+
+                                            <!-- Restricted validation -->
+                                            <span v-else-if="restrictedLabels.includes(field.label?.toLowerCase().trim())"
+                                                  class="font-11 text-danger">
+                                              This label is not allowed**
+                                            </span>
                                           </td>
                                           <td v-else>{{ field.label }}</td>
 
@@ -1127,7 +1150,7 @@
                                             <div>
                                               <span :class="field.label ? 'd-none' : 'text-danger'">*</span>
                                               <input v-model="field.label" placeholder="Name the field"
-                                                @blur="updateFieldname(field)"
+                                               @blur="() => { updateFieldname(field); validateFieldLabel(field, blockIndex, sectionIndex, tableIndex, fieldIndex) }"
                                                 class="border-less-input font-14 p-0 inputHeight" :class="{
                                                   'italic-style': !field.label,
                                                   'fw-medium': field.label,
@@ -1571,7 +1594,15 @@ watch(
   },
   { immediate: true }
 );
+const restrictedLabels = [
+  "name", "parent", "creation", "owner", "modified", "modified_by",
+  "parentfield", "parenttype", "file_list", "flags", "docstatus"
+].map(label => label.toLowerCase().trim());
 
+const excludedLabels = ["Approver", "Approved on", "Approved By"].map(label => label.toLowerCase().trim());
+function generateFieldname(label) {
+  return label.toLowerCase().replace(/\s+/g, '_').replace(/[^\w_]/g, '');
+}
 const formDescriptions = computed(() => filterObj.value);
 const child_id = ref("");
 const updateBtnDiv = ref(false);
@@ -1702,36 +1733,41 @@ const handleFieldDropAtIndex = (
 };
 
 const tableExistsMessage = ref('');
-
-const GetDoctypeList = (searchText) => {
+const GetDoctypeList = async (searchText) => {
   const filters = [
-    ['module', 'in', ['User Forms']],
-    ['istable', '=', 1],
+    ["module", "in", ["User Forms"]],
+    ["istable", "=", 1],
   ];
 
   if (searchText?.trim()) {
-    filters.push(['name', 'like', `%${searchText}%`]);
+    filters.push(["name", "=", `${searchText}`]);
   }
 
   const queryParams = {
-    fields: JSON.stringify(['name']),
+    fields: JSON.stringify(["name"]),
     filters: JSON.stringify(filters),
-    limit_page_length: '10',
+    limit_page_length: "None",
   };
 
-  return axiosInstance
-    .get(apis.resource + doctypes.doctypesList, { params: queryParams })
-    .then((res) => res.data || [])
-    .catch((error) => {
-      console.error('Error fetching doctype list:', error);
-      return [];
-    });
+  try {
+    const res = await axiosInstance.get(
+      apis.resource + doctypes.doctypesList,
+      { params: queryParams }
+    );
+    return res.data || [];
+  } catch (error) {
+    console.error("Error fetching doctype list:", error);
+    return [];
+  }
 };
 
 const matched = ref(null)
 
 const updateFieldname = async (field) => {
-  if (field.tableName) {
+  tableExistsMessage.value = ''; // reset message
+  matched.value = null; // reset matched
+
+  if (field.tableName?.trim()) {
     const searchText = field.tableName.trim();
     const existing = await GetDoctypeList(searchText);
 
@@ -1740,14 +1776,13 @@ const updateFieldname = async (field) => {
     if (matched.value) {
       tableExistsMessage.value = 'Table already exists';
     }
-  } else {
-    tableExistsMessage.value = '';
   }
 
   if (field.label) {
     field.fieldname = generateFieldname(field.label);
   }
 };
+
 function searchForm() {
   const searchValue = filterObj.value.is_linked_form;
   if (!searchValue) {
@@ -2158,9 +2193,7 @@ const onDrop = (event, table) => {
 //   }
 // };
 const childTables = ref([]);
-function generateFieldname(label) {
-  return label.toLowerCase().replace(/\s+/g, '_').replace(/[^\w_]/g, '');
-}
+
 const cleanFieldOptions = (field) => {
   if (
     ["Select", "Table MultiSelect", "Check", "Small Text"].includes(field.fieldtype) &&
@@ -2260,6 +2293,30 @@ const removeFieldFromTable = (blockIndex, sectionIndex, tableIndex, fieldIndex) 
   blockArr[blockIndex].sections[sectionIndex].childTables[tableIndex].columns.splice(fieldIndex, 1);
 };
 
+function validateFieldLabel(field, blockIndex, sectionIndex, tableIndex, fieldIndex) {
+  const key = `${blockIndex}-${sectionIndex}-${tableIndex}`;
+  if (!fieldErrors[key]) {
+    fieldErrors[key] = { columns: [] };
+  }
+
+  const fieldError = {};
+
+  // Empty label check
+  if (!field.label?.trim()) {
+    fieldError.label = "Field Label is required";
+  } else {
+    const normalized = field.label.trim().toLowerCase();
+
+    // Restricted labels check
+    if (restrictedLabels.includes(normalized) && !excludedLabels.includes(normalized)) {
+      fieldError.label = `"${field.label}" is a restricted field label`;
+    }
+  }
+
+  // Save error state for this field
+  fieldErrors[key].columns[fieldIndex] = fieldError;
+}
+
 const isEmptyFieldType = (blockIndex, sectionIndex, tableIndex) => {
   const table = blockArr[blockIndex].sections[sectionIndex].childTables[tableIndex];
   const errors = {
@@ -2332,7 +2389,7 @@ const processFields = (blockIndex, sectionIndex, tableIndex) => {
   }));
   table.newTable = false
   const data = {
-    form_short_name: formatTableName(table.tableName),
+    form_short_name: table.tableName,
     fields: table.columns,
     idx: table.idx,
     as_a_block: table.as_a_block  ? table.as_a_block : 'false',
@@ -2350,29 +2407,32 @@ const processFields = (blockIndex, sectionIndex, tableIndex) => {
   //  // transition: "zoom",
   //  //});
   axiosInstance
-    .post(apis.childtable, data)
-    .then((res) => {
-      if (res) {
-        ensureArrayPath(blockIndex, sectionIndex, 'afterCreated');
+  .post(apis.childtable, data)
+  .then((res) => {
+    if (res) {
+      ensureArrayPath(blockIndex, sectionIndex, 'afterCreated');
 
-        // // Save original table to afterCreated
-        section.afterCreated[tableIndex] = table;
+      // Save original table to afterCreated
+      section.afterCreated[tableIndex] = { ...table };
 
-        blockArr[blockIndex].sections[sectionIndex].childTables[tableIndex] = []
+      toast.success("Table created successfully!", {
+        autoClose: 500,
+        transition: "zoom",
+      });
 
-        toast.success("Table created successfully!", {
-          autoClose: 500,
-          transition: "zoom",
-        });
+      const responseData = res.message?.[0]?.[0]?.child_doc;
 
-        const responseData = res.message?.[0]?.[0]?.child_doc;
-
-        // // Store the response data back to the table
-        blockArr[blockIndex].sections[sectionIndex].childTables[tableIndex] = responseData;
-
-        // console.log("Table response saved:", responseData);
+      if (responseData) {
+        // ✅ Merge response into the existing table instead of replacing
+        blockArr[blockIndex].sections[sectionIndex].childTables[tableIndex] = {
+          ...blockArr[blockIndex].sections[sectionIndex].childTables[tableIndex],
+          ...responseData,
+          newTable: false, // keep this flag under control
+        };
       }
-    })
+    }
+  })
+
     .catch((error) => {
       console.error("Error creating table:", error);
     });
@@ -2421,11 +2481,58 @@ const afterImmediateEditaddNewFieldedit = (blockIndex, sectionIndex, tableName) 
 };
 
 const afterdata = ref([])
-const afterImmediateEdit = (blockIndex, sectionIndex, tableName) => {
+// const afterImmediateEdit = (blockIndex, sectionIndex, tableName) => {
 
+//   const section = blockArr[blockIndex].sections[sectionIndex];
+//   const table = section.afterCreated.find((t) => t.tableName === tableName);
+//   // console.log('table', table)
+//   if (!table) return;
+
+//   if (editMode[tableName]) {
+//     invalidFields.value[tableName] = [];
+//     let isValid = true;
+
+//     table.columns.forEach((field, index) => {
+//       if (!field.label || !field.fieldtype) {
+//         invalidFields.value[tableName].push(index);
+//         isValid = false;
+//       }
+//     });
+
+//     if (!isValid) return;
+
+//    const allFields = table.columns.map(({ isNew, ...rest }, index) => ({
+//   ...rest,
+//   idx: index + 1,
+//   options: cleanFieldOptions(rest),
+// }));
+
+
+//     const formData = {
+//       form_short_name: formatTableName(tableName),
+//       fields: allFields,
+//       as_a_block: table.description
+//     };
+
+//     axiosInstance
+//       .post(apis.childtable, formData)
+//       .then((response) => {
+//         afterdata.value = response.data;
+//         toast.success("Fields updated successfully!", { autoClose: 500 });
+
+//       })
+//       .catch((error) => {
+//         console.error("❌ Saving fields failed:", error);
+//       });
+//   }
+
+//   editMode[tableName] = !editMode[tableName];
+// };
+
+
+const afterImmediateEdit = (blockIndex, sectionIndex, tableName) => {
   const section = blockArr[blockIndex].sections[sectionIndex];
   const table = section.afterCreated.find((t) => t.tableName === tableName);
-  // console.log('table', table)
   if (!table) return;
 
   if (editMode[tableName]) {
@@ -2433,7 +2540,9 @@ const afterImmediateEdit = (blockIndex, sectionIndex, tableName) => {
     let isValid = true;
 
     table.columns.forEach((field, index) => {
-      if (!field.label || !field.fieldtype) {
+      const label = field.label?.toLowerCase().trim();
+
+      if (!field.label || !field.fieldtype || restrictedLabels.includes(label)) {
         invalidFields.value[tableName].push(index);
         isValid = false;
       }
@@ -2441,12 +2550,11 @@ const afterImmediateEdit = (blockIndex, sectionIndex, tableName) => {
 
     if (!isValid) return;
 
-   const allFields = table.columns.map(({ isNew, ...rest }, index) => ({
-  ...rest,
-  idx: index + 1,
-  options: cleanFieldOptions(rest),
-}));
-
+    const allFields = table.columns.map(({ isNew, ...rest }, index) => ({
+      ...rest,
+      idx: index + 1,
+      options: cleanFieldOptions(rest),
+    }));
 
     const formData = {
       form_short_name: formatTableName(tableName),
@@ -2459,7 +2567,6 @@ const afterImmediateEdit = (blockIndex, sectionIndex, tableName) => {
       .then((response) => {
         afterdata.value = response.data;
         toast.success("Fields updated successfully!", { autoClose: 500 });
-
       })
       .catch((error) => {
         console.error("❌ Saving fields failed:", error);
@@ -2468,8 +2575,6 @@ const afterImmediateEdit = (blockIndex, sectionIndex, tableName) => {
 
   editMode[tableName] = !editMode[tableName];
 };
-
-
 
 const editMode = reactive({});
 
@@ -2499,6 +2604,7 @@ const deleteRow = (tableName, index) => {
   }
 };
 
+
 const toggleEdit = (tableName, description) => {
   if (editMode[tableName]) {
 
@@ -2510,11 +2616,22 @@ const toggleEdit = (tableName, description) => {
 
     // Validate all fields in the table
     childtableHeaders.value[tableName].forEach((field, index) => {
-      if (!field.label || !field.fieldtype) {
-        invalidFields.value[tableName].push(index); // Store index of invalid rows
-        isValid = false;
-      }
-    });
+  const label = field.label?.toLowerCase().trim();
+
+  // Run label validation
+  validateFieldLabel(field, 0, 0, tableName, index);
+
+  if (
+    !field.label ||
+    !field.fieldtype ||
+    restrictedLabels.includes(label) ||   // 🚫 restricted labels check
+    fieldErrors[`${0}-${0}-${tableName}`]?.columns[index]?.label
+  ) {
+    invalidFields.value[tableName].push(index);
+    isValid = false;
+  }
+});
+
 
     if (!isValid) {
 
@@ -2562,7 +2679,8 @@ const toggleEdit = (tableName, description) => {
 watch(childtableHeaders, (newTables) => {
   Object.keys(newTables).forEach((tableName) => {
     newTables[tableName].forEach((field, index) => {
-      if (field.label && field.fieldtype) {
+      if (field.label && field.fieldtype &&
+        !restrictedLabels.includes(field.label)) {
         // ✅ Remove error dynamically when user enters a valid value
         invalidFields.value[tableName] = invalidFields.value[tableName]?.filter(i => i !== index);
       }
@@ -2910,23 +3028,49 @@ const AddDesignCanvas = (idx) => {
   selectedBlockIndex.value = idx;
   initializeDesignationValue(idx);
 };
-const userlist = ref([]);
+// const userlist = ref([]);
+// function designationData(departments) {
+//   const filters = [];
+
+//   if (Array.isArray(departments) && departments.length > 0) {
+//     filters.push(["ezy_departments", "in", departments]);
+//   }
+
+//   axiosInstance
+//     .get(apis.resource + doctypes.WFRoleMatrix + `/${filterObj.value.business_unit}`)
+//     .then((res) => {
+//       if (res.data) {
+//         // console.log(res.data.users, "wf role matrix");
+//         userlist.value = res.data.users;
+
+//         DesignationList.value = [
+//           ...new Set(res.data.users.map((user) => user.role_name)),
+//         ];
+//       }
+//     })
+//     .catch((error) => {
+//       console.error("Error fetching designations data:", error);
+//     });
+// }
 function designationData(departments) {
   const filters = [];
 
   if (Array.isArray(departments) && departments.length > 0) {
     filters.push(["ezy_departments", "in", departments]);
   }
+  const queryParams = {
+    limit_page_length: 'None',
+  }
 
   axiosInstance
-    .get(apis.resource + doctypes.WFRoleMatrix + `/${filterObj.value.business_unit}`)
+    .get(apis.resource + doctypes.designations,{    params: queryParams })
     .then((res) => {
       if (res.data) {
         // console.log(res.data.users, "wf role matrix");
-        userlist.value = res.data.users;
+        // userlist.value = res.data;
 
         DesignationList.value = [
-          ...new Set(res.data.users.map((user) => user.role_name)),
+          ...new Set(res.data.map((user) => user.name)),
         ];
       }
     })
@@ -3610,12 +3754,6 @@ const onFieldTypeChange = (
 // const hasDuplicates = (array) => new Set(array).size !== array.length;
 
 
-const restrictedLabels = [
-  "name", "parent", "creation", "owner", "modified", "modified_by",
-  "parentfield", "parenttype", "file_list", "flags", "docstatus"
-].map(label => label.toLowerCase().trim());
-
-const excludedLabels = ["Approver", "Approved on", "Approved By"].map(label => label.toLowerCase().trim());
 
 function isRestricted(label) {
   return restrictedLabels.includes(label?.trim().toLowerCase());
@@ -3751,6 +3889,10 @@ function handleInputChange(event, fieldType) {
     return;
   } else {
     formShortNameError.value = ""; // Clear error if input is valid
+  }
+    if (fieldType === "form_short_name" && inputValue.length < 2) {
+    formShortNameError.value = "Short name must have at least 2 letters";
+    return;
   }
   if (fieldType === "form_short_name" && /[^a-zA-Z ]/.test(inputValue)) {
     formShortNameError.value = "Only alphabets and spaces are allowed";

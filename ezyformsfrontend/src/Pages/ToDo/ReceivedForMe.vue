@@ -24,7 +24,7 @@
           @updateFilters="inLineFiltersData" :field-mapping="fieldMapping" @cell-click="viewPreview"
           isFiltersoption="false" :actions="actions" @actionClicked="actionCreated" />
       </div>
-      <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
+      <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords" :items-per-page="filterObj.limitPageLength"
         @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
     </div>
     <div class="modal fade" id="viewRequest" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"

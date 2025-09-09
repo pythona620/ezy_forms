@@ -109,10 +109,10 @@ export function extractFieldsWithBreaks(data) {
           // });
 
           // Actual table field
-          const tableFieldname = getUniqueFieldname(table.label, fieldnameTracker);
+          // const tableFieldname = getUniqueFieldname(table.label, fieldnameTracker);
           result.push({
             description: table.description || "Table",
-            fieldname: tableFieldname,
+            fieldname: table.fieldname,
             fieldtype: "Table",
             idx: index++,
             label: table.label,

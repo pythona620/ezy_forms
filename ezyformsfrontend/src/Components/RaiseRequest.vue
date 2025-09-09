@@ -7,100 +7,18 @@
     <div class="container">
       <div v-if="blockArr.length" class="position-relative">
         <div class="requestPreviewDiv" ref="mainBlockRef">
-          <div>
-            <!-- Open Modal -->
-            <!-- <button class="btn btn-outline-secondary" @click="openModal">Open Modal</button> -->
-
-            <!-- Modal -->
-            <div v-if="showModal" class="modal d-block " tabindex="-1">
-              <div class="modal-dialog">
-                <div class="modal-content">
-
-                  <!-- Header -->
-                  <div class="modal-header">
-                    <h5 class="modal-title">Select Form</h5>
-                    <button type="button" class="btn-close" @click="showModal = false"></button>
-                  </div>
-
-                  <!-- Body -->
-                  <div class="modal-body ">
-                    <div class="position-relative ">
-                      <input type="text" class="form-control mb-2" v-model="searchQuery"
-                        placeholder="Search and select form..." @input="fetchDepartmentDetails"
-                        @focus="showDropdown = true" @blur="hideDropdownWithDelay" />
-
-                      <ul v-if="showDropdown && formOptions.length"
-                        class="list-group position-absolute w-100 zindex-dropdown">
-                        <li v-for="option in formOptions" :key="option.value"
-                          class="list-group-item list-group-item-action font-12"
-                          @mousedown.prevent="selectOption(option)">
-                          {{ option.label }}
-                        </li>
-                      </ul>
-                    </div>
-
-                  </div>
-
-                  <!-- Footer -->
-                  <div class="modal-footer">
-                    <button class="btn btn-dark" @click="toSelectedFormRaise">Raise</button>
-                  </div>
-
-                </div>
-              </div>
-            </div>
+          <div class="d-flex justify-content-center align-items-center px-3 py-2 ">
+            <h5 class="card-title responsive-title">{{ checkingIs_linked.form_name }}</h5>
+           
+           
           </div>
           <RequestPreview :blockArr="blockArr" :formName="selectedData.selectedform" :tableHeaders="tableHeaders"  ref="childRef"
             :linked_id="linkedId" :LinkedChildTableData="LinkedChildTableData" @updateField="handleFieldUpdate" @updateRemovedFiles="handleRemovedFiles"
             :tableRowsdata="tableRows" @formValidation="isFormValid = $event" @updateTableData="handleTableData" />
           <!-- @formValidation="isFormValid = $event" -->
 
-          <!-- <span class="font-13 fw-bold">{{ table.childTableName.replace(/_/g, " ") }}</span> -->
-          <!-- <div v-if="!tableHeaders" class="mt-3">
-            <div v-for="(table, tableIndex) in tableHeaders" :key="tableIndex" class="mt-3">
-              <div>
-                <span class="font-13 fw-bold">{{ tableIndex.replace(/_/g, " ") }}</span>
-              </div>
-
-              <table class="table table-striped" border="1" width="100%">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th v-for="field in table" :key="field.fieldname">
-                      {{ field.label }}
-                    </th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="(row, rowIndex) in tableRows[tableIndex]" :key="rowIndex">
-                    <td style="text-align: center;">{{ rowIndex + 1 }}</td>
-                    <td v-for="field in table" :key="field.fieldname">
-                      <template v-if="field.fieldtype === 'Data'">
-                        <input type="text" class="form-control font-12" v-model="row[field.fieldname]" />
-                      </template>
-<template v-if="field.fieldtype === 'Date'">
-                        <input type="date" class="form-control font-12" v-model="row[field.fieldname]" />
-                      </template>
-<template v-if="field.fieldtype === 'Datetime'">
-                        <input type="datetime-local" class="form-control font-12" v-model="row[field.fieldname]" />
-                      </template>
-<template v-else-if="field.fieldtype === 'Attach'">
-                        <input type="file" class="form-control font-12"
-                          @change="handleFileUpload($event, row, field.fieldname)" />
-                      </template>
-</td>
-<td>
-  <span @click="removeRow(tableIndex, rowIndex)"><i class="bi bi-x-lg"></i></span>
-</td>
-</tr>
-</tbody>
-</table>
-
-<button class="btn btn-light font-12" @click="addRow(tableIndex)">Add Row</button>
-</div>
-</div> -->
-
+        
+         
 
         </div>
         <!-- @formValidation="isFormValid = $event" -->
@@ -704,7 +622,7 @@ function formDefinations() {
       );
       // console.log(tableName.value);
       // console.log(tableName.value, "5555");
-      childTableName.value = tableName.value[0]?.options.replace(/_/g, " ");
+      childTableName.value = tableName.value[0]?.options?.replace(/_/g, " ");
 
       // console.log(childTableName.value, "child====");
 // const lowerCaseChildTableFields = {};
@@ -720,11 +638,12 @@ const originalChildTableFields = parsedFormJson.child_table_fields;
 const transformedChildTableFields = {};
 
 for (const key in originalChildTableFields) {
-  const lowerKey = key.toLowerCase();
+  const lowerKey = key.toLowerCase().replace(/ /g, "_");
   transformedChildTableFields[lowerKey] = originalChildTableFields[key];
 }
 
 tableHeaders.value = transformedChildTableFields;
+console.log(tableHeaders.value);
 
       // tableHeaders.value = parsedFormJson.child_table_fields; 
       initializeTableRows();
@@ -940,7 +859,7 @@ async function raiseRequestSubmission() {
   // Append all child tables
   childEntries.forEach(([tableName, rows]) => {
     if (rows && rows.length) {
-      form[tableName.toLowerCase()] = rows;
+      form[tableName.toLowerCase().replace(/ /g,"_")] = rows;
     } else {
       console.warn(`⚠ Skipping empty child table: ${tableName}`);
     }
@@ -1261,7 +1180,7 @@ function WfRequestUpdate() {
         axiosInstance
           .get(`${apis.resource}${selectedData.value.selectedform}`)
           .then((res) => {
-            console.log(`Data for :`, res.data[0]);
+            // console.log(`Data for :`, res.data[0]);
             newMainId.value = res.data[0].name
 
           })
@@ -1283,7 +1202,7 @@ function WfRequestUpdate() {
 
             if (childTables.length) {
               tableRows.value = {};
-
+              
               childTables.forEach((tableKey) => {
                 tableRows.value[tableKey] = res.data[tableKey] || [];
               });
@@ -1397,6 +1316,21 @@ function linked_id_adding_method(name) {
 </script>
 
 <style lang="scss" scoped>
+.responsive-title {
+  font-size: 12px; /* default mobile */
+}
+
+@media (min-width: 768px) {
+  .responsive-title {
+    font-size: 14px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .responsive-title {
+    font-size: 18px;
+  }
+}
 .zindex-dropdown {
   z-index: 1050;
   max-height: 200px;

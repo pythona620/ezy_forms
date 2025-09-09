@@ -171,8 +171,11 @@ def employee_update_notification(emp_mail):
 
   
 @frappe.whitelist(allow_guest=True)
-def get_signup_value():
+def get_signup_value(business_unit=None):
 	return_value = {}
+	if business_unit:
+		return_value["signature_required"] = 1 if frappe.get_value("Ezy Business Unit",business_unit,  "signature_required") else 0
+		return return_value
 	web_signup_value =  frappe.get_value("Website Settings", "Website Settings", "disable_signup") or 0
 	return_value["acknowledgement"] = frappe.get_all("Acknowledgement", fields=["name","acknowledgement"],filters={"enable":1}, order_by="name")
 	return_value["business_unit"] = frappe.get_all("Ezy Business Unit", fields=["name","bu_name"], order_by="name")

@@ -147,7 +147,7 @@
           </div>
           <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
             <label class="font-13" for="emp_code">Property Name<span class="text-danger ps-1">*</span></label>
-            <Vue3Select v-model="SignUpdata.business_unit" :options="this.propertyDetails"
+            <Vue3Select v-model="SignUpdata.business_unit" @change="checkSignitureRequired" :options="this.propertyDetails"
               placeholder="Select Property" />
           </div>
         </div>
@@ -166,8 +166,7 @@
 
           <div v-if="selectedOption === 'digital'">
             <DigitalSignature ref="digitalSignature" class="mt-3" @signature-saved="onSignatureSaved"
-              @signature-cleared="onSignatureCleared" @signature-removed="onSignatureRemoved"
-              @signature-uploaded="onSignatureUploaded" />
+              @signature-cleared="onSignatureCleared" @signature-uploaded="onSignatureUploaded" :showSaveButton="false" />
           </div>
 
           <div v-if="selectedOption === 'upload'">
@@ -321,15 +320,37 @@
           </div>
           <div class="modal-body font-11">
             <div v-if="this.isAcknowledge == 0" class="ql-editor read-mode" v-html="acknowledgementHtml"></div>
-            <div v-if="this.isAcknowledgeSign == 0" class="mt-3">
-              <label class="font-13">Upload Signature</label>
-              <input type="file" ref="signatureInput" class="form-control shadow-none mt-1 p-1"
-                @change="handleSignatureUpload" />
+          
+            <div class="mt-2 row" v-if="this.isAcknowledgeSign == 0">
+              <div class="col-lg-4 col-md-6 col-sm-12 mb-2">
+                <input type="radio" id="digital" value="digital" v-model="selectedOption"
+                  class="form-check-input mt-0 input-border" />
+                <label class="font-13 ms-2" for="digital">Digital Signature</label>
+              </div>
 
-              <div v-if="acknowledge_signature" class="mt-2">
-                <img :src="acknowledge_signature" alt="Signature" style="max-height: 100px;" />
+              <div class="col-lg-4 col-md-6 col-sm-12 mb-2">
+                <input type="radio" id="upload" value="upload" v-model="selectedOption"
+                  class="form-check-input mt-0 input-border" />
+                <label class="font-13 ms-2" for="upload">Upload Signature</label>
+              </div>
+
+              <div v-if="selectedOption === 'digital'">
+                <DigitalSignature ref="digitalAcknowledgeSignature" class="mt-3" :showSaveButton="true" @signature-saved="acknowledgeSignSaved"
+                  @signature-cleared="onSignatureCleared" @signature-uploaded="acknowledgeSignUploaded" />
+              </div>
+
+              <div v-if="selectedOption === 'upload'">
+                <input type="file" ref="signatureInput" class="form-control mt-3" id="signatureInput"
+                  @change="handleSignatureUpload" aria-describedby="fileHelpId" accept="image/png, image/jpeg" />
+
+                <div v-if="acknowledge_signature" class="mt-2">
+                  <label class="font-13" for="emp_code">Uploaded Signature:</label><br>
+                  <img :src="acknowledge_signature" alt="Signature" class="img-thumbnail mt-1"
+                    style="max-width: 100px;" />
+                </div>
               </div>
             </div>
+
             <div class="mt-4 d-flex align-items-center">
               <input type="checkbox" id="acknowledge" v-model="acknowledge" class="me-1 m-0" />
               <label for="acknowledge">I acknowledge that the information provided is correct.</label>
@@ -339,7 +360,7 @@
             <button type="button" class="btn btn-outline-secondary" @click="ClearAcknowledge"
               data-bs-dismiss="modal">Cancel</button>
             <button type="button" @click="employeeAcknowledge"
-              :disabled="!acknowledge || (isAcknowledgeSign == 0 && !acknowledge_signature)" class="btn btn-dark"
+              :disabled="!acknowledge" class="btn btn-dark"
               style="min-width:120px;">
               Yes, Proceed
             </button>
@@ -444,7 +465,8 @@ export default {
       signatureInput: null,
       subEndDate: "",
       today: "",
-      selectedScore: ""
+      selectedScore: "",
+      signRequired: "",
       // timeLeft: 60,
       // timer: null,
       // resentMessage: "",
@@ -509,6 +531,9 @@ export default {
       this.formdata.usr = "";
     },
     validateEmail() {
+      if(this.SignUpdata.email){
+        this.SignUpdata.email = this.SignUpdata.email.trim().toLowerCase();
+      
       const email = this.SignUpdata.email;
       const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -523,7 +548,7 @@ export default {
       }
       axiosInstance
         .get(`${apis.loginCheckmethod}`, {
-          params: { user_id: this.SignUpdata.email },
+          params: { user_id: this.SignUpdata.email},
         })
         .then((res) => {
           // Case: User not found – clear error
@@ -539,6 +564,7 @@ export default {
           console.error("Login error: ", error);
           this.errors.email = "Error checking email";
         });
+        }
 
 
 
@@ -651,6 +677,7 @@ export default {
       this.SignUpdata.emp_code = "";
       this.SignUpdata.emp_phone = "";
       this.SignUpdata.designation = null;
+      this.SignUpdata.business_unit=null;
       this.SignUpdata.dept = null;
       this.SignUpdata.signature = null;
       this.selectedOption = null;
@@ -679,6 +706,9 @@ export default {
         this.acknowledge_signature = ""
       if (this.$refs.signatureInput) {
         this.$refs.signatureInput.value = null; // Clear file input
+      }
+      if (this.$refs.digitalAcknowledgeSignature) {
+        this.$refs.digitalAcknowledgeSignature.clearSignature();
       }
     },
     // validateOtp() {
@@ -776,6 +806,7 @@ export default {
               this.SignUpdata.emp_code = "";
               this.SignUpdata.emp_phone = "";
               this.SignUpdata.designation = null;
+              this.SignUpdata.business_unit=null;
               this.SignUpdata.dept = null;
               this.SignUpdata.signature = null;
               this.selectedOption = null;
@@ -793,7 +824,46 @@ export default {
       }
     },
 
+    acknowledgeSignUploaded(signatureData) {
+      this.acknowledge_signature = signatureData;
+      this.errors.signature = null;
+    },
+
+  acknowledgeSignSaved(signatureData) {
+  return new Promise((resolve, reject) => {
+    try {
+      const base64 = signatureData.dataUrl;
+
+      // Convert base64 to File
+      const arr = base64.split(',');
+      const mime = arr[0].match(/:(.*?);/)[1];
+      const bstr = atob(arr[1]);
+      let n = bstr.length;
+      const u8arr = new Uint8Array(n);
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+      }
+
+      const file = new File([u8arr], "signature.png", { type: mime });
+
+      // Call upload function
+      this.uploadFile(file, "acknowledge signature");
+    
+      this.errors.signature = null;
+
+      resolve(); // Success
+    } catch (error) {
+      reject(error); // Failure
+    }
+  });
+},
+
+
     employeeAcknowledge() {
+      if (this.isAcknowledgeSign === 0 && !this.acknowledge_signature) {
+        toast.error("Signature not Saved");
+        return;
+      }
       const payload = {
         user_id: this.formdata.usr,
         ...(this.isAcknowledge === 0 && { acknowledgement: this.SignUpdata.acknowledgement }),
@@ -1181,28 +1251,47 @@ export default {
       this.errors.signature = null;
       // console.log("Signature ready for upload:", file);
     },
+
+    checkSignitureRequired() {
+    axiosInstance
+      .get(`${apis.GetsignUp}`, { params: { business_unit: this.SignUpdata.business_unit } })
+      .then((res) => {
+        if (res.message) {
+          this.signRequired = res.message.signature_required;
+          console.log('Signature Required:', this.signRequired);
+        }
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
+  },
+
     handleSignUp() {
       const signatureComponent = this.$refs.digitalSignature;
-      if (signatureComponent && signatureComponent.getSignatureData) {
-        const signatureData = signatureComponent.getSignatureData();
+      if (this.signRequired == 1) {
+        if (signatureComponent && signatureComponent.getSignatureData) {
+          const signatureData = signatureComponent.getSignatureData();
+          // this.onSignatureSaved(signatureData);
+          if (signatureData) {
         this.onSignatureSaved(signatureData);
-        //   if (signatureData) {
-        //     this.onSignatureSaved(signatureData);
-        //     const modal = new bootstrap.Modal(document.getElementById('EmployeeToggleModal'));
-        //     modal.show();
-        //   } else {
-        //     console.log("No signature data available");
-        //   }
-        // }
-        // else if (this.SignUpdata.signature) {
-        // const modal = new bootstrap.Modal(document.getElementById('EmployeeToggleModal'));
-        // modal.show();
-        // }
-        // else {
-        //   toast.error("signature Not Added")
-      }
+             const modal = new bootstrap.Modal(document.getElementById('EmployeeToggleModal'));
+            modal.show();
+          } else {
+            console.log("No signature data available");
+          }
+        }
+        else if (this.SignUpdata.signature) {
       const modal = new bootstrap.Modal(document.getElementById('EmployeeToggleModal'));
       modal.show();
+        }
+        else {
+          toast.error("signature Not Added")
+        }
+      }
+      else {
+        const modal = new bootstrap.Modal(document.getElementById('EmployeeToggleModal'));
+        modal.show();
+      }
     },
     openDigitakSignature() {
       this.isDigital = true;
@@ -1262,13 +1351,10 @@ export default {
 
     onSignatureCleared() {
       this.SignUpdata.signature = "";
+      this.acknowledge_signature = "";
       this.errors.signature = 'Signature is required';
     },
 
-    onSignatureRemoved() {
-      this.SignUpdata.signature = "";
-      this.errors.signature = 'Signature is required';
-    },
 
     onSignatureUploaded(signatureData) {
       this.SignUpdata.signature = signatureData;
@@ -1332,6 +1418,13 @@ export default {
       }
     },
 
+  },
+  watch: {
+  'SignUpdata.business_unit'(newVal) {
+    if (newVal) {
+      this.checkSignitureRequired();
+    }
+  }
   },
   mounted() {
     this.checkSignUpPage();

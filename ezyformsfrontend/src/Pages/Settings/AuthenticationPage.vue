@@ -61,6 +61,7 @@ const tableData = ref([
     { title: "Enable Sign Up in Login Page", checked: false },
     { title: "Send Daily E-mail reminders", checked: false },
     { title: "Take Acknowledgement and Signiture while Login", checked: false },
+    { title: "Take Signiture while Sig Up", checked: false },
 ]);
 
 const default_mail = ref(false);
@@ -111,6 +112,10 @@ const handleToggle = (index) => {
         confirmMessage.value = isChecked
             ? "Are you sure you want to enable Acknowledgement and Signiture while Login?"
             : "Are you sure you want to disable Acknowledgement and Signiture while Login?";
+    } else if (index === 6) {
+        confirmMessage.value = isChecked
+            ? "Are you sure you want to enable Signiture while Sig Up?"
+            : "Are you sure you want to disable Signiture while Sig Up?";
     }
 
     // Show the modal
@@ -224,6 +229,20 @@ const confirmAction = () => {
             .catch(() => {
                 toast.error("Failed to update acknowledgement");
             });
+    } else if (index === 6) {
+        axiosInstance
+            .put(`${apis.resource}${doctypes.wfSettingEzyForms}/${encodeURIComponent(docName)}`, {
+                signature_required: newStatus,
+            })
+            .then(() => {
+                toast.success(`Signiture while Sig Up ${newStatus === 0 ? "Disabled" : "Enabled"} Successfully!`, { autoClose: 700 });
+                const modal = bootstrap.Modal.getInstance(document.getElementById('EnableDisable'));
+                    modal.hide();
+                    BussinesUnit()
+            })
+            .catch(() => {
+                toast.error("Failed to update Signiture while Sig Up");
+            });
     }
 };
 
@@ -247,6 +266,8 @@ function BussinesUnit() {
                 tableData.value[4].checked = send_daily_alerts == 1;
                 const is_acknowledge = res.data[0].is_acknowledge;
                 tableData.value[5].checked = is_acknowledge == 1;
+                const signature_required = res.data[0].signature_required;
+                tableData.value[6].checked = signature_required == 1;
             }
         })
         .catch((error) => {

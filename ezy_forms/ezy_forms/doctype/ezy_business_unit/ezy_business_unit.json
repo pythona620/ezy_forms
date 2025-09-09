@@ -20,6 +20,7 @@
   "water_mark",
   "send_form_in_email",
   "send_daily_alerts",
+  "signature_required",
   "section_break_ftig",
   "letter_head"
  ],
@@ -56,19 +57,19 @@
    "fieldtype": "Check",
    "label": "Send form as a attach through mail"
   },
-    {
+  {
    "default": "0",
    "fieldname": "is_acknowledge",
    "fieldtype": "Check",
    "label": "Acknowledge Required"
   },
-      {
+  {
    "default": "0",
    "fieldname": "send_form_in_email",
    "fieldtype": "Check",
    "label": "Send Form in Mail Messageg Body"
   },
-    {
+  {
    "default": "0",
    "fieldname": "send_daily_alerts",
    "fieldtype": "Check",
@@ -106,18 +107,23 @@
   {
    "fieldname": "section_break_ftig",
    "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "signature_required",
+   "fieldtype": "Check",
+   "label": "Signature Required"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-05-19 12:21:01.195421",
+ "modified": "2025-09-08 13:34:04.502029",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
  "name": "Ezy Business Unit",
  "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
- 
   {
    "create": 1,
    "delete": 1,
