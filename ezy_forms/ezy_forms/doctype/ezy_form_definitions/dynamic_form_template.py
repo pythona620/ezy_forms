@@ -1512,7 +1512,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                 )
 
             # Generate PDFs
-            pdf_filename = f"{form_name or 'form'}-{employee_name}.pdf"
+            pdf_filename = f"{form_short_name or 'form'}-{employee_name}.pdf"
             absolute_pdf_path = os.path.join(attachment_folder, pdf_filename)
 
             activate_pdf_name = "Activity Log .pdf"
