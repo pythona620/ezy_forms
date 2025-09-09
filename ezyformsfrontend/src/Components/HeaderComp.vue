@@ -507,10 +507,10 @@ onMounted(() => {
 });
 
 function clearPassword() {
-    this.new_password = ""
-    this.confirm_password = ""
-    this.passwordError = ""
-    this.passwordsMismatch = ""
+    new_password.value = ""
+    confirm_password.value = ""
+    passwordError.value = ""
+    passwordsMismatch.value = ""
 }
 
 
