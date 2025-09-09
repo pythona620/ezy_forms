@@ -1268,12 +1268,12 @@ export default {
         if (signatureComponent && signatureComponent.getSignatureData) {
           const signatureData = signatureComponent.getSignatureData();
           // this.onSignatureSaved(signatureData);
-          if (signatureData) {
+          if (signatureData.hasSignature==true) {
         this.onSignatureSaved(signatureData);
              const modal = new bootstrap.Modal(document.getElementById('EmployeeToggleModal'));
             modal.show();
           } else {
-            console.log("No signature data available");
+            toast.error("signature Not Added");
           }
         }
         else if (this.SignUpdata.signature) {
