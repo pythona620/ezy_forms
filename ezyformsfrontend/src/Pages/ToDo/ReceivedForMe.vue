@@ -151,9 +151,9 @@ const responseData = ref([]);
 const ViewOnlyReportee = ref(false);
 const tableheaders = ref([
   { th: "Request ID", td_key: "name" },
-  { th: "Requested By", td_key: "requested_by" },
+  { th: "Requester Name", td_key: "requester_name" },
   { th: "Requested on", td_key: "requested_on" },
-  { th: "Requested Department", td_key: "department_name" },
+  { th: "Requester Department", td_key: "department_name" },
   { th: "Approval Status", td_key: "status" },
   { th: "Pending With", td_key: "assigned_to_users" },
   { th: "Linked ID", td_key: "linked_form_id" },
@@ -724,7 +724,7 @@ const fieldMapping = computed(() => ({
   // credit_irn_generated: { type: "select", options: ["Pending", "Completed", "Error"] },
   // role: { type: "input" },
   name: { type: "input" },
-  requested_by: { type: "input" },
+  requester_name: { type: "input" },
   department_name: { type: "input" },
   requested_on: { type: "date" },
 
