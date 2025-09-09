@@ -241,12 +241,12 @@ const settingsSideBarData = [
     { name: 'System Settings', icon: 'bi bi-tags', route: 'authenticationpage' },
     { name: 'Activity Log', icon: 'bi bi-clock-history', route: 'activitylog' },
     { name: 'Audit Log', icon: 'bi bi-clock', route: 'auditlog' },
+    { name: 'Email Queue' , icon: 'bi bi-file-earmark-text', route: 'emailqueue' },
     { name: 'Form Creation' , icon: 'bi bi-file-earmark-text', route: 'CreateForm' },
     { name: 'Form Templates', icon: 'bi bi-file-earmark-text', route: 'predefinedforms' },
     { name: 'Vendor Comparison', icon: 'bi bi-file-earmark-text', route: 'vendorcomparison' },
     { name: 'Acknowledgement' , icon: 'bi bi-file-earmark-text', route: 'acknowledgement' },
     { name: 'Email Template' , icon: 'bi bi-file-earmark-text', route: 'emailtemplate' },
-    { name: 'Email Queue' , icon: 'bi bi-file-earmark-text', route: 'emailqueue' },
     { name: 'Password Policy' , icon: 'bi bi-lock', route: 'passwordpolicy' },
 
     // {name: 'Roles',icon:' bi bi-people', route:'role'},
@@ -333,10 +333,10 @@ const filteredSettingsGroups = computed(() => {
             thirdSettingsGroup: settingsSideBarData.slice(1, 3),
             forthSettingsGroup: settingsSideBarData.slice(3, 6),
             fifthSettingsGroup: settingsSideBarData.slice(6,7),
-            sixthGroup: settingsSideBarData.slice(7,9),
-            seventhGroup: settingsSideBarData.slice(9,12),
-            eightGroup: settingsSideBarData.slice(12,13),
-            ninthGroup: settingsSideBarData.slice(13,15),
+            sixthGroup: settingsSideBarData.slice(7,10),
+            seventhGroup: settingsSideBarData.slice(10,13),
+            eightGroup: settingsSideBarData.slice(13,14),
+            ninthGroup: settingsSideBarData.slice(14,15),
             tenthGroup: settingsSideBarData.slice(15),
 
 
