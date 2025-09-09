@@ -1418,13 +1418,14 @@ function receivedForMe(data) {
   if (selectedData.value.type !== 'myteam' && selectedData.value.type !== 'myapprovals' && selectedData.value.type !== 'linkedForm') {
     if (selectedData.value.type == "myforms") {
       filters.push(["requested_by", "like", EmpRequestdesignation.emp_mail_id]);
-    } else {
-      filters.push([
-        "assigned_to_users",
-        "like",
-        `%${EmpRequestdesignation?.designation}%`,
-      ]);
     }
+    //  else {
+    //   filters.push([
+    //     "assigned_to_users",
+    //     "like",
+    //     `%${EmpRequestdesignation?.designation}%`,
+    //   ]);
+    // }
   }
 
   const queryParams = {
