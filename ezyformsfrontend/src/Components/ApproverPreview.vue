@@ -2356,10 +2356,10 @@ function closeAttachmentList() {
 //   emit("attachmentsReady", allPreviewed);
 // }
 
-// function previewAttachment(url) {
-//   previewUrl.value = url
-//   showPreviewModal.value = true
-// }
+function previewAttachment(url) {
+  previewUrl.value = url
+  showPreviewModal.value = true
+}
 
 function closePreviewModal() {
   showPreviewModal.value = false
