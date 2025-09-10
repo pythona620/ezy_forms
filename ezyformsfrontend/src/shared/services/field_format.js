@@ -692,6 +692,10 @@ export function addErrorMessagesToStructuredArray(structuredArray) {
               if (fieldLabel === "") {
                 errors.push("Field label is required.");
               }
+              if (field.label && field.label.trim().length > 64) {
+                errors.push(`Field label cannot exceed 64 characters.`);
+              }
+
 
               // Check for empty field type
               if (!field.fieldtype || field.fieldtype.trim() === "") {

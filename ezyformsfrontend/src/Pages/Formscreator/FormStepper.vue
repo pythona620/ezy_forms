@@ -3794,7 +3794,9 @@ function handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex, fiel
     } else if (hasInvalidCharacters(label)) {
       errorPath.errorMsg = "Label should not contain special characters, double quotes (\") or single quotes (')";
     } else {
-      errorPath.errorMsg = duplicateLabels.includes(label.trim().toLowerCase()) ? "Duplicate Label Name" : "";
+      errorPath.errorMsg = duplicateLabels.includes(label.trim().toLowerCase())
+        ? "Duplicate Label Name"
+        : "";
     }
   }
 
@@ -3821,6 +3823,17 @@ function handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex, fiel
       blockArr[blockIndex].sections[sectionIndex]
     );
   }
+   blockArr.forEach((block) => {
+    block.sections.forEach((section) => {
+      section.rows.forEach((row) => {
+        row.columns.forEach((column) => {
+          column.fields.forEach((field) => {
+            validateLabel(field.label, field);
+          });
+        });
+      });
+    });
+  });
 }
 
 
