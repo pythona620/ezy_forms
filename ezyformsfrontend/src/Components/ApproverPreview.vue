@@ -121,7 +121,7 @@
                               <div class="row">
                                 <template v-for="(option, index) in field?.options?.split('\n')">
                                   <div v-if="(JSON.parse(field.value || '[]') || []).includes(option)" :key="index"
-                                    class="col-4  mb-2">
+                                    class=" col-12 col-sm-6 col-md-4   mb-2">
                                     <div class="form-check">
                                       <input class="form-check-input" type="checkbox" :checked="true" :disabled="true"
                                         :id="`${option}-${index}`" />
@@ -138,7 +138,7 @@
                             <div v-else>
                               <div class="container-fluid">
                                 <div class="row">
-                                  <div class="form-check col-4 mb-1"
+                                  <div class="form-check  col-12 col-sm-6 col-md-4  mb-1"
                                     v-for="(option, index) in field?.options?.split('\n')" :key="index"
                                     :class="{ 'd-none': index === 0 }">
 
@@ -1174,8 +1174,8 @@
                                                   </template>
                                                   <template v-else>
                                                     <p>No preview available for this file type.
-                                                      <a :href="previewUrl"
-                                                        download>Download</a>
+                                                      <!-- <a :href="previewUrl"
+                                                        download>Download</a> -->
                                                         <button class="btn btn-sm font-13 btn-light"
                                                           @click="downloadAttachment(url, previewUrl)">
                                                           Download
