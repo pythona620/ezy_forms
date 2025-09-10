@@ -63,7 +63,7 @@
 
                         <label :for="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
                           class=" label-text  text-nowrap">
-                          <span class=" fw-medium">{{ field.label }}</span>
+                          <span class=" fw-medium text-wrap">{{ field.label }}</span>
                           <span class="ms-1 text-danger">{{ field.reqd === 1 ? "*" : "" }}</span>
                           <span class="pe-2"
                             v-if="field.fieldtype !== 'Check' && (props.readonlyFor === 'true' || blockIndex < currentLevel)">:</span>
@@ -1400,6 +1400,7 @@ import Multiselect from "vue-multiselect";
 import "@vueform/multiselect/themes/default.css";
 import Vue3Select from 'vue3-select'
 import 'vue3-select/dist/vue3-select.css';
+import { onBeforeUnmount } from "vue";
 const props = defineProps({
   blockArr: {
     type: [Array, null],
@@ -1449,6 +1450,9 @@ const previewUrl = ref('')
 const showModal = ref(false)
 const hovered = reactive({});
 const showPreview = ref(false);
+const currentTime = ref("");
+
+let timer = null;
 // const isEditable = ref(false);
 
 // // Example function to toggle edit mode
@@ -1456,7 +1460,21 @@ const showPreview = ref(false);
 //   isEditable.value = !isEditable.value;
 // } 
 
-
+function updateTime() {
+  currentTime.value = new Date()
+    .toLocaleString("en-CA", {
+      timeZone: "Asia/Kolkata",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    })
+    .replace(/,/, "")
+    .replace(/\//g, "-");
+}
 const filteredColumns = (row) => {
   return row.columns.filter(column => column.fields && column.fields.length);
 };
@@ -1668,6 +1686,8 @@ function getFileArray(value) {
   return value.split(',').map(f => f.trim())
 }
 onMounted(() => {
+  updateTime()
+  timer = setInterval(updateTime, 1000);
   emit("updateField", getAllFieldsData());
   if (selectedData.value.type === 'mytasks') {
     getEmploye()
@@ -1679,7 +1699,9 @@ onMounted(() => {
 
 
 });
-
+onBeforeUnmount(() => {
+  if (timer) clearInterval(timer);
+});
 
 
 const modalRefs = ref({});
@@ -1866,18 +1888,7 @@ const filteredBlocks = computed(() => {
             // }
           }
           if (field.label === "Approved On" || field.label === 'Acknowledged On') {
-            const localTime = new Date().toLocaleString("en-CA", {
-              timeZone: "Asia/Kolkata", // Change this to your target timezone
-              year: "numeric",
-              month: "2-digit",
-              day: "2-digit",
-              hour: "2-digit",
-              minute: "2-digit",
-              hour12: false,
-            }).replace(/,/, "").replace(/\//g, "-");
-
-
-            field.value = localTime;
+             field.value = currentTime.value; // 👈 always latest
             emit("updateField", field);
 
             // const now = new Date();

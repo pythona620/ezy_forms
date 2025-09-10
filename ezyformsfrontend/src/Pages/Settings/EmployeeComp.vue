@@ -502,7 +502,7 @@
                   <label class="font-13 ps-1" for="reporting_to">Reports To</label>
                   <VueMultiselect v-model="createEmployee.reporting_to"
                     :options="employeeEmails.map((dept) => dept.emp_mail_id)" :multiple="false" :close-on-select="true"
-                    :allow-empty="true" :clear-on-select="false" :preserve-search="true" placeholder="Select Reports To"
+                    :allow-empty="true" :clear-on-select="false" :preserve-search="false" placeholder="Select Reports To"
                     class="font-11 mb-3">
 
 
@@ -515,7 +515,7 @@
                   <label class="font-13 ps-1" for="reporting_designation">Reporting Designation</label>
 
                   <VueMultiselect v-model="createEmployee.reporting_designation" :options="designations"
-                    :multiple="false" :close-on-select="true" :clear-on-select="false" :preserve-search="true"
+                    :multiple="false" :close-on-select="true" :clear-on-select="false" :preserve-search="false"
                     placeholder="Select Reporting Designation" class="font-11 mb-3"
                     :disabled="true">
 
