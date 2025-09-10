@@ -1589,9 +1589,19 @@ const normalizeFileList = (value) => {
     return [];
 };
 
+// const removechildFile = (index, field, row) => {
+//     let files = normalizeFileList(row[field.fieldname]);
+//     files.splice(index, 1);
+//     row[field.fieldname] = files.join('|');
+// };
 const removechildFile = (index, field, row) => {
     let files = normalizeFileList(row[field.fieldname]);
-    files.splice(index, 1);
+
+    if (index >= 0 && index < files.length) {
+        files.splice(index, 1);
+    }
+
+    // Keep consistent with upload: save back as "|" string
     row[field.fieldname] = files.join('|');
 };
 

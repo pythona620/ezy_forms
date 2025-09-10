@@ -690,7 +690,7 @@ const fieldMapping = computed(() => ({
   // credit_irn_generated: { type: "select", options: ["Pending", "Completed", "Error"] },
   // role: { type: "input" },
   name: { type: "input" },
-  requested_by: { type: "input" },
+  requester_name: { type: "input" },
   department_name: { type: "input" },
   requested_on: { type: "date" },
 
