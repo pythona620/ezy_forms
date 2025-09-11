@@ -1,7 +1,7 @@
 import frappe
 from frappe.permissions import add_permission
 from frappe.core.page.permission_manager.permission_manager import get_standard_permissions, reset, get_permissions
-
+@frappe.whitelist()
 def assign_custom_permissions(doc, method):
     """
     Enqueue the assignment of custom permissions when a Role is created.

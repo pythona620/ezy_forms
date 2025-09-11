@@ -81,7 +81,7 @@
                                             :options="departmentsList" /> -->
                       <VueMultiselect v-model="createEmployee.department" :options="departmentsList" :multiple="false"
                         @update:modelValue="onDepartmentChange" :close-on-select="true" :clear-on-select="false"
-                        :preserve-search="true" placeholder="Select department" label="department_name" track-by="name"
+                        :preserve-search="false" placeholder="Select department" label="department_name" track-by="name"
                         class="font-11 mb-3">
                         <template #selection="{ values, isOpen }">
                           <span class="multiselect__single font-10" v-if="values.length" v-show="!isOpen">
@@ -112,11 +112,11 @@
                         </label>
 
                         <input type="text" v-model="searchText" @input="() => { filterDesignations(); validateInput(); }"
-                        :class="['form-control font-12', errorMessage ? 'border-danger' : '']" class="form-control shadow-none font-12"
-                                                placeholder="Search or type new role" />
-                                                <p v-if="errorMessage" class="text-danger font-11 ps-1">
-                                            {{ errorMessage }}
-                                          </p>
+                        :class="['form-control font-12', ( errorMessage || noDataError) ? 'border-danger' : '']" class="form-control shadow-none font-12"
+                          placeholder="Search or type new role" />
+                          <p v-if="errorMessage || noDataError" class="text-danger font-11 ps-1">
+                            {{ errorMessage || noDataError }}
+                          </p>
                         <ul class="list-group position-absolute w-100 zindex-dropdown"
                           v-if="searchText && (filteredDesignations.length || showCreateButton) && !errorMessage">
                           <li v-for="(role, index) in filteredDesignations" :key="index"
@@ -124,11 +124,6 @@
                             style="cursor: pointer">
                             {{ role }}
                           </li>
-                          <!-- <li v-if="searchText"
-                            class="list-group-item list-group-item-action font-12 text-primary" style="cursor: pointer"
-                            @click="showModal = true">
-                            <i class="bi bi-plus-lg"></i> Create role "<strong>{{ searchText }}</strong>"
-                          </li> -->
                         </ul>
                         <!-- Modal -->
                         <div class="modal fade" :class="{ show: showModal }" style="display: block;" v-if="showModal">
@@ -183,7 +178,7 @@
                                             v-model="createEmployee.reporting_to" /> -->
                       <VueMultiselect v-model="createEmployee.reporting_to"
                         :options="employeeEmails.map((dept) => dept.emp_mail_id)" :multiple="false"
-                        :close-on-select="true" :clear-on-select="false" :preserve-search="true"
+                        :close-on-select="true" :clear-on-select="false" :preserve-search="false"
                         placeholder="Select Reports To" class="font-11 mb-3">
 
 
@@ -199,7 +194,7 @@
                                             v-model="createEmployee.reporting_designation" /> -->
                       <VueMultiselect v-model="createEmployee.reporting_designation" :options="designations"
                         :allow-empty="true" :multiple="false" :close-on-select="true" :clear-on-select="false"
-                        :preserve-search="true" placeholder="Select Reporting Designation" class="font-11 mb-3"
+                        :preserve-search="false" placeholder="Select Reporting Designation" class="font-11 mb-3"
                         :disabled="true">
                         <!-- taggable
                                             @tag="addReportingDesignation"
@@ -422,7 +417,7 @@
 
                   <VueMultiselect v-model="createEmployee.department" :options="departmentsList" :multiple="false"
                     @update:modelValue="onDepartmentChange" :close-on-select="true" :clear-on-select="false"
-                    :preserve-search="true" placeholder="Select department" label="department_name" track-by="name"
+                    :preserve-search="false" placeholder="Select department" label="department_name" track-by="name"
                     class="font-11 mb-3">
                     <template #selection="{ values, isOpen }">
                       <span class="multiselect__single font-10" v-if="values.length" v-show="!isOpen">
@@ -453,23 +448,16 @@
                       Designation<span class="text-danger ps-1">*</span>
                     </label>
 
-                    <input type="text" v-model="searchText" @input="() => { filterDesignations(); validateInput(); }" class="form-control font-12"
-                      :class="['form-control font-12', errorMessage ? 'border-danger' : '']" placeholder="Search or type new role" />
-                      <p v-if="errorMessage" class="text-danger font-11 ps-1">
-                                            {{ errorMessage }}
-                                          </p>
+                    <input type="text" v-model="searchText" @input="() => { filterDesignations(); validateInput(); }" class="form-control font-12 shadow-none"
+                      :class="['form-control font-12',( errorMessage || noDataError) ? 'border-danger' : '']" placeholder="Search or type new role" />
+                      <p v-if="errorMessage || noDataError" class="text-danger font-11 ps-2">
+                        {{ errorMessage || noDataError }}</p>
                     <ul class="list-group position-absolute w-100 zindex-dropdown"
-                      v-if="searchText && (filteredDesignations.length || showCreateButton) && !errorMessage">
+                      v-if="searchText && (filteredDesignations.length || showCreateButton) && !errorMessage ">
                       <li v-for="(role, index) in filteredDesignations" :key="index"
                         class="list-group-item list-group-item-action font-12" @click="selectDesignation(role)"
                         style="cursor: pointer">
                         {{ role }}
-                      </li>
-
-                      <!-- Create Role option as part of the dropdown -->
-                      <li v-if="searchText" class="list-group-item list-group-item-action font-12 text-primary" style="cursor: pointer"
-                        @click="showModal = true">
-                        <i class="bi bi-plus-lg"></i> Create role "<strong>{{ searchText }}</strong>"
                       </li>
 
                     </ul>
@@ -502,7 +490,7 @@
                   <label class="font-13 ps-1" for="reporting_to">Reports To</label>
                   <VueMultiselect v-model="createEmployee.reporting_to"
                     :options="employeeEmails.map((dept) => dept.emp_mail_id)" :multiple="false" :close-on-select="true"
-                    :allow-empty="true" :clear-on-select="false" :preserve-search="true" placeholder="Select Reports To"
+                    :allow-empty="true" :clear-on-select="false" :preserve-search="false" placeholder="Select Reports To"
                     class="font-11 mb-3">
 
 
@@ -515,7 +503,7 @@
                   <label class="font-13 ps-1" for="reporting_designation">Reporting Designation</label>
 
                   <VueMultiselect v-model="createEmployee.reporting_designation" :options="designations"
-                    :multiple="false" :close-on-select="true" :clear-on-select="false" :preserve-search="true"
+                    :multiple="false" :close-on-select="true" :clear-on-select="false" :preserve-search="false"
                     placeholder="Select Reporting Designation" class="font-11 mb-3"
                     :disabled="true">
 
@@ -655,6 +643,10 @@ import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
 import { domain } from "../../shared/apiurls";
+import { useRouter,useRoute } from "vue-router";
+
+const router = useRouter();
+const route = useRoute();
 
 const businessUnit = computed(() => {
   return EzyBusinessUnit.value;
@@ -1515,6 +1507,7 @@ watch(showModal, (visible) => {
   if (visible) newRole.value = searchText.value
 })
 const errorMessage = ref('')
+const noDataError = ref('');
 
 const validateInput = () => {
   const pattern = /[^a-zA-Z0-9 ]/
@@ -1525,10 +1518,15 @@ const validateInput = () => {
   }
 }
 const filterDesignations = () => {
-  const search = searchText.value.toLowerCase().trim()
+  const search = searchText.value.toLowerCase().trim();
   filteredDesignations.value = designations.value.filter((role) =>
     role.toLowerCase().includes(search)
-  )
+  );
+   if (filteredDesignations.value.length === 0 && search) {
+    noDataError.value = 'No Designation found';
+  } else {
+    noDataError.value = '';
+  }
 }
 
 const selectDesignation = (role) => {
@@ -1595,7 +1593,7 @@ const removeSignature = () => {
 // function addnewDesignation() {
 //     newDesignation.value = !newDesignation.value
 // }
-const actions = ref([{ name: "Edit Employee", icon: "fa-solid fa-eye" }, { name: "Reset Password", icon: "fa fa-lock" }]);
+const actions = ref([{ name: "Edit Employee", icon: "fa-solid fa-edit" },{ name: "View Forms", icon: "fa-solid fa-eye" }, { name: "Reset Password", icon: "fa fa-lock" }]);
 const isFormFilled = computed(() => {
   return [
     createEmployee.value.emp_code,
@@ -1672,6 +1670,17 @@ function actionCreated(rowData, actionEvent) {
     forgotData.value = rowData;
     const modal = new bootstrap.Modal(document.getElementById('ForgotPasswordModal'), {});
     modal.show();
+  }
+  if (actionEvent?.name === 'View Forms') {
+      router.push({
+        name: "employeeforms",
+        query: {
+          name: rowData.name,
+          EmpName: rowData.emp_name,
+          business_unit: rowData.company_field,
+          Dept:rowData.department,
+        },
+      });
   }
 }
 
@@ -1799,6 +1808,7 @@ function cancelCreate() {
     company_field: businessUnit.value,
   };
   searchText.value=""
+  noDataError.value = '';
   filterDesignations.value = [];
   createEmailError.value = '';
   const fileInput = document.getElementById("signatureInput");
@@ -2196,7 +2206,7 @@ function createEmpl() {
     return;
   }
   if(createEmployee.value.designation !== searchText.value.trim()) {
-     toast.error("Please create the role before creating an employee.", {
+     toast.error("Please Add the designation before creating an employee.", {
       autoClose: 1000,
       transition: "zoom",
     });
@@ -2275,7 +2285,7 @@ function SaveEditEmp() {
     return;
   }
    if(createEmployee.value.designation !== searchText.value) {
-     toast.error("Please create the role before updating employee.", {
+     toast.error("Please Add the designation before updating employee.", {
       autoClose: 1000,
       transition: "zoom",
     });

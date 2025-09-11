@@ -6,8 +6,10 @@
         <div class="d-flex justify-content-between asset_request">
 
           <div class="backtofromPage  px-2 py-2">
-            <router-link :to="backTo" class="text-decoration-none text-dark font-13"><span> <i
-                  class="bi bi-arrow-left px-2"></i></span>Back</router-link>
+            <!-- <router-link :to="backTo" class="text-decoration-none text-dark font-13"><span> <i
+                  class="bi bi-arrow-left px-2"></i></span>Back</router-link>  -->
+                  <span class="m-0 p-0 text-dark font-13 pointer" @click="router.back()">
+                    <i class="bi bi-arrow-left px-2"></i>Back</span>
           </div>
           <div>
             <button class="btn btn-light font-12  me-2 d-xl-none " type="button"
@@ -56,7 +58,7 @@
 
                   <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel"
                     @updateTableData="approvalChildData" :childData="responseData" :readonly-for="selectedData.readOnly"
-                    :childHeaders="tableHeaders" :employee-data="employeeData" @updateField="updateFormData"  />
+                    :childHeaders="tableHeaders" :employee-data="employeeData" @updateField="updateFormData"  @formValidation="isFormValid = $event"  @acknowledgementValidation="isAcknowledgementValid = $event"  />
                     <!-- @attachmentsReady="attachmentsReady = $event" -->
                 </div>
 
@@ -826,7 +828,8 @@ const linkedNew_Id = ref([]);
 const mainStandardForm = ref('')
 const activeTab = ref("activity");
 const linkedActivity = ref([]);
-
+const isFormValid = ref(false);
+const isAcknowledgementValid = ref(false);
 const resetCommentsValidation = () => {
   if (ApproverReason.value.trim() !== "") {
     // If comment is not empty, set isCommentsValid to true
@@ -1118,8 +1121,15 @@ async function ApproverFormSubmission(dataObj, type) {
   //   isCommentsValid.value = false; // Show validation error
   //   return; // Stop execution
   // }
+if (!isFormValid.value) {
+    toast.error("Please Fill All Mandatory Fields",{autoClose:700});
+    return;
+  }
 
-
+ if (!isAcknowledgementValid.value) {
+      toast.error("Acknowledgement is required.", { autoClose: 700 });
+      return;
+  }
   // isCommentsValid.value = true;
   loading.value = true; // Start loader
 
