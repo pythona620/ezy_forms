@@ -19,7 +19,7 @@
         </div>
         <div class="form-container p-0 container-fluid mt-1">
           <div class="row">
-            <div class="col-2">
+            <div class="col-lg-2 col-md-2 col-sm-12">
               <div class="steps-sticky-div">
                 <ul class="steps">
                   <li v-for="step in steps" :key="step.id" :class="{
@@ -40,7 +40,7 @@
                 </ul>
               </div>
             </div>
-            <div class="col-10 formbackground-color">
+            <div class="col-lg-10 col-md-10 col-sm-12 formbackground-color">
               <div class="">
                 <div class="form-content stepsDiv">
                   <!-- About Form Step -->
@@ -580,7 +580,8 @@
                                                       rowIndex,
                                                       columnIndex,
                                                       fieldIndex
-                                                    )
+                                                    );
+              handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex);
                                                     ">
                                                   <i class="bi bi-x-lg font-13"></i>
                                                 </button>
@@ -1393,51 +1394,24 @@
               </div>
             </div>
             
-            <!-- <div v-if="selectedBlockIndex !== 0" class="p-3 approval-border-bottom  ">
-              <div class=" d-flex justify-content-start gap-5 mb-3 ">
 
-
-              <div class="form-check ps-0" v-if="selectedBlockIndex !== 0">
-                <div>
-                  <input type="checkbox" id="ViewOnlyReportee" v-model="ViewOnlyReportee" :disabled="requester_as_a_approver || all_approvals_required "
-                    class="me-2  mt-0 form-check-input designationCheckBox" />
-                  <label for="ViewOnlyReportee" class="SelectallDesignation text-nowrap fw-bold mt-1 form-check-label">View Only
-                    Reportee</label>  
-                </div>
-              </div>
-              
-              <div class="form-check ps-0" v-if="selectedBlockIndex !== 0">
-                <div>
-                  <input type="checkbox" id="all_approvals_required" v-model="all_approvals_required" :disabled="ViewOnlyReportee ||  requester_as_a_approver "
-                    class="me-2  mt-0 form-check-input designationCheckBox" />
-                  <label for="all_approvals_required" class="SelectallDesignation text-nowrap fw-bold mt-1 form-check-label">All Approvers Required</label>
-                </div>
-              </div>
-              </div>
-            <div class="form-check ps-0" v-if="selectedBlockIndex !== 0">
-                <div>
-                  <input type="checkbox" id="requester_as_a_approver" v-model="requester_as_a_approver" :disabled="ViewOnlyReportee ||  all_approvals_required"
-                    class="me-2  mt-0 form-check-input designationCheckBox" />
-                  <label for="requester_as_a_approver" class="SelectallDesignation text-nowrap fw-bold mt-1 form-check-label">Requested Only</label>
-                </div>
-              </div>
-            </div> -->
           </div>
 
         </div>
         <div class="p-3 listofdesignations">
           <input v-model="searchDesignation" class="SearchDesignation rounded-2 form-control shadow-none my-1"
             type="text" placeholder="Search Designation" />
+            <span class="font-12 SelectallDesignation ps-2  ">Selected Designations ({{ designationValue.length }})</span>
 
-          <div class="form-check ps-1 mt-3" v-if="DesignationList.length">
-            <div>
               <!-- :disabled="ViewOnlyReportee"  -->
+          <!-- <div class="form-check ps-1 mt-3" v-if="DesignationList.length">
+            <div>
               <input type="checkbox" id="selectAll" v-model="isAllSelected"
                 class="me-2 mt-0 designationCheckBox form-check-input" />
               <label for="selectAll" class="SelectallDesignation fw-bold mx-2 form-check-label">Select all</label>
             </div>
 
-          </div>
+          </div> -->
           <!-- Selected Items Display -->
           <!-- <div v-if="designationValue.length" class="d-flex flex-wrap gap-2 mt-3">
             <span v-for="(selected, i) in designationValue" :key="i"
@@ -1450,6 +1424,36 @@
                 @click="removeDesignation(selected)" style="font-size: 0.6rem;"></button>
             </span>
           </div> -->
+          <div class=" my-3" v-if="DesignationList.length">
+              <div  class="d-flex align-items-center gap-4">
+                
+                <!-- Select All -->
+                <div class="form-check ps-1 d-flex align-items-center m-0">
+                  <input
+                    type="checkbox"
+                    id="selectAll"
+                    :checked="isAllSelected"
+                    @change="toggleSelectAll"
+                    class="form-check-input me-2 designationCheckBox"
+                  />
+                  <label for="selectAll" class="form-check-label SelectallDesignation mt-2 fw-bold">Select All</label>
+                </div>
+
+                <!-- Show HODs -->
+                <div v-if="selectedBlockIndex !== 0 " class="form-check d-flex align-items-center m-0">
+                  <input
+                    type="checkbox"
+                    id="showHods"
+                    v-model="showHods"
+                    class="form-check-input me-2 designationCheckBox"
+                  />
+                  <label for="showHods" class="form-check-label  mt-2 fw-bold">Show HODs Only</label>
+                </div>
+
+              </div>
+            </div>
+
+
 
           <ul v-if="DesignationList.length" class="list-unstyled designation-scroll">
             <li v-for="(item, index) in filteredDesignationList" :key="index" class="designationList form-check">
@@ -1551,6 +1555,7 @@ const selectedData = ref({
 });
 const printFormatID = ref('')
 const is_landscape = ref(false)
+const showHods = ref(false);
 
 
 // const computedDisabled = computed(() => {
@@ -2036,19 +2041,43 @@ const lowerApproverLevels = computed(() => {
 
 
 
-
-
-
 const filteredDesignationList = computed(() => {
-  return DesignationList.value
-    .filter((item) => item.toLowerCase().includes(searchDesignation.value.toLowerCase()))
-    .sort((a, b) => {
-      const aSelected = designationValue.value.includes(a);
-      const bSelected = designationValue.value.includes(b);
-      if (aSelected === bSelected) return 0;
-      return aSelected ? -1 : 1;
-    });
+  let list = DesignationList.value;
+
+  // Show only HODs
+  if (showHods.value) {
+    list = list.filter((item) => item.is_hod === 1);
+  }
+
+  // Search filter
+  if (searchDesignation.value.trim()) {
+    list = list.filter((item) =>
+      item.role.toLowerCase().includes(searchDesignation.value.toLowerCase())
+    );
+  }
+
+  // Sort selected first
+  list = list.sort((a, b) => {
+    const aSelected = designationValue.value.includes(a.role);
+    const bSelected = designationValue.value.includes(b.role);
+    if (aSelected === bSelected) return 0;
+    return aSelected ? -1 : 1;
+  });
+
+  return list.map((item) => item.role);
 });
+
+
+// const filteredDesignationList = computed(() => {
+//   return DesignationList.value
+//     .filter((item) => item.toLowerCase().includes(searchDesignation.value.toLowerCase()))
+//     .sort((a, b) => {
+//       const aSelected = designationValue.value.includes(a);
+//       const bSelected = designationValue.value.includes(b);
+//       if (aSelected === bSelected) return 0;
+//       return aSelected ? -1 : 1;
+//     });
+// });
 
 const hoveredIndexes = ref(null);
 const hoveredColumnIndexes = ref(null);
@@ -2890,21 +2919,30 @@ const handleRemove = (option) => {
   }
 };
 
-const isAllSelected = computed({
-  get() {
-    return (
-      DesignationList.value.length > 0 &&
-      DesignationList.value.every((item) => designationValue.value.includes(item))
-    );
-  },
-  set(value) {
-    if (value) {
-      designationValue.value = [...DesignationList.value];
-    } else {
-      designationValue.value = [];
-    }
-  },
+const isAllSelected = computed(() => {
+  return (
+    filteredDesignationList.value.length > 0 &&
+    filteredDesignationList.value.every((role) =>
+      designationValue.value.includes(role)
+    )
+  );
 });
+
+// ✅ Toggle select all
+function toggleSelectAll(event) {
+  if (event.target.checked) {
+    // Add all filtered roles
+    const newSelection = [
+      ...new Set([...designationValue.value, ...filteredDesignationList.value]),
+    ];
+    designationValue.value = newSelection;
+  } else {
+    // Remove only filtered roles
+    designationValue.value = designationValue.value.filter(
+      (role) => !filteredDesignationList.value.includes(role)
+    );
+  }
+}
 
 function handleSingleSelect() {
   if (!isAllSelected.value && designationValue.value.length === 1) {
@@ -3023,7 +3061,7 @@ const AddDesignCanvas = (idx) => {
   OnRejection.value = '';
   // console.log(idx, "---clicked idex", selectedBlockIndex.value);
   if (filterObj.value.accessible_departments.length) {
-    designationData(filterObj.value.accessible_departments);
+    designationData(idx,filterObj.value.accessible_departments);
   }
   selectedBlockIndex.value = idx;
   initializeDesignationValue(idx);
@@ -3052,32 +3090,40 @@ const AddDesignCanvas = (idx) => {
 //       console.error("Error fetching designations data:", error);
 //     });
 // }
-function designationData(departments) {
-  const filters = [];
+// const filters = [];
 
-  if (Array.isArray(departments) && departments.length > 0) {
-    filters.push(["ezy_departments", "in", departments]);
-  }
-  const queryParams = {
-    limit_page_length: 'None',
-  }
+// if (Array.isArray(departments) && departments.length > 0) {
+//   filters.push(["ezy_departments", "in", departments]);
+// }
+// const queryParams = {
+//   limit_page_length: 'None',
+// }
+
+
+//  Fetching Employee Designations based on Enabled Employees and Is Hods Only 
+function designationData(blockIndex, departments) {
+  let data = {
+    index: blockIndex,                // The current step index (0 = requester, 1 = approver, etc.)
+    departments: departments,         // Array of departments (must remain as array, not params)
+    property: filterObj.value.business_unit // Business unit (property) selected from filters
+  };
 
   axiosInstance
-    .get(apis.resource + doctypes.designations,{    params: queryParams })
+    .post(apis.addDesignationroles, data) 
     .then((res) => {
-      if (res.data) {
-        // console.log(res.data.users, "wf role matrix");
-        // userlist.value = res.data;
-
-        DesignationList.value = [
-          ...new Set(res.data.map((user) => user.name)),
-        ];
+      //  Check if backend returned "message" key with data
+      if (res.message) {
+        //  Store the result in DesignationList (used in UI)
+        DesignationList.value = res.message;
       }
     })
     .catch((error) => {
+      //  Handle errors gracefully
       console.error("Error fetching designations data:", error);
     });
 }
+
+
 function add_Wf_roles_setup() {
   axiosInstance
     .post(apis.add_roles_WF, {
