@@ -579,6 +579,10 @@ import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
 import { domain } from "../../shared/apiurls";
+import { useRouter,useRoute } from "vue-router";
+
+const router = useRouter();
+const route = useRoute();
 
 const businessUnit = computed(() => {
   return EzyBusinessUnit.value;
@@ -1412,7 +1416,7 @@ watch(
 // function addnewDesignation() {
 //     newDesignation.value = !newDesignation.value
 // }
-const actions = ref([{ name: "Edit Employee", icon: "fa-solid fa-eye" }]);
+const actions = ref([{ name: "Edit Employee", icon: "fa-solid fa-edit" },{ name: "View Forms", icon: "fa-solid fa-eye" }]);
 const isFormFilled = computed(() => {
   return [
     createEmployee.value.emp_code,
@@ -1493,6 +1497,18 @@ function actionCreated(rowData, actionEvent) {
       console.warn("No form fields provided.");
       formCreation(rowData);
     }
+  }
+  if (actionEvent?.name === 'View Forms') {
+      router.push({
+        name: "employeeforms",
+        query: {
+          name: rowData.name,
+          EmpName: rowData.emp_name,
+          business_unit: rowData.company_field,
+          Dept:rowData.department,
+        },
+      });
+      
   }
 
   // Handle other actions like enabling here if needed
