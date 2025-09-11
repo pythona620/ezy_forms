@@ -5,26 +5,12 @@
         <h1 class="m-0 font-13">Requests Assigned to me</h1>
         <p class="m-0 font-11 pt-1">{{ totalRecords }} request</p>
       </div>
-      <!-- <div>
-        <input type="checkbox" id="ViewOnlyReportee" v-model="ViewOnlyReportee" class="me-2 mt-1 form-check-input" @change="ViewOnlyRe" />
-              <label for="ViewOnlyReportee " class="SelectallDesignation  font-12 m-0 form-check-label">View Only Reportee</label>
-        
-        
-      </div> -->
     </div>
     <div class="mt-2">
-      <div class=" d-none d-lg-block">
-
       <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" viewType="viewPdf" isCheckbox="true"
         @updateFilters="inLineFiltersData" :field-mapping="fieldMapping" @cell-click="viewPreview"
         isFiltersoption="true" :actions="actions" @actionClicked="actionCreated" />
-      </div>
-      <div class=" d-block d-lg-none">
-        <GlobalCard :tHeaders="tableheaders" :tData="tableData" isAction="true" viewType="viewPdf" isCheckbox="true"
-          @updateFilters="inLineFiltersData" :field-mapping="fieldMapping" @cell-click="viewPreview"
-          isFiltersoption="false" :actions="actions" @actionClicked="actionCreated" />
-      </div>
-      <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
+      <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords" :items-per-page="filterObj.limitPageLength"
         @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
     </div>
     <div class="modal fade" id="viewRequest" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
@@ -108,19 +94,12 @@
         </div>
       </div>
     </div>
-    <!-- <div>
-								<ButtonComp type="button" icon="ban" class="cancelbtn border-1 text-nowrap font-10"
-									@click="approvalCancelFn(formData, 'Request Cancelled')" name="Cancel Request" />
-							</div> -->
 
-    <!-- <ButtonComp @click="approvalCancelFn(formData, 'Request Cancelled')" type="button" icon="x"
-									class="rejectbtn border-1 text-nowrap font-10 " name="Reject" /> -->
   </div>
 </template>
 <script setup>
 import ButtonComp from "../../Components/ButtonComp.vue";
 import GlobalTable from "../../Components/GlobalTable.vue";
-import GlobalCard from "../../Components/GlobalCard.vue";
 import axiosInstance from "../../shared/services/interceptor";
 import { apis, doctypes } from "../../shared/apiurls";
 import { onMounted, ref, reactive, computed, watch } from "vue";
@@ -151,9 +130,9 @@ const responseData = ref([]);
 const ViewOnlyReportee = ref(false);
 const tableheaders = ref([
   { th: "Request ID", td_key: "name" },
-  { th: "Requester Name", td_key: "requester_name" },
+  { th: "Requested By", td_key: "requester_name" },
   { th: "Requested on", td_key: "requested_on" },
-  { th: "Requester Department", td_key: "department_name" },
+  { th: "Requested Department", td_key: "department_name" },
   { th: "Approval Status", td_key: "status" },
   { th: "Pending With", td_key: "assigned_to_users" },
   { th: "Linked ID", td_key: "linked_form_id" },
@@ -167,7 +146,6 @@ const actions = ref([
   // { name: 'Download Form', icon: 'fa-solid fa-download' },
   // { name: 'Edit Form', icon: 'fa-solid fa-edit' },
 ]);
-const tableData = ref([]);
 const selectedRequest = ref({});
 const showRequest = ref(null);
 const doctypeForm = ref([]);
@@ -177,6 +155,7 @@ const tableHeaders = ref([]);
 
 const loading = ref(false)
 const Rejectloading = ref(false)
+const filteredData = ref([]);
 
 onMounted(() => {
   // getClientIP()
@@ -186,34 +165,22 @@ onMounted(() => {
 });
 
 const viewlist = ref([])
-function ViewOnlyReport() {
+// function ViewOnlyReport() {
 
-  // console.log(ViewOnlyReportee.value); 
-  axiosInstance
-    .post(apis.view_only_reportee,)
-    .then((response) => {
-      // console.log(response.message,"list");
-      viewlist.value = response.message;
+//   // console.log(ViewOnlyReportee.value); 
+//   axiosInstance
+//     .post(apis.view_only_reportee,)
+//     .then((response) => {
+//       // console.log(response.message,"list");
+//       viewlist.value = response.message;
+// //       receivedForMe(filterObj.value.filters);
 
-      // const filters = [ "name","in", viewlist.value];
-      //    if (route.query.status) {
-      //   filterObj.value.filters = [
-      //     ["name", "in", viewlist.value],
-      //     ["status", "=", route.query.status],
-      //   ];
+//     })
+//     .catch((error) => {
+//       console.log(error);
+//     });
+// }
 
-
-      //   // filterObj.value.filters.push(["status", "=", route.query.status]);
-      // }
-      receivedForMe(filterObj.value.filters);
-
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-
-
-}
 function actionCreated(rowData, actionEvent) {
   if (actionEvent.name === "View Request") {
     if (rowData) {
@@ -315,7 +282,7 @@ function viewPreview(data, index, type) {
         name: data.name,
         doctype_name: data.doctype_name,
         type: "mytasks",
-        designation: employeeData.value
+        designation: employeeData.value.designation
 
       },
     });
@@ -597,128 +564,127 @@ function closeModal() {
   isCommentsValid.value = true;
 }
 
-const PaginationUpdateValue = (itemsPerPage) => {
-  filterObj.value.limitPageLength = itemsPerPage;
-  filterObj.value.limit_start = 0;
-  if (filterObj.value.filters.length) {
-    receivedForMe(filterObj.value.filters);
-  } else {
-    receivedForMe();
-  }
-};
+// const PaginationUpdateValue = (itemsPerPage) => {
+//   filterObj.value.limitPageLength = itemsPerPage;
+//   filterObj.value.limit_start = 0;
+//   if (filterObj.value.filters.length) {
+//     receivedForMe(filterObj.value.filters);
+//   } else {
+//     receivedForMe();
+//   }
+// };
 // Handle updating the limit start
-const PaginationLimitStart = ([itemsPerPage, start]) => {
-  filterObj.value.limitPageLength = itemsPerPage;
-  filterObj.value.limit_start = start;
-  if (filterObj.value.filters.length) {
-    receivedForMe(filterObj.value.filters);
-  } else {
-    receivedForMe();
-  }
-};
+// const PaginationLimitStart = ([itemsPerPage, start]) => {
+//   filterObj.value.limitPageLength = itemsPerPage;
+//   filterObj.value.limit_start = start;
+//   if (filterObj.value.filters.length) {
+//     receivedForMe(filterObj.value.filters);
+//   } else {
+//     receivedForMe();
+//   }
+// };
 
 const filters = ref([]);
-const timeout = ref(null);
+// function inLineFiltersData(searchedData) {
+//   clearTimeout(timeout.value); // Clear previous timeout
 
-function inLineFiltersData(searchedData) {
-  clearTimeout(timeout.value); // Clear previous timeout
+//   timeout.value = setTimeout(() => {
+//     // Initialize filters array
+//     filterObj.value.filters = [];
 
-  timeout.value = setTimeout(() => {
-    // Initialize filters array
-    filterObj.value.filters = [];
+//     // Loop through the table headers and build dynamic filters
+//     tableheaders.value.forEach((header) => {
+//       const key = header.td_key;
 
-    // Loop through the table headers and build dynamic filters
-    tableheaders.value.forEach((header) => {
-      const key = header.td_key;
+//       if (searchedData[key]) {
+//         // Push as an array of 3 items
+//         filterObj.value.filters.push([key, "like", `%${searchedData[key]}%`]);
+//       }
+//     });
 
-      if (searchedData[key]) {
-        // Push as an array of 3 items
-        filterObj.value.filters.push([key, "like", `%${searchedData[key]}%`]);
-      }
-    });
-
-    // Check if status is present in the route query params
+//     // Check if status is present in the route query params
 
 
-    // Call receivedForMe with or without filters
-    if (filterObj.value.filters.length) {
-      filterObj.value.limit_start = 0;
-      receivedForMe(filterObj.value.filters);
-    } else {
-      receivedForMe();
-    }
-  }, 500); // Adjust debounce delay as needed
-}
-function receivedForMe(data) {
-  // Initialize filters array for building dynamic query parameters
+//     // Call receivedForMe with or without filters
+//     if (filterObj.value.filters.length) {
+//       filterObj.value.limit_start = 0;
+//       receivedForMe(filterObj.value.filters);
+//     } else {
+//       receivedForMe();
+//     }
+//   }, 500); // Adjust debounce delay as needed
+// }
+// function receivedForMe(data) {
+//   // Initialize filters array for building dynamic query parameters
 
-  const EmpRequestdesignation = JSON.parse(localStorage.getItem("employeeData"));
-  employeeData.value = EmpRequestdesignation.designation;
+//   const EmpRequestdesignation = JSON.parse(localStorage.getItem("employeeData"));
+//   employeeData.value = EmpRequestdesignation.designation;
 
-  const filters = [
-    // assigned_to_users
-    ["assigned_to_users", "like", `%${EmpRequestdesignation?.designation}%`],
-    ["property", "like", `%${newBusinessUnit.value.business_unit}%`],
-    ["status", "!=", "Request Cancelled"],
+//   const filters = [
+//     // assigned_to_users
+//     ["assigned_to_users", "like", `%${EmpRequestdesignation?.designation}%`],
+//     ["property", "=", `${newBusinessUnit.value.business_unit}`],
+//     ["status", "!=", "Request Cancelled"],
 
-    ["name", "in", viewlist.value],
-    ["status", "!=", "Completed"]
-  ];
-  if (data) {
-    filters.push(...data);
-    // console.log(data);
-  }
+//     ["name", "in", viewlist.value],
+//     ["status", "!=", "Completed"]
+//   ];
+//   if (data) {
+//     filters.push(...data);
+//     // console.log(data);
+//   }
 
-  const queryParams = {
-    fields: JSON.stringify(["*"]),
-    limit_page_length: filterObj.value.limitPageLength,
-    limit_start: filterObj.value.limit_start,
-    filters: JSON.stringify(filters),
-    order_by: "`tabWF Workflow Requests`.`creation` desc",
-  };
+//   const queryParams = {
+//     fields: JSON.stringify(["*"]),
+//     limit_page_length: filterObj.value.limitPageLength,
+//     limit_start: filterObj.value.limit_start,
+//     filters: JSON.stringify(filters),
+//     order_by: "`tabWF Workflow Requests`.`creation` desc",
+//   };
 
-  const queryParamsCount = {
-    fields: JSON.stringify(["count(name) AS total_count"]),
-    limitPageLength: "None",
-    filters: JSON.stringify(filters),
-  };
+//   const queryParamsCount = {
+//     fields: JSON.stringify(["count(name) AS total_count"]),
+//     limitPageLength: "None",
+//     filters: JSON.stringify(filters),
+//   };
 
-  // Fetch total count of records matching filters
-  axiosInstance
-    .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, {
-      params: queryParamsCount,
-    })
-    .then((res) => {
-      totalRecords.value = res.data[0].total_count;
-    })
-    .catch((error) => {
-      console.error("Error fetching total count:", error);
-    });
+//   // Fetch total count of records matching filters
+//   axiosInstance
+//     .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, {
+//       params: queryParamsCount,
+//     })
+//     .then((res) => {
+//       totalRecords.value = res.data[0].total_count;
+//     })
+//     .catch((error) => {
+//       console.error("Error fetching total count:", error);
+//     });
 
-  // Fetch the records matching filters
-  axiosInstance
-    .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, {
-      params: queryParams,
-    })
-    .then((res) => {
-      if (filterObj.value.limit_start === 0) {
+//   // Fetch the records matching filters
+//   axiosInstance
+//     .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, {
+//       params: queryParams,
+//     })
+//     .then((res) => {
+//       if (filterObj.value.limit_start === 0) {
 
-        tableData.value = res.data;
-        idDta.value = [...new Set(res.data.map((id) => id.name))];
-        docTypeName.value = [
-          ...new Set(res.data.map((docTypeName) => docTypeName.doctype_name)),
-        ];
-        statusOptions.value = [...new Set(res.data.map((status) => status.status))];
-      }
-      else {
-        tableData.value = tableData.value.concat(res.data);
-      }
+//         tableData.value = res.data;
+//         idDta.value = [...new Set(res.data.map((id) => id.name))];
+//         docTypeName.value = [
+//           ...new Set(res.data.map((docTypeName) => docTypeName.doctype_name)),
+//         ];
+//         statusOptions.value = [...new Set(res.data.map((status) => status.status))];
+//       }
+//       else {
+//         tableData.value = tableData.value.concat(res.data);
+//       }
 
-    })
-    .catch((error) => {
-      console.error("Error fetching records:", error);
-    });
-}
+//     })
+//     .catch((error) => {
+//       console.error("Error fetching records:", error);
+//     });
+// }
+
 const fieldMapping = computed(() => ({
   // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
   // credit_irn_generated: { type: "select", options: ["Pending", "Completed", "Error"] },
@@ -734,6 +700,101 @@ const fieldMapping = computed(() => ({
 }));
 
 
+
+const tableData = ref([]);
+const timeout = ref(null);
+const fullData = ref([]); 
+
+
+function ViewOnlyReport() {
+  axiosInstance
+    .post(apis.view_only_reportee)
+    .then((response) => {
+      // Filter out items with status 'Completed' or 'Request Cancelled'
+      const filtered = (response.message || []).filter(
+        item => item.status !== 'Completed' && item.status !== 'Request Cancelled'
+      );
+
+      fullData.value = filtered;
+      filteredData.value = [...filtered];
+
+      totalRecords.value = filteredData.value.length;
+      filterObj.value.limit_start = 0;
+      tableData.value = filteredData.value.slice(0, filterObj.value.limitPageLength);
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+}
+
+
+
+const limit = ref(20);
+// const limitStart = ref(0);
+
+// function paginateData(filtered = fullData.value) {
+//   const paginated = filtered.slice(filterObj.value.limit_start, filterObj.value.limit_start + filterObj.value.limitPageLength);
+//   tableData.value = paginated;
+//   totalRecords.value = filtered.length;
+// }
+function paginateData(filtered = filteredData.value) {
+  const paginated = filtered.slice(filterObj.value.limit_start, filterObj.value.limit_start + filterObj.value.limitPageLength);
+  tableData.value = paginated;
+  totalRecords.value = filtered.length;
+}
+
+function inLineFiltersData(searchedData) {
+  clearTimeout(timeout.value);
+
+  timeout.value = setTimeout(() => {
+    filteredData.value = fullData.value.filter((row) => {
+      return tableheaders.value.every((header) => {
+        const key = header.td_key;
+        if (searchedData[key]) {
+          return String(row[key] || "").toLowerCase().includes(String(searchedData[key]).toLowerCase());
+        }
+        return true;
+      });
+    });
+
+    totalRecords.value = filteredData.value.length;
+    filterObj.value.limitPageLength = 20;
+    filterObj.value.limit_start = 0;
+
+    tableData.value = filteredData.value.slice(0, filterObj.value.limitPageLength);
+  }, 500);
+}
+
+function PaginationUpdateValue(newLimit) {
+  filterObj.value.limitPageLength = newLimit;
+  filterObj.value.limit_start = 0;
+  paginateData();
+}
+
+// function PaginationLimitStart() {
+//   filterObj.value.limit_start += filterObj.value.limitPageLength;
+
+//   const nextBatch = filteredData.value.slice(filterObj.value.limit_start, filterObj.value.limit_start + filterObj.value.limitPageLength);
+
+//   tableData.value = [...tableData.value, ...nextBatch];
+// }
+
+function PaginationLimitStart() {
+  filterObj.value.limit_start += filterObj.value.limitPageLength;
+
+  // Always take from filteredData instead of fullData
+  const nextBatch = filteredData.value.slice(
+    filterObj.value.limit_start,
+    filterObj.value.limit_start + filterObj.value.limitPageLength
+  );
+
+  // Append next filtered records
+  tableData.value = [...tableData.value, ...nextBatch];
+}
+
+
+
+
 watch(
   businessUnit,
   (newVal) => {
@@ -747,6 +808,7 @@ watch(
 );
 
 </script>
+
 <style scoped>
 .approvebtn {
   width: 146px;

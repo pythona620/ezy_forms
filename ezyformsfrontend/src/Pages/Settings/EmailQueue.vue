@@ -22,7 +22,7 @@
                 isAction="true" viewType="viewPdf" isFiltersoption="true" :field-mapping="fieldMapping"
                 @updateFilters="inLineFiltersData" />
 
-            <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords" @limitStart="PaginationLimitStart"
+            <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords" @limitStart="PaginationLimitStart" :items-per-page="filterObj.limitPageLength"
                 @updateValue="PaginationUpdateValue" />
         </div>
 
@@ -146,12 +146,10 @@ function inLineFiltersData(searchedData) {
     });
 
     // Call receivedForMe with or without filters
-    if (filterObj.value.filters.length) {
+        filterObj.value.limitPageLength = 20;
       filterObj.value.limit_start = 0;
       EmailQueueData(filterObj.value.filters);
-    } else {
-        EmailQueueData();
-    }
+   
 },500)
     
 }
@@ -159,13 +157,13 @@ function inLineFiltersData(searchedData) {
 const PaginationUpdateValue = (itemsPerPage) => {
     filterObj.value.limitPageLength = itemsPerPage;
     filterObj.value.limit_start = 0;
-    EmailQueueData();
+    EmailQueueData(filterObj.value.filters);
 };
 
 const PaginationLimitStart = ([itemsPerPage, start]) => {
     filterObj.value.limitPageLength = itemsPerPage;
     filterObj.value.limit_start = start;
-    EmailQueueData();
+    EmailQueueData(filterObj.value.filters);
 };
 
 watch(

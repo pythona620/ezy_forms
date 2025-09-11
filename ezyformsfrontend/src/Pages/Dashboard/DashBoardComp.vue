@@ -94,7 +94,10 @@ const subEndDate=ref("");
 const remainingDaysCount = ref(0);
 const subscriptionEndDateStr = ref("");
 const showSubscriptionAlert = ref(false);
+const timeout = ref(null);
 
+const fullData = ref([]); 
+const filteredData = ref([]);
 const tableheaders = ref([
   { th: "Request ID", td_key: "name" },
   // { th: "Form name", td_key: "name" },
@@ -256,26 +259,87 @@ onMounted(() => {
     // document.head.appendChild(script)
 })
 const viewlist = ref([])
-function ViewOnlyReport(){
-
-  // console.log(ViewOnlyReportee.value); 
+function ViewOnlyReport() {
   axiosInstance
-    .post(apis.view_only_reportee,)
+    .post(apis.view_only_reportee)
     .then((response) => {
-      // console.log(response.message,"list");
-      viewlist.value = response.message;
+      // Filter out items with status 'Completed' or 'Request Cancelled'
+      const filtered = (response.message || []).filter(
+        item => item.status !== 'Completed' && item.status !== 'Request Cancelled'
+      );
 
-      // const filters = [ "name","in", viewlist.value];
-      receivedForMe()
-      fetchData()
+      fullData.value = filtered;
+      filteredData.value = [...filtered];
 
+      totalRecords.value = filteredData.value.length;
+      limitStart.value = 0;
+      tableData.value = filteredData.value.slice(0, limit.value);
     })
     .catch((error) => {
-      console.log(error);
-      });
-   
-
+      console.error(error);
+    });
 }
+
+const limit = ref(20);
+const limitStart = ref(0);
+
+function paginateData(filtered = fullData.value) {
+  const paginated = filtered.slice(limitStart.value, limitStart.value + limit.value);
+  tableData.value = paginated;
+  totalRecords.value = filtered.length;
+}
+
+function inLineFiltersData(searchedData) {
+  clearTimeout(timeout.value);
+
+  timeout.value = setTimeout(() => {
+    filteredData.value = fullData.value.filter((row) => {
+      return tableheaders.value.every((header) => {
+        const key = header.td_key;
+        if (searchedData[key]) {
+          return String(row[key] || "").toLowerCase().includes(String(searchedData[key]).toLowerCase());
+        }
+        return true;
+      });
+    });
+
+    totalRecords.value = filteredData.value.length;
+    limit.value = 20;
+    limitStart.value = 0;
+
+    tableData.value = filteredData.value.slice(0, limit.value);
+  }, 500);
+}
+
+function PaginationUpdateValue(newLimit) {
+  limit.value = newLimit;
+  limitStart.value = 0;
+  paginateData();
+}
+
+function PaginationLimitStart() {
+  limitStart.value += limit.value;
+
+  const nextBatch = filteredData.value.slice(limitStart.value, limitStart.value + limit.value);
+
+  tableData.value = [...tableData.value, ...nextBatch];
+}
+
+
+
+
+
+watch(
+  businessUnit,
+  (newVal) => {
+    newBusinessUnit.value.business_unit = newVal;
+
+    if (newVal.length) {
+      ViewOnlyReport();
+    }
+  },
+  { immediate: true }
+);
 function viewPreview(data) {
   // console.log(data);
   router.push({
@@ -291,106 +355,8 @@ function viewPreview(data) {
   });
 }
 
-const timeout = ref(null);
 
-function inLineFiltersData(searchedData) {
-    clearTimeout(timeout.value); // Clear previous timeout
 
-    timeout.value = setTimeout(() => {
-        // Initialize filters array
-        filterObj.value.filters = [];
-
-        // Loop through the table headers and build dynamic filters
-        tableheaders.value.forEach((header) => {
-            const key = header.td_key;
-
-            if (searchedData[key]) {
-                // Push as an array of 3 items
-                filterObj.value.filters.push([key, "like", `%${searchedData[key]}%`]);
-            }
-        });
-
-        // Call receivedForMe with or without filters
-        if (filterObj.value.filters.length) {
-          filterObj.value.limit_start = 0;
-
-            receivedForMe(filterObj.value.filters);
-        } else {
-            receivedForMe();
-            
-        }
-    }, 500); // Adjust debounce delay as needed
-}
-function receivedForMe(data) {
-  // Initialize filters array for building dynamic query parameters
-
-  const EmpRequestdesignation = JSON.parse(localStorage.getItem("employeeData"));
-  employeeData.value = EmpRequestdesignation.designation;
-
-  const filters = [
-    // assigned_to_users
-    ["assigned_to_users", "like", `%${EmpRequestdesignation?.designation}%`],
-    ["property", "=", `${newBusinessUnit.value.business_unit}`],
-    ["status", "!=", "Request Cancelled"],
-    
-    ["name","in", viewlist.value],
-    ["status", "!=", "Completed"]
-  ];
-  if (data) {
-    filters.push(...data);
-    console.log(data);
-  }
-
-  const queryParams = {
-    fields: JSON.stringify(["*"]),
-    limit_page_length: filterObj.value.limitPageLength,
-    limit_start: filterObj.value.limit_start,
-    filters: JSON.stringify(filters),
-    order_by: "`tabWF Workflow Requests`.`creation` desc",
-  };
-
-  const queryParamsCount = {
-    fields: JSON.stringify(["count(name) AS total_count"]),
-    limitPageLength: "None",
-    filters: JSON.stringify(filters),
-  };
-
-  // Fetch total count of records matching filters
-  axiosInstance
-    .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, {
-      params: queryParamsCount,
-    })
-    .then((res) => {
-      totalRecords.value = res.data[0].total_count;
-    })
-    .catch((error) => {
-      console.error("Error fetching total count:", error);
-    });
-
-  // Fetch the records matching filters
-  axiosInstance
-    .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, {
-      params: queryParams,
-    })
-    .then((res) => {
-      if (filterObj.value.limit_start === 0) {
-
-        tableData.value = res.data;
-        idDta.value = [...new Set(res.data.map((id) => id.name))];
-        docTypeName.value = [
-          ...new Set(res.data.map((docTypeName) => docTypeName.doctype_name)),
-        ];
-        statusOptions.value = [...new Set(res.data.map((status) => status.status))];
-      }
-      else {
-        tableData.value = tableData.value.concat(res.data);
-      }
-
-    })
-    .catch((error) => {
-      console.error("Error fetching records:", error);
-    });
-}
 const fieldMapping = computed(() => ({
   // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
   // credit_irn_generated: { type: "select", options: ["Pending", "Completed", "Error"] },
@@ -406,17 +372,6 @@ const fieldMapping = computed(() => ({
 }));
 
 
-watch(
-  businessUnit,
-  (newVal) => {
-    newBusinessUnit.value.business_unit = newVal;
-
-    if (newVal.length) {
-      ViewOnlyReport();
-    }
-  },
-  { immediate: true }
-);
 
 // Function to initialize and update each chart dynamically
 function updateCharts() {

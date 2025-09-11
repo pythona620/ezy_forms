@@ -16,6 +16,8 @@ from frappe.utils import now as frappe_now
 import re
 import json
 import shutil
+from frappe.modules.import_file import import_file_by_path
+from frappe.modules import get_module_path
 
 
  
@@ -80,11 +82,11 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
 			frappe.set_value("Ezy Form Definitions",form_short_name,"has_workflow",has_workflow)
 			# frappe.set_value("Ezy Form Definitions",form_short_name,"is_linked_form", is_linked_form)
 			
-			frappe.set_value("Ezy Form Definitions",{"name":form_short_name},{"form_status":form_status,"accessible_departments":accessible_departments,"owner_of_the_form":owner_of_the_form,"is_linked_form":is_linked_form,"is_linked":is_linked,"is_predefined_doctype":is_predefined_doctype})
+			frappe.set_value("Ezy Form Definitions",{"name":form_short_name},{"form_status":form_status,"accessible_departments":accessible_departments,"owner_of_the_form":owner_of_the_form,"is_linked_form":is_linked_form,"is_linked":is_linked,"is_predefined_doctype":is_predefined_doctype,"has_workflow":has_workflow})
 		if not frappe.db.exists("DocType",doctype):
-			frappe.db.sql(f"DROP TABLE IF EXISTS `tab{doctype}`;")
-			frappe.db.commit()
-			if frappe.db.exists("Ezy Form Definitions",{"name":form_short_name}):return {"success":True,"message":f"Already Created Form with the same name - '{form_short_name}' but haven't removed in 'Ezy Form Definitions'."}
+			if frappe.db.exists("Ezy Form Definitions",{"name":form_short_name}):
+				return {"success":True,"message":f"Already Created Form with the same name - '{form_short_name}' but haven't removed in 'Ezy Form Definitions'."}
+			
 			doc = frappe.new_doc("DocType")
 			doc.name = doctype
 			doc.creation = frappe_now()
@@ -120,6 +122,7 @@ def enqueued_add_dynamic_doctype(owner_of_the_form:str,business_unit:str,form_ca
 			bench_migrating_from_code()
 			form_defs = frappe.new_doc("Ezy Form Definitions")
 			form_defs.form_category = form_category
+			form_defs.owner = "Administrator"
 			form_defs.accessible_departments = accessible_departments
 			form_defs.form_name = form_name
 			form_defs.form_short_name = form_short_name
@@ -169,88 +172,84 @@ def enqueued_add_customized_fields_for_dynamic_doc(fields: list[dict], doctype: 
 	try:
 		if isinstance(fields, str):
 			fields = literal_eval(fields)
-		if not len(fields) > 0:
+		if not fields:
 			return {"success": False, "message": "Pass Fields for storing."}
 
-		fields_in_mentioned_doctype = [
-			_[0] for _ in frappe.db.sql(f"SELECT fieldname FROM `tabDocField` WHERE parent ='{doctype}';")
-		]
-
-		table_fieldnames = [item["options"] for item in fields if item.get("fieldtype") == "Table"]
-		
-		# Initialize as an empty dictionary
-		child_table_fields = {"child_table_fields": {}}
-
-		for table_name in table_fieldnames:
-			fields_in_child_doctype = frappe.db.sql(
-				f"SELECT IFNULL(options, '') AS options,IFNULL(description, '') AS description, fieldname, fieldtype, idx, label FROM `tabDocField` WHERE parent ='{table_name}';",
-				as_dict=True
+		# Existing fieldnames in the doctype
+		fields_in_mentioned_doctype = {
+			r[0] for r in frappe.db.sql(
+				"SELECT fieldname FROM `tabDocField` WHERE parent=%s", (doctype,)
 			)
-		   
-			for each_child in fields_in_child_doctype:
-				each_child['value'] = ''
-			# Sort the fields by 'idx' within each child table
-			sorted_fields = sorted(fields_in_child_doctype, key=lambda x: x["idx"])
- 
-			# Store the sorted results in the dictionary
-			child_table_fields["child_table_fields"][table_name] = sorted_fields
-			
-		# Sort the dictionary keys before returning
-		child_table_fields["child_table_fields"] = dict(sorted(child_table_fields["child_table_fields"].items()));print("Child Table Fields:", child_table_fields,"-"*100)
-		for dicts_of_docs_entries in fields:
-			if dicts_of_docs_entries["fieldname"] in fields_in_mentioned_doctype:
-				doc_exists_name_or_not = frappe.db.exists("DocField", dicts_of_docs_entries)             
-				if not doc_exists_name_or_not:
-					name_of_existing_doc = frappe.db.get_all(
-						"DocField",
-						filters={"fieldname": dicts_of_docs_entries["fieldname"], "parent": doctype},
-						pluck="name"
-					)[0]
-					doc_for_existing_custom_field = frappe.get_doc("DocField", name_of_existing_doc)
-					
-					if "options" in dicts_of_docs_entries:
-						if isinstance(dicts_of_docs_entries["options"], str):
-							doc_for_existing_custom_field.options = dicts_of_docs_entries["options"]
-						else:
-							doc_for_existing_custom_field.options = "\n".join(dicts_of_docs_entries["options"])
-	  
-					if "default" in dicts_of_docs_entries:
-						doc_for_existing_custom_field.default = dicts_of_docs_entries["default"]
-					if "description" in dicts_of_docs_entries:
-						doc_for_existing_custom_field.description = dicts_of_docs_entries["description"]
-					doc_for_existing_custom_field.idx = dicts_of_docs_entries["idx"]
-					doc_for_existing_custom_field.label = dicts_of_docs_entries["label"]
-					doc_for_existing_custom_field.fieldtype = dicts_of_docs_entries["fieldtype"]
-					# doc_for_existing_custom_field.reqd = dicts_of_docs_entries["reqd"]
-					doc_for_existing_custom_field.save(ignore_permissions=True)
-					frappe.db.commit()
-					doc_for_existing_custom_field.db_update()
-					doc_for_existing_custom_field.reload()
+		}
+
+		# Collect child table fieldnames directly
+		table_fieldnames = [f["options"] for f in fields if f.get("fieldtype") == "Table"]
+
+		# Get child table fields in one pass
+		child_table_fields = {
+			"child_table_fields": dict(
+				sorted({
+					t: sorted(
+						map(lambda f: {**f, "value": ""}, frappe.db.sql(
+							"""SELECT IFNULL(options,'') AS options,
+							          IFNULL(description,'') AS description,
+							          fieldname, fieldtype, idx, label
+							   FROM `tabDocField` WHERE parent=%s""", (t,), as_dict=True
+						)),
+						key=lambda x: x["idx"]
+					)
+					for t in table_fieldnames
+				}.items())
+			)
+		}
+
+		# Process fields: update if exists, else create
+		for f in fields:
+			if f["fieldname"] in fields_in_mentioned_doctype:
+				# Update existing
+				name = frappe.db.get_value(
+					"DocField", {"fieldname": f["fieldname"], "parent": doctype}, "name"
+				)
+				if name:
+					doc = frappe.get_doc("DocField", name)
+					doc.update({
+						"options": f.get("options") if isinstance(f.get("options"), str)
+							else "\n".join(f.get("options", [])),
+						"default": f.get("default"),
+						"description": f.get("description"),
+						"idx": f.get("idx"),
+						"label": f.get("label"),
+						"fieldtype": f.get("fieldtype"),
+					})
+					doc.save(ignore_permissions=True)
 			else:
-				# Create a new field
-				doc_for_new_custom_field = frappe.get_doc('DocType', doctype)
-				# appending records in child with get_doc
-				doc_for_new_custom_field.append('fields', dicts_of_docs_entries)
-				doc_for_new_custom_field.save(ignore_permissions=True)
-				frappe.db.commit()
-				doc_for_new_custom_field.db_update()
-				doc_for_new_custom_field.reload()
+				# New field
+				doc = frappe.get_doc("DocType", doctype)
+				doc.append("fields", f)
+				doc.save(ignore_permissions=True)
+
+		# Call bench migration (your custom logic)
 		bench_migrating_from_code()
-		workflow_from_defs = frappe.db.get_value("Ezy Form Definitions",doctype,"form_json")
-		if not workflow_from_defs:
-			workflow_from_defs = {"workflow":[]}
-		else:
-			workflow_from_defs = literal_eval(workflow_from_defs)["workflow"]
-			workflow_from_defs = {"workflow":workflow_from_defs}
-		field_with_workflow = {"fields":fields} | workflow_from_defs | child_table_fields
-		frappe.db.set_value("Ezy Form Definitions",doctype,{"form_json":str(field_with_workflow).replace("'",'"').replace("None","null")})
-		# frappe.db.set_value("Ezy Form Definitions",doctype,{"form_json":str(field_with_workflow).replace("'",'"').replace("None","null"),'accessible_departments':accessible_departments})
+
+		# Workflow definitions
+		workflow = frappe.db.get_value("Ezy Form Definitions", doctype, "form_json")
+		workflow = {"workflow": []} if not workflow else {"workflow": literal_eval(workflow)["workflow"]}
+
+		# Merge everything
+		field_with_workflow = {"fields": fields} | workflow | child_table_fields
+		frappe.db.set_value(
+			"Ezy Form Definitions",
+			doctype,
+			{"form_json": str(field_with_workflow).replace("'", '"').replace("None", "null")}
+		)
+
 		frappe.db.commit()
-		return {"success":True,"message":fields}
+		return {"success": True, "message": fields}
+
 	except Exception as e:
 		exc_type, exc_obj, exc_tb = sys.exc_info()
 		frappe.log_error("Error in add_customized_fields_for_dynamic_doc",
-						 "line No:{}\n{}".format(exc_tb.tb_lineno, str(e)))
+						 f"line No:{exc_tb.tb_lineno}\n{str(e)}")
 		frappe.db.rollback()
 		frappe.throw(str(e))
 		return {"success": False, "message": str(e)}
@@ -270,16 +269,32 @@ def enqueued_deleting_customized_field_from_custom_dynamic_doc(doctype:str,delet
 		frappe.throw(str(e))
 		return {"success": False, "message": str(e)}
 
-@frappe.whitelist()    
+
+@frappe.whitelist()
 def bench_migrating_from_code():
-	try:
-		site_name = cstr(frappe.local.site)
-		os.chdir(frappe.utils.get_bench_path() + "/sites")
-		subprocess.run(["bench","--site", site_name,"migrate"])
-	except Exception as e:
-		frappe.log_error(str(e))
+    try:
+        module = "User Forms"
+        module_path = get_module_path(module)
  
-def activating_perms(doctype,role):
+        # Create an importer lambda
+        importer = lambda path: import_file_by_path(path, force=True, ignore_version=True)
+ 
+        # Find all JSON files and import them
+        [
+            importer(os.path.join(root, fname))
+            for root, _, files in os.walk(module_path)
+            for fname in files if fname.endswith(".json")
+        ]
+ 
+        frappe.clear_cache()
+        return f"Module {module} synced successfully."
+ 
+    except Exception as e:
+        
+        return f"Error syncing {module}: {str(e)}"
+
+def activating_perms(doctype, role):
+	
 	if not frappe.db.exists("DocPerm",{"parent":doctype,"parentfield":"permissions","parenttype":"DocType","role":role}):
 		perm_doc = frappe.new_doc("DocPerm")
 		perm_doc.parent = doctype
@@ -303,28 +318,10 @@ def activating_perms_for_all_roles_in_wf_roadmap():
 		fields=["doctype_names"]
 	)
 
-	module_child_entries = frappe.get_all(
-		"Custom Modules Permissions",
-		filters={
-			"parent": "Ezy Doctype Permissions",
-			"parenttype": "Ezy Doctype Permissions",
-			"parentfield": "custom_modules",
-		},
-		fields=["custom_modules"]  # ✅ make sure fieldname is correct
-	)
-
 	document_type_list = [entry.get("doctype_names") for entry in child_entries if entry.get("doctype_names")]
-	modules_list = [entry.get("custom_modules") for entry in module_child_entries if entry.get("custom_modules")]
 
 	# fetch doctypes belonging to the given modules
-	custom_fields_list = frappe.get_all(
-		"DocType",
-		filters={"module": ["in", modules_list]},
-		pluck="name"
-	)
 
-	# merge lists
-	document_type_list.extend(custom_fields_list)
 
  
 	for doc in document_type_list:
@@ -387,13 +384,8 @@ def add_child_doctype(form_short_name: str, as_a_block: str, fields: list[dict],
 				new_field_data = {
 							"label": field.get("label"),
 							"fieldtype": field.get("fieldtype"),
-							"options": (
-								("\n" if not field["options"].startswith("\n") else "") +
-								"\n".join([opt.strip() for opt in field["options"].split("\n") if opt.strip()])
-							) if field.get("fieldtype") == "Select" and field.get("options") else field.get("options"),
-							"description": field.get("description"),
-							"idx": field.get("idx"),
-						}
+							"options": field.get("options") or "",
+							}
 				if clean_fieldname in existing_fields_dict:
 					# Update existing field
 					existing_field = existing_fields_dict[clean_fieldname]
@@ -471,7 +463,7 @@ def add_child_doctype(form_short_name: str, as_a_block: str, fields: list[dict],
 			{
 				"child_doc": {
 					"description": as_a_block,
-					"fieldname": child_doc_name,
+					"fieldname": child_doc_name.replace(" ","_").lower(),
 					"fieldtype": "Table",
 					"idx": idx or 0,
 					"label": child_doc_name,

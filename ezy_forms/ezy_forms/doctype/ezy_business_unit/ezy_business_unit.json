@@ -135,6 +135,11 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+     {
+    "role": "Guest",
+   "read": 1,
+   "select": 1
   }
  ],
  "sort_field": "creation",
