@@ -67,6 +67,7 @@ const limitStart = ref(0);
 const tableheaders = ref([
   { th: "Request ID", td_key: "name" },
   { th: "Requester Name", td_key: "requester_name" },
+  { th: "Requested On", td_key: "requested_on" },
   { th: "Requester Department", td_key: "department_name" },
   { th: "Approval Status", td_key: "status" },
   { th: "Pending With", td_key: "assigned_to_users" },
@@ -192,6 +193,7 @@ function viewPreview(data, index, type) {
 const fieldMapping = computed(() => ({
   name: { type: "input" },
   requester_name: { type: "input" },
+  requested_on: { type: "date" },
   department_name: { type: "input" },
   status: { type: "select", options: ["Request Raised", "In Progress", "Completed", "Request Cancelled"] },
 }));
