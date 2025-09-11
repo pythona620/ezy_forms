@@ -581,21 +581,27 @@
 
 
                           <template v-else>
-                           <component
-                            v-if="field.fieldtype !== 'Text' && field.fieldtype !== 'Int' && field.fieldtype !== 'Select' && blockIndex !== 0"
-                            :maxlength="field.fieldtype === 'Phone' ? '10' : '140'"
-                            :style="{ width: Math.min(100 + (field.value?.length * 2), 600) + 'px' }"
-                            :disabled="blockIndex < currentLevel || props.readonlyFor === 'true' || field.label === 'Approver'"
-                            :is="getFieldComponent(field.fieldtype)"
-                            :class="blockIndex < currentLevel || props.readonlyFor === 'true' ? 'border-0  bg-transparent text-dark w-100 font-12' : 'form-control text-dark previewInputHeight w-100 p-1 '"
-                            :value="field.value"
-                            @input="event => { field.value = event.target.value }"
-                            :type="field.fieldtype"
-                            :readOnly="blockIndex < currentLevel || props.readonlyFor === 'true'"
-                            :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
-                            @blur="event => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
-                          ></component>
-
+                            <component
+                              v-if="field.fieldtype !== 'Text' && field.fieldtype !== 'Int' && field.fieldtype !== 'Select' && blockIndex !== 0"  :maxlength="field.fieldtype === 'Phone' ? '10' : '140'"
+                              :style="{
+                                width: Math.min(100 + (field.value?.length * 2), 600) + 'px'
+                              }" :disabled="blockIndex < currentLevel || props.readonlyFor === 'true' || field.label === 'Approver'"
+                              :is="getFieldComponent(field.fieldtype)" :class="props.readonlyFor === 'true' || blockIndex < currentLevel
+                                ? 'border-0  w-50 bg-transparent'
+                                : ''" :value="field.fieldtype === 'Time' ? formatTime(field.value) : field.value"
+                              :type="field.fieldtype"
+                              :readOnly="blockIndex < currentLevel || props.readonlyFor === 'true'"
+                              :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex" @blur="
+                                (event) =>
+                                  logFieldValue(
+                                    event,
+                                    blockIndex,
+                                    sectionIndex,
+                                    rowIndex,
+                                    columnIndex,
+                                    fieldIndex
+                                  )
+                              " class="form-control previewInputHeight w-100 p-1" />
                           </template>
                         </template>
                       </div>
@@ -1448,9 +1454,9 @@ const previewUrl = ref('')
 const showModal = ref(false)
 const hovered = reactive({});
 const showPreview = ref(false);
-const currentTime = ref("");
+// const currentTime = ref("");
 
-let timer = null;
+// let timer = null;
 // const isEditable = ref(false);
 
 // // Example function to toggle edit mode
@@ -1458,21 +1464,21 @@ let timer = null;
 //   isEditable.value = !isEditable.value;
 // } 
 
-function updateTime() {
-  currentTime.value = new Date()
-    .toLocaleString("en-CA", {
-      timeZone: "Asia/Kolkata",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: false,
-    })
-    .replace(/,/, "")
-    .replace(/\//g, "-");
-}
+// function updateTime() {
+//   currentTime.value = new Date()
+//     .toLocaleString("en-CA", {
+//       timeZone: "Asia/Kolkata",
+//       year: "numeric",
+//       month: "2-digit",
+//       day: "2-digit",
+//       hour: "2-digit",
+//       minute: "2-digit",
+//       second: "2-digit",
+//       hour12: false,
+//     })
+//     .replace(/,/, "")
+//     .replace(/\//g, "-");
+// }
 const filteredColumns = (row) => {
   return row.columns.filter(column => column.fields && column.fields.length);
 };
@@ -1684,9 +1690,9 @@ function getFileArray(value) {
   return value.split(',').map(f => f.trim())
 }
 onMounted(() => {
-  updateTime()
-  timer = setInterval(updateTime, 1000);
-  emit("updateField", getAllFieldsData());
+  // updateTime()
+  // timer = setInterval(updateTime, 1000);
+  // emit("updateField", getAllFieldsData());
   if (selectedData.value.type === 'mytasks') {
     getEmploye()
   }
@@ -1697,9 +1703,9 @@ onMounted(() => {
 
 
 });
-onBeforeUnmount(() => {
-  if (timer) clearInterval(timer);
-});
+// onBeforeUnmount(() => {
+//   if (timer) clearInterval(timer);
+// });
 
 
 const modalRefs = ref({});
@@ -1886,7 +1892,18 @@ const filteredBlocks = computed(() => {
             // }
           }
           if (field.label === "Approved On" || field.label === 'Acknowledged On') {
-             field.value = currentTime.value; // 👈 always latest
+            const localTime = new Date().toLocaleString("en-CA", {
+              timeZone: "Asia/Kolkata", // Change this to your target timezone
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: false,
+            }).replace(/,/, "").replace(/\//g, "-");
+
+
+            field.value = localTime;
             emit("updateField", field);
 
             // const now = new Date();
