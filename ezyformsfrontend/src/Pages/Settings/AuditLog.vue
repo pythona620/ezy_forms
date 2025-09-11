@@ -92,8 +92,42 @@
                     </ul>
                 </div>
 
+                <!-- Removed Logs -->
+                <div v-if="removedLogs.length">
+                    <h6 class="text-muted fw-bold mb-3">➖ Removed</h6>
+                    <ul class="list-unstyled ps-0">
+                        <li v-for="(item, index) in removedLogs" :key="'removed-' + index"
+                            class="mb-2 px-3 py-2 rounded" style="background-color: #f9fafb; color: #333;">
+
+                            <!-- Document Name or Field -->
+                            <p class="m-0 mb-1" style="font-weight: 500; font-size:12px; color: #4b5563;">
+                                {{ item[0].replace(/_/g, ' ') }}
+                            </p>
+
+                            <!-- Removed Data Details -->
+                            <div v-if="typeof item[1] === 'object' && item[1] !== null" class="ps-2">
+                                <div v-for="(val, key) in item[1]" :key="key" class="mb-1"
+                                    style="font-size: 13px; color: #6b7280;">
+                                    <span class="text-muted">{{ key }}:</span>
+                                    <span style="background-color: #fee2e2; padding: 2px 6px; border-radius: 4px; color: #b91c1c; margin-left: 5px; word-wrap: break-word;">
+                                        {{ val }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div v-else style="font-size: 13px; color: #6b7280;">
+                                <span>Value:</span>
+                                <span style="background-color: #fee2e2; padding: 2px 6px; border-radius: 4px; color: #b91c1c; margin-left: 5px; word-wrap: break-word;">
+                                    {{ item[1] }}
+                                </span>
+                            </div>
+
+                        </li>
+                    </ul>
+                </div>
+
                 <!-- No data -->
-                <div v-if="!addedLogs.length && !changedLogs.length" class="text-center text-muted mt-4">
+                <div v-if="!addedLogs.length && !changedLogs.length && !removedLogs.length" class="text-center text-muted mt-4">
                     <i class="bi bi-info-circle me-2"></i>No added or changed data.
                 </div>
             </div>
@@ -355,7 +389,7 @@ const parsedLogData = computed(() => {
 
 const addedLogs = computed(() => parsedLogData.value.added || []);
 const changedLogs = computed(() => parsedLogData.value.changed || []);
-
+const removedLogs = computed(() => parsedLogData.value.removed || []);
 
 
 
