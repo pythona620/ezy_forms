@@ -56,7 +56,7 @@
 
                   <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel"
                     @updateTableData="approvalChildData" :childData="responseData" :readonly-for="selectedData.readOnly"
-                    :childHeaders="tableHeaders" :employee-data="employeeData" @updateField="updateFormData"  />
+                    :childHeaders="tableHeaders" :employee-data="employeeData" @updateField="updateFormData"  @formValidation="isFormValid = $event"  @acknowledgementValidation="isAcknowledgementValid = $event"  />
                     <!-- @attachmentsReady="attachmentsReady = $event" -->
                 </div>
 
@@ -826,7 +826,8 @@ const linkedNew_Id = ref([]);
 const mainStandardForm = ref('')
 const activeTab = ref("activity");
 const linkedActivity = ref([]);
-
+const isFormValid = ref(false);
+const isAcknowledgementValid = ref(false);
 const resetCommentsValidation = () => {
   if (ApproverReason.value.trim() !== "") {
     // If comment is not empty, set isCommentsValid to true
@@ -1118,8 +1119,15 @@ async function ApproverFormSubmission(dataObj, type) {
   //   isCommentsValid.value = false; // Show validation error
   //   return; // Stop execution
   // }
+if (!isFormValid.value) {
+    toast.error("Please Fill All Mandatory Fields",{autoClose:700});
+    return;
+  }
 
-
+ if (!isAcknowledgementValid.value) {
+      toast.error("Acknowledgement is required.", { autoClose: 700 });
+      return;
+  }
   // isCommentsValid.value = true;
   loading.value = true; // Start loader
 

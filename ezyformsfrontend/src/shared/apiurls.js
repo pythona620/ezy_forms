@@ -110,6 +110,7 @@ export const apis = {
   download_workorder: domain + `/method/forms_templates.api.v1.vendor_comparision.vendor_comparision_api`,
   generate_qr_code:domain + `/method/ezy_flow.api.v1.generate_qr.generate_qr_for_new_doc`,
   getQrCodeData:domain+`/method/ezy_flow.api.v1.generate_qr.qr_code_to_new_form`,
+  addDesignationroles: domain + `/method/ezy_flow.api.v1.get_roles.get_role_list`
   
 
   

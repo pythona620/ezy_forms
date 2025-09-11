@@ -46,7 +46,7 @@
                           :class="[
                             ((props.readonlyFor === 'true' || blockIndex < currentLevel) &&
                               field.value &&
-                              (field.value.length <= 20 || field.fieldtype === 'Attach'))
+                              (field.value.length <= 20 || field.fieldtype === 'Attach' || field.fieldtype ==='Int'))
                               ? 'd-flex'
                               : '',
                             field.fieldtype === 'Check'
@@ -581,27 +581,21 @@
 
 
                           <template v-else>
-                            <component
-                              v-if="field.fieldtype !== 'Text' && field.fieldtype !== 'Int' && field.fieldtype !== 'Select' && blockIndex !== 0"  :maxlength="field.fieldtype === 'Phone' ? '10' : '140'"
-                              :style="{
-                                width: Math.min(100 + (field.value?.length * 2), 600) + 'px'
-                              }" :disabled="blockIndex < currentLevel || props.readonlyFor === 'true' || field.label === 'Approver'"
-                              :is="getFieldComponent(field.fieldtype)" :class="props.readonlyFor === 'true' || blockIndex < currentLevel
-                                ? 'border-0  w-50 bg-transparent'
-                                : ''" :value="field.fieldtype === 'Time' ? formatTime(field.value) : field.value"
-                              :type="field.fieldtype"
-                              :readOnly="blockIndex < currentLevel || props.readonlyFor === 'true'"
-                              :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex" @blur="
-                                (event) =>
-                                  logFieldValue(
-                                    event,
-                                    blockIndex,
-                                    sectionIndex,
-                                    rowIndex,
-                                    columnIndex,
-                                    fieldIndex
-                                  )
-                              " class="form-control previewInputHeight w-100 p-1" />
+                           <component
+                            v-if="field.fieldtype !== 'Text' && field.fieldtype !== 'Int' && field.fieldtype !== 'Select' && blockIndex !== 0"
+                            :maxlength="field.fieldtype === 'Phone' ? '10' : '140'"
+                            :style="{ width: Math.min(100 + (field.value?.length * 2), 600) + 'px' }"
+                            :disabled="blockIndex < currentLevel || props.readonlyFor === 'true' || field.label === 'Approver'"
+                            :is="getFieldComponent(field.fieldtype)"
+                            :class="blockIndex < currentLevel || props.readonlyFor === 'true' ? 'border-0  bg-transparent text-dark w-100 font-12' : 'form-control text-dark previewInputHeight w-100 p-1 '"
+                            :value="field.value"
+                            @input="event => { field.value = event.target.value }"
+                            :type="field.fieldtype"
+                            :readOnly="blockIndex < currentLevel || props.readonlyFor === 'true'"
+                            :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                            @blur="event => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
+                          ></component>
+
                           </template>
                         </template>
                       </div>
@@ -1105,7 +1099,9 @@
                                           <div v-if="row[field.fieldname]" class="mt-2">
                                             <span class="cursor-pointer text-decoration-underline"
                                               @click="openAttachmentsList(row[field.fieldname])">
-                                              View <i class="bi bi-paperclip"></i>
+                                              View 
+                                              <span>({{ row[field.fieldname].split('|').filter(f => f.trim()).length }})</span> 
+                                              <i class="bi bi-paperclip"></i>
                                             </span>
                                           </div>
 
@@ -1401,6 +1397,8 @@ import "@vueform/multiselect/themes/default.css";
 import Vue3Select from 'vue3-select'
 import 'vue3-select/dist/vue3-select.css';
 import { onBeforeUnmount } from "vue";
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 const props = defineProps({
   blockArr: {
     type: [Array, null],
@@ -2101,6 +2099,80 @@ const getFieldComponent = (type) => {
   }
 };
 
+const fieldErrors = ref({});
+
+const allFieldsFilled = computed(() => {
+  if (!props.blockArr || props.blockArr.length === 0) return false;
+
+  // Only check the block that matches currentLevel
+  const currentBlock = props.blockArr[props.currentLevel];
+  if (!currentBlock) return false;
+
+  for (const section of currentBlock.sections) {
+    for (const row of section.rows) {
+      for (const column of row.columns) {
+        for (const field of column.fields) {
+          const rowKey = row.__row_id || row.id || row._temp_id;
+          const fieldError = fieldErrors.value[rowKey]?.[field.fieldname];
+
+          // Required field check
+          if (field.reqd === 1 && (!field.value || field.value.toString().trim() === "")) {
+            
+            return false;
+          }
+
+          // Field error check
+          if (fieldError) {
+            
+            return false;
+          }
+        }
+      }
+    }
+  }
+
+  return true; // All required fields filled for current block
+});
+
+// Watch `allFieldsFilled` and emit value
+
+// Function to validate Acknowledgement checkbox
+const isAcknowledgementChecked = computed(() => {
+  if (!props.blockArr || props.blockArr.length === 0) return true;
+
+  for (let blockIndex = 0; blockIndex < props.blockArr.length; blockIndex++) {
+    // Only check the block if it matches currentLevel
+    if (blockIndex.toString() !== props.currentLevel) continue;
+
+    const block = props.blockArr[blockIndex];
+    for (const section of block.sections) {
+      for (const row of section.rows) {
+        for (const column of row.columns) {
+          for (const field of column.fields) {
+            if (field.fieldtype === "Check" && field.label === "Acknowledgement") {
+              return !!field.value && field.value !== 0 && field.value !== "";
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return true; // default true if checkbox not found or block doesn't match
+});
+watch(
+    allFieldsFilled,
+    (newValue) => {
+      
+        emit("formValidation", newValue);
+    },
+    { immediate: true }
+);
+// Watcher for allFieldsFilled + acknowledgement validation
+watch(isAcknowledgementChecked, (newVal) => {
+  emit("acknowledgementValidation", newVal);
+}, { immediate: true });
+
 const logFieldValue = (
   eve,
   blockIndex,
@@ -2212,7 +2284,17 @@ const validateField = (
   ) {
     errorMessages.value[fieldKey] = `${field.label || "This field"
       } is required.`;
-  } else if (field.fieldtype === "Phone") {
+  }
+    // ✅ Special validation for Acknowledgement checkbox
+  else if (field.fieldtype === "Check" && field.label === "Acknowledgement") {
+    if (!field.value || field.value === 0 || field.value === "") {
+      errorMessages.value[fieldKey] = "Acknowledgement is required.";
+    } else {
+      delete errorMessages.value[fieldKey];
+    }
+  }
+  
+  else if (field.fieldtype === "Phone") {
     const phoneRegex = /^\+91[0-9]{10}$/; // Accepts +91 followed by exactly 10 digits
 
     if (!phoneRegex.test(field.value)) {
