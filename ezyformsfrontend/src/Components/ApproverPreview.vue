@@ -46,7 +46,7 @@
                           :class="[
                             ((props.readonlyFor === 'true' || blockIndex < currentLevel) &&
                               field.value &&
-                              (field.value.length <= 20 || field.fieldtype === 'Attach'))
+                              (field.value.length <= 20 || field.fieldtype === 'Attach' || field.fieldtype ==='Int'))
                               ? 'd-flex'
                               : '',
                             field.fieldtype === 'Check'
@@ -1105,7 +1105,9 @@
                                           <div v-if="row[field.fieldname]" class="mt-2">
                                             <span class="cursor-pointer text-decoration-underline"
                                               @click="openAttachmentsList(row[field.fieldname])">
-                                              View <i class="bi bi-paperclip"></i>
+                                              View 
+                                              <span>({{ row[field.fieldname].split('|').filter(f => f.trim()).length }})</span> 
+                                              <i class="bi bi-paperclip"></i>
                                             </span>
                                           </div>
 
@@ -1401,6 +1403,8 @@ import "@vueform/multiselect/themes/default.css";
 import Vue3Select from 'vue3-select'
 import 'vue3-select/dist/vue3-select.css';
 import { onBeforeUnmount } from "vue";
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 const props = defineProps({
   blockArr: {
     type: [Array, null],
@@ -1450,9 +1454,9 @@ const previewUrl = ref('')
 const showModal = ref(false)
 const hovered = reactive({});
 const showPreview = ref(false);
-const currentTime = ref("");
+// const currentTime = ref("");
 
-let timer = null;
+// let timer = null;
 // const isEditable = ref(false);
 
 // // Example function to toggle edit mode
@@ -1460,21 +1464,21 @@ let timer = null;
 //   isEditable.value = !isEditable.value;
 // } 
 
-function updateTime() {
-  currentTime.value = new Date()
-    .toLocaleString("en-CA", {
-      timeZone: "Asia/Kolkata",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: false,
-    })
-    .replace(/,/, "")
-    .replace(/\//g, "-");
-}
+// function updateTime() {
+//   currentTime.value = new Date()
+//     .toLocaleString("en-CA", {
+//       timeZone: "Asia/Kolkata",
+//       year: "numeric",
+//       month: "2-digit",
+//       day: "2-digit",
+//       hour: "2-digit",
+//       minute: "2-digit",
+//       second: "2-digit",
+//       hour12: false,
+//     })
+//     .replace(/,/, "")
+//     .replace(/\//g, "-");
+// }
 const filteredColumns = (row) => {
   return row.columns.filter(column => column.fields && column.fields.length);
 };
@@ -1686,9 +1690,9 @@ function getFileArray(value) {
   return value.split(',').map(f => f.trim())
 }
 onMounted(() => {
-  updateTime()
-  timer = setInterval(updateTime, 1000);
-  emit("updateField", getAllFieldsData());
+  // updateTime()
+  // timer = setInterval(updateTime, 1000);
+  // emit("updateField", getAllFieldsData());
   if (selectedData.value.type === 'mytasks') {
     getEmploye()
   }
@@ -1699,9 +1703,9 @@ onMounted(() => {
 
 
 });
-onBeforeUnmount(() => {
-  if (timer) clearInterval(timer);
-});
+// onBeforeUnmount(() => {
+//   if (timer) clearInterval(timer);
+// });
 
 
 const modalRefs = ref({});
@@ -1888,7 +1892,18 @@ const filteredBlocks = computed(() => {
             // }
           }
           if (field.label === "Approved On" || field.label === 'Acknowledged On') {
-             field.value = currentTime.value; // 👈 always latest
+            const localTime = new Date().toLocaleString("en-CA", {
+              timeZone: "Asia/Kolkata", // Change this to your target timezone
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: false,
+            }).replace(/,/, "").replace(/\//g, "-");
+
+
+            field.value = localTime;
             emit("updateField", field);
 
             // const now = new Date();
@@ -2101,6 +2116,80 @@ const getFieldComponent = (type) => {
   }
 };
 
+const fieldErrors = ref({});
+
+const allFieldsFilled = computed(() => {
+  if (!props.blockArr || props.blockArr.length === 0) return false;
+
+  // Only check the block that matches currentLevel
+  const currentBlock = props.blockArr[props.currentLevel];
+  if (!currentBlock) return false;
+
+  for (const section of currentBlock.sections) {
+    for (const row of section.rows) {
+      for (const column of row.columns) {
+        for (const field of column.fields) {
+          const rowKey = row.__row_id || row.id || row._temp_id;
+          const fieldError = fieldErrors.value[rowKey]?.[field.fieldname];
+
+          // Required field check
+          if (field.reqd === 1 && (!field.value || field.value.toString().trim() === "")) {
+            
+            return false;
+          }
+
+          // Field error check
+          if (fieldError) {
+            
+            return false;
+          }
+        }
+      }
+    }
+  }
+
+  return true; // All required fields filled for current block
+});
+
+// Watch `allFieldsFilled` and emit value
+
+// Function to validate Acknowledgement checkbox
+const isAcknowledgementChecked = computed(() => {
+  if (!props.blockArr || props.blockArr.length === 0) return true;
+
+  for (let blockIndex = 0; blockIndex < props.blockArr.length; blockIndex++) {
+    // Only check the block if it matches currentLevel
+    if (blockIndex.toString() !== props.currentLevel) continue;
+
+    const block = props.blockArr[blockIndex];
+    for (const section of block.sections) {
+      for (const row of section.rows) {
+        for (const column of row.columns) {
+          for (const field of column.fields) {
+            if (field.fieldtype === "Check" && field.label === "Acknowledgement") {
+              return !!field.value && field.value !== 0 && field.value !== "";
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return true; // default true if checkbox not found or block doesn't match
+});
+watch(
+    allFieldsFilled,
+    (newValue) => {
+      
+        emit("formValidation", newValue);
+    },
+    { immediate: true }
+);
+// Watcher for allFieldsFilled + acknowledgement validation
+watch(isAcknowledgementChecked, (newVal) => {
+  emit("acknowledgementValidation", newVal);
+}, { immediate: true });
+
 const logFieldValue = (
   eve,
   blockIndex,
@@ -2212,7 +2301,17 @@ const validateField = (
   ) {
     errorMessages.value[fieldKey] = `${field.label || "This field"
       } is required.`;
-  } else if (field.fieldtype === "Phone") {
+  }
+    // ✅ Special validation for Acknowledgement checkbox
+  else if (field.fieldtype === "Check" && field.label === "Acknowledgement") {
+    if (!field.value || field.value === 0 || field.value === "") {
+      errorMessages.value[fieldKey] = "Acknowledgement is required.";
+    } else {
+      delete errorMessages.value[fieldKey];
+    }
+  }
+  
+  else if (field.fieldtype === "Phone") {
     const phoneRegex = /^\+91[0-9]{10}$/; // Accepts +91 followed by exactly 10 digits
 
     if (!phoneRegex.test(field.value)) {
