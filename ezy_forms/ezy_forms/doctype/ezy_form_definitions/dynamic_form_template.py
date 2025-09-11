@@ -798,35 +798,45 @@ template_str = """
                                         {% endif %}
 
                                         
+                                       
                                        {% elif field.fieldtype == 'Small Text' %}
-                                        {% if field.options %}
-                                            {% set options = field.options.strip().split('\n') %}
-                                        {% else %}
-                                            {% set options = field.options %}
-                                        {% endif %}
-                                            {% if field['values'] %}
-                                                {% set selected_values = field['values'] | replace('["', '') | replace('"]', '') | replace('","', ',') %}
-                                                {% set selected_values_list = selected_values.split(',') %}
-                                                <div class="checkbox-container">
-                                                    {% for value in selected_values_list if value %}
-                                                        <div class="checkbox-gap">
-                                                            <span class="custom-checkbox checked"></span>
-                                                            <span style="margin-left:3px; margin-top:3px;" >{{ value }}</span>
-                                                        </div>
-                                                    {% endfor %}
-                                                </div>
-                                            {% else %}
-                                                <div class="checkbox-container">
-                                                    {% for option in options if option %}
-                                                        <div class="checkbox-gap">
-                                                            <span class="custom-checkbox unchecked"></span>
-                                                           <span style="margin-top:4px; margin-left:4px;"> {{ option }}</span>
-                                                        </div>
-                                                    {% endfor %}
-                                                </div>
-                                            {% endif %}
+    {% if field.options %}
+        {% set options = field.options.strip().split('\n') %}
+    {% else %}
+        {% set options = field.options %}
+    {% endif %}
+    
+    {% if field['values'] %}
+        {# Clean JSON-like string into plain text list #}
+        {% set cleaned = field['values']
+            | replace('["', '')
+            | replace('"]', '')
+            | replace('","', '|') %}
+        {# Split only by "|" so comma inside a value is preserved #}
+        {% set selected_values_list = cleaned.split('|') %}
+
+        <div class="checkbox-container">
+            {% for value in selected_values_list if value %}
+                <div class="checkbox-gap">
+                    <span class="custom-checkbox checked"></span>
+                    <span style="margin-left:3px; margin-top:3px;">{{ value }}</span>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="checkbox-container">
+            {% for option in options if option %}
+                <div class="checkbox-gap">
+                    <span class="custom-checkbox unchecked"></span>
+                    <span style="margin-top:4px; margin-left:4px;">{{ option }}</span>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
                                         {% elif field.fieldtype == 'Attach' %}
                                             {% if field['values'] %}
+                                            
                                                 {% if field.fieldtype == 'Attach' and (field.fieldname.startswith('approved_by') or field.fieldname.startswith('requestor')or field.fieldname.startswith('acknowle')) %}
                                                     <img  
                                                         id="{{ field.fieldname }}" 
@@ -836,8 +846,9 @@ template_str = """
                                                     >
                                                 {% else %}
                                                     <ul style="padding-left: 20px; margin: 0px 0;">
-                                                        {% for file in field['values'].split(',') %}
+                                                        {% for file in field['values'].split('|') %}
                                                             <li style="font-size:12px;">
+                                                            
                                                                 {{ file.strip().split('@')[-1] if '@' in file else file.strip().split('/')[-1] }}
                                                             </li>
                                                         {% endfor %}
@@ -1204,7 +1215,7 @@ def preview_dynamic_form(form_short_name: str, business_unit=None, name=None):
                 # Main form attachments
                 if iteration.get("fieldtype") == "Attach" and iteration.get("value"):
                     # Split by comma and strip whitespace
-                    file_urls = [url.strip() for url in iteration["value"].split(",") if url.strip()]
+                    file_urls = [url.strip() for url in iteration["value"].split("|") if url.strip()]
                     
                     for file_url in file_urls:
                         
@@ -1238,7 +1249,7 @@ def preview_dynamic_form(form_short_name: str, business_unit=None, name=None):
                             fieldtype = field_types.get(field)
                             # if fieldtype =='int':
                             if fieldtype == "Attach" and value:
-                                file_urls = [url.strip() for url in value.split(',') if url.strip()]
+                                file_urls = [url.strip() for url in value.split('|') if url.strip()]
                                 for file_url in file_urls:
                                     mail_attachment.append({
                                         "label": "Form Attachments",
@@ -1284,18 +1295,23 @@ def preview_dynamic_form(form_short_name: str, business_unit=None, name=None):
  
  
  
+def clean_filename(filename: str) -> str:
+    """Keep only the part after '@' if present, otherwise return original filename."""
+    if "@" in filename:
+        return filename.split("@", 1)[1]  # take everything after the first '@'
+    return filename
 
 
 def add_file_to_zip(item, zipf, zip_folder_name="Attachments"):
     """Add file to zip under a folder if file_path exists."""
-    if os.path.exists(item["file_path"]):
-        zipf.write(
-            item["file_path"],
-            arcname=os.path.join(zip_folder_name, os.path.basename(item["file_path"]))
-        )
-    else:
-        frappe.log_error(f"File not found: {item['file_path']}")
+    original_filename = os.path.basename(item["file_path"])
+    safe_filename = clean_filename(original_filename)
 
+    # Preserve folder structure if needed
+    arcname = os.path.join(zip_folder_name, safe_filename)
+
+    # Add file to zip
+    zipf.write(item["file_path"], arcname)
         
         
 @frappe.whitelist()
@@ -1391,7 +1407,8 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
             print_format = frappe.db.get_value("Ezy Form Definitions", form_short_name, "print_format")
             wf_generated_request_id = frappe.get_value(form_short_name, name, "wf_generated_request_id")
             activate_log = frappe.get_doc('WF Activity Log', wf_generated_request_id).as_dict()
-
+            wf_work_flow_request = frappe.get_doc('WF Workflow Requests', wf_generated_request_id).as_dict()
+            employee_name = frappe.get_value("Ezy Employee",wf_work_flow_request['requested_by'],"emp_name")
             filtered_reasons = sorted([{ 'level': entry['level'],'role': entry['role'], 'user': entry['user'], 'user_name': entry['user_name'], 'reason': entry['reason'], 'action': entry['action'], 'time': entry['time'], 'random_string': entry['random_string']  }  for entry in activate_log.get('reason', [])  ],key=lambda x: datetime.strptime(x['time'], "%Y/%m/%d %H:%M:%S:%f") if x.get('time') else datetime.min )
             html_table_output = ""
             if filtered_reasons:
@@ -1416,8 +1433,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                     # Main form attachments
                     if iteration.get("fieldtype") == "Attach" and iteration.get("value"):
                         # Split by comma and strip whitespace
-                        file_urls = [url.strip() for url in iteration["value"].split(",") if url.strip()]
-                        
+                        file_urls = [url.strip() for url in iteration["value"].split("|") if url.strip()]
                         for file_url in file_urls:
                             
                             attachment_info = {
@@ -1450,7 +1466,8 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                                 fieldtype = field_types.get(field)
                                 # if fieldtype =='int':
                                 if fieldtype == "Attach" and value:
-                                    file_urls = [url.strip() for url in value.split(',') if url.strip()]
+                                    file_urls = [url.strip() for url in value.split('|') if url.strip()]
+                                    
                                     for file_url in file_urls:
                                         mail_attachment.append({
                                             "label": "Form Attachments",
@@ -1495,7 +1512,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                 )
 
             # Generate PDFs
-            pdf_filename = f"{form_short_name or 'form'}.pdf"
+            pdf_filename = f"{form_short_name or 'form'}-{employee_name}.pdf"
             absolute_pdf_path = os.path.join(attachment_folder, pdf_filename)
 
             activate_pdf_name = "Activity Log .pdf"
@@ -1523,7 +1540,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
 
             # Create ZIP
             zip_folder_name = "Attachments"
-            zip_filename = f"{form_name or 'form'}.zip"
+            zip_filename = f"{form_name or 'form'}-{employee_name}.zip"
             zip_path = os.path.join(attachment_folder, zip_filename)
 
             with zipfile.ZipFile(zip_path, 'w') as zipf:

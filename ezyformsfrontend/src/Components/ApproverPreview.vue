@@ -63,7 +63,7 @@
 
                         <label :for="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
                           class=" label-text  text-nowrap">
-                          <span class=" fw-medium">{{ field.label }}</span>
+                          <span class=" fw-medium text-wrap">{{ field.label }}</span>
                           <span class="ms-1 text-danger">{{ field.reqd === 1 ? "*" : "" }}</span>
                           <span class="pe-2"
                             v-if="field.fieldtype !== 'Check' && (props.readonlyFor === 'true' || blockIndex < currentLevel)">:</span>
@@ -121,7 +121,7 @@
                               <div class="row">
                                 <template v-for="(option, index) in field?.options?.split('\n')">
                                   <div v-if="(JSON.parse(field.value || '[]') || []).includes(option)" :key="index"
-                                    class="col-4  mb-2">
+                                    class=" col-12 col-sm-6 col-md-4   mb-2">
                                     <div class="form-check">
                                       <input class="form-check-input" type="checkbox" :checked="true" :disabled="true"
                                         :id="`${option}-${index}`" />
@@ -138,7 +138,7 @@
                             <div v-else>
                               <div class="container-fluid">
                                 <div class="row">
-                                  <div class="form-check col-4 mb-1"
+                                  <div class="form-check  col-12 col-sm-6 col-md-4  mb-1"
                                     v-for="(option, index) in field?.options?.split('\n')" :key="index"
                                     :class="{ 'd-none': index === 0 }">
 
@@ -374,7 +374,11 @@
                                         <i v-else class="bi bi-file-earmark fs-5"></i>
 
                                         <!-- File Name -->
+                                        <span style="max-width:500px;" class="nowrap">
+                                         
+
                                         {{ getFilename(url) }}
+                                        </span>
                                       </span>
                                       <div class="d-flex gap-2">
                                         <button class="btn btn-sm font-13 btn-light"
@@ -613,10 +617,12 @@
                       <div v-if="props.childHeaders && Object.keys(props.childHeaders).length">
                         <div v-for="(headers, tableName) in props.childHeaders" :key="tableName">
                           <!-- || tableName === field.options -->
+                          
                           <div v-if="field.fieldname === tableName || tableName === field.options" class="overTable">
+                            
                             <div v-if="field.description === 'true'">
 
-                              <div v-for="(row, index) in props.childData[tableName]" :key="index"
+                              <div v-for="(row, index) in props.childData[tableName.toLowerCase().replace(/ /g, '_')]" :key="index"
                                 class="border p-2 mb-3 rounded bg-light">
                                 <div class="mb-2 font-12 fw-bold">#{{ blockIndex + 1 }}</div>
                                 <div v-for="i in Math.ceil(headers.length / 2)" :key="i" class="row mb-2">
@@ -975,7 +981,7 @@
                                         <div class="modal-body">
                                           <ul class="list-group">
                                             <li v-for="(file, index) in selectedAttachments" :key="index" class="list-group-item font-12 d-flex justify-content-between align-items-center">
-                                              <span class="d-flex align-items-center gap-2">
+                                              <span style="max-width:200px;" class="d-flex align-items-center gap-2">
                                                                           <!-- File Type Icon -->
                                                                           <i v-if="isImageFile(file)"
                                                                             class="bi bi-file-earmark-image text-secondary fs-5"></i>
@@ -986,15 +992,18 @@
                                                                           <i v-else class="bi bi-file-earmark fs-5"></i>
 
                                                                           <!-- File Name -->
+                                                                          <span  class="nowrap">
+
                                                                           {{ getFilename(file) }}
+                                                                          </span>
                                                                         </span>
                                               
                                               <div>
                                                 <button class="btn btn-sm btn-light me-2" @click="viewAttachment(file)">View</button>
                                                 <button class="btn btn-sm font-13 btn-light"
-  @click="downloadAttachment(file, getFilename(file))">
-  Download
-</button>
+                                                @click="downloadAttachment(file, getFilename(file))">
+                                                Download
+                                              </button>
                                                 <a :href="file" download class="btn btn-sm btn-light">Download</a>
                                               </div>
                                             </li>
@@ -1023,6 +1032,7 @@
 
                               </div>
                               <div v-else>
+                                
                                 <div class=" d-flex justify-content-between align-items-center">
                                   <span class="font-13 fw-bold tablename">{{ field.label.replace(/_/g, " ") }}</span>
                                 </div>
@@ -1114,7 +1124,7 @@
                                                     <li
                                                       class="list-group-item d-flex justify-content-between align-items-center"
                                                       v-for="(file, index) in attachmentFiles" :key="index">
-                                                      <span class="d-flex align-items-center gap-2">
+                                                      <span style="max-width:500px;" class="d-flex align-items-center gap-2">
                                                         <!-- File Type Icon -->
                                                         <i v-if="isImageFile(file)"
                                                           class="bi bi-file-earmark-image text-secondary fs-5"></i>
@@ -1125,7 +1135,8 @@
                                                         <i v-else class="bi bi-file-earmark fs-5"></i>
 
                                                         <!-- File Name -->
-                                                        {{ getFilename(file) }}
+                                                        <span> {{ getFilename(file) }}</span>
+                                                        
                                                       </span>
                                                       <div>
                                                         <button class="btn btn-sm btn-light me-2"
@@ -1163,8 +1174,8 @@
                                                   </template>
                                                   <template v-else>
                                                     <p>No preview available for this file type.
-                                                      <a :href="previewUrl"
-                                                        download>Download</a>
+                                                      <!-- <a :href="previewUrl"
+                                                        download>Download</a> -->
                                                         <button class="btn btn-sm font-13 btn-light"
                                                           @click="downloadAttachment(url, previewUrl)">
                                                           Download
@@ -1389,6 +1400,7 @@ import Multiselect from "vue-multiselect";
 import "@vueform/multiselect/themes/default.css";
 import Vue3Select from 'vue3-select'
 import 'vue3-select/dist/vue3-select.css';
+import { onBeforeUnmount } from "vue";
 const props = defineProps({
   blockArr: {
     type: [Array, null],
@@ -1438,6 +1450,9 @@ const previewUrl = ref('')
 const showModal = ref(false)
 const hovered = reactive({});
 const showPreview = ref(false);
+const currentTime = ref("");
+
+let timer = null;
 // const isEditable = ref(false);
 
 // // Example function to toggle edit mode
@@ -1445,7 +1460,21 @@ const showPreview = ref(false);
 //   isEditable.value = !isEditable.value;
 // } 
 
-
+function updateTime() {
+  currentTime.value = new Date()
+    .toLocaleString("en-CA", {
+      timeZone: "Asia/Kolkata",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    })
+    .replace(/,/, "")
+    .replace(/\//g, "-");
+}
 const filteredColumns = (row) => {
   return row.columns.filter(column => column.fields && column.fields.length);
 };
@@ -1657,6 +1686,8 @@ function getFileArray(value) {
   return value.split(',').map(f => f.trim())
 }
 onMounted(() => {
+  updateTime()
+  timer = setInterval(updateTime, 1000);
   emit("updateField", getAllFieldsData());
   if (selectedData.value.type === 'mytasks') {
     getEmploye()
@@ -1668,7 +1699,9 @@ onMounted(() => {
 
 
 });
-
+onBeforeUnmount(() => {
+  if (timer) clearInterval(timer);
+});
 
 
 const modalRefs = ref({});
@@ -1855,18 +1888,7 @@ const filteredBlocks = computed(() => {
             // }
           }
           if (field.label === "Approved On" || field.label === 'Acknowledged On') {
-            const localTime = new Date().toLocaleString("en-CA", {
-              timeZone: "Asia/Kolkata", // Change this to your target timezone
-              year: "numeric",
-              month: "2-digit",
-              day: "2-digit",
-              hour: "2-digit",
-              minute: "2-digit",
-              hour12: false,
-            }).replace(/,/, "").replace(/\//g, "-");
-
-
-            field.value = localTime;
+             field.value = currentTime.value; // 👈 always latest
             emit("updateField", field);
 
             // const now = new Date();
@@ -2566,9 +2588,17 @@ border: 1px solid #EEEEEE !important;
 }
 
 .overTable {
-  overflow: auto;
+  overflow-x: scroll;
+}
+/* Hide scrollbar but keep functionality */
+.overTable::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
 }
 
+.overTable {
+  -ms-overflow-style: none;  /* IE & Edge */
+  scrollbar-width: none;     /* Firefox */
+}
 .no-drag {
   user-select: none;
   /* Prevent text selection */

@@ -231,6 +231,57 @@
                                                     </button>
                                                     </div>
                                                 </div>
+                                                <!-- Upload Confirmation Modal -->
+<!-- Upload Confirmation Modal -->
+<div class="modal fade" id="uploadModal" tabindex="-1" aria-hidden="true" v-if="showUploadModal">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      
+      <div class="modal-header">
+        <h6 class="modal-title">Files ready to upload</h6>
+        <button type="button" class="btn-close" @click="cancelUpload"></button>
+      </div>
+
+      <div class="modal-body">
+        <!-- File List -->
+        <ul class="list-group">
+          <li v-for="(file, index) in tempFiles" :key="index"
+              class="list-group-item d-flex align-items-center justify-content-between">
+
+            <!-- File Type Icon -->
+            <div class="d-flex align-items-center gap-2">
+              <i v-if="isImageFile(file.name)"
+                 class="bi bi-file-earmark-image text-secondary fs-5"></i>
+              <i v-else-if="isPdfFile(file.name)"
+                 class="bi bi-file-earmark-pdf text-danger fs-5"></i>
+              <i v-else-if="isExcelFile(file.name)"
+                 class="bi bi-file-earmark-spreadsheet text-success fs-5"></i>
+              <i v-else class="bi bi-file-earmark fs-5"></i>
+
+              <span class="text-truncate" style="max-width: 500px;">{{ file.name }}</span>
+            </div>
+
+            <!-- Remove Icon -->
+            <i class="bi bi-x-circle text-danger fs-5"
+               style="cursor: pointer;"
+               @click="removeTempFile(index)"></i>
+          </li>
+        </ul>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" @click="cancelUpload">Cancel</button>
+        <button type="button" class="btn btn-primary btn-sm"
+                @click="confirmUpload(field, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
+          Upload
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
                                                 
 
                                                 <!-- Modal Preview -->
@@ -478,6 +529,7 @@
                                                                 <div class="col-6"
                                                                     v-for="fieldItem in table.slice((i - 1) * 2, i * 2)"
                                                                     :key="fieldItem.fieldname">
+                                                                    <div class="d-flex flex-column">
                                                                     <label v-if="fieldItem.label !== 'Form Name'"
                                                                         class="font-12 fw-medium">{{
                                                                             fieldItem.label
@@ -553,10 +605,26 @@
                                                                     <template
                                                                         v-else-if="fieldItem.fieldtype === 'Attach'">
                                                                         <!-- File Input -->
-                                                                        <input multiple type="file"
+                                                                        <!-- <label for="fileInput" class="btn btn-outline-primary btn-sm font-12">
+                                                                            Attach
+                                                                            </label>
+                                                                        <input multiple type="file" id="fileInput"
                                                                             class="form-control font-12"
                                                                            
-                                                                            @change="handleFileUpload($event, row, fieldItem.fieldname)" />
+                                                                            @change="handleFileUpload($event, row, fieldItem.fieldname)" /> -->
+                                                                                <label
+                                                                            :for="`fileInput-${row[fieldItem.fieldname]}-${field.fieldname}`"
+                                                                            class="btn btn-light attchaInputLabel btn-sm font-12"
+                                                                        >
+                                                                            <i class="bi bi-paperclip me-1"></i> Attach
+                                                                        </label>
+                                                                        <input
+                                                                            :id="`fileInput-${row[fieldItem.fieldname]}-${field.fieldname}`"
+                                                                            type="file"
+                                                                            multiple
+                                                                            class="form-control d-none font-12"
+                                                                            @change="handleFileUpload($event, row, fieldItem.fieldname)"
+                                                                        />
 
                                                                         <!-- Preview Section -->
                                                                         <div v-if="row[fieldItem.fieldname]"
@@ -639,7 +707,7 @@
 
                                                                 </div>
                                                             </div>
-
+</div>
                                                         </div>
 
                                                         <!-- Add Block Button -->
@@ -658,11 +726,14 @@
                                                 </div>
                                             </div>
                                             <div v-else>
-                                                <div v-for="(table, tableIndex) in props.tableHeaders" :key="tableIndex"
+                                                <div v-for="(table, tableIndex) in props.tableHeaders" :key="tableIndex.replace"
                                                     class="mt-3">
                                                     
+                                                    
                                                      <!-- || tableIndex === field.options -->
-                                                    <div class="overTable" v-if="tableIndex.toLowerCase() === field.fieldname.toLowerCase() ||(field.options && tableIndex.toLowerCase() === field.options.toLowerCase())">
+                                                     
+                                                    <div class="overTable" v-if="tableIndex.toLowerCase() === field.fieldname.toLowerCase() ||
+                                                    (field.options && tableIndex.toLowerCase() === field.options.toLowerCase())">
                                                         <div>
                                                             <span class="font-13 text-secondary ">{{
                                                                 field.label.replace(/_/g, " ")
@@ -694,6 +765,7 @@
                                                                         </div>
                                                                     </td>
                                                                 </tr>
+                                                                
                                                                 <tr v-for="(row, rowIndex) in tableRows[tableIndex]"
                                                                     :key="rowIndex">
                                                                     <!-- <td style="text-align: center;" class="font-12">
@@ -805,9 +877,19 @@
                                                                         <template
                                                                             v-else-if="field.fieldtype === 'Attach'">
                                                                             <!-- File Input -->
-                                                                            <input type="file" multiple
-                                                                                class="form-control font-12"
-                                                                                @change="handleFileUpload($event, row, field.fieldname)" />
+                                                                            <label
+                                                                            :for="`fileInput-${row[field.fieldname]}-${field.fieldname}`"
+                                                                            class="btn btn-light attchaInputLabel btn-sm font-12"
+                                                                        >
+                                                                            <i class="bi bi-paperclip me-1"></i> Attach
+                                                                        </label>
+                                                                        <input
+                                                                            :id="`fileInput-${row[field.fieldname]}-${field.fieldname}`"
+                                                                            type="file"
+                                                                            multiple
+                                                                            class="form-control d-none font-12"
+                                                                            @change="handleFileUpload($event, row, field.fieldname)"
+                                                                        />
 
                                                                             <!-- Preview Section -->
                                                                             <div v-if="row[field.fieldname]"
@@ -939,6 +1021,29 @@
                                             </div>
                                         </div>
 
+                                                                    <div v-if="showModal" class="modal-backdrop"
+                                                                            @click.self="closePreview" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                                                                                background: rgba(0,0,0,0.5); display: flex; align-items: center;
+                                                                                justify-content: center; z-index: 1050;">
+                                                                            <div style="background: white; padding: 20px; max-width: 90%; max-height: 90%;
+                                                                                overflow: auto; border-radius: 8px; position: relative;">
+                                                                                <button @click="closePreview" style="position: absolute; top: 10px; right: 10px;
+                                                                                    border: none; background: transparent; font-size: 20px;">
+                                                                                    &times;
+                                                                                </button>
+
+                                                                                <!-- Image Preview -->
+                                                                                <img v-if="isImageFile(previewUrl)"
+                                                                                    :src="previewUrl"
+                                                                                    style="max-width: 100%; max-height: 80vh;" />
+
+                                                                                <!-- PDF Preview -->
+                                                                                <iframe v-else :src="previewUrl"
+                                                                                    style="width: 80vw; height: 80vh;"
+                                                                                    frameborder="0"></iframe>
+                                                                            </div>
+                                                                        </div>
+
                                     </div>
                                 </div>
                             </div>
@@ -947,6 +1052,10 @@
                 </div>
             </div>
         </div>
+
+
+
+
     </section>
 </template>
 <script setup>
@@ -1000,6 +1109,8 @@ const currentFieldOptions = ref('');
 const tableRows = reactive({});
 // const showPopup = ref(null); 
 const focusedField = ref({ rowIndex: null, fieldname: null })
+const tempFiles = ref([]); // store selected before upload
+const showUploadModal = ref(false);
 
 const past = new Date().toISOString().split('T')[0]
 // const today = new Date().toISOString().split('T')[0];  
@@ -1455,7 +1566,7 @@ const tableFileUpload = (file, row, fieldname) => {
                     files.push(fileUrl);
 
                     // Store back as comma-separated string
-                    row[fieldname] = files.join(',');
+                    row[fieldname] = files.join('|');
                     resolve(); // ✅ done
                 } else {
                     console.error("file_url not found in the response.");
@@ -1478,10 +1589,20 @@ const normalizeFileList = (value) => {
     return [];
 };
 
+// const removechildFile = (index, field, row) => {
+//     let files = normalizeFileList(row[field.fieldname]);
+//     files.splice(index, 1);
+//     row[field.fieldname] = files.join('|');
+// };
 const removechildFile = (index, field, row) => {
     let files = normalizeFileList(row[field.fieldname]);
-    files.splice(index, 1);
-    row[field.fieldname] = files.join(',');
+
+    if (index >= 0 && index < files.length) {
+        files.splice(index, 1);
+    }
+
+    // Keep consistent with upload: save back as "|" string
+    row[field.fieldname] = files.join('|');
 };
 
 const isImageChildFile = (fileUrl) => {
@@ -1868,6 +1989,37 @@ watch(
     },
     { immediate: true }
 );
+// const removeTempFile = (index) => {
+//   tempFiles.value.splice(index, 1);
+//   if (tempFiles.value.length === 0) {
+//     cancelUpload();
+//   }
+// };
+
+// const cancelUpload = () => {
+//   tempFiles.value = [];
+//   showUploadModal.value = false;
+//   const modalEl = document.getElementById("uploadModal");
+//   if (modalEl) {
+//     const modal = bootstrap.Modal.getInstance(modalEl);
+//     modal?.hide();
+//   }
+// };
+
+// const confirmUpload = (field, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) => {
+//   tempFiles.value.forEach((file) => {
+//     uploadFile(file, field, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex);
+//   });
+//   tempFiles.value = [];
+//   showUploadModal.value = false;
+//   const modalEl = document.getElementById("uploadModal");
+//   if (modalEl) {
+//     const modal = bootstrap.Modal.getInstance(modalEl);
+//     modal?.hide();
+//   }
+// };
+
+
 
 const logFieldValue = (
     eve,
@@ -1889,6 +2041,7 @@ const logFieldValue = (
     //     fieldIndex);
 
 
+
     if (eve.target?.files && eve.target.files.length > 0) {
         let files = Array.from(eve.target.files); // Convert FileList to an array
 
@@ -1908,6 +2061,34 @@ const logFieldValue = (
         // ✅ Reset file input to allow same file re-selection
         eve.target.value = null;
     }
+
+// if (eve.target?.files && eve.target.files.length > 0) {
+//   let files = Array.from(eve.target.files);
+
+//   let existingFiles = field["value"]
+//     ? field["value"].split('|').map(f => f.trim())
+//     : [];
+
+//   const totalFiles = existingFiles.length + files.length;
+//   if (totalFiles > 35) {
+//     alert("You can upload a maximum of 35 files.");
+//     files = files.slice(0, 35 - existingFiles.length);
+//   }
+
+//   tempFiles.value = files;
+//   showUploadModal.value = true;
+
+//   // ✅ Show Bootstrap modal once Vue has rendered it
+//   nextTick(() => {
+//     const modalEl = document.getElementById("uploadModal");
+//     if (modalEl) {
+//       const modal = new bootstrap.Modal(modalEl);
+//       modal.show();
+//     }
+//   });
+
+//   eve.target.value = null; // reset
+// }
 
     else if (eve.target?.type === "checkbox") {
         if (field.fieldtype === "Check") {
@@ -2126,6 +2307,48 @@ const uploadFile = (file, field, blockIndex, sectionIndex, rowIndex, columnIndex
             console.error("Upload error:", error);
         });
 };
+
+// const uploadFile = (file, field, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) => {
+//   return new Promise((resolve, reject) => {
+//     const randomNumber = generateRandomNumber();
+//     let fileName = `${props.formName}${randomNumber}-@${file.name}`;
+
+//     const formData = new FormData();
+//     formData.append("file", file, fileName);
+//     formData.append("is_private", "0");
+//     formData.append("folder", "Home");
+
+//     axiosInstance.post(apis.uploadfile, formData)
+//       .then((res) => {
+//         if (res.message && res.message.file_url) {
+//           const respone = res.message;
+//           if (field["value"]) {
+//             field["value"] += `| ${res.message.file_url}`;
+//           } else {
+//             field["value"] = res.message.file_url;
+//           }
+//           uploadedFiles.value.push({ respone });
+//           emit("updateField", field);
+//           validateField(field, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex);
+//           resolve();
+//           const modalEl = document.getElementById("uploadModal");
+//             if (modalEl) {
+//                 const modal = bootstrap.Modal.getInstance(modalEl);
+//                 modal?.hide();
+//             }
+
+//         } else {
+//           console.error("file_url not found in response.");
+//           reject();
+//         }
+//       })
+//       .catch((error) => {
+//         console.error("Upload error:", error);
+//         reject(error);
+//       });
+//   });
+// };
+
 
 
  const flatFieldList = computed(() => {

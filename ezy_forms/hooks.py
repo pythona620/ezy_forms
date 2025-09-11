@@ -20,6 +20,7 @@ app_license = "mit"
 # 		"has_permission": "ezy_forms.api.permission.has_app_permission"
 # 	}
 # ]
+after_install = "ezy_forms.api.v1.default_mail_templates.email_template_create"
 after_migrate = ["ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions.activating_perms_for_all_roles_in_wf_roadmap"]
 # Includes in <head>
 # ------------------
@@ -157,6 +158,9 @@ doc_events = {
 #     },
 "File":{
     "after_insert":"ezy_forms.api.v1.make_private_file_to_public.make_file_public_after_insert"
+},
+"Role": {
+        "after_insert": "ezy_forms.api.v1.custom_role_permission.assign_custom_permissions"    
 }
 }
 
@@ -191,7 +195,7 @@ doc_events = {
 #
 override_whitelisted_methods = {
     # "frappe.desk.doctype.event.event.get_events": "ezy_forms.event.get_events"
-"frappe.core.doctype.user.user.sign_up":"ezy_forms.ezy_custom_forms.custom_script.v1.sign_up.sign_up",
+"frappe.core.doctype.user.user.sign_up":"ezy_forms.api.v1.sign_up.sign_up",
 "upload_file": "ezy_forms.api.v1.ezy_file_uploads.custom_upload_file",
 }
 #

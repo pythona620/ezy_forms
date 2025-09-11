@@ -268,10 +268,10 @@
                       Download Workorder
                     </button>  -->
 
-                    <!-- <button type="button" class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto "
+                    <button type="button" class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto "
                       data-bs-toggle="modal" data-bs-target="#pdfView" @click="viewasPdfView">
                       Preview
-                    </button> -->
+                    </button>
 
                   </div>
                 </div>
@@ -1420,13 +1420,14 @@ function receivedForMe(data) {
   if (selectedData.value.type !== 'myteam' && selectedData.value.type !== 'myapprovals' && selectedData.value.type !== 'linkedForm') {
     if (selectedData.value.type == "myforms") {
       filters.push(["requested_by", "like", EmpRequestdesignation.emp_mail_id]);
-    } else {
-      filters.push([
-        "assigned_to_users",
-        "like",
-        `%${EmpRequestdesignation?.designation}%`,
-      ]);
     }
+    //  else {
+    //   filters.push([
+    //     "assigned_to_users",
+    //     "like",
+    //     `%${EmpRequestdesignation?.designation}%`,
+    //   ]);
+    // }
   }
 
   const queryParams = {

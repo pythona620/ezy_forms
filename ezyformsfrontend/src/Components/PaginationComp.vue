@@ -1,37 +1,48 @@
 <template>
   <div class="pagination-controls">
     <ul class="pagination">
+      <li 
+        v-for="page in filteredPages" 
+        :key="page" 
+        class="p-0" 
+        @click.prevent="setItemsPerPage(page)"
+      >
+        <a href="#" :class="{ active: page === props.itemsPerPage }">{{ page }}</a>
+      </li>
+      <li v-if="props.currentRecords < props.totalRecords" class="more" @click="itemsIncrease()">more..</li>
+    </ul>
+    <div>
+      <span class="totalcount text-secondary">
+        {{ props.currentRecords }} / <span class="fw-bold">{{ props.totalRecords }}</span> records
+      </span>
+    </div>
+  </div>
+    <!-- <div class="pagination-controls">
+    <ul class="pagination">
       <li v-for="page in filteredPages" :key="page" class="p-0" @click.prevent="setItemsPerPage(page)">
         <a href="#" :itemsPerPage="itemsPerPage" :class="{ active: page === itemsPerPage }">{{ page }}</a>
       </li>
       <li v-if="props.currentRecords < props.totalRecords" class="more" @click="itemsIncrease()">more..</li>
-      <!-- v-if="props.currentRecords < props.totalRecords" -->
+     
     </ul>
     <div>
       <span class="totalcount text-secondary">{{ props.currentRecords }} /
         <span class="fw-bold">{{ props.totalRecords }}</span> records</span>
     </div>
-  </div>
+  </div> -->
 </template>
 
 <script setup>
-import { ref, watch, defineEmits, defineProps, computed } from "vue";
+import { ref, defineEmits, defineProps, computed } from "vue";
 
 const props = defineProps({
-  currentRecords: {
-    type: Number,
-    required: true,
-  },
-  totalRecords: {
-    type: Number,
-    required: true,
-  },
-
+  currentRecords: { type: Number, required: true },
+  totalRecords: { type: Number, required: true },
+  itemsPerPage: { type: Number, required: false, },  // ✅ controlled from parent
 });
 
-const itemsPerPage = ref(20);
-const newpages = ref([20, 50, 100, 200, 500]);
 const emit = defineEmits(["updateValue", "limitStart"]);
+const newpages = ref([20, 50, 100, 200, 500]);
 const start = ref(0);
 
 const filteredPages = computed(() => {
@@ -40,32 +51,67 @@ const filteredPages = computed(() => {
 
 // page size changes
 const setItemsPerPage = (page) => {
-  itemsPerPage.value = page;
   start.value = 0;
-  emit("updateValue", itemsPerPage.value);
+  emit("updateValue", page); // ✅ tell parent the new page size
 };
 
 // load more items
 const itemsIncrease = () => {
-  start.value += itemsPerPage.value;
-  emit("limitStart", [itemsPerPage.value, start.value]);
+  start.value += props.itemsPerPage;
+  emit("limitStart", [props.itemsPerPage, start.value]);
 };
-const count = ref([])
-// watch currentRecords
-watch(() => props.currentRecords, (newVal, oldVal) => {
-  count.value = oldVal;
-  count.value = newVal;
-  // console.log(`Current records changed from ${oldVal} to ${newVal}`);
-});
-// watch(() => props.tab_name, (newVal, oldVal) => {
-//   if (newVal !== oldVal) {
-//     itemsPerPage.value = 100;
-//     start.value = 0;
-//     emit("updateValue", itemsPerPage.value);
-//   }
+
+// import { ref, watch, defineEmits, defineProps, computed } from "vue";
+
+// const props = defineProps({
+//   currentRecords: {
+//     type: Number,
+//     required: true,
+//   },
+//   totalRecords: {
+//     type: Number,
+//     required: true,
+//   },
+
 // });
 
+// const itemsPerPage = ref(20);
+// const newpages = ref([20, 50, 100, 200, 500]);
+// const emit = defineEmits(["updateValue", "limitStart"]);
+// const start = ref(0);
+
+// const filteredPages = computed(() => {
+//   return newpages.value.filter(page => page <= props.totalRecords);
+// });
+
+// // page size changes
+// const setItemsPerPage = (page) => {
+//   itemsPerPage.value = page;
+//   start.value = 0;
+//   emit("updateValue", itemsPerPage.value);
+// };
+
+// // load more items
+// const itemsIncrease = () => {
+//   start.value += itemsPerPage.value;
+//   emit("limitStart", [itemsPerPage.value, start.value]);
+// };
+// const count = ref([])
+// // watch currentRecords
+// watch(() => props.currentRecords, (newVal, oldVal) => {
+//   count.value = oldVal;
+//   count.value = newVal;
+//   // console.log(`Current records changed from ${oldVal} to ${newVal}`);
+// });
+// // watch(() => props.tab_name, (newVal, oldVal) => {
+// //   if (newVal !== oldVal) {
+// //     itemsPerPage.value = 100;
+// //     start.value = 0;
+// //     emit("updateValue", itemsPerPage.value);
+// //   }
+// // });
 </script>
+
 <!-- Styles -->
 <style scoped>
 .pagination-controls {

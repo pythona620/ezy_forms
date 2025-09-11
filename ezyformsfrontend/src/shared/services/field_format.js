@@ -109,10 +109,10 @@ export function extractFieldsWithBreaks(data) {
           // });
 
           // Actual table field
-          const tableFieldname = getUniqueFieldname(table.label, fieldnameTracker);
+          // const tableFieldname = getUniqueFieldname(table.label, fieldnameTracker);
           result.push({
             description: table.description || "Table",
-            fieldname: tableFieldname,
+            fieldname: table.fieldname,
             fieldtype: "Table",
             idx: index++,
             label: table.label,
@@ -692,6 +692,10 @@ export function addErrorMessagesToStructuredArray(structuredArray) {
               if (fieldLabel === "") {
                 errors.push("Field label is required.");
               }
+              if (field.label && field.label.trim().length > 64) {
+                errors.push(`Field label cannot exceed 64 characters.`);
+              }
+
 
               // Check for empty field type
               if (!field.fieldtype || field.fieldtype.trim() === "") {

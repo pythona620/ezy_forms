@@ -10,7 +10,7 @@
       <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" viewType="viewPdf" isCheckbox="true"
         :actions="actions" @actionClicked="actionCreated" isFiltersoption="true" :field-mapping="fieldMapping"
         @cell-click="viewPreview" @updateFilters="inLineFiltersData" />
-      <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
+      <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords" :items-per-page="filterObj.limitPageLength"
         @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
     </div>
     <div class="modal fade" id="viewRequest" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
@@ -191,7 +191,7 @@ const newBusinessUnit = ref({ business_unit: "" });
 const route = useRoute();
 const router = useRouter();
 
-const filterObj = ref({ limitPageLength: 20, limit_start: 0 });
+const filterObj = ref({ limitPageLength: 20, limit_start: 0, filters: [] });
 const totalRecords = ref(0);
 const selectedRequest = ref({});
 const showRequest = ref(null);
@@ -370,14 +370,14 @@ function actionCreated(rowData, actionEvent) {
     // pdfView
     selectedRequest.value = rowData;
     // Prepare the filters for fetching data
-    const filters = [
+    filterObj.value.filters = [
       ["wf_generated_request_id", "like", `%${selectedRequest.value.name}%`],
     ];
     const queryParams = {
       fields: JSON.stringify(["*"]),
       limit_page_length: "None",
       limit_start: 0,
-      filters: JSON.stringify(filters),
+      filters: JSON.stringify(filterObj.value.filters),
       order_by: `\`tab${selectedRequest.value.doctype_name}\`.\`creation\` desc`,
     };
 
@@ -537,13 +537,13 @@ function mapFormFieldsToRequest(doctypeData, showRequestData) {
 const PaginationUpdateValue = (itemsPerPage) => {
   filterObj.value.limitPageLength = itemsPerPage;
   filterObj.value.limit_start = 0;
-  receivedForMe();
+  receivedForMe(filterObj.value.filters);
 };
 // Handle updating the limit start
 const PaginationLimitStart = ([itemsPerPage, start]) => {
   filterObj.value.limitPageLength = itemsPerPage;
   filterObj.value.limit_start = start;
-  receivedForMe();
+  receivedForMe(filterObj.value.filters);
 };
 const timeout = ref(null);
 
@@ -553,37 +553,37 @@ function inLineFiltersData(searchedData) {
 
   // Set a new timeout to delay the API call
   timeout.value = setTimeout(() => {
+    filterObj.value.filters = [];
     // Initialize filters array
-    const filters = [];
+   
 
     // Loop through the table headers and build dynamic filters
     tableheaders.value.forEach((header) => {
       const key = header.td_key;
 
       if (searchedData[key]) {
-        filters.push([key, "like", `%${searchedData[key]}%`]);
+        filterObj.value.filters.push([key, "like", `%${searchedData[key]}%`]);
       }
     });
 
     // Call receivedForMe with or without filters
-    if (filters.length) {
-      receivedForMe(filters);
-    } else {
-      receivedForMe();
-    }
+    filterObj.value.limit_start = 0;
+    filterObj.value.limitPageLength = 20;
+      receivedForMe(filterObj.value.filters);
+   
   }, 500); // Adjust debounce delay as needed (e.g., 500ms)
 }
 
 function receivedForMe(data) {
   // Initialize filters array for building dynamic query parameters
   // const EmpRequestMail = JSON.parse(localStorage.getItem("employeeData"));
-  const filters = [
+ filterObj.value.filters = [
     ["property", "=", `${newBusinessUnit.value.business_unit}`],
   ];
   // ["requested_by", "like", EmpRequestMail.emp_mail_id],
 
   if (data) {
-    filters.push(...data);
+    filterObj.value.filters = data;
   }
 
   // Define query parameters for data and count retrieval
@@ -591,14 +591,14 @@ function receivedForMe(data) {
     fields: JSON.stringify(["*"]),
     limit_page_length: filterObj.value?.limitPageLength,
     limit_start: filterObj.value?.limit_start,
-    filters: JSON.stringify(filters),
+    filters: JSON.stringify(filterObj.value?.filters),
     order_by: "`tabWF Workflow Requests`.`creation` desc",
   };
 
   const queryParamsCount = {
     fields: JSON.stringify(["count(name) AS total_count"]),
     limitPageLength: "None",
-    filters: JSON.stringify(filters),
+    filters: JSON.stringify(filterObj.value?.filters),
   };
 
   // Fetch total count of records matching filters
