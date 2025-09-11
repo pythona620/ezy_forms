@@ -6,8 +6,10 @@
         <div class="d-flex justify-content-between asset_request">
 
           <div class="backtofromPage  px-2 py-2">
-            <router-link :to="backTo" class="text-decoration-none text-dark font-13"><span> <i
-                  class="bi bi-arrow-left px-2"></i></span>Back</router-link>
+            <!-- <router-link :to="backTo" class="text-decoration-none text-dark font-13"><span> <i
+                  class="bi bi-arrow-left px-2"></i></span>Back</router-link>  -->
+                  <span class="m-0 p-0 text-dark font-13 pointer" @click="router.back()">
+                    <i class="bi bi-arrow-left px-2"></i>Back</span>
           </div>
           <div>
             <button class="btn btn-light font-12  me-2 d-xl-none " type="button"

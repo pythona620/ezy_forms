@@ -100,8 +100,9 @@ const tableheaders = ref([
   // { th: "Form name", td_key: "name" },
   // { th: "Form category", td_key: "doctype_name" },
   // { th: "Owner of form", td_key: "owner" },
-  { th: "Requested By", td_key: "requested_by" },
-  { th: "Requested Department", td_key: "role" },
+  { th: "Requester Name", td_key: "requester_name" },
+  { th: "Requested On", td_key: "requested_on" },
+  { th: "Requester Department", td_key: "department_name" },
   // { th: "Property", td_key: "property" },
   { th: "Approval Status", td_key: "status" },
   { th: "Pending With", td_key: "assigned_to_users" },
@@ -395,8 +396,9 @@ const fieldMapping = computed(() => ({
   // credit_irn_generated: { type: "select", options: ["Pending", "Completed", "Error"] },
   // role: { type: "input" },
   name: { type: "input" },
-  requested_by: { type: "input" },
-  role: { type: "input" },
+  requester_name: { type: "input" },
+  requested_on: { type: "date" },
+  department_name: { type: "input" },
 
 
   status: { type: "select", options:["Request Raised","In Progress"] },

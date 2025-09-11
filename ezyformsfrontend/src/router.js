@@ -20,6 +20,9 @@ import PdfPreview from "./Components/PdfPreview.vue";
 import EmailApprove from "./Components/EmailApprove.vue";
 import LinkPreviewComp from "./Components/LinkPreviewComp.vue";
 import WorkOrderDetailes from "./Components/WorkOrderDetailes.vue";
+import QrRaiseRequest from "./Components/QrRaiseRequest.vue";
+import EmployeeForms from "./Components/EmployeeForms.vue";
+
 
 const routes = [
   {
@@ -48,7 +51,11 @@ const routes = [
     component: EmailApprove,
     name: 'EmailApprove',
   },
-
+  {
+    path: '/qrraiserequest',
+    component: QrRaiseRequest,
+    name: 'QrRaiseRequest',
+  },
   {
     path: '/formpreview',
     component: FormPreview,
@@ -68,6 +75,11 @@ const routes = [
     path: '/pdfpreview',
     component: PdfPreview,
     name: 'PdfPreview'
+  },
+   {
+    path: '/employeeforms',
+    component: EmployeeForms,
+    name: 'employeeforms'
   },
   {
     path:'/settings/vendorcomparison',
@@ -89,6 +101,9 @@ router.beforeEach((to, from, next) => {
   // Allow access to /approverequest without login
   if (to.name === 'EmailApprove') {
     next(); // Skip authentication for this route
+  }
+  if (to.name === 'QrRaiseRequest') {
+    next();
   }
   // If the route requires authentication and the user is not logged in, redirect to LoginPage
   else if (requiresAuth && !isLoggedIn) {
