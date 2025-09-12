@@ -1392,6 +1392,12 @@
                   </option> 
                 </select>
               </div>
+
+            <div class="px-2 mt-2 d-flex align-items-center user-select-none">
+              <input v-model="approval_required" type="checkbox" :true-value="1" :false-value="0" id="Approver"  class="me-2 m-0 form-check-input designationCheckBox" />
+              <label for="Approver" class="m-0">Approver Required</label>
+            </div>
+
             </div>
             
 
@@ -1529,6 +1535,7 @@ const ViewOnlyReportee = ref(false);
 const all_approvals_required = ref(false);
 const requester_as_a_approver = ref(false);
 const OnRejection = ref('');
+const approval_required=ref('');
 const wrkAfterGetData = ref([]);
 // const hasWorkflowToastShown = ref(false);
 const tableFieldsCache = ref([]);
@@ -2961,6 +2968,7 @@ function addDesignationBtn() {
   let xyz = {
     type: selectedBlockIndex.value == 0 ? "requestor" : "approver",
     roles: designationValue.value,
+    approval_required:approval_required.value,
     fields: block.sections.flatMap(extractFieldnames),
     idx: selectedBlockIndex.value,
   };
