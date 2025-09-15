@@ -1141,4 +1141,50 @@ th:first-child {
   max-width: 500px;
   white-space: nowrap;
 }
+.table-responsive {
+  overflow: auto;
+}
+
+/* WebKit Browsers */
+.table-responsive::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+/* Track */
+.table-responsive::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 5px rgb(216, 216, 216);
+  border-radius: var(--border-radius-lg);
+  margin-top: 15px;
+  background: transparent; /* keep it clean */
+}
+
+/* Thumb hidden by default */
+.table-responsive::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: var(--border-radius-lg);
+}
+
+/* Show styled thumb on hover */
+.table-responsive:hover::-webkit-scrollbar-thumb {
+  background: #e2e2e2;
+}
+
+/* Thumb hover effect */
+.table-responsive:hover::-webkit-scrollbar-thumb:hover {
+  background: var(--black-color);
+}
+
+/* Firefox */
+.table-responsive {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent; /* hidden by default */
+}
+
+.table-responsive:hover {
+  scrollbar-color: #e2e2e2 transparent; /* visible on hover */
+}
+
+
+
 </style>

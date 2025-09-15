@@ -594,4 +594,49 @@ li:hover {
   font-weight: bold !important;
   height: 33px;
 }
+.sidebar {
+  overflow: auto;
+}
+
+/* WebKit Browsers */
+.sidebar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+/* Track */
+.sidebar::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 5px rgb(216, 216, 216);
+  border-radius: var(--border-radius-lg);
+  margin-top: 15px;
+  background: transparent; /* keep it clean */
+}
+
+/* Thumb hidden by default */
+.sidebar::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: var(--border-radius-lg);
+}
+
+/* Show styled thumb on hover */
+.sidebar:hover::-webkit-scrollbar-thumb {
+  background: #e2e2e2;
+}
+
+/* Thumb hover effect */
+.sidebar:hover::-webkit-scrollbar-thumb:hover {
+  background: var(--black-color);
+}
+
+/* Firefox */
+.sidebar {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent; /* hidden by default */
+}
+
+.sidebar:hover {
+  scrollbar-color: #e2e2e2 transparent; /* visible on hover */
+}
+
+
 </style>

@@ -2342,7 +2342,7 @@ const uploadFile = (file, field) => {
       // console.log(res, res.message.file_url);
       if (res.message && res.message.file_url) {
         if (field["value"]) {
-          field["value"] += `| ${res.message.file_url}`;
+          field["value"] += `|${res.message.file_url}`;
         } else {
           field["value"] = res.message.file_url;
         }

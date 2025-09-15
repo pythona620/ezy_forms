@@ -829,15 +829,17 @@
 
                                                             <!-- Label Input -->
                                                             <td v-if="editMode[tableName]">
-                                                              <input v-model="field.label" placeholder="Field Label"
-                                                                class="form-control"
-                                                                :class="{ 'border-1 border-danger': invalidFields[tableName]?.includes(index) }" />
-                                                              <span v-if="invalidFields[tableName]?.includes(index)"
-                                                                class="font-11 text-danger">Label required**</span>
-                                                                 <span v-else-if="restrictedLabels.includes(field.label?.toLowerCase().trim())"
-        class="font-11 text-danger">
-    This label is not allowed**
-  </span>
+                                                              <input
+                                                                  v-model="field.label"
+                                                                  @input="validateField(field, tableName, index)"
+                                                                  placeholder="Field Label"
+                                                                  class="form-control"
+                                                                  :class="{ 'border-1 border-danger': fieldErrors[tableName]?.[index]?.length }"
+                                                                />
+                                                                <div v-if="fieldErrors[tableName]?.[index]?.length" class="text-danger font-11">
+                                                                  <div v-for="(err, i) in fieldErrors[tableName][index]" :key="i">{{ err }}</div>
+                                                                </div>
+
                                                             </td>
                                                             <td v-else>{{ field.label }}</td>
 
@@ -845,14 +847,15 @@
                                                             <td v-if="editMode[tableName]">
                                                               <div class="d-flex gap-1">
                                                                 <select v-model="field.fieldtype"
-                                                                  class="form-select form-select-sm"
-                                                                  :class="{ 'border-1 border-danger': invalidFields[tableName]?.includes(index) }">
+                                                                    @change="validateField(field, tableName, index)"
+                                                                    class="form-select form-select-sm"
+                                                                    :class="{ 'border-1 border-danger': fieldErrors[tableName]?.[index]?.length }">
                                                                   <option value="">Select Type</option>
-                                                                  <option v-for="option in childfield"
-                                                                    :key="option.type" :value="option.type">
+                                                                  <option v-for="option in childfield" :key="option.type" :value="option.type">
                                                                     {{ option.label }}
                                                                   </option>
                                                                 </select>
+
                                                                 <div class=" d-flex">
                                                                   <div class=" d-flex align-items-center gap-2">
 
@@ -880,8 +883,10 @@
                                                                 <label class="font-12 fw-light" for="options">Enter
                                                                   Options:</label>
                                                                 <textarea id="options" placeholder="Enter your Options"
-                                                                  v-model="field.options"
-                                                                  class="form-control shadow-none mb-1 font-12"></textarea>
+                                                              v-model="field.options"
+                                                              @input="validateField(field, tableName, index)"
+                                                              class="form-control shadow-none mb-1 font-12"></textarea>
+
                                                                 <small v-if="
                                                                   !field.options ||
                                                                   field.options.trim() === ''
@@ -1024,61 +1029,66 @@
                                         <tr v-for="(field, index) in table.columns" :key="index">
                                           <td>{{ index + 1 }}</td>
 
+                                          <!-- Label Input -->
                                           <td v-if="editMode[table.tableName]">
-                                            <input v-model="field.label" placeholder="Field Label" class="form-control" 
-                                              @blur="() => { updateFieldname(field); validateFieldLabel(field, blockIndex, sectionIndex, tableIndex, index) }"
-                                              :class="{ 'border-1 border-danger': invalidFields[table.tableName]?.includes(index) }" />
-                                            <span v-if="!field.label && invalidFields[table.tableName]?.includes(index)"
-                                                  class="font-11 text-danger">
-                                              Label required**
-                                            </span>
-
-                                            <!-- Restricted validation -->
-                                            <span v-else-if="restrictedLabels.includes(field.label?.toLowerCase().trim())"
-                                                  class="font-11 text-danger">
-                                              This label is not allowed**
-                                            </span>
+                                            <input
+                                              v-model="field.label"
+                                              placeholder="Field Label"
+                                              class="form-control"
+                                              
+                                              @blur="field.label = field.label?.trim(); validateField(field, tableName, index)"
+                                              :class="{ 'border-1 border-danger': invalidFields[table.tableName]?.includes(index) }"
+                                            />
+                                            <div v-if="invalidFields[table.tableName]?.includes(index)" class="text-danger font-11 mt-1">
+                                              <span v-if="!field.label">Label required**</span>
+                                              <span v-else-if="restrictedLabels.includes(field.label?.toLowerCase().trim())">This label is not allowed**</span>
+                                              <span v-else-if="field.label.length > 64">Max 64 characters allowed</span>
+                                              <span v-else-if="!/^[A-Za-z0-9]+(?: [A-Za-z0-9]+)*$/.test(field.label)">Only letters, numbers, spaces allowed</span>
+                                            </div>
                                           </td>
                                           <td v-else>{{ field.label }}</td>
 
+                                          <!-- Field Type Select -->
                                           <td v-if="editMode[table.tableName]">
-                                            <div class="d-flex gap-1">
-                                              <select v-model="field.fieldtype" class="form-select form-select-sm"
-                                                :class="{ 'border-1 border-danger': invalidFields[table.tableName]?.includes(index) }">
+                                            <div class="d-flex gap-1 align-items-center">
+                                              <select
+                                                v-model="field.fieldtype"
+                                                class="form-select form-select-sm"
+                                                @change="validateTableField(field, table.tableName, index)"
+                                                :class="{ 'border-1 border-danger': invalidFields[table.tableName]?.includes(index) }"
+                                              >
                                                 <option value="">Select Type</option>
-                                                <option v-for="option in childfield" :key="option.type"
-                                                  :value="option.type">
+                                                <option v-for="option in childfield" :key="option.type" :value="option.type">
                                                   {{ option.label }}
                                                 </option>
                                               </select>
-                                              <button class="btn btn-light btn-sm"
-                                                @click="afterImmediateEditdeleteRow(blockIndex, sectionIndex, table.tableName, index)">
+
+                                              <button class="btn btn-light btn-sm" @click="afterImmediateEditdeleteRow(blockIndex, sectionIndex, table.tableName, index)">
                                                 <i class="bi bi-x-lg"></i>
                                               </button>
                                             </div>
-                                            <div v-if="
-                                              [
-                                                'Select'
-                                              ].includes(field.fieldtype)
-                                            ">
+
+                                            <!-- Options for Select type -->
+                                            <div v-if="field.fieldtype === 'Select'" class="mt-1">
                                               <label class="font-12 fw-light" for="options">Enter Options:</label>
-                                              <textarea id="options" placeholder="Enter your Options"
+                                              <textarea
+                                                id="options"
+                                                placeholder="Enter your Options"
                                                 v-model="field.options"
-                                                class="form-control shadow-none mb-1 font-12"></textarea>
-                                              <small v-if="
-                                                !field.options ||
-                                                field.options.trim() === ''
-                                              " class="text-danger font-10">
-                                                Options are required for this field type.
-                                              </small>
+                                                class="form-control shadow-none mb-1 font-12"
+                                                @input="validateTableField(field, table.tableName, index)"
+                                              ></textarea>
                                             </div>
-                                            <span v-if="invalidFields[table.tableName]?.includes(index)"
-                                              class="font-11 text-danger">Type
-                                              required**</span>
+
+                                            <div v-if="invalidFields[table.tableName]?.includes(index)" class="text-danger font-11 mt-1">
+                                              <span v-if="!field.fieldtype">Type required**</span>
+                                              <span v-if="field.fieldtype === 'Select' && (!field.options || !field.options.trim())">Options required**</span>
+                                            </div>
                                           </td>
                                           <td v-else>{{ field.fieldtype }}</td>
                                         </tr>
                                       </tbody>
+
                                     </table>
 
                                     <!-- Edit/Add buttons -->
@@ -1772,21 +1782,43 @@ const updateFieldname = async (field) => {
   tableExistsMessage.value = ''; // reset message
   matched.value = null; // reset matched
 
-  if (field.tableName?.trim()) {
-    const searchText = field.tableName.trim();
-    const existing = await GetDoctypeList(searchText);
+  if (field.tableName) {
+    // 🚀 Remove leading/trailing spaces
+    let searchText = field.tableName.trim();
 
+    // 🚨 Condition 1: Check length
+    if (searchText.length > 64) {
+      tableExistsMessage.value = 'Table name cannot exceed 64 characters';
+      return;
+    }
+
+    // 🚨 Condition 2: Only letters and spaces allowed in the middle
+    const validNameRegex = /^[a-zA-Z]+( [a-zA-Z]+)*$/;
+    if (!validNameRegex.test(searchText)) {
+      tableExistsMessage.value = 'Table name can only contain letters and spaces (no leading/trailing spaces or special characters)';
+      return;
+    }
+
+    // Check if table already exists
+    const existing = await GetDoctypeList(searchText);
     matched.value = existing.find(item => item.name.toLowerCase() === searchText.toLowerCase());
 
     if (matched.value) {
       tableExistsMessage.value = 'Table already exists';
     }
+
+    // Update field.tableName with trimmed version
+    field.tableName = searchText;
   }
 
+  // Auto-generate fieldname from label
   if (field.label) {
     field.fieldname = generateFieldname(field.label);
   }
 };
+
+
+
 
 function searchForm() {
   const searchValue = filterObj.value.is_linked_form;
@@ -2183,7 +2215,7 @@ onMounted(() => {
 
 
 const draggingIndex = ref(null);
-const invalidFields = ref({});
+const invalidFields = reactive({});
 const currentEditingTable = ref(null);
 
 const onDragStart = (index) => {
@@ -2330,21 +2362,64 @@ function validateFieldLabel(field, blockIndex, sectionIndex, tableIndex, fieldIn
 
   const fieldError = {};
 
+  const label = field.label?.trim() || "";
+
   // Empty label check
-  if (!field.label?.trim()) {
+  if (!label) {
     fieldError.label = "Field Label is required";
   } else {
-    const normalized = field.label.trim().toLowerCase();
+    const normalized = label.toLowerCase();
 
     // Restricted labels check
     if (restrictedLabels.includes(normalized) && !excludedLabels.includes(normalized)) {
-      fieldError.label = `"${field.label}" is a restricted field label`;
+      fieldError.label = `"${label}" is a restricted field label`;
+    }
+
+    // Max length check
+    else if (label.length > 64) {
+      fieldError.label = "Field Label cannot exceed 64 characters";
+    }
+
+    // Special characters check (allow letters, numbers, spaces inside, no leading/trailing space)
+    else if (!/^[A-Za-z0-9]+(?: [A-Za-z0-9]+)*$/.test(label)) {
+      fieldError.label = "Field Label can only contain letters, numbers, and single spaces between words";
     }
   }
 
   // Save error state for this field
   fieldErrors[key].columns[fieldIndex] = fieldError;
 }
+function validateField(field, tableName, index) {
+  if (!fieldErrors[tableName]) fieldErrors[tableName] = {};
+
+  const errors = [];
+
+  const label = field.label?.trim() || "";
+
+  // Required
+  if (!label) errors.push("Label is required");
+
+  // Max 64 characters
+  if (label.length > 64) errors.push("Label cannot exceed 64 characters");
+
+  // Only letters, numbers, spaces in middle
+  if (label && !/^[A-Za-z0-9]+(?: [A-Za-z0-9]+)*$/.test(label))
+    errors.push("No special characters allowed");
+
+  // Restricted labels
+  if (label && restrictedLabels.includes(label.toLowerCase().trim()))
+    errors.push("This label is restricted");
+
+  // Field type required
+  if (!field.fieldtype) errors.push("Field type is required");
+
+  // Options required for 'Select'
+  if (field.fieldtype === "Select" && (!field.options || field.options.trim() === ""))
+    errors.push("Options are required");
+
+  fieldErrors[tableName][index] = errors;
+}
+
 
 const isEmptyFieldType = (blockIndex, sectionIndex, tableIndex) => {
   const table = blockArr[blockIndex].sections[sectionIndex].childTables[tableIndex];
@@ -2466,6 +2541,56 @@ const processFields = (blockIndex, sectionIndex, tableIndex) => {
       console.error("Error creating table:", error);
     });
 };
+// Reactive object to track invalid fields per table
+
+
+// Validation function
+function validateTableField(field, tableName, index) {
+  // Ensure reactive array exists
+  if (!invalidFields[tableName]) invalidFields[tableName] = [];
+
+  // Remove old error for this field
+  invalidFields[tableName] = invalidFields[tableName].filter(i => i !== index);
+
+  let hasError = false;
+
+  // Trim first and last spaces
+  const label = field.label?.trim() || "";
+
+  // 1. Label required
+  if (!label) {
+    hasError = true;
+  } 
+  // 2. Restricted labels
+  else if (restrictedLabels.includes(label.toLowerCase())) {
+    hasError = true;
+  } 
+  // 3. Max length 64
+  else if (label.length > 64) {
+    hasError = true;
+  } 
+  // 4. Only letters, numbers, and spaces in middle (no special chars at start/end)
+  else if (!/^[A-Za-z0-9]+(?: [A-Za-z0-9]+)*$/.test(label)) {
+    hasError = true;
+  }
+
+  // 5. Field type required
+  if (!field.fieldtype) {
+    hasError = true;
+  }
+
+  // 6. Options required for Select type
+  if (field.fieldtype === "Select" && (!field.options || !field.options.trim())) {
+    hasError = true;
+  }
+
+  // Add to invalidFields if error
+  if (hasError) invalidFields[tableName].push(index);
+
+  return !hasError;
+}
+
+
 
 const afterImmediateEditdeleteRow = (blockIndex, sectionIndex, tableName, index) => {
   const section = blockArr[blockIndex].sections[sectionIndex];
@@ -2497,7 +2622,7 @@ const afterImmediateEditaddNewFieldedit = (blockIndex, sectionIndex, tableName) 
 
   const newIndex = table.columns.length;
 
-  table.columns.push({
+  const newField = {
     fieldname: "",
     fieldtype: "",
     idx: newIndex + 1,
@@ -2505,9 +2630,14 @@ const afterImmediateEditaddNewFieldedit = (blockIndex, sectionIndex, tableName) 
     value: "",
     isNew: true,
     description: '',
+  };
 
-  });
+  table.columns.push(newField);
+
+  // Live validate the new field
+  validateTableField(newField, tableName, newIndex);
 };
+
 
 const afterdata = ref([])
 // const afterImmediateEdit = (blockIndex, sectionIndex, tableName) => {
@@ -2565,19 +2695,20 @@ const afterImmediateEdit = (blockIndex, sectionIndex, tableName) => {
   if (!table) return;
 
   if (editMode[tableName]) {
-    invalidFields.value[tableName] = [];
+    invalidFields[tableName] = [];
     let isValid = true;
 
     table.columns.forEach((field, index) => {
-      const label = field.label?.toLowerCase().trim();
-
-      if (!field.label || !field.fieldtype || restrictedLabels.includes(label)) {
-        invalidFields.value[tableName].push(index);
-        isValid = false;
-      }
+      if (!validateTableField(field, tableName, index)) isValid = false;
     });
 
-    if (!isValid) return;
+    if (!isValid){
+     toast.error("Please fix the errors in the highlighted fields before saving!", {
+      autoClose: 1000,
+    });
+      
+      return; // stop save if invalid
+    }
 
     const allFields = table.columns.map(({ isNew, ...rest }, index) => ({
       ...rest,
@@ -2604,6 +2735,7 @@ const afterImmediateEdit = (blockIndex, sectionIndex, tableName) => {
 
   editMode[tableName] = !editMode[tableName];
 };
+
 
 const editMode = reactive({});
 
@@ -2635,87 +2767,100 @@ const deleteRow = (tableName, index) => {
 
 
 const toggleEdit = (tableName, description) => {
+  if (!tableName) return;
+
+  if (!invalidFields.value) invalidFields.value = {};
+  if (!invalidFields.value[tableName]) invalidFields.value[tableName] = [];
+
+  const tableFields = childtableHeaders.value[tableName];
+  if (!tableFields) return;
+
   if (editMode[tableName]) {
-
-
-    // ✅ Reset validation errors
     invalidFields.value[tableName] = [];
-
     let isValid = true;
 
-    // Validate all fields in the table
-    childtableHeaders.value[tableName].forEach((field, index) => {
-  const label = field.label?.toLowerCase().trim();
+    tableFields.forEach((field, index) => {
+      // Validate using your existing function
+      validateField(field, tableName, index);
 
-  // Run label validation
-  validateFieldLabel(field, 0, 0, tableName, index);
+      const errors = fieldErrors[tableName]?.[index];
+      if (errors && errors.length > 0) {
+        invalidFields.value[tableName].push(index);
+        isValid = false;
+      }
 
-  if (
-    !field.label ||
-    !field.fieldtype ||
-    restrictedLabels.includes(label) ||   // 🚫 restricted labels check
-    fieldErrors[`${0}-${0}-${tableName}`]?.columns[index]?.label
-  ) {
-    invalidFields.value[tableName].push(index);
-    isValid = false;
-  }
-});
-
+      // Trim first/last spaces for label
+      if (field.label) field.label = field.label.trim();
+    });
 
     if (!isValid) {
-
-      return; // Stop execution if validation fails
+      toast.error("Please fix the errors before saving", { autoClose: 1000 });
+      return;
     }
 
+    const allFields = tableFields.map(({ isNew, ...rest }, idx) => ({
+      ...rest,
+      idx: idx + 1,
+      options: cleanFieldOptions(rest),
+    }));
 
-
-    // Process all fields (both old and new)
-    let allFields = childtableHeaders.value[tableName].map(({ isNew, ...rest }, index) => ({
-        ...rest,
-        idx: index,
-        options: cleanFieldOptions(rest),
-      }));
-
-    // ✅ Single API request to save both old and new fields
     const formData = {
       form_short_name: tableName,
       fields: allFields,
-      as_a_block: description
+      as_a_block: description,
     };
-    // console.log(formData);
-
 
     axiosInstance
-      .post(apis.childtable, formData) // Use a single API endpoint
+      .post(apis.childtable, formData)
       .then((response) => {
-        toast.success("Fields updated successfully!", { autoClose: 500 }, {
-          transition: "zoom",
-        });
         afterdata.value = response.data;
-        // console.log("✅ All fields saved successfully:", response.data);
+        toast.success("Fields updated successfully!", { autoClose: 500 });
       })
       .catch((error) => {
         console.error("❌ Saving fields failed:", error);
       });
   }
 
-  // Toggle edit mode for the table
+  // Toggle edit mode
   editMode[tableName] = !editMode[tableName];
   currentEditingTable.value = editMode[tableName] ? tableName : null;
 };
 
 
-watch(childtableHeaders, (newTables) => {
-  Object.keys(newTables).forEach((tableName) => {
-    newTables[tableName].forEach((field, index) => {
-      if (field.label && field.fieldtype &&
-        !restrictedLabels.includes(field.label)) {
-        // ✅ Remove error dynamically when user enters a valid value
-        invalidFields.value[tableName] = invalidFields.value[tableName]?.filter(i => i !== index);
-      }
-    });
-  });
-}, { deep: true });
+// watch(childtableHeaders, (newTables) => {
+//   if (!newTables) return;
+
+//   Object.keys(newTables).forEach((tableName) => {
+//     const fields = newTables[tableName];
+//     if (!fields || !Array.isArray(fields)) return;
+
+//     fields.forEach((field, index) => {
+//       if (
+//         field.label &&
+//         field.fieldtype &&
+//         !restrictedLabels.includes(field.label.toLowerCase().trim())
+//       ) {
+//         // Remove error dynamically when user enters a valid value
+//         if (invalidFields.value[tableName]) {
+//           invalidFields.value[tableName] = invalidFields.value[tableName].filter(i => i !== index);
+//         }
+//       }
+//     });
+//   });
+// }, { deep: true });
+
+
+// watch(childtableHeaders, (newTables) => {
+//   Object.keys(newTables).forEach((tableName) => {
+//     newTables[tableName].forEach((field, index) => {
+//       if (field.label && field.fieldtype &&
+//         !restrictedLabels.includes(field.label)) {
+//         // ✅ Remove error dynamically when user enters a valid value
+//         invalidFields.value[tableName] = invalidFields.value[tableName]?.filter(i => i !== index);
+//       }
+//     });
+//   });
+// }, { deep: true });
 
 // Object.keys(newTables).forEach((tableName) => {
 //   const fields = newTables[tableName];
@@ -3571,6 +3716,15 @@ const removeBlock = (blockIndex) => {
   if (workflowSetup.length > blockIndex) {
     workflowSetup.splice(blockIndex, 1);
   }
+   blockArr.forEach((block, bIndex) => {
+    block.sections.forEach((section, sIndex) => {
+      section.rows.forEach((row, rIndex) => {
+        row.columns.forEach((column, cIndex) => {
+          handleFieldChange(bIndex, sIndex, rIndex, cIndex);
+        });
+      });
+    });
+  });
   // if(rolesToDelete.length){
 
 
@@ -3655,11 +3809,30 @@ const addSection = (blockIndex, sectionIndex) => {
   blockArr[blockIndex].sections.splice(sectionIndex + 1, 0, newSection);
 };
 // Function to remove a section
+// const removeSection = (blockIndex, sectionIndex) => {
+//   let item = blockArr[blockIndex].sections[sectionIndex];
+//   if (item.parent) deleted_items.push(item);
+//   blockArr[blockIndex].sections.splice(sectionIndex, 1);
+//   // toast.success("Section removed", { autoClose: 500 })
+// }; 
 const removeSection = (blockIndex, sectionIndex) => {
   let item = blockArr[blockIndex].sections[sectionIndex];
   if (item.parent) deleted_items.push(item);
+
+  // Remove the section
   blockArr[blockIndex].sections.splice(sectionIndex, 1);
-  // toast.success("Section removed", { autoClose: 500 })
+
+  // Re-validate all remaining fields for duplicates
+  blockArr[blockIndex].sections.forEach((section, sIndex) => {
+    section.rows.forEach((row, rIndex) => {
+      row.columns.forEach((column, cIndex) => {
+        handleFieldChange(blockIndex, sIndex, rIndex, cIndex);
+      });
+    });
+  });
+
+  // Optionally show a toast
+  // toast.success("Section removed", { autoClose: 500 });
 };
 
 
@@ -3690,13 +3863,24 @@ const removeColumn = (blockIndex, sectionIndex, rowIndex, columnIndex) => {
   if (columns.length === 1) {
     // Remove entire row
     blockArr[blockIndex].sections[sectionIndex].rows.splice(rowIndex, 1);
-    // toast.success("Row removed", { autoClose: 500 });
   } else {
     // Remove only the column
     columns.splice(columnIndex, 1);
-    // toast.success("Column removed", { autoClose: 500 });
   }
+
+  // Re-validate all remaining fields in the block for duplicates
+  blockArr[blockIndex].sections.forEach((section, sIndex) => {
+    section.rows.forEach((r, rIndex) => {
+      r.columns.forEach((c, cIndex) => {
+        handleFieldChange(blockIndex, sIndex, rIndex, cIndex);
+      });
+    });
+  });
+
+  // Optionally show toast
+  // toast.success("Column/Row removed", { autoClose: 500 });
 };
+
 
 // Function to remove a column inside a section
 // const removeColumn = (blockIndex, sectionIndex, rowIndex, columnIndex) => {
@@ -3937,6 +4121,14 @@ function handleInputChange(event, fieldType) {
       formNameError.value = "Input cannot be empty or only spaces";
     } else if (fieldType === "form_short_name") {
       formShortNameError.value = "Input cannot be empty or only spaces";
+    }
+    return;
+  }
+   if (inputValue.length > 63) {
+    if (fieldType === "form_name") {
+      formNameError.value = "Name cannot exceed 63 characters";
+    } else if (fieldType === "form_short_name") {
+      formShortNameError.value = "Short name cannot exceed 63 characters";
     }
     return;
   }

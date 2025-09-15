@@ -7,7 +7,7 @@
     <div class="container">
       <div v-if="blockArr.length" class="position-relative">
         <div class="requestPreviewDiv" ref="mainBlockRef">
-          <div class="d-flex justify-content-center align-items-center px-3 py-2 ">
+          <div class="d-flex justify-content-center align-items-center px-3 pb-2 ">
             <h5 class="card-title responsive-title">{{ checkingIs_linked.form_name }}</h5>
            
            
@@ -1349,8 +1349,52 @@ function linked_id_adding_method(name) {
 .requestPreviewDiv {
   height: 80vh;
   overflow-y: auto;
-  padding: 20px 0px;
+  padding: 0px 0px 20px 0px;
 }
+.requestPreviewDiv {
+  overflow: auto;
+}
+
+/* WebKit Browsers */
+.requestPreviewDiv::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+/* Track */
+.requestPreviewDiv::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 5px rgb(216, 216, 216);
+  border-radius: var(--border-radius-lg);
+  margin-top: 15px;
+  background: transparent; /* keep it clean */
+}
+
+/* Thumb hidden by default */
+.requestPreviewDiv::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: var(--border-radius-lg);
+}
+
+/* Show styled thumb on hover */
+.requestPreviewDiv:hover::-webkit-scrollbar-thumb {
+  background: #e2e2e2;
+}
+
+/* Thumb hover effect */
+.requestPreviewDiv:hover::-webkit-scrollbar-thumb:hover {
+  background: var(--black-color);
+}
+
+/* Firefox */
+.requestPreviewDiv {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent; /* hidden by default */
+}
+
+.requestPreviewDiv:hover {
+  scrollbar-color: #e2e2e2 transparent; /* visible on hover */
+}
+
 
 .raiserequestBtnDiv {
   position: sticky;
