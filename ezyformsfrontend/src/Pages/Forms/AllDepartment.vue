@@ -461,130 +461,218 @@ watch(
 );
 
 // Handle updating the current value
-// Handle updating the current value
-const PaginationUpdateValue = (itemsPerPage) => {
-  filterObj.value.limitPageLength = itemsPerPage;
-  filterObj.value.limit_start = 0;
+// // Handle updating the current value
+// const PaginationUpdateValue = (itemsPerPage) => {
+//   filterObj.value.limitPageLength = itemsPerPage;
+//   filterObj.value.limit_start = 0;
 
-  fetchDepartmentDetails(); // always uses current filterObj.value.filters
-};
+//   fetchDepartmentDetails(); // always uses current filterObj.value.filters
+// };
 
-// Handle updating the limit start
-const PaginationLimitStart = ([itemsPerPage, start]) => {
-  filterObj.value.limitPageLength = itemsPerPage;
-  filterObj.value.limit_start = start;
+// // Handle updating the limit start
+// const PaginationLimitStart = ([itemsPerPage, start]) => {
+//   filterObj.value.limitPageLength = itemsPerPage;
+//   filterObj.value.limit_start = start;
 
-  fetchDepartmentDetails();
-};
+//   fetchDepartmentDetails();
+// };
 
 
 
 const timeout = ref(null);
 
+// function inLineFiltersData(searchedData) {
+//   clearTimeout(timeout.value);
+
+//   timeout.value = setTimeout(() => {
+//     filterObj.value.filters = [];
+
+//     // Special handling
+//     if (searchedData.form_status === 'Active') {
+//       filterObj.value.filters.push(["form_status", "like", "Created"]);
+//     } else if (searchedData.form_status === 'Retired') {
+//       filterObj.value.filters.push(["form_status", "like", "Draft"]);
+//     }
+
+//     if (searchedData.enable === 'Enabled') {
+//       filterObj.value.filters.push(["enable", "=", 1]);
+//     } else if (searchedData.enable === 'Disabled') {
+//       filterObj.value.filters.push(["enable", "=", 0]);
+//     }
+
+//     // Other filters
+//     tableheaders.value.forEach((header) => {
+//       const key = header.td_key;
+//       const value = searchedData[key];
+//       if (key === 'form_status' || key === 'enable') return;
+
+//       if (value) {
+//         filterObj.value.filters.push([key, "like", `%${value}%`]);
+//       }
+//     });
+
+//     // Reset pagination
+//     filterObj.value.limit_start = 0;
+//     filterObj.value.limitPageLength = 20;
+
+//     fetchDepartmentDetails();
+//   }, 500);
+// }
+
+// // Fetch department details function
+// function fetchDepartmentDetails() {
+//   // Base filters (fresh every time)
+//   let filters = [
+//     ["business_unit", "=", `${newBusinessUnit.value.business_unit}`],
+//     ["form_status", "like", "Created"],  // fixed case
+//     ["accessible_departments", "like", `%${userDept.value}%`]
+//   ];
+
+//   // Add owner filter if needed
+//   if (props.id && props.id !== "allforms") {
+//     filters.push(["owner_of_the_form", "=", props.id]);
+//   }
+
+//   // Inline filters: override base if same key, otherwise append
+//   if (filterObj.value.filters.length) {
+//     const inline = filterObj.value.filters;
+
+//     // Filter out duplicates: keep inline over base
+//     filters = filters.filter(([key]) => {
+//       return !inline.some(([inlineKey]) => inlineKey === key);
+//     });
+
+//     filters.push(...inline);
+//   }
+
+//   // Replace instead of pushing duplicates
+//   filterObj.value.filters = filters;
+
+//   const queryParams = {
+//     fields: JSON.stringify(["*"]),
+//     limit_page_length: filterObj.value.limitPageLength,
+//     limit_start: filterObj.value.limit_start,
+//     filters: JSON.stringify(filterObj.value.filters),
+//     order_by: "`tabEzy Form Definitions`.`enable` DESC, `tabEzy Form Definitions`.`creation` DESC"
+//   };
+
+//   const queryParamsCount = {
+//     fields: JSON.stringify(["count(name) AS total_count"]),
+//     limitPageLength: "None",
+//     filters: JSON.stringify(filterObj.value.filters),
+//   };
+
+//   // Count query
+//   axiosInstance.get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParamsCount })
+//     .then((res) => {
+//       totalRecords.value = res.data[0].total_count;
+//     })
+//     .catch((error) => {
+//       console.error("Error fetching ezyForms data:", error);
+//     });
+
+//   // Data query
+//   axiosInstance.get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParams })
+//     .then((response) => {
+//       if (filterObj.value.limit_start === 0) {
+//         tableData.value = response.data;
+//         formCategory.value = [...new Set(tableData.value.map((form) => form.form_category))];
+//       } else {
+//         tableData.value = tableData.value.concat(response.data);
+//       }
+//     })
+//     .catch((error) => {
+//       console.error("Error fetching department details:", error);
+//     });
+// }
+
+
+function fetchDepartmentDetails() {
+  if (props.id && props.id !== "allforms") {
+    filterObj.value.filters.push(["owner_of_the_form", "=", props.id]);
+  }
+
+  if (filterObj.value.filters.length) {
+    const inline = filterObj.value.filters;
+
+    filterObj.value.filters = filterObj.value.filters.filter(([key]) => {
+      return !inline.some(([inlineKey]) => inlineKey === key);
+    });
+
+    filterObj.value.filters.push(...inline);
+  }
+  
+  const payload = {
+    // employee: selectedData.value.EmpId,
+    // department: selectedData.value.DeptName,
+    // ...(activeTab.value === 'raised' && { requested_by_me: "1" }),
+    // ...(activeTab.value === 'approved' && { approved_by_me: "1" }), 
+    filters: filterObj.value.filters,
+  }
+  
+  axiosInstance
+    .post(apis.GetAccessibleDeptForms, payload)
+    .then((response) => {
+      fullData.value = response.message || [];
+
+      // Initially filteredData = fullData
+      filteredData.value = [...fullData.value];
+
+      totalRecords.value = filteredData.value.length;
+      filterObj.value.limit_start = 0;
+      tableData.value = filteredData.value.slice(0, filterObj.value.limitPageLength);
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+}
+
+function paginateData(filtered = filteredData.value) {
+  const paginated = filtered.slice(filterObj.value.limit_start, filterObj.value.limit_start + filterObj.value.limitPageLength);
+  tableData.value = paginated;
+  totalRecords.value = filtered.length;
+}
+
 function inLineFiltersData(searchedData) {
   clearTimeout(timeout.value);
 
   timeout.value = setTimeout(() => {
-    filterObj.value.filters = [];
-
-    // Special handling
-    if (searchedData.form_status === 'Active') {
-      filterObj.value.filters.push(["form_status", "like", "Created"]);
-    } else if (searchedData.form_status === 'Retired') {
-      filterObj.value.filters.push(["form_status", "like", "Draft"]);
-    }
-
-    if (searchedData.enable === 'Enabled') {
-      filterObj.value.filters.push(["enable", "=", 1]);
-    } else if (searchedData.enable === 'Disabled') {
-      filterObj.value.filters.push(["enable", "=", 0]);
-    }
-
-    // Other filters
-    tableheaders.value.forEach((header) => {
-      const key = header.td_key;
-      const value = searchedData[key];
-      if (key === 'form_status' || key === 'enable') return;
-
-      if (value) {
-        filterObj.value.filters.push([key, "like", `%${value}%`]);
-      }
+    filteredData.value = fullData.value.filter((row) => {
+      return tableheaders.value.every((header) => {
+        const key = header.td_key;
+        if (searchedData[key]) {
+          return String(row[key] || "").toLowerCase().includes(String(searchedData[key]).toLowerCase());
+        }
+        return true;
+      });
     });
 
-    // Reset pagination
-    filterObj.value.limit_start = 0;
+    totalRecords.value = filteredData.value.length;
     filterObj.value.limitPageLength = 20;
+    filterObj.value.limit_start = 0;
 
-    fetchDepartmentDetails();
+    tableData.value = filteredData.value.slice(0, filterObj.value.limitPageLength);
   }, 500);
 }
 
-// Fetch department details function
-function fetchDepartmentDetails() {
-  // Base filters (fresh every time)
-  let filters = [
-    ["business_unit", "=", `${newBusinessUnit.value.business_unit}`],
-    ["form_status", "like", "Created"],  // fixed case
-    ["accessible_departments", "like", `%${userDept.value}%`]
-  ];
-
-  // Add owner filter if needed
-  if (props.id && props.id !== "allforms") {
-    filters.push(["owner_of_the_form", "=", props.id]);
-  }
-
-  // Inline filters: override base if same key, otherwise append
-  if (filterObj.value.filters.length) {
-    const inline = filterObj.value.filters;
-
-    // Filter out duplicates: keep inline over base
-    filters = filters.filter(([key]) => {
-      return !inline.some(([inlineKey]) => inlineKey === key);
-    });
-
-    filters.push(...inline);
-  }
-
-  // Replace instead of pushing duplicates
-  filterObj.value.filters = filters;
-
-  const queryParams = {
-    fields: JSON.stringify(["*"]),
-    limit_page_length: filterObj.value.limitPageLength,
-    limit_start: filterObj.value.limit_start,
-    filters: JSON.stringify(filterObj.value.filters),
-    order_by: "`tabEzy Form Definitions`.`enable` DESC, `tabEzy Form Definitions`.`creation` DESC"
-  };
-
-  const queryParamsCount = {
-    fields: JSON.stringify(["count(name) AS total_count"]),
-    limitPageLength: "None",
-    filters: JSON.stringify(filterObj.value.filters),
-  };
-
-  // Count query
-  axiosInstance.get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParamsCount })
-    .then((res) => {
-      totalRecords.value = res.data[0].total_count;
-    })
-    .catch((error) => {
-      console.error("Error fetching ezyForms data:", error);
-    });
-
-  // Data query
-  axiosInstance.get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParams })
-    .then((response) => {
-      if (filterObj.value.limit_start === 0) {
-        tableData.value = response.data;
-        formCategory.value = [...new Set(tableData.value.map((form) => form.form_category))];
-      } else {
-        tableData.value = tableData.value.concat(response.data);
-      }
-    })
-    .catch((error) => {
-      console.error("Error fetching department details:", error);
-    });
+function PaginationUpdateValue(newLimit) {
+  filterObj.value.limitPageLength = newLimit;
+  filterObj.value.limit_start = 0;
+  paginateData();
 }
+
+function PaginationLimitStart() {
+  filterObj.value.limit_start += filterObj.value.limitPageLength;
+  const nextBatch = filteredData.value.slice(filterObj.value.limit_start, filterObj.value.limit_start + filterObj.value.limitPageLength);
+  tableData.value = [...tableData.value, ...nextBatch];
+}
+
+
+
+
+
+
+
 
 // // Handle updating the current value
 // const PaginationUpdateValue = (itemsPerPage) => {

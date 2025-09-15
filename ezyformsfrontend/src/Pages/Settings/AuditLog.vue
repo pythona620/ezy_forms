@@ -323,7 +323,7 @@ function activitylog(data) {
     filterObj.value.filters.push(["ref_doctype", "in", activityDoctypes.value]);
 
     const queryParams = {
-        fields: JSON.stringify(["*"]),
+        fields: JSON.stringify(["docname","ref_doctype","modified_by","modified","data"]),
         filters: JSON.stringify(filterObj.value.filters),
         limit_page_length: filterObj.value.limitPageLength,
         limit_start: filterObj.value.limit_start,

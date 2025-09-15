@@ -181,7 +181,7 @@ function EmailQueueData() {
     // }
 
     const queryParams = {
-        fields: JSON.stringify(["*"]),
+        fields: JSON.stringify(["name","message","sender","creation","status"]),
         filters: JSON.stringify(filterObj.value.filters),
         limit_page_length: filterObj.value.limitPageLength,
         limit_start: filterObj.value.limit_start,
@@ -237,7 +237,6 @@ function viewPreview(data, type) {
         .then((res) => {
             if (res.data) {
                 emailsData.value = res.data.recipients;
-                console.log("emailsData.value", emailsData.value);
                 const modal = new bootstrap.Modal(document.getElementById('CreateDesignationModal'), {});
                 modal.show();
             }
@@ -245,68 +244,6 @@ function viewPreview(data, type) {
         .catch((error) => {
             console.error("Error fetching system settings:", error);
         });
-}
-
-
-
-
-
-function checkDesignation() {
-    const queryParams = {
-        fields: JSON.stringify(["role"]),
-        limit_page_length: "none",
-        order_by: "`tabWF Roles`.`creation` desc"
-    };
-    axiosInstance.get(apis.resource + doctypes.designations, { params: queryParams })
-        .then((res) => {
-            if (res.data) {
-                checkEmailQueueData.value = res.data;
-            }
-        })
-        .catch((error) => {
-            console.error("Error fetching designations data:", error);
-        });
-}
-
-function validateDesignation() {
-    const invalidCharRegex = /[^a-zA-Z .]/;
-
-    if (!Designation.value.trim()) {
-        errorMessage.value = 'Designation is required';
-    } else if (invalidCharRegex.test(Designation.value)) {
-        errorMessage.value = 'Only letters, spaces, and dot (.) are allowed';
-    } else if (
-        checkEmailQueueData.value.some(
-            item => item.role?.toLowerCase() === Designation.value.trim().toLowerCase()
-        )
-    ) {
-        errorMessage.value = 'This designation already exists';
-    } else {
-        errorMessage.value = '';
-    }
-}
-
-function SubmitDesignation() {
-    if (!errorMessage.value && Designation.value.trim()) {
-        const payload = {
-            role_name: Designation.value.trim(),
-        }
-        axiosInstance
-            .post(apis.resource + doctypes.roles, payload)
-            .then((response) => {
-                if (response) {
-                    //console.log(response);
-                    EmailQueueData();
-                    resetDesignation();
-                    toast.success("Designation Created Successfully", { autoClose: 1000 });
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('CreateDesignationModal'));
-                    modal.hide();
-                }
-            })
-            .catch((err) => {
-                console.error('Error creating role:', err)
-            })
-    }
 }
 
 

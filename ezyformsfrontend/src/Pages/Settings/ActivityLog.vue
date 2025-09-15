@@ -214,7 +214,7 @@ function activitylog(data) {
     }
 
     const queryParams = {
-        fields: JSON.stringify(["*"]),
+        fields: JSON.stringify(["name","full_name","user","subject","communication_date","ip_address","status"]),
         filters: JSON.stringify(filterObj.value.filters),
         limit_page_length: filterObj.value.limitPageLength,
         limit_start: filterObj.value.limit_start,

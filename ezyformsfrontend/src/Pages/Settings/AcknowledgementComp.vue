@@ -349,7 +349,7 @@ function activitylog(data) {
     }
 
     const queryParams = {
-        fields: JSON.stringify(["*"]),
+        fields: JSON.stringify(["name","acknowledgement","naming_series","enable"]),
         filters: JSON.stringify(filterObj.value.filters),
         limit_page_length: filterObj.value.limitPageLength,
         limit_start: filterObj.value.limit_start,
