@@ -1310,11 +1310,11 @@
 
 
                                       </td>
-                                      <td v-if="blockIndex !== 0 || props.readonlyFor !== 'true'"
+                                     <td v-if="blockIndex !== 0 || props.readonlyFor !== 'true' || blockIndex > currentLevel " width="3%"
                                         class="d-table-cell text-center align-middle removeRowTd">
 
-                                        <span v-if="props.readonlyFor !== 'true'" class="tableRowRemoveBtn "
-                                          :class="blockIndex !== 0 && blockIndex < currentLevel ? 'd-none' : null"
+                                        <span v-if="blockIndex !== 0 || props.readonlyFor !== 'true'" width="3%" class="tableRowRemoveBtn "
+                                          :class="blockIndex !== 0 && blockIndex < currentLevel ? 'd-none' : 'd-none'"
                                           @click="removeRow(tableName, index)">
                                           <i class="bi bi-x-lg "></i>
                                         </span>
