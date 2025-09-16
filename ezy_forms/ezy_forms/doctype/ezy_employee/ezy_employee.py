@@ -80,6 +80,8 @@ class EzyEmployee(Document):
 			"first_name": self.emp_name.split(" ")[0],
 			"send_welcome_email":  0
 		})
+		if self.is_admin:
+			user_doc.append("roles", {"role": "System Manager"})
 		if self.designation:
 			user_doc.append("roles", {"role": self.designation})
 		time.sleep(2) 
