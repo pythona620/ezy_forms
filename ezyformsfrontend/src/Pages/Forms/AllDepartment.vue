@@ -586,38 +586,51 @@ const timeout = ref(null);
 //     });
 // }
 
+const fullData = ref([]);
+const filteredData = ref([]);
 
 function fetchDepartmentDetails() {
+  const userDetails = JSON.parse(localStorage.getItem('employeeData'));
+
+const payload = {
+  designation: userDetails.designation || "",
+  property: `${newBusinessUnit.value.business_unit}`,
+  fields: ["accessible_departments","active","business_unit","count",
+    "creation",
+    "docstatus",
+    "enable",
+    "form_category",
+    "form_department",
+    "form_json",
+    "form_name",
+    "form_short_name",
+    "form_status",
+    "has_workflow",
+    "idx",
+    "is_landscape",
+    "is_linked",
+    "is_linked_form",
+    "is_predefined_doctype",
+    "modified",
+    "modified_by",
+    "name",
+    "owner",
+    "owner_of_the_form",
+    "print_format",
+    "series",
+    "workflow_check"
+  ],
+};
+
   if (props.id && props.id !== "allforms") {
-    filterObj.value.filters.push(["owner_of_the_form", "=", props.id]);
+    payload.department = props.id;
   }
 
-  if (filterObj.value.filters.length) {
-    const inline = filterObj.value.filters;
-
-    filterObj.value.filters = filterObj.value.filters.filter(([key]) => {
-      return !inline.some(([inlineKey]) => inlineKey === key);
-    });
-
-    filterObj.value.filters.push(...inline);
-  }
-  
-  const payload = {
-    // employee: selectedData.value.EmpId,
-    // department: selectedData.value.DeptName,
-    // ...(activeTab.value === 'raised' && { requested_by_me: "1" }),
-    // ...(activeTab.value === 'approved' && { approved_by_me: "1" }), 
-    filters: filterObj.value.filters,
-  }
-  
   axiosInstance
     .post(apis.GetAccessibleDeptForms, payload)
     .then((response) => {
       fullData.value = response.message || [];
-
-      // Initially filteredData = fullData
       filteredData.value = [...fullData.value];
-
       totalRecords.value = filteredData.value.length;
       filterObj.value.limit_start = 0;
       tableData.value = filteredData.value.slice(0, filterObj.value.limitPageLength);
@@ -797,7 +810,6 @@ onMounted(() => {
 
   const userData = JSON.parse(localStorage.getItem('employeeData'));
   is_admin.value = userData.is_admin || '';
-  userDept.value=userData.department;
 
   if (is_admin.value == 1) {
     isEnable.value = "true";
