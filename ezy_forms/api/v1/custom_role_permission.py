@@ -48,8 +48,18 @@ def assign_custom_permissions_job(role_name):
                 frappe.db.commit()
 
             frappe.set_user("Administrator")
-            get_standard_permissions(doc_name)
-            reset(doc_name)
-            get_permissions(role=role_name, doctype=doc_name)
+            try:
+                try:
+                    get_standard_permissions(doc_name)
+                except OSError as e:
+                    if "missing" in str(e):
+                        frappe.log_error(message=f"Skipped missing JSON for {doc_name}", title="permission skip")
+                    else:
+                        raise
+                reset(doc_name)
+                get_permissions(role=role_name, doctype=doc_name)
+            except Exception as ex:
+                frappe.log_error(message=f"{str(ex)}", title="permission creation error")
+
 
     return f"Custom permissions assigned to role: {role_name}"
