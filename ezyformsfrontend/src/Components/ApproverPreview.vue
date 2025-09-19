@@ -303,19 +303,29 @@
 
                           <!-- ✅ View Attachments Label for All Other Fields -->
                           <template v-else-if="field.value && field.value.length">
-                             <span
-                                  class="cursor-pointer font-12 d-inline-flex align-items-center mt-1 gap-1"
-                                  @click="openAttachmentList(field.value,blockIndex)"
-                                >
-                                  <span class="text-dark text-decoration-underline label-text ">View</span>
-                                  <span>({{ field.value.split('|').filter(f => f.trim()).length }})</span>
-                                  <i
-                                    class="bi bi-paperclip text-secondary "
-                                    style="transform: rotate(-20deg) translateY(-1px); display: inline-block;"
-                                  ></i>
-                                </span>
-                          </template>
-</div>
+                                    <span
+                                        class="cursor-pointer font-12 d-inline-flex align-items-center mt-1 gap-1"
+                                        @click="openAttachmentList(field.value, blockIndex)"
+                                      >
+                                        <span class="text-dark text-decoration-underline label-text">View</span>
+                                        <span>({{ field.value.split('|').filter(f => f.trim()).length }})</span>
+                                        <i
+                                          class="bi bi-paperclip text-secondary"
+                                          style="transform: rotate(-20deg) translateY(-1px); display: inline-block;"
+                                        ></i>
+
+                                        <!-- ✅ Show Seen Label -->
+                                        <span
+                                          v-if="isFieldSeen(field)"
+                                          class=" font-10"
+                                          
+                                        >
+                                         <i class="bi bi-check2-circle fs-6 fw-bold text-success" style="text-shadow: 0 0 1px currentColor, 0 0 1px currentColor;"></i>
+                                        </span>
+                                      </span>
+
+                                   </template>
+                                </div>
                           <!-- ✅ View Attachments Label for All Other Fields -->
                           <!-- <template v-else-if="field.value && field.value.length"> 
                             <template v-if=" 
@@ -381,12 +391,22 @@
                                         </span>
                                       </span>
                                       <div class="d-flex gap-2">
-                                        <button class="btn btn-sm font-13 btn-light"
-                                          @click="previewAttachment(url)">Show</button>
-                                       <button class="btn btn-sm font-13 btn-light"
-  @click="downloadAttachment(url, getFilename(url))">
-  Download
-</button>
+                                        <span
+                                          class="fs-6 d-flex align-items-center"
+                                          :class="previewedAttachments.has(url) ? 'text-success' : 'text-secondary'"
+                                          style="border-radius: 5px;"
+                                        >
+                                          <i
+                                            class="bi bi-check2-circle"
+                                            :style="previewedAttachments.has(url) ? 'font-weight: 900; -webkit-text-stroke: 1px;' : 'font-size: 12px;'"
+                                          ></i>
+                                        </span>
+                                                                                <button class="btn btn-sm font-13 btn-light"
+                                                                                  @click="previewAttachment(url)">Show</button>
+                                                                              <button class="btn btn-sm font-13 btn-light"
+                                          @click="downloadAttachment(url, getFilename(url))">
+                                          Download
+                                        </button>
                                         
                                        <button v-if="props.readonlyFor === 'true' || currentBlockIndex !== 0 || currentBlockIndex < currentLevel" :class="{ 'disabled d-none': props.readonlyFor === 'true' || currentBlockIndex === 0 || currentBlockIndex < currentLevel }"
                                   class="btn btn-sm btn-outline-dark rounded-circle" @click="removeFile(i, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)">
@@ -2122,26 +2142,23 @@ const fieldErrors = ref({});
 const allFieldsFilled = computed(() => {
   if (!props.blockArr || props.blockArr.length === 0) return false;
 
-  // Only check the block that matches currentLevel
   const currentBlock = props.blockArr[props.currentLevel];
-  if (!currentBlock) return false;
+  if (!currentBlock || !currentBlock.sections) return false;
 
-  for (const section of currentBlock.sections) {
-    for (const row of section.rows) {
-      for (const column of row.columns) {
-        for (const field of column.fields) {
+  for (const section of currentBlock.sections || []) {
+    for (const row of section.rows || []) {
+      for (const column of row.columns || []) {
+        for (const field of column.fields || []) {
           
-          // Required field check
+          // ✅ Check required fields only in current level
           if (field.reqd === 1 && (!field.value || field.value.toString().trim() === "")) {
-            
             return false;
           }
+
           const rowKey = row.__row_id || row.id || row._temp_id;
           const fieldError = fieldErrors.value[rowKey]?.[field.fieldname];
 
-          // Field error check
           if (fieldError) {
-            
             return false;
           }
         }
@@ -2149,8 +2166,41 @@ const allFieldsFilled = computed(() => {
     }
   }
 
-  return true; // All required fields filled for current block
+  return true; // ✅ All required fields filled for current block only
 });
+
+// const allFieldsFilled = computed(() => {
+//   if (!props.blockArr || props.blockArr.length === 0) return false;
+
+//   // Only check the block that matches currentLevel
+//   const currentBlock = props.blockArr[props.currentLevel];
+//   if (!currentBlock) return false;
+
+//   for (const section of currentBlock.sections) {
+//     for (const row of section.rows) {
+//       for (const column of row.columns) {
+//         for (const field of column.fields) {
+          
+//           // Required field check
+//           if (field.reqd === 1 && (!field.value || field.value.toString().trim() === "")) {
+            
+//             return false;
+//           }
+//           const rowKey = row.__row_id || row.id || row._temp_id;
+//           const fieldError = fieldErrors.value[rowKey]?.[field.fieldname];
+
+//           // Field error check
+//           if (fieldError) {
+            
+//             return false;
+//           }
+//         }
+//       }
+//     }
+//   }
+
+//   return true; // All required fields filled for current block
+// });
 
 // Watch `allFieldsFilled` and emit value
 
@@ -2430,46 +2480,40 @@ const previewedAttachments = ref(new Set());
 //   allAttachments.value = attachments;
 //   console.log(allAttachments.value,"allAttachments.value");
 // }
+
 function collectAllAttachments(blocks) {
   const attachments = [];
 
-  (blocks || []).forEach((block) => {
+  (blocks || []).forEach((block, blockIndex) => {
+    // 🚫 Skip the current level block
+    if (String(blockIndex) === String(props.currentLevel)) {
+      return;
+    }
+
     (block.sections || []).forEach((section) => {
       (section.rows || []).forEach((row) => {
         (row.columns || []).forEach((column) => {
           (column.fields || []).forEach((field) => {
-              console.log("Attach field =>", field.label, "| fieldtype =>", field.fieldtype, "| value =>", field.value);
- 
+            // console.log("Attach field =>",field.label,"| fieldtype =>",field.fieldtype,"| value =>",field.value);
 
-            // ✅ Normal Attach fields
-            if (
-              field.fieldtype === "Attach" &&
-              field.value &&
-              !["Requestor Signature", " Approved By", "Acknowledged By"].includes(field.label) 
-            ) {
-              console.log("condition checked", field.label); 
-              field.value
+            if (field.fieldtype === "Attach" && field.value) {
+              const files = field.value
                 .split("|")
                 .map((f) => f.trim())
-                .filter((f) => f)
-                .forEach((f) => attachments.push(f));
-            }
+                .filter((f) => f);
 
-            // ✅ Table fields (child rows)
-            // if (field.fieldtype === "Table" && Array.isArray(field.value)) {
-              
-            //   field.value.forEach((childRow) => {
-            //     console.log(childRow,"childrows");
-            //     Object.values(childRow || {}).forEach((val) => {
-            //       if (typeof val === "string" && val.includes(".")) {
-            //         val.split("|")
-            //           .map((f) => f.trim())
-            //           .filter((f) => f)
-            //           .forEach((f) => attachments.push(f));
-            //       }
-            //     });
-            //   });
-            // }
+              // ✅ Normal Attachments (require preview)
+              if (
+                !["Requestor Signature", "Approved By", "Acknowledged By"].includes(
+                  field.label
+                )
+              ) {
+                attachments.push(...files);
+              } else {
+                // ✅ Auto-mark these as previewed
+                files.forEach((f) => previewedAttachments.value.add(f));
+              }
+            }
           });
         });
       });
@@ -2477,8 +2521,14 @@ function collectAllAttachments(blocks) {
   });
 
   allAttachments.value = attachments;
-  // console.log("allAttachments.value =>", allAttachments.value);
+
+  // ✅ Check if attachments are already all previewed
+  const allPreviewed = allAttachments.value.every((f) =>
+    previewedAttachments.value.has(f)
+  );
+  emit("attachmentsReady", allPreviewed);
 }
+
 
 /**
  * Watch the incoming data
@@ -2519,6 +2569,17 @@ function previewAttachment(url) {
   );
   // console.log(previewedAttachments.value,"previewedAttachments");
   emit("attachmentsReady", allPreviewed);
+}
+function isFieldSeen(field) {
+  if (!field.value) return false;
+
+  const files = field.value
+    .split("|")
+    .map((f) => f.trim())
+    .filter((f) => f);
+
+  // Check if every file in this field has been previewed
+  return files.every((f) => previewedAttachments.value.has(f));
 }
 
 // function previewAttachment(url) {

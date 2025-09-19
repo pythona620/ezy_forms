@@ -873,14 +873,14 @@ const attachmentsReady = ref(false);
 const handleApprove = () => {
   console.log(attachmentsReady.value);
   if (!attachmentsReady.value) {
-    toast.info("⚠️ Please preview all attachments before approving", { 
-      autoClose: 1500, 
-      transition: "zoom" 
+    toast("⚠️ Please preview all attachments before approving", { 
+      transition: "zoom",
+      theme: "auto",
     });
     return;
   }
 
-  loading.value = true;
+
   ApproverFormSubmission(emittedFormData, "Approve");
 }; 
 
@@ -1132,12 +1132,12 @@ async function ApproverFormSubmission(dataObj, type) {
   //   return; // Stop execution
   // }
 if (!isFormValid.value) {
-    toast.error("Please Fill All Mandatory Fields",{autoClose:700});
+    toast.error("Please Fill All Mandatory Fields");
     return;
   }
 
  if (!isAcknowledgementValid.value) {
-      toast.error("Acknowledgement is required.", { autoClose: 700 });
+      toast.error("Acknowledgement is required.");
       return;
   }
   // isCommentsValid.value = true;
@@ -1159,24 +1159,25 @@ if (!isFormValid.value) {
   //   loading.value = false;
   //   return;
   // }
-  toast.success("All files Viewed")
+  // toast.info("Submitting form...", { autoClose: 500, transition: "zoom" });
+
 
  
-  // axiosInstance
-  //   .put(`${apis.resource}${selectedData.value.doctype_name}/${doctypeForm.value.name}`, form)
-  //   .then((response) => {
-  //     if (response?.data) {
-  //       approvalStatusFn(dataObj, type);
-  //     } else {
-  //       loading.value = false; // Stop loader on failure
-  //       toast.error("Failed to submit form", { autoClose: 1000, transition: "zoom" });
-  //     }
-  //   })
-  //   .catch((error) => {
-  //     console.error("Error submitting form:", error);
-  //     loading.value = false; // Stop loader on error
-  //     toast.error("An error occurred while submitting the form.", { autoClose: 1000, transition: "zoom" });
-  //   });
+  axiosInstance
+    .put(`${apis.resource}${selectedData.value.doctype_name}/${doctypeForm.value.name}`, form)
+    .then((response) => {
+      if (response?.data) {
+        approvalStatusFn(dataObj, type);
+      } else {
+        loading.value = false; // Stop loader on failure
+        toast.error("Failed to submit form", { autoClose: 1000, transition: "zoom" });
+      }
+    })
+    .catch((error) => {
+      console.error("Error submitting form:", error);
+      loading.value = false; // Stop loader on error
+      toast.error("An error occurred while submitting the form.", { autoClose: 1000, transition: "zoom" });
+    });
 }
 
 
