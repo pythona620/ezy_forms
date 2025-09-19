@@ -17,7 +17,6 @@ def side_nav_department_and_forms(business_unit):
         (business_unit,),
         as_list=True
     )
-    print("departments_raw", departments_raw)
     departments = [d[0] for d in departments_raw if d[0]]
 
     if not departments:
