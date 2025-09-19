@@ -33,7 +33,7 @@
         <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" viewType="viewPdf" isCheckbox="true"
           @updateFilters="inLineFiltersData" :field-mapping="fieldMapping" @cell-click="viewPreview"
           isFiltersoption="true" :actions="actions" />
-        <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords"
+        <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords" :items-per-page="limit"
           @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
       </div>
 
@@ -45,7 +45,7 @@
 import GlobalTable from "../Components/GlobalTable.vue";
 import axiosInstance from "../shared/services/interceptor";
 import { apis } from "../shared/apiurls";
-import { onMounted, ref, computed } from "vue";
+import { onMounted, ref, computed, watch } from "vue";
 import { EzyBusinessUnit } from "../shared/services/business_unit";
 import PaginationComp from "../Components/PaginationComp.vue";
 import { useRoute, useRouter } from "vue-router";
@@ -86,12 +86,39 @@ const selectedData = ref({
   DeptName: route.query.Dept || "",
 });
 
-const activeTab = ref('raised')
+// const activeTab = ref('raised')
 
+// function switchTab(tab) {
+//   activeTab.value = tab
+//   ViewOnlyReport()
+// }
+const activeTab = ref(route.query.tab || "raised"); // default to "raised"
+
+// Function to switch tab
 function switchTab(tab) {
-  activeTab.value = tab
-  ViewOnlyReport()
+  activeTab.value = tab;
+
+  // Update query without reloading component
+  router.replace({
+    query: {
+      ...route.query, // keep other query params if any
+      tab: tab
+    }
+  });
+
+  ViewOnlyReport(); // your existing function
 }
+
+// Keep activeTab in sync when route query changes (like on refresh or navigation)
+watch(
+  () => route.query.tab,
+  (newTab) => {
+    if (newTab) {
+      console.log(route);
+      activeTab.value = newTab;
+    }
+  }
+);
 
 function ViewOnlyReport() {
   const payload = {

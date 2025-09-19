@@ -393,6 +393,7 @@
 <script setup>
 // import ButtonComp from "./ButtonComp.vue";
 import { defineProps, defineEmits, ref, onMounted, watch, reactive } from "vue";
+import { useRoute } from "vue-router";
 // import moment from "moment";
 // import FormFields from "./FormFields.vue";
 const props = defineProps({
@@ -455,7 +456,7 @@ const props = defineProps({
 
   }
 });
-
+const route = useRoute();
 const emits = defineEmits(["actionClicked", "updateFilters", "cell-click", "toggle-click", "actionClickedDropDown"]);
 
 function selectedAction(row, action) {
@@ -671,9 +672,10 @@ function selectedCheckList(row, index) {
   // console.log("Selected Data:", selectedData);
   emits("checkbox-click", row, index);
 }
+// filters state
 const filters = ref(
   props.tHeaders.reduce((acc, column) => {
-    acc[column.td_key] = ""; // Initialize with empty strings
+    acc[column.td_key] = "";
     return acc;
   }, {})
 );
@@ -732,6 +734,15 @@ onMounted(() => {
 function handleCellClick(check, index, type) {
   emits("cell-click", check, index, type);
 }
+watch(
+  () => route.fullPath,   // you can also use route.name or route.query if needed
+  () => {
+    filters.value = props.tHeaders.reduce((acc, column) => {
+      acc[column.td_key] = "";
+      return acc;
+    }, {});
+  }
+);
 // function formatDate(dateString) {
 // 	return moment(dateString).format("DD-MM-YYYY");
 // }
