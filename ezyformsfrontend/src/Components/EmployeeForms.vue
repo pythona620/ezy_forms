@@ -33,7 +33,7 @@
         <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" viewType="viewPdf" isCheckbox="true"
           @updateFilters="inLineFiltersData" :field-mapping="fieldMapping" @cell-click="viewPreview"
           isFiltersoption="true" :actions="actions" />
-        <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords" :items-per-page="limit"
+        <PaginationComp :currentRecords="tableData.length" :totalRecords="totalRecords" :items-per-page="filterObj.limitPageLength"
           @updateValue="PaginationUpdateValue" @limitStart="PaginationLimitStart" />
       </div>
 
@@ -119,6 +119,7 @@ watch(
     }
   }
 );
+const filterObj = ref({ limitPageLength: 20, limit_start: 0, filters: [] });
 
 function ViewOnlyReport() {
   const payload = {
@@ -136,16 +137,16 @@ function ViewOnlyReport() {
       filteredData.value = [...fullData.value];
 
       totalRecords.value = filteredData.value.length;
-      limitStart.value = 0;
-      tableData.value = filteredData.value.slice(0, limit.value);
+      filterObj.value.limit_start = 0;
+      tableData.value = filteredData.value.slice(0, filterObj.value.limitPageLength);
     })
     .catch((error) => {
       console.error(error);
     });
 }
 
-function paginateData(filtered = fullData.value) {
-  const paginated = filtered.slice(limitStart.value, limitStart.value + limit.value);
+function paginateData(filtered = filteredData.value) {
+  const paginated = filtered.slice(filterObj.value.limit_start, filterObj.value.limit_start + filterObj.value.limitPageLength);
   tableData.value = paginated;
   totalRecords.value = filtered.length;
 }
@@ -165,22 +166,22 @@ function inLineFiltersData(searchedData) {
     });
 
     totalRecords.value = filteredData.value.length;
-    limit.value = 20;
-    limitStart.value = 0;
+    filterObj.value.limitPageLength = 20;
+    filterObj.value.limit_start = 0;
 
-    tableData.value = filteredData.value.slice(0, limit.value);
+    tableData.value = filteredData.value.slice(0, filterObj.value.limitPageLength);
   }, 500);
 }
 
 function PaginationUpdateValue(newLimit) {
-  limit.value = newLimit;
-  limitStart.value = 0;
+  filterObj.value.limitPageLength = newLimit;
+  filterObj.value.limit_start = 0;
   paginateData();
 }
 
 function PaginationLimitStart() {
-  limitStart.value += limit.value;
-  const nextBatch = filteredData.value.slice(limitStart.value, limitStart.value + limit.value);
+  filterObj.value.limit_start += filterObj.value.limitPageLength;
+  const nextBatch = filteredData.value.slice(filterObj.value.limit_start, filterObj.value.limit_start + filterObj.value.limitPageLength);
   tableData.value = [...tableData.value, ...nextBatch];
 }
 
