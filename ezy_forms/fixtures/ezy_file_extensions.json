@@ -1,0 +1,9 @@
+[
+ {
+  "allowed_extensions": "TXT, MD, RTF, DOC, DOCX, ODT, PDF, TEX, XLS, XLSX, ODS, CSV, TSV, PPT, PPTX, ODP, KEY, MP3, WAV, FLAC, AAC, OGG, M4A, MP4, AVI, MOV, MKV, WMV, FLV, JPG, JPEG, PNG, GIF, BMP, TIFF, SVG, WEBP, ZIP, RAR, 7Z, TAR, GZ, BZ2, EXE, MSI, BAT, SH, APK, DMG, ISO, C, CPP, H, JAVA, PY, JS, TS, HTML, CSS, PHP, RB, GO, RS,xlsm,xlsm,MSG,msg,eml",
+  "docstatus": 0,
+  "doctype": "Ezy File Extensions",
+  "modified": "2025-09-19 16:01:33.898942",
+  "name": "Ezy File Extensions"
+ }
+]
