@@ -56,7 +56,7 @@
               <div class="position-relative ">
                 <div class="requestPreviewDiv pb-5">
 
-                  <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel"
+                  <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel"  @attachmentsReady="attachmentsReady = $event"
                     @updateTableData="approvalChildData" :childData="responseData" :readonly-for="selectedData.readOnly"
                     :childHeaders="tableHeaders" :employee-data="employeeData" @updateField="updateFormData"  @formValidation="isFormValid = $event"  @acknowledgementValidation="isAcknowledgementValid = $event"  />
                     <!-- @attachmentsReady="attachmentsReady = $event" -->
@@ -121,9 +121,17 @@
 
                         </div> -->
                         <div>
-                          <button :disabled="loading"  type="submit" class="btn btn-success approvebtn"
-                            @click.prevent="ApproverFormSubmission(emittedFormData, 'Approve')">
                             <!-- @click.prevent="handleApprove" -->
+                          <!-- <button :disabled="loading"  type="submit" class="btn btn-success approvebtn"
+                            @click.prevent="ApproverFormSubmission(emittedFormData, 'Approve')">
+                            <span v-if="loading" class="spinner-border spinner-border-sm" role="status"
+                              aria-hidden="true"></span>
+                            <span v-if="!loading"><i class="bi bi-check-lg font-15 me-2"></i><span
+                                class="font-12">Approve</span></span>
+                          </button> -->
+                          <button :disabled="loading"  type="submit" class="btn btn-success approvebtn"
+                            @click.prevent="handleApprove">
+                            
                             <span v-if="loading" class="spinner-border spinner-border-sm" role="status"
                               aria-hidden="true"></span>
                             <span v-if="!loading"><i class="bi bi-check-lg font-15 me-2"></i><span
@@ -859,21 +867,23 @@ function formatCreation(dateStr) {
 
 const ApprovePDF = ref(true)
 
-// const attachmentsReady = ref(false);
+const attachmentsReady = ref(false);
 
 // // Approve button click handler
-// const handleApprove = () => {
-//   if (!attachmentsReady.value) {
-//     toast.error("⚠️ Please preview all attachments before approving", { 
-//       autoClose: 1500, 
-//       transition: "zoom" 
-//     });
-//     return;
-//   }
+const handleApprove = () => {
+  console.log(attachmentsReady.value);
+  if (!attachmentsReady.value) {
+    toast("⚠️ Please preview all attachments before approving", { 
+      transition: "zoom",
+      theme: "auto",
+    });
+    return;
+  }
 
-//   loading.value = true;
-//   ApproverFormSubmission(emittedFormData, "Approve");
-// }; 
+
+  ApproverFormSubmission(emittedFormData, "Approve");
+}; 
+
 // Format the date for display
 // const formatDate = (dateString) => {
 //   if (!dateString) return "N/A";
@@ -1122,12 +1132,12 @@ async function ApproverFormSubmission(dataObj, type) {
   //   return; // Stop execution
   // }
 if (!isFormValid.value) {
-    toast.error("Please Fill All Mandatory Fields",{autoClose:700});
+    toast.error("Please Fill All Mandatory Fields");
     return;
   }
 
  if (!isAcknowledgementValid.value) {
-      toast.error("Acknowledgement is required.", { autoClose: 700 });
+      toast.error("Acknowledgement is required.");
       return;
   }
   // isCommentsValid.value = true;
@@ -1149,8 +1159,10 @@ if (!isFormValid.value) {
   //   loading.value = false;
   //   return;
   // }
+  // toast.info("Submitting form...", { autoClose: 500, transition: "zoom" });
 
 
+ 
   axiosInstance
     .put(`${apis.resource}${selectedData.value.doctype_name}/${doctypeForm.value.name}`, form)
     .then((response) => {
