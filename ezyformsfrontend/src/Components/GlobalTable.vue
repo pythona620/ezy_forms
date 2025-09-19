@@ -679,6 +679,16 @@ const filters = ref(
     return acc;
   }, {})
 );
+
+watch(
+  () => route.fullPath,   // you can also use route.name or route.query if needed
+  () => {
+    filters.value = props.tHeaders.reduce((acc, column) => {
+      acc[column.td_key] = "";
+      return acc;
+    }, {});
+  }
+);
 // Handle filter change
 // function handleFilterChange() {
 //   const activeFilters = Object.fromEntries(

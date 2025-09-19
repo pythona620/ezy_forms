@@ -4,7 +4,7 @@ app_publisher = "bharath"
 app_description = "ezy_forms"
 app_email = "bharath@gmail.com"
 app_license = "mit"
-
+required_apps = ["ezy_flow", "forms_templates","insights"]
 # Apps
 # ------------------
 
@@ -267,6 +267,5 @@ override_whitelisted_methods = {
 # website_route_rules = [{'from_route': '/UserManagement/<path:app_path>', 'to_route': 'UserManagement'},]
 
 website_redirects = [
-    {"source": "/fr", "target": "/ezyformsfrontend"},
-    {"source": "/user", "target": "/UserManagement"}
+    {"source": "/fr", "target": "/ezyformsfrontend"}
 ]

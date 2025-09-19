@@ -49,6 +49,7 @@ import { onMounted, ref, computed, watch } from "vue";
 import { EzyBusinessUnit } from "../shared/services/business_unit";
 import PaginationComp from "../Components/PaginationComp.vue";
 import { useRoute, useRouter } from "vue-router";
+
 const router = useRouter();
 const route = useRoute();
 
@@ -86,13 +87,7 @@ const selectedData = ref({
   DeptName: route.query.Dept || "",
 });
 
-// const activeTab = ref('raised')
-
-// function switchTab(tab) {
-//   activeTab.value = tab
-//   ViewOnlyReport()
-// }
-const activeTab = ref(route.query.tab || "raised"); // default to "raised"
+const activeTab = ref("raised"); // default to "raised"
 
 // Function to switch tab
 function switchTab(tab) {
@@ -114,11 +109,11 @@ watch(
   () => route.query.tab,
   (newTab) => {
     if (newTab) {
-      console.log(route);
       activeTab.value = newTab;
     }
   }
 );
+
 const filterObj = ref({ limitPageLength: 20, limit_start: 0, filters: [] });
 
 function ViewOnlyReport() {
