@@ -153,7 +153,7 @@ const originalDepartmentCode = ref("");
 const originalDepartmentName = ref("");
 
 const filterObj = ref({
-    limitPageLength: 'None',
+    limitPageLength: 20,
     limit_start: 0
 });
 // Handle updating the current value
@@ -252,6 +252,7 @@ watch(
     },
     { immediate: true }
 );
+
 function actionCreated(rowData, actionEvent) {
         CreateDeprtModal()
     if (actionEvent.name === 'View Categories') {
@@ -375,18 +376,19 @@ function CreateDeprtModal() {
     ];
 
     const queryParams = {
-        fields: JSON.stringify(["name","department_name", "department_code","business_unit"]),
-        filters: JSON.stringify(filters),
-        limit_page_length: 'None',
+        fields: ["name","department_name", "department_code","business_unit"],
+        filters: filters,
+        limit_page_length: 999,
         limit_start: filterObj.value.limit_start,
+        doctype:doctypes.departments,
         order_by: "`tabEzy Departments`.`creation` desc"
     };
 
-    axiosInstance.get(apis.resource + doctypes.departments, { params: queryParams })
+    axiosInstance.post(apis.GetDoctypeData, queryParams)
         .then((res) => {
-            if (res.data) {
-                designiations.value = [...new Set(res.data.map((designation) => designation.department_name))];
-                departmenCodeData.value = [...new Set(res.data.map((designation) => designation.department_code))];
+            if (res.message.data) {
+                designiations.value = [...new Set(res.message.data.map((designation) => designation.department_name))];
+                departmenCodeData.value = [...new Set(res.message.data.map((designation) => designation.department_code))];
             }
         })
         .catch((error) => {
@@ -401,31 +403,20 @@ function deptData(data) {
     if (data) {
         filters.push(...data)
     }
-    const queryParams = {
-        fields: JSON.stringify(["name","department_code","department_name","business_unit"]),
-        filters: JSON.stringify(filters),
+    const payload = {
+        fields: ["name","department_code","department_name","business_unit"],
+        filters: filters,
         limit_page_length: filterObj.value.limitPageLength,
         limit_start: filterObj.value.limit_start,
+        doctype:doctypes.departments,
         order_by: "`tabEzy Departments`.`creation` desc"
     };
-    const queryParamsCount = {
-        fields: JSON.stringify(["count(name) AS total_count"]),
-        limitPageLength: "None",
-        filters: JSON.stringify(filters),
-    }
-    axiosInstance.get(`${apis.resource}${doctypes.departments}`, { params: queryParamsCount })
-        .then((res) => {
-            totalRecords.value = res.data[0].total_count
 
-        })
-        .catch((error) => {
-            console.error("Error fetching ezyForms data:", error);
-        });
-
-    axiosInstance.get(apis.resource + doctypes.departments, { params: queryParams })
+    axiosInstance.post(apis.GetDoctypeData, payload)
         .then((res) => {
-            if (res.data) {
-                tableData.value = res.data;
+            if (res) {
+                totalRecords.value=res.message.total_count;
+                tableData.value = res.message.data;
             }
         })
         .catch((error) => {

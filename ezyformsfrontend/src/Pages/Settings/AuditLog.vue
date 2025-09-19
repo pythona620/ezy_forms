@@ -278,15 +278,17 @@ const activityDoctypes=ref([])
 function activityData() {
     const docName="Ezy Dynamic Activate Log"
     const queryParams = {
-        fields: JSON.stringify(["activate_log"]),
-        limit_page_length: "none"
+        fields: ["activate_log"],
+        limit_page_length: 999,
+        doctype:doctypes.EzyActivityLog,
     };
 
     axiosInstance
-        .get(`${apis.resource}${doctypes.EzyActivityLog}/${encodeURIComponent(docName)}`, { params: queryParams })
+    .post(`${apis.GetDoctypeData}/${encodeURIComponent(docName)}`, queryParams)
+    // axiosInstance.post(apis.GetDoctypeData/encodeURIComponent(docName), queryParams)
         .then((res) => {
-            if (res.data) {
-                activityDoctypes.value = res.data.activate_log;
+            if (res) {
+                activityDoctypes.value = res.message.data[0].activate_log;
                 activitylog();
             }
         })
@@ -323,31 +325,19 @@ function activitylog(data) {
     filterObj.value.filters.push(["ref_doctype", "in", activityDoctypes.value]);
 
     const queryParams = {
-        fields: JSON.stringify(["docname","ref_doctype","modified_by","modified","data"]),
-        filters: JSON.stringify(filterObj.value.filters),
+        fields: ["docname","ref_doctype","modified_by","modified","data"],
+        filters: filterObj.value.filters,
         limit_page_length: filterObj.value.limitPageLength,
         limit_start: filterObj.value.limit_start,
+        doctype:doctypes.version,
         order_by: "`tabVersion`.`creation` desc"
     };
-    const queryParamsCount = {
-        fields: JSON.stringify(["count(name) AS total_count"]),
-        limitPageLength: "None",
-        filters: JSON.stringify(filterObj.value.filters),
-    }
-    axiosInstance.get(`${apis.resource}${doctypes.version}`, { params: queryParamsCount })
-        .then((res) => {
-            // console.log(res.data[0].total_count);
-            totalRecords.value = res.data[0].total_count
 
-        })
-        .catch((error) => {
-            console.error("Error fetching ezyForms data:", error);
-        });
-
-    axiosInstance.get(apis.resource + doctypes.version, { params: queryParams })
+    axiosInstance.post(apis.GetDoctypeData, queryParams)
         .then((res) => {
-            if (res.data) {
-                const newData = res.data
+            if (res) {
+                const newData = res.message.data
+                totalRecords.value=res.message.total_count;
                 if (filterObj.value.limit_start === 0) {
                     tableData.value = newData;
                 }

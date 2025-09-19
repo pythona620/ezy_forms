@@ -193,7 +193,7 @@ const router = useRouter();
 
 const newBusinessUnit = ref({ business_unit: "" });
 
-const filterObj = ref({ limitPageLength: 20, limit_start: 0, filters: [] });
+const filterObj = ref({ limitPageLength: 20, limit_start: 0, filters: {} });
 const totalRecords = ref(0);
 const selectedRequest = ref({});
 const showRequest = ref(null);
@@ -218,14 +218,14 @@ const loading = ref(false);
 const tableheaders = ref([
   { th: "Request ID", td_key: "name" },
   { th: "Form Name", td_key: "doctype_name" },
-  { th: "Requester Name", td_key: "requester_name" },
+  // { th: "Requester Name", td_key: "requester_name" },
   // { th: "Linked Form", td_key: "is_linked_form" },
   
   // { th: "Business Unit", td_key: "property" },
   // { th: "Form category", td_key: "doctype_name" },
   // { th: "Role", td_key: "role" },
   { th: "Requested on", td_key: "requested_on" },
-  { th: "Requester Department", td_key: "department_name" },
+  // { th: "Requester Department", td_key: "department_name" },
   { th: "Approval Status", td_key: "status" },
   { th: "Pending With", td_key: "assigned_to_users" },
   { th: "Last Action On", td_key: "modified" },
@@ -574,127 +574,176 @@ function mapFormFieldsToRequest(doctypeData, showRequestData) {
   });
 }
 
-const PaginationUpdateValue = (itemsPerPage) => {
-  filterObj.value.limitPageLength = itemsPerPage;
-  filterObj.value.limit_start = 0;
-  if (filterObj.value.filters.length) {
-    receivedForMe(filterObj.value.filters);
-  }
-  else {
-    receivedForMe();
-  }
-};
-// Handle updating the limit start
-const PaginationLimitStart = ([itemsPerPage, start]) => {
-  filterObj.value.limitPageLength = itemsPerPage;
-  filterObj.value.limit_start = start;
-  if (filterObj.value.filters.length) {
-    receivedForMe(filterObj.value.filters);
-  }
-  else {
-    receivedForMe();
-  }
-};
-
 const timeout = ref(null);
 
-function inLineFiltersData(searchedData) {
-  console.log(searchedData);
-  clearTimeout(timeout.value); // Clear previous timeout
 
-  timeout.value = setTimeout(() => {
-    // Initialize filters array
-    filterObj.value.filters = [];
+// const PaginationUpdateValue = (itemsPerPage) => {
+//   filterObj.value.limitPageLength = itemsPerPage;
+//   filterObj.value.limit_start = 0;
+//   if (filterObj.value.filters.length) {
+//     receivedForMe(filterObj.value.filters);
+//   }
+//   else {
+//     receivedForMe();
+//   }
+// };
+// // Handle updating the limit start
+// const PaginationLimitStart = ([itemsPerPage, start]) => {
+//   filterObj.value.limitPageLength = itemsPerPage;
+//   filterObj.value.limit_start = start;
+//   if (filterObj.value.filters.length) {
+//     receivedForMe(filterObj.value.filters);
+//   }
+//   else {
+//     receivedForMe();
+//   }
+// };
 
-    // Loop through the table headers and build dynamic filters
-    tableheaders.value.forEach((header) => {
-      const key = header.td_key;
 
-      if (searchedData[key]) {
-        filterObj.value.filters.push([key, "like", `%${searchedData[key]}%`]);
+// function inLineFiltersData(searchedData) {
+//   console.log(searchedData);
+//   clearTimeout(timeout.value); // Clear previous timeout
 
-      }
-    });
+//   timeout.value = setTimeout(() => {
+//     // Initialize filters array
+//     filterObj.value.filters = [];
 
-    // Call receivedForMe with or without filters
-    if (filterObj.value.filters.length) {
+//     // Loop through the table headers and build dynamic filters
+//     tableheaders.value.forEach((header) => {
+//       const key = header.td_key;
+
+//       if (searchedData[key]) {
+//         filterObj.value.filters.push([key, "like", `%${searchedData[key]}%`]);
+
+//       }
+//     });
+
+//     // Call receivedForMe with or without filters
+//     if (filterObj.value.filters.length) {
+//       filterObj.value.limit_start = 0;
+//       receivedForMe(filterObj.value.filters);
+//     } else {
+//       receivedForMe();
+//     }
+
+//     // Optionally call fetchTotalRecords
+//     // fetchTotalRecords(filters);
+//   }, 500); // Adjust debounce delay as needed
+// }
+
+// function receivedForMe(data) {
+//   console.log("data",data);
+//   const EmpRequestMail = JSON.parse(localStorage.getItem("employeeData"));
+
+//   // Always initialize filters as an array
+//   filterObj.value.filters = { 
+//     requested_by: EmpRequestMail.emp_mail_id,
+//     property: newBusinessUnit.value.business_unit,
+//   };
+
+//   if (data) {
+//     filterObj.value.filters.push(...data);
+//   }
+
+//   const queryParams = {
+//     fields: ["*"],
+//     limit_page_length: filterObj.value?.limitPageLength,
+//     limit_start: filterObj.value?.limit_start,
+//     filters: filterObj.value.filters,
+//     order_by: "`tabWF Workflow Requests`.`creation` desc",
+//     doctype: doctypes?.WFWorkflowRequests,
+//   };
+
+//   axiosInstance
+//     .post(apis.GetDOctypesData, queryParams)
+//     .then((res) => {
+//       const newData = res.message.data;
+//       totalRecords.value=res.message.total_count;
+//       if (filterObj.value.limit_start === 0) {
+//         tableData.value = newData;
+
+//         idDta.value = [...new Set(newData.map((id) => id.name))];
+//         docTypeName.value = [
+//           ...new Set(newData.map((docTypeName) => docTypeName.doctype_name)),
+//         ];
+//         statusOptions.value = [
+//           ...new Set(newData.map((status) => status.status)),
+//         ];
+//       } else {
+//         tableData.value = tableData.value.concat(newData);
+//       }
+//     })
+//     .catch((error) => {
+//       console.error("Error fetching records:", error);
+//     });
+// }
+
+
+const fullData = ref([]);
+const filteredData = ref([]);
+
+function receivedForMe() {
+  const EmpRequestMail = JSON.parse(localStorage.getItem("employeeData"));
+  const payload = {
+    employee: EmpRequestMail.emp_mail_id,
+    requested_by_me: "1",
+    property_field: newBusinessUnit.value.business_unit,
+  }
+  axiosInstance
+    .post(apis.GetEmployeeForms, payload)
+    .then((response) => {
+      fullData.value = response.message || [];
+
+      // Initially filteredData = fullData
+      filteredData.value = [...fullData.value];
+
+      totalRecords.value = filteredData.value.length;
       filterObj.value.limit_start = 0;
-      receivedForMe(filterObj.value.filters);
-    } else {
-      receivedForMe();
-    }
-
-    // Optionally call fetchTotalRecords
-    // fetchTotalRecords(filters);
-  }, 500); // Adjust debounce delay as needed
+      tableData.value = filteredData.value.slice(0, filterObj.value.limitPageLength);
+    })
+    .catch((error) => {
+      console.error(error);
+    });
 }
 
-function receivedForMe(data) {
-  // Initialize filters array for building dynamic query parameters
-  const EmpRequestMail = JSON.parse(localStorage.getItem("employeeData"));
-  const filters = [
-    ["requested_by", "like", EmpRequestMail.emp_mail_id],
-    ["property", "=", `${newBusinessUnit.value.business_unit}`],
-  ];
+function paginateData(filtered = filteredData.value) {
+  const paginated = filtered.slice(filterObj.value.limit_start, filterObj.value.limit_start + filterObj.value.limitPageLength);
+  tableData.value = paginated;
+  totalRecords.value = filtered.length;
+}
 
-  if (data) {
-    filters.push(...data);
-  }
+function inLineFiltersData(searchedData) {
+  clearTimeout(timeout.value);
 
-  // Define query parameters for data and count retrieval
-  const queryParams = {
-    fields: JSON.stringify(["*"]),
-    limit_page_length: filterObj.value?.limitPageLength,
-    limit_start: filterObj.value?.limit_start,
-    filters: JSON.stringify(filters),
-    order_by: "`tabWF Workflow Requests`.`creation` desc",
-  };
-
-  const queryParamsCount = {
-    fields: JSON.stringify(["count(name) AS total_count"]),
-    limitPageLength: "None",
-    filters: JSON.stringify(filters),
-  };
-
-  // Fetch total count of records matching filters
-  axiosInstance
-    .get(`${apis?.resource}${doctypes?.WFWorkflowRequests}`, {
-      params: queryParamsCount,
-    })
-    .then((res) => {
-      totalRecords.value = res.data[0].total_count;
-    })
-    .catch((error) => {
-      console.error("Error fetching total count:", error);
+  timeout.value = setTimeout(() => {
+    filteredData.value = fullData.value.filter((row) => {
+      return tableheaders.value.every((header) => {
+        const key = header.td_key;
+        if (searchedData[key]) {
+          return String(row[key] || "").toLowerCase().includes(String(searchedData[key]).toLowerCase());
+        }
+        return true;
+      });
     });
 
-  // Fetch the records matching filters
-  axiosInstance
-    .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, {
-      params: queryParams,
-    })
-    .then((res) => {
-      const newData = res.data;
-      if (filterObj.value.limit_start === 0) {
-        tableData.value = newData;
+    totalRecords.value = filteredData.value.length;
+    filterObj.value.limitPageLength = 20;
+    filterObj.value.limit_start = 0;
 
-        idDta.value = [...new Set(newData.map((id) => id.name))];
-        docTypeName.value = [
-          ...new Set(newData.map((docTypeName) => docTypeName.doctype_name)),
-        ];
-        statusOptions.value = [
-          ...new Set(newData.map((status) => status.status)),
-        ];
-      }
-      else {
-        tableData.value = tableData.value.concat(newData)
-      }
+    tableData.value = filteredData.value.slice(0, filterObj.value.limitPageLength);
+  }, 500);
+}
 
+function PaginationUpdateValue(newLimit) {
+  filterObj.value.limitPageLength = newLimit;
+  filterObj.value.limit_start = 0;
+  paginateData();
+}
 
-    })
-    .catch((error) => {
-      console.error("Error fetching records:", error);
-    });
+function PaginationLimitStart() {
+  filterObj.value.limit_start += filterObj.value.limitPageLength;
+  const nextBatch = filteredData.value.slice(filterObj.value.limit_start, filterObj.value.limit_start + filterObj.value.limitPageLength);
+  tableData.value = [...tableData.value, ...nextBatch];
 }
 
 const fieldMapping = computed(() => ({
@@ -732,9 +781,9 @@ watch(
   },
   { immediate: true }
 );
-onMounted(() => {
-  // receivedForMe()
-});
+// onMounted(() => {
+//   receivedForMe()
+// });
 </script>
 <style lang="scss" scoped>
 .approvebtn {

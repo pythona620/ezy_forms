@@ -1817,16 +1817,15 @@ const uploadFile = (file, field) => {
 };
 function deptData(callback) {
   const queryParams = {
-    fields: JSON.stringify(["*"]),
-    limit_page_length: "None",
-    limit_start: filterObj.value.limit_start,
+    fields: ["department_name"],
+    limit_page_length: 999,
+    doctype:doctypes.departments,
   };
 
-  axiosInstance
-    .get(apis.resource + doctypes.departments, { params: queryParams })
+  axiosInstance.post(apis.GetDoctypeData, queryParams)
     .then((res) => {
-      if (res.data) {
-        departmentsList.value = res.data;
+      if (res.message.data) {
+        departmentsList.value = res.message.data;
         if (callback) callback(); // Execute after fetch
       }
     })
@@ -1923,33 +1922,20 @@ function employeeData(data) {
   }
 
   const queryParams = {
-    fields: JSON.stringify(["*"]),
-    filters: JSON.stringify(filters),
+    fields: ["acknowledge_on","acknowledgement","company_field","creation","custom_enable","department","designation","emp_code","emp_mail_id",
+    "emp_name","emp_phone","enable","enable_on","is_admin","is_hod","is_web_form","last_ip","last_login","name","profile_image","remarks","reporting_designation","reporting_to","signature"],
+    filters: filters,
     limit_page_length: filterObj.value.limitPageLength,
     limit_start: filterObj.value.limit_start,
-    order_by: "`tabEzy Employee`.`enable` DESC,`tabEzy Employee`.`modified` DESC",
+    doctype:doctypes.EzyEmployeeList,
+    order_by: "`tabEzy Employee`.`enable` DESC, `tabEzy Employee`.`modified` DESC",
   };
-  const queryParamsCount = {
-    fields: JSON.stringify(["count(name) AS total_count"]),
-    limitPageLength: "None",
-    filters: JSON.stringify(filters),
-  };
-  axiosInstance
-    .get(`${apis.resource}${doctypes.EzyEmployeeList}`, {
-      params: queryParamsCount,
-    })
-    .then((res) => {
-      totalRecords.value = res.data[0].total_count;
-    })
-    .catch((error) => {
-      console.error("Error fetching ezyForms data:", error);
-    });
 
-  axiosInstance
-    .get(apis.resource + doctypes.EzyEmployeeList, { params: queryParams })
+  axiosInstance.post(apis.GetDoctypeData, queryParams)
     .then((res) => {
-      if (res.data) {
-        const newData = res.data
+      if (res.message) {
+        totalRecords.value=res.message.total_count;
+        const newData = res.message.data
         if (filterObj.value.limit_start === 0) {
 
           tableData.value = newData;
@@ -1982,26 +1968,27 @@ const employeeEmails = ref([]);
 
 function employeeOptions() {
   const queryParams = {
-    fields: JSON.stringify(["*"]),
-    limit_page_length: "None",
-    filters: JSON.stringify([["company_field", "=", `${newbusiness.value}`]]),
-    order_by: "`tabEzy Employee`.`creation` desc",
+    fields: ["acknowledge_on","acknowledgement","company_field","creation","custom_enable","department","designation","emp_code","emp_mail_id",
+    "emp_name","emp_phone","enable","enable_on","is_admin","is_hod","is_web_form","last_ip","last_login","name","profile_image","remarks","reporting_designation","reporting_to","signature"],
+    limit_page_length: 9999,
+    filters: [["company_field", "=", `${newbusiness.value}`]],
+    doctype:doctypes.EzyEmployeeList,
+    order_by: "`tabEzy Employee`.`modified` desc",
   };
-  axiosInstance
-    .get(apis.resource + doctypes.EzyEmployeeList, { params: queryParams })
+  axiosInstance.post(apis.GetDoctypeData, queryParams)
     .then((res) => {
-      if (res.data) {
-        const newData = res.data
+      if (res.message.data) {
+        const newData = res.message.data
         if (filterObj.value.limit_start === 0) {
 
           employeeEmails.value = newData;
-          // designations.value = [...new Set(res.data.map((designation) => designation.designation))];
+          // designations.value = [...new Set(res.message.data.map((designation) => designation.designation))];
           reportingTo.value = [
-            ...new Set(res.data.map((reporting) => reporting.reporting_to)),
+            ...new Set(res.message.data.map((reporting) => reporting.reporting_to)),
           ];
           reportingDesigination.value = [
             ...new Set(
-              res.data.map(
+              res.message.data.map(
                 (reportingDesigination) =>
                   reportingDesigination.reporting_designation
               )
@@ -2031,18 +2018,15 @@ watch(
 function designationData() {
   const filters = [];
   const queryParams = {
-    fields: JSON.stringify(["*"]),
-    filters: JSON.stringify(filters),
-    limit_page_length: "None",
-    limit_start: filterObj.value.limit_start,
-    order_by: "`tabWF Roles`.`creation` desc",
+    fields: ["role"],
+    limit_page_length: 999,
+    doctype:doctypes.designations,
   };
 
-  axiosInstance
-    .get(apis.resource + doctypes.designations, { params: queryParams })
+  axiosInstance.post(apis.GetDoctypeData, queryParams)
     .then((res) => {
-      if (res.data) {
-        designations.value = [...new Set(res.data.map((user) => user.role))];
+      if (res.message.data) {
+        designations.value = [...new Set(res.message.data.map((user) => user.role))];
       }
     })
     .catch((error) => {

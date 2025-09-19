@@ -349,31 +349,19 @@ function activitylog(data) {
     }
 
     const queryParams = {
-        fields: JSON.stringify(["name","acknowledgement","naming_series","enable"]),
-        filters: JSON.stringify(filterObj.value.filters),
+        fields: ["name","acknowledgement","naming_series","enable"],
+        filters: filterObj.value.filters,
         limit_page_length: filterObj.value.limitPageLength,
         limit_start: filterObj.value.limit_start,
+        doctype:doctypes.acknowledgement,
         order_by: "`tabAcknowledgement`.`creation` desc"
     };
-    const queryParamsCount = {
-        fields: JSON.stringify(["count(name) AS total_count"]),
-        limitPageLength: "None",
-        filters: JSON.stringify(filterObj.value.filters),
-    }
-    axiosInstance.get(`${apis.resource}${doctypes.acknowledgement}`, { params: queryParamsCount })
-        .then((res) => {
-            // console.log(res.data[0].total_count);
-            totalRecords.value = res.data[0].total_count
 
-        })
-        .catch((error) => {
-            console.error("Error fetching ezyForms data:", error);
-        });
-
-    axiosInstance.get(apis.resource + doctypes.acknowledgement, { params: queryParams })
+    axiosInstance.post(apis.GetDoctypeData, queryParams)
         .then((res) => {
-            if (res.data) {
-                const newData = res.data
+            if (res) {
+                const newData = res.message.data
+                totalRecords.value=res.message.total_count;
                 if (filterObj.value.limit_start === 0) {
                     tableData.value = newData;
                 }

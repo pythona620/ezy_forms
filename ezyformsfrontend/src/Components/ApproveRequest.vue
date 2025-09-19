@@ -305,7 +305,7 @@
 
                         <span class="strong-content">{{ formatAction(item.action) }} on </span>
                         <span class="strong-content">{{ formatCreation(item.time) }}</span><br />
-                        <span class="strong-content">{{ item.user_name }}</span><br />
+                        <span class="strong-content fw-bolder">{{ item.user }}</span><br />
                         <span>{{ item.role }}</span><br />
                         <span class="font-12 text-secondary">{{ item.reason || "N/A" }}</span>.
 

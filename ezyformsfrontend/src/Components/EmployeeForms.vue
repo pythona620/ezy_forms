@@ -15,18 +15,23 @@
     </div>
     <div class="px-3">
       <div class="d-flex align-items-center gap-4 my-3">
-        <!-- <div class="d-flex align-items-center gap-2">
-          <h1 class="m-0 font-13">{{ selectedData.EmpName }}</h1>
-          <p class="m-0 p-0 font-10">( {{ totalRecords }} request )</p>
-        </div> -->
-        <div class="card-container d-flex align-items-center gap-4 ms-2">
-          <label class="card d-flex m-0" @click="switchTab('raised')" :class="{ active: activeTab === 'raised' }">
-            Raised Forms
-          </label>
-          <label class="card d-flex m-0" @click="switchTab('approved')" :class="{ active: activeTab === 'approved' }">
-            Approved Forms
-          </label>
-        </div>
+       <div class="tab-container d-flex gap-2 ms-2">
+  <button 
+    class="tab-btn" 
+    :class="{ active: activeTab === 'raised' }" 
+    @click="switchTab('raised')"
+  >
+    Raised Forms
+  </button>
+  
+  <button 
+    class="tab-btn" 
+    :class="{ active: activeTab === 'approved' }" 
+    @click="switchTab('approved')"
+  >
+    Approved Forms
+  </button>
+</div>
       </div>
 
       <div class="mt-2">
@@ -99,6 +104,7 @@ function ViewOnlyReport() {
   const payload = {
     employee: selectedData.value.EmpId,
     department: selectedData.value.DeptName,
+    property_field: selectedData.value.business_unit,
     ...(activeTab.value === 'raised' && { requested_by_me: "1" }),
     ...(activeTab.value === 'approved' && { approved_by_me: "1" }),
   }
@@ -249,4 +255,35 @@ onMounted(() => {
   background-color: #212529d9;
   color: white;
 }
+
+.tab-container {
+  background: #f6f6f6;
+  padding: 6px;
+  border-radius: 12px;
+  display: inline-flex;
+}
+
+.tab-btn {
+  border: none;
+  background: transparent;
+  height:32px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #495057;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tab-btn:hover {
+  background: #e9ecef;
+}
+
+.tab-btn.active {
+  background: #4d4e4f;
+  color: white;
+  font-weight: 600;
+  // box-shadow: 0 2px 6px rgba(13, 110, 253, 0.3); 
+}
+
 </style>

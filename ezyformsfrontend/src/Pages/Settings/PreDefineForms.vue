@@ -256,32 +256,18 @@ function fetchTable(data) {
 
 
     const queryParams = {
-        fields: JSON.stringify(["form_name", "installed","form_json","name"]),
-        filters: JSON.stringify(filters),
-        limit_page_length: "None",
+        fields: ["form_name", "installed","form_json","name"],
+        filters: filters,
+        limit_page_length: 999,
         limit_start: filterObj.value.limit_start,
+        doctype:doctypes.preDefinedForm,
         order_by: "`installed` DESC",
 
     };
-    const queryParamsCount = {
-        fields: JSON.stringify(["count(name) AS total_count"]),
-        limitPageLength: "None",
-        filters: JSON.stringify(filters),
-    }
-    axiosInstance.get(`${apis.resource}${doctypes.preDefinedForm}`, { params: queryParamsCount })
-        .then((res) => {
-
-            totalRecords.value = res.data[0].total_count
-
-        })
-        .catch((error) => {
-            console.error("Error fetching ezyForms data:", error);
-        });
-
-
-    axiosInstance.get(`${apis.resource}${doctypes.preDefinedForm}`, { params: queryParams })
+    axiosInstance.post(apis.GetDoctypeData, queryParams)
         .then(res => {
-            const newData = res.data;
+            const newData = res.message.data;
+            totalRecords.value=res.message.total_count;
             if (filterObj.value.limit_start === 0) {
                 tableData.value = newData;
                 formCategory.value = [...new Set(newData.map((formCategory) => formCategory.form_category))];
