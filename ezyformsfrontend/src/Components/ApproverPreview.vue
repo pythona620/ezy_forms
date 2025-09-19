@@ -1031,7 +1031,7 @@
 
 
                               </div>
-                              <div v-else>
+                              <div v-else> 
                                 
                                 <div class=" d-flex justify-content-between align-items-center">
                                   <span class="font-13 fw-bold tablename">{{ field.label.replace(/_/g, " ") }}</span>
@@ -1454,6 +1454,7 @@ const previewUrl = ref('')
 const showModal = ref(false)
 const hovered = reactive({});
 const showPreview = ref(false);
+const attachmentFiles = ref([])
 // const currentTime = ref("");
 
 // let timer = null;
@@ -2129,14 +2130,14 @@ const allFieldsFilled = computed(() => {
     for (const row of section.rows) {
       for (const column of row.columns) {
         for (const field of column.fields) {
-          const rowKey = row.__row_id || row.id || row._temp_id;
-          const fieldError = fieldErrors.value[rowKey]?.[field.fieldname];
-
+          
           // Required field check
           if (field.reqd === 1 && (!field.value || field.value.toString().trim() === "")) {
             
             return false;
           }
+          const rowKey = row.__row_id || row.id || row._temp_id;
+          const fieldError = fieldErrors.value[rowKey]?.[field.fieldname];
 
           // Field error check
           if (fieldError) {
@@ -2391,14 +2392,14 @@ const showPreviewModal = ref(false)
 const attachmentList = ref([])
 const currentBlockIndex = ref(null);
 
-// // Store all files across the form
-// const allAttachments = ref([]);
-// // Store which ones have been previewed
-// const previewedAttachments = ref(new Set());
+// Store all files across the form
+const allAttachments = ref([]);
+// Store which ones have been previewed
+const previewedAttachments = ref(new Set());
 
-// /**
-//  * Collect every attachment in the form
-//  */
+/**
+ * Collect every attachment in the form
+ */
 // function collectAllAttachments(blocks) {
 //   const attachments = [];
 
@@ -2413,8 +2414,9 @@ const currentBlockIndex = ref(null);
 //               field.value &&
 //               !["Requestor Signature", "Approved By", "Acknowledged By"].includes(field.label)
 //             ) {
+//               console.log(field);
 //               field.value
-//                 .split(",")
+//                 .split("|")
 //                 .map((f) => f.trim())
 //                 .filter((f) => f)
 //                 .forEach((f) => attachments.push(f));
@@ -2426,18 +2428,69 @@ const currentBlockIndex = ref(null);
 //   });
 
 //   allAttachments.value = attachments;
+//   console.log(allAttachments.value,"allAttachments.value");
 // }
+function collectAllAttachments(blocks) {
+  const attachments = [];
 
-// /**
-//  * Watch the incoming data
-//  */
-// watch(
-//   () => props.blockArr,
-//   (newVal) => {
-//     collectAllAttachments(newVal);
-//   },
-//   { deep: true, immediate: true }
-// );
+  (blocks || []).forEach((block) => {
+    (block.sections || []).forEach((section) => {
+      (section.rows || []).forEach((row) => {
+        (row.columns || []).forEach((column) => {
+          (column.fields || []).forEach((field) => {
+              console.log("Attach field =>", field.label, "| fieldtype =>", field.fieldtype, "| value =>", field.value);
+ 
+
+            // ✅ Normal Attach fields
+            if (
+              field.fieldtype === "Attach" &&
+              field.value &&
+              !["Requestor Signature", " Approved By", "Acknowledged By"].includes(field.label) 
+            ) {
+              console.log("condition checked", field.label); 
+              field.value
+                .split("|")
+                .map((f) => f.trim())
+                .filter((f) => f)
+                .forEach((f) => attachments.push(f));
+            }
+
+            // ✅ Table fields (child rows)
+            // if (field.fieldtype === "Table" && Array.isArray(field.value)) {
+              
+            //   field.value.forEach((childRow) => {
+            //     console.log(childRow,"childrows");
+            //     Object.values(childRow || {}).forEach((val) => {
+            //       if (typeof val === "string" && val.includes(".")) {
+            //         val.split("|")
+            //           .map((f) => f.trim())
+            //           .filter((f) => f)
+            //           .forEach((f) => attachments.push(f));
+            //       }
+            //     });
+            //   });
+            // }
+          });
+        });
+      });
+    });
+  });
+
+  allAttachments.value = attachments;
+  // console.log("allAttachments.value =>", allAttachments.value);
+}
+
+/**
+ * Watch the incoming data
+ */
+watch(
+  () => props.blockArr,
+  (newVal) => {
+    collectAllAttachments(newVal);
+
+  },
+  { deep: true, immediate: true }
+);
 
 /**
  * When opening the "View" list
@@ -2454,22 +2507,24 @@ function closeAttachmentList() {
 }
 
 
-// function previewAttachment(url) {
-//   previewedAttachments.value.add(url);
-//   previewUrl.value = url;
-//   showPreviewModal.value = true;
-
-//   // Check if ALL attachments across the form are previewed
-//   const allPreviewed = allAttachments.value.every((f) =>
-//     previewedAttachments.value.has(f)
-//   );
-//   emit("attachmentsReady", allPreviewed);
-// }
-
 function previewAttachment(url) {
-  previewUrl.value = url
-  showPreviewModal.value = true
+  // console.log(url,"url");
+  previewedAttachments.value.add(url);
+  previewUrl.value = url;
+  showPreviewModal.value = true;
+
+  // Check if ALL attachments across the form are previewed
+  const allPreviewed = allAttachments.value.every((f) =>
+    previewedAttachments.value.has(f)
+  );
+  // console.log(previewedAttachments.value,"previewedAttachments");
+  emit("attachmentsReady", allPreviewed);
 }
+
+// function previewAttachment(url) {
+//   previewUrl.value = url
+//   showPreviewModal.value = true
+// }
 
 function closePreviewModal() {
   showPreviewModal.value = false
@@ -2558,7 +2613,7 @@ const removeFile = (
 };
 
 
-const attachmentFiles = ref([])
+
 
 
 // Extract filename
@@ -2578,12 +2633,28 @@ const openAttachmentsList = (fileString) => {
 }
 
 // Open preview modal
+// const ChildpreviewFile = (fileUrl) => {
+//   previewUrl.value = fileUrl
+//   const modal = new bootstrap.Modal(document.getElementById('filePreviewModal'))
+//   modal.show()
+// }
 const ChildpreviewFile = (fileUrl) => {
-  previewUrl.value = fileUrl
-  const modal = new bootstrap.Modal(document.getElementById('filePreviewModal'))
-  modal.show()
-}
+  
+  previewUrl.value = fileUrl;
+  previewedAttachments.value.add(fileUrl);
 
+  // ✅ Check if all attachments have been previewed
+  const allPreviewed =
+    allAttachments.value.length > 0 &&
+    allAttachments.value.every((f) => previewedAttachments.value.has(f));
+
+  // if (allPreviewed) {
+    emit("attachmentsReady", allPreviewed); // inform parent that approve can be enabled
+  // }
+
+  const modal = new bootstrap.Modal(document.getElementById("filePreviewModal"));
+  modal.show();
+};
 // Helper to check file type
 const isImage = (url) => /\.(jpeg|jpg|png)$/i.test(url)
 const isPDF = (url) => /\.pdf$/i.test(url)

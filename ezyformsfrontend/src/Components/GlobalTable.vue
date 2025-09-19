@@ -393,6 +393,7 @@
 <script setup>
 // import ButtonComp from "./ButtonComp.vue";
 import { defineProps, defineEmits, ref, onMounted, watch, reactive } from "vue";
+import { useRoute } from "vue-router";
 // import moment from "moment";
 // import FormFields from "./FormFields.vue";
 const props = defineProps({
@@ -676,6 +677,16 @@ const filters = ref(
     acc[column.td_key] = ""; // Initialize with empty strings
     return acc;
   }, {})
+);
+const route = useRoute();
+watch(
+  () => route.fullPath,   // you can also use route.name or route.query if needed
+  () => {
+    filters.value = props.tHeaders.reduce((acc, column) => {
+      acc[column.td_key] = "";
+      return acc;
+    }, {});
+  }
 );
 // Handle filter change
 // function handleFilterChange() {
