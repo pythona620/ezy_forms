@@ -5,8 +5,8 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils import now as frappe_now
 from frappe.utils.background_jobs import enqueue
-from frappe.modules.import_file import import_file_by_path
-
+from frappe.modules.import_file import import_file_by_path,get_module_path
+from frappe.modules import get_module_path
 import sys
 import subprocess
 import os
@@ -68,18 +68,7 @@ def validate_and_clean_fields(fields: List[Dict[str, Any]]) -> List[Dict[str, An
         cleaned_fields.append(field)
     
     return cleaned_fields
-    """Validate required parameters and return cleaned data."""
-    required_fields = ['owner_of_the_form', 'business_unit', 'form_name', 'form_short_name']
-    missing_fields = [field for field in required_fields if not kwargs.get(field)]
-    
-    if missing_fields:
-        frappe.throw(f"Missing required fields: {', '.join(missing_fields)}")
-    
-    # Clean and validate business unit
-    business_unit = kwargs['business_unit']
-    if not business_unit:
-        frappe.throw("Business Unit is required as a prefix")
-    
+   
 def validate_required_params(**kwargs):
     """Validate required parameters and return cleaned data."""
     required_fields = ['owner_of_the_form', 'business_unit', 'form_name', 'form_short_name']

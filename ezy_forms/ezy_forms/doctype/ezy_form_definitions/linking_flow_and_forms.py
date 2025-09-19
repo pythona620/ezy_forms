@@ -1,6 +1,5 @@
 import frappe
 import sys
-# import polars as pl
 from ast import literal_eval
 
 def enqueing_creation_of_roadmap(doctype:str,property_name:str,bulk_request:bool):
@@ -40,156 +39,118 @@ def list_to_dict_with_ones(x):
 	x = str(x).split(" ,")
 	x = f"""{dict(zip(x,[1] * len(x)))}"""
 	return x
-# @frappe.whitelist()
-# def add_roles_to_wf_requestors(business_unit:str,doctype:str,workflow_setup:list[dict]):
-# 	try:
-# 		from ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions import activating_perms
-# 		if not len(workflow_setup)>0 or not business_unit or not doctype:return {"success":False,"message":"Please pass levels or requestors for adding Workflow Level Setup."}
-# 		doc_rec = "_".join(business_unit.split()).upper() + "_" + "_".join(doctype.split()).upper().replace(" ", "_")
-# 		requestors_df = pl.DataFrame(workflow_setup)
-# 		requestors_df = requestors_df.explode("roles")
-# 		requestors_df = requestors_df.with_columns(pl.col("fields").list.join(" ,").map_elements(list_to_dict_with_ones).alias("fields"))
-# 		requestors_section = requestors_df.filter(pl.col('type').str.contains("requestor")).select("roles","fields").rename({"roles":"requestor","fields":"columns_allowed"}).to_dicts()
-# 		approvers_section = requestors_df.filter(pl.col('type').str.contains("approver")).with_columns(pl.lit(1).alias('cancel_request')).with_columns(pl.lit(1).alias('mandatory')).with_columns(pl.lit("Approve/Reject").alias('action'))
-# 		if approvers_section.shape[0]>0:
-# 			approvers_section = approvers_section.select("roles","fields","idx","cancel_request","mandatory","action",'view_only_reportee',"requester_as_a_approver",'all_approvals_required','on_rejection').rename({"roles":"role","fields":"columns_allowed","idx":"level"}).to_dicts()
-# 		else:approvers_section=[]
-  
-# 		try:
-# 			frappe.db.sql(f"""delete from `tabWF Requestors` where parent = '{doc_rec}' and parentfield = 'wf_requestors' and parenttype = 'WF Roadmap';""")
-# 			frappe.db.commit()
-# 			frappe.db.sql(f"""delete from `tabWF Level Setup` where parent ='{doc_rec}' and parentfield = 'wf_level_setup' and parenttype='WF Roadmap';""")
-# 			frappe.db.commit()
-# 		except Exception as e:
-# 			frappe.log_error("add role to wf requestors",str(e))
-   
-# 		roadmap_doc = frappe.get_doc("WF Roadmap",doc_rec)
-# 		if len(approvers_section)>0:
-# 			roadmap_doc.workflow_levels = max([max_level['level'] for max_level in approvers_section])
-# 		for single_requestor in requestors_section:
-# 			if single_requestor["requestor"]:
-# 				activating_perms(doctype=doctype,role=single_requestor["requestor"])
-# 				roadmap_doc.append("wf_requestors", single_requestor)
-# 		for single_approver in approvers_section:
-# 			if single_approver["role"]:
-# 				activating_perms(doctype=doctype,role=single_approver["role"])
-# 				roadmap_doc.append("wf_level_setup", single_approver)
-# 		roadmap_doc.save(ignore_permissions=True)
-# 		frappe.db.commit()
-# 		workflow_from_defs = frappe.db.get_value("Ezy Form Definitions",doctype,"form_json")
-# 		fields_from_defs = literal_eval(workflow_from_defs)["fields"]
-# 		fields_from_defs = {"fields":fields_from_defs}
-# 		child_table_fields = literal_eval(workflow_from_defs)["child_table_fields"]
-# 		field_with_workflow = fields_from_defs | {"workflow":workflow_setup} | {"child_table_fields":child_table_fields}
-# 		frappe.db.set_value("Ezy Form Definitions",doctype,{"form_json":str(field_with_workflow).replace("'",'"').replace("None","null")})
-# 		frappe.db.commit()
-# 	except Exception as e:
-# 		exc_type, exc_obj, exc_tb = sys.exc_info()
-# 		frappe.log_error("Error in Updating Roadmap's requestors and approvers in Workflow.",
-# 						 "line No:{}\n{}".format(exc_tb.tb_lineno, str(e)))
-# 		frappe.db.rollback()
-# 		frappe.throw(str(e))
-# 		return {"success": False, "message": str(e)}
+
 
 @frappe.whitelist()
 def add_roles_to_wf_requestors(business_unit: str, doctype: str, workflow_setup: list[dict]):
     try:
         from ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions import activating_perms
-        if not len(workflow_setup) > 0 or not business_unit or not doctype:
+
+        if not workflow_setup or not business_unit or not doctype:
             return {"success": False, "message": "Please pass levels or requestors for adding Workflow Level Setup."}
-        
-        doc_rec = "_".join(business_unit.split()).upper() + "_" + "_".join(doctype.split()).upper().replace(" ", "_")
-        
-        # Replace Polars DataFrame operations with native Python
-        exploded_data = []
-        for row in workflow_setup:
-            roles = row.get("roles", [])
-            if isinstance(roles, str):
-                roles = [roles]
-            elif not isinstance(roles, list):
-                roles = []
-            
-            for role in roles:
-                new_row = row.copy()
-                new_row["roles"] = role
-                exploded_data.append(new_row)
-        
-        # Process fields column - convert list to dict with ones
+
+        # Generate Roadmap doc name
+        doc_rec = "_".join(business_unit.split()).upper() + "_" + "_".join(doctype.split()).upper()
+
+        # Explode rows by role (flatten roles list/string into multiple rows)
+        exploded_data = [
+            {**row, "roles": role}
+            for row in workflow_setup
+            for role in (
+                row["roles"] if isinstance(row.get("roles"), list)
+                else [row["roles"]] if isinstance(row.get("roles"), str)
+                else []
+            )
+        ]
+
+        # Convert fields list into dict with ones
         for row in exploded_data:
-            fields = row.get("fields", [])
-            if isinstance(fields, list):
-                fields_str = " ,".join(str(f) for f in fields)
-                row["fields"] = list_to_dict_with_ones(fields_str)
-        
-        # Filter requestors section
-        requestors_section = []
-        for row in exploded_data:
-            if row.get('type', '').find("requestor") != -1:
-                requestors_section.append({
-                    "requestor": row.get("roles"),
-                    "columns_allowed": row.get("fields")
-                })
-        
-        # Filter approvers section
-        approvers_data = []
-        for row in exploded_data:
-            if row.get('type', '').find("approver") != -1:
-                approvers_data.append(row)
-        
-        # Process approvers section
-        approvers_section = []
-        if len(approvers_data) > 0:
-            for row in approvers_data:
-                approvers_section.append({
-                    "role": row.get("roles"),
-                    "columns_allowed": row.get("fields"),
-                    "level": row.get("idx"),
-                    "cancel_request": 1,
-                    "mandatory": 1,
-                    "action": "Approve/Reject",
-                    "view_only_reportee": row.get("view_only_reportee"),
-                    "requester_as_a_approver": row.get("requester_as_a_approver"),
-                    "all_approvals_required": row.get("all_approvals_required"),
-                    "on_rejection": row.get("on_rejection")
-                })
-        
+            if isinstance(row.get("fields"), list):
+                row["fields"] = {str(f): 1 for f in row["fields"]}
+
+        # Separate requestors and approvers
+        requestors_section = [
+            {"requestor": row["roles"], "columns_allowed": row.get("fields")}
+            for row in exploded_data if "requestor" in str(row.get("type", "")).lower()
+        ]
+
+        approvers_section = [
+            {
+                "role": row["roles"],
+                "columns_allowed": row.get("fields"),
+                "level": row.get("idx"),
+                "cancel_request": 1,
+                "mandatory": 1,
+                "action": "Approve/Reject",
+                "view_only_reportee": row.get("view_only_reportee"),
+                "requester_as_a_approver": row.get("requester_as_a_approver"),
+                "all_approvals_required": row.get("all_approvals_required"),
+                "on_rejection": row.get("on_rejection"),
+            }
+            for row in exploded_data if "approver" in str(row.get("type", "")).lower()
+        ]
+
+        # Delete existing requestors/levels if any
         try:
-            frappe.db.sql(f"""delete from `tabWF Requestors` where parent = '{doc_rec}' and parentfield = 'wf_requestors' and parenttype = 'WF Roadmap';""")
-            frappe.db.commit()
-            frappe.db.sql(f"""delete from `tabWF Level Setup` where parent ='{doc_rec}' and parentfield = 'wf_level_setup' and parenttype='WF Roadmap';""")
+            frappe.db.sql(
+                """DELETE FROM `tabWF Requestors`
+                   WHERE parent=%s AND parentfield='wf_requestors' AND parenttype='WF Roadmap'""",
+                (doc_rec,),
+            )
+            frappe.db.sql(
+                """DELETE FROM `tabWF Level Setup`
+                   WHERE parent=%s AND parentfield='wf_level_setup' AND parenttype='WF Roadmap'""",
+                (doc_rec,),
+            )
             frappe.db.commit()
         except Exception as e:
-            frappe.log_error("add role to wf requestors", str(e))
-   
+            frappe.log_error("add role to wf requestors - deletion error", str(e))
+
         roadmap_doc = frappe.get_doc("WF Roadmap", doc_rec)
-        if len(approvers_section) > 0:
-            roadmap_doc.workflow_levels = max([max_level['level'] for max_level in approvers_section])
-        
-        for single_requestor in requestors_section:
-            if single_requestor["requestor"]:
-                activating_perms(doctype=doctype, role=single_requestor["requestor"])
-                roadmap_doc.append("wf_requestors", single_requestor)
-        
-        for single_approver in approvers_section:
-            if single_approver["role"]:
-                activating_perms(doctype=doctype, role=single_approver["role"])
-                roadmap_doc.append("wf_level_setup", single_approver)
-        
+
+        # Set workflow levels
+        if approvers_section:
+            roadmap_doc.workflow_levels = max(a["level"] for a in approvers_section if a.get("level"))
+
+        # Append requestors & approvers
+        roles_to_activate = set()
+        for r in requestors_section:
+            if r["requestor"]:
+                roles_to_activate.add(r["requestor"])
+                roadmap_doc.append("wf_requestors", r)
+
+        for a in approvers_section:
+            if a["role"]:
+                roles_to_activate.add(a["role"])
+                roadmap_doc.append("wf_level_setup", a)
+
+        # Activate permissions once per unique role
+        for role in roles_to_activate:
+            activating_perms(doctype=doctype, role=role)
+
         roadmap_doc.save(ignore_permissions=True)
-        frappe.db.commit()
-        
+
+        # Update form definition
         workflow_from_defs = frappe.db.get_value("Ezy Form Definitions", doctype, "form_json")
-        fields_from_defs = literal_eval(workflow_from_defs)["fields"]
-        fields_from_defs = {"fields": fields_from_defs}
-        child_table_fields = literal_eval(workflow_from_defs)["child_table_fields"]
-        field_with_workflow = fields_from_defs | {"workflow": workflow_setup} | {"child_table_fields": child_table_fields}
-        frappe.db.set_value("Ezy Form Definitions", doctype, {"form_json": str(field_with_workflow).replace("'", '"').replace("None", "null")})
+        parsed_defs = literal_eval(workflow_from_defs)
+        field_with_workflow = {
+            "fields": parsed_defs.get("fields", []),
+            "workflow": workflow_setup,
+            "child_table_fields": parsed_defs.get("child_table_fields", []),
+        }
+        frappe.db.set_value("Ezy Form Definitions", doctype, {
+            "form_json": str(field_with_workflow).replace("'", '"').replace("None", "null")
+        })
+
         frappe.db.commit()
-        
+        return {"success": True, "message": "Workflow setup completed successfully"}
+
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
-        frappe.log_error("Error in Updating Roadmap's requestors and approvers in Workflow.",
-                         "line No:{}\n{}".format(exc_tb.tb_lineno, str(e)))
+        frappe.log_error(
+            "Error in Updating Roadmap's requestors and approvers in Workflow.",
+            f"line No:{exc_tb.tb_lineno}\n{str(e)}"
+        )
         frappe.db.rollback()
         frappe.throw(str(e))
         return {"success": False, "message": str(e)}
