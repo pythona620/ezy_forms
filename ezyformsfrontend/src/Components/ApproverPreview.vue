@@ -1783,20 +1783,18 @@ function getEmploye() {
   const storedData = JSON.parse(localStorage.getItem("employeeData"));
   // console.log(storedData, "=============================");
   const queryParams = {
-    filters: JSON.stringify([["Ezy Employee", "emp_mail_id", "=", storedData?.emp_mail_id]]),
-    fields: JSON.stringify(["emp_name", "signature", "designation", "department"]),
-
+    filters: [["Ezy Employee", "emp_mail_id", "=", storedData?.emp_mail_id]],
+    fields: ["emp_name", "signature", "designation", "department"],
+    doctype:doctypes.EzyEmployeeList,
+    limit_page_length:"none"
   };
 
 
-  axiosInstance
-    .get(`${apis.resource}${doctypes.EzyEmployeeList}`, {
-      params: queryParams,
-    })
+  axiosInstance.post(apis.GetDoctypeData, queryParams)
     .then((response) => {
       emp_data.value = {
-        emp_name: response.data[0]?.emp_name,
-        signature: response.data[0]?.signature,
+        emp_name: response.message.data[0]?.emp_name,
+        signature: response.message.data[0]?.signature,
       };
       // console.log(response);
       // console.log(emp_data.value, "response");

@@ -378,7 +378,7 @@ function CreateDeprtModal() {
     const queryParams = {
         fields: ["name","department_name", "department_code","business_unit"],
         filters: filters,
-        limit_page_length: 999,
+        limit_page_length: "none",
         limit_start: filterObj.value.limit_start,
         doctype:doctypes.departments,
         order_by: "`tabEzy Departments`.`creation` desc"

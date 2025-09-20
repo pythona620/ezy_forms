@@ -279,7 +279,7 @@ function activityData() {
     const docName="Ezy Dynamic Activate Log"
     const queryParams = {
         fields: ["activate_log"],
-        limit_page_length: 999,
+        limit_page_length: "none",
         doctype:doctypes.EzyActivityLog,
     };
 

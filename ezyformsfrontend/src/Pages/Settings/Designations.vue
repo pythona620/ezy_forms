@@ -150,7 +150,7 @@ function designationData() {
 function checkDesignation() {
     const queryParams = {
         fields: ["role"],
-        limit_page_length: 999,
+        limit_page_length: "none",
         order_by: "`tabWF Roles`.`creation` desc",
         doctype:doctypes.designations,
     };

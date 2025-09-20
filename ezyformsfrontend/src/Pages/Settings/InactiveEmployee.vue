@@ -1692,8 +1692,8 @@ const uploadFile = (file, field) => {
 };
 function deptData(callback) {
   const queryParams = {
-    fields: ["department_name"],
-    limit_page_length: 999,
+    fields: ["*"],
+    limit_page_length: "none",
     doctype:doctypes.departments,
   };
 
@@ -1845,14 +1845,14 @@ function employeeOptions() {
   const queryParams = {
     fields: ["acknowledge_on","acknowledgement","company_field","creation","custom_enable","department","designation","emp_code","emp_mail_id",
     "emp_name","emp_phone","enable","enable_on","is_admin","is_hod","is_web_form","last_ip","last_login","name","profile_image","remarks","reporting_designation","reporting_to","signature"],
-    limit_page_length: 9999,
+    limit_page_length: "none",
     filters: [["company_field", "=", `${newbusiness.value}`]],
     doctype:doctypes.EzyEmployeeList,
     order_by: "`tabEzy Employee`.`modified` desc",
   };
   axiosInstance.post(apis.GetDoctypeData, queryParams)
     .then((res) => {
-      if (res.data) {
+      if (res.message) {
         const newData = res.message.data
         if (filterObj.value.limit_start === 0) {
 
@@ -1863,7 +1863,7 @@ function employeeOptions() {
           ];
           reportingDesigination.value = [
             ...new Set(
-              res.data.map(
+              res.message.data.map(
                 (reportingDesigination) =>
                   reportingDesigination.reporting_designation
               )
@@ -1900,7 +1900,7 @@ function designationData() {
   const filters = [];
   const queryParams = {
     fields: ["role"],
-    limit_page_length: 999,
+    limit_page_length: "none",
     doctype:doctypes.designations,
   };
 

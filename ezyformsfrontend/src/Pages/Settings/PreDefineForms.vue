@@ -258,7 +258,7 @@ function fetchTable(data) {
     const queryParams = {
         fields: ["form_name", "installed","form_json","name"],
         filters: filters,
-        limit_page_length: 999,
+        limit_page_length: "none",
         limit_start: filterObj.value.limit_start,
         doctype:doctypes.preDefinedForm,
         order_by: "`installed` DESC",

@@ -1438,36 +1438,17 @@ function receivedForMe(data) {
     // }
   }
 
-  const queryParams = {
-    fields: JSON.stringify(["*"]),
-    filters: JSON.stringify(filters),
+   const queryParams = {
+    fields: ["*"],
+    filters: filters,
+    doctype:doctypes.WFWorkflowRequests,
+    limit_page_length:"none"
   };
 
-  // const queryParamsCount = {
-  //   fields: JSON.stringify(["count(name) AS total_count"]),
-  //   limitPageLength: "None",
-  //   filters: JSON.stringify(filters),
-  // };
-
-  // // Fetch total count of records matching filters
-  // axiosInstance
-  //   .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, {
-  //     params: queryParamsCount,
-  //   })
-  //   .then((res) => {
-  //     totalRecords.value = res.data[0].total_count;
-  //   })
-  //   .catch((error) => {
-  //     console.error("Error fetching total count:", error);
-  //   });
-
   // Fetch the records matching filters
-  axiosInstance
-    .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, {
-      params: queryParams,
-    })
+  axiosInstance.post(apis.GetDoctypeData, queryParams)
     .then((res) => {
-      tableData.value = res.data[0];
+      tableData.value = res.message.data[0];
 
       selectedcurrentLevel.value = tableData.value?.current_level;
       selectedtotalLevels.value = tableData.value?.total_levels;
@@ -1488,7 +1469,7 @@ function receivedForMe(data) {
       ).child_table_fields;
 
       // console.log(tableHeaders.value, "req");
-      if (res.data.length) {
+      if (res.message.data.length) {
         Wfactivitylog(tableData.value.name);
         getdata(tableData.value.name);
 
