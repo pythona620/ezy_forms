@@ -14,5 +14,9 @@ def employee_last_login_activate(login_manager):
         },
         update_modified=False
     )
-    employee_doc = frappe.get_doc("Ezy Employee", frappe.session.user,fields=["name","company_field","emp_name","emp_mail_id","designation","department","emp_code","is_admin","responsible_units"])
+    employee_doc = frappe.db.get_values(
+        "Ezy Employee", 
+        frappe.session.user,
+        ["name","company_field","emp_name","emp_mail_id","designation","department","emp_code","is_admin"]
+    )
     frappe.local.response["employee_doc"] = employee_doc
