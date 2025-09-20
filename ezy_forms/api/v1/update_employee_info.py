@@ -14,9 +14,14 @@ def employee_last_login_activate(login_manager):
         },
         update_modified=False
     )
-    employee_doc = frappe.db.get_values(
-        "Ezy Employee", 
+    employee_list = frappe.db.get_values(
+        "Ezy Employee",
         frappe.session.user,
-        ["name","company_field","emp_name","emp_mail_id","designation","department","emp_code","is_admin"]
+        ["name","company_field","emp_name","emp_mail_id","designation","department","emp_code","is_admin"],
+        as_dict=1  # returns a list of dicts
     )
-    frappe.local.response["employee_doc"] = employee_doc
+
+    # Convert to a single dictionary (empty dict if no result)
+    employee_doc = employee_list[0] if employee_list else {}
+
+    frappe.local.response["employee_doc"] = [employee_doc]
