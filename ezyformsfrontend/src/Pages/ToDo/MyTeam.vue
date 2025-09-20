@@ -648,12 +648,12 @@ const filteredData = ref([]);
 
 function receivedForMe() {
   const EmpRequestMail = JSON.parse(localStorage.getItem("employeeData"));
-  const payload = {
+  const queryParams = {
     property_field: newBusinessUnit.value.business_unit,
     department: EmpRequestMail.department,
   }
   axiosInstance
-    .post(apis.GetEmployeeForms, payload)
+    .get(apis.GetEmployeeForms, { params: queryParams })
     .then((response) => {
       fullData.value = response.message || [];
 

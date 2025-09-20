@@ -122,7 +122,7 @@ watch(
 const filterObj = ref({ limitPageLength: 20, limit_start: 0, filters: [] });
 
 function ViewOnlyReport() {
-  const payload = {
+  const queryParams = {
     employee: selectedData.value.EmpId,
     department: selectedData.value.DeptName,
     property_field: selectedData.value.business_unit,
@@ -130,7 +130,7 @@ function ViewOnlyReport() {
     ...(activeTab.value === 'approved' && { approved_by_me: "1" }),
   }
   axiosInstance
-    .post(apis.GetEmployeeForms, payload)
+    .get(apis.GetEmployeeForms, { params: queryParams })
     .then((response) => {
       fullData.value = response.message || [];
 
