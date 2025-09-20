@@ -158,16 +158,16 @@ function userDetails(empEmail) {
 
 
   const queryParams = {
-    fields: ["acknowledge_on","acknowledgement","company_field","creation","department","designation","emp_code","emp_mail_id",
-    "emp_name","emp_phone","enable","enable_on","is_admin","is_hod","is_web_form","last_ip","last_login","name","profile_image","remarks","reporting_designation","reporting_to","signature"],
+    fields: JSON.stringify(["acknowledge_on","company_field","department","designation","emp_code","emp_mail_id",
+    "emp_name","emp_phone","name","profile_image","reporting_designation","reporting_to","signature"]),
     doctype:doctypes.EzyEmployeeList,
-    filters: [["Ezy Employee","emp_mail_id","=",empEmail]],
+    filters: JSON.stringify([["Ezy Employee","emp_mail_id","=",empEmail]]),
     
     order_by: "`tabEzy Employee`.`enable` DESC, `tabEzy Employee`.`modified` DESC",
   };
 
   // Data API
-  axiosInstance.post(apis.GetDoctypeData, queryParams)
+  axiosInstance.get(apis.GetDoctypeData, { params: queryParams })
     .then((res) => {
       if (res.message.data) {
         console.log(res.message.data);

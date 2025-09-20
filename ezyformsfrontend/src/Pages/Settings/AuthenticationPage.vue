@@ -275,13 +275,13 @@ function BussinesUnit() {
     //     });
 
     const queryParamse = {
-        fields: ["name", "bu_code", "send_form_as_a_attach_through_mail", "welcome_mail_to_employee", "send_daily_alerts", "is_acknowledge", "signature_required"],
-        filters:[["name",'=',Bussines_unit.value]],
+        fields: JSON.stringify(["name", "bu_code", "send_form_as_a_attach_through_mail", "welcome_mail_to_employee", "send_daily_alerts", "is_acknowledge", "signature_required"]),
+        filters:JSON.stringify([["name",'=',Bussines_unit.value]]),
         doctype:doctypes.wfSettingEzyForms,
         limit_page_length:"none",
 
     };
-    axiosInstance.post(apis.GetDoctypeData, queryParamse)
+    axiosInstance.get(apis.GetDoctypeData,  { params: queryParamse })
     .then((res) => {
         if (res?.message) {
             const status = res.message.data[0].send_form_as_a_attach_through_mail;
