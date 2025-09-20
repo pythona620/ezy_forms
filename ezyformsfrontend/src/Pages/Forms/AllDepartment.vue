@@ -592,10 +592,10 @@ const filteredData = ref([]);
 function fetchDepartmentDetails() {
   const userDetails = JSON.parse(localStorage.getItem('employeeData'));
 
-const payload = {
+const queryParams = {
   designation: userDetails.designation || "",
   property: `${newBusinessUnit.value.business_unit}`,
-  fields: ["accessible_departments","active","business_unit","count",
+  fields: JSON.stringify(["accessible_departments","active","business_unit","count",
     "creation",
     "docstatus",
     "enable",
@@ -619,7 +619,7 @@ const payload = {
     "print_format",
     "series",
     "workflow_check"
-  ],
+  ]),
 };
 
   if (props.id && props.id !== "allforms") {
@@ -627,7 +627,7 @@ const payload = {
   }
 
   axiosInstance
-    .post(apis.GetAccessibleDeptForms, payload)
+    .get(apis.GetAccessibleDeptForms, { params: queryParams })
     .then((response) => {
       fullData.value = response.message || [];
       filteredData.value = [...fullData.value];
