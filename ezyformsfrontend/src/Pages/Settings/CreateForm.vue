@@ -600,41 +600,15 @@ function fetchDepartmentDetails(data) {
   }
 
   const queryParams = {
-    fields: [  "name",
-              "business_unit",
-              "form_type",
-              "form_category",
-              "owner_of_the_form",
-              "active",
-              "count",
-              "accessible_departments",
-              "form_short_name",
-              "form_json",
-              "form_name",
-              "form_status",
-              "enable",
-              "print_format",
-              "is_landscape",
-              "has_workflow",
-              "workflow_check",
-              "is_predefined_doctype",
-              "predefined_doctype_name",
-              "is_linked",
-              "is_linked_form",
-              "form_department",
-              "qr_code",
-              "qr_url",
-              "send_mail_for_frist_approval",
-              "mail_id",
-              "series"],
+    fields: JSON.stringify(["*"]),
     limit_page_length: filterObj.value.limitPageLength,
     limit_start: filterObj.value.limit_start,
-    filters: filterObj.value.filters,
+    filters: JSON.stringify(filterObj.value.filters),
     doctype:doctypes.EzyFormDefinitions,
     order_by: "`tabEzy Form Definitions`.`enable` DESC, `tabEzy Form Definitions`.`creation` DESC"
   };
 
-  axiosInstance.post(apis.GetDoctypeData, queryParams)
+  axiosInstance.get(apis.GetDoctypeData, { params: queryParams })
     .then((response) => {
       totalRecords.value=response.message.total_count;
       if (filterObj.value.limit_start === 0) {

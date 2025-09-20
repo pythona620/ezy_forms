@@ -256,15 +256,15 @@ function fetchTable(data) {
 
 
     const queryParams = {
-        fields: ["form_name", "installed","form_json","name"],
-        filters: filters,
+        fields: JSON.stringify(["form_name", "installed","form_json","name"]),
+        filters: JSON.stringify(filters),
         limit_page_length: "none",
         limit_start: filterObj.value.limit_start,
         doctype:doctypes.preDefinedForm,
         order_by: "`installed` DESC",
 
     };
-    axiosInstance.post(apis.GetDoctypeData, queryParams)
+    axiosInstance.get(apis.GetDoctypeData, { params: queryParams })
         .then(res => {
             const newData = res.message.data;
             totalRecords.value=res.message.total_count;

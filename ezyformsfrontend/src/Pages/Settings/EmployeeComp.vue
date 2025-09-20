@@ -1923,12 +1923,12 @@ const uploadFile = (file, field) => {
 
 function deptData(callback) {
   const queryParams = {
-    fields: ["*"],
+    fields: JSON.stringify(["*"]),
     limit_page_length: "none",
     doctype:doctypes.departments,
   };
 
-  axiosInstance.post(apis.GetDoctypeData, queryParams)
+  axiosInstance.get(apis.GetDoctypeData, { params: queryParams })
     .then((res) => {
       if (res.message.data) {
         departmentsList.value = res.message.data;
@@ -2037,9 +2037,9 @@ function employeeData(data) {
   });
 
   const queryParams = {
-    fields: ["acknowledge_on","acknowledgement","company_field","creation","department","designation","emp_code","emp_mail_id",
-    "emp_name","emp_phone","enable","enable_on","is_admin","is_hod","is_web_form","last_ip","last_login","name","profile_image","remarks","reporting_designation","reporting_to","signature"],
-    filters: uniqueFilters,
+    fields: JSON.stringify(["acknowledge_on","acknowledgement","company_field","creation","department","designation","emp_code","emp_mail_id",
+    "emp_name","emp_phone","enable","enable_on","is_admin","is_hod","is_web_form","last_ip","last_login","name","profile_image","remarks","reporting_designation","reporting_to","signature"]),
+    filters: JSON.stringify(uniqueFilters),
     limit_page_length: filterObj.value.limitPageLength,
     limit_start: filterObj.value.limit_start,
     doctype:doctypes.EzyEmployeeList,
@@ -2047,7 +2047,7 @@ function employeeData(data) {
   };
 
   // Data API
-  axiosInstance.post(apis.GetDoctypeData, queryParams)
+  axiosInstance.get(apis.GetDoctypeData, { params: queryParams })
     .then((res) => {
       if (res.message.data) {
         totalRecords.value=res.message.total_count;
@@ -2070,14 +2070,14 @@ const employeeEmails = ref([]);
 
 function employeeOptions() {
   const queryParams = {
-    fields: ["acknowledge_on","acknowledgement","company_field","creation","department","designation","emp_code","emp_mail_id",
-    "emp_name","emp_phone","enable","enable_on","is_admin","is_hod","is_web_form","last_ip","last_login","name","profile_image","remarks","reporting_designation","reporting_to","signature"],
+    fields: JSON.stringify(["acknowledge_on","acknowledgement","company_field","creation","department","designation","emp_code","emp_mail_id",
+    "emp_name","emp_phone","enable","enable_on","is_admin","is_hod","is_web_form","last_ip","last_login","name","profile_image","remarks","reporting_designation","reporting_to","signature"]),
     limit_page_length: "none",
-    filters: [["company_field", "=", `${newbusiness.value}`]],
+    filters: JSON.stringify([["company_field", "=", `${newbusiness.value}`]]),
     doctype:doctypes.EzyEmployeeList,
     order_by: "`tabEzy Employee`.`modified` desc",
   };
-  axiosInstance.post(apis.GetDoctypeData, queryParams)
+  axiosInstance.get(apis.GetDoctypeData, { params: queryParams })
     .then((res) => {
       if (res.message.data) {
         const newData = res.message.data
@@ -2120,13 +2120,13 @@ function employeeOptions() {
 function designationData() {
   const filters = [];
   const queryParams = {
-    fields: ["role"],
+    fields: JSON.stringify(["role"]),
     limit_page_length: "none",
     doctype:doctypes.designations,
     limit_start: filterObj.value.limit_start,
   };
 
-  axiosInstance.post(apis.GetDoctypeData, queryParams)
+  axiosInstance.get(apis.GetDoctypeData, { params: queryParams })
     .then((res) => {
       if (res.message.data) {
         designations.value = [...new Set(res.message.data.map((user) => user.role))];

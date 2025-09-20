@@ -1804,14 +1804,14 @@ function getEmploye() {
   const storedData = JSON.parse(localStorage.getItem("employeeData"));
   // console.log(storedData, "=============================");
   const queryParams = {
-    filters: [["Ezy Employee", "emp_mail_id", "=", storedData?.emp_mail_id]],
-    fields: ["emp_name", "signature", "designation", "department"],
+    filters: JSON.stringify([["Ezy Employee", "emp_mail_id", "=", storedData?.emp_mail_id]]),
+    fields: JSON.stringify(["emp_name", "signature", "designation", "department"]),
     doctype:doctypes.EzyEmployeeList,
     limit_page_length:"none"
   };
 
 
-  axiosInstance.post(apis.GetDoctypeData, queryParams)
+  axiosInstance.get(apis.GetDoctypeData, { params: queryParams })
     .then((response) => {
       emp_data.value = {
         emp_name: response.message.data[0]?.emp_name,

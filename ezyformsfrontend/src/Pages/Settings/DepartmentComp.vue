@@ -376,15 +376,15 @@ function CreateDeprtModal() {
     ];
 
     const queryParams = {
-        fields: ["name","department_name", "department_code","business_unit"],
-        filters: filters,
+        fields: JSON.stringify(["name","department_name", "department_code","business_unit"]),
+        filters: JSON.stringify(filters),
         limit_page_length: "none",
         limit_start: filterObj.value.limit_start,
         doctype:doctypes.departments,
         order_by: "`tabEzy Departments`.`creation` desc"
     };
 
-    axiosInstance.post(apis.GetDoctypeData, queryParams)
+    axiosInstance.get(apis.GetDoctypeData, { params: queryParams })
         .then((res) => {
             if (res.message.data) {
                 designiations.value = [...new Set(res.message.data.map((designation) => designation.department_name))];
@@ -403,16 +403,16 @@ function deptData(data) {
     if (data) {
         filters.push(...data)
     }
-    const payload = {
-        fields: ["name","department_code","department_name","business_unit"],
-        filters: filters,
+    const queryParams = {
+        fields: JSON.stringify(["name","department_code","department_name","business_unit"]),
+        filters: JSON.stringify(filters),
         limit_page_length: filterObj.value.limitPageLength,
         limit_start: filterObj.value.limit_start,
         doctype:doctypes.departments,
         order_by: "`tabEzy Departments`.`creation` desc"
     };
 
-    axiosInstance.post(apis.GetDoctypeData, payload)
+        axiosInstance.get(apis.GetDoctypeData, { params: queryParams })
         .then((res) => {
             if (res) {
                 totalRecords.value=res.message.total_count;

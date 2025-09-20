@@ -181,15 +181,15 @@ function EmailQueueData() {
     // }
 
     const queryParams = {
-        fields: ["name","message","sender","creation","status"],
-        filters: filterObj.value.filters,
+        fields: JSON.stringify(["name","message","sender","creation","status"]),
+        filters: JSON.stringify(filterObj.value.filters),
         limit_page_length: filterObj.value.limitPageLength,
         limit_start: filterObj.value.limit_start,
         doctype:doctypes.emailQueue,
         order_by: `\`tab${doctypes.emailQueue}\`.\`creation\` desc`,
     };
 
-    axiosInstance.post(apis.GetDoctypeData, queryParams)
+    axiosInstance.get(apis.GetDoctypeData, { params: queryParams })
         .then((res) => {
             if (res.message) {
                 totalRecords.value=res.message.total_count;
