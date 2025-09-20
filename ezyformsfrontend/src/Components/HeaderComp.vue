@@ -482,7 +482,7 @@ onMounted(() => {
     const userName = JSON.parse(localStorage.getItem('UserName'));
 
     EmpCompony.value = userData.company_field;
-    responsibleUnits.value = userData.responsible_units.map(unit => unit.company);
+    responsibleUnits.value = userData.responsible_units?.map(unit => unit.company);
 
     // const syetemmanger = JSON.parse(localStorage.getItem('systemManager'))
     if (userName) {
