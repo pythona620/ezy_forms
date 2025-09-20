@@ -24,4 +24,4 @@ def employee_last_login_activate(login_manager):
     # Convert to a single dictionary (empty dict if no result)
     employee_doc = employee_list[0] if employee_list else {}
 
-    frappe.local.response["employee_doc"] = [employee_doc]
+    frappe.local.response["employee_doc"] = employee_doc
