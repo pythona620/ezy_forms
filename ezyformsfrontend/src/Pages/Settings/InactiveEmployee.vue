@@ -1797,7 +1797,7 @@ function employeeData(data) {
   }
 
   const queryParams = {
-    fields: ["acknowledge_on","acknowledgement","company_field","creation","custom_enable","department","designation","emp_code","emp_mail_id",
+    fields: ["acknowledge_on","acknowledgement","company_field","creation","department","designation","emp_code","emp_mail_id",
     "emp_name","emp_phone","enable","enable_on","is_admin","is_hod","is_web_form","last_ip","last_login","name","profile_image","remarks","reporting_designation","reporting_to","signature"],
     filters: filters,
     limit_page_length: filterObj.value.limitPageLength,
@@ -1843,7 +1843,7 @@ const employeeEmails = ref([]);
 
 function employeeOptions() {
   const queryParams = {
-    fields: ["acknowledge_on","acknowledgement","company_field","creation","custom_enable","department","designation","emp_code","emp_mail_id",
+    fields: ["acknowledge_on","acknowledgement","company_field","creation","department","designation","emp_code","emp_mail_id",
     "emp_name","emp_phone","enable","enable_on","is_admin","is_hod","is_web_form","last_ip","last_login","name","profile_image","remarks","reporting_designation","reporting_to","signature"],
     limit_page_length: "none",
     filters: [["company_field", "=", `${newbusiness.value}`]],
