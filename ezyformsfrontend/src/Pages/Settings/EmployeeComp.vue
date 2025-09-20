@@ -2010,7 +2010,6 @@ function inLineFiltersData(searchedData) {
       }
     });
 
-    // Call receivedForMe with or without filters
    
       filterObj.value.limit_start = 0;
       filterObj.value.limitPageLength = 20; // Reset to first page on new search
