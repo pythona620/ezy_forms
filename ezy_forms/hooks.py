@@ -24,8 +24,7 @@ after_install = "ezy_forms.api.v1.default_mail_templates.email_template_create"
 after_migrate = ["ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions.activating_perms_for_all_roles_in_wf_roadmap"]
 # Includes in <head>
 # ------------------
-on_session_creation = ["ezy_forms.api.v1.update_employee_info.employee_last_login_activate",
-                                                "ezy_forms.api.v1.update_employee_info.log_in_session"]
+on_session_creation = ["ezy_forms.api.v1.update_employee_info.employee_last_login_activate"]
 # include js, css files in header of desk.html
 # app_include_css = "/assets/ezy_forms/css/ezy_forms.css"
 # app_include_js = "/assets/ezy_forms/js/ezy_forms.js"
