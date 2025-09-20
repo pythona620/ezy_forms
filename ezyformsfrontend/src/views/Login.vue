@@ -1102,7 +1102,7 @@ export default {
                   emp_code: employeeData.emp_code,
                   emp_signature: employeeData.signature,
                   is_admin: employeeData.is_admin,
-                  responsible_units: employeeData.responsible_units,
+                  responsible_units: employeeData?.responsible_units,
                   // department: employeeData.department,
                 };
                 localStorage.setItem("subEndDate", this.subEndDate)
