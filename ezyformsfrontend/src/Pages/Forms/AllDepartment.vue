@@ -623,7 +623,7 @@ const queryParams = {
 };
 
   if (props.id && props.id !== "allforms") {
-    payload.department = props.id;
+    queryParams.department = props.id;
   }
 
   axiosInstance

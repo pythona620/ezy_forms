@@ -278,14 +278,13 @@ const activityDoctypes=ref([])
 function activityData() {
     const docName="Ezy Dynamic Activate Log"
     const queryParams = {
-        fields: ["activate_log"],
+        fields: JSON.stringify(["activate_log"]),
         limit_page_length: "none",
         doctype:doctypes.EzyActivityLog,
     };
 
     axiosInstance
-    .post(`${apis.GetDoctypeData}/${encodeURIComponent(docName)}`, queryParams)
-    // axiosInstance.post(apis.GetDoctypeData/encodeURIComponent(docName), queryParams)
+    .get(`${apis.GetDoctypeData}/${encodeURIComponent(docName)}`, { params: queryParams })
         .then((res) => {
             if (res) {
                 activityDoctypes.value = res.message.data[0].activate_log;
@@ -325,15 +324,15 @@ function activitylog(data) {
     filterObj.value.filters.push(["ref_doctype", "in", activityDoctypes.value]);
 
     const queryParams = {
-        fields: ["docname","ref_doctype","modified_by","modified","data"],
-        filters: filterObj.value.filters,
+        fields: JSON.stringify(["docname","ref_doctype","modified_by","modified","data"]),
+        filters:JSON.stringify(filterObj.value.filters),
         limit_page_length: filterObj.value.limitPageLength,
         limit_start: filterObj.value.limit_start,
         doctype:doctypes.version,
         order_by: "`tabVersion`.`creation` desc"
     };
 
-    axiosInstance.post(apis.GetDoctypeData, queryParams)
+    axiosInstance.get(apis.GetDoctypeData, { params: queryParams })
         .then((res) => {
             if (res) {
                 const newData = res.message.data

@@ -1439,14 +1439,14 @@ function receivedForMe(data) {
   }
 
    const queryParams = {
-    fields: ["*"],
-    filters: filters,
+    fields: JSON.stringify(["*"]),
+    filters: JSON.stringify(filters),
     doctype:doctypes.WFWorkflowRequests,
     limit_page_length:"none"
   };
 
   // Fetch the records matching filters
-  axiosInstance.post(apis.GetDoctypeData, queryParams)
+  axiosInstance.get(apis.GetDoctypeData, { params: queryParams })
     .then((res) => {
       tableData.value = res.message.data[0];
 

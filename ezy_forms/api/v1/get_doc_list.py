@@ -1,8 +1,8 @@
 import frappe
 import json
 
-@frappe.whitelist()
-def get_doctype_list(doctype, fields:list, filters=None, limit_start:int=None, limit_page_length=None):
+@frappe.whitelist(methods=["GET"])
+def get_doctype_list(doctype, fields:str, filters=None, limit_start:int=None, limit_page_length=None):
     # Prevent using '*' in fields
     # if fields == ["*"]:
     #     frappe.throw("Wildcard '*' is not allowed in fields. Please pass required fields explicitly.")
@@ -32,8 +32,13 @@ def get_doctype_list(doctype, fields:list, filters=None, limit_start:int=None, l
     )
 
     # Get total count of matching records
-    total_count = frappe.db.count(doctype, filters)
-
+    total_count = 0
+    filters = frappe.parse_json(filters)
+    if not filters:
+        total_count = frappe.db.count(doctype)
+    else:
+        total_count = frappe.db.count(doctype,filters)
+        
     return {
         "data": data,
         "total_count": total_count,

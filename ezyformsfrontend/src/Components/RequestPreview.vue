@@ -1863,15 +1863,15 @@ const emp_data = ref({});
 async function getEmploye() {
   const storedData = JSON.parse(localStorage.getItem("employeeData"));
   const queryParams = {
-    filters: [
+    filters: JSON.stringify([
       ["Ezy Employee", "emp_mail_id", "=", storedData?.emp_mail_id],
-    ],
-    fields: ["emp_name", "signature", "designation", "department"],
+    ]),
+    fields: JSON.stringify(["emp_name", "signature", "designation", "department"]),
     doctype:doctypes.EzyEmployeeList,
   };
 
   try {
-    const response = await axiosInstance.post(apis.GetDoctypeData, queryParams)
+    const response = await axiosInstance.get(apis.GetDoctypeData, { params: queryParams })
     const data = response.message.data?.[0];
 
     if (data) {

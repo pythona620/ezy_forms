@@ -600,15 +600,15 @@ function fetchDepartmentDetails(data) {
   }
 
   const queryParams = {
-    fields: ["*"],
+    fields: JSON.stringify(["*"]),
     limit_page_length: filterObj.value.limitPageLength,
     limit_start: filterObj.value.limit_start,
-    filters: filterObj.value.filters,
+    filters: JSON.stringify(filterObj.value.filters),
     doctype:doctypes.EzyFormDefinitions,
     order_by: "`tabEzy Form Definitions`.`enable` DESC, `tabEzy Form Definitions`.`creation` DESC"
   };
 
-  axiosInstance.post(apis.GetDoctypeData, queryParams)
+  axiosInstance.get(apis.GetDoctypeData, { params: queryParams })
     .then((response) => {
       totalRecords.value=response.message.total_count;
       if (filterObj.value.limit_start === 0) {

@@ -590,12 +590,12 @@ function passwordChange() {
 }
 const ezyForms = () => {
     const queryParams = {
-        fields: ["name", "bu_code"],
+        fields: JSON.stringify(["name", "bu_code"]),
         doctype:doctypes.wfSettingEzyForms,
         limit_page_length:"none",
 
     };
-    axiosInstance.post(apis.GetDoctypeData, queryParams)
+    axiosInstance.get(apis.GetDoctypeData, { params: queryParams })
     .then((res) => {
         if (res?.message) {
             EzyFormsCompanys.value = res.message.data.map((company) => company.bu_code);

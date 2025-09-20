@@ -349,15 +349,15 @@ function activitylog(data) {
     }
 
     const queryParams = {
-        fields: ["name","acknowledgement","naming_series","enable"],
-        filters: filterObj.value.filters,
+        fields: JSON.stringify(["name","acknowledgement","naming_series","enable"]),
+        filters: JSON.stringify(filterObj.value.filters),
         limit_page_length: filterObj.value.limitPageLength,
         limit_start: filterObj.value.limit_start,
         doctype:doctypes.acknowledgement,
         order_by: "`tabAcknowledgement`.`creation` desc"
     };
 
-    axiosInstance.post(apis.GetDoctypeData, queryParams)
+    axiosInstance.get(apis.GetDoctypeData, { params: queryParams })
         .then((res) => {
             if (res) {
                 const newData = res.message.data

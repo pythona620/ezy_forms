@@ -121,15 +121,15 @@ function designationData() {
     }
 
     const queryParams = {
-        fields: ["role"],
-        filters: filters,
+        fields: JSON.stringify(["role"]),
+        filters: JSON.stringify(filters),
         limit_page_length: filterObj.value.limitPageLength,
         limit_start: filterObj.value.limit_start,
         doctype:doctypes.designations,
         order_by: "`tabWF Roles`.`creation` desc"
     };
 
-        axiosInstance.post(apis.GetDoctypeData, queryParams)
+        axiosInstance.get(apis.GetDoctypeData, { params: queryParams })
         .then((res) => {
             if (res.message.data) {
                 const newData = res.message.data;
@@ -149,12 +149,12 @@ function designationData() {
 
 function checkDesignation() {
     const queryParams = {
-        fields: ["role"],
+        fields: JSON.stringify(["role"]),
         limit_page_length: "none",
         order_by: "`tabWF Roles`.`creation` desc",
         doctype:doctypes.designations,
     };
-    axiosInstance.post(apis.GetDoctypeData, queryParams)
+    axiosInstance.get(apis.GetDoctypeData, { params: queryParams })
         .then((res) => {
             if (res.message.data) {
                 checkDesignationData.value = res.message.data;

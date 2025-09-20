@@ -593,15 +593,15 @@ function formDefinations() {
   }
 
   const queryParams = {
-    fields: ["*"],
+    fields: JSON.stringify(["form_json","accessible_departments","name","business_unit","form_name","form_short_name"]),
     limit_page_length: 'None',
     limit_start: filterObj.value.limit_start,
-    filters: filters,
+    filters: JSON.stringify(filters),
     doctype:doctypes.EzyFormDefinitions,
     order_by: "`tabEzy Form Definitions`.`creation` desc",
   };
 
-  axiosInstance.post(apis.GetDoctypeData, queryParams)
+  axiosInstance.get(apis.GetDoctypeData, { params: queryParams })
     .then((res) => {
       checkingIs_linked.value = res.message.data[0];
       const form_json = res.message.data[0].form_json;
