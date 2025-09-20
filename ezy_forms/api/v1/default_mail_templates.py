@@ -3,7 +3,7 @@ from frappe.utils import get_url
 from frappe import _
 from ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions import ezy_doctype_permission
 from ezy_forms.ezy_forms.doctype.ezy_dynamic_activate_log.ezy_dynamic_activate_log import create_default_activation_log
-
+@frappe.whitelist()
 def email_template_create():
     
 	def create_template(name, subject, message):
