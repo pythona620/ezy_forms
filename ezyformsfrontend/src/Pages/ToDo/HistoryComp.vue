@@ -74,8 +74,15 @@ const fullData = ref([]);
 
 
 function ViewOnlyReport() {
+    const EmpRequestMail = JSON.parse(localStorage.getItem("employeeData"));
+
+  const payload = {
+    employee: EmpRequestMail.emp_mail_id,
+    approved_by_me: "1",
+    property_field: newBusinessUnit.value.business_unit,
+  }
   axiosInstance
-    .post(apis.get_approved_by_me)
+    .post(apis.GetEmployeeForms, payload)
     .then((response) => {
       fullData.value = response.message || [];
 

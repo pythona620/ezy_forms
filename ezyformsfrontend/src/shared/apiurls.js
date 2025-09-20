@@ -112,10 +112,8 @@ export const apis = {
   getQrCodeData:domain+`/method/ezy_flow.api.v1.generate_qr.qr_code_to_new_form`,
   addDesignationroles: domain + `/method/ezy_flow.api.v1.get_roles.get_role_list`,
   GetEmployeeForms:domain + `/method/ezy_flow.api.v1.get_employee_form.get_employee_forms`,
-
-  
-  
-
+  GetAccessibleDeptForms:domain + `/method/ezy_flow.api.v1.get_employee_accessible_forms.get_employee_accessible_forms`,
+  GetDoctypeData:domain + `/method/ezy_forms.api.v1.get_doc_list.get_doctype_list`,
   
   // getReportData: domain + `/api/method/frappe.utils.print_format.download_pdf`
 };

@@ -590,14 +590,15 @@ function passwordChange() {
 }
 const ezyForms = () => {
     const queryParams = {
-        fields: JSON.stringify(["name", "bu_code"]),
-    };
+        fields: ["name", "bu_code"],
+        doctype:doctypes.wfSettingEzyForms,
+        limit_page_length:"none",
 
-    axiosInstance.get(apis.resource + doctypes.wfSettingEzyForms, {
-        params: queryParams,
-    }).then((res) => {
-        if (res?.data?.length) {
-            EzyFormsCompanys.value = res.data.map((company) => company.bu_code);
+    };
+    axiosInstance.post(apis.GetDoctypeData, queryParams)
+    .then((res) => {
+        if (res?.message) {
+            EzyFormsCompanys.value = res.message.data.map((company) => company.bu_code);
             if (EzyFormsCompanys.value.length && !business_unit.value.length) {
                 business_unit.value = EzyFormsCompanys.value[0];
             }

@@ -2,38 +2,41 @@ import frappe
 import json
 
 @frappe.whitelist()
-def get_doctype_list(doctype, fields, filters=None, length=20):
-    # Parse fields into a Python list
-    if isinstance(fields, str):
-        try:
-            fields = json.loads(fields)
-        except Exception:
-            fields = [f.strip() for f in fields.split(',')]
+def get_doctype_list(doctype, fields:list, filters=None, limit_start:int=None, limit_page_length=None):
+    # Prevent using '*' in fields
+    # if fields == ["*"]:
+    #     frappe.throw("Wildcard '*' is not allowed in fields. Please pass required fields explicitly.")
+    # if not limit_page_length:
+    #     limit_page_length = 20
+    # Parse fields into a list
 
-    # Convert filters to Python list
-    parsed_filters = {}
-    if filters:
-        try:
-            parsed_filters = json.loads(filters)
-        except Exception as e:
-            frappe.throw(f"Invalid filters format: {str(e)}")
 
+    # Ensure pagination parameters are integers
     try:
-        length = int(length)
+        limit_start = int(limit_start)
     except:
-        length = 20
+        limit_start = 0
 
-    # Correct usage: fields must be a list
+    # try:
+    #     limit_page_length = int(limit_page_length)
+    # except:
+    #     limit_page_length = 20
+
+    # Fetch data with pagination
     data = frappe.get_all(
         doctype,
         fields=fields,
-        filters=parsed_filters,
-        limit_page_length=length
+        filters=filters,
+        limit_start=limit_start,
+        limit_page_length=limit_page_length 
     )
 
-    total_count = frappe.db.count(doctype, parsed_filters)
+    # Get total count of matching records
+    total_count = frappe.db.count(doctype, filters)
 
     return {
         "data": data,
-        "total_count": total_count
+        "total_count": total_count,
+        "limit_start": limit_start,
+        "limit_page_length": limit_page_length
     }

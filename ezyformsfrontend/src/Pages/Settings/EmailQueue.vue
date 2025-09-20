@@ -181,31 +181,19 @@ function EmailQueueData() {
     // }
 
     const queryParams = {
-        fields: JSON.stringify(["*"]),
-        filters: JSON.stringify(filterObj.value.filters),
+        fields: ["name","message","sender","creation","status"],
+        filters: filterObj.value.filters,
         limit_page_length: filterObj.value.limitPageLength,
         limit_start: filterObj.value.limit_start,
+        doctype:doctypes.emailQueue,
         order_by: `\`tab${doctypes.emailQueue}\`.\`creation\` desc`,
     };
-    const queryParamsCount = {
-        fields: JSON.stringify(["count(name) AS total_count"]),
-        limitPageLength: "None",
-        filters: JSON.stringify(filterObj.value.filters),
-    }
-    axiosInstance.get(`${apis.resource}${doctypes.emailQueue}`, { params: queryParamsCount })
+
+    axiosInstance.post(apis.GetDoctypeData, queryParams)
         .then((res) => {
-
-            totalRecords.value = res.data[0].total_count
-
-        })
-        .catch((error) => {
-            console.error("Error fetching ezyForms data:", error);
-        });
-
-    axiosInstance.get(apis.resource + doctypes.emailQueue, { params: queryParams })
-        .then((res) => {
-            if (res.data) {
-                const newData = res.data.map(item => {
+            if (res.message) {
+                totalRecords.value=res.message.total_count;
+                const newData = res.message.data.map(item => {
                     // Extract Subject from the message
                     const subjectMatch = item.message.match(/Subject:\s*(.*)/);
                     const subject = subjectMatch ? subjectMatch[1].trim() : '';
@@ -237,7 +225,6 @@ function viewPreview(data, type) {
         .then((res) => {
             if (res.data) {
                 emailsData.value = res.data.recipients;
-                console.log("emailsData.value", emailsData.value);
                 const modal = new bootstrap.Modal(document.getElementById('CreateDesignationModal'), {});
                 modal.show();
             }
@@ -245,68 +232,6 @@ function viewPreview(data, type) {
         .catch((error) => {
             console.error("Error fetching system settings:", error);
         });
-}
-
-
-
-
-
-function checkDesignation() {
-    const queryParams = {
-        fields: JSON.stringify(["role"]),
-        limit_page_length: "none",
-        order_by: "`tabWF Roles`.`creation` desc"
-    };
-    axiosInstance.get(apis.resource + doctypes.designations, { params: queryParams })
-        .then((res) => {
-            if (res.data) {
-                checkEmailQueueData.value = res.data;
-            }
-        })
-        .catch((error) => {
-            console.error("Error fetching designations data:", error);
-        });
-}
-
-function validateDesignation() {
-    const invalidCharRegex = /[^a-zA-Z .]/;
-
-    if (!Designation.value.trim()) {
-        errorMessage.value = 'Designation is required';
-    } else if (invalidCharRegex.test(Designation.value)) {
-        errorMessage.value = 'Only letters, spaces, and dot (.) are allowed';
-    } else if (
-        checkEmailQueueData.value.some(
-            item => item.role?.toLowerCase() === Designation.value.trim().toLowerCase()
-        )
-    ) {
-        errorMessage.value = 'This designation already exists';
-    } else {
-        errorMessage.value = '';
-    }
-}
-
-function SubmitDesignation() {
-    if (!errorMessage.value && Designation.value.trim()) {
-        const payload = {
-            role_name: Designation.value.trim(),
-        }
-        axiosInstance
-            .post(apis.resource + doctypes.roles, payload)
-            .then((response) => {
-                if (response) {
-                    //console.log(response);
-                    EmailQueueData();
-                    resetDesignation();
-                    toast.success("Designation Created Successfully", { autoClose: 1000 });
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('CreateDesignationModal'));
-                    modal.hide();
-                }
-            })
-            .catch((err) => {
-                console.error('Error creating role:', err)
-            })
-    }
 }
 
 
