@@ -67,6 +67,7 @@
                                     <div class="mx-3 my-2">
                                         <div v-for="(field, fieldIndex) in column.fields"
                                             :key="'field-preview-' + fieldIndex">
+                                            
                                             <div v-if="field.label && field.fieldtype !== 'Table'">
                                                 <label :for="'field-' +
                                                     sectionIndex +
@@ -91,6 +92,19 @@ option, index
                                                         </option>
                                                     </select>
                                                 </template>
+                                                <template v-else-if="field.fieldtype == 'Check' && field.fieldname !== 'auto_calculations'">
+
+
+                                                    <input type="checkbox" :checked="field.value"
+                                                        disabled
+                                                        :placeholder="'Enter ' + field.label" :name="'field-' +
+                                                        sectionIndex +
+                                                        '-' +
+                                                        columnIndex +
+                                                        '-' +
+                                                        fieldIndex
+                                                        " class="form-check-input fs-6 border-dark form-check-input previewInputHeight font-10" />
+                                                    </template>
                                                 <template v-else-if="
                                                     field.fieldtype == 'Check' ||
                                                     field.fieldtype == 'radio' ||
@@ -100,10 +114,11 @@ option, index
                                                     <div class="container">
                                                         <div class="row">
                                                             <div class="col-4 form-check mb-4" v-for="(
-option, index
-                                        ) in field?.options?.split('\n')" :key="index" :class="{ 'd-none': index === 0 && !field.option }"
+                                                                    option, index
+                                                                        ) in field?.options?.split('\n')" :key="index" :class="{ 'd-none': index === 0 && !field.option }"
                                                                 >
                                                                 <div class="d-flex align-items-center gap-2">
+                                                                    
                                                                     <div>
                                                                         <input v-if="( field?.option ||
                                                                             field.fieldtype === 'Check' || field.fieldtype === 'Select' || field.fieldtype == 'Small Text' )&&

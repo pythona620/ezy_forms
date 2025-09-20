@@ -114,39 +114,46 @@ watch(
     { immediate: true }
 );
 
+let debounceTimeout = null;
+
 function designationData() {
-     const filters = [];
+  // Clear previous timeout if user is still typing
+  if (debounceTimeout) clearTimeout(debounceTimeout);
+
+  // Set a new timeout
+  debounceTimeout = setTimeout(() => {
+    const filters = [];
     if (filterObj.value.search.trim()) {
-        filters.push(["name", "like", `%${filterObj.value.search}%`]);
+      filters.push(["name", "like", `%${filterObj.value.search}%`]);
     }
 
     const queryParams = {
-        fields: ["role"],
-        filters: filters,
-        limit_page_length: filterObj.value.limitPageLength,
-        limit_start: filterObj.value.limit_start,
-        doctype:doctypes.designations,
-        order_by: "`tabWF Roles`.`creation` desc"
+      fields: ["role"],
+      filters: filters,
+      limit_page_length: filterObj.value.limitPageLength,
+      limit_start: filterObj.value.limit_start,
+      doctype: doctypes.designations,
+      order_by: "`tabWF Roles`.`creation` desc",
     };
 
-        axiosInstance.post(apis.GetDoctypeData, queryParams)
-        .then((res) => {
-            if (res.message.data) {
-                const newData = res.message.data;
-                totalRecords.value=res.message.total_count;
-                if (filterObj.value.limit_start === 0) {
-                    tableData.value = newData;
-                } else {
-                    tableData.value = tableData.value.concat(newData)
-                }
-
-            }
-        })
-        .catch((error) => {
-            console.error("Error fetching designations data:", error);
-        });
+    axiosInstance
+      .post(apis.GetDoctypeData, queryParams)
+      .then((res) => {
+        if (res.message.data) {
+          const newData = res.message.data;
+          totalRecords.value = res.message.total_count;
+          if (filterObj.value.limit_start === 0) {
+            tableData.value = newData;
+          } else {
+            tableData.value = tableData.value.concat(newData);
+          }
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching designations data:", error);
+      });
+  }, 500); // 500ms delay after the last keystroke
 }
-
 function checkDesignation() {
     const queryParams = {
         fields: ["role"],

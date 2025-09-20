@@ -393,6 +393,7 @@
 <script setup>
 // import ButtonComp from "./ButtonComp.vue";
 import { defineProps, defineEmits, ref, onMounted, watch, reactive } from "vue";
+import { useRoute } from "vue-router";
 // import moment from "moment";
 // import FormFields from "./FormFields.vue";
 const props = defineProps({
@@ -455,7 +456,7 @@ const props = defineProps({
 
   }
 });
-
+const route = useRoute();
 const emits = defineEmits(["actionClicked", "updateFilters", "cell-click", "toggle-click", "actionClickedDropDown"]);
 
 function selectedAction(row, action) {
@@ -671,11 +672,22 @@ function selectedCheckList(row, index) {
   // console.log("Selected Data:", selectedData);
   emits("checkbox-click", row, index);
 }
+// filters state
 const filters = ref(
   props.tHeaders.reduce((acc, column) => {
-    acc[column.td_key] = ""; // Initialize with empty strings
+    acc[column.td_key] = "";
     return acc;
   }, {})
+);
+
+watch(
+  () => route.fullPath,   // you can also use route.name or route.query if needed
+  () => {
+    filters.value = props.tHeaders.reduce((acc, column) => {
+      acc[column.td_key] = "";
+      return acc;
+    }, {});
+  }
 );
 // Handle filter change
 // function handleFilterChange() {
@@ -732,6 +744,15 @@ onMounted(() => {
 function handleCellClick(check, index, type) {
   emits("cell-click", check, index, type);
 }
+watch(
+  () => route.fullPath,   // you can also use route.name or route.query if needed
+  () => {
+    filters.value = props.tHeaders.reduce((acc, column) => {
+      acc[column.td_key] = "";
+      return acc;
+    }, {});
+  }
+);
 // function formatDate(dateString) {
 // 	return moment(dateString).format("DD-MM-YYYY");
 // }
@@ -1141,4 +1162,50 @@ th:first-child {
   max-width: 500px;
   white-space: nowrap;
 }
+.table-responsive {
+  overflow: auto;
+}
+
+/* WebKit Browsers */
+.table-responsive::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+/* Track */
+.table-responsive::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 5px rgb(216, 216, 216);
+  border-radius: var(--border-radius-lg);
+  margin-top: 15px;
+  background: transparent; /* keep it clean */
+}
+
+/* Thumb hidden by default */
+.table-responsive::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: var(--border-radius-lg);
+}
+
+/* Show styled thumb on hover */
+.table-responsive:hover::-webkit-scrollbar-thumb {
+  background: #e2e2e2;
+}
+
+/* Thumb hover effect */
+.table-responsive:hover::-webkit-scrollbar-thumb:hover {
+  background: var(--black-color);
+}
+
+/* Firefox */
+.table-responsive {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent; /* hidden by default */
+}
+
+.table-responsive:hover {
+  scrollbar-color: #e2e2e2 transparent; /* visible on hover */
+}
+
+
+
 </style>

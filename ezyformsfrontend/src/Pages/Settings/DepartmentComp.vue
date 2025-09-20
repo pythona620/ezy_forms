@@ -442,6 +442,7 @@ function createDepart() {
         CreateDepartments.value.ezy_departments_items = categoriesDataEdit.value.ezy_departments_items;
         const dataObj = {
             ...CreateDepartments.value,
+            department_code: `${CreateDepartments.value.department_code}-${CreateDepartments.value.department_name}`,
             "doctype": doctypes.departments,
 
         }

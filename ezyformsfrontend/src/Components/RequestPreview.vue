@@ -874,78 +874,74 @@
                                                                         </template>
 
 
-                                                                        <template
-                                                                            v-else-if="field.fieldtype === 'Attach'">
-                                                                            <!-- File Input -->
-                                                                            <label
-                                                                            :for="`fileInput-${row[field.fieldname]}-${field.fieldname}`"
-                                                                            class="btn btn-light attchaInputLabel btn-sm font-12"
-                                                                        >
-                                                                            <i class="bi bi-paperclip me-1"></i> Attach
-                                                                        </label>
-                                                                        <input
-                                                                            :id="`fileInput-${row[field.fieldname]}-${field.fieldname}`"
-                                                                            type="file"
-                                                                            multiple
-                                                                            class="form-control d-none font-12"
-                                                                            @change="handleFileUpload($event, row, field.fieldname)"
-                                                                        />
+                                                                       <template v-else-if="field.fieldtype === 'Attach'">
+  <!-- File Input Trigger -->
+  <label
+    :for="`fileInput-${rowIndex}-${field.fieldname}`"
+    class="btn btn-light attchaInputLabel btn-sm font-12"
+  >
+    <i class="bi bi-paperclip me-1"></i> Attach
+  </label>
 
-                                                                            <!-- Preview Section -->
-                                                                            <div v-if="row[field.fieldname]"
-                                                                                class="d-flex flex-wrap gap-2">
-                                                                                <div v-for="(fileUrl, index) in normalizeFileList(row[field.fieldname])"
-                                                                                    :key="index"
-                                                                                    class="position-relative d-inline-block"
-                                                                                    @mouseover="hovered = index"
-                                                                                    @mouseleave="hovered = null">
-                                                                                    <!-- Preview click -->
-                                                                                    <div @click="openPreview(fileUrl)"
-                                                                                        style="cursor: pointer">
-                                                                                        <!-- Show Image Thumbnail -->
-                                                                                        <img v-if="isImageChildFile(fileUrl)"
-                                                                                            :src="fileUrl"
-                                                                                            class="img-thumbnail mt-2 border-0"
-                                                                                            style="max-width: 100px; max-height: 100px" />
+  <!-- Hidden File Input -->
+  <input
+    :id="`fileInput-${rowIndex}-${field.fieldname}`"
+    type="file"
+    multiple
+    class="d-none"
+    @change="handleFileUpload($event, row, field.fieldname)"
+  />
 
-                                                                                        <!-- Show PDF Icon -->
-                                                                                         <div
-                                                                                            v-else-if="isPdfFile(fileUrl)"
-                                                                                            class="d-flex align-items-center justify-content-center border mt-2"
-                                                                                            style="width: 60px; height: 70px; background: #f9f9f9"
-                                                                                            >
-                                                                                            <i class="bi bi-file-earmark-pdf fs-1 text-danger"></i>
-                                                                                            </div>
+  <!-- File Previews -->
+  <div v-if="row[field.fieldname]" class="d-flex flex-wrap gap-2 mt-2">
+    <div
+      v-for="(fileUrl, index) in normalizeFileList(row[field.fieldname])"
+      :key="index"
+      class="file-preview position-relative"
+    >
+      <!-- Preview -->
+      <div @click="openPreview(fileUrl)" class="preview-box">
+        <!-- Image Thumbnail -->
+        <img
+          v-if="isImageChildFile(fileUrl)"
+          :src="fileUrl"
+          class="img-thumbnail border-0"
+        />
 
-                                                                                            <!-- Excel Preview -->
-                                                                                            <div
-                                                                                            v-else-if="isExcelFile(fileUrl)"
-                                                                                            class="d-flex align-items-center justify-content-center border mt-2"
-                                                                                            style="width: 100px; height: 100px; background: #f9f9f9"
-                                                                                            >
-                                                                                            <i class="bi bi-file-earmark-spreadsheet fs-1 text-success"></i>
-                                                                                            </div>
+        <!-- PDF Icon -->
+        <div
+          v-else-if="isPdfFile(fileUrl)"
+          class="file-icon text-danger"
+        >
+          <i class="bi bi-file-earmark-pdf fs-1"></i>
+        </div>
 
-                                                                                            <!-- Other File Types -->
-                                                                                            <div
-                                                                                            v-else
-                                                                                            class="d-flex align-items-center justify-content-center border mt-2"
-                                                                                            style="width: 100px; height: 100px; background: #f9f9f9"
-                                                                                            >
-                                                                                            <i class="bi bi-file-earmark fs-1"></i>
-                                                                                            </div>
-                                                                                    </div>
+        <!-- Excel Icon -->
+        <div
+          v-else-if="isExcelFile(fileUrl)"
+          class="file-icon text-success"
+        >
+          <i class="bi bi-file-earmark-spreadsheet fs-1"></i>
+        </div>
 
-                                                                                    <!-- Remove Icon -->
-                                                                                    <button v-if="hovered === index"
-                                                                                        @click="removechildFile(index, field, row)"
-                                                                                        class="btn btn-sm btn-light position-absolute"
-                                                                                        style="top: 5px; right: -5px; border-radius: 50%; padding: 0 5px;height:27px;">
-                                                                                        <i class="bi bi-x fs-6"></i>
-                                                                                    </button>
-                                                                                </div>
-                                                                            </div>
-                                                                        </template>
+        <!-- Other File Types -->
+        <div v-else class="file-icon text-secondary">
+          <i class="bi bi-file-earmark fs-1"></i>
+        </div>
+      </div>
+
+      <!-- ❌ Remove Button (always visible on hover) -->
+      <button
+        class="remove-btn btn btn-sm btn-light"
+        @click="removechildFile(index, field, row)"
+      >
+        <i class="bi bi-x"></i>
+      </button>
+    </div>
+  </div>
+</template> 
+
+
 
 
 
@@ -1595,15 +1591,22 @@ const normalizeFileList = (value) => {
 //     row[field.fieldname] = files.join('|');
 // };
 const removechildFile = (index, field, row) => {
-    let files = normalizeFileList(row[field.fieldname]);
+  if (!row[field.fieldname]) return;
 
-    if (index >= 0 && index < files.length) {
-        files.splice(index, 1);
-    }
+  // Convert string to array if needed
+  let files = typeof row[field.fieldname] === "string"
+    ? row[field.fieldname].split("|")
+    : [...row[field.fieldname]]; // copy of array
 
-    // Keep consistent with upload: save back as "|" string
-    row[field.fieldname] = files.join('|');
+  // Remove file at index
+  if (index >= 0 && index < files.length) {
+    files.splice(index, 1);
+  }
+
+  // Save back as "|" string (or null if empty)
+  row[field.fieldname] = files.length ? files.join("|") : null;
 };
+
 
 const isImageChildFile = (fileUrl) => {
     return /\.(jpg|jpeg|png)$/i.test(fileUrl);
@@ -2735,6 +2738,51 @@ function getFieldError(row, field) {
     overflow-x: scroll;
     
 }  
+.overTable {
+  overflow: auto;
+}
+
+/* WebKit Browsers */
+.overTable::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+/* Track */
+.overTable::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 5px rgb(216, 216, 216);
+  border-radius: var(--border-radius-lg);
+  margin-top: 15px;
+  background: transparent; /* keep it clean */
+}
+
+/* Thumb hidden by default */
+.overTable::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: var(--border-radius-lg);
+}
+
+/* Show styled thumb on hover */
+.overTable:hover::-webkit-scrollbar-thumb {
+  background: #e2e2e2;
+}
+
+/* Thumb hover effect */
+.overTable:hover::-webkit-scrollbar-thumb:hover {
+  background: var(--black-color);
+}
+
+/* Firefox */
+.overTable {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent; /* hidden by default */
+}
+
+.overTable:hover {
+  scrollbar-color: #e2e2e2 transparent; /* visible on hover */
+}
+
+
 .removeRowTd {
     width: 20px;
 }
@@ -3046,4 +3094,49 @@ input:focus{
 .attchaInputLabel{
     border: 1px solid #e2e2e2;
 }
+.file-preview {
+  display: inline-block;
+  position: relative;
+  cursor: pointer;
+}
+
+.preview-box {
+  width: 83px;
+  height: 60px;
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.preview-box img {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.file-icon {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.remove-btn {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  border-radius: 50%;
+  padding: 0;
+  width: 22px;
+  height: 22px;
+  display: none;
+}
+
+.file-preview:hover .remove-btn {
+  display: block;
+}
+
 </style>

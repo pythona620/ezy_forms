@@ -288,7 +288,7 @@ function activityData() {
     // axiosInstance.post(apis.GetDoctypeData/encodeURIComponent(docName), queryParams)
         .then((res) => {
             if (res) {
-                activityDoctypes.value = res.message.data[0].activate_log;
+                activityDoctypes.value = res?.message?.data[0]?.activate_log;
                 activitylog();
             }
         })
