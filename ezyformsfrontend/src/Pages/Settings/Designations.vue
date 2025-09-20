@@ -152,6 +152,7 @@ function designationData() {
         .catch((error) => {
             console.error("Error fetching designations data:", error);
         });
+    }, 500); // Adjust the delay as needed (300ms in this case)
 }
 function checkDesignation() {
     const queryParams = {
