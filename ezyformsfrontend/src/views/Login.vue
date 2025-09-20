@@ -1088,31 +1088,8 @@ export default {
                   modal.show();
                 }
                 else {
-                  this.userData(this.formdata.usr);
-                }
-              }
-            }
-          })
-          .catch((error) => {
-            console.error("Login error: ", error);
-          })
-          .finally(() => {
-            this.loading = false;
-          });
-
-      }
-    },
-
-    userData(email) {
-      axiosInstance
-        .get(`${apis.resource}${doctypes.users}/${email}`)
-        .then((res) => {
-          this.email = res.data.email;
-          if (this.email) {
-            axiosInstance
-              .get(`${apis.resource}${doctypes.EzyEmployeeList}/${this.email}`)
-              .then((responce) => {
-                const employeeData = responce.data;
+                  console.log(res.employee_doc);
+                   const employeeData = res.employee_doc;
 
                 // Extract only the required fields
                 const filteredEmployeeData = {
@@ -1144,18 +1121,74 @@ export default {
                   this.$router.push({ path: "/dashboard/maindash" });
                 }, 500);
 
-              })
-              .catch((error) => {
-                console.error("Error fetching employee data:", error);
-              });
-          } else {
-            localStorage.setItem("employeeData", JSON.stringify(this.employeeData));
-          }
-        })
-        .catch((error) => {
-          console.error("Error fetching user data:", error);
-        });
+                  // this.userData(this.formdata.usr);
+                }
+              }
+            }
+          })
+          .catch((error) => {
+            console.error("Login error: ", error);
+          })
+          .finally(() => {
+            this.loading = false;
+          });
+
+      }
     },
+
+    // userData(email) {
+    //   axiosInstance
+    //     .get(`${apis.resource}${doctypes.users}/${email}`)
+    //     .then((res) => {
+    //       this.email = res.data.email;
+    //       if (this.email) {
+    //         axiosInstance
+    //           .get(`${apis.resource}${doctypes.EzyEmployeeList}/${this.email}`)
+    //           .then((responce) => {
+    //             const employeeData = responce.data;
+
+    //             // Extract only the required fields
+    //             const filteredEmployeeData = {
+    //               name: employeeData.name,
+    //               company_field: employeeData.company_field,
+    //               emp_name: employeeData.emp_name,
+    //               emp_mail_id: employeeData.emp_mail_id,
+    //               designation: employeeData.designation,
+    //               department: employeeData.department,
+    //               emp_code: employeeData.emp_code,
+    //               emp_signature: employeeData.signature,
+    //               is_admin: employeeData.is_admin,
+    //               responsible_units: employeeData.responsible_units,
+    //               // department: employeeData.department,
+    //             };
+    //             localStorage.setItem("subEndDate", this.subEndDate)
+    //             localStorage.setItem("UserName", JSON.stringify(this.storeData));
+    //             sessionStorage.setItem("UserName", JSON.stringify(this.storeData));
+
+    //             localStorage.setItem("employeeData", JSON.stringify(filteredEmployeeData));
+    //             sessionStorage.setItem("employeeData", JSON.stringify(filteredEmployeeData));
+
+    //             localStorage.setItem("USERROLE", JSON.stringify(filteredEmployeeData.designation));
+    //             sessionStorage.setItem("USERROLE", JSON.stringify(filteredEmployeeData.designation));
+
+    //             toast.success("Login successfull", { autoClose: 2000 });
+
+    //             setTimeout(() => {
+    //               this.$router.push({ path: "/dashboard/maindash" });
+    //             }, 500);
+
+    //           })
+    //           .catch((error) => {
+    //             console.error("Error fetching employee data:", error);
+    //           });
+    //       } else {
+    //         localStorage.setItem("employeeData", JSON.stringify(this.employeeData));
+    //       }
+    //     })
+    //     .catch((error) => {
+    //       console.error("Error fetching user data:", error);
+    //     });
+    // },
 
 
     validateOtp() {
@@ -1180,9 +1213,9 @@ export default {
               // console.log("message", message);
               this.storeData = message;
               // localStorage.setItem("UserName", JSON.stringify(this.storeData));
-              if (this.formdata.usr) {
-                this.userData(this.formdata.usr);
-              }
+              // if (this.formdata.usr) {
+              //   this.userData(this.formdata.usr);
+              // }
             }
           })
           .catch((error) => {
