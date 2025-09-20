@@ -14,9 +14,5 @@ def employee_last_login_activate(login_manager):
         },
         update_modified=False
     )
-    
-
-@frappe.whitelist()
-def log_in_session(login_manager):
     employee_doc = frappe.get_doc("Ezy Employee", frappe.session.user,fields=["name","company_field","emp_name","emp_mail_id","designation","department","emp_code","is_admin","responsible_units"])
     frappe.local.response["employee_doc"] = employee_doc
