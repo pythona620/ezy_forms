@@ -2029,7 +2029,6 @@ function employeeData(data) {
     filters.push(...data);
   }
 
-  // ✅ Deduplicate filters
   const seen = new Set();
   const uniqueFilters = filters.filter(f => {
     const key = f.join("|");
