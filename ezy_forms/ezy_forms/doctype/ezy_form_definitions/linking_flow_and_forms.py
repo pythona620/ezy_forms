@@ -39,6 +39,7 @@ def list_to_dict_with_ones(x):
 	x = str(x).split(" ,")
 	x = f"""{dict(zip(x,[1] * len(x)))}"""
 	return x
+
 @frappe.whitelist()
 def add_roles_to_wf_requestors(business_unit: str, doctype: str, workflow_setup: list[dict]):
     try:
@@ -48,80 +49,124 @@ def add_roles_to_wf_requestors(business_unit: str, doctype: str, workflow_setup:
         
         doc_rec = "_".join(business_unit.split()).upper() + "_" + "_".join(doctype.split()).upper().replace(" ", "_")
         
-        # Replace Polars DataFrame operations with native Python
-        exploded_data = sum( map(lambda row: list( map(lambda role: {**row, "roles": role}, row.get("roles") if isinstance(row.get("roles"), list)  else ([row.get("roles")] if isinstance(row.get("roles"), str) else [])  )  ), workflow_setup),   []  )
-
+        exploded_data = []
+        for row in workflow_setup:
+            roles = row.get("roles", [])
+            if isinstance(roles, str):
+                roles = [roles]
+            elif not isinstance(roles, list):
+                roles = []
+            
+            for role in roles:
+                new_row = row.copy()
+                new_row["roles"] = role
+                exploded_data.append(new_row)
         
         # Process fields column - convert list to dict with ones
-        exploded_data = list(map(lambda row: 
-            {**row, "fields": list_to_dict_with_ones(" ,".join(map(str, row.get("fields", []))))} 
-            if isinstance(row.get("fields", []), list) else row, exploded_data))
-
+        for row in exploded_data:
+            fields = row.get("fields", [])
+            if isinstance(fields, list):
+                fields_str = " ,".join(str(f) for f in fields)
+                row["fields"] = list_to_dict_with_ones(fields_str)
         
-        # Filter requestors section
-        requestors_section = list(map(
-            lambda row: {
-                "requestor": row.get("roles"),
-                "columns_allowed": row.get("fields")
-            },
-            filter(lambda row: "requestor" in row.get("type", ""), exploded_data)
-        ))
+        # Filter requestors and approvers sections
+        requestors_section = []
+        approvers_section = []
         
-        # Filter approvers section
-        approvers_data = list(filter(lambda row: "approver" in row.get('type', ''), exploded_data))
-
-        approvers_section = list(map(lambda row: {
-            "role": row.get("roles"),
-            "columns_allowed": row.get("fields"),
-            "level": row.get("idx"),
-            "cancel_request": 1,
-            "mandatory": 1,
-            "action": "Approve/Reject",
-            "view_only_reportee": row.get("view_only_reportee"),
-            "requester_as_a_approver": row.get("requester_as_a_approver"),
-            "all_approvals_required": row.get("all_approvals_required"),
-            "on_rejection": row.get("on_rejection")
-        }, approvers_data))
-
+        for row in exploded_data:
+            row_type = row.get('type', '')
+            if row_type.find("requestor") != -1:
+                requestors_section.append({
+                    "requestor": row.get("roles"),
+                    "columns_allowed": row.get("fields")
+                })
+            elif row_type.find("approver") != -1:
+                approvers_section.append({
+                    "role": row.get("roles"),
+                    "columns_allowed": row.get("fields"),
+                    "level": row.get("idx"),
+                    "cancel_request": 1,
+                    "mandatory": 1,
+                    "action": "Approve/Reject",
+                    "view_only_reportee": row.get("view_only_reportee"),
+                    "requester_as_a_approver": row.get("requester_as_a_approver"),
+                    "all_approvals_required": row.get("all_approvals_required"),
+                    "on_rejection": row.get("on_rejection")
+                })
         
+        # Check if records exist before deleting
         try:
-            frappe.db.sql(f"""delete from `tabWF Requestors` where parent = '{doc_rec}' and parentfield = 'wf_requestors' and parenttype = 'WF Roadmap';""")
-            frappe.db.commit()
-            frappe.db.sql(f"""delete from `tabWF Level Setup` where parent ='{doc_rec}' and parentfield = 'wf_level_setup' and parenttype='WF Roadmap';""")
-            frappe.db.commit()
+            # Check for existing requestors
+            existing_requestors = frappe.db.sql(
+                f"""SELECT COUNT(*) as count FROM `tabWF Requestors` 
+                    WHERE parent = '{doc_rec}' AND parentfield = 'wf_requestors' AND parenttype = 'WF Roadmap'""", 
+                as_dict=True
+            )
+            
+            # Check for existing level setup
+            existing_levels = frappe.db.sql(
+                f"""SELECT COUNT(*) as count FROM `tabWF Level Setup` 
+                    WHERE parent = '{doc_rec}' AND parentfield = 'wf_level_setup' AND parenttype = 'WF Roadmap'""", 
+                as_dict=True
+            )
+            
+            # Only delete if records exist and combine both deletions in single transaction
+            if existing_requestors[0]['count'] > 0 or existing_levels[0]['count'] > 0:
+                if existing_requestors[0]['count'] > 0:
+                    frappe.db.sql(f"""DELETE FROM `tabWF Requestors` 
+                                     WHERE parent = '{doc_rec}' AND parentfield = 'wf_requestors' AND parenttype = 'WF Roadmap'""")
+                
+                if existing_levels[0]['count'] > 0:
+                    frappe.db.sql(f"""DELETE FROM `tabWF Level Setup` 
+                                     WHERE parent = '{doc_rec}' AND parentfield = 'wf_level_setup' AND parenttype = 'WF Roadmap'""")
+                
+                frappe.db.commit()  #c                
         except Exception as e:
-            frappe.log_error("add role to wf requestors", str(e))
+            frappe.log_error("add role to wf requestors - deletion error", str(e))
    
         roadmap_doc = frappe.get_doc("WF Roadmap", doc_rec)
-
-        # Set workflow_levels if approvers_section is not empty
-        if approvers_section:
-            roadmap_doc.workflow_levels = max(map(lambda max_level: max_level['level'], approvers_section))
-
-        # Process requestors_section using map and lambda
-        list(map(lambda single_requestor: (
-            activating_perms(doctype=doctype, role=single_requestor["requestor"]),
-            roadmap_doc.append("wf_requestors", single_requestor)
-        ) if single_requestor["requestor"] else None, requestors_section))
-
-        # Process approvers_section using map and lambda
-        list(map(lambda single_approver: (
-            activating_perms(doctype=doctype, role=single_approver["role"]),
-            roadmap_doc.append("wf_level_setup", single_approver)
-        ) if single_approver["role"] else None, approvers_section))
-
-        # Save and commit
-        roadmap_doc.save(ignore_permissions=True)
-        frappe.db.commit()
-
         
+        # Set workflow levels if approvers exist
+        if approvers_section:
+            roadmap_doc.workflow_levels = max(level['level'] for level in approvers_section)
+        
+        # Batch process requestors with role activation
+        roles_to_activate = set()  # Use set to avoid duplicate role activations
+        
+        for single_requestor in requestors_section:
+            if single_requestor["requestor"]:
+                roles_to_activate.add(single_requestor["requestor"])
+                roadmap_doc.append("wf_requestors", single_requestor)
+        
+        for single_approver in approvers_section:
+            if single_approver["role"]:
+                roles_to_activate.add(single_approver["role"])
+                roadmap_doc.append("wf_level_setup", single_approver)
+        
+        # Activate permissions for all unique roles at once
+        for role in roles_to_activate:
+            activating_perms(doctype=doctype, role=role)
+        
+        roadmap_doc.save(ignore_permissions=True)
+        
+        # Optimize form definition update
         workflow_from_defs = frappe.db.get_value("Ezy Form Definitions", doctype, "form_json")
         fields_from_defs = literal_eval(workflow_from_defs)["fields"]
-        fields_from_defs = {"fields": fields_from_defs}
         child_table_fields = literal_eval(workflow_from_defs)["child_table_fields"]
-        field_with_workflow = fields_from_defs | {"workflow": workflow_setup} | {"child_table_fields": child_table_fields}
-        frappe.db.set_value("Ezy Form Definitions", doctype, {"form_json": str(field_with_workflow).replace("'", '"').replace("None", "null")})
-        frappe.db.commit()
+        
+        field_with_workflow = {
+            "fields": fields_from_defs,
+            "workflow": workflow_setup,
+            "child_table_fields": child_table_fields
+        }
+        
+        frappe.db.set_value("Ezy Form Definitions", doctype, {
+            "form_json": str(field_with_workflow).replace("'", '"').replace("None", "null")
+        })
+        
+        frappe.db.commit()  # Final commit for all operations
+        
+        return {"success": True, "message": "Workflow setup completed successfully"}
         
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
