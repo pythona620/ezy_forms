@@ -740,11 +740,14 @@
                                               <div class=" d-flex align-items-center gap-2">
                                                 <div class="d-flex align-items-center">
 
-                                                  <input class="font-12" v-model="field.reqd" :true-value="1"
+                                                  <input  class="font-12" v-model="field.reqd" :true-value="1" :id="'mandatory-' + blockIndex + '-' + sectionIndex + '-' + rowIndex + '-' + columnIndex + '-' + fieldIndex"
                                                     :false-value="0" placeholder="Field Name" type="checkbox" />
+                                                  <!-- :id="'mandatory-' + blockIndex + '-' + sectionIndex + '-' + rowIndex + '-' + columnIndex + '-' + fieldIndex" -->
                                                 </div>
                                                 <div>
-                                                  <label for="mandatory" class="font-12 m-0 fw-light">Mandatory</label>
+                                                  <label  class="font-12 m-0 fw-light" :for="'mandatory-' + blockIndex + '-' + sectionIndex + '-' + rowIndex + '-' + columnIndex + '-' + fieldIndex"
+                                                   >Mandatory</label>
+                                                   <!-- :for="'mandatory-' + blockIndex + '-' + sectionIndex + '-' + rowIndex + '-' + columnIndex + '-' + fieldIndex" -->
                                                 </div>
                                               </div>
                                               <div>
