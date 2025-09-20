@@ -9,26 +9,34 @@ def get_doctype_list(doctype, fields:str, filters=None, limit_start:int=None, li
     # if not limit_page_length:
     #     limit_page_length = 20
     # Parse fields into a list
+    meta = frappe.get_meta(doctype)
 
+    # Handle Single DocTypes
+    if meta.issingle:
+        doc = frappe.get_doc(doctype)
+        if fields == fields:
+            data = [doc.as_dict()]
+        else:
+            data = [{field: doc.get(field) for field in fields}]
+        return {
+            "data": data,
+            "total_count": 1,
+            "limit_start": 0,
+            "limit_page_length": 1
+        }
 
-    # Ensure pagination parameters are integers
+    # Normal DocTypes
     try:
         limit_start = int(limit_start)
     except:
         limit_start = 0
 
-    # try:
-    #     limit_page_length = int(limit_page_length)
-    # except:
-    #     limit_page_length = 20
-
-    # Fetch data with pagination
     data = frappe.get_all(
         doctype,
         fields=fields,
         filters=filters,
         limit_start=limit_start,
-        limit_page_length=limit_page_length 
+        limit_page_length=limit_page_length
     )
 
     # Get total count of matching records

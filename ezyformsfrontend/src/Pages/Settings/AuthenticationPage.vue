@@ -249,30 +249,56 @@ const confirmAction = () => {
 
 
 function BussinesUnit() {
-    const queryParams = {
-        fields: JSON.stringify(["*"]),
-        filters: JSON.stringify([["name", "=", Bussines_unit.value]])
-    };
+    // const queryParams = {
+    //     fields: JSON.stringify(["*"]),
+    //     filters: JSON.stringify([["name", "=", Bussines_unit.value]])
+    // };
 
-    axiosInstance
-        .get(`${apis.resource}${doctypes.wfSettingEzyForms}`, { params: queryParams })
-        .then((res) => {
-            if (res.data.length > 0) {
-                const status = res.data[0].send_form_as_a_attach_through_mail;
-                tableData.value[1].checked = status == 1;
-                const welcome_mail = res.data[0].welcome_mail_to_employee;
-                tableData.value[2].checked = welcome_mail == 1;
-                const send_daily_alerts = res.data[0].send_daily_alerts;
-                tableData.value[4].checked = send_daily_alerts == 1;
-                const is_acknowledge = res.data[0].is_acknowledge;
-                tableData.value[5].checked = is_acknowledge == 1;
-                const signature_required = res.data[0].signature_required;
-                tableData.value[6].checked = signature_required == 1;
-            }
-        })
-        .catch((error) => {
-            console.error("Error fetching business unit settings:", error);
-        });
+    // axiosInstance
+    //     .get(`${apis.resource}${doctypes.wfSettingEzyForms}`, { params: queryParams })
+    //     .then((res) => {
+    //         if (res.data.length > 0) {
+    //             const status = res.data[0].send_form_as_a_attach_through_mail;
+    //             tableData.value[1].checked = status == 1;
+    //             const welcome_mail = res.data[0].welcome_mail_to_employee;
+    //             tableData.value[2].checked = welcome_mail == 1;
+    //             const send_daily_alerts = res.data[0].send_daily_alerts;
+    //             tableData.value[4].checked = send_daily_alerts == 1;
+    //             const is_acknowledge = res.data[0].is_acknowledge;
+    //             tableData.value[5].checked = is_acknowledge == 1;
+    //             const signature_required = res.data[0].signature_required;
+    //             tableData.value[6].checked = signature_required == 1;
+    //         }
+    //     })
+    //     .catch((error) => {
+    //         console.error("Error fetching business unit settings:", error);
+    //     });
+
+    const queryParamse = {
+        fields: ["name", "bu_code", "send_form_as_a_attach_through_mail", "welcome_mail_to_employee", "send_daily_alerts", "is_acknowledge", "signature_required"],
+        filters:[["name",'=',Bussines_unit.value]],
+        doctype:doctypes.wfSettingEzyForms,
+        limit_page_length:"none",
+
+    };
+    axiosInstance.post(apis.GetDoctypeData, queryParamse)
+    .then((res) => {
+        if (res?.message) {
+            const status = res.message.data[0].send_form_as_a_attach_through_mail;
+            tableData.value[1].checked = status == 1;
+            const welcome_mail = res.message.data[0].welcome_mail_to_employee;
+            tableData.value[2].checked = welcome_mail == 1;
+            const send_daily_alerts = res.message.data[0].send_daily_alerts;
+            tableData.value[4].checked = send_daily_alerts == 1;
+            const is_acknowledge = res.message.data[0].is_acknowledge;
+            tableData.value[5].checked = is_acknowledge == 1;
+            const signature_required = res.message.data[0].signature_required;
+            tableData.value[6].checked = signature_required == 1;
+        }
+    }).catch((error) => {
+        console.error("Error fetching ezyForms data:", error);
+    });
+
 };
 
 const enable_two_factor = () => {

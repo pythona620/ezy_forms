@@ -287,7 +287,7 @@ function activityData() {
     .get(`${apis.GetDoctypeData}/${encodeURIComponent(docName)}`, { params: queryParams })
         .then((res) => {
             if (res) {
-                activityDoctypes.value = res.message.data[0].activate_log;
+                activityDoctypes.value = res?.message?.data[0]?.activate_log;
                 activitylog();
             }
         })

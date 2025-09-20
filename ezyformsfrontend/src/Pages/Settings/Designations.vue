@@ -114,10 +114,17 @@ watch(
     { immediate: true }
 );
 
+let debounceTimeout = null;
+
 function designationData() {
-     const filters = [];
+  // Clear previous timeout if user is still typing
+  if (debounceTimeout) clearTimeout(debounceTimeout);
+
+  // Set a new timeout
+  debounceTimeout = setTimeout(() => {
+    const filters = [];
     if (filterObj.value.search.trim()) {
-        filters.push(["name", "like", `%${filterObj.value.search}%`]);
+      filters.push(["name", "like", `%${filterObj.value.search}%`]);
     }
 
     const queryParams = {
@@ -146,7 +153,6 @@ function designationData() {
             console.error("Error fetching designations data:", error);
         });
 }
-
 function checkDesignation() {
     const queryParams = {
         fields: JSON.stringify(["role"]),

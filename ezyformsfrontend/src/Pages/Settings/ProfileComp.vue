@@ -133,6 +133,7 @@ function uploadImage(event) {
             );
         })
         .then(() => {
+            // userDetails(userData.value.name);
             userDetails(userData.value.name);
             toast.success(`${uploadType.value === 'profile' ? 'Profile' : 'Signature'} Updated Successfully`, { autoClose: 300 });
         })
@@ -141,22 +142,50 @@ function uploadImage(event) {
         });
 }
 
+// function userDetails(empEmail) {
+//     axiosInstance
+//         .get(`${apis.resource}${doctypes.EzyEmployeeList}/${empEmail}`)
+//         .then((res) => {
+//             userData.value = res.data
+//         })
+//         .catch((error) => {
+//             console.error("Error fetching user data:", error);
+//         });
+// }
 function userDetails(empEmail) {
-    axiosInstance
-        .get(`${apis.resource}${doctypes.EzyEmployeeList}/${empEmail}`)
-        .then((res) => {
-            userData.value = res.data
-        })
-        .catch((error) => {
-            console.error("Error fetching user data:", error);
-        });
+  console.log(empEmail);
+ 
+
+
+  const queryParams = {
+    fields: ["acknowledge_on","acknowledgement","company_field","creation","department","designation","emp_code","emp_mail_id",
+    "emp_name","emp_phone","enable","enable_on","is_admin","is_hod","is_web_form","last_ip","last_login","name","profile_image","remarks","reporting_designation","reporting_to","signature"],
+    doctype:doctypes.EzyEmployeeList,
+    filters: [["Ezy Employee","emp_mail_id","=",empEmail]],
+    
+    order_by: "`tabEzy Employee`.`enable` DESC, `tabEzy Employee`.`modified` DESC",
+  };
+
+  // Data API
+  axiosInstance.post(apis.GetDoctypeData, queryParams)
+    .then((res) => {
+      if (res.message.data) {
+        console.log(res.message.data);
+        userData.value = res.message.data[0] || {};
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching department data:", error);
+    });
 }
+
 
 onMounted(() => {
     employeeData.value = JSON.parse(localStorage.getItem('employeeData')) || {};
     email.value = employeeData.value.emp_mail_id || "";
 
     if (email.value) {
+        // userDetails(email.value);
         userDetails(email.value);
     }
 });
