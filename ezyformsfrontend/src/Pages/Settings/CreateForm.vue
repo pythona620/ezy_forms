@@ -600,33 +600,45 @@ function fetchDepartmentDetails(data) {
   }
 
   const queryParams = {
-    fields: JSON.stringify(["*"]),
+    fields: [  "name",
+              "business_unit",
+              "form_type",
+              "form_category",
+              "owner_of_the_form",
+              "active",
+              "count",
+              "accessible_departments",
+              "form_short_name",
+              "form_json",
+              "form_name",
+              "form_status",
+              "enable",
+              "print_format",
+              "is_landscape",
+              "has_workflow",
+              "workflow_check",
+              "is_predefined_doctype",
+              "predefined_doctype_name",
+              "is_linked",
+              "is_linked_form",
+              "form_department",
+              "qr_code",
+              "qr_url",
+              "send_mail_for_frist_approval",
+              "mail_id",
+              "series"],
     limit_page_length: filterObj.value.limitPageLength,
     limit_start: filterObj.value.limit_start,
-    filters: JSON.stringify(filterObj.value.filters),
+    filters: filterObj.value.filters,
+    doctype:doctypes.EzyFormDefinitions,
     order_by: "`tabEzy Form Definitions`.`enable` DESC, `tabEzy Form Definitions`.`creation` DESC"
   };
-  const queryParamsCount = {
-    fields: JSON.stringify(["count(name) AS total_count"]),
-    limitPageLength: "None",
-    filters: JSON.stringify(filterObj.value.filters),
-  }
-  axiosInstance.get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParamsCount })
-    .then((res) => {
 
-      totalRecords.value = res.data[0].total_count
-
-    })
-    .catch((error) => {
-      console.error("Error fetching ezyForms data:", error);
-    });
-
-  axiosInstance
-    .get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParams })
+  axiosInstance.post(apis.GetDoctypeData, queryParams)
     .then((response) => {
-
+      totalRecords.value=response.message.total_count;
       if (filterObj.value.limit_start === 0) {
-        tableData.value = response.data;
+        tableData.value = response.message.data;
         formCategory.value = [...new Set(tableData.value.map((formCategory) => formCategory.form_category))];
 
       } else {

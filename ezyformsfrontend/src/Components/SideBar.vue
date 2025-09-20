@@ -534,7 +534,7 @@ li:hover {
     height: 90dvh;
     background-color: var(--sidebar-color);
     padding-top: 12px;
-    border-radius: 10px;
+    /* border-radius: 10px;  */
     overflow-y: auto;
     overflow-x: hidden;
     /* box-shadow: 4px 0 4px -2px #00000040; */

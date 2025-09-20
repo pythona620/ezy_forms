@@ -534,111 +534,181 @@ function mapFormFieldsToRequest(doctypeData, showRequestData) {
   });
 }
 
-const PaginationUpdateValue = (itemsPerPage) => {
-  filterObj.value.limitPageLength = itemsPerPage;
-  filterObj.value.limit_start = 0;
-  receivedForMe(filterObj.value.filters);
-};
-// Handle updating the limit start
-const PaginationLimitStart = ([itemsPerPage, start]) => {
-  filterObj.value.limitPageLength = itemsPerPage;
-  filterObj.value.limit_start = start;
-  receivedForMe(filterObj.value.filters);
-};
 const timeout = ref(null);
 
+// const PaginationUpdateValue = (itemsPerPage) => {
+//   filterObj.value.limitPageLength = itemsPerPage;
+//   filterObj.value.limit_start = 0;
+//   receivedForMe(filterObj.value.filters);
+// };
+// // Handle updating the limit start
+// const PaginationLimitStart = ([itemsPerPage, start]) => {
+//   filterObj.value.limitPageLength = itemsPerPage;
+//   filterObj.value.limit_start = start;
+//   receivedForMe(filterObj.value.filters);
+// };
+
+
+// function inLineFiltersData(searchedData) {
+//   // Clear the previous timeout to prevent multiple API calls while typing
+//   clearTimeout(timeout.value);
+
+//   // Set a new timeout to delay the API call
+//   timeout.value = setTimeout(() => {
+//     filterObj.value.filters = [];
+//     // Initialize filters array
+   
+
+//     // Loop through the table headers and build dynamic filters
+//     tableheaders.value.forEach((header) => {
+//       const key = header.td_key;
+
+//       if (searchedData[key]) {
+//         filterObj.value.filters.push([key, "like", `%${searchedData[key]}%`]);
+//       }
+//     });
+
+//     // Call receivedForMe with or without filters
+//     filterObj.value.limit_start = 0;
+//     filterObj.value.limitPageLength = 20;
+//       receivedForMe(filterObj.value.filters);
+   
+//   }, 500); // Adjust debounce delay as needed (e.g., 500ms)
+// }
+
+// function receivedForMe(data) {
+//   // Initialize filters array for building dynamic query parameters
+//   const EmpRequestMail = JSON.parse(localStorage.getItem("employeeData"));
+//  filterObj.value.filters = [
+//     ["property", "=", `${newBusinessUnit.value.business_unit}`],
+//     ["department", "=", `${EmpRequestMail.department}`]
+//   ];
+//   // ["requested_by", "like", EmpRequestMail.emp_mail_id],
+
+//   if (data) {
+//     filterObj.value.filters = data;
+//   }
+
+//   // Define query parameters for data and count retrieval
+//   const queryParams = {
+//     fields: JSON.stringify(["*"]),
+//     limit_page_length: filterObj.value?.limitPageLength,
+//     limit_start: filterObj.value?.limit_start,
+//     filters: JSON.stringify(filterObj.value?.filters),
+//     order_by: "`tabWF Workflow Requests`.`creation` desc",
+//   };
+
+//   const queryParamsCount = {
+//     fields: JSON.stringify(["count(name) AS total_count"]),
+//     limitPageLength: "None",
+//     filters: JSON.stringify(filterObj.value?.filters),
+//   };
+
+//   // Fetch total count of records matching filters
+//   axiosInstance
+//     .get(`${apis?.resource}${doctypes?.WFWorkflowRequests}`, {
+//       params: queryParamsCount,
+//     })
+//     .then((res) => {
+//       totalRecords.value = res.data[0].total_count;
+//     })
+//     .catch((error) => {
+//       console.error("Error fetching total count:", error);
+//     });
+
+//   // Fetch the records matching filters
+//   axiosInstance
+//     .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, {
+//       params: queryParams,
+//     })
+//     .then((res) => {
+//       const newData = res.data;
+//       if (filterObj.value.limit_start === 0) {
+//         tableData.value = newData;
+
+//         idDta.value = [...new Set(res.data.map((id) => id.name))];
+//         docTypeName.value = [
+//           ...new Set(res.data.map((docTypeName) => docTypeName.doctype_name)),
+//         ];
+//         statusOptions.value = [
+//           ...new Set(res.data.map((status) => status.status)),
+//         ];
+//       }
+//       else {
+//         tableData.value = tableData.value.concat(newData)
+//       }
+//     })
+//     .catch((error) => {
+//       console.error("Error fetching records:", error);
+//     });
+// }
+
+const fullData = ref([]);
+const filteredData = ref([]);
+
+function receivedForMe() {
+  const EmpRequestMail = JSON.parse(localStorage.getItem("employeeData"));
+  const payload = {
+    property_field: newBusinessUnit.value.business_unit,
+    department: EmpRequestMail.department,
+  }
+  axiosInstance
+    .post(apis.GetEmployeeForms, payload)
+    .then((response) => {
+      fullData.value = response.message || [];
+
+      // Initially filteredData = fullData
+      filteredData.value = [...fullData.value];
+
+      totalRecords.value = filteredData.value.length;
+      filterObj.value.limit_start = 0;
+      tableData.value = filteredData.value.slice(0, filterObj.value.limitPageLength);
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+}
+
+function paginateData(filtered = filteredData.value) {
+  const paginated = filtered.slice(filterObj.value.limit_start, filterObj.value.limit_start + filterObj.value.limitPageLength);
+  tableData.value = paginated;
+  totalRecords.value = filtered.length;
+}
+
 function inLineFiltersData(searchedData) {
-  // Clear the previous timeout to prevent multiple API calls while typing
   clearTimeout(timeout.value);
 
-  // Set a new timeout to delay the API call
   timeout.value = setTimeout(() => {
-    filterObj.value.filters = [];
-    // Initialize filters array
-   
-
-    // Loop through the table headers and build dynamic filters
-    tableheaders.value.forEach((header) => {
-      const key = header.td_key;
-
-      if (searchedData[key]) {
-        filterObj.value.filters.push([key, "like", `%${searchedData[key]}%`]);
-      }
+    filteredData.value = fullData.value.filter((row) => {
+      return tableheaders.value.every((header) => {
+        const key = header.td_key;
+        if (searchedData[key]) {
+          return String(row[key] || "").toLowerCase().includes(String(searchedData[key]).toLowerCase());
+        }
+        return true;
+      });
     });
 
-    // Call receivedForMe with or without filters
-    filterObj.value.limit_start = 0;
+    totalRecords.value = filteredData.value.length;
     filterObj.value.limitPageLength = 20;
-      receivedForMe(filterObj.value.filters);
-   
-  }, 500); // Adjust debounce delay as needed (e.g., 500ms)
+    filterObj.value.limit_start = 0;
+
+    tableData.value = filteredData.value.slice(0, filterObj.value.limitPageLength);
+  }, 500);
 }
 
-function receivedForMe(data) {
-  // Initialize filters array for building dynamic query parameters
-  // const EmpRequestMail = JSON.parse(localStorage.getItem("employeeData"));
- filterObj.value.filters = [
-    ["property", "=", `${newBusinessUnit.value.business_unit}`],
-  ];
-  // ["requested_by", "like", EmpRequestMail.emp_mail_id],
-
-  if (data) {
-    filterObj.value.filters = data;
-  }
-
-  // Define query parameters for data and count retrieval
-  const queryParams = {
-    fields: JSON.stringify(["*"]),
-    limit_page_length: filterObj.value?.limitPageLength,
-    limit_start: filterObj.value?.limit_start,
-    filters: JSON.stringify(filterObj.value?.filters),
-    order_by: "`tabWF Workflow Requests`.`creation` desc",
-  };
-
-  const queryParamsCount = {
-    fields: JSON.stringify(["count(name) AS total_count"]),
-    limitPageLength: "None",
-    filters: JSON.stringify(filterObj.value?.filters),
-  };
-
-  // Fetch total count of records matching filters
-  axiosInstance
-    .get(`${apis?.resource}${doctypes?.WFWorkflowRequests}`, {
-      params: queryParamsCount,
-    })
-    .then((res) => {
-      totalRecords.value = res.data[0].total_count;
-    })
-    .catch((error) => {
-      console.error("Error fetching total count:", error);
-    });
-
-  // Fetch the records matching filters
-  axiosInstance
-    .get(`${apis.resource}${doctypes.WFWorkflowRequests}`, {
-      params: queryParams,
-    })
-    .then((res) => {
-      const newData = res.data;
-      if (filterObj.value.limit_start === 0) {
-        tableData.value = newData;
-
-        idDta.value = [...new Set(res.data.map((id) => id.name))];
-        docTypeName.value = [
-          ...new Set(res.data.map((docTypeName) => docTypeName.doctype_name)),
-        ];
-        statusOptions.value = [
-          ...new Set(res.data.map((status) => status.status)),
-        ];
-      }
-      else {
-        tableData.value = tableData.value.concat(newData)
-      }
-    })
-    .catch((error) => {
-      console.error("Error fetching records:", error);
-    });
+function PaginationUpdateValue(newLimit) {
+  filterObj.value.limitPageLength = newLimit;
+  filterObj.value.limit_start = 0;
+  paginateData();
 }
+
+function PaginationLimitStart() {
+  filterObj.value.limit_start += filterObj.value.limitPageLength;
+  const nextBatch = filteredData.value.slice(filterObj.value.limit_start, filterObj.value.limit_start + filterObj.value.limitPageLength);
+  tableData.value = [...tableData.value, ...nextBatch];
+}
+
 
 watch(
   businessUnit,
@@ -651,9 +721,9 @@ watch(
   },
   { immediate: true }
 );
-onMounted(() => {
-  // receivedForMe()
-});
+// onMounted(() => {
+//    receivedForMe()
+// });
 </script>
 <style scoped>
 .approvebtn {

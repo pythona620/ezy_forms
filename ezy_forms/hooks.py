@@ -4,7 +4,7 @@ app_publisher = "bharath"
 app_description = "ezy_forms"
 app_email = "bharath@gmail.com"
 app_license = "mit"
-required_apps = ["ezy_flow", "forms_templates","insights"]
+# required_apps = ["ezy_flow", "forms_templates","insights"]
 # Apps
 # ------------------
 
@@ -24,7 +24,7 @@ after_install = "ezy_forms.api.v1.default_mail_templates.email_template_create"
 after_migrate = ["ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions.activating_perms_for_all_roles_in_wf_roadmap"]
 # Includes in <head>
 # ------------------
-on_session_creation = "ezy_forms.ezy_forms.doctype.ezy_employee.ezy_employee.employee_last_login_activate"
+on_session_creation = "ezy_flow.ezy_flow.doctype.ezy_employee.ezy_employee.employee_last_login_activate"
 # include js, css files in header of desk.html
 # app_include_css = "/assets/ezy_forms/css/ezy_forms.css"
 # app_include_js = "/assets/ezy_forms/js/ezy_forms.js"
@@ -148,7 +148,7 @@ doc_events = {
 # 		"on_trash": "method"
 # 	}
 "Ezy Employee":{
-        "after_insert":"ezy_forms.ezy_forms.doctype.ezy_employee.ezy_employee.set_reporting_to_and_designation"
+        "after_insert":"ezy_flow.ezy_flow.doctype.ezy_employee.ezy_employee.set_reporting_to_and_designation"
     },
 # "NICO MOD REPORT":{
 #     "after_insert":"ezy_forms.ezy_custom_forms.custom_script.mail.email_pdf_send"

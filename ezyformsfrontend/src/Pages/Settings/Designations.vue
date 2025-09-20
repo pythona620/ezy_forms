@@ -109,66 +109,63 @@ watch(
     businessUnit,
     (newVal) => {
         createDesignation.value.ezy_business_unit = newVal;
+        
     },
     { immediate: true }
 );
 
+let debounceTimeout = null;
+
 function designationData() {
+  // Clear previous timeout if user is still typing
+  if (debounceTimeout) clearTimeout(debounceTimeout);
+
+  // Set a new timeout
+  debounceTimeout = setTimeout(() => {
     const filters = [];
     if (filterObj.value.search.trim()) {
-        filters.push(["name", "like", `%${filterObj.value.search}%`]);
+      filters.push(["name", "like", `%${filterObj.value.search}%`]);
     }
 
     const queryParams = {
-        fields: JSON.stringify(["role"]),
-        filters: JSON.stringify(filters),
-        limit_page_length: filterObj.value.limitPageLength,
-        limit_start: filterObj.value.limit_start,
-        order_by: "`tabWF Roles`.`creation` desc"
+      fields: ["role"],
+      filters: filters,
+      limit_page_length: filterObj.value.limitPageLength,
+      limit_start: filterObj.value.limit_start,
+      doctype: doctypes.designations,
+      order_by: "`tabWF Roles`.`creation` desc",
     };
-    const queryParamsCount = {
-        fields: JSON.stringify(["count(name) AS total_count"]),
-        limitPageLength: "None",
-        filters: JSON.stringify(filters),
-    }
-    axiosInstance.get(`${apis.resource}${doctypes.designations}`, { params: queryParamsCount })
-        .then((res) => {
 
-            totalRecords.value = res.data[0].total_count
-
-        })
-        .catch((error) => {
-            console.error("Error fetching ezyForms data:", error);
-        });
-
-    axiosInstance.get(apis.resource + doctypes.designations, { params: queryParams })
-        .then((res) => {
-            if (res.data) {
-                const newData = res.data
-                if (filterObj.value.limit_start === 0) {
-                    tableData.value = newData;
-
-                } else {
-                    tableData.value = tableData.value.concat(newData)
-                }
-
-            }
-        })
-        .catch((error) => {
-            console.error("Error fetching designations data:", error);
-        });
+    axiosInstance
+      .post(apis.GetDoctypeData, queryParams)
+      .then((res) => {
+        if (res.message.data) {
+          const newData = res.message.data;
+          totalRecords.value = res.message.total_count;
+          if (filterObj.value.limit_start === 0) {
+            tableData.value = newData;
+          } else {
+            tableData.value = tableData.value.concat(newData);
+          }
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching designations data:", error);
+      });
+  }, 500); // 500ms delay after the last keystroke
 }
-
 function checkDesignation() {
     const queryParams = {
-        fields: JSON.stringify(["role"]),
+        fields: ["role"],
         limit_page_length: "none",
-        order_by: "`tabWF Roles`.`creation` desc"
+        order_by: "`tabWF Roles`.`creation` desc",
+        doctype:doctypes.designations,
     };
-    axiosInstance.get(apis.resource + doctypes.designations, { params: queryParams })
+    axiosInstance.post(apis.GetDoctypeData, queryParams)
         .then((res) => {
-            if (res.data) {
-                checkDesignationData.value = res.data;
+            if (res.message.data) {
+                checkDesignationData.value = res.message.data;
+
             }
         })
         .catch((error) => {
