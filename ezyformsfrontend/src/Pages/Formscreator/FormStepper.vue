@@ -21,7 +21,7 @@
           <div class="row">
             <div class="col-lg-2 col-md-2 col-sm-12">
               <div class="steps-sticky-div">
-                <ul class="steps">
+                <ul class="steps d-sm-inline-flex d-md-block m-0 p-0">
                   <li v-for="step in steps" :key="step.id" :class="{
                     active: activeStep === step.id,
                     completed: activeStep > step.id,
@@ -66,8 +66,8 @@
                     </div>
                     <div class="container-fluid aboutFields p-0">
                       <div class="row">
-                        <div class="col-4"></div>
-                        <div class="col-4">
+                        <div class="col-sm-none col-md-4"></div>
+                        <div class="col-sm-12 col-md-4">
                           <div class="">
                             <div class="mt-3">
                               <div class=" position-relative">
@@ -244,7 +244,7 @@
                           </div>
                         </div>
 
-                        <div class="col-4"></div>
+                        <div class="col-sm-none col-md-4"></div>
                       </div>
                     </div>
                   </div>
