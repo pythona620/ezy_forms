@@ -1,5 +1,14 @@
 import frappe
 from datetime import datetime
+
+def parse_time(t):
+    try:
+        # Handle format with microseconds
+        return datetime.strptime(t, "%Y/%m/%d %H:%M:%S:%f")
+    except ValueError:
+        # Handle format without full microseconds (e.g., single-digit seconds)
+        return datetime.strptime(t, "%Y/%m/%d %H:%M:%S:%f".replace("%S", "%-S"))
+
 @frappe.whitelist()
 def pick_view_only_reportee():
     present_user = frappe.session.user
