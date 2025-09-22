@@ -1452,7 +1452,7 @@ function receivedForMe(data) {
 
    const queryParams = {
     fields: JSON.stringify(["linked_form_id","is_linked_form","property","doctype_name","name","current_level","total_levels","json_columns","status","action","assigned_to_users",
-    "be_half_of","cluster_name","department","department","employee_id","is_linked","requested_by","requested_by_name","requested_on","requester_name","role","user_session_id"]),
+    "be_half_of","cluster_name","department","department","employee_id","is_linked","requested_by","requested_on","requester_name","role","user_session_id"]),
     filters: JSON.stringify(filters),
     doctype:doctypes.WFWorkflowRequests,
     limit_page_length:"none"
