@@ -619,10 +619,6 @@ function fetchDepartmentDetails(data) {
               "is_linked",
               "is_linked_form",
               "form_department",
-              "qr_code",
-              "qr_url",
-              "send_mail_for_frist_approval",
-              "mail_id",
               "series"
 ]),
     limit_page_length: filterObj.value.limitPageLength,
