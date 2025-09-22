@@ -277,15 +277,15 @@ onMounted(() => {
 function fetchDepartmentDetails() {
 
     const queryParams = {
-        fields: JSON.stringify(["*"]),
+        fields: JSON.stringify(["name","business_unit","doctype","form_department","form_category","form_json","form_name","form_short_name","form_status"]),
         form_short_name: route.query.form_short_name || route.query.id,
-
+        doctype:doctypes.EzyFormDefinitions,
+        limit_page_length: "none",
     };
 
     axiosInstance
         .get(`${apis.resource}${doctypes.EzyFormDefinitions}/${route.query.form_short_name || route.query.id}`, { params: queryParams })
         .then((response) => {
-            console.log("response", response);
             formDescriptions.value = response.data
 
             selectedForm.value = rebuildToStructuredArray(JSON.parse(response.data?.form_json).fields)
