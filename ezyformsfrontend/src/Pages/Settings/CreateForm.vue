@@ -617,8 +617,6 @@ function fetchDepartmentDetails(data) {
               "is_landscape",
               "has_workflow",
               "workflow_check",
-              "is_predefined_doctype",
-              "predefined_doctype_name",
               "is_linked",
               "is_linked_form",
               "form_department",
@@ -643,7 +641,7 @@ function fetchDepartmentDetails(data) {
         formCategory.value = [...new Set(tableData.value.map((formCategory) => formCategory.form_category))];
 
       } else {
-        tableData.value = tableData.value.concat(response.data);
+        tableData.value = tableData.value.concat(response.message.data);
       }
     })
     .catch((error) => {

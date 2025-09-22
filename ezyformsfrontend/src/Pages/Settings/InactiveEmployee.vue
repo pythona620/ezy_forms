@@ -1692,7 +1692,7 @@ const uploadFile = (file, field) => {
 };
 function deptData(callback) {
   const queryParams = {
-    fields: JSON.stringify(["*"]),
+    fields: JSON.stringify(["name","department_code","department_name"]),
     limit_page_length: "none",
     doctype:doctypes.departments,
   };
