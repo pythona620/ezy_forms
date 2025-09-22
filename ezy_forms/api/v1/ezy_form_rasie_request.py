@@ -561,13 +561,13 @@ def todo_tab(document_type, request_id, property=None, cluster_name=None, curren
 				for remaining_role in approvals_reasons
 				if int(remaining_role["level"]) == int(current_level) and not remaining_role["action"].strip() and not remaining_role["user"].strip() and remaining_role.get("approval_required", 0) == 0
 			]
-			print(approvar_excits,"<"*100)
+			
 			if approvar_excits:
 				approval_list = [role.role for role in activate_log_roles.reason if role.level != 0]
 				approvar_excits_list = list(set(approval_list))
 				has_match = any(map(lambda role: role in approvar_excits_list, approvar_excits))
 				match_role = next((role for role in approvar_excits if role in approvar_excits_list), None)
-				print(match_role,"-"*100)
+				
 				if has_match:
 					if all_approvals_required:
 						all_approvals_required.remove(match_role)
@@ -601,7 +601,7 @@ def todo_tab(document_type, request_id, property=None, cluster_name=None, curren
 			else:
 				picking_remaining_roles_for_approval = [remaining_role["role"]  for remaining_role in approvals_reasons  if int(remaining_role["level"]) == int(current_level) and not remaining_role["action"].strip() and not remaining_role["user"].strip() ]
 		
-			print(picking_remaining_roles_for_approval,"1"*100)
+			
 			role_list = list( set( map( lambda r: r.role, filter(lambda r: int(r.level) == int(current_level), activate_log_roles.reason) ) )  )
 			if current_user_role in picking_remaining_roles_for_approval and not view_only_roles and not requester_as_a_approver and not all_approvals_required and not status and not approvar_excits:
 				doctype_ids = frappe.get_doc(document_type,account_ids)
