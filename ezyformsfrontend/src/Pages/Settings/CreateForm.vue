@@ -602,7 +602,6 @@ function fetchDepartmentDetails(data) {
   const queryParams = {
     fields: JSON.stringify(["name",
               "business_unit",
-              "form_type",
               "form_category",
               "owner_of_the_form",
               "active",
