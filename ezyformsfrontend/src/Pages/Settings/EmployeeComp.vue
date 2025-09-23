@@ -2207,9 +2207,9 @@ function createEmpl() {
   loading.value = true;
 
   axiosInstance
-    .post(apis.resource + doctypes.EzyEmployeeList, dataObj)
+    .post(apis.DataUpdate, dataObj)
     .then((res) => {
-      if (res.data) {
+      if (res.message.success==true) {
         toast.success("Employee Created", {
           autoClose: 500,
           transition: "zoom",
@@ -2231,6 +2231,9 @@ function createEmpl() {
         }
         employeeData();
         loading.value = false;
+      }
+      else{
+        toast.error(res.message.message)
       }
     })
     .catch((error) => {
@@ -2292,23 +2295,24 @@ function SaveEditEmp() {
 
   const payload = {
     ...createEmployee.value,
-    department: createEmployee.value.department?.name || "", // Only send name
+    department: createEmployee.value.department?.name || "",
+    doctype:doctypes.EzyEmployeeList,
   };
 
   axiosInstance
-    .put(
-      `${apis.resource}${doctypes.EzyEmployeeList}/${createEmployee.value.name}`,
-      payload
-    )
-    .then((response) => {
-      if (response.data) {
-        toast.success("Changes Saved", { autoClose: 500, transition: "zoom" });
-        employeeData(); // refresh list
-        const modal = bootstrap.Modal.getInstance(document.getElementById('exampleModal'));
-        modal.hide();
-        createEmployee.value = {}; // clear form
-        searchText.value=""
-      }
+    .put(`${apis.DataUpdate}/${createEmployee.value.name}`,payload)
+      .then((response) => {
+        if (response.message.success==true) {
+          toast.success("Changes Saved", { autoClose: 500, transition: "zoom" });
+          employeeData(); // refresh list
+          const modal = bootstrap.Modal.getInstance(document.getElementById('exampleModal'));
+          modal.hide();
+          createEmployee.value = {}; // clear form
+          searchText.value=""
+        }
+        else{
+          toast.error(response.message.message)
+        }
     })
     .catch((error) => {
       console.error("Error saving employee:", error);

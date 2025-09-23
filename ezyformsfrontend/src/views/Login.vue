@@ -136,19 +136,31 @@
             </div>
           </div>
           <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
-            <label class="font-13" for="emp_code">Designation<span class="text-danger ps-1">*</span></label>
-            <Vue3Select v-model="SignUpdata.designation" :options="this.disignationDetails"
-              placeholder="Select Designation" />
+            <label class="font-13" for="emp_code">Property Name<span class="text-danger ps-1">*</span></label>
+            <Vue3Select v-model="SignUpdata.business_unit" @change="checkSignitureRequired" :options="this.propertyDetails"
+              placeholder="Select Property" />
           </div>
           <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
             <label class="font-13" for="emp_code">Department<span class="text-danger ps-1">*</span></label>
             <Vue3Select v-model="SignUpdata.dept" :reduce="dept => dept.value" :options="this.deptDetails"
-              placeholder="Select Department" />
+              placeholder="Select Department" >
+              <template #no-options>
+                <span class="text-muted">
+                  {{ selectMessage ? "No Department Available" : "Select Property Name" }}
+                </span>
+              </template>
+            </Vue3Select>
           </div>
           <div class="mb-2  col-lg-6 col-md-12 col-sm-12">
-            <label class="font-13" for="emp_code">Property Name<span class="text-danger ps-1">*</span></label>
-            <Vue3Select v-model="SignUpdata.business_unit" @change="checkSignitureRequired" :options="this.propertyDetails"
-              placeholder="Select Property" />
+            <label class="font-13" for="emp_code">Designation<span class="text-danger ps-1">*</span></label>
+            <Vue3Select v-model="SignUpdata.designation" :options="this.disignationDetails"
+              placeholder="Select Designation" noOptionsText="No Designations Available" >
+              <template #no-options>
+                <span class="text-muted">
+                  {{ selectMessage ? "No Department Available" : "Select Property Name" }}
+                </span>
+              </template>
+            </Vue3Select>
           </div>
         </div>
         <div class="mt-2 row">
@@ -457,6 +469,7 @@ export default {
       isUploadImage: false,
       selectedOption: "",
       saveloading: false,
+      selectMessage:false,
       isAcknowledge: "",
       ShowAcknowledgement: "",
       acknowledge_signature: null,
@@ -895,11 +908,6 @@ export default {
           if (res.message) {
             this.isSignup = res.message.is_signup;
             this.propertyDetails = res.message.business_unit.map((prty) => prty.name);
-            this.disignationDetails = res.message.designation.map((disg) => disg.name);
-            this.deptDetails = res.message.department.map((dept) => ({
-              label: dept.department_name,
-              value: dept.name,
-            }));
             const active = res.message.acknowledgement;
             const firstActive = active[0];
             this.acknowledgementHtml = firstActive.acknowledgement;
@@ -1286,12 +1294,19 @@ export default {
     },
 
     checkSignitureRequired() {
+      this.SignUpdata.designation = null;
+      this.SignUpdata.dept = null;
     axiosInstance
       .get(`${apis.GetsignUp}`, { params: { business_unit: this.SignUpdata.business_unit } })
       .then((res) => {
         if (res.message) {
+          this.selectMessage=true;
           this.signRequired = res.message.signature_required;
-          console.log('Signature Required:', this.signRequired);
+          this.disignationDetails = res.message.designation.map((disg) => disg.name);
+          this.deptDetails = res.message.department.map((dept) => ({
+            label: dept.department_name,
+            value: dept.name,
+            }));
         }
       })
       .catch((error) => {

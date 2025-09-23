@@ -443,11 +443,11 @@ function createDepart() {
         const dataObj = {
             ...CreateDepartments.value,
             department_code: `${CreateDepartments.value.department_code}-${CreateDepartments.value.department_name}`,
-            "doctype": doctypes.departments,
+            doctype: doctypes.departments,
 
         }
-        axiosInstance.post(apis.resource + doctypes.departments, dataObj).then((res) => {
-            if (res.data) {
+        axiosInstance.post(apis.DataUpdate, dataObj).then((res) => {
+            if (res.message.data) {
                 toast.success("Department Created successfully", { autoClose: 500, "transition": "zoom" })
                 deptData()
                 CreateDepartments.value = {
@@ -501,9 +501,9 @@ function UpdateDeprtment() {
         };
 
         axiosInstance
-            .put(`${apis.resource}${doctypes.departments}/${CreateDepartments.value.name}`, dataObj)
+            .put(`${apis.DataUpdate}/${CreateDepartments.value.name}`, dataObj)
             .then((res) => {
-                if (res.data) {
+                if (res.message.success==true) {
                     toast.success("Department Updated successfully", { autoClose: 500, transition: "zoom" });
                     deptData();
 
@@ -517,6 +517,10 @@ function UpdateDeprtment() {
                     const modal = bootstrap.Modal.getInstance(document.getElementById('viewCategory'));
                     modal.hide();
                 }
+                if (res.message.success==false) {
+                    toast.error(res.message.message)
+                }
+
             })
             .catch((error) => {
                 console.error("Error updating department:", error.response?.data || error);

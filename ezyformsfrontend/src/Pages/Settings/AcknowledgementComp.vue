@@ -121,11 +121,12 @@ function createAcknowledgement() {
     const dataObj = {
         acknowledgement: content.value,
         naming_series: acknowledgementName.value,
+        doctype:doctypes.acknowledgement,
     }
     // console.log(dataObj, "------------------");
-    axiosInstance.post(apis.resource + doctypes.acknowledgement, dataObj)
+    axiosInstance.post(apis.DataUpdate, dataObj)
         .then((res) => {
-            if (res.data) {
+            if (res.message.data) {
                 // console.log("res", res.data);
                 const modal = bootstrap.Modal.getInstance(
                     document.getElementById("AcknowledgementModal")
@@ -141,17 +142,22 @@ function UpdateAcknowledgement(){
     const updatedData = {
         acknowledgement: content.value,
         naming_series: acknowledgementName.value,
+        doctype:doctypes.acknowledgement,
+        name:acknowledgementData.value.name,
       };
      axiosInstance
-        .put(`${apis.resource}${doctypes.acknowledgement}/${acknowledgementData.value.name}`, updatedData)
+        .put(`${apis.DataUpdate}/${acknowledgementData.value.name}`, updatedData)
         .then((response) => {
-            if (response.data) {
+            if (response.message.success==true) {
                 toast.success(`acknowledgement Updated successfully`, { autoClose: 700 });
                 activitylog()
                 const modal = bootstrap.Modal.getInstance(
                     document.getElementById("AcknowledgementModal")
                 );
                 modal.hide();
+            }
+            if (response.message.success==false) {  
+                toast.error(response.message.message)
             }
 
         })

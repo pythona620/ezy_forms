@@ -2037,16 +2037,14 @@ function SaveEditEmp() {
 
   const payload = {
     ...createEmployee.value,
-    department: createEmployee.value.department?.name || "", // Only send name
+    department: createEmployee.value.department?.name || "",
+    doctype:doctypes.EzyEmployeeList,
   };
 
   axiosInstance
-    .put(
-      `${apis.resource}${doctypes.EzyEmployeeList}/${createEmployee.value.name}`,
-      payload
-    )
+    .put(`${apis.DataUpdate}/${createEmployee.value.name}`,payload)
     .then((response) => {
-      if (response.data) {
+      if (response.message.success==true) {
         toast.success("Changes Saved", { autoClose: 500, transition: "zoom" });
         const modal = bootstrap.Modal.getInstance(
           document.getElementById("exampleModal")
@@ -2054,6 +2052,9 @@ function SaveEditEmp() {
         modal.hide();
         // exampleModal
         employeeData(); // refresh list
+      }
+      else{
+          toast.error(response.message.message)
       }
     })
     .catch((error) => {
