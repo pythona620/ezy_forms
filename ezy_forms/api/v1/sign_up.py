@@ -175,10 +175,10 @@ def get_signup_value(business_unit=None):
 	return_value = {}
 	if business_unit:
 		return_value["signature_required"] = 1 if frappe.get_value("Ezy Business Unit",business_unit,  "signature_required") else 0
-		return_value["department"] = frappe.get_all("Ezy Departments",filters = {"business_unit":business_unit}, fields=["name","department_name"], order_by="name")
-		return_value["designation"] = frappe.get_all("WF Roles", fields=["name"],  order_by="role")
 		return return_value
 	web_signup_value =  frappe.get_value("Website Settings", "Website Settings", "disable_signup") or 0
+	return_value["department"] = frappe.get_all("Ezy Departments",filters = {"business_unit":business_unit}, fields=["name","department_name"], order_by="name")
+	return_value["designation"] = frappe.get_all("WF Roles", fields=["name"],  order_by="role")
 	return_value["acknowledgement"] = frappe.get_all("Acknowledgement", fields=["name","acknowledgement"],filters={"enable":1}, order_by="name")
 	return_value["business_unit"] = frappe.get_all("Ezy Business Unit", fields=["name","bu_name"], order_by="name")
 	return_value["is_signup"] = web_signup_value
