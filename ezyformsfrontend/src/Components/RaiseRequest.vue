@@ -408,6 +408,10 @@ function handleTableData(data) {
 
 
 function EditRequestUpdate() {
+   if (!isFormValid.value) {
+    toast.error("Please Fill All Mandatory Fields");
+    return;
+  }
   let form = {};
 
   // Include normal form fields
@@ -807,6 +811,7 @@ const linkedId = ref("");
 const childRef = ref(null)
 
 function toRaiseReqBtn() {
+  console.log(childRef.value, "childRef");
   const hasError = childRef.value?.errorStatus ?? false;
 
   if (hasError) {
@@ -1280,6 +1285,7 @@ function request_raising_fn(item) {
           router.push({ path: "/todo/raisedbyme" });
         },
       });
+      
     }
   })
    .catch((error) => {
