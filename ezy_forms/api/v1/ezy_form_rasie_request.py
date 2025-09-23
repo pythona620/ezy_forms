@@ -419,7 +419,7 @@ def combination_of_roadmap_and_request(document_type, request_id, property=None,
 		roadmap_data_wf_level_setup = roadmap_data["wf_level_setup"]
 
 		dataframe_roadmap_wf_level_setup = pd.DataFrame.from_records(roadmap_data_wf_level_setup)
-		dataframe_roadmap_wf_level_setup = dataframe_roadmap_wf_level_setup[["level", "idx", "role", "action", "cancel_request", "on_rejection", "mandatory", "escalation_time", 'requester_as_a_approver','view_only_reportee', 'all_approvals_required']]
+		dataframe_roadmap_wf_level_setup = dataframe_roadmap_wf_level_setup[["level", "idx", "role", "action", "cancel_request", "on_rejection", "mandatory", "escalation_time", 'requester_as_a_approver','view_only_reportee', 'all_approvals_required',"approval_required"]]
 		dataframe_roadmap_wf_level_setup = dataframe_roadmap_wf_level_setup.sort_values(['level'], ascending=[True])
 
 		# Now creating the dataframe of request id
@@ -442,8 +442,8 @@ def combination_of_roadmap_and_request(document_type, request_id, property=None,
 			left_on=['level', 'role'],
 			right_on=['level', 'role']
 		)
-		merging_dataframes[['on_rejection', 'cancel_request', 'mandatory', 'requester_as_a_approver','view_only_reportee', 'all_approvals_required']] = merging_dataframes[
-			['on_rejection', 'cancel_request', 'mandatory', 'requester_as_a_approver','view_only_reportee', 'all_approvals_required']
+		merging_dataframes[['on_rejection', 'cancel_request', 'mandatory', 'requester_as_a_approver','view_only_reportee', 'all_approvals_required',"approval_required"]] = merging_dataframes[
+			['on_rejection', 'cancel_request', 'mandatory', 'requester_as_a_approver','view_only_reportee', 'all_approvals_required',"approval_required"]
 		].fillna(value=0)
 
 		merging_dataframes.rename(columns={"action_x": "action"}, inplace=True)
@@ -455,11 +455,12 @@ def combination_of_roadmap_and_request(document_type, request_id, property=None,
 		merging_dataframes["requester_as_a_approver"] = merging_dataframes["requester_as_a_approver"].astype(int)
 		merging_dataframes["view_only_reportee"] = merging_dataframes["view_only_reportee"].astype(int)
 		merging_dataframes["all_approvals_required"] = merging_dataframes["all_approvals_required"].astype(int)
+		merging_dataframes["approval_required"] = merging_dataframes["approval_required"].astype(int)
 
 		# Remove the requestor row (level 0) for approvals
 		removing_requestor_row_in_the_view = merging_dataframes[merging_dataframes['level'] != 0]
 		removing_requestor_row_in_the_view = removing_requestor_row_in_the_view[
-			["name", "level", "action", "role", "user", "reason", "time", "cancel_request", "on_rejection", "mandatory", "escalation_time", 'requester_as_a_approver','view_only_reportee', 'all_approvals_required']
+			["name", "level", "action", "role", "user", "reason", "time", "cancel_request", "on_rejection", "mandatory", "escalation_time", 'requester_as_a_approver',"approval_required",'view_only_reportee', 'all_approvals_required']
 		].sort_values("time").reset_index(drop=True)
 
 		approvals = removing_requestor_row_in_the_view.to_dict("records")
@@ -487,7 +488,7 @@ def combination_of_roadmap_and_request(document_type, request_id, property=None,
 			filtered_data = [{
 				'name': None, 'level': 0, 'action': None, 'role': None, 'user': None, 'reason': None, 'time': None,
 				'cancel_request': 0, 'on_rejection': 0, 'mandatory': 0, 'escalation_time': None,
-				'requester_as_a_approver': 0,'view_only_reportee': 0, 'all_approvals_required': 0
+				'requester_as_a_approver': 0,'view_only_reportee': 0, 'all_approvals_required': 0,"approval_required":0
 			}]
 
 		filtered_data_df = pd.DataFrame.from_records(filtered_data)
@@ -498,7 +499,7 @@ def combination_of_roadmap_and_request(document_type, request_id, property=None,
 		merging_dataframes = pd.merge(filtered_data_df, dataframe_roadmap_wf_level_setup, how="outer")
 		merging_dataframes = merging_dataframes.drop_duplicates(subset=["level", "role"], keep='first')
 		merging_dataframes = merging_dataframes[
-			["name", "level", "role", "user", "action", "reason", "cancel_request", "on_rejection", "mandatory", "escalation_time", "time",'requester_as_a_approver', 'view_only_reportee', 'all_approvals_required']
+			["name", "level", "role", "user", "action", "reason", "cancel_request", "on_rejection", "mandatory", "escalation_time", "time",'requester_as_a_approver', 'view_only_reportee', 'all_approvals_required','approval_required']
 		]
 		merging_dataframes = merging_dataframes.replace(np.nan, '')
 		merging_dataframes['role'].replace('', np.nan, inplace=True)
