@@ -91,7 +91,8 @@ def add_roles_to_wf_requestors(business_unit: str, doctype: str, workflow_setup:
                     "view_only_reportee": row.get("view_only_reportee"),
                     "requester_as_a_approver": row.get("requester_as_a_approver"),
                     "all_approvals_required": row.get("all_approvals_required"),
-                    "on_rejection": row.get("on_rejection")
+                    "on_rejection": row.get("on_rejection"),
+                    "approval_required":row.get("approval_required")
                 })
         
         # Check if records exist before deleting
