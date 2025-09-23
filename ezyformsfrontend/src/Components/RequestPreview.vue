@@ -473,6 +473,7 @@
                                                                 )
                                                         " class="form-control previewInputHeight font-10">
                                                 </component>
+                                                
                                             </template>
                                             <div v-if="
                                                 errorMessages[
@@ -1128,6 +1129,8 @@ const getMaxLength = (field) => {
     if (label.includes('expense code')) return 6;
     if (label.includes('cost center')) return 4;
     if (field.fieldtype?.toLowerCase() === 'phone') return 10;
+    if (field.fieldtype?.toLowerCase() === 'int') return 10;
+
 
     return 140;
 };
@@ -1739,11 +1742,11 @@ const updateDateTimeFields = () => {
                                 field.value = getCurrentDateTime();
                                 emit("updateField", field);
                             }
-                            if (field.fieldtype === "Date" && !field.value) {
-                                field.value = new Date().toISOString().split('T')[0]; // Ensure format is YYYY-MM-DD
-                                // console.log("Setting field.value:", field.value); // Debugging log
-                                emit("updateField", field);
-                            }
+                            // if (field.fieldtype === "Date" && !field.value) {
+                            //     field.value = new Date().toISOString().split('T')[0]; // Ensure format is YYYY-MM-DD
+                            //     // console.log("Setting field.value:", field.value); // Debugging log
+                            //     emit("updateField", field);
+                            // }
                             if(field.fieldname.includes('returnable_gate_pass_id') || field.label.includes('Returnable Gate Pass Id')){
                                 
                                 field.value = props.linked_id;
@@ -1831,11 +1834,11 @@ onMounted(async() => {
                                 emit("updateField", field);
                             }
 
-                            if (field.fieldtype === "Date" && !field.value) {
-                                field.value = new Date().toISOString().split('T')[0]; // Ensure format is YYYY-MM-DD
-                                // console.log("Setting field.value:", field.value); // Debugging log
-                                emit("updateField", field);
-                            }
+                            // if (field.fieldtype === "Date" && !field.value) {
+                            //     field.value = new Date().toISOString().split('T')[0]; // Ensure format is YYYY-MM-DD 
+                            //     // console.log("Setting field.value:", field.value); // Debugging log
+                            //     emit("updateField", field);
+                            // }
                             if(field.label.includes("Department Name") || field.label.includes("Department name")){
                                 field.value = emp_data.value.department;
                                 emit("updateField", field);
@@ -1978,9 +1981,9 @@ const allFieldsFilled = computed(() => {
             }
         }
     }
-    //     if (Object.keys(errorMessages.value).length > 0) {
-    //     return false;
-    //   }
+        if (Object.keys(errorMessages.value).length > 0) {
+        return false;
+      }
 
     return true; // If all required fields are filled, return true
 });
@@ -1993,6 +1996,7 @@ watch(
     },
     { immediate: true }
 );
+
 // const removeTempFile = (index) => {
 //   tempFiles.value.splice(index, 1);
 //   if (tempFiles.value.length === 0) {
@@ -2138,7 +2142,7 @@ const logFieldValue = (
         //     return;
         // } else {
         //     delete errorMessages.value[fieldKey];
-        // }
+        // } 
 
         field["value"] = inputValue;
         emit("updateField", field.value);
@@ -2196,7 +2200,10 @@ const validateField = (
     ) {
         errorMessages.value[fieldKey] = `${field.label || "This field"
             } is required.`;
-    } else if (field.fieldtype === "Phone") {
+    }
+    
+    
+    else if (field.fieldtype === "Phone") {
         const phoneRegex = /^\+91[0-9]{10}$/; // Accepts +91 followed by exactly 10 digits
 
         if (!phoneRegex.test(field.value)) {
@@ -2204,7 +2211,33 @@ const validateField = (
         } else {
             delete errorMessages.value[fieldKey]; // Clear error if valid
         }
+    }
+        else if (field.fieldtype === "Data") {
+        if (field.value && field.value.length > 139) {
+            errorMessages.value[fieldKey] = "Maximum 140 characters allowed.";
+        } else {
+            delete errorMessages.value[fieldKey];
+        }
+    }
+
+    // Integer field validation
+   else if (field.fieldtype === "Int") {
+    if (field.value && field.value.toString().trim() !== "") {
+        const intValue = parseInt(field.value, 10);
+        if (isNaN(intValue)) {
+            errorMessages.value[fieldKey] = "Enter a valid integer.";
+        } else if (intValue > 2147483647 || intValue < -2147483647) {
+            errorMessages.value[fieldKey] = "Integer value out of range (-2147483647 to 2147483647).";
+        } else {
+            delete errorMessages.value[fieldKey];
+        }
     } else {
+        // No value entered → no error
+        delete errorMessages.value[fieldKey];
+    }
+}
+    
+    else {
         delete errorMessages.value[fieldKey]; // Clear error if valid
     }
 };
@@ -2479,12 +2512,31 @@ function performAutoCalculations() {
     }
   }
 }
+// function emitErrorStatus() {
+//     // console.log(fieldErrors.value)
+//   errorStatus.value = Object.values(fieldErrors.value).some(
+//     rowErrors => Object.keys(rowErrors).length > 0
+//   )
+// }
 function emitErrorStatus() {
-    // console.log(fieldErrors.value)
-  errorStatus.value = Object.values(fieldErrors.value).some(
+  // Check if any fieldErrors exist
+  const hasFieldErrors = Object.values(fieldErrors.value).some(
     rowErrors => Object.keys(rowErrors).length > 0
-  )
+  );
+
+  // Check if any global errorMessages exist
+  const hasGlobalErrors = Object.keys(errorMessages.value || {}).length > 0;
+
+  // Update exposed ref
+  errorStatus.value = hasFieldErrors || hasGlobalErrors;
 }
+watch(fieldErrors, () => {
+  emitErrorStatus();
+}, { deep: true });
+
+watch(errorMessages, () => {
+  emitErrorStatus();
+}, { deep: true });
 
 function validateFields(row, fields) {
   fields.forEach(field => {
