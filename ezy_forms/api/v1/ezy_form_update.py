@@ -19,8 +19,8 @@ def edit_the_form_before_approve(document_type,property,form_id,updated_fields,s
         if not frappe.db.exists("DocType",document_type):
             return {"success":True, "message":"Form Not Found"}
         record_data = frappe.get_doc(document_type,{"wf_generated_request_id":form_id,"company_field":property})
-        frappe.db.set_value('WF Workflow Requests', form_id, {"status":status,'current_level':current_level_for_wf_workflow,"action":"Request Raised","user_session_id":""})
-        todo_tab(document_type=document_type, request_id=form_id, property=property, cluster_name=None, current_level=current_level_for_wf_workflow,account_ids=record_data,status=None)
+        frappe.db.set_value('WF Workflow Requests', form_id, {"status":'Request Raised','current_level':1,"action":"Request Raised","user_session_id":""})
+        todo_tab(document_type=document_type, request_id=form_id, property=property, cluster_name=None, current_level=current_level_for_wf_workflow,account_ids=record_data,status="None")
             
         now = add_to_date(None,as_datetime=True)
         my_time = f"{now.year}/{now.month}/{now.day} {now.hour}:{now.minute}:{now.second}:{now.microsecond}" 
