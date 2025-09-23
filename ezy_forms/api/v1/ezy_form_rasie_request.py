@@ -603,7 +603,7 @@ def todo_tab(document_type, request_id, property=None, cluster_name=None, curren
 		
 			
 			role_list = list( set( map( lambda r: r.role, filter(lambda r: int(r.level) == int(current_level), activate_log_roles.reason) ) )  )
-			if current_user_role in picking_remaining_roles_for_approval and not view_only_roles and not requester_as_a_approver and not all_approvals_required and not status and not approvar_excits:
+			if current_user_role in picking_remaining_roles_for_approval and not view_only_roles and not requester_as_a_approver and not all_approvals_required and not status and  approvar_excits:
 				doctype_ids = frappe.get_doc(document_type,account_ids)
 				doctype_ids.wf_generated_request_status =  "In Progress" if len(approvals_reasons)>1 else "Completed"
 				doctype_ids.save(ignore_permissions=True)
