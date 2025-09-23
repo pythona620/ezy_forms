@@ -564,7 +564,7 @@ def todo_tab(document_type, request_id, property=None, cluster_name=None, curren
 				if int(remaining_role["level"]) == int(current_level) and not remaining_role["action"].strip() and not remaining_role["user"].strip() and remaining_role.get("approval_required", 0) == 0
 			]
 			
-			if approvar_excits:
+			if approvar_excits and not status:
 				approval_list = [role.role for role in activate_log_roles.reason if role.level != 0]
 				approvar_excits_list = list(set(approval_list))
 				has_match = any(map(lambda role: role in approvar_excits_list, approvar_excits))
@@ -617,7 +617,7 @@ def todo_tab(document_type, request_id, property=None, cluster_name=None, curren
 			# Find the next level's approver role(s)
 			picking_remaining_roles_for_approval = [remaining_role["role"] for remaining_role in approvals_reasons if int(remaining_role["level"]) == int(current_level) and not remaining_role["action"].strip() and not remaining_role["user"].strip()]
 			
-			if view_only_roles:
+			if view_only_roles and not status:
 				be_half_of = workflow_requests.get("be_half_of", None)
 				if be_half_of and not status:
 					# Assign to the reporting manager of be_half_of user
@@ -625,31 +625,28 @@ def todo_tab(document_type, request_id, property=None, cluster_name=None, curren
 					picking_remaining_roles_for_approval = [reporting_manager]
 				else:
 					reporting_manager = frappe.db.get_value("Ezy Employee",workflow_requests.requested_by ,"reporting_designation")
-					if reporting_manager in view_only_roles and not status:
+					if reporting_manager in view_only_roles:
 						picking_remaining_roles_for_approval = [reporting_manager]
 					else:
 						picking_remaining_roles_for_approval = ['No Role Assigned - View Only']
-			if all_approvals_required:
+			if all_approvals_required :
 				prives_level_role_list = list( set( map( lambda r: r.role, filter(lambda r: int(r.level) == int(current_level)-1, activate_log_roles.reason) ) )  )
 				all_approvals_required = list(filter(lambda x: True if not x in prives_level_role_list else False, all_approvals_required))
 				# # # if the privies level approver in the same role, then assign to the next level approver skip
 				############################################################# 
-							  
 
 				picking_remaining_roles_for_approval = all_approvals_required
 			#############################################################
 				if status:
 						picking_remaining_roles_for_approval = role_list
-				else:
-					picking_remaining_roles_for_approval = all_approvals_required
+
 								
-			if requester_as_a_approver :
+			if requester_as_a_approver and not status :
 				if workflow_requests.role in requester_as_a_approver:
 					picking_remaining_roles_for_approval = [workflow_requests.role]
 				else:
 					picking_remaining_roles_for_approval = ['No Role Assigned - Requester as Approver']
-			
-			
+	
 			if len(picking_remaining_roles_for_approval) > 0:
 				frappe.db.set_value("WF Workflow Requests", request_id, "assigned_to_users", str(picking_remaining_roles_for_approval))
 				frappe.db.commit()
