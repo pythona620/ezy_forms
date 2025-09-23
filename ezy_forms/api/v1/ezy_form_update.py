@@ -3,7 +3,7 @@ from ezy_forms.api.v1.ezy_form_rasie_request import todo_tab,send_notifications,
 import random
 import string
 from frappe.utils import add_to_date
-import sys
+import sys,os
 from ezy_forms.ezy_forms.doctype.ezy_form_definitions.dynamic_form_template import download_filled_form
 import traceback
 from urllib.parse import urlparse
@@ -85,9 +85,13 @@ def edit_the_form_before_approve(document_type,property,form_id,updated_fields,s
             if attachment_to_mail :
                 file_down = download_filled_form(form_short_name=doctype_name, name=document_name,business_unit=property,from_raise_request='from_raise_request')
                 parsed_url = urlparse(file_down)
-                attach_down.append({
-                    "file_url":  parsed_url.path
-                })
+                file_path = frappe.get_site_path("public", parsed_url.path.lstrip("/"))
+                if os.path.exists(file_path):
+                    with open(file_path, "rb") as f:
+                        attach_down.append({
+                            "fname": os.path.basename(file_path),
+                            "fcontent": f.read()
+                        })
             for email in fetching_all_roles_from_role_matrix:
                 email_content = generate_email_content(
                     document_name, doctype_name, user_name_by_seccion, requested_by_role, email,requested_by,
