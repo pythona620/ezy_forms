@@ -310,6 +310,7 @@
                     <li v-for="(warning, i) in templateWarnings" :key="i">{{ warning }}</li>
                   </ul>
                 </div>
+               
 
 
                 <table v-if="formattedData.length > 0" class="styled-table">
@@ -328,7 +329,13 @@
                       <td :class="record.status === 'success' ? 'status-success' : 'status-failed'">
                         {{ record.status }}
                       </td>
-                      <td>{{ record.displayMessage }}</td>
+                      <td>
+                        
+                        <div>{{ record.displayMessage }}</div>
+                        <div v-if="record.errorMessage" class=" small font-10 text-danger">
+                          {{ record.errorMessage }}
+                        </div>
+                      </td>
                     </tr>
                   </tbody>
                 </table>
@@ -908,6 +915,7 @@ const formattedData = computed(() => {
   return data.map((record, index) => {
     let email = "N/A";
     let messageText = "N/A";
+    let errorMessage = ''; // Default to original message
 
     try {
       if (record.status.toLowerCase() === "success") {
@@ -919,6 +927,8 @@ const formattedData = computed(() => {
 
         if (Array.isArray(parsedMessages) && parsedMessages.length > 0) {
           messageText = parsedMessages[0].title || "Unknown Issue";
+          errorMessage = parsedMessages[0].message || "";
+
 
           // Check for invalid email error
           const invalidEmail = extractInvalidEmail(parsedMessages);
@@ -932,6 +942,7 @@ const formattedData = computed(() => {
       }
     } catch (error) {
       messageText = "Parsing Error"; // Fallback if JSON parsing fails
+      errorMessage = record.message; // Keep original message for reference
     }
 
     return {
@@ -939,6 +950,8 @@ const formattedData = computed(() => {
       email,
       status: record.status,
       displayMessage: messageText, // Extract only the title
+     errorMessage, // Full original message for reference
+
     };
   });
 });
