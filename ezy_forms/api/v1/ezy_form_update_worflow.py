@@ -241,10 +241,13 @@ def enqueuing_updating_wf_workflow_requests(doctype,request_ids:list, current_le
                             if attachment_to_mail :
                                 file_down = download_filled_form(form_short_name=doctype, name=request_id_document[0].name,business_unit=property,from_raise_request='from_raise_request')
                                 parsed_url = urlparse(file_down)
-                                attach_down.append({
-                                    "file_url":  parsed_url.path
-                                })
-
+                                file_path = frappe.get_site_path("public", parsed_url.path.lstrip("/"))
+                                if os.path.exists(file_path):
+                                    with open(file_path, "rb") as f:
+                                        attach_down.append({
+                                            "fname": os.path.basename(file_path),
+                                            "fcontent": f.read()
+                                        })
                             user_name_by_seccion = frappe.get_value("User",requested_by,'full_name')    
                             employee_mails = frappe.db.get_all("Ezy Employee",filters = {'emp_mail_id':['in',fetching_all_roles_from_role_matrix],'enable': 1})
                             fetching_all_roles_from_role_matrix = [emp['name'] for emp in employee_mails]
@@ -299,9 +302,13 @@ def enqueuing_updating_wf_workflow_requests(doctype,request_ids:list, current_le
                             if attachment_to_mail:
                                 file_down = download_filled_form(form_short_name=doctype, name=request_id_document[0].name,business_unit=property,from_raise_request='from_raise_request')
                                 parsed_url = urlparse(file_down)
-                                attach_down.append({
-                                    "file_url":  parsed_url.path
-                                })
+                                file_path = frappe.get_site_path("public", parsed_url.path.lstrip("/"))
+                                if os.path.exists(file_path):
+                                    with open(file_path, "rb") as f:
+                                        attach_down.append({
+                                            "fname": os.path.basename(file_path),
+                                            "fcontent": f.read()
+                                        })
 
                             user_name_by_seccion = frappe.get_value("User",requested_by,'full_name')
                             email_content = generate_email_content(
@@ -377,9 +384,13 @@ def enqueuing_updating_wf_workflow_requests(doctype,request_ids:list, current_le
                     if attachment_to_mail:
                         file_down = download_filled_form(form_short_name=doctype, name=request_id_document[0].name,business_unit=property,from_raise_request='from_raise_request')
                         parsed_url = urlparse(file_down)
-                        attach_down.append({
-                            "file_url":  parsed_url.path
-                        })
+                        file_path = frappe.get_site_path("public", parsed_url.path.lstrip("/"))
+                        if os.path.exists(file_path):
+                            with open(file_path, "rb") as f:
+                                attach_down.append({
+                                    "fname": os.path.basename(file_path),
+                                    "fcontent": f.read()
+                                })
 
 
                

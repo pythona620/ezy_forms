@@ -27,7 +27,7 @@ from frappe.utils import (
 )
 import sys, traceback, time
 from ezy_forms.api.v1.delete_files import delete_files_api
-
+import os
 
 
 @frappe.whitelist()
@@ -524,12 +524,13 @@ def combination_of_roadmap_and_request(document_type, request_id, property=None,
 @frappe.whitelist()
 def todo_tab(document_type, request_id, property=None, cluster_name=None, current_level=None,account_ids=None,status=None):
 	try:
-		road_map = frappe.db.get_value('WF Roadmap',{"document_type":document_type},'workflow_levels')
-		
+		road_map = int(frappe.db.get_value('WF Roadmap',{"document_type":document_type},'workflow_levels'))
+		current_level = int(current_level)
+  
 		for level in range(1,int(road_map)+1):
 			
 			return_message = combination_of_roadmap_and_request(document_type, request_id, property=property, cluster_name=cluster_name)
-	
+			
 			approvals_reasons = return_message["message"]["approvals_reasons"]
 			activate_log_roles = frappe.get_doc("WF Activity Log",request_id)
 			workflow_requests = frappe.get_doc("WF Workflow Requests", request_id)
@@ -567,7 +568,6 @@ def todo_tab(document_type, request_id, property=None, cluster_name=None, curren
 				approvar_excits_list = list(set(approval_list))
 				has_match = any(map(lambda role: role in approvar_excits_list, approvar_excits))
 				match_role = next((role for role in approvar_excits if role in approvar_excits_list), None)
-				
 				if has_match:
 					if all_approvals_required:
 						all_approvals_required.remove(match_role)
@@ -583,16 +583,15 @@ def todo_tab(document_type, request_id, property=None, cluster_name=None, curren
 					}
 					existing_roles = activate_log_roles.get("reason") or []
 					record_exists = any(int(r.get("level")) == int(current_level) and r.get("role") == match_role for r in existing_roles)
-					if not record_exists and not requester_as_a_approver:
-						frappe.log_error(title="first conditon",message=current_level)
+					if not record_exists and  not requester_as_a_approver:
 						activate_log_roles.append("reason", new_record)
 						activate_log_roles.save(ignore_permissions=True)
-					
+					if not requester_as_a_approver:
 						doctype_ids = frappe.get_doc(document_type,account_ids)
 						doctype_ids.wf_generated_request_status =  "In Progress" if len(approvals_reasons)>1 else "Completed"
 						doctype_ids.save(ignore_permissions=True)
 						workflow_requests.status = "In Progress" if current_level < road_map else "Completed"
-						current_level += 1  if int(current_level) < road_map else  0 # move to next level
+						current_level += 1  if int(current_level) < road_map and not all_approvals_required else  0 # move to next level
 						workflow_requests.current_level = current_level if current_level<road_map else road_map
 						workflow_requests.save()
 						workflow_requests.reload()	
@@ -769,9 +768,13 @@ def send_notifications(request_id, doctype_name, property, cluster, reason, time
 
 		file_down = download_filled_form(form_short_name=doctype_name, name=request_id_document[0].name,business_unit=property,from_raise_request='from_raise_request')
 		parsed_url = urlparse(file_down)
-		attach_down.append({
-			"file_url":parsed_url.path
-		})
+		file_path = frappe.get_site_path("public", parsed_url.path.lstrip("/"))
+		if os.path.exists(file_path):
+			with open(file_path, "rb") as f:
+				attach_down.append({
+					"fname": os.path.basename(file_path),
+					"fcontent": f.read()
+				})
 	try:
 		# Check if email account is configured
 		email_accounts = frappe.get_all(

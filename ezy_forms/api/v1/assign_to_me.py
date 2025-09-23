@@ -12,22 +12,20 @@ def parse_time(t):
 @frappe.whitelist()
 def pick_view_only_reportee():
     present_user = frappe.session.user
+
+    designation = frappe.db.get_value("Ezy Employee", present_user, "designation")
  
-    roles = frappe.get_all("Has Role", {"parent": present_user}, ["role"], order_by="role asc", pluck="role")
-    all_role_type = frappe.db.get_value("Ezy Employee", present_user, "designation")
+    if not designation:
+        return f"No Designation For the Employee:- {present_user}"
  
-    if not roles:
-        return []
- 
-    users_role_is = all_role_type if all_role_type in roles else roles[0]
-    
+
     def fetch_requests(view_only_flag):
         matched_requests = []
  
         parent_names = frappe.db.get_all(
             "WF Level Setup",
             filters={
-                "role": users_role_is,
+                "role": designation,
                 "view_only_reportee": view_only_flag  # <-- using view_only_flag here
             },
             fields=["parent", "requester_as_a_approver", "view_only_reportee", "all_approvals_required","level"]
@@ -43,13 +41,14 @@ def pick_view_only_reportee():
             if parent["requester_as_a_approver"] == 1:
                 dynamic_filter.update({
                     "requested_by": ["like", f"%{present_user}%"],
+                    "current_level":parent['level'],
                     "status": "In Progress",
                     
                 })
                 
             else:
                 dynamic_filter.update({
-                    "assigned_to_users": ["like", f"%'{users_role_is}'%"],
+                    "assigned_to_users": ["like", f"%'{designation}'%"],
                     "current_level":parent['level']
                 })
             requests = frappe.db.get_all("WF Workflow Requests", filters=dynamic_filter, pluck="name")
