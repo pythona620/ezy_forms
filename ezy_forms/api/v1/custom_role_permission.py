@@ -80,7 +80,7 @@ def assign_custom_permissions_job(role_name: str):
     return f"Custom permissions assigned to role: {role_name}"
 
 
-
+@frappe.whitelist() 
 def system_role_permissions():
     docs = frappe.get_all("WF Roles")
     for doc in docs:
