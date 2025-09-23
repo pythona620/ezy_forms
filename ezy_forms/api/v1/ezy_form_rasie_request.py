@@ -629,16 +629,13 @@ def todo_tab(document_type, request_id, property=None, cluster_name=None, curren
 						picking_remaining_roles_for_approval = [reporting_manager]
 					else:
 						picking_remaining_roles_for_approval = ['No Role Assigned - View Only']
-			if all_approvals_required :
+			if all_approvals_required and not status:
 				prives_level_role_list = list( set( map( lambda r: r.role, filter(lambda r: int(r.level) == int(current_level)-1, activate_log_roles.reason) ) )  )
 				all_approvals_required = list(filter(lambda x: True if not x in prives_level_role_list else False, all_approvals_required))
 				# # # if the privies level approver in the same role, then assign to the next level approver skip
 				############################################################# 
-
 				picking_remaining_roles_for_approval = all_approvals_required
-			#############################################################
-				if status:
-						picking_remaining_roles_for_approval = role_list
+
 
 								
 			if requester_as_a_approver and not status :
