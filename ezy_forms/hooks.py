@@ -167,13 +167,13 @@ doc_events = {
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
+scheduler_events = {
 # 	"all": [
 # 		"ezy_forms.tasks.all"
 # 	],
-# 	"daily": [
-# 		"ezy_forms.tasks.daily"
-# 	],
+	"daily": [
+		"ezy_forms.api.v1.daily_email_alert.send_daily_alerts"
+	],
 # 	"hourly": [
 # 		"ezy_forms.tasks.hourly"
 # 	],
@@ -183,7 +183,7 @@ doc_events = {
 # 	"monthly": [
 # 		"ezy_forms.tasks.monthly"
 # 	],
-# }
+}
 
 # Testing
 # -------

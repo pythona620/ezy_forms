@@ -4,8 +4,8 @@ import json
 @frappe.whitelist(methods=["GET"])
 def get_doctype_list(doctype, fields:str, filters=None, limit_start:int=None, limit_page_length=None):
     # Prevent using '*' in fields
-    # if fields == ["*"]:
-    #     frappe.throw("Wildcard '*' is not allowed in fields. Please pass required fields explicitly.")
+    if doctype and fields == '["*"]':
+        frappe.throw("Wildcard '*' is not allowed in fields. Please pass required fields explicitly.")
     # if not limit_page_length:
     #     limit_page_length = 20
     # Parse fields into a list

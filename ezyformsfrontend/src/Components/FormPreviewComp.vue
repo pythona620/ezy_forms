@@ -277,20 +277,23 @@ onMounted(() => {
 function fetchDepartmentDetails() {
 
     const queryParams = {
-        fields: JSON.stringify(["*"]),
-        form_short_name: route.query.form_short_name || route.query.id,
-
+        doctype: doctypes.EzyFormDefinitions,
+        filters: JSON.stringify({
+            form_short_name: route.query.form_short_name || route.query.id,
+        }),
+        fields: JSON.stringify(["name","business_unit","form_department","form_category","form_json","form_name","form_short_name","form_status"]),
+        limit_page_length: "none",
     };
 
     axiosInstance
-        .get(`${apis.resource}${doctypes.EzyFormDefinitions}/${route.query.form_short_name || route.query.id}`, { params: queryParams })
+        // .get(`${apis.resource}${doctypes.EzyFormDefinitions}/${route.query.form_short_name || route.query.id}`, { params: queryParams })
+        .get(apis.GetDoctypeData, { params: queryParams })
         .then((response) => {
-            console.log("response", response);
-            formDescriptions.value = response.data
+            formDescriptions.value = response.message.data[0]
 
-            selectedForm.value = rebuildToStructuredArray(JSON.parse(response.data?.form_json).fields)
+            selectedForm.value = rebuildToStructuredArray(JSON.parse(formDescriptions.value.form_json).fields)
             childtableHeaders.value = JSON.parse(
-                response.data.form_json
+                formDescriptions.value.form_json
             ).child_table_fields;
 
 

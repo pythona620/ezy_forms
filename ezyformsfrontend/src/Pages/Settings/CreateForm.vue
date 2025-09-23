@@ -602,7 +602,6 @@ function fetchDepartmentDetails(data) {
   const queryParams = {
     fields: JSON.stringify(["name",
               "business_unit",
-              "form_type",
               "form_category",
               "owner_of_the_form",
               "active",
@@ -617,15 +616,9 @@ function fetchDepartmentDetails(data) {
               "is_landscape",
               "has_workflow",
               "workflow_check",
-              "is_predefined_doctype",
-              "predefined_doctype_name",
               "is_linked",
               "is_linked_form",
               "form_department",
-              "qr_code",
-              "qr_url",
-              "send_mail_for_frist_approval",
-              "mail_id",
               "series"
 ]),
     limit_page_length: filterObj.value.limitPageLength,
@@ -643,7 +636,7 @@ function fetchDepartmentDetails(data) {
         formCategory.value = [...new Set(tableData.value.map((formCategory) => formCategory.form_category))];
 
       } else {
-        tableData.value = tableData.value.concat(response.data);
+        tableData.value = tableData.value.concat(response.message.data);
       }
     })
     .catch((error) => {
