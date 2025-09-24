@@ -1546,9 +1546,11 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
             with zipfile.ZipFile(zip_path, 'w') as zipf:
                 for item in mail_attachment:
                     add_file_to_zip(item, zipf, zip_folder_name=zip_folder_name)
+            file_size = None
             if from_raise_request:
                 size_mb = os.path.getsize(zip_path) / (1024 * 1024)
                 if size_mb > 30:
+                    file_size = 30
                     # Recreate zip with only the 2 PDFs
                     with zipfile.ZipFile(zip_path, 'w') as zipf:
                         if activate_pdf_path and os.path.exists(activate_pdf_path):
@@ -1557,7 +1559,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
                             add_file_to_zip({"file_path": absolute_pdf_path}, zipf, zip_folder_name=zip_folder_name)
             site_url = get_url()
             full_download_url = f"{site_url}/files/Attachment_folder/{zip_filename}"
-            return full_download_url
+            return full_download_url if not from_raise_request else {"full_download_url":full_download_url,"file_size": True if file_size else False}
 
 
 

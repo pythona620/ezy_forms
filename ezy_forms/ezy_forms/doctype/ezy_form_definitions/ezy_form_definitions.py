@@ -249,7 +249,8 @@ def enqueued_add_dynamic_doctype(
         fields = validate_and_clean_fields(fields or [])
 
         doctype = form_short_name
-
+        frappe.db.set_value("DocType",doctype,"owner", "Administrator")
+        frappe.db.commit()
         # Batch database checks for better performance
         existing_checks = frappe.db.sql("""
             SELECT 
@@ -558,6 +559,7 @@ def _update_existing_field(fieldname: str, doctype: str, field_data: Dict[str, A
             frappe_now(),
             name
         ))
+        frappe.db.commit()
 
 
 def _update_form_json(doctype: str, fields: List[Dict[str, Any]], child_table_fields: Dict[str, Any]):
