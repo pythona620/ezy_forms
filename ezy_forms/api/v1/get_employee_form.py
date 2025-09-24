@@ -4,7 +4,19 @@ import frappe
 def get_employee_forms(property_field,employee=None, requested_by_me=False, approved_by_me=False, department=None,):
     
     filters = {"department": department,"property":property_field} if department else {"property":property_field}
+    all_employees = []
 
+    reporting_to = frappe.get_value("Ezy Employee", frappe.session.user, "reporting_to")
+
+    # Get employees reporting to me + myself
+    all_employees = frappe.get_all(
+        "Ezy Employee",
+        filters={"reporting_to": ["in", [frappe.session.user, reporting_to]]},
+        pluck="name"
+    )
+
+    if all_employees:
+        filters.update({"requested_by": ["in", all_employees]})
     if approved_by_me:
         approved_comments = frappe.db.get_all(
             "WF Comments",
@@ -27,6 +39,7 @@ def get_employee_forms(property_field,employee=None, requested_by_me=False, appr
     if not filters:
         return []
 
+    print(filters,"-"*100)
     workflow_requests = frappe.db.get_all(
         "WF Workflow Requests",
         filters=filters,

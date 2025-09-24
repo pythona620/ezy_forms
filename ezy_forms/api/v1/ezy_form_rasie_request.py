@@ -419,7 +419,7 @@ def combination_of_roadmap_and_request(document_type, request_id, property=None,
 		roadmap_data_wf_level_setup = roadmap_data["wf_level_setup"]
 
 		dataframe_roadmap_wf_level_setup = pd.DataFrame.from_records(roadmap_data_wf_level_setup)
-		dataframe_roadmap_wf_level_setup = dataframe_roadmap_wf_level_setup[["level", "idx", "role", "action", "cancel_request", "on_rejection", "mandatory", "escalation_time", 'requester_as_a_approver','view_only_reportee', 'all_approvals_required']]
+		dataframe_roadmap_wf_level_setup = dataframe_roadmap_wf_level_setup[["level", "idx", "role", "action", "cancel_request", "on_rejection", "mandatory", "escalation_time", 'requester_as_a_approver','view_only_reportee', 'all_approvals_required',"approval_required"]]
 		dataframe_roadmap_wf_level_setup = dataframe_roadmap_wf_level_setup.sort_values(['level'], ascending=[True])
 
 		# Now creating the dataframe of request id
@@ -442,8 +442,8 @@ def combination_of_roadmap_and_request(document_type, request_id, property=None,
 			left_on=['level', 'role'],
 			right_on=['level', 'role']
 		)
-		merging_dataframes[['on_rejection', 'cancel_request', 'mandatory', 'requester_as_a_approver','view_only_reportee', 'all_approvals_required']] = merging_dataframes[
-			['on_rejection', 'cancel_request', 'mandatory', 'requester_as_a_approver','view_only_reportee', 'all_approvals_required']
+		merging_dataframes[['on_rejection', 'cancel_request', 'mandatory', 'requester_as_a_approver','view_only_reportee', 'all_approvals_required',"approval_required"]] = merging_dataframes[
+			['on_rejection', 'cancel_request', 'mandatory', 'requester_as_a_approver','view_only_reportee', 'all_approvals_required',"approval_required"]
 		].fillna(value=0)
 
 		merging_dataframes.rename(columns={"action_x": "action"}, inplace=True)
@@ -455,11 +455,12 @@ def combination_of_roadmap_and_request(document_type, request_id, property=None,
 		merging_dataframes["requester_as_a_approver"] = merging_dataframes["requester_as_a_approver"].astype(int)
 		merging_dataframes["view_only_reportee"] = merging_dataframes["view_only_reportee"].astype(int)
 		merging_dataframes["all_approvals_required"] = merging_dataframes["all_approvals_required"].astype(int)
+		merging_dataframes["approval_required"] = merging_dataframes["approval_required"].astype(int)
 
 		# Remove the requestor row (level 0) for approvals
 		removing_requestor_row_in_the_view = merging_dataframes[merging_dataframes['level'] != 0]
 		removing_requestor_row_in_the_view = removing_requestor_row_in_the_view[
-			["name", "level", "action", "role", "user", "reason", "time", "cancel_request", "on_rejection", "mandatory", "escalation_time", 'requester_as_a_approver','view_only_reportee', 'all_approvals_required']
+			["name", "level", "action", "role", "user", "reason", "time", "cancel_request", "on_rejection", "mandatory", "escalation_time", 'requester_as_a_approver',"approval_required",'view_only_reportee', 'all_approvals_required']
 		].sort_values("time").reset_index(drop=True)
 
 		approvals = removing_requestor_row_in_the_view.to_dict("records")
@@ -487,7 +488,7 @@ def combination_of_roadmap_and_request(document_type, request_id, property=None,
 			filtered_data = [{
 				'name': None, 'level': 0, 'action': None, 'role': None, 'user': None, 'reason': None, 'time': None,
 				'cancel_request': 0, 'on_rejection': 0, 'mandatory': 0, 'escalation_time': None,
-				'requester_as_a_approver': 0,'view_only_reportee': 0, 'all_approvals_required': 0
+				'requester_as_a_approver': 0,'view_only_reportee': 0, 'all_approvals_required': 0,"approval_required":0
 			}]
 
 		filtered_data_df = pd.DataFrame.from_records(filtered_data)
@@ -498,7 +499,7 @@ def combination_of_roadmap_and_request(document_type, request_id, property=None,
 		merging_dataframes = pd.merge(filtered_data_df, dataframe_roadmap_wf_level_setup, how="outer")
 		merging_dataframes = merging_dataframes.drop_duplicates(subset=["level", "role"], keep='first')
 		merging_dataframes = merging_dataframes[
-			["name", "level", "role", "user", "action", "reason", "cancel_request", "on_rejection", "mandatory", "escalation_time", "time",'requester_as_a_approver', 'view_only_reportee', 'all_approvals_required']
+			["name", "level", "role", "user", "action", "reason", "cancel_request", "on_rejection", "mandatory", "escalation_time", "time",'requester_as_a_approver', 'view_only_reportee', 'all_approvals_required','approval_required']
 		]
 		merging_dataframes = merging_dataframes.replace(np.nan, '')
 		merging_dataframes['role'].replace('', np.nan, inplace=True)
@@ -563,7 +564,7 @@ def todo_tab(document_type, request_id, property=None, cluster_name=None, curren
 				if int(remaining_role["level"]) == int(current_level) and not remaining_role["action"].strip() and not remaining_role["user"].strip() and remaining_role.get("approval_required", 0) == 0
 			]
 			
-			if approvar_excits:
+			if approvar_excits and not status:
 				approval_list = [role.role for role in activate_log_roles.reason if role.level != 0]
 				approvar_excits_list = list(set(approval_list))
 				has_match = any(map(lambda role: role in approvar_excits_list, approvar_excits))
@@ -602,7 +603,7 @@ def todo_tab(document_type, request_id, property=None, cluster_name=None, curren
 		
 			
 			role_list = list( set( map( lambda r: r.role, filter(lambda r: int(r.level) == int(current_level), activate_log_roles.reason) ) )  )
-			if current_user_role in picking_remaining_roles_for_approval and not view_only_roles and not requester_as_a_approver and not all_approvals_required and not status and not approvar_excits:
+			if current_user_role in picking_remaining_roles_for_approval and not view_only_roles and not requester_as_a_approver and not all_approvals_required and not status and  approvar_excits:
 				doctype_ids = frappe.get_doc(document_type,account_ids)
 				doctype_ids.wf_generated_request_status =  "In Progress" if len(approvals_reasons)>1 else "Completed"
 				doctype_ids.save(ignore_permissions=True)
@@ -616,7 +617,7 @@ def todo_tab(document_type, request_id, property=None, cluster_name=None, curren
 			# Find the next level's approver role(s)
 			picking_remaining_roles_for_approval = [remaining_role["role"] for remaining_role in approvals_reasons if int(remaining_role["level"]) == int(current_level) and not remaining_role["action"].strip() and not remaining_role["user"].strip()]
 			
-			if view_only_roles:
+			if view_only_roles and not status:
 				be_half_of = workflow_requests.get("be_half_of", None)
 				if be_half_of and not status:
 					# Assign to the reporting manager of be_half_of user
@@ -624,31 +625,25 @@ def todo_tab(document_type, request_id, property=None, cluster_name=None, curren
 					picking_remaining_roles_for_approval = [reporting_manager]
 				else:
 					reporting_manager = frappe.db.get_value("Ezy Employee",workflow_requests.requested_by ,"reporting_designation")
-					if reporting_manager in view_only_roles and not status:
+					if reporting_manager in view_only_roles:
 						picking_remaining_roles_for_approval = [reporting_manager]
 					else:
 						picking_remaining_roles_for_approval = ['No Role Assigned - View Only']
-			if all_approvals_required:
+			if all_approvals_required and not status:
 				prives_level_role_list = list( set( map( lambda r: r.role, filter(lambda r: int(r.level) == int(current_level)-1, activate_log_roles.reason) ) )  )
 				all_approvals_required = list(filter(lambda x: True if not x in prives_level_role_list else False, all_approvals_required))
 				# # # if the privies level approver in the same role, then assign to the next level approver skip
 				############################################################# 
-							  
-
 				picking_remaining_roles_for_approval = all_approvals_required
-			#############################################################
-				if status:
-						picking_remaining_roles_for_approval = role_list
-				else:
-					picking_remaining_roles_for_approval = all_approvals_required
+
+
 								
-			if requester_as_a_approver :
+			if requester_as_a_approver and not status :
 				if workflow_requests.role in requester_as_a_approver:
 					picking_remaining_roles_for_approval = [workflow_requests.role]
 				else:
 					picking_remaining_roles_for_approval = ['No Role Assigned - Requester as Approver']
-			
-			
+	
 			if len(picking_remaining_roles_for_approval) > 0:
 				frappe.db.set_value("WF Workflow Requests", request_id, "assigned_to_users", str(picking_remaining_roles_for_approval))
 				frappe.db.commit()

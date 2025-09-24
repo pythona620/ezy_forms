@@ -225,8 +225,10 @@
             </td> -->
             <!-- <td > -->
 
+            <!-- </td> -->
+            <td   class="dropdown_sticky">
             <div v-if="isAction == 'true' && viewType === 'viewPdf'" class="text-center align-middle">
-              <span v-if="raiseRequest === 'true'" class="px-4">
+              <span v-if="raiseRequest === 'true'" class="px-2">
                 <i v-tooltip.top="'Raise Request'" class="bi bi-send eye-cursor mx-1"
                   @click="handleCellClick(row, rowIndex, 'raiseRequest')"></i>
               </span>
@@ -238,13 +240,14 @@
                 <i class="bi bi-download eye-cursor" @click="handleCellClick(row, rowIndex, 'download')"></i>
               </span>
             </div>
-            <!-- </td> -->
-            <td v-if="actionType === 'dropdown'" class="text-center fixed-column ">
-              <div class="dropdown">
-                <p @click="actionDropDown(row)" class="p-0 actions" data-bs-toggle="dropdown" aria-expanded="false">
+
+            
+            <div v-if="actionType === 'dropdown'" class="text-center  fixed-column ">
+              <div class="dropdown ">
+                <p type="button" @click="actionDropDown(row)" class="p-0 actions" data-bs-toggle="dropdown" aria-expanded="false">
                   <span>...</span>
                 </p>
-                <ul class="dropdown-menu actionsdropdown">
+                <ul class="dropdown-menu dropdown-menu-left actionsdropdown">
                   <li class="py-1" @click="selectedAction(row, action)" v-for="(action, index) in actions" :key="index">
                     <a class="dropdown-item py-2 d-flex align-items-center gap-2">
                       <i :class="action.icon"></i>
@@ -253,7 +256,7 @@
                   </li>
                 </ul>
               </div>
-            </td>
+            </div>
 
             <!-- <td v-if="isRequest == 'true' && viewType === 'viewPdf'"  class="text-center fixed-column position-relative">
                 <span class="px-2 font-13 cursor-pointer" @click="handleCellClick(row, rowIndex, 'view')">
@@ -261,25 +264,25 @@
                 </span>
              </td> -->
 
-            <td v-if="download === 'true'" class="text-center fixed-action position-relative">
+            <div v-if="download === 'true'" class="text-center fixed-action position-relative">
               <span>
                 <i class="bi bi-download me-3 eye-cursor" @click="handleCellClick(row, rowIndex, 'download')"></i>
               </span>
               <span>
                 <i class="bi bi-envelope eye-cursor" @click="handleCellClick(row, rowIndex, 'mail')"></i>
               </span>
-            </td>
+            </div>
 
             <!-- Raise Request Column -->
-            <td v-if="isRequest === 'true'" class="text-center fixed-column position-relative">
+            <div v-if="isRequest === 'true'" class="text-center fixed-column position-relative">
               <span v-if="raiseRequest === 'true'">
                 <p @click="handleCellClick(row, rowIndex, 'raiseRequest')" class="p-0 m-0"><span
                     class="raiseRequest">Raise Request</span></p>
               </span>
-            </td>
+            </div>
 
             <!-- Action Column -->
-            <td v-if="isAction === 'true' && view === 'edit'" class="text-center fixed-column position-relative">
+            <div v-if="isAction === 'true' && view === 'edit'" class="text-center fixed-column position-relative">
               <!-- Show both Setup Form and View if not installed -->
               <template v-if="row.installed == 'No'">
                 <span v-tooltip.top="'View'" class="font-13 view-text ms-4"
@@ -302,8 +305,8 @@
                 </span>
               </template>
 
-            </td>
-
+            </div>
+          </td>
 
             <!-- <td v-if="actionType === 'Toogle&dropdown'"
               class="text-end d-flex justify-content-end align-items-center fixed-column position-relative">
@@ -834,15 +837,18 @@ watch(
 
 .actionsdropdown {
   position: absolute !important;
-  z-index: 1050;
+  z-index: 999 !important;
   /* Ensures it appears above the table */
   left: auto;
-  right: 0;
+  // right: 0;
+  right: 200px;
   /* Aligns the dropdown properly */
   min-width: 150px;
   /* Adjust as needed */
   background-color: white;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  position: absolute;
+  transform: translate3d(-45.286px, 12px, 0px) !important;
 }
 
 .activeform {
@@ -903,12 +909,22 @@ td.fixed-column {
 
 .dropdown-menu {
   position: absolute;
+  overflow: visible !important;
+  right: 200px;
 
   li {
     cursor: pointer;
     font-size: 12px;
+    overflow: visible !important;
   }
 }
+// .global-table tbody tr:nth-child(odd) {
+//   background-color: #fff;
+// }
+
+// .global-table tbody tr:nth-child(even) {
+//   background-color: #f9f9f9;
+// }
 
 .text-decoration,
 .text-decoration1 {
@@ -925,6 +941,7 @@ td.fixed-column {
 .global-table th,
 .global-table td {
   padding: 8px;
+  transition: transform 0.2s ease;
   // border-bottom: 1px solid #eeeeee !important;
 }
 
@@ -959,6 +976,7 @@ td.fixed-column {
   padding: 5px 8px !important;
   margin: auto !important;
   cursor: pointer;
+  overflow: visible !important;
 
   span {
     position: relative;
@@ -971,9 +989,10 @@ td.fixed-column {
   height: 77vh;
   overflow: auto;
   overflow-x: unset;
+  scroll-behavior: smooth;
 
   thead {
-    z-index: 1;
+    z-index: 1000;
   }
 }
 
@@ -1205,7 +1224,14 @@ th:first-child {
 .table-responsive:hover {
   scrollbar-color: #e2e2e2 transparent; /* visible on hover */
 }
-
+.dropdown_sticky{
+  position: sticky !important;
+  right: 0 !important;
+  background: white !important;
+  z-index: 1;
+  overflow: visible !important;
+  width: 3%!important;
+}
 
 
 </style>

@@ -78,3 +78,11 @@ def assign_custom_permissions_job(role_name: str):
 
     frappe.db.commit()
     return f"Custom permissions assigned to role: {role_name}"
+
+
+@frappe.whitelist() 
+def system_role_permissions():
+    docs = frappe.get_all("WF Roles")
+    for doc in docs:
+        doc = frappe.get_doc("WF Roles",doc)
+        frappe.call("ezy_forms.api.v1.custom_role_permission.assign_custom_permissions",    doc=doc,    method=None)

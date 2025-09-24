@@ -330,7 +330,7 @@ def enqueuing_updating_wf_workflow_requests(doctype,request_ids:list, current_le
                 message = "Rejected"
                 on_rejection_level = frappe.get_all("WF Level Setup", filters = {"level": current_level,"role": role, "parent":roadmap_title}, fields = 'on_rejection', pluck="on_rejection")
                 level_changed = int(current_level)
-                current_level = on_rejection_level[0]
+                current_level = int(on_rejection_level[0])
                 
                 is_email_account_set = frappe.db.get_all("Email Account",{"enable_outgoing":["=",1],"default_outgoing":["=",1]})
             
