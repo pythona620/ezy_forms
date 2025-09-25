@@ -515,7 +515,8 @@ def todo_tab(document_type, request_id, property=None, cluster_name=None, curren
 	try:
 		road_map = int(frappe.db.get_value('WF Roadmap',{"document_type":document_type},'workflow_levels'))
 		current_level = int(current_level)
-  
+		now = add_to_date(None,as_datetime=True)
+		my_time = f"{now.year}/{now.month}/{now.day} {now.hour}:{now.minute}:{now.second}:{now.microsecond}"
 		for level in range(1,int(road_map)+1):
 			
 			return_message = combination_of_roadmap_and_request(document_type, request_id, property=property, cluster_name=cluster_name)
@@ -553,15 +554,14 @@ def todo_tab(document_type, request_id, property=None, cluster_name=None, curren
 			]
 			
 			if approvar_excits and not status:
-				approval_list = [role.role for role in activate_log_roles.reason if role.level != 0]
+				approval_list = [role.role for role in activate_log_roles.reason if role.level != 0 and role.action != "Rejected"]
 				approvar_excits_list = list(set(approval_list))
 				has_match = any(map(lambda role: role in approvar_excits_list, approvar_excits))
 				match_role = next((role for role in approvar_excits if role in approvar_excits_list), None)
 				if has_match:
 					if all_approvals_required:
 						all_approvals_required.remove(match_role)
-					now = add_to_date(None,as_datetime=True)
-					my_time = f"{now.year}/{now.month}/{now.day} {now.hour}:{now.minute}:{now.second}:{now.microsecond}"
+    
 					new_record = {
 						"level": current_level,
 						"role": match_role,
@@ -571,10 +571,8 @@ def todo_tab(document_type, request_id, property=None, cluster_name=None, curren
 						"random_string": ''.join(random.choices(string.ascii_letters + string.digits, k=10))
 					}
 					existing_roles = activate_log_roles.get("reason") or []
-					record_exists = any(int(r.get("level")) == int(current_level) and r.get("role") == match_role for r in existing_roles)
+					record_exists = any(int(r.get("level")) == int(current_level) and r.get("role") == match_role and r.get("action") != "Rejected"  for r in existing_roles)
 					if not record_exists and  not requester_as_a_approver:
-						sending_mail_api(request_id=request_id, doctype_name=document_type,property= property,cluster= cluster_name,reason= "Auto Approved by the system",timestamp= my_time,skip_user_role= match_role )
-						
 						activate_log_roles.append("reason", new_record)
 						activate_log_roles.save(ignore_permissions=True)
 					if not requester_as_a_approver:
@@ -587,6 +585,7 @@ def todo_tab(document_type, request_id, property=None, cluster_name=None, curren
 						workflow_requests.save()
 						workflow_requests.reload()	
 						frappe.db.commit()
+						sending_mail_api(request_id=request_id, doctype_name=document_type,property= property,cluster= cluster_name,reason= "Auto Approved by the system",timestamp= my_time,skip_user_role= match_role )
 				picking_remaining_roles_for_approval = [remaining_role["role"]  for remaining_role in approvals_reasons  if int(remaining_role["level"]) == int(current_level) and not remaining_role["action"].strip() and not remaining_role["user"].strip() ]
 			else:
 				picking_remaining_roles_for_approval = [remaining_role["role"]  for remaining_role in approvals_reasons  if int(remaining_role["level"]) == int(current_level) and not remaining_role["action"].strip() and not remaining_role["user"].strip() ]
@@ -595,6 +594,19 @@ def todo_tab(document_type, request_id, property=None, cluster_name=None, curren
 			role_list = list( set( map( lambda r: r.role, filter(lambda r: int(r.level) == int(current_level), activate_log_roles.reason) ) )  )
 			if current_user_role in picking_remaining_roles_for_approval and not view_only_roles and not requester_as_a_approver and not all_approvals_required and not status and  approvar_excits:
 				doctype_ids = frappe.get_doc(document_type,account_ids)
+				new_record = {
+					"level": current_level,
+					"role": current_user_role,
+					"action": "Approved",
+					"reason": "Auto Approved by the system",
+					"time": my_time,
+					"random_string": ''.join(random.choices(string.ascii_letters + string.digits, k=10))
+				}
+				existing_roles = activate_log_roles.get("reason") or []
+				record_exists = any(int(r.get("level")) == int(current_level) and r.get("role") == match_role and r.get("action") != "Rejected"  for r in existing_roles)
+				if not record_exists:
+					activate_log_roles.append("reason", new_record)
+					activate_log_roles.save(ignore_permissions=True)
 				doctype_ids.wf_generated_request_status =  "In Progress" if len(approvals_reasons)>1 else "Completed"
 				doctype_ids.save(ignore_permissions=True)
 				workflow_requests.status = "In Progress" if len(approvals_reasons)>1 else "Completed"
