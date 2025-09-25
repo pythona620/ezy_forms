@@ -22,7 +22,7 @@ def send_notifications(request_id, doctype_name, property, cluster, reason, time
 	"""Send email notifications to relevant users"""
 	request_id_document = frappe.get_all(doctype_name, filters={"wf_generated_request_id": request_id}, fields=["name"])
 	attach_down = []
-	file_down = None
+	file_down = ''
 	attachment_to_mail = frappe.get_value("Ezy Business Unit",property,"send_form_as_a_attach_through_mail")
 	if request_id_document and attachment_to_mail:
 
@@ -89,7 +89,7 @@ def send_notifications(request_id, doctype_name, property, cluster, reason, time
 						recipients=[email],
 						subject="ezyForms Notification",
 						message=email_content['message'],
-						content = email_content['email_template'] + ("Since the file size is more than 30MB, please refer to the attachments in the form." if file_down['file_size'] else ''),
+						content = email_content['email_template'] + ("<b>Note: </b>Since the file size is more than 30MB, please refer to the attachments in the form." if file_down['file_size'] else ''),
 						attachments=attach_down
 					)
 				except Exception as e:
