@@ -650,7 +650,7 @@ function receivedForMe() {
   const EmpRequestMail = JSON.parse(localStorage.getItem("employeeData"));
   const queryParams = {
     property_field: newBusinessUnit.value.business_unit,
-    department: EmpRequestMail.department,
+    // department: EmpRequestMail.department,
   }
   axiosInstance
     .get(apis.GetEmployeeForms, { params: queryParams })

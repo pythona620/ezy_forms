@@ -14,7 +14,13 @@
                     <td>{{ index + 1 }}</td>
                     <td>{{ item.title }}</td>
                     <td>
-                        <div class="form-check form-switch">
+                        <div v-if="item.title === 'Company Logo'">
+                            <div @click="handleToggle(index)" class="d-flex align-items-center">
+                                <i class="bi bi-eye mx-2 fs-6"></i>View
+                            </div>
+                        </div>
+
+                        <div v-else class="form-check form-switch">
                             <input class="form-check-input shadow-none" type="checkbox" role="switch"
                                 :checked="item.checked" @click.prevent="handleToggle(index)" />
                             <label class="form-check-label mt-1">
@@ -27,19 +33,40 @@
         </table>
 
         <!-- Modal -->
-        <div class="modal fade" id="EnableDisable" tabindex="-1" aria-labelledby="EnableDisableLabel" aria-hidden="true">
+        <div class="modal fade" id="EnableDisable" tabindex="-1" data-bs-backdrop="static" aria-labelledby="EnableDisableLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="EnableDisableLabel">Confirm Action</h5>
+                        <h5 class="modal-title" id="EnableDisableLabel">{{ viewImage ? 'Company Logo' : 'Confirm Action' }}</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" @click="closeModal"></button>
                     </div>
                     <div class="modal-body">
-                        {{ confirmMessage }}
+                        <div v-if="viewImage" class="logo-upload text-center">
+                            <label class="btn btn-outline-secondary upload-label">
+                                <i class="bi bi-upload"></i> Upload Logo
+                                <input type="file" accept="image/*" id="logoInput" @change="previewLogo($event, index)"
+                                    hidden />
+                            </label>
+
+                            <div v-if="companyLogo" for="logoInput" class="logo-preview mt-3 position-relative">
+                                <img :src="companyLogo" alt="Company Logo" class="img-thumbnail rounded shadow"
+                                    width="100" />
+
+                                <button type="button" class="btn-close position-absolute top-0 end-10 font-12"
+                                    aria-label="Close" @click="companyLogo = null">
+                                </button>
+                            </div>
+                        </div>
+
+                        <div v-else>
+                            {{ confirmMessage }}
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" @click="closeModal">Close</button>
-                        <button type="button" class="btn btn-dark" @click="confirmAction">Yes, Proceed</button>
+                        <button type="button" class="btn btn-dark" @click="confirmAction">
+                            {{ viewImage ? 'Submit' : 'Yes, Proceed' }}
+                        </button>
                     </div>
                 </div>
             </div>
@@ -62,8 +89,11 @@ const tableData = ref([
     { title: "Send Daily E-mail reminders", checked: false },
     { title: "Take Acknowledgement and Signiture while Login", checked: false },
     { title: "Take Signiture while Sig Up", checked: false },
+    { title: "Company Logo", checked: false },
 ]);
 
+const companyLogo = ref("");
+const viewImage = ref(false);
 const default_mail = ref(false);
 const selectedRowData = ref(null);  // stores index
 const selectedCheckedState = ref(false); // stores checkbox state before toggle
@@ -117,6 +147,9 @@ const handleToggle = (index) => {
             ? "Are you sure you want to enable Signiture while Sig Up?"
             : "Are you sure you want to disable Signiture while Sig Up?";
     }
+    else if (index === 7) {
+        viewImage.value = true;
+    }
 
     // Show the modal
     const modal = new bootstrap.Modal(document.getElementById('EnableDisable'));
@@ -126,7 +159,18 @@ const handleToggle = (index) => {
 const closeModal = () => {
     // Revert checkbox state if the modal is closed or canceled
     tableData.value[selectedRowData.value].checked = originalCheckedState.value;
+    viewImage.value = false;
 };
+
+const selectedFile = ref(null);
+
+function previewLogo(event) {
+    const file = event.target.files[0];
+    if (file) {
+        selectedFile.value = file;
+        companyLogo.value = URL.createObjectURL(file);
+    }
+}
 
 const confirmAction = () => {
     const index = selectedRowData.value;
@@ -243,6 +287,36 @@ const confirmAction = () => {
             .catch(() => {
                 toast.error("Failed to update Signiture while Sig Up");
             });
+    } else if (index === 7) {
+        if (!selectedFile.value) return;
+        const formData = new FormData();
+        formData.append("file", selectedFile.value);
+
+        axiosInstance
+        .post(apis.uploadfile, formData)
+        .then((res) => {
+            const imageUrl = res.message.file_url;
+            const payload = {
+              bu_logo: imageUrl,
+              doctype: doctypes.wfSettingEzyForms,
+              name:docName,
+            };
+
+            return axiosInstance.put(`${apis.DataUpdate}`,payload);
+        })
+         .then((res) => {
+            if (res.message?.success) {
+                toast.success("Logo Updated Successfully", { autoClose: 1000 });
+                const modal = bootstrap.Modal.getInstance(document.getElementById('EnableDisable'));
+                modal.hide();
+            }
+            else{
+                toast.error(res.message?.message, { autoClose: 1000 });
+            }
+        })
+        .catch((error) => {
+            console.error("Error uploading image:", error);
+        });
     }
 };
 
@@ -275,7 +349,7 @@ function BussinesUnit() {
     //     });
 
     const queryParamse = {
-        fields: JSON.stringify(["name", "bu_code", "send_form_as_a_attach_through_mail", "welcome_mail_to_employee", "send_daily_alerts", "is_acknowledge", "signature_required"]),
+        fields: JSON.stringify(["name", "bu_logo", "bu_code", "send_form_as_a_attach_through_mail", "welcome_mail_to_employee", "send_daily_alerts", "is_acknowledge", "signature_required"]),
         filters:JSON.stringify([["name",'=',Bussines_unit.value]]),
         doctype:doctypes.wfSettingEzyForms,
         limit_page_length:"none",
@@ -284,6 +358,7 @@ function BussinesUnit() {
     axiosInstance.get(apis.GetDoctypeData,  { params: queryParamse })
     .then((res) => {
         if (res?.message) {
+            companyLogo.value = res.message.data[0].bu_logo;
             const status = res.message.data[0].send_form_as_a_attach_through_mail;
             tableData.value[1].checked = status == 1;
             const welcome_mail = res.message.data[0].welcome_mail_to_employee;
@@ -410,5 +485,14 @@ td {
     white-space: nowrap;
     color: var(--muted) !important;
     font-size: var(--twelve);
+}
+
+.upload-label {
+    border: 1px solid #e7e1e1;
+    padding: 7px 23px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 5px 0px, rgba(0, 0, 0, 0.1) 0px 0px 1px 0px;
 }
 </style>
