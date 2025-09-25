@@ -22,6 +22,7 @@ def send_notifications(request_id, doctype_name, property, cluster, reason, time
 	"""Send email notifications to relevant users"""
 	request_id_document = frappe.get_all(doctype_name, filters={"wf_generated_request_id": request_id}, fields=["name"])
 	attach_down = []
+	file_down = None
 	attachment_to_mail = frappe.get_value("Ezy Business Unit",property,"send_form_as_a_attach_through_mail")
 	if request_id_document and attachment_to_mail:
 
