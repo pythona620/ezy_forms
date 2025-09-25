@@ -114,6 +114,7 @@ export const apis = {
   GetEmployeeForms:domain + `/method/ezy_forms.api.v1.get_employee_form.get_employee_forms`,
   GetAccessibleDeptForms:domain + `/method/ezy_forms.api.v1.get_employee_accessible_forms.get_employee_accessible_forms`,
   GetDoctypeData:domain + `/method/ezy_forms.api.v1.get_doc_list.get_doctype_list`,
+  DataUpdate:domain + `/method/ezy_forms.api.v1.doc_operations.doc_operation`,
   
   // getReportData: domain + `/api/method/frappe.utils.print_format.download_pdf`
 };

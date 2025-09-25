@@ -126,10 +126,11 @@ function createEmailTemplate() {
         __newname: template.value.name,
         subject:template.value.subject,
         response: content.value,
+        doctype:doctypes.emailTemplate,
     }
-    axiosInstance.post(apis.resource + doctypes.emailTemplate, dataObj)
+    axiosInstance.post(apis.DataUpdate, dataObj)
         .then((res) => {
-            if (res.data) {
+            if (res.message.success==true) {
                 const modal = bootstrap.Modal.getInstance(
                     document.getElementById("EmailTemplateModal")
                 );
@@ -137,6 +138,9 @@ function createEmailTemplate() {
                 toast.success(`Email Template Create successfully`, { autoClose: 700 });
                 isSubmitBtn.value = false;
                 activitylog()
+            }
+            else {  
+                toast.error(response.message.message)
             }
         })
 }
@@ -146,17 +150,21 @@ function UpdateEmailTemplate(){
         response: content.value,
         name: template.value.name,
         subject: template.value.subject,
+        doctype:doctypes.emailTemplate,
       };
      axiosInstance
-        .put(`${apis.resource}${doctypes.emailTemplate}/${templateData.value.name}`, updatedData)
+        .put(`${apis.DataUpdate}/${templateData.value.name}`, updatedData)
         .then((response) => {
-            if (response.data) {
+            if (response.message.success==true) {
                 toast.success(`Email Template Updated successfully`, { autoClose: 700 });
                 activitylog()
                 const modal = bootstrap.Modal.getInstance(
                     document.getElementById("EmailTemplateModal")
                 );
                 modal.hide();
+            }
+            else{
+                toast.error(response.message.message)
             }
 
         })

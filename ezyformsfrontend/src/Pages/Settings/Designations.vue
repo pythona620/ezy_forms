@@ -195,9 +195,10 @@ function SubmitDesignation() {
     if (!errorMessage.value && Designation.value.trim()) {
         const payload = {
             role_name: Designation.value.trim(),
+            doctype:doctypes.roles,
         }
         axiosInstance
-            .post(apis.resource + doctypes.roles, payload)
+            .post(apis.DataUpdate, payload)
             .then((response) => {
                 if (response) {
                     //console.log(response);
