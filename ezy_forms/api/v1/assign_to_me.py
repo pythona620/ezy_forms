@@ -1,6 +1,6 @@
 import frappe
 from datetime import datetime
-
+from frappe.model.db_query import DatabaseQuery
 def parse_time(t):
     try:
         # Handle format with microseconds
@@ -86,7 +86,10 @@ def pick_view_only_reportee():
  
     # Step 4: Combine and deduplicate
     final_requests = list(set(filtered_view_only_requests + non_reportee_requests))
-    final_requests = frappe.db.get_all("WF Workflow Requests", filters={"name": ["in", final_requests]},fields = [    "name", "requested_by", "role", "current_level", "total_levels","requested_on","action","department","is_linked_form","linked_form_id","is_linked","user_session_id","property",
-                "status", "assigned_to_users", "is_linked", "is_linked_form", "linked_form_id","doctype_name","role","be_half_of","department_name","requester_name"])
-    
+    final_requests  = DatabaseQuery("WF Workflow Requests").execute(
+        filters={"name": ["in", final_requests]},
+        fields=["name", "requested_by", "role", "current_level", "total_levels","requested_on","action","department","is_linked_form","linked_form_id","is_linked","user_session_id","property",
+                "status", "assigned_to_users", "is_linked", "is_linked_form", "linked_form_id","doctype_name","role","be_half_of","department_name","requester_name"],
+        order_by="creation desc",
+    )
     return final_requests
