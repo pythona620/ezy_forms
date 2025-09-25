@@ -1,33 +1,19 @@
 import pandas as pd
 from urllib.parse import urlparse
 import frappe
-from frappe.utils import add_to_date,get_url
+from frappe.utils import add_to_date
 import ast
 from frappe.utils.background_jobs import enqueue
-from frappe.core.page.permission_manager.permission_manager import reset
 import string
 import numpy as np
 import random
-from ezy_forms.ezy_forms.doctype.ezy_form_definitions.dynamic_form_template import download_filled_form
-from ezy_forms.api.v1.mail_message_html import preview_dynamic_form
-from ezy_forms.ezy_forms.doctype.email_approval.email_approval import (
-	create_email_approval_records,update_token_status
-)
-# from frappe import STANDARD_USERS, _, msgprint, throw
-from frappe.utils import (
-	cint,
-	escape_html,
-	flt,
-	format_datetime,
-	get_formatted_email,
-	get_system_timezone,
-	has_gravatar,
-	now_datetime,
-	today,
-)
 import sys, traceback, time
 from ezy_forms.api.v1.delete_files import delete_files_api
 import os
+from ezy_forms.api.v1.send_an_email import sending_mail_api
+
+
+
 
 
 @frappe.whitelist()
@@ -74,7 +60,11 @@ unwanted_files=[]
 		validation_result = validate_account_ids(ids, doctype_name, doctype_field, property, cluster)
 		if not validation_result["success"]:
 			return validation_result
-		
+		if len(unwanted_files)>0:
+			enqueue(
+				method=delete_files_api,
+				unwanted_files=unwanted_files
+				)
 		# Process request based on bulk flag
 		if bulk is None:  # Individual requests
 			return process_individual_requests(
@@ -288,7 +278,6 @@ def process_individual_requests(ids, doctype_name, doctype_field, property, clus
 							   reason, roadmap_title, url_for_request_id, ip_address, 
 							   employee_id, be_half_of, is_linked, timestamp):
 	"""Process individual workflow requests"""
-	results = []
 	
 	for account_id in ids:
 		if not account_id.strip():
@@ -325,15 +314,14 @@ def process_individual_requests(ids, doctype_name, doctype_field, property, clus
 		# Create todos for next level
 		create_next_level_todos(doctype_name, request_id, property, cluster, account_id)
 		
-		results.append(request_id)
 	
 	frappe.db.commit()
 	
 	# Send notifications
-	if results:
-		send_notifications(results[0], doctype_name, property, cluster, reason, timestamp)
+									
+	sending_mail_api(request_id=request_id, doctype_name=doctype_name,property= property,cluster= cluster,reason= reason,timestamp= timestamp,skip_user_role= None )
 	
-	return {"success": True, "message": reason or 'Request Raised', "request_ids": results}
+	return {"success": True, "message": reason or 'Request Raised', "request_ids": request_id}
 
 
 def process_bulk_request(ids, doctype_name, doctype_field, property, cluster,
@@ -376,7 +364,7 @@ def process_bulk_request(ids, doctype_name, doctype_field, property, cluster,
 	frappe.db.commit()
 	
 	# Send notifications
-	send_notifications(request_id, doctype_name, property, cluster, reason, timestamp)
+	sending_mail_api(request_id=request_id, doctype_name=doctype_name,property= property,cluster= cluster,reason= reason,timestamp= timestamp,skip_user_role= None )
 	
 	return {"success": True, "message": reason or 'Request Raised', "request_id": request_id}
 
@@ -393,7 +381,7 @@ def handle_auto_approval(roadmap_title, user_role, doctype_name, request_id,
 	if auto_approval:
 		# Call auto approval function (assuming it exists)
 		try:
-			frappe.get_attr("ezy_forms.api.v1.rasie_request.auto_approval_after_request_raising")(
+			frappe.get_attr("ezy_forms.api.v1.ezy_form_rasie_request.auto_approval_after_request_raising")(
 				doctype_name, request_id, 
 				property=property, 
 				cluster_name=cluster,
@@ -585,13 +573,15 @@ def todo_tab(document_type, request_id, property=None, cluster_name=None, curren
 					existing_roles = activate_log_roles.get("reason") or []
 					record_exists = any(int(r.get("level")) == int(current_level) and r.get("role") == match_role for r in existing_roles)
 					if not record_exists and  not requester_as_a_approver:
+						sending_mail_api(request_id=request_id, doctype_name=document_type,property= property,cluster= cluster_name,reason= "Auto Approved by the system",timestamp= my_time,skip_user_role= match_role )
+						
 						activate_log_roles.append("reason", new_record)
 						activate_log_roles.save(ignore_permissions=True)
 					if not requester_as_a_approver:
 						doctype_ids = frappe.get_doc(document_type,account_ids)
 						doctype_ids.wf_generated_request_status =  "In Progress" if len(approvals_reasons)>1 else "Completed"
 						doctype_ids.save(ignore_permissions=True)
-						workflow_requests.status = "In Progress" if current_level < road_map else "Completed"
+						workflow_requests.status = "In Progress" if len(approvals_reasons)>1 else "Completed"
 						current_level += 1  if int(current_level) < road_map and not all_approvals_required else  0 # move to next level
 						workflow_requests.current_level = current_level if current_level<road_map else road_map
 						workflow_requests.save()
@@ -607,13 +597,13 @@ def todo_tab(document_type, request_id, property=None, cluster_name=None, curren
 				doctype_ids = frappe.get_doc(document_type,account_ids)
 				doctype_ids.wf_generated_request_status =  "In Progress" if len(approvals_reasons)>1 else "Completed"
 				doctype_ids.save(ignore_permissions=True)
-				workflow_requests.status = "In Progress" if current_level < road_map else "Completed"
-				current_level += 1  if len(approvals_reasons)>1 else 0 # move to next level
-		  
+				workflow_requests.status = "In Progress" if len(approvals_reasons)>1 else "Completed"
+				current_level += 1  if int(current_level) < road_map else 0 # move to next level
 				workflow_requests.current_level = current_level if current_level<road_map else road_map
 				workflow_requests.save()
 				workflow_requests.reload()
 				frappe.db.commit()
+				sending_mail_api(request_id=request_id, doctype_name=document_type,property= property,cluster= cluster_name,reason= "Auto Approved by the system",timestamp= my_time,skip_user_role= current_user_role )
 			# Find the next level's approver role(s)
 			picking_remaining_roles_for_approval = [remaining_role["role"] for remaining_role in approvals_reasons if int(remaining_role["level"]) == int(current_level) and not remaining_role["action"].strip() and not remaining_role["user"].strip()]
 			
@@ -643,7 +633,7 @@ def todo_tab(document_type, request_id, property=None, cluster_name=None, curren
 					picking_remaining_roles_for_approval = [workflow_requests.role]
 				else:
 					picking_remaining_roles_for_approval = ['No Role Assigned - Requester as Approver']
-	
+
 			if len(picking_remaining_roles_for_approval) > 0:
 				frappe.db.set_value("WF Workflow Requests", request_id, "assigned_to_users", str(picking_remaining_roles_for_approval))
 				frappe.db.commit()
@@ -663,7 +653,7 @@ def todo_tab(document_type, request_id, property=None, cluster_name=None, curren
 					frappe.db.commit()
 				picking_remaining_roles_for_approval = [remaining_role["role"] for remaining_role in approvals_reasons if int(remaining_role["level"]) == int(current_level) and not remaining_role["action"].strip() and not remaining_role["user"].strip()]
 				
-				
+
 				frappe.db.set_value("WF Workflow Requests", request_id, {"assigned_to_users":str(picking_remaining_roles_for_approval),"current_level": ( int(current_level) if not status and int(current_level) < int(road_map) else  int(current_level) if  int(current_level) < int(road_map) else int(road_map)) })
 				frappe.db.commit()
 	except Exception as e:
@@ -680,6 +670,7 @@ def auto_approval_after_request_raising(document_type, request_id, property=None
 	Automatically approve a workflow request if the requestor's role exists 
 	in the approval flow at the given level.
 	"""
+	from ezy_forms.api.v1.ezy_form_update_worflow import updating_wf_workflow_requests
 	try:
 		# Get request + roadmap data
 
@@ -753,130 +744,6 @@ def create_next_level_todos(doctype_name, request_id, property, cluster, account
 		)
 	except Exception as e:
 		frappe.log_error(f"TODO creation failed: {str(e)}", "TODO Creation Error")
-
-def send_notifications(request_id, doctype_name, property, cluster, reason, timestamp):
-	"""Send email notifications to relevant users"""
-	request_id_document = frappe.get_all(doctype_name, filters={"wf_generated_request_id": request_id}, fields=["name"])
-	attach_down = []
-	attachment_to_mail = frappe.get_value("Ezy Business Unit",property,"send_form_as_a_attach_through_mail")
-	if request_id_document and attachment_to_mail:
-
-		file_down = download_filled_form(form_short_name=doctype_name, name=request_id_document[0].name,business_unit=property,from_raise_request='from_raise_request')
-		parsed_url = urlparse(file_down)
-		file_path = frappe.get_site_path("public", parsed_url.path.lstrip("/"))
-		if os.path.exists(file_path):
-			with open(file_path, "rb") as f:
-				attach_down.append({
-					"fname": os.path.basename(file_path),
-					"fcontent": f.read()
-				})
-	try:
-		# Check if email account is configured
-		email_accounts = frappe.get_all(
-			"Email Account",
-			filters={"enable_outgoing": 1, "default_outgoing": 1}
-		)
-		
-		if not email_accounts:
-			return
-		
-		# Get assigned users
-		assigned_users = frappe.get_value("WF Workflow Requests", request_id, "assigned_to_users")
-		requested_by = frappe.get_value("WF Workflow Requests", request_id, "requested_by")
-		if assigned_users:
-			assigned_users = ast.literal_eval(assigned_users)
-		else:
-			assigned_users = []
-		
-		# Get user emails based on property/cluster
-		user_emails = []
-		if property:
-			user_emails = frappe.get_all(
-				"WF Users",
-				filters={"role_name": ["in", assigned_users], "parent": property},
-				fields=["mail"],
-				pluck="mail"
-			)
-		elif cluster:
-			user_emails = frappe.get_all(
-				"WF Users", 
-				filters={"role_name": ["in", assigned_users], "parent": cluster},
-				fields=["mail"],
-				pluck="mail"
-			)
-		
-		# Add current user to email list
-		if frappe.session.user not in user_emails:
-			user_emails.append(frappe.session.user)
-		
-		# Get user details
-		user_name = frappe.get_value("User", frappe.session.user, "full_name")
-
-		user_role = frappe.get_value("Ezy Employee",frappe.session.user,"designation")
-		
-		# Send emails
-		if email_accounts:
-			for email in user_emails:
-				try:
-					email_content = generate_email_content(
-						request_id, doctype_name, user_name, user_role, email,requested_by,
-						reason, timestamp
-					)
-					
-					frappe.sendmail(
-						recipients=[email],
-						subject="ezyForms Notification",
-						message=email_content['message'],
-						content = email_content['email_template'],
-						attachments=attach_down
-					)
-				except Exception as e:
-					frappe.log_error(f"Email sending failed for {email}: {str(e)}", "Email Error")
-					
-	except Exception as e:
-		frappe.log_error(f"Notification sending failed: {str(e)}", "Notification Error")
-
-
-def generate_email_content(request_id, doctype_name, user_name, user_role, email,requested_by,reason, timestamp):
-	email_template = frappe.get_doc('Email Template',"ezyForms Notification")
-	if requested_by != email:
-		# token = get_ezy_forms_token(request_id,doctype_name,request_id_document,each_one_mail,reason if reason else 'Request Raised',next_level_after_raising_request,property)
-		url_for_request_id = get_url(
-			f"/ezyformsfrontend#/"
-		)
-		# url_for_request_id = get_url(
-		#     f"/ezyformsfrontend#/emailapprove?&key={token}&readOnly=true"
-		# )
-	else:
-		url_for_request_id = ''
-	now = add_to_date(None,as_datetime=True)
-	my_time = f"{now.year}/{now.month}/{now.day} {now.hour}:{now.minute}"
-	response_data = email_template.response_html
-	if response_data:
-		rep = response_data.replace("doctypename", doctype_name)
-		rep = rep.replace("generated_request_id", request_id)
-		rep = rep.replace("--action_by--", f"{user_name if user_name else frappe.session.user}  ({user_role})")
-		rep = rep.replace("current_date_and_time", my_time)
-		if url_for_request_id and url_for_request_id != '---url---':
-			rep = rep.replace("---url---", url_for_request_id)
-		else:
-			rep = rep.replace(
-				'href="---url---"',
-				'href="/ezyformsfrontend#" style="pointer-events: none; background-color: #eee; color: #999; border: 1px solid #ccc; cursor: not-allowed;"'
-			)
-		rep = rep.replace("reason_after_action", reason)
-		rep = rep.replace("--current_status--", reason if reason else 'Request Raised')
-		rep = rep.replace("--next-level--", f"{1}")
-		email_template.response_html = rep
-		
-		if int(frappe.get_value("Ezy Business Unit",property,"send_form_in_email")) == 1:
-			email_template_response_html = None
-			message =preview_dynamic_form(form_short_name=doctype_name, business_unit=property, name=request_id)
-			message =message+f"""<a href="{url_for_request_id}" style=" color: blue; text-decoration: none;padding:5px 10px; border:1px solid blue; border-radius: 4px; ">   Approve Email    </a>"""
-		else:
-			message = email_template.response_html
-			email_template_response_html = email_template.response_html
-	return {"email_template":email_template_response_html,"message":message}
 
 # Utility function to get linked form status
 def get_linked_form_status(doctype_name):

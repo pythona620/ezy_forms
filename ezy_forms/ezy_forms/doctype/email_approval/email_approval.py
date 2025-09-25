@@ -57,9 +57,9 @@ def create_email_approval_records(
 
 
 # Update token status if any one approve through web version.    
-def update_token_status(action,wf_request_id,document_id,current_level,status=None):
+def update_token_status(action,wf_request_id,document_id,current_level,user_session_id,status=None):
     
-    if action == "Approve" or action == "Request Cancelled":
+    if action == "Approve" or action == "Request Cancelled" or action == "Reject":
         
         if status == "In Progress":
             previous_level = int(current_level) - 1
@@ -68,7 +68,7 @@ def update_token_status(action,wf_request_id,document_id,current_level,status=No
             
         frappe.db.set_value(
                 "Email Approval",
-                {"current_level":  str(previous_level), "token_status": "Active","wf_request_id":wf_request_id,"document_id":document_id.get("name")},
+                {"current_level":  str(previous_level), "token_status": "Active","wf_request_id":wf_request_id,"document_id":document_id.get("name"),"user_id":user_session_id},
                 {"token_status": "Inactive"},
             )
         frappe.db.commit()
