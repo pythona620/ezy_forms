@@ -1,5 +1,5 @@
 import frappe
-from ezy_forms.api.v1.ezy_form_rasie_request import todo_tab,send_notifications,generate_email_content
+from ezy_forms.api.v1.ezy_form_rasie_request import todo_tab
 import random
 import string
 from frappe.utils import add_to_date

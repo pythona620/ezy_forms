@@ -1,12 +1,12 @@
 import frappe
-
+from frappe.model.db_query import DatabaseQuery
 @frappe.whitelist(methods=["GET"])
 def get_employee_accessible_forms(designation: str = None, fields = None, property: str = None, department: str = None):
     # Fetch roadmaps directly
     if not property:
         return "Property value missing"
-    roadmaps = frappe.get_all(
-        "WF Roadmap",
+    roadmaps = DatabaseQuery(
+        "WF Roadmap").execute(
         filters={"property": property},
         fields=["name", "document_type"]
     )
@@ -38,4 +38,4 @@ def get_employee_accessible_forms(designation: str = None, fields = None, proper
         filters["owner_of_the_form"] = department
 
     # Fetch and return forms
-    return frappe.get_all("Ezy Form Definitions", filters=filters, fields=fields)
+    return  DatabaseQuery("Ezy Form Definitions").execute( filters=filters, fields=fields)

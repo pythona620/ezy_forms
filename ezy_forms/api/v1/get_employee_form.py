@@ -1,5 +1,5 @@
 import frappe
-
+from frappe.model.db_query import DatabaseQuery
 
 
 def my_team():
@@ -42,45 +42,45 @@ def my_team():
 
 
 @frappe.whitelist(methods=["GET"])
-def get_employee_forms(property_field,employee=None, requested_by_me=False, approved_by_me=False, department=None,):
-    
-    filters = {"department": department,"property":property_field} if department else {"property":property_field}
-    all_employees =my_team()
+@frappe.read_only()
+def get_employee_forms(property_field, employee=None, requested_by_me=False, approved_by_me=False, department=None):
+    filters = {"property": property_field}
+    if department:
+        filters["department"] = department
 
+    all_employees = my_team()
     if all_employees:
         filters.update({"requested_by": ["in", all_employees]})
+
     if approved_by_me:
-        approved_comments = frappe.db.get_all(
+        approved_comments = frappe.get_all(
             "WF Comments",
             filters={
                 "user": employee,
-                "action": ["in", ["Approved", "Request Cancelled"]]
+                "action": ["in", ["Approved", "Request Cancelled"]],
             },
-            pluck="parent"
+            pluck="parent",
         )
-        approved_requests = list(set(approved_comments)) if approved_comments else []
-        
-        if not approved_requests:
+        if not approved_comments:
             return []
-        
-        filters={"name": ["in", approved_requests]}
+        filters = {"name": ["in", list(set(approved_comments))]}
 
     if requested_by_me:
-        filters={"requested_by": employee}
+        filters = {"requested_by": employee}
 
     if not filters:
         return []
 
-    workflow_requests = frappe.db.get_all(
-        "WF Workflow Requests",
+    # Use DatabaseQuery().execute instead of frappe.db.get_all
+    workflow_requests = DatabaseQuery("WF Workflow Requests").execute(
         filters=filters,
         fields=[
             "name", "requested_by", "role", "current_level", "total_levels", "employee_id",
             "json_columns", "requested_on", "action", "status", "assigned_to_users",
             "is_linked", "is_linked_form", "linked_form_id", "department_name",
-            "requester_name", "doctype_name"
+            "requester_name", "doctype_name",
         ],
-        
-        order_by="creation desc"
+        order_by="creation desc",
     )
+
     return workflow_requests
