@@ -300,9 +300,9 @@
                         <!-- Here is block level starts -->
                         <div class="block-level" v-for="(block, blockIndex) in blockArr" :key="blockIndex">
                           <div class="requestandAppHeader">
-                            <div class="d-flex justify-content-between">
-                              <div>
-                                <h6 class="ps-2 pt-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                              <div class=" d-flex align-items-center">
+                                <h6 class="ps-2 mb-0 ">
                                   {{
                                     blockIndex === 0
                                       ? "Requestor Block"
@@ -312,20 +312,26 @@
                                   }}
                                   <!-- ${blockIndex++} -->
                                 </h6>
-                              </div>
-                              <div class="d-flex align-items-center">
-                                  <!-- <div class="text-center me-2 mt-1">
-                                    <div class="font-12 d-flex align-items-center">
-                                      <input type="checkbox" class="me-1 mt-1 mb-0" v-model="getWorkflowSetup(blockIndex).view_only_reportee"
-                                        :true-value="1" :false-value="0"  />
-                                        
+                                  <div class="text-center ms-3">
+                                    <div v-if="blockIndex !== 0 && getWorkflowSetup(blockIndex).view_only_reportee || getWorkflowSetup(blockIndex).all_approvals_required || getWorkflowSetup(blockIndex).requester_as_a_approver" class="font-12 d-flex align-items-center approver_type_div">
+                                      <span class="">
+                                        <i class="bi bi-circle"></i>
+                                      </span>
                                       <span>
 
-                                      {{getWorkflowSetup(blockIndex).view_only_reportee === 1 ? 'View Only Reportee' : ''}}
+
+                                      {{getWorkflowSetup(blockIndex).view_only_reportee === 1 ? 'View only reportee' : ''}}
+                                      {{getWorkflowSetup(blockIndex).all_approvals_required === 1 ? 'All approvers required' : ''}}
+                                      {{getWorkflowSetup(blockIndex).requester_as_a_approver === 1 ? 'Requested only' : ''}}
                                       </span>
+
+
                                       
                                     </div>
-                                  </div> -->
+
+                                  </div>
+                              </div>
+                              <div class="d-flex align-items-center">
                                 <div v-if="paramId && workflowSetup.length" class="role-container">
                                   <label class="role-text d-flex align-items-center"
                                     v-if="getWorkflowSetup(blockIndex)">
@@ -398,9 +404,9 @@
                                     'font-14',
                                     { 'italic-style': !section.label },
                                     { 'fw-medium': section.label },
-                                  ]" @change="handleFieldChange(blockIndex, sectionIndex)"
+                                  ]" @change="handleFieldChange(blockIndex, sectionIndex)" @input="handleFieldChange(blockIndex, sectionIndex)"
                                     placeholder="Untitled section" />
-                                  <small v-if="section.errorMsg" class="text-danger font-10">
+                                  <small v-if="section.errorMsg" class="text-danger ps-3 font-10">
                                     {{ section.errorMsg }}
                                   </small>
                                 </div>
@@ -424,12 +430,12 @@
                                 <section class="row dynamicRow row-container" v-for="(row, rowIndex) in section.rows"
                                   :key="'row-' + rowIndex">
                                   <div class="d-flex justify-content-between align-items-center">
-                                    <label class="rownames">{{
+                                    <label class="rownames m-0">{{
                                       getRowSuffix(rowIndex)
                                     }}</label>
                                     <div>
                                       <button v-if="row.columns.length < 3"
-                                        class="btn btn-light bg-transparent border-0 font-12" @click="
+                                        class="btn btn-light bg-transparent border-0 p-1 font-12" @click="
                                           addColumn(blockIndex, sectionIndex, rowIndex)
                                           ">
                                         <i class="bi bi-plus font-14"></i> Add Column
@@ -475,8 +481,8 @@
                                                 rowIndex,
                                                 columnIndex
                                               )
-                                              " placeholder="Column Name" />
-                                            <small v-if="column.errorMsg" class="text-danger font-10">
+                                              " @input="handleFieldChange(blockIndex,sectionIndex,rowIndex,columnIndex)" placeholder="Column Name" />
+                                            <small v-if="column.errorMsg" class="text-danger ps-2 font-10">
                                               {{ column.errorMsg }}
                                             </small>
                                           </div>
@@ -551,7 +557,7 @@
                                                     columnIndex,
                                                     fieldIndex
                                                   )
-                                                  " />
+                                                  " @input="handleFieldChange(blockIndex,sectionIndex,rowIndex,columnIndex,fieldIndex)" />
                                                 <small v-if="field.errorMsg" class="text-danger font-10">
                                                   {{ field.errorMsg }}
                                                 </small>
@@ -1625,7 +1631,7 @@ watch(
 );
 const restrictedLabels = [
   "name", "parent", "creation", "owner", "modified", "modified_by",
-  "parentfield", "parenttype", "file_list", "flags", "docstatus"
+  "parentfield", "parenttype", "file_list", "flags", "docstatus","idx", "doctype","company_field","business_unit"
 ].map(label => label.toLowerCase().trim());
 
 const excludedLabels = ["Approver", "Approved on", "Approved By"].map(label => label.toLowerCase().trim());
@@ -4077,11 +4083,30 @@ function handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex, fiel
   const checkFieldType = addErrorMessagesToStructuredArray(blockArr);
   blockArr.splice(0, blockArr.length, ...checkFieldType);
 
-  function validateLabel(label, errorPath) {
+  // function validateLabel(label, errorPath) {
+  //   if (isRestricted(label)) {
+  //     errorPath.errorMsg = "Entered label is restricted";
+  //   } else if (hasInvalidCharacters(label)) {
+  //     errorPath.errorMsg = "Label should not contain special characters, double quotes (\") or single quotes (')";
+  //   } else {
+  //     errorPath.errorMsg = duplicateLabels.includes(label.trim().toLowerCase())
+  //       ? "Duplicate Label Name"
+  //       : "";
+  //   }
+  // }
+    function validateLabel(label, errorPath) {
+    if (!label) {
+      errorPath.errorMsg = "";
+      return;
+    }
+
     if (isRestricted(label)) {
       errorPath.errorMsg = "Entered label is restricted";
     } else if (hasInvalidCharacters(label)) {
-      errorPath.errorMsg = "Label should not contain special characters, double quotes (\") or single quotes (')";
+      errorPath.errorMsg =
+        "Label should not contain special characters, double quotes (\") or single quotes (')";
+    } else if (label.length > 64) {
+      errorPath.errorMsg = "Label should not exceed 64 characters";
     } else {
       errorPath.errorMsg = duplicateLabels.includes(label.trim().toLowerCase())
         ? "Duplicate Label Name"
@@ -4114,8 +4139,10 @@ function handleFieldChange(blockIndex, sectionIndex, rowIndex, columnIndex, fiel
   }
    blockArr.forEach((block) => {
     block.sections.forEach((section) => {
+      validateLabel(section.label, section);
       section.rows.forEach((row) => {
         row.columns.forEach((column) => {
+          validateLabel(column.label, column);
           column.fields.forEach((field) => {
             validateLabel(field.label, field);
           });
@@ -4331,6 +4358,26 @@ const hasDuplicates = (array) => new Set(array).size !== array.length;
 <style src="vue-multiselect/dist/vue-multiselect.min.css"></style>
 
 <style lang="scss" scoped>
+
+.approver_type_div{
+  border: 1px solid #23b207;
+  border-radius: 6px;
+  padding: 4px 4px;
+  color: #23b207;
+  background-color: #e5ffe0 ;
+}
+.approver_type_div span{
+  font-size: 11px;
+  color: #23b207;
+  font-weight: 500;
+  padding: 0px 4px;
+  
+}
+.approver_type_div i{
+  color: #23b207;
+  font-weight: 900;
+  -webkit-text-stroke: 1px #23b207;
+}
 .formlist {
   max-height: 180px;
   /* 🔥 Set desired height */
@@ -5096,7 +5143,7 @@ select {
 }
 
 .more-count {
-  color: #000;
+  color: #1b14df;
   font-weight: 500;
   display: inline;
   cursor: pointer;
