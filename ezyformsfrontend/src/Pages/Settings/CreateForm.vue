@@ -101,10 +101,42 @@
         </div>
       </div>
     </div>
+  
+   <div class="modal fade" id="reportmodal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="reportmodalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title font-16" id="reportmodalLabel">Report Creation</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="font-13">Select the fields you want to include in the report:</p>
+        <div class="report-fields row">
+          <div 
+            v-for="(field, index) in reportFields" 
+            :key="index" 
+            class="col-md-4 mb-3 d-flex align-items-center"
+          >
+            <input
+              :id="'field-' + index"
+              type="checkbox"
+              class="form-check-input me-2"
+              v-model="field.selected"
+            />
+            <label :for="'field-' + index" class="form-label font-12 mb-0">
+              {{ field.label }}
+            </label>
+          </div>  
+        </div>
+      </div>
 
-
-    <!-- <FormPreview :blockArr="selectedForm" :formDescriptions="formDescriptions" :childHeaders="childtableHeaders" /> -->
-
+      <div class="modal-footer">
+        <button type="button" class="btn btn-light font-13" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-dark font-13 text-white" @click="generateReport">Generate Report</button>
+      </div>
+    </div>
+  </div>
+</div>
   </div>
 </template>
 
@@ -143,8 +175,12 @@ const pdfPreview = ref('')
 const childtableHeaders = ref([]);
 const is_admin = ref('');
 const isEnable = ref("");
+const reportFields = ref([])
+const responcedata = ref([]);
 
-
+// Toggle function triggered when a checkbox is clicked
+const selectedRowData = ref(null);
+const selectedActionText = ref('');
 // Business unit and filter object
 const businessUnit = computed(() => {
   return EzyBusinessUnit.value});
@@ -278,6 +314,9 @@ function actionClickedDropDown(row) {
   if (is_admin.value == 1) {
     baseActions.push({ name: 'Edit Form', icon: 'fa-solid fa-edit' });
   }
+  // if (is_admin.value == 1) {
+  //   baseActions.push({ name: 'Create Report', icon: 'fa fa-file-text' });
+  // }
 
   actions.value = baseActions;
 
@@ -417,7 +456,35 @@ function actionCreated(rowData, actionEvent) {
   if (actionEvent.name === 'In-active this form') {
     toggleFunction(rowData, null, null);
   }
+  // if (actionEvent.name === 'Create Report') {
+  //     let fields = JSON.parse(rowData?.form_json).fields || [];
+
+  // // filter valid fields and add a `selected` flag
+  // reportFields.value = fields
+  //   .filter(f => f.label && f.fieldtype !== "Column Break" && f.fieldtype !== "Section Break")
+  //   .map(f => ({ ...f, selected: false }));
+  //   const modal = new bootstrap.Modal(document.getElementById('reportmodal'), {});
+  //   modal.show();
+  // }
 }
+// async function generateReport() {
+//   // collect only selected fields
+//   const selectedFields = reportFields.value
+//     .filter(f => f.selected)
+//     .map(f => `${f.fieldname} as '${f.label}'`);
+
+//   const payload = selectedFields.join(","); // comma separated string
+//   console.log(payload,"payload");
+
+//   try {
+//     const response = await axiosInstance.post("/your-endpoint", {
+//       fields: payload,
+//     });
+//     console.log("Report generated:", response.data);
+//   } catch (err) {
+//     console.error("Error generating report:", err);
+//   }
+// }
 
 function downloadPdf() {
 
@@ -446,11 +513,7 @@ function downloadPdf() {
     });
 }
 
-const responcedata = ref([]);
 
-// Toggle function triggered when a checkbox is clicked
-const selectedRowData = ref(null);
-const selectedActionText = ref('');
 
 function toggleFunction(rowData, rowIndex, event) {
   selectedRowData.value = rowData;
@@ -662,7 +725,11 @@ onMounted(() => {
 
 </script>
 
-<style>
+<style scoped lang="scss">
+.report-fields{
+  max-height: 400px;
+  overflow-y: auto;
+}
 .dashedcircle {
   border: 1px dashed #AAAAAA;
   height: 30px;

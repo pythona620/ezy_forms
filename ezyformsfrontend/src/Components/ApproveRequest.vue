@@ -1212,9 +1212,10 @@ function approvalStatusFn(dataObj, type) {
         }
         // DynamicCalculateMethod()
         ApproverReason.value = ""; // Clear reason after success
-        toast.success(`Request ${type}ed`, {
+        toast.success(`Request ${type}d`, {
           autoClose: 500,
           transition: "zoom",
+          pauseOnHover: false,
           onClose: () => {
             router.push({ path: selectedData.value.routepath }); // Navigate after toast closes
           }
@@ -1405,9 +1406,10 @@ function approvalCancelFn(dataObj, type) {
     .post(apis.requestApproval, { request_details: [data] })
     .then((response) => {
       if (response?.message) {
-        toast.success(`${type}`, {
+        toast.success(`Request ${type}ed`, {
           autoClose: 500,
           transition: "zoom",
+          pauseOnHover: false,
           onClose: () => {
             router.push({ name: "ReceivedForMe" }); // Navigate after toast
           },

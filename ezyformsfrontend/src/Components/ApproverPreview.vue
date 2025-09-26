@@ -484,7 +484,7 @@
                             <input type="text" :value="field.value"
                               :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'"
                               @input="(e) => onInputChange(e.target.value, field)"
-                              :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0  w-50 pb-0 bg-transparent' : ''"
+                              :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0  pb-0 bg-transparent' : ''"
                               @change="(event) =>
                                 logFieldValue(
                                   event,
@@ -506,7 +506,7 @@
                         <template v-else-if="field.fieldtype == 'Datetime'">
                           <template v-if="props.readonlyFor === 'true' || blockIndex < currentLevel">
                             <span style="font-size: 12px;"
-                              :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0  w-50 bg-transparent' : ''"
+                              :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0  bg-transparent' : ''"
                               :value="field.value" :type="field.fieldtype">
                               {{ field.fieldtype === 'Time' ? formatTime(field.value) : field.value }}
                             </span>
@@ -563,7 +563,7 @@
                           <input v-if="field.fieldtype == 'Int'"
                             :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'" :readOnly="blockIndex < currentLevel || props.readonlyFor === 'true'
                               " type="number" v-model="field.value"
-                            :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0  w-50 bg-white' : ' '"
+                            :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0  bg-white' : ' '"
                             :placeholder="'Enter ' + field.label" :value="field.value" :name="'field-' +
                               sectionIndex +
                               '-' +
@@ -607,7 +607,7 @@
                                 width: Math.min(100 + (field.value?.length * 2), 600) + 'px'
                               }" :disabled="blockIndex < currentLevel || props.readonlyFor === 'true' || field.label === 'Approver'"
                               :is="getFieldComponent(field.fieldtype)" :class="props.readonlyFor === 'true' || blockIndex < currentLevel
-                                ? 'border-0  w-50 bg-transparent'
+                                ? 'border-0   bg-transparent'
                                 : ''" :value="field.fieldtype === 'Time' ? formatTime(field.value) : field.value"
                               :type="field.fieldtype"
                               :readOnly="blockIndex < currentLevel || props.readonlyFor === 'true'"
@@ -2480,11 +2480,12 @@ const previewedAttachments = ref(new Set());
 // }
 
 function collectAllAttachments(blocks) {
+  console.log("Current Level =>", props.currentLevel);
   const attachments = [];
 
   (blocks || []).forEach((block, blockIndex) => {
-    // 🚫 Skip the current level block
-    if (String(blockIndex) === String(props.currentLevel)) {
+    // 🚫 Only check previous levels
+    if (Number(blockIndex) >= Number(props.currentLevel)) {
       return;
     }
 
@@ -2492,26 +2493,22 @@ function collectAllAttachments(blocks) {
       (section.rows || []).forEach((row) => {
         (row.columns || []).forEach((column) => {
           (column.fields || []).forEach((field) => {
-            // console.log("Attach field =>",field.label,"| fieldtype =>",field.fieldtype,"| value =>",field.value);
-
+            
             if (field.fieldtype === "Attach" && field.value) {
               const files = field.value
                 .split("|")
                 .map((f) => f.trim())
                 .filter((f) => f);
 
-              // ✅ Normal Attachments (require preview)
               if (
-                !["Requestor Signature", "Approved By", "Acknowledged By"].includes(
-                  field.label
-                )
+                !["Requestor Signature", "Approved By", "Acknowledged By"].includes(field.label)
               ) {
                 attachments.push(...files);
               } else {
-                // ✅ Auto-mark these as previewed
                 files.forEach((f) => previewedAttachments.value.add(f));
               }
             }
+
           });
         });
       });
@@ -2520,12 +2517,14 @@ function collectAllAttachments(blocks) {
 
   allAttachments.value = attachments;
 
-  // ✅ Check if attachments are already all previewed
+  // ✅ Only require preview for previous levels’ attachments
   const allPreviewed = allAttachments.value.every((f) =>
     previewedAttachments.value.has(f)
   );
+
   emit("attachmentsReady", allPreviewed);
 }
+
 
 
 /**

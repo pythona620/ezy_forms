@@ -25,3 +25,13 @@ app.directive('tooltip', Tooltip);
 // app.use(PrimeVue, { ripple: true });
 // app.directive('tooltip', Tooltip);
 app.mount("#app");
+const loader = document.getElementById("loader");
+if (loader) {
+  loader.style.transition = "opacity 0.3s ease";
+  loader.style.opacity = 0;
+  setTimeout(() => {
+    loader.remove();
+    // Show Vue app after loader is gone
+    document.getElementById("app").style.visibility = "visible";
+  }, 100);
+}
