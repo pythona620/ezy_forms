@@ -619,7 +619,7 @@ def todo_tab(document_type, request_id, property=None, cluster_name=None, curren
 			# Find the next level's approver role(s)
 			picking_remaining_roles_for_approval = [remaining_role["role"] for remaining_role in approvals_reasons if int(remaining_role["level"]) == int(current_level) and not remaining_role["action"].strip() and not remaining_role["user"].strip()]
 			
-			if view_only_roles and not status:
+			if view_only_roles:
 				be_half_of = workflow_requests.get("be_half_of", None)
 				if be_half_of and not status:
 					# Assign to the reporting manager of be_half_of user
