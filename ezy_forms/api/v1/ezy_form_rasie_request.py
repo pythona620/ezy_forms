@@ -555,9 +555,11 @@ def todo_tab(document_type, request_id, property=None, cluster_name=None, curren
 			
 			if approvar_excits and not status:
 				approval_list = [role.role for role in activate_log_roles.reason if role.level != 0 and role.action != "Rejected"]
+				role_user_map = {role.role: role.user for role in activate_log_roles.reason	if role.level != 0 and role.action != "Rejected"}
 				approvar_excits_list = list(set(approval_list))
 				has_match = any(map(lambda role: role in approvar_excits_list, approvar_excits))
-				match_role = next((role for role in approvar_excits if role in approvar_excits_list), None)
+				match_role = next((role for role in approvar_excits if role in role_user_map), None)
+				match_role_user = role_user_map.get(match_role) if match_role else None
 				if has_match:
 					if all_approvals_required:
 						all_approvals_required.remove(match_role)
@@ -565,6 +567,7 @@ def todo_tab(document_type, request_id, property=None, cluster_name=None, curren
 					new_record = {
 						"level": current_level,
 						"role": match_role,
+						"user":match_role_user,
 						"action": "Approved",
 						"reason": "Auto Approved by the system",
 						"time": my_time,
@@ -597,6 +600,7 @@ def todo_tab(document_type, request_id, property=None, cluster_name=None, curren
 				new_record = {
 					"level": current_level,
 					"role": current_user_role,
+					"user":frappe.session.user,
 					"action": "Approved",
 					"reason": "Auto Approved by the system",
 					"time": my_time,

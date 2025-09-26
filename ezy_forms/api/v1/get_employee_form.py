@@ -11,7 +11,7 @@ def my_team():
 
         # If Administrator → return all employee names
         if user == "Administrator":
-            return frappe.DatabaseQuery("Ezy Employee").execute(pluck="name")
+            return DatabaseQuery("Ezy Employee").execute(pluck="name")
 
         # Get current employee record
         employee_id = frappe.db.get_value(
@@ -21,7 +21,8 @@ def my_team():
             return []
 
         # Fetch all employees (only once)
-        all_employees = frappe.DatabaseQuery("Ezy Employee").execute(
+        all_employees = DatabaseQuery(
+            "Ezy Employee").execute(
             fields=["name", "reporting_to"]
         )
 
@@ -31,12 +32,18 @@ def my_team():
             manager = emp.get("reporting_to")
             reports_map.setdefault(manager, []).append(emp.get("name"))
 
-        # Recursive fetch from in-memory dict
-        def get_reports(emp_id):
+        # Recursive fetch with cycle protection
+        def get_reports(emp_id, visited=None):
+            if visited is None:
+                visited = set()
+            if emp_id in visited:
+                return []  # cycle detected → stop
+            visited.add(emp_id)
+
             direct_reports = reports_map.get(emp_id, [])
             all_reports = list(direct_reports)
             for r in direct_reports:
-                all_reports.extend(get_reports(r))
+                all_reports.extend(get_reports(r, visited))
             return all_reports
 
         # Start with self + reports
