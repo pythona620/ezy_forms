@@ -47,10 +47,10 @@ def get_employee_forms(property_field, employee=None, requested_by_me=False, app
     filters = {"property": property_field}
     if department:
         filters["department"] = department
-
+    is_admini = frappe.db.get_value("Ezy Employee",frappe.session.user,"is_admin")
     all_employees = my_team()
-    if all_employees:
-        filters.update({"requested_by": ["in", all_employees]})
+    if not is_admini and all_employees:
+            filters.update({"requested_by": ["in", all_employees]})
 
     if approved_by_me:
         approved_comments = frappe.get_all(
