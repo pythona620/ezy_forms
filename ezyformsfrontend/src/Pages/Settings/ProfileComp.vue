@@ -123,12 +123,16 @@ function uploadImage(event) {
         .post(apis.uploadfile, formData)
         .then((res) => {
             const imageUrl = res.message.file_url;
-            const payload = uploadType.value === 'profile'
+            const payload = {
+              ...(uploadType.value === 'profile'
                 ? { profile_image: imageUrl }
-                : { signature: imageUrl };
+                : { signature: imageUrl }),
+              name: userData.value.name,
+              doctype: doctypes.EzyEmployeeList
+            };
 
             return axiosInstance.put(
-                `${apis.resource}${doctypes.EzyEmployeeList}/${userData.value.name}`,
+                `${apis.DataUpdate}/${userData.value.name}`,
                 payload
             );
         })

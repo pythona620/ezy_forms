@@ -3211,6 +3211,7 @@ function initializeDesignationValue(blockIndex) {
   designationValue.value = [...rolesForBlock];
 
   OnRejection.value = currentSetup.on_rejection;
+  approval_required.value=currentSetup.approval_required;
   // Check for view_only_reportee flag
   // ViewOnlyReportee.value = currentSetup.view_only_reportee === 1;
   // OnRejection.value = currentSetup.on_rejection

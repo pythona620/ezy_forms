@@ -3,31 +3,17 @@ import frappe
 from frappe.utils import add_to_date
 import ast
 from frappe.utils.background_jobs import enqueue
-from frappe.core.page.permission_manager.permission_manager import reset
 import string
 import operator
 import random
-from ezy_forms.ezy_forms.doctype.ezy_form_definitions.dynamic_form_template import download_filled_form
-from ezy_forms.api.v1.mail_message_html import preview_dynamic_form
 from ezy_forms.ezy_forms.doctype.email_approval.email_approval import (
     create_email_approval_records,update_token_status
 )
 # from frappe import STANDARD_USERS, _, msgprint, throw
-from frappe.utils import (
-    cint,
-    escape_html,
-    flt,
-    format_datetime,
-    get_formatted_email,
-    get_system_timezone,
-    has_gravatar,
-    now_datetime,
-    today,
-)
 import sys, traceback, time
 from ezy_forms.api.v1.delete_files import delete_files_api
+from ezy_forms.api.v1.send_an_email import sending_mail_api
 
-from ezy_forms.api.v1.ezy_form_rasie_request import *
 
 @frappe.whitelist()
 def updating_wf_workflow_requests(request_details,user_session=None,unwanted_files=[]):
@@ -64,6 +50,7 @@ def updating_wf_workflow_requests(request_details,user_session=None,unwanted_fil
 @frappe.whitelist()
 def enqueuing_updating_wf_workflow_requests(doctype,request_ids:list, current_level, action, reason, url_for_approval_id, files:list|None, property = None, cluster_name=None,user_session=None,unwanted_files =[]):
     try:
+        from ezy_forms.api.v1.ezy_form_rasie_request import todo_tab,combination_of_roadmap_and_request
         message = ""
         email_template_for_requested_status_response_html = None
         
@@ -171,9 +158,7 @@ def enqueuing_updating_wf_workflow_requests(doctype,request_ids:list, current_le
                         request_id_document = frappe.get_all(doctype, filters={"wf_generated_request_id": request_id}, fields=["name"])
                         # level_1_reasons = [row for row in setting_reason.reason if row.level == current_level]
                         # count_level_1 = len(level_1_reasons)
-                        
-                        members_having_mails = frappe.get_doc("WF Roadmap",roadmap_title).as_dict()
-                        # workflow_levels = members_having_mails['workflow_levels']
+
                         
 
                         
@@ -201,71 +186,11 @@ def enqueuing_updating_wf_workflow_requests(doctype,request_ids:list, current_le
                             change_current_level = int(current_level) + 1
                         frappe.db.set_value("WF Workflow Requests", request_id, {"current_level": change_current_level,"status":"In Progress","action":action})
                         frappe.db.commit()
+                        
                         todo_tab(document_type = doctype, request_id = request_id,  property=property, cluster_name=cluster_name, current_level= change_current_level,account_ids=request_id_document[0].name,status=None)                            
-
-                        members_having_mails = members_having_mails["wf_level_setup"]
+                        sending_mail_api(request_id=request_id, doctype_name=doctype,property= property,cluster= cluster_name,reason= reason,timestamp= my_time,skip_user_role= None )
                         
-                        roles_in_next_level_level = [rolee ["role"] for rolee in members_having_mails if rolee["level"] == change_current_level and rolee["view_only_reportee"] == 1]
-                        roles_in_next_level = [rolee ["role"] for rolee in members_having_mails if rolee["level"] == change_current_level]
-                        
-                        if len(roles_in_next_level_level) > 0:
-                            roles_in_next_level = roles_in_next_level_level
-                            
-                        next_role_values = ast.literal_eval(frappe.get_value("WF Workflow Requests",request_id,"assigned_to_users"))
-                        if property!=None:
-                            fetching_all_roles_from_role_matrix = frappe.db.get_all("WF Users",filters = {"role_name":["in", next_role_values],"parent":property}, fields = ["mail"],pluck="mail")
-                        elif cluster_name!=None:
-                            fetching_all_roles_from_role_matrix = frappe.db.get_all("WF Users",filters = {"role_name":["in", next_role_values],"parent":property}, fields = ["mail"],pluck="mail")
-
-                       
-                        # Now adding Requestor for sending mail.
-                        is_email_account_set = frappe.db.get_all("Email Account",{"enable_outgoing":["=",1],"default_outgoing":["=",1]})
-                        if is_email_account_set:    
-                        
-                            requestor_user = frappe.db.get_value("WF Comments",{"parent" :request_id, "level":0},["user"])
-                            
-                            if len(roles_in_next_level_level) > 0:
-                                fetching_all_roles_from_role_matrix = []
-                                reporting_manager = frappe.db.get_value("Ezy Employee",frappe.get_value("WF Workflow Requests",request_id,"requested_by"),"reporting_to")
-                                if reporting_manager not in fetching_all_roles_from_role_matrix and reporting_manager:
-                                    fetching_all_roles_from_role_matrix.append(reporting_manager)
-                                
-                            # Now adding Requestor for sending mail.
-                            if requestor_user not in fetching_all_roles_from_role_matrix:
-                                fetching_all_roles_from_role_matrix.append(requestor_user)
-                                
-                            attachment_to_mail = frappe.get_value("Ezy Business Unit",property,"send_form_as_a_attach_through_mail")
-                            # sending mail after level changes
-                            from urllib.parse import urlparse
-                            attach_down = []
-                            if attachment_to_mail :
-                                file_down = download_filled_form(form_short_name=doctype, name=request_id_document[0].name,business_unit=property,from_raise_request='from_raise_request')
-                                parsed_url = urlparse(file_down)
-                                file_path = frappe.get_site_path("public", parsed_url.path.lstrip("/"))
-                                if os.path.exists(file_path):
-                                    with open(file_path, "rb") as f:
-                                        attach_down.append({
-                                            "fname": os.path.basename(file_path),
-                                            "fcontent": f.read()
-                                        })
-                            user_name_by_seccion = frappe.get_value("User",requested_by,'full_name')    
-                            employee_mails = frappe.db.get_all("Ezy Employee",filters = {'emp_mail_id':['in',fetching_all_roles_from_role_matrix],'enable': 1})
-                            fetching_all_roles_from_role_matrix = [emp['name'] for emp in employee_mails]
-                        
-
-                            for email in fetching_all_roles_from_role_matrix:
-                                email_content = generate_email_content(
-                                    request_id, doctype, user_name_by_seccion, requested_by_role, email,requested_by,
-                                    reason, my_time
-                                )
-                                frappe.sendmail(
-                                    recipients=[email],
-                                    subject="ezyForms Notification",
-                                    message=email_content['message'],
-                                    content = email_content['email_template'],
-                                    attachments=attach_down
-                                )
-                            update_token_status(action,request_id,request_id_document[0],change_current_level,status='In Progress')
+                        update_token_status(action,request_id,request_id_document[0],change_current_level,user_id,status='In Progress')
 
                     elif int(current_level) == checking_whether_it_matches_levels:
                     
@@ -293,70 +218,20 @@ def enqueuing_updating_wf_workflow_requests(doctype,request_ids:list, current_le
                         request_id_document = frappe.get_all(doctype, filters={"wf_generated_request_id": request_id}, fields=["name"])
                         todo_tab(document_type = doctype, request_id = request_id,  property=property, cluster_name=cluster_name, current_level=current_level,account_ids=request_id_document[0].name,status=None)
                         
-                        is_email_account_set = frappe.db.get_all("Email Account",{"enable_outgoing":["=",1],"default_outgoing":["=",1]})
-                        if is_email_account_set:
-                            attachment_to_mail = frappe.get_value("Ezy Business Unit",property,"send_form_as_a_attach_through_mail")
-                            from urllib.parse import urlparse
-
-                            attach_down = []
-                            if attachment_to_mail:
-                                file_down = download_filled_form(form_short_name=doctype, name=request_id_document[0].name,business_unit=property,from_raise_request='from_raise_request')
-                                parsed_url = urlparse(file_down)
-                                file_path = frappe.get_site_path("public", parsed_url.path.lstrip("/"))
-                                if os.path.exists(file_path):
-                                    with open(file_path, "rb") as f:
-                                        attach_down.append({
-                                            "fname": os.path.basename(file_path),
-                                            "fcontent": f.read()
-                                        })
-
-                            user_name_by_seccion = frappe.get_value("User",requested_by,'full_name')
-                            email_content = generate_email_content(
-                                request_id, doctype, user_name_by_seccion, requested_by_role, requested_by,requested_by,
-                                reason, my_time
-                            )
-                            frappe.sendmail(
-                                recipients=[requested_by],
-                                subject="ezyForms Notification",
-                                message=email_content['message'],
-                                content = email_content['email_template'],
-                                attachments=attach_down
-                            )
-                            
-                            update_token_status(action,request_id,request_id_document[0],current_level,status="Completed")
+                        sending_mail_api(request_id=request_id, doctype_name=doctype, property=property, cluster=cluster_name, reason="Completd", timestamp=my_time,skip_user_role= None)
+                        update_token_status(action,request_id,request_id_document[0],current_level,user_id,status="Completed")
 
 
             elif action == "Reject":
                 message = "Rejected"
                 on_rejection_level = frappe.get_all("WF Level Setup", filters = {"level": current_level,"role": role, "parent":roadmap_title}, fields = 'on_rejection', pluck="on_rejection")
                 level_changed = int(current_level)
-                current_level = on_rejection_level[0]
-                
-                is_email_account_set = frappe.db.get_all("Email Account",{"enable_outgoing":["=",1],"default_outgoing":["=",1]})
-            
-
-                members_having_mails = frappe.get_doc("WF Roadmap",roadmap_title).as_dict()
-                members_having_mails = members_having_mails["wf_level_setup"]
-
-                roles_in_next_level = [rolee ["role"] for rolee in members_having_mails if rolee["level"] == current_level]
-
+                current_level = int(on_rejection_level[0])
                 request_id_document = frappe.get_all(doctype, filters={"wf_generated_request_id": request_id}, fields=["name"])
                 todo_tab(document_type = doctype, request_id = request_id,  property=property, cluster_name=cluster_name, current_level=current_level,account_ids = request_id_document[0]["name"],status="Reject")
                 frappe.db.set_value("WF Workflow Requests", request_id, {"current_level" : int(current_level)if int(current_level) != 0 else 0, "action":action,"status":"In Progress" if int(current_level) != 0 else "Request Cancelled"})
                 frappe.db.commit()
                
-                attachment_to_mail = frappe.get_value("Ezy Business Unit",property,"send_form_as_a_attach_through_mail")
-                
-                next_role_values = ast.literal_eval(frappe.get_value("WF Workflow Requests",request_id,"assigned_to_users"))
-                if property!=None:
-                    fetching_all_roles_from_role_matrix = frappe.db.get_all("WF Users",filters = {"role_name":["in", next_role_values],"parent":property}, fields = ["mail"],pluck="mail")
-                elif cluster_name!=None:
-                    fetching_all_roles_from_role_matrix = frappe.db.get_all("WF Users",filters = {"role_name":["in", next_role_values],"parent":property}, fields = ["mail"],pluck="mail")
-               
-                    # sending mail after level changes
-                from urllib.parse import urlparse
-
-                attach_down = []
                 if request_id_document:
                     docname = request_id_document[0]["name"]
                     doc = frappe.get_doc(doctype, docname)
@@ -380,41 +255,8 @@ def enqueuing_updating_wf_workflow_requests(doctype,request_ids:list, current_le
 
                     doc.save(ignore_permissions=True)
                     frappe.db.commit()
-                    ###################################
-                    if attachment_to_mail:
-                        file_down = download_filled_form(form_short_name=doctype, name=request_id_document[0].name,business_unit=property,from_raise_request='from_raise_request')
-                        parsed_url = urlparse(file_down)
-                        file_path = frappe.get_site_path("public", parsed_url.path.lstrip("/"))
-                        if os.path.exists(file_path):
-                            with open(file_path, "rb") as f:
-                                attach_down.append({
-                                    "fname": os.path.basename(file_path),
-                                    "fcontent": f.read()
-                                })
-
-
-               
-                    # Now adding Requestor for sending mail.
-                    requestor_user = frappe.db.get_value("WF Comments",{"parent" :request_id, "level":0},["user"])
-                    if requestor_user not in fetching_all_roles_from_role_matrix:
-                        fetching_all_roles_from_role_matrix.append(requestor_user)
-
-                    user_name_by_seccion = frappe.get_value("User",requested_by,'full_name')
-                employee_mails = frappe.get_all("Ezy Employee",filters = {'emp_mail_id':['in',fetching_all_roles_from_role_matrix],'enable': 1},fields=['emp_mail_id'])
-                fetching_all_roles_from_role_matrix = [emp['emp_mail_id'] for emp in employee_mails]
-                for each_one_mail in fetching_all_roles_from_role_matrix:
-                    email_content = generate_email_content(
-                        request_id, doctype, user_name_by_seccion, requested_by_role, each_one_mail,requested_by,
-                        reason, my_time
-                    )
-                    frappe.sendmail(
-                        recipients=[each_one_mail],
-                        subject="ezyForms Notification",
-                        message=email_content['message'],
-                        content = email_content['email_template'],
-                        attachments=attach_down
-                            )
-                            
+                sending_mail_api(request_id=request_id, doctype_name=doctype, property=property, cluster=cluster_name, reason="Rejected", timestamp=my_time,skip_user_role= None)
+                update_token_status(action,request_id,request_id_document[0],current_level,user_id,status="Reject")
             if property !=None:
                 frappe.publish_realtime("custom_socket", {'message':'Request Updated', 'type':"Request Updated","total_count":100, "count":100,"request_id":request_id, "property":property,"user":user_id})
             elif cluster_name!=None:
