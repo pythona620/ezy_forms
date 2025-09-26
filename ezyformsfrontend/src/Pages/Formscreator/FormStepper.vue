@@ -301,8 +301,8 @@
                         <div class="block-level" v-for="(block, blockIndex) in blockArr" :key="blockIndex">
                           <div class="requestandAppHeader">
                             <div class="d-flex justify-content-between align-items-center">
-                              <div class=" d-flex align-items-center">
-                                <h6 class="ps-2 mb-0 ">
+                              <div class=" ">
+                                <h6 class="ps-2 mb-0 fw-bolder font-14 blockTitle">
                                   {{
                                     blockIndex === 0
                                       ? "Requestor Block"
@@ -312,17 +312,33 @@
                                   }}
                                   <!-- ${blockIndex++} -->
                                 </h6>
-                                  <div class="text-center ms-3">
-                                    <div v-if="blockIndex !== 0 && getWorkflowSetup(blockIndex).view_only_reportee || getWorkflowSetup(blockIndex).all_approvals_required || getWorkflowSetup(blockIndex).requester_as_a_approver" class="font-12 d-flex align-items-center approver_type_div">
-                                      <span class="">
+                                  <div class="text-center ms-2 mt-1">
+                                    <div v-if="blockIndex !== 0 && getWorkflowSetup(blockIndex).view_only_reportee || getWorkflowSetup(blockIndex).all_approvals_required || getWorkflowSetup(blockIndex).requester_as_a_approver" class="font-12 d-flex align-items-center">
+                                      <!-- <span class="">
                                         <i class="bi bi-circle"></i>
-                                      </span>
-                                      <span>
+                                      </span> -->
+                                      <span class="font-12  approver_type_div">
 
 
                                       {{getWorkflowSetup(blockIndex).view_only_reportee === 1 ? 'View only reportee' : ''}}
                                       {{getWorkflowSetup(blockIndex).all_approvals_required === 1 ? 'All approvers required' : ''}}
                                       {{getWorkflowSetup(blockIndex).requester_as_a_approver === 1 ? 'Requested only' : ''}}
+                                      </span>
+                                      
+                                      
+                                      <span>
+                                        <span class="ms-1">
+                                          
+                                          on rejection escalating to 
+                                        </span>
+                                          <span class="font-12 fw-bold">
+                                        {{ getWorkflowSetup(blockIndex).on_rejection ? `Level ${getWorkflowSetup(blockIndex).on_rejection}` : 'Requestor' }}
+                                          </span>
+
+                                      </span>
+                                      <span class="font-12 text-danger ms-1">
+                                        {{ getWorkflowSetup(blockIndex).all_approvals_required === 1 ? '' : '(Skipping multi approval)' }}
+                                        
                                       </span>
 
 
@@ -335,7 +351,7 @@
                                 <div v-if="paramId && workflowSetup.length" class="role-container">
                                   <label class="role-text d-flex align-items-center"
                                     v-if="getWorkflowSetup(blockIndex)">
-                                    <span class="role-label">
+                                    <span class="role-label fw-bold">
                                       {{
                                         getWorkflowSetup(blockIndex).roles.length > 0
                                           ? blockIndex === 0
@@ -4361,11 +4377,11 @@ const hasDuplicates = (array) => new Set(array).size !== array.length;
 <style lang="scss" scoped>
 
 .approver_type_div{
-  border: 1px solid #23b207;
+  border: 1px solid #BAFFC2;
   border-radius: 6px;
-  padding: 4px 4px;
-  color: #23b207;
-  background-color: #e5ffe0 ;
+  padding: 2px 4px;
+  color: #00C917;
+  background-color: #EAFFED;
 }
 .approver_type_div span{
   font-size: 11px;
@@ -4995,7 +5011,7 @@ select {
 }
 
 .requestandAppHeader {
-  padding: 10px 6px;
+  padding: 12px 6px;
   // box-shadow: 0px 4px 4px 0px #0000000d; 
 }
 

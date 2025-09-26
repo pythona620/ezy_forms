@@ -7,7 +7,7 @@
     <div class="container">
       <div v-if="blockArr.length" class="position-relative">
         <div class="requestPreviewDiv" ref="mainBlockRef">
-          <div class="d-flex justify-content-center align-items-center px-3 pb-2 ">
+          <div class="d-flex justify-content-center align-items-center px-3 py-2 ">
             <h5 class="card-title responsive-title">{{ checkingIs_linked.form_name }}</h5>
            
            
@@ -62,15 +62,18 @@
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">Acknowledgement</h5>
+            <h5 class="modal-title font-15">Acknowledgement</h5>
             <button type="button" class="btn-close" @click="acknowledge=''" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <input type="checkbox" v-model="acknowledge" id="Acknowledgement" value="Acknowledgement" class="me-2 mt-1 form-check-input Acknowledgement-check " />
-            <label for="Acknowledgement">
+            <div class="d-flex align-items-center"> 
+
+            <input type="checkbox" v-model="acknowledge" id="Acknowledgement" value="Acknowledgement" class="me-2 mt-0 form-check-input Acknowledgement-check " />
+            <label for="Acknowledgement" class="acknowledgement-label">
 
             I acknowledge that the information provided is correct.
             </label>
+            </div>
           </div>
           <div class="modal-footer">
             <button type="button" @click="acknowledge=''" class="btn btn-outline-secondary font-12" data-bs-dismiss="modal">Cancel</button>
@@ -1281,6 +1284,7 @@ function request_raising_fn(item) {
       toast.success(resp?.message?.message, {
         autoClose: 1000,
         transition: "zoom",
+        pauseOnHover: false,
         onClose: () => {
           router.push({ path: "/todo/raisedbyme" });
         },
@@ -1434,6 +1438,7 @@ function linked_id_adding_method(name) {
 .backtofromPage {
   background-color: #ffffff;
   padding: 5px;
+   box-shadow: rgba(0, 0, 0, 0.1) 0px 3px 3px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
 }
 
 .no-form {
@@ -1474,5 +1479,9 @@ button {
 .bi-x-lg::before {
   content: "\f659";
   margin-top: 8px;
+}
+.acknowledgement-label{
+  font-size: 14px;
+  font-weight: 500;
 }
 </style>

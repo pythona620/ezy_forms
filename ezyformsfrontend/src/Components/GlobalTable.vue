@@ -56,8 +56,8 @@
             </template>
           </td>
           <!-- <td class="text-center fixed-column" v-if="enableDisable == 'true'"></td> -->
-          <td class="text-center fixed-column" v-if="isAction == 'true'"></td>
-          <td class="text-center fixed-column" v-if="isRequest == 'true'"></td>
+          <td class="text-center fixed-column dropdown_sticky" v-if="isAction == 'true'"></td>
+          <td class="text-center fixed-column dropdown_sticky" v-if="isRequest == 'true'"></td>
         </tr>
         <template v-if="tData.length">
           <tr v-for="(row, rowIndex) in tData" :key="rowIndex">
@@ -226,7 +226,7 @@
             <!-- <td > -->
 
             <!-- </td> -->
-            <td   class="dropdown_sticky">
+            <td v-if="(isAction == 'true' && viewType === 'viewPdf') || actionType === 'dropdown' || download === 'true' || isRequest === 'true' || ( isAction === 'true' && view === 'edit')"  class="dropdown_sticky">
             <div v-if="isAction == 'true' && viewType === 'viewPdf'" class="text-center align-middle">
               <span v-if="raiseRequest === 'true'" class="px-2">
                 <i v-tooltip.top="'Raise Request'" class="bi bi-send eye-cursor mx-1"
@@ -848,7 +848,7 @@ watch(
   background-color: white;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
   position: absolute;
-  transform: translate3d(-45.286px, 12px, 0px) !important;
+  transform: translate3d(-69.286px, 12px, 0px) !important;
 }
 
 .activeform {
@@ -1039,7 +1039,7 @@ th:first-child {
 
 @media (max-width: 1400px) {
   .table-responsive {
-    height: 67vh;
+    height: 75vh;
   }
 
   .global-table td {
@@ -1230,7 +1230,7 @@ th:first-child {
   background: white !important;
   z-index: 1;
   overflow: visible !important;
-  width: 3%!important;
+  width: 5%!important;
 }
 
 

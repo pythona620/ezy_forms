@@ -5,12 +5,7 @@
         <h1 class="m-0 font-13">My Approval Forms</h1>
         <p class="m-0 font-11 pt-1">{{ totalRecords }} Forms</p>
       </div>
-      <!-- <div>
-        <input type="checkbox" id="ViewOnlyReportee" v-model="ViewOnlyReportee" class="me-2 mt-1 form-check-input" @change="ViewOnlyRe" />
-              <label for="ViewOnlyReportee " class="SelectallDesignation  font-12 m-0 form-check-label">View Only Reportee</label>
-        
-        
-      </div> -->
+     
     </div>
     <div class="mt-2">
       <GlobalTable :tHeaders="tableheaders" :tData="tableData" isAction="true" viewType="viewPdf" isCheckbox="true"
@@ -23,36 +18,24 @@
   </div>
 </template>
 <script setup>
-import ButtonComp from "../../Components/ButtonComp.vue";
+
 import GlobalTable from "../../Components/GlobalTable.vue";
 import axiosInstance from "../../shared/services/interceptor";
-import { apis, doctypes } from "../../shared/apiurls";
-import { onMounted, ref, reactive, computed, watch } from "vue";
+import { apis } from "../../shared/apiurls";
+import {  ref,  computed, watch } from "vue";
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
 import PaginationComp from "../../Components/PaginationComp.vue";
-import { rebuildToStructuredArray } from "../../shared/services/field_format";
-// import ApproverPreview from "../../Components/ApproverPreview.vue";
-import { toast } from "vue3-toastify";
-import "vue3-toastify/dist/index.css";
 import { useRoute, useRouter } from "vue-router";
 const router = useRouter();
 const route = useRoute();
-
 const businessUnit = computed(() => {
   return EzyBusinessUnit.value;
 });
 const newBusinessUnit = ref({ business_unit: "" });
-
 const filterObj = ref({ limitPageLength: 20, limit_start: 0, filters: [] });
 const totalRecords = ref(0);
-const idDta = ref([]);
-const docTypeName = ref([]);
-const statusOptions = ref([]);
-const emittedFormData = ref([]);
-const selectedcurrentLevel = ref("");
-const activityData = ref([]);
-const responseData = ref([]);
-const ViewOnlyReportee = ref(false);
+const limit = ref(20);
+const limitStart = ref(0);
 const filteredData = ref([]); 
 const tableheaders = ref([
   { th: "Request ID", td_key: "name" },
@@ -85,7 +68,6 @@ function ViewOnlyReport() {
     .get(apis.GetEmployeeForms, { params: queryParams })
     .then((response) => {
       fullData.value = response.message || [];
-
       // Initially filteredData = fullData
       filteredData.value = [...fullData.value];
 
@@ -99,8 +81,6 @@ function ViewOnlyReport() {
 }
 
 
-const limit = ref(20);
-const limitStart = ref(0);
 
 function paginateData(filtered = fullData.value) {
   const paginated = filtered.slice(limitStart.value, limitStart.value + limit.value);
@@ -138,9 +118,7 @@ function PaginationUpdateValue(newLimit) {
 
 function PaginationLimitStart() {
   limitStart.value += limit.value;
-
   const nextBatch = filteredData.value.slice(limitStart.value, limitStart.value + limit.value);
-
   tableData.value = [...tableData.value, ...nextBatch];
 }
 
@@ -181,16 +159,10 @@ function viewPreview(data, index, type) {
 
 
 const fieldMapping = computed(() => ({
-  // invoice_type: { type: "select", options: ["B2B", "B2G", "B2C"] },
-  // credit_irn_generated: { type: "select", options: ["Pending", "Completed", "Error"] },
-  // role: { type: "input" },
   name: { type: "input" },
   requester_name: { type: "input" },
   department_name: { type: "input" },
-
-
   status: { type: "select", options: ["In Progress", "Completed", "Request Cancelled"] },
-
 }));
 
 
