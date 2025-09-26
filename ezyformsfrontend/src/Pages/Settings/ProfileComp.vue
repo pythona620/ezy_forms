@@ -157,7 +157,6 @@ function uploadImage(event) {
 //         });
 // }
 function userDetails(empEmail) {
-  console.log(empEmail);
  
 
 
