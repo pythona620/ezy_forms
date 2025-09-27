@@ -15,11 +15,19 @@ def sending_mail_api(request_id, doctype_name, property, cluster, reason, timest
 		property=property,
 		cluster=cluster,
 		reason=reason,
+		now = True,
 		timestamp= timestamp,
 		skip_user_role = skip_user_role
 	)
 def send_notifications(request_id, doctype_name, property, cluster, reason, timestamp,skip_user_role=None):
 	"""Send email notifications to relevant users"""
+	email_accounts = frappe.get_all(
+		"Email Account",
+		filters={"enable_outgoing": 1, "default_outgoing": 1}
+	)
+	
+	if not email_accounts:
+		return
 	request_id_document = frappe.get_all(doctype_name, filters={"wf_generated_request_id": request_id}, fields=["name"])
 	attach_down = []
 	file_down = ''
@@ -36,16 +44,8 @@ def send_notifications(request_id, doctype_name, property, cluster, reason, time
 					"fcontent": f.read()
 				})
 	try:
-		# Check if email account is configured
-		email_accounts = frappe.get_all(
-			"Email Account",
-			filters={"enable_outgoing": 1, "default_outgoing": 1}
-		)
-		
-		if not email_accounts:
-			return
-		
-		# Get assigned users
+     
+     
 		assigned_users = frappe.get_value("WF Workflow Requests", request_id, "assigned_to_users") if not skip_user_role else [skip_user_role]
 		
 		requested_by = frappe.get_value("WF Workflow Requests", request_id, "requested_by")
@@ -54,28 +54,39 @@ def send_notifications(request_id, doctype_name, property, cluster, reason, time
    
 		else:
 			assigned_users = assigned_users
-		
-	
-		# Get user emails based on property/cluster
-		user_emails = []
-	
-		user_emails = frappe.get_all(
-			"Ezy Employee",
-			filters={"designation": ["in", assigned_users], "company_field": property,'enable': 1},
-			fields=["name"],
-			pluck="name"
-		)
+		# Fetch roadmap and current level
+		roadmap = frappe.get_doc("WF Roadmap", {"property": property, "document_type": doctype_name}).as_dict()
+		if not roadmap:
+			return "No Roadmap Founded"
+		current_level = int(frappe.get_value("WF Workflow Requests", request_id, "current_level"))
 
-		
-		
-		# Add current user to email list
+		# Precompute level setup for current level
+		level_setup = [i for i in roadmap.wf_level_setup if int(i.level) == current_level]
+
+		# Identify approver and requester roles
+		approver_level = [i.role for i in level_setup if int(i.view_only_reportee) == 1]
+		requester_to_level = [i.role for i in level_setup if int(i.requester_as_a_approver) == 1]
+
+		# Get user emails based on property/cluster
+		if  requester_to_level:
+			user_emails = [requested_by]
+		elif approver_level:
+			user_emails = [frappe.db.get_value("Ezy Employee", requested_by, "reporting_to")]
+   
+		else:
+			user_emails = frappe.get_all(
+				"Ezy Employee",
+				filters={"designation": ["in", assigned_users], "company_field": property, "enable": 1},
+				fields=["name"],
+				pluck="name"
+			)
 		user_emails.append(requested_by)
+		user_emails = list(set(user_emails))
 		# Get user details
 		user_name = frappe.get_value("User", frappe.get_value("WF Workflow Requests", request_id, "requested_by"), "full_name")
 
 		user_role = frappe.get_value("Ezy Employee",frappe.get_value("WF Workflow Requests", request_id, "requested_by"),"designation")
 		
-		user_emails = list(set(user_emails))
 		# Send emails
 		if email_accounts:
 			for email in user_emails:
