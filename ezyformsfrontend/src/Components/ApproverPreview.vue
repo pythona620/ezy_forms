@@ -121,7 +121,7 @@
                               <div class="row">
                                 <template v-for="(option, index) in field?.options?.split('\n')">
                                   <div v-if="(JSON.parse(field.value || '[]') || []).includes(option)" :key="index"
-                                    class=" col-12 col-sm-6 col-md-4   mb-2">
+                                    class=" col-lg-12 col-sm-6 col-md-4   mb-2">
                                     <div class="form-check">
                                       <input class="form-check-input" type="checkbox" :checked="true" :disabled="true"
                                         :id="`${option}-${index}`" />
