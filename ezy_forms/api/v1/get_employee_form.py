@@ -5,7 +5,7 @@ from frappe import _
 
 
 @frappe.whitelist(methods=["GET"])
-def my_team():
+def my_team(property_field):
     try:
         user = frappe.session.user
 
@@ -15,7 +15,7 @@ def my_team():
 
         # Get current employee record
         employee_id = frappe.db.get_value(
-            "Ezy Employee", {"emp_mail_id": user}, "name"
+            "Ezy Employee", {"emp_mail_id": user,"company_field":property_field}, "name"
         )
         if not employee_id:
             return []
@@ -23,7 +23,8 @@ def my_team():
         # Fetch all employees (only once)
         all_employees = DatabaseQuery(
             "Ezy Employee").execute(
-            fields=["name", "reporting_to"]
+            fields=["name", "reporting_to"],
+            filters={"company_field":property_field}
         )
 
         # Build mapping: manager → list of reports
@@ -66,7 +67,7 @@ def get_employee_forms(property_field, employee=None, requested_by_me=False, app
         filters["department"] = department
 
     is_admin = frappe.db.get_value("Ezy Employee", frappe.session.user, "is_admin")
-    all_employees = my_team()
+    all_employees = my_team(property_field=property_field)
 
     if not is_admin and all_employees:
         filters["requested_by"] = ["in", all_employees]
@@ -85,11 +86,11 @@ def get_employee_forms(property_field, employee=None, requested_by_me=False, app
         approved_parent_names = list(set([c["parent"] for c in approved_parents]))
         if not approved_parent_names:
             return []
-        filters = {"name": ["in", approved_parent_names]}
+        filters ["name"]= ["in", approved_parent_names]
 
     # Filter by requests made by the user
     if requested_by_me and employee:
-        filters = {"requested_by": employee}
+        filters ["requested_by"]= employee
 
     if not filters:
         return []

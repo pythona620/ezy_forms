@@ -476,11 +476,34 @@ def enqueued_add_customized_fields_for_dynamic_doc(fields: List[Dict[str, Any]],
             
             for field in fields:
                 fieldname = field["fieldname"]
-                
-                if fieldname in existing_fieldnames:
-                    _update_existing_field(fieldname, doctype, field)
+                # try to find existing field
+                existing_df = next((df for df in doc.fields if df.fieldname == fieldname), None)
+                options_value = (
+                    field.get("options") if isinstance(field.get("options"), str)
+                    else "\n".join(field.get("options", []))
+                )
+
+                if existing_df:
+                    # update existing
+                    existing_df.options = options_value
+                    existing_df.description = field.get("description")
+                    existing_df.fieldtype = field.get("fieldtype")
+                    existing_df.idx = field.get("idx")
+                    existing_df.label = field.get("label")
+                    existing_df.reqd = field.get("reqd")
+                    existing_df.default = field.get("value")  # 'value' maps to 'default'
                 else:
-                    doc.append("fields", field)
+                    # append new
+                    doc.append("fields", {
+                        "description": field.get("description"),
+                        "fieldname": fieldname,
+                        "fieldtype": field.get("fieldtype"),
+                        "idx": field.get("idx"),
+                        "options": options_value,
+                        "label": field.get("label"),
+                        "reqd": field.get("reqd"),
+                        "default": field.get("value")
+                    })
 
             doc.save(ignore_permissions=True)
             bench_migrating_from_code()

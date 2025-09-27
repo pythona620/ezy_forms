@@ -51,7 +51,7 @@ def pick_view_only_reportee():
                     "assigned_to_users": ["like", f"%'{designation}'%"],
                     "current_level":parent['level']
                 })
-            requests = frappe.db.get_all("WF Workflow Requests", filters=dynamic_filter, pluck="name")
+            requests = DatabaseQuery("WF Workflow Requests").execute( filters=dynamic_filter, pluck="name")
             matched_requests.extend(requests)
             
         return matched_requests
