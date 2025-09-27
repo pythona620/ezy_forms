@@ -72,6 +72,38 @@
         </div>
       </div>
     </div>
+
+    <div v-if="reportingData.length">
+      <h6 class="font-16 my-3 ms-2">My Team</h6>
+      <div class="container-fluid p-0">
+        <div class="row">
+          <div class="col-lg-4 col-md-6 col-sm-12 mb-3" v-for="(employee, index) in reportingData" :key="index">
+            <div class="card p-3 shadow-sm team-card">
+              <div class="d-flex align-items-center">
+                <!-- Profile Image -->
+                <img :src="employee.profile_image || defaultImage" class="rounded-circle me-3" alt="Profile Image"
+                  width="80" height="80" />
+
+                <div>
+                  <h5 class="mb-0 font-14">{{ employee.emp_name }}</h5>
+                  <p class="paragraph-txt mb-2">{{ employee.emp_code || "-"}}</p>
+                  <p class="paragraph-txt">
+                    <strong class="text-secondary">Designation :</strong> {{ employee.designation }}
+                  </p>
+                  <p class="paragraph-txt">
+                    <strong class="text-secondary">Department :</strong> {{ employee.department }}
+                  </p>
+                  <p class="paragraph-txt">
+                    <strong class="text-secondary">Email :</strong> {{ employee.emp_mail_id }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -92,7 +124,7 @@ const userData = ref([])
 
 const fileInput = ref(null);
 const uploadType = ref('');
-
+const reportingData = ref("");
 
 function triggerFileInput(type) {
     uploadType.value = type; // 'profile' or 'signature'
@@ -157,15 +189,12 @@ function uploadImage(event) {
 //         });
 // }
 function userDetails(empEmail) {
- 
-
-
   const queryParams = {
     fields: JSON.stringify(["acknowledge_on","company_field","department","designation","emp_code","emp_mail_id",
     "emp_name","emp_phone","name","profile_image","reporting_designation","reporting_to","signature"]),
     doctype:doctypes.EzyEmployeeList,
     filters: JSON.stringify([["Ezy Employee","emp_mail_id","=",empEmail]]),
-    
+
     order_by: "`tabEzy Employee`.`enable` DESC, `tabEzy Employee`.`modified` DESC",
   };
 
@@ -173,12 +202,34 @@ function userDetails(empEmail) {
   axiosInstance.get(apis.GetDoctypeData, { params: queryParams })
     .then((res) => {
       if (res.message.data) {
-        console.log(res.message.data);
         userData.value = res.message.data[0] || {};
+          fetchReportingToData()
       }
     })
     .catch((error) => {
       console.error("Error fetching department data:", error);
+    });
+}
+
+function fetchReportingToData() {
+  const filters = {
+    reporting_to: userData.value.emp_mail_id,
+  };
+
+  const queryParams = {
+    filters: JSON.stringify(filters),
+    limit_page_length: "none",
+    doctype:doctypes.EzyEmployeeList,
+    fields: JSON.stringify(["profile_image","name","department","designation","emp_code","emp_mail_id","emp_name"]),
+  };
+
+  axiosInstance
+    .get(`${apis.GetDoctypeData}`, { params: queryParams })
+    .then((res) => {
+      reportingData.value = res.message.data; // make sure `data.data` is correct
+    })
+    .catch((error) => {
+      console.error("Error fetching user data:", error);
     });
 }
 
@@ -313,5 +364,12 @@ span {
 .upload-sign-btn:hover {
   background-color: #e9ecef;
 }
+.team-card:hover{
+  box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px;
+}
 
+.paragraph-txt{
+  font-size: 13px;
+  margin: 0px;
+}
 </style>
