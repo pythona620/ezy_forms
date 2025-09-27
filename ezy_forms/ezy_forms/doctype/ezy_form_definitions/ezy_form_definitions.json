@@ -26,7 +26,8 @@
   "workflow_check",
   "is_predefined_doctype",
   "is_linked",
-  "is_linked_form"
+  "is_linked_form",
+  "report_fields"
  ],
  "fields": [
   {
@@ -149,18 +150,23 @@
    "in_list_view": 1,
    "label": "Form Department",
    "options": "Ezy Departments"
+  },
+  {
+   "fieldname": "report_fields",
+   "fieldtype": "Long Text",
+   "label": "Report Fields"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-07-21 11:15:28.746877",
+ "modified": "2025-09-27 11:06:21.746037",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
  "name": "Ezy Form Definitions",
  "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
- {
+  {
    "create": 1,
    "delete": 1,
    "email": 1,
