@@ -319,7 +319,7 @@ def process_individual_requests(ids, doctype_name, doctype_field, property, clus
 	
 	# Send notifications
 									
-	sending_mail_api(request_id=request_id, doctype_name=doctype_name,property= property,cluster= cluster,reason= reason,timestamp= timestamp,skip_user_role= None )
+	sending_mail_api(request_id=request_id, doctype_name=doctype_name,property= property,cluster= cluster,reason= reason,timestamp= timestamp,skip_user_role= None,user=None )
 	
 	return {"success": True, "message": reason or 'Request Raised', "request_ids": request_id}
 
@@ -364,7 +364,7 @@ def process_bulk_request(ids, doctype_name, doctype_field, property, cluster,
 	frappe.db.commit()
 	
 	# Send notifications
-	sending_mail_api(request_id=request_id, doctype_name=doctype_name,property= property,cluster= cluster,reason= reason,timestamp= timestamp,skip_user_role= None )
+	sending_mail_api(request_id=request_id, doctype_name=doctype_name,property= property,cluster= cluster,reason= reason,timestamp= timestamp,skip_user_role= None,user=None )
 	
 	return {"success": True, "message": reason or 'Request Raised', "request_id": request_id}
 
@@ -588,7 +588,7 @@ def todo_tab(document_type, request_id, property=None, cluster_name=None, curren
 						workflow_requests.save()
 						workflow_requests.reload()	
 						frappe.db.commit()
-						sending_mail_api(request_id=request_id, doctype_name=document_type,property= property,cluster= cluster_name,reason= "Auto Approved by the system",timestamp= my_time,skip_user_role= match_role )
+						sending_mail_api(request_id=request_id, doctype_name=document_type,property= property,cluster= cluster_name,reason= "Auto Approved by the system",timestamp= my_time,skip_user_role= match_role,user = match_role_user )
 				picking_remaining_roles_for_approval = [remaining_role["role"]  for remaining_role in approvals_reasons  if int(remaining_role["level"]) == int(current_level) and not remaining_role["action"].strip() and not remaining_role["user"].strip() ]
 			else:
 				picking_remaining_roles_for_approval = [remaining_role["role"]  for remaining_role in approvals_reasons  if int(remaining_role["level"]) == int(current_level) and not remaining_role["action"].strip() and not remaining_role["user"].strip() ]
@@ -619,7 +619,7 @@ def todo_tab(document_type, request_id, property=None, cluster_name=None, curren
 				workflow_requests.save()
 				workflow_requests.reload()
 				frappe.db.commit()
-				sending_mail_api(request_id=request_id, doctype_name=document_type,property= property,cluster= cluster_name,reason= "Auto Approved by the system",timestamp= my_time,skip_user_role= current_user_role )
+				sending_mail_api(request_id=request_id, doctype_name=document_type,property= property,cluster= cluster_name,reason= "Auto Approved by the system",timestamp= my_time,skip_user_role= current_user_role,user = frappe.session.user )
 			# Find the next level's approver role(s)
 			picking_remaining_roles_for_approval = [remaining_role["role"] for remaining_role in approvals_reasons if int(remaining_role["level"]) == int(current_level) and not remaining_role["action"].strip() and not remaining_role["user"].strip()]
 			

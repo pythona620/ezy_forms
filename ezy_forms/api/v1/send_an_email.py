@@ -6,7 +6,7 @@ from ezy_forms.ezy_forms.doctype.ezy_form_definitions.dynamic_form_template impo
 from ezy_forms.api.v1.mail_message_html import preview_dynamic_form
 from frappe.utils import add_to_date,get_url
 
-def sending_mail_api(request_id, doctype_name, property, cluster, reason, timestamp,skip_user_role=None):
+def sending_mail_api(request_id, doctype_name, property, cluster, reason, timestamp,skip_user_role=None,user=None):
 	frappe.enqueue('ezy_forms.api.v1.send_an_email.send_notifications',
 		queue='default',
 		timeout=300,
@@ -15,11 +15,11 @@ def sending_mail_api(request_id, doctype_name, property, cluster, reason, timest
 		property=property,
 		cluster=cluster,
 		reason=reason,
-		now = True,
 		timestamp= timestamp,
-		skip_user_role = skip_user_role
+		skip_user_role = skip_user_role,
+		user=user
 	)
-def send_notifications(request_id, doctype_name, property, cluster, reason, timestamp,skip_user_role=None):
+def send_notifications(request_id, doctype_name, property, cluster, reason, timestamp,skip_user_role=None,user=None):
 	"""Send email notifications to relevant users"""
 	email_accounts = frappe.get_all(
 		"Email Account",
@@ -74,12 +74,7 @@ def send_notifications(request_id, doctype_name, property, cluster, reason, time
 			user_emails = [frappe.db.get_value("Ezy Employee", requested_by, "reporting_to")]
    
 		else:
-			user_emails = frappe.get_all(
-				"Ezy Employee",
-				filters={"designation": ["in", assigned_users], "company_field": property, "enable": 1},
-				fields=["name"],
-				pluck="name"
-			)
+			user_emails = frappe.get_all("Ezy Employee",filters={"designation": ["in", assigned_users], "company_field": property, "enable": 1},fields=["name"],pluck="name") if not user else [user]
 		user_emails.append(requested_by)
 		user_emails = list(set(user_emails))
 		# Get user details

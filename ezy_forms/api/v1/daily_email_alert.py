@@ -72,14 +72,12 @@ def send_daily_alerts():
                 message = frappe.render_template(email_template.response_html, context)
                 # Assuming this is your internal email sending method
                 frappe.enqueue(
-                    sending_mail_api,
-                    queue='default',
-                    timeout=300,
-                    email_template_for_requested_status=message,
-                    each_one_mail=to_email,
+                    method=frappe.sendmail,
+                    queue="default",
+                    timeout=300,   # optional, in seconds
+                    recipients=[to_email],
                     subject=subject,
-                    message=message,
-                    attachments=None
+                    message=message
                 )
 
     return "Emails sent successfully."
