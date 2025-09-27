@@ -343,6 +343,7 @@ function actionClickedDropDown(row) {
 
 //   return baseActions
 // })
+const reportShortCode = ref('');
 function actionCreated(rowData, actionEvent) {
   if (actionEvent.name === 'View form') {
     if (rowData) {
@@ -456,35 +457,75 @@ function actionCreated(rowData, actionEvent) {
   if (actionEvent.name === 'In-active this form') {
     toggleFunction(rowData, null, null);
   }
-  // if (actionEvent.name === 'Create Report') {
-  //     let fields = JSON.parse(rowData?.form_json).fields || [];
+if (actionEvent.name === 'Create Report') {
+  console.log(rowData, "rowData");
 
-  // // filter valid fields and add a `selected` flag
-  // reportFields.value = fields
-  //   .filter(f => f.label && f.fieldtype !== "Column Break" && f.fieldtype !== "Section Break")
-  //   .map(f => ({ ...f, selected: false }));
-  //   const modal = new bootstrap.Modal(document.getElementById('reportmodal'), {});
-  //   modal.show();
-  // }
+  // Store document name for PUT request
+  reportShortCode.value = rowData.name;
+
+  // Parse all available fields from form_json
+  const fields = JSON.parse(rowData?.form_json)?.fields || [];
+
+  // Convert saved report_fields string into an array of fieldnames
+  let alreadySelected = [];
+  if (rowData.report_fields) {
+    alreadySelected = rowData.report_fields
+      .split(",")
+      .map(item => item.trim().split(" as ")[0]); // ["requested_by", "requested_on", "file_one"]
+  }
+
+  // Filter valid fields and mark them as selected if previously saved
+  reportFields.value = fields
+    .filter(f => f.label && f.fieldtype !== "Column Break" && f.fieldtype !== "Section Break")
+    .map(f => ({
+      ...f,
+      selected: alreadySelected.includes(f.fieldname) // pre-check
+    }));
+
+  // Open the modal
+  const modal = new bootstrap.Modal(document.getElementById("reportmodal"), {});
+  modal.show();
 }
-// async function generateReport() {
-//   // collect only selected fields
-//   const selectedFields = reportFields.value
-//     .filter(f => f.selected)
-//     .map(f => `${f.fieldname} as '${f.label}'`);
 
-//   const payload = selectedFields.join(","); // comma separated string
-//   console.log(payload,"payload");
+}
+async function generateReport() {
+  // collect only selected fields
+  // collect selected fields
+  const selectedFields = reportFields.value
+    .filter(f => f.selected)
+    .map(f => `${f.fieldname} as '${f.label}'`);
 
-//   try {
-//     const response = await axiosInstance.post("/your-endpoint", {
-//       fields: payload,
-//     });
-//     console.log("Report generated:", response.data);
-//   } catch (err) {
-//     console.error("Error generating report:", err);
-//   }
-// }
+  const payload = selectedFields.join(","); // comma separated string
+
+  const data = {};
+  if (payload) {
+    data.report_fields = payload;
+  }
+
+  try {
+    const response = await axiosInstance.put(
+      apis.resource + doctypes.EzyFormDefinitions + `/${reportShortCode.value}`,
+      data
+    );
+
+    console.log("Report fields updated:", response.data);
+
+    // close modal
+    const modal = bootstrap.Modal.getInstance(document.getElementById('reportmodal'));
+    if (modal) modal.hide();
+
+    // show success toast
+    toast.success("Report Fields Updated Successfully", {
+      autoClose: 1000,
+      transition: "zoom",
+    });
+  } catch (error) {
+    console.error("Error updating report fields:", error);
+    toast.error("Failed to update report fields", { autoClose: 1500 });
+  }
+   
+}
+
 
 function downloadPdf() {
 
@@ -682,7 +723,8 @@ function fetchDepartmentDetails(data) {
               "is_linked",
               "is_linked_form",
               "form_department",
-              "series"
+              "series",
+              "report_fields"
 ]),
     limit_page_length: filterObj.value.limitPageLength,
     limit_start: filterObj.value.limit_start,

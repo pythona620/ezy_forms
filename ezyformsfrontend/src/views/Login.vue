@@ -1123,7 +1123,7 @@ export default {
                 localStorage.setItem("USERROLE", JSON.stringify(filteredEmployeeData.designation));
                 sessionStorage.setItem("USERROLE", JSON.stringify(filteredEmployeeData.designation));
 
-                toast.success("Login successfull", { autoClose: 2000 });
+                toast.success("Login successfull", { autoClose: 2000, pauseOnFocusLoss: false ,pauseOnHover: false});
 
                 setTimeout(() => {
                   this.$router.push({ path: "/dashboard/maindash" });

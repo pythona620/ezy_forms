@@ -77,7 +77,7 @@
                 <div v-if="selectedData.type === 'mytasks'" class="">
 
                   <!-- v-if="!requestcancelled" -->
-                  <div class="approveBtns pb-2 mb-2 mt-3 flex-column ">
+                  <div class="approveBtns pb-2 mb-2 mt-3 flex-column">
                     <!-- <div v-if="!canApprove & view_only_reportee === 1" class=" d-flex align-items-center gap-1">
 
                       <span class=" font-12 text-danger">
@@ -88,13 +88,28 @@
                     </div> -->
 
                     <div class="form-floating mb-2 p-1">
-                      <!-- :disabled="view_only_reportee === 1" -->
-                      <textarea class="form-control font-12" placeholder="Leave a comment here" id="floatingTextarea"
-                        @input="resetCommentsValidation" :class="{ 'is-invalid': !isCommentsValid }"
-                        v-model="ApproverReason"></textarea>
+                      <textarea 
+                        class="form-control font-12" 
+                        placeholder="Leave a comment here" 
+                        id="floatingTextarea"
+                        @input="resetCommentsValidation" 
+                        :class="{ 'is-invalid': !isCommentsValid }"
+                        v-model="ApproverReason"
+                        maxlength="140"   
+                      ></textarea>
                       <label class="font-11" for="floatingTextarea">Comments..</label>
-                      <span v-if="!isCommentsValid" class="font-11 text-danger ps-1">Please enter comments**</span>
+
+                      <!-- Validation error -->
+                      <span v-if="!isCommentsValid" class="font-11 text-danger ps-1">
+                        Please enter comments**
+                      </span>
+
+                      <!-- Character counter -->
+                      <span class="font-10 text-muted ps-1">
+                        {{ ApproverReason.length }}/140
+                      </span>
                     </div>
+
                     <div class=" d-flex justify-content-between ">
                       <div>
                         <button :disabled="rejectLoad" class="btn btn-outline-danger font-10 py-0 rejectbtn"
@@ -839,10 +854,13 @@ const linkedActivity = ref([]);
 const isFormValid = ref(false);
 const isAcknowledgementValid = ref(false);
 const resetCommentsValidation = () => {
-  if (ApproverReason.value.trim() !== "") {
-    // If comment is not empty, set isCommentsValid to true
+  // Trim whitespace and validate
+  if (ApproverReason.value.trim() !== "" && ApproverReason.value.length <= 140) {
     isCommentsValid.value = true;
-  }
+  } 
+  // else {
+  //   isCommentsValid.value = false;
+  // }
 };
 function formatCreation(dateStr) {
   const [datePart, timePart] = dateStr.split(' ');
