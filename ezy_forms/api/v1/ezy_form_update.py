@@ -71,7 +71,7 @@ def edit_the_form_before_approve(document_type,property,form_id,updated_fields,s
         doc.reload()
         frappe.db.commit()
         sending_mail_api(request_id=form_id, doctype_name=doctype_name, property=property, cluster=None, reason="Request Updated", timestamp=my_time,skip_user_role= None)
-        return {"success":True, "message":"edit form Succesfully Updated"}
+        return {"success":True, "message":"Form updated successfully."}
        
     except Exception as e:
         exc_type,exc_obj, exc_tb = sys.exc_info()
