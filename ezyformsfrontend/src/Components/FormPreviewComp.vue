@@ -40,6 +40,7 @@
         </div> -->
 
         <div class="container card form-containe-div border-0 mt-4">
+            
             <div v-for="(blockItem, blockIndex) in displayedBlocks" :key="blockIndex">
                 <div class="d-flex align-items-center justify-content-end me-2">
                     <span class="font-12 px-2 py-1" v-if="workFlowRoles[blockIndex]?.roles.length > 0">
@@ -49,7 +50,32 @@
                                 : `Approver ${blockIndex}
                         `
                         }}: <b>{{ workFlowRoles[blockIndex].roles.join(", ") }}</b>
+                        
                     </span>
+                    
+                </div>
+                <div class="d-flex justify-content-end">
+                    <span v-if="blockIndex !== 0" class="workflow-conditions d-flex flex-wrap align-items-center gap-1">
+                             <!-- Approver types -->
+                            <span v-if="workFlowRoles[blockIndex].view_only_reportee" class="approver-type">
+                            View only reportee
+                            </span>
+                            <span v-if="workFlowRoles[blockIndex].all_approvals_required" class="approver-type">
+                            All approvers required
+                            </span>
+                            <span v-if="workFlowRoles[blockIndex].requester_as_a_approver" class="approver-type">
+                            Requested only
+                            </span>
+
+
+                            <!-- On rejection escalation -->
+                            <span class="ms-1">
+                                on rejection escalating to 
+                                <b class="text-danger">
+                                {{ workFlowRoles[blockIndex].on_rejection ? `Level ${workFlowRoles[blockIndex].on_rejection}` : 'Requestor' }}
+                                </b>
+                            </span>
+                        </span>
                 </div>
                 <div v-for="(section, sectionIndex) in blockItem.sections" :key="'preview-' + sectionIndex"
                     class="preview-section">
@@ -239,7 +265,7 @@ const workFlowRoles = ref([]);
 
 const businessUnit = computed(() => EzyBusinessUnit.value);
 const newBusinessUnit = ref({ business_unit: '' });
-
+const workflowConitions = ref([]);
 
 const selectedData = ref({
     business_unit: route.query.business_unit || "", // Retrieve from query
@@ -263,6 +289,7 @@ const props = defineProps({
 });
 
 onMounted(() => {
+    console.log(props.blockArr, "props.blockArr");
     fetchDepartmentDetails();
     // if(!route.query.id){
 
@@ -295,6 +322,9 @@ function fetchDepartmentDetails() {
             childtableHeaders.value = JSON.parse(
                 formDescriptions.value.form_json
             ).child_table_fields;
+            workflowConitions.value = JSON.parse(
+                formDescriptions.value.form_json
+            ).workflow;
 
 
 
@@ -378,32 +408,46 @@ function setView(view) {
     updateWorkFlowRoles();
 }
 function updateWorkFlowRoles() {
-    let approverIndex = 0; // Keep track of approvers
+  let approverIndex = 0; // Keep track of approvers
 
+  workFlowRoles.value = displayedBlocks.value.map((block) => {
+    let roles = [];
+    let workflowConditions = {
+      view_only_reportee: 0,
+      all_approvals_required: 0,
+      requester_as_a_approver: 0,
+      on_rejection: null
+    };
 
-    workFlowRoles.value = displayedBlocks.value.map((block) => {
-        let roles = [];
+    if (block.fieldname === "requestor") {
+      // ✅ Find requestor roles
+      const requestorWorkflow = workflowData.value.find(wf => wf.type === "requestor");
+      roles = requestorWorkflow ? requestorWorkflow.roles : [];
+      // No extra conditions for requestor
+    } else if (block.label.startsWith("approver-")) {
+      // ✅ Get all approvers
+      const approverWorkflow = workflowData.value.filter(wf => wf.type === "approver");
 
-        if (block.fieldname === "requestor") {
-            // ✅ Find requestor roles
-            const requestorWorkflow = workflowData.value.find(wf => wf.type === "requestor");
-            roles = requestorWorkflow ? requestorWorkflow.roles : [];
-        } else if (block.label.startsWith("approver-")) {
-            // ✅ Get all approvers
-            const approverWorkflow = workflowData.value.filter(wf => wf.type === "approver");
+      if (approverWorkflow[approverIndex]) {
+        roles = approverWorkflow[approverIndex].roles || [];
 
-            // ✅ Assign correct role (removes `-1` mistake)
-            if (approverWorkflow[approverIndex]) {
-                roles = approverWorkflow[approverIndex].roles || [];
-            }
+        // Assign workflow conditions
+        workflowConditions.view_only_reportee = approverWorkflow[approverIndex].view_only_reportee || 0;
+        workflowConditions.all_approvals_required = approverWorkflow[approverIndex].all_approvals_required || 0;
+        workflowConditions.requester_as_a_approver = approverWorkflow[approverIndex].requester_as_a_approver || 0;
+        workflowConditions.on_rejection = approverWorkflow[approverIndex].on_rejection || null;
+      }
 
-            approverIndex++; // Move to the next approver
-        }
+      approverIndex++; // Move to the next approver
+    }
 
-        return { roles };
-    });
-
+    return {
+      roles,
+      ...workflowConditions
+    };
+  });
 }
+
 
 
 //  Filter blocks based on the view
@@ -560,7 +604,25 @@ const getFieldComponent = (type) => {
 </script>
 
 
-<style scoped>
+<style lang="scss" scoped>
+.workflow-conditions {
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+
+.approver-type {
+  border: 1px solid #BAFFC2;
+  border-radius: 6px;
+  padding: 2px 4px;
+  color: #00C917;
+  background-color: #EAFFED;
+  font-size: 12px;
+  display: inline-block;
+/* spacing between badges */
+}
+
+
 .previewInputHeight {
     /* height: 35px; */
     margin-bottom: 5px;

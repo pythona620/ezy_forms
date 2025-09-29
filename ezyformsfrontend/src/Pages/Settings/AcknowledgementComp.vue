@@ -97,6 +97,7 @@ import "@vueform/multiselect/themes/default.css";
 import { QuillEditor } from '@vueup/vue-quill';
 // Quill styles (needed for toolbar, fonts, etc.)
 import '@vueup/vue-quill/dist/vue-quill.snow.css'
+import { showError, showSuccess } from '../../shared/services/toast';
 
 const totalRecords = ref(0);
 const departmenCodeData = ref([]);
@@ -149,7 +150,7 @@ function UpdateAcknowledgement(){
         .put(`${apis.DataUpdate}/${acknowledgementData.value.name}`, updatedData)
         .then((response) => {
             if (response.message.success==true) {
-                toast.success(`acknowledgement Updated successfully`, { autoClose: 700 });
+                showSuccess(`acknowledgement Updated successfully`);
                 activitylog()
                 const modal = bootstrap.Modal.getInstance(
                     document.getElementById("AcknowledgementModal")
@@ -157,7 +158,7 @@ function UpdateAcknowledgement(){
                 modal.hide();
             }
             if (response.message.success==false) {  
-                toast.error(response.message.message)
+                showError(response.message.message)
             }
 
         })
@@ -209,7 +210,7 @@ function toggleFunction(rowData) {
         .put(`${apis.resource}${doctypes.acknowledgement}/${selectedEmpRow.value.name}`, selectedEmpRow.value)
         .then((response) => {
             if (response.data) {
-                toast.success(`acknowledgement ${empActionText.value}d successfully`, { autoClose: 700 });
+                showSuccess(`acknowledgement ${empActionText.value}d successfully`);
                 activitylog()
             }
 

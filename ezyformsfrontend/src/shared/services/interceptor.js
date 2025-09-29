@@ -1,7 +1,6 @@
 import axios from "axios";
 import { loadValue } from "../../Components/loader/loader";
-import { toast } from "vue3-toastify";
-
+import { showError } from "./toast";
 const axiosInstance = axios.create();
 axiosInstance.interceptors.request.use(
   (config) => {
@@ -10,7 +9,7 @@ axiosInstance.interceptors.request.use(
   },
   (error) => {
     loadValue.value = false;
-    toast.error("Request error: " + (error.message || "Unknown error"));
+    showError("Request error: " + (error.message || "Unknown error"));
     return Promise.reject(error);
   }
 );
@@ -35,43 +34,43 @@ axiosInstance.interceptors.response.use(
           messages.forEach((msg) => {
             const parsed = JSON.parse(msg);
             let message = parsed.message?.replace(/\s*\(.*?\)\s*/g, "").trim();
-            toast.error(message || "Server error", { transition: "zoom" });
+            showError(message || "Server error", { transition: "zoom" });
           });
         }
       } catch (e) {
-        toast.error("Failed to parse server messages", { transition: "zoom" });
+        showError("Failed to parse server messages", { transition: "zoom" });
       }
     };
 
     if (error.response) {
       switch (status) {
         case 400:
-          toast.error("Bad Request", { transition: "zoom" });
+          showError("Bad Request", { transition: "zoom" });
           break;
         case 401:
-          toast.error(error.response.data?.message || "Unauthorized", { transition: "zoom" });
+          showError(error.response.data?.message || "Unauthorized", { transition: "zoom" });
           break;
         case 403:
-          toast.error(error.response.data?.exc_type || "Forbidden", { transition: "zoom" });
+          showError(error.response.data?.exc_type || "Forbidden", { transition: "zoom" });
           break;
         case 404:
         case 417:
           showServerMessages(error.response.data);
           break;
         case 409:
-          toast.error("Conflict: The data already exists.");
+          showError("Conflict: The data already exists.");
           break;
         case 500:
-          toast.error(error.response.data?.exception || "Internal Server Error", { transition: "zoom" });
+          showError(error.response.data?.exception || "Internal Server Error", { transition: "zoom" });
           break;
         default:
-          toast.error(`${status}: ${statusText}`, { transition: "zoom" });
+          showError(`${status}: ${statusText}`, { transition: "zoom" });
           break;
       }
     } else if (error.request) {
-      toast.error("No response received: Please check your network connection", { transition: "zoom" });
+      showError("No response received: Please check your network connection", { transition: "zoom" });
     } else {
-      toast.error((error.message || "Unknown error"), { transition: "zoom" });
+      showError((error.message || "Unknown error"), { transition: "zoom" });
     }
 
     return Promise.reject(error);

@@ -404,13 +404,13 @@ import { apis, doctypes } from "../shared/apiurls";
 import axiosInstance from "../shared/services/interceptor";
 import FormFields from "../Components/FormFields.vue";
 import ButtonComp from '../Components/ButtonComp.vue'
-import { toast } from "vue3-toastify";
-import "vue3-toastify/dist/index.css";
+// import { toast } from "vue3-toastify";
+// import "vue3-toastify/dist/index.css";
 import { nextTick } from "vue";
 import Vue3Select from 'vue3-select'
 import 'vue3-select/dist/vue3-select.css';
 import DigitalSignature from '../views/DigitalSignature.vue';
-
+import { showSuccess, showError } from "../shared/services/toast";
 export default {
   props: ["id"],
   components: {
@@ -769,7 +769,7 @@ export default {
               const messages = JSON.parse(res._server_messages);
               const messageObj = JSON.parse(messages[0]);
               if (messageObj.message) {
-                toast.success(messageObj.message);
+                showSuccess(messageObj.message);
                 this.forgotPasswordMail = "";
                 this.ShowLoginPage = true;
                 this.showOtpPage = false;
@@ -795,16 +795,16 @@ export default {
             if (res) {
               // console.log("signup=", res);
               if (res.message == 'Already Registered') {
-                toast.error(res.message)
+                showError(res.message)
               }
               else if (res.message == 'Please contact your IT Manager to verify your sign-up') {
-                toast.success(res.message)
+                showSuccess(res.message)
               }
               else if (res.message == 'Already registered but currently disabled') {
-                toast.error(res.message)
+                showError(res.message)
               }
               else {
-                toast.error(res.message)
+                showError(res.message)
               }
               const modal = bootstrap.Modal.getInstance(
                 document.getElementById("EmployeeToggleModal")
@@ -874,7 +874,7 @@ export default {
 
     employeeAcknowledge() {
       if (this.isAcknowledgeSign === 0 && !this.acknowledge_signature) {
-        toast.error("Signature not Saved");
+        showError("Signature not Saved");
         return;
       }
       const payload = {
@@ -886,7 +886,7 @@ export default {
         .post(apis.loginCheckmethod, payload)
         .then((res) => {
           if (res.message.success == true) {
-            // toast.success("");
+            // showSuccess("");
             const modal = bootstrap.Modal.getInstance(
               document.getElementById("EmployeeAcknowledgementModal")
             );
@@ -993,7 +993,7 @@ export default {
         .put(`${apis.loginUpdatePassword}`, payload)
         .then((res) => {
           if (res.message) {
-            toast.success("Password updated Successfully", { autoClose: 300 });
+            showSuccess("Password updated Successfully");
             const modal = bootstrap.Modal.getInstance(
               document.getElementById("changePassword")
             );
@@ -1004,7 +1004,7 @@ export default {
             const messages = JSON.parse(res._server_messages);
             messages.forEach((msg) => {
               const parsed = JSON.parse(msg);
-              toast.error(parsed.message, { autoClose: 2000 });
+              showError(parsed.message);
             });
           }
         })
@@ -1040,7 +1040,7 @@ export default {
               this.showOtpPage = false;
             }
             if (this.isFirstLogin === 0 && this.enableCheck == 0) {
-              toast.error("User is disabled. Please contact your IT Manager to verify your sign-up")
+              showError("User is disabled. Please contact your IT Manager to verify your sign-up")
             }
             if (this.isFirstLogin === 1) {
               this.showPwdField = true;
@@ -1123,7 +1123,7 @@ export default {
                 localStorage.setItem("USERROLE", JSON.stringify(filteredEmployeeData.designation));
                 sessionStorage.setItem("USERROLE", JSON.stringify(filteredEmployeeData.designation));
 
-                toast.success("Login successfull", { autoClose: 2000 });
+                showSuccess("Login successfull");
 
                 setTimeout(() => {
                   this.$router.push({ path: "/dashboard/maindash" });
@@ -1179,7 +1179,7 @@ export default {
     //             localStorage.setItem("USERROLE", JSON.stringify(filteredEmployeeData.designation));
     //             sessionStorage.setItem("USERROLE", JSON.stringify(filteredEmployeeData.designation));
 
-    //             toast.success("Login successfull", { autoClose: 2000 });
+    //             showSuccess("Login successfull");
 
     //             setTimeout(() => {
     //               this.$router.push({ path: "/dashboard/maindash" });
@@ -1325,7 +1325,7 @@ export default {
              const modal = new bootstrap.Modal(document.getElementById('EmployeeToggleModal'));
             modal.show();
           } else {
-            toast.error("signature Not Added");
+            showError("signature Not Added");
           }
         }
         else if (this.SignUpdata.signature) {
@@ -1333,7 +1333,7 @@ export default {
       modal.show();
         }
         else {
-          toast.error("signature Not Added")
+          showError("signature Not Added")
         }
       }
       else {
