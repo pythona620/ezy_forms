@@ -1196,8 +1196,7 @@
                                                   </template>
                                                   <template v-else>
                                                     <p>No preview available for this file type.
-                                                      <!-- <a :href="previewUrl"
-                                                        download>Download</a> -->
+                                                      
                                                         <button class="btn btn-sm font-13 btn-light"
                                                           @click="downloadAttachment(url, previewUrl)">
                                                           Download
@@ -1344,7 +1343,7 @@
                                 </table>
                               </div>
                               <!-- File Preview Modal -->
-                              <div class="modal fade" id="filePreviewModal" tabindex="-1" aria-hidden="true">
+                              <!-- <div class="modal fade" id="filePreviewModal" tabindex="-1" aria-hidden="true">
                                 <div class="modal-dialog modal-lg modal-dialog-centered">
                                   <div class="modal-content">
                                     <div class="modal-header">
@@ -1385,7 +1384,7 @@
                                     </div>
                                   </div>
                                 </div>
-                              </div>
+                              </div> -->
                               <button
                                 v-if="blockIndex !== 0 && selectedData.formStatus !== 'Completed' && props.readonlyFor !== 'true'"
                                 class="btn btn-sm btn-light font-12 my-2" @click="addRow(tableName)">
