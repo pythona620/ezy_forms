@@ -101,6 +101,7 @@ import "@vueform/multiselect/themes/default.css";
 import { QuillEditor } from '@vueup/vue-quill';
 // Quill styles (needed for toolbar, fonts, etc.)
 import '@vueup/vue-quill/dist/vue-quill.snow.css'
+import { showError, showSuccess } from '../../shared/services/toast';
 
 const totalRecords = ref(0);
 const departmenCodeData = ref([]);
@@ -135,12 +136,12 @@ function createEmailTemplate() {
                     document.getElementById("EmailTemplateModal")
                 );
                 modal.hide();
-                toast.success(`Email Template Create successfully`, { autoClose: 700 });
+                showSuccess(`Email Template Create successfully`);
                 isSubmitBtn.value = false;
                 activitylog()
             }
             else {  
-                toast.error(response.message.message)
+                showError(response.message.message)
             }
         })
 }
@@ -156,7 +157,7 @@ function UpdateEmailTemplate(){
         .put(`${apis.DataUpdate}/${templateData.value.name}`, updatedData)
         .then((response) => {
             if (response.message.success==true) {
-                toast.success(`Email Template Updated successfully`, { autoClose: 700 });
+                showSuccess(`Email Template Updated successfully`);
                 activitylog()
                 const modal = bootstrap.Modal.getInstance(
                     document.getElementById("EmailTemplateModal")
@@ -164,7 +165,7 @@ function UpdateEmailTemplate(){
                 modal.hide();
             }
             else{
-                toast.error(response.message.message)
+                showError(response.message.message)
             }
 
         })

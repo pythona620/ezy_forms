@@ -615,6 +615,7 @@ import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
 import { domain } from "../../shared/apiurls";
+import { showError, showSuccess, showWarning } from "../../shared/services/toast";
 
 const businessUnit = computed(() => {
   return EzyBusinessUnit.value;
@@ -754,7 +755,7 @@ const exportEmployeesToExcel = async () => {
           document.getElementById("ExportEmployeeModal")
         );
         modal.hide();
-        toast.success("Successfully Completed")
+       showSuccess("Successfully Completed")
 
         const worksheet = XLSX.utils.json_to_sheet(employees)
         const workbook = XLSX.utils.book_new()
@@ -762,7 +763,7 @@ const exportEmployeesToExcel = async () => {
         XLSX.writeFile(workbook, 'EmployeeDetails.xlsx')
       }
       else {
-        toast.error("No Employee Details")
+        showError("No Employee Details")
       }
     }
   } catch (error) {
@@ -797,18 +798,18 @@ const uploadbulkFile = (file) => {
       if (res.message && res.message.file_url) {
         bulkfileUrl.value = res.message.file_url;
 
-        // toast.success("File uploaded successfully! Processing import...");
+        //showSuccess("File uploaded successfully! Processing import...");
 
         if (res.message.file_url && bulkfileUrl.value) {
           buluploding();
         }
       } else {
-        toast.error("File upload failed: file_url not found in response.");
+        showError("File upload failed: file_url not found in response.");
       }
     })
     .catch((error) => {
       console.error("Upload error:", error);
-      toast.error("File upload failed. Please try again.");
+      showError("File upload failed. Please try again.");
     })
     .finally(() => {
       setTimeout(() => {
@@ -827,7 +828,7 @@ const buluploding = () => {
     .post(apis.uploadbulkEmployeefile, data)
     .then((res) => {
       if (!res?.data) {
-        toast.error("Import response not found.");
+        showError("Import response not found.");
         return;
       }
 
@@ -840,7 +841,7 @@ const buluploding = () => {
         // Remove anything inside parentheses (including the parentheses)
         errorMessage = errorMessage.replace(/\s*\(.*?\)\s*/g, "").trim();
 
-        toast.error(errorMessage);
+        showError(errorMessage);
 
         // Parse and display _server_messages if available
         if (res.data._server_messages) {
@@ -854,7 +855,7 @@ const buluploding = () => {
                 // Remove anything inside parentheses
                 parsedErrorMessage = parsedErrorMessage.replace(/\s*\(.*?\)\s*/g, "").trim();
 
-                toast.error(parsedErrorMessage);
+                showError(parsedErrorMessage);
               });
             }
           } catch (err) {
@@ -867,7 +868,7 @@ const buluploding = () => {
       // Show warnings if present
       if (bulkdata.value.template_warnings?.length) {
         bulkdata.value.template_warnings.forEach((warning) => {
-          toast.warning(`Warning: ${warning}`);
+         showWarning(`Warning: ${warning}`);
         });
       }
 
@@ -880,16 +881,16 @@ const buluploding = () => {
       }
       // Handle different statuses
       if (bulkdata.value.template_status === "success") {
-        toast.success("Bulk data imported successfully!");
+       showSuccess("Bulk data imported successfully!");
       } else if (bulkdata.value.template_status === "failed") {
-        toast.error(`Import Failed: ${bulkdata.value.message}`);
+        showError(`Import Failed: ${bulkdata.value.message}`);
       } else if (bulkdata.value.status === "Partial Success") {
-        toast.warning("Partial Success: Some records failed.");
+       showWarning("Partial Success: Some records failed.");
       }
     })
     .catch((error) => {
       console.error("Upload error:", error);
-      toast.error("Upload failed. Please try again.");
+      showError("Upload failed. Please try again.");
     });
 };
 
@@ -1583,7 +1584,7 @@ function deleteEmployee() {
     .post(apis.deleteEmployee, payload)
     .then((res) => {
       if (res) {
-        toast.success(res.message)
+       showSuccess(res.message)
         employeeData()
         const modal = bootstrap.Modal.getInstance(
           document.getElementById("DeleteEmployeeModal")
@@ -1669,7 +1670,7 @@ function confirmEmployeeToggle() {
                     document.getElementById("EmployeeToggleModal")
                 );
                 modal.hide();
-                toast.success(res.message, { autoClose: 700 });
+               showSuccess(res.message);
                 // isSubmitBtn.value = false;
                 employeeData()()
             }
@@ -1687,7 +1688,7 @@ function confirmEmployeeToggle() {
   //     return axiosInstance.put(`${apis.resource}${doctypes.users}/${selectedEmpRow.value.name}`, userData);
   //   })
   //   .then(() => {
-  //     toast.success(`Employee ${empActionText.value}d successfully`);
+  //    showSuccess(`Employee ${empActionText.value}d successfully`);
   //     const modal = bootstrap.Modal.getInstance(
   //       document.getElementById("EmployeeToggleModal")
   //     );
@@ -2048,17 +2049,11 @@ watch(
 );
 function createEmpl() {
   if (!isFormFilled.value) {
-    toast.error("Please fill all required fields", {
-      autoClose: 1000,
-      transition: "zoom",
-    });
+    showError("Please fill all required fields");
     return;
   }
   if (emailError.value) {
-    toast.error("Employee Email Id already exists", {
-      autoClose: 1000,
-      transition: "zoom",
-    });
+    showError("Employee Email Id already exists");
     return;
   }
 
@@ -2075,10 +2070,7 @@ function createEmpl() {
     .post(apis.resource + doctypes.EzyEmployeeList, dataObj)
     .then((res) => {
       if (res.data) {
-        toast.success("Employee Created", {
-          autoClose: 500,
-          transition: "zoom",
-        });
+       showSuccess("Employee Created");
 
         const modal = bootstrap.Modal.getInstance(
           document.getElementById("createDepartments")
@@ -2104,31 +2096,19 @@ function createEmpl() {
 
 function SaveEditEmp() {
    if (!isFormFilled.value) {
-    toast.error("Please fill all required fields", {
-      autoClose: 1000,
-      transition: "zoom",
-    });
+    showError("Please fill all required fields");
     return;
   }
     if(phoneError.value) {
-    toast.error("Invalid phone number", {
-      autoClose: 1000,
-      transition: "zoom",
-    });
+    showError("Invalid phone number");
     return;
   }
       if(!searchText.value){
-      toast.error("Please select or enter a designation", {
-      autoClose: 1000,
-      transition: "zoom",
-    });
+      showError("Please select or enter a designation");
     return;
   }
   if(createEmployee.value.designation !== searchText.value) {
-     toast.error("Please Add the designation before updating employee.", {
-      autoClose: 1000,
-      transition: "zoom",
-    });
+     showError("Please Add the designation before updating employee.");
     return;
   }
   if (!createEmployee.value.designation && searchText.value) {
@@ -2157,7 +2137,7 @@ function SaveEditEmp() {
     .put(`${apis.DataUpdate}/${createEmployee.value.name}`,payload)
     .then((response) => {
       if (response.message.success==true) {
-        toast.success("Changes Saved", { autoClose: 500, transition: "zoom" });
+       showSuccess("Changes Saved");
         const modal = bootstrap.Modal.getInstance(
           document.getElementById("exampleModal")
         );
@@ -2165,7 +2145,7 @@ function SaveEditEmp() {
         employeeData(); // refresh list
       }
       else{
-          toast.error(response.message.message)
+          showError(response.message.message)
       }
     })
     .catch((error) => {

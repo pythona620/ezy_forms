@@ -1311,10 +1311,11 @@ import { ref, nextTick } from 'vue';
 import { useRoute, useRouter } from "vue-router";
 import { apis, doctypes } from '../shared/apiurls';
 import axiosInstance from '../shared/services/interceptor';
-import { toast } from 'vue3-toastify';
+// import { toast } from 'vue3-toastify';
 import draggable from "vuedraggable";
 import Vue3Select from 'vue3-select'
 import 'vue3-select/dist/vue3-select.css';
+import { showError, showInfo, showSuccess } from '../shared/services/toast';
 
 
 const route = useRoute();
@@ -1498,7 +1499,7 @@ const currentStep = ref(0)
 const goToStep = (index) => {
   // Block going to step 1 (Preview) if conditions not met
   // if (index === 1 && (!vendorDetails.value.length || !itemDetails.value.length)) {
-  //   toast.info("Please add vendor and item details before previewing.")
+  //   showInfo("Please add vendor and item details before previewing.")
   //   return
   // }
   currentStep.value = index
@@ -1507,7 +1508,7 @@ const goToStep = (index) => {
 const nextStep = () => {
   // If moving from step 0 to step 1, check conditions
   // if (currentStep.value === 0 && (!vendorDetails.value.length || !itemDetails.value.length)) {
-  //   toast.info("Please add vendor and item details before previewing.")
+  //   showInfo("Please add vendor and item details before previewing.")
   //   return
   // }
 
@@ -1599,7 +1600,7 @@ function fetchingVendorMasterData() {
     })
     .catch(error => {
       console.error('Error fetching items:', error);
-      toast.error('Failed to fetch items.');
+      showError('Failed to fetch items.');
     });
 }
 // const submitComparison = () => {
@@ -1636,12 +1637,12 @@ function fetchingVendorMasterData() {
 //   axiosInstance.post(apis.resource + doctypes.ezyContracts, finalPayload)
 //     .then(response => {
 //       console.log('Comparison submitted successfully:', response.data);
-//       toast.success('Comparison submitted successfully!');
+//       showSuccess('Comparison submitted successfully!');
 //       request_raising_fn(response.data);
 //     })
 //     .catch(error => {
 //       console.error('Error submitting comparison:', error);
-//       toast.error('Failed to submit comparison.');
+//       showError('Failed to submit comparison.');
 //     });
 // };
 // const submitComparison = async () => {
@@ -1683,11 +1684,11 @@ function fetchingVendorMasterData() {
 //   try {
 //     const response = await axiosInstance.post(apis.savedocs, formData);
 //     console.log("Comparison saved successfully:", response);
-//     toast.success("Comparison saved successfully!");
+//     showSuccess("Comparison saved successfully!");
 //     request_raising_fn(response.docs[0]);
 //   } catch (error) {
 //     console.error("Error saving comparison:", error);
-//     toast.error("Failed to save comparison.");
+//     showError("Failed to save comparison.");
 //   }
 // };
 
@@ -1781,11 +1782,11 @@ const submitComparison = async () => {
   try { 
     const response = await axiosInstance.post(apis.savedocs, formData);
     console.log("Comparison saved successfully:", response);
-    toast.success("Comparison saved successfully!");
+    showSuccess("Comparison saved successfully!");
     request_raising_fn(response.docs[0]);
   } catch (error) {
     console.error("Error saving comparison:", error);
-    toast.error("Failed to save comparison.");
+    showError("Failed to save comparison.");
   }
 };
 
@@ -1812,11 +1813,7 @@ function request_raising_fn(item) {
     if (resp?.message?.success === true) {
 
 
-      toast.success("Request Raised", {
-        autoClose: 1000,
-        transition: "zoom",
-
-      });
+      showSuccess("Request Raised");
       setTimeout(() => {
         router.push({ path: '/todo/raisedbyme' });
       }, 300);
@@ -1824,7 +1821,7 @@ function request_raising_fn(item) {
   })
     .catch((error) => {
       console.error("Error raising request:", error);
-      toast.error("Error raising request");
+      showError("Error raising request");
     })
   // .finally(() => {
   //   saveloading.value = false;
@@ -2277,7 +2274,7 @@ const addNewItem = () => {
   axiosInstance.post(apis.resource + doctypes.ezyItems, newItemObj)
     .then(response => {
 
-      toast.success('New item added successfully!' , { autoClose: 1000 });
+      showSuccess('New item added successfully!');
       // console.log('New item added:', response.data);
       newItem.value = { name: '', unit: '' };
       fetchingItemsList()
@@ -2303,14 +2300,14 @@ function AddNewVendor(){
     axiosInstance.post(apis.resource + doctypes.ezyVendors, MasterVendor)
       .then(response => {
         console.log('Vendor saved successfully:', response.data);
-        toast.success('Vendor details saved successfully!');
+        showSuccess('Vendor details saved successfully!');
         const modal = bootstrap.Modal.getInstance(document.getElementById('NewVendorMasterData'));
         modal.hide();
         fetchingVendorMasterData()
       })
       .catch(error => {
         console.error('Error saving vendor:', error);
-        toast.error('Failed to save vendor details.');
+        showError('Failed to save vendor details.');
       });
 
 }
@@ -2459,23 +2456,23 @@ function saveVendorDetails() {
   calculateVendorTotal(); // Update vendorForm.value.total first
   // console.log(vendorForm.value, "[[[]]]");
   if (!vendorForm.value.vendor_name?.trim()) {
-    toast.info("Vendor name is required.");
+    showInfo("Vendor name is required.");
     return;
   }
   // if (!vendorForm.value.gst_number?.trim()) {
-  //   toast.info("GST number is required.");
+  //   showInfo("GST number is required.");
   //   return;
   // }
   // if (!vendorForm.value.phone_number?.trim()) {
-  //   toast.info("Phone number is required.");
+  //   showInfo("Phone number is required.");
   //   return;
   // }
   // if (!vendorForm.value.mail_id?.trim()) {
-  //   toast.info("Email is required.");
+  //   showInfo("Email is required.");
   //   return;
   // }
   // if (!vendorForm.value.ezy_item_details?.length) {
-  //   toast.info("Please add at least one item detail.");
+  //   showInfo("Please add at least one item detail.");
   //   return;
   // } 
   const vendorData = {
@@ -2539,11 +2536,11 @@ function saveVendorDetails() {
   //   axiosInstance.post(apis.resource + doctypes.ezyVendors, MasterVendor)
   //     .then(response => {
   //       console.log('Vendor saved successfully:', response.data);
-  //       toast.success('Vendor details saved successfully!');
+  //       showSuccess('Vendor details saved successfully!');
   //     })
   //     .catch(error => {
   //       console.error('Error saving vendor:', error);
-  //       toast.error('Failed to save vendor details.');
+  //       showError('Failed to save vendor details.');
   //     });
   // }
 
@@ -2893,7 +2890,7 @@ function fetchingWork() {
     })
     .catch((error) => {
       console.error('Error fetching workflow:', error);
-      toast.error('Failed to fetch workflow.');
+      showError('Failed to fetch workflow.');
     });
 }
 

@@ -1545,11 +1545,12 @@ import FormPreview from "../../Components/FormPreview.vue";
 import Multiselect from "vue-multiselect";
 import "@vueform/multiselect/themes/default.css";
 import VueMultiselect from "vue-multiselect";
-import { toast } from "vue3-toastify";
-import "vue3-toastify/dist/index.css";
+// import { toast } from "vue3-toastify";
+// import "vue3-toastify/dist/index.css";
 // import { nextTick } from "vue";
 import { useDragAndDrop } from "../../shared/services/draggable";
 import FormPreviewComp from "../../Components/FormPreviewComp.vue";
+import { showError, showInfo, showSuccess } from "../../shared/services/toast";
 
 const route = useRoute();
 const router = useRouter();
@@ -2543,14 +2544,14 @@ const formatTableName = (tableName) => {
 const processFields = (blockIndex, sectionIndex, tableIndex) => {
   const hasErrors = isEmptyFieldType(blockIndex, sectionIndex, tableIndex);
   if (hasErrors) {
-    toast.error("Please fix validation errors before creating the table", {
+    showError("Please fix validation errors before creating the table", {
       transition: "zoom",
     });
     return;
   }
   if (matched.value) {
     //  tableExistsMessage.value = 'Table already exists';
-    toast.error("Table already exists", {
+    showError("Table already exists", {
       transition: "zoom",
     });
     return;
@@ -2578,7 +2579,7 @@ const processFields = (blockIndex, sectionIndex, tableIndex) => {
   // // section.afterCreated[tableIndex] = table;
 
   // // blockArr[blockIndex].sections[sectionIndex].childTables[tableIndex] = []
-  // //toast.success("Table created successfully!", {
+  // //showSuccess("Table created successfully!", {
   //  // autoClose: 500,
   //  // transition: "zoom",
   //  //});
@@ -2591,10 +2592,7 @@ const processFields = (blockIndex, sectionIndex, tableIndex) => {
       // Save original table to afterCreated
       section.afterCreated[tableIndex] = { ...table };
 
-      toast.success("Table created successfully!", {
-        autoClose: 500,
-        transition: "zoom",
-      });
+      showSuccess("Table created successfully!");
 
       const responseData = res.message?.[0]?.[0]?.child_doc;
 
@@ -2751,7 +2749,7 @@ const afterImmediateEditdeleteRow = (blockIndex, sectionIndex, tableName, index)
 //       .post(apis.childtable, formData)
 //       .then((response) => {
 //         afterdata.value = response.data;
-//         toast.success("Fields updated successfully!", { autoClose: 500 });
+//         showSuccess("Fields updated successfully!", { autoClose: 500 });
 
 //       })
 //       .catch((error) => {
@@ -2777,9 +2775,7 @@ const afterImmediateEdit = (blockIndex, sectionIndex, tableName) => {
 });
 
     if (!isValid){
-     toast.error("Please fix the errors in the highlighted fields before saving!", {
-      autoClose: 1000,
-    });
+     showError("Please fix the errors in the highlighted fields before saving!");
       
       return; // stop save if invalid
     }
@@ -2800,7 +2796,7 @@ const afterImmediateEdit = (blockIndex, sectionIndex, tableName) => {
       .post(apis.childtable, formData)
       .then((response) => {
         afterdata.value = response.data;
-        toast.success("Fields updated successfully!", { autoClose: 500 });
+        showSuccess("Fields updated successfully!");
       })
       .catch((error) => {
         console.error("❌ Saving fields failed:", error);
@@ -2868,7 +2864,7 @@ const toggleEdit = (tableName, description) => {
     });
 
     if (!isValid) {
-      toast.error("Please fix the errors before saving", { autoClose: 1000 });
+      showError("Please fix the errors before saving");
       return;
     }
 
@@ -2888,7 +2884,7 @@ const toggleEdit = (tableName, description) => {
       .post(apis.childtable, formData)
       .then((response) => {
         afterdata.value = response.data;
-        toast.success("Fields updated successfully!", { autoClose: 500 });
+        showSuccess("Fields updated successfully!");
       })
       .catch((error) => {
         console.error("❌ Saving fields failed:", error);
@@ -3356,15 +3352,9 @@ function add_Wf_roles_setup() {
       console.log(res);
 
       if (selectedBlockIndex.value == 0) {
-        toast.success("Requestor Added", {
-          autoClose: 1000,
-          transition: "zoom",
-        });
+        showSuccess("Requestor Added");
       } else {
-        toast.success(`Approver-${selectedBlockIndex.value} Added`, {
-          autoClose: 1000,
-          transition: "zoom",
-        });
+        showSuccess(`Approver-${selectedBlockIndex.value} Added`);
       }
     });
 }
@@ -3392,10 +3382,7 @@ function clearForm() {
 }
 const handleStepClick = (stepId) => {
   if (isNextDisabled.value) {
-    toast.error("Please check all required fields before proceeding.", {
-      autoClose: 2000,
-      transition: "zoom",
-    });
+    showError("Please check all required fields before proceeding.");
     return;
   }
 
@@ -3408,10 +3395,7 @@ const handleStepClick = (stepId) => {
 
 const nextStep = () => {
   if (isNextDisabled.value) {
-    toast.error("Please check all required fields before proceeding.", {
-      autoClose: 2000,
-      transition: "zoom",
-    });
+    showError("Please check all required fields before proceeding.");
     return;
   }
 
@@ -3509,10 +3493,7 @@ function SetPrintFormatFn() {
       console.log(res);
       const modal = bootstrap.Modal.getInstance(document.getElementById('customFormatModal'));
       modal.hide();
-      toast.success("Print Format Added Successfully", {
-        autoClose: 1000,
-        transition: "zoom",
-      });
+      showSuccess("Print Format Added Successfully");
 
     })
     .catch((error) => {
@@ -3642,26 +3623,23 @@ function formData(status) {
         // console.log(paramId.value, "Updated paramId");
 
         if (workflowSetup.length < blockArr.length) {
-          toast.info("Add Workflow", {
-            autoClose: 2000,
-            transition: "zoom",
-          });
+          showInfo("Add Workflow");
         } else {
           if (isBlockRemoved.value === true) {
-            toast.success("Form Created Successfully!", {
+            showSuccess("Form Created Successfully!", {
               autoClose: 2000,
               transition: "zoom",
-              onClose: () => {
-                let toPath = localStorage.getItem('routepath');
-                if (status === "save") {
-                  router.push({ path: toPath });
-                }
-                else if (status === "Draft") {
-                  router.push({ path: toPath });
-
-                }
-              },
+              // onClose: () => {
+              // },
             });
+            let toPath = localStorage.getItem('routepath');
+            if (status === "save") {
+              router.push({ path: toPath });
+            }
+            else if (status === "Draft") {
+              router.push({ path: toPath });
+
+            }
           }
         }
       } else {
@@ -3895,7 +3873,7 @@ const addSection = (blockIndex, sectionIndex) => {
 //   let item = blockArr[blockIndex].sections[sectionIndex];
 //   if (item.parent) deleted_items.push(item);
 //   blockArr[blockIndex].sections.splice(sectionIndex, 1);
-//   // toast.success("Section removed", { autoClose: 500 })
+//   // showSuccess("Section removed", { autoClose: 500 })
 // }; 
 const removeSection = (blockIndex, sectionIndex) => {
   let item = blockArr[blockIndex].sections[sectionIndex];
@@ -3914,7 +3892,7 @@ const removeSection = (blockIndex, sectionIndex) => {
   });
 
   // Optionally show a toast
-  // toast.success("Section removed", { autoClose: 500 });
+  // showSuccess("Section removed", { autoClose: 500 });
 };
 
 
@@ -3960,7 +3938,7 @@ const removeColumn = (blockIndex, sectionIndex, rowIndex, columnIndex) => {
   });
 
   // Optionally show toast
-  // toast.success("Column/Row removed", { autoClose: 500 });
+  // showSuccess("Column/Row removed", { autoClose: 500 });
 };
 
 
@@ -3973,7 +3951,7 @@ const removeColumn = (blockIndex, sectionIndex, rowIndex, columnIndex) => {
 //     columnIndex,
 //     1
 //   );
-//   // toast.success("Column removed", { autoClose: 500 })
+//   // showSuccess("Column removed", { autoClose: 500 })
 // };
 
 // Function to add a new field inside a column
@@ -4007,7 +3985,7 @@ const removeField = (blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex
   blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
     columnIndex
   ].fields.splice(fieldIndex, 1);
-  // toast.success("Field removed", { autoClose: 500 })
+  // showSuccess("Field removed", { autoClose: 500 })
 };
 
 // Function to copy a field and add it below the original field inside a column
@@ -4357,7 +4335,7 @@ function delete_form_items_fields() {
 async function saveFormData(type) {
   // Check for errors
   if (hasErrors.value) {
-    toast.error("Please fix the errors before proceeding.");
+    showError("Please fix the errors before proceeding.");
     return;
   }
   isBlockRemoved.value = true;

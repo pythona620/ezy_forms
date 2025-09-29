@@ -154,6 +154,7 @@ import "vue3-toastify/dist/index.css";
 import router from '../../router';
 import { useRoute } from 'vue-router';
 import ButtonComp from '../../Components/ButtonComp.vue';
+import { showError, showInfo, showSuccess, showWarning } from '../../shared/services/toast';
 const totalRecords = ref(0);
 const tableheaders = ref([
   { th: "Form Name", td_key: "form_name" },
@@ -257,7 +258,7 @@ function viewPreview(data, index, type) {
       // console.log(designation);
 
       if (!parsedData.workflow.length) {
-        toast.info("No Roles Added", { autoClose: 500 })
+        showInfo("No Roles Added")
       }
       const roles = parsedData.workflow[0].roles;
       // console.log(roles);
@@ -284,7 +285,7 @@ function viewPreview(data, index, type) {
           },
         });
       } else {
-        toast.info("You do not have permission to access this Form.");
+        showInfo("You do not have permission to access this Form.");
       }
     }
     //  else {
@@ -367,7 +368,7 @@ function actionCreated(rowData, actionEvent) {
       });
 
     } else {
-      toast.warn(" There is no form fields ")
+      showWarning(" There is no form fields ")
     }
   }
   else if (actionEvent.name === 'Edit Form') {
@@ -383,7 +384,7 @@ function actionCreated(rowData, actionEvent) {
       const designation = JSON.parse(storedData).designation;
       // console.log(designation);
       if (!parsedData.workflow?.length) {
-        toast.info("No Roles Added", { autoClose: 500 });
+        showInfo("No Roles Added");
       }
       const roles = parsedData.workflow[0].roles;
       // console.log(roles);
@@ -419,9 +420,9 @@ function actionCreated(rowData, actionEvent) {
           });
         }
       } else if (rowData.enable === 0) {
-        toast.info("This form is currently disabled.", { autoClose: 500 });
+        showInfo("This form is currently disabled.");
       } else {
-        toast.info("You do not have permission to access this Form.", { autoClose: 500 });
+        showInfo("You do not have permission to access this Form.");
       }
     }
     //  else {
@@ -515,13 +516,10 @@ async function generateReport() {
     if (modal) modal.hide();
 
     // show success toast
-    toast.success("Report Fields Updated Successfully", {
-      autoClose: 1000,
-      transition: "zoom",
-    });
+    showSuccess("Report Fields Updated Successfully");
   } catch (error) {
     console.error("Error updating report fields:", error);
-    toast.error("Failed to update report fields", { autoClose: 1500 });
+    showError("Failed to update report fields");
   }
    
 }
@@ -580,7 +578,7 @@ function confirmAction() {
     .put(`${apis.resource}${doctypes.EzyFormDefinitions}/${selectedRowData.value.name}`, selectedRowData.value)
     .then((response) => {
       responcedata.value = response.data;
-      toast.success(`Form ${selectedActionText.value}d successfully`, { autoClose: 700 });
+      showSuccess(`Form ${selectedActionText.value}d successfully`);
       setTimeout(() => {
         fetchDepartmentDetails();
       }, 1000);
