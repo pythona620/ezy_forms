@@ -87,6 +87,7 @@ import axiosInstance from "../../shared/services/interceptor";
 import { apis, doctypes } from "../../shared/apiurls";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
+import { showSuccess } from "../../shared/services/toast";
 
 const selectedScore = ref("");
 
@@ -160,7 +161,7 @@ function SavePasswordPolicy(){
                 minimum_password_score: selectedScore.value,
             })
             .then(() => {
-                toast.success(`Password Policy Saved Successfully`, { autoClose: 700 });
+                showSuccess(`Password Policy Saved Successfully`);
                 const modal = bootstrap.Modal.getInstance(document.getElementById('SavePasswordModal'));
                     modal.hide();
                 SystemSettingData();

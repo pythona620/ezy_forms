@@ -336,6 +336,7 @@ import RequestPreview from './RequestPreview.vue';
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import { ref, onMounted, watch, computed, onUnmounted } from 'vue';
+import { showError, showSuccess, showWarning } from '../shared/services/toast';
 // import socket from '../socketService';
 // import { io } from "socket.io-client";
 
@@ -578,7 +579,7 @@ function passwordChange() {
 
     axiosInstance.put(`${apis.resource}${doctypes.users}/${userName.name}`, payload)
         .then((res) => {
-            toast.success('Password changed Successfully', { autoClose: 300 });
+            showSuccess('Password changed Successfully');
             const modal = bootstrap.Modal.getInstance(document.getElementById('changePassword'));
             modal.hide();
             new_password.value = '';
@@ -745,7 +746,7 @@ function SelectedFromchange(value) {
     userRole = userRole?.replace(/^"|"$/g, ''); // Remove surrounding quotes
 
     if (!userRole) {
-        toast.error("User role is missing. Please log in again.", { autoClose: 2000 });
+        showError("User role is missing. Please log in again.");
         return;
     }
 
@@ -753,7 +754,7 @@ function SelectedFromchange(value) {
     const selectedForm = formList.value.find(form => form.form_short_name === value);
 
     if (!selectedForm) {
-        toast.error("Selected form does not exist in the fetched list.", { autoClose: 2000 });
+        showError("Selected form does not exist in the fetched list.");
         return;
     }
 
@@ -765,7 +766,7 @@ function SelectedFromchange(value) {
         const requestor = formJson.workflow?.find(item => item.type === "requestor");
 
         if (!requestor || !Array.isArray(requestor.roles)) {
-            toast.error("Invalid requestor data.", { autoClose: 2000 });
+            showError("Invalid requestor data.");
             return;
         }
 
@@ -790,11 +791,11 @@ function SelectedFromchange(value) {
         if (isRoleMatched) {
             toRaiseRequest(); // Call toRaiseRequest() when there's a match
         } else {
-            toast.error("You do not have permission to raise this request.", { autoClose: 2000 });
+            showError("You do not have permission to raise this request.");
         }
     } catch (error) {
 
-        toast.error("Invalid form data. Please contact support.", { autoClose: 2000 });
+        showError("Invalid form data. Please contact support.");
     }
 }
 
@@ -808,7 +809,7 @@ function SelectedDepartment(departmentName) {
     userRole = userRole?.replace(/^"|"$/g, ""); // Remove surrounding quotes
 
     if (!userRole) {
-        toast.error("User role is missing. Please log in again.", { autoClose: 2000 });
+        showError("User role is missing. Please log in again.");
         return;
     }
 
@@ -858,13 +859,13 @@ function SelectedDepartment(departmentName) {
             });
 
             if (allowedForms.length === 0) {
-                toast.warning("No forms have been created in this department.", { autoClose: 2000, transition: "zoom", });
+                showWarning("No forms have been created in this department.");
             }
             formList.value = allowedForms; // Only store role-matched forms
         })
         .catch((error) => {
             console.error("Error fetching ezyForms data:", error);
-            toast.error("Error fetching forms. Please try again.", { autoClose: 2000, transition: "zoom", });
+            showError("Error fetching forms. Please try again.");
         });
 }
 

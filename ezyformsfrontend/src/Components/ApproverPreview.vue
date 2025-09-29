@@ -171,7 +171,7 @@
                         <template v-else-if="field.fieldtype == 'Check' && field.fieldname !== 'auto_calculations'">
 
 
-                          <input type="checkbox" :checked="field.value"
+                          <input type="checkbox" :checked="field.value == 1"
                             :disabled="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel"
                             :placeholder="'Enter ' + field.label" :name="'field-' +
                               sectionIndex +
@@ -2274,14 +2274,10 @@ const logFieldValue = (
   } else if (eve.target.type === "checkbox") {
     if (field.fieldtype === "Check") {
       // Ensure value is a string, not an array
-      if (eve.target.checked) {
-        // If checked, set the value as a string
-        field["value"] = eve.target.checked ? 1 : 0;
-
-      } else {
-        // If unchecked, set the value as an empty string (or use any default value)
-        field.value = "";
-      }
+      if (field.fieldtype === "Check") {
+    // Always set value as 1 or 0
+    field.value = eve.target.checked ? 1 : 0;
+  }
     } else if (field.fieldtype === "Small Text") {
       let selectedValues = field.value ? JSON.parse(field.value) : []; // Parse existing values or create an empty array
 
