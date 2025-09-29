@@ -2475,6 +2475,8 @@ const previewedAttachments = ref(new Set());
 //   console.log(allAttachments.value,"allAttachments.value");
 // }
 
+
+
 function collectAllAttachments(blocks) {
   console.log("Current Level =>", props.currentLevel);
   const attachments = [];
