@@ -611,7 +611,7 @@ def todo_tab(document_type, request_id, property=None, cluster_name=None, curren
 				if not record_exists:
 					activate_log_roles.append("reason", new_record)
 					activate_log_roles.save(ignore_permissions=True)
-				doctype_ids.wf_generated_request_status =  "In Progress" if  int(current_level) < road_map  else "Completed"
+				doctype_ids.wf_generated_request_status =  "In Progress" if   len(approvals_reasons)>1 else "Completed"
 				doctype_ids.save(ignore_permissions=True)
 				workflow_requests.status = "In Progress" if int(current_level) < road_map else "Completed"
 				current_level += 1  if int(current_level) < road_map else 0 # move to next level
