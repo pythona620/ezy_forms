@@ -1799,14 +1799,12 @@ const GetDoctypeList = async (searchText) => {
     fields: JSON.stringify(["name"]),
     filters: JSON.stringify(filters),
     limit_page_length: "None",
+    doctype:doctypes.doctypesList,
   };
 
   try {
-    const res = await axiosInstance.get(
-      apis.resource + doctypes.doctypesList,
-      { params: queryParams }
-    );
-    return res.data || [];
+    const res = await axiosInstance.get(apis.GetDoctypeData, { params: queryParams });
+    return res.message.data || [];
   } catch (error) {
     console.error("Error fetching doctype list:", error);
     return [];
@@ -1877,13 +1875,14 @@ function searchForm() {
       limit_page_length: 10,
       limit_start: 0,
       filters: JSON.stringify(filters),
+      doctype:doctypes.EzyFormDefinitions,
       order_by: "`tabEzy Form Definitions`.`enable` DESC, `tabEzy Form Definitions`.`creation` DESC"
     };
 
     axiosInstance
-      .get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParams })
+      .get(`${apis.GetDoctypeData}`, { params: queryParams })
       .then((response) => {
-        filteredForms.value = response.data || [];
+        filteredForms.value = response.message.data || [];
       })
       .catch((error) => {
         console.error("Error fetching form definitions:", error);
@@ -1980,13 +1979,14 @@ function fetchDoctypeList(searchText, b, s, r, c, f) {
   const queryParams = {
     fields: JSON.stringify(['name']),
     filters: JSON.stringify(filters),
-    limit_page_length: '10',
+    limit_page_length: 'none',
+    doctype:doctypes.doctypesList,
   };
 
   axiosInstance
-    .get(apis.resource + doctypes.doctypesList, { params: queryParams })
+    .get(apis.GetDoctypeData, { params: queryParams })
     .then((res) => {
-      linkSearchResults[fieldKey] = res.data || [];
+      linkSearchResults[fieldKey] = res.message.data || [];
     })
     .catch((error) => {
       console.error('Error fetching doctype list:', error);
@@ -2006,12 +2006,13 @@ function fetchChildDoctypeList(searchText) {
     fields: JSON.stringify(['name']),
     filters: JSON.stringify(filters),
     limit_page_length: '10',
+    doctype:doctypes.doctypesList,
   };
 
   axiosInstance
-    .get(apis.resource + doctypes.doctypesList, { params: queryParams })
+    .get(apis.GetDoctypeData, { params: queryParams })
     .then((res) => {
-      linkSearchResults.value = res.data || [];
+      linkSearchResults.value = res.message.data || [];
     })
     .catch((error) => {
       console.error('Error fetching doctype list:', error);
@@ -3416,10 +3417,16 @@ const prevStep = () => {
 const returTables = ref([])
 // Get form by ID
 function getFormData() {
+   const queryParams = {
+        fields: JSON.stringify(["*"]),
+        limit_page_length: "none",
+        doctype:doctypes.EzyFormDefinitions,
+        doc_id:paramId.value,
+    };
   axiosInstance
-    .get(apis.resource + doctypes.EzyFormDefinitions + `/${paramId.value}`)
+    .get(apis.GetDoctypeData, { params: queryParams })
     .then((res) => {
-      let res_data = res?.data;
+      let res_data = res?.message.data;
       if (res_data) {
         router.push({
           query: {
@@ -3436,8 +3443,7 @@ function getFormData() {
             res_data.owner_of_the_form || filterObj.value.owner_of_the_form || "",
         };
 
-        // console.log(res.data, "7777777777777777");
-        const parsedFormJson = JSON.parse(res.data?.form_json);
+        const parsedFormJson = JSON.parse(res.message.data?.form_json);
         wrkAfterGetData.value = parsedFormJson.workflow;
         // console.log(parsedFormJson.workflow, "parsedFormJson");
         tableName.value = parsedFormJson.fields.filter(
@@ -3447,12 +3453,12 @@ function getFormData() {
           (field) => field.fieldtype === "Table"
         );
 
-        is_landscape.value = res.data.is_landscape;
+        is_landscape.value = res.message.data.is_landscape;
         // let structuredArr = rebuildToStructuredArray((JSON.parse(res_data?.form_json?.fields).fields)?.replace(/\\\"/g, '"'))
         let structuredArr = rebuildToStructuredArray(
           JSON.parse(res_data?.form_json).fields
         );
-        childtableHeaders.value = JSON.parse(res.data.form_json).child_table_fields;
+        childtableHeaders.value = JSON.parse(res.message.data.form_json).child_table_fields;
 
         childTables.value = []
         tableFieldsCache.value = []
@@ -3506,22 +3512,16 @@ function deptData() {
     fields: JSON.stringify(["name","department_name"]),
     limit_page_length: "none",
     business_unit: `${selectedData.value.business_unit || route.query.business_unit}`,
-
+    doctype:doctypes.departments,
   };
 
   axiosInstance
-    .get(apis.resource + doctypes.departments, { params: queryParams })
+    .get(apis.GetDoctypeData, { params: queryParams })
     .then((res) => {
-      if (res?.data?.length) {
-        // Mapping department names
-        // label="name" track-by="name"
-        OwnerOfTheFormData.value = res.data.map((dept) => dept.name);
-//                 OwnerOfTheFormData.value = res.data.map((dept) => ({
-//   label: dept.department_name, // shows in dropdown
-//   value: dept.name             // stored in v-model
-// })); 
-        formOptions.value = res.data.map((dept) => dept.name); // Store the full data for accessible departments
-        // departments.value = res.data.map(item => item.category)
+      if (res?.message.data?.length) {
+        OwnerOfTheFormData.value = res.message.data.map((dept) => dept.name);
+        formOptions.value = res.message.data.map((dept) => dept.name); // Store the full data for accessible departments
+        // departments.value = res.message.data.map(item => item.category)
       }
     })
     .catch((error) => {
@@ -3545,11 +3545,16 @@ function OwnerOftheForm(newVal) {
 }
 
 function categoriesData(newVal) {
+  const queryParams = {
+    fields: JSON.stringify(["ezy_departments_items"]),
+    doctype:doctypes.departments,
+    doc_id:newVal,
+  };
   axiosInstance
-    .get(apis.resource + doctypes.departments + `/${newVal}`)
+    .get(apis.GetDoctypeData, { params: queryParams })
     .then((res) => {
-      if (res?.data?.ezy_departments_items) {
-        departments.value = res.data.ezy_departments_items.map((item) => item.category);
+      if (res?.message.data?.ezy_departments_items) {
+        departments.value = res.message.data.ezy_departments_items.map((item) => item.category);
       }
     })
     .catch((error) => {
@@ -4254,14 +4259,15 @@ function handleInputChange(event, fieldType) {
   const queryParams = {
     fields: JSON.stringify(['form_name','form_short_name']),
     filters: JSON.stringify(filters),
+    doctype:doctypes.EzyFormDefinitions,
   };
 
   axiosInstance
-    .get(`${apis.resource}${doctypes.EzyFormDefinitions}`, {
+    .get(`${apis.GetDoctypeData}`, {
       params: queryParams,
     })
     .then((res) => {
-      ezyFormsData.value = res.data;
+      ezyFormsData.value = res.message.data;
 
       // Check for duplicates (ignore spaces when comparing)
       if (fieldType === "form_name") {

@@ -2084,7 +2084,7 @@ watch(activityData, (newVal) => {
 }
 
 .activity_height {
-  height: 80vh;
+  height: 71vh !important;
   overflow-y: scroll;
   position: relative;
 }

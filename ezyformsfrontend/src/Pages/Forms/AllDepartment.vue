@@ -629,12 +629,16 @@ const queryParams = {
   axiosInstance
     .get(apis.GetAccessibleDeptForms, { params: queryParams })
     .then((response) => {
-      fullData.value = response.message || [];
-      filteredData.value = [...fullData.value];
-      totalRecords.value = filteredData.value.length;
-      filterObj.value.limit_start = 0;
-      tableData.value = filteredData.value.slice(0, filterObj.value.limitPageLength);
-    })
+      if (Array.isArray(response.message)) {
+      fullData.value = response.message;
+    } else {
+      fullData.value = [];
+    }
+    filteredData.value = [...fullData.value];
+    totalRecords.value = filteredData.value.length;
+    filterObj.value.limit_start = 0;
+    tableData.value = filteredData.value.slice(0, filterObj.value.limitPageLength);
+  })
     .catch((error) => {
       console.error(error);
     });
