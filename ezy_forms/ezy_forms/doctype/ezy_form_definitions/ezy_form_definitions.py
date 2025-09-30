@@ -792,11 +792,17 @@ def _update_existing_child_doctype(form_short_name: str, fields: List[Dict[str, 
     fields_updated = False
 
     for field in fields:
+        options_value = (
+            field.get("options") if isinstance(field.get("options"), str)
+            else "\n".join(field.get("options", []))
+        )
         fieldname = field["fieldname"]
         new_field_data = {
             "label": field.get("label"),
             "fieldtype": field.get("fieldtype"),
-            "options": field.get("options", ""),
+            "options":options_value,
+            "reqd":0,
+            "description":field.get("description", ""),
         }
 
         if fieldname in existing_fields_dict:

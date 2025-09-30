@@ -869,7 +869,7 @@ template_str = """
                                             </span>
                                         {% elif field.fieldtype == 'Time' %}
                                              <span id="{{ field.fieldname }}" style="font-size:13px; font-weight:500;" name="{{ field.fieldname }}" class="date-span">
-                                                {{ field['values'] }}
+                                                {{ (field['values'] | string).split('.')[0] }}
                                             </span>
                                         {% elif field.fieldtype == 'Color' %}
                                             <input type="color" id="{{ field.fieldname }}" value="{{ field['values'] }}" name="{{ field.fieldname }}">
