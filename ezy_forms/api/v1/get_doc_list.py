@@ -1,5 +1,6 @@
 import frappe
 import json
+from frappe.model.db_query import DatabaseQuery
 
 @frappe.whitelist(methods=["GET"])
 def get_doctype_list(doctype, fields:str, filters=None, limit_start:int=None, limit_page_length=None, doc_id=None):
@@ -30,8 +31,8 @@ def get_doctype_list(doctype, fields:str, filters=None, limit_start:int=None, li
     except:
         limit_start = 0
 
-    data = frappe.get_all(
-        doctype,
+    data = DatabaseQuery(
+        doctype).execute(
         fields=fields,
         filters=filters,
         limit_start=limit_start,

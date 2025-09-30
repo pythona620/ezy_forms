@@ -1,5 +1,5 @@
 import frappe
-
+from frappe.model.db_query import DatabaseQuery
 @frappe.whitelist()
 def get_role_list(index:int=None, departments:list=None, property:str=None):
     """
@@ -27,14 +27,14 @@ def get_role_list(index:int=None, departments:list=None, property:str=None):
         filters.update({"is_hod": 1})
 
     # Fetch employee designations
-    admin_designations = frappe.get_all(
-        "Ezy Employee",
+    admin_designations = DatabaseQuery(
+        "Ezy Employee").execute(
         filters=filters,
         pluck="designation"
     )
 
     # Fetch workflow roles
-    wf_roles = frappe.get_all("WF Roles", pluck="role")
+    wf_roles = DatabaseQuery("WF Roles").execute( pluck="role")
 
     # Build role list
     if requester:
