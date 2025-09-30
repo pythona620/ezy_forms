@@ -31,7 +31,7 @@ def get_employee_accessible_forms(designation: str = None, fields = None, proper
     # Prepare filters for Ezy Form Definitions
     filters = {
         "form_short_name": ["in", document_types],
-        "active": 1,
+        "enable":1,
         "business_unit": property
     }
     if department:
