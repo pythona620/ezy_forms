@@ -624,13 +624,13 @@
                               " class="form-control previewInputHeight w-100 p-1" />
                           </template>
                         </template>
-                      </div>
-                    </div>
                     <div
                       v-if="field.description !== 'Field' && field.fieldtype !== 'Table' && field.fieldname !== 'auto_calculations' && field.description !== 'Disable'"
                       class="w-100 font-11 description-block mt-1">
                       <!-- <span class="fw-semibold"></span><br> -->
                       <span v-html="field.description.replace(/\n/g, '<br>')"></span>
+                    </div>
+                      </div>
                     </div>
 
                     <div v-if="field.fieldtype === 'Table' && field.options !== 'Ezy Item Details' && field.options !== 'ezy item details'" class="field-width">
