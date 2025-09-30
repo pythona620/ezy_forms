@@ -113,8 +113,6 @@ def my_team(property_field):
 @frappe.read_only()
 def get_employee_forms(property_field, employee=None, requested_by_me=False, approved_by_me=False, department=None):
     filters = {"property": property_field}
-    if department:
-        filters["department"] = department
 
     is_admin = frappe.db.get_value("Ezy Employee", frappe.session.user, "is_admin")
     all_employees = my_team(property_field=property_field)
