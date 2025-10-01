@@ -3,28 +3,28 @@ import json
 from frappe.model.db_query import DatabaseQuery
 
 @frappe.whitelist(methods=["GET"])
-def get_doctype_list(doctype, fields:str, filters=None, limit_start:int=None, limit_page_length=None, doc_id=None):
+def get_doctype_list(doctype, fields:str, filters=None, limit_start:int=None, limit_page_length=None):
     # Prevent using '*' in fields
-    
+    if doctype and fields == '["*"]':
+        frappe.throw("Wildcard '*' is not allowed in fields. Please pass required fields explicitly.")
     # if not limit_page_length:
     #     limit_page_length = 20
     # Parse fields into a list
     meta = frappe.get_meta(doctype)
-   
-    # Fetch by doc_id
-    if doc_id:
-        doc = frappe.get_doc(doctype, doc_id).as_dict()
-        
-        # data = [doc.as_dict()] if fields == ["*"] else [{field: doc.get(field) for field in fields}]
-        # frappe.log_error("data",data)
+
+    # Handle Single DocTypes
+    if meta.issingle:
+        doc = frappe.get_doc(doctype)
+        if fields == fields:
+            data = [doc.as_dict()]
+        else:
+            data = [{field: doc.get(field) for field in fields}]
         return {
-            "data": doc,
+            "data": data,
             "total_count": 1,
             "limit_start": 0,
             "limit_page_length": 1
         }
-    if doctype and fields == '["*"]':
-        frappe.throw("Wildcard '*' is not allowed in fields. Please pass required fields explicitly.")
     # Normal DocTypes
     try:
         limit_start = int(limit_start)
