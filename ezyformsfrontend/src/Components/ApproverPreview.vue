@@ -1,10 +1,10 @@
 <template>
 
-  <!-- <button type="button" class="btn btn-dark btn-
+  <section>
+  <button type="button" class="btn btn-dark btn-
                   " @click="toggleEdit">
               {{ isEditable ? 'Cancel' : 'Edit' }}
-            </button> -->
-  <section>
+            </button>
 
     <div v-if="filteredBlocks.length" class="card p-2">
 
@@ -586,32 +586,49 @@
 
 
                           <template
-                            v-if="field.fieldtype !== 'Text' && field.fieldtype !== 'Int' && field.fieldtype !== 'Select' && (blockIndex === 0 || props.readonlyFor === 'true')">
+                            v-if="
+                              !isEditable &&
+                              field.fieldtype !== 'Text' &&
+                              field.fieldtype !== 'Int' &&
+                              field.fieldtype !== 'Select' 
+                            "
+                          >
                             <span
                               class="responsive-text"
                               :class="[
-                                props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0  bg-transparent' : '',
+                                (!isEditable && (props.readonlyFor === 'true' || blockIndex < currentLevel))
+                                  ? 'border-0 bg-transparent'
+                                  : '',
                                 field.value && field.value.length > 10 ? 'wrap-text' : ''
                               ]"
                               :value="field.value"
-                              :type="field.fieldtype">
+                              :type="field.fieldtype"
+                            >
                               {{ field.fieldtype === 'Time' ? formatTime(field.value) : field.value }}
                             </span>
                           </template>
 
-
                           <template v-else>
                             <component
-                              v-if="field.fieldtype !== 'Text' && field.fieldtype !== 'Int' && field.fieldtype !== 'Select' && blockIndex !== 0"  :maxlength="field.fieldtype === 'Phone' ? '10' : '140'"
+                              v-if="
+                                field.fieldtype !== 'Text' &&
+                                field.fieldtype !== 'Int' &&
+                                field.fieldtype !== 'Select'
+                              "
+                              :maxlength="field.fieldtype === 'Phone' ? '10' : '140'"
                               :style="{
                                 width: Math.min(100 + (field.value?.length * 2), 600) + 'px'
-                              }" :disabled="blockIndex < currentLevel || props.readonlyFor === 'true' || field.label === 'Approver'"
-                              :is="getFieldComponent(field.fieldtype)" :class="props.readonlyFor === 'true' || blockIndex < currentLevel
-                                ? 'border-0   bg-transparent'
-                                : ''" :value="field.fieldtype === 'Time' ? formatTime(field.value) : field.value"
+                              }"
+                              :disabled="!isEditable && (blockIndex < currentLevel || props.readonlyFor === 'true' || field.label === 'Approver')"
+                              :is="getFieldComponent(field.fieldtype)"
+                              :class="!isEditable && (props.readonlyFor === 'true' || blockIndex < currentLevel)
+                                ? 'border-0 bg-transparent'
+                                : ''"
+                              :value="field.fieldtype === 'Time' ? formatTime(field.value) : field.value"
                               :type="field.fieldtype"
-                              :readOnly="blockIndex < currentLevel || props.readonlyFor === 'true'"
-                              :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex" @blur="
+                              :readOnly="!isEditable && (blockIndex < currentLevel || props.readonlyFor === 'true')"
+                              :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
+                              @blur="
                                 (event) =>
                                   logFieldValue(
                                     event,
@@ -621,8 +638,11 @@
                                     columnIndex,
                                     fieldIndex
                                   )
-                              " class="form-control previewInputHeight w-100 p-1" />
+                              "
+                              class="form-control previewInputHeight w-100 p-1"
+                            />
                           </template>
+
                         </template>
                     <div
                       v-if="field.description !== 'Field' && field.fieldtype !== 'Table' && field.fieldname !== 'auto_calculations' && field.description !== 'Disable'"
@@ -1477,12 +1497,12 @@ const attachmentFiles = ref([])
 // const currentTime = ref("");
 
 // let timer = null;
-// const isEditable = ref(false);
+const isEditable = ref(false);
 
 // // Example function to toggle edit mode
-// function toggleEdit() {
-//   isEditable.value = !isEditable.value;
-// } 
+function toggleEdit() {
+  isEditable.value = !isEditable.value;
+}  
 
 // function updateTime() {
 //   currentTime.value = new Date()
