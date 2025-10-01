@@ -63,13 +63,11 @@ def my_team(property_field):
 @frappe.read_only()
 def get_employee_forms(property_field, employee=None, requested_by_me=False, approved_by_me=False, department=None):
     filters = {"property": property_field}
-    if department:
-        filters["department"] = department
 
     is_admin = frappe.db.get_value("Ezy Employee", frappe.session.user, "is_admin")
     all_employees = my_team(property_field=property_field)
 
-    if not is_admin and all_employees:
+    if not is_admin and all_employees and  not approved_by_me and not requested_by_me:
         filters["requested_by"] = ["in", all_employees]
 
     # Filter by approvals
@@ -94,7 +92,6 @@ def get_employee_forms(property_field, employee=None, requested_by_me=False, app
 
     if not filters:
         return []
-
     # Fetch workflow requests using DatabaseQuery (parent table)
     workflow_requests = DatabaseQuery("WF Workflow Requests").execute(
         filters=filters,
