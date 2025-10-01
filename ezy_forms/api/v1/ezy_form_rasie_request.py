@@ -583,7 +583,7 @@ def todo_tab(document_type, request_id, property=None, cluster_name=None, curren
 						doctype_ids.wf_generated_request_status =  "In Progress" if int(current_level) < road_map  else "Completed"
 						doctype_ids.save(ignore_permissions=True)
 						workflow_requests.status = "In Progress" if int(current_level) < road_map else "Completed"
-						current_level += 1  if int(current_level) < road_map and not all_approvals_required else  0 # move to next level
+						current_level += 1  if len(approvals_reasons)>1 else 0 
 						workflow_requests.current_level = current_level if current_level<road_map else road_map
 						workflow_requests.save()
 						workflow_requests.reload()	
@@ -592,8 +592,18 @@ def todo_tab(document_type, request_id, property=None, cluster_name=None, curren
 				picking_remaining_roles_for_approval = [remaining_role["role"]  for remaining_role in approvals_reasons  if int(remaining_role["level"]) == int(current_level) and not remaining_role["action"].strip() and not remaining_role["user"].strip() ]
 			else:
 				picking_remaining_roles_for_approval = [remaining_role["role"]  for remaining_role in approvals_reasons  if int(remaining_role["level"]) == int(current_level) and not remaining_role["action"].strip() and not remaining_role["user"].strip() ]
-		
+			view_only_roles = [
+				remaining_role["role"]
+				for remaining_role in approvals_reasons
+				if int(remaining_role["level"]) == int(current_level) and not remaining_role["action"].strip() and not remaining_role["user"].strip() and remaining_role.get("view_only_reportee", 0) == 1
+			]
 			
+			requester_as_a_approver = [
+				remaining_role["role"]
+				for remaining_role in approvals_reasons
+				if int(remaining_role["level"]) == int(current_level) and not remaining_role["action"].strip() and not remaining_role["user"].strip() and remaining_role.get("requester_as_a_approver", 0) == 1
+			]
+
 			role_list = list( set( map( lambda r: r.role, filter(lambda r: int(r.level) == int(current_level), activate_log_roles.reason) ) )  )
 			if current_user_role in picking_remaining_roles_for_approval and not view_only_roles and not requester_as_a_approver and not all_approvals_required and not status and  approvar_excits:
 				doctype_ids = frappe.get_doc(document_type,account_ids)
@@ -611,10 +621,10 @@ def todo_tab(document_type, request_id, property=None, cluster_name=None, curren
 				if not record_exists:
 					activate_log_roles.append("reason", new_record)
 					activate_log_roles.save(ignore_permissions=True)
-				doctype_ids.wf_generated_request_status =  "In Progress" if  int(current_level) < road_map  else "Completed"
+				doctype_ids.wf_generated_request_status =  "In Progress" if   len(approvals_reasons)>1 else "Completed"
 				doctype_ids.save(ignore_permissions=True)
 				workflow_requests.status = "In Progress" if int(current_level) < road_map else "Completed"
-				current_level += 1  if int(current_level) < road_map else 0 # move to next level
+				current_level += 1  if len(approvals_reasons)>1 else 0  # move to next level
 				workflow_requests.current_level = current_level if current_level<road_map else road_map
 				workflow_requests.save()
 				workflow_requests.reload()
