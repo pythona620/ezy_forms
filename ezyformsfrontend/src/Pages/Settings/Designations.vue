@@ -77,7 +77,7 @@ const errorMessage = ref('');
 
 const tableData = ref([]);
 const tableheaders = ref([
-    { th: "Designation", td_key: "role" },
+    { th: "Designation", td_key: "name" },
 ])
 
 function resetDesignation() {
@@ -128,12 +128,12 @@ function designationData() {
     }
 
     const queryParams = {
-        fields: JSON.stringify(["role"]),
+        fields: JSON.stringify(["name"]),
         filters: JSON.stringify(filters),
         limit_page_length: filterObj.value.limitPageLength,
         limit_start: filterObj.value.limit_start,
-        doctype:doctypes.designations,
-        order_by: "`tabWF Roles`.`creation` desc"
+        doctype:doctypes.roles,
+        order_by: "`tabRole`.`creation` desc"
     };
 
         axiosInstance.get(apis.GetDoctypeData, { params: queryParams })
@@ -156,10 +156,10 @@ function designationData() {
 }
 function checkDesignation() {
     const queryParams = {
-        fields: JSON.stringify(["role"]),
+        fields: JSON.stringify(["name"]),
         limit_page_length: "none",
-        order_by: "`tabWF Roles`.`creation` desc",
-        doctype:doctypes.designations,
+        order_by: "`tabRole`.`creation` desc",
+        doctype:doctypes.roles,
     };
     axiosInstance.get(apis.GetDoctypeData, { params: queryParams })
         .then((res) => {
