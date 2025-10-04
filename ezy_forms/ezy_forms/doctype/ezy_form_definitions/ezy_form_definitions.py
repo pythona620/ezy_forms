@@ -490,7 +490,6 @@ def enqueued_add_customized_fields_for_dynamic_doc(fields: List[Dict[str, Any]],
                     existing_df.fieldtype = field.get("fieldtype")
                     existing_df.idx = field.get("idx")
                     existing_df.label = field.get("label")
-                    existing_df.reqd = field.get("reqd")
                     existing_df.default = field.get("value")  # 'value' maps to 'default'
                 else:
                     # append new
@@ -501,7 +500,6 @@ def enqueued_add_customized_fields_for_dynamic_doc(fields: List[Dict[str, Any]],
                         "idx": field.get("idx"),
                         "options": options_value,
                         "label": field.get("label"),
-                        "reqd": field.get("reqd"),
                         "default": field.get("value")
                     })
 
