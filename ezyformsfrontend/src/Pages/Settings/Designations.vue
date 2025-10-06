@@ -182,7 +182,7 @@ function validateDesignation() {
     errorMessage.value = 'Only letters, spaces, and dot (.) are allowed';
   } else if (
     checkDesignationData.value.some(
-      item => item.role?.toLowerCase() === Designation.value.trim().toLowerCase()
+      item => item.name?.toLowerCase() === Designation.value.trim().toLowerCase()
     )
   ) {
     errorMessage.value = 'This designation already exists';
@@ -200,13 +200,19 @@ function SubmitDesignation() {
         axiosInstance
             .post(apis.DataUpdate, payload)
             .then((response) => {
-                if (response) {
-                    //console.log(response);
+                if (response.message.success==true) {
                     designationData();
                     resetDesignation();
                     toast.success("Designation Created Successfully",{ autoClose: 1000 });
                     const modal = bootstrap.Modal.getInstance(document.getElementById('CreateDesignationModal'));
                     modal.hide();
+                } else {
+                    // Parse the server messages
+                    const serverMessages = JSON.parse(response._server_messages);
+                    const parsedMessage = JSON.parse(serverMessages[0]);
+                    // Remove HTML tags from message
+                    const cleanMessage = parsedMessage.message.replace(/<[^>]*>/g, '');
+                    toast.error(cleanMessage, { autoClose: 2000 });
                 }
             })
             .catch((err) => {
