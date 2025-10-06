@@ -206,6 +206,13 @@ function SubmitDesignation() {
                     toast.success("Designation Created Successfully",{ autoClose: 1000 });
                     const modal = bootstrap.Modal.getInstance(document.getElementById('CreateDesignationModal'));
                     modal.hide();
+                } else {
+                    // Parse the server messages
+                    const serverMessages = JSON.parse(response._server_messages);
+                    const parsedMessage = JSON.parse(serverMessages[0]);
+                    // Remove HTML tags from message
+                    const cleanMessage = parsedMessage.message.replace(/<[^>]*>/g, '');
+                    toast.error(cleanMessage, { autoClose: 2000 });
                 }
             })
             .catch((err) => {
