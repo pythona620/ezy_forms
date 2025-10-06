@@ -96,20 +96,11 @@ const viewReport = ref(false);
 const tableData = ref([]);
 const frappeTH = ref([]);
 function ReportsData() {
-    const filters = [
-        ["module", "=", 'ezy_custom_forms']
-    ];
-    const queryParams = {
-        fields: JSON.stringify(["*"]),
-        filters: JSON.stringify(filters),
-
-
-    };
-
-    axiosInstance.get(apis.resource + doctypes.reportsApi, { params: queryParams })
+   
+    axiosInstance.get(apis.getReportList)
         .then((res) => {
-            if (res.data) {
-                tableData.value = res.data;
+            if (res.message) {
+                tableData.value = res.message;
             }
         })
         .catch((error) => {
@@ -127,7 +118,9 @@ function viewPreview(data) {
 
     axiosInstance.get(apis.repostListData, {
         params: {
-            report_name: SelectedReportName.value
+            doctype_name: SelectedReportName.value,
+            source:data.source
+
         }
     })
         .then((res) => {

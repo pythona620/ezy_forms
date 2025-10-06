@@ -19,6 +19,7 @@
   "accessible_departments",
   "form_short_name",
   "form_json",
+  "report_fields",
   "form_status",
   "print_format",
   "is_landscape",
@@ -26,8 +27,7 @@
   "workflow_check",
   "is_predefined_doctype",
   "is_linked",
-  "is_linked_form",
-  "report_fields"
+  "is_linked_form"
  ],
  "fields": [
   {
@@ -159,7 +159,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-27 11:06:21.746037",
+ "modified": "2025-10-06 14:46:03.959294",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
  "name": "Ezy Form Definitions",

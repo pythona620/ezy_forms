@@ -315,9 +315,9 @@ function actionClickedDropDown(row) {
   if (is_admin.value == 1) {
     baseActions.push({ name: 'Edit Form', icon: 'fa-solid fa-edit' });
   }
-  // if (is_admin.value == 1) {
-  //   baseActions.push({ name: 'Create Report', icon: 'fa fa-file-text' });
-  // }
+  if (is_admin.value == 1) {
+     baseActions.push({ name: 'Create Report', icon: 'fa fa-file-text' });
+   }  
 
   actions.value = baseActions;
 
