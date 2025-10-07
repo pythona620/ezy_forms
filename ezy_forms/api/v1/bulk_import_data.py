@@ -37,10 +37,11 @@ def import_bulk_data(file: str | None, doctype: str | None):
             "doctype": "Data Import",
             "reference_doctype": doctype,
             "import_type": "Insert New Records",
+            "import_file": file_doc.file_url,
             "status": "Pending"
         })
         data_import_doc.insert(ignore_permissions=True)
-
+        frappe.db.commit()
         # Preview & logs
         try:
             templet = get_preview_from_template(data_import=data_import_doc.name, import_file=file)
@@ -111,7 +112,7 @@ def import_bulk_data(file: str | None, doctype: str | None):
 
         # ----- Run import -----
         try:
-            form_start_import(data_import_doc.name)
+            start_import(data_import_doc.name)
             frappe.db.commit()
         except Exception as e:
             frappe.log_error(f"Import failed: {str(e)}")
