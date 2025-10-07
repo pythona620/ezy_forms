@@ -390,9 +390,21 @@
                       </span>
                     </template>
                   </VueMultiselect>
-                   <div class="ms-1">
-                         <input type="checkbox" id="isHOD" true-value="1" false-value="0" v-model="createEmployee.is_hod" class="form-check-input mt-1 input-border" />
+                   <div class="d-flex gap-3">
+                    <div class="ms-1">
+                        <input type="checkbox" id="isHOD" true-value="1" false-value="0" v-model="createEmployee.is_hod" class="form-check-input mt-1 input-border" />
                         <label class="font-13 ms-2 " for="isHOD">Is HOD</label>
+                    </div>
+                    <div class="ms-1">
+                      <input type="checkbox" id="is_admin" :true-value='1' :false-value='0'
+                        v-model="createEmployee.is_admin" class="form-check-input mt-1 input-border" />
+                      <label class="font-13 ms-2 " for="is_admin">Is Admin</label>
+                    </div>
+                    <div class="ms-1">
+                      <input type="checkbox" id="is_high_level" :true-value='1' :false-value='0'
+                        v-model="createEmployee.is_high_level" class="form-check-input mt-1 input-border" />
+                      <label class="font-13 ms-2 " for="is_high_level">Is High-level</label>
+                    </div>
                   </div>
                 </div>
                 <div class="col">
@@ -439,7 +451,7 @@
 
                     </div>
                   </div>
-                  <label class="font-13 ps-1" for="reporting_to">Reports To</label>
+                  <label class="font-13 ps-1" for="reporting_to">Reports To<span v-if="createEmployee.is_high_level==0" class="text-danger ps-1">*</span></label>
                   <VueMultiselect v-model="createEmployee.reporting_to"
                     :options="employeeEmails.map((dept) => dept.emp_mail_id)" :multiple="false" :close-on-select="true"
                     :allow-empty="true" :clear-on-select="false" :preserve-search="false" placeholder="Select Reports To"
@@ -1923,7 +1935,7 @@ function employeeData(data) {
 
   const queryParams = {
     fields: JSON.stringify(["acknowledge_on","acknowledgement","company_field","creation","department","designation","emp_code","emp_mail_id",
-    "emp_name","emp_phone","enable","enable_on","is_admin","is_hod","is_web_form","last_ip","last_login","name","profile_image","remarks","reporting_designation","reporting_to","signature"]),
+    "emp_name","emp_phone","enable","enable_on","is_admin","is_hod","is_high_level","is_web_form","last_ip","last_login","name","profile_image","remarks","reporting_designation","reporting_to","signature"]),
     filters: JSON.stringify(filters),
     limit_page_length: filterObj.value.limitPageLength,
     limit_start: filterObj.value.limit_start,
@@ -1969,7 +1981,7 @@ const employeeEmails = ref([]);
 function employeeOptions() {
   const queryParams = {
     fields: JSON.stringify(["acknowledge_on","acknowledgement","company_field","creation","department","designation","emp_code","emp_mail_id",
-    "emp_name","emp_phone","enable","enable_on","is_admin","is_hod","is_web_form","last_ip","last_login","name","profile_image","remarks","reporting_designation","reporting_to","signature"]),
+    "emp_name","emp_phone","enable","enable_on","is_admin","is_hod","is_high_level","is_web_form","last_ip","last_login","name","profile_image","remarks","reporting_designation","reporting_to","signature"]),
     limit_page_length: "none",
     filters: JSON.stringify([["company_field", "=", `${newbusiness.value}`]]),
     doctype:doctypes.EzyEmployeeList,
@@ -2061,6 +2073,13 @@ function createEmpl() {
     });
     return;
   }
+  if(createEmployee.value.is_high_level=== 0 && !createEmployee.value.reporting_to) {
+     toast.error("Please Add the Reports To before updating employee.", {
+      autoClose: 1000,
+      transition: "zoom",
+    });
+    return;
+  }
 
   createEmployee.value.company_field = businessUnit.value;
 
@@ -2126,6 +2145,13 @@ function SaveEditEmp() {
   }
   if(createEmployee.value.designation !== searchText.value) {
      toast.error("Please Add the designation before updating employee.", {
+      autoClose: 1000,
+      transition: "zoom",
+    });
+    return;
+  }
+  if(createEmployee.value.is_high_level=== 0 && !createEmployee.value.reporting_to) {
+     toast.error("Please Add the Reports To before updating employee.", {
       autoClose: 1000,
       transition: "zoom",
     });
