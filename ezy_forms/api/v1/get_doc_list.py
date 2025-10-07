@@ -9,7 +9,21 @@ def get_doctype_list(doctype, fields:str, filters=None, limit_start:int=None, li
     #     limit_page_length = 20
     # Parse fields into a list
     meta = frappe.get_meta(doctype)
-   
+    
+    # Handle Single DocTypes
+    if meta.issingle:
+        doc = frappe.get_doc(doctype)
+        if fields == fields:
+            data = [doc.as_dict()]
+        else:
+            data = [{field: doc.get(field) for field in fields}]
+        return {
+            "data": data,
+            "total_count": 1,
+            "limit_start": 0,
+            "limit_page_length": 1
+        }
+
     # Fetch by doc_id
     if doc_id:
         doc = frappe.get_doc(doctype, doc_id).as_dict()
