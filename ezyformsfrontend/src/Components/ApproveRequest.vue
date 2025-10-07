@@ -45,6 +45,7 @@
                         v-if="tableData?.status === 'Request Cancelled'">
                         Request Rejected
                       </span>
+                      
                     </div>
                     <!-- <span v-if="tableData?.status === 'Completed'"><i
                         class="bi approved-icon bi-check2-circle "></i></span>
@@ -56,7 +57,7 @@
               <div class="position-relative ">
                 <div class="requestPreviewDiv pb-5">
 
-                  <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel"  @attachmentsReady="attachmentsReady = $event"
+                  <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel"  @attachmentsReady="attachmentsReady = $event" :isEditable="isEditable"
                     @updateTableData="approvalChildData" :childData="responseData" :readonly-for="selectedData.readOnly"
                     :childHeaders="tableHeaders" :employee-data="employeeData" @updateField="updateFormData"  @formValidation="isFormValid = $event"  @acknowledgementValidation="isAcknowledgementValid = $event"  />
                     <!-- @attachmentsReady="attachmentsReady = $event" -->
@@ -135,25 +136,45 @@
                           </button>
 
                         </div> -->
-                        <div>
-                            <!-- @click.prevent="handleApprove" -->
-                          <!-- <button :disabled="loading"  type="submit" class="btn btn-success approvebtn"
-                            @click.prevent="ApproverFormSubmission(emittedFormData, 'Approve')">
-                            <span v-if="loading" class="spinner-border spinner-border-sm" role="status"
-                              aria-hidden="true"></span>
-                            <span v-if="!loading"><i class="bi bi-check-lg font-15 me-2"></i><span
-                                class="font-12">Approve</span></span>
-                          </button> -->
-                          <button :disabled="loading"  type="submit" class="btn btn-success approvebtn"
-                            @click.prevent="handleApprove">
-                            
-                            <span v-if="loading" class="spinner-border spinner-border-sm" role="status"
-                              aria-hidden="true"></span>
-                            <span v-if="!loading"><i class="bi bi-check-lg font-15 me-2"></i><span
-                                class="font-12">Approve</span></span>
-                          </button>
+                        <div class="d-flex gap-2">
+    <!-- ✏️ Edit / Discard Button -->
+    <div v-if="allowEdit" class="d-flex justify-content-end">
+      <button
+        type="button"
+        class="btn btn-light font-12 text-dark mb-2"
+        :class="isEditable ? 'btn-outline-secondary' : 'btn-outline-light'"
+        @click="handleEditClick"
+      >
+        <template v-if="!isEditable">
+          <i class="bi bi-pencil-fill"></i> Edit
+        </template>
+        <template v-else>
+          Discard
+        </template>
+      </button>
+    </div>
 
-                        </div>
+    <!-- ✅ Approve / Save & Approve Button -->
+    <button
+  :disabled="loading"
+  type="submit"
+  class="btn btn-success approvebtn"
+  @click.prevent="handleApprove"
+  :class="isEditable ? 'wide-approve' : 'normal-approve'"
+>
+  <span v-if="loading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+  <span v-else>
+    <i class="bi bi-check-lg font-15 me-2"></i>
+    <span class="font-12">
+      {{ isEditable ? "Save & Approve" : "Approve" }}
+    </span>
+  </span>
+</button>
+
+
+    <!-- 🧩 Custom Modal -->
+   
+  </div>
                       </div>
                     </div>
 
@@ -792,7 +813,38 @@
       </div>
     </div>
 
+ <div
+      class="modal modal-confirm fade show d-block"
+      tabindex="-1"
+      role="dialog"
+      v-if="showConfirmModal"
+      style="background-color: rgba(0, 0, 0, 0.4)"
+    >
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content rounded-3 shadow">
+          <div class="modal-header">
+            <h6 class="modal-title fw-bold">Confirm Action</h6>
+            <button type="button" class="btn-close" @click="closeModal"></button>
+          </div>
 
+          <div class="modal-body">
+            <p class="m-0 text-secondary font-15">
+              {{ isEditable ? "Are you sure you want to discard changes?" : "Are you sure you want to edit the form?" }}
+            </p>
+          </div>
+
+          <div class="modal-footer">
+            <button class="btn btn-light btn-sm font-13" @click="closeModal">Cancel</button>
+            <button
+              class="btn btn-dark font-14 px-4"
+              @click="confirmAction"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -854,6 +906,8 @@ const activeTab = ref("activity");
 const linkedActivity = ref([]);
 const isFormValid = ref(false);
 const isAcknowledgementValid = ref(false);
+const isEditable = ref(false);
+const allowEdit = ref(false);
 const resetCommentsValidation = () => {
   // Trim whitespace and validate
   if (ApproverReason.value.trim() !== "" && ApproverReason.value.length <= 140) {
@@ -883,22 +937,62 @@ function formatCreation(dateStr) {
   return `${formattedDate} ${formattedTime}`;
 }
 
+const showConfirmModal = ref(false);
+
+function handleEditClick() {
+  showConfirmModal.value = true;
+}
+
+function closeModal() {
+  showConfirmModal.value = false;
+}
+
+function confirmAction() {
+  if (isEditable.value) {
+    // Currently in edit mode — discard changes
+    window.location.reload(); // refresh page
+  } else {
+    // Enable edit mode
+    isEditable.value = true;
+  }
+  closeModal();
+}
 
 const ApprovePDF = ref(true)
 
 const attachmentsReady = ref(false);
-
-// // Approve button click handler
 const handleApprove = () => {
-  console.log(attachmentsReady.value);
+  // console.log(attachmentsReady.value);
+
+  // 🧩 Check if all attachments are previewed before approval
   if (!attachmentsReady.value) {
     showDefault("⚠️ Please preview all attachments before approving");
     return;
   }
+  // console.log(emittedFormData.value, "pp");
 
 
-  ApproverFormSubmission(emittedFormData, "Approve");
-}; 
+  // 🧠 If editable, treat as Save & Approve
+  if (isEditable.value) {
+    console.log("💾 Save & Approve triggered");
+    ApproverFormSubmission(emittedFormData, "Save & Approve");
+  } else {
+    console.log("✅ Approve triggered");
+    ApproverFormSubmission(emittedFormData, "Approve");
+  } 
+};
+
+// // Approve button click handler
+// const handleApprove = () => {
+//   console.log(attachmentsReady.value);
+//   if (!attachmentsReady.value) {
+//     showDefault("⚠️ Please preview all attachments before approving");
+//     return;
+//   }
+
+
+//   ApproverFormSubmission(emittedFormData, "Approve");
+// }; 
 
 // Format the date for display
 // const formatDate = (dateString) => {
@@ -1496,8 +1590,8 @@ function receivedForMe(data) {
       // console.log(JSON.parse(
       //   tableData.value?.json_columns
       // ).workflow, "workflow");
-      // view_only_reportee.value = JSON.parse(tableData.value?.json_columns)?.workflow[selectedcurrentLevel.value]?.view_only_reportee;
-      // console.log(" wrk === =>", view_only_reportee.value);
+      allowEdit.value = JSON.parse(tableData.value?.json_columns)?.workflow[selectedcurrentLevel.value]?.approver_can_edit === 1 ? true : false;
+      // console.log(" wrk === =>", allowEdit.value);
       tableHeaders.value = JSON.parse(
         tableData.value?.json_columns
       ).child_table_fields;
@@ -1967,16 +2061,22 @@ watch(activityData, (newVal) => {
 
 
 .approvebtn {
-  width: 146px;
-  //height: 30px;
   background: #099819;
   color: white;
-  padding: 5px 15px 5px 15px;
-  gap: 7px;
+  padding: 5px 15px;
   border-radius: 4px;
-  opacity: 0px;
   font-weight: bold;
+  transition: width 0.3s ease;
 }
+
+.normal-approve {
+  width: 146px;
+}
+
+.wide-approve {
+  width: 180px;
+}
+
 
 .requestPreviewDiv {
   height: 75vh;
@@ -2310,6 +2410,17 @@ td {
 @media (max-width: 768px) {
   .offcanvas-end {
     width: 80%; /* full width on mobile */
+  }
+}
+.modal-confirm {
+  animation: fadeIn 0.2s ease-in-out;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 </style>

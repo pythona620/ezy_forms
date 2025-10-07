@@ -1395,7 +1395,7 @@
         <button type="button" class="btn-close bg-light text-reset" data-bs-dismiss="offcanvas"
           aria-label="Close"></button>
       </div>
-      <div class="offcanvas-body p-0">
+      <div class="offcanvas-body add_desig_offCanvas_body p-0">
         <div class="">
           <div class="">
            
@@ -1436,6 +1436,21 @@
               <input v-model="approval_required" type="checkbox" :true-value="1" :false-value="0" id="Approver"  class="me-2 m-0 form-check-input designationCheckBox" />
               <label for="Approver" class="m-0">Approver Required</label>
             </div>
+            <div v-if="allowEditSettingType === true" class="px-2 mt-2 d-flex align-items-center user-select-none">
+              <input
+                v-model="approver_can_edit"
+                type="checkbox"
+                :true-value="1"
+                :false-value="0"
+                id="approver_can_edit"
+                class="me-2 m-0 form-check-input designationCheckBox"
+              />
+              <label for="approver_can_edit" class="m-0">
+               Does the Approver Need to Edit the Form?
+              </label>
+              
+            </div>
+
 
             </div>
             
@@ -1576,12 +1591,14 @@ const all_approvals_required = ref(false);
 const requester_as_a_approver = ref(false);
 const OnRejection = ref('');
 const approval_required=ref('');
+const approver_can_edit=ref('');
 const wrkAfterGetData = ref([]);
 // const hasWorkflowToastShown = ref(false);
 const tableFieldsCache = ref([]);
 const fieldErrors = reactive({});
 // const childtableRows = ref([]);
 const childtableHeaders = ref([]);
+const allowEditSettingType = ref(false);
 // const childtableName = ref("");
 // const childTableresponseData = ref([]);
 const filteredForms = ref([]);
@@ -2218,6 +2235,7 @@ onMounted(() => {
     OwnerOftheForm();
     // console.log(paramId.value, "[[[]]]");
   }
+  sessionStorage.getItem('allow_approver_to_edit_form') == '1' ? allowEditSettingType.value = true : allowEditSettingType.value = false
   let Bu_Unit = localStorage.getItem("Bu");
   filterObj.value.business_unit = Bu_Unit;
   if (route.query.preId === 'PreDefine') {
@@ -3178,6 +3196,7 @@ function addDesignationBtn() {
     type: selectedBlockIndex.value == 0 ? "requestor" : "approver",
     roles: designationValue.value,
     approval_required:approval_required.value,
+    approver_can_edit:approver_can_edit.value,
     fields: block.sections.flatMap(extractFieldnames),
     idx: selectedBlockIndex.value,
   };
@@ -3225,6 +3244,7 @@ function initializeDesignationValue(blockIndex) {
 
   OnRejection.value = currentSetup.on_rejection;
   approval_required.value=currentSetup.approval_required;
+  approver_can_edit.value = currentSetup.approver_can_edit;
   // Check for view_only_reportee flag
   // ViewOnlyReportee.value = currentSetup.view_only_reportee === 1;
   // OnRejection.value = currentSetup.on_rejection
@@ -5173,4 +5193,5 @@ td {
   color: #999;
   background-color: #f9f9f9;
 }
+
 </style>

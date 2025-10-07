@@ -399,7 +399,8 @@ const filterObj = ref({
     limit_start: 0,
     limitPageLength: 100,
 });
-
+const allow_approver_to_edit_form = ref('')
+const buFullData = ref([])
 const EmpCompony = ref([]);
 const selectedScore = ref("");
 const responsibleUnits = ref([])
@@ -591,7 +592,7 @@ function passwordChange() {
 }
 const ezyForms = () => {
     const queryParams = {
-        fields: JSON.stringify(["name", "bu_code"]),
+        fields: JSON.stringify(["name", "bu_code","allow_approver_to_edit_form"]),
         doctype:doctypes.wfSettingEzyForms,
         limit_page_length:"none",
 
@@ -599,9 +600,17 @@ const ezyForms = () => {
     axiosInstance.get(apis.GetDoctypeData, { params: queryParams })
     .then((res) => {
         if (res?.message) {
-            EzyFormsCompanys.value = res.message.data.map((company) => company.bu_code);
+            const data = res.message.data || [];
+            buFullData.value = data; // store full data if needed
+            EzyFormsCompanys.value = data.map((company) => company.bu_code);
             if (EzyFormsCompanys.value.length && !business_unit.value.length) {
                 business_unit.value = EzyFormsCompanys.value[0];
+            }
+              const currentBU = data.find((company) => company.bu_code === business_unit.value);
+            if (currentBU) {
+               
+                allow_approver_to_edit_form.value = currentBU.allow_approver_to_edit_form;
+                sessionStorage.setItem("allow_approver_to_edit_form", currentBU.allow_approver_to_edit_form);
             }
         }
     }).catch((error) => {
@@ -648,7 +657,11 @@ watch(business_unit, (newBu, oldBu) => {
     EzyBusinessUnit.value = newBu;
     localStorage.setItem("Bu", EzyBusinessUnit.value)
     sessionStorage.setItem("Bu", EzyBusinessUnit.value)
-
+    const currentBU = buFullData.value.find((company) => company.bu_code === newBu);
+    if (currentBU) {
+        allow_approver_to_edit_form.value = currentBU.allow_approver_to_edit_form;
+        sessionStorage.setItem("allow_approver_to_edit_form", currentBU.allow_approver_to_edit_form);
+    }
     if (route.path.includes('forms') && newBu !== oldBu) {
         gettingDepartmentNames(true);
     } else if (route.path.includes('forms') && newBu === oldBu) {
