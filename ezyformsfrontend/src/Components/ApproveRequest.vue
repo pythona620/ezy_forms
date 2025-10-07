@@ -975,7 +975,7 @@ const handleApprove = () => {
   // 🧠 If editable, treat as Save & Approve
   if (isEditable.value) {
     console.log("💾 Save & Approve triggered");
-    ApproverFormSubmission(emittedFormData, "Save & Approve");
+    ApproverFormSubmission(emittedFormData, "Approve");
   } else {
     console.log("✅ Approve triggered");
     ApproverFormSubmission(emittedFormData, "Approve");

@@ -702,7 +702,7 @@
                               }"
                               :disabled="isFieldAlwaysDisabled(field)"
                               :is="getFieldComponent(field.fieldtype)"
-                              :class="!isEditable && !['Approver'].includes(field.label) && (props.readonlyFor === 'true' || blockIndex < currentLevel)
+                              :class="!isEditable  && (props.readonlyFor === 'true' || blockIndex < currentLevel)
                                 ? 'border-0 bg-transparent'
                                 : ''"
                               :value="field.fieldtype === 'Time' ? formatTime(field.value) : field.value"
