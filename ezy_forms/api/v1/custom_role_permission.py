@@ -3,9 +3,18 @@ from frappe.core.page.permission_manager.permission_manager import (
     get_standard_permissions, reset, get_permissions
 )
 
+from frappe.query_builder import DocType
+
 @frappe.whitelist()
 def assign_custom_permissions(doc, method):
     """Enqueue the assignment of custom permissions when a Role is created."""
+    # Ensure WF Role exists
+    if not frappe.db.exists("WF Roles", doc.name):
+        frappe.get_doc({
+            "doctype": "WF Roles",
+            "role": doc.name
+        }).insert(ignore_permissions=True)
+
     frappe.enqueue(
         "ezy_forms.api.v1.custom_role_permission.assign_custom_permissions_job",
         role_name=doc.name,
@@ -15,15 +24,7 @@ def assign_custom_permissions(doc, method):
 
 @frappe.whitelist()
 def assign_custom_permissions_job(role_name: str):
-    """Assign custom permissions to the given role across selected modules."""
-
-    # Ensure WF Role exists
-    if not frappe.db.exists("WF Roles", role_name):
-        frappe.get_doc({
-            "doctype": "WF Roles",
-            "role": role_name
-        }).insert(ignore_permissions=True)
-
+    """Assign custom permissions to the given role across selected modules."""   
     custom_modules = ["Ezy Flow", "Ezy Forms", "Form Templates"]
 
     frappe.set_user("Administrator")  # ensure admin context
@@ -31,9 +32,15 @@ def assign_custom_permissions_job(role_name: str):
     for module in custom_modules:
         if not frappe.db.exists("Module Def", module):
             continue
-
         # Get all doctypes in the module
-        doctypes = frappe.get_all("DocType", filters={"module": module}, pluck="name")
+        # doctypes = frappe.get_all("DocType", filters={"module": module}, pluck="name")
+        doctype = DocType("DocType")
+        query = (
+            frappe.qb.from_(doctype)
+            .select(doctype.name)
+            .where(doctype.module == module)
+        )
+        doctypes = [r[0] for r in query.run()]
 
         for doc_name in doctypes:
             # Skip if permission already exists
