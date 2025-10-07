@@ -127,7 +127,7 @@ def get_employee_forms(property_field, employee=None, requested_by_me=False, app
             "WF Comments",
             filters={
                 "user": employee,
-                "action": ["in", ["Approved", "Request Cancelled"]]
+                "action": ["in", ["Approved", "Rejected"]]
             },
             fields=["parent"]
         )
