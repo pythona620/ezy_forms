@@ -14,6 +14,7 @@ def assign_custom_permissions(doc, method):
             "doctype": "WF Roles",
             "role": doc.name
         }).insert(ignore_permissions=True)
+        frappe.db.commit()
 
     frappe.enqueue(
         "ezy_forms.api.v1.custom_role_permission.assign_custom_permissions_job",
