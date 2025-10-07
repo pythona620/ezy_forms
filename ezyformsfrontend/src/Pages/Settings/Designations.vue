@@ -77,7 +77,7 @@ const errorMessage = ref('');
 
 const tableData = ref([]);
 const tableheaders = ref([
-    { th: "Designation", td_key: "name" },
+    { th: "Designation", td_key: "role" },
 ])
 
 function resetDesignation() {
@@ -128,12 +128,12 @@ function designationData() {
     }
 
     const queryParams = {
-        fields: JSON.stringify(["name"]),
+        fields: JSON.stringify(["role"]),
         filters: JSON.stringify(filters),
         limit_page_length: filterObj.value.limitPageLength,
         limit_start: filterObj.value.limit_start,
-        doctype:doctypes.roles,
-        order_by: "`tabRole`.`creation` desc"
+        doctype:doctypes.designations,
+        order_by: "`tabWF Roles`.`creation` desc"
     };
 
         axiosInstance.get(apis.GetDoctypeData, { params: queryParams })
@@ -156,10 +156,10 @@ function designationData() {
 }
 function checkDesignation() {
     const queryParams = {
-        fields: JSON.stringify(["name"]),
+        fields: JSON.stringify(["role"]),
         limit_page_length: "none",
-        order_by: "`tabRole`.`creation` desc",
-        doctype:doctypes.roles,
+        order_by: "`tabWF Roles`.`creation` desc",
+        doctype:doctypes.designations,
     };
     axiosInstance.get(apis.GetDoctypeData, { params: queryParams })
         .then((res) => {
@@ -182,7 +182,7 @@ function validateDesignation() {
     errorMessage.value = 'Only letters, spaces, and dot (.) are allowed';
   } else if (
     checkDesignationData.value.some(
-      item => item.name?.toLowerCase() === Designation.value.trim().toLowerCase()
+      item => item.role?.toLowerCase() === Designation.value.trim().toLowerCase()
     )
   ) {
     errorMessage.value = 'This designation already exists';
