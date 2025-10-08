@@ -20,6 +20,7 @@ from contextlib import contextmanager
 
 # Import custom modules
 from ezy_forms.ezy_forms.doctype.ezy_form_definitions.linking_flow_and_forms import enqueing_creation_of_roadmap
+from ezy_forms.api.v1.ezy_web_forms import create_qr_for_web_view
 
 
 class EzyFormDefinitions(Document):
@@ -299,7 +300,7 @@ def enqueued_add_dynamic_doctype(
                 _create_form_definitions(
                     form_category, accessible_departments, form_name, form_short_name,
                     form_status, owner_of_the_form, naming_series, business_unit,
-                    has_workflow, is_linked_form, is_linked, is_predefined_doctype
+                    has_workflow, is_linked_form, is_linked, is_predefined_doctype, as_web_view=kwargs.get('as_web_view', 0)
                 )
 
                 # Add default static fields
@@ -396,7 +397,7 @@ def _create_form_definitions(
     form_short_name: str, form_status: str, owner_of_the_form: str,
     naming_series: str, business_unit: str, has_workflow: Optional[str],
     is_linked_form: Optional[str], is_linked: Optional[int],
-    is_predefined_doctype: Optional[int]
+    is_predefined_doctype: Optional[int], as_web_view,
 ):
     """Create form definitions efficiently."""
     form_defs = frappe.get_doc({
@@ -415,10 +416,15 @@ def _create_form_definitions(
         "has_workflow": has_workflow or '',
         "is_linked_form": is_linked_form or '',
         "is_linked": is_linked,
-        "is_predefined_doctype": is_predefined_doctype
+        "is_predefined_doctype": is_predefined_doctype,
+        "as_web_view": as_web_view
     })
     form_defs.insert(ignore_permissions=True)
 
+    
+    # creating Qr For Web View forms
+    if as_web_view == 1:
+        create_qr_for_web_view(form_name=form_name)
 
 def _add_default_static_fields(doctype: str):
     """Add default static fields to DocType."""
@@ -1262,7 +1268,6 @@ def monitor_performance(func):
             raise
     
     return wrapper
-
 
 # Apply performance monitoring to critical functions
 add_dynamic_doctype = monitor_performance(add_dynamic_doctype)
