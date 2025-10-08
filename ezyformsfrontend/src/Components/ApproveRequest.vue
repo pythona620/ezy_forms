@@ -57,7 +57,7 @@
               <div class="position-relative ">
                 <div class="requestPreviewDiv pb-5">
 
-                  <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel"  @attachmentsReady="attachmentsReady = $event" :isEditable="isEditable"
+                  <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel"  @attachmentsReady="attachmentsReady = $event" :isEditable="isEditable" @field-change="handleFieldChanges"
                     @updateTableData="approvalChildData" :childData="responseData" :readonly-for="selectedData.readOnly"
                     :childHeaders="tableHeaders" :employee-data="employeeData" @updateField="updateFormData"  @formValidation="isFormValid = $event"  @acknowledgementValidation="isAcknowledgementValid = $event"  />
                     <!-- @attachmentsReady="attachmentsReady = $event" -->
@@ -312,7 +312,7 @@
                       Download Workorder
                     </button>  -->
 
-                    <button type="button" class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto "
+                    <button v-if="tableData.status !== 'Completed'" type="button" class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto "
                       data-bs-toggle="modal" data-bs-target="#pdfView" @click="viewasPdfView">
                       Preview
                     </button>
@@ -351,7 +351,17 @@
                         <span class="strong-content">{{ formatCreation(item.time) }}</span><br />
                         <span class="strong-content fw-bolder">{{ item.user }}</span><br />
                         <span>{{ item.role }}</span><br />
-                        <span class="font-12 text-secondary">{{ item.reason || "N/A" }}</span>.
+                        <span class="font-12 text-secondary">{{ item.reason || "N/A" }}</span>.<br/>
+                        <button
+                              v-if="item.field_changes"
+                              class="btn btn-sm text-decoration-underline font-13"
+                              type="button"
+                              data-bs-toggle="offcanvas"
+                              data-bs-target="#changesOffcanvas"
+                              @click="openChanges(item)"
+                            >
+                              Changes
+                            </button>
 
                       </p>
                     </div>
@@ -515,7 +525,53 @@
         </div>
       </div>
     </div>
+  <div
+      class="offcanvas offcanvas-end "
+      tabindex="-1"
+      id="changesOffcanvas"
+      aria-labelledby="changesOffcanvasLabel"
+    >
+      <div class="offcanvas-header">
+        <h6 class="offcanvas-title" id="changesOffcanvasLabel">
+          Field Changes
+        </h6>
+        <button
+          type="button"
+          class="btn-close text-reset"
+          data-bs-dismiss="offcanvas"
+          aria-label="Close"
+        ></button>
+      </div>
 
+      <div class="offcanvas-body">
+        <table
+          v-if="selectedItem && selectedItem.field_changes"
+          class="table table-sm table-bordered font-12"
+        >
+          <thead class="table-light">
+            <tr>
+              <th>Field</th>
+              <th>Original Value</th>
+              <th>New Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="(change, key) in parsedChanges"
+              :key="key"
+            >
+              <td>{{ key }}</td>
+              <td class="old-value">{{ change.oldValue || '-' }}</td>
+              <td class="new-value">{{ change.newValue || '-' }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div v-else class="text-center text-muted font-12">
+          No field changes found.
+        </div>
+      </div>
+    </div>
 
     <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
       <div class="offcanvas-header">
@@ -688,7 +744,17 @@
                     <span class="strong-content">{{ formatCreation(item.time) }}</span><br />
                     <span class="strong-content">{{ item.user_name }}</span><br />
                     <span>{{ item.role }}</span><br />
-                    <span class="font-12 text-secondary">{{ item.reason || "N/A" }}</span>.
+                    <span class="font-12 text-secondary">{{ item.reason || "N/A" }}</span>.<br/>
+                     <button
+                              v-if="item.field_changes"
+                              class="btn btn-sm border-0 text-decoration-underline font-12 mt-2"
+                              type="button"
+                              data-bs-toggle="offcanvas"
+                              data-bs-target="#changesOffcanvas"
+                              @click="openChanges(item)"
+                            >
+                              Changes
+                            </button>
 
                   </p>
                 </div>
@@ -908,6 +974,7 @@ const isFormValid = ref(false);
 const isAcknowledgementValid = ref(false);
 const isEditable = ref(false);
 const allowEdit = ref(false);
+const changedFields = ref([]);
 const resetCommentsValidation = () => {
   // Trim whitespace and validate
   if (ApproverReason.value.trim() !== "" && ApproverReason.value.length <= 140) {
@@ -959,7 +1026,11 @@ function confirmAction() {
 }
 
 const ApprovePDF = ref(true)
-
+function handleFieldChanges(updatedChanges) {
+  console.log("Received from child:", updatedChanges);
+  changedFields.value = updatedChanges;
+  // You can store or process these values as needed
+}
 const attachmentsReady = ref(false);
 const handleApprove = () => {
   // console.log(attachmentsReady.value);
@@ -970,7 +1041,7 @@ const handleApprove = () => {
     return;
   }
   // console.log(emittedFormData.value, "pp");
-
+console.log(changedFields.value);
 
   // 🧠 If editable, treat as Save & Approve
   if (isEditable.value) {
@@ -1069,7 +1140,21 @@ function approvalChildData(data) {
   childtablesData.value = data;
   // console.log(data);
 }
+const selectedItem = ref(null);
 
+const openChanges = (item) => {
+  selectedItem.value = item;
+};
+
+const parsedChanges = computed(() => {
+  if (!selectedItem.value?.field_changes) return {};
+  try {
+    return JSON.parse(selectedItem.value.field_changes);
+  } catch (error) {
+    console.error("Invalid JSON:", error);
+    return {};
+  }
+});
 
 
 const formatAction = (action) => {
@@ -1307,6 +1392,7 @@ function approvalStatusFn(dataObj, type) {
     cluster_name: null,
     url_for_approval_id: "",
     current_level: tableData.value.current_level,
+    field_changes:Object.keys(changedFields.value).length ? changedFields.value : null,
   };
 
   axiosInstance
@@ -1901,7 +1987,7 @@ function Wfactivitylog(name) {
   axiosInstance
     .post(apis.get_wf_activate_log, FormId)
     .then((responce) => {
-      // console.log(responce, "activity log data"); 
+      console.log(responce, "activity log data");  
       activityData.value = responce.message || []; // Ensure it's always an array
 
     })
@@ -2422,5 +2508,13 @@ td {
   to {
     opacity: 1;
   }
+}
+.old-value {
+  background-color: #fff0f0 !important;
+}
+
+/* 🟩 New value background */
+.new-value {
+  background-color: #e4f5e9 !important;
 }
 </style>

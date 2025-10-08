@@ -68,13 +68,12 @@
                                                     @update:modelValue="(val) => handleSelectChange(val, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
                                                     class="font-11 multiselect" /> -->
 
-                                                    <Vue3Select v-tooltip.top="row[field.fieldname]"  class="font-11" style="min-width: 200px;" :append-to-body="true"
+                                                    <Vue3Select v-tooltip.top="row[field.fieldname]"  class="font-11" style="min-width: 200px;"
                                                                                    :multiple="field.fieldtype === 'Table MultiSelect' " :disabled="field.description === 'Disable'"
                                                     :maxlength="getMaxLength(field)"
                                                     :options="field.options?.split('\n').filter(opt => opt.trim() !== '') || []"
                                                     :modelValue="field.value" placeholder="Select"
                                                     @update:modelValue="(val) => handleSelectChange(val, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)" />
-
 
                                             </template>
 
@@ -329,7 +328,7 @@
                                                 </template>
 
                                             <template v-else-if="field.fieldtype == 'Check' && field.fieldname !== 'auto_calculations'">
-                                                <input type="checkbox" :value="field.value" :checked="field.value"
+                                                <input type="checkbox" :value="field.value" :checked="field.value"  :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
                                                     :placeholder="'Enter ' + field.label" :name="'field-' +
                                                         sectionIndex +
                                                         '-' +
@@ -3129,7 +3128,7 @@ input:focus{
 .v-select * {
   box-sizing: border-box;
   font-size: 12px !important;
-  height: 32px !important;
+//   height: 32px !important;
   // background-color: white;
 }
 
@@ -3189,6 +3188,26 @@ input:focus{
 
 .file-preview:hover .remove-btn {
   display: block;
+}
+.form-check-input{
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  box-shadow: none !important;
+  outline: none !important;
+  transition: all 0.2s ease-in-out;
+
+
+}
+.form-check-input:focus {
+  box-shadow: none !important;
+  outline: none !important;
+  border: 1px solid blue !important;
+}
+.vue3-select .vs__dropdown-menu {
+  position: absolute;  /* ensure dropdown is above parent */
+  z-index: 9999;       /* make sure it’s on top */
 }
 
 </style>

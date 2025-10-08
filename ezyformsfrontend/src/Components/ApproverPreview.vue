@@ -21,7 +21,7 @@
 
     <div v-if="filteredBlocks.length" class="card mb-5 p-2">
 
-      <div v-for="(block, blockIndex) in filteredBlocks" :key="blockIndex" class="block-container  rounded-2" :class="blockIndex < currentLevel ? 'my-2':''">
+      <div v-for="(block, blockIndex) in filteredBlocks" :key="blockIndex" class="block-container  rounded-2" :class="blockIndex < currentLevel ? 'my-0':''">
         <div v-if="blockIndex === 0"><label class=" fw-bold Request_ID " :style="{ 'padding-left': '12px' }">Request ID: </label> <span class="Request_ID">
             {{ selectedData.formname.replace(/_/g, ' ') }}</span> </div>
           <!-- <div><span class="font-12 ps-2 border-bottom"> {{
@@ -195,7 +195,7 @@
 
                        <template v-else-if="field.fieldtype === 'Check' && field.fieldname !== 'auto_calculations'">
                             <input
-                              type="checkbox"
+                              type="checkbox" :id="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
                               :checked="field.value == 1 || field.value === true || field.value === '1' || field.value === 'true'"
                              :disabled="!isEditable && (props.readonlyFor === 'true' || blockIndex < currentLevel)"
                               :name="'field-' + sectionIndex + '-' + columnIndex + '-' + fieldIndex"
@@ -208,7 +208,7 @@
                                   columnIndex,
                                   fieldIndex
                                 )"
-                              class="form-check-input fs-6 previewInputHeight font-10 border-dark"
+                              class="form-check-input  fs-6 previewInputHeight font-10 "
                             />
                           </template>
                                         <template v-else-if="field.fieldtype === 'Link'">
@@ -580,7 +580,7 @@
                                 class="bi bi-link-45deg font-15"></i></button> -->
                           <template v-else-if="field.fieldtype === 'Datetime'">
                             <!-- Read-only display -->
-                            <template v-if="!isEditable && (props.readonlyFor === 'true' || blockIndex < currentLevel)">
+                            <template v-if="(!isEditable || ['Requested On' ,'Approved On'].includes(field.label))&& (props.readonlyFor === 'true' || blockIndex < currentLevel)">
                               <span
                                 style="font-size: 12px;"
                                 class="border-0 bg-transparent"
@@ -667,11 +667,14 @@
 
                           <template
                             v-if="
-                              !isEditable &&
+                              (
+                                  !isEditable || 
+                                  ['Requested By'].includes(field.label) // ✅ show span even in edit mode for Requested By
+                                ) &&
                               field.fieldtype !== 'Text' &&
                               field.fieldtype !== 'Int' &&
                               field.fieldtype !== 'Select' && field.value !== '' && field.value !== null && field.value !== undefined && !['Approver'].includes(field.label) &&
-    blockIndex < currentLevel
+                   blockIndex < currentLevel 
                             "
                           >
                             <span
@@ -688,13 +691,13 @@
                               {{ field.fieldtype === 'Time' ? formatTime(field.value) : field.value }}
                             </span>
                           </template>
-
+ 
                           <template v-else>
                             <component
                               v-if="
                                 field.fieldtype !== 'Text' &&
                                 field.fieldtype !== 'Int' &&
-                                field.fieldtype !== 'Select'
+                                field.fieldtype !== 'Select' 
                               "
                               :maxlength="field.fieldtype === 'Phone' ? '10' : '140'"
                               :style="{
@@ -702,7 +705,7 @@
                               }"
                               :disabled="isFieldAlwaysDisabled(field)"
                               :is="getFieldComponent(field.fieldtype)"
-                              :class="!isEditable  && (props.readonlyFor === 'true' || blockIndex < currentLevel)
+                              :class="(!isEditable || ['Requested By', 'Approver'].includes(field.label))  && (props.readonlyFor === 'true' || blockIndex < currentLevel)
                                 ? 'border-0 bg-transparent'
                                 : ''"
                               :value="field.fieldtype === 'Time' ? formatTime(field.value) : field.value"
@@ -1550,7 +1553,8 @@ const props = defineProps({
   isEditable: {
     type: Boolean,
     default: false
-  }
+  },
+  
 });
 const route = useRoute();
 const router = useRouter();
@@ -1584,7 +1588,7 @@ const attachmentFiles = ref([])
 const linkSearchResults = ref([]);
 // let timer = null;
 const isEditable = computed(() => props.isEditable);
-
+const fieldChanges = ref({}) 
 // // Example function to toggle edit mode
 function toggleEdit() {
   isEditable.value = !isEditable.value;
@@ -2417,7 +2421,7 @@ const logFieldValue = (
     props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
       columnIndex
     ].fields[fieldIndex];
-
+const oldValue = field.value;
   if (eve.target.files && eve.target.files.length > 0) {
     let files = Array.from(eve.target.files); // Convert FileList to an array
 
@@ -2484,6 +2488,18 @@ const logFieldValue = (
     }
 
     field["value"] = inputValue;
+  }
+    const newValue = field.value;
+  const key = field.label || field.fieldname;
+
+  // Only store if the value actually changed
+  if (oldValue !== newValue) {
+    fieldChanges.value[key] = {
+      oldValue,
+      newValue,
+    };
+    console.log("Field change recorded:", fieldChanges.value);
+    emit('field-change', fieldChanges.value);
   }
   validateField(
     field,
@@ -2779,6 +2795,15 @@ async function downloadAttachment(url, filename) {
     link.download = filename;
     link.click();
     window.URL.revokeObjectURL(link.href);
+     previewedAttachments.value.add(url);
+
+    // ✅ Check if ALL attachments are downloaded
+    const allDownloaded = allAttachments.value.every((f) =>
+      previewedAttachments.value.has(f)
+    );
+
+    // ✅ Emit event like previewAttachment
+    emit("attachmentsReady", allDownloaded);
   } catch (err) {
     alert("Unable to download file: " + err.message);
   }
@@ -2911,7 +2936,22 @@ const isImageVendor = (url) => {
 //       position: absolute; top: -4px;
 // }
 
+.form-check-input{
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  box-shadow: none !important;
+  outline: none !important;
+  transition: all 0.2s ease-in-out;
 
+
+}
+.form-check-input:focus {
+  box-shadow: none !important;
+  outline: none !important;
+  border: 1px solid blue !important;
+}
 .responsive-text {
   font-size: 12px; /* default for mobile */
 }
@@ -3369,4 +3409,5 @@ input:focus, textarea:focus, select:focus {
   outline: 0;
   box-shadow: none;
 }
+
 </style>
