@@ -244,7 +244,7 @@ const settingsSideBarData = [
     { name: 'Email Queue' , icon: 'bi bi-file-earmark-text', route: 'emailqueue' },
     { name: 'Form Creation' , icon: 'bi bi-file-earmark-text', route: 'CreateForm' },
     { name: 'Form Templates', icon: 'bi bi-file-earmark-text', route: 'predefinedforms' },
-    { name: 'Vendor Comparison', icon: 'bi bi-file-earmark-text', route: 'vendorcomparison' },
+    // { name: 'Vendor Comparison', icon: 'bi bi-file-earmark-text', route: 'vendorcomparison' },
     { name: 'Acknowledgement' , icon: 'bi bi-file-earmark-text', route: 'acknowledgement' },
     { name: 'Email Template' , icon: 'bi bi-file-earmark-text', route: 'emailtemplate' },
     { name: 'Password Policy' , icon: 'bi bi-lock', route: 'passwordpolicy' },
@@ -334,10 +334,10 @@ const filteredSettingsGroups = computed(() => {
             forthSettingsGroup: settingsSideBarData.slice(3, 6),
             fifthSettingsGroup: settingsSideBarData.slice(6,7),
             sixthGroup: settingsSideBarData.slice(7,10),
-            seventhGroup: settingsSideBarData.slice(10,13),
-            eightGroup: settingsSideBarData.slice(13,14),
-            ninthGroup: settingsSideBarData.slice(14,15),
-            tenthGroup: settingsSideBarData.slice(15),
+            seventhGroup: settingsSideBarData.slice(10,12),
+            eightGroup: settingsSideBarData.slice(12,13),
+            ninthGroup: settingsSideBarData.slice(13,14),
+            tenthGroup: settingsSideBarData.slice(14),
 
 
         }
