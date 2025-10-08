@@ -21,6 +21,8 @@
   "send_form_in_email",
   "send_daily_alerts",
   "signature_required",
+  "attachment_view_required",
+  "vender_comparison_form",
   "section_break_ftig",
   "letter_head"
  ],
@@ -113,6 +115,18 @@
    "fieldname": "signature_required",
    "fieldtype": "Check",
    "label": "Signature Required"
+  },
+  {
+   "default": "0",
+   "fieldname": "attachment_view_required",
+   "fieldtype": "Check",
+   "label": "Attachment View Required"
+  },
+  {
+   "default": "0",
+   "fieldname": "vender_comparison_form",
+   "fieldtype": "Check",
+   "label": "Vender Comparison Form"
   }
  ],
  "index_web_pages_for_search": 1,
