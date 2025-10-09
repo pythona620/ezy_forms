@@ -2209,7 +2209,7 @@ const Predata = ref([
   }
 ]);
 onMounted(() => {
-  // deptData();
+  deptData();
   paramId.value = route.params.paramid || "new";
   // console.log(paramId.value, "ggggg");
 

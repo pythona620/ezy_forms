@@ -1,8 +1,9 @@
+import io
 import frappe
 import pandas as pd
 from frappe import _
-from frappe.core.doctype.data_import.data_import import start_import, get_import_logs, get_preview_from_template
-from frappe.utils.file_manager import get_file
+from frappe.core.doctype.data_import.data_import import start_import, get_import_logs, get_preview_from_template,form_start_import
+from frappe.utils.file_manager import save_file
 
 @frappe.whitelist(allow_guest=True)
 def import_bulk_data(file: str | None, doctype: str | None):
@@ -25,119 +26,91 @@ def import_bulk_data(file: str | None, doctype: str | None):
             frappe.response["data"] = {"message": _("Importing data for this doctype is not allowed"), "success": False}
             return
 
-        # Get the uploaded file
+        # Locate uploaded file
         file_doc = frappe.get_doc("File", {"file_url": file})
         if not file_doc:
             frappe.response["data"] = {"message": _("Invalid file URL"), "success": False}
             return
 
-        # Create Data Import Doc
+        # Create Data Import doc
         data_import_doc = frappe.get_doc({
             "doctype": "Data Import",
             "reference_doctype": doctype,
             "import_type": "Insert New Records",
+            "import_file": file_doc.file_url,
             "status": "Pending"
         })
         data_import_doc.insert(ignore_permissions=True)
-        frappe.db.set_value("Data Import", data_import_doc.name, "import_file", file)
-        frappe.db.set_value("Data Import", data_import_doc.name, "status", "Pending")  # keep it pending
         frappe.db.commit()
-
-        # Get template preview and logs
+        # Preview & logs
         try:
             templet = get_preview_from_template(data_import=data_import_doc.name, import_file=file)
             get_logs = get_import_logs(data_import=data_import_doc.name)
         except Exception as e:
-
             frappe.response["data"] = {"message": _("Preview/Logs error: ") + str(e), "success": False}
             return
 
-        template_warnings = [warning["message"] for warning in templet.get("warnings", [])]
+        template_warnings = [w["message"] for w in templet.get("warnings", [])]
         log_warnings = get_logs.get("messages", []) if isinstance(get_logs, dict) else []
 
-        # Handle missing Ezy Departments and WF Roles
-        missing_departments = []
-        created_departments = []
-        missing_roles = []
-        created_roles = []
+        # ----- Read Excel with pandas -----
+        try:
+            df = pd.read_excel(file_doc.get_full_path(), engine="openpyxl")
+        except Exception as e:
+            frappe.response["data"] = {"message": _("Error reading Excel file: ") + str(e), "success": False}
+            return
 
-        for warning in template_warnings:
-            if "do not exist for Ezy Departments" in warning:
-                dept_list = warning.split(":")[1].strip().split(", ")
-                missing_departments.extend(dept_list)
-            elif "do not exist for WF Roles" in warning:
-                role_list = warning.split(":")[1].strip().split(", ")
-                missing_roles.extend(role_list)
+        # ----- Normalize Department using Company ONLY for Ezy Employee -----
+        if doctype == "Ezy Employee":
+            cols_lower = {c.lower().strip(): c for c in df.columns}
+            company_col, department_col = None, None
 
-        # Read Excel
-        ignored, content = get_file(file_doc.file_url)
-        df = pd.read_excel(content, engine="openpyxl")
+            for key in ("company", "company name", "company_field", "company field"):
+                if key in cols_lower:
+                    company_col = cols_lower[key]
+                    break
 
-        # Create missing departments
-        for dept_code_raw in missing_departments:
-            try:
-                if "-" not in dept_code_raw:
-                    frappe.log_error(f"Invalid department format: {dept_code_raw}")
-                    continue
+            for key in ("department", "dept", "department name"):
+                if key in cols_lower:
+                    department_col = cols_lower[key]
+                    break
 
-                parts = dept_code_raw.split("-", 1)
-                business_unit = parts[0]
-                department_code = parts[1]
-                department_name = department_code
+            if company_col and department_col:
+                def fix_department(row):
+                    comp = str(row[company_col]).strip() if pd.notna(row[company_col]) else ""
+                    dept = str(row[department_col]).strip() if pd.notna(row[department_col]) else ""
+                    if not dept:
+                        return dept
+                    if comp and not dept.startswith(f"{comp}-"):
+                        return f"{comp}-{dept}"
+                    return dept
 
-                if not frappe.db.exists("Ezy Departments", {"department_code": department_code}):
-                    frappe.get_doc({
-                        "doctype": "Ezy Departments",
-                        "department_code": department_code,
-                        "department_name": department_name,
-                        "business_unit": business_unit
-                    }).insert(ignore_permissions=True)
-                    created_departments.append(dept_code_raw)
+                df[department_col] = df.apply(fix_department, axis=1)
 
-            except Exception as e:
-                frappe.log_error(f"Error creating department from {dept_code_raw}: {str(e)}")
+        # ----- Save modified Excel and set it on Data Import -----
+        try:
+            buffer = io.BytesIO()
+            with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+                df.to_excel(writer, index=False)
+            buffer.seek(0)
 
-        # Create missing roles
-        for role in missing_roles:
-            try:
-                if not frappe.db.exists("Role", {"name": role}):
-                    frappe.get_doc({
-                        "doctype": "Role",
-                        "role_name": role
-                    }).insert(ignore_permissions=True)
+            new_filename = f"normalized_{file_doc.file_name or 'import.xlsx'}"
+            saved = save_file(
+                new_filename,
+                buffer.getvalue(),
+                "Data Import",
+                data_import_doc.name,
+                is_private=0
+            )
+            frappe.db.set_value("Data Import", data_import_doc.name, "import_file", saved.file_url)
+            frappe.db.set_value("Data Import", data_import_doc.name, "status", "Pending")
+            start_import(data_import_doc.name)
+            frappe.db.commit()
+        except Exception as e:
+            frappe.response["data"] = {"message": _("Failed to save normalized file: ") + str(e), "success": False}
+            return
 
-                if not frappe.db.exists("WF Roles", {"role": role}):
-                    frappe.get_doc({
-                        "doctype": "WF Roles",
-                        "role": role,
-                        "role_name": role
-                    }).insert(ignore_permissions=True)
-
-                created_roles.append(role)
-            except Exception as e:
-                frappe.log_error(f"Error creating WF Role {role}: {str(e)}")
-
-        # Clean up warnings
-        cleaned_template_warnings = []
-        for warning in template_warnings:
-            if "do not exist for Ezy Departments" in warning:
-                dept_part = warning.split(":")[1].strip()
-                remaining_depts = [d for d in dept_part.split(", ") if d not in created_departments]
-                if remaining_depts:
-                    cleaned_template_warnings.append(
-                        f"The following values do not exist for Ezy Departments: {', '.join(remaining_depts)}"
-                    )
-            elif "do not exist for WF Roles" in warning:
-                role_part = warning.split(":")[1].strip()
-                remaining_roles = [r for r in role_part.split(", ") if r not in created_roles]
-                if remaining_roles:
-                    cleaned_template_warnings.append(
-                        f"The following values do not exist for WF Roles: {', '.join(remaining_roles)}"
-                    )
-            else:
-                cleaned_template_warnings.append(warning)
-
-        # Start import
+        # ----- Run import -----
         try:
             start_import(data_import_doc.name)
             frappe.db.commit()
@@ -146,16 +119,18 @@ def import_bulk_data(file: str | None, doctype: str | None):
             frappe.response["data"] = {
                 "message": _("Import failed: ") + str(e),
                 "success": False,
-                "template_warnings": cleaned_template_warnings,
+                "template_warnings": template_warnings,
                 "log_warnings": log_warnings,
             }
             return
 
-        # Import results
+        # ----- Collect results -----
         import_status = frappe.db.get_value("Data Import", data_import_doc.name, "status")
-        logs = frappe.get_all("Data Import Log",
-                              filters={"data_import": data_import_doc.name},
-                              fields=["success", "exception", "log_index", "messages", "docname"])
+        logs = frappe.get_all(
+            "Data Import Log",
+            filters={"data_import": data_import_doc.name},
+            fields=["success", "exception", "log_index", "messages", "docname"]
+        )
 
         records = [
             {"row": log["log_index"] + 1, "status": "success", "message": f"Successfully imported {log['docname']}"}
@@ -172,7 +147,7 @@ def import_bulk_data(file: str | None, doctype: str | None):
             "No of Imported Records": sum(1 for log in logs if log["success"]),
             "No of Failed Records": sum(1 for log in logs if not log["success"]),
             "template_status": "success" if import_status == "Success" else "partial",
-            "template_warnings": cleaned_template_warnings,
+            "template_warnings": template_warnings,
             "log_warnings": log_warnings,
         }
         frappe.db.commit()

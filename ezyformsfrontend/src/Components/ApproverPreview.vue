@@ -1659,8 +1659,8 @@ const getMaxLength = (field) => {
 
 const tableFileUpload = (file, row, fieldname) => {
   return new Promise((resolve, reject) => {
-    const randomNumber = generateRandomNumber();
-    const fileName = `${randomNumber}-@${file.name}`;
+    // const randomNumber = generateRandomNumber();
+    const fileName = `ezyForms-@${file.name}`;
 
     const formData = new FormData();
     formData.append("file", file, fileName);
@@ -2373,8 +2373,8 @@ const generateRandomNumber = () => {
 };
 
 const uploadFile = (file, field) => {
-  const randomNumber = generateRandomNumber();
-  let fileName = `${props.formName}-${randomNumber}-@${file.name}`;
+  // const randomNumber = generateRandomNumber();
+  let fileName = `ezyForms-@${file.name}`;
 
   const formData = new FormData();
   formData.append("file", file, fileName);

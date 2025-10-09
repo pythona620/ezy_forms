@@ -33,7 +33,25 @@ def my_team(property_field):
             manager = emp.get("reporting_to")
             reports_map.setdefault(manager, []).append(emp.get("name"))
 
-        # Recursive fetch with cycle protection
+        manager_map = {}
+        for mngr, emps in reports_map.items():
+            for e in emps:
+                manager_map[e] = mngr
+
+        # Upward chain
+        def get_managers(emp_id, visited=None):
+            if visited is None:
+                visited = set()
+            if emp_id in visited:
+                return []
+            visited.add(emp_id)
+
+            manager = manager_map.get(emp_id)
+            if not manager:
+                return []
+            return [manager] + get_managers(manager, visited)
+
+        
         def get_reports(emp_id, visited=None):
             if visited is None:
                 visited = set()
@@ -42,16 +60,48 @@ def my_team(property_field):
             visited.add(emp_id)
 
             direct_reports = reports_map.get(emp_id, [])
-            all_reports = list(direct_reports)
+            result = []
             for r in direct_reports:
-                all_reports.extend(get_reports(r, visited))
-            return all_reports
+                result.append(r)
+                result.extend(get_reports(r, visited))
+            return result
 
-        # Start with self + reports
-        team_list = [employee_id]
-        team_list.extend(get_reports(employee_id))
+            
+        def get_full_chain(emp_id):
+            visited = set()
 
-        # Deduplicate
+            # Get managers recursively
+            def collect_managers(emp):
+                manager = manager_map.get(emp)
+                if manager and manager not in visited:
+                    visited.add(manager)
+                    collect_managers(manager)
+
+            # Get reports recursively
+            def collect_reports(emp):
+                for r in reports_map.get(emp, []):
+                    if r not in visited:
+                        visited.add(r)
+                        collect_reports(r)
+
+            # Always include self
+            visited.add(emp_id)
+
+            # Collect upward chain
+            collect_managers(emp_id)
+
+            # Collect downward chain for self
+            collect_reports(emp_id)
+
+            # ALSO collect reports for all managers found
+            for m in list(visited):
+                collect_reports(m)
+
+            return list(visited)
+
+
+        
+        team_list = get_full_chain(employee_id)
         return list(set(team_list))
 
     except Exception:
@@ -67,7 +117,7 @@ def get_employee_forms(property_field, employee=None, requested_by_me=False, app
     is_admin = frappe.db.get_value("Ezy Employee", frappe.session.user, "is_admin")
     all_employees = my_team(property_field=property_field)
 
-    if not is_admin and all_employees and  not approved_by_me and not requested_by_me:
+    if not is_admin and all_employees and not approved_by_me and not requested_by_me:
         filters["requested_by"] = ["in", all_employees]
 
     # Filter by approvals
@@ -77,7 +127,7 @@ def get_employee_forms(property_field, employee=None, requested_by_me=False, app
             "WF Comments",
             filters={
                 "user": employee,
-                "action": ["in", ["Approved", "Request Cancelled"]]
+                "action": ["in", ["Approved", "Rejected"]]
             },
             fields=["parent"]
         )

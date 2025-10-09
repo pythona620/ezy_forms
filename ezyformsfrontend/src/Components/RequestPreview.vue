@@ -68,7 +68,7 @@
                                                     @update:modelValue="(val) => handleSelectChange(val, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
                                                     class="font-11 multiselect" /> -->
 
-                                                    <Vue3Select v-tooltip.top="row[field.fieldname]"  class="font-11" style="min-width: 200px;" :append-to-body="true"
+                                                    <Vue3Select v-tooltip.top="row[field.fieldname]"  class="font-11" style="min-width: 200px;" 
                                                                                    :multiple="field.fieldtype === 'Table MultiSelect' " :disabled="field.description === 'Disable'"
                                                     :maxlength="getMaxLength(field)"
                                                     :options="field.options?.split('\n').filter(opt => opt.trim() !== '') || []"
@@ -347,7 +347,7 @@
                                                                     fieldIndex
                                                                 )
                                                         "
-                                                    class=" form-check-input previewInputHeight mb-0 font-20" />
+                                                    class=" form-check-input previewInputHeight mb-0 mt-0 font-20" />
                                             </template>
                                             <template v-else-if="field.fieldtype == 'Datetime'">
                                                 <input type="datetime-local" :value="field.value"
@@ -1546,8 +1546,8 @@ const handleFileUpload = async (event, row, fieldname) => {
 
 const tableFileUpload = (file, row, fieldname) => {
     return new Promise((resolve, reject) => {
-        const randomNumber = generateRandomNumber();
-        const fileName = `${randomNumber}-@${file.name}`;
+        // const randomNumber = generateRandomNumber();
+        const fileName = `ezyForms-@${file.name}`;
 
         const formData = new FormData();
         formData.append("file", file, fileName);
@@ -2305,7 +2305,7 @@ const uploadedFiles = ref([]);
 
 const uploadFile = (file, field, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex) => {
     const randomNumber = generateRandomNumber();
-    let fileName = `${props.formName}${randomNumber}-@${file.name}`;
+    let fileName = `ezyForms-@${file.name}`;
 
     const formData = new FormData();
     formData.append("file", file, fileName);
@@ -3129,7 +3129,7 @@ input:focus{
 .v-select * {
   box-sizing: border-box;
   font-size: 12px !important;
-  height: 32px !important;
+//   height: 32px !important;  
   // background-color: white;
 }
 

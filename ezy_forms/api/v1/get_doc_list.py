@@ -3,19 +3,15 @@ import json
 from frappe.model.db_query import DatabaseQuery
 
 @frappe.whitelist(methods=["GET"])
-def get_doctype_list(doctype, fields: str, filters=None, limit_start: int = None, limit_page_length=None):
-    # Prevent using wildcard
-    if doctype and fields == '["*"]':
-        frappe.throw("Wildcard '*' is not allowed in fields. Please pass required fields explicitly.")
+def get_doctype_list(doctype, fields:str, filters=None, limit_start:int=None, limit_page_length=None, doc_id=None,order_by=None):
+    # Prevent using '*' in fields
+    
+    # if not limit_page_length:
+    #     limit_page_length = 20
+    # Parse fields into a list
+    fields = json.loads(fields)
 
     meta = frappe.get_meta(doctype)
-
-    # Parse fields safely into list
-    try:
-        fields = frappe.parse_json(fields) if isinstance(fields, str) else fields
-    except Exception:
-        frappe.throw("Invalid fields format. Fields must be a JSON list.")
-
     # Handle Single DocTypes
     if meta.issingle:
         doc = frappe.get_doc(doctype)
@@ -30,7 +26,21 @@ def get_doctype_list(doctype, fields: str, filters=None, limit_start: int = None
             "limit_page_length": 1
         }
 
-    # Safe limit_start
+    # Fetch by doc_id
+    if doc_id:
+        doc = frappe.get_doc(doctype, doc_id).as_dict()
+        frappe.log_error("doc",doc)
+        # data = [doc.as_dict()] if fields == ["*"] else [{field: doc.get(field) for field in fields}]
+        # frappe.log_error("data",data)
+        return {
+            "data": doc,
+            "total_count": 1,
+            "limit_start": 0,
+            "limit_page_length": 1
+        }
+    if doctype and fields == '["*"]':
+        frappe.throw("Wildcard '*' is not allowed in fields. Please pass required fields explicitly.")
+    # Normal DocTypes
     try:
         limit_start = int(limit_start or 0)
     except Exception:
@@ -58,7 +68,8 @@ def get_doctype_list(doctype, fields: str, filters=None, limit_start: int = None
         fields=parent_fields,
         filters=filters,
         limit_start=limit_start,
-        limit_page_length=limit_page_length
+        limit_page_length=limit_page_length,
+        order_by="modified desc" if not order_by else order_by,
     )
 
     # Attach child tables
