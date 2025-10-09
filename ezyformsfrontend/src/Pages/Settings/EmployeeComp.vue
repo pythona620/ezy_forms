@@ -359,6 +359,10 @@
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="viewEmployeeLabel">Employee Data</h5>
+            <div class="form-check d-flex justify-content-end w-75 text-end form-switch text-end ">
+              <input class="form-check-input shadow-none" v-model="createEmployee.enable" :checked="createEmployee.enable == 1" true-value="1" false-value="0" type="checkbox" role="switch" />
+              <label class="font-13 ms-2 mt-1 fw-bold" for="is_high_level">{{ createEmployee.enable  == '1' ? 'Enabled' : 'Disabled' }}</label>
+            </div>
             <button type="button" class="btn-close" data-bs-dismiss="modal" @click="cancelCreate"
               aria-label="Close"></button>
           </div>
@@ -437,7 +441,7 @@
                       </span>
                     </template>
                   </VueMultiselect>
-                  <div class=" d-flex gap-3">
+                  <div class=" d-flex gap-2">
 
 
                     <div class="ms-1">
@@ -2805,5 +2809,15 @@ function SaveEditEmp() {
 .remarks {
   border: 1px solid #c5bdbd;
   border-radius: 5px;
+}
+.form-check-input {
+  font-size: 15px;
+  margin-top: 5px;
+}
+
+.form-switch .form-check-input:checked {
+  background-position: right center;
+  background-color: rgb(103, 216, 109);
+  border: 0;
 }
 </style>
