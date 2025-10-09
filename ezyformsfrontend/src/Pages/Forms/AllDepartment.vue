@@ -80,10 +80,31 @@
         </div>
       </div>
     </div>
-    <!-- Button trigger modal -->
-    <!-- <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#EnableDisable">
-      Launch demo modal
-    </button> -->
+
+    <div class="modal fade py-2" id="showQRModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title font-16">{{ formName.form_name }}</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="text-center">
+              <qrcode-vue :value="formName.qr_url" :size="180" level="H" />
+              <!-- <h6>{{ formName.qr_url }}</h6> -->
+            </div>
+            <div class="input-group my-3">
+              <input type="text" class="form-control shadow-none font-12" :value="formName.qr_url" readonly />
+              <button class="btn bg-secondary text-white shadow-none" @click="copyToClipboard"><i class="bi bi-copy h-100"></i></button>
+            </div>
+            <button class="btn download-btn font-14 w-100 shadow-none" @click="downloadQR">
+              <i class="bi bi-download me-2"></i> Download
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
 
     <!-- Modal -->
     <div class="modal fade" id="EnableDisable" tabindex="-1" aria-labelledby="EnableDisableLabel" aria-hidden="true">
@@ -126,6 +147,7 @@ import "vue3-toastify/dist/index.css";
 import router from '../../router';
 import { useRoute } from 'vue-router';
 import GlobalCard from '../../Components/GlobalCard.vue';
+import QrcodeVue from "qrcode.vue";
 // import ButtonComp from '../../Components/ButtonComp.vue';
 const totalRecords = ref(0);
 const tableheaders = ref([
@@ -164,6 +186,26 @@ const actions = computed(() => {
 
   return baseActions
 })
+
+const formName = ref("");
+
+
+// Copy QR ID
+const copyToClipboard = () => {
+  navigator.clipboard.writeText(formName.value.qr_url);
+  toast.success("Copied QR ID", { autoClose: 600 });
+};
+
+// downloadQR
+const downloadQR = () => {
+  const canvas = document.querySelector("canvas");
+  const url = canvas.toDataURL("image/png");
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "qrcode.png";
+  a.click();
+};
+
 
 
 const fieldMapping = ref({
@@ -205,18 +247,25 @@ function formCreation(item = null) {
 function viewPreview(data, index, type) {
   // console.log(route.path);
   if (type === "view") {
-    if (data) {
-      // console.log(data, "------------");
-      router.push({
-        name: "FormPreviewComp",
-        query: {
-          routepath: route.path,
-          form_short_name: data.form_short_name,
-          business_unit: businessUnit.value,
+    // if (data) {
+    //   // console.log(data, "------------");
+    //   router.push({
+    //     name: "FormPreviewComp",
+    //     query: {
+    //       routepath: route.path,
+    //       form_short_name: data.form_short_name,
+    //       business_unit: businessUnit.value,
 
-        },
-      });
-    }
+    //     },
+    //   });
+    // }
+
+    formName.value = data;
+    // console.log("formName=",formName.value.qr_url);
+    const modal = new bootstrap.Modal(document.getElementById('showQRModal'), {});
+    modal.show();
+
+
   }
   if (type === 'raiseRequest') {
     const parsedData = JSON.parse(data.form_json);
@@ -869,4 +918,18 @@ onMounted(() => {
   padding: 8px;
   width: 100%;
 }
+
+.download-btn{
+  padding: 10px;
+  border: 1px dashed #6c757d;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+}
+.download-btn:hover{
+  background-color: #6c757d;
+  color: white;
+}
+
 </style>

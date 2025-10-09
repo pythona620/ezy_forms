@@ -179,6 +179,15 @@
 
 
                             </div>
+
+                            <div class="mt-3">
+                              <div class="">
+                                <label for="">Form Type</label>
+                                <Multiselect :options="formTypeOptions" v-model="selectedFormType" placeholder="Select Form Type"
+                                  :multiple="false" :searchable="true" label="label" track-by="value" :reduce="option => option.value" class="font-11 multiselect" />
+                              </div>
+                            </div>
+
                             <div class="mt-3">
                               <div class="">
 
@@ -1581,6 +1590,24 @@ const printFormatID = ref('')
 const is_landscape = ref(false)
 const showHods = ref(false);
 
+const formTypeOptions = [
+  { label: "Public", value: 0 },
+  { label: "Private", value: 1 },
+];
+
+const selectedFormType = computed({
+  get() {
+    // This returns the option object that matches filterObj.as_web_view
+    return formTypeOptions.find(
+      (opt) => opt.value === filterObj.value.as_web_view
+    );
+  },
+  set(selected) {
+    // 👇 This line updates filterObj.as_web_view every time user selects a new option
+    filterObj.value.as_web_view = selected ? selected.value : null;
+  },
+});
+
 
 // const computedDisabled = computed(() => {
 //   return paramId.value.length > 0
@@ -1608,6 +1635,7 @@ const filterObj = ref({
   is_linked: 0,
   is_linked_form: "",
   is_predefined_doctype: route.query.id ? 1 : 0,
+  as_web_view: 0,
 
 
 });
