@@ -13,6 +13,8 @@
                         class="bi bi-download me-2"></i>Download Pdf</button>
             </div>
         </div>
+      
+
 
         <!-- <div class="d-flex gap-2">
             <div class="dropdown">
@@ -38,8 +40,28 @@
                 </ul>
             </div>
         </div> -->
+<div class="device-preview mt-2" :class="selectedDevice">
+         <div class="d-flex justify-content-center mt-3">
 
-        <div class="container card form-containe-div border-0 mt-4">
+          <div class="d-flex gap-2 mb-3">
+    <button class="btn btn-outline-dark" 
+        :class="{ active: selectedDevice === 'desktop' }"
+        @click="selectedDevice = 'desktop'">
+        <i class="bi bi-laptop"></i>
+    </button>
+    <button class="btn btn-outline-dark" 
+        :class="{ active: selectedDevice === 'tablet' }"
+        @click="selectedDevice = 'tablet'">
+        <i class="bi bi-tablet"></i>
+    </button>
+    <button class="btn btn-outline-dark" 
+        :class="{ active: selectedDevice === 'mobile' }"
+        @click="selectedDevice = 'mobile'">
+        <i class="bi bi-phone"></i>
+    </button>
+</div>
+        </div>
+        <div class="container card form-containe-div border-0 mt-1" >
             
             <div v-for="(blockItem, blockIndex) in displayedBlocks" :key="blockIndex">
                 <div class="d-flex align-items-center justify-content-end me-2">
@@ -78,7 +100,7 @@
                         </span>
                 </div>
                 <div v-for="(section, sectionIndex) in blockItem.sections" :key="'preview-' + sectionIndex"
-                    class="preview-section">
+                    class="preview-section ">
                     <div v-if="section.label" class="d-flex justify-content-between section-label">
                         <h5 class="m-0 font-13">{{ section.label }}</h5>
                     </div>
@@ -86,13 +108,13 @@
                         <div class="container">
                             <div class="row" v-for="(row, rowIndex) in section.rows" :key="rowIndex">
                                 <div v-for="(column, columnIndex) in row.columns" :key="'column-preview-' + columnIndex"
-                                    class="col dynamicColumn">
+                                    class="col dynamicColumn" style="background-color: #f5f5f5;">
                                     <div v-if="column.label" class="border-bottom p-3">
                                         <h6 class="m-0 font-12">{{ column.label || "-" }}</h6>
                                     </div>
                                     <div class="mx-3 my-2">
                                         <div v-for="(field, fieldIndex) in column.fields"
-                                            :key="'field-preview-' + fieldIndex">
+                                            :key="'field-preview-' + fieldIndex"  >
                                             
                                             <div v-if="field.label && field.fieldtype !== 'Table'">
                                                 <label :for="'field-' +
@@ -238,6 +260,8 @@ option, index
 
             </div>
         </div>
+        </div>
+       
     </div>
 </template>
 
@@ -300,7 +324,14 @@ onMounted(() => {
     // }
 
 })
+const selectedDevice = ref("desktop"); // default preview
 
+// optionally, define device-specific classes
+// const deviceClasses = {
+//     desktop: "w-100",
+//     tablet: "w-75 mx-auto",
+//     mobile: "w-50 mx-auto"
+// };
 function fetchDepartmentDetails() {
 
     const queryParams = {
@@ -584,6 +615,7 @@ const getFieldComponent = (type) => {
         case "Date":
         case "Int":
         case "Datetime":
+        case "Link":
         case "radio":
             return "input";
         case "Text":
@@ -713,7 +745,7 @@ td {
 }
 
 .backBtn {
-    box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+    // box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -722,5 +754,57 @@ td {
 .form-containe-div {
     height: 80vh;
     overflow-y: scroll;
+}
+.form-containe-div.w-75 { max-width: 768px; }
+.form-containe-div.w-50 { max-width: 375px; }
+
+.active { border: 1px solid #000; }
+.device-preview {
+    transition: all 0.3s ease-in-out;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    background: #fff;
+    padding: 15px;
+    margin: 0 auto;
+}
+
+.device-preview.desktop {
+    width: 100%;
+}
+
+.device-preview.tablet {
+    max-width: 768px;
+}
+
+.device-preview.mobile {
+    max-width: 375px;
+}
+
+/* Optional: smooth scaling when changing device */
+.device-preview-enter-active,
+.device-preview-leave-active {
+    transition: all 0.4s ease;
+}
+
+.device-preview-enter-from,
+.device-preview-leave-to {
+    transform: scale(0.95);
+    opacity: 0;
+}
+.form-check-input{
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  box-shadow: none !important;
+  outline: none !important;
+  transition: all 0.2s ease-in-out;
+
+
+}
+.form-check-input:focus {
+  box-shadow: none !important;
+  outline: none !important;
+  border: 1px solid blue !important;
 }
 </style>

@@ -8,13 +8,13 @@
           <div class="backtofromPage  px-2 py-2">
             <!-- <router-link :to="backTo" class="text-decoration-none text-dark font-13"><span> <i
                   class="bi bi-arrow-left px-2"></i></span>Back</router-link>  -->
-                  <span class="m-0 p-0 text-dark font-13 pointer" @click="router.back()">
-                    <i class="bi bi-arrow-left px-2"></i>Back</span>
+            <span class="m-0 p-0 text-dark font-13 pointer" @click="router.back()">
+              <i class="bi bi-arrow-left px-2"></i>Back</span>
           </div>
           <div>
-            <button class="btn btn-light font-12  me-2 d-xl-none " type="button"
-              data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight"><i
-                class="bi bi-clock font-14"></i> Activity</button>
+            <button class="btn btn-light font-12  me-2 d-xl-none " type="button" data-bs-toggle="offcanvas"
+              data-bs-target="#offcanvasRight" aria-controls="offcanvasRight"><i class="bi bi-clock font-14"></i>
+              Activity</button>
 
 
           </div>
@@ -45,6 +45,7 @@
                         v-if="tableData?.status === 'Request Cancelled'">
                         Request Rejected
                       </span>
+
                     </div>
                     <!-- <span v-if="tableData?.status === 'Completed'"><i
                         class="bi approved-icon bi-check2-circle "></i></span>
@@ -56,10 +57,13 @@
               <div class="position-relative ">
                 <div class="requestPreviewDiv pb-5">
 
-                  <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel"  @attachmentsReady="attachmentsReady = $event"
-                    @updateTableData="approvalChildData" :childData="responseData" :readonly-for="selectedData.readOnly"
-                    :childHeaders="tableHeaders" :employee-data="employeeData" @updateField="updateFormData"  @formValidation="isFormValid = $event"  @acknowledgementValidation="isAcknowledgementValid = $event"  />
-                    <!-- @attachmentsReady="attachmentsReady = $event" -->
+                  <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel"
+                    @attachmentsReady="attachmentsReady = $event" :isEditable="isEditable"
+                    @field-change="handleFieldChanges" @updateTableData="approvalChildData" :childData="responseData"
+                    :readonly-for="selectedData.readOnly" :childHeaders="tableHeaders" :employee-data="employeeData"
+                    @updateField="updateFormData" @formValidation="isFormValid = $event"
+                    @acknowledgementValidation="isAcknowledgementValid = $event" />
+                  <!-- @attachmentsReady="attachmentsReady = $event" -->
                 </div>
 
                 <div v-if="selectedData?.type === 'myforms' &&
@@ -88,15 +92,9 @@
                     </div> -->
 
                     <div class="form-floating mb-2 p-1">
-                      <textarea 
-                        class="form-control font-12" 
-                        placeholder="Leave a comment here" 
-                        id="floatingTextarea"
-                        @input="resetCommentsValidation" 
-                        :class="{ 'is-invalid': !isCommentsValid }"
-                        v-model="ApproverReason"
-                        maxlength="140"   
-                      ></textarea>
+                      <textarea class="form-control font-12" placeholder="Leave a comment here" id="floatingTextarea"
+                        @input="resetCommentsValidation" :class="{ 'is-invalid': !isCommentsValid }"
+                        v-model="ApproverReason" maxlength="140"></textarea>
                       <label class="font-11" for="floatingTextarea">Comments..</label>
 
                       <!-- Validation error -->
@@ -135,23 +133,36 @@
                           </button>
 
                         </div> -->
-                        <div>
-                            <!-- @click.prevent="handleApprove" -->
-                          <!-- <button :disabled="loading"  type="submit" class="btn btn-success approvebtn"
-                            @click.prevent="ApproverFormSubmission(emittedFormData, 'Approve')">
+                        <div class="d-flex gap-2">
+                          <!-- ✏️ Edit / Discard Button -->
+                          <div v-if="allowEdit" class="d-flex justify-content-end">
+                            <button type="button" class="btn btn-light font-12 text-dark mb-2"
+                              :class="isEditable ? 'btn-outline-secondary' : 'btn-outline-light'"
+                              @click="handleEditClick">
+                              <template v-if="!isEditable">
+                                <i class="bi bi-pencil-fill"></i> Edit
+                              </template>
+                              <template v-else>
+                                Discard
+                              </template>
+                            </button>
+                          </div>
+
+                          <!-- ✅ Approve / Save & Approve Button -->
+                          <button :disabled="loading" type="submit" class="btn btn-success approvebtn"
+                            @click.prevent="handleApprove" :class="isEditable ? 'wide-approve' : 'normal-approve'">
                             <span v-if="loading" class="spinner-border spinner-border-sm" role="status"
                               aria-hidden="true"></span>
-                            <span v-if="!loading"><i class="bi bi-check-lg font-15 me-2"></i><span
-                                class="font-12">Approve</span></span>
-                          </button> -->
-                          <button :disabled="loading"  type="submit" class="btn btn-success approvebtn"
-                            @click.prevent="handleApprove">
-                            
-                            <span v-if="loading" class="spinner-border spinner-border-sm" role="status"
-                              aria-hidden="true"></span>
-                            <span v-if="!loading"><i class="bi bi-check-lg font-15 me-2"></i><span
-                                class="font-12">Approve</span></span>
+                            <span v-else>
+                              <i class="bi bi-check-lg font-15 me-2"></i>
+                              <span class="font-12">
+                                {{ isEditable ? "Save & Approve" : "Approve" }}
+                              </span>
+                            </span>
                           </button>
+
+
+                          <!-- 🧩 Custom Modal -->
 
                         </div>
                       </div>
@@ -164,57 +175,7 @@
           </div>
           <div class="col-lg-3 d-none d-lg-block">
             <div class="activity-log-container px-1">
-              <!-- <div class=" w-100  mb-2">
-              <div class=" py-2 px-3">
-
-                <h5 class="font-13 fw-bold">{{ selectedData.doctype_name }} form approval</h5>
-              </div>
-              <div class="py-2 px-3">
-                <span class="text-warning font-12  fw-bold">
-                  Pending ({{ tableData.current_level }} /
-                  {{ tableData.total_levels }})</span>
-              </div>
-            </div> -->
-              <!-- <div class="mt-5 mb-3 pt-2 d-flex justify-content-between align-items-center">
-              <h6 class="font-14 ps-3  mb-0">Activity log <span
-                  v-if="tableData?.status !== 'Completed' && tableData.status !== 'Request Cancelled'"
-                  class="text-warning font-12  fw-bold">
-                  Pending ({{ tableData.current_level }} /
-                  {{ tableData?.total_levels }})</span>
-                <span class=" font-11 status_completed" v-if="tableData?.status === 'Completed'">
-                  Completed
-                </span>
-                <span class=" font-11 requestRejected" v-if="tableData?.status === 'Request Cancelled'">
-                  Request Rejected
-                </span>
-              </h6>
-              <button v-if="tableData.status === 'Completed'"
-                class="btn btn-light font-12 fw-bold text-decoration-underline" type="button" @click="downloadPdf"><i
-                  class="bi bi-arrow-down-circle fw-bold px-1"></i>Download
-                PDF</button>
-            </div> -->
               <div class="row mb-3">
-                <!-- <div class="col-xl-3 col-lg-12 col-md-12">
-                  <div class="d-flex  align-items-baseline  mt-2">
-                   
-                    <div class="d-flex align-items-baseline gap-2 ps-1 ">
-                      <span v-if="tableData?.status !== 'Completed' && tableData.status !== 'Request Cancelled'"
-                        class="text-warning font-11 text-nowrap fw-bold">
-                        Pending ({{ tableData.current_level }} /
-                        {{ tableData?.total_levels }})</span>
-                      <span class=" font-11 status_completed text-nowrap" v-if="tableData?.status === 'Completed'">
-                        Approved
-                      </span>
-                      <span class=" font-11 requestRejected text-nowrap"
-                        v-if="tableData?.status === 'Request Cancelled'">
-                        Request Rejected
-                      </span>
-                    </div>
-                  </div>
-
-
-                </div> -->
-
                 <div class="col-xl-12 col-lg-12 col-md-12">
                   <div class=" d-flex justify-content-between gap-2">
 
@@ -231,9 +192,6 @@
 
                         <i class="bi bi-arrow-right px-2"></i>
                       </button>
-
-
-
                     </div>
                     <!-- Case 1: Both PDF + Workorder available -->
                     <div v-if="((tableData.status === 'Completed' && linked_status !== 'Completed') || linked_status === 'Completed')
@@ -269,30 +227,11 @@
 
 
 
-                    <!-- <div>
-                      <button
-                        v-if="tableData.status === 'Completed' && linked_status !== 'Completed' || linked_status === 'Completed'"
-                        class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto " type="button"
-                        @click="downloadPdf"><i class="bi bi-download px-2 fw-bold"></i>Download
-                      </button>
-                    <button v-if="doctypeForm.work_order == 1" type="button" data-bs-toggle="modal"
-                      data-bs-target="#pdfView"
-                      class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto "
-                      @click="DownloadWorkorder">
-                      Download Workorder
-                    </button>
-                    </div> -->
-                    <!-- data-bs-toggle="modal"
-                      data-bs-target="#pdfView" -->
-                    <!-- <button v-if="doctypeForm.work_order == 1" type="button" data-bs-toggle="modal"
-                      data-bs-target="#pdfView"
-                      class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto "
-                      @click="DownloadWorkorder">
-                      Download Workorder
-                    </button>  -->
 
-                    <button type="button" class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto "
-                      data-bs-toggle="modal" data-bs-target="#pdfView" @click="viewasPdfView">
+
+                    <button v-if="tableData.status !== 'Completed'" type="button"
+                      class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto " data-bs-toggle="modal"
+                      data-bs-target="#pdfView" @click="viewasPdfView">
                       Preview
                     </button>
 
@@ -330,7 +269,12 @@
                         <span class="strong-content">{{ formatCreation(item.time) }}</span><br />
                         <span class="strong-content fw-bolder">{{ item.user }}</span><br />
                         <span>{{ item.role }}</span><br />
-                        <span class="font-12 text-secondary">{{ item.reason || "N/A" }}</span>.
+                        <span class="font-12 text-secondary">{{ item.reason || "N/A" }}</span>.<br />
+                        <button v-if="item.field_changes" class="btn btn-sm text-decoration-underline font-13"
+                          type="button" data-bs-toggle="offcanvas" data-bs-target="#changesOffcanvas"
+                          @click="openChanges(item)">
+                          Changes
+                        </button>
 
                       </p>
                     </div>
@@ -426,17 +370,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body linkedformspreview p-4">
-            <!-- Show key-value -->
-            <!-- <table class="table table-bordered table-sm">
-                        <tbody>
-                          <tr v-for="(item, index) in normalFields" :key="index">
-                            <th class="font-12 text-nowrap">
-                              {{ formatKey(item.key) }}
-                            </th>
-                            <td class="font-12">{{ item.value }}</td>
-                          </tr>
-                        </tbody>
-                      </table> -->
+
             <div class="row">
               <div class=" col-md-12">
                 <div class="row">
@@ -446,23 +380,7 @@
                   </div>
                 </div>
               </div>
-              <!-- <div class=" col-md-6 ">
-                          <div v-for="(item, index) in linkedActivity" :key="index" class="activity-log-item"
-                            :class="{ 'last-item': index === linkedActivity.length - 1 }">
-                            <div :class="item.action === 'Approved' || item.action === 'Request Raised' || item.action === '' || item.action === 'Completed'
-                              ? 'activity-log-dot'
-                              : 'activityRedDot'"></div>
-                            <div class="activity-log-content">
-                              <p class="font-12 mb-1">
-                                <span class="strong-content">{{ formatAction(item.action) }} on </span>
-                                <span class="strong-content">{{ formatCreation(item.creation) }}</span><br />
-                                <span class="strong-content">{{ item.user_name }}</span><br />
-                                <span>{{ item.role }}</span><br />
-                                <span class="font-12 text-secondary">{{ item.reason || "N/A" }}</span>.
-                              </p>
-                            </div>
-                          </div>
-                        </div> -->
+
             </div>
 
 
@@ -494,7 +412,38 @@
         </div>
       </div>
     </div>
+    <div class="offcanvas offcanvas-end custom-responsive " tabindex="-1" id="changesOffcanvas"
+      aria-labelledby="changesOffcanvasLabel">
+      <div class="offcanvas-header">
+        <h6 class="offcanvas-title" id="changesOffcanvasLabel">
+          Field Changes
+        </h6>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
 
+      <div class="offcanvas-body">
+        <table v-if="selectedItem && selectedItem.field_changes" class="table table-sm table-bordered font-12">
+          <thead class="table-light">
+            <tr>
+              <th>Field</th>
+              <th>Original Value</th>
+              <th>New Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(change, key) in parsedChanges" :key="key">
+              <td>{{ key }}</td>
+              <td class="old-value">{{ change.oldValue || '-' }}</td>
+              <td class="new-value">{{ change.newValue || '-' }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div v-else class="text-center text-muted font-12">
+          No field changes found.
+        </div>
+      </div>
+    </div>
 
     <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
       <div class="offcanvas-header">
@@ -503,56 +452,9 @@
       </div>
       <div class="offcanvas-body">
         <div class="activity-log-container mt-0 px-1">
-          <!-- <div class=" w-100  mb-2">
-              <div class=" py-2 px-3">
 
-                <h5 class="font-13 fw-bold">{{ selectedData.doctype_name }} form approval</h5>
-              </div>
-              <div class="py-2 px-3">
-                <span class="text-warning font-12  fw-bold">
-                  Pending ({{ tableData.current_level }} /
-                  {{ tableData.total_levels }})</span>
-              </div>
-            </div> -->
-          <!-- <div class="mt-5 mb-3 pt-2 d-flex justify-content-between align-items-center">
-              <h6 class="font-14 ps-3  mb-0">Activity log <span
-                  v-if="tableData?.status !== 'Completed' && tableData.status !== 'Request Cancelled'"
-                  class="text-warning font-12  fw-bold">
-                  Pending ({{ tableData.current_level }} /
-                  {{ tableData?.total_levels }})</span>
-                <span class=" font-11 status_completed" v-if="tableData?.status === 'Completed'">
-                  Completed
-                </span>
-                <span class=" font-11 requestRejected" v-if="tableData?.status === 'Request Cancelled'">
-                  Request Rejected
-                </span>
-              </h6>
-              <button v-if="tableData.status === 'Completed'"
-                class="btn btn-light font-12 fw-bold text-decoration-underline" type="button" @click="downloadPdf"><i
-                  class="bi bi-arrow-down-circle fw-bold px-1"></i>Download
-                PDF</button>
-            </div> -->
           <div class="row mb-3">
-            <!-- <div class="col-xl-3 col-lg-12 col-md-12">
-                  <div class="d-flex  align-items-baseline  mt-2">
-                   
-                    <div class="d-flex align-items-baseline gap-2 ps-1 ">
-                      <span v-if="tableData?.status !== 'Completed' && tableData.status !== 'Request Cancelled'"
-                        class="text-warning font-11 text-nowrap fw-bold">
-                        Pending ({{ tableData.current_level }} /
-                        {{ tableData?.total_levels }})</span>
-                      <span class=" font-11 status_completed text-nowrap" v-if="tableData?.status === 'Completed'">
-                        Approved
-                      </span>
-                      <span class=" font-11 requestRejected text-nowrap"
-                        v-if="tableData?.status === 'Request Cancelled'">
-                        Request Rejected
-                      </span>
-                    </div>
-                  </div>
 
-
-                </div> -->
 
             <div class="col-xl-12 col-lg-12 col-md-12">
               <div class=" d-flex justify-content-between gap-2">
@@ -602,37 +504,6 @@
                   <i class="bi bi-download px-2 fw-bold"></i> Download
                 </button>
 
-
-
-
-
-                <!-- <div>
-                      <button
-                        v-if="tableData.status === 'Completed' && linked_status !== 'Completed' || linked_status === 'Completed'"
-                        class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto " type="button"
-                        @click="downloadPdf"><i class="bi bi-download px-2 fw-bold"></i>Download
-                      </button>
-                    <button v-if="doctypeForm.work_order == 1" type="button" data-bs-toggle="modal"
-                      data-bs-target="#pdfView"
-                      class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto "
-                      @click="DownloadWorkorder">
-                      Download Workorder
-                    </button>
-                    </div> -->
-                <!-- data-bs-toggle="modal"
-                      data-bs-target="#pdfView" -->
-                <!-- <button v-if="doctypeForm.work_order == 1" type="button" data-bs-toggle="modal"
-                      data-bs-target="#pdfView"
-                      class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto "
-                      @click="DownloadWorkorder">
-                      Download Workorder
-                    </button>  -->
-
-                <!-- <button type="button" class="btn btn-light font-14 fw-bold h-0 nowrap border border-dark h-auto "
-                      data-bs-toggle="modal" data-bs-target="#pdfView" @click="viewasPdfView">
-                      Preview
-                    </button> -->
-
               </div>
             </div>
           </div>
@@ -667,7 +538,12 @@
                     <span class="strong-content">{{ formatCreation(item.time) }}</span><br />
                     <span class="strong-content">{{ item.user_name }}</span><br />
                     <span>{{ item.role }}</span><br />
-                    <span class="font-12 text-secondary">{{ item.reason || "N/A" }}</span>.
+                    <span class="font-12 text-secondary">{{ item.reason || "N/A" }}</span>.<br />
+                    <button v-if="item.field_changes" class="btn btn-sm border-0 text-decoration-underline font-12 mt-2"
+                      type="button" data-bs-toggle="offcanvas" data-bs-target="#changesOffcanvas"
+                      @click="openChanges(item)">
+                      Changes
+                    </button>
 
                   </p>
                 </div>
@@ -792,7 +668,30 @@
       </div>
     </div>
 
+    <div class="modal modal-confirm fade show d-block" tabindex="-1" role="dialog" v-if="showConfirmModal"
+      style="background-color: rgba(0, 0, 0, 0.4)">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content rounded-3 shadow">
+          <div class="modal-header">
+            <h6 class="modal-title fw-bold">Confirm Action</h6>
+            <button type="button" class="btn-close" @click="closeModal"></button>
+          </div>
 
+          <div class="modal-body">
+            <p class="m-0 text-secondary font-15">
+              {{ isEditable ? "Are you sure you want to discard changes?" : "Are you sure you want to edit the form?" }}
+            </p>
+          </div>
+
+          <div class="modal-footer">
+            <button class="btn btn-light btn-sm font-13" @click="closeModal">Cancel</button>
+            <button class="btn btn-dark font-14 px-4" @click="confirmAction">
+              OK
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -854,11 +753,14 @@ const activeTab = ref("activity");
 const linkedActivity = ref([]);
 const isFormValid = ref(false);
 const isAcknowledgementValid = ref(false);
+const isEditable = ref(false);
+const allowEdit = ref(false);
+const changedFields = ref([]);
 const resetCommentsValidation = () => {
   // Trim whitespace and validate
   if (ApproverReason.value.trim() !== "" && ApproverReason.value.length <= 140) {
     isCommentsValid.value = true;
-  } 
+  }
   // else {
   //   isCommentsValid.value = false;
   // }
@@ -883,22 +785,66 @@ function formatCreation(dateStr) {
   return `${formattedDate} ${formattedTime}`;
 }
 
+const showConfirmModal = ref(false);
+
+function handleEditClick() {
+  showConfirmModal.value = true;
+}
+
+function closeModal() {
+  showConfirmModal.value = false;
+}
+
+function confirmAction() {
+  if (isEditable.value) {
+    // Currently in edit mode — discard changes
+    window.location.reload(); // refresh page
+  } else {
+    // Enable edit mode
+    isEditable.value = true;
+  }
+  closeModal();
+}
 
 const ApprovePDF = ref(true)
-
+function handleFieldChanges(updatedChanges) {
+  // console.log("Received from child:", updatedChanges);
+  changedFields.value = updatedChanges;
+  // You can store or process these values as needed
+}
 const attachmentsReady = ref(false);
-
-// // Approve button click handler
 const handleApprove = () => {
-  console.log(attachmentsReady.value);
+  // console.log(attachmentsReady.value);
+
+  // 🧩 Check if all attachments are previewed before approval
   if (!attachmentsReady.value) {
     showDefault("⚠️ Please preview all attachments before approving");
     return;
   }
+  // console.log(emittedFormData.value, "pp");
+  // console.log(changedFields.value);
+
+  // 🧠 If editable, treat as Save & Approve
+  if (isEditable.value) {
+    // console.log("💾 Save & Approve triggered");
+    ApproverFormSubmission(emittedFormData, "Approve");
+  } else {
+    // console.log("✅ Approve triggered");
+    ApproverFormSubmission(emittedFormData, "Approve");
+  }
+};
+
+// // Approve button click handler
+// const handleApprove = () => {
+//   console.log(attachmentsReady.value);
+//   if (!attachmentsReady.value) {
+//     showDefault("⚠️ Please preview all attachments before approving");
+//     return;
+//   }
 
 
-  ApproverFormSubmission(emittedFormData, "Approve");
-}; 
+//   ApproverFormSubmission(emittedFormData, "Approve");
+// }; 
 
 // Format the date for display
 // const formatDate = (dateString) => {
@@ -975,7 +921,21 @@ function approvalChildData(data) {
   childtablesData.value = data;
   // console.log(data);
 }
+const selectedItem = ref(null);
 
+const openChanges = (item) => {
+  selectedItem.value = item;
+};
+
+const parsedChanges = computed(() => {
+  if (!selectedItem.value?.field_changes) return {};
+  try {
+    return JSON.parse(selectedItem.value.field_changes);
+  } catch (error) {
+    console.error("Invalid JSON:", error);
+    return {};
+  }
+});
 
 
 const formatAction = (action) => {
@@ -1147,14 +1107,14 @@ async function ApproverFormSubmission(dataObj, type) {
   //   isCommentsValid.value = false; // Show validation error
   //   return; // Stop execution
   // }
-if (!isFormValid.value) {
+  if (!isFormValid.value) {
     showError("Please Fill All Mandatory Fields");
     return;
   }
 
- if (!isAcknowledgementValid.value) {
-      showError("Acknowledgement is required.");
-      return;
+  if (!isAcknowledgementValid.value) {
+    showError("Acknowledgement is required.");
+    return;
   }
   // isCommentsValid.value = true;
   loading.value = true; // Start loader
@@ -1178,7 +1138,7 @@ if (!isFormValid.value) {
   // toast.info("Submitting form...", { autoClose: 500, transition: "zoom" });
 
 
- 
+
   axiosInstance
     .put(`${apis.resource}${selectedData.value.doctype_name}/${doctypeForm.value.name}`, form)
     .then((response) => {
@@ -1213,6 +1173,7 @@ function approvalStatusFn(dataObj, type) {
     cluster_name: null,
     url_for_approval_id: "",
     current_level: tableData.value.current_level,
+    field_changes: Object.keys(changedFields.value).length ? changedFields.value : null,
   };
 
   axiosInstance
@@ -1471,12 +1432,12 @@ function receivedForMe(data) {
     // }
   }
 
-   const queryParams = {
-    fields: JSON.stringify(["linked_form_id","is_linked_form","property","doctype_name","name","current_level","total_levels","json_columns","status","action","assigned_to_users",
-    "be_half_of","cluster_name","department","department","employee_id","is_linked","requested_by","requested_on","requester_name","role","user_session_id"]),
+  const queryParams = {
+    fields: JSON.stringify(["linked_form_id", "is_linked_form", "property", "doctype_name", "name", "current_level", "total_levels", "json_columns", "status", "action", "assigned_to_users",
+      "be_half_of", "cluster_name", "department", "department", "employee_id", "is_linked", "requested_by", "requested_on", "requester_name", "role", "user_session_id"]),
     filters: JSON.stringify(filters),
-    doctype:doctypes.WFWorkflowRequests,
-    limit_page_length:"none"
+    doctype: doctypes.WFWorkflowRequests,
+    limit_page_length: "none"
   };
 
   // Fetch the records matching filters
@@ -1496,8 +1457,8 @@ function receivedForMe(data) {
       // console.log(JSON.parse(
       //   tableData.value?.json_columns
       // ).workflow, "workflow");
-      // view_only_reportee.value = JSON.parse(tableData.value?.json_columns)?.workflow[selectedcurrentLevel.value]?.view_only_reportee;
-      // console.log(" wrk === =>", view_only_reportee.value);
+      allowEdit.value = JSON.parse(tableData.value?.json_columns)?.workflow[selectedcurrentLevel.value]?.approver_can_edit === 1 ? true : false;
+      // console.log(" wrk === =>", allowEdit.value);
       tableHeaders.value = JSON.parse(
         tableData.value?.json_columns
       ).child_table_fields;
@@ -1807,7 +1768,7 @@ function Wfactivitylog(name) {
   axiosInstance
     .post(apis.get_wf_activate_log, FormId)
     .then((responce) => {
-      // console.log(responce, "activity log data"); 
+      console.log(responce, "activity log data");
       activityData.value = responce.message || []; // Ensure it's always an array
 
     })
@@ -1967,16 +1928,22 @@ watch(activityData, (newVal) => {
 
 
 .approvebtn {
-  width: 146px;
-  //height: 30px;
   background: #099819;
   color: white;
-  padding: 5px 15px 5px 15px;
-  gap: 7px;
+  padding: 5px 15px;
   border-radius: 4px;
-  opacity: 0px;
   font-weight: bold;
+  transition: width 0.3s ease;
 }
+
+.normal-approve {
+  width: 146px;
+}
+
+.wide-approve {
+  width: 180px;
+}
+
 
 .requestPreviewDiv {
   height: 75vh;
@@ -2015,8 +1982,10 @@ watch(activityData, (newVal) => {
   z-index: 10;
   background-color: #fff;
 }
+
 .responsive-title {
-  font-size: 12px; /* default mobile */
+  font-size: 12px;
+  /* default mobile */
 }
 
 @media (min-width: 768px) {
@@ -2038,13 +2007,14 @@ watch(activityData, (newVal) => {
   transform: translateX(-50%);
   z-index: 10;
   background-color: #fff;
-  padding: 5px ;
+  padding: 5px;
   display: flex;
   justify-content: space-between;
   width: 50%;
   margin: 2px 5px;
 
 }
+
 @media (max-width: 768px) {
   .approveBtns {
     width: 100%;
@@ -2295,6 +2265,7 @@ td {
 .offcanvas-header {
   box-shadow: 0px 2px 4px 0px #0000000D;
 }
+
 .offcanvas-end {
   width: 400px;
 }
@@ -2309,7 +2280,48 @@ td {
 /* Small screens */
 @media (max-width: 768px) {
   .offcanvas-end {
-    width: 80%; /* full width on mobile */
+    width: 80%;
+    /* full width on mobile */
+  }
+}
+
+.modal-confirm {
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.old-value {
+  background-color: #fff0f0 !important;
+}
+
+/* 🟩 New value background */
+.new-value {
+  background-color: #e4f5e9 !important;
+}
+
+
+.offcanvas.custom-responsive.offcanvas-end {
+  width: 90% !important;
+}
+
+@media (min-width: 768px) {
+  .offcanvas.custom-responsive.offcanvas-end {
+    width: 50% !important;
+  }
+}
+
+@media (min-width: 1200px) {
+  .offcanvas.custom-responsive.offcanvas-end {
+    width: 40% !important;
   }
 }
 </style>

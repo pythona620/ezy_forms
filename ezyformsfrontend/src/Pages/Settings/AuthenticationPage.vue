@@ -90,6 +90,7 @@ const tableData = ref([
     { title: "Send Daily E-mail reminders", checked: false },
     { title: "Take Acknowledgement and Signiture while Login", checked: false },
     { title: "Take Signiture while Sig Up", checked: false },
+    { title: "Allow Approver to Edit Form?", checked: false },
     { title: "Company Logo", checked: false },
 ]);
 
@@ -147,8 +148,11 @@ const handleToggle = (index) => {
         confirmMessage.value = isChecked
             ? "Are you sure you want to enable Signiture while Sig Up?"
             : "Are you sure you want to disable Signiture while Sig Up?";
-    }
-    else if (index === 7) {
+    } else if (index === 7) {
+        confirmMessage.value = isChecked
+            ? "Are you sure you want to enable Approver Edit Form?"
+            : "Are you sure you want to disable Approver Edit Form?";
+    } else if (index === 8) {
         viewImage.value = true;
     }
 
@@ -288,7 +292,24 @@ const confirmAction = () => {
             .catch(() => {
                 showError("Failed to update Signiture while Sig Up");
             });
-    } else if (index === 7) {
+    }
+    else if (index === 7) {
+        axiosInstance
+            .put(`${apis.resource}${doctypes.wfSettingEzyForms}/${encodeURIComponent(docName)}`, {
+                allow_approver_to_edit_form: newStatus,
+            })
+            .then(() => {
+               showSuccess(`Approver’s ability to edit the form has been ${newStatus === 0 ? "disabled" : "enabled"} successfully!`);
+                sessionStorage.setItem("allow_approver_to_edit_form", newStatus);
+                const modal = bootstrap.Modal.getInstance(document.getElementById('EnableDisable'));
+                    modal.hide();
+                    BussinesUnit()
+            })
+            .catch(() => {
+                showError("Failed to update Approver Edit Form");
+            });
+        }
+     else if (index === 8) {
         if (!selectedFile.value) return;
         const formData = new FormData();
         formData.append("file", selectedFile.value);
@@ -325,7 +346,7 @@ const confirmAction = () => {
 
 function BussinesUnit() {
     const queryParamse = {
-        fields: JSON.stringify(["name", "bu_logo", "bu_code", "send_form_as_a_attach_through_mail", "welcome_mail_to_employee", "send_daily_alerts", "is_acknowledge", "signature_required"]),
+        fields: JSON.stringify(["name", "bu_logo", "bu_code", "send_form_as_a_attach_through_mail", "welcome_mail_to_employee", "send_daily_alerts", "is_acknowledge", "signature_required","allow_approver_to_edit_form"]),
         filters:JSON.stringify([["name",'=',Bussines_unit.value]]),
         doctype:doctypes.wfSettingEzyForms,
         limit_page_length:"none",
@@ -345,6 +366,9 @@ function BussinesUnit() {
             tableData.value[5].checked = is_acknowledge == 1;
             const signature_required = res.message.data[0].signature_required;
             tableData.value[6].checked = signature_required == 1;
+            const allow_approver_to_edit_form = res.message.data[0].allow_approver_to_edit_form;
+            console.log(allow_approver_to_edit_form,'allow_approver_to_edit_form');
+            tableData.value[7].checked = allow_approver_to_edit_form == 1;
         }
     }).catch((error) => {
         console.error("Error fetching ezyForms data:", error);

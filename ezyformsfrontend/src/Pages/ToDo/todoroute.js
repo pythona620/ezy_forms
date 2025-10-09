@@ -20,34 +20,40 @@ const todoroutes = [
         component: ReceivedForMe,
 
         name: "ReceivedForMe",
+        meta: { title: 'Assign To Me - Ezy Forms' }
       },
       {
         path: "history",
         component: HistoryComp,
 
         name: "HistoryComp",
+        meta: { title: 'My Approvals - Ezy Forms' }
       },
       {
         path: "raisedbyme",
         component: RaisedByMe,
 
         name: "RaisedByMe",
+        meta: { title: 'My Requests - Ezy Forms' }
       },
       {
         path: "myteam",
         component: MyTeam,
 
         name: "MyTeam",
+        meta: { title: 'My Team Requests- Ezy Forms' }
       },
       {
         path: "reports",
         component: ReportsComp,
         name: "ReportsComp",
+        meta: { title: 'Reports - Ezy Forms' }
       },
       {
         path: "insights",
         component: InsightsComp,
         name: "InsightsComp",
+        meta: { title: 'Insights - Ezy Forms' }
       },
     ],
   },

@@ -18,6 +18,9 @@ const Masterroutes = [
         component: AllDeptComp,
         name: 'DepartmentDetail/:id',
         props: true, // Automatically pass route params as props
+         meta: {
+    title: (route) => `${route.params.id} - Ezy Forms`
+  }
       },
      
     ],

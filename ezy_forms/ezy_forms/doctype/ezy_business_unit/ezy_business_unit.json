@@ -21,6 +21,7 @@
   "send_form_in_email",
   "send_daily_alerts",
   "signature_required",
+  "allow_approver_to_edit_form",
   "section_break_ftig",
   "letter_head"
  ],
@@ -113,11 +114,17 @@
    "fieldname": "signature_required",
    "fieldtype": "Check",
    "label": "Signature Required"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_approver_to_edit_form",
+   "fieldtype": "Check",
+   "label": "Allow Approver to Edit Form"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-08 13:34:04.502029",
+ "modified": "2025-10-06 12:43:00.454205",
  "modified_by": "Administrator",
  "module": "Ezy Forms",
  "name": "Ezy Business Unit",
@@ -136,9 +143,9 @@
    "share": 1,
    "write": 1
   },
-     {
-    "role": "Guest",
+  {
    "read": 1,
+   "role": "Guest",
    "select": 1
   }
  ],

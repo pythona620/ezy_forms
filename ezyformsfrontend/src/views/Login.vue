@@ -282,7 +282,7 @@
           </div>
           <div>
             <div class="d-flex justify-content-center align-items-center p-3">
-              <button class="btn btn-dark font-12 w-100 mt-3" type="submit" @click="passwordChange"
+              <button class="btn btn-dark font-12 w-100 mt-3" type="button" @click="passwordChange"
                 :disabled="isButtonDisabled">
                 Confirm New Password
               </button>
@@ -994,14 +994,28 @@ export default {
         .then((res) => {
           if (res.message) {
             showSuccess("Password updated Successfully");
-            const modal = bootstrap.Modal.getInstance(
-              document.getElementById("changePassword")
-            );
-            modal.hide();
+             const modalEl = document.getElementById("changePassword");
+        const modal = bootstrap.Modal.getInstance(modalEl);
+
+        if (modal) {
+          modalEl.addEventListener(
+            "hidden.bs.modal",
+            () => {
+              const backdrop = document.querySelector(".modal-backdrop");
+              if (backdrop) backdrop.remove();
+              document.body.classList.remove("modal-open");
+              document.body.style.overflow = "";
+              document.body.style.paddingRight = "";
+            },
+            { once: true }
+          );
+          modal.hide();
+        }
+
             this.checkboxChange();
           }
           if (res._server_messages) {
-            const messages = JSON.parse(res._server_messages);
+            const messages = JSON.parse(res?._server_messages);
             messages.forEach((msg) => {
               const parsed = JSON.parse(msg);
               showError(parsed.message);
