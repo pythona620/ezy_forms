@@ -3190,7 +3190,7 @@ input:focus{
   display: block;
 }
 .form-check-input{
-  border-radius: 50%;
+//   border-radius: 50%; 
   width: 16px;
   height: 16px;
   cursor: pointer;
