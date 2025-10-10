@@ -209,11 +209,11 @@ option, index
                                                         v-model="field.value" :type="field.fieldtype"
                                                         class="form-control font-10 previewInputHeight" />
                                                 </template>
+
+                                            </div>
                                                 <span v-if="field.description !== 'Field'" class="font-11"><span
                                                         class="fw-semibold">Description: </span>{{
                                                     field.description }}</span>
-
-                                            </div>
                                             <div >
 
 
