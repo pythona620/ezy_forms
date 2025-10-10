@@ -97,7 +97,7 @@ def send_notifications(request_id, doctype_name, property, cluster, reason, time
 				if email in user_list and user_list:
 
 					reason =  "Form Has been Updated"
-				elif email == requested_by:
+				elif email == requested_by and user_emails:
 					reason = reason + ("<br><b>Form Has been Updated <b> ")
 				try:
 					email_content = generate_email_content(
