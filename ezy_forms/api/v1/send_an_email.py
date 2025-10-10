@@ -6,7 +6,7 @@ from ezy_forms.ezy_forms.doctype.ezy_form_definitions.dynamic_form_template impo
 from ezy_forms.api.v1.mail_message_html import preview_dynamic_form
 from frappe.utils import add_to_date,get_url
 
-def sending_mail_api(request_id, doctype_name, property, cluster, reason, timestamp,skip_user_role=None,user=None):
+def sending_mail_api(request_id, doctype_name, property, cluster, reason, timestamp,skip_user_role=None,user=None,field_changes=None,current_level=None):
 	frappe.enqueue('ezy_forms.api.v1.send_an_email.send_notifications',
 		queue='default',
 		timeout=300,
@@ -15,17 +15,23 @@ def sending_mail_api(request_id, doctype_name, property, cluster, reason, timest
 		property=property,
 		cluster=cluster,
 		reason=reason,
+		current_level=current_level,
+		field_changes=field_changes,
 		timestamp= timestamp,
 		skip_user_role = skip_user_role,
 		user=user
 	)
-def send_notifications(request_id, doctype_name, property, cluster, reason, timestamp,skip_user_role=None,user=None):
+def send_notifications(request_id, doctype_name, property, cluster, reason, timestamp,skip_user_role=None,user=None,field_changes=None,current_level=None):
 	"""Send email notifications to relevant users"""
 	email_accounts = frappe.get_all(
 		"Email Account",
 		filters={"enable_outgoing": 1, "default_outgoing": 1}
 	)
-	
+	user_list = []
+	if field_changes:
+		user_list= frappe.get_doc("WF Activity Log",request_id)
+		user_list = [role.user for role in user_list.reason if int(role.level) != 0 and int(role.level) !=int(current_level)]
+
 	if not email_accounts:
 		return
 	request_id_document = frappe.get_all(doctype_name, filters={"wf_generated_request_id": request_id}, fields=["name"])
@@ -76,7 +82,10 @@ def send_notifications(request_id, doctype_name, property, cluster, reason, time
 		else:
 			user_emails = frappe.get_all("Ezy Employee",filters={"designation": ["in", assigned_users], "company_field": property, "enable": 1},fields=["name"],pluck="name") if not user else [user]
 		user_emails.append(requested_by)
-		user_emails = list(set(user_emails))
+		if user_list:
+			user_emails = list(set(user_emails + user_list ))
+		else:
+			user_emails = list(set(user_emails))
 		# Get user details
 		user_name = frappe.get_value("User", frappe.get_value("WF Workflow Requests", request_id, "requested_by"), "full_name")
 
@@ -85,6 +94,11 @@ def send_notifications(request_id, doctype_name, property, cluster, reason, time
 		# Send emails
 		if email_accounts:
 			for email in user_emails:
+				if email in user_list and user_list:
+
+					reason =  "Form Has been Updated"
+				elif email == requested_by:
+					reason = reason + ("<br><b>Form Has been Updated <b> ")
 				try:
 					email_content = generate_email_content(
 						request_id, doctype_name, user_name, user_role, email,requested_by,
@@ -95,11 +109,11 @@ def send_notifications(request_id, doctype_name, property, cluster, reason, time
 						recipients=[email],
 						subject="ezyForms Notification",
 						message=email_content['message'],
-						content = email_content['email_template'] + ("<b>Note: </b>Since the file size is more than 30MB, please refer to the attachments in the form." if  file_down and file_down['file_size'] else ''),
+						content = email_content['email_template'] or '' + ("<b>Note: </b>Since the file size is more than 30MB, please refer to the attachments in the form." if  file_down and file_down['file_size'] else ''),
 						attachments=attach_down
 					)
 				except Exception as e:
-					frappe.log_error(f"Email sending failed for {email}: {str(e)}", "Email Error")
+					frappe.log_error(message=f"{str(e)}", title="Email Error")
 					
 	except Exception as e:
 		frappe.log_error(f"Notification sending failed: {str(e)}", "Notification Error")
