@@ -743,7 +743,7 @@ const exportEmployeesToExcel = async () => {
   }
   try {
     const response = await axiosInstance.get(
-      apis.resource + doctypes.EzyEmployeeList,
+      apis.resource + doctypes.SignUpEmployee,
       { params: queryParams }
     )
 
@@ -820,7 +820,7 @@ const uploadbulkFile = (file) => {
 const buluploding = () => {
   const data = {
     file: bulkfileUrl.value,
-    doctype: doctypes.EzyEmployeeList,
+    doctype: doctypes.SignUpEmployee,
   };
 
   axiosInstance
@@ -1622,10 +1622,10 @@ function fetchingIsHod(department) {
     fields: JSON.stringify(["*"]),
     filters: JSON.stringify(filters),
     limit_page_length: "none",
-    order_by: "`tabEzy Employee`.`enable` DESC,`tabEzy Employee`.`creation` DESC",
+    order_by: "`tabSignup Employee`.`enable` DESC,`tabSignup Employee`.`creation` DESC",
   };
   axiosInstance
-    .get(apis.resource + doctypes.EzyEmployeeList, { params: queryParams })
+    .get(apis.resource + doctypes.SignUpEmployee, { params: queryParams })
     .then((res) => {
      createEmployee.value.reporting_to = res.data[0].name;
      createEmployee.reporting_designation = res.data[0].designation;
@@ -1681,7 +1681,7 @@ function confirmEmployeeToggle() {
             saveloading.value = false;
         });
   // axiosInstance
-  //   .put(`${apis.resource}${doctypes.EzyEmployeeList}/${selectedEmpRow.value.name}`, selectedEmpRow.value)
+  //   .put(`${apis.resource}${doctypes.SignUpEmployee}/${selectedEmpRow.value.name}`, selectedEmpRow.value)
   //   .then(() => {
   //     const userData = { enabled: selectedEmpRow.value.enable };
   //     return axiosInstance.put(`${apis.resource}${doctypes.users}/${selectedEmpRow.value.name}`, userData);
@@ -1927,8 +1927,8 @@ function employeeData(data) {
     filters: JSON.stringify(filters),
     limit_page_length: filterObj.value.limitPageLength,
     limit_start: filterObj.value.limit_start,
-    doctype:doctypes.EzyEmployeeList,
-    order_by: "`tabEzy Employee`.`enable` DESC, `tabEzy Employee`.`modified` DESC",
+    doctype:doctypes.SignUpEmployee,
+    order_by: "`tabSignup Employee`.`enable` DESC, `tabSignup Employee`.`modified` DESC",
   };
 
   axiosInstance.get(apis.GetDoctypeData, { params: queryParams })
@@ -1972,8 +1972,8 @@ function employeeOptions() {
     "emp_name","emp_phone","enable","enable_on","is_admin","is_hod","is_web_form","last_ip","last_login","name","profile_image","remarks","reporting_designation","reporting_to","signature"]),
     limit_page_length: "none",
     filters: JSON.stringify([["company_field", "=", `${newbusiness.value}`]]),
-    doctype:doctypes.EzyEmployeeList,
-    order_by: "`tabEzy Employee`.`modified` desc",
+    doctype:doctypes.SignUpEmployee,
+    order_by: "`tabSignup Employee`.`modified` desc",
   };
   axiosInstance.get(apis.GetDoctypeData, { params: queryParams })
     .then((res) => {
@@ -2067,12 +2067,12 @@ function createEmpl() {
   const dataObj = {
     ...createEmployee.value,
     department: createEmployee.value.department?.name || "", // ✅ only send name
-    doctype: doctypes.EzyEmployeeList,
+    doctype: doctypes.SignUpEmployee,
   };
   loading.value = true;
 
   axiosInstance
-    .post(apis.resource + doctypes.EzyEmployeeList, dataObj)
+    .post(apis.resource + doctypes.SignUpEmployee, dataObj)
     .then((res) => {
       if (res.data) {
         toast.success("Employee Created", {
@@ -2150,7 +2150,7 @@ function SaveEditEmp() {
   const payload = {
     ...createEmployee.value,
     department: createEmployee.value.department?.name || "",
-    doctype:doctypes.EzyEmployeeList,
+    doctype:doctypes.SignUpEmployee,
   };
 
   axiosInstance
