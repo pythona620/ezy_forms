@@ -30,6 +30,7 @@
   "column_break_tby9l",
   "is_admin",
   "is_hod",
+  "is_high_level",
   "is_web_form",
   "section_break_jqcpq",
   "acknowledgement",
@@ -176,6 +177,12 @@
    "fieldname": "is_hod",
    "fieldtype": "Check",
    "label": "Is HOD"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_high_level",
+   "fieldtype": "Check",
+   "label": "Is High Level"
   },
   {
    "default": "0",
