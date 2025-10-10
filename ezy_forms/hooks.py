@@ -161,6 +161,7 @@ doc_events = {
     "after_insert":"ezy_forms.api.v1.make_private_file_to_public.make_file_public_after_insert"
 },
 "Role": {
+        "before_insert": "ezy_forms.api.v1.custom_role_permission.restrict_spical_characters_in_role",
         "after_insert": "ezy_forms.api.v1.custom_role_permission.assign_custom_permissions"    
 }
 }
