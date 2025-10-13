@@ -1386,7 +1386,7 @@
     <div class="offcanvas addOffCanvas offcanvas-end" tabindex="-1" id="offcanvasRight"
       aria-labelledby="offcanvasRightLabel">
       <div class="offcanvas-header add_designationHeader">
-        <span id="offcanvasRightLabel" class="font-14">
+        <span id="offcanvasRightLabel" class="font-14 fw-bold">
 
           {{ selectedBlockIndex == 0 ? "Add designation for Requestor" : `Approval Settings For
           Level-${selectedBlockIndex}`
@@ -1539,8 +1539,17 @@
 
       <div class="offcanvas-footer">
         <div class="text-end p-3">
+          <div v-if="selectedBlockIndex === 0 ">
+
+          <ButtonComp class="btn btn-dark addingDesignations" data-bs-dismiss="offcanvas" @click="addDesignationBtn"
+            name="Add Requestors" />
+          </div>
+          
+          <div v-if="selectedBlockIndex !== 0 ">
+
           <ButtonComp class="btn btn-dark addingDesignations" data-bs-dismiss="offcanvas" @click="addDesignationBtn"
             name="Add Approvers" />
+          </div>
         </div>
       </div>
     </div>

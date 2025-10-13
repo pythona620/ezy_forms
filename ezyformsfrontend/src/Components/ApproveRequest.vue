@@ -58,7 +58,7 @@
                 <div class="requestPreviewDiv pb-5">
 
                   <ApproverPreview :blockArr="showRequest" :current-level="selectedcurrentLevel"
-                    @attachmentsReady="attachmentsReady = $event" :isEditable="isEditable"
+                    @attachmentsReady="attachmentsReady = $event" :isEditable="isEditable"  @childTableFieldChanges="handleChildTableChanges"
                     @field-change="handleFieldChanges" @updateTableData="approvalChildData" :childData="responseData"
                     :readonly-for="selectedData.readOnly" :childHeaders="tableHeaders" :employee-data="employeeData"
                     @updateField="updateFormData" @formValidation="isFormValid = $event"
@@ -422,26 +422,52 @@
       </div>
 
       <div class="offcanvas-body">
-        <table v-if="selectedItem && selectedItem.field_changes" class="table table-sm table-bordered font-12">
-          <thead class="table-light">
-            <tr>
-              <th>Field</th>
-              <th>Original Value</th>
-              <th>New Value</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(change, key) in parsedChanges" :key="key">
-              <td>{{ key }}</td>
-              <td class="old-value">{{ change.oldValue || '-' }}</td>
-              <td class="new-value">{{ change.newValue || '-' }}</td>
-            </tr>
-          </tbody>
-        </table>
+        <div v-for="(entry, index) in parsedChanges" :key="index" class="mb-4">
 
-        <div v-else class="text-center text-muted font-12">
+  <!-- Normal fields -->
+  <table v-if="entry.type === 'normal'" class="table table-sm table-bordered align-middle">
+    <thead class="table-light">
+      <tr>
+        <th>Field</th>
+        <th>Old Value</th>
+        <th>New Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="(val, key) in entry.fields" :key="key">
+        <td>{{ key }}</td>
+        <td class="old-value">{{ val.oldValue }}</td>
+        <td class="new-value">{{ val.newValue }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Child table -->
+  <div v-if="entry.type === 'child'" class="child-section">
+    <h6 class="fw-bold text-dark font-13">Child Table: {{ entry.tableName }}</h6>
+    <table class="table table-sm table-bordered align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Field</th>
+          <th>Old Value</th>
+          <th>New Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(val, key) in entry.fields" :key="key">
+          <td>{{ key }}</td>
+          <td class="old-value">{{ val.old_value }}</td>
+          <td class="new-value">{{ val.new_value }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+        <!-- <div v-else class="text-center text-muted font-12">
           No field changes found.
-        </div>
+        </div> -->
       </div>
     </div>
 
@@ -794,6 +820,9 @@ function handleEditClick() {
 function closeModal() {
   showConfirmModal.value = false;
 }
+const attachmentsReady = ref(false);
+const allChildTableChanges = ref({});
+const ApprovePDF = ref(true)
 
 function confirmAction() {
   if (isEditable.value) {
@@ -806,13 +835,32 @@ function confirmAction() {
   closeModal();
 }
 
-const ApprovePDF = ref(true)
 function handleFieldChanges(updatedChanges) {
-  // console.log("Received from child:", updatedChanges);
-  changedFields.value = updatedChanges;
-  // You can store or process these values as needed
+  // Ensure updatedChanges is always an array
+  if (Array.isArray(updatedChanges)) {
+    changedFields.value = updatedChanges;
+  } else {
+    // Wrap single object into an array
+    changedFields.value = [updatedChanges];
+  }
 }
-const attachmentsReady = ref(false);
+
+function handleChildTableChanges(updatedChanges) {
+  allChildTableChanges.value = updatedChanges;
+
+  // 🧠 Ensure changedFields is always an array before filtering
+  if (!Array.isArray(changedFields.value)) {
+    changedFields.value = [];
+  }
+
+  // ✅ Merge: keep existing non-child changes, add/replace child table data
+  changedFields.value = [
+    ...changedFields.value.filter(item => !item.childTable),
+    { childTable: updatedChanges },
+  ];
+
+  console.log("✅ Updated changedFields:", changedFields.value);
+}
 const handleApprove = () => {
   // console.log(attachmentsReady.value);
 
@@ -821,8 +869,9 @@ const handleApprove = () => {
     showDefault("⚠️ Please preview all attachments before approving");
     return;
   }
-  // console.log(emittedFormData.value, "pp");
-  // console.log(changedFields.value);
+    console.log("📤 Emitted Form Data:", emittedFormData.value);
+    console.log("📋 All Child Table Changes:", allChildTableChanges.value);
+    console.log("🔄 Combined Changed Fields:", changedFields.value);
 
   // 🧠 If editable, treat as Save & Approve
   if (isEditable.value) {
@@ -928,12 +977,23 @@ const openChanges = (item) => {
 };
 
 const parsedChanges = computed(() => {
-  if (!selectedItem.value?.field_changes) return {};
+  if (!selectedItem.value?.field_changes) return [];
+
   try {
-    return JSON.parse(selectedItem.value.field_changes);
+    const data = JSON.parse(selectedItem.value.field_changes);
+
+    // Normalize the structure into a uniform list
+    return data.map((entry) => {
+      if (entry.childTable) {
+        const [tableName, tableFields] = Object.entries(entry.childTable)[0];
+        return { type: "child", tableName, fields: tableFields };
+      } else {
+        return { type: "normal", fields: entry };
+      }
+    });
   } catch (error) {
-    console.error("Invalid JSON:", error);
-    return {};
+    console.error("Invalid JSON in field_changes:", error);
+    return [];
   }
 });
 
@@ -1120,7 +1180,7 @@ async function ApproverFormSubmission(dataObj, type) {
   loading.value = true; // Start loader
 
   let form = {
-    // ...childtablesData.value
+    ...childtablesData.value
   };
   if (Array.isArray(emittedFormData.value) && emittedFormData.value.length) {
     emittedFormData.value.forEach((each) => {
@@ -1770,7 +1830,7 @@ function Wfactivitylog(name) {
   axiosInstance
     .post(apis.get_wf_activate_log, FormId)
     .then((responce) => {
-      console.log(responce, "activity log data");
+      // console.log(responce, "activity log data");
       activityData.value = responce.message || []; // Ensure it's always an array
 
     })
