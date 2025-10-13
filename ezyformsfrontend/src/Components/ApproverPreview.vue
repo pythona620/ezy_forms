@@ -121,7 +121,7 @@
                               <div class="row">
                                 <template v-for="(option, index) in field?.options?.split('\n')">
                                   <div v-if="(JSON.parse(field.value || '[]') || []).includes(option)" :key="index"
-                                    class=" col-12 col-sm-6 col-md-4   mb-2">
+                                    class=" col-lg-12 col-sm-6 col-md-4   mb-2">
                                     <div class="form-check">
                                       <input class="form-check-input" type="checkbox" :checked="true" :disabled="true"
                                         :id="`${option}-${index}`" />
@@ -171,7 +171,7 @@
                         <template v-else-if="field.fieldtype == 'Check' && field.fieldname !== 'auto_calculations'">
 
 
-                          <input type="checkbox" :checked="field.value"
+                          <input type="checkbox" :checked="field.value == 1"
                             :disabled="blockIndex === 0 || props.readonlyFor === 'true' || blockIndex < currentLevel"
                             :placeholder="'Enter ' + field.label" :name="'field-' +
                               sectionIndex +
@@ -484,7 +484,7 @@
                             <input type="text" :value="field.value"
                               :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'"
                               @input="(e) => onInputChange(e.target.value, field)"
-                              :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0  w-50 pb-0 bg-transparent' : ''"
+                              :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0  pb-0 bg-transparent' : ''"
                               @change="(event) =>
                                 logFieldValue(
                                   event,
@@ -506,7 +506,7 @@
                         <template v-else-if="field.fieldtype == 'Datetime'">
                           <template v-if="props.readonlyFor === 'true' || blockIndex < currentLevel">
                             <span style="font-size: 12px;"
-                              :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0  w-50 bg-transparent' : ''"
+                              :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0  bg-transparent' : ''"
                               :value="field.value" :type="field.fieldtype">
                               {{ field.fieldtype === 'Time' ? formatTime(field.value) : field.value }}
                             </span>
@@ -563,7 +563,7 @@
                           <input v-if="field.fieldtype == 'Int'"
                             :disabled="blockIndex < currentLevel || props.readonlyFor === 'true'" :readOnly="blockIndex < currentLevel || props.readonlyFor === 'true'
                               " type="number" v-model="field.value"
-                            :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0  w-50 bg-white' : ' '"
+                            :class="props.readonlyFor === 'true' || blockIndex < currentLevel ? 'border-0  bg-white' : ' '"
                             :placeholder="'Enter ' + field.label" :value="field.value" :name="'field-' +
                               sectionIndex +
                               '-' +
@@ -607,7 +607,7 @@
                                 width: Math.min(100 + (field.value?.length * 2), 600) + 'px'
                               }" :disabled="blockIndex < currentLevel || props.readonlyFor === 'true' || field.label === 'Approver'"
                               :is="getFieldComponent(field.fieldtype)" :class="props.readonlyFor === 'true' || blockIndex < currentLevel
-                                ? 'border-0  w-50 bg-transparent'
+                                ? 'border-0   bg-transparent'
                                 : ''" :value="field.fieldtype === 'Time' ? formatTime(field.value) : field.value"
                               :type="field.fieldtype"
                               :readOnly="blockIndex < currentLevel || props.readonlyFor === 'true'"
@@ -2274,14 +2274,10 @@ const logFieldValue = (
   } else if (eve.target.type === "checkbox") {
     if (field.fieldtype === "Check") {
       // Ensure value is a string, not an array
-      if (eve.target.checked) {
-        // If checked, set the value as a string
-        field["value"] = eve.target.checked ? 1 : 0;
-
-      } else {
-        // If unchecked, set the value as an empty string (or use any default value)
-        field.value = "";
-      }
+      if (field.fieldtype === "Check") {
+    // Always set value as 1 or 0
+    field.value = eve.target.checked ? 1 : 0;
+  }
     } else if (field.fieldtype === "Small Text") {
       let selectedValues = field.value ? JSON.parse(field.value) : []; // Parse existing values or create an empty array
 
@@ -2480,11 +2476,12 @@ const previewedAttachments = ref(new Set());
 // }
 
 function collectAllAttachments(blocks) {
+  console.log("Current Level =>", props.currentLevel);
   const attachments = [];
 
   (blocks || []).forEach((block, blockIndex) => {
-    // 🚫 Skip the current level block
-    if (String(blockIndex) === String(props.currentLevel)) {
+    // 🚫 Only check previous levels
+    if (Number(blockIndex) >= Number(props.currentLevel)) {
       return;
     }
 
@@ -2492,26 +2489,22 @@ function collectAllAttachments(blocks) {
       (section.rows || []).forEach((row) => {
         (row.columns || []).forEach((column) => {
           (column.fields || []).forEach((field) => {
-            // console.log("Attach field =>",field.label,"| fieldtype =>",field.fieldtype,"| value =>",field.value);
-
+            
             if (field.fieldtype === "Attach" && field.value) {
               const files = field.value
                 .split("|")
                 .map((f) => f.trim())
                 .filter((f) => f);
 
-              // ✅ Normal Attachments (require preview)
               if (
-                !["Requestor Signature", "Approved By", "Acknowledged By"].includes(
-                  field.label
-                )
+                !["Requestor Signature", "Approved By", "Acknowledged By"].includes(field.label)
               ) {
                 attachments.push(...files);
               } else {
-                // ✅ Auto-mark these as previewed
                 files.forEach((f) => previewedAttachments.value.add(f));
               }
             }
+
           });
         });
       });
@@ -2520,12 +2513,14 @@ function collectAllAttachments(blocks) {
 
   allAttachments.value = attachments;
 
-  // ✅ Check if attachments are already all previewed
+  // ✅ Only require preview for previous levels’ attachments
   const allPreviewed = allAttachments.value.every((f) =>
     previewedAttachments.value.has(f)
   );
+
   emit("attachmentsReady", allPreviewed);
 }
+
 
 
 /**

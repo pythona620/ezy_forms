@@ -81,6 +81,7 @@ import { apis, doctypes } from "../../shared/apiurls";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
+import { showError, showInfo, showSuccess } from "../../shared/services/toast";
 const tableData = ref([
     { title: "Two Factor Authentication", checked: false },
     { title: "Send Form as an Attachment Via an E-Mail ", checked: false },
@@ -190,13 +191,13 @@ const confirmAction = () => {
                 enable_two_factor_auth: newStatus,
             })
             .then(() => {
-                toast.success(`Two Factor Authentication ${newStatus === 0 ? "Disabled" : "Enabled"} Successfully!`, { autoClose: 700 });
+                showSuccess(`Two Factor Authentication ${newStatus === 0 ? "Disabled" : "Enabled"} Successfully!`);
                 const modal = bootstrap.Modal.getInstance(document.getElementById('EnableDisable'));
                     modal.hide();
                 enable_two_factor();
             })
             .catch(() => {
-                toast.error("Failed to update Two Factor Authentication!");
+                showError("Failed to update Two Factor Authentication!");
             });
     } else if (index === 1) {
         axiosInstance
@@ -204,13 +205,13 @@ const confirmAction = () => {
                 send_form_as_a_attach_through_mail: newStatus,
             })
             .then(() => {
-                toast.success(`Send Form As an Attachment Through Mail ${newStatus === 0 ? "Disabled" : "Enabled"} Successfully!`, { autoClose: 700 });
+                showSuccess(`Send Form As an Attachment Through Mail ${newStatus === 0 ? "Disabled" : "Enabled"} Successfully!`);
                 const modal = bootstrap.Modal.getInstance(document.getElementById('EnableDisable'));
                     modal.hide();
                     BussinesUnit()
             })
             .catch(() => {
-                toast.error("Failed to update Send Form As an Attachment Through Mail!");
+                showError("Failed to update Send Form As an Attachment Through Mail!");
             });
     } else if (index === 2) {
         if (default_mail.value === true) {
@@ -219,16 +220,16 @@ const confirmAction = () => {
                     welcome_mail_to_employee: newStatus,
                 })
                 .then(() => {
-                    toast.success(`Welcome Mail Configuration ${newStatus === 0 ? "Disabled" : "Enabled"} Successfully!`, { autoClose: 700 });
+                    showSuccess(`Welcome Mail Configuration ${newStatus === 0 ? "Disabled" : "Enabled"} Successfully!`);
                     const modal = bootstrap.Modal.getInstance(document.getElementById('EnableDisable'));
                     modal.hide();
                     BussinesUnit()
                 })
                 .catch(() => {
-                    toast.error("Failed to update Welcome Mail Configuration!");
+                    showError("Failed to update Welcome Mail Configuration!");
                 });
         } else {
-            toast.info("Please Configure Default Mail First!");
+            showInfo("Please Configure Default Mail First!");
             tableData.value[index].checked = false;
         }
     } else if (index === 3) {
@@ -237,13 +238,13 @@ const confirmAction = () => {
                 disable_signup: webSiteStatus,
             })
             .then(() => {
-                toast.success(`Sign up ${webSiteStatus === 1 ? "Disabled" : "Enabled"} Successfully!`, { autoClose: 700 });
+                showSuccess(`Sign up ${webSiteStatus === 1 ? "Disabled" : "Enabled"} Successfully!`);
                 const modal = bootstrap.Modal.getInstance(document.getElementById('EnableDisable'));
                 modal.hide();
                 signUp();
             })
             .catch(() => {
-                toast.error("Failed to update Sign up!");
+                showError("Failed to update Sign up!");
             });
     } else if (index === 4) {
         axiosInstance
@@ -251,13 +252,13 @@ const confirmAction = () => {
                 send_daily_alerts: newStatus,
             })
             .then(() => {
-                toast.success(`daily email reminders ${newStatus === 0 ? "Disabled" : "Enabled"} Successfully!`, { autoClose: 700 });
+                showSuccess(`daily email reminders ${newStatus === 0 ? "Disabled" : "Enabled"} Successfully!`);
                 const modal = bootstrap.Modal.getInstance(document.getElementById('EnableDisable'));
                     modal.hide();
                     BussinesUnit()
             })
             .catch(() => {
-                toast.error("Failed to update E-Mail Send Daily reminders");
+                showError("Failed to update E-Mail Send Daily reminders");
             });
     } else if (index === 5) {
         axiosInstance
@@ -265,13 +266,13 @@ const confirmAction = () => {
                 is_acknowledge: newStatus,
             })
             .then(() => {
-                toast.success(`acknowledgement and Signiture ${newStatus === 0 ? "Disabled" : "Enabled"} Successfully!`, { autoClose: 700 });
+                showSuccess(`acknowledgement and Signiture ${newStatus === 0 ? "Disabled" : "Enabled"} Successfully!`);
                 const modal = bootstrap.Modal.getInstance(document.getElementById('EnableDisable'));
                     modal.hide();
                     BussinesUnit()
             })
             .catch(() => {
-                toast.error("Failed to update acknowledgement");
+                showError("Failed to update acknowledgement");
             });
     } else if (index === 6) {
         axiosInstance
@@ -279,13 +280,13 @@ const confirmAction = () => {
                 signature_required: newStatus,
             })
             .then(() => {
-                toast.success(`Signiture while Sig Up ${newStatus === 0 ? "Disabled" : "Enabled"} Successfully!`, { autoClose: 700 });
+                showSuccess(`Signiture while Sig Up ${newStatus === 0 ? "Disabled" : "Enabled"} Successfully!`);
                 const modal = bootstrap.Modal.getInstance(document.getElementById('EnableDisable'));
                     modal.hide();
                     BussinesUnit()
             })
             .catch(() => {
-                toast.error("Failed to update Signiture while Sig Up");
+                showError("Failed to update Signiture while Sig Up");
             });
     } else if (index === 7) {
         if (!selectedFile.value) return;
@@ -306,12 +307,12 @@ const confirmAction = () => {
         })
          .then((res) => {
             if (res.message?.success) {
-                toast.success("Logo Updated Successfully", { autoClose: 1000 });
+                showSuccess("Logo Updated Successfully");
                 const modal = bootstrap.Modal.getInstance(document.getElementById('EnableDisable'));
                 modal.hide();
             }
             else{
-                toast.error(res.message?.message, { autoClose: 1000 });
+                showError(res.message?.message);
             }
         })
         .catch((error) => {

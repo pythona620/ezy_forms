@@ -163,6 +163,7 @@ import { onMounted, ref, computed, watch, reactive } from 'vue';
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
+import { showSuccess } from '../../shared/services/toast';
 
 
 const businessUnit = computed(() => {
@@ -323,7 +324,7 @@ function saveCategories() {
 
     axiosInstance.put(`${apis.resource}${doctypes.departments}/${categoriesDataEdit.value.name}`, categoriesDataEdit.value)
         .then((response) => {
-            toast.success("Changes Saved", { autoClose: 500 })
+            showSuccess("Changes Saved")
             const modal = bootstrap.Modal.getInstance(document.getElementById('viewCategory'));
             modal.hide();
 
@@ -457,7 +458,7 @@ function createDepart() {
 
     axiosInstance.post(apis.resource + doctypes.departments, dataObj).then((res) => {
         if (res.data) {
-            toast.success("Department Created", { autoClose: 500 })
+            showSuccess("Department Created")
             deptData()
         }
 

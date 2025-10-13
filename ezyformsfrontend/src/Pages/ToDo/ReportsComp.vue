@@ -88,6 +88,7 @@ import { onBeforeUnmount, onMounted, ref } from "vue";
 import ButtonComp from "../../Components/ButtonComp.vue";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
+import { showSuccess } from "../../shared/services/toast";
 
 const saveloading = ref(false)
 // const totalRecords = ref(0);
@@ -257,7 +258,7 @@ function sendMail() {
         .then((res) => {
             if (res) {
                 const response = res;
-                toast.success("Mail send successfully")
+                showSuccess("Mail send successfully")
                 const modal = bootstrap.Modal.getInstance(
                     document.getElementById("SendMailModal")
                 );

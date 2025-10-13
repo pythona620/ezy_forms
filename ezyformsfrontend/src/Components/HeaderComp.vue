@@ -9,6 +9,9 @@
                 <div class=" d-flex gap-3 justify-content-end align-items-center m-0 me-3">
                     <div>
 
+                        <i class="bi bi-question-circle-fill fs-5" style="cursor: pointer" data-bs-toggle="modal" data-bs-target="#confirmMailModal" title="Contact Support"></i>
+                    </div>
+                    <div>
                         <FormFields tag="select" placeholder="" class="font-12" name="roles" id="roles"
                             :Required="false" v-model="business_unit" :options="EzyFormsCompanys" />
                     </div>
@@ -88,7 +91,6 @@
                                     src="../assets/Final-logo-ezyforms-removebg-preview.png" />
                                 <div class="d-sm-block d-md-none p-2">
                                     <div class="">
-
                                         <FormFields tag="select" placeholder="" class="font-12" name="roles" id="roles"
                                             :Required="false" v-model="business_unit" :options="EzyFormsCompanys" />
                                     </div>
@@ -129,8 +131,10 @@
                                         name="Raise Request" data-bs-toggle="modal" @click="raiseRequest"
                                         data-bs-target="#riaseRequestModal" />
                                 </div> -->
+                                    <div>
+                                        <i class="bi bi-question-circle-fill fs-5" style="cursor: pointer" data-bs-toggle="modal" data-bs-target="#confirmMailModal" title="Contact Support"></i>
+                                    </div>
                                     <div class=" d-none d-md-block">
-
                                         <FormFields tag="select" placeholder="" class="font-12" name="roles" id="roles"
                                             :Required="false" v-model="business_unit" :options="EzyFormsCompanys" />
                                     </div>
@@ -315,6 +319,23 @@
             </div>
         </div>
 
+        <div class="modal fade" id="confirmMailModal" tabindex="-1" aria-labelledby="confirmMailModalLabel" aria-hidden="true" ref="confirmModal">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmMailModalLabel">Confirm Action</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to contact support?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn font-13" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-secondary font-13 text-white" @click="openMail">Yes, Continue</button>
+                </div>
+                </div>
+            </div>
+        </div>
 
 
     </div>
@@ -336,6 +357,7 @@ import RequestPreview from './RequestPreview.vue';
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import { ref, onMounted, watch, computed, onUnmounted } from 'vue';
+import { showError, showSuccess, showWarning } from '../shared/services/toast';
 // import socket from '../socketService';
 // import { io } from "socket.io-client";
 
@@ -506,6 +528,30 @@ onMounted(() => {
     }
 });
 
+const openMail = () => {
+  const supportEmail = "support@caratred.com";
+  const userEmail = "example@caratred.com";
+
+  let mailURL = "";
+
+  if (userEmail.includes("@gmail.com")) {
+    // Gmail
+    mailURL = `https://mail.google.com/mail/?view=cm&fs=1&to=${supportEmail}`;
+  } else if (
+    userEmail.includes("@outlook.com") ||
+    userEmail.includes("@hotmail.com") ||
+    userEmail.includes("@live.com")
+  ) {
+    // Outlook
+    mailURL = `https://outlook.office.com/mail/deeplink/compose?to=${supportEmail}`;
+  } else {
+    // Fallback - default mail app
+    mailURL = `mailto:${supportEmail}`;
+  }
+
+  window.open(mailURL, "_blank");
+};
+
 function clearPassword() {
     new_password.value = ""
     confirm_password.value = ""
@@ -578,7 +624,7 @@ function passwordChange() {
 
     axiosInstance.put(`${apis.resource}${doctypes.users}/${userName.name}`, payload)
         .then((res) => {
-            toast.success('Password changed Successfully', { autoClose: 300 });
+            showSuccess('Password changed Successfully');
             const modal = bootstrap.Modal.getInstance(document.getElementById('changePassword'));
             modal.hide();
             new_password.value = '';
@@ -745,7 +791,7 @@ function SelectedFromchange(value) {
     userRole = userRole?.replace(/^"|"$/g, ''); // Remove surrounding quotes
 
     if (!userRole) {
-        toast.error("User role is missing. Please log in again.", { autoClose: 2000 });
+        showError("User role is missing. Please log in again.");
         return;
     }
 
@@ -753,7 +799,7 @@ function SelectedFromchange(value) {
     const selectedForm = formList.value.find(form => form.form_short_name === value);
 
     if (!selectedForm) {
-        toast.error("Selected form does not exist in the fetched list.", { autoClose: 2000 });
+        showError("Selected form does not exist in the fetched list.");
         return;
     }
 
@@ -765,7 +811,7 @@ function SelectedFromchange(value) {
         const requestor = formJson.workflow?.find(item => item.type === "requestor");
 
         if (!requestor || !Array.isArray(requestor.roles)) {
-            toast.error("Invalid requestor data.", { autoClose: 2000 });
+            showError("Invalid requestor data.");
             return;
         }
 
@@ -790,11 +836,11 @@ function SelectedFromchange(value) {
         if (isRoleMatched) {
             toRaiseRequest(); // Call toRaiseRequest() when there's a match
         } else {
-            toast.error("You do not have permission to raise this request.", { autoClose: 2000 });
+            showError("You do not have permission to raise this request.");
         }
     } catch (error) {
 
-        toast.error("Invalid form data. Please contact support.", { autoClose: 2000 });
+        showError("Invalid form data. Please contact support.");
     }
 }
 
@@ -808,7 +854,7 @@ function SelectedDepartment(departmentName) {
     userRole = userRole?.replace(/^"|"$/g, ""); // Remove surrounding quotes
 
     if (!userRole) {
-        toast.error("User role is missing. Please log in again.", { autoClose: 2000 });
+        showError("User role is missing. Please log in again.");
         return;
     }
 
@@ -858,13 +904,13 @@ function SelectedDepartment(departmentName) {
             });
 
             if (allowedForms.length === 0) {
-                toast.warning("No forms have been created in this department.", { autoClose: 2000, transition: "zoom", });
+                showWarning("No forms have been created in this department.");
             }
             formList.value = allowedForms; // Only store role-matched forms
         })
         .catch((error) => {
             console.error("Error fetching ezyForms data:", error);
-            toast.error("Error fetching forms. Please try again.", { autoClose: 2000, transition: "zoom", });
+            showError("Error fetching forms. Please try again.");
         });
 }
 

@@ -18,13 +18,13 @@
         <div class="d-none d-lg-block">
 
         <GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true" viewType="viewPdf"  raiseRequest="true"
-          :enableDisable="isEnable" @cell-click="viewPreview" @actionClicked="actionCreated"
+          :enableDisable="isEnable" @cell-click="viewPreview" @actionClicked="actionCreated" QR_Code="true"
           @toggle-click="toggleFunction" :actions="actions" @updateFilters="inLineFiltersData"
           :field-mapping="fieldMapping" isFiltersoption="true" />
         </div>
          <div class=" d-block d-lg-none">
         <GlobalCard :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true" viewType="viewPdf"  raiseRequest="true"
-          :enableDisable="isEnable" @cell-click="viewPreview" @actionClicked="actionCreated"
+          :enableDisable="isEnable" @cell-click="viewPreview" @actionClicked="actionCreated" QR_Code="true"
           @toggle-click="toggleFunction" :actions="actions" @updateFilters="inLineFiltersData"
           :field-mapping="fieldMapping" isFiltersoption="flase"  />
       </div>
@@ -90,16 +90,18 @@
           </div>
           <div class="modal-body">
             <div class="text-center">
-              <qrcode-vue :value="formName.qr_url" :size="180" level="H" />
-              <!-- <h6>{{ formName.qr_url }}</h6> -->
+              <qrcode-vue :value="formName.qr_url" :size="180" level="H" class="qrCodeDiv" />
             </div>
             <div class="input-group my-3">
               <input type="text" class="form-control shadow-none font-12" :value="formName.qr_url" readonly />
               <button class="btn bg-secondary text-white shadow-none" @click="copyToClipboard"><i class="bi bi-copy h-100"></i></button>
             </div>
-            <button class="btn download-btn font-14 w-100 shadow-none" @click="downloadQR">
-              <i class="bi bi-download me-2"></i> Download
-            </button>
+            <div>
+              <button class="btn download-btn font-14 w-100 shadow-none" @click="downloadQR">
+                <i class="bi bi-download me-2"></i> Download
+              </button>
+            </div>
+
           </div>
         </div>
       </div>
@@ -142,23 +144,26 @@ import { EzyBusinessUnit } from '../../shared/services/business_unit';
 // import { rebuildToStructuredArray } from '../../shared/services/field_format';
 import PaginationComp from "../../Components/PaginationComp.vue"
 // import FormPreview from '../../Components/FormPreview.vue'
-import { toast } from "vue3-toastify";
-import "vue3-toastify/dist/index.css";
+
 import router from '../../router';
 import { useRoute } from 'vue-router';
 import GlobalCard from '../../Components/GlobalCard.vue';
 import QrcodeVue from "qrcode.vue";
+import { showInfo, showSuccess, showWarning } from '../../shared/services/toast';
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 // import ButtonComp from '../../Components/ButtonComp.vue';
 const totalRecords = ref(0);
 const tableheaders = ref([
   { th: "Form Name", td_key: "form_name" },
   // { th: "Form Short Code", td_key: "form_short_name" },
   { th: "Department", td_key: "form_department" },
-  // { th: "Accessible Departments", td_key: "accessible_departments" },
+  { th: "Form Type", td_key: "as_web_view" },
   // { th: "Status", td_key: "form_status" },
   // { th: "Form Status", td_key: "enable" },
 
 ]);
+
 const props = defineProps(['id']);
 const formDescriptions = ref({})
 const selectedForm = ref(null);
@@ -193,7 +198,7 @@ const formName = ref("");
 // Copy QR ID
 const copyToClipboard = () => {
   navigator.clipboard.writeText(formName.value.qr_url);
-  toast.success("Copied QR ID", { autoClose: 600 });
+  toast.success(`Copied QR for ${formName.value.form_name}`, { autoClose: 600 });
 };
 
 // downloadQR
@@ -201,10 +206,43 @@ const downloadQR = () => {
   const canvas = document.querySelector("canvas");
   const url = canvas.toDataURL("image/png");
   const a = document.createElement("a");
+
+  // Use form name or fallback
+  const fileName = formName.value.form_name
+    ? `${formName.value.form_name}.png`
+    : "qrcode.png";
+
   a.href = url;
-  a.download = "qrcode.png";
+  a.download = fileName;
   a.click();
 };
+
+// const showShareOptions = ref(false);
+
+// const shareQR = async () => {
+//   try {
+//     const canvas = document.querySelector("canvas");
+//     const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+//     const fileName = formName.value.form_name ? `${formName.value.form_name}.png` : "qrcode.png";
+//     const file = new File([blob], fileName, { type: "image/png" });
+
+//     const shareData = {
+//       title: formName.value.form_name,
+//       text: `Check out this form:\n${formName.value.qr_url}`,
+//       files: [file],
+//     };
+
+//     if (navigator.canShare && navigator.canShare({ files: [file] })) {
+//       await navigator.share(shareData);
+//     } else {
+//       showShareOptions.value = true;
+//     }
+//   } catch (err) {
+//     console.error("Sharing failed:", err);
+//     showShareOptions.value = true;
+//   }
+// };
+
 
 
 
@@ -245,26 +283,29 @@ function formCreation(item = null) {
 }
 
 function viewPreview(data, index, type) {
-  // console.log(route.path);
   if (type === "view") {
-    // if (data) {
-    //   // console.log(data, "------------");
-    //   router.push({
-    //     name: "FormPreviewComp",
-    //     query: {
-    //       routepath: route.path,
-    //       form_short_name: data.form_short_name,
-    //       business_unit: businessUnit.value,
+    if (data) {
+      router.push({
+        name: "FormPreviewComp",
+        query: {
+          routepath: route.path,
+          form_short_name: data.form_short_name,
+          business_unit: businessUnit.value,
 
-    //     },
-    //   });
-    // }
+        },
+      });
+    }
 
+  }
+  if (type === "QR Code") {
     formName.value = data;
-    // console.log("formName=",formName.value.qr_url);
-    const modal = new bootstrap.Modal(document.getElementById('showQRModal'), {});
-    modal.show();
-
+    if(formName.value.qr_url && data.as_web_view===1){
+      const modal = new bootstrap.Modal(document.getElementById('showQRModal'), {});
+      modal.show();
+    }
+    else{
+      toast.info("No QR Code Available", { autoClose: 500 })
+    }
 
   }
   if (type === 'raiseRequest') {
@@ -277,7 +318,7 @@ function viewPreview(data, index, type) {
       // console.log(designation);
 
       if (!parsedData.workflow.length) {
-        toast.info("No Roles Added", { autoClose: 500 })
+        showInfo("No Roles Added")
       }
       const roles = parsedData.workflow[0].roles;
       // console.log(roles);
@@ -314,7 +355,7 @@ function viewPreview(data, index, type) {
         }
 
       } else {
-        toast.info("You do not have permission to access this Form.");
+        showInfo("You do not have permission to access this Form.");
       }
     }
     //  else {
@@ -347,7 +388,7 @@ function actionCreated(rowData, actionEvent) {
       });
 
     } else {
-      toast.warn(" There is no form fields ")
+      showWarning(" There is no form fields ")
     }
   }
   else if (actionEvent.name === 'Edit Form') {
@@ -363,7 +404,7 @@ function actionCreated(rowData, actionEvent) {
       const designation = JSON.parse(storedData).designation;
       // console.log(designation);
       if (!parsedData.workflow?.length) {
-        toast.info("No Roles Added", { autoClose: 500 });
+        showInfo("No Roles Added");
       }
       const roles = parsedData.workflow[0].roles;
       // console.log(roles);
@@ -392,9 +433,9 @@ function actionCreated(rowData, actionEvent) {
           },
         });
       } else if (rowData.enable === 0) {
-      toast.info("This form is currently disabled.", { autoClose: 500 });
+      showInfo("This form is currently disabled.");
     } else {
-      toast.info("You do not have permission to access this Form.", { autoClose: 500 });
+      showInfo("You do not have permission to access this Form.");
     }
     }
     //  else {
@@ -482,7 +523,7 @@ function confirmAction() {
     .put(`${apis.resource}${doctypes.EzyFormDefinitions}/${selectedRowData.value.name}`, selectedRowData.value)
     .then((response) => {
       responcedata.value = response.data;
-      toast.success(`Form ${selectedActionText.value}d successfully`, { autoClose: 700 });
+      showSuccess(`Form ${selectedActionText.value}d successfully`);
       setTimeout(() => {
         fetchDepartmentDetails();
       }, 1000);
@@ -667,7 +708,9 @@ const queryParams = {
     "owner_of_the_form",
     "print_format",
     "series",
-    "workflow_check"
+    "workflow_check",
+    "qr_url",
+    "as_web_view",
   ]),
 };
 
@@ -931,5 +974,9 @@ onMounted(() => {
   background-color: #6c757d;
   color: white;
 }
-
+.qrCodeDiv{
+  border: 1px solid black;
+  padding: 10px;
+  border-radius: 6px;
+}
 </style>

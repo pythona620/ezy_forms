@@ -43,6 +43,7 @@ import { rebuildToStructuredArray } from "../../shared/services/field_format";
 import FormPreview from '../../Components/FormPreview.vue'
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
+import { showSuccess } from "../../shared/services/toast";
 
 
 
@@ -194,7 +195,7 @@ function toggleFunction(rowData, rowIndex, event) {
         axiosInstance
             .put(`${apis.resource}${doctypes.EzyFormDefinitions}/${rowData.name}`, rowData)
             .then((response) => {
-                toast.success(`Form ${actionText}d successfully`, { autoClose: 700 });
+                showSuccess(`Form ${actionText}d successfully`);
                 // setTimeout(() => {
                 //     fetchTable();
                 // }, 1000);

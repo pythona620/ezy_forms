@@ -56,8 +56,8 @@
             </template>
           </td>
           <!-- <td class="text-center fixed-column" v-if="enableDisable == 'true'"></td> -->
-          <td class="text-center fixed-column" v-if="isAction == 'true'"></td>
-          <td class="text-center fixed-column" v-if="isRequest == 'true'"></td>
+          <td class="text-center fixed-column dropdown_sticky" v-if="isAction == 'true'"></td>
+          <td class="text-center fixed-column dropdown_sticky" v-if="isRequest == 'true'"></td>
         </tr>
         <template v-if="tData.length">
           <tr v-for="(row, rowIndex) in tData" :key="rowIndex">
@@ -78,7 +78,7 @@
               <span v-if="column.td_key === 'status'">
 
                 <i class="bi bi-circle-fill status-circle font-10 text-center pe-2" :class="{
-                  'text-warning fw-medium': row[column.td_key] === 'Request Raised',
+                  'text-warning fw-medium': row[column.td_key] === 'Request Raised' || row[column.td_key] === 'Request Raised Via QR Code',
                   'textcompleted fw-medium': row[column.td_key] === 'Completed' || 'Sent',
                   'text-primary fw-medium': row[column.td_key] === 'In Progress',
                   'textcancel fw-medium': row[column.td_key] === 'Cancelled',
@@ -120,6 +120,9 @@
                 <span  class="tooltip-text" v-tooltip.top="row[column.td_key]">
                   {{ row[column.td_key]  === 'Yes' ? 'Yes' : 'No' }} 
                 </span>
+              </span>
+              <span v-else-if="column.td_key === 'as_web_view'">
+                {{ row.as_web_view == 1 ? 'Public' : 'Private' }}
               </span>
 
               <!-- Default Column Rendering -->
@@ -226,15 +229,19 @@
             <!-- <td > -->
 
             <!-- </td> -->
-            <td   class="dropdown_sticky">
+            <td v-if="(isAction == 'true' && viewType === 'viewPdf') || actionType === 'dropdown' || download === 'true' || isRequest === 'true' || ( isAction === 'true' && view === 'edit')"  class="dropdown_sticky">
             <div v-if="isAction == 'true' && viewType === 'viewPdf'" class="text-center align-middle">
               <span v-if="raiseRequest === 'true'" class="px-2">
                 <i v-tooltip.top="'Raise Request'" class="bi bi-send eye-cursor mx-1"
                   @click="handleCellClick(row, rowIndex, 'raiseRequest')"></i>
               </span>
-              <span class="px-2">
+              <span class="px-1">
                 <i v-tooltip.top="'View'" @click="handleCellClick(row, rowIndex, 'view')"
                   class="ri-eye-line eye-cursor"></i>
+              </span>
+              <span v-if="QR_Code === 'true'" class="px-2">
+                <i @click="handleCellClick(row, rowIndex, 'QR Code')"
+                  class="bi bi-qr-code-scan eye-cursor"></i>
               </span>
               <span v-if="download === 'true'">
                 <i class="bi bi-download eye-cursor" @click="handleCellClick(row, rowIndex, 'download')"></i>
@@ -421,6 +428,9 @@ const props = defineProps({
   },
   download: {
     type: String,
+  },
+  QR_Code:{
+    type:Boolean,
   },
   raiseRequest: {
     type: String
@@ -848,7 +858,7 @@ watch(
   background-color: white;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
   position: absolute;
-  transform: translate3d(-45.286px, 12px, 0px) !important;
+  transform: translate3d(-69.286px, 12px, 0px) !important;
 }
 
 .activeform {
@@ -1039,7 +1049,7 @@ th:first-child {
 
 @media (max-width: 1400px) {
   .table-responsive {
-    height: 67vh;
+    height: 75vh;
   }
 
   .global-table td {
@@ -1230,7 +1240,7 @@ th:first-child {
   background: white !important;
   z-index: 1;
   overflow: visible !important;
-  width: 3%!important;
+  width: 5%!important;
 }
 
 

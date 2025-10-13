@@ -77,7 +77,7 @@
                 <div v-if="selectedData.type === 'mytasks'" class="">
 
                   <!-- v-if="!requestcancelled" -->
-                  <div class="approveBtns pb-2 mb-2 mt-3 flex-column ">
+                  <div class="approveBtns pb-2 mb-2 mt-3 flex-column">
                     <!-- <div v-if="!canApprove & view_only_reportee === 1" class=" d-flex align-items-center gap-1">
 
                       <span class=" font-12 text-danger">
@@ -88,13 +88,28 @@
                     </div> -->
 
                     <div class="form-floating mb-2 p-1">
-                      <!-- :disabled="view_only_reportee === 1" -->
-                      <textarea class="form-control font-12" placeholder="Leave a comment here" id="floatingTextarea"
-                        @input="resetCommentsValidation" :class="{ 'is-invalid': !isCommentsValid }"
-                        v-model="ApproverReason"></textarea>
+                      <textarea 
+                        class="form-control font-12" 
+                        placeholder="Leave a comment here" 
+                        id="floatingTextarea"
+                        @input="resetCommentsValidation" 
+                        :class="{ 'is-invalid': !isCommentsValid }"
+                        v-model="ApproverReason"
+                        maxlength="140"   
+                      ></textarea>
                       <label class="font-11" for="floatingTextarea">Comments..</label>
-                      <span v-if="!isCommentsValid" class="font-11 text-danger ps-1">Please enter comments**</span>
+
+                      <!-- Validation error -->
+                      <span v-if="!isCommentsValid" class="font-11 text-danger ps-1">
+                        Please enter comments**
+                      </span>
+
+                      <!-- Character counter -->
+                      <span class="font-10 text-muted ps-1">
+                        {{ ApproverReason.length }}/140
+                      </span>
                     </div>
+
                     <div class=" d-flex justify-content-between ">
                       <div>
                         <button :disabled="rejectLoad" class="btn btn-outline-danger font-10 py-0 rejectbtn"
@@ -792,6 +807,7 @@ import { rebuildToStructuredArray } from "../shared/services/field_format";
 // import ButtonComp from "./ButtonComp.vue";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
+import { showDefault, showError, showSuccess } from "../shared/services/toast";
 const route = useRoute();
 
 const selectedData = ref({
@@ -839,10 +855,13 @@ const linkedActivity = ref([]);
 const isFormValid = ref(false);
 const isAcknowledgementValid = ref(false);
 const resetCommentsValidation = () => {
-  if (ApproverReason.value.trim() !== "") {
-    // If comment is not empty, set isCommentsValid to true
+  // Trim whitespace and validate
+  if (ApproverReason.value.trim() !== "" && ApproverReason.value.length <= 140) {
     isCommentsValid.value = true;
-  }
+  } 
+  // else {
+  //   isCommentsValid.value = false;
+  // }
 };
 function formatCreation(dateStr) {
   const [datePart, timePart] = dateStr.split(' ');
@@ -873,10 +892,7 @@ const attachmentsReady = ref(false);
 const handleApprove = () => {
   console.log(attachmentsReady.value);
   if (!attachmentsReady.value) {
-    toast("⚠️ Please preview all attachments before approving", { 
-      transition: "zoom",
-      theme: "auto",
-    });
+    showDefault("⚠️ Please preview all attachments before approving");
     return;
   }
 
@@ -1132,12 +1148,12 @@ async function ApproverFormSubmission(dataObj, type) {
   //   return; // Stop execution
   // }
 if (!isFormValid.value) {
-    toast.error("Please Fill All Mandatory Fields");
+    showError("Please Fill All Mandatory Fields");
     return;
   }
 
  if (!isAcknowledgementValid.value) {
-      toast.error("Acknowledgement is required.");
+      showError("Acknowledgement is required.");
       return;
   }
   // isCommentsValid.value = true;
@@ -1155,7 +1171,7 @@ if (!isFormValid.value) {
   //   // ✅ Submit child table data first
   //   await ChildTableData();
   // } catch (error) {
-  //   toast.error("❌ Child table submission failed");
+  //   showError("❌ Child table submission failed");
   //   loading.value = false;
   //   return;
   // }
@@ -1170,13 +1186,13 @@ if (!isFormValid.value) {
         approvalStatusFn(dataObj, type);
       } else {
         loading.value = false; // Stop loader on failure
-        toast.error("Failed to submit form", { autoClose: 1000, transition: "zoom" });
+        showError("Failed to submit form");
       }
     })
     .catch((error) => {
       console.error("Error submitting form:", error);
       loading.value = false; // Stop loader on error
-      toast.error("An error occurred while submitting the form.", { autoClose: 1000, transition: "zoom" });
+      showError("An error occurred while submitting the form.");
     });
 }
 
@@ -1212,20 +1228,22 @@ function approvalStatusFn(dataObj, type) {
         }
         // DynamicCalculateMethod()
         ApproverReason.value = ""; // Clear reason after success
-        toast.success(`Request ${type}ed`, {
-          autoClose: 500,
-          transition: "zoom",
-          onClose: () => {
-            router.push({ path: selectedData.value.routepath }); // Navigate after toast closes
-          }
-        });
+        // toast.success(`Request ${type}d`, {
+        //   autoClose: 500,
+        //   transition: "zoom",
+        //   pauseOnHover: false,
+        //   onClose: () => {
+        //   }
+        // });
+        showSuccess(`Request ${type}d`);
+        router.push({ path: selectedData.value.routepath }); // Navigate after toast closes
       } else {
-        toast.error(`Failed to ${type} request`, { autoClose: 1000, transition: "zoom" });
+        showError(`Failed to ${type} request`);
       }
     })
     .catch((error) => {
       console.error("Error processing request:", error);
-      toast.error("An error occurred while processing your request.", { autoClose: 1000, transition: "zoom" });
+      showError("An error occurred while processing your request.");
     })
     .finally(() => {
       loading.value = false; // Ensure loader stops
@@ -1262,7 +1280,7 @@ function DynamicCalculateMethod() {
 //   //   // ✅ Submit child table data first
 //   //   await ChildTableData();
 //   // } catch (error) {
-//   //   toast.error("❌ Child table submission failed");
+//   //   showError("❌ Child table submission failed");
 //   //   loading.value = false;
 //   //   return;
 //   // }
@@ -1296,25 +1314,25 @@ function DynamicCalculateMethod() {
 //               // receivedForMe()
 
 //             } else {
-//               toast.error(`Failed to request`, { autoClose: 1000, transition: "zoom" });
+//               showError(`Failed to request`);
 //             }
 //           })
 //           .catch((error) => {
 //             console.error("Error processing request:", error);
-//             toast.error("An error occurred while processing your request.", { autoClose: 1000, transition: "zoom" });
+//             showError("An error occurred while processing your request.");
 //           })
 
 
 
 //       } else {
 //         loading.value = false; // Stop loader on failure
-//         toast.error("Failed to submit form", { autoClose: 1000, transition: "zoom" });
+//         showError("Failed to submit form");
 //       }
 //     })
 //     .catch((error) => {
 //       console.error("Error submitting form:", error);
 //       loading.value = false; // Stop loader on error
-//       toast.error("An error occurred while submitting the form.", { autoClose: 1000, transition: "zoom" });
+//       showError("An error occurred while submitting the form.");
 //     });
 //   // console.log(request_id,"data");
 //   // console.log(selectedcurrentLevel.value,"current level");
@@ -1349,13 +1367,13 @@ function ApproverCancelSubmission(dataObj, type) {
         approvalCancelFn(dataObj, type);
       } else {
         rejectLoad.value = false; // Stop loader on failure
-        toast.error("Failed to cancel request", { autoClose: 1000, transition: "zoom" });
+        showError("Failed to cancel request");
       }
     })
     .catch((error) => {
       console.error("Error cancelling request:", error);
       rejectLoad.value = false; // Stop loader on error
-      toast.error("An error occurred while cancelling the request.", { autoClose: 1000, transition: "zoom" });
+      showError("An error occurred while cancelling the request.");
     });
 }
 
@@ -1405,20 +1423,23 @@ function approvalCancelFn(dataObj, type) {
     .post(apis.requestApproval, { request_details: [data] })
     .then((response) => {
       if (response?.message) {
-        toast.success(`${type}`, {
-          autoClose: 500,
-          transition: "zoom",
-          onClose: () => {
-            router.push({ name: "ReceivedForMe" }); // Navigate after toast
-          },
-        });
+        // toast.success(`Request ${type}ed`, {
+        //   autoClose: 500,
+        //   transition: "zoom",
+        //   pauseOnHover: false,
+        //   onClose: () => {
+        //   },
+        // });
+        showSuccess(`Request ${type}ed`);
+        router.push({ name: "ReceivedForMe" }); // Navigate after toast 
+
       } else {
-        toast.error(`Failed to ${type} request`, { autoClose: 1000, transition: "zoom" });
+        showError(`Failed to ${type} request`);
       }
     })
     .catch((error) => {
       console.error("Error processing cancellation:", error);
-      toast.error("An error occurred while cancelling the request.", { autoClose: 1000, transition: "zoom" });
+      showError("An error occurred while cancelling the request.");
     })
     .finally(() => {
       rejectLoad.value = false; // Ensure loader stops
@@ -1841,7 +1862,7 @@ function toLinkedForm() {
       },
     });
   } else {
-    toast.error("No linked form available", { autoClose: 1000, transition: "zoom" });
+    showError("No linked form available");
   }
 
   // console.log("Linked Form Data:", tableData.value.is_linked_form);

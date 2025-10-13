@@ -1772,7 +1772,10 @@ const updateDateTimeFields = () => {
 const emp_dep = ref('')
 // Initialize datetime fields on component mount
 onMounted(async() => {
+    const ftid = route.query.ftid;
+    if (!ftid) {
      await getEmploye()
+    }
     // console.log(props.LinkedChildTableData , "LinkedChildTableData");
     // if (props.LinkedChildTableData && Object.keys(props.LinkedChildTableData).length > 0) {
     // for (const [key, value] of Object.entries(props.LinkedChildTableData)) {

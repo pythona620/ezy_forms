@@ -109,7 +109,7 @@ export const apis = {
   get_wf_activate_log: domain + `/method/ezy_flow.ezy_flow.doctype.wf_activity_log.wf_activity_log.get_wf_activate_log`,
   download_workorder: domain + `/method/forms_templates.api.v1.vendor_comparision.vendor_comparision_api`,
   generate_qr_code:domain + `/method/ezy_forms.api.v1.generate_qr.generate_qr_for_new_doc`,
-  getQrCodeData:domain+`/method/ezy_forms.api.v1.generate_qr.qr_code_to_new_form`,
+  getQrCodeData:domain+`/method/ezy_forms.api.v1.ezy_web_forms.qr_code_to_new_form`,
   addDesignationroles: domain + `/method/ezy_forms.api.v1.get_roles.get_role_list`,
   GetEmployeeForms:domain + `/method/ezy_forms.api.v1.get_employee_form.get_employee_forms`,
   GetAccessibleDeptForms:domain + `/method/ezy_forms.api.v1.get_employee_accessible_forms.get_employee_accessible_forms`,

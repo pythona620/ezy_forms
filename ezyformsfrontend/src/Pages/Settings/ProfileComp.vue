@@ -14,7 +14,7 @@
             />
             <i
               v-if="userData.profile_image"
-              class="bi bi-pencil edit-profile-icon position-absolute top-0 end-0"
+              class="bi bi-pencil-fill edit-profile-icon position-absolute "
               @click="triggerFileInput('profile')"
               style="cursor: pointer;"
             ></i>
@@ -25,7 +25,7 @@
             <h6 class="mb-3 mt-2">{{ userData.emp_name }}</h6>
 
             <!-- Top details -->
-            <div class="d-flex flex-wrap justify-content-center justify-content-md-start gap-3 role-details">
+            <div class="d-flex flex-wrap justify-content-center justify-content-md-start gap-4 role-details">
               <span><i class="bi bi-person-badge-fill me-1"></i>{{ userData.emp_code || "-" }}</span>
               <span><i class="bi bi-envelope-fill me-1"></i>{{ userData.emp_mail_id || "-" }}</span>
               <span><i class="bi bi-telephone-fill me-1"></i>{{ userData.emp_phone || "-" }}</span>
@@ -34,26 +34,40 @@
             </div>
 
             <!-- Bottom info -->
-            <div class="mt-3 d-flex flex-wrap justify-content-center justify-content-md-start gap-3 font-11">
-              <span>Department: {{ userData.department || "-" }}</span>
-              <span>Reporting Manager: {{ userData.reporting_to || "-" }}</span>
-              <span>Acknowledged On: {{ formatDateTime(userData.acknowledge_on) || "-" }}</span>
+            <div class="mt-3 d-flex flex-wrap justify-content-center justify-content-md-start gap-4 font-11">
+              <span>Department: 
+                <span class="fw-bold">
+
+                {{ userData.department || "-" }}
+                </span>
+
+              </span>
+              <span>Reporting Manager: 
+                <span class="fw-bold">
+                  {{ userData.reporting_to || "-" }}
+                </span>
+              </span>
+              <span>Acknowledged On: 
+                <span class="fw-bold">
+                {{ formatDateTime(userData.acknowledge_on) || "-" }}
+                </span>
+                </span>
             </div>
 
             <!-- Signature -->
-            <div class="mt-3 d-flex flex-column flex-sm-row align-items-center">
-              <p class="m-0 me-sm-2">Signature:</p>
+            <div class="mt-3 d-flex flex-column flex-sm-row align-items-end">
+              <p class="m-0 me-sm-2 fw-bold font-12">Signature:</p>
               <div class="position-relative d-inline-block mt-2 mt-sm-0">
                 <img
                   v-if="userData?.signature"
                   :src="userData.signature"
-                  class="img-fluid signiture-image border"
+                  class="img-fluid signiture-image border p-1"
                   @click="triggerFileInput('signature')"
                   style="cursor: pointer;"
                 />
                 <i
                   v-if="userData?.signature"
-                  class="bi bi-pencil edit-image m-2"
+                  class="bi bi-pencil-fill edit-image m-2"
                   @click="triggerFileInput('signature')"
                   style="cursor: pointer;"
                 ></i>
@@ -79,10 +93,11 @@
 import { apis, doctypes } from "../../shared/apiurls";
 import axiosInstance from "../../shared/services/interceptor";
 import { onMounted, ref } from "vue";
-import { toast } from "vue3-toastify";
-import "vue3-toastify/dist/index.css";
+// import { toast } from "vue3-toastify";
+// import "vue3-toastify/dist/index.css";
 import defaultImage from "@/assets/UploadProfile.jpg";
 import defaultSign from "@/assets/Sign.png";
+import { showSuccess } from "../../shared/services/toast";
 
 
 const employeeData = ref({});
@@ -139,7 +154,7 @@ function uploadImage(event) {
         .then(() => {
             // userDetails(userData.value.name);
             userDetails(userData.value.name);
-            toast.success(`${uploadType.value === 'profile' ? 'Profile' : 'Signature'} Updated Successfully`, { autoClose: 300 });
+            showSuccess(`${uploadType.value === 'profile' ? 'Profile' : 'Signature'} Updated Successfully`);
         })
         .catch((error) => {
             console.error("Error uploading image:", error);
@@ -234,11 +249,12 @@ onMounted(() => {
 
 .edit-image {
     position: absolute;
-    top: -15px;
+    top: -20px;
     left: 79px;
-    background: black;
+    /* background: black; */
+    color: black;
     border-radius: 13px;
-    color: white;
+    /* color: white; */
     padding: 4px;
     font-size: 13px;
     height: 24px;
@@ -248,12 +264,15 @@ onMounted(() => {
     /* position: absolute;
     top: -15px;
     left: 133px; */
-    background: black;
+    /* background: black; */
     border-radius: 13px;
-    color: white;
+    /* color: white; */
+    color: black;
     padding: 4px;
     font-size: 13px;
     height: 25px;
+    top: -14px;
+    right: -11px;
 }
 
 span {
