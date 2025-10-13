@@ -31,7 +31,8 @@
   "qr_url",
   "send_mail_for_frist_approval",
   "mail_id",
-  "as_web_view"
+  "as_web_view",
+  "report_fields"
  ],
  "fields": [
   {
@@ -181,6 +182,11 @@
    "fieldname": "as_web_view",
    "fieldtype": "Check",
    "label": "As Web View"
+  },
+  {   
+    "fieldname": "report_fields",
+   "fieldtype": "Long Text",
+   "label": "Report Fields"
   }
  ],
  "index_web_pages_for_search": 1,

@@ -263,7 +263,7 @@ const forthSettingsTitle = 'Employee';
 
 const fifthSettingsTitle = 'System Settings';
 const sixthTitle = 'Audits';
-const seventhSettingsTitle = 'Form Creation';
+const seventhSettingsTitle = 'Forms';
 const eightSettingsTitle = 'Acknowledgement';
 const ninthSettingsTitle = 'Email Template';
 const tenthSettingsTitle = 'Password Policy';

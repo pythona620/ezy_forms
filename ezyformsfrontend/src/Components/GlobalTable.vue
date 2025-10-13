@@ -292,12 +292,12 @@
             <div v-if="isAction === 'true' && view === 'edit'" class="text-center fixed-column position-relative">
               <!-- Show both Setup Form and View if not installed -->
               <template v-if="row.installed == 'No'">
-                <span v-tooltip.top="'View'" class="font-13 view-text ms-4"
+                <!-- <span v-tooltip.top="'View'" class="font-13 view-text ms-4"
                       @click="handleCellClick(row, rowIndex, 'FormPreview')">
                   <i class="ri-eye-line eye-cursor ms-1"></i>
-                </span>
+                </span> -->
 
-                <span v-tooltip.top="'Setup form'" class="font-13 view-text ms-3"
+                <span v-tooltip.top="'Setup form'" class="font-13 view-text"
                       @click="handleCellClick(row, rowIndex, 'edit')">
                   <i class="bi-gear-fill eye-cursor"></i>
                 </span>

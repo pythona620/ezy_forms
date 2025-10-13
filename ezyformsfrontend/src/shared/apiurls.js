@@ -14,6 +14,7 @@ export const doctypes = {
   EzyCategories: "Ezy Category",
   designations: "WF Roles",
   EzyEmployeeList: "Ezy Employee",
+  SignUpEmployee: "Signup Employee",
   roles: 'Role',
   WFRoleMatrix: "WF Role Matrix",
   WFWorkflowRequests: 'WF Workflow Requests',

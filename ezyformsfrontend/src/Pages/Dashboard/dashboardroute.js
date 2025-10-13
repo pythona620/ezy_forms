@@ -5,6 +5,7 @@ const dashBoardroutes = [
     path: "/dashboard",
     component: DashBoard,
     redirect: "/dashboard/maindash",
+    meta:{ title: 'Dashboard - Ezy Forms' },
     children: [
       {
         path: "maindash",

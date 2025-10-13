@@ -61,7 +61,7 @@ import axiosInstance from '../../shared/services/interceptor';
 import { apis, doctypes } from '../../shared/apiurls';
 import { onMounted, ref, computed, watch } from 'vue';
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
-import { showSuccess } from '../../shared/services/toast';
+import { showError, showSuccess } from '../../shared/services/toast';
 
 const businessUnit = computed(() => {
     return EzyBusinessUnit.value;
@@ -212,7 +212,7 @@ function SubmitDesignation() {
                     const parsedMessage = JSON.parse(serverMessages[0]);
                     // Remove HTML tags from message
                     const cleanMessage = parsedMessage.message.replace(/<[^>]*>/g, '');
-                    toast.error(cleanMessage, { autoClose: 2000 });
+                    showError(cleanMessage, { autoClose: 2000 });
                 }
             })
             .catch((err) => {

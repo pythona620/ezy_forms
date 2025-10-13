@@ -2205,7 +2205,7 @@ function createEmpl() {
     return;
   }
   if(createEmployee.value.is_high_level=== 0 && !createEmployee.value.reporting_to) {
-     toast.error("Please Add the Reports To before updating employee.", {
+     showError("Please Add the Reports To before updating employee.", {
       autoClose: 1000,
       transition: "zoom",
     });
@@ -2279,7 +2279,7 @@ function SaveEditEmp() {
     return;
   }
   if(createEmployee.value.is_high_level=== 0 && !createEmployee.value.reporting_to) {
-     toast.error("Please Add the Reports To before updating employee.", {
+     showError("Please Add the Reports To before updating employee.", {
       autoClose: 1000,
       transition: "zoom",
     });

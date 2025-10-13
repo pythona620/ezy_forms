@@ -343,9 +343,9 @@
                                       <span class="font-12  approver_type_div">
 
 
-                                      {{getWorkflowSetup(blockIndex).view_only_reportee === 1 ? 'View only reportee' : ''}}
-                                      {{getWorkflowSetup(blockIndex).all_approvals_required === 1 ? 'All approvers required' : ''}}
-                                      {{getWorkflowSetup(blockIndex).requester_as_a_approver === 1 ? 'Requested only' : ''}}
+                                      {{getWorkflowSetup(blockIndex).view_only_reportee === 1 ? 'Reporting Manager only' : ''}}
+                                      {{getWorkflowSetup(blockIndex).all_approvals_required === 1 ? 'All of the selected approvers' : ''}}
+                                      {{getWorkflowSetup(blockIndex).requester_as_a_approver === 1 ? 'Approval by Requestor' : ''}}
                                       </span>
                                       
                                       
@@ -409,7 +409,7 @@
                                   data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight"
                                   aria-controls="offcanvasRight" @click="AddDesignCanvas(blockIndex)">
                                   <img src="../../assets/oui_app-users-roles.svg" alt="Add" class="me-1" />
-                                  Add designations
+                                  Add Approvers
                                 </button>
 
                                 <!-- Edit Designation Button (only when roles are present for that block) -->
@@ -1382,12 +1382,13 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <input v-model="printFormatID" :multiple="false" :placeholder="route.query.id" class="font-11 form-control "
+                <label for="">Form Name</label>
+            <input v-model="printFormatID" :multiple="false" :placeholder="route.query.id" class="font-11 form-control " id="Form_name_print"
               :searchable="true" />
             <div class=" d-flex align-items-center gap-2">
               <div class="d-flex align-items-center py-2">
 
-                <input class="font-12" v-model="is_landscape" :true-value="1" :false-value="0" placeholder="Field Name"
+                <input  class="font-12" v-model="is_landscape" :true-value="1" :false-value="0" placeholder="Field Name"
                   type="checkbox" />
               </div>
               <div>
@@ -1418,22 +1419,45 @@
         <button type="button" class="btn-close bg-light text-reset" data-bs-dismiss="offcanvas"
           aria-label="Close"></button>
       </div>
-      <div class="offcanvas-body p-0">
+      <div class="offcanvas-body add_desig_offCanvas_body p-0">
         <div class="">
           <div class="">
+            
            
 
 
 
             <div v-if="selectedBlockIndex !== 0"
               class=" p-3 approval-border-bottom ">
+              <div class="d-flex gap-1">
+
+                <div class="px-2 mt-2 d-flex align-items-center user-select-none">
+              <input v-model="approval_required" type="checkbox" :true-value="1" :false-value="0" id="Approver"  class="me-2 m-0 form-check-input designationCheckBox" />
+              <label for="Approver" class="m-0">Approval Mandatory</label>
+            </div>
+            <div v-if="allowEditSettingType === true" class="px-2 mt-2 d-flex align-items-center user-select-none">
+              <input
+                v-model="approver_can_edit"
+                type="checkbox"
+                :true-value="1"
+                :false-value="0"
+                id="approver_can_edit"
+                class="me-2 m-0 form-check-input designationCheckBox"
+              />
+              <label for="approver_can_edit" class="m-0">
+               Allow to Edit
+              </label>
+              
+              </div>
+            </div>
+
                <div v-if="selectedBlockIndex !== 0" class=" p-2">
               <label class="fw-bold font-12 mb-2">Approver Type</label>
               <select v-model="selectedApproverType" class="form-select shadow-none font-12 ">
-                <option value="">Send To Selected Approvers</option>
-                <option value="ViewOnlyReportee">View Only Reportee</option>
-                <option value="all_approvals_required">All Approvers Required</option>
-                <option value="requester_as_a_approver">Requested Only</option>
+                <option value="">Any one of the selected approvers</option>
+                <option value="ViewOnlyReportee">Reporting Manager only</option>
+                <option value="all_approvals_required">All of the selected approvers</option>
+                <option value="requester_as_a_approver">Approval by Requestor</option>
               </select>
             </div>
 
@@ -1455,10 +1479,7 @@
                 </select>
               </div>
 
-            <div class="px-2 mt-2 d-flex align-items-center user-select-none">
-              <input v-model="approval_required" type="checkbox" :true-value="1" :false-value="0" id="Approver"  class="me-2 m-0 form-check-input designationCheckBox" />
-              <label for="Approver" class="m-0">Approver Required</label>
-            </div>
+          
 
             </div>
             
@@ -1542,7 +1563,7 @@
       <div class="offcanvas-footer">
         <div class="text-end p-3">
           <ButtonComp class="btn btn-dark addingDesignations" data-bs-dismiss="offcanvas" @click="addDesignationBtn"
-            name=" Add Designations" />
+            name="Add Approvers" />
         </div>
       </div>
     </div>
@@ -1599,12 +1620,14 @@ const all_approvals_required = ref(false);
 const requester_as_a_approver = ref(false);
 const OnRejection = ref('');
 const approval_required=ref('');
+const approver_can_edit=ref('');
 const wrkAfterGetData = ref([]);
 // const hasWorkflowToastShown = ref(false);
 const tableFieldsCache = ref([]);
 const fieldErrors = reactive({});
 // const childtableRows = ref([]);
 const childtableHeaders = ref([]);
+const allowEditSettingType = ref(false);
 // const childtableName = ref("");
 // const childTableresponseData = ref([]);
 const filteredForms = ref([]);
@@ -1841,14 +1864,12 @@ const GetDoctypeList = async (searchText) => {
     fields: JSON.stringify(["name"]),
     filters: JSON.stringify(filters),
     limit_page_length: "None",
+    doctype:doctypes.doctypesList,
   };
 
   try {
-    const res = await axiosInstance.get(
-      apis.resource + doctypes.doctypesList,
-      { params: queryParams }
-    );
-    return res.data || [];
+    const res = await axiosInstance.get(apis.GetDoctypeData, { params: queryParams });
+    return res.message.data || [];
   } catch (error) {
     console.error("Error fetching doctype list:", error);
     return [];
@@ -1919,13 +1940,14 @@ function searchForm() {
       limit_page_length: 10,
       limit_start: 0,
       filters: JSON.stringify(filters),
+      doctype:doctypes.EzyFormDefinitions,
       order_by: "`tabEzy Form Definitions`.`enable` DESC, `tabEzy Form Definitions`.`creation` DESC"
     };
 
     axiosInstance
-      .get(`${apis.resource}${doctypes.EzyFormDefinitions}`, { params: queryParams })
+      .get(`${apis.GetDoctypeData}`, { params: queryParams })
       .then((response) => {
-        filteredForms.value = response.data || [];
+        filteredForms.value = response.message.data || [];
       })
       .catch((error) => {
         console.error("Error fetching form definitions:", error);
@@ -2022,13 +2044,14 @@ function fetchDoctypeList(searchText, b, s, r, c, f) {
   const queryParams = {
     fields: JSON.stringify(['name']),
     filters: JSON.stringify(filters),
-    limit_page_length: '10',
+    limit_page_length: 'none',
+    doctype:doctypes.doctypesList,
   };
 
   axiosInstance
-    .get(apis.resource + doctypes.doctypesList, { params: queryParams })
+    .get(apis.GetDoctypeData, { params: queryParams })
     .then((res) => {
-      linkSearchResults[fieldKey] = res.data || [];
+      linkSearchResults[fieldKey] = res.message.data || [];
     })
     .catch((error) => {
       console.error('Error fetching doctype list:', error);
@@ -2048,12 +2071,13 @@ function fetchChildDoctypeList(searchText) {
     fields: JSON.stringify(['name']),
     filters: JSON.stringify(filters),
     limit_page_length: '10',
+    doctype:doctypes.doctypesList,
   };
 
   axiosInstance
-    .get(apis.resource + doctypes.doctypesList, { params: queryParams })
+    .get(apis.GetDoctypeData, { params: queryParams })
     .then((res) => {
-      linkSearchResults.value = res.data || [];
+      linkSearchResults.value = res.message.data || [];
     })
     .catch((error) => {
       console.error('Error fetching doctype list:', error);
@@ -2259,6 +2283,7 @@ onMounted(() => {
     OwnerOftheForm();
     // console.log(paramId.value, "[[[]]]");
   }
+  sessionStorage.getItem('allow_approver_to_edit_form') == '1' ? allowEditSettingType.value = true : allowEditSettingType.value = false
   let Bu_Unit = localStorage.getItem("Bu");
   filterObj.value.business_unit = Bu_Unit;
   if (route.query.preId === 'PreDefine') {
@@ -3219,6 +3244,7 @@ function addDesignationBtn() {
     type: selectedBlockIndex.value == 0 ? "requestor" : "approver",
     roles: designationValue.value,
     approval_required:approval_required.value,
+    approver_can_edit:approver_can_edit.value,
     fields: block.sections.flatMap(extractFieldnames),
     idx: selectedBlockIndex.value,
   };
@@ -3266,6 +3292,7 @@ function initializeDesignationValue(blockIndex) {
 
   OnRejection.value = currentSetup.on_rejection;
   approval_required.value=currentSetup.approval_required;
+  approver_can_edit.value = currentSetup.approver_can_edit;
   // Check for view_only_reportee flag
   // ViewOnlyReportee.value = currentSetup.view_only_reportee === 1;
   // OnRejection.value = currentSetup.on_rejection
@@ -3458,10 +3485,16 @@ const prevStep = () => {
 const returTables = ref([])
 // Get form by ID
 function getFormData() {
+   const queryParams = {
+        fields: JSON.stringify(["*"]),
+        limit_page_length: "none",
+        doctype:doctypes.EzyFormDefinitions,
+        doc_id:paramId.value,
+    };
   axiosInstance
-    .get(apis.resource + doctypes.EzyFormDefinitions + `/${paramId.value}`)
+    .get(apis.GetDoctypeData, { params: queryParams })
     .then((res) => {
-      let res_data = res?.data;
+      let res_data = res?.message.data;
       if (res_data) {
         router.push({
           query: {
@@ -3478,8 +3511,7 @@ function getFormData() {
             res_data.owner_of_the_form || filterObj.value.owner_of_the_form || "",
         };
 
-        // console.log(res.data, "7777777777777777");
-        const parsedFormJson = JSON.parse(res.data?.form_json);
+        const parsedFormJson = JSON.parse(res.message.data?.form_json);
         wrkAfterGetData.value = parsedFormJson.workflow;
         // console.log(parsedFormJson.workflow, "parsedFormJson");
         tableName.value = parsedFormJson.fields.filter(
@@ -3489,12 +3521,12 @@ function getFormData() {
           (field) => field.fieldtype === "Table"
         );
 
-        is_landscape.value = res.data.is_landscape;
+        is_landscape.value = res.message.data.is_landscape;
         // let structuredArr = rebuildToStructuredArray((JSON.parse(res_data?.form_json?.fields).fields)?.replace(/\\\"/g, '"'))
         let structuredArr = rebuildToStructuredArray(
           JSON.parse(res_data?.form_json).fields
         );
-        childtableHeaders.value = JSON.parse(res.data.form_json).child_table_fields;
+        childtableHeaders.value = JSON.parse(res.message.data.form_json).child_table_fields;
 
         childTables.value = []
         tableFieldsCache.value = []
@@ -3548,22 +3580,16 @@ function deptData() {
     fields: JSON.stringify(["name","department_name"]),
     limit_page_length: "none",
     business_unit: `${selectedData.value.business_unit || route.query.business_unit}`,
-
+    doctype:doctypes.departments,
   };
 
   axiosInstance
-    .get(apis.resource + doctypes.departments, { params: queryParams })
+    .get(apis.GetDoctypeData, { params: queryParams })
     .then((res) => {
-      if (res?.data?.length) {
-        // Mapping department names
-        // label="name" track-by="name"
-        OwnerOfTheFormData.value = res.data.map((dept) => dept.name);
-//                 OwnerOfTheFormData.value = res.data.map((dept) => ({
-//   label: dept.department_name, // shows in dropdown
-//   value: dept.name             // stored in v-model
-// })); 
-        formOptions.value = res.data.map((dept) => dept.name); // Store the full data for accessible departments
-        // departments.value = res.data.map(item => item.category)
+      if (res?.message.data?.length) {
+        OwnerOfTheFormData.value = res.message.data.map((dept) => dept.name);
+        formOptions.value = res.message.data.map((dept) => dept.name); // Store the full data for accessible departments
+        // departments.value = res.message.data.map(item => item.category)
       }
     })
     .catch((error) => {
@@ -3587,11 +3613,16 @@ function OwnerOftheForm(newVal) {
 }
 
 function categoriesData(newVal) {
+  const queryParams = {
+    fields: JSON.stringify(["ezy_departments_items"]),
+    doctype:doctypes.departments,
+    doc_id:newVal,
+  };
   axiosInstance
-    .get(apis.resource + doctypes.departments + `/${newVal}`)
+    .get(apis.GetDoctypeData, { params: queryParams })
     .then((res) => {
-      if (res?.data?.ezy_departments_items) {
-        departments.value = res.data.ezy_departments_items.map((item) => item.category);
+      if (res?.message.data?.ezy_departments_items) {
+        departments.value = res.message.data.ezy_departments_items.map((item) => item.category);
       }
     })
     .catch((error) => {
@@ -4296,14 +4327,15 @@ function handleInputChange(event, fieldType) {
   const queryParams = {
     fields: JSON.stringify(['form_name','form_short_name']),
     filters: JSON.stringify(filters),
+    doctype:doctypes.EzyFormDefinitions,
   };
 
   axiosInstance
-    .get(`${apis.resource}${doctypes.EzyFormDefinitions}`, {
+    .get(`${apis.GetDoctypeData}`, {
       params: queryParams,
     })
     .then((res) => {
-      ezyFormsData.value = res.data;
+      ezyFormsData.value = res.message.data;
 
       // Check for duplicates (ignore spaces when comparing)
       if (fieldType === "form_name") {
@@ -5209,4 +5241,5 @@ td {
   color: #999;
   background-color: #f9f9f9;
 }
+
 </style>

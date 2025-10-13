@@ -90,6 +90,7 @@ const tableData = ref([
     { title: "Send Daily E-mail reminders", checked: false },
     { title: "Take Acknowledgement and Signiture while Login", checked: false },
     { title: "Take Signiture while Sig Up", checked: false },
+    { title: "Allow Approver to Edit Form?", checked: false },
     { title: "Company Logo", checked: false },
 ]);
 
@@ -147,8 +148,11 @@ const handleToggle = (index) => {
         confirmMessage.value = isChecked
             ? "Are you sure you want to enable Signiture while Sig Up?"
             : "Are you sure you want to disable Signiture while Sig Up?";
-    }
-    else if (index === 7) {
+    } else if (index === 7) {
+        confirmMessage.value = isChecked
+            ? "Are you sure you want to enable Approver Edit Form?"
+            : "Are you sure you want to disable Approver Edit Form?";
+    } else if (index === 8) {
         viewImage.value = true;
     }
 
@@ -288,7 +292,24 @@ const confirmAction = () => {
             .catch(() => {
                 showError("Failed to update Signiture while Sig Up");
             });
-    } else if (index === 7) {
+    }
+    else if (index === 7) {
+        axiosInstance
+            .put(`${apis.resource}${doctypes.wfSettingEzyForms}/${encodeURIComponent(docName)}`, {
+                allow_approver_to_edit_form: newStatus,
+            })
+            .then(() => {
+               showSuccess(`Approver’s ability to edit the form has been ${newStatus === 0 ? "disabled" : "enabled"} successfully!`);
+                sessionStorage.setItem("allow_approver_to_edit_form", newStatus);
+                const modal = bootstrap.Modal.getInstance(document.getElementById('EnableDisable'));
+                    modal.hide();
+                    BussinesUnit()
+            })
+            .catch(() => {
+                showError("Failed to update Approver Edit Form");
+            });
+        }
+     else if (index === 8) {
         if (!selectedFile.value) return;
         const formData = new FormData();
         formData.append("file", selectedFile.value);
@@ -324,33 +345,8 @@ const confirmAction = () => {
 
 
 function BussinesUnit() {
-    // const queryParams = {
-    //     fields: JSON.stringify(["*"]),
-    //     filters: JSON.stringify([["name", "=", Bussines_unit.value]])
-    // };
-
-    // axiosInstance
-    //     .get(`${apis.resource}${doctypes.wfSettingEzyForms}`, { params: queryParams })
-    //     .then((res) => {
-    //         if (res.data.length > 0) {
-    //             const status = res.data[0].send_form_as_a_attach_through_mail;
-    //             tableData.value[1].checked = status == 1;
-    //             const welcome_mail = res.data[0].welcome_mail_to_employee;
-    //             tableData.value[2].checked = welcome_mail == 1;
-    //             const send_daily_alerts = res.data[0].send_daily_alerts;
-    //             tableData.value[4].checked = send_daily_alerts == 1;
-    //             const is_acknowledge = res.data[0].is_acknowledge;
-    //             tableData.value[5].checked = is_acknowledge == 1;
-    //             const signature_required = res.data[0].signature_required;
-    //             tableData.value[6].checked = signature_required == 1;
-    //         }
-    //     })
-    //     .catch((error) => {
-    //         console.error("Error fetching business unit settings:", error);
-    //     });
-
     const queryParamse = {
-        fields: JSON.stringify(["name", "bu_logo", "bu_code", "send_form_as_a_attach_through_mail", "welcome_mail_to_employee", "send_daily_alerts", "is_acknowledge", "signature_required"]),
+        fields: JSON.stringify(["name", "bu_logo", "bu_code", "send_form_as_a_attach_through_mail", "welcome_mail_to_employee", "send_daily_alerts", "is_acknowledge", "signature_required","allow_approver_to_edit_form"]),
         filters:JSON.stringify([["name",'=',Bussines_unit.value]]),
         doctype:doctypes.wfSettingEzyForms,
         limit_page_length:"none",
@@ -370,6 +366,9 @@ function BussinesUnit() {
             tableData.value[5].checked = is_acknowledge == 1;
             const signature_required = res.message.data[0].signature_required;
             tableData.value[6].checked = signature_required == 1;
+            const allow_approver_to_edit_form = res.message.data[0].allow_approver_to_edit_form;
+            console.log(allow_approver_to_edit_form,'allow_approver_to_edit_form');
+            tableData.value[7].checked = allow_approver_to_edit_form == 1;
         }
     }).catch((error) => {
         console.error("Error fetching ezyForms data:", error);
@@ -380,15 +379,17 @@ function BussinesUnit() {
 const enable_two_factor = () => {
     const docName = "System Settings";
     const queryParams = {
-        fields: JSON.stringify(["*"]),
+        fields: JSON.stringify(["enable_two_factor_auth"]),
+        doctype:doctypes.SystemSettings,
+        doc_id:docName
     };
 
     axiosInstance
-        .get(`${apis.resource}${doctypes.SystemSettings}/${encodeURIComponent(docName)}`, { params: queryParams })
+        .get(`${apis.GetDoctypeData}/${encodeURIComponent(docName)}`, { params: queryParams })
         .then((res) => {
-            if (res.data) {
+            if (res.message.data) {
 
-                tableData.value[0].checked = res.data.enable_two_factor_auth == 1;
+                tableData.value[0].checked = res.message.data.enable_two_factor_auth == 1;
             }
         })
         .catch((error) => {
@@ -399,14 +400,16 @@ const enable_two_factor = () => {
 const signUp = () => {
     const docName = "Website Settings";
     const queryParams = {
-        fields: JSON.stringify(["*"]),
+        fields: JSON.stringify(["disable_signup"]),
+        doctype:doctypes.websiteSettings,
+        doc_id:docName,
     };
 
     axiosInstance
-        .get(`${apis.resource}${doctypes.websiteSettings}/${encodeURIComponent(docName)}`, { params: queryParams })
+        .get(`${apis.GetDoctypeData}/${encodeURIComponent(docName)}`, { params: queryParams })
         .then((res) => {
-            if (res.data) {
-                tableData.value[3].checked = res.data.disable_signup == 0;
+            if (res.message.data) {
+                tableData.value[3].checked = res.message.data.disable_signup == 0;
             }
         })
         .catch((error) => {
@@ -421,13 +424,14 @@ const email_account = () => {
             ["default_outgoing", "=", 1],
             ["enable_outgoing", "=", 1],
         ]),
+        doctype:doctypes.Email_Account,
     };
 
     axiosInstance
-        .get(`${apis.resource}${doctypes.Email_Account}`, { params: queryParams })
+        .get(`${apis.GetDoctypeData}`, { params: queryParams })
         .then((res) => {
-            if (res.data && res.data.length > 0) {
-                const emailData = res.data[0];
+            if (res.message.data && res.message.data.length > 0) {
+                const emailData = res.message.data[0];
                 // console.log(emailData, "response");
 
                 if (emailData.default_outgoing === 1 && emailData.enable_outgoing === 1) {

@@ -10,7 +10,7 @@ from ezy_forms.ezy_forms.doctype.email_approval.email_approval import (
     create_email_approval_records,update_token_status
 )
 # from frappe import STANDARD_USERS, _, msgprint, throw
-import sys, traceback, time
+import sys, traceback, time ,json
 from ezy_forms.api.v1.delete_files import delete_files_api
 from ezy_forms.api.v1.send_an_email import sending_mail_api
 
@@ -35,6 +35,7 @@ def updating_wf_workflow_requests(request_details,user_session=None,unwanted_fil
 			files=per_request_updation["files"],
 			property=per_request_updation["property"],
 			cluster_name=per_request_updation["cluster_name"],
+            field_changes=per_request_updation.get("field_changes"),
 			user_session=user_session,
 			unwanted_files = unwanted_files
 			
@@ -48,7 +49,7 @@ def updating_wf_workflow_requests(request_details,user_session=None,unwanted_fil
 	return {"success":True,"message":message}
 
 @frappe.whitelist()
-def enqueuing_updating_wf_workflow_requests(doctype,request_ids:list, current_level, action, reason, url_for_approval_id, files:list|None, property = None, cluster_name=None,user_session=None,unwanted_files =[]):
+def enqueuing_updating_wf_workflow_requests(doctype,request_ids:list, current_level, action, reason, url_for_approval_id, files:list|None, property = None, cluster_name=None,user_session=None,unwanted_files =[],field_changes = None):
     try:
         from ezy_forms.api.v1.ezy_form_rasie_request import todo_tab,combination_of_roadmap_and_request
         message = ""
@@ -112,17 +113,27 @@ def enqueuing_updating_wf_workflow_requests(doctype,request_ids:list, current_le
                 random_reference_id = ''.join(random.sample(random_reference_id,len(random_reference_id)))
                 if random_reference_id not in frappe.db.get_all("WF Supporting Documents",fields=["reference_id"],pluck="reference_id"):
                     already_used_random_string = False
-
+            
             if action == "Approve":
-                dict_for_child_reason_table = {"level":current_level,'reason': reason,"role":role,"user":user_id,"action":action+"d","time":my_time,"random_string":random_reference_id}
+                # dict_for_child_reason_table = {"level":current_level,'reason': reason,"role":role,"user":user_id,"action":action+"d","time":my_time,"random_string":random_reference_id,field_changes:field_changes}
+                dict_for_child_reason_table = {
+                    "level": current_level,
+                    "reason": reason,
+                    "role": role,
+                    "user": user_id,
+                    "action": action + "d",
+                    "time": my_time,
+                    "random_string": random_reference_id,
+                    "field_changes": json.dumps(field_changes),
+                }
                 previous_reasons.append(dict_for_child_reason_table)
             elif action == "Reject":
-                dict_for_child_reason_table = {"level":current_level,'reason': reason,"role":role,"user":user_id,"action":action+"ed","time":my_time,"random_string":random_reference_id}
+                dict_for_child_reason_table = {"level":current_level,'reason': reason,"role":role,"user":user_id,"action":action+"ed","time":my_time,"random_string":random_reference_id,field_changes:json.dumps(field_changes)}
                 previous_reasons.append(dict_for_child_reason_table)
 
             # Sorting as per the Time so that we can append in the correct order
-            previous_reasons.sort(key = operator.itemgetter('time'))
-
+            previous_reasons.sort(key=operator.itemgetter('time'))
+            
             setting_reason = frappe.get_doc({"doctype":"WF Activity Log","request_id":request_id,"reason": previous_reasons})
             setting_reason.insert(ignore_permissions=True)
             setting_reason.save()
@@ -140,7 +151,7 @@ def enqueuing_updating_wf_workflow_requests(doctype,request_ids:list, current_le
             if action == "Approve":
                 message = "Approved"
                 requests_with_combo_roadmap = combination_of_roadmap_and_request(document_type=doctype, request_id = request_id, property=property, cluster_name=cluster_name)
-               
+                
                 approvals_reasons = requests_with_combo_roadmap["message"]["approvals_reasons"]
                 
                 if_current_level_not_req_action_check = [d for d in approvals_reasons if d['level'] == current_level and d["mandatory"] == 1 and d["action"] == ""]
@@ -188,7 +199,7 @@ def enqueuing_updating_wf_workflow_requests(doctype,request_ids:list, current_le
                         frappe.db.commit()
                         
                         todo_tab(document_type = doctype, request_id = request_id,  property=property, cluster_name=cluster_name, current_level= change_current_level,account_ids=request_id_document[0].name,status=None)                            
-                        sending_mail_api(request_id=request_id, doctype_name=doctype,property= property,cluster= cluster_name,reason= reason,timestamp= my_time,skip_user_role= None )
+                        sending_mail_api(request_id=request_id, doctype_name=doctype,property= property,cluster= cluster_name,reason= reason,timestamp= my_time,skip_user_role= None,field_changes=field_changes,current_level=current_level )
                         
                         update_token_status(action,request_id,request_id_document[0],change_current_level,user_id,status='In Progress')
 
@@ -218,7 +229,7 @@ def enqueuing_updating_wf_workflow_requests(doctype,request_ids:list, current_le
                         request_id_document = frappe.get_all(doctype, filters={"wf_generated_request_id": request_id}, fields=["name"])
                         todo_tab(document_type = doctype, request_id = request_id,  property=property, cluster_name=cluster_name, current_level=current_level,account_ids=request_id_document[0].name,status=None)
                         
-                        sending_mail_api(request_id=request_id, doctype_name=doctype, property=property, cluster=cluster_name, reason="Completd", timestamp=my_time,skip_user_role= None)
+                        sending_mail_api(request_id=request_id, doctype_name=doctype, property=property, cluster=cluster_name, reason="Completd", timestamp=my_time,skip_user_role= None,field_changes=field_changes,current_level=current_level)
                         update_token_status(action,request_id,request_id_document[0],current_level,user_id,status="Completed")
 
 
@@ -255,7 +266,7 @@ def enqueuing_updating_wf_workflow_requests(doctype,request_ids:list, current_le
 
                     doc.save(ignore_permissions=True)
                     frappe.db.commit()
-                sending_mail_api(request_id=request_id, doctype_name=doctype, property=property, cluster=cluster_name, reason="Rejected", timestamp=my_time,skip_user_role= None)
+                sending_mail_api(request_id=request_id, doctype_name=doctype, property=property, cluster=cluster_name, reason="Rejected", timestamp=my_time,skip_user_role= None,current_level=current_level)
                 update_token_status(action,request_id,request_id_document[0],current_level,user_id,status="Reject")
             if property !=None:
                 frappe.publish_realtime("custom_socket", {'message':'Request Updated', 'type':"Request Updated","total_count":100, "count":100,"request_id":request_id, "property":property,"user":user_id})
