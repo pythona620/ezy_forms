@@ -21,7 +21,7 @@
                                         :key="'field-preview-' + fieldIndex">
                                         
                                         <div v-if="field.fieldtype !== 'Table' && field.fieldname !== 'auto_calculations'"
-                                            :class="field.fieldtype === 'Check' ? ' d-flex mt-4 flex-row-reverse justify-content-end gap-2' : ''">
+                                            :class="field.fieldtype === 'Check' ? ' d-flex mt-4 flex-row-reverse align-items-center justify-content-end gap-2' : ''">
                                             <div v-if="field.label">
                                                 <label :for="'field-' +
                                                     sectionIndex +
@@ -481,8 +481,8 @@
                                             </div>
                                         </div>
                                         <span v-if="field.description !== 'Field' && field.fieldtype !== 'Table' && field.fieldname !== 'auto_calculations' && field.description !== 'Disable'"
-                                            class="font-11"><span  class="fw-semibold">Description: </span>{{
-                                                field.description }}</span>
+                                            class="font-11"><span  class="fw-semibold"></span>
+                                            <span v-html="field.description.replace(/\n/g, '<br>')"></span></span>
                                         <div v-if="blockIndex === 0 && field.fieldtype === 'Table'">
 
                                             <div v-if="field.fieldtype === 'Table' && field.description === 'true'">
