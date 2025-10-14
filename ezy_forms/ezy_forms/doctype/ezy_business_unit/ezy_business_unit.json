@@ -22,7 +22,6 @@
   "send_daily_alerts",
   "signature_required",
   "attachment_view_required",
-  "vender_comparison_form",
   "allow_approver_to_edit_form",
   "section_break_ftig",
   "letter_head"
@@ -122,12 +121,6 @@
    "fieldname": "attachment_view_required",
    "fieldtype": "Check",
    "label": "Attachment View Required"
-  },
-  {
-   "default": "0",
-   "fieldname": "vender_comparison_form",
-   "fieldtype": "Check",
-   "label": "Vender Comparison Form"
   },
   {
     "default": "0",
