@@ -1,37 +1,54 @@
 <template>
     <div class="p-1 mt-3">
         <h1 class="m-0 font-13 mb-3">Settings</h1>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>S.No</th>
-                    <th>Title</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="(item, index) in tableData" :key="index">
-                    <td>{{ index + 1 }}</td>
-                    <td>{{ item.title }}</td>
-                    <td>
-                        <div v-if="item.title === 'Company Logo'">
-                            <div @click="handleToggle(index)" class="d-flex align-items-center">
-                                <i class="bi bi-eye mx-2 fs-6"></i>View
-                            </div>
-                        </div>
+          <table class="table">
+    <thead>
+      <tr>
+        <th class="px-2 text-center" >S.No</th>
+        <th>Title</th>
+        <th class="text-end">About</th>
+        <th width="15%" class="text-end pe-5">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="(item, index) in tableData" :key="index">
+        <td>{{ index + 1 }}</td>
+        <td>{{ item.title }}</td>
 
-                        <div v-else class="form-check form-switch">
-                            <input class="form-check-input shadow-none" type="checkbox" role="switch"
-                                :checked="item.checked" @click.prevent="handleToggle(index)" />
-                            <label class="form-check-label mt-1">
-                                {{ item.checked ? "Enabled" : "Disabled" }}
-                            </label>
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+        <!-- 🟦 About Column -->
+        <td class=" text-end align-middle pe-3">
+          <i
+            class="bi bi-info-circle text-primary cursor-pointer"
+            v-tooltip.top="item.about"
+          ></i>
+        </td>
 
+        <td class=" px-4 text-end">
+          <div v-if="item.title === 'Company Logo'">
+            <div @click="handleToggle(index)" class="d-flex align-items-center justify-content-end font-12 gap-3 pe-3">
+              <i class="bi bi-eye mx-2 font-13"></i>View
+            </div>
+          </div>
+
+          <div v-else class="d-flex justify-content-end align-items-center gap-2 ">
+            <div class="form-check form-switch ">
+
+            <input
+              class="form-check-input shadow-none"
+              type="checkbox"
+              role="switch"
+              :checked="item.checked"
+              @click.prevent="handleToggle(index)"
+            />
+            </div>
+            <label class="form-check-label mt-1">
+              {{ item.checked ? "Enabled" : "Disabled" }}
+            </label>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
         <!-- Modal -->
         <div class="modal fade" id="EnableDisable" tabindex="-1" data-bs-backdrop="static" aria-labelledby="EnableDisableLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
@@ -83,17 +100,16 @@ import "vue3-toastify/dist/index.css";
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
 import { showError, showInfo, showSuccess } from "../../shared/services/toast";
 const tableData = ref([
-    { title: "Two Factor Authentication", checked: false },
-    { title: "Send Form as an Attachment Via an E-Mail ", checked: false },
-    { title: "Welcome E-Mail Configuration", checked: false },
-    { title: "Enable Sign Up in Login Page", checked: false },
-    { title: "Send Daily E-mail reminders", checked: false },
-    { title: "Take Acknowledgement and Signiture while Login", checked: false },
-    { title: "Take Signiture while Sig Up", checked: false },
-    { title: "Allow Approver to Edit Form?", checked: false },
-    { title: "Company Logo", checked: false },
+  { title: "Two Factor Authentication", checked: false, about: "User need to scan QR code using Google Authenticator and set his two factor Authentication." },
+  { title: "Send Form as an Attachment Via an E-Mail", checked: false, about: "When a request is raised, an email will be triggered to all the approval members with form as an attachment." },
+  { title: "Welcome E-Mail Configuration", checked: false, about: "An email will be sent to the new user." },
+  { title: "Enable Sign Up in Login Page", checked: false, about: "In login page Sign up screen will be enabled so that new user can register them self." },
+  { title: "Send Daily E-mail reminders", checked: false, about: "Team members will receive a daily morning notification containing a list of pending forms that require their attention." },
+  { title: "Take Acknowledgement and Signature while Login", checked: false, about: "A message will be displayed at the time of Sign in by the user to Acknowledge and Sign at the time of login." },
+  { title: "Take Signature while Sign Up", checked: false, about: "When enabled user need to submit his signature before doing any activity in the application." },
+  { title: "Allow Approver to Edit Form?", checked: false, about: "When enabled approver can edit the form." },
+  { title: "Company Logo", checked: false, about: "You can upload the company logo." },
 ]);
-
 const companyLogo = ref("");
 const viewImage = ref(false);
 const default_mail = ref(false);
@@ -468,6 +484,14 @@ watch(
 </script>
 
 <style scoped>
+.cursor-pointer {
+  cursor: pointer;
+}
+td:first-child,
+th:first-child {
+  width: 3%;
+  text-align: center;
+}
 .table {
     width: 100%;
     white-space: nowrap;
@@ -490,6 +514,8 @@ td {
     white-space: nowrap;
     color: var(--muted) !important;
     font-size: var(--twelve);
+
+
 }
 
 .upload-label {
