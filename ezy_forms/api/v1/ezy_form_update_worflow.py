@@ -13,6 +13,17 @@ from ezy_forms.ezy_forms.doctype.email_approval.email_approval import (
 import sys, traceback, time ,json
 from ezy_forms.api.v1.delete_files import delete_files_api
 from ezy_forms.api.v1.send_an_email import sending_mail_api
+from datetime import datetime
+
+def parse_time(t):
+    try:
+        # Example format: "2025/10/8 11:24:38:17643"
+        # Split milliseconds
+        base, ms = t.rsplit(":", 1)
+        dt = datetime.strptime(base, "%Y/%m/%d %H:%M:%S")
+        return dt.replace(microsecond=int(ms))  # convert last part to microseconds
+    except Exception:
+        return datetime.max 
 
 
 @frappe.whitelist()
@@ -132,7 +143,11 @@ def enqueuing_updating_wf_workflow_requests(doctype,request_ids:list, current_le
                 previous_reasons.append(dict_for_child_reason_table)
 
             # Sorting as per the Time so that we can append in the correct order
-            previous_reasons.sort(key=operator.itemgetter('time'))
+            previous_reasons.sort(
+                key=lambda x: datetime.strptime(x["time"].rsplit(":", 1)[0], "%Y/%m/%d %H:%M:%S").replace(
+                    microsecond=int(x["time"].rsplit(":", 1)[1])
+                )
+            )
             
             setting_reason = frappe.get_doc({"doctype":"WF Activity Log","request_id":request_id,"reason": previous_reasons})
             setting_reason.insert(ignore_permissions=True)
@@ -199,7 +214,7 @@ def enqueuing_updating_wf_workflow_requests(doctype,request_ids:list, current_le
                         frappe.db.commit()
                         
                         todo_tab(document_type = doctype, request_id = request_id,  property=property, cluster_name=cluster_name, current_level= change_current_level,account_ids=request_id_document[0].name,status=None)                            
-                        sending_mail_api(request_id=request_id, doctype_name=doctype,property= property,cluster= cluster_name,reason= reason,timestamp= my_time,skip_user_role= None,field_changes=field_changes,current_level=current_level )
+                        sending_mail_api(request_id=request_id, doctype_name=doctype,property= property,cluster= cluster_name,reason= reason,timestamp= my_time,skip_user_role= None,field_changes=field_changes,current_level=current_level,current_status = "Approved" )
                         
                         update_token_status(action,request_id,request_id_document[0],change_current_level,user_id,status='In Progress')
 
@@ -229,7 +244,7 @@ def enqueuing_updating_wf_workflow_requests(doctype,request_ids:list, current_le
                         request_id_document = frappe.get_all(doctype, filters={"wf_generated_request_id": request_id}, fields=["name"])
                         todo_tab(document_type = doctype, request_id = request_id,  property=property, cluster_name=cluster_name, current_level=current_level,account_ids=request_id_document[0].name,status=None)
                         
-                        sending_mail_api(request_id=request_id, doctype_name=doctype, property=property, cluster=cluster_name, reason="Completd", timestamp=my_time,skip_user_role= None,field_changes=field_changes,current_level=current_level)
+                        sending_mail_api(request_id=request_id, doctype_name=doctype, property=property, cluster=cluster_name, reason=reason, timestamp=my_time,skip_user_role= None,field_changes=field_changes,current_level=current_level,current_status = "Completed" )
                         update_token_status(action,request_id,request_id_document[0],current_level,user_id,status="Completed")
 
 
@@ -266,17 +281,17 @@ def enqueuing_updating_wf_workflow_requests(doctype,request_ids:list, current_le
 
                     doc.save(ignore_permissions=True)
                     frappe.db.commit()
-                sending_mail_api(request_id=request_id, doctype_name=doctype, property=property, cluster=cluster_name, reason="Rejected", timestamp=my_time,skip_user_role= None,current_level=current_level)
+                sending_mail_api(request_id=request_id, doctype_name=doctype, property=property, cluster=cluster_name, reason=reason, timestamp=my_time, skip_user_role=None, current_level=current_level, current_status="Rejected",field_changes=field_changes)
                 update_token_status(action,request_id,request_id_document[0],current_level,user_id,status="Reject")
             if property !=None:
                 frappe.publish_realtime("custom_socket", {'message':'Request Updated', 'type':"Request Updated","total_count":100, "count":100,"request_id":request_id, "property":property,"user":user_id})
             elif cluster_name!=None:
                 frappe.publish_realtime("custom_socket", {'message':'Request Updated', 'type':"Request Updated","total_count":100, "count":100,"request_id":request_id, "cluster":cluster_name,"user":user_id})
-            if len(unwanted_files)>0:
-                enqueue(
-                    method=delete_files_api,
-                    unwanted_files=unwanted_files
-                    )
+            # if len(unwanted_files)>0:
+            #     enqueue(
+            #         method=delete_files_api,
+            #         unwanted_files=unwanted_files
+            #         )
         return {"success":True,"message":message}
    
 
