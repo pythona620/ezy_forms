@@ -18,13 +18,13 @@
         <div class="d-none d-lg-block">
 
         <GlobalTable :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true" viewType="viewPdf"  raiseRequest="true"
-          :enableDisable="isEnable" @cell-click="viewPreview" @actionClicked="actionCreated"
+          :enableDisable="isEnable" @cell-click="viewPreview" @actionClicked="actionCreated" QR_Code="true"
           @toggle-click="toggleFunction" :actions="actions" @updateFilters="inLineFiltersData"
           :field-mapping="fieldMapping" isFiltersoption="true" />
         </div>
          <div class=" d-block d-lg-none">
         <GlobalCard :tHeaders="tableheaders" :tData="tableData" isCheckbox="true" isAction="true" viewType="viewPdf"  raiseRequest="true"
-          :enableDisable="isEnable" @cell-click="viewPreview" @actionClicked="actionCreated"
+          :enableDisable="isEnable" @cell-click="viewPreview" @actionClicked="actionCreated" QR_Code="true"
           @toggle-click="toggleFunction" :actions="actions" @updateFilters="inLineFiltersData"
           :field-mapping="fieldMapping" isFiltersoption="flase"  />
       </div>
@@ -80,10 +80,33 @@
         </div>
       </div>
     </div>
-    <!-- Button trigger modal -->
-    <!-- <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#EnableDisable">
-      Launch demo modal
-    </button> -->
+
+    <div class="modal fade py-2" id="showQRModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title font-16">{{ formName.form_name }}</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="text-center">
+              <qrcode-vue :value="formName.qr_url" :size="180" level="H" class="qrCodeDiv" />
+            </div>
+            <div class="input-group my-3">
+              <input type="text" class="form-control shadow-none font-12" :value="formName.qr_url" readonly />
+              <button class="btn bg-secondary text-white shadow-none" @click="copyToClipboard"><i class="bi bi-copy h-100"></i></button>
+            </div>
+            <div>
+              <button class="btn download-btn font-14 w-100 shadow-none" @click="downloadQR">
+                <i class="bi bi-download me-2"></i> Download
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
 
     <!-- Modal -->
     <div class="modal fade" id="EnableDisable" tabindex="-1" aria-labelledby="EnableDisableLabel" aria-hidden="true">
@@ -125,18 +148,22 @@ import PaginationComp from "../../Components/PaginationComp.vue"
 import router from '../../router';
 import { useRoute } from 'vue-router';
 import GlobalCard from '../../Components/GlobalCard.vue';
+import QrcodeVue from "qrcode.vue";
 import { showInfo, showSuccess, showWarning } from '../../shared/services/toast';
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 // import ButtonComp from '../../Components/ButtonComp.vue';
 const totalRecords = ref(0);
 const tableheaders = ref([
   { th: "Form Name", td_key: "form_name" },
   // { th: "Form Short Code", td_key: "form_short_name" },
   { th: "Department", td_key: "form_department" },
-  // { th: "Accessible Departments", td_key: "accessible_departments" },
+  { th: "Form Type", td_key: "as_web_view" },
   // { th: "Status", td_key: "form_status" },
   // { th: "Form Status", td_key: "enable" },
 
 ]);
+
 const props = defineProps(['id']);
 const formDescriptions = ref({})
 const selectedForm = ref(null);
@@ -164,6 +191,59 @@ const actions = computed(() => {
 
   return baseActions
 })
+
+const formName = ref("");
+
+
+// Copy QR ID
+const copyToClipboard = () => {
+  navigator.clipboard.writeText(formName.value.qr_url);
+  toast.success(`Copied QR for ${formName.value.form_name}`, { autoClose: 600 });
+};
+
+// downloadQR
+const downloadQR = () => {
+  const canvas = document.querySelector("canvas");
+  const url = canvas.toDataURL("image/png");
+  const a = document.createElement("a");
+
+  // Use form name or fallback
+  const fileName = formName.value.form_name
+    ? `${formName.value.form_name}.png`
+    : "qrcode.png";
+
+  a.href = url;
+  a.download = fileName;
+  a.click();
+};
+
+// const showShareOptions = ref(false);
+
+// const shareQR = async () => {
+//   try {
+//     const canvas = document.querySelector("canvas");
+//     const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+//     const fileName = formName.value.form_name ? `${formName.value.form_name}.png` : "qrcode.png";
+//     const file = new File([blob], fileName, { type: "image/png" });
+
+//     const shareData = {
+//       title: formName.value.form_name,
+//       text: `Check out this form:\n${formName.value.qr_url}`,
+//       files: [file],
+//     };
+
+//     if (navigator.canShare && navigator.canShare({ files: [file] })) {
+//       await navigator.share(shareData);
+//     } else {
+//       showShareOptions.value = true;
+//     }
+//   } catch (err) {
+//     console.error("Sharing failed:", err);
+//     showShareOptions.value = true;
+//   }
+// };
+
+
 
 
 const fieldMapping = ref({
@@ -203,10 +283,8 @@ function formCreation(item = null) {
 }
 
 function viewPreview(data, index, type) {
-  // console.log(route.path);
   if (type === "view") {
     if (data) {
-      // console.log(data, "------------");
       router.push({
         name: "FormPreviewComp",
         query: {
@@ -217,6 +295,18 @@ function viewPreview(data, index, type) {
         },
       });
     }
+
+  }
+  if (type === "QR Code") {
+    formName.value = data;
+    if(formName.value.qr_url && data.as_web_view===1){
+      const modal = new bootstrap.Modal(document.getElementById('showQRModal'), {});
+      modal.show();
+    }
+    else{
+      toast.info("No QR Code Available", { autoClose: 500 })
+    }
+
   }
   if (type === 'raiseRequest') {
     const parsedData = JSON.parse(data.form_json);
@@ -618,7 +708,9 @@ const queryParams = {
     "owner_of_the_form",
     "print_format",
     "series",
-    "workflow_check"
+    "workflow_check",
+    "qr_url",
+    "as_web_view",
   ]),
 };
 
@@ -872,5 +964,23 @@ onMounted(() => {
   color: #999999;
   padding: 8px;
   width: 100%;
+}
+
+.download-btn{
+  padding: 10px;
+  border: 1px dashed #6c757d;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+}
+.download-btn:hover{
+  background-color: #6c757d;
+  color: white;
+}
+.qrCodeDiv{
+  border: 1px solid black;
+  padding: 10px;
+  border-radius: 6px;
 }
 </style>

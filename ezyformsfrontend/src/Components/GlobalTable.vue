@@ -78,7 +78,7 @@
               <span v-if="column.td_key === 'status'">
 
                 <i class="bi bi-circle-fill status-circle font-10 text-center pe-2" :class="{
-                  'text-warning fw-medium': row[column.td_key] === 'Request Raised',
+                  'text-warning fw-medium': row[column.td_key] === 'Request Raised' || row[column.td_key] === 'Request Raised Via QR Code',
                   'textcompleted fw-medium': row[column.td_key] === 'Completed' || 'Sent',
                   'text-primary fw-medium': row[column.td_key] === 'In Progress',
                   'textcancel fw-medium': row[column.td_key] === 'Cancelled',
@@ -120,6 +120,9 @@
                 <span  class="tooltip-text" v-tooltip.top="row[column.td_key]">
                   {{ row[column.td_key]  === 'Yes' ? 'Yes' : 'No' }} 
                 </span>
+              </span>
+              <span v-else-if="column.td_key === 'as_web_view'">
+                {{ row.as_web_view == 1 ? 'Public' : 'Private' }}
               </span>
 
               <!-- Default Column Rendering -->
@@ -232,9 +235,13 @@
                 <i v-tooltip.top="'Raise Request'" class="bi bi-send eye-cursor mx-1"
                   @click="handleCellClick(row, rowIndex, 'raiseRequest')"></i>
               </span>
-              <span class="px-2">
+              <span class="px-1">
                 <i v-tooltip.top="'View'" @click="handleCellClick(row, rowIndex, 'view')"
                   class="ri-eye-line eye-cursor"></i>
+              </span>
+              <span v-if="QR_Code === 'true'" class="px-2">
+                <i @click="handleCellClick(row, rowIndex, 'QR Code')"
+                  class="bi bi-qr-code-scan eye-cursor"></i>
               </span>
               <span v-if="download === 'true'">
                 <i class="bi bi-download eye-cursor" @click="handleCellClick(row, rowIndex, 'download')"></i>
@@ -421,6 +428,9 @@ const props = defineProps({
   },
   download: {
     type: String,
+  },
+  QR_Code:{
+    type:Boolean,
   },
   raiseRequest: {
     type: String

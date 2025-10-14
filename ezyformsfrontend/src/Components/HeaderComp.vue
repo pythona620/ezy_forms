@@ -9,6 +9,9 @@
                 <div class=" d-flex gap-3 justify-content-end align-items-center m-0 me-3">
                     <div>
 
+                        <i class="bi bi-question-circle-fill fs-5" style="cursor: pointer" data-bs-toggle="modal" data-bs-target="#confirmMailModal" title="Contact Support"></i>
+                    </div>
+                    <div>
                         <FormFields tag="select" placeholder="" class="font-12" name="roles" id="roles"
                             :Required="false" v-model="business_unit" :options="EzyFormsCompanys" />
                     </div>
@@ -88,7 +91,6 @@
                                     src="../assets/Final-logo-ezyforms-removebg-preview.png" />
                                 <div class="d-sm-block d-md-none p-2">
                                     <div class="">
-
                                         <FormFields tag="select" placeholder="" class="font-12" name="roles" id="roles"
                                             :Required="false" v-model="business_unit" :options="EzyFormsCompanys" />
                                     </div>
@@ -129,8 +131,10 @@
                                         name="Raise Request" data-bs-toggle="modal" @click="raiseRequest"
                                         data-bs-target="#riaseRequestModal" />
                                 </div> -->
+                                    <div>
+                                        <i class="bi bi-question-circle-fill fs-5" style="cursor: pointer" data-bs-toggle="modal" data-bs-target="#confirmMailModal" title="Contact Support"></i>
+                                    </div>
                                     <div class=" d-none d-md-block">
-
                                         <FormFields tag="select" placeholder="" class="font-12" name="roles" id="roles"
                                             :Required="false" v-model="business_unit" :options="EzyFormsCompanys" />
                                     </div>
@@ -315,6 +319,23 @@
             </div>
         </div>
 
+        <div class="modal fade" id="confirmMailModal" tabindex="-1" aria-labelledby="confirmMailModalLabel" aria-hidden="true" ref="confirmModal">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmMailModalLabel">Confirm Action</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to contact support?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn font-13" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-secondary font-13 text-white" @click="openMail">Yes, Continue</button>
+                </div>
+                </div>
+            </div>
+        </div>
 
 
     </div>
@@ -507,6 +528,30 @@ onMounted(() => {
         console.warn("No user data found in localStorage.");
     }
 });
+
+const openMail = () => {
+  const supportEmail = "support@caratred.com";
+  const userEmail = "example@caratred.com";
+
+  let mailURL = "";
+
+  if (userEmail.includes("@gmail.com")) {
+    // Gmail
+    mailURL = `https://mail.google.com/mail/?view=cm&fs=1&to=${supportEmail}`;
+  } else if (
+    userEmail.includes("@outlook.com") ||
+    userEmail.includes("@hotmail.com") ||
+    userEmail.includes("@live.com")
+  ) {
+    // Outlook
+    mailURL = `https://outlook.office.com/mail/deeplink/compose?to=${supportEmail}`;
+  } else {
+    // Fallback - default mail app
+    mailURL = `mailto:${supportEmail}`;
+  }
+
+  window.open(mailURL, "_blank");
+};
 
 function clearPassword() {
     new_password.value = ""

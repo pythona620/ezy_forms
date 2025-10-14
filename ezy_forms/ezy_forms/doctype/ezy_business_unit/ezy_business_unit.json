@@ -21,6 +21,7 @@
   "send_form_in_email",
   "send_daily_alerts",
   "signature_required",
+  "attachment_view_required",
   "allow_approver_to_edit_form",
   "section_break_ftig",
   "letter_head"
@@ -117,7 +118,13 @@
   },
   {
    "default": "0",
-   "fieldname": "allow_approver_to_edit_form",
+   "fieldname": "attachment_view_required",
+   "fieldtype": "Check",
+   "label": "Attachment View Required"
+  },
+  {
+    "default": "0",
+    "fieldname": "allow_approver_to_edit_form",
    "fieldtype": "Check",
    "label": "Allow Approver to Edit Form"
   }

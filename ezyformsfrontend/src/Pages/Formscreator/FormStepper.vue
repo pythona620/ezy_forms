@@ -56,7 +56,7 @@
                         </h1> -->
                         <h1 class="font-14 fw-bold m-0">About Form</h1>
                         <div>
-                          <button v-if="!$route.query.id" class=" btn btn-light font-12 mx-2" type="button"
+                          <button v-if="!$route.query.id && !$route.query.preId" class=" btn btn-light font-12 mx-2" type="button"
                             @click="clearForm">Clear
                             Form</button>
 
@@ -70,182 +70,217 @@
                     <div class="container-fluid aboutFields p-0">
                       <div class="row">
                         <div class="col-sm-none col-md-4"></div>
-                        <div class="col-sm-12 col-md-4">
-                          <div class="">
-                            <div class="mt-3">
-                              <div class=" position-relative">
-                                <span v-if="route.query.preId"
-                                  class=" font-12 position-absolute PredefinedLabel">Predefined<i
-                                    class="bi bi-check2-circle"></i></span>
+                        <div class="col-sm-12 col-md-12 mt-lg-3 p-lg-4">
+  <div class="container-fluid">
+    <div class="row g-3"> 
+      <!-- Form Name -->
+      <div class="col-md-6">
+        <div class=" position-relative">
+            <span v-if="route.query.preId" class=" font-12 position-absolute PredefinedLabel">Predefined
+              <i class="bi bi-check2-circle"></i></span>
+                <FormFields
+                  :disabled="selectedData.formId && selectedData.formId.length > 0 || route.query.form_name"
+                  labeltext="Form Name" class="formHeight" type="text" tag="input" name="Value"
+                  id="formName" validationStar="true" placeholder="Untitled Form"
+                  @change="(event) => handleInputChange(event, 'form_name')" v-model="formNameModel" />
+                  <span v-if="formNameError" class="text-danger ErrorMsg ms-2">
+                  {{ formNameError }}</span>
+                  </div>
+      </div>
 
-                                <!-- || route.query.form_name -->
-                                <!-- || route.query.form_name   -->
-                                <FormFields :disabled="selectedData.formId && selectedData.formId.length > 0 || route.query.form_name"
-                                  labeltext="Form Name" class="formHeight" type="text" tag="input" name="Value"
-                                  id="formName" validationStar="true" placeholder="Untitled Form" 
-                                  @change="(event) => handleInputChange(event, 'form_name')" v-model="formNameModel" />
-                                <span v-if="formNameError" class="text-danger ErrorMsg ms-2">
-                                  {{ formNameError }}</span>
-                              </div>
-                            </div>
-                            <div class="mt-3">
-                              <div class="">
-                                <FormFields :disabled="selectedData.formId && selectedData.formId.length > 0 || route.query.form_name"
-                                  labeltext="Form Short Code" class="formHeight" type="text" tag="input" name="Value"
-                                  id="formShortCode" validationStar="true" placeholder="Untitled Form" @change="
-                                    (event) => handleInputChange(event, 'form_short_name')
-                                  " v-model="filterObj.form_short_name" />
-                                <span v-if="formShortNameError" class="text-danger ErrorMsg ms-2">
-                                  {{ formShortNameError }}</span>
-                                <!-- <label for="">Form Short Code</label>
+      <!-- Form Short Code -->
+      <div class="col-md-6">
+        <FormFields
+          :disabled="selectedData.formId && selectedData.formId.length > 0 || route.query.form_name"
+          labeltext="Form Short Code"
+          class="formHeight"
+          type="text"
+          tag="input"
+          name="Value"
+          id="formShortCode"
+          validationStar="true"
+          placeholder="Untitled Form"
+          @change="(event) => handleInputChange(event, 'form_short_name')"
+          v-model="filterObj.form_short_name"
+        />
+        <span v-if="formShortNameError" class="text-danger ErrorMsg ms-2">{{ formShortNameError }}</span>
+      </div>
 
-                                                        <Multiselect :options=formOptions
-                                                            v-model="filterObj.form_short_name"
-                                                            placeholder="Untitle Form" :multiple="true"
-                                                            :searchable="true" /> -->
-                              </div>
-                              <div>
-                                <FormFields :disabled="selectedData.formId && selectedData.formId.length > 0"
-                                  labeltext="Form Naming series" class="formHeight mt-2" type="text" tag="input"
-                                  name="Value" id="formNameSeries" placeholder="Form Naming series"
-                                  v-model="filterObj.series" />
-                                <small class="text-muted" style="font-size:12px">
-                                  Note : Enter <code>YY-YY</code>, <code>YYYY</code>, or <code>ABC</code>. The system
-                                  will
-                                  default to the format <code> 24-25-0001</code>, <code> 2025-0001</code>, or
-                                  <code> ABC-0001</code> respectively.
-                                </small>
-                              </div>
-                            </div>
-                            <div class="mt-3">
-                              <div class="">
-                                <!-- <FormFields labeltext="Owner Of The Form" class="mb-3 w-100"
-                                                            tag="select" name="dept" id="dept"
-                                                            placeholder="Select Department" :options=formOptions
-                                                            v-model="filterObj.owner_of_the_form" /> -->
-                                <label for="">Owner Of The Form
-                                  <span v-if="!filterObj.owner_of_the_form" class="text-danger">*</span></label>
+      <!-- Form Naming Series -->
+      <div class="col-md-6">
+        <FormFields
+          :disabled="selectedData.formId && selectedData.formId.length > 0"
+          labeltext="Form Naming series"
+          class="formHeight"
+          type="text"
+          tag="input"
+          name="Value"
+          id="formNameSeries"
+          placeholder="Form Naming series"
+          v-model="filterObj.series"
+        />
+        <small class="text-muted" style="font-size:12px"> Note : Enter <code>YY-YY</code>, <code>YYYY</code>, or <code>ABC</code>. The system will default to the format <code> 24-25-0001</code>, <code> 2025-0001</code>, or <code> ABC-0001</code> respectively. </small>
+      </div>
+      
+      <!-- Owner Of The Form -->
+      <div class="col-md-6">
+        <label>Owner Of The Form
+          <span v-if="!filterObj.owner_of_the_form" class="text-danger">*</span>
+        </label>
+        <Multiselect
+          :disabled="selectedData.formId && selectedData.formId.length > 0"
+          @open="deptData"
+          :options="OwnerOfTheFormData"
+          @change="OwnerOftheForm"
+          v-model="filterObj.owner_of_the_form"
+          placeholder="Select Department"
+          :multiple="false"
+          class="font-11 multiselect"
+          :searchable="true"
+          openDirection="bottom"
+        />
+      </div>
 
-                                <Multiselect :disabled="selectedData.formId && selectedData.formId.length > 0" @open="deptData"
-                                  :options="OwnerOfTheFormData" @change="OwnerOftheForm"
-                                  v-model="filterObj.owner_of_the_form" placeholder="Select Department"
-                                  :multiple="false" class="font-11 multiselect" :searchable="true" />
-                              </div>
-                            </div>
-                            <div class="mt-3">
-                              <div class="">
-                                <!-- <FormFields labeltext="Form Cateogry" class="mb-3" tag="select"
-                                                            name="desgination" id="desgination"
-                                                            placeholder="Select Cateogry" :options=departments
-                                                            v-model="filterObj.form_category" /> -->
+      <!-- Form Category -->
+      <div class="col-md-6">
+        <label>Form Category
+          <span v-if="!filterObj.form_category" class="text-danger">*</span>
+        </label>
+        <Multiselect
+          :disabled="selectedData.formId && selectedData.formId.length > 0"
+          :options="departments"
+          v-model="filterObj.form_category"
+          placeholder="Select Category"
+          :multiple="false"
+          :searchable="true"
+          class="font-11 multiselect"
+        />
+      </div>
 
-                                <label for="">Form Cateogry
-                                  <span v-if="!filterObj.form_category" class="text-danger">*</span></label>
+      <!-- Accessible to department -->
+      <div class="col-md-6">
+        <label>Accessible to Department
+          <span v-if="!filterObj.accessible_departments.length" class="text-danger">*</span>
+        </label>
+        <VueMultiselect
+          v-model="filterObj.accessible_departments"
+          :options="filteredOptions"
+          :multiple="true"
+          :close-on-select="false"
+          :clear-on-select="false"
+          :preserve-search="true"
+          placeholder="Select Department"
+          class="font-11"
+          @select="handleSelect"
+          @remove="handleRemove"
+          openDirection="bottom"
+        >
+          <template #option="{ option }">
+            <div class="custom-option">
+              <input type="checkbox" :checked="isChecked(option)" class="custom-checkbox"
+                     @change="toggleOption(option, $event)" @click.stop />
+              <span>{{ option }}</span>
+            </div>
+          </template>
+          <template #selection="{ values, isOpen }">
+            <span class="multiselect__single font-10" v-if="values.length" v-show="!isOpen">
+              {{ formattedSelection }}
+            </span>
+          </template>
+        </VueMultiselect>
+      </div>
 
-                                <Multiselect :disabled="selectedData.formId && selectedData.formId.length > 0"
-                                  :options="departments" v-model="filterObj.form_category" placeholder="Select Cateogry"
-                                  :multiple="false" :searchable="true" class="font-11 multiselect" />
-                              </div>
-                            </div>
+      <!-- Form Type -->
+      <div class="col-md-6">
+        <label>Form Type</label>
+        <Multiselect
+          :options="formTypeOptions"
+          v-model="selectedFormType"
+          placeholder="Select Form Type"
+          :multiple="false"
+          :searchable="true"
+          label="label"
+          track-by="value"
+          :reduce="option => option.value"
+          class="font-11 multiselect"
+          openDirection="top"
+        />
+        <small class="text-muted font-12 ms-2">Note: Public form is accessible by anyone through QR code.</small>
 
+        <FormFields
+          v-if="filterObj.as_web_view===1"
+          labeltext="Form Submit Response"
+          class="formHeight mt-2"
+          type="text"
+          tag="input"
+          name="Value"
+          id="formNameSeries"
+          placeholder="Form Submit Response"
+          v-model="filterObj.public_form_response"
+        />
+      </div>
 
+      <!-- Has Workflow -->
+      <div class="col-md-6">
+        <label>Has Workflow <span class="fw-normal font-11 text-secondary">(optional)</span></label>
+        <Multiselect
+          :options="['Yes', 'No']"
+          v-model="filterObj.has_workflow"
+          placeholder="Select"
+          :multiple="false"
+          class="font-11 multiselect"
+          :searchable="true"
+        />
+      </div>
 
-                            <div class="mt-3">
-                              <label class="typo__label">
-                                <label for="">Accessible to department
-                                  <span v-if="!filterObj.accessible_departments.length"
-                                    class="text-danger">*</span></label>
-                              </label>
-                              <!-- :disabled="selectedData.formId && selectedData.formId.length > 0" -->
-                              <VueMultiselect v-model="filterObj.accessible_departments" :options="filteredOptions"
-                                :multiple="true" :close-on-select="false" :clear-on-select="false"
-                                :preserve-search="true" placeholder="Select Department" class="font-11"
-                                @select="handleSelect" @remove="handleRemove">
-                                <template #option="{ option }">
-                                  <div class="custom-option">
-                                    <input type="checkbox" :checked="isChecked(option)" class="custom-checkbox"
-                                      @change="toggleOption(option, $event)" @click.stop />
-                                    <span>{{ option }}</span>
-                                  </div>
-                                </template>
+      <!-- Linked Checkbox and Linked Form -->
+      <div class="col-md-6">
+        <div v-if="route.query.preId" class="form-check d-flex align-items-center p-0 pe-3">
+          <input
+            class="form-check-input linketoCheck p-1"
+            :disabled="filterObj.is_predefined_doctype == 1"
+            type="checkbox"
+            id="is_linked"
+            v-model="filterObj.is_linked"
+            :true-value="1"
+            :false-value="0"
+          />
+          <label class="form-check-label font-12 mx-2 mb-0 ps-1" for="is_linked">
+            Link
+          </label>
+        </div>
+      </div>
 
-                                <template #selection="{ values, isOpen }">
-                                  <span class="multiselect__single font-10" v-if="values.length" v-show="!isOpen">
-                                    {{ formattedSelection }}
-                                  </span>
-                                </template>
-                              </VueMultiselect>
-
-
-
-                            </div>
-                            <div class="mt-3">
-                              <div class="">
-
-                                <label for="">Has Workflow <span
-                                    class="fw-normal font-11 text-secondary">(optional)</span>
-                                  <!-- <span v-if="!filterObj.has_Workflow" class="text-danger">*</span> -->
-                                </label>
-                                <!-- :disabled="selectedData.formId && selectedData.formId.length > 0" -->
-                                <Multiselect :options="['Yes', 'No']" v-model="filterObj.has_workflow"
-                                  placeholder="Select" :multiple="false" class="font-11 multiselect"
-                                  :searchable="true" />
-                              </div>
-                            </div>
-                            <div class="my-2 mb-5">
-                              <div v-if="route.query.preId" class="form-check d-flex align-items-center p-0 pe-3">
-                                <input class="form-check-input linketoCheck p-1"
-                                  :disabled="filterObj.is_predefined_doctype == 1" type="checkbox" id="is_linked"
-                                  v-model="filterObj.is_linked" :true-value="1" :false-value="0" />
-                                <label class="form-check-label font-12 mx-2 mb-0 ps-1" for="is_linked">
-                                  Link
-                                </label>
-                              </div>
-                              <div>
-
-                                <!-- <div class="form-check d-flex align-items-center p-0 pe-3">
-                                  <input class="form-check-input linketoCheck p-1" type="checkbox" id="is_predefined_doctype"
-                                    v-model="filterObj.is_predefined_doctype"   :true-value="1" :false-value="0"/>
-                                  <label class="form-check-label font-12 mx-2 mb-0 ps-1" for="is_predefined_doctype">
-                                    is_predefined_doctype
-                                  </label>
-                                </div> -->
-
-                              </div>
-
-                              <div v-if="filterObj.is_linked" class="mt-2 position-relative mb-5">
-                                <label for="standardFormInput">Form</label>
-                                <input type="text" class="form-control standardFormInput" id="standardFormInput"
-                                  :disabled="filterObj.is_predefined_doctype == 1" v-model="filterObj.is_linked_form"
-                                  placeholder="Type to search Form Name..." @input="searchForm"
-                                  @focus="showSuggestions = true" @blur="hideSuggestions" />
-
-
-                                <!-- Suggestions Dropdown -->
-                                <ul v-if="showSuggestions && filteredForms.length"
-                                  class="list-group position-absolute w-100 z-3 formslist">
-                                  <li class="list-group-item formlistitem" v-for="(item, index) in filteredForms"
-                                    :key="index" @mousedown.prevent="selectForm(item.name)">
-                                    {{ item.name }}
-                                  </li>
-                                </ul>
-                              </div>
-                            </div>
-
-                            <!-- <div class="mt-3">
-                              <div class="">
-
-                                <label for="">Reverse Workflow
-                                 
-                                </label>
-                               
-                                <Multiselect :options="['Yes']" v-model="filterObj.workflow_check" placeholder="Select"
-                                  :multiple="false" class="font-11 multiselect" :searchable="true" />
-                              </div>
-                               </div> -->
-
-                          </div>
-                        </div>
+      <div class="col-md-6" v-if="filterObj.is_linked">
+        <label for="standardFormInput">Form</label>
+        <input
+          type="text"
+          class="form-control standardFormInput"
+          id="standardFormInput"
+          :disabled="filterObj.is_predefined_doctype == 1"
+          v-model="filterObj.is_linked_form"
+          placeholder="Type to search Form Name..."
+          @input="searchForm"
+          @focus="showSuggestions = true"
+          @blur="hideSuggestions"
+        />
+        <ul
+          v-if="showSuggestions && filteredForms.length"
+          class="list-group position-absolute w-100 z-3 formslist"
+        >
+          <li
+            class="list-group-item formlistitem"
+            v-for="(item, index) in filteredForms"
+            :key="index"
+            @mousedown.prevent="selectForm(item.name)"
+          >
+            {{ item.name }}
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
 
                         <div class="col-sm-none col-md-4"></div>
                       </div>
@@ -1627,6 +1662,24 @@ const printFormatID = ref('')
 const is_landscape = ref(false)
 const showHods = ref(false);
 
+const formTypeOptions = [
+  { label: "Public", value: 1 },
+  { label: "Private", value: 0 },
+];
+
+const selectedFormType = computed({
+  get() {
+    // This returns the option object that matches filterObj.as_web_view
+    return formTypeOptions.find(
+      (opt) => opt.value === filterObj.value.as_web_view
+    );
+  },
+  set(selected) {
+    // 👇 This line updates filterObj.as_web_view every time user selects a new option
+    filterObj.value.as_web_view = selected ? selected.value : null;
+  },
+});
+
 
 // const computedDisabled = computed(() => {
 //   return paramId.value.length > 0
@@ -1654,6 +1707,7 @@ const filterObj = ref({
   is_linked: 0,
   is_linked_form: "",
   is_predefined_doctype: route.query.id ? 1 : 0,
+  as_web_view: 0,
 
 
 });
