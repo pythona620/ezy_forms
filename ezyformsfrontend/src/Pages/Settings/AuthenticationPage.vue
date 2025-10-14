@@ -21,7 +21,7 @@
                         </div>
 
                         <div v-else class="form-check form-switch">
-                            <input class="form-check-input shadow-none" type="checkbox" role="switch"
+                            <input class="form-check-input shadow-none font-12 mt-2" type="checkbox" role="switch"
                                 :checked="item.checked" @click.prevent="handleToggle(index)" />
                             <label class="form-check-label mt-1">
                                 {{ item.checked ? "Enabled" : "Disabled" }}
@@ -474,6 +474,9 @@ watch(
     font-size: var(--font-size-xs);
     font-weight: 400;
 }
+.table>:not(caption)>*>* {
+    padding: 6px;
+}
 
 th {
     background-color: #f2f2f2 !important;
@@ -490,6 +493,11 @@ td {
     white-space: nowrap;
     color: var(--muted) !important;
     font-size: var(--twelve);
+    vertical-align: middle;
+    border-left: 1px solid #ececec !important;
+}
+tr:nth-child(even) td {
+  background-color: #f9f9f9; /* Light gray background for even rows */
 }
 
 .upload-label {
@@ -499,5 +507,10 @@ td {
     font-size: 13px;
     font-weight: 500;
     box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 5px 0px, rgba(0, 0, 0, 0.1) 0px 0px 1px 0px;
+}
+.form-switch .form-check-input:checked {
+  background-position: right center;
+  background-color: rgb(103, 216, 109);
+  border: 0;
 }
 </style>
