@@ -100,15 +100,15 @@ import "vue3-toastify/dist/index.css";
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
 import { showError, showInfo, showSuccess } from "../../shared/services/toast";
 const tableData = ref([
-  { title: "Two Factor Authentication", checked: false, about: "Adds extra security by requiring a verification code." },
-  { title: "Send Form as an Attachment Via an E-Mail", checked: false, about: "Automatically attaches submitted forms to outgoing emails." },
-  { title: "Welcome E-Mail Configuration", checked: false, about: "Customize the welcome email sent to new users." },
-  { title: "Enable Sign Up in Login Page", checked: false, about: "Allows users to create accounts directly from the login page." },
-  { title: "Send Daily E-mail reminders", checked: false, about: "Sends daily reminders to users about pending tasks or updates." },
-  { title: "Take Acknowledgement and Signature while Login", checked: false, about: "Prompts users to sign and acknowledge terms at login." },
-  { title: "Take Signature while Sign Up", checked: false, about: "Requires users to provide a signature during account registration." },
-  { title: "Allow Approver to Edit Form?", checked: false, about: "Lets approvers make edits before final approval." },
-  { title: "Company Logo", checked: false, about: "Displays or updates the company logo used across the application." },
+  { title: "Two Factor Authentication", checked: false, about: "User need to scan QR code using Google Authenticator and set his two factor Authentication." },
+  { title: "Send Form as an Attachment Via an E-Mail", checked: false, about: "When a request is raised, an email will be triggered to all the approval members with form as an attachment." },
+  { title: "Welcome E-Mail Configuration", checked: false, about: "An email will be sent to the new user." },
+  { title: "Enable Sign Up in Login Page", checked: false, about: "In login page Sign up screen will be enabled so that new user can register them self." },
+  { title: "Send Daily E-mail reminders", checked: false, about: "Team members will receive a daily morning notification containing a list of pending forms that require their attention." },
+  { title: "Take Acknowledgement and Signature while Login", checked: false, about: "A message will be displayed at the time of Sign in by the user to Acknowledge and Sign at the time of login." },
+  { title: "Take Signature while Sign Up", checked: false, about: "When enabled user need to submit his signature before doing any activity in the application." },
+  { title: "Allow Approver to Edit Form?", checked: false, about: "When enabled approver can edit the form." },
+  { title: "Company Logo", checked: false, about: "You can upload the company logo." },
 ]);
 const companyLogo = ref("");
 const viewImage = ref(false);
