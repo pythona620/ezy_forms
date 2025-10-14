@@ -560,7 +560,7 @@
                                                                    
                                                                     <template
                                                                         v-else-if="fieldItem.fieldtype === 'Date'">
-                                                                        <input :min="field.fieldname === 'expense_date' ? null : today"
+                                                                        <input :min="field.fieldname === 'expense_date' ? null : null"
                                                                                 :max="field.fieldname === 'expense_date' ? today : null"
                                                                             :title="row[fieldItem.fieldname]"
                                                                             type="date" class="form-control font-12"
@@ -830,7 +830,7 @@
                                                                         <template v-if="field.fieldtype === 'Date'">
 
                                                                             <input type="date" v-tooltip.top="row[field.fieldname]"
-                                                                                :min="field.fieldname === 'expense_date' ? null : today"
+                                                                                :min="field.fieldname === 'expense_date' ? null : null"
                                                                                 :max="field.fieldname === 'expense_date' ? today : null"
                                                                                 :title="row[field.fieldname]"
                                                                                 class="form-control font-12"

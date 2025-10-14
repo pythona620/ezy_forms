@@ -1421,9 +1421,9 @@
     <div class="offcanvas addOffCanvas offcanvas-end" tabindex="-1" id="offcanvasRight"
       aria-labelledby="offcanvasRightLabel">
       <div class="offcanvas-header add_designationHeader">
-        <span id="offcanvasRightLabel" class="font-14">
+        <span id="offcanvasRightLabel" class="font-14 fw-bold">
 
-          {{ selectedBlockIndex == 0 ? "Add designation for Requestor" : `Approval Settings For
+          {{ selectedBlockIndex == 0 ? "Add designation for Requestors" : `Approval Settings For
           Level-${selectedBlockIndex}`
           }}
         </span>
@@ -1441,29 +1441,29 @@
 
             <div v-if="selectedBlockIndex !== 0"
               class=" p-3 approval-border-bottom ">
-              <div class="d-flex gap-1">
+              <!-- <div class="d-flex gap-1">
 
                 <div class="px-2 mt-2 d-flex align-items-center user-select-none">
-              <input v-model="approval_required" type="checkbox" :true-value="1" :false-value="0" id="Approver"  class="me-2 m-0 form-check-input designationCheckBox" />
-              <label for="Approver" class="m-0">Approval Mandatory</label>
-            </div>
-            <div v-if="allowEditSettingType === true" class="px-2 mt-2 d-flex align-items-center user-select-none">
-              <input
-                v-model="approver_can_edit"
-                type="checkbox"
-                :true-value="1"
-                :false-value="0"
-                id="approver_can_edit"
-                class="me-2 m-0 form-check-input designationCheckBox"
-              />
-              <label for="approver_can_edit" class="m-0">
-               Allow to Edit
-              </label>
+                  <input v-model="approval_required" type="checkbox" :true-value="1" :false-value="0" id="Approver"  class="me-2 m-0 form-check-input designationCheckBox" />
+                  <label for="Approver" class="m-0">Approval Mandatory</label>
+                </div>
+                <div v-if="allowEditSettingType === true" class="px-2 mt-2 d-flex align-items-center user-select-none">
+                  <input
+                    v-model="approver_can_edit"
+                    type="checkbox"
+                    :true-value="1"
+                    :false-value="0"
+                    id="approver_can_edit"
+                    class="me-2 m-0 form-check-input designationCheckBox"
+                  />
+                  <label for="approver_can_edit" class="m-0">
+                  Allow to Edit
+                  </label>
               
-              </div>
-            </div>
+                </div>
+              </div>  -->
 
-               <div v-if="selectedBlockIndex !== 0" class=" p-2">
+               <div v-if="selectedBlockIndex !== 0" class=" ">
               <label class="fw-bold font-12 mb-2">Approver Type</label>
               <select v-model="selectedApproverType" class="form-select shadow-none font-12 ">
                 <option value="">Any one of the selected approvers</option>
@@ -1479,18 +1479,7 @@
                   <span class=" font-12">Approver Level {{ selectedBlockIndex }}</span>
                 </div>
               </div> -->
-              <div class="p-2">
-              <div>
-                <label for="" class="fw-bold font-12 ">On Rejection</label>
-              </div>
-                <select v-model.number="OnRejection" class="form-select shadow-none font-12 mt-1  me-2">
-                  <option disabled value="">Select Lower Level</option>
-                  <option v-for="level in lowerApproverLevels" :key="level" :value="level">
-                    {{ level === 0 ? 'Requestor' : 'Approver Level ' + level }}
-                  </option> 
-                </select>
-              </div>
-
+             
           
 
             </div>
@@ -1499,10 +1488,9 @@
           </div>
 
         </div>
-        <div class="p-3 listofdesignations">
-          <input v-model="searchDesignation" class="SearchDesignation rounded-2 form-control shadow-none my-1"
+          <!-- <input v-model="searchDesignation" class="SearchDesignation rounded-2 form-control shadow-none my-1"
             type="text" placeholder="Search Designation" />
-            <span class="font-12 SelectallDesignation ps-2  ">Selected Designations ({{ designationValue.length }})</span>
+            <span class="font-12 SelectallDesignation ps-2  ">Selected Designations ({{ designationValue.length }})</span> -->
 
               <!-- :disabled="ViewOnlyReportee"  -->
           <!-- <div class="form-check ps-1 mt-3" v-if="DesignationList.length">
@@ -1525,8 +1513,13 @@
                 @click="removeDesignation(selected)" style="font-size: 0.6rem;"></button>
             </span>
           </div> -->
-          <div class=" my-3" v-if="DesignationList.length">
-              <div  class="d-flex align-items-center gap-4">
+        <div class="px-3 listofdesignations">
+          <div class="my-1 d-flex justify-content-between">
+            <span class="font-12 fw-bold">Select {{  selectedBlockIndex === 0 ? 'Requestors': ' Approvers' }} </span>
+            <span class="italic-style text-secondary font-12">{{ designationValue.length }} Selected </span>
+          </div>
+          <div  ref="resizableDiv" class=" my-1 disgnationlist_div" v-if="DesignationList.length">
+              <div  class="d-flex align-items-center justify-content-between gap-1">
                 
                 <!-- Select All -->
                 <div class="form-check ps-1 d-flex align-items-center m-0">
@@ -1537,7 +1530,7 @@
                     @change="toggleSelectAll"
                     class="form-check-input me-2 designationCheckBox"
                   />
-                  <label for="selectAll" class="form-check-label SelectallDesignation mt-2 fw-bold">Select All</label>
+                  <label for="selectAll" class="form-check-label SelectallDesignation mt-2 fw-bold">Select all designation ({{ filteredDesignationList.length }})</label>
                 </div>
 
                 <!-- Show HODs -->
@@ -1550,32 +1543,72 @@
                   />
                   <label for="showHods" class="form-check-label  mt-2 fw-bold">Show HODs Only</label>
                 </div>
+                <div><button type="button" class="btn btn-sm font-12  text-danger" @click="clearall_designations"> <i class="bi bi-x" ></i>Clear all</button></div>
+
+
 
               </div>
+            <Vue3Select v-if="DesignationList.length" :multiple="true" v-model="designationValue" 
+            :options="filteredDesignationList" :close-on-select="false" :clear-search-on-select="true"
+             placeholder="Search & Select Designations" label="label"  />
             </div>
 
 
-
-          <ul v-if="DesignationList.length" class="list-unstyled designation-scroll">
+          <!-- <ul v-if="DesignationList.length" class="list-unstyled designation-scroll">
             <li v-for="(item, index) in filteredDesignationList" :key="index" class="designationList form-check">
               <input type="checkbox" :id="`SelectedDisignation_${index}`" v-model="designationValue" :value="item"
                 class="designationCheckBox  form-check-input mt-0" @change="handleSingleSelect" />
               <label :for="`SelectedDisignation_${index}`" class="ps-2">{{ item }}</label>
 
             </li>
-          </ul>
+          </ul>  -->
           <div v-else>
             <div class="d-flex justify-content-center">
               <span>No Designations Found</span>
             </div>
           </div>
         </div>
+         <div v-if="selectedBlockIndex !== 0 " class="p-3">
+              <div>
+                <label for="" class="fw-bold font-12 ">On Rejection</label>
+              </div>
+                <select v-model.number="OnRejection" class="form-select shadow-none font-12 mt-1  me-2">
+                  <!-- <option disabled value="">Select Lower Level</option> -->
+                  <option v-for="level in lowerApproverLevels" :key="level" :value="level">
+                    {{ level === 0 ? 'Requestor' : 'Approver Level ' + level }}
+                  </option> 
+                </select>
+              </div>
+              <div v-if="selectedBlockIndex !== 0 ">
+                <div class="">
+
+                <div class="px-4 py-1 mt-2 d-flex align-items-center user-select-none">
+              <input v-model="approval_required" type="checkbox" :true-value="1" :false-value="0" id="Approver"  class="me-2 m-0 form-check-input designationCheckBox" />
+              <label for="Approver" class="m-0">Approval Mandatory</label>
+            </div>
+            <div v-if="allowEditSettingType === true" class="px-4 py-1 mt-2 d-flex align-items-center user-select-none">
+              <input
+                v-model="approver_can_edit"
+                type="checkbox"
+                :true-value="1"
+                :false-value="0"
+                id="approver_can_edit"
+                class="me-2 m-0 form-check-input designationCheckBox"
+              />
+              <label for="approver_can_edit" class="m-0">
+               Allow this approver to edit the form
+              </label>
+              
+              </div>
+            </div>
+              </div>
+
       </div>
 
       <div class="offcanvas-footer">
         <div class="text-end p-3">
           <ButtonComp class="btn btn-dark addingDesignations" data-bs-dismiss="offcanvas" @click="addDesignationBtn"
-            :name="selectedBlockIndex === 0 ? 'Add Requstors' : 'Add Approvers'" />
+            :name="selectedBlockIndex === 0 ? 'Add Requestor':'Add Approvers'" />
         </div>
       </div>
     </div>
@@ -1607,7 +1640,8 @@ import VueMultiselect from "vue-multiselect";
 import { useDragAndDrop } from "../../shared/services/draggable";
 import FormPreviewComp from "../../Components/FormPreviewComp.vue";
 import { showError, showInfo, showSuccess } from "../../shared/services/toast";
-
+import Vue3Select from 'vue3-select'
+import 'vue3-select/dist/vue3-select.css';
 const route = useRoute();
 const router = useRouter();
 const activeStep = ref(1);
@@ -2202,7 +2236,9 @@ const filteredDesignationList = computed(() => {
       item.role.toLowerCase().includes(searchDesignation.value.toLowerCase())
     );
   }
-
+ list = list.filter(
+    (item) => !designationValue.value.includes(item.role)
+  );
   // Sort selected first
   list = list.sort((a, b) => {
     const aSelected = designationValue.value.includes(a.role);
@@ -3221,7 +3257,9 @@ const isAllSelected = computed(() => {
     )
   );
 });
-
+function clearall_designations(){
+  designationValue.value = []
+}
 // ✅ Toggle select all
 function toggleSelectAll(event) {
   if (event.target.checked) {
@@ -4522,9 +4560,9 @@ const hasDuplicates = (array) => new Set(array).size !== array.length;
 
 }
 
-.approval-border-bottom {
-  border-bottom: 1px solid #ccc;
-}
+// .approval-border-bottom {
+//   border-bottom: 1px solid #ccc;
+// } 
 
 .rounded-table {
   border-radius: 10px;
@@ -4600,7 +4638,7 @@ const hasDuplicates = (array) => new Set(array).size !== array.length;
 }
 
 .SelectallDesignation {
-  color: #1b14df;
+  color: #000;
 }
 
 .designation-scroll {
@@ -4934,6 +4972,7 @@ select {
 
 .designationCheckBox {
   font-size: 20px !important;
+  border: 1px solid #000;
 }
 
 .designationCheckBox:focus {
@@ -5252,6 +5291,119 @@ td {
   text-align: center;
   color: #999;
   background-color: #f9f9f9;
+}
+:deep(.vs__selected) {
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 16px;
+  padding: 0px 8px;
+  font-size: 12px;
+}
+
+:deep(.vs__selected-options) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 1px;
+}
+
+:deep(.vs__dropdown-toggle) {
+  height: auto !important;
+}
+
+
+:deep(.vs__deselect) svg {
+  color: #000;
+  background-color: #f1f1f1 ;
+  border-radius: 50%;
+  margin-left: 4px;
+  margin-top: 8px;
+  font-size: 5px !important;
+
+  padding: 4px;
+
+}
+
+:deep(.vs__deselect:hover) {
+  color: #000;
+}
+.vue3-select__dropdown,
+.vue3-select-dropdown {
+  z-index: 9999 !important;
+}
+
+/* Vue 3 SFC scoped style */
+::v-deep(.vs__dropdown-toggle) {
+  border: 1px solid transparent !important;
+  border-radius: 6px;
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+  transition: border-color 0.15s ease;
+  padding: 2px;
+
+}
+
+/* when dropdown is open or focused */
+::v-deep(.vs__dropdown-toggle.vs--open),
+::v-deep(.vs__dropdown-toggle:focus),
+::v-deep(.vs__dropdown-toggle:focus-within) {
+  border: 1px solid #1b14df !important;
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+  padding:2px;
+}
+/* Placeholder styling for Vue3Select */
+::v-deep(.vs__search::placeholder) {
+  color: #9ca3af !important;  /* grey placeholder text */
+  font-size: 13px !important; /* adjust size */
+  opacity: 1;                 /* make sure it’s visible */
+  padding: 2px 6px;
+}
+
+
+
+
+.disgnationlist_div{
+  border: 1px solid #CCCCCC !important;
+  border-radius: 6px;
+  
+  // padding: 0px 4px;
+}
+::v-deep(.vs__selected) {
+  // min-width: 100px; /* adjust per tag */
+  margin: 1px;
+  max-height: 30px;
+}
+::v-deep(.vs__selected-options) {
+  max-height: 130px; /* 4 rows * 40px per tag */
+  overflow-y: auto;
+  flex-wrap: wrap;
+}
+/* Selected tags container */
+::v-deep(.vs__selected-options) {
+  display: flex;
+  max-width: calc(4 * 120px); /* show 4 tags */
+  overflow-x: auto;            /* scroll only if needed */
+  scrollbar-width: thin;       /* Firefox */
+  white-space: nowrap;          /* prevent wrapping */
+}
+
+/* Hide scrollbar by default */
+::v-deep(.vs__selected-options::-webkit-scrollbar) {
+  display: none;
+}
+
+/* Show scrollbar on hover */
+::v-deep(.vs__selected-options:hover::-webkit-scrollbar) {
+  display: block;
+}
+
+/* Optional: Firefox */
+::v-deep(.vs__selected-options) {
+  scrollbar-color: #ccc transparent;
+  scrollbar-width: thin;
 }
 
 </style>
