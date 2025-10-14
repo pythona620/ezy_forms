@@ -98,7 +98,7 @@ def enqueuing_updating_wf_workflow_requests(doctype,request_ids:list, current_le
             previous_reasons = []
             # deleting record if exists
             if frappe.db.exists({"doctype": "WF Activity Log", "name": request_id}):
-                first_getting_all_previous_reasons = frappe.get_all("WF Comments",fields=["level","role","user","action","reason","time","random_string"],filters={"parent":request_id})
+                first_getting_all_previous_reasons = frappe.get_all("WF Comments",fields=["level","role","user","action","reason","time","random_string","field_changes"],filters={"parent":request_id})
                 for reasons_ in first_getting_all_previous_reasons:
                     previous_reasons.append(reasons_)
                 frappe.db.delete("WF Activity Log", {"name": request_id})
@@ -124,11 +124,11 @@ def enqueuing_updating_wf_workflow_requests(doctype,request_ids:list, current_le
                     "action": action + "d",
                     "time": my_time,
                     "random_string": random_reference_id,
-                    "field_changes": json.dumps(field_changes),
+                    "field_changes": json.dumps(field_changes) if field_changes else None ,
                 }
                 previous_reasons.append(dict_for_child_reason_table)
             elif action == "Reject":
-                dict_for_child_reason_table = {"level":current_level,'reason': reason,"role":role,"user":user_id,"action":action+"ed","time":my_time,"random_string":random_reference_id,field_changes:json.dumps(field_changes)}
+                dict_for_child_reason_table = {"level":current_level,'reason': reason,"role":role,"user":user_id,"action":action+"ed","time":my_time,"random_string":random_reference_id,field_changes:json.dumps(field_changes) if field_changes else None}
                 previous_reasons.append(dict_for_child_reason_table)
 
             # Sorting as per the Time so that we can append in the correct order
