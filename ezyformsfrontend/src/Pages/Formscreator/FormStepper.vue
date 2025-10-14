@@ -206,6 +206,18 @@
           openDirection="top"
         />
         <small class="text-muted font-12 ms-2">Note: Public form is accessible by anyone through QR code.</small>
+
+        <FormFields
+          v-if="filterObj.as_web_view===1"
+          labeltext="Form Submit Response"
+          class="formHeight mt-2"
+          type="text"
+          tag="input"
+          name="Value"
+          id="formNameSeries"
+          placeholder="Form Submit Response"
+          v-model="filterObj.public_form_response"
+        />
       </div>
 
       <!-- Has Workflow -->

@@ -68,7 +68,7 @@
 
         </div>
 
-        <div class="res_div" v-if="raiseResponse=='Thank you! Your form has been submitted successfully.'">
+        <div class="res_div" v-if="raiseResponse">
             <div class="res_message text-center">
               <i class="bi bi-check2-circle fs-1 mb-4"></i>
               <h6 class="font-16">{{ raiseResponse || "No Data" }}</h6>
@@ -522,7 +522,7 @@ async function raiseRequestSubmission() {
     try {
         const response = await axiosInstance.post(apis.getQrCodeData, formData);
         raiseResponse.value=response.message.message;
-        if (raiseResponse.value==="Thank you! Your form has been submitted successfully.") {
+        if (raiseResponse.value) {
             // request_raising_fn(response);
             const modal = bootstrap.Modal.getInstance(document.getElementById('ExportEmployeeModal'));
             modal.hide();
@@ -531,7 +531,6 @@ async function raiseRequestSubmission() {
         }
     } catch (error) {
         console.error("❌ Error submitting main form:", error);
-        // toast.error("Error submitting the form.");
     }
 }
 

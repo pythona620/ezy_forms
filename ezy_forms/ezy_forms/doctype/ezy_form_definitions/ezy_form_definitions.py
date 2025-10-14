@@ -146,6 +146,8 @@ def add_dynamic_doctype(
     is_linked: Optional[int] = None,
     is_predefined_doctype: Optional[int] = None,
     series: Optional[str] = None,
+    as_web_view:Optional[int] = None,
+    public_form_response:Optional[str] = None,
     **kwargs  # Accept additional parameters gracefully
 ):
     """Optimized version with better parameter validation and error handling."""
@@ -180,6 +182,8 @@ def add_dynamic_doctype(
         is_predefined_doctype=is_predefined_doctype,
         workflow_check=workflow_check,
         workflow_setup=workflow_setup,
+        as_web_view=as_web_view,
+        public_form_response=public_form_response,
         now=True,
         is_async=True,
         queue="short"
@@ -237,6 +241,8 @@ def enqueued_add_dynamic_doctype(
     series: Optional[str] = None,
     workflow_check: Optional[str] = None,
     workflow_setup: Optional[List] = None,
+    as_web_view:Optional[int] = None,
+    public_form_response:Optional[str] = None,
     **kwargs  # Accept any additional parameters
 ):
     """Optimized DocType creation with better error handling and performance."""
@@ -272,8 +278,12 @@ def enqueued_add_dynamic_doctype(
                     "is_linked_form": is_linked_form,
                     "is_linked": is_linked,
                     "is_predefined_doctype": is_predefined_doctype,
-                    "has_workflow": has_workflow
+                    "has_workflow": has_workflow,
+                    "as_web_view":as_web_view,
+                    "public_form_response":public_form_response
                 })
+                if as_web_view == 1:
+                    enqueue(create_qr_for_web_view,form_name=doctype,queue="short")
 
             # Create DocType if it doesn't exist
             if not doctype_exists:
@@ -300,7 +310,7 @@ def enqueued_add_dynamic_doctype(
                 _create_form_definitions(
                     form_category, accessible_departments, form_name, form_short_name,
                     form_status, owner_of_the_form, naming_series, business_unit,
-                    has_workflow, is_linked_form, is_linked, is_predefined_doctype, as_web_view=kwargs.get('as_web_view', 0)
+                    has_workflow, is_linked_form, is_linked, is_predefined_doctype,public_form_response,as_web_view 
                 )
 
                 # Add default static fields
@@ -397,7 +407,7 @@ def _create_form_definitions(
     form_short_name: str, form_status: str, owner_of_the_form: str,
     naming_series: str, business_unit: str, has_workflow: Optional[str],
     is_linked_form: Optional[str], is_linked: Optional[int],
-    is_predefined_doctype: Optional[int], as_web_view,
+    is_predefined_doctype: Optional[int],public_form_response:Optional[str], as_web_view
 ):
     """Create form definitions efficiently."""
     form_defs = frappe.get_doc({
@@ -417,14 +427,15 @@ def _create_form_definitions(
         "is_linked_form": is_linked_form or '',
         "is_linked": is_linked,
         "is_predefined_doctype": is_predefined_doctype,
-        "as_web_view": as_web_view
+        "as_web_view": as_web_view,
+        "public_form_response":public_form_response
     })
     form_defs.insert(ignore_permissions=True)
 
     
     # creating Qr For Web View forms
     if as_web_view == 1:
-        create_qr_for_web_view(form_name=form_name)
+        enqueue(create_qr_for_web_view,form_name=form_short_name,queue="short")
 
 def _add_default_static_fields(doctype: str):
     """Add default static fields to DocType."""
@@ -475,7 +486,9 @@ def enqueued_add_customized_fields_for_dynamic_doc(fields: List[Dict[str, Any]],
 
             # Collect child table fieldnames
             table_fieldnames = [f["options"] for f in fields if f.get("fieldtype") == "Table"]
-            child_table_fields = _get_child_table_fields(table_fieldnames)
+            child_table_fields ={}
+            if table_fieldnames:
+                child_table_fields = _get_child_table_fields(table_fieldnames)
 
             # Process fields efficiently
             doc = frappe.get_doc("DocType", doctype)

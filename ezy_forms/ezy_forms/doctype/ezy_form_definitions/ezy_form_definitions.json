@@ -32,7 +32,8 @@
   "send_mail_for_frist_approval",
   "mail_id",
   "as_web_view",
-  "report_fields"
+  "report_fields",
+  "public_form_response"
  ],
  "fields": [
   {
@@ -183,10 +184,15 @@
    "fieldtype": "Check",
    "label": "As Web View"
   },
-  {   
-    "fieldname": "report_fields",
+  {
+   "fieldname": "report_fields",
    "fieldtype": "Long Text",
    "label": "Report Fields"
+  },
+  {
+   "fieldname": "public_form_response",
+   "fieldtype": "Long Text",
+   "label": "Public Form Response"
   }
  ],
  "index_web_pages_for_search": 1,
