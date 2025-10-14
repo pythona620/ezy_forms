@@ -1539,17 +1539,13 @@
 
       <div class="offcanvas-footer">
         <div class="text-end p-3">
-          <div v-if="selectedBlockIndex === 0 ">
-
-          <ButtonComp class="btn btn-dark addingDesignations" data-bs-dismiss="offcanvas" @click="addDesignationBtn"
-            name="Add Requestors" />
-          </div>
           
-          <div v-if="selectedBlockIndex !== 0 ">
+          
+          <div>
 
           <ButtonComp class="btn btn-dark addingDesignations" data-bs-dismiss="offcanvas" @click="addDesignationBtn"
-            name="Add Approvers" />
-          </div>
+            :name="selectedBlockIndex === 0 ? 'Add Requstors' : 'Add Approvers'" />
+        </div>
         </div>
       </div>
     </div>

@@ -6,7 +6,7 @@ from ezy_forms.ezy_forms.doctype.ezy_form_definitions.dynamic_form_template impo
 from ezy_forms.api.v1.mail_message_html import preview_dynamic_form
 from frappe.utils import add_to_date,get_url
 
-def sending_mail_api(request_id, doctype_name, property, cluster, reason, timestamp,skip_user_role=None,user=None,field_changes=None,current_level=None):
+def sending_mail_api(request_id, doctype_name, property, cluster, reason, timestamp,skip_user_role=None,user=None,field_changes=None,current_level=None,current_status=None):
 	frappe.enqueue('ezy_forms.api.v1.send_an_email.send_notifications',
 		queue='default',
 		timeout=300,
@@ -18,10 +18,11 @@ def sending_mail_api(request_id, doctype_name, property, cluster, reason, timest
 		current_level=current_level,
 		field_changes=field_changes,
 		timestamp= timestamp,
+		current_status =current_status,
 		skip_user_role = skip_user_role,
 		user=user
 	)
-def send_notifications(request_id, doctype_name, property, cluster, reason, timestamp,skip_user_role=None,user=None,field_changes=None,current_level=None):
+def send_notifications(request_id, doctype_name, property, cluster, reason, timestamp,skip_user_role=None,user=None,field_changes=None,current_level=None,current_status=None):
 	"""Send email notifications to relevant users"""
 	email_accounts = frappe.get_all(
 		"Email Account",
@@ -97,12 +98,12 @@ def send_notifications(request_id, doctype_name, property, cluster, reason, time
 				if email in user_list and user_list:
 
 					reason =  "Form Has been Updated"
-				elif email == requested_by and user_emails:
+				elif field_changes and user_emails:
 					reason = reason + ("<br><b>Form Has been Updated <b> ")
 				try:
 					email_content = generate_email_content(
 						request_id, doctype_name, user_name, user_role, email,requested_by,
-						reason, timestamp
+						reason, timestamp,current_status
 					)
 					
 					frappe.sendmail(
@@ -119,7 +120,7 @@ def send_notifications(request_id, doctype_name, property, cluster, reason, time
 		frappe.log_error(f"Notification sending failed: {str(e)}", "Notification Error")
 
 
-def generate_email_content(request_id, doctype_name, user_name, user_role, email,requested_by,reason, timestamp):
+def generate_email_content(request_id, doctype_name, user_name, user_role, email,requested_by,reason, timestamp,current_status):
 	email_template = frappe.get_doc('Email Template',"ezyForms Notification")
 	if requested_by != email:
 		# token = get_ezy_forms_token(request_id,doctype_name,request_id_document,each_one_mail,reason if reason else 'Request Raised',next_level_after_raising_request,property)
@@ -147,7 +148,7 @@ def generate_email_content(request_id, doctype_name, user_name, user_role, email
 				'href="/ezyformsfrontend#" style="pointer-events: none; background-color: #eee; color: #999; border: 1px solid #ccc; cursor: not-allowed;"'
 			)
 		rep = rep.replace("reason_after_action", reason)
-		rep = rep.replace("--current_status--", reason if reason else 'Request Raised')
+		rep = rep.replace("--current_status--", current_status if current_status else 'Request Raised')
 		rep = rep.replace("--next-level--", f"{1}")
 		email_template.response_html = rep
 		

@@ -88,7 +88,7 @@
     </div>
 
     <div v-if="reportingData.length">
-      <h6 class="font-16 my-3 ms-2 fw-bold">My Team</h6>
+      <h6 class="font-16 my-3 fw-bold ms-2">My Team</h6>
       <div class="container-fluid p-0">
         <div class="row">
           <div class="col-lg-4 col-md-6 col-sm-12 mb-3" v-for="(employee, index) in reportingData" :key="index">
