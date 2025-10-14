@@ -454,7 +454,7 @@
                           <!-- Attachment List Modal -->
                           <div v-if="showListModal" class="modal fade show"
                             style="display: block; background: rgba(0,0,0,0.5); position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1050;">
-                            <div class="modal-dialog modal-dialog-centered modal-lg">
+                            <div class="modal-dialog modal-dialog-centered modal-lg ">
                               <div class="modal-content">
 
                                 <div class="modal-header">
@@ -463,7 +463,7 @@
                                     style="right: 10px; top: 10px;"> &times;</button>
                                 </div>
 
-                                <div class="modal-body">
+                                <div class="modal-body attachmnet_list_modal">
                                   <ul class="list-group font-13">
                                     <li v-for="(url, i) in attachmentList" :key="i" 
                                       class="list-group-item d-flex justify-content-between align-items-center">
@@ -3409,5 +3409,8 @@ input:focus, textarea:focus, select:focus {
   outline: 0;
   box-shadow: none;
 }
-
+.attachmnet_list_modal{
+  height: 80vh;
+  overflow: auto;
+}
 </style>

@@ -10,7 +10,7 @@ from frappe.utils import get_bench_path, cstr,get_url,now_datetime,get_site_path
 from pdf2image import convert_from_path
 import zipfile
 from frappe.utils.file_manager import get_file_path
-import shutil
+import shutil, json
 from datetime import date, datetime
 
 
@@ -1000,63 +1000,156 @@ activate_log_table = """
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Activity Log</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
-      font-family: Arial, sans-serif;
-      margin: 2rem;
+      font-family: 'Arial', sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 20px;
+      background-color: #ffffff;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .log-entry {
       background-color: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      transition: box-shadow 0.3s ease-in-out;
     }
-    h1 {
-      margin-bottom: 1rem;
+
+    .log-entry:hover {
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
-    table {
+
+    .log-entry strong {
+      color: #555;
+    }
+
+    .log-entry .details {
+      margin-bottom: 10px;
+    }
+
+    .log-entry .details span {
+      font-weight: bold;
+      color: #000;
+    }
+
+    .log-entry .comments {
+      font-style: italic;
+      color: #777;
+    }
+
+    .log-entry .field-changes {
+      background-color: #f1f1f1;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 5px;
+      font-size: 14px;
+      border: 1px solid #ddd;
+    }
+
+    .log-entry table {
       width: 100%;
+      margin-top: 10px;
       border-collapse: collapse;
-      background: #fff;
-      box-shadow: 0 0 5px rgba(0,0,0,0.1);
     }
-    th, td {
-      padding: 0.75rem;
+
+    .log-entry table, .log-entry th, .log-entry td {
+      border: 1px solid #ddd;
+      padding: 8px;
       text-align: left;
-      border-bottom: 1px solid #e0e0e0;
     }
-    th {
-      background-color: #f0f0f0;
+
+    .log-entry th {
+      background-color: #f4f4f4;
+      color: #555;
     }
-    tr:nth-child(even) {
-      background-color: #fcfcfc;
+
+    .log-entry td {
+      background-color: #fff;
     }
+
+    .log-entry .no-field-changes {
+      color: #f44336;
+      font-weight: bold;
+    }
+    
   </style>
 </head>
 <body>
-  <h1>Activity Log</h1>
-  <table>
-    <thead>
-      <tr>
-        <th>Designation</th>
-        <th>Employee</th>
-        <th>Action</th>
-        <th>Time</th>
-        <th>Comments</th>
-      </tr> 
-    </thead>
-    <tbody>
+
+  <div class="container">
+    <h2>Activity Log</h2>
+
+    <ul>
       {% for entry in filtered_reasons %}
-      <tr>
-        <td>{{ entry.role }}</td>
-        <td>{{ entry.user_name }}</td>
-        <td>{{ entry.action }}</td>
-        <td>{{ entry.time.rsplit(':', 1)[0] }}</td>
-        <td>{{ entry.reason }}</td>
-      </tr>
+        <li class="log-entry">
+          <div class="details">
+            <p><span>Employee:</span> {{ entry.user_name }}</p>
+            <p><span>Designation:</span> {{ entry.role }}</p>
+            <p><span>Action:</span> {{ entry.action }}</p>
+            <p><span>Time:</span> {{ entry.time.rsplit(':', 1)[0] }}</p>
+          </div>
+
+          <div class="comments">
+            <strong>Comments:</strong> {{ entry.reason }}
+          </div>
+
+          {% if entry.field_changes %}
+            <div class="field-changes">
+              <strong>Changes Logged by Approver:</strong>
+              {% if entry.field_changes is string %}
+                <p>{{ entry.field_changes }}</p>
+              {% elif entry.field_changes is mapping %}
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Field</th>
+                      <th>Old Value</th>
+                      <th>New Value</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for field, change in entry.field_changes.items() %}
+                      <tr>
+                        <td>{{ field }}</td>
+                        <td>{{ change.oldValue }}</td>
+                        <td>{{ change.newValue }}</td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              
+              {% endif %}
+            </div>
+          
+          {% endif %}
+        </li>
       {% endfor %}
-    </tbody>
-  </table>
+    </ul>
+  </div>
+
 </body>
-</html>"""
+</html>
+"""
 
 def convert_html_to_pdf(html_content, pdf_path,options=None):
 
@@ -1409,7 +1502,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
             activate_log = frappe.get_doc('WF Activity Log', wf_generated_request_id).as_dict()
             wf_work_flow_request = frappe.get_doc('WF Workflow Requests', wf_generated_request_id).as_dict()
             employee_name = frappe.get_value("Ezy Employee",wf_work_flow_request['requested_by'],"emp_name")
-            filtered_reasons = sorted([{ 'level': entry['level'],'role': entry['role'], 'user': entry['user'], 'user_name': entry['user_name'], 'reason': entry['reason'], 'action': entry['action'], 'time': entry['time'], 'random_string': entry['random_string']  }  for entry in activate_log.get('reason', [])  ],key=lambda x: datetime.strptime(x['time'], "%Y/%m/%d %H:%M:%S:%f") if x.get('time') else datetime.min )
+            filtered_reasons = sorted([{ 'level': entry['level'],'role': entry['role'], 'user': entry['user'], 'user_name': entry['user_name'], 'reason': entry['reason'], 'action': entry['action'], 'time': entry['time'], 'random_string': entry['random_string']  ,"field_changes":json.loads(entry['field_changes']) if entry.get('field_changes') else None}  for entry in activate_log.get('reason', [])  ],key=lambda x: datetime.strptime(x['time'], "%Y/%m/%d %H:%M:%S:%f") if x.get('time') else datetime.min )
             html_table_output = ""
             if filtered_reasons:
                 html_table_output = Template(activate_log_table).render(filtered_reasons=filtered_reasons)

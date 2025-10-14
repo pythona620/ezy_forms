@@ -94,3 +94,42 @@ def system_role_permissions():
     for doc in docs:
         doc = frappe.get_doc("WF Roles",doc)
         frappe.call("ezy_forms.api.v1.custom_role_permission.assign_custom_permissions",    doc=doc,    method=None)
+        
+        
+@frappe.whitelist(methods=["POST"])
+def restrict_spical_characters_in_role(doc, method):
+    special_characters = [
+        "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+", "-",
+        "=", "[", "]", "{", "}", "|", ";", ":", "'", '"', ",", ".", "<",
+        ">", "/", "?", "`", "~"
+    ]
+    
+    # Ensure doc.name is a valid string
+    role_name = (doc.role_name or "").strip()
+
+    if not role_name:
+        frappe.throw("Role name cannot be empty.")
+
+    if any(char in special_characters for char in role_name):
+        frappe.throw(f"Role name cannot contain special characters: {''.join(special_characters)}")
+
+
+@frappe.whitelist()
+def wf_role_creation():
+    # Get all core roles and existing WF Roles
+    core_roles = frappe.get_list("Role", fields=["name"])
+    wf_roles = frappe.get_list("WF Roles", fields=["name"])
+    wf_role_names = {role["name"] for role in wf_roles}
+
+    # Exclude these roles from being added
+    excluded_roles = { 'Administrator', 'Guest', 'Desk User', 'System Manager', 'Dashboard Manager', 'Script Manager', 'Inbox User',  'Blogger',"All" } # Explicitly excluding 'WF Roles'
+
+    for role in core_roles:
+        role_name = role["name"]
+        if role_name not in wf_role_names and role_name not in excluded_roles:
+            wf_doc = frappe.new_doc("WF Roles")
+            wf_doc.role = role_name
+            wf_doc.insert(ignore_permissions=True)
+
+    frappe.db.commit()
+    return {"success": True, "message": "WF Roles created successfully for all core roles."}

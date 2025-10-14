@@ -80,13 +80,13 @@
                     <span v-if="blockIndex !== 0" class="workflow-conditions d-flex flex-wrap align-items-center gap-1">
                              <!-- Approver types -->
                             <span v-if="workFlowRoles[blockIndex].view_only_reportee" class="approver-type">
-                            View only reportee
+                            Reporting Manager only
                             </span>
                             <span v-if="workFlowRoles[blockIndex].all_approvals_required" class="approver-type">
-                            All approvers required
+                            All of the selected approvers
                             </span>
                             <span v-if="workFlowRoles[blockIndex].requester_as_a_approver" class="approver-type">
-                            Requested only
+                            Approval by Requestor
                             </span>
 
 
@@ -209,11 +209,11 @@ option, index
                                                         v-model="field.value" :type="field.fieldtype"
                                                         class="form-control font-10 previewInputHeight" />
                                                 </template>
+
+                                            </div>
                                                 <span v-if="field.description !== 'Field'" class="font-11"><span
                                                         class="fw-semibold">Description: </span>{{
                                                     field.description }}</span>
-
-                                            </div>
                                             <div >
 
 

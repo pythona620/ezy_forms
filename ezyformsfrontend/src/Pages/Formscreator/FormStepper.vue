@@ -320,9 +320,9 @@
                                       <span class="font-12  approver_type_div">
 
 
-                                      {{getWorkflowSetup(blockIndex).view_only_reportee === 1 ? 'View only reportee' : ''}}
-                                      {{getWorkflowSetup(blockIndex).all_approvals_required === 1 ? 'All approvers required' : ''}}
-                                      {{getWorkflowSetup(blockIndex).requester_as_a_approver === 1 ? 'Requested only' : ''}}
+                                      {{getWorkflowSetup(blockIndex).view_only_reportee === 1 ? 'Reporting Manager only' : ''}}
+                                      {{getWorkflowSetup(blockIndex).all_approvals_required === 1 ? 'All of the selected approvers' : ''}}
+                                      {{getWorkflowSetup(blockIndex).requester_as_a_approver === 1 ? 'Approval by Requestor' : ''}}
                                       </span>
                                       
                                       
@@ -1359,12 +1359,13 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
-            <input v-model="printFormatID" :multiple="false" :placeholder="route.query.id" class="font-11 form-control "
+                <label for="">Form Name</label>
+            <input v-model="printFormatID" :multiple="false" :placeholder="route.query.id" class="font-11 form-control " id="Form_name_print"
               :searchable="true" />
             <div class=" d-flex align-items-center gap-2">
               <div class="d-flex align-items-center py-2">
 
-                <input class="font-12" v-model="is_landscape" :true-value="1" :false-value="0" placeholder="Field Name"
+                <input  class="font-12" v-model="is_landscape" :true-value="1" :false-value="0" placeholder="Field Name"
                   type="checkbox" />
               </div>
               <div>

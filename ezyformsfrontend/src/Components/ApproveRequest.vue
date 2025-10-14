@@ -270,7 +270,7 @@
                         <span class="strong-content fw-bolder">{{ item.user }}</span><br />
                         <span>{{ item.role }}</span><br />
                         <span class="font-12 text-secondary">{{ item.reason || "N/A" }}</span>.<br />
-                        <button v-if="item.field_changes" class="btn btn-sm text-decoration-underline font-13"
+                        <button  v-if="item.field_changes && item.field_changes !== 'null'" class="btn btn-sm text-decoration-underline font-13"
                           type="button" data-bs-toggle="offcanvas" data-bs-target="#changesOffcanvas"
                           @click="openChanges(item)">
                           Changes
@@ -539,7 +539,7 @@
                     <span class="strong-content">{{ item.user_name }}</span><br />
                     <span>{{ item.role }}</span><br />
                     <span class="font-12 text-secondary">{{ item.reason || "N/A" }}</span>.<br />
-                    <button v-if="item.field_changes" class="btn btn-sm border-0 text-decoration-underline font-12 mt-2"
+                    <button v-if="item.field_changes && item.field_changes !== 'null'" class="btn btn-sm border-0 text-decoration-underline font-12 mt-2"
                       type="button" data-bs-toggle="offcanvas" data-bs-target="#changesOffcanvas"
                       @click="openChanges(item)">
                       Changes
@@ -1173,9 +1173,11 @@ function approvalStatusFn(dataObj, type) {
     cluster_name: null,
     url_for_approval_id: "",
     current_level: tableData.value.current_level,
-    field_changes: Object.keys(changedFields.value).length ? changedFields.value : null,
   };
-
+  // field_changes: Object.keys(changedFields.value).length ? changedFields.value : '',
+if (Object.keys(changedFields.value).length > 0) {
+    data.field_changes = changedFields.value;
+  }
   axiosInstance
     .post(apis.requestApproval, { request_details: [data] })
     .then((response) => {
