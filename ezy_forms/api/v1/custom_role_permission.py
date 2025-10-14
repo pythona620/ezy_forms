@@ -94,3 +94,21 @@ def system_role_permissions():
     for doc in docs:
         doc = frappe.get_doc("WF Roles",doc)
         frappe.call("ezy_forms.api.v1.custom_role_permission.assign_custom_permissions",    doc=doc,    method=None)
+        
+        
+@frappe.whitelist(methods=["POST"])
+def restrict_spical_characters_in_role(doc, method):
+    special_characters = [
+        "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+", "-",
+        "=", "[", "]", "{", "}", "|", ";", ":", "'", '"', ",", ".", "<",
+        ">", "/", "?", "`", "~"
+    ]
+    
+    # Ensure doc.name is a valid string
+    role_name = (doc.role_name or "").strip()
+
+    if not role_name:
+        frappe.throw("Role name cannot be empty.")
+
+    if any(char in special_characters for char in role_name):
+        frappe.throw(f"Role name cannot contain special characters: {''.join(special_characters)}")
