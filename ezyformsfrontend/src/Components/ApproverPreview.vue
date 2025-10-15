@@ -476,6 +476,12 @@
 
                                         <div class="modal-header">
                                           <h5 class="modal-title font-14">Attachments</h5>
+                                          <div class="d-flex justify-content-end w-100 me-5">
+                                            <button class="btn btn-sm font-13 btn-light" 
+                                              @click="downloadAllAttachments" :disabled="isDownloadingAll">
+                                              {{ isDownloadingAll ? 'Downloading...' : 'Download All Files' }}
+                                            </button>
+                                          </div>
                                           <button type="button" @click="closeAttachmentList" class="btn position-absolute"
                                             style="right: 10px; top: 10px;"> &times;</button>
                                         </div>
@@ -484,13 +490,6 @@
                                           <ul class="list-group font-13">
                                             <li v-for="(url, i) in attachmentList" :key="i" 
                                               class="list-group-item d-flex justify-content-between align-items-center">
-                                              <!-- <button
-                                        v-if="hovered[`${field.fieldname}-${i}`] "
-                                        @click="removeFile(i, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
-                                        class="btn btn-sm btn-light border-0 position-absolute"
-                                        style="top: -15px; right: -10px; border-radius: 50%; padding: 0 5px; height: 27px;">
-                                        <i class="bi bi-x fs-6"></i>
-                                      </button> -->
                                       <!-- && props.readonlyFor !== 'true' && blockIndex !== 0 -->
                                               <span class="d-flex align-items-center gap-2">
                                                 <!-- File Type Icon -->
@@ -1545,6 +1544,8 @@ import 'vue3-select/dist/vue3-select.css';
 import { onBeforeUnmount } from "vue";
 import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
 
 const props = defineProps({
   blockArr: {
@@ -2802,6 +2803,39 @@ function isExcelFile(file) {
   return /\.(xls|xlsx)$/i.test(file)
 }
 
+const isDownloadingAll = ref(false);
+
+async function downloadAllAttachments() {
+  const zip = new JSZip();
+
+  for (const url of attachmentList.value) {
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("File not found");
+
+      const blob = await response.blob();
+      zip.file(getFilename(url), blob);
+
+      // ✅ Mark this file as previewed
+      previewedAttachments.value.add(url);
+    } catch (err) {
+      console.error("Failed to fetch file:", url, err);
+    }
+  }
+
+  // ✅ Generate ZIP file
+  const content = await zip.generateAsync({ type: "blob" });
+  saveAs(content, "attachments.zip");
+
+  // ✅ Check if all attachments are downloaded
+  const allDownloaded = attachmentList.value.every((f) =>
+    previewedAttachments.value.has(f)
+  );
+
+  // ✅ Emit event to parent
+  emit("attachmentsReady", allDownloaded);
+}
+
 async function downloadAttachment(url, filename) {
   try {
     const response = await fetch(url);
@@ -3430,5 +3464,8 @@ input:focus, textarea:focus, select:focus {
 .attachmnet_list_modal{
   height: 80vh;
   overflow: auto;
+}
+.download-all-btn{
+  background-color: #adadad;
 }
 </style>
