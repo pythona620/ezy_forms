@@ -372,7 +372,7 @@
                                             @click="deleteSelectedVendors"><i class="bi bi-trash"></i> Delete
                                             Vendor</button>
                                           <!-- :disabled="!itemDetails.length" -->
-                                          <button class="btn  add_vendor_btn btn-sm ms-2" @click="addVendorModal"><i
+                                          <button :disabled="!itemDetails.length" class="btn  add_vendor_btn btn-sm ms-2" @click="addVendorModal"><i
                                               class="bi bi-plus"></i>
                                             Add
                                             Vendor</button>
@@ -3597,6 +3597,11 @@ function fetchCostCenters() {
   background-color: var(--white-color);
 }
 
+// .vendor_sidebar ul li{
+//   padding: 8px 12px;
+
+//   font-size: 13px;
+// }
 .vendor_sidebar {
   height: 90dvh;
   background-color: #FAFAFA !important;
@@ -3606,8 +3611,5 @@ function fetchCostCenters() {
   overflow-x: hidden;
 }
 
-// .vendor_sidebar ul li{
-//   padding: 8px 12px;
 
-//   font-size: 13px;
-// }</style>
+</style>
