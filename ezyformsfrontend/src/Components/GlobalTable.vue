@@ -122,6 +122,7 @@
                 </span>
               </span>
               <span v-else-if="column.td_key === 'as_web_view'">
+                <i :class="[row.as_web_view == 1 ? 'bi bi-unlock text-success' : 'bi bi-lock text-danger','fw-bold me-1']"></i>
                 {{ row.as_web_view == 1 ? 'Public' : 'Private' }}
               </span>
 
@@ -230,7 +231,7 @@
 
             <!-- </td> -->
             <td v-if="(isAction == 'true' && viewType === 'viewPdf') || actionType === 'dropdown' || download === 'true' || isRequest === 'true' || ( isAction === 'true' && view === 'edit')"  class="dropdown_sticky">
-            <div v-if="isAction == 'true' && viewType === 'viewPdf'" class="text-center align-middle">
+            <div v-if="isAction == 'true' && viewType === 'viewPdf'" :class="['align-middle',QR_Code === 'true' ? '' : 'text-center']">
               <span v-if="raiseRequest === 'true'" class="px-2">
                 <i v-tooltip.top="'Raise Request'" class="bi bi-send eye-cursor mx-1"
                   @click="handleCellClick(row, rowIndex, 'raiseRequest')"></i>
@@ -239,7 +240,7 @@
                 <i v-tooltip.top="'View'" @click="handleCellClick(row, rowIndex, 'view')"
                   class="ri-eye-line eye-cursor"></i>
               </span>
-              <span v-if="QR_Code === 'true'" class="px-2">
+              <span v-if="QR_Code === 'true' && row.as_web_view === 1 " class="px-2">
                 <i @click="handleCellClick(row, rowIndex, 'QR Code')"
                   class="bi bi-qr-code-scan eye-cursor"></i>
               </span>
@@ -430,7 +431,7 @@ const props = defineProps({
     type: String,
   },
   QR_Code:{
-    type:Boolean,
+    type:String,
   },
   raiseRequest: {
     type: String

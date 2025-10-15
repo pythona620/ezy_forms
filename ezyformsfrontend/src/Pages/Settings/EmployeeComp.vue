@@ -43,7 +43,14 @@
                 <div class="container-fluid">
                   <div class="row">
                     <div class="col">
-                      <label class="font-13 ps-1" for="create_emp_name">Emp Name<span class="text-danger ps-1">*</span></label>
+                      <div class="d-flex justify-content-between">
+                        <label class="font-13 ps-1" for="emp_name">Emp Name<span class="text-danger ps-1">*</span></label>
+                        <div class="me-2">
+                          <input type="checkbox" id="is_admin" :true-value='1' :false-value='0'
+                            v-model="createEmployee.is_admin" class="form-check-input mt-1 input-border" />
+                          <label class="font-13 ms-2 " for="is_admin">Is Admin</label>
+                        </div>
+                      </div>
                       <FormFields class="mb-3" tag="input" type="text" name="create_emp_name" id="create_emp_name"
                         placeholder="Enter Emp Name" v-model.trim="createEmployee.emp_name" @input="validateEmpName" />
                       <label class="font-13 ps-1" for="create_emp_code">Emp ID<span class="text-danger ps-1">*</span></label>
@@ -74,8 +81,15 @@
                           {{ createEmailError }}
                         </p>
                       </div>
-                      <label class="font-13 ps-1 fw-medium" for="dept">Departments<span
-                          class="text-danger ps-1">*</span></label>
+                      <div class="d-flex justify-content-between">
+                        <label class="font-13 ps-1 fw-medium" for="dept">Departments<span
+                            class="text-danger ps-1">*</span></label>
+                          <div class="me-2">
+                            <input type="checkbox" id="isHOD" :true-value="1" :false-value="0" v-model="createEmployee.is_hod"
+                              class="form-check-input mt-1 input-border border-1" />
+                            <label class="font-13 ms-2 " for="isHOD">Is HOD</label>
+                          </div>
+                      </div>
                       <!-- <FormFields tag="select" placeholder="Select Department" class="mb-3"
                                             name="dept" v-model="createEmployee.department" id="dept" :Required="false"
                                             :options="departmentsList" /> -->
@@ -89,25 +103,6 @@
                           </span>
                         </template>
                       </VueMultiselect>
-                      <div class=" d-flex gap-3">
-
-
-                        <div class="ms-1">
-                          <input type="checkbox" id="isHOD" :true-value='1' :false-value='0'
-                            v-model="createEmployee.is_hod" class="form-check-input mt-1 input-border border-1" />
-                          <label class="font-13 ms-2 " for="isHOD">Is HOD</label>
-                        </div>
-                        <div class="ms-1">
-                          <input type="checkbox" id="is_admin" :true-value='1' :false-value='0'
-                            v-model="createEmployee.is_admin" class="form-check-input mt-1 input-border" />
-                          <label class="font-13 ms-2 " for="is_admin">Is Admin</label>
-                        </div>
-                        <div class="ms-1">
-                          <input type="checkbox" id="is_high_level" :true-value='1' :false-value='0'
-                            v-model="createEmployee.is_high_level" class="form-check-input mt-1 input-border" />
-                          <label class="font-13 ms-2 " for="is_high_level">Is High-level</label>
-                        </div>
-                      </div>
 
                     </div>
                     <div class="col">
@@ -177,7 +172,14 @@
                                         <FormFields v-if="newDesignation" class="mb-3" tag="input" type="text"
                                             name="emp_code" id="emp_code" placeholder="Enter Designation"
                                             v-model="inputDesignation" /> -->
-                      <label class="font-13 ps-1" for="reporting_to">Reports To<span v-if="createEmployee.is_high_level!==1" class="text-danger ps-1">*</span></label>
+                      <div class="d-flex justify-content-between">
+                        <label class="font-13 ps-1" for="reporting_to">Reports To<span v-if="createEmployee.is_high_level==0" class="text-danger ps-1">*</span></label>
+                        <div class="me-2">
+                          <input type="checkbox" id="is_high_level" :true-value='1' :false-value='0'
+                            v-model="createEmployee.is_high_level" class="form-check-input mt-1 input-border" />
+                          <label class="font-13 ms-2 " for="is_high_level">Is High-level</label>
+                        </div>
+                      </div>
                       <!-- <FormFields class="mb-3" tag="input" type="text" name="reporting_to"
                                             id="reporting_to" placeholder="Enter Reports To"
                                             v-model="createEmployee.reporting_to" /> -->
@@ -359,7 +361,7 @@
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="viewEmployeeLabel">Employee Data</h5>
-            <div class="form-check d-flex justify-content-end w-75 text-end form-switch text-end ">
+            <div class="form-check d-flex justify-content-center w-25 form-switch ">
               <input class="form-check-input shadow-none" v-model="createEmployee.enable" :checked="createEmployee.enable == 1" true-value="1" false-value="0" type="checkbox" role="switch" />
               <label class="font-13 ms-2 mt-1 fw-bold" for="is_high_level">{{ createEmployee.enable  == '1' ? 'Enabled' : 'Disabled' }}</label>
             </div>
@@ -370,7 +372,14 @@
             <div class="container-fluid">
               <div class="row">
                 <div class="col">
-                  <label class="font-13 ps-1" for="emp_name">Emp Name<span class="text-danger ps-1">*</span></label>
+                  <div class="d-flex justify-content-between">
+                    <label class="font-13 ps-1" for="emp_name">Emp Name<span class="text-danger ps-1">*</span></label>
+                    <div class="me-2">
+                      <input type="checkbox" id="is_admin" :true-value='1' :false-value='0'
+                        v-model="createEmployee.is_admin" class="form-check-input mt-1 input-border" />
+                      <label class="font-13 ms-2 " for="is_admin">Is Admin</label>
+                    </div>
+                  </div>
                   <FormFields class="mb-3" tag="input" type="text" name="emp_name" id="emp_name"
                     placeholder="Enter Emp Name" v-model.trim="createEmployee.emp_name" @input="validateEmpName" />
                   <label class="font-13 ps-1" for="emp_code">Emp ID<span class="text-danger ps-1">*</span></label>
@@ -428,8 +437,15 @@
                    </p>
 
                   </div>
+                  <div class="d-flex justify-content-between">
                   <label class="font-13 ps-1 fw-medium" for="dept">Departments<span
                       class="text-danger ps-1">*</span></label>
+                    <div class="me-2">
+                      <input type="checkbox" id="isHOD" :true-value="1" :false-value="0" v-model="createEmployee.is_hod"
+                        class="form-check-input mt-1 input-border border-1" />
+                      <label class="font-13 ms-2 " for="isHOD">Is HOD</label>
+                    </div>
+                  </div>
 
                   <VueMultiselect v-model="createEmployee.department" :options="departmentsList" :multiple="false"
                     @update:modelValue="onDepartmentChange" :close-on-select="true" :clear-on-select="false"
@@ -441,25 +457,6 @@
                       </span>
                     </template>
                   </VueMultiselect>
-                  <div class=" d-flex gap-2">
-
-
-                    <div class="ms-1">
-                      <input type="checkbox" id="isHOD" :true-value="1" :false-value="0" v-model="createEmployee.is_hod"
-                        class="form-check-input mt-1 input-border border-1" />
-                      <label class="font-13 ms-2 " for="isHOD">Is HOD</label>
-                    </div>
-                    <div class="ms-1">
-                      <input type="checkbox" id="is_admin" :true-value='1' :false-value='0'
-                        v-model="createEmployee.is_admin" class="form-check-input mt-1 input-border" />
-                      <label class="font-13 ms-2 " for="is_admin">Is Admin</label>
-                    </div>
-                    <div class="ms-1">
-                      <input type="checkbox" id="is_high_level" :true-value='1' :false-value='0'
-                        v-model="createEmployee.is_high_level" class="form-check-input mt-1 input-border" />
-                      <label class="font-13 ms-2 " for="is_high_level">Is High-level</label>
-                    </div>
-                  </div>
 
 
                 </div>
@@ -508,7 +505,14 @@
 
                     </div>
                   </div>
+                  <div class="d-flex justify-content-between">
                   <label class="font-13 ps-1" for="reporting_to">Reports To<span v-if="createEmployee.is_high_level==0" class="text-danger ps-1">*</span></label>
+                  <div class="me-2">
+                    <input type="checkbox" id="is_high_level" :true-value='1' :false-value='0'
+                      v-model="createEmployee.is_high_level" class="form-check-input mt-1 input-border" />
+                    <label class="font-13 ms-2 " for="is_high_level">Is High-level</label>
+                  </div>
+                  </div>
                   <VueMultiselect v-model="createEmployee.reporting_to"
                     :options="employeeEmails.map((dept) => dept.emp_mail_id)" :multiple="false" :close-on-select="true"
                     :allow-empty="true" :clear-on-select="false" :preserve-search="false" placeholder="Select Reports To"

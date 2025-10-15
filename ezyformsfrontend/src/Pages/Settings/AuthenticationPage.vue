@@ -425,7 +425,7 @@ const signUp = () => {
         .get(`${apis.GetDoctypeData}/${encodeURIComponent(docName)}`, { params: queryParams })
         .then((res) => {
             if (res.message.data) {
-                tableData.value[3].checked = res.message.data.disable_signup == 0;
+                tableData.value[3].checked = res.message.data[0].disable_signup == 0;
             }
         })
         .catch((error) => {
