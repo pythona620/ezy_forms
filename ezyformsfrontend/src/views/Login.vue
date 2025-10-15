@@ -33,7 +33,7 @@
         </div>
 
           <div class="text-end">
-            <span @click="openForgotpassword" class="font-12 p-0 text-end forgot-password">Forgot password?</span><br />
+            <span @click="openForgotpassword" class="font-12 p-0 text-end link-color">Forgot password?</span><br />
           </div>
 
         <button :disabled="!showPwdField" @click="Login" type="submit"
@@ -44,7 +44,7 @@
 
       </div>
       <!-- && today !== today -->
-      <div v-if="isSignup == 0" class="font-13 m-0 cursor-pointer text-center" @click="OpenSignUp"><span
+      <div v-if="isSignup == 0" class="font-13 m-0 cursor-pointer text-center link-color" @click="OpenSignUp"><span
           class="sign">Not
           a user? Sign
           Up</span></div>
@@ -204,7 +204,7 @@
           Sign Up
         </button>
       </div>
-      <div class="font-13 m-0 cursor-pointer text-center" @click="OpenLogin"><span class="sign">Existing user? Log
+      <div class="font-13 m-0 cursor-pointer text-center link-color" @click="OpenLogin"><span class="sign">Existing user? Log
           In</span></div>
     </div>
 
@@ -232,7 +232,7 @@
         </button>
 
       </div>
-      <div class="font-13 m-0 cursor-pointer text-center" @click="OpenLogin">
+      <div class="font-13 m-0 cursor-pointer text-center link-color" @click="OpenLogin">
         <span class="sign">Back to Log In</span>
       </div>
     </div>
@@ -1701,9 +1701,10 @@ button {
   font-size: 13px;
 }
 
-.forgot-password:hover {
+ .link-color:hover {
   text-decoration: underline;
   transition: all 0.3s ease;
+  color: rgb(21, 21, 252);
 }
 
 .toggle-icon {
