@@ -108,7 +108,7 @@ const tableData = ref([
   { title: "Take Acknowledgement and Signature while Login", checked: false, about: "A message will be displayed at the time of Sign in by the user to Acknowledge and Sign at the time of login." },
   { title: "Take Signature while Sign Up", checked: false, about: "When enabled user need to submit his signature before doing any activity in the application." },
   { title: "Allow Approver to Edit Form?", checked: false, about: "When enabled approver can edit the form." },
-  { title: "Form Attachment View Required Before Approval", checked: false },
+  { title: "Form Attachment View Required Before Approval", checked: false, about:"When form approval, the approver must view all attachments linked to that form." },
   { title: "Company Logo", checked: false, about: "You can upload the company logo." },
 ]);
 const companyLogo = ref("");
