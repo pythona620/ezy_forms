@@ -283,7 +283,7 @@ def enqueued_add_dynamic_doctype(
                     "public_form_response":public_form_response
                 })
                 if as_web_view == 1:
-                    enqueue(create_qr_for_web_view,form_name=doctype,queue="short")
+                    enqueue(create_qr_for_web_view,form_name=form_short_name,queue="short")
 
             # Create DocType if it doesn't exist
             if not doctype_exists:
