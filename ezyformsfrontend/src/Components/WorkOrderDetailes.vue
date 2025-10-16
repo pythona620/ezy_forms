@@ -1106,7 +1106,7 @@
                           <tr>
                             <th>Item Name</th>
                             <th>Unit of Measure</th>
-                            <th class=" text-center">Actions</th>
+                            <th v-if="isAdmin === true" class=" text-center">Actions</th>
 
                           </tr>
                         </thead>
@@ -1114,7 +1114,7 @@
                           <tr v-for="(item, index) in availableItems" :key="index">
                             <td>{{ item.item_name }}</td>
                             <td>{{ item.item_unit_of_measure }}</td>
-                            <td class="text-center" >
+                            <td  v-if="isAdmin" class="text-center" >
                               <span v-tooltip.top="'Edit'"  @click="openItemModalMaster('edit', item, index)" class="text-center ">
 
                               <i class="bi bi-pencil-fill mx-2 "></i>
@@ -1197,7 +1197,7 @@
                           <th>Contact</th>
                           <th>Email</th>
                           <th>Address</th>
-                          <th class="text-center px-4">Actions</th>
+                          <th v-if="isAdmin" class="text-center px-4">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1209,7 +1209,7 @@
                           <td>
                             {{ vendor.address }}
                           </td>
-                          <td class="text-center">
+                          <td v-if="isAdmin" class="text-center">
                           <span v-tooltip.top="'Edit'" class="font-12 btn-light" @click="NewMasterVendorCreate('edit', vendor)">
                            <i class="bi bi-pencil-fill"></i>
                           </span>
@@ -1345,7 +1345,7 @@ const vendorDetails = ref([
 ]);
 const expense_code = ref('')
 const cost_center = ref('')
-
+const isAdmin = ref(false)
 // { item_name: 'Computer', item_unit_of_measure: 'Unit' },
 // { item_name: 'CPU', item_unit_of_measure: 'Unit' },
 // { item_name: 'Mouse', item_unit_of_measure: 'Unit' },
@@ -1481,8 +1481,9 @@ const l1Fields = [
 ];
 onMounted(() => {
   employeeData.value = JSON.parse(localStorage.getItem('employeeData') || '{}');
-
-  // console.log(employeeData.value, "[[[[[[[[[[[[]]]]]]]]]]]]");
+  
+  isAdmin.value = employeeData.value.is_admin === 1 ? true : false;
+  
   fetchingItemsList()
   fetchingVendorMasterData()
   window.addEventListener('click', handleClickOutside);
