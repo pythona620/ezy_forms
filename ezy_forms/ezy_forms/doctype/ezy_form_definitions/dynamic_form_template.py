@@ -1642,7 +1642,7 @@ def download_filled_form(form_short_name: str, name: str|None,business_unit=None
             file_size = None
             if from_raise_request:
                 size_mb = os.path.getsize(zip_path) / (1024 * 1024)
-                if size_mb > 30:
+                if size_mb > int(frappe.get_value("Ezy Business Unit",business_unit,"file_attachment_limit_for_form")):
                     file_size = 30
                     # Recreate zip with only the 2 PDFs
                     with zipfile.ZipFile(zip_path, 'w') as zipf:

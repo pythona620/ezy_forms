@@ -91,7 +91,7 @@ def send_notifications(request_id, doctype_name, property, cluster, reason, time
 		user_name = frappe.get_value("User", frappe.get_value("WF Workflow Requests", request_id, "requested_by"), "full_name")
 
 		user_role = frappe.get_value("Ezy Employee",frappe.get_value("WF Workflow Requests", request_id, "requested_by"),"designation")
-		
+		file_attachment_limit_for_form=int(frappe.get_value("Ezy Business Unit",property,"file_attachment_limit_for_form"))
 		# Send emails
 		if email_accounts:
 			for email in user_emails:
@@ -109,8 +109,8 @@ def send_notifications(request_id, doctype_name, property, cluster, reason, time
 					frappe.sendmail(
 						recipients=[email],
 						subject="ezyForms Notification",
-						message=email_content['message'],
-						content = email_content['email_template'] or '' + ("<b>Note: </b>Since the file size is more than 30MB, please refer to the attachments in the form." if  file_down and file_down['file_size'] else ''),
+						message=email_content['message'] if email_content['email_template'] else("<br><b>Note: </b>Since the file size is more than 30MB, please refer to the attachments in the form.<br>" if  file_down and file_down['file_size'] else '')+ email_content['message'] ,
+						content = email_content['email_template'] + (f"<b>Note: </b>Since the file size is more than {file_attachment_limit_for_form}MB, please refer to the attachments in the form." if  file_down and file_down['file_size'] else '') if email_content['email_template'] else '',
 						attachments=attach_down
 					)
 				except Exception as e:
