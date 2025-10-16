@@ -833,8 +833,9 @@
                                       </div>
 
                                       <div>
+                                         <!-- @open="fetchingDesignations(index)" -->
                                         <Vue3Select :append-to-body="true" v-if="workflowEditIndex === index"
-                                          :multiple="true" v-model="element.designation" :options="designationOptions"
+                                          :multiple="true" v-model="element.designation" :options="designationOptions" 
                                           label="label" @keydown.enter="stopWorkflowEditing" />
                                         <!-- <input v-if="workflowEditIndex === index" :ref="el => setWorkflowInputRef(el, index)"
                           v-model="element.designation" class="form-control form-control-sm"
@@ -1593,7 +1594,7 @@ function fetchingVendorMasterData() {
 
   axiosInstance.get(apis.resource + doctypes.ezyVendors, { params: queryParams })
     .then(response => {
-      console.log(response.data);
+      // console.log(response.data);
       vendorMasterList.value = response.data.map(vendor => ({
         vendor_name: vendor.vendor_name,
         gst_number: vendor.gst_number,
@@ -3128,16 +3129,37 @@ function fetchingWork() {
 
 function WfroleMatrix() {
 
+  // axiosInstance
+  //   .get(apis.resource + doctypes.WFRoleMatrix + `/${employeeData.value.company_field}`)
+  //   .then((res) => {
+  //     if (res.data) {
+  //       designationOptions.value = [
+  //         ...new Set(res.data.users.map((user) => user.role_name)),
+  //       ];
+  //     }
+  //   })
+  //   .catch((error) => {
+  //     console.error("Error fetching designations data:", error);
+  //   });
+
+     let data = { 
+    property: employeeData.value.company_field // Business unit (property) selected from filters
+  };
+
   axiosInstance
-    .get(apis.resource + doctypes.WFRoleMatrix + `/${employeeData.value.company_field}`)
+    .post(apis.addDesignationroles, data) 
     .then((res) => {
-      if (res.data) {
+      //  Check if backend returned "message" key with data
+      if (res.message) {
+        //  Store the result in DesignationList (used in UI)
         designationOptions.value = [
-          ...new Set(res.data.users.map((user) => user.role_name)),
-        ];
+          ...new Set(res.message.map((user) => user.role)),
+        ];;
+        // console.log(designationOptions.value);
       }
     })
     .catch((error) => {
+      //  Handle errors gracefully
       console.error("Error fetching designations data:", error);
     });
 }
@@ -3848,4 +3870,118 @@ function fetchCostCenters() {
 .bi-trash-fill{
  cursor: pointer;
 }
+:deep(.vs__selected) {
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 16px;
+  padding: 0px 8px;
+  font-size: 12px;
+}
+
+:deep(.vs__selected-options) {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 1px;
+}
+
+:deep(.vs__dropdown-toggle) {
+  height: auto !important;
+}
+
+
+:deep(.vs__deselect) svg {
+  color: #000;
+  background-color: #f1f1f1 ;
+  border-radius: 50%;
+  margin-left: 4px;
+  margin-top: 8px;
+  font-size: 5px !important;
+
+  padding: 4px;
+
+}
+
+:deep(.vs__deselect:hover) {
+  color: #000;
+}
+.vue3-select__dropdown,
+.vue3-select-dropdown {
+  z-index: 9999 !important;
+}
+
+/* Vue 3 SFC scoped style */
+::v-deep(.vs__dropdown-toggle) {
+  border: 1px solid #ccc !important;
+  border-radius: 6px;
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+  transition: border-color 0.15s ease;
+  padding: 2px;
+
+}
+
+/* when dropdown is open or focused */
+::v-deep(.vs__dropdown-toggle.vs--open),
+::v-deep(.vs__dropdown-toggle:focus),
+::v-deep(.vs__dropdown-toggle:focus-within) {
+  border: 1px solid #1b14df !important;
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+  padding:2px;
+}
+/* Placeholder styling for Vue3Select */
+::v-deep(.vs__search::placeholder) {
+  color: #9ca3af !important;  /* grey placeholder text */
+  font-size: 13px !important; /* adjust size */
+  opacity: 1;                 /* make sure it’s visible */
+  padding: 2px 6px;
+}
+
+
+
+
+.disgnationlist_div{
+  border: 1px solid #CCCCCC !important;
+  border-radius: 6px;
+  
+  // padding: 0px 4px;
+}
+::v-deep(.vs__selected) {
+  // min-width: 100px; /* adjust per tag */
+  margin: 1px;
+  max-height: 30px;
+}
+::v-deep(.vs__selected-options) {
+  max-height: 130px; /* 4 rows * 40px per tag */
+  overflow-y: auto;
+  flex-wrap: wrap;
+}
+/* Selected tags container */
+::v-deep(.vs__selected-options) {
+  display: flex;
+  max-width: calc(4 * 120px); /* show 4 tags */
+  overflow-x: auto;            /* scroll only if needed */
+  scrollbar-width: thin;       /* Firefox */
+  white-space: nowrap;          /* prevent wrapping */
+}
+
+/* Hide scrollbar by default */
+::v-deep(.vs__selected-options::-webkit-scrollbar) {
+  display: none;
+}
+
+/* Show scrollbar on hover */
+::v-deep(.vs__selected-options:hover::-webkit-scrollbar) {
+  display: block;
+}
+
+/* Optional: Firefox */
+::v-deep(.vs__selected-options) {
+  scrollbar-color: #ccc transparent;
+  scrollbar-width: thin;
+}
+
 </style>
