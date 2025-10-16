@@ -766,7 +766,7 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from "vue";
+import { ref, watch, computed,onMounted } from "vue";
 import ApproverPreview from "./ApproverPreview.vue";
 import { useRoute, useRouter } from "vue-router";
 import axiosInstance from "../shared/services/interceptor";
@@ -882,12 +882,18 @@ function handleFieldChanges(updatedChanges) {
   changedFields.value = updatedChanges;
   // You can store or process these values as needed
 }
+const attachmentViewRequired=ref("");
+
+onMounted(() => {
+  attachmentViewRequired.value = sessionStorage.getItem("attachmentViewRequired");
+});
+
 const attachmentsReady = ref(false);
 const handleApprove = () => {
   // console.log(attachmentsReady.value);
 
   // 🧩 Check if all attachments are previewed before approval
-  if (!attachmentsReady.value) {
+  if (attachmentViewRequired.value == 1 && !attachmentsReady.value) {
     showDefault("⚠️ Please preview all attachments before approving");
     return;
   }
