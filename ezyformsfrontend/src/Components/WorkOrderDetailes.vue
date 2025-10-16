@@ -1587,29 +1587,28 @@ function addVendorModal() {
   new bootstrap.Modal(document.getElementById('vendorModal')).show();
 }
 function fetchingVendorMasterData() {
-  let queryParams = {
-    fields: JSON.stringify(['vendor_name', 'mail_id', 'contact_number', 'gst_number', 'address']),
-    limit_page_length: 'None'
-  }
+      let queryParams = {
+        fields: JSON.stringify(['vendor_name', 'mail_id', 'contact_number', 'gst_number', 'address']),
+        limit_page_length: 'None',
+        doctype: doctypes.ezyVendors
+      }
 
-  axiosInstance.get(apis.resource + doctypes.ezyVendors, { params: queryParams })
-    .then(response => {
-      // console.log(response.data);
-      vendorMasterList.value = response.data.map(vendor => ({
-        vendor_name: vendor.vendor_name,
-        gst_number: vendor.gst_number,
-        phone_number: vendor.contact_number,
-        mail_id: vendor.mail_id,
-        address: vendor.address,
-        selected: false
-      }));
-
-
-    })
-    .catch(error => {
-      console.error('Error fetching items:', error);
-      showError('Failed to fetch items.');
-    });
+      axiosInstance.get(apis.GetDoctypeData, { params: queryParams })
+          .then((res) => {
+              if (res.message.data) {
+                          vendorMasterList.value = res.message.data.map(vendor => ({
+                  vendor_name: vendor.vendor_name,
+                  gst_number: vendor.gst_number,
+                  phone_number: vendor.contact_number,
+                  mail_id: vendor.mail_id,
+                  address: vendor.address,
+                  selected: false
+                }));
+            }
+        })
+        .catch((error) => {
+            console.error("Error fetching designations data:", error);
+        });
 }
 // const submitComparison = () => {
 //   const vendor_details = vendorDetails.value.map(vendor => {
@@ -2930,23 +2929,28 @@ const deleteMasterItem = (item, index) => {
 
 
 function fetchingItemsList() {
-  let queryParams = {
-    fields: JSON.stringify(['item_name', 'item_unit_of_measure','name']),
-    limit_page_length: 'None'
-  }
-  axiosInstance.get(apis.resource + doctypes.ezyItems, { params: queryParams })
-    .then(response => {
-      availableItems.value = response.data.map(item => ({
-        item_name: item.item_name,
-        item_unit_of_measure: item.item_unit_of_measure,
-        name:item.name,
-        selected: false
-      }));
-      itemOptions.value = availableItems.value.map(item => item.item_name);
-    })
-    .catch(error => {
-      console.error('Error fetching items:', error);
-    });
+        let queryParams = {
+          fields: JSON.stringify(['item_name', 'item_unit_of_measure','name']),
+          limit_page_length: 'None',
+          doctype:doctypes.ezyItems,
+        }
+
+        axiosInstance.get(apis.GetDoctypeData, { params: queryParams })
+        .then((res) => {
+            if (res.message.data) {
+                availableItems.value = res.message.data.map(item => ({
+              item_name: item.item_name,
+              item_unit_of_measure: item.item_unit_of_measure,
+              name:item.name,
+              selected: false
+            }));
+            itemOptions.value = availableItems.value.map(item => item.item_name);
+
+            }
+        })
+        .catch((error) => {
+            console.error("Error fetching designations data:", error);
+        });
 }
 
 // // Approver data
@@ -3086,6 +3090,7 @@ const getRejectLabel = (designation) => {
   return levelIndex !== -1 ? `Level ${levelIndex + 1}` : designation;
 };
 function fetchingWork() {
+
   axiosInstance
     .get(apis.resource + doctypes.wfRoadmap + `/${employeeData.value.company_field}_${'VENDOR_COMPARISON'}`)
     .then((response) => {
