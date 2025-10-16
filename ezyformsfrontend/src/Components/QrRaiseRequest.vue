@@ -399,6 +399,9 @@ function initializeTableRows() {
     }
 }
 
+function handleTableData(data) {
+  childtablesData.value = data;
+}
 const handleFileUpload = (event, row, fieldname) => {
     const file = event.target.files[0];
     if (file) {
@@ -497,7 +500,7 @@ async function raiseRequestSubmission() {
     // Append all child tables
     childEntries.forEach(([tableName, rows]) => {
         if (rows && rows.length) {
-            form[tableName.toLowerCase()] = rows;
+            form[tableName.toLowerCase().replace(/ /g,"_")] = rows;
         } else {
             console.warn(`⚠ Skipping empty child table: ${tableName}`);
         }

@@ -1,6 +1,6 @@
 <template>
   <div class="table-responsive mb-2">
-    <table class="global-table border-0 position-relative" :class="props.class">
+    <table class="global-table position-relative" :class="props.class">
       <thead class="position-sticky">
         <tr>
           <!-- <th v-if="isCheckbox == 'true'">
@@ -122,6 +122,7 @@
                 </span>
               </span>
               <span v-else-if="column.td_key === 'as_web_view'">
+                <i :class="[row.as_web_view == 1 ? 'bi bi-unlock text-success' : 'bi bi-lock text-danger','fw-bold me-1']"></i>
                 {{ row.as_web_view == 1 ? 'Public' : 'Private' }}
               </span>
 
@@ -230,7 +231,7 @@
 
             <!-- </td> -->
             <td v-if="(isAction == 'true' && viewType === 'viewPdf') || actionType === 'dropdown' || download === 'true' || isRequest === 'true' || ( isAction === 'true' && view === 'edit')"  class="dropdown_sticky">
-            <div v-if="isAction == 'true' && viewType === 'viewPdf'" class="text-center align-middle">
+            <div v-if="isAction == 'true' && viewType === 'viewPdf'" :class="['align-middle',QR_Code === 'true' ? '' : 'text-center']">
               <span v-if="raiseRequest === 'true'" class="px-2">
                 <i v-tooltip.top="'Raise Request'" class="bi bi-send eye-cursor mx-1"
                   @click="handleCellClick(row, rowIndex, 'raiseRequest')"></i>
@@ -239,7 +240,7 @@
                 <i v-tooltip.top="'View'" @click="handleCellClick(row, rowIndex, 'view')"
                   class="ri-eye-line eye-cursor"></i>
               </span>
-              <span v-if="QR_Code === 'true'" class="px-2">
+              <span v-if="QR_Code === 'true' && row.as_web_view === 1 " class="px-2">
                 <i @click="handleCellClick(row, rowIndex, 'QR Code')"
                   class="bi bi-qr-code-scan eye-cursor"></i>
               </span>
@@ -430,7 +431,7 @@ const props = defineProps({
     type: String,
   },
   QR_Code:{
-    type:Boolean,
+    type:String,
   },
   raiseRequest: {
     type: String
@@ -914,8 +915,21 @@ td.fixed-column {
     white-space: nowrap;
     color: var(--muted) !important;
     font-size: var(--twelve);
+    border-left: 1px solid #ececec !important;
+    
   }
+  tr:nth-child(even) td {
+  background-color: #f9f9f9; /* Light gray background for even rows */
 }
+
+}
+.global-table th {
+    background-color: #ededed !important;
+    text-align: left;
+    color: #737373;
+  font-size: 12px;
+}
+
 
 .dropdown-menu {
   position: absolute;
@@ -955,12 +969,6 @@ td.fixed-column {
   // border-bottom: 1px solid #eeeeee !important;
 }
 
-.global-table th {
-  background-color: #f2f2f2 !important;
-  text-align: left;
-  color: #999999;
-  font-size: 12px;
-}
 
 .global-table thead {
   th {
@@ -1053,7 +1061,7 @@ th:first-child {
   }
 
   .global-table td {
-    border-bottom: 1px solid var(--border-bottom) !important;
+    // border-bottom: 1px solid var(--border-bottom) !important;
     padding: 4px 10px;
   }
 }
@@ -1064,7 +1072,7 @@ th:first-child {
   }
 
   .global-table td {
-    border-bottom: 1px solid var(--border-bottom) !important;
+    // border-bottom: 1px solid var(--border-bottom) !important;
     padding: 6px 10px;
   }
 }
@@ -1075,7 +1083,7 @@ th:first-child {
   }
 
   .global-table td {
-    border-bottom: 1px solid var(--border-bottom) !important;
+    // border-bottom: 1px solid var(--border-bottom) !important;
     padding: 10px 10px;
   }
 }

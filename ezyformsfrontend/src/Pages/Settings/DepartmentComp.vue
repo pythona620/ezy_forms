@@ -184,11 +184,12 @@ function clearModalData() {
 }
 
 const tableheaders = ref([
+    { th: "Name", td_key: "name" },
     { th: "Department Code", td_key: "department_code" },
     { th: "Department Name", td_key: "department_name" },
-    { th: "Business Unit", td_key: "business_unit" },
 ])
 const fieldMapping = ref({
+    name: { type: "input" },
     department_code: { type: "input" },
     department_name: { type: "input" },
     form_category: { type: "select", options: ["Software", "Hardware"] },
@@ -443,7 +444,7 @@ function createDepart() {
         CreateDepartments.value.ezy_departments_items = categoriesDataEdit.value.ezy_departments_items;
         const dataObj = {
             ...CreateDepartments.value,
-            department_code: `${CreateDepartments.value.department_code}-${CreateDepartments.value.department_name}`,
+            department_code: `${CreateDepartments.value.department_code}`,
             doctype: doctypes.departments,
 
         }
