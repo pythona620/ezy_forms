@@ -678,6 +678,7 @@ const timeout = ref(null);
 
 const fullData = ref([]);
 const filteredData = ref([]);
+const VendorComparison=ref("");
 
 function fetchDepartmentDetails() {
   const userDetails = JSON.parse(localStorage.getItem('employeeData'));
@@ -730,6 +731,15 @@ const queryParams = {
     totalRecords.value = filteredData.value.length;
     filterObj.value.limit_start = 0;
     tableData.value = filteredData.value.slice(0, filterObj.value.limitPageLength);
+    
+    if (props.id === "allforms") {
+      const hasVendorComparison = fullData.value.some(
+        (item) => item.form_name === "Vendor Comparison"
+      );
+      VendorComparison.value = hasVendorComparison;
+      sessionStorage.setItem("VendorComparison", hasVendorComparison);
+    }
+    
   })
     .catch((error) => {
       console.error(error);

@@ -108,6 +108,7 @@ const tableData = ref([
   { title: "Take Acknowledgement and Signature while Login", checked: false, about: "A message will be displayed at the time of Sign in by the user to Acknowledge and Sign at the time of login." },
   { title: "Take Signature while Sign Up", checked: false, about: "When enabled user need to submit his signature before doing any activity in the application." },
   { title: "Allow Approver to Edit Form?", checked: false, about: "When enabled approver can edit the form." },
+  { title: "Form Attachment View Required Before Approval", checked: false, about:"When form approval, the approver must view all attachments linked to that form." },
   { title: "Company Logo", checked: false, about: "You can upload the company logo." },
 ]);
 const companyLogo = ref("");
@@ -169,6 +170,10 @@ const handleToggle = (index) => {
             ? "Are you sure you want to enable Approver Edit Form?"
             : "Are you sure you want to disable Approver Edit Form?";
     } else if (index === 8) {
+        confirmMessage.value = isChecked
+            ? "Are you sure you want to enable File Attachment View Required?"
+            : "Are you sure you want to disable File Attachment View Required?";
+    } else if (index === 9) {
         viewImage.value = true;
     }
 
@@ -308,8 +313,7 @@ const confirmAction = () => {
             .catch(() => {
                 showError("Failed to update Signiture while Sig Up");
             });
-    }
-    else if (index === 7) {
+    } else if (index === 7) {
         axiosInstance
             .put(`${apis.resource}${doctypes.wfSettingEzyForms}/${encodeURIComponent(docName)}`, {
                 allow_approver_to_edit_form: newStatus,
@@ -324,8 +328,22 @@ const confirmAction = () => {
             .catch(() => {
                 showError("Failed to update Approver Edit Form");
             });
-        }
-     else if (index === 8) {
+    } else if (index === 8) {
+        axiosInstance
+            .put(`${apis.resource}${doctypes.wfSettingEzyForms}/${encodeURIComponent(docName)}`, {
+                attachment_view_required: newStatus,
+            })
+            .then(() => {
+                showSuccess(`File Attachment View Required ${newStatus === 0 ? "Disabled" : "Enabled"} Successfully!`, { autoClose: 700 });
+                sessionStorage.setItem("attachmentViewRequired", newStatus);
+                const modal = bootstrap.Modal.getInstance(document.getElementById('EnableDisable'));
+                    modal.hide();
+                    BussinesUnit()
+            })
+            .catch(() => {
+                toast.error("Failed to update File Attachment View Required");
+            });
+    } else if (index === 9) {
         if (!selectedFile.value) return;
         const formData = new FormData();
         formData.append("file", selectedFile.value);
@@ -362,7 +380,7 @@ const confirmAction = () => {
 
 function BussinesUnit() {
     const queryParamse = {
-        fields: JSON.stringify(["name", "bu_logo", "bu_code", "send_form_as_a_attach_through_mail", "welcome_mail_to_employee", "send_daily_alerts", "is_acknowledge", "signature_required","allow_approver_to_edit_form"]),
+        fields: JSON.stringify(["name", "bu_logo", "bu_code", "send_form_as_a_attach_through_mail", "welcome_mail_to_employee", "send_daily_alerts", "is_acknowledge", "signature_required","allow_approver_to_edit_form","attachment_view_required"]),
         filters:JSON.stringify([["name",'=',Bussines_unit.value]]),
         doctype:doctypes.wfSettingEzyForms,
         limit_page_length:"none",
@@ -383,8 +401,9 @@ function BussinesUnit() {
             const signature_required = res.message.data[0].signature_required;
             tableData.value[6].checked = signature_required == 1;
             const allow_approver_to_edit_form = res.message.data[0].allow_approver_to_edit_form;
-            console.log(allow_approver_to_edit_form,'allow_approver_to_edit_form');
             tableData.value[7].checked = allow_approver_to_edit_form == 1;
+            const attachment_view_required = res.message.data[0].attachment_view_required;
+            tableData.value[8].checked = attachment_view_required == 1;
         }
     }).catch((error) => {
         console.error("Error fetching ezyForms data:", error);

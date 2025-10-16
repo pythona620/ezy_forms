@@ -21,8 +21,9 @@ def create_qr_for_web_view(form_name):
     }).insert(ignore_permissions=True)
 
     # Build the QR link
-    base_url = frappe.get_value("Global Site Settings","Global Site Settings","site")
+    # base_url = frappe.get_value("Global Site Settings","Global Site Settings","site")
     # base_url = frappe.utils.get_url()
+    base_url = get_url()
     qr_link = f"{base_url}/ezyformsfrontend#/qrRaiseRequest?{form_name.lower().replace(' ', '-')}?&ftid={action_token}"
 
     # Update the Ezy Form Definitions record
@@ -38,7 +39,8 @@ def qr_code_to_new_form(token, save_doc=None):
  
     # Get form definition details
     data = frappe.get_doc("Ezy Form Definitions", {"name": form_name}).as_dict()
- 
+    if data.get("enable") == 0:
+        frappe.throw("This form is disabled. Please contact administrator.")
     # Case 1: If save_doc is NOT provided → return form definition only
     if not save_doc:
         return {
@@ -72,7 +74,7 @@ def qr_code_to_new_form(token, save_doc=None):
     
     doctype_name = data.get("name")
     reason = "Request Raised via QR Code"  
-    parent_for_wf_level_setup = "_".join(data.get("business_unit").split()).upper() + "_" + "_".join(data.get("form_name").split()).upper().replace(" ", "_")
+    parent_for_wf_level_setup = "_".join(data.get("business_unit").split()).upper() + "_" + "_".join(data.get("name").split()).upper().replace(" ", "_")
     
     assign_to_users = frappe.db.get_list("WF Level Setup",{"parent":parent_for_wf_level_setup,"level":1,"parenttype":"WF Roadmap"},pluck="role",ignore_permissions=True)
     

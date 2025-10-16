@@ -421,7 +421,8 @@
                                   data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight"
                                   aria-controls="offcanvasRight" @click="AddDesignCanvas(blockIndex)">
                                   <img src="../../assets/oui_app-users-roles.svg" alt="Add" class="me-1" />
-                                  Add Approvers
+                                  {{ blockIndex === 0 ? 'Add Requestors' :'Add Approvers' }}
+                                  
                                 </button>
 
                                 <!-- Edit Designation Button (only when roles are present for that block) -->
@@ -1524,13 +1525,16 @@
                 <!-- Select All -->
                 <div class="form-check ps-1 d-flex align-items-center m-0">
                   <input
-                    type="checkbox"
-                    id="selectAll"
-                    :checked="isAllSelected"
-                    @change="toggleSelectAll"
-                    class="form-check-input me-2 designationCheckBox"
-                  />
-                  <label for="selectAll" class="form-check-label SelectallDesignation mt-2 fw-bold">Select all designation ({{ filteredDesignationList.length }})</label>
+            type="checkbox"
+            id="selectAll"
+            
+            :checked="isAllSelected"
+            @change="toggleSelectAll"
+            class="form-check-input me-2 designationCheckBox"
+          />
+          <label for="selectAll" class="form-check-label SelectallDesignation mt-2 fw-bold">
+            Select all designation ({{ filteredDesignationList.length }})
+          </label>
                 </div>
 
                 <!-- Show HODs -->
@@ -1548,6 +1552,8 @@
 
 
               </div>
+              <!-- {{ designationValue }}
+              {{filteredDesignationList}} -->
             <Vue3Select v-if="DesignationList.length" :multiple="true" v-model="designationValue" 
             :options="filteredDesignationList" :close-on-select="false" :clear-search-on-select="true"
              placeholder="Search & Select Designations" label="label"  />
@@ -2221,34 +2227,51 @@ const lowerApproverLevels = computed(() => {
 // };
 
 
-
 const filteredDesignationList = computed(() => {
   let list = DesignationList.value;
 
-  // Show only HODs
   if (showHods.value) {
-    list = list.filter((item) => item.is_hod === 1);
+    list = list.filter(item => item.is_hod === 1);
   }
 
-  // Search filter
-  if (searchDesignation.value.trim()) {
-    list = list.filter((item) =>
+  if (searchDesignation.value?.trim()) {
+    list = list.filter(item =>
       item.role.toLowerCase().includes(searchDesignation.value.toLowerCase())
     );
   }
- list = list.filter(
-    (item) => !designationValue.value.includes(item.role)
-  );
-  // Sort selected first
-  list = list.sort((a, b) => {
-    const aSelected = designationValue.value.includes(a.role);
-    const bSelected = designationValue.value.includes(b.role);
-    if (aSelected === bSelected) return 0;
-    return aSelected ? -1 : 1;
-  });
 
-  return list.map((item) => item.role);
+  // Remove already selected items for display only
+  list = list.filter(item => !designationValue.value.includes(item.role));
+
+  return list.map(item => item.role);
 });
+
+
+// const filteredDesignationList = computed(() => {
+//   let list = DesignationList.value;
+
+//   // Show only HODs if toggled
+//   if (showHods.value) {
+//     list = list.filter(item => item.is_hod === 1);
+//   }
+
+//   // Search filter
+//   if (searchDesignation.value?.trim()) {
+//     list = list.filter(item =>
+//       item.role.toLowerCase().includes(searchDesignation.value.toLowerCase())
+//     );
+//   }
+
+//   // Remove already selected items from the dropdown
+//   list = list.filter(item => !designationValue.value.includes(item.role));
+
+//   // Sort remaining items (optional)
+//   list = list.sort((a, b) => a.role.localeCompare(b.role));
+
+//   // Return array of strings for Vue3Select
+//   return list.map(item => item.role);
+// });
+
 
 
 // const filteredDesignationList = computed(() => {
@@ -3248,33 +3271,77 @@ const handleRemove = (option) => {
     filterObj.value.accessible_departments = [];
   }
 };
-
 const isAllSelected = computed(() => {
-  return (
-    filteredDesignationList.value.length > 0 &&
-    filteredDesignationList.value.every((role) =>
-      designationValue.value.includes(role)
-    )
-  );
+  return designationValue.value.length === DesignationList.value.length;
 });
+// Toggle Select All
+// Toggle Select All
+function toggleSelectAll(event) {
+  if (event.target.checked) {
+    // Select all items currently visible in the filtered dropdown
+    const itemsToSelect = DesignationList.value
+      .filter(item => {
+        // Respect HOD filter
+        if (showHods.value && item.is_hod !== 1) return false;
+
+        // Respect search filter
+        if (searchDesignation.value?.trim() && !item.role.toLowerCase().includes(searchDesignation.value.toLowerCase())) {
+          return false;
+        }
+
+        return true;
+      })
+      .map(item => item.role);
+
+    designationValue.value = itemsToSelect;
+  } else {
+    // Unselect all visible items
+    const itemsToRemove = DesignationList.value
+      .filter(item => {
+        if (showHods.value && item.is_hod !== 1) return false;
+        if (searchDesignation.value?.trim() && !item.role.toLowerCase().includes(searchDesignation.value.toLowerCase())) {
+          return false;
+        }
+        return true;
+      })
+      .map(item => item.role);
+
+    // Remove only the visible items from the selection
+    designationValue.value = designationValue.value.filter(role => !itemsToRemove.includes(role));
+  }
+}
+
+
+
+// Toggle select all
+// function toggleSelectAll(event) {
+//   if (event.target.checked) {
+//     console.log(designationValue.value);
+//     // Select all
+//     designationValue.value = [...DesignationList.value];
+//   } else {
+//     // Unselect all
+//     designationValue.value = [];
+//   }
+// }
 function clearall_designations(){
   designationValue.value = []
 }
 // ✅ Toggle select all
-function toggleSelectAll(event) {
-  if (event.target.checked) {
-    // Add all filtered roles
-    const newSelection = [
-      ...new Set([...designationValue.value, ...filteredDesignationList.value]),
-    ];
-    designationValue.value = newSelection;
-  } else {
-    // Remove only filtered roles
-    designationValue.value = designationValue.value.filter(
-      (role) => !filteredDesignationList.value.includes(role)
-    );
-  }
-}
+// function toggleSelectAll(event) {
+//   if (event.target.checked) {
+//     // Add all filtered roles
+//     const newSelection = [
+//       ...new Set([...designationValue.value, ...filteredDesignationList.value]),
+//     ];
+//     designationValue.value = newSelection;
+//   } else {
+//     // Remove only filtered roles
+//     designationValue.value = designationValue.value.filter(
+//       (role) => !filteredDesignationList.value.includes(role)
+//     );
+//   }
+// }
 
 function handleSingleSelect() {
   if (!isAllSelected.value && designationValue.value.length === 1) {

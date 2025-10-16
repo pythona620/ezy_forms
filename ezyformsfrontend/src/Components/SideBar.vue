@@ -169,7 +169,7 @@
                                 {{ department.name }}
                             </li>
                         </router-link>
-                         <router-link to="/settings/vendorcomparison" class="text-decoration-none text-black">
+                         <router-link v-if="VendorComparison" to="/settings/vendorcomparison" class="text-decoration-none text-black">
                             <li><i v-tooltip.right="'Vendor'" class="bi-icon fs-6 bi bi-file-earmark-richtext me-3"></i>Vendor Comparison</li>
                         
                         </router-link>
@@ -376,6 +376,7 @@ const deptartmentData = ref([])
 const username = ref('');
 const userAdmin = ref('');
 const is_admin = ref('');
+const VendorComparison=ref("");
 
 onMounted(() => {
     // gettingDepartmentNames()
@@ -455,6 +456,8 @@ function gettingDepartmentNames(){
                         name: department.department_name,
                         route: department.name,
                     }));
+
+                    VendorComparison.value = sessionStorage.getItem("VendorComparison") === "true";
     })
     .catch((error) => {
       console.log(error);

@@ -421,6 +421,7 @@ const filterObj = ref({
     limitPageLength: 100,
 });
 const allow_approver_to_edit_form = ref('')
+const attachmentViewRequired = ref('')
 const buFullData = ref([])
 const EmpCompony = ref([]);
 const selectedScore = ref("");
@@ -637,7 +638,7 @@ function passwordChange() {
 }
 const ezyForms = () => {
     const queryParams = {
-        fields: JSON.stringify(["name", "bu_code","allow_approver_to_edit_form"]),
+        fields: JSON.stringify(["name", "bu_code","allow_approver_to_edit_form","attachment_view_required"]),
         doctype:doctypes.wfSettingEzyForms,
         limit_page_length:"none",
 
@@ -655,6 +656,8 @@ const ezyForms = () => {
             if (currentBU) {
                
                 allow_approver_to_edit_form.value = currentBU.allow_approver_to_edit_form;
+                attachmentViewRequired.value = currentBU.attachment_view_required;
+                sessionStorage.setItem("attachmentViewRequired", currentBU.attachment_view_required);
                 sessionStorage.setItem("allow_approver_to_edit_form", currentBU.allow_approver_to_edit_form);
             }
         }
@@ -705,6 +708,8 @@ watch(business_unit, (newBu, oldBu) => {
     const currentBU = buFullData.value.find((company) => company.bu_code === newBu);
     if (currentBU) {
         allow_approver_to_edit_form.value = currentBU.allow_approver_to_edit_form;
+        attachmentViewRequired.value = currentBU.attachment_view_required;
+        sessionStorage.setItem("attachmentViewRequired", currentBU.attachment_view_required);
         sessionStorage.setItem("allow_approver_to_edit_form", currentBU.allow_approver_to_edit_form);
     }
     if (route.path.includes('forms') && newBu !== oldBu) {

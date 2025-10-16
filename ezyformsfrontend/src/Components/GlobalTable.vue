@@ -1,7 +1,7 @@
 <template>
   <div class="table-responsive mb-2">
     <table class="global-table position-relative" :class="props.class">
-      <thead class="position-sticky">
+      <thead class="thead-sticky">
         <tr>
           <!-- <th v-if="isCheckbox == 'true'">
 						<input type="checkbox" class="checkbox form-check-input" @change="SelectedAll()" />
@@ -17,7 +17,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr class="mb-1" v-if="isFiltersoption == 'true'">
+        <tr class="mb-1 filters-row position-sticky top-10 bg-white z-9" v-if="isFiltersoption == 'true'">
           <td></td>
 
           <td class="p-1" v-for="(column, index) in tHeaders" :key="index">
@@ -822,6 +822,7 @@ watch(
 // .tooltip-text:hover::after {
 //   opacity: 1;
 // }
+
 .raiseRequest {
   background-color: transparent;
   border-bottom: 1px solid blue;
@@ -970,12 +971,29 @@ td.fixed-column {
 }
 
 
-.global-table thead {
-  th {
-    position: sticky;
-    top: -1px;
-  }
+// .global-table thead {
+//   th {
+//     position: sticky;
+//     top: 1px;
+//   }
+// }
+.thead-sticky {
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 15;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
+
+/* 🧭 Make filter row sticky below header */
+.filters-row {
+  position: sticky;
+  top: 34px; /* Adjust depending on your thead height */
+  background: white;
+  z-index: 14;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
 
 .global-table tbody tr:hover {
   background-color: #f2f2f2;
