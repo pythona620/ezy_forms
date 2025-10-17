@@ -669,7 +669,7 @@ import "vue3-toastify/dist/index.css";
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
 import { domain } from "../../shared/apiurls";
 import { useRouter,useRoute } from "vue-router";
-import { showError, showSuccess, showWarning } from "../../shared/services/toast";
+import { showError, showSuccess, showWarning,showDefault } from "../../shared/services/toast";
 
 const router = useRouter();
 const route = useRoute();
@@ -1777,9 +1777,13 @@ function toggleFunction(rowData) {
   document.getElementById('empActionText').innerText = empActionText.value;
   document.getElementById('empRowName').innerText = rowData.emp_name;
 
-  const modal = new bootstrap.Modal(document.getElementById('EmployeeToggleModal'));
-  modal.show();
-}
+  if ((selectedEmpRow.value.reporting_to !== '' && selectedEmpRow.value.reporting_to !== null) || selectedEmpRow.value.is_high_level === 1) {
+      const modal = new bootstrap.Modal(document.getElementById('EmployeeToggleModal'));
+      modal.show();
+  } else {
+    showDefault('Please Add the Reports To before Disable employee.');
+  }
+  }
 
 function confirmEmployeeToggle() {
   const isEnabled = selectedEmpRow.value.enable === '1' || selectedEmpRow.value.enable === 1;

@@ -632,7 +632,7 @@ import { toast } from "vue3-toastify";
 import "vue3-toastify/dist/index.css";
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
 import { domain } from "../../shared/apiurls";
-import { showError, showSuccess, showWarning } from "../../shared/services/toast";
+import { showError, showSuccess, showWarning,showDefault } from "../../shared/services/toast";
 
 const businessUnit = computed(() => {
   return EzyBusinessUnit.value;
@@ -1668,8 +1668,12 @@ function toggleFunction(rowData) {
   document.getElementById('empActionText').innerText = empActionText.value;
   document.getElementById('empRowName').innerText = rowData.emp_name;
 
-  const modal = new bootstrap.Modal(document.getElementById('EmployeeToggleModal'));
-  modal.show();
+  if ((selectedEmpRow.value.reporting_to !== '' && selectedEmpRow.value.reporting_to !== null) || selectedEmpRow.value.is_high_level === 1) {
+      const modal = new bootstrap.Modal(document.getElementById('EmployeeToggleModal'));
+      modal.show();
+  } else {
+    showDefault('Please Add the Reports To before Enable employee.');
+  }
 }
 
 function confirmEmployeeToggle() {
