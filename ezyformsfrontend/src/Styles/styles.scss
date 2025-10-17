@@ -351,3 +351,9 @@ body {
   font-size: 14px !important; /* or any size you want */
   padding: 5px !important;
 }
+.custom-toast-padding {
+  padding: 10px !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
