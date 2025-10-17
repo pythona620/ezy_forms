@@ -95,7 +95,7 @@
             <div class="card p-3 shadow-sm team-card">
               <div class="d-flex align-items-center">
                 <!-- Profile Image -->
-                <img :src="employee.profile_image || defaultImage" class="rounded-circle me-3" alt="Profile Image"
+               <img :src="employee.profile_image || defaultImage" :class="[employee.profile_image ? 'rounded-circle' : '', 'me-3']" alt="Profile Image"
                   width="80" height="80" />
 
                 <div>
