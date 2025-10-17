@@ -324,6 +324,10 @@
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="viewEmployeeLabel">Employee Data</h5>
+            <div class="form-check d-flex justify-content-center w-25 form-switch ">
+              <input class="form-check-input shadow-none" v-model="createEmployee.enable" :checked="createEmployee.enable == 1" true-value="1" false-value="0" type="checkbox" role="switch" />
+              <label class="font-13 ms-2 mt-1 fw-bold" for="is_high_level">{{ createEmployee.enable  == '1' ? 'Enabled' : 'Disabled' }}</label>
+            </div>
             <button type="button" class="btn-close" data-bs-dismiss="modal" @click="cancelCreate"
               aria-label="Close"></button>
           </div>
@@ -331,7 +335,14 @@
             <div class="container-fluid">
               <div class="row">
                 <div class="col">
-                  <label class="font-13 ps-1" for="emp_name">Emp Name<span class="text-danger ps-1">*</span></label>
+                  <div class="d-flex justify-content-between">
+                    <label class="font-13 ps-1" for="emp_name">Emp Name<span class="text-danger ps-1">*</span></label>
+                    <div class="me-2">
+                      <input type="checkbox" id="is_admin" :true-value='1' :false-value='0'
+                        v-model="createEmployee.is_admin" class="form-check-input mt-1 input-border" />
+                      <label class="font-13 ms-2 " for="is_admin">Is Admin</label>
+                    </div>
+                  </div>
                   <FormFields class="mb-3" tag="input" type="text" name="emp_name" id="emp_name"
                     placeholder="Enter Emp Name" v-model="createEmployee.emp_name" @input="validateEmpName" />
                   <label class="font-13 ps-1" for="emp_code">Emp ID<span class="text-danger ps-1">*</span></label>
@@ -372,8 +383,15 @@
                       {{ emailError }}
                     </p>
                   </div>
+                  <div class="d-flex justify-content-between">
                   <label class="font-13 ps-1 fw-medium" for="dept">Departments<span
                       class="text-danger ps-1">*</span></label>
+                    <div class="me-2">
+                      <input type="checkbox" id="isHOD" :true-value="1" :false-value="0" v-model="createEmployee.is_hod"
+                        class="form-check-input mt-1 input-border border-1" />
+                      <label class="font-13 ms-2 " for="isHOD">Is HOD</label>
+                    </div>
+                  </div>
 
                   <VueMultiselect v-model="createEmployee.department" :options="departmentsList" :multiple="false" @update:modelValue="onDepartmentChange"
                     :close-on-select="true" :clear-on-select="false" :preserve-search="false"
@@ -427,23 +445,17 @@
 
                     </div>
                   </div>
-                  <div class="d-flex gap-3">
-                    <div class="ms-1">
-                         <input type="checkbox" id="isHOD" true-value="1" false-value="0" v-model="createEmployee.is_hod" class="form-check-input mt-1 input-border" />
-                        <label class="font-13 ms-2 " for="isHOD">Is HOD</label>
-                  </div>
-                  <div class="ms-1">
-                      <input type="checkbox" id="is_admin" :true-value='1' :false-value='0'
-                        v-model="createEmployee.is_admin" class="form-check-input mt-1 input-border" />
-                      <label class="font-13 ms-2 " for="is_admin">Is Admin</label>
-                  </div>
-                  </div>
-
-
                 </div>
                 <div class="col">
                   
-                  <label class="font-13 ps-1" for="reporting_to">Reports To</label>
+                  <div class="d-flex justify-content-between">
+                  <label class="font-13 ps-1" for="reporting_to">Reports To<span v-if="createEmployee.is_high_level==0" class="text-danger ps-1">*</span></label>
+                  <div class="me-2">
+                    <input type="checkbox" id="is_high_level" :true-value='1' :false-value='0'
+                      v-model="createEmployee.is_high_level" class="form-check-input mt-1 input-border" />
+                    <label class="font-13 ms-2 " for="is_high_level">Is High-level</label>
+                  </div>
+                  </div>
                   <VueMultiselect v-model="createEmployee.reporting_to"
                     :options="employeeEmails.map((dept) => dept.emp_mail_id)" :multiple="false" :close-on-select="true" :allow-empty="true"
                     :clear-on-select="false" :preserve-search="false" placeholder="Select Reports To"
@@ -1799,7 +1811,7 @@ function employeeData(data) {
 
   const queryParams = {
     fields: JSON.stringify(["acknowledge_on","acknowledgement","company_field","creation","department","designation","emp_code","emp_mail_id",
-    "emp_name","emp_phone","enable","enable_on","is_admin","is_hod","is_web_form","last_ip","last_login","name","profile_image","remarks","reporting_designation","reporting_to","signature"]),
+    "emp_name","emp_phone","enable","enable_on","is_admin","is_hod","is_high_level","is_web_form","last_ip","last_login","name","profile_image","remarks","reporting_designation","reporting_to","signature"]),
     filters: JSON.stringify(filters),
     limit_page_length: filterObj.value.limitPageLength,
     limit_start: filterObj.value.limit_start,
@@ -1845,7 +1857,7 @@ const employeeEmails = ref([]);
 function employeeOptions() {
   const queryParams = {
     fields: JSON.stringify(["acknowledge_on","acknowledgement","company_field","creation","department","designation","emp_code","emp_mail_id",
-    "emp_name","emp_phone","enable","enable_on","is_admin","is_hod","is_web_form","last_ip","last_login","name","profile_image","remarks","reporting_designation","reporting_to","signature"]),
+    "emp_name","emp_phone","enable","enable_on","is_admin","is_high_level","is_hod","is_web_form","last_ip","last_login","name","profile_image","remarks","reporting_designation","reporting_to","signature"]),
     limit_page_length: "none",
     filters: JSON.stringify([["company_field", "=", `${newbusiness.value}`]]),
     doctype:doctypes.EzyEmployeeList,
@@ -1997,6 +2009,13 @@ function SaveEditEmp() {
   }
   if(createEmployee.value.designation !== searchText.value.trim()) {
      showError("Please Add the designation before Update an employee.");
+    return;
+  }
+  if(createEmployee.value.is_high_level=== 0 && !createEmployee.value.reporting_to) {
+     showError("Please Add the Reports To before updating employee.", {
+      autoClose: 1000,
+      transition: "zoom",
+    });
     return;
   }
 
@@ -2477,5 +2496,15 @@ function SaveEditEmp() {
 .remarks{
   border: 1px solid #c5bdbd;
   border-radius: 5px
+}
+.form-check-input {
+  font-size: 15px;
+  margin-top: 5px;
+}
+
+.form-switch .form-check-input:checked {
+  background-position: right center;
+  background-color: rgb(103, 216, 109);
+  border: 0;
 }
 </style>

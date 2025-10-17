@@ -1,37 +1,54 @@
 <template>
     <div class="p-1 mt-3">
         <h1 class="m-0 font-13 mb-3">Settings</h1>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>S.No</th>
-                    <th>Title</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="(item, index) in tableData" :key="index">
-                    <td>{{ index + 1 }}</td>
-                    <td>{{ item.title }}</td>
-                    <td>
-                        <div v-if="item.title === 'Company Logo'">
-                            <div @click="handleToggle(index)" class="d-flex align-items-center">
-                                <i class="bi bi-eye mx-2 fs-6"></i>View
-                            </div>
-                        </div>
+          <table class="table">
+    <thead>
+      <tr>
+        <th class="px-2 text-center" >S.No</th>
+        <th>Title</th>
+        <th class="text-end">About</th>
+        <th width="15%" class="text-end pe-5">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="(item, index) in tableData" :key="index">
+        <td>{{ index + 1 }}</td>
+        <td>{{ item.title }}</td>
 
-                        <div v-else class="form-check form-switch">
-                            <input class="form-check-input shadow-none" type="checkbox" role="switch"
-                                :checked="item.checked" @click.prevent="handleToggle(index)" />
-                            <label class="form-check-label mt-1">
-                                {{ item.checked ? "Enabled" : "Disabled" }}
-                            </label>
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+        <!-- 🟦 About Column -->
+        <td class=" text-end align-middle pe-3">
+          <i
+            class="bi bi-info-circle text-primary cursor-pointer"
+            v-tooltip.top="item.about"
+          ></i>
+        </td>
 
+        <td class=" px-4 text-end">
+          <div v-if="item.title === 'Company Logo'">
+            <div @click="handleToggle(index)" class="d-flex align-items-center justify-content-end font-12 gap-3 pe-3">
+              <i class="bi bi-eye mx-2 font-13"></i>View
+            </div>
+          </div>
+
+          <div v-else class="d-flex justify-content-end align-items-center gap-2 ">
+            <div class="form-check form-switch ">
+
+            <input
+              class="form-check-input shadow-none"
+              type="checkbox"
+              role="switch"
+              :checked="item.checked"
+              @click.prevent="handleToggle(index)"
+            />
+            </div>
+            <label class="form-check-label mt-1">
+              {{ item.checked ? "Enabled" : "Disabled" }}
+            </label>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
         <!-- Modal -->
         <div class="modal fade" id="EnableDisable" tabindex="-1" data-bs-backdrop="static" aria-labelledby="EnableDisableLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
@@ -83,16 +100,17 @@ import "vue3-toastify/dist/index.css";
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
 import { showError, showInfo, showSuccess } from "../../shared/services/toast";
 const tableData = ref([
-    { title: "Two Factor Authentication", checked: false },
-    { title: "Send Form as an Attachment Via an E-Mail ", checked: false },
-    { title: "Welcome E-Mail Configuration", checked: false },
-    { title: "Enable Sign Up in Login Page", checked: false },
-    { title: "Send Daily E-mail reminders", checked: false },
-    { title: "Take Acknowledgement and Signiture while Login", checked: false },
-    { title: "Take Signiture while Sig Up", checked: false },
-    { title: "Company Logo", checked: false },
+  { title: "Two Factor Authentication", checked: false, about: "User need to scan QR code using Google Authenticator and set his two factor Authentication." },
+  { title: "Send Form as an Attachment Via an E-Mail", checked: false, about: "When a request is raised, an email will be triggered to all the approval members with form as an attachment." },
+  { title: "Welcome E-Mail Configuration", checked: false, about: "An email will be sent to the new user." },
+  { title: "Enable Sign Up in Login Page", checked: false, about: "In login page Sign up screen will be enabled so that new user can register them self." },
+  { title: "Send Daily E-mail reminders", checked: false, about: "Team members will receive a daily morning notification containing a list of pending forms that require their attention." },
+  { title: "Take Acknowledgement and Signature while Login", checked: false, about: "A message will be displayed at the time of Sign in by the user to Acknowledge and Sign at the time of login." },
+  { title: "Take Signature while Sign Up", checked: false, about: "When enabled user need to submit his signature before doing any activity in the application." },
+  { title: "Allow Approver to Edit Form?", checked: false, about: "When enabled approver can edit the form." },
+  { title: "Form Attachment View Required Before Approval", checked: false, about:"When form approval, the approver must view all attachments linked to that form." },
+  { title: "Company Logo", checked: false, about: "You can upload the company logo." },
 ]);
-
 const companyLogo = ref("");
 const viewImage = ref(false);
 const default_mail = ref(false);
@@ -147,8 +165,15 @@ const handleToggle = (index) => {
         confirmMessage.value = isChecked
             ? "Are you sure you want to enable Signiture while Sig Up?"
             : "Are you sure you want to disable Signiture while Sig Up?";
-    }
-    else if (index === 7) {
+    } else if (index === 7) {
+        confirmMessage.value = isChecked
+            ? "Are you sure you want to enable Approver Edit Form?"
+            : "Are you sure you want to disable Approver Edit Form?";
+    } else if (index === 8) {
+        confirmMessage.value = isChecked
+            ? "Are you sure you want to enable File Attachment View Required?"
+            : "Are you sure you want to disable File Attachment View Required?";
+    } else if (index === 9) {
         viewImage.value = true;
     }
 
@@ -289,6 +314,36 @@ const confirmAction = () => {
                 showError("Failed to update Signiture while Sig Up");
             });
     } else if (index === 7) {
+        axiosInstance
+            .put(`${apis.resource}${doctypes.wfSettingEzyForms}/${encodeURIComponent(docName)}`, {
+                allow_approver_to_edit_form: newStatus,
+            })
+            .then(() => {
+               showSuccess(`Approver’s ability to edit the form has been ${newStatus === 0 ? "disabled" : "enabled"} successfully!`);
+                sessionStorage.setItem("allow_approver_to_edit_form", newStatus);
+                const modal = bootstrap.Modal.getInstance(document.getElementById('EnableDisable'));
+                    modal.hide();
+                    BussinesUnit()
+            })
+            .catch(() => {
+                showError("Failed to update Approver Edit Form");
+            });
+    } else if (index === 8) {
+        axiosInstance
+            .put(`${apis.resource}${doctypes.wfSettingEzyForms}/${encodeURIComponent(docName)}`, {
+                attachment_view_required: newStatus,
+            })
+            .then(() => {
+                showSuccess(`File Attachment View Required ${newStatus === 0 ? "Disabled" : "Enabled"} Successfully!`, { autoClose: 700 });
+                sessionStorage.setItem("attachmentViewRequired", newStatus);
+                const modal = bootstrap.Modal.getInstance(document.getElementById('EnableDisable'));
+                    modal.hide();
+                    BussinesUnit()
+            })
+            .catch(() => {
+                toast.error("Failed to update File Attachment View Required");
+            });
+    } else if (index === 9) {
         if (!selectedFile.value) return;
         const formData = new FormData();
         formData.append("file", selectedFile.value);
@@ -325,7 +380,7 @@ const confirmAction = () => {
 
 function BussinesUnit() {
     const queryParamse = {
-        fields: JSON.stringify(["name", "bu_logo", "bu_code", "send_form_as_a_attach_through_mail", "welcome_mail_to_employee", "send_daily_alerts", "is_acknowledge", "signature_required"]),
+        fields: JSON.stringify(["name", "bu_logo", "bu_code", "send_form_as_a_attach_through_mail", "welcome_mail_to_employee", "send_daily_alerts", "is_acknowledge", "signature_required","allow_approver_to_edit_form","attachment_view_required"]),
         filters:JSON.stringify([["name",'=',Bussines_unit.value]]),
         doctype:doctypes.wfSettingEzyForms,
         limit_page_length:"none",
@@ -345,6 +400,10 @@ function BussinesUnit() {
             tableData.value[5].checked = is_acknowledge == 1;
             const signature_required = res.message.data[0].signature_required;
             tableData.value[6].checked = signature_required == 1;
+            const allow_approver_to_edit_form = res.message.data[0].allow_approver_to_edit_form;
+            tableData.value[7].checked = allow_approver_to_edit_form == 1;
+            const attachment_view_required = res.message.data[0].attachment_view_required;
+            tableData.value[8].checked = attachment_view_required == 1;
         }
     }).catch((error) => {
         console.error("Error fetching ezyForms data:", error);
@@ -385,7 +444,7 @@ const signUp = () => {
         .get(`${apis.GetDoctypeData}/${encodeURIComponent(docName)}`, { params: queryParams })
         .then((res) => {
             if (res.message.data) {
-                tableData.value[3].checked = res.message.data.disable_signup == 0;
+                tableData.value[3].checked = res.message.data[0].disable_signup == 0;
             }
         })
         .catch((error) => {
@@ -444,11 +503,22 @@ watch(
 </script>
 
 <style scoped>
+.cursor-pointer {
+  cursor: pointer;
+}
+td:first-child,
+th:first-child {
+  width: 3%;
+  text-align: center;
+}
 .table {
     width: 100%;
     white-space: nowrap;
     font-size: var(--font-size-xs);
     font-weight: 400;
+}
+.table>:not(caption)>*>* {
+    padding: 6px;
 }
 
 th {
@@ -466,6 +536,11 @@ td {
     white-space: nowrap;
     color: var(--muted) !important;
     font-size: var(--twelve);
+    vertical-align: middle;
+    border-left: 1px solid #ececec !important;
+}
+tr:nth-child(even) td {
+  background-color: #f9f9f9; /* Light gray background for even rows */
 }
 
 .upload-label {
@@ -475,5 +550,10 @@ td {
     font-size: 13px;
     font-weight: 500;
     box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 5px 0px, rgba(0, 0, 0, 0.1) 0px 0px 1px 0px;
+}
+.form-switch .form-check-input:checked {
+  background-position: right center;
+  background-color: rgb(103, 216, 109);
+  border: 0;
 }
 </style>

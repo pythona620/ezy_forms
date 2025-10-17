@@ -16,16 +16,19 @@ const createrRoutes = [
         path: "created",
         component: Created,
         name: "Created",
+        meta: { title: 'Created Forms - Ezy Forms' }
       },
       {
         path: "trash",
         component: Trash,
         name: "Trash",
+        meta: { title: 'Trash - Ezy Forms' }
       },
       {
         path: "draft",
         component: Draft,
         name: "Draft",
+        meta: { title: 'Drafts - Ezy Forms' }
       },
       // {
       //   path: "formsteps",
@@ -35,7 +38,8 @@ const createrRoutes = [
       {
         path: 'formsteps/:paramid?',
         component: FormStepper,
-        name: 'FormStepper'
+        name: 'FormStepper',
+        meta: { title: 'Form Creation - Ezy Forms'}
       }
     ],
   },

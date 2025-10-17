@@ -9,6 +9,9 @@
                 <div class=" d-flex gap-3 justify-content-end align-items-center m-0 me-3">
                     <div>
 
+                        <i class="bi bi-question-circle-fill fs-5" style="cursor: pointer" data-bs-toggle="modal" data-bs-target="#confirmMailModal" title="Contact Support"></i>
+                    </div>
+                    <div>
                         <FormFields tag="select" placeholder="" class="font-12" name="roles" id="roles"
                             :Required="false" v-model="business_unit" :options="EzyFormsCompanys" />
                     </div>
@@ -88,7 +91,6 @@
                                     src="../assets/Final-logo-ezyforms-removebg-preview.png" />
                                 <div class="d-sm-block d-md-none p-2">
                                     <div class="">
-
                                         <FormFields tag="select" placeholder="" class="font-12" name="roles" id="roles"
                                             :Required="false" v-model="business_unit" :options="EzyFormsCompanys" />
                                     </div>
@@ -129,8 +131,10 @@
                                         name="Raise Request" data-bs-toggle="modal" @click="raiseRequest"
                                         data-bs-target="#riaseRequestModal" />
                                 </div> -->
+                                    <div>
+                                        <i class="bi bi-question-circle-fill fs-5" style="cursor: pointer" data-bs-toggle="modal" data-bs-target="#confirmMailModal" title="Contact Support"></i>
+                                    </div>
                                     <div class=" d-none d-md-block">
-
                                         <FormFields tag="select" placeholder="" class="font-12" name="roles" id="roles"
                                             :Required="false" v-model="business_unit" :options="EzyFormsCompanys" />
                                     </div>
@@ -315,6 +319,23 @@
             </div>
         </div>
 
+        <div class="modal fade" id="confirmMailModal" tabindex="-1" aria-labelledby="confirmMailModalLabel" aria-hidden="true" ref="confirmModal">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmMailModalLabel">Confirm Action</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to contact support?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn font-13" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-secondary font-13 text-white" @click="openMail">Yes, Continue</button>
+                </div>
+                </div>
+            </div>
+        </div>
 
 
     </div>
@@ -399,7 +420,9 @@ const filterObj = ref({
     limit_start: 0,
     limitPageLength: 100,
 });
-
+const allow_approver_to_edit_form = ref('')
+const attachmentViewRequired = ref('')
+const buFullData = ref([])
 const EmpCompony = ref([]);
 const selectedScore = ref("");
 const responsibleUnits = ref([])
@@ -507,6 +530,30 @@ onMounted(() => {
     }
 });
 
+const openMail = () => {
+  const supportEmail = "support@caratred.com";
+  const userEmail = "example@caratred.com";
+
+  let mailURL = "";
+
+  if (userEmail.includes("@gmail.com")) {
+    // Gmail
+    mailURL = `https://mail.google.com/mail/?view=cm&fs=1&to=${supportEmail}`;
+  } else if (
+    userEmail.includes("@outlook.com") ||
+    userEmail.includes("@hotmail.com") ||
+    userEmail.includes("@live.com")
+  ) {
+    // Outlook
+    mailURL = `https://outlook.office.com/mail/deeplink/compose?to=${supportEmail}`;
+  } else {
+    // Fallback - default mail app
+    mailURL = `mailto:${supportEmail}`;
+  }
+
+  window.open(mailURL, "_blank");
+};
+
 function clearPassword() {
     new_password.value = ""
     confirm_password.value = ""
@@ -591,7 +638,7 @@ function passwordChange() {
 }
 const ezyForms = () => {
     const queryParams = {
-        fields: JSON.stringify(["name", "bu_code"]),
+        fields: JSON.stringify(["name", "bu_code","allow_approver_to_edit_form","attachment_view_required"]),
         doctype:doctypes.wfSettingEzyForms,
         limit_page_length:"none",
 
@@ -599,9 +646,19 @@ const ezyForms = () => {
     axiosInstance.get(apis.GetDoctypeData, { params: queryParams })
     .then((res) => {
         if (res?.message) {
-            EzyFormsCompanys.value = res.message.data.map((company) => company.bu_code);
+            const data = res.message.data || [];
+            buFullData.value = data; // store full data if needed
+            EzyFormsCompanys.value = data.map((company) => company.bu_code);
             if (EzyFormsCompanys.value.length && !business_unit.value.length) {
                 business_unit.value = EzyFormsCompanys.value[0];
+            }
+              const currentBU = data.find((company) => company.bu_code === business_unit.value);
+            if (currentBU) {
+               
+                allow_approver_to_edit_form.value = currentBU.allow_approver_to_edit_form;
+                attachmentViewRequired.value = currentBU.attachment_view_required;
+                sessionStorage.setItem("attachmentViewRequired", currentBU.attachment_view_required);
+                sessionStorage.setItem("allow_approver_to_edit_form", currentBU.allow_approver_to_edit_form);
             }
         }
     }).catch((error) => {
@@ -648,7 +705,13 @@ watch(business_unit, (newBu, oldBu) => {
     EzyBusinessUnit.value = newBu;
     localStorage.setItem("Bu", EzyBusinessUnit.value)
     sessionStorage.setItem("Bu", EzyBusinessUnit.value)
-
+    const currentBU = buFullData.value.find((company) => company.bu_code === newBu);
+    if (currentBU) {
+        allow_approver_to_edit_form.value = currentBU.allow_approver_to_edit_form;
+        attachmentViewRequired.value = currentBU.attachment_view_required;
+        sessionStorage.setItem("attachmentViewRequired", currentBU.attachment_view_required);
+        sessionStorage.setItem("allow_approver_to_edit_form", currentBU.allow_approver_to_edit_form);
+    }
     if (route.path.includes('forms') && newBu !== oldBu) {
         gettingDepartmentNames(true);
     } else if (route.path.includes('forms') && newBu === oldBu) {

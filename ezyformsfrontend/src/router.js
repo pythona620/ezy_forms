@@ -20,7 +20,7 @@ import PdfPreview from "./Components/PdfPreview.vue";
 import EmailApprove from "./Components/EmailApprove.vue";
 import LinkPreviewComp from "./Components/LinkPreviewComp.vue";
 import WorkOrderDetailes from "./Components/WorkOrderDetailes.vue";
-// import QrRaiseRequest from "./Components/QrRaiseRequest.vue";
+import QrRaiseRequest from "./Components/QrRaiseRequest.vue";
 import EmployeeForms from "./Components/EmployeeForms.vue";
 
 
@@ -28,7 +28,8 @@ const routes = [
   {
     path: '/',
     component: Login,
-    name: 'LoginPage'
+    name: 'LoginPage',
+    meta: { title: 'Login - Ezy Forms' }
   },
   ...Masterroutes,
   ...settingRoutes,
@@ -39,52 +40,61 @@ const routes = [
   {
     path: '/raiserequest',
     component: RaiseRequest,
-    name: 'RaiseRequest'
+    name: 'RaiseRequest',
+     meta: { title: 'Raise Request - Ezy Forms' }
   },
   {
     path: '/approverequest',
     component: ApproveRequest,
-    name: 'ApproveRequest'
+    name: 'ApproveRequest',
+    meta: { title: 'Approve Request - Ezy Forms' }
   },
   {
     path: '/emailapprove',
     component: EmailApprove,
     name: 'EmailApprove',
+    meta: { title: 'Email Approve - Ezy Forms' }
   },
-  // {
-  //   path: '/qrraiserequest',
-  //   component: QrRaiseRequest,
-  //   name: 'QrRaiseRequest',
-  // },
+  {
+    path: '/qrraiserequest',
+    component: QrRaiseRequest,
+    name: 'QrRaiseRequest',
+  },
   {
     path: '/formpreview',
     component: FormPreview,
-    name: 'FormPreview'
+    name: 'FormPreview',
+    meta: { title: 'Form Preview - Ezy Forms' }
   },
   {
     path: '/formpreviewComp',
     component: FormPreviewComp,
-    name: 'FormPreviewComp'
+    name: 'FormPreviewComp',
+    meta: { title: 'Form Preview - Ezy Forms' }
   },
   {
     path: '/linkpreviewComp',
     component: LinkPreviewComp,
-    name: 'LinkPreviewComp'
+    name: 'LinkPreviewComp',
+    meta: { title: 'Link Preview - Ezy Forms' }
   },
   {
     path: '/pdfpreview',
     component: PdfPreview,
-    name: 'PdfPreview'
+    name: 'PdfPreview',
+    meta: { title: 'PDF Preview - Ezy Forms' }
   },
    {
     path: '/employeeforms',
     component: EmployeeForms,
-    name: 'employeeforms'
+    name: 'employeeforms',
+    meta: { title: 'Employee Forms - Ezy Forms' }
   },
   {
     path:'/settings/vendorcomparison',
     component:WorkOrderDetailes,
-    name:'vendorcomparison'
+    name:'vendorcomparison',
+    meta: { title: 'Vendor Comparison - Ezy Forms' }
   },
 
   { path: "/:pathMatch(.*)*", name: "NotFound", component: NotFound },
@@ -102,9 +112,9 @@ router.beforeEach((to, from, next) => {
   if (to.name === 'EmailApprove') {
     next(); // Skip authentication for this route
   }
-  // if (to.name === 'QrRaiseRequest') {
-  //   next();
-  // }
+  if (to.name === 'QrRaiseRequest') {
+    next();
+  }
   // If the route requires authentication and the user is not logged in, redirect to LoginPage
   else if (requiresAuth && !isLoggedIn) {
     next({ name: 'LoginPage' });
@@ -131,4 +141,20 @@ router.beforeEach((to, from, next) => {
 //   });
 //   next();
 // });
+router.afterEach((to) => {
+  const nearestWithTitle = to.matched.slice().reverse().find(r => r.meta && r.meta.title)
+
+  if (nearestWithTitle) {
+    // If meta.title is a function, call it with route
+    const title = typeof nearestWithTitle.meta.title === 'function'
+      ? nearestWithTitle.meta.title(to)
+      : nearestWithTitle.meta.title
+
+    document.title = title
+  } else {
+    document.title = 'Ezy Forms'
+  }
+})
+
+
 export default router;

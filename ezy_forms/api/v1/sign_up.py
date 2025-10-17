@@ -1,14 +1,15 @@
 import frappe
-from frappe.website.utils import get_home_page, is_signup_disabled
-from frappe.utils import escape_html
+from frappe.website.utils import is_signup_disabled
 from frappe import _
+from frappe.utils import get_url
+
 
 @frappe.whitelist(allow_guest=True)
 def sign_up(email: str, full_name: str,designation:str|None,emp_phone:str|None,emp_code:str|None,dept:str|None, redirect_to: str|None,acknowledge_on=None,signature=None,acknowledgement=None,business_unit=None) -> tuple[int, str]:
 	
 	if is_signup_disabled():
-		return _("Sign Up is disabled")
- 
+		return _("Sign Up is disabled Please Contact IT Team")
+
 	user = frappe.db.get("User", {"email": email})
 	if user:
 		if user.enabled:
@@ -24,33 +25,13 @@ def sign_up(email: str, full_name: str,designation:str|None,emp_phone:str|None,e
 				),
 				http_status_code=429,
 			)
- 
-		from frappe.utils import generate_hash
-	
-		user = frappe.get_doc(
-				{
-					"doctype": "User",
-					"email": email,
-					"first_name": escape_html(full_name),
-					"enabled": 0,
-					'send_welcome_email': 0,
-					"new_password": generate_hash(length=10),
-					"user_type": "Website User",
-					"roles": [
-						{
-							"role": designation}]
-				}
-			)
-		user.flags.ignore_permissions = True
-		user.flags.ignore_password_policy = True
-		user.insert(ignore_permissions = True)
 		company_field = frappe.get_all("Ezy Business Unit",fields = ['name'])
 		company = company_field[0].name
-		if not frappe.db.exists("Ezy Employee", {"emp_mail_id": user.email}):
-			doc = frappe.new_doc("Ezy Employee")
+		if not frappe.db.exists("Signup Employee", {"emp_mail_id": email}):
+			doc = frappe.new_doc("Signup Employee")
 			doc.update({
-				"emp_name": user.username.replace('_', " ").upper() if user.username else user.first_name.upper(),
-				"emp_mail_id": user.email,
+				"emp_name": full_name,
+				"emp_mail_id": email,
 				"company_field": business_unit if business_unit else company,
 				"enable": 0,
 				"is_web_form": 1,
@@ -65,16 +46,7 @@ def sign_up(email: str, full_name: str,designation:str|None,emp_phone:str|None,e
 			doc.insert(ignore_permissions=True)
 			frappe.db.commit()
 			send_mail_when_user_signup(emp_name=doc.emp_name, emp_mail_id=email,designation=designation,department=doc.department)
-
-		# set default signup role as per Portal Set	tings
-		default_role = frappe.db.get_single_value("Portal Settings", "default_role")
-		if default_role:
-			user.add_roles(default_role)
-		if redirect_to:
-			frappe.cache().hset("redirect_after_login", user.name, redirect_to)
 	return  _("Please contact your IT Manager to verify your sign-up")
-
-
 
 
 @frappe.whitelist()
@@ -107,14 +79,15 @@ def send_mail_when_user_signup(emp_name:str|None,emp_mail_id:str|None,designatio
 				"designation":designation if designation else "Not Provided",
 				"department": department if department else "Not Provided"
 			})
-		frappe.sendmail(
-			recipients=[recipction_mail],
-			subject= subject,
-			sender=sender,
-			message=message,
-			now = True
-		)
-from frappe.utils import get_url
+		if sender:
+			frappe.sendmail(
+				recipients=[recipction_mail],
+				subject= subject,
+				sender=sender,
+				message=message,
+				now=True
+			)
+
 
 @frappe.whitelist()
 def employee_update_notification(emp_mail):
@@ -139,10 +112,10 @@ def employee_update_notification(emp_mail):
 	email_template = frappe.get_doc("Email Template", "Account Activation")
 
 	# Default subject and message
-	subject = "Your Ezy Forms Profile is Now Active"
+	subject = "Your ezyForms Profile is Now Active"
 	message = f"""
 		Hi {emp_name},<br>
-		Your user account in Ezy Forms has been successfully activated by the IT team.<br>
+		Your user account in ezyForms has been successfully activated by the IT team.<br>
 		You can now log in and start using the system. If you haven’t received your login details or need help accessing your account, please contact IT support. - <b>Email:<b> {mail_id} <br> 
 		Login Link: <a href="{site_url}/ezyformsfrontend#/">View Page</a><br>
 		Let us know if you have any questions.

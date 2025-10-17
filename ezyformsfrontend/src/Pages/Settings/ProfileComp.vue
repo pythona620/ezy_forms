@@ -22,15 +22,15 @@
 
           <!-- Employee Details -->
           <div class="ms-md-3 flex-grow-1 text-center text-md-start">
-            <h6 class="mb-3 mt-2">{{ userData.emp_name }}</h6>
+            <h6 class="mb-3 mt-2">{{ userData.emp_name || "N/A" }}</h6>
 
             <!-- Top details -->
             <div class="d-flex flex-wrap justify-content-center justify-content-md-start gap-4 role-details">
-              <span><i class="bi bi-person-badge-fill me-1"></i>{{ userData.emp_code || "-" }}</span>
-              <span><i class="bi bi-envelope-fill me-1"></i>{{ userData.emp_mail_id || "-" }}</span>
-              <span><i class="bi bi-telephone-fill me-1"></i>{{ userData.emp_phone || "-" }}</span>
-              <span><i class="bi bi-briefcase-fill me-1"></i>{{ userData.designation || "-" }}</span>
-              <span><i class="bi bi-building-fill me-1"></i>{{ userData.company_field || "-" }}</span>
+              <span><i class="bi bi-person-badge-fill me-1"></i>{{ userData.emp_code || "N/A" }}</span>
+              <span><i class="bi bi-envelope-fill me-1"></i>{{ userData.emp_mail_id || "N/A" }}</span>
+              <span><i class="bi bi-telephone-fill me-1"></i>{{ userData.emp_phone || "N/A" }}</span>
+              <span><i class="bi bi-briefcase-fill me-1"></i>{{ userData.designation || "N/A" }}</span>
+              <span><i class="bi bi-building-fill me-1"></i>{{ userData.company_field || "N/A" }}</span>
             </div>
 
             <!-- Bottom info -->
@@ -38,18 +38,18 @@
               <span>Department: 
                 <span class="fw-bold">
 
-                {{ userData.department || "-" }}
+                {{ userData.department || "N/A" }}
                 </span>
 
               </span>
               <span>Reporting Manager: 
                 <span class="fw-bold">
-                  {{ userData.reporting_to || "-" }}
+                  {{ userData.reporting_to || "N/A" }}
                 </span>
               </span>
               <span>Acknowledged On: 
                 <span class="fw-bold">
-                {{ formatDateTime(userData.acknowledge_on) || "-" }}
+                {{ formatDateTime(userData.acknowledge_on) || "N/A" }}
                 </span>
                 </span>
             </div>
@@ -88,27 +88,27 @@
     </div>
 
     <div v-if="reportingData.length">
-      <h6 class="font-16 my-3 ms-2">My Team</h6>
+      <h6 class="font-16 my-3 ms-2 fw-bold">My Team</h6>
       <div class="container-fluid p-0">
         <div class="row">
           <div class="col-lg-4 col-md-6 col-sm-12 mb-3" v-for="(employee, index) in reportingData" :key="index">
             <div class="card p-3 shadow-sm team-card">
               <div class="d-flex align-items-center">
                 <!-- Profile Image -->
-                <img :src="employee.profile_image || defaultImage" class="rounded-circle me-3" alt="Profile Image"
+               <img :src="employee.profile_image || defaultImage" :class="[employee.profile_image ? 'rounded-circle' : '', 'me-3']" alt="Profile Image"
                   width="80" height="80" />
 
                 <div>
-                  <h5 class="mb-0 font-14">{{ employee.emp_name }}</h5>
-                  <p class="paragraph-txt mb-2">{{ employee.emp_code || "-"}}</p>
+                  <h5 class="mb-0 font-14">{{ employee.emp_name || "N/A" }}</h5>
+                  <p class="paragraph-txt mb-2">{{ employee.emp_code || "N/A"}}</p>
                   <p class="paragraph-txt">
-                    <strong class="text-secondary">Designation :</strong> {{ employee.designation }}
+                    <strong class="text-secondary">Designation :</strong> {{ employee.designation || "N/A" }}
                   </p>
                   <p class="paragraph-txt">
-                    <strong class="text-secondary">Department :</strong> {{ employee.department }}
+                    <strong class="text-secondary">Department :</strong> {{ employee.department || "N/A" }}
                   </p>
                   <p class="paragraph-txt">
-                    <strong class="text-secondary">Email :</strong> {{ employee.emp_mail_id }}
+                    <strong class="text-secondary">Email :</strong> {{ employee.emp_mail_id || "N/A" }}
                   </p>
                 </div>
               </div>
@@ -147,7 +147,7 @@ function triggerFileInput(type) {
 }
 
 function formatDateTime(datetime) {
-  if (!datetime) return "-";
+  if (!datetime) return "N/A";
   const options = {
     year: 'numeric',
     month: 'short',

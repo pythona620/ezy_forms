@@ -113,20 +113,23 @@
         <p class="font-13">Select the fields you want to include in the report:</p>
         <div class="report-fields row">
           <div 
-            v-for="(field, index) in reportFields" 
-            :key="index" 
-            class="col-md-4 mb-3 d-flex align-items-center"
-          >
-            <input
-              :id="'field-' + index"
-              type="checkbox"
-              class="form-check-input me-2"
-              v-model="field.selected"
-            />
-            <label :for="'field-' + index" class="form-label font-12 mb-0">
-              {{ field.label }}
-            </label>
-          </div>  
+    v-for="(field, index) in reportFields" 
+    :key="index" 
+    class="col-md-4 mb-3"
+  >
+    <div class="d-flex align-items-center">
+      <input
+        :id="'field-' + index"
+        type="checkbox"
+        class="form-check-input me-2"
+        v-model="field.selected"
+      />
+      <label :for="'field-' + index" class="form-label font-12 mb-0">
+        {{ getDisplayLabel(field) }}
+      </label>
+    </div>
+  </div>
+
         </div>
       </div>
 
@@ -322,6 +325,22 @@ function actionClickedDropDown(row) {
   actions.value = baseActions;
 
 }
+function getDisplayLabel(field) {
+  const suffixMatch = field.fieldname.match(/_(\d+)$/);
+  const suffixNumber = suffixMatch ? parseInt(suffixMatch[1]) + 1 : null;
+
+  // Check if this field belongs to the "Approver" group
+  const approverGroup = ["approver", "approved_on", "approved_by"];
+  const baseField = field.fieldname.replace(/_\d+$/, "");
+
+  if (approverGroup.includes(baseField)) {
+    // Add number: if has suffix (_1) → 2, else → 1
+    return suffixNumber ? `${field.label} ${suffixNumber}` : `${field.label} 1`;
+  }
+
+  // For all other fields, just show the label
+  return field.label;
+}
 
 // function actionClickedDropDown(row){
 
@@ -474,6 +493,7 @@ if (actionEvent.name === 'Create Report') {
       .split(",")
       .map(item => item.trim().split(" as ")[0]); // ["requested_by", "requested_on", "file_one"]
   }
+  
 
   // Filter valid fields and mark them as selected if previously saved
   reportFields.value = fields

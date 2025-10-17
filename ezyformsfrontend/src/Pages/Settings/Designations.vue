@@ -61,7 +61,7 @@ import axiosInstance from '../../shared/services/interceptor';
 import { apis, doctypes } from '../../shared/apiurls';
 import { onMounted, ref, computed, watch } from 'vue';
 import { EzyBusinessUnit } from "../../shared/services/business_unit";
-import { showSuccess } from '../../shared/services/toast';
+import { showError, showSuccess } from '../../shared/services/toast';
 
 const businessUnit = computed(() => {
     return EzyBusinessUnit.value;
@@ -200,13 +200,19 @@ function SubmitDesignation() {
         axiosInstance
             .post(apis.DataUpdate, payload)
             .then((response) => {
-                if (response) {
-                    //console.log(response);
+                if (response.message.success==true) {
                     designationData();
                     resetDesignation();
                     showSuccess("Designation Created Successfully");
                     const modal = bootstrap.Modal.getInstance(document.getElementById('CreateDesignationModal'));
                     modal.hide();
+                } else {
+                    // Parse the server messages
+                    const serverMessages = JSON.parse(response._server_messages);
+                    const parsedMessage = JSON.parse(serverMessages[0]);
+                    // Remove HTML tags from message
+                    const cleanMessage = parsedMessage.message.replace(/<[^>]*>/g, '');
+                    showError(cleanMessage, { autoClose: 2000 });
                 }
             })
             .catch((err) => {
