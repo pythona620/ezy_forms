@@ -24,7 +24,13 @@
                     <button type="button" class="font-12 btn btn-light backtoListbtn" @click="backtoReportList">
                         <i class="bi bi-chevron-left"></i> Back to Report List
                     </button>
+                    <div class=" position-relative">
+
                     <button type="button" class=" btn btn-dark font-12" @click="OpenFilterModal">Filters</button>
+                    <button v-if="dateFilter.date_field.length || dateFilter.start_date.length || dateFilter.end_date.length" type="button" class="btn btn-light btn-sm clear_filters position-absolute top-0 right-0" @click="clearFilters">
+                      <i class="bi bi-x"></i>
+                        </button>
+                    </div>
                     </div>
                     <!-- <button class=" btn btn-outline-danger font-12" @click="exportReport('Excel')">Export</button> -->
                     <div class=" d-flex gap-2 ">
@@ -441,8 +447,38 @@ function applyFiltersToReport() {
   }, 500);
 }
 function closeFilterModal(){
-  dateFilter.value = {}
-  filtersArray.value = []
+  dateFilter.value = {
+    date_field: "",
+    start_date: "",
+    end_date: "",
+  };
+  filtersArray.value = [
+    {
+      field: "",
+      condition: "is",
+      value: "",
+    },
+  ];
+}
+function clearFilters(){
+   dateFilter.value = {
+    date_field: "",
+    start_date: "",
+    end_date: "",
+  };
+  filtersArray.value = [
+    {
+      field: "",
+      condition: "is",
+      value: "",
+    },
+  ];
+  let payload = {
+    doctype_name: SelectedReportName.value,
+    source: source.value
+  }
+  gettingReportData(payload)
+
 }
 function gettingReportData(payload) {
     axiosInstance.get(apis.repostListData, {
@@ -599,5 +635,13 @@ onBeforeUnmount(() => {
 }
 .border {
   border: 1px solid #ddd !important;
+}
+.clear_filters{
+  position: absolute;
+    top: -15px;
+    right: -14px;
+    border-radius: 50%;
+    background-color: #ccc;
+
 }
 </style>

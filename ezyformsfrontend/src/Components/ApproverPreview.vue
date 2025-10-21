@@ -179,11 +179,16 @@
                                             :disabled="!isEditable && (props.readonlyFor === 'true' || blockIndex < currentLevel)"
                                             :checked="(JSON.parse(field.value || '[]') || []).includes(option)"
                                             :value="option"
-                                            :name="`${field.fieldtype}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
-                                            :id="`${option}-${index}`"
+                                            :name="`${field.fieldname}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}`"
+                                            :id="`${field.fieldname}-${option}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}-${index}`"
                                             @change="(event) => logFieldValue(event, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex)"
                                           />
-                                          <label class="form-check-label font-12 m-0" :for="`${option}-${index}`">{{ option }}</label>
+                                          <label
+                                            class="form-check-label font-12 m-0"
+                                            :for="`${field.fieldname}-${option}-${blockIndex}-${sectionIndex}-${rowIndex}-${columnIndex}-${fieldIndex}-${index}`"
+                                          >
+                                            {{ option }}
+                                          </label>
                                         </div>
                                       </div>
                                     </div>
@@ -2029,6 +2034,26 @@ watch(
   { immediate: true }
 ); // Runs immediately in case childData already has a value
 
+// const handleSelectChange = (
+//   value,
+//   blockIndex,
+//   sectionIndex,
+//   rowIndex,
+//   columnIndex,
+//   fieldIndex
+// ) => {
+//   const field =
+//     props.blockArr[blockIndex].sections[sectionIndex].rows[rowIndex].columns[
+//       columnIndex
+//     ].fields[fieldIndex];
+
+//   field.value = value;
+
+//   const mockEvent = { target: { value: field.value } };
+//   // console.log(mockEvent, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex);
+
+//   logFieldValue(mockEvent, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex);
+// };
 const handleSelectChange = (
   value,
   blockIndex,
@@ -2042,13 +2067,36 @@ const handleSelectChange = (
       columnIndex
     ].fields[fieldIndex];
 
-  field.value = value;
+  const oldValue = field.value;
+  const newValue = value;
+  const key = field.label || field.fieldname;
 
-  const mockEvent = { target: { value: field.value } };
-  // console.log(mockEvent, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex);
+  // update field value
+  field.value = newValue;
 
-  logFieldValue(mockEvent, blockIndex, sectionIndex, rowIndex, columnIndex, fieldIndex);
+  // only record change if different
+  if (oldValue !== newValue) {
+    fieldChanges.value[key] = {
+      oldValue,
+      newValue,
+    };
+
+    emit("field-change", fieldChanges.value);
+  }
+
+  // ✅ optional: call same validation + updateField emit as logFieldValue
+  validateField(
+    field,
+    blockIndex,
+    sectionIndex,
+    rowIndex,
+    columnIndex,
+    fieldIndex
+  );
+
+  emit("updateField", field);
 };
+
 const filteredBlocks = computed(() => {
 
   if (!props.blockArr || props.blockArr.length === 0) return [];
