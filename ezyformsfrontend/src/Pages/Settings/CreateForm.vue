@@ -110,25 +110,39 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <p class="font-13">Select the fields you want to include in the report:</p>
+       <div class="d-flex justify-content-between align-items-center mb-2">
+  <p class="font-13 mb-0">Select the fields you want to include in the report:</p>
+
+  <div class="form-check m-0">
+    <input
+      id="select-all-fields"
+      type="checkbox"
+      class="form-check-input me-1"
+      v-model="selectAll"
+      @change="toggleSelectAll"
+    />
+    <label for="select-all-fields" class="form-check-label font-12">Select All Fields</label>
+  </div>
+</div>
+
         <div class="report-fields row">
           <div 
-    v-for="(field, index) in reportFields" 
-    :key="index" 
-    class="col-md-4 mb-3"
-  >
-    <div class="d-flex align-items-center">
-      <input
-        :id="'field-' + index"
-        type="checkbox"
-        class="form-check-input me-2"
-        v-model="field.selected"
-      />
-      <label :for="'field-' + index" class="form-label font-12 mb-0">
-        {{ getDisplayLabel(field) }}
-      </label>
-    </div>
-  </div>
+            v-for="(field, index) in reportFields" 
+            :key="index" 
+            class="col-md-4 mb-3"
+          >
+          <div class="d-flex align-items-center">
+            <input
+              :id="'field-' + index"
+              type="checkbox"
+              class="form-check-input me-2"
+              v-model="field.selected"
+            />
+            <label :for="'field-' + index" class="form-label font-12 mb-0">
+              {{ getDisplayLabel(field) }}
+            </label>
+          </div>
+        </div>
 
         </div>
       </div>
@@ -181,7 +195,7 @@ const is_admin = ref('');
 const isEnable = ref("");
 const reportFields = ref([])
 const responcedata = ref([]);
-
+const selectAll = ref(false);
 // Toggle function triggered when a checkbox is clicked
 const selectedRowData = ref(null);
 const selectedActionText = ref('');
@@ -325,6 +339,28 @@ function actionClickedDropDown(row) {
   actions.value = baseActions;
 
 }
+
+function toggleSelectAll() {
+  reportFields.value.forEach(field => {
+    field.selected = selectAll.value;
+  });
+}
+
+// ✅ Watch for manual changes
+watch(
+  () => reportFields.value.map(f => f.selected),
+  (newVals) => {
+    // If every field is selected -> selectAll = true
+    if (newVals.every(v => v)) {
+      selectAll.value = true;
+    } else {
+      // If even one field is unselected -> selectAll = false
+      selectAll.value = false;
+    }
+  },
+  { deep: true }
+);
+
 function getDisplayLabel(field) {
   const suffixMatch = field.fieldname.match(/_(\d+)$/);
   const suffixNumber = suffixMatch ? parseInt(suffixMatch[1]) + 1 : null;
