@@ -27,7 +27,7 @@
                     <div class=" position-relative">
 
                     <button type="button" class=" btn btn-dark font-12" @click="OpenFilterModal">Filters</button>
-                    <button v-if="dateFilter.date_field.length || dateFilter.start_date.length || dateFilter.end_date.length" type="button" class="btn btn-light btn-sm clear_filters position-absolute top-0 right-0" @click="clearFilters">
+                    <button v-tooltip.bottom="'Clear Filters'" v-if="dateFilter.date_field.length || dateFilter.start_date.length || dateFilter.end_date.length" type="button" class="btn btn-light btn-sm clear_filters position-absolute top-0 right-0" @click="clearFilters">
                       <i class="bi bi-x"></i>
                         </button>
                     </div>
