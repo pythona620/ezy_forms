@@ -99,7 +99,7 @@
               <select v-model="dateFilter.date_field" placeholder="Select" class="form-select font-12">
                 <option value="" disabled>Select</option>
                 <option value="creation">Created On</option>
-                <option value="modified">Modified On</option>
+                <option value="modified">Last Updated On</option>
               </select>
             </div>
 
@@ -116,7 +116,7 @@
         </div>
 
         <!-- Dynamic Field Filters -->
-        <div v-for="(filter, index) in filtersArray" :key="index" class="row mb-3 align-items-end border-top pt-2 mt-2">
+        <!-- <div v-for="(filter, index) in filtersArray" :key="index" class="row mb-3 align-items-end border-top pt-2 mt-2">
           <div class="col-md-3">
             <label class="form-label font-12">Field</label>
             <select v-model="filter.field" class="form-select font-12">
@@ -148,18 +148,18 @@
           </div>
         </div>
 
-        <!-- Add Filter Button -->
         <div class="text-center mb-3">
           <button type="button" class="btn btn-light font-12 btn-sm" @click="addFilterRow">
             + Add Filter
           </button>
-        </div>
+        </div> -->
       </div>
+        <!-- Add Filter Button -->
 
       <!-- Footer -->
       <div class="modal-footer">
         <button type="button" class="btn btn-outline-secondary font-12" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-dark " :disabled="saveloading" @click="applyFiltersToReport">
+        <button type="button" class="btn btn-dark h-auto " :disabled="saveloading" @click="applyFiltersToReport">
           <span class="font-12 fw-bold">Apply Filters</span>
         </button>
       </div>

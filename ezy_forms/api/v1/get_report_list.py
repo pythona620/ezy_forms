@@ -1,6 +1,6 @@
 import frappe
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist(methods=["GET"])
 def get_reports_list():
     """
     Fetches all reports from 'Report' and 'Ezy Form Definitions' doctypes.
