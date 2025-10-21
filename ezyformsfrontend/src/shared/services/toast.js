@@ -5,24 +5,39 @@ const toast = useToast();
 
 // Basic types
 export function showSuccess(message, options = {}) {
-  toast.success(message, options);
+    toast.success(message, {
+    ...options,
+    toastClassName: "custom-toast-padding"
+  });
 }
 
 export function showError(message, options = {}) {
-  toast.error(message, options);
+  toast.error(message, {
+    ...options,
+    toastClassName: "custom-toast-padding"
+  });
 }
 
 export function showInfo(message, options = {}) {
-  toast.info(message, options);
+  toast.info(message, {
+    ...options,
+    toastClassName: "custom-toast-padding"
+  });
 }
 
 export function showWarning(message, options = {}) {
-  toast.warning(message, options);
+  toast.warning(message, {
+    ...options,
+    toastClassName: "custom-toast-padding"
+  });
 }
 
 // Neutral/default toast
 export function showDefault(message, options = {}) {
-  toast(message, options); // no type, just neutral
+  toast(message, {
+    ...options,
+    toastClassName: "custom-toast-padding"
+  }); // no type, just neutral
 }
 
 // Custom toast with icon, style, or HTML content
