@@ -110,13 +110,28 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <p class="font-13">Select the fields you want to include in the report:</p>
+       <div class="d-flex justify-content-between align-items-center mb-2">
+  <p class="font-13 mb-0">Select the fields you want to include in the report:</p>
+
+  <div class="form-check m-0">
+    <input
+      id="select-all-fields"
+      type="checkbox"
+      class="form-check-input me-1"
+      v-model="selectAll"
+      @change="toggleSelectAll"
+    />
+    <label for="select-all-fields" class="form-check-label font-12">Select All Fields</label>
+  </div>
+</div>
+
         <div class="report-fields row">
           <div 
             v-for="(field, index) in reportFields" 
             :key="index" 
-            class="col-md-4 mb-3 d-flex align-items-center"
+            class="col-md-4 mb-3"
           >
+          <div class="d-flex align-items-center">
             <input
               :id="'field-' + index"
               type="checkbox"
@@ -124,9 +139,11 @@
               v-model="field.selected"
             />
             <label :for="'field-' + index" class="form-label font-12 mb-0">
-              {{ field.label }}
+              {{ getDisplayLabel(field) }}
             </label>
-          </div>  
+          </div>
+        </div>
+
         </div>
       </div>
 
@@ -178,7 +195,7 @@ const is_admin = ref('');
 const isEnable = ref("");
 const reportFields = ref([])
 const responcedata = ref([]);
-
+const selectAll = ref(false);
 // Toggle function triggered when a checkbox is clicked
 const selectedRowData = ref(null);
 const selectedActionText = ref('');
@@ -315,12 +332,50 @@ function actionClickedDropDown(row) {
   if (is_admin.value == 1) {
     baseActions.push({ name: 'Edit Form', icon: 'fa-solid fa-edit' });
   }
-  // if (is_admin.value == 1) {
-  //   baseActions.push({ name: 'Create Report', icon: 'fa fa-file-text' });
-  // }
+  if (is_admin.value == 1) {
+     baseActions.push({ name: 'Create Report', icon: 'fa fa-file-text' });
+   }  
 
   actions.value = baseActions;
 
+}
+
+function toggleSelectAll() {
+  reportFields.value.forEach(field => {
+    field.selected = selectAll.value;
+  });
+}
+
+// ✅ Watch for manual changes
+watch(
+  () => reportFields.value.map(f => f.selected),
+  (newVals) => {
+    // If every field is selected -> selectAll = true
+    if (newVals.every(v => v)) {
+      selectAll.value = true;
+    } else {
+      // If even one field is unselected -> selectAll = false
+      selectAll.value = false;
+    }
+  },
+  { deep: true }
+);
+
+function getDisplayLabel(field) {
+  const suffixMatch = field.fieldname.match(/_(\d+)$/);
+  const suffixNumber = suffixMatch ? parseInt(suffixMatch[1]) + 1 : null;
+
+  // Check if this field belongs to the "Approver" group
+  const approverGroup = ["approver", "approved_on", "approved_by"];
+  const baseField = field.fieldname.replace(/_\d+$/, "");
+
+  if (approverGroup.includes(baseField)) {
+    // Add number: if has suffix (_1) → 2, else → 1
+    return suffixNumber ? `${field.label} ${suffixNumber}` : `${field.label} 1`;
+  }
+
+  // For all other fields, just show the label
+  return field.label;
 }
 
 // function actionClickedDropDown(row){
@@ -474,6 +529,7 @@ if (actionEvent.name === 'Create Report') {
       .split(",")
       .map(item => item.trim().split(" as ")[0]); // ["requested_by", "requested_on", "file_one"]
   }
+  
 
   // Filter valid fields and mark them as selected if previously saved
   reportFields.value = fields

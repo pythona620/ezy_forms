@@ -87,7 +87,7 @@ export const apis = {
  view_only_reportee : domain + `/method/ezy_forms.api.v1.assign_to_me.pick_view_only_reportee`,
  toMailApproval: domain + `/method/ezy_forms.ezy_forms.doctype.email_approval.custom_email_approval.email_approval`,
  deleteAssigneRoles:domain+`/method/ezy_forms.ezy_forms.doctype.ezy_form_definitions.ezy_form_definitions.delete_roles_for_approver_roles`,
- repostListData: domain + `/method/frappe.desk.query_report.run`,
+ 
   ExportReport: domain + `/method/ezy_forms.api.v1.export_report.export_report_data`,
   approvedByMe:domain+`/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.approval_by_me`,
   ActivitySaveComment: domain + `/method/ezy_flow.ezy_flow.doctype.wf_workflow_requests.wf_workflow_requests.save_button_commite_update`,
@@ -116,8 +116,9 @@ export const apis = {
   GetAccessibleDeptForms:domain + `/method/ezy_forms.api.v1.get_employee_accessible_forms.get_employee_accessible_forms`,
   GetDoctypeData:domain + `/method/ezy_forms.api.v1.get_doc_list.get_doctype_list`,
   DataUpdate:domain + `/method/ezy_forms.api.v1.doc_operations.doc_operation`,
-  
-  // getReportData: domain + `/api/method/frappe.utils.print_format.download_pdf`
+  // repostListData: domain + `/method/frappe.desk.query_report.run`,
+  repostListData: domain + `/method/ezy_forms.api.v1.generate_report.generate_custom_report`,
+  getReportList: domain + `/method/ezy_forms.api.v1.get_report_list.get_reports_list`
 };
 
 // export const tokens = {

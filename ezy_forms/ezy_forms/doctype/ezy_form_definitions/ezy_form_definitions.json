@@ -19,6 +19,7 @@
   "accessible_departments",
   "form_short_name",
   "form_json",
+  "report_fields",
   "form_status",
   "print_format",
   "is_landscape",
