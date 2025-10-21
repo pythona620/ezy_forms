@@ -129,6 +129,10 @@ def email_template_create():
 		<th>Form Details</th>
 	</tr>
 	<tr>
+		<td><strong>Property</strong></td>
+		<td>{{property}}</td>
+	</tr>
+	<tr>
 		<td><strong>Form Name</strong></td>
 		<td>{{doctypename}}</td>
 	</tr>
