@@ -1993,9 +1993,9 @@ function employeeOptions() {
     fields: JSON.stringify(["acknowledge_on","acknowledgement","company_field","creation","department","designation","emp_code","emp_mail_id",
     "emp_name","emp_phone","enable","enable_on","is_admin","is_hod","is_high_level","is_web_form","last_ip","last_login","name","profile_image","remarks","reporting_designation","reporting_to","signature"]),
     limit_page_length: "none",
-    filters: JSON.stringify([["company_field", "=", `${newbusiness.value}`]]),
-    doctype:doctypes.SignUpEmployee,
-    order_by: "`tabSignup Employee`.`modified` desc",
+    filters: JSON.stringify([["company_field", "=", `${newbusiness.value}`],["enable","=",1]]),
+    doctype:doctypes.EzyEmployeeList,
+    order_by: "`tabEzy Employee`.`modified` desc",
   };
   axiosInstance.get(apis.GetDoctypeData, { params: queryParams })
     .then((res) => {
