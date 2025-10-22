@@ -2159,7 +2159,7 @@ function SaveEditEmp() {
       createEmployee.value.reporting_designation = selectedReportee.designation;
     }
   } else {
-    createEmployee.value.reporting_designation = ""; // Clear if reporting_to is empty
+    createEmployee.value.reporting_designation = ""; 
   }
 
   const payload = {
